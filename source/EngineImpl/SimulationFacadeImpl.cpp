@@ -340,6 +340,11 @@ RawLineageStatistics _SimulationFacadeImpl::getRawLineageStatistics() const
     return _worker.getRawLineageStatistics();
 }
 
+OverallStatisticsEntry _SimulationFacadeImpl::getOverallStatistics() const
+{
+    return _worker.getOverallStatistics();
+}
+
 LineageHistory const& _SimulationFacadeImpl::getLineageHistory() const
 {
     return _worker.getLineageHistory();

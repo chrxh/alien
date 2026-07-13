@@ -79,6 +79,7 @@ namespace
 
 DataPointCollection StatisticsConverterService::convert(
     TimelineStatistics const& data,
+    OverallStatisticsEntry const& overallStatistics,
     uint64_t timestep,
     double time,
     std::optional<TimelineStatistics> const& lastData,
@@ -100,19 +101,19 @@ DataPointCollection StatisticsConverterService::convert(
     result.averageNumCells = getDataPointByAveraging(data.timestep.numObjects, data.timestep.numSelfReplicators);
     result.totalEnergy = getDataPointBySummation(data.timestep.totalEnergy);
 
-    auto const& evolution = data.timestep.evolution;
-    result.numCreatures = toDouble(evolution.numCreatures);
-    result.averageCreatureCells = evolution.numCreatures > 0 ? toDouble(evolution.sumCreatureCells) / evolution.numCreatures : 0.0;
-    result.averageGeneration = evolution.numCreatures > 0 ? toDouble(evolution.sumCreatureGenerations) / evolution.numCreatures : 0.0;
-    result.averageGenomeNodes = evolution.numGenomes > 0 ? toDouble(evolution.sumGenomeNodes) / evolution.numGenomes : 0.0;
-    result.averageMutationRate = evolution.numGenomes > 0 ? toDouble(evolution.sumMutationRates) / evolution.numGenomes : 0.0;
-    result.creatureEnergy = toDouble(evolution.sumCreatureEnergy);
-    result.numLineages = toDouble(evolution.numActiveLineages);
-    result.numSolidObjects = toDouble(evolution.numSolidObjects);
-    result.numFluidObjects = toDouble(evolution.numFluidObjects);
-    result.numCellObjects = toDouble(evolution.numCellObjects);
-    result.accumCreatedCreatures = toDouble(data.accumulated.numCreatedCreatures);
-    result.accumMutations = data.accumulated.totalMutations;
+    auto const& overall = overallStatistics;
+    result.numCreatures = toDouble(overall.numCreatures);
+    result.averageCreatureCells = overall.numCreatures > 0 ? toDouble(overall.sumCreatureCells) / overall.numCreatures : 0.0;
+    result.averageGeneration = overall.numCreatures > 0 ? toDouble(overall.sumCreatureGenerations) / overall.numCreatures : 0.0;
+    result.averageGenomeNodes = overall.numGenomes > 0 ? toDouble(overall.sumGenomeNodes) / overall.numGenomes : 0.0;
+    result.averageMutationRate = overall.numGenomes > 0 ? toDouble(overall.sumMutationRates) / overall.numGenomes : 0.0;
+    result.creatureEnergy = toDouble(overall.sumCreatureEnergy);
+    result.numLineages = toDouble(overall.numActiveLineages);
+    result.numSolidObjects = toDouble(overall.numSolidObjects);
+    result.numFluidObjects = toDouble(overall.numFluidObjects);
+    result.numCellObjects = toDouble(overall.numCellObjects);
+    result.accumCreatedCreatures = toDouble(overall.numCreatedCreatures);
+    result.accumMutations = toDouble(overall.totalMutations);
 
     auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
     if (deltaTimesteps < NEAR_ZERO) {

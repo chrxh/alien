@@ -6,6 +6,7 @@
 
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/DataPointCollection.h>
+#include <EngineInterface/OverallStatistics.h>
 #include <EngineInterface/StatisticsRawData.h>
 
 class TimelineLiveStatistics
@@ -14,7 +15,7 @@ public:
     static auto constexpr MaxLiveHistory = 240.0f;  //in seconds
 
     std::vector<DataPointCollection> const& getDataPointCollectionHistory() const;
-    void update(TimelineStatistics const& statistics, uint64_t timestep);
+    void update(TimelineStatistics const& statistics, OverallStatisticsEntry const& overallStatistics, uint64_t timestep);
 
 private:
     void truncate();

@@ -119,6 +119,11 @@ RawLineageStatistics EngineWorker::getRawLineageStatistics() const
     return _simulationCudaFacade->getRawLineageStatistics();
 }
 
+OverallStatisticsEntry EngineWorker::getOverallStatistics() const
+{
+    return _simulationCudaFacade->getOverallStatistics();
+}
+
 LineageHistory const& EngineWorker::getLineageHistory() const
 {
     return _simulationCudaFacade->getLineageHistory();
