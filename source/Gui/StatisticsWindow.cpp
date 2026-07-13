@@ -73,7 +73,7 @@ void StatisticsWindow::initIntern()
 }
 
 StatisticsWindow::StatisticsWindow()
-    : AlienWindow("Statistics", "windows.statistics", false)
+    : AlienWindow(_("Statistics"), "windows.statistics", false)
 {}
 
 void StatisticsWindow::shutdownIntern()
@@ -100,7 +100,7 @@ void StatisticsWindow::processIntern()
     if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -_settingsHeight : -scale(40.0f)})) {
         if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-            if (ImGui::BeginTabItem("Timelines")) {
+            if (ImGui::BeginTabItem(_("Timelines"))) {
                 if (ImGui::BeginChild("##timelines", ImVec2(0, 0), 0)) {
                     processTimelinesTab();
                 }
@@ -108,7 +108,7 @@ void StatisticsWindow::processIntern()
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Histograms")) {
+            if (ImGui::BeginTabItem(_("Histograms"))) {
                 if (ImGui::BeginChild("##histograms", ImVec2(0, 0), 0)) {
                     processHistogramsTab();
                 }
@@ -116,7 +116,7 @@ void StatisticsWindow::processIntern()
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Throughput")) {
+            if (ImGui::BeginTabItem(_("Throughput"))) {
                 if (ImGui::BeginChild("##throughput", ImVec2(0, 0), 0)) {
                     processTablesTab();
                 }
@@ -135,9 +135,9 @@ void StatisticsWindow::processTimelinesTab()
 {
     ImGui::Spacing();
 
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").textWidth(RightColumnWidth).values({"Real-time plots", "Entire history plots"}), &_plotMode);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name(_("Mode")).textWidth(RightColumnWidth).values({_("Real-time plots"), _("Entire history plots")}), &_plotMode);
 
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Plot type").textWidth(RightColumnWidth).values(createPlotTypeStrings()), &_plotType);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name(_("Plot type")).textWidth(RightColumnWidth).values(createPlotTypeStrings()), &_plotType);
 
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
         processTimelineStatistics();
@@ -233,22 +233,22 @@ void StatisticsWindow::processTablesTab()
             ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersOuterV,
             ImVec2(-1, 0))) {
 
-        ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
+        ImGui::TableSetupColumn(_("##"));
+        ImGui::TableSetupColumn(_("##"), ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedCellsPerSecond()));
 
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Created cells / sec");
+        AlienGui::Text(_("Created cells / sec"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedReplicatorsPerSecond()));
 
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Created self-replicators / sec");
+        AlienGui::Text(_("Created self-replicators / sec"));
 
         ImGui::EndTable();
     }
@@ -263,14 +263,14 @@ void StatisticsWindow::processSettings()
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
-    _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
+    _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(_("Settings")).rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
             if (_plotMode == 0) {
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters()
-                        .name("Time horizon")
+                        .name(_("Time horizon"))
                         .min(1.0f)
                         .max(TimelineLiveStatistics::MaxLiveHistory)
                         .format("%.1f s")
@@ -279,13 +279,13 @@ void StatisticsWindow::processSettings()
             }
             if (_plotMode == 1) {
                 AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("Time horizon").min(1.0f).max(100.0f).format("%.0f percent").textWidth(RightColumnWidth),
+                    AlienGui::SliderFloatParameters().name(_("Time horizon")).min(1.0f).max(100.0f).format("%.0f percent").textWidth(RightColumnWidth),
                     &_timeHorizonForLongtermStatistics);
             }
 
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Plot height").min(MinPlotHeight).max(1000.0f).format("%.0f").textWidth(RightColumnWidth), &_plotHeight);
-            AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), &_plotScale);
+                AlienGui::SliderFloatParameters().name(_("Plot height")).min(MinPlotHeight).max(1000.0f).format("%.0f").textWidth(RightColumnWidth), &_plotHeight);
+            AlienGui::Switcher(AlienGui::SwitcherParameters().name(_("Scale")).textWidth(RightColumnWidth).values({_("Linear"), _("Logarithmic")}), &_plotScale);
         }
         ImGui::EndChild();
     }
@@ -299,8 +299,8 @@ void StatisticsWindow::processTimelineStatistics()
     ImGui::PushID(1);
     int row = 0;
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
+        ImGui::TableSetupColumn(_("##"));
+        ImGui::TableSetupColumn(_("##"), ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
 
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
@@ -308,31 +308,31 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numObjects);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Objects");
+        AlienGui::Text(_("Objects"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numEnergyParticles);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Energy particles");
+        AlienGui::Text(_("Energy particles"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::totalEnergy);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Contained energy");
+        AlienGui::Text(_("Contained energy"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numSelfReplicators);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Self-replicators");
+        AlienGui::Text(_("Self-replicators"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numColonies);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Diversity");
+        AlienGui::Text(_("Diversity"));
         ImGui::SameLine();
         AlienGui::HelpMarker("The number of colonies is displayed. A colony is a set of at least 20 same mutants.");
 
@@ -340,7 +340,7 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Num genotype\ncells average");
+        AlienGui::Text(_("Num genotype\ncells average"));
         ImGui::SameLine();
         AlienGui::HelpMarker("The average number of encoded cells in the genomes is displayed.");
 
@@ -348,31 +348,31 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageNumCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Genome complexity\naverage");
+        AlienGui::Text(_("Genome complexity\naverage"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::varianceNumCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Genome complexity\nvariance");
+        AlienGui::Text(_("Genome complexity\nvariance"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::maxNumCellsOfColonies, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Genome complexity\nmaximum");
+        AlienGui::Text(_("Genome complexity\nmaximum"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numViruses);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Viruses");
+        AlienGui::Text(_("Viruses"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numFreeCells);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Free cells");
+        AlienGui::Text(_("Free cells"));
 
         ImPlot::PopColormap();
 
@@ -384,93 +384,93 @@ void StatisticsWindow::processTimelineStatistics()
     AlienGui::Group(AlienGui::GroupParameters().text("Processes per time step and active cell"));
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
+        ImGui::TableSetupColumn(_("##"));
+        ImGui::TableSetupColumn(_("##"), ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numCreatedCells, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Created cells");
+        AlienGui::Text(_("Created cells"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numAttacks, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Attacks");
+        AlienGui::Text(_("Attacks"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numMuscleActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Muscle activities");
+        AlienGui::Text(_("Muscle activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numDepotActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Transmitter activities");
+        AlienGui::Text(_("Transmitter activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numDefenderActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Defender activities");
+        AlienGui::Text(_("Defender activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numGeneratorPulses, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Generator pulses");
+        AlienGui::Text(_("Generator pulses"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numNeuronActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Neural activities");
+        AlienGui::Text(_("Neural activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numSensorActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Sensor activities");
+        AlienGui::Text(_("Sensor activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numSensorMatches, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Sensor matches");
+        AlienGui::Text(_("Sensor matches"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numInjectionActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Injection activities");
+        AlienGui::Text(_("Injection activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numCompletedInjections, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Completed injections");
+        AlienGui::Text(_("Completed injections"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numReconnectorCreated, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Reconnector creations");
+        AlienGui::Text(_("Reconnector creations"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numReconnectorRemoved, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Reconnector deletions");
+        AlienGui::Text(_("Reconnector deletions"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numDetonations, 8);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Detonations");
+        AlienGui::Text(_("Detonations"));
 
         ImPlot::PopColormap();
         ImGui::EndTable();

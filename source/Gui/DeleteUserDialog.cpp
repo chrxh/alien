@@ -10,7 +10,7 @@
 #include "GenericMessageDialog.h"
 
 DeleteUserDialog::DeleteUserDialog()
-    : AlienDialog("Delete user")
+    : AlienDialog(_("Delete user"))
 {}
 
 void DeleteUserDialog::processIntern()
@@ -20,16 +20,16 @@ void DeleteUserDialog::processIntern()
         + "' will be deleted on the server side.\nThese include the likes, the simulations and the account data.");
     AlienGui::Separator();
 
-    AlienGui::InputText(AlienGui::InputTextParameters().hint("Re-enter password").password(true).textWidth(0), _reenteredPassword);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint(_("Re-enter password")).password(true).textWidth(0), _reenteredPassword);
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_reenteredPassword.empty());
-    if (AlienGui::Button("Delete")) {
+    if (AlienGui::Button(_("Delete"))) {
         close();
         if (_reenteredPassword == *NetworkService::get().getPassword()) {
             onDelete();
         } else {
-            GenericMessageDialog::get().information("Error", "The password does not match.");
+            GenericMessageDialog::get().information(_("Error"), _("The password does not match."));
         }
         _reenteredPassword.clear();
     }
@@ -37,7 +37,7 @@ void DeleteUserDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
         _reenteredPassword.clear();
     }
@@ -48,8 +48,8 @@ void DeleteUserDialog::onDelete()
     auto userName = *NetworkService::get().getLoggedInUserName();
     if (NetworkService::get().deleteUser()) {
         BrowserWindow::get().onRefresh();
-        GenericMessageDialog::get().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
+        GenericMessageDialog::get().information(_("Information"), "The user '" + userName + "' has been deleted.\nYou are logged out.");
     } else {
-        GenericMessageDialog::get().information("Error", "An error occurred on the server.");
+        GenericMessageDialog::get().information(_("Error"), _("An error occurred on the server."));
     }
 }

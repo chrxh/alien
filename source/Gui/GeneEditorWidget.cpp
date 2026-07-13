@@ -54,12 +54,12 @@ _GeneEditorWidget::_GeneEditorWidget(GenomeTabEditData const& editData, GenomeTa
 
 void _GeneEditorWidget::processNoSelection()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Selected gene"));
+    AlienGui::Group(AlienGui::GroupParameters().text(_("Selected gene")));
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
         AlienGui::DisabledField();
-        auto text = "No gene is selected";
+        auto text = _("No gene is selected");
         auto textSize = ImGui::CalcTextSize(text);
         ImVec2 textPos(startPos.x + size.x / 2 - textSize.x / 2, startPos.y + size.y / 2 - textSize.y / 2);
         ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text);
@@ -69,7 +69,7 @@ void _GeneEditorWidget::processNoSelection()
 
 void _GeneEditorWidget::processHeaderData()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Selected gene").highlighted(true));
+    AlienGui::Group(AlienGui::GroupParameters().text(_("Selected gene")).highlighted(true));
 
     if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
@@ -81,14 +81,14 @@ void _GeneEditorWidget::processHeaderData()
 
             auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
+            AlienGui::Group(AlienGui::GroupParameters().text(_("Base properties")));
 
             // Gene name
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
+            AlienGui::InputText(AlienGui::InputTextParameters().name(_("Gene name")).textWidth(rightColumnWidth), gene._name);
 
             // Shape
             if (AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth),
+                    AlienGui::ComboParameters().name(_("Shape generator")).values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth),
                     gene._shape)) {
                 {
                     ShapeGenerator shapeGenerator;
@@ -100,17 +100,17 @@ void _GeneEditorWidget::processHeaderData()
 
             // Connection distance
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
+                AlienGui::InputFloatParameters().name(_("Connection distance")).format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
 
             // Stiffness
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Stiffness")).format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
 
             // Homogeneous cell type
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
-                    .name("Homogeneous cell type")
+                    .name(_("Homogeneous cell type"))
                     .textWidth(rightColumnWidth)
-                    .tooltip("If enabled, every constructed cell of this gene uses the cell type and its properties of the first node."),
+                    .tooltip(_("If enabled, every constructed cell of this gene uses the cell type and its properties of the first node.")),
                 gene._homogeneousCellType);
 
             table.next();
@@ -138,11 +138,11 @@ void _GeneEditorWidget::processNodeList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTable("Node list", 5, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("Node index", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
-            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
-            ImGui::TableSetupColumn("Construction", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
-            ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
-            ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
+            ImGui::TableSetupColumn(_("Node index"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
+            ImGui::TableSetupColumn(_("Type"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
+            ImGui::TableSetupColumn(_("Construction"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
+            ImGui::TableSetupColumn(_("Angle"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
+            ImGui::TableSetupColumn(_("Color"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -318,7 +318,7 @@ void _GeneEditorWidget::onMoveNodeUpward()
     auto& gene = _editData->getSelectedGeneRef();
 
     if (indexToMove == 1 && gene._nodes.at(indexToMove).getCellType() == CellType_Void) {
-        showMessage("Error", "The first node cannot be void.");
+        showMessage(_("Error"), _("The first node cannot be void."));
         return;
     }
 
@@ -334,7 +334,7 @@ void _GeneEditorWidget::onMoveNodeDownward()
     auto& gene = _editData->getSelectedGeneRef();
 
     if (indexToMove == gene._nodes.size() - 2 && gene._nodes.at(indexToMove).getCellType() == CellType_Void) {
-        showMessage("Error", "The last node cannot be void.");
+        showMessage(_("Error"), _("The last node cannot be void."));
         return;
     }
 

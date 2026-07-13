@@ -56,7 +56,7 @@ void SignalsBufferDialog::processIntern()
     auto buttonAreaHeight = scale(50.0f);
     if (ImGui::BeginChild("SignalsBufferContent", ImVec2(0, -buttonAreaHeight), false)) {
         int numEntries = static_cast<int>(_channelsBuffer.size());
-        if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of signals").textWidth(DialogTextWidth), numEntries)) {
+        if (AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Number of signals")).textWidth(DialogTextWidth), numEntries)) {
             numEntries = std::clamp(numEntries, 0, MAX_CELL_MEMORY_ENTRIES);
             _channelsBuffer.resize(numEntries, std::vector<float>(NEURONS_PER_CELL, 0.0f));
         }
@@ -67,7 +67,7 @@ void SignalsBufferDialog::processIntern()
             }
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
-            AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(DialogTextWidth), &_selectedEntry);
+            AlienGui::Switcher(AlienGui::SwitcherParameters().name(_("Edit signal")).values(entryTexts).textWidth(DialogTextWidth), &_selectedEntry);
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
             auto& channels = _channelsBuffer.at(_selectedEntry);
@@ -85,7 +85,7 @@ void SignalsBufferDialog::processIntern()
 
     AlienGui::Separator();
 
-    if (AlienGui::Button("Adopt")) {
+    if (AlienGui::Button(_("Adopt"))) {
         ImGui::CloseCurrentPopup();
         onAdopt();
         close();
@@ -93,7 +93,7 @@ void SignalsBufferDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         ImGui::CloseCurrentPopup();
         close();
     }

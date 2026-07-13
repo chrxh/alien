@@ -17,7 +17,7 @@ void LogWindow::initIntern()
 }
 
 LogWindow::LogWindow()
-    : AlienWindow("Log", "windows.log", false)
+    : AlienWindow(_("Log"), "windows.log", false)
 {}
 
 void LogWindow::shutdownIntern()
@@ -42,5 +42,5 @@ void LogWindow::processIntern()
 
     ImGui::Spacing();
     ImGui::Spacing();
-    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Verbose"), _verbose);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name(_("Verbose")), _verbose);
 }

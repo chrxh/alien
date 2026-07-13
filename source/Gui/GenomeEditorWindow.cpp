@@ -61,7 +61,7 @@ GenomeDesc GenomeEditorWindow::getCurrentGenome() const
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
-    : AlienWindow("Genome editor", "windows.genome editor", false, true, {500.0f, 300.0f})
+    : AlienWindow(_("Genome editor"), "windows.genome editor", false, true, {500.0f, 300.0f})
 {}
 
 void GenomeEditorWindow::initIntern()
@@ -94,12 +94,12 @@ bool GenomeEditorWindow::isShown()
 
 void GenomeEditorWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open genome from file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip(_("Open genome from file")))) {
         onOpenGenome();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save genome to file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip(_("Save genome to file")))) {
         onSaveGenome();
     }
 
@@ -107,31 +107,31 @@ void GenomeEditorWindow::processToolbar()
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters()
                 .text(ICON_FA_UPLOAD)
-                .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser."))) {
+                .tooltip(_("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.")))) {
     }
 
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip(_("Clone genome")))) {
         onCloneGenome();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome to clipboard"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip(_("Copy genome to clipboard")))) {
         onCopyGenome();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste genome from clipboard").disabled(!_copiedGenome.has_value()))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip(_("Paste genome from clipboard")).disabled(!_copiedGenome.has_value()))) {
         onPasteGenome();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_WINDOW_CLOSE).tooltip("Close all tabs except the current one").disabled(_tabs.size() <= 1))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_WINDOW_CLOSE).tooltip(_("Close all tabs except the current one")).disabled(_tabs.size() <= 1))) {
         onCloseOtherTabs();
     }
 
@@ -141,12 +141,12 @@ void GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point in this tab").disabled(!hasGenomeChanged))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip(_("Create save point in this tab")).disabled(!hasGenomeChanged))) {
         onSavepointGenome();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert genome to save point").disabled(!hasGenomeChanged))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip(_("Revert genome to save point")).disabled(!hasGenomeChanged))) {
         _tabs.at(_selectedTabIndex)->revertChanges();
     }
 
@@ -154,7 +154,7 @@ void GenomeEditorWindow::processToolbar()
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PALETTE).tooltip("Change the color of all nodes with a certain color"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PALETTE).tooltip(_("Change the color of all nodes with a certain color")))) {
         ChangeColorDialog::get().open(_tabs.at(_selectedTabIndex)->getEditData());
     }
 
@@ -165,14 +165,14 @@ void GenomeEditorWindow::processToolbar()
     auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the current genome to the selected creatures in the simulation")
+                                    .tooltip(_("Inject the current genome to the selected creatures in the simulation"))
                                     .disabled(!creaturesSelected))) {
         onInjectGenome();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING).tooltip("Create a seed with current genome without free energy supply"))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING).tooltip(_("Create a seed with current genome without free energy supply")))) {
         onCreateSeed(false);
     }
     ImGui::SameLine();
@@ -180,7 +180,7 @@ void GenomeEditorWindow::processToolbar()
                                     .text(ICON_FA_SEEDLING)
                                     .secondText(ICON_FA_BOLT)
                                     .secondTextOffset({30.0f, 25.0f})
-                                    .tooltip("Create a seed with current genome with free energy supply"))) {
+                                    .tooltip(_("Create a seed with current genome with free energy supply")))) {
         onCreateSeed(true);
     }
 
@@ -197,7 +197,7 @@ void GenomeEditorWindow::processTabWidget()
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 onScheduleAddTab(getDefaultGenome());
             }
-            AlienGui::Tooltip("New genome");
+            AlienGui::Tooltip(_("New genome"));
 
             std::optional<int> tabIndexToSelect = _tabIndexToSelect;
             std::optional<int> tabToDelete;
@@ -295,7 +295,7 @@ void GenomeEditorWindow::onInjectGenome()
 {
     auto const& selectedTab = _tabs.at(_selectedTabIndex);
     auto numCreatures = _SimulationFacade::get()->injectGenomeToSelectedCreatures(selectedTab->getGenomeDesc());
-    printOverlayMessage("Genome injected to " + std::to_string(numCreatures) + (numCreatures == 1 ? " creature" : " creatures"));
+    printOverlayMessage(_("Genome injected to ") + std::to_string(numCreatures) + (numCreatures == 1 ? _(" creature") : _(" creatures")));
     selectedTab->resetOriginal();
 }
 
@@ -326,7 +326,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();
 
-    printOverlayMessage("Seed created");
+    printOverlayMessage(_("Seed created"));
 }
 
 void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome)

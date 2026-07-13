@@ -32,7 +32,7 @@ void GpuSettingsDialog::shutdownIntern()
 }
 
 GpuSettingsDialog::GpuSettingsDialog()
-    : AlienDialog("CUDA settings")
+    : AlienDialog(_("CUDA settings"))
 {}
 
 void GpuSettingsDialog::processIntern()
@@ -41,11 +41,11 @@ void GpuSettingsDialog::processIntern()
 
     AlienGui::InputInt(
         AlienGui::InputIntParameters()
-            .name("Blocks")
+            .name(_("Blocks"))
             .textWidth(RightColumnWidth)
             .defaultValue(origGpuSettings.numBlocks)
-            .tooltip("This values specifies the number of CUDA thread blocks. If you are using a high-end graphics card, you can try to increase the number of "
-                     "blocks."),
+            .tooltip(_("This values specifies the number of CUDA thread blocks. If you are using a high-end graphics card, you can try to increase the number of "
+                      "blocks.")),
         _pendingGpuSettings.numBlocks);
 
     validateAndCorrect(_pendingGpuSettings);
@@ -53,14 +53,14 @@ void GpuSettingsDialog::processIntern()
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("Adopt")) {
+    if (AlienGui::Button(_("Adopt"))) {
         close();
         _SimulationFacade::get()->setGpuSettings_async(_pendingGpuSettings);
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }

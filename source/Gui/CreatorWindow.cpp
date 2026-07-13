@@ -28,11 +28,11 @@
 namespace
 {
     auto const ModeText = std::unordered_map<CreationMode, std::string>{
-        {CreationMode_CreateObject, "Create a single object"},
-        {CreationMode_CreateRectangle, "Create a rectangular object network"},
-        {CreationMode_CreateHexagon, "Create a hexagonal object network"},
-        {CreationMode_CreateDisc, "Create a disc-shaped object network"},
-        {CreationMode_Drawing, "Draw freehand"},
+        {CreationMode_CreateObject, _("Create a single object")},
+        {CreationMode_CreateRectangle, _("Create a rectangular object network")},
+        {CreationMode_CreateHexagon, _("Create a hexagonal object network")},
+        {CreationMode_CreateDisc, _("Create a disc-shaped object network")},
+        {CreationMode_Drawing, _("Draw freehand")},
     };
 
     auto const RightColumnWidth = 160.0f;
@@ -101,7 +101,7 @@ void CreatorWindow::processIntern()
         AlienGui::ComboColor(
             AlienGui::ComboColorParameters()
                 .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                .name("Color")
+                .name(_("Color"))
                 .textWidth(RightColumnWidth)
                 .tooltip(Const::GenomeColorTooltip),
             color);
@@ -110,7 +110,7 @@ void CreatorWindow::processIntern()
             auto pencilWidth = EditorModel::get().getPencilWidth();
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Pencil radius")
+                    .name(_("Pencil radius"))
                     .min(1.0f)
                     .max(8.0f)
                     .textWidth(RightColumnWidth)
@@ -121,45 +121,45 @@ void CreatorWindow::processIntern()
         }
         AlienGui::Switcher(
             AlienGui::SwitcherParameters()
-                .name("Material")
+                .name(_("Material"))
                 .textWidth(RightColumnWidth)
-                .values({"Solid", "Fluid", "Free cells", "Energy particles"})
+                .values({_("Solid"), _("Fluid"), _("Free cells"), _("Energy particles")})
                 .tooltip(Const::CreatorDrawingTypeTooltip),
             &_material);
         AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
+            AlienGui::InputFloatParameters().name(_("Energy")).format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
         if (_material == CreationMaterial_Fluid) {
-            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name(_("Glow")).min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
         }
         if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
+                AlienGui::SliderFloatParameters().name(_("Stiffness")).max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
         }
 
         if (_mode == CreationMode_CreateRectangle) {
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Horizontal objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
+                AlienGui::InputIntParameters().name(_("Horizontal objects")).textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
                 _rectHorizontalObjects);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Vertical objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
+                AlienGui::InputIntParameters().name(_("Vertical objects")).textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
                 _rectVerticalObjects);
         }
         if (_mode == CreationMode_CreateHexagon) {
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Layers")).textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
         }
         if (_mode == CreationMode_CreateDisc) {
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
+                AlienGui::InputFloatParameters().name(_("Outer radius")).textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
                 _outerRadius);
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
+                AlienGui::InputFloatParameters().name(_("Inner radius")).textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
                 _innerRadius);
         }
         if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
-                    .name("Object distance")
+                    .name(_("Object distance"))
                     .format("%.2f")
                     .step(0.1)
                     .textWidth(RightColumnWidth)
@@ -167,10 +167,10 @@ void CreatorWindow::processIntern()
                 _objectDistance);
         }
         if (_mode != CreationMode_CreateObject) {
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name(_("Sticky")).textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
         if (!isEnergyMaterial()) {
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(Const::CellStaticTooltip), _static);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name(_("Static")).textWidth(RightColumnWidth).tooltip(Const::CellStaticTooltip), _static);
         }
     }
     ImGui::EndChild();
@@ -181,7 +181,7 @@ void CreatorWindow::processIntern()
     } else {
         AlienGui::Separator();
         simInteractionController.setDrawMode(false);
-        if (AlienGui::Button("Build")) {
+        if (AlienGui::Button(_("Build"))) {
             if (_mode == CreationMode_CreateObject) {
                 createEntity();
             }
@@ -277,7 +277,7 @@ void CreatorWindow::finishDrawing()
 }
 
 CreatorWindow::CreatorWindow()
-    : AlienWindow("Creator", "editors.creator", false)
+    : AlienWindow(_("Creator"), "editors.creator", false)
 {}
 
 void CreatorWindow::createEntity()

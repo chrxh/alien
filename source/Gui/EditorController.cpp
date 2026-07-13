@@ -256,7 +256,7 @@ bool EditorController::isCopyingPossible() const
 void EditorController::onCopy()
 {
     PatternEditorWindow::get().onCopy();
-    printOverlayMessage("Selection copied");
+    printOverlayMessage(_("Selection copied"));
 }
 
 bool EditorController::isPastingPossible() const
@@ -267,7 +267,7 @@ bool EditorController::isPastingPossible() const
 void EditorController::onPaste()
 {
     PatternEditorWindow::get().onPaste();
-    printOverlayMessage("Selection pasted");
+    printOverlayMessage(_("Selection pasted"));
 }
 
 bool EditorController::isDeletingPossible() const
@@ -278,7 +278,7 @@ bool EditorController::isDeletingPossible() const
 void EditorController::onDelete()
 {
     PatternEditorWindow::get().onDelete();
-    printOverlayMessage("Selection deleted");
+    printOverlayMessage(_("Selection deleted"));
 }
 
 void EditorController::processInspectorWindows()

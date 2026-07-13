@@ -14,25 +14,25 @@ namespace
 }
 
 NetworkSettingsDialog::NetworkSettingsDialog()
-    : AlienDialog("Network settings")
+    : AlienDialog(_("Network settings"))
 {}
 
 void NetworkSettingsDialog::processIntern()
 {
     AlienGui::InputText(
-        AlienGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
+        AlienGui::InputTextParameters().name(_("Blocks")).defaultValue(_origServerAddress).name(_("Server address")).textWidth(RightColumnWidth), _serverAddress);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("Adopt")) {
+    if (AlienGui::Button(_("Adopt"))) {
         close();
         onChangeSettings();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }
