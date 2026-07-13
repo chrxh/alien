@@ -2,7 +2,7 @@
 
 #include <EngineInterface/LineageStatistics.h>
 #include <EngineInterface/OverallStatistics.h>
-#include <EngineInterface/StatisticsRawData.h>
+#include <EngineInterface/TimelineStatistics.h>
 
 #include "Base.cuh"
 #include "CudaMemoryManager.cuh"
@@ -13,7 +13,7 @@ public:
     __host__ void init()
     {
         _lineageArrayCapacity = 1 << 18;
-        CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
+        CudaMemoryManager::getInstance().acquireMemory<TimelineStatistics>(1, _data);
 
         CudaMemoryManager::getInstance().acquireMemory<OverallStatisticsEntry>(1, _overallStatisticsEntry);
         CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageArrayCapacity, _lineageStatisticsEntries);
@@ -23,7 +23,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapControl>(1, _lineageAccumulatorMapControl);
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapEntry>(_lineageArrayCapacity, _lineageAccumulatorMaps[0]);
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapEntry>(_lineageArrayCapacity, _lineageAccumulatorMaps[1]);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_data, 0, sizeof(TimelineStatistics)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_overallStatisticsEntry, 0, sizeof(OverallStatisticsEntry)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMapControl, 0, sizeof(LineageAccumulatorMapControl)));
 
@@ -49,10 +49,10 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[1]);
     }
 
-    __host__ StatisticsRawData getStatistics()
+    __host__ TimelineStatistics getStatistics()
     {
-        StatisticsRawData result;
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
+        TimelineStatistics result;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _data, sizeof(TimelineStatistics), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -63,10 +63,10 @@ public:
         return result;
     }
 
-    __host__ RawLineageStatistics getLineageStatistics()
+    __host__ LineageStatistics getLineageStatistics()
     {
         auto control = getLineageMapControl();
-        RawLineageStatistics result;
+        LineageStatistics result;
         result.entries.resize(control.numCompactEntries);
         if (control.numCompactEntries > 0) {
             CHECK_FOR_DEVICE_ERRORS(
@@ -85,37 +85,37 @@ public:
     __inline__ __device__ void resetTimestepData()
     {
         if (threadIdx.x == 0 && blockIdx.x == 0) {
-            _data->timeline.timestep = TimestepStatistics();
+            _data->timestep = TimestepStatistics();
         }
     }
 
-    __inline__ __device__ void incNumObjects(int color) { atomicAdd(&(_data->timeline.timestep.numObjects[color]), 1); }
-    __inline__ __device__ void incNumReplicator(int color) { atomicAdd(&_data->timeline.timestep.numSelfReplicators[color], 1); }
+    __inline__ __device__ void incNumObjects(int color) { atomicAdd(&(_data->timestep.numObjects[color]), 1); }
+    __inline__ __device__ void incNumReplicator(int color) { atomicAdd(&_data->timestep.numSelfReplicators[color], 1); }
     __inline__ __device__ int getNumReplicators()
     {
         auto result = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result += _data->timeline.timestep.numSelfReplicators[i];
+            result += _data->timestep.numSelfReplicators[i];
         }
         return result;
     }
-    __inline__ __device__ void incNumViruses(int color) { atomicAdd(&_data->timeline.timestep.numViruses[color], 1); }
-    __inline__ __device__ void incNumFreeCells(int color) { atomicAdd(&_data->timeline.timestep.numFreeCells[color], 1); }
-    __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timeline.timestep.numEnergyParticles[color], 1); }
-    __inline__ __device__ void addEnergy(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.totalEnergy[color], valueToAdd); }
-    __inline__ __device__ void addNumObjects(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.numObjects[color], valueToAdd); }
+    __inline__ __device__ void incNumViruses(int color) { atomicAdd(&_data->timestep.numViruses[color], 1); }
+    __inline__ __device__ void incNumFreeCells(int color) { atomicAdd(&_data->timestep.numFreeCells[color], 1); }
+    __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timestep.numEnergyParticles[color], 1); }
+    __inline__ __device__ void addEnergy(int color, float valueToAdd) { atomicAdd(&_data->timestep.totalEnergy[color], valueToAdd); }
+    __inline__ __device__ void addNumObjects(int color, float valueToAdd) { atomicAdd(&_data->timestep.numObjects[color], valueToAdd); }
     __inline__ __device__ double getSummedNumCells()
     {
         auto result = 0.0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result += toDouble(_data->timeline.timestep.numObjects[i]);
+            result += toDouble(_data->timestep.numObjects[i]);
         }
         return result;
     }
     __inline__ __device__ void halveNumConnections()
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            _data->timeline.timestep.numFreeCells[i] /= 2;
+            _data->timestep.numFreeCells[i] /= 2;
         }
     }
 
@@ -284,33 +284,33 @@ public:
     //accumulated statistics
     __host__ void resetAccumulatedStatistics()
     {
-        StatisticsRawData hostData;
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&hostData, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
-        hostData.timeline.accumulated = AccumulatedStatistics();
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_data, &hostData, sizeof(StatisticsRawData), cudaMemcpyHostToDevice));
+        TimelineStatistics hostData;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&hostData, _data, sizeof(TimelineStatistics), cudaMemcpyDeviceToHost));
+        hostData.accumulated = AccumulatedStatistics();
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_data, &hostData, sizeof(TimelineStatistics), cudaMemcpyHostToDevice));
     }
 
-    __inline__ __device__ void incNumCreatedCells(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCreatedCells[color], uint64_t(1)); }
-    __inline__ __device__ void incNumCreatedReplicators(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCreatedReplicators[color], uint64_t(1)); }
-    __inline__ __device__ void incNumAttacks(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numAttacks[color], uint64_t(1)); }
-    __inline__ __device__ void incNumMuscleActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numMuscleActivities[color], uint64_t(1)); }
-    __inline__ __device__ void incNumDefenderActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numDefenderActivities[color], uint64_t(1)); }
-    __inline__ __device__ void incNumDepotActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numDepotActivities[color], uint64_t(1)); }
+    __inline__ __device__ void incNumCreatedCells(int color) { alienAtomicAdd64(&_data->accumulated.numCreatedCells[color], uint64_t(1)); }
+    __inline__ __device__ void incNumCreatedReplicators(int color) { alienAtomicAdd64(&_data->accumulated.numCreatedReplicators[color], uint64_t(1)); }
+    __inline__ __device__ void incNumAttacks(int color) { alienAtomicAdd64(&_data->accumulated.numAttacks[color], uint64_t(1)); }
+    __inline__ __device__ void incNumMuscleActivities(int color) { alienAtomicAdd64(&_data->accumulated.numMuscleActivities[color], uint64_t(1)); }
+    __inline__ __device__ void incNumDefenderActivities(int color) { alienAtomicAdd64(&_data->accumulated.numDefenderActivities[color], uint64_t(1)); }
+    __inline__ __device__ void incNumDepotActivities(int color) { alienAtomicAdd64(&_data->accumulated.numDepotActivities[color], uint64_t(1)); }
     __inline__ __device__ void incNumInjectionActivities(int color)
     {
-        alienAtomicAdd64(&_data->timeline.accumulated.numInjectionActivities[color], uint64_t(1));
+        alienAtomicAdd64(&_data->accumulated.numInjectionActivities[color], uint64_t(1));
     }
     __inline__ __device__ void incNumCompletedInjections(int color)
     {
-        alienAtomicAdd64(&_data->timeline.accumulated.numCompletedInjections[color], uint64_t(1));
+        alienAtomicAdd64(&_data->accumulated.numCompletedInjections[color], uint64_t(1));
     }
-    __inline__ __device__ void incNumGeneratorPulses(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numGeneratorPulses[color], uint64_t(1)); }
-    __inline__ __device__ void incNumNeuronActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numNeuronActivities[color], uint64_t(1)); }
-    __inline__ __device__ void incNumSensorActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numSensorActivities[color], uint64_t(1)); }
-    __inline__ __device__ void incNumSensorMatches(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numSensorMatches[color], uint64_t(1)); }
-    __inline__ __device__ void incNumReconnectorCreated(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numReconnectorCreated[color], uint64_t(1)); }
-    __inline__ __device__ void incNumReconnectorRemoved(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numReconnectorRemoved[color], uint64_t(1)); }
-    __inline__ __device__ void incNumDetonations(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numDetonations[color], uint64_t(1)); }
+    __inline__ __device__ void incNumGeneratorPulses(int color) { alienAtomicAdd64(&_data->accumulated.numGeneratorPulses[color], uint64_t(1)); }
+    __inline__ __device__ void incNumNeuronActivities(int color) { alienAtomicAdd64(&_data->accumulated.numNeuronActivities[color], uint64_t(1)); }
+    __inline__ __device__ void incNumSensorActivities(int color) { alienAtomicAdd64(&_data->accumulated.numSensorActivities[color], uint64_t(1)); }
+    __inline__ __device__ void incNumSensorMatches(int color) { alienAtomicAdd64(&_data->accumulated.numSensorMatches[color], uint64_t(1)); }
+    __inline__ __device__ void incNumReconnectorCreated(int color) { alienAtomicAdd64(&_data->accumulated.numReconnectorCreated[color], uint64_t(1)); }
+    __inline__ __device__ void incNumReconnectorRemoved(int color) { alienAtomicAdd64(&_data->accumulated.numReconnectorRemoved[color], uint64_t(1)); }
+    __inline__ __device__ void incNumDetonations(int color) { alienAtomicAdd64(&_data->accumulated.numDetonations[color], uint64_t(1)); }
 
     __inline__ __device__ void incCreatedCreature(uint32_t lineageId)
     {
@@ -328,20 +328,6 @@ public:
             atomicAdd(&getActiveAccumulatorMap()[slotIndex].totalMutations, value);
         }
     }
-
-    //histogram
-    __inline__ __device__ void resetHistogramData()
-    {
-        _data->histogram.maxAge = 0;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            for (int j = 0; j < MAX_HISTOGRAM_SLOTS; ++j) {
-                _data->histogram.numCellsByColorBySlot[i][j] = 0;
-            }
-        }
-    }
-    __inline__ __device__ void incNumCells(int color, int slot) { atomicAdd(&(_data->histogram.numCellsByColorBySlot[color][slot]), 1); }
-    __inline__ __device__ void maxAge(int value) { atomicMax(&_data->histogram.maxAge, value); }
-    __inline__ __device__ int getMaxAge() const { return _data->histogram.maxAge; }
 
 private:
     static auto constexpr LineageIdEmpty = 0xffffffffu;
@@ -420,7 +406,7 @@ private:
         return -1;
     }
 
-    StatisticsRawData* _data;
+    TimelineStatistics* _data;
 
     int _lineageArrayCapacity;  // Used for all lineage maps and arrays
 

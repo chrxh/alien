@@ -22,7 +22,7 @@
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsHistory.h>
-#include <EngineInterface/StatisticsRawData.h>
+#include <EngineInterface/TimelineStatistics.h>
 
 #include <EngineKernels/Definitions.cuh>
 #include <EngineKernels/TOs.cuh>
@@ -87,11 +87,11 @@ public:
 
     ArraySizesForTOs estimateCapacityNeededForTO() const;
 
-    StatisticsRawData getStatisticsRawData();
+    TimelineStatistics getTimelineStatistics();
     void updateStatistics();
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
-    RawLineageStatistics getRawLineageStatistics();
+    LineageStatistics getLineageStatistics();
     OverallStatisticsEntry getOverallStatistics();
     LineageHistory const& getLineageHistory() const;
 
@@ -164,9 +164,9 @@ private:
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    std::optional<StatisticsRawData> _statisticsData;
+    std::optional<TimelineStatistics> _statisticsData;
     StatisticsHistory _statisticsHistory;
-    std::optional<RawLineageStatistics> _lineageStatisticsData;
+    std::optional<LineageStatistics> _lineageStatisticsData;
     std::optional<OverallStatisticsEntry> _overallStatisticsData;
     LineageHistory _lineageHistory;
     LineageHistoryService _lineageHistoryService;

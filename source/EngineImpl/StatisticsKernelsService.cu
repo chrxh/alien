@@ -11,9 +11,6 @@ void StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings,
     KERNEL_CALL(cudaUpdateTimestepStatistics_substep1, data, simulationStatistics);
     KERNEL_CALL(cudaUpdateTimestepStatistics_substep2, data, simulationStatistics);
     KERNEL_CALL(cudaUpdateTimestepStatistics_substep3, data, simulationStatistics);
-    KERNEL_CALL_1_1(cudaUpdateHistogramData_substep1, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateHistogramData_substep2, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateHistogramData_substep3, data, simulationStatistics);
 }
 
 void StatisticsKernelsService::updateEvolutionStatistics(

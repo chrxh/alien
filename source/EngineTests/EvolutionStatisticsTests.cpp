@@ -28,7 +28,7 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     EXPECT_FLOAT_EQ(8.0f, overall.sumCreatureGenerations);
     EXPECT_GT(overall.sumCreatureEnergy, 0.0f);
 
-    auto lineageStatistics = _simulationFacade->getRawLineageStatistics();
+    auto lineageStatistics = _simulationFacade->getLineageStatistics();
     ASSERT_EQ(2, lineageStatistics.entries.size());
     auto findEntry = [&](uint32_t lineageId) -> LineageStatisticsEntry const* {
         for (auto const& entry : lineageStatistics.entries) {
@@ -94,7 +94,7 @@ TEST_F(EvolutionStatisticsTests, accumulatedMutations)
     EXPECT_GT(overall.sumAccumulatedMutations, 0.0f);
     EXPECT_GT(overall.totalMutations, 0.0f);
 
-    auto lineageStatistics = _simulationFacade->getRawLineageStatistics();
+    auto lineageStatistics = _simulationFacade->getLineageStatistics();
     ASSERT_EQ(1, lineageStatistics.entries.size());
     EXPECT_EQ(42, lineageStatistics.entries.front().lineageId);
     EXPECT_GT(lineageStatistics.entries.front().totalMutations, 0.0f);

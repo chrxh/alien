@@ -67,7 +67,7 @@ add_library(EngineInterface
     StatisticsConverterService.h
     StatisticsHistory.cpp
     StatisticsHistory.h
-    StatisticsRawData.h)
+    TimelineStatistics.h)
 
 target_link_libraries(EngineInterface Base)
 

@@ -12,9 +12,9 @@ protected:
         return result;
     }
 
-    static RawLineageStatistics createRawStatistics(std::vector<LineageStatisticsEntry> entries)
+    static LineageStatistics createRawStatistics(std::vector<LineageStatisticsEntry> entries)
     {
-        RawLineageStatistics result;
+        LineageStatistics result;
         result.entries = std::move(entries);
         return result;
     }

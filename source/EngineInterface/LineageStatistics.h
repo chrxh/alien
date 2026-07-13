@@ -19,7 +19,7 @@ struct LineageStatisticsEntry
     double totalMutations = 0;          // Accumulated, never reset
 };
 
-struct RawLineageStatistics
+struct LineageStatistics
 {
     std::vector<LineageStatisticsEntry> entries;
 };

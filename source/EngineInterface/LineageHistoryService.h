@@ -8,7 +8,7 @@
 class LineageHistoryService
 {
 public:
-    void addSample(LineageHistory& history, RawLineageStatistics const& rawStatistics, uint64_t timestep);
+    void addSample(LineageHistory& history, LineageStatistics const& lineageStatistics, uint64_t timestep);
     void reset();
 
     // Merges two consecutive samples: union of the lineage ids, momentary values are averaged
