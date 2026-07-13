@@ -16,21 +16,34 @@ DataPointCollection StatisticsConverterService::convert(
     auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
     result.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
 
-    auto const& overall = overallStatistics.overallEntry;
-    result.numCreatures = toDouble(overall.numCreatures);
-    result.averageCreatureCells = overall.numCreatures > 0 ? toDouble(overall.sumCreatureCells) / overall.numCreatures : 0.0;
-    result.averageGeneration = overall.numCreatures > 0 ? toDouble(overall.sumCreatureGenerations) / overall.numCreatures : 0.0;
-    result.averageGenomeNodes = overall.numGenomes > 0 ? toDouble(overall.sumGenomeNodes) / overall.numGenomes : 0.0;
-    result.averageMutationRate = overall.numGenomes > 0 ? toDouble(overall.sumMutationRates) / overall.numGenomes : 0.0;
-    result.creatureEnergy = toDouble(overall.sumCreatureEnergy);
-    result.numLineages = toDouble(overall.numActiveLineages);
-    result.numSolidObjects = toDouble(overall.numSolidObjects);
-    result.numFluidObjects = toDouble(overall.numFluidObjects);
-    result.numCellObjects = toDouble(overall.numCellObjects);
-    result.accumCreatedCreatures = toDouble(overall.numCreatedCreatures);
-    result.accumMutations = toDouble(overall.totalMutations);
+    auto const& o = overallStatistics.overallEntry;
+    result.overall.numCreatures = toDouble(o.numCreatures);
+    result.overall.averageCreatureCells = o.numCreatures > 0 ? toDouble(o.sumCreatureCells) / o.numCreatures : 0.0;
+    result.overall.averageGeneration = o.numCreatures > 0 ? toDouble(o.sumCreatureGenerations) / o.numCreatures : 0.0;
+    result.overall.averageGenomeNodes = o.numGenomes > 0 ? toDouble(o.sumGenomeNodes) / o.numGenomes : 0.0;
+    result.overall.averageMutationRate = o.numGenomes > 0 ? toDouble(o.sumMutationRates) / o.numGenomes : 0.0;
+    result.overall.creatureEnergy = toDouble(o.sumCreatureEnergy);
+    result.overall.numLineages = toDouble(o.numActiveLineages);
+    result.overall.numSolidObjects = toDouble(o.numSolidObjects);
+    result.overall.numFluidObjects = toDouble(o.numFluidObjects);
+    result.overall.numCellObjects = toDouble(o.numCellObjects);
+    result.overall.accumCreatedCreatures = toDouble(o.numCreatedCreatures);
+    result.overall.accumMutations = toDouble(o.totalMutations);
 
-    result.lineageEntries = overallStatistics.entries;
+    for (auto const& entry : overallStatistics.entries) {
+        LineageDataPoint point;
+        point.colorBitset = entry.colorBitset;
+        point.numCreatures = toDouble(entry.numCreatures);
+        point.numGenomes = toDouble(entry.numGenomes);
+        point.sumCreatureCells = toDouble(entry.sumCreatureCells);
+        point.sumCreatureGenerations = toDouble(entry.sumCreatureGenerations);
+        point.sumGenomeNodes = toDouble(entry.sumGenomeNodes);
+        point.sumMutationRates = toDouble(entry.sumMutationRates);
+        point.sumCreatureEnergy = toDouble(entry.sumCreatureEnergy);
+        point.numCreatedCreatures = toDouble(entry.numCreatedCreatures);
+        point.totalMutations = entry.totalMutations;
+        result.lineages[entry.lineageId] = point;
+    }
 
     return result;
 }
