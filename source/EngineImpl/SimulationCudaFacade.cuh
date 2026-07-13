@@ -155,7 +155,7 @@ private:
 
     mutable std::mutex _mutexForStatistics;
     StatisticsHistory _statisticsHistory;
-    std::optional<StatisticsEntry> _overallStatisticsData;
+    std::optional<StatisticsEntry> _statisticsEntry;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
 };
