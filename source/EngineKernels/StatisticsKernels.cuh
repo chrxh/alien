@@ -20,6 +20,3 @@ __global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics)
 __global__ void cudaLineageAccumulatorGC(SimulationStatistics statistics);
 __global__ void cudaFinishLineageAccumulatorGC(SimulationStatistics statistics);
 
-__global__ void cudaUpdateHistogramData_substep1(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaUpdateHistogramData_substep2(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaUpdateHistogramData_substep3(SimulationData data, SimulationStatistics statistics);

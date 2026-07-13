@@ -53,7 +53,6 @@
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
-#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
@@ -406,9 +405,6 @@ void MainLoopController::processMenubar()
             .selected(SpatialControlWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Statistics").keyAlt(true).key(ImGuiKey_3).selected(StatisticsWindow::get().isOn()).closeMenuWhenItemClicked(false),
-        [&] { StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Simulation parameters")

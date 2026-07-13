@@ -5,7 +5,7 @@
 
 #include <Base/Definitions.h>
 
-void LineageHistoryService::addSample(LineageHistory& history, RawLineageStatistics const& rawStatistics, uint64_t timestep)
+void LineageHistoryService::addSample(LineageHistory& history, LineageStatistics const& lineageStatistics, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& historyData = history.getDataRef();
@@ -24,7 +24,7 @@ void LineageHistoryService::addSample(LineageHistory& history, RawLineageStatist
     auto now = std::chrono::system_clock::now();
     auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
     sample.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
-    sample.entries = rawStatistics.entries;
+    sample.entries = lineageStatistics.entries;
     std::sort(sample.entries.begin(), sample.entries.end(), [](auto const& lhs, auto const& rhs) { return lhs.lineageId < rhs.lineageId; });
     historyData.emplace_back(std::move(sample));
 

@@ -8,18 +8,6 @@
 class _SharedDeserializedSimulation
 {
 public:
-    void setLastStatisticsData(StatisticsRawData const& value)
-    {
-        std::lock_guard lock(_mutex);
-        _statisticsRawData = value;
-    }
-
-    StatisticsRawData getStatisticsRawData() const
-    {
-        std::lock_guard lock(_mutex);
-        return _statisticsRawData;
-    }
-
     void setDeserializedSimulation(DeserializedSimulation&& value)
     {
         std::lock_guard lock(_mutex);
@@ -42,7 +30,6 @@ public:
     void reset()
     {
         setDeserializedSimulation(DeserializedSimulation());
-        setLastStatisticsData(StatisticsRawData());
     }
 
     bool isEmpty() const
@@ -54,7 +41,6 @@ public:
 private:
     mutable std::mutex _mutex;
     DeserializedSimulation _deserializedSimulation;
-    StatisticsRawData _statisticsRawData;
     std::chrono::system_clock::time_point _timestamp;
 };
 using SharedDeserializedSimulation = std::shared_ptr<_SharedDeserializedSimulation>;

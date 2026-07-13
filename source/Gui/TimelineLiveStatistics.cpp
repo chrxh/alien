@@ -7,7 +7,6 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/StatisticsConverterService.h>
-#include <EngineInterface/StatisticsRawData.h>
 
 std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointCollectionHistory() const
 {

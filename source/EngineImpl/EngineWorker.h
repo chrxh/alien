@@ -24,7 +24,7 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsHistory.h>
-#include <EngineInterface/StatisticsRawData.h>
+#include <EngineInterface/TimelineStatistics.h>
 
 #include <EngineKernels/Definitions.h>
 
@@ -58,10 +58,10 @@ public:
     Desc getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     Desc getSelectedSimulationData(bool includeClusters);
     Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    StatisticsRawData getStatisticsRawData() const;
+    TimelineStatistics getTimelineStatistics() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
-    RawLineageStatistics getRawLineageStatistics() const;
+    LineageStatistics getLineageStatistics() const;
     OverallStatisticsEntry getOverallStatistics() const;
     LineageHistory const& getLineageHistory() const;
 

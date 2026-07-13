@@ -65,8 +65,6 @@ PUBLIC
     GuiLogger.cpp
     GuiLogger.h
     HelpStrings.h
-    HistogramLiveStatistics.cpp
-    HistogramLiveStatistics.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
     InspectionWindow.cpp
@@ -159,12 +157,8 @@ PUBLIC
     SpecificationGuiService.h
     StartupCheckService.cpp
     StartupCheckService.h
-    StatisticsWindow.cpp
-    StatisticsWindow.h
     StyleRepository.cpp
     StyleRepository.h
-    TableLiveStatistics.cpp
-    TableLiveStatistics.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
     TimelineLiveStatistics.cpp

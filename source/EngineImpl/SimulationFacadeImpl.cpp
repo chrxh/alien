@@ -320,9 +320,9 @@ IntVector2D _SimulationFacadeImpl::getWorldSize() const
     return _worldSize;
 }
 
-StatisticsRawData _SimulationFacadeImpl::getStatisticsRawData() const
+TimelineStatistics _SimulationFacadeImpl::getTimelineStatistics() const
 {
-    return _worker.getStatisticsRawData();
+    return _worker.getTimelineStatistics();
 }
 
 StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const
@@ -335,9 +335,9 @@ void _SimulationFacadeImpl::setStatisticsHistory(StatisticsHistoryData const& da
     _worker.setStatisticsHistory(data);
 }
 
-RawLineageStatistics _SimulationFacadeImpl::getRawLineageStatistics() const
+LineageStatistics _SimulationFacadeImpl::getLineageStatistics() const
 {
-    return _worker.getRawLineageStatistics();
+    return _worker.getLineageStatistics();
 }
 
 OverallStatisticsEntry _SimulationFacadeImpl::getOverallStatistics() const

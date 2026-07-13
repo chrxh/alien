@@ -41,7 +41,6 @@
 #include "NetworkTransferController.h"
 #include "OpenGLHelper.h"
 #include "OverlayController.h"
-#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"

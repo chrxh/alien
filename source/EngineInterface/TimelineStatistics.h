@@ -39,18 +39,6 @@ struct TimelineStatistics
     AccumulatedStatistics accumulated;
 };
 
-struct HistogramData
-{
-    int maxAge = 0;
-    int numCellsByColorBySlot[MAX_COLORS][MAX_HISTOGRAM_SLOTS];
-};
-
-struct StatisticsRawData
-{
-    TimelineStatistics timeline;
-    HistogramData histogram;
-};
-
 inline double sumColorVector(ColorVector<double> const& v)
 {
     auto result = 0.0;

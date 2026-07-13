@@ -236,11 +236,11 @@ void EvolutionDashboardWindow::processBackground()
     _lastTimepoint = timepoint;
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto rawStatistics = _SimulationFacade::get()->getStatisticsRawData();
+    auto timelineStatistics = _SimulationFacade::get()->getTimelineStatistics();
     auto overallStatistics = _SimulationFacade::get()->getOverallStatistics();
-    _timelineLiveStatistics.update(rawStatistics.timeline, overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
+    _timelineLiveStatistics.update(timelineStatistics, overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
 
-    auto rawLineageStatistics = _SimulationFacade::get()->getRawLineageStatistics();
+    auto rawLineageStatistics = _SimulationFacade::get()->getLineageStatistics();
     LineageSample sample;
     sample.time = _timeSinceSimStart;
     sample.systemClock = _timeSinceSimStart;

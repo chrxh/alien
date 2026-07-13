@@ -4,7 +4,7 @@
 
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
-#include <EngineInterface/StatisticsRawData.h>
+#include <EngineInterface/TimelineStatistics.h>
 
 #include <EngineKernels/Definitions.cuh>
 
@@ -23,5 +23,5 @@ public:
         MaxAgeBalancer const& maxAgeBalancer,
         SimulationData const& simulationData,
         uint64_t timestep,
-        StatisticsRawData const& statistics);  //returns true if parameters have been changed
+        TimelineStatistics const& statistics);  //returns true if parameters have been changed
 };

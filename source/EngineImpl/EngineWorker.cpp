@@ -99,9 +99,9 @@ Desc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
     return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
-StatisticsRawData EngineWorker::getStatisticsRawData() const
+TimelineStatistics EngineWorker::getTimelineStatistics() const
 {
-    return _simulationCudaFacade->getStatisticsRawData();
+    return _simulationCudaFacade->getTimelineStatistics();
 }
 
 StatisticsHistory const& EngineWorker::getStatisticsHistory() const
@@ -114,9 +114,9 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-RawLineageStatistics EngineWorker::getRawLineageStatistics() const
+LineageStatistics EngineWorker::getLineageStatistics() const
 {
-    return _simulationCudaFacade->getRawLineageStatistics();
+    return _simulationCudaFacade->getLineageStatistics();
 }
 
 OverallStatisticsEntry EngineWorker::getOverallStatistics() const

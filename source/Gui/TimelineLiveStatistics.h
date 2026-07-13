@@ -7,7 +7,7 @@
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/DataPointCollection.h>
 #include <EngineInterface/OverallStatistics.h>
-#include <EngineInterface/StatisticsRawData.h>
+#include <EngineInterface/TimelineStatistics.h>
 
 class TimelineLiveStatistics
 {

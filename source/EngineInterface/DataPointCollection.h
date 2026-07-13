@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/StatisticsRawData.h>
+#include <EngineInterface/TimelineStatistics.h>
 
 struct DataPoint
 {
