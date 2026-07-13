@@ -24,7 +24,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
         auto newDataPoint = [&] {
             if (!_lastTimestep && !historyData.empty()) {
 
-                //reuse last entry if no statistics is available
+                // Reuse last entry if no statistics is available
                 auto result = historyData.back();
                 result.time = toDouble(timestep);
                 return result;
@@ -43,13 +43,13 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
         _numDataPoints = 0;
         _accumulatedDataPoint.reset();
 
-        //remove last entry if timestep has not changed
+        // Remove last entry if timestep has not changed
         if (!historyData.empty() && abs(historyData.back().time - toDouble(timestep)) < NEAR_ZERO) {
             historyData.pop_back();
         }
         historyData.emplace_back(newDataPoint);
 
-        //compress history after MaxSamples
+        // Compress history after MaxSamples
         if (historyData.size() > MaxSamples) {
             std::vector<DataPointCollection> newData;
             newData.reserve(historyData.size() / 2);

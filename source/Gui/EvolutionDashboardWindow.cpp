@@ -122,17 +122,17 @@ namespace
     {
         switch (metricIndex) {
         case 0:
-            return dataPoints.numCreatures;
+            return dataPoints.overall.numCreatures;
         case 1:
-            return dataPoints.averageCreatureCells;
+            return dataPoints.overall.averageCreatureCells;
         case 2:
-            return dataPoints.averageGenomeNodes;
+            return dataPoints.overall.averageGenomeNodes;
         case 3:
-            return dataPoints.creatureEnergy;
+            return dataPoints.overall.creatureEnergy;
         case 4:
-            return dataPoints.averageMutationRate;
+            return dataPoints.overall.averageMutationRate;
         case 5:
-            return dataPoints.averageGeneration;
+            return dataPoints.overall.averageGeneration;
         case 6:
         case 7: {
             if (!lastDataPoints) {
@@ -141,9 +141,9 @@ namespace
             auto clock = clockFromTime ? dataPoints.time : dataPoints.systemClock;
             auto lastClock = clockFromTime ? lastDataPoints->time : lastDataPoints->systemClock;
             if (metricIndex == 6) {
-                return calcRate(dataPoints.accumCreatedCreatures, lastDataPoints->accumCreatedCreatures, clock, lastClock);
+                return calcRate(dataPoints.overall.accumCreatedCreatures, lastDataPoints->overall.accumCreatedCreatures, clock, lastClock);
             } else {
-                return calcRate(dataPoints.accumMutations, lastDataPoints->accumMutations, clock, lastClock);
+                return calcRate(dataPoints.overall.accumMutations, lastDataPoints->overall.accumMutations, clock, lastClock);
             }
         }
         default:
@@ -151,38 +151,34 @@ namespace
         }
     }
 
-    double getLineageMetricValue(LineageStatisticsEntry const& entry, LineageStatisticsEntry const* lastEntry, double clock, double lastClock, int metricIndex)
+    double getLineageMetricValue(LineageDataPoint const& entry, LineageDataPoint const* lastEntry, double clock, double lastClock, int metricIndex)
     {
         switch (metricIndex) {
         case 0:
-            return toDouble(entry.numCreatures);
+            return entry.numCreatures;
         case 1:
-            return entry.numCreatures > 0 ? toDouble(entry.sumCreatureCells) / entry.numCreatures : 0.0;
+            return entry.numCreatures > 0 ? entry.sumCreatureCells / entry.numCreatures : 0.0;
         case 2:
-            return entry.numGenomes > 0 ? toDouble(entry.sumGenomeNodes) / entry.numGenomes : 0.0;
+            return entry.numGenomes > 0 ? entry.sumGenomeNodes / entry.numGenomes : 0.0;
         case 3:
-            return toDouble(entry.sumCreatureEnergy);
+            return entry.sumCreatureEnergy;
         case 4:
-            return entry.numGenomes > 0 ? toDouble(entry.sumMutationRates) / entry.numGenomes : 0.0;
+            return entry.numGenomes > 0 ? entry.sumMutationRates / entry.numGenomes : 0.0;
         case 5:
-            return entry.numCreatures > 0 ? toDouble(entry.sumCreatureGenerations) / entry.numCreatures : 0.0;
+            return entry.numCreatures > 0 ? entry.sumCreatureGenerations / entry.numCreatures : 0.0;
         case 6:
-            return lastEntry ? calcRate(toDouble(entry.numCreatedCreatures), toDouble(lastEntry->numCreatedCreatures), clock, lastClock) : 0.0;
+            return lastEntry ? calcRate(entry.numCreatedCreatures, lastEntry->numCreatedCreatures, clock, lastClock) : 0.0;
         case 7:
-            return lastEntry ? calcRate(toDouble(entry.totalMutations), toDouble(lastEntry->totalMutations), clock, lastClock) : 0.0;
+            return lastEntry ? calcRate(entry.totalMutations, lastEntry->totalMutations, clock, lastClock) : 0.0;
         default:
             return 0.0;
         }
     }
 
-    LineageStatisticsEntry const* findLineageEntry(DataPointCollection const& sample, uint32_t lineageId)
+    LineageDataPoint const* findLineageEntry(DataPointCollection const& sample, uint32_t lineageId)
     {
-        auto it = std::lower_bound(
-            sample.lineageEntries.begin(), sample.lineageEntries.end(), lineageId, [](auto const& entry, uint32_t id) { return entry.lineageId < id; });
-        if (it != sample.lineageEntries.end() && it->lineageId == lineageId) {
-            return &*it;
-        }
-        return nullptr;
+        auto it = sample.lineages.find(lineageId);
+        return it != sample.lineages.end() ? &it->second : nullptr;
     }
 
     double calcWindowDeltaPercent(std::vector<double> const& series)
@@ -298,11 +294,11 @@ void EvolutionDashboardWindow::updateDisplayData()
     if (!liveHistory.empty()) {
         auto const& lastSample = liveHistory.back();
         auto const* previousSample = liveHistory.size() >= 2 ? &liveHistory.at(liveHistory.size() - 2) : nullptr;
-        for (auto const& entry : lastSample.lineageEntries) {
+        for (auto const& [lineageId, entry] : lastSample.lineages) {
             LineageDisplayData lineage;
-            lineage.id = toInt(entry.lineageId);
+            lineage.id = toInt(lineageId);
             lineage.colorBitset = toInt(entry.colorBitset);
-            auto const* previousEntry = previousSample ? findLineageEntry(*previousSample, entry.lineageId) : nullptr;
+            auto const* previousEntry = previousSample ? findLineageEntry(*previousSample, lineageId) : nullptr;
             for (int i = 0; i < NumMetrics; ++i) {
                 lineage.currentValues.at(i) = getLineageMetricValue(entry, previousEntry, lastSample.time, previousSample ? previousSample->time : 0.0, i);
             }
@@ -366,7 +362,7 @@ void EvolutionDashboardWindow::updateDisplayData()
             LineageDisplayData lineage;
             lineage.id = selectedId;
             DataPointCollection const* lastSampleWithEntry = nullptr;
-            LineageStatisticsEntry const* lastEntry = nullptr;
+            LineageDataPoint const* lastEntry = nullptr;
             for (auto const& sample : lineageSource) {
                 auto const* entry = findLineageEntry(sample, toUInt32(selectedId));
                 if (!entry) {
@@ -407,10 +403,10 @@ void EvolutionDashboardWindow::updateDisplayData()
             for (auto const& dataPoints : liveGlobalHistory) {
                 switch (cardIndex) {
                 case 1:
-                    fullSeries.emplace_back(dataPoints.numLineages);
+                    fullSeries.emplace_back(dataPoints.overall.numLineages);
                     break;
                 case 2:
-                    fullSeries.emplace_back(dataPoints.numCreatures);
+                    fullSeries.emplace_back(dataPoints.overall.numCreatures);
                     break;
                 }
             }
@@ -438,7 +434,7 @@ void EvolutionDashboardWindow::processHeader()
     auto externalEnergy = !_externalEnergySeries.empty() ? _externalEnergySeries.back() : 0.0;
     processKpiCard("EXTERNAL ENERGY", formatMetricValue(externalEnergy, 0), toFloat(_headerDeltas.at(0)), 0, cardWidth, cardHeight);
     ImGui::SameLine();
-    auto numLineages = lastDataPoints ? lastDataPoints->numLineages : 0.0;
+    auto numLineages = lastDataPoints ? lastDataPoints->overall.numLineages : 0.0;
     processKpiCard("LINEAGES", formatMetricValue(numLineages, 0), toFloat(_headerDeltas.at(1)), 1, cardWidth, cardHeight);
     ImGui::SameLine();
     processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), toFloat(_headerDeltas.at(2)), 2, cardWidth, cardHeight);
@@ -499,9 +495,9 @@ void EvolutionDashboardWindow::processEntitiesCard(float width, float height)
     auto total = 0.0;
     if (!liveGlobalHistory.empty()) {
         auto const& dataPoints = liveGlobalHistory.back();
-        solids = dataPoints.numSolidObjects;
-        fluids = dataPoints.numFluidObjects;
-        cells = dataPoints.numCellObjects;
+        solids = dataPoints.overall.numSolidObjects;
+        fluids = dataPoints.overall.numFluidObjects;
+        cells = dataPoints.overall.numCellObjects;
         total = solids + fluids + cells;
     }
 
