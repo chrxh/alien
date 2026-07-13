@@ -10,7 +10,11 @@ namespace
     auto constexpr MaxSamples = 1000;
 }
 
-void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newTimelineStatistics, uint64_t timestep)
+void StatisticsService::addDataPoint(
+    StatisticsHistory& history,
+    TimelineStatistics const& newTimelineStatistics,
+    OverallStatisticsEntry const& overallStatistics,
+    uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& historyData = history.getDataRef();
@@ -28,7 +32,8 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatist
                 result.time = toDouble(timestep);
                 return result;
             } else {
-                return StatisticsConverterService::get().convert(newTimelineStatistics, timestep, toDouble(timestep), _lastTimelineStatistics, _lastTimestep);
+                return StatisticsConverterService::get().convert(
+                    newTimelineStatistics, overallStatistics, timestep, toDouble(timestep), _lastTimelineStatistics, _lastTimestep);
             }
         }();
 

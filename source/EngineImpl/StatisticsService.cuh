@@ -2,6 +2,7 @@
 
 #include <Base/Singleton.h>
 
+#include <EngineInterface/OverallStatistics.h>
 #include <EngineInterface/StatisticsHistory.h>
 
 #include <EngineKernels/Definitions.cuh>
@@ -11,7 +12,11 @@ class StatisticsService
     MAKE_SINGLETON(StatisticsService);
 
 public:
-    void addDataPoint(StatisticsHistory& history, TimelineStatistics const& newTimelineStatistics, uint64_t timestep);
+    void addDataPoint(
+        StatisticsHistory& history,
+        TimelineStatistics const& newTimelineStatistics,
+        OverallStatisticsEntry const& overallStatistics,
+        uint64_t timestep);
     void resetTime(StatisticsHistory& history, uint64_t timestep);
     void rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep);
 

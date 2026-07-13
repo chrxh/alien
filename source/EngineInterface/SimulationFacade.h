@@ -6,6 +6,7 @@
 #include "GeometryBuffers.h"
 #include "LineageHistory.h"
 #include "LineageStatistics.h"
+#include "OverallStatistics.h"
 #include "PreviewDesc.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
@@ -109,6 +110,7 @@ public:
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;
     virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
     virtual RawLineageStatistics getRawLineageStatistics() const = 0;
+    virtual OverallStatisticsEntry getOverallStatistics() const = 0;
     virtual LineageHistory const& getLineageHistory() const = 0;
 
     //********************

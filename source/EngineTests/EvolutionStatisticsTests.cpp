@@ -2,7 +2,6 @@
 
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/StatisticsRawData.h>
 
 #include "MutationTestsBase.h"
 
@@ -18,18 +17,17 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
 
     _simulationFacade->setSimulationData(data);
 
-    auto statistics = _simulationFacade->getStatisticsRawData();
-    auto const& evolution = statistics.timeline.timestep.evolution;
-    EXPECT_EQ(2, evolution.numCreatures);
-    EXPECT_EQ(2, evolution.numGenomes);
-    EXPECT_EQ(2, evolution.numActiveLineages);
-    EXPECT_EQ(3, evolution.numCellObjects);
-    EXPECT_EQ(0, evolution.numSolidObjects);
-    EXPECT_EQ(0, evolution.numFluidObjects);
-    EXPECT_EQ(0, evolution.lineageMapOverflow);
-    EXPECT_FLOAT_EQ(3.0f, evolution.sumCreatureCells);
-    EXPECT_FLOAT_EQ(8.0f, evolution.sumCreatureGenerations);
-    EXPECT_GT(evolution.sumCreatureEnergy, 0.0f);
+    auto overall = _simulationFacade->getOverallStatistics();
+    EXPECT_EQ(2u, overall.numCreatures);
+    EXPECT_EQ(2u, overall.numGenomes);
+    EXPECT_EQ(2u, overall.numActiveLineages);
+    EXPECT_EQ(3u, overall.numCellObjects);
+    EXPECT_EQ(0u, overall.numSolidObjects);
+    EXPECT_EQ(0u, overall.numFluidObjects);
+    EXPECT_EQ(0u, overall.lineageMapOverflow);
+    EXPECT_FLOAT_EQ(3.0f, overall.sumCreatureCells);
+    EXPECT_FLOAT_EQ(8.0f, overall.sumCreatureGenerations);
+    EXPECT_GT(overall.sumCreatureEnergy, 0.0f);
 
     auto lineageStatistics = _simulationFacade->getRawLineageStatistics();
     ASSERT_EQ(2, lineageStatistics.entries.size());
@@ -69,11 +67,10 @@ TEST_F(EvolutionStatisticsTests, genomeNodesAndMutationRates)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
     _simulationFacade->setSimulationData(data);
 
-    auto statistics = _simulationFacade->getStatisticsRawData();
-    auto const& evolution = statistics.timeline.timestep.evolution;
-    EXPECT_EQ(1, evolution.numGenomes);
-    EXPECT_FLOAT_EQ(toFloat(numNodes), evolution.sumGenomeNodes);
-    EXPECT_FLOAT_EQ(0.01f, evolution.sumMutationRates);  //mean over 21 probability values: 0.21 / 21
+    auto overall = _simulationFacade->getOverallStatistics();
+    EXPECT_EQ(1u, overall.numGenomes);
+    EXPECT_FLOAT_EQ(toFloat(numNodes), overall.sumGenomeNodes);
+    EXPECT_FLOAT_EQ(0.01f, overall.sumMutationRates);  //mean over 21 probability values: 0.21 / 21
 }
 
 TEST_F(EvolutionStatisticsTests, accumulatedMutations)
@@ -94,9 +91,9 @@ TEST_F(EvolutionStatisticsTests, accumulatedMutations)
     }
     _simulationFacade->calcTimesteps(1);
 
-    auto statistics = _simulationFacade->getStatisticsRawData();
-    EXPECT_GT(statistics.timeline.timestep.evolution.sumAccumulatedMutations, 0.0f);
-    EXPECT_GT(statistics.timeline.accumulated.totalMutations, 0.0);
+    auto overall = _simulationFacade->getOverallStatistics();
+    EXPECT_GT(overall.sumAccumulatedMutations, 0.0f);
+    EXPECT_GT(overall.totalMutations, 0.0f);
 
     auto lineageStatistics = _simulationFacade->getRawLineageStatistics();
     ASSERT_EQ(1, lineageStatistics.entries.size());

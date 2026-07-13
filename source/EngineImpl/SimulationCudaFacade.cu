@@ -458,11 +458,13 @@ void _SimulationCudaFacade::updateTimestepStatistics()
     StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
+    OverallStatisticsEntry overallStatistics;
     {
         std::lock_guard lock(_mutexForStatistics);
         _statisticsData = _cudaSimulationStatistics->getStatistics();
+        overallStatistics = _overallStatisticsData.value_or(OverallStatisticsEntry());
     }
-    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, overallStatistics, getCurrentTimestep());
 }
 
 void _SimulationCudaFacade::updateEvolutionStatistics()
@@ -471,9 +473,11 @@ void _SimulationCudaFacade::updateEvolutionStatistics()
     syncAndCheck();
 
     auto lineageStatistics = _cudaSimulationStatistics->getLineageStatistics();
+    auto overallStatistics = _cudaSimulationStatistics->getOverallStatistics();
     {
         std::lock_guard lock(_mutexForStatistics);
         _lineageStatisticsData = lineageStatistics;
+        _overallStatisticsData = overallStatistics;
     }
     _lineageHistoryService.addSample(_lineageHistory, lineageStatistics, getCurrentTimestep());
 }
@@ -490,6 +494,16 @@ RawLineageStatistics _SimulationCudaFacade::getRawLineageStatistics()
         return *_lineageStatisticsData;
     } else {
         return RawLineageStatistics();
+    }
+}
+
+OverallStatisticsEntry _SimulationCudaFacade::getOverallStatistics()
+{
+    std::lock_guard lock(_mutexForStatistics);
+    if (_overallStatisticsData) {
+        return *_overallStatisticsData;
+    } else {
+        return OverallStatisticsEntry();
     }
 }
 

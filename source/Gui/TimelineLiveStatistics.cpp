@@ -14,7 +14,7 @@ std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointColl
     return _dataPointCollectionHistory;
 }
 
-void TimelineLiveStatistics::update(TimelineStatistics const& data, uint64_t timestep)
+void TimelineLiveStatistics::update(TimelineStatistics const& data, OverallStatisticsEntry const& overallStatistics, uint64_t timestep)
 {
     truncate();
 
@@ -24,7 +24,7 @@ void TimelineLiveStatistics::update(TimelineStatistics const& data, uint64_t tim
 
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto newDataPoint = StatisticsConverterService::get().convert(data, timestep, _timeSinceSimStart, _lastData, _lastTimestep);
+    auto newDataPoint = StatisticsConverterService::get().convert(data, overallStatistics, timestep, _timeSinceSimStart, _lastData, _lastTimestep);
     _dataPointCollectionHistory.emplace_back(newDataPoint);
     _lastData = data;
     _lastTimestep = timestep;

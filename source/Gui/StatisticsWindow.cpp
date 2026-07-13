@@ -535,8 +535,9 @@ void StatisticsWindow::processBackground()
     if (!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
         _lastTimepoint = timepoint;
         auto rawStatistics = _SimulationFacade::get()->getStatisticsRawData();
+        auto overallStatistics = _SimulationFacade::get()->getOverallStatistics();
         _histogramLiveStatistics.update(rawStatistics.histogram);
-        _timelineLiveStatistics.update(rawStatistics.timeline, _SimulationFacade::get()->getCurrentTimestep());
+        _timelineLiveStatistics.update(rawStatistics.timeline, overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
         _tableLiveStatistics.update(rawStatistics.timeline);
     }
 }

@@ -3,23 +3,6 @@
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/EngineConstants.h>
 
-struct EvolutionStatistics
-{
-    int numCreatures = 0;
-    float sumCreatureCells = 0;
-    float sumCreatureGenerations = 0;
-    float sumAccumulatedMutations = 0;
-    int numGenomes = 0;
-    float sumGenomeNodes = 0;
-    float sumMutationRates = 0;  // Sum over genomes of the per-genome mean of all mutation probabilities
-    float sumCreatureEnergy = 0;
-    int numSolidObjects = 0;
-    int numFluidObjects = 0;
-    int numCellObjects = 0;
-    int numActiveLineages = 0;
-    int lineageMapOverflow = 0;
-};
-
 struct TimestepStatistics
 {
     ColorVector<int> numObjects = {};
@@ -29,7 +12,6 @@ struct TimestepStatistics
     ColorVector<int> numFreeCells = {};
     ColorVector<int> numEnergyParticles = {};
     ColorVector<float> totalEnergy = {};
-    EvolutionStatistics evolution;
 };
 
 struct AccumulatedStatistics
@@ -49,8 +31,6 @@ struct AccumulatedStatistics
     ColorVector<uint64_t> numReconnectorCreated = {};
     ColorVector<uint64_t> numReconnectorRemoved = {};
     ColorVector<uint64_t> numDetonations = {};
-    uint64_t numCreatedCreatures = 0;
-    double totalMutations = 0;
 };
 
 struct TimelineStatistics

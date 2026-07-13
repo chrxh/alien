@@ -239,8 +239,9 @@ void EvolutionDashboardWindow::processBackground()
     _timeSinceSimStart += toDouble(duration) / 1000;
 
     auto rawStatistics = _SimulationFacade::get()->getStatisticsRawData();
-    _timelineLiveStatistics.update(rawStatistics.timeline, _SimulationFacade::get()->getCurrentTimestep());
-    _lineageMapOverflow = rawStatistics.timeline.timestep.evolution.lineageMapOverflow != 0;
+    auto overallStatistics = _SimulationFacade::get()->getOverallStatistics();
+    _timelineLiveStatistics.update(rawStatistics.timeline, overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
+    _lineageMapOverflow = overallStatistics.lineageMapOverflow != 0;
 
     auto rawLineageStatistics = _SimulationFacade::get()->getRawLineageStatistics();
     LineageSample sample;
@@ -814,11 +815,9 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
             auto const& series = lineage->series.at(metricIndex);
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
             ImPlot::PlotLine("##line", lineage->timePoints.data(), series.data(), count);
-            if (_plotScale == PlotScale_Linear) {
-                ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.15f * ImGui::GetStyle().Alpha);
-                ImPlot::PlotShaded("##shaded", lineage->timePoints.data(), series.data(), count);
-                ImPlot::PopStyleVar();
-            }
+            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
+            ImPlot::PlotShaded("##shaded", lineage->timePoints.data(), series.data(), count);
+            ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
             if (ImGui::GetStyle().Alpha == 1.0f) {
                 ImPlot::Annotation(

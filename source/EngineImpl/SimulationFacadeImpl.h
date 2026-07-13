@@ -92,6 +92,7 @@ public:
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
     RawLineageStatistics getRawLineageStatistics() const override;
+    OverallStatisticsEntry getOverallStatistics() const override;
     LineageHistory const& getLineageHistory() const override;
 
     std::optional<int> getTpsRestriction() const override;

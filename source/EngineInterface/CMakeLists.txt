@@ -36,6 +36,7 @@ add_library(EngineInterface
     NeuralNetWeight.h
     NumberGenerator.cpp
     NumberGenerator.h
+    OverallStatistics.h
     ParametersEditService.cpp
     ParametersEditService.h
     ParametersFilter.h

@@ -16,6 +16,7 @@
 #include <EngineInterface/LineageHistory.h>
 #include <EngineInterface/LineageHistoryService.h>
 #include <EngineInterface/LineageStatistics.h>
+#include <EngineInterface/OverallStatistics.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
@@ -91,6 +92,7 @@ public:
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
     RawLineageStatistics getRawLineageStatistics();
+    OverallStatisticsEntry getOverallStatistics();
     LineageHistory const& getLineageHistory() const;
 
     void resetTimeIntervalStatistics();
@@ -165,6 +167,7 @@ private:
     std::optional<StatisticsRawData> _statisticsData;
     StatisticsHistory _statisticsHistory;
     std::optional<RawLineageStatistics> _lineageStatisticsData;
+    std::optional<OverallStatisticsEntry> _overallStatisticsData;
     LineageHistory _lineageHistory;
     LineageHistoryService _lineageHistoryService;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
