@@ -436,13 +436,13 @@ ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
     return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.cudaSettings, getSimulationDataPtrCopy());
 }
 
-StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
+TimelineStatistics _SimulationCudaFacade::getTimelineStatistics()
 {
     std::lock_guard lock(_mutexForStatistics);
     if (_statisticsData) {
         return *_statisticsData;
     } else {
-        return StatisticsRawData();
+        return TimelineStatistics();
     }
 }
 
@@ -463,7 +463,7 @@ void _SimulationCudaFacade::updateTimestepStatistics()
         _statisticsData = _cudaSimulationStatistics->getStatistics();
         overallStatistics = _overallStatisticsData.value_or(OverallStatisticsEntry());
     }
-    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, overallStatistics, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, *_statisticsData, overallStatistics, getCurrentTimestep());
 }
 
 void _SimulationCudaFacade::updateEvolutionStatistics()
@@ -486,13 +486,13 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
     return _statisticsHistory;
 }
 
-RawLineageStatistics _SimulationCudaFacade::getRawLineageStatistics()
+LineageStatistics _SimulationCudaFacade::getLineageStatistics()
 {
     std::lock_guard lock(_mutexForStatistics);
     if (_lineageStatisticsData) {
         return *_lineageStatisticsData;
     } else {
-        return RawLineageStatistics();
+        return LineageStatistics();
     }
 }
 
@@ -865,7 +865,7 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
             resizeArraysIfNecessary();
         }
 
-        auto statistics = getStatisticsRawData();
+        auto statistics = getTimelineStatistics();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
             if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(

@@ -13,7 +13,6 @@
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
 #include "OverlayController.h"
-#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include <EngineInterface/SimulationFacade.h>
 

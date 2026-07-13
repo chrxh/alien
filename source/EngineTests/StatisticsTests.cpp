@@ -4,7 +4,6 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/StatisticsRawData.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -36,7 +35,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
     //});
 
     //_simulationFacade->setSimulationData(data);
-    //auto statistics = _simulationFacade->getStatisticsRawData();
+    //auto statistics = _simulationFacade->getTimelineStatistics();
 
     //EXPECT_EQ(1, statistics.timeline.timestep.numObjects[0]);
     //EXPECT_EQ(1, statistics.timeline.timestep.numSelfReplicators[0]);
@@ -61,7 +60,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
     //});
 
     //_simulationFacade->setSimulationData(data);
-    //auto statistics = _simulationFacade->getStatisticsRawData();
+    //auto statistics = _simulationFacade->getTimelineStatistics();
 
     //EXPECT_EQ(1, statistics.timeline.timestep.numObjects[0]);
     //EXPECT_EQ(1, statistics.timeline.timestep.numSelfReplicators[0]);
@@ -85,7 +84,7 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
     //});
 
     //_simulationFacade->setSimulationData(data);
-    //auto statistics = _simulationFacade->getStatisticsRawData();
+    //auto statistics = _simulationFacade->getTimelineStatistics();
 
     //EXPECT_EQ(1, statistics.timeline.timestep.numObjects[0]);
     //EXPECT_EQ(0, statistics.timeline.timestep.numSelfReplicators[0]);

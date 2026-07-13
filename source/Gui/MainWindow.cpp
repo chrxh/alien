@@ -75,7 +75,6 @@
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
 #include "StartupCheckService.h"
-#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
@@ -126,7 +125,6 @@ _MainWindow::_MainWindow()
     EditorController::get().setup();
     SimulationView::get().setup();
     SimulationInteractionController::get().setup();
-    StatisticsWindow::get().setup();
     EvolutionDashboardWindow::get().setup();
     TemporalControlWindow::get().setup();
     SpatialControlWindow::get().setup();

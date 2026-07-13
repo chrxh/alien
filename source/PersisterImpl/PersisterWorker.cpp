@@ -663,8 +663,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 .filename = filename,
                 .projectName = deserializedData.auxiliaryData.simulationParameters.projectName.value,
                 .timestep = deserializedData.auxiliaryData.timestep,
-                .timestamp = requestData.sharedDeserializedSimulation->getTimestamp(),
-                .statisticsRawData = requestData.sharedDeserializedSimulation->getStatisticsRawData()});
+                .timestamp = requestData.sharedDeserializedSimulation->getTimestamp()});
 
         if (requestData.resetDeserializedSimulation) {
             requestData.sharedDeserializedSimulation->reset();
