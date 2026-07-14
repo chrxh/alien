@@ -36,7 +36,14 @@ private:
     void updateCellColors();
     void updateDisplayData();
     void processHeader();
-    void processKpiCard(std::string const& label, std::string const& value, std::optional<double> delta, int sparklineIndex, float width, float height);
+    void processKpiCard(
+        std::string const& label,
+        std::string const& value,
+        std::optional<double> delta,
+        bool isPercentage,
+        int sparklineIndex,
+        float width,
+        float height);
     void processEntitiesCard(float width, float height);
     void processFilterBar();
     void processLineageTable();
@@ -44,6 +51,14 @@ private:
     void processTimelineHeader();
     void processTimelinePlots();
     void processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex, bool showTimeAxis);
+    void drawValuesAtMouseCursor(
+        std::vector<double> const& series,
+        std::vector<double> const& timePoints,
+        std::vector<double> const& systemClockPoints,
+        double startTime,
+        double endTime,
+        double upperBound,
+        int fracPartDecimals);
 
     void validateAndCorrect();
 
@@ -54,6 +69,7 @@ private:
         std::array<double, NumMetrics> currentValues = {};
         std::array<std::vector<double>, NumMetrics> series = {};  //only filled for plotted lineages
         std::vector<double> timePoints;                           //only filled for plotted lineages
+        std::vector<double> systemClockPoints;                    //only filled when the x-axis represents time steps
     };
 
     std::vector<LineageDisplayData> _lineages;  //table rows from the latest sample, sorted by creature count

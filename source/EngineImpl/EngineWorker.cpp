@@ -109,7 +109,7 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-StatisticsEntry EngineWorker::getOverallStatistics() const
+StatisticsEntry EngineWorker::getStatisticsEntry() const
 {
     return _simulationCudaFacade->getStatisticsEntry();
 }

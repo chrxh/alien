@@ -3,11 +3,14 @@
 #include <algorithm>
 #include <bit>
 #include <cmath>
+#include <ctime>
 #include <limits>
 #include <cstdio>
 
 #include <imgui.h>
 #include <implot.h>
+
+#include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/Definitions.h>
 #include <Base/GlobalSettings.h>
@@ -58,9 +61,13 @@ namespace
         {"Mutations /s", "Mutations / s", 1},
     };
 
-    ImColor toImColor(uint32_t rgb, float alpha = 1.0f)
+    ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
     {
-        return ImColor(toInt((rgb >> 16) & 0xff), toInt((rgb >> 8) & 0xff), toInt(rgb & 0xff), toInt(alpha * 255.0f));
+        return ImColor(
+            toInt(toFloat((rgb >> 16) & 0xff) * brightness),
+            toInt(toFloat((rgb >> 8) & 0xff) * brightness),
+            toInt(toFloat(rgb & 0xff) * brightness),
+            toInt(alpha * 255.0f));
     }
 
     std::string formatMetricValue(double value, int decimals)
@@ -77,6 +84,16 @@ namespace
             return StringHelper::format(toFloat(value / 1e3), 0) + " K";
         }
         return StringHelper::format(toFloat(value), decimals);
+    }
+
+    std::string convertSystemClockToString(double systemClock)
+    {
+        auto time_t = static_cast<std::time_t>(systemClock);
+        std::tm* tm = std::localtime(&time_t);
+
+        char buffer[100];
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm);
+        return std::string(buffer);
     }
 
     void rightAlignedText(std::string const& text)
@@ -196,18 +213,10 @@ namespace
         return result;
     }
 
-    double calcWindowDeltaPercent(std::vector<double> const& series)
-    {
-        if (series.size() < 2 || std::abs(series.front()) < NEAR_ZERO) {
-            return 0.0;
-        }
-        return (series.back() / series.front() - 1.0) * 100;
-    }
-
     auto constexpr DeltaWindowInSeconds = 60.0;
 
-    //growth rate over the trailing minute, based only on samples actually covering that minute (no extrapolation from shorter windows)
-    std::optional<double> calcDeltaPercentPerMinute(std::vector<double> const& series, std::vector<double> const& timePoints)
+    //value and elapsed time of the reference sample ~60s in the past; nullopt if that much history isn't available yet
+    std::optional<std::pair<double, double>> findRateWindow(std::vector<double> const& series, std::vector<double> const& timePoints)
     {
         if (series.size() != timePoints.size() || series.size() < 2) {
             return std::nullopt;
@@ -222,13 +231,32 @@ namespace
             return std::nullopt;
         }
         auto startIndex = static_cast<size_t>(std::distance(timePoints.begin(), startIt));
-        auto startValue = series.at(startIndex);
         auto elapsed = currentTime - timePoints.at(startIndex);
-        if (elapsed < NEAR_ZERO || std::abs(startValue) < NEAR_ZERO) {
+        if (elapsed < NEAR_ZERO) {
             return std::nullopt;
         }
-        auto percentChange = (series.back() / startValue - 1.0) * 100.0;
-        return percentChange * (60.0 / elapsed);
+        return std::make_pair(series.at(startIndex), elapsed);
+    }
+
+    //growth rate over the trailing minute, based only on samples actually covering that minute (no extrapolation from shorter windows)
+    std::optional<double> calcDeltaPercentPerMinute(std::vector<double> const& series, std::vector<double> const& timePoints)
+    {
+        auto window = findRateWindow(series, timePoints);
+        if (!window || std::abs(window->first) < NEAR_ZERO) {
+            return std::nullopt;  //percentage is undefined for a near-zero baseline
+        }
+        auto percentChange = (series.back() / window->first - 1.0) * 100.0;
+        return percentChange * (60.0 / window->second);
+    }
+
+    //absolute change over the trailing minute; used for metrics that can legitimately be zero, where a percentage is undefined
+    std::optional<double> calcAbsoluteDeltaPerMinute(std::vector<double> const& series, std::vector<double> const& timePoints)
+    {
+        auto window = findRateWindow(series, timePoints);
+        if (!window) {
+            return std::nullopt;
+        }
+        return (series.back() - window->first) * (60.0 / window->second);
     }
 }
 
@@ -390,6 +418,7 @@ void EvolutionDashboardWindow::updateDisplayData()
     _allLineages.id = -1;
     _allLineages.colorBitset = 0;
     _allLineages.timePoints.clear();
+    _allLineages.systemClockPoints.clear();
     for (int i = 0; i < NumMetrics; ++i) {
         _allLineages.series.at(i).clear();
     }
@@ -406,6 +435,9 @@ void EvolutionDashboardWindow::updateDisplayData()
         }
         auto const* referenceDataPoints = sampleIndex > 0 ? &globalSource.at(globalReferenceIndex) : nullptr;
         _allLineages.timePoints.emplace_back(dataPoints.time);
+        if (!useTimeAsClock) {
+            _allLineages.systemClockPoints.emplace_back(dataPoints.systemClock);
+        }
         for (int i = 0; i < NumMetrics; ++i) {
             _allLineages.series.at(i).emplace_back(getGlobalMetricValue(dataPoints, referenceDataPoints, useTimeAsClock, i));
         }
@@ -448,6 +480,9 @@ void EvolutionDashboardWindow::updateDisplayData()
                 }
                 lineage.colorBitset = toInt(entry->colorBitset);
                 lineage.timePoints.emplace_back(useTimeAsClock ? sample.time : sample.timestep);
+                if (!useTimeAsClock) {
+                    lineage.systemClockPoints.emplace_back(sample.systemClock);
+                }
                 auto clock = useTimeAsClock ? sample.time : sample.systemClock;
                 while (rateReferenceIndex + 1 < rateReferences.size() && rateReferences.at(rateReferenceIndex + 1).first + RateAveragingInterval <= clock) {
                     ++rateReferenceIndex;
@@ -495,7 +530,8 @@ void EvolutionDashboardWindow::updateDisplayData()
                 fullTimePoints.emplace_back(dataPoints.time);
             }
         }
-        _headerDeltas.at(cardIndex) = calcDeltaPercentPerMinute(fullSeries, fullTimePoints);
+        _headerDeltas.at(cardIndex) =
+            cardIndex == 0 ? calcAbsoluteDeltaPerMinute(fullSeries, fullTimePoints) : calcDeltaPercentPerMinute(fullSeries, fullTimePoints);
         auto stride = std::max(size_t(1), fullSeries.size() / NumSparklinePoints);
         for (size_t i = 0; i < fullSeries.size(); i += stride) {
             sparkline.emplace_back(fullSeries.at(i));
@@ -516,18 +552,19 @@ void EvolutionDashboardWindow::processHeader()
     processEntitiesCard(cardWidth * 2, cardHeight);
     ImGui::SameLine();
     auto externalEnergy = !_externalEnergySeries.empty() ? _externalEnergySeries.back() : 0.0;
-    processKpiCard("External energy", formatMetricValue(externalEnergy, 0), _headerDeltas.at(0), 0, cardWidth, cardHeight);
+    processKpiCard("External energy", formatMetricValue(externalEnergy, 0), _headerDeltas.at(0), false, 0, cardWidth, cardHeight);
     ImGui::SameLine();
     auto numLineages = lastDataPoints ? lastDataPoints->overall.numLineages : 0.0;
-    processKpiCard("Lineages", formatMetricValue(numLineages, 0), _headerDeltas.at(1), 1, cardWidth, cardHeight);
+    processKpiCard("Lineages", formatMetricValue(numLineages, 0), _headerDeltas.at(1), true, 1, cardWidth, cardHeight);
     ImGui::SameLine();
-    processKpiCard("Creatures", formatMetricValue(_allLineages.currentValues.at(0), 0), _headerDeltas.at(2), 2, cardWidth, cardHeight);
+    processKpiCard("Creatures", formatMetricValue(_allLineages.currentValues.at(0), 0), _headerDeltas.at(2), true, 2, cardWidth, cardHeight);
 }
 
 void EvolutionDashboardWindow::processKpiCard(
     std::string const& label,
     std::string const& value,
     std::optional<double> delta,
+    bool isPercentage,
     int sparklineIndex,
     float width,
     float height)
@@ -546,7 +583,11 @@ void EvolutionDashboardWindow::processKpiCard(
 
         if (delta.has_value()) {
             char deltaText[32];
-            snprintf(deltaText, sizeof(deltaText), "%+.1f %% / min", *delta);
+            if (isPercentage) {
+                snprintf(deltaText, sizeof(deltaText), "%+.1f %% / min", *delta);
+            } else {
+                snprintf(deltaText, sizeof(deltaText), "%s%s / min", *delta >= 0 ? "+" : "-", formatMetricValue(std::abs(*delta), 0).c_str());
+            }
             ImGui::PushStyleColor(ImGuiCol_Text, *delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
             AlienGui::Text(deltaText);
             ImGui::PopStyleColor();
@@ -646,7 +687,7 @@ void EvolutionDashboardWindow::processFilterBar()
             _colorFilter ^= 1 << i;
         }
         auto active = (_colorFilter & (1 << i)) != 0;
-        auto color = toImColor(_cellColors.at(i), active ? 1.0f : 0.2f);
+        auto color = toImColor(_cellColors.at(i), active ? 1.0f : 0.2f, 0.75f);
         drawList->AddRectFilled(pos, {pos.x + chipSize, pos.y + chipSize}, color, scale(5.0f));
         if (active) {
             drawList->AddRect(
@@ -815,11 +856,10 @@ void EvolutionDashboardWindow::processTimelinePlots()
         ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth));
         ImGui::TableSetupColumn("##plot");
         for (int i = 0; i < NumMetrics; ++i) {
-            auto showTimeAxis = i == NumMetrics - 1;
+            auto showTimeAxis = i == NumMetrics - 1 && _timelineMode == TimelineMode_EntireHistory;
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             AlienGui::Text(Metrics[i].plotName);
-            auto compactLayout = plottedLineages.size() > 1;
             for (auto const* lineage : plottedLineages) {
                 ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
                 if (lineage->id != -1) {
@@ -830,15 +870,6 @@ void EvolutionDashboardWindow::processTimelinePlots()
                     ImGui::PopStyleColor();
                 }
                 ImGui::PopFont();
-                if (compactLayout) {
-                    ImGui::SameLine();
-                }
-                auto delta = calcWindowDeltaPercent(lineage->series.at(i));
-                char deltaText[32];
-                snprintf(deltaText, sizeof(deltaText), "%+.1f %%", delta);
-                ImGui::PushStyleColor(ImGuiCol_Text, delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
-                AlienGui::Text(deltaText);
-                ImGui::PopStyleColor();
             }
 
             ImGui::TableSetColumnIndex(1);
@@ -917,11 +948,79 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
             }
             ImGui::PopID();
         }
+        if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered() && plottedLineages.size() == 1 && plottedLineages.front()->timePoints.size() >= 2) {
+            auto const* lineage = plottedLineages.front();
+            drawValuesAtMouseCursor(
+                lineage->series.at(metricIndex),
+                lineage->timePoints,
+                lineage->systemClockPoints,
+                minTime,
+                maxTime,
+                upperBound + NEAR_ZERO,
+                Metrics[metricIndex].decimals);
+        }
         ImPlot::EndPlot();
     }
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+void EvolutionDashboardWindow::drawValuesAtMouseCursor(
+    std::vector<double> const& series,
+    std::vector<double> const& timePoints,
+    std::vector<double> const& systemClockPoints,
+    double startTime,
+    double endTime,
+    double upperBound,
+    int fracPartDecimals)
+{
+    auto count = toInt(timePoints.size());
+    auto hasSystemClock = !systemClockPoints.empty();
+
+    auto mousePos = ImPlot::GetPlotMousePos();
+    mousePos.x = std::max(startTime, std::min(endTime, mousePos.x));
+    mousePos.y = series.at(0);
+    auto systemClockEntry = hasSystemClock ? systemClockPoints.at(0) : 0.0;
+    for (int i = 1; i < count; ++i) {
+        if (timePoints.at(i) > mousePos.x) {
+            mousePos.y = series.at(i);
+            if (hasSystemClock) {
+                systemClockEntry = systemClockPoints.at(i);
+            }
+            break;
+        }
+    }
+    mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
+
+    ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
+    ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, {scale(1.0f), scale(2.0f)});
+    ImPlot::PopStyleColor();
+
+    ImPlot::PushStyleColor(ImPlotCol_Line, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
+    ImPlot::PlotInfLines("", &mousePos.x, 1);
+    ImPlot::PopStyleColor();
+
+    char label[256];
+    auto leftSideFactor = mousePos.x > (startTime + endTime) / 2 ? -1.0f : 1.0f;
+    if (hasSystemClock) {
+        auto dateTimeString = systemClockEntry != 0 ? convertSystemClockToString(systemClockEntry) : std::string("-");
+        snprintf(
+            label,
+            sizeof(label),
+            "Time step: %s\nTimestamp: %s\nValue: %s",
+            StringHelper::format(toFloat(mousePos.x), 0).c_str(),
+            dateTimeString.c_str(),
+            formatMetricValue(mousePos.y, fracPartDecimals).c_str());
+    } else {
+        snprintf(
+            label,
+            sizeof(label),
+            "Relative time: %s\nValue: %s",
+            StringHelper::format(toFloat(mousePos.x), 0).c_str(),
+            formatMetricValue(mousePos.y, fracPartDecimals).c_str());
+    }
+    ImPlot::PlotText(label, mousePos.x, upperBound, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
 void EvolutionDashboardWindow::validateAndCorrect()

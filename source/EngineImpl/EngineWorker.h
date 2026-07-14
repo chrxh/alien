@@ -57,7 +57,7 @@ public:
     Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
-    StatisticsEntry getOverallStatistics() const;
+    StatisticsEntry getStatisticsEntry() const;
 
     void addAndSelectSimulationData(Desc&& dataToUpdate);
     void setSimulationData(Desc const& dataToUpdate);
