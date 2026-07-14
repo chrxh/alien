@@ -70,18 +70,10 @@ private:
     enum TimelineMode_
     {
         TimelineMode_RealTime,
-        TimelineMode_EntireHistory,
-        TimelineMode_LastSteps
+        TimelineMode_LastSteps,
+        TimelineMode_EntireHistory  //only selectable when all lineages are shown
     };
     TimelineMode _timelineMode = TimelineMode_EntireHistory;
-
-    using PlotScale = int;
-    enum PlotScale_
-    {
-        PlotScale_Linear,
-        PlotScale_Logarithmic
-    };
-    PlotScale _plotScale = PlotScale_Linear;
 
     int _lastSteps = 100000;
     float _timelinesHeight = 0;
