@@ -24,6 +24,8 @@ public:
     static auto constexpr NumMetrics = 8;
 
 private:
+    struct LineageDisplayData;
+
     EvolutionDashboardWindow();
 
     void initIntern() override;
@@ -41,7 +43,7 @@ private:
     void processTimelineSection();
     void processTimelineHeader();
     void processTimelinePlots();
-    void processTimelinePlot(int metricIndex, bool showTimeAxis);
+    void processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex, bool showTimeAxis);
 
     void validateAndCorrect();
 
@@ -57,7 +59,6 @@ private:
     std::vector<LineageDisplayData> _lineages;  //table rows from the latest sample, sorted by creature count
     std::vector<LineageDisplayData> _plottedLineages;
     LineageDisplayData _allLineages;
-    std::array<double, NumMetrics> _metricWindowDeltas = {};
     std::array<std::vector<double>, 3> _headerSparklines = {};
     std::array<double, 3> _headerDeltas = {};
 
@@ -76,12 +77,14 @@ private:
     TimelineMode _timelineMode = TimelineMode_EntireHistory;
 
     int _lastSteps = 100000;
+    float _timeHorizon = 10.0f;  //in seconds
     float _timelinesHeight = 0;
 
     struct RebuildKey
     {
         int timelineMode = 0;
         int lastSteps = 0;
+        float timeHorizon = 0;
         double liveBackTime = 0;
         double historyBackTime = 0;
         std::set<int64_t> selectedLineageIds;
