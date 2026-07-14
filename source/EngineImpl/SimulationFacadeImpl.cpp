@@ -332,7 +332,7 @@ void _SimulationFacadeImpl::setStatisticsHistory(StatisticsHistoryData const& da
 
 StatisticsEntry _SimulationFacadeImpl::getStatisticsEntry() const
 {
-    return _worker.getOverallStatistics();
+    return _worker.getStatisticsEntry();
 }
 
 std::optional<int> _SimulationFacadeImpl::getTpsRestriction() const
