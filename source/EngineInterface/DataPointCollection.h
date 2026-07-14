@@ -36,19 +36,27 @@ struct LineageDataPoint
 
     double numCreatedCreatures = 0;
     double totalMutations = 0;
-
-    LineageDataPoint operator+(LineageDataPoint const& other) const;
-    LineageDataPoint operator/(double divisor) const;
 };
 
-struct DataPointCollection
+struct OverallDataPointCollection
 {
     double time = 0;
     double systemClock = 0;
 
     OverallDataPoint overall;
+
+    OverallDataPointCollection operator+(OverallDataPointCollection const& other) const;
+    OverallDataPointCollection operator/(double divisor) const;
+};
+
+struct DataPointCollection
+{
+    double time = 0;
+    double timestep = 0;
+    double systemClock = 0;
+
+    OverallDataPoint overall;
     std::unordered_map<uint32_t, LineageDataPoint> lineages;
 
-    DataPointCollection operator+(DataPointCollection const& other) const;
-    DataPointCollection operator/(double divisor) const;
+    OverallDataPointCollection toOverallDataPointCollection() const;
 };

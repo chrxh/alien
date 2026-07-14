@@ -118,7 +118,8 @@ namespace
         return std::max(0.0, (accumValue - lastAccumValue) / deltaClock);  //negative deltas occur after accumulated statistics have been reset
     }
 
-    double getGlobalMetricValue(DataPointCollection const& dataPoints, DataPointCollection const* lastDataPoints, bool clockFromTime, int metricIndex)
+    double
+    getGlobalMetricValue(OverallDataPointCollection const& dataPoints, OverallDataPointCollection const* lastDataPoints, bool clockFromTime, int metricIndex)
     {
         switch (metricIndex) {
         case 0:
@@ -206,7 +207,6 @@ void EvolutionDashboardWindow::initIntern()
 {
     _timelinesHeight = GlobalSettings::get().getValue("windows.evolution dashboard.timelines height", scale(DefaultTimelinesHeight));
     _timelineMode = GlobalSettings::get().getValue("windows.evolution dashboard.timeline mode", _timelineMode);
-    _plotScale = GlobalSettings::get().getValue("windows.evolution dashboard.plot scale", _plotScale);
     _lastSteps = GlobalSettings::get().getValue("windows.evolution dashboard.last steps", _lastSteps);
     _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.color filter", _colorFilter);
     validateAndCorrect();
@@ -216,7 +216,6 @@ void EvolutionDashboardWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("windows.evolution dashboard.timelines height", _timelinesHeight);
     GlobalSettings::get().setValue("windows.evolution dashboard.timeline mode", _timelineMode);
-    GlobalSettings::get().setValue("windows.evolution dashboard.plot scale", _plotScale);
     GlobalSettings::get().setValue("windows.evolution dashboard.last steps", _lastSteps);
     GlobalSettings::get().setValue("windows.evolution dashboard.color filter", _colorFilter);
 }
@@ -244,6 +243,9 @@ void EvolutionDashboardWindow::processBackground()
 
 void EvolutionDashboardWindow::processIntern()
 {
+    if (!_selectedLineageIds.empty() && _timelineMode == TimelineMode_EntireHistory) {
+        _timelineMode = TimelineMode_LastSteps;
+    }
     updateCellColors();
     updateDisplayData();
     processHeader();
@@ -307,24 +309,23 @@ void EvolutionDashboardWindow::updateDisplayData()
         std::sort(_lineages.begin(), _lineages.end(), [](auto const& lhs, auto const& rhs) { return lhs.currentValues.at(0) > rhs.currentValues.at(0); });
     }
 
-    //data source for the timeline plots
+    //data source for the "all lineages" timeline plots
     auto useTimeAsClock = _timelineMode == TimelineMode_RealTime;
     StatisticsHistoryData globalSource;
-    StatisticsHistoryData lineageSource;
     if (_timelineMode == TimelineMode_RealTime) {
-        globalSource = _timelineLiveStatistics.getDataPointCollectionHistory();
-        lineageSource = globalSource;
+        globalSource.reserve(liveHistory.size());
+        for (auto const& sample : liveHistory) {
+            globalSource.emplace_back(sample.toOverallDataPointCollection());
+        }
     } else {
         auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
         {
             std::lock_guard lock(statisticsHistory.getMutex());
             globalSource = statisticsHistory.getDataRef();
         }
-        lineageSource = globalSource;
         if (_timelineMode == TimelineMode_LastSteps && !globalSource.empty()) {
             auto startTime = globalSource.back().time - toDouble(_lastSteps);
             std::erase_if(globalSource, [&](auto const& dataPoints) { return dataPoints.time < startTime; });
-            std::erase_if(lineageSource, [&](auto const& sample) { return sample.time < startTime; });
         }
     }
 
@@ -345,31 +346,39 @@ void EvolutionDashboardWindow::updateDisplayData()
     }
     auto const& liveGlobalHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
     if (!liveGlobalHistory.empty()) {
-        auto const& lastDataPoints = liveGlobalHistory.back();
-        auto const* previousDataPoints = liveGlobalHistory.size() >= 2 ? &liveGlobalHistory.at(liveGlobalHistory.size() - 2) : nullptr;
+        auto lastDataPoints = liveGlobalHistory.back().toOverallDataPointCollection();
+        std::optional<OverallDataPointCollection> previousDataPoints;
+        if (liveGlobalHistory.size() >= 2) {
+            previousDataPoints = liveGlobalHistory.at(liveGlobalHistory.size() - 2).toOverallDataPointCollection();
+        }
         for (int i = 0; i < NumMetrics; ++i) {
-            _allLineages.currentValues.at(i) = getGlobalMetricValue(lastDataPoints, previousDataPoints, true, i);
+            _allLineages.currentValues.at(i) = getGlobalMetricValue(lastDataPoints, previousDataPoints ? &*previousDataPoints : nullptr, true, i);
         }
     }
     for (int i = 0; i < NumMetrics; ++i) {
         _metricWindowDeltas.at(i) = calcWindowDeltaPercent(_allLineages.series.at(i));
     }
 
-    //per-lineage series for the selected lineages
+    //per-lineage series for the selected lineages (live statistics are the only source of lineage data)
     _plottedLineages.clear();
     if (!_selectedLineageIds.empty()) {
+        auto startTimestep = _timelineMode == TimelineMode_LastSteps && !liveHistory.empty() ? liveHistory.back().timestep - toDouble(_lastSteps)
+                                                                                             : std::numeric_limits<double>::lowest();
         for (auto const& selectedId : _selectedLineageIds) {
             LineageDisplayData lineage;
             lineage.id = selectedId;
             DataPointCollection const* lastSampleWithEntry = nullptr;
             LineageDataPoint const* lastEntry = nullptr;
-            for (auto const& sample : lineageSource) {
+            for (auto const& sample : liveHistory) {
+                if (sample.timestep < startTimestep) {
+                    continue;
+                }
                 auto const* entry = findLineageEntry(sample, toUInt32(selectedId));
                 if (!entry) {
                     continue;
                 }
                 lineage.colorBitset = toInt(entry->colorBitset);
-                lineage.timePoints.emplace_back(sample.time);
+                lineage.timePoints.emplace_back(useTimeAsClock ? sample.time : sample.timestep);
                 auto clock = useTimeAsClock ? sample.time : sample.systemClock;
                 auto lastClock = lastSampleWithEntry ? (useTimeAsClock ? lastSampleWithEntry->time : lastSampleWithEntry->systemClock) : 0.0;
                 for (int i = 0; i < NumMetrics; ++i) {
@@ -661,10 +670,11 @@ void EvolutionDashboardWindow::processTimelineSection()
 void EvolutionDashboardWindow::processTimelineHeader()
 {
     ImGui::Spacing();
-    AlienGui::Switcher(
-        AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values({"Real-time", "Entire history", "Last X steps"}), &_timelineMode);
-    ImGui::SameLine(0, scale(20.0f));
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").width(220.0f).textWidth(45.0f).values({"Linear", "Logarithmic"}), &_plotScale);
+    std::vector<std::string> modeValues{"Real-time", "Last X steps"};
+    if (_selectedLineageIds.empty()) {
+        modeValues.emplace_back("Entire history");
+    }
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values(modeValues), &_timelineMode);
     if (_timelineMode == TimelineMode_LastSteps) {
         ImGui::SameLine(0, scale(20.0f));
         if (ImGui::BeginChild("##lastSteps", {scale(200.0f), ImGui::GetFrameHeight()})) {
@@ -766,12 +776,6 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
         ImPlot::SetupAxis(ImAxis_X1, "", showTimeAxis ? ImPlotAxisFlags_None : ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
-        if (_plotScale == PlotScale_Logarithmic) {
-            ImPlot::SetupAxisScale(
-                ImAxis_Y1,
-                [](double value, void* userData) { return log(value * 1000 + 1.0) / log(2.0); },
-                [](double value, void* userData) { return (pow(2.0, value) - 1.0) / 1000; });
-        }
         for (auto const* lineage : plottedLineages) {
             auto count = toInt(lineage->timePoints.size());
             if (count < 2) {
@@ -808,8 +812,7 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
 void EvolutionDashboardWindow::validateAndCorrect()
 {
     _timelinesHeight = std::max(scale(100.0f), _timelinesHeight);
-    _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_LastSteps));
-    _plotScale = std::clamp(_plotScale, static_cast<PlotScale>(PlotScale_Linear), static_cast<PlotScale>(PlotScale_Logarithmic));
+    _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_EntireHistory));
     _lastSteps = std::clamp(_lastSteps, 1000, 1000000000);
     _colorFilter &= (1 << MAX_COLORS) - 1;
     if (_colorFilter == 0) {
