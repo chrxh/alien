@@ -407,6 +407,14 @@ void MainLoopController::processMenubar()
         [&] { SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
+            .name("Evolution dashboard")
+            .keyAlt(true)
+            .key(ImGuiKey_3)
+            .selected(EvolutionDashboardWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { EvolutionDashboardWindow::get().setOn(!EvolutionDashboardWindow::get().isOn()); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
             .name("Simulation parameters")
             .keyAlt(true)
             .key(ImGuiKey_4)
@@ -419,14 +427,6 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_6).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Evolution dashboard")
-            .keyAlt(true)
-            .key(ImGuiKey_7)
-            .selected(EvolutionDashboardWindow::get().isOn())
-            .closeMenuWhenItemClicked(false),
-        [&] { EvolutionDashboardWindow::get().setOn(!EvolutionDashboardWindow::get().isOn()); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuOpened);
