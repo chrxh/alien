@@ -204,12 +204,31 @@ namespace
         return (series.back() / series.front() - 1.0) * 100;
     }
 
-    double calcDeltaPercentPerMinute(std::vector<double> const& series, double windowInSeconds)
+    auto constexpr DeltaWindowInSeconds = 60.0;
+
+    //growth rate over the trailing minute, based only on samples actually covering that minute (no extrapolation from shorter windows)
+    std::optional<double> calcDeltaPercentPerMinute(std::vector<double> const& series, std::vector<double> const& timePoints)
     {
-        if (windowInSeconds < NEAR_ZERO) {
-            return 0.0;
+        if (series.size() != timePoints.size() || series.size() < 2) {
+            return std::nullopt;
         }
-        return calcWindowDeltaPercent(series) / (windowInSeconds / 60);
+        auto currentTime = timePoints.back();
+        if (currentTime - timePoints.front() < DeltaWindowInSeconds) {
+            return std::nullopt;  //not enough history yet to evaluate a full minute
+        }
+        auto targetTime = currentTime - DeltaWindowInSeconds;
+        auto startIt = std::lower_bound(timePoints.begin(), timePoints.end(), targetTime);
+        if (startIt == timePoints.end()) {
+            return std::nullopt;
+        }
+        auto startIndex = static_cast<size_t>(std::distance(timePoints.begin(), startIt));
+        auto startValue = series.at(startIndex);
+        auto elapsed = currentTime - timePoints.at(startIndex);
+        if (elapsed < NEAR_ZERO || std::abs(startValue) < NEAR_ZERO) {
+            return std::nullopt;
+        }
+        auto percentChange = (series.back() / startValue - 1.0) * 100.0;
+        return percentChange * (60.0 / elapsed);
     }
 }
 
@@ -249,11 +268,17 @@ void EvolutionDashboardWindow::processBackground()
 
     auto overallStatistics = _SimulationFacade::get()->getStatisticsEntry();
     _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
+    if (_timelineLiveStatistics.wasReset()) {
+        _externalEnergySeries.clear();
+        _externalEnergyTimeSeries.clear();
+    }
 
     _externalEnergySeries.emplace_back(toDouble(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
+    _externalEnergyTimeSeries.emplace_back(_timeSinceSimStart);
     auto maxExternalEnergyValues = toInt(std::lround(MaxLiveHistory * 1000 / LiveStatisticsDeltaTime));
     while (toInt(_externalEnergySeries.size()) > maxExternalEnergyValues) {
         _externalEnergySeries.erase(_externalEnergySeries.begin());
+        _externalEnergyTimeSeries.erase(_externalEnergyTimeSeries.begin());
     }
 }
 
@@ -443,15 +468,17 @@ void EvolutionDashboardWindow::updateDisplayData()
     }
 
     //header sparklines and deltas from the live statistics
-    auto liveWindowInSeconds = liveGlobalHistory.size() >= 2 ? liveGlobalHistory.back().time - liveGlobalHistory.front().time : 0.0;
     for (int cardIndex = 0; cardIndex < 3; ++cardIndex) {
         auto& sparkline = _headerSparklines.at(cardIndex);
         sparkline.clear();
         std::vector<double> fullSeries;
+        std::vector<double> fullTimePoints;
         if (cardIndex == 0) {
             fullSeries = _externalEnergySeries;
+            fullTimePoints = _externalEnergyTimeSeries;
         } else {
             fullSeries.reserve(liveGlobalHistory.size());
+            fullTimePoints.reserve(liveGlobalHistory.size());
             for (auto const& dataPoints : liveGlobalHistory) {
                 switch (cardIndex) {
                 case 1:
@@ -461,9 +488,10 @@ void EvolutionDashboardWindow::updateDisplayData()
                     fullSeries.emplace_back(dataPoints.overall.numCreatures);
                     break;
                 }
+                fullTimePoints.emplace_back(dataPoints.time);
             }
         }
-        _headerDeltas.at(cardIndex) = calcDeltaPercentPerMinute(fullSeries, liveWindowInSeconds);
+        _headerDeltas.at(cardIndex) = calcDeltaPercentPerMinute(fullSeries, fullTimePoints);
         auto stride = std::max(size_t(1), fullSeries.size() / NumSparklinePoints);
         for (size_t i = 0; i < fullSeries.size(); i += stride) {
             sparkline.emplace_back(fullSeries.at(i));
@@ -484,15 +512,21 @@ void EvolutionDashboardWindow::processHeader()
     processEntitiesCard(cardWidth * 2, cardHeight);
     ImGui::SameLine();
     auto externalEnergy = !_externalEnergySeries.empty() ? _externalEnergySeries.back() : 0.0;
-    processKpiCard("External energy", formatMetricValue(externalEnergy, 0), toFloat(_headerDeltas.at(0)), 0, cardWidth, cardHeight);
+    processKpiCard("External energy", formatMetricValue(externalEnergy, 0), _headerDeltas.at(0), 0, cardWidth, cardHeight);
     ImGui::SameLine();
     auto numLineages = lastDataPoints ? lastDataPoints->overall.numLineages : 0.0;
-    processKpiCard("Lineages", formatMetricValue(numLineages, 0), toFloat(_headerDeltas.at(1)), 1, cardWidth, cardHeight);
+    processKpiCard("Lineages", formatMetricValue(numLineages, 0), _headerDeltas.at(1), 1, cardWidth, cardHeight);
     ImGui::SameLine();
-    processKpiCard("Creatures", formatMetricValue(_allLineages.currentValues.at(0), 0), toFloat(_headerDeltas.at(2)), 2, cardWidth, cardHeight);
+    processKpiCard("Creatures", formatMetricValue(_allLineages.currentValues.at(0), 0), _headerDeltas.at(2), 2, cardWidth, cardHeight);
 }
 
-void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width, float height)
+void EvolutionDashboardWindow::processKpiCard(
+    std::string const& label,
+    std::string const& value,
+    std::optional<double> delta,
+    int sparklineIndex,
+    float width,
+    float height)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
@@ -506,14 +540,20 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
         AlienGui::Text(value);
         ImGui::PopFont();
 
-        char deltaText[32];
-        snprintf(deltaText, sizeof(deltaText), "%+.1f %% / min", delta);
-        ImGui::PushStyleColor(ImGuiCol_Text, delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
-        AlienGui::Text(deltaText);
-        ImGui::PopStyleColor();
+        if (delta.has_value()) {
+            char deltaText[32];
+            snprintf(deltaText, sizeof(deltaText), "%+.1f %% / min", *delta);
+            ImGui::PushStyleColor(ImGuiCol_Text, *delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
+            AlienGui::Text(deltaText);
+            ImGui::PopStyleColor();
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+            AlienGui::Text("collecting data ...");
+            ImGui::PopStyleColor();
+        }
 
         auto const& sparkline = _headerSparklines.at(sparklineIndex);
-        if (sparkline.size() >= 2) {
+        if (delta.has_value() && sparkline.size() >= 2) {
             ImGui::SetCursorPos({width - scale(SparklineWidth + 12.0f), height - scale(SparklineHeight + 12.0f)});
             ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
             ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0, 0, 0, 0));
@@ -524,7 +564,7 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
                 ImPlot::SetupAxes(nullptr, nullptr, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations);
                 auto [minIt, maxIt] = std::minmax_element(sparkline.begin(), sparkline.end());
                 ImPlot::SetupAxesLimits(0, toDouble(sparkline.size() - 1), *minIt * 0.9, *maxIt * 1.1 + NEAR_ZERO, ImGuiCond_Always);
-                ImPlot::PushStyleColor(ImPlotCol_Line, delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
+                ImPlot::PushStyleColor(ImPlotCol_Line, *delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
                 ImPlot::PlotLine("##", sparkline.data(), toInt(sparkline.size()));
                 ImPlot::PopStyleColor();
                 ImPlot::EndPlot();
