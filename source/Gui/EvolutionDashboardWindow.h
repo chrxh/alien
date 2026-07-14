@@ -98,5 +98,6 @@ private:
     std::vector<double> _externalEnergySeries;
     std::vector<double> _externalEnergyTimeSeries;
     double _timeSinceSimStart = 0;  //in seconds
+    std::optional<int> _lastSessionId;
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
 };
