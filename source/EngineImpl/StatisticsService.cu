@@ -21,7 +21,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
     }
 
     if (!_lastTimestep || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta / 100 * (_numDataPoints + 1)) {
-        auto newDataPoint = [&] {
+        auto newDataPoint = [&]() -> OverallDataPointCollection {
             if (!_lastTimestep && !historyData.empty()) {
 
                 // Reuse last entry if no statistics is available
@@ -29,7 +29,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
                 result.time = toDouble(timestep);
                 return result;
             } else {
-                return StatisticsConverterService::get().convert(overallStatistics, timestep, toDouble(timestep));
+                return StatisticsConverterService::get().convert(overallStatistics, timestep, toDouble(timestep)).toOverallDataPointCollection();
             }
         }();
 
@@ -51,10 +51,10 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
 
         // Compress history after MaxSamples
         if (historyData.size() > MaxSamples) {
-            std::vector<DataPointCollection> newData;
+            StatisticsHistoryData newData;
             newData.reserve(historyData.size() / 2);
             for (size_t i = 0; i < (historyData.size() - 1) / 2; ++i) {
-                DataPointCollection interpolatedDataPoint = (historyData.at(i * 2) + historyData.at(i * 2 + 1)) / 2.0;
+                auto interpolatedDataPoint = (historyData.at(i * 2) + historyData.at(i * 2 + 1)) / 2.0;
                 interpolatedDataPoint.time = historyData.at(i * 2).time;
                 newData.emplace_back(interpolatedDataPoint);
             }
@@ -84,7 +84,7 @@ void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
         _longtermTimestepDelta = DefaultTimeStepDelta;
     }
 
-    std::vector<DataPointCollection> newData;
+    StatisticsHistoryData newData;
     newData.reserve(data.size());
     for (size_t i = 0; i < data.size(); ++i) {
         if (data.at(i).time < toDouble(timestep)) {

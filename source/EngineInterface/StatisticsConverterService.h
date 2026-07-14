@@ -10,5 +10,5 @@ class StatisticsConverterService
     MAKE_SINGLETON(StatisticsConverterService);
 
 public:
-    DataPointCollection convert(StatisticsEntry const& overallStatistics, uint64_t timestep, double time);
+    DataPointCollection convert(StatisticsEntry const& statisticsEntry, uint64_t timestep, double time);
 };

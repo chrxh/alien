@@ -36,64 +36,29 @@ OverallDataPoint OverallDataPoint::operator/(double divisor) const
     return result;
 }
 
-LineageDataPoint LineageDataPoint::operator+(LineageDataPoint const& other) const
+OverallDataPointCollection OverallDataPointCollection::operator+(OverallDataPointCollection const& other) const
 {
-    LineageDataPoint result;
-    result.colorBitset = colorBitset | other.colorBitset;
-    result.numCreatures = numCreatures + other.numCreatures;
-    result.numGenomes = numGenomes + other.numGenomes;
-    result.sumCreatureCells = sumCreatureCells + other.sumCreatureCells;
-    result.sumCreatureGenerations = sumCreatureGenerations + other.sumCreatureGenerations;
-    result.sumGenomeNodes = sumGenomeNodes + other.sumGenomeNodes;
-    result.sumMutationRates = sumMutationRates + other.sumMutationRates;
-    result.sumCreatureEnergy = sumCreatureEnergy + other.sumCreatureEnergy;
-    result.numCreatedCreatures = numCreatedCreatures + other.numCreatedCreatures;
-    result.totalMutations = totalMutations + other.totalMutations;
-    return result;
-}
-
-LineageDataPoint LineageDataPoint::operator/(double divisor) const
-{
-    LineageDataPoint result;
-    result.colorBitset = colorBitset;
-    result.numCreatures = numCreatures / divisor;
-    result.numGenomes = numGenomes / divisor;
-    result.sumCreatureCells = sumCreatureCells / divisor;
-    result.sumCreatureGenerations = sumCreatureGenerations / divisor;
-    result.sumGenomeNodes = sumGenomeNodes / divisor;
-    result.sumMutationRates = sumMutationRates / divisor;
-    result.sumCreatureEnergy = sumCreatureEnergy / divisor;
-    result.numCreatedCreatures = numCreatedCreatures / divisor;
-    result.totalMutations = totalMutations / divisor;
-    return result;
-}
-
-DataPointCollection DataPointCollection::operator+(DataPointCollection const& other) const
-{
-    DataPointCollection result;
+    OverallDataPointCollection result;
     result.time = time + other.time;
     result.systemClock = systemClock + other.systemClock;
     result.overall = overall + other.overall;
-    result.lineages = lineages;
-    for (auto const& [id, point] : other.lineages) {
-        auto it = result.lineages.find(id);
-        if (it != result.lineages.end()) {
-            it->second = it->second + point;
-        } else {
-            result.lineages[id] = point;
-        }
-    }
     return result;
 }
 
-DataPointCollection DataPointCollection::operator/(double divisor) const
+OverallDataPointCollection OverallDataPointCollection::operator/(double divisor) const
 {
-    DataPointCollection result;
+    OverallDataPointCollection result;
     result.time = time / divisor;
     result.systemClock = systemClock / divisor;
     result.overall = overall / divisor;
-    for (auto const& [id, point] : lineages) {
-        result.lineages[id] = point / divisor;
-    }
+    return result;
+}
+
+OverallDataPointCollection DataPointCollection::toOverallDataPointCollection() const
+{
+    OverallDataPointCollection result;
+    result.time = time;
+    result.systemClock = systemClock;
+    result.overall = overall;
     return result;
 }
