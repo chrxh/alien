@@ -36,7 +36,7 @@ private:
     void updateCellColors();
     void updateDisplayData();
     void processHeader();
-    void processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width, float height);
+    void processKpiCard(std::string const& label, std::string const& value, std::optional<double> delta, int sparklineIndex, float width, float height);
     void processEntitiesCard(float width, float height);
     void processFilterBar();
     void processLineageTable();
@@ -60,7 +60,7 @@ private:
     std::vector<LineageDisplayData> _plottedLineages;
     LineageDisplayData _allLineages;
     std::array<std::vector<double>, 3> _headerSparklines = {};
-    std::array<double, 3> _headerDeltas = {};
+    std::array<std::optional<double>, 3> _headerDeltas = {};
 
     std::array<uint32_t, MAX_COLORS> _cellColors = {};
 
@@ -96,6 +96,7 @@ private:
     // Live statistics
     TimelineLiveStatistics _timelineLiveStatistics;
     std::vector<double> _externalEnergySeries;
+    std::vector<double> _externalEnergyTimeSeries;
     double _timeSinceSimStart = 0;  //in seconds
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
 };
