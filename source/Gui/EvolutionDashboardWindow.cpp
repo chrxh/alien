@@ -266,12 +266,16 @@ void EvolutionDashboardWindow::processBackground()
     _lastTimepoint = timepoint;
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto overallStatistics = _SimulationFacade::get()->getStatisticsEntry();
-    _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
-    if (_timelineLiveStatistics.wasReset()) {
+    auto sessionId = _SimulationFacade::get()->getSessionId();
+    if (_lastSessionId.has_value() && *_lastSessionId != sessionId) {
+        _timelineLiveStatistics.clear();
         _externalEnergySeries.clear();
         _externalEnergyTimeSeries.clear();
     }
+    _lastSessionId = sessionId;
+
+    auto overallStatistics = _SimulationFacade::get()->getStatisticsEntry();
+    _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
 
     _externalEnergySeries.emplace_back(toDouble(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
     _externalEnergyTimeSeries.emplace_back(_timeSinceSimStart);
