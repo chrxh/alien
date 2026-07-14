@@ -29,6 +29,23 @@ TEST_F(DescValidationServiceTests, genome_removesConstructorFromVoidCell)
     EXPECT_FALSE(genome._genes.at(0)._nodes.at(1)._constructor.has_value());
 }
 
+TEST_F(DescValidationServiceTests, genome_keepsConstructorOnVoidCellInHomogeneousGene)
+{
+    // In a homogeneous gene the effective cell type comes from the first node, so a void node is expressed as that type
+    // and legitimately keeps its constructor (matching ConstructorProcessor and MutationProcessor).
+    auto genome = GenomeDesc().genes({
+        GeneDesc().homogeneousCellType(true).nodes({
+            NodeDesc(),
+            NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
+            NodeDesc(),
+        }),
+    });
+
+    _descValidationService.validateAndCorrect(genome);
+
+    EXPECT_TRUE(genome._genes.at(0)._nodes.at(1)._constructor.has_value());
+}
+
 TEST_F(DescValidationServiceTests, genome_keepsConstructorOnNonVoidCell)
 {
     auto genome = GenomeDesc().genes({

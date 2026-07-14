@@ -284,8 +284,10 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 }
             }
 
-            // Validate optional constructor field (void cells cannot have a constructor)
-            if (nodeType == CellType_Void) {
+            // Validate optional constructor field. A void node normally cannot have a constructor, but in a homogeneous gene the
+            // effective cell type is taken from the first node, so a void node is actually expressed as that type and keeps its
+            // constructor (see MutationProcessor::applyMutations and ConstructorProcessor::createConstructionData).
+            if (nodeType == CellType_Void && !gene._homogeneousCellType) {
                 node._constructor = std::nullopt;
             } else if (node._constructor.has_value()) {
                 auto& constructor = node._constructor.value();
