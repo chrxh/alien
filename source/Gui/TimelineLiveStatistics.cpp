@@ -13,19 +13,14 @@ std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointColl
     return _dataPointCollectionHistory;
 }
 
-bool TimelineLiveStatistics::wasReset() const
+void TimelineLiveStatistics::clear()
 {
-    return _wasReset;
+    _dataPointCollectionHistory.clear();
 }
 
 void TimelineLiveStatistics::update(StatisticsEntry const& overallStatistics, uint64_t timestep)
 {
-    _wasReset = _lastTimestep.has_value() && timestep < *_lastTimestep;
-    if (_wasReset) {
-        _dataPointCollectionHistory.clear();
-    } else {
-        truncate();
-    }
+    truncate();
 
     auto timepoint = std::chrono::steady_clock::now();
     auto duration =
