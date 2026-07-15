@@ -11,6 +11,7 @@ class TimelineLiveStatistics
 {
 public:
     static auto constexpr MaxLiveHistory = 240.0f;  //in seconds
+    static auto constexpr MaxLiveSteps = 100000;    //max span retained for "Last X steps" mode
 
     std::vector<DataPointCollection> const& getDataPointCollectionHistory() const;
     void update(StatisticsEntry const& overallStatistics, uint64_t timestep);

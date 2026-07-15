@@ -8,6 +8,11 @@
 
 #include <EngineInterface/StatisticsConverterService.h>
 
+namespace
+{
+    auto constexpr MaxSampleCount = 20000;  //hard cap to bound memory when the simulation stalls
+}
+
 std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointCollectionHistory() const
 {
     return _dataPointCollectionHistory;
@@ -36,7 +41,17 @@ void TimelineLiveStatistics::update(StatisticsEntry const& overallStatistics, ui
 
 void TimelineLiveStatistics::truncate()
 {
-    if (!_dataPointCollectionHistory.empty() && _dataPointCollectionHistory.back().time - _dataPointCollectionHistory.front().time > (MaxLiveHistory + 1.0)) {
+    //keep enough history to cover both the real-time window (time-based) and the "Last X steps" window
+    //(step-based); a sample is only dropped once it is no longer needed by either, with a hard count cap
+    //to bound memory if the simulation stalls (timestep barely advancing over real time)
+    while (_dataPointCollectionHistory.size() > 1) {
+        auto const& front = _dataPointCollectionHistory.front();
+        auto const& back = _dataPointCollectionHistory.back();
+        auto exceedsSampleCount = toInt(_dataPointCollectionHistory.size()) > MaxSampleCount;
+        auto exceedsTimeAndStepWindow = back.time - front.time > (MaxLiveHistory + 1.0) && back.timestep - front.timestep > MaxLiveSteps;
+        if (!exceedsSampleCount && !exceedsTimeAndStepWindow) {
+            break;
+        }
         _dataPointCollectionHistory.erase(_dataPointCollectionHistory.begin());
     }
 }
