@@ -110,6 +110,16 @@ std::string StringHelper::formatInHex(uint64_t value)
     return ss.str();
 }
 
+std::string StringHelper::formatInThousands(double value)
+{
+    if (value == 0.0) {
+        return "0";
+    }
+    std::stringstream ss;
+    ss << value / 1000 << "K";
+    return ss.str();
+}
+
 void StringHelper::copy(char* target, int maxSize, std::string const& source)
 {
     auto sourceSize = source.size();

@@ -15,6 +15,7 @@ public:
     static std::string format(std::chrono::milliseconds duration);
     static std::string format(std::chrono::system_clock::time_point const& timePoint);
     static std::string formatInHex(uint64_t value);
+    static std::string formatInThousands(double value);  //e.g. 12000 -> "12K"
 
     static void copy(char* target, int maxSize, std::string const& source);
     static bool compare(char const* target, int maxSize, char const* source);

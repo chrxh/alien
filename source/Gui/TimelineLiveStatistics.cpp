@@ -41,7 +41,7 @@ void TimelineLiveStatistics::update(StatisticsEntry const& overallStatistics, ui
 
 void TimelineLiveStatistics::truncate()
 {
-    //keep enough history to cover both the real-time window (time-based) and the "Last X steps" window
+    //keep enough history to cover both the real-time window (time-based) and the "Last time steps" window
     //(step-based); a sample is only dropped once it is no longer needed by either, with a hard count cap
     //to bound memory if the simulation stalls (timestep barely advancing over real time)
     while (_dataPointCollectionHistory.size() > 1) {
