@@ -26,13 +26,15 @@ namespace
 {
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
     auto constexpr RateAveragingInterval = 30.0;  //in seconds
+    auto constexpr MinRateTimesteps = 1000.0;     //at the start of the history, rates are already shown once this many time steps are covered
 
     auto constexpr ColorChipSize = 22.0f;
     auto constexpr SwatchSize = 11.0f;
     auto constexpr SwatchGap = 3.0f;
     auto constexpr PlotLabelColumnWidth = 150.0f;
-    auto constexpr PlotHeight = 60.0f;
-    auto constexpr PlotHeightWithAxis = 80.0f;
+    auto constexpr MinPlotHeight = 40.0f;
+    auto constexpr MaxPlotHeight = 300.0f;
+    auto constexpr TimeAxisExtraHeight = 20.0f;
     auto constexpr DefaultTimelinesHeight = 380.0f;
 
     ImColor const CardBackgroundColor = ImColor(0.095f, 0.117f, 0.165f, 1.0f);
@@ -68,11 +70,12 @@ namespace
     }
 
     //palette as used by the former statistics window; one colormap color per plot row,
-    //or one per selected lineage if multiple lineages are plotted together
+    //or one per selected lineage if multiple lineages are plotted together;
+    //stepping through the colormap with a stride coprime to its size makes adjacent rows clearly distinct
     ImColor getPlotColor(int metricIndex, int seriesIndex, int numSeries)
     {
         auto index = numSeries > 1 ? seriesIndex : metricIndex;
-        return ImColor(ImPlot::GetColormapColor((index % 21) <= 10 ? (index % 21) : 20 - (index % 21), ImPlotColormap_Cool));
+        return ImColor(ImPlot::GetColormapColor(index * 2 % 11, ImPlotColormap_Cool));
     }
 
     std::string formatMetricValue(double value, int decimals)
@@ -207,7 +210,7 @@ namespace
 }
 
 EvolutionDashboardWindow::EvolutionDashboardWindow()
-    : AlienWindow("Evolution Dashboard", "windows.evolution dashboard", false, true)
+    : AlienWindow("Evolution dashboard", "windows.evolution dashboard", false, true, {scale(700.0f), scale(500.0f)})
 {}
 
 void EvolutionDashboardWindow::initIntern()
@@ -216,6 +219,7 @@ void EvolutionDashboardWindow::initIntern()
     _timelineMode = GlobalSettings::get().getValue("windows.evolution dashboard.timeline mode", _timelineMode);
     _lastSteps = GlobalSettings::get().getValue("windows.evolution dashboard.last steps", _lastSteps);
     _timeHorizon = GlobalSettings::get().getValue("windows.evolution dashboard.time horizon", _timeHorizon);
+    _plotHeight = GlobalSettings::get().getValue("windows.evolution dashboard.plot height", _plotHeight);
     _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.color filter", _colorFilter);
     validateAndCorrect();
 }
@@ -226,6 +230,7 @@ void EvolutionDashboardWindow::shutdownIntern()
     GlobalSettings::get().setValue("windows.evolution dashboard.timeline mode", _timelineMode);
     GlobalSettings::get().setValue("windows.evolution dashboard.last steps", _lastSteps);
     GlobalSettings::get().setValue("windows.evolution dashboard.time horizon", _timeHorizon);
+    GlobalSettings::get().setValue("windows.evolution dashboard.plot height", _plotHeight);
     GlobalSettings::get().setValue("windows.evolution dashboard.color filter", _colorFilter);
 }
 
@@ -396,9 +401,12 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
         while (globalReferenceIndex + 1 < sampleIndex && getRateWindowClock(source.at(globalReferenceIndex + 1)) + RateAveragingInterval <= rateWindowClock) {
             ++globalReferenceIndex;
         }
-        //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples
-        auto referenceIsOldEnough =
-            globalReferenceIndex < sampleIndex && getRateWindowClock(source.at(globalReferenceIndex)) + RateAveragingInterval <= rateWindowClock;
+        //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples;
+        //at the start of the history the oldest sample serves as reference once it is at least MinRateTimesteps old (like in the table)
+        auto const& referenceSample = source.at(globalReferenceIndex);
+        auto referenceIsOldEnough = globalReferenceIndex < sampleIndex
+            && (getRateWindowClock(referenceSample) + RateAveragingInterval <= rateWindowClock
+                || (globalReferenceIndex == 0 && referenceSample.timestep + MinRateTimesteps <= dataPoints.timestep));
         auto const* referenceDataPoints = referenceIsOldEnough ? &source.at(globalReferenceIndex) : nullptr;
         _allLineages.timePoints.emplace_back(getX(dataPoints));
         if (!useTimeAsX) {
@@ -439,8 +447,11 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 if (!useTimeAsX) {
                     lineage.systemClockPoints.emplace_back(sample.systemClock);
                 }
-                //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples
-                auto referenceIsOldEnough = !rateReferences.empty() && rateReferences.at(rateReferenceIndex).windowClock + RateAveragingInterval <= windowClock;
+                //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples;
+                //at the start of the lineage the oldest sample serves as reference once it is at least MinRateTimesteps old (like in the table)
+                auto referenceIsOldEnough = !rateReferences.empty()
+                    && (rateReferences.at(rateReferenceIndex).windowClock + RateAveragingInterval <= windowClock
+                        || (rateReferenceIndex == 0 && rateReferences.at(0).timestep + MinRateTimesteps <= sample.timestep));
                 auto const* lastEntry = referenceIsOldEnough ? rateReferences.at(rateReferenceIndex).entry : nullptr;
                 auto deltaKSteps = referenceIsOldEnough ? (sample.timestep - rateReferences.at(rateReferenceIndex).timestep) / 1000.0 : 0.0;
                 for (int i = 0; i < NumMetrics; ++i) {
@@ -483,7 +494,7 @@ void EvolutionDashboardWindow::processHeader()
          {"Fluids", formatMetricValue(fluids, 0)},
          {"Cells", formatMetricValue(cells, 0)},
          {"Free cells", formatMetricValue(freeCells, 0)},
-         {"Energies", formatMetricValue(energyParticles, 0)}},
+         {"Energy particles", formatMetricValue(energyParticles, 0)}},
         cardWidth * 2,
         cardHeight);
     ImGui::SameLine();
@@ -504,8 +515,8 @@ void EvolutionDashboardWindow::processHeader()
     processCard(
         "Lineages",
         formatMetricValue(numLineages, 0),
-        {{">= 1% creatures", formatMetricValue(toDouble(numLineagesAbove1Percent), 0)},
-         {">= 5% creatures", formatMetricValue(toDouble(numLineagesAbove5Percent), 0)}},
+        {{"> 1% creatures", formatMetricValue(toDouble(numLineagesAbove1Percent), 0)},
+         {"> 5% creatures", formatMetricValue(toDouble(numLineagesAbove5Percent), 0)}},
         cardWidth,
         cardHeight);
     ImGui::SameLine();
@@ -629,6 +640,8 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::TextUnformatted(columnName);
         }
 
+        auto drawList = ImGui::GetWindowDrawList();
+
         //summary row
         ImGui::TableNextRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImColor(0.13f, 0.16f, 0.23f, 1.0f));
@@ -638,6 +651,18 @@ void EvolutionDashboardWindow::processLineageTable()
             _selectedLineageIds.clear();
         }
         ImGui::SameLine(0, 0);
+
+        //draw the pin icon slightly smaller and shifted so it aligns nicely with the row text
+        auto iconSize = ImGui::GetFontSize() * 0.75f;
+        auto iconPos = ImGui::GetCursorScreenPos();
+        drawList->AddText(
+            ImGui::GetFont(),
+            iconSize,
+            {iconPos.x + scale(2.0f), iconPos.y + (ImGui::GetTextLineHeight() - iconSize) / 2 + scale(1.0f)},
+            ImGui::GetColorU32(ImGuiCol_Text),
+            ICON_FA_THUMBTACK);
+        auto iconWidth = ImGui::GetFont()->CalcTextSizeA(iconSize, FLT_MAX, 0.0f, ICON_FA_THUMBTACK).x;
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconWidth + scale(7.0f));
         AlienGui::Text("All lineages (" + std::to_string(_lineages.size()) + ")");
         for (int i = 0; i < NumMetrics; ++i) {
             ImGui::TableSetColumnIndex(i + 1);
@@ -645,7 +670,6 @@ void EvolutionDashboardWindow::processLineageTable()
         }
 
         //lineage rows
-        auto drawList = ImGui::GetWindowDrawList();
         auto maxNumColors = 1;
         for (auto const& lineage : _lineages) {
             if (_colorFilter & lineage.colorBitset) {
@@ -706,26 +730,37 @@ void EvolutionDashboardWindow::processTimelineHeader()
     ImGui::Spacing();
     std::vector<std::string> modeValues{"Real-time", "Last time steps", "Entire history"};
     AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values(modeValues), &_timelineMode);
+
+    //sliders keep their default width and only shrink when the window gets too narrow
+    auto numSliders = _timelineMode == TimelineMode_EntireHistory ? 1.0f : 2.0f;
+    ImGui::SameLine(0, scale(20.0f));
+    auto sliderWidth = std::clamp((ImGui::GetContentRegionAvail().x - scale(20.0f) * (numSliders - 1.0f)) / numSliders, scale(140.0f), scale(320.0f));
     if (_timelineMode == TimelineMode_RealTime) {
-        ImGui::SameLine(0, scale(20.0f));
-        if (ImGui::BeginChild("##timeHorizon", {scale(320.0f), ImGui::GetFrameHeight()})) {
+        if (ImGui::BeginChild("##timeHorizon", {sliderWidth, ImGui::GetFrameHeight()})) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Time horizon").min(1.0f).max(TimelineLiveStatistics::MaxLiveHistory).format("%.1f s").textWidth(100.0f),
                 &_timeHorizon);
             validateAndCorrect();
         }
         ImGui::EndChild();
+        ImGui::SameLine(0, scale(20.0f));
     }
     if (_timelineMode == TimelineMode_LastSteps) {
-        ImGui::SameLine(0, scale(20.0f));
-        if (ImGui::BeginChild("##lastSteps", {scale(320.0f), ImGui::GetFrameHeight()})) {
+        if (ImGui::BeginChild("##lastSteps", {sliderWidth, ImGui::GetFrameHeight()})) {
             AlienGui::SliderInt(
                 AlienGui::SliderIntParameters().name("Steps").min(1000).max(TimelineLiveStatistics::MaxLiveSteps).logarithmic(true).textWidth(100.0f),
                 &_lastSteps);
             validateAndCorrect();
         }
         ImGui::EndChild();
+        ImGui::SameLine(0, scale(20.0f));
     }
+    if (ImGui::BeginChild("##plotHeight", {sliderWidth, ImGui::GetFrameHeight()})) {
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().name("Plot height").min(MinPlotHeight).max(MaxPlotHeight).format("%.0f").textWidth(100.0f), &_plotHeight);
+        validateAndCorrect();
+    }
+    ImGui::EndChild();
 
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
     AlienGui::Text("Timeline filter");
@@ -820,7 +855,7 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextAxesLimits(minTime, maxTime, 0, upperBound + NEAR_ZERO, ImGuiCond_Always);
 
-    auto height = showTimeAxis ? PlotHeightWithAxis : PlotHeight;
+    auto height = _plotHeight + (showTimeAxis ? TimeAxisExtraHeight : 0.0f);
     if (ImPlot::BeginPlot(
             "##plot", ImVec2(-1, scale(height)), ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText)) {
         ImPlot::SetupAxis(ImAxis_X1, "", showTimeAxis ? ImPlotAxisFlags_None : ImPlotAxisFlags_NoTickLabels);
@@ -948,6 +983,7 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_EntireHistory));
     _lastSteps = std::clamp(_lastSteps, 1000, TimelineLiveStatistics::MaxLiveSteps);
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, TimelineLiveStatistics::MaxLiveHistory);
+    _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
     _colorFilter &= (1 << MAX_COLORS) - 1;
     if (_colorFilter == 0) {
         _colorFilter = (1 << MAX_COLORS) - 1;

@@ -115,9 +115,16 @@ std::string StringHelper::formatInThousands(double value)
     if (value == 0.0) {
         return "0";
     }
-    std::stringstream ss;
-    ss << value / 1000 << "K";
-    return ss.str();
+    auto result = format(value / 1000, 3);
+    if (result.find('.') != std::string::npos) {
+        while (result.back() == '0') {
+            result.pop_back();
+        }
+        if (result.back() == '.') {
+            result.pop_back();
+        }
+    }
+    return result + "K";
 }
 
 void StringHelper::copy(char* target, int maxSize, std::string const& source)
