@@ -71,11 +71,11 @@ namespace
 
     //palette as used by the former statistics window; one colormap color per plot row,
     //or one per selected lineage if multiple lineages are plotted together;
-    //stepping through the colormap with a stride coprime to its size makes adjacent rows clearly distinct
+    //stepping through the colormap with an alternating stride of 1 and 2 makes adjacent rows distinct
     ImColor getPlotColor(int metricIndex, int seriesIndex, int numSeries)
     {
         auto index = numSeries > 1 ? seriesIndex : metricIndex;
-        return ImColor(ImPlot::GetColormapColor(index * 2 % 11, ImPlotColormap_Cool));
+        return ImColor(ImPlot::GetColormapColor((index / 2 * 3 + index % 2) % 11, ImPlotColormap_Cool));
     }
 
     std::string formatMetricValue(double value, int decimals)
@@ -630,13 +630,19 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
         }
 
-        //header row with centered labels
+        //header row with labels centered within the visible part of each column; columns can be
+        //partially hidden behind the frozen lineage column or cut off at the right window border
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         for (int column = 0; column < NumMetrics + 1; ++column) {
             ImGui::TableSetColumnIndex(column);
             auto columnName = ImGui::TableGetColumnName(column);
             auto textWidth = ImGui::CalcTextSize(columnName).x;
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (ImGui::GetContentRegionAvail().x - textWidth) / 2));
+            auto cellMinX = ImGui::GetCursorScreenPos().x;
+            auto cellMaxX = cellMinX + ImGui::GetContentRegionAvail().x;
+            auto visibleMinX = std::max(cellMinX, ImGui::GetWindowDrawList()->GetClipRectMin().x);
+            auto visibleMaxX = std::min(cellMaxX, ImGui::GetWindowDrawList()->GetClipRectMax().x);
+            auto textPosX = std::clamp((visibleMinX + visibleMaxX - textWidth) / 2, cellMinX, std::max(cellMinX, cellMaxX - textWidth));
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textPosX - cellMinX);
             ImGui::TextUnformatted(columnName);
         }
 
