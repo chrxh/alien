@@ -5,7 +5,7 @@
 
 #include "DataPointCollection.h"
 
-using StatisticsHistoryData = std::vector<OverallDataPointCollection>;
+using StatisticsHistoryData = std::vector<DataPointCollection>;
 
 class StatisticsHistory
 {

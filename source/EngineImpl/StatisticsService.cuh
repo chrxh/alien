@@ -23,6 +23,6 @@ private:
 
     double _longtermTimestepDelta = DefaultTimeStepDelta;
     int _numDataPoints = 0;
-    std::optional<OverallDataPointCollection> _accumulatedDataPoint;
+    std::optional<DataPointCollection> _accumulatedDataPoint;
     std::optional<uint64_t> _lastTimestep;
 };

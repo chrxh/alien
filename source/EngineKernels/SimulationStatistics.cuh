@@ -83,11 +83,13 @@ public:
         overall.numSolidObjects = 0;
         overall.numFluidObjects = 0;
         overall.numCellObjects = 0;
+        overall.numEnergyParticles = 0;
         overall.numActiveLineages = 0;
     }
     __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_overallStatisticsEntry->numSolidObjects, 1u); }
     __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_overallStatisticsEntry->numFluidObjects, 1u); }
     __inline__ __device__ void incNumCellObjects() { atomicAdd(&_overallStatisticsEntry->numCellObjects, 1u); }
+    __inline__ __device__ void incNumEnergyParticles() { atomicAdd(&_overallStatisticsEntry->numEnergyParticles, 1u); }
     __inline__ __device__ void addCreatureStatistics(uint32_t numCells, uint32_t generation, float accumulatedMutations)
     {
         auto& overall = *_overallStatisticsEntry;

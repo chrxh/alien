@@ -35,16 +35,16 @@ private:
 
     void updateCellColors();
     void updateDisplayData();
+    void updateTableData();
+    void updatePlotData();
+    void rebuildPlotSeries(std::vector<DataPointCollection> const& source);
     void processHeader();
-    void processKpiCard(
+    void processCard(
         std::string const& label,
         std::string const& value,
-        std::optional<double> delta,
-        bool isPercentage,
-        int sparklineIndex,
+        std::vector<std::pair<std::string, std::string>> const& subValues,
         float width,
         float height);
-    void processEntitiesCard(float width, float height);
     void processFilterBar();
     void processLineageTable();
     void processTimelineSection();
@@ -75,8 +75,6 @@ private:
     std::vector<LineageDisplayData> _lineages;  //table rows from the latest sample, sorted by creature count
     std::vector<LineageDisplayData> _plottedLineages;
     LineageDisplayData _allLineages;
-    std::array<std::vector<double>, 3> _headerSparklines = {};
-    std::array<std::optional<double>, 3> _headerDeltas = {};
 
     std::array<uint32_t, MAX_COLORS> _cellColors = {};
 
@@ -88,32 +86,30 @@ private:
     {
         TimelineMode_RealTime,
         TimelineMode_LastSteps,
-        TimelineMode_EntireHistory  //only selectable when all lineages are shown
+        TimelineMode_EntireHistory
     };
     TimelineMode _timelineMode = TimelineMode_EntireHistory;
 
     int _lastSteps = 100000;
     float _timeHorizon = 10.0f;  //in seconds
     float _timelinesHeight = 0;
+    std::optional<float> _lastWindowHeight;
 
     struct RebuildKey
     {
         int timelineMode = 0;
         int lastSteps = 0;
         float timeHorizon = 0;
-        double liveBackTime = 0;
-        double historyBackTime = 0;
+        double sourceBackTime = 0;
         std::set<int64_t> selectedLineageIds;
 
         bool operator==(RebuildKey const&) const = default;
     };
     std::optional<RebuildKey> _lastRebuildKey;
+    std::optional<double> _lastTableBackTime;
 
     // Live statistics
     TimelineLiveStatistics _timelineLiveStatistics;
-    std::vector<double> _externalEnergySeries;
-    std::vector<double> _externalEnergyTimeSeries;
-    double _timeSinceSimStart = 0;  //in seconds
     std::optional<int> _lastSessionId;
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
 };

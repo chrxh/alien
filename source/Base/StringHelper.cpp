@@ -25,13 +25,18 @@ std::string StringHelper::format(uint64_t n, char separator)
 
 std::string StringHelper::format(float v, int fracPartDecimals)
 {
+    return format(static_cast<double>(v), fracPartDecimals);
+}
+
+std::string StringHelper::format(double v, int fracPartDecimals)
+{
     std::string result;
     if (v < 0) {
         result = "-";
         v = -v;
     }
     auto scale = static_cast<uint64_t>(std::llround(std::pow(10.0, fracPartDecimals)));
-    auto scaled = static_cast<uint64_t>(std::llround(static_cast<double>(v) * scale));
+    auto scaled = static_cast<uint64_t>(std::llround(v * scale));
     result += format(scaled / scale);
     if (fracPartDecimals > 0) {
         result += ".";
