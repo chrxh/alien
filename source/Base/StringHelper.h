@@ -10,6 +10,7 @@ class StringHelper
 public:
     static std::string format(uint64_t n, char separator = ',');
     static std::string format(float v, int decimalsAfterPoint);
+    static std::string format(double v, int decimalsAfterPoint);
     static std::string format(std::chrono::seconds duration);
     static std::string format(std::chrono::milliseconds duration);
     static std::string format(std::chrono::system_clock::time_point const& timePoint);

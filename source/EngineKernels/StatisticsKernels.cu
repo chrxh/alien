@@ -68,6 +68,15 @@ __global__ void cudaUpdateEvolutionStatistics_substep1(SimulationData data, Simu
 
 __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, SimulationStatistics statistics)
 {
+    {
+        auto& particles = data.entities.energies;
+        auto const partition = calcSystemThreadPartition(particles.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            if (particles.at(index)) {
+                statistics.incNumEnergyParticles();
+            }
+        }
+    }
     auto& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 

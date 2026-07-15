@@ -28,6 +28,7 @@ DataPointCollection StatisticsConverterService::convert(
     result.overall.numSolidObjects = toDouble(o.numSolidObjects);
     result.overall.numFluidObjects = toDouble(o.numFluidObjects);
     result.overall.numCellObjects = toDouble(o.numCellObjects);
+    result.overall.numEnergyParticles = toDouble(o.numEnergyParticles);
     result.overall.accumCreatedCreatures = toDouble(o.numCreatedCreatures);
     result.overall.accumMutations = toDouble(o.totalMutations);
 

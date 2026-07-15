@@ -15,6 +15,7 @@ struct OverallDataPoint
     double numSolidObjects = 0;
     double numFluidObjects = 0;
     double numCellObjects = 0;
+    double numEnergyParticles = 0;
 
     double accumCreatedCreatures = 0;  // Raw accumulated value; rates are derived GUI-side
     double accumMutations = 0;         // Raw accumulated value; rates are derived GUI-side
@@ -36,17 +37,9 @@ struct LineageDataPoint
 
     double numCreatedCreatures = 0;
     double totalMutations = 0;
-};
 
-struct OverallDataPointCollection
-{
-    double time = 0;
-    double systemClock = 0;
-
-    OverallDataPoint overall;
-
-    OverallDataPointCollection operator+(OverallDataPointCollection const& other) const;
-    OverallDataPointCollection operator/(double divisor) const;
+    LineageDataPoint operator+(LineageDataPoint const& other) const;
+    LineageDataPoint operator/(double divisor) const;
 };
 
 struct DataPointCollection
@@ -58,5 +51,6 @@ struct DataPointCollection
     OverallDataPoint overall;
     std::unordered_map<uint32_t, LineageDataPoint> lineages;
 
-    OverallDataPointCollection toOverallDataPointCollection() const;
+    DataPointCollection operator+(DataPointCollection const& other) const;
+    DataPointCollection operator/(double divisor) const;
 };
