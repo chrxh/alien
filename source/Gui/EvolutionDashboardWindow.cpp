@@ -17,6 +17,7 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/SimulationParametersTypes.h>
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
@@ -45,16 +46,16 @@ namespace
         int plotDecimals;
     };
 
-    //the last two metrics are rates: per second in the table, per 1K time steps in the timeline plots
+    //the last two metrics are rates per 1K time steps, both in the table and in the timeline plots
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
         {"Creatures", "Creatures", 0, 0},
         {"Avg cells", "Avg cells", 1, 1},
         {"Avg nodes", "Avg nodes", 1, 1},
         {"Internal energy", "Internal energy", 0, 0},
         {"Avg mut. rate", "Avg mutation rate", 4, 4},
-        {"Avg age (gen)", "Avg age (generations)", 0, 0},
-        {"Created /s", "Created creatures / 1K steps", 2, 2},
-        {"Mutations /s", "Mutations / 1K steps", 4, 4},
+        {"Avg generation", "Avg generation", 0, 0},
+        {"Created /1K", "Created /1K", 2, 2},
+        {"Mutations /1K", "Mutations /1K", 4, 4},
     };
 
     ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
@@ -76,7 +77,10 @@ namespace
 
     std::string formatMetricValue(double value, int decimals)
     {
-        if (std::isinf(value)) {
+        if (std::isnan(value)) {
+            return "-";
+        }
+        if (value >= toDouble(Infinity<float>::value)) {  //parameters use FLT_MAX to represent infinity
             return "infinity";
         }
         return StringHelper::format(value, decimals);
@@ -121,7 +125,7 @@ namespace
         return std::max(0.0, (accumValue - lastAccumValue) / delta);  //negative deltas occur after accumulated statistics have been reset
     }
 
-    double getGlobalMetricValue(DataPointCollection const& dataPoints, DataPointCollection const* lastDataPoints, bool ratePerKSteps, int metricIndex)
+    double getGlobalMetricValue(DataPointCollection const& dataPoints, DataPointCollection const* lastDataPoints, int metricIndex)
     {
         switch (metricIndex) {
         case 0:
@@ -139,13 +143,13 @@ namespace
         case 6:
         case 7: {
             if (!lastDataPoints) {
-                return 0.0;
+                return std::numeric_limits<double>::quiet_NaN();
             }
-            auto delta = ratePerKSteps ? (dataPoints.timestep - lastDataPoints->timestep) / 1000.0 : dataPoints.time - lastDataPoints->time;
+            auto deltaKSteps = (dataPoints.timestep - lastDataPoints->timestep) / 1000.0;
             if (metricIndex == 6) {
-                return calcRate(dataPoints.overall.accumCreatedCreatures, lastDataPoints->overall.accumCreatedCreatures, delta);
+                return calcRate(dataPoints.overall.accumCreatedCreatures, lastDataPoints->overall.accumCreatedCreatures, deltaKSteps);
             } else {
-                return calcRate(dataPoints.overall.accumMutations, lastDataPoints->overall.accumMutations, delta);
+                return calcRate(dataPoints.overall.accumMutations, lastDataPoints->overall.accumMutations, deltaKSteps);
             }
         }
         default:
@@ -169,9 +173,9 @@ namespace
         case 5:
             return entry.numCreatures > 0 ? entry.sumCreatureGenerations / entry.numCreatures : 0.0;
         case 6:
-            return lastEntry ? calcRate(entry.numCreatedCreatures, lastEntry->numCreatedCreatures, rateDelta) : 0.0;
+            return lastEntry ? calcRate(entry.numCreatedCreatures, lastEntry->numCreatedCreatures, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         case 7:
-            return lastEntry ? calcRate(entry.totalMutations, lastEntry->totalMutations, rateDelta) : 0.0;
+            return lastEntry ? calcRate(entry.totalMutations, lastEntry->totalMutations, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         default:
             return 0.0;
         }
@@ -181,6 +185,11 @@ namespace
     {
         auto it = sample.lineages.find(lineageId);
         return it != sample.lineages.end() ? &it->second : nullptr;
+    }
+
+    int formatTimestepsInThousands(double value, char* buff, int size, void*)
+    {
+        return snprintf(buff, size, "%s", StringHelper::formatInThousands(value).c_str());
     }
 
     //most recent sample that is at least RateAveragingInterval older; falls back to the oldest sample
@@ -262,8 +271,7 @@ void EvolutionDashboardWindow::processIntern()
 
     AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _timelinesHeight);
 
-    //apply selection changes from the table immediately; otherwise the plots show "No data" for one
-    //frame, which collapses the plot child window and resets its scroll position
+    //apply selection changes from the table immediately; otherwise the plots are empty for one frame
     updateDisplayData();
 
     if (ImGui::BeginChild("##timelineSection", {0, 0})) {
@@ -295,7 +303,7 @@ void EvolutionDashboardWindow::updateTableData()
     }
     _lastTableBackTime = liveBackTime;
 
-    //table rows from the latest live sample (rates per second)
+    //table rows from the latest live sample (rates per 1K time steps)
     _lineages.clear();
     if (liveHistory.empty()) {
         return;
@@ -307,16 +315,16 @@ void EvolutionDashboardWindow::updateTableData()
         lineage.id = toInt(lineageId);
         lineage.colorBitset = toInt(entry.colorBitset);
         LineageDataPoint const* referenceEntry = nullptr;
-        auto referenceTime = 0.0;
+        auto referenceTimestep = 0.0;
         for (auto sampleIndex = referenceIndex; sampleIndex + 1 < liveHistory.size(); ++sampleIndex) {  //young lineages: use their oldest sample
             if (auto const* candidate = findLineageEntry(liveHistory.at(sampleIndex), lineageId)) {
                 referenceEntry = candidate;
-                referenceTime = liveHistory.at(sampleIndex).time;
+                referenceTimestep = liveHistory.at(sampleIndex).timestep;
                 break;
             }
         }
         for (int i = 0; i < NumMetrics; ++i) {
-            lineage.currentValues.at(i) = getLineageMetricValue(entry, referenceEntry, lastSample.time - referenceTime, i);
+            lineage.currentValues.at(i) = getLineageMetricValue(entry, referenceEntry, (lastSample.timestep - referenceTimestep) / 1000.0, i);
         }
         _lineages.emplace_back(std::move(lineage));
     }
@@ -325,7 +333,7 @@ void EvolutionDashboardWindow::updateTableData()
     //current values for the table summary row
     DataPointCollection const* referenceDataPoints = liveHistory.size() >= 2 ? &liveHistory.at(referenceIndex) : nullptr;
     for (int i = 0; i < NumMetrics; ++i) {
-        _allLineages.currentValues.at(i) = getGlobalMetricValue(lastSample, referenceDataPoints, false, i);
+        _allLineages.currentValues.at(i) = getGlobalMetricValue(lastSample, referenceDataPoints, i);
     }
 }
 
@@ -369,6 +377,11 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
         while (firstIndex < source.size() && getX(source.at(firstIndex)) < startX) {
             ++firstIndex;
         }
+        //keep one sample left of the visible range so the lines extend beyond the left plot border
+        //(they are clipped there); otherwise a flickering gap remains between border and first sample
+        if (firstIndex > 0) {
+            --firstIndex;
+        }
     }
 
     //"all lineages" series (the current values are maintained by updateTableData)
@@ -376,20 +389,23 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
     _allLineages.series = {};
     _allLineages.timePoints.clear();
     _allLineages.systemClockPoints.clear();
-    auto globalReferenceIndex = firstIndex;
+    size_t globalReferenceIndex = 0;  //reference samples may also lie before the visible range
     for (auto sampleIndex = firstIndex; sampleIndex < source.size(); ++sampleIndex) {
         auto const& dataPoints = source.at(sampleIndex);
         auto rateWindowClock = getRateWindowClock(dataPoints);
         while (globalReferenceIndex + 1 < sampleIndex && getRateWindowClock(source.at(globalReferenceIndex + 1)) + RateAveragingInterval <= rateWindowClock) {
             ++globalReferenceIndex;
         }
-        auto const* referenceDataPoints = sampleIndex > firstIndex ? &source.at(globalReferenceIndex) : nullptr;
+        //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples
+        auto referenceIsOldEnough =
+            globalReferenceIndex < sampleIndex && getRateWindowClock(source.at(globalReferenceIndex)) + RateAveragingInterval <= rateWindowClock;
+        auto const* referenceDataPoints = referenceIsOldEnough ? &source.at(globalReferenceIndex) : nullptr;
         _allLineages.timePoints.emplace_back(getX(dataPoints));
         if (!useTimeAsX) {
             _allLineages.systemClockPoints.emplace_back(dataPoints.systemClock);
         }
         for (int i = 0; i < NumMetrics; ++i) {
-            _allLineages.series.at(i).emplace_back(getGlobalMetricValue(dataPoints, referenceDataPoints, true, i));
+            _allLineages.series.at(i).emplace_back(getGlobalMetricValue(dataPoints, referenceDataPoints, i));
         }
     }
 
@@ -404,28 +420,32 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
             double timestep = 0;
             LineageDataPoint const* entry = nullptr;
         };
-        std::vector<RateReference> rateReferences;  //already visited samples containing the lineage
+        std::vector<RateReference> rateReferences;  //already visited samples containing the lineage; may also lie before the visible range
         size_t rateReferenceIndex = 0;
-        for (auto sampleIndex = firstIndex; sampleIndex < source.size(); ++sampleIndex) {
+        for (size_t sampleIndex = 0; sampleIndex < source.size(); ++sampleIndex) {
             auto const& sample = source.at(sampleIndex);
             auto const* entry = findLineageEntry(sample, toUInt32(selectedId));
             if (!entry) {
                 continue;
             }
             lineage.colorBitset = toInt(entry->colorBitset);
-            lineage.timePoints.emplace_back(getX(sample));
-            if (!useTimeAsX) {
-                lineage.systemClockPoints.emplace_back(sample.systemClock);
-            }
             auto windowClock = getRateWindowClock(sample);
             while (rateReferenceIndex + 1 < rateReferences.size()
                    && rateReferences.at(rateReferenceIndex + 1).windowClock + RateAveragingInterval <= windowClock) {
                 ++rateReferenceIndex;
             }
-            auto const* lastEntry = !rateReferences.empty() ? rateReferences.at(rateReferenceIndex).entry : nullptr;
-            auto deltaKSteps = !rateReferences.empty() ? (sample.timestep - rateReferences.at(rateReferenceIndex).timestep) / 1000.0 : 0.0;
-            for (int i = 0; i < NumMetrics; ++i) {
-                lineage.series.at(i).emplace_back(getLineageMetricValue(*entry, lastEntry, deltaKSteps, i));
+            if (sampleIndex >= firstIndex) {
+                lineage.timePoints.emplace_back(getX(sample));
+                if (!useTimeAsX) {
+                    lineage.systemClockPoints.emplace_back(sample.systemClock);
+                }
+                //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples
+                auto referenceIsOldEnough = !rateReferences.empty() && rateReferences.at(rateReferenceIndex).windowClock + RateAveragingInterval <= windowClock;
+                auto const* lastEntry = referenceIsOldEnough ? rateReferences.at(rateReferenceIndex).entry : nullptr;
+                auto deltaKSteps = referenceIsOldEnough ? (sample.timestep - rateReferences.at(rateReferenceIndex).timestep) / 1000.0 : 0.0;
+                for (int i = 0; i < NumMetrics; ++i) {
+                    lineage.series.at(i).emplace_back(getLineageMetricValue(*entry, lastEntry, deltaKSteps, i));
+                }
             }
             rateReferences.push_back({windowClock, sample.timestep, entry});
         }
@@ -453,14 +473,17 @@ void EvolutionDashboardWindow::processHeader()
     auto solids = lastDataPoints ? lastDataPoints->overall.numSolidObjects : 0.0;
     auto fluids = lastDataPoints ? lastDataPoints->overall.numFluidObjects : 0.0;
     auto cells = lastDataPoints ? lastDataPoints->overall.numCellObjects : 0.0;
+    auto creatureCells = lastDataPoints ? lastDataPoints->overall.numCreatures * lastDataPoints->overall.averageCreatureCells : 0.0;
+    auto freeCells = std::max(0.0, cells - creatureCells);
     auto energyParticles = lastDataPoints ? lastDataPoints->overall.numEnergyParticles : 0.0;
     processCard(
         "Entities",
         formatMetricValue(solids + fluids + cells + energyParticles, 0),
         {{"Solids", formatMetricValue(solids, 0)},
-         {"Fluid particles", formatMetricValue(fluids, 0)},
+         {"Fluids", formatMetricValue(fluids, 0)},
          {"Cells", formatMetricValue(cells, 0)},
-         {"Energy particles", formatMetricValue(energyParticles, 0)}},
+         {"Free cells", formatMetricValue(freeCells, 0)},
+         {"Energies", formatMetricValue(energyParticles, 0)}},
         cardWidth * 2,
         cardHeight);
     ImGui::SameLine();
@@ -481,8 +504,8 @@ void EvolutionDashboardWindow::processHeader()
     processCard(
         "Lineages",
         formatMetricValue(numLineages, 0),
-        {{">= 5% creatures", formatMetricValue(toDouble(numLineagesAbove5Percent), 0)},
-         {">= 1% creatures", formatMetricValue(toDouble(numLineagesAbove1Percent), 0)}},
+        {{">= 1% creatures", formatMetricValue(toDouble(numLineagesAbove1Percent), 0)},
+         {">= 5% creatures", formatMetricValue(toDouble(numLineagesAbove5Percent), 0)}},
         cardWidth,
         cardHeight);
     ImGui::SameLine();
@@ -519,14 +542,28 @@ void EvolutionDashboardWindow::processCard(
         AlienGui::Text(value);
         ImGui::PopFont();
 
+        auto firstSubValue = true;
         for (auto const& [subLabel, subValue] : subValues) {
+            if (!firstSubValue) {
+                ImGui::SameLine(0, scale(18.0f));
+            }
+            firstSubValue = false;
+
+            //draw an ellipsis instead of sub-values that do not fit into the card
+            auto groupWidth = std::max(ImGui::CalcTextSize(subLabel.c_str()).x, ImGui::CalcTextSize(subValue.c_str()).x);
+            if (ImGui::GetContentRegionAvail().x < groupWidth) {
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+                AlienGui::Text("...");
+                ImGui::PopStyleColor();
+                break;
+            }
+
             ImGui::BeginGroup();
             ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
             AlienGui::Text(subLabel);
             ImGui::PopStyleColor();
             AlienGui::Text(subValue);
             ImGui::EndGroup();
-            ImGui::SameLine(0, scale(18.0f));
         }
     }
     ImGui::EndChild();
@@ -653,6 +690,11 @@ void EvolutionDashboardWindow::processLineageTable()
 void EvolutionDashboardWindow::processTimelineSection()
 {
     processTimelineHeader();
+
+    //rebuild the plot series right after the header widgets changed the horizon; otherwise the widened
+    //x-axis shows a gap on the left for one frame because the series are still trimmed to the old horizon
+    updatePlotData();
+
     if (ImGui::BeginChild("##timelinePlots", {0, 0})) {
         processTimelinePlots();
     }
@@ -662,7 +704,7 @@ void EvolutionDashboardWindow::processTimelineSection()
 void EvolutionDashboardWindow::processTimelineHeader()
 {
     ImGui::Spacing();
-    std::vector<std::string> modeValues{"Real-time", "Last X steps", "Entire history"};
+    std::vector<std::string> modeValues{"Real-time", "Last time steps", "Entire history"};
     AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values(modeValues), &_timelineMode);
     if (_timelineMode == TimelineMode_RealTime) {
         ImGui::SameLine(0, scale(20.0f));
@@ -715,13 +757,17 @@ void EvolutionDashboardWindow::processTimelinePlots()
         }
     }
 
+    //labels and current values are placed to the right of the widgets, matching the general ALIEN layout
     if (ImGui::BeginTable("##plots", 2, ImGuiTableFlags_None)) {
-        ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth));
         ImGui::TableSetupColumn("##plot");
+        ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth));
         for (int i = 0; i < NumMetrics; ++i) {
             auto showTimeAxis = i == NumMetrics - 1 && _timelineMode == TimelineMode_EntireHistory;
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
+            processTimelinePlot(plottedLineages, i, showTimeAxis);
+
+            ImGui::TableSetColumnIndex(1);
             AlienGui::Text(Metrics[i].plotName);
             auto seriesIndex = 0;
             for (auto const* lineage : plottedLineages) {
@@ -733,9 +779,6 @@ void EvolutionDashboardWindow::processTimelinePlots()
                 ImGui::PopFont();
                 ++seriesIndex;
             }
-
-            ImGui::TableSetColumnIndex(1);
-            processTimelinePlot(plottedLineages, i, showTimeAxis);
         }
         ImGui::EndTable();
     }
@@ -755,16 +798,15 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
         minTime = std::min(minTime, lineage->timePoints.front());
         maxTime = std::max(maxTime, lineage->timePoints.back());
         for (auto const& value : lineage->series.at(metricIndex)) {
-            upperBound = std::max(upperBound, value);
+            if (std::isfinite(value)) {
+                upperBound = std::max(upperBound, value);
+            }
         }
     }
     if (!hasData) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-        AlienGui::Text("No data");
-        ImGui::PopStyleColor();
-        return;
-    }
-    if (_timelineMode == TimelineMode_RealTime) {
+        minTime = 0.0;
+        maxTime = 1.0;
+    } else if (_timelineMode == TimelineMode_RealTime) {
         minTime = maxTime - toDouble(_timeHorizon);
     } else if (_timelineMode == TimelineMode_LastSteps) {
         minTime = maxTime - toDouble(_lastSteps);
@@ -782,23 +824,33 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
     if (ImPlot::BeginPlot(
             "##plot", ImVec2(-1, scale(height)), ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText)) {
         ImPlot::SetupAxis(ImAxis_X1, "", showTimeAxis ? ImPlotAxisFlags_None : ImPlotAxisFlags_NoTickLabels);
+        if (showTimeAxis) {
+            ImPlot::SetupAxisFormat(ImAxis_X1, formatTimestepsInThousands, nullptr);
+        }
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
         auto seriesIndex = 0;
         for (auto const* lineage : plottedLineages) {
             auto count = toInt(lineage->timePoints.size());
+            auto const& series = lineage->series.at(metricIndex);
+
+            //rate series start with NaN samples until a sufficiently old rate reference exists; skip them
+            auto offset = 0;
+            while (offset < count && std::isnan(series.at(offset))) {
+                ++offset;
+            }
+            count -= offset;
             if (count < 2) {
                 ++seriesIndex;
                 continue;
             }
             ImGui::PushID(toInt(lineage->id) + 1);
             auto color = getPlotColor(metricIndex, seriesIndex, toInt(plottedLineages.size()));
-            auto const& series = lineage->series.at(metricIndex);
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
             ImPlot::PushStyleColor(ImPlotCol_Fill, (ImU32)color);
-            ImPlot::PlotLine("##line", lineage->timePoints.data(), series.data(), count);
+            ImPlot::PlotLine("##line", lineage->timePoints.data() + offset, series.data() + offset, count);
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##shaded", lineage->timePoints.data(), series.data(), count);
+            ImPlot::PlotShaded("##shaded", lineage->timePoints.data() + offset, series.data() + offset, count);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor(2);
             if (ImGui::GetStyle().Alpha == 1.0f) {
@@ -857,7 +909,8 @@ void EvolutionDashboardWindow::drawValuesAtMouseCursor(
             break;
         }
     }
-    mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
+    auto valueAtCursor = mousePos.y;  //may be NaN for rate series without a sufficiently old rate reference
+    mousePos.y = std::isnan(mousePos.y) ? 0.0 : std::max(0.0, std::min(upperBound, mousePos.y));
 
     ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
     ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, {scale(1.0f), scale(2.0f)});
@@ -877,14 +930,14 @@ void EvolutionDashboardWindow::drawValuesAtMouseCursor(
             "Time step: %s\nTimestamp: %s\nValue: %s",
             StringHelper::format(toFloat(mousePos.x), 0).c_str(),
             dateTimeString.c_str(),
-            formatMetricValue(mousePos.y, fracPartDecimals).c_str());
+            formatMetricValue(valueAtCursor, fracPartDecimals).c_str());
     } else {
         snprintf(
             label,
             sizeof(label),
             "Relative time: %s\nValue: %s",
             StringHelper::format(toFloat(mousePos.x), 0).c_str(),
-            formatMetricValue(mousePos.y, fracPartDecimals).c_str());
+            formatMetricValue(valueAtCursor, fracPartDecimals).c_str());
     }
     ImPlot::PlotText(label, mousePos.x, upperBound, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }

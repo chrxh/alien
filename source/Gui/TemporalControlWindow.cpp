@@ -73,34 +73,34 @@ void TemporalControlWindow::processIntern()
 
 void TemporalControlWindow::processTpsInfo()
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::Text("Time steps per second");
+    ImGui::PopStyleColor();
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value /*0xffa07050*/);
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getTps(), 1).c_str());
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 
 void TemporalControlWindow::processTotalTimestepsInfo()
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::Text("Total time steps");
+    ImGui::PopStyleColor();
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getCurrentTimestep()).c_str());
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 
 void TemporalControlWindow::processRealTimeInfo()
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::Text("Real-time");
+    ImGui::PopStyleColor();
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getRealTime()).c_str());
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 

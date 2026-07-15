@@ -24,35 +24,35 @@ void SelectionWindow::processIntern()
     if (table.begin()) {
 
         auto selection = EditorModel::get().getSelectionShallowData();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Cells");
+        ImGui::PopStyleColor();
         ImGui::PushFont(StyleRepository::get().getLargeFont());
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::TextUnformatted(StringHelper::format(selection.numObjects).c_str());
-        ImGui::PopStyleColor();
         ImGui::PopFont();
         table.next();
 
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Connected cells");
+        ImGui::PopStyleColor();
         ImGui::PushFont(StyleRepository::get().getLargeFont());
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());
-        ImGui::PopStyleColor();
         ImGui::PopFont();
         table.next();
 
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Creatures");
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-        ImGui::TextUnformatted(StringHelper::format(selection.numCreatures).c_str());
         ImGui::PopStyleColor();
+        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::TextUnformatted(StringHelper::format(selection.numCreatures).c_str());
         ImGui::PopFont();
         table.next();
 
-        ImGui::Text("Energy particles");
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-        ImGui::TextUnformatted(StringHelper::format(selection.numEnergyParticles).c_str());
+        ImGui::Text("Energy particles");
         ImGui::PopStyleColor();
+        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::TextUnformatted(StringHelper::format(selection.numEnergyParticles).c_str());
         ImGui::PopFont();
         table.next();
 
