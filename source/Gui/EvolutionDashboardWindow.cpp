@@ -221,6 +221,8 @@ void EvolutionDashboardWindow::initIntern()
     _timeHorizon = GlobalSettings::get().getValue("windows.evolution dashboard.time horizon", _timeHorizon);
     _plotHeight = GlobalSettings::get().getValue("windows.evolution dashboard.plot height", _plotHeight);
     _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.color filter", _colorFilter);
+    _sortColumnIndex = GlobalSettings::get().getValue("windows.evolution dashboard.sort column", _sortColumnIndex);
+    _sortAscending = GlobalSettings::get().getValue("windows.evolution dashboard.sort ascending", _sortAscending);
     validateAndCorrect();
 }
 
@@ -232,6 +234,8 @@ void EvolutionDashboardWindow::shutdownIntern()
     GlobalSettings::get().setValue("windows.evolution dashboard.time horizon", _timeHorizon);
     GlobalSettings::get().setValue("windows.evolution dashboard.plot height", _plotHeight);
     GlobalSettings::get().setValue("windows.evolution dashboard.color filter", _colorFilter);
+    GlobalSettings::get().setValue("windows.evolution dashboard.sort column", _sortColumnIndex);
+    GlobalSettings::get().setValue("windows.evolution dashboard.sort ascending", _sortAscending);
 }
 
 void EvolutionDashboardWindow::processBackground()
@@ -333,13 +337,36 @@ void EvolutionDashboardWindow::updateTableData()
         }
         _lineages.emplace_back(std::move(lineage));
     }
-    std::sort(_lineages.begin(), _lineages.end(), [](auto const& lhs, auto const& rhs) { return lhs.currentValues.at(0) > rhs.currentValues.at(0); });
+    sortLineages();
 
     //current values for the table summary row
     DataPointCollection const* referenceDataPoints = liveHistory.size() >= 2 ? &liveHistory.at(referenceIndex) : nullptr;
     for (int i = 0; i < NumMetrics; ++i) {
         _allLineages.currentValues.at(i) = getGlobalMetricValue(lastSample, referenceDataPoints, i);
     }
+}
+
+void EvolutionDashboardWindow::sortLineages()
+{
+    std::sort(_lineages.begin(), _lineages.end(), [column = _sortColumnIndex, ascending = _sortAscending](auto const& lhs, auto const& rhs) {
+        if (column == 0) {
+            return ascending ? lhs.id < rhs.id : lhs.id > rhs.id;
+        }
+        auto lhsValue = lhs.currentValues.at(column - 1);
+        auto rhsValue = rhs.currentValues.at(column - 1);
+        auto lhsIsNan = std::isnan(lhsValue);
+        auto rhsIsNan = std::isnan(rhsValue);
+        if (lhsIsNan || rhsIsNan) {
+            if (lhsIsNan != rhsIsNan) {
+                return rhsIsNan;  //rows without a value are sorted to the bottom
+            }
+            return lhs.id < rhs.id;
+        }
+        if (lhsValue != rhsValue) {
+            return ascending ? lhsValue < rhsValue : lhsValue > rhsValue;
+        }
+        return lhs.id < rhs.id;
+    });
 }
 
 void EvolutionDashboardWindow::updatePlotData()
@@ -630,23 +657,36 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
         }
 
+        auto drawList = ImGui::GetWindowDrawList();
+
         //header row with labels centered within the visible part of each column; columns can be
         //partially hidden behind the frozen lineage column or cut off at the right window border
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         for (int column = 0; column < NumMetrics + 1; ++column) {
             ImGui::TableSetColumnIndex(column);
-            auto columnName = ImGui::TableGetColumnName(column);
-            auto textWidth = ImGui::CalcTextSize(columnName).x;
-            auto cellMinX = ImGui::GetCursorScreenPos().x;
-            auto cellMaxX = cellMinX + ImGui::GetContentRegionAvail().x;
-            auto visibleMinX = std::max(cellMinX, ImGui::GetWindowDrawList()->GetClipRectMin().x);
-            auto visibleMaxX = std::min(cellMaxX, ImGui::GetWindowDrawList()->GetClipRectMax().x);
-            auto textPosX = std::clamp((visibleMinX + visibleMaxX - textWidth) / 2, cellMinX, std::max(cellMinX, cellMaxX - textWidth));
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textPosX - cellMinX);
-            ImGui::TextUnformatted(columnName);
+            ImGui::PushID(column);
+            std::string label = ImGui::TableGetColumnName(column);
+            if (column == _sortColumnIndex) {
+                label += _sortAscending ? " " ICON_FA_CARET_UP : " " ICON_FA_CARET_DOWN;
+            }
+            auto textWidth = ImGui::CalcTextSize(label.c_str()).x;
+            auto cellPos = ImGui::GetCursorScreenPos();
+            auto cellMaxX = cellPos.x + ImGui::GetContentRegionAvail().x;
+            if (ImGui::Selectable("##header", false)) {
+                if (column == _sortColumnIndex) {
+                    _sortAscending = !_sortAscending;
+                } else {
+                    _sortColumnIndex = column;
+                    _sortAscending = column == 0;  //metric columns show the largest values on top by default
+                }
+                sortLineages();
+            }
+            auto visibleMinX = std::max(cellPos.x, drawList->GetClipRectMin().x);
+            auto visibleMaxX = std::min(cellMaxX, drawList->GetClipRectMax().x);
+            auto textPosX = std::clamp((visibleMinX + visibleMaxX - textWidth) / 2, cellPos.x, std::max(cellPos.x, cellMaxX - textWidth));
+            drawList->AddText({textPosX, cellPos.y}, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
+            ImGui::PopID();
         }
-
-        auto drawList = ImGui::GetWindowDrawList();
 
         //summary row
         ImGui::TableNextRow();
@@ -990,6 +1030,7 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _lastSteps = std::clamp(_lastSteps, 1000, TimelineLiveStatistics::MaxLiveSteps);
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, TimelineLiveStatistics::MaxLiveHistory);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
+    _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics);
     _colorFilter &= (1 << MAX_COLORS) - 1;
     if (_colorFilter == 0) {
         _colorFilter = (1 << MAX_COLORS) - 1;
