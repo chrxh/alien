@@ -93,6 +93,7 @@ private:
     int _lastSteps = 100000;
     float _timeHorizon = 10.0f;  //in seconds
     float _timelinesHeight = 0;
+    float _plotHeight = 60.0f;
     std::optional<float> _lastWindowHeight;
 
     struct RebuildKey
