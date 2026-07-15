@@ -36,6 +36,7 @@ private:
     void updateCellColors();
     void updateDisplayData();
     void updateTableData();
+    void sortLineages();
     void updatePlotData();
     void rebuildPlotSeries(std::vector<DataPointCollection> const& source);
     void processHeader();
@@ -72,7 +73,7 @@ private:
         std::vector<double> systemClockPoints;                    //only filled when the x-axis represents time steps
     };
 
-    std::vector<LineageDisplayData> _lineages;  //table rows from the latest sample, sorted by creature count
+    std::vector<LineageDisplayData> _lineages;  //table rows from the latest sample, sorted by the selected table column
     std::vector<LineageDisplayData> _plottedLineages;
     LineageDisplayData _allLineages;
 
@@ -80,6 +81,9 @@ private:
 
     std::set<int64_t> _selectedLineageIds;
     int _colorFilter = 0x3ff;  //bitset for MAX_COLORS cell colors
+
+    int _sortColumnIndex = 1;  //0 = lineage column, 1..NumMetrics = metric columns
+    bool _sortAscending = false;
 
     using TimelineMode = int;
     enum TimelineMode_
