@@ -351,7 +351,7 @@ void EvolutionDashboardWindow::updateDisplayData()
     auto const& liveHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
     auto liveBackTime = !liveHistory.empty() ? liveHistory.back().time : -1.0;
     auto historyBackTime = -1.0;
-    if (_timelineMode != TimelineMode_RealTime) {
+    if (_timelineMode == TimelineMode_EntireHistory) {
         auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
         std::lock_guard lock(statisticsHistory.getMutex());
         if (!statisticsHistory.getDataRef().empty()) {
@@ -402,16 +402,24 @@ void EvolutionDashboardWindow::updateDisplayData()
             auto startTime = globalSource.back().time - toDouble(_timeHorizon);
             std::erase_if(globalSource, [&](auto const& dataPoints) { return dataPoints.time < startTime; });
         }
+    } else if (_timelineMode == TimelineMode_LastSteps) {
+        //fed from the same fine-grained live buffer as real-time mode (not the coarse, entire-run history),
+        //so the plot has enough resolution over the requested step window; the timestep is carried in the
+        //(otherwise unused for this mode) time field, mirroring how the entire-run history encodes it
+        globalSource.reserve(liveHistory.size());
+        for (auto const& sample : liveHistory) {
+            auto dataPoints = sample.toOverallDataPointCollection();
+            dataPoints.time = sample.timestep;
+            globalSource.emplace_back(dataPoints);
+        }
+        if (!globalSource.empty()) {
+            auto startStep = globalSource.back().time - toDouble(_lastSteps);
+            std::erase_if(globalSource, [&](auto const& dataPoints) { return dataPoints.time < startStep; });
+        }
     } else {
         auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
-        {
-            std::lock_guard lock(statisticsHistory.getMutex());
-            globalSource = statisticsHistory.getDataRef();
-        }
-        if (_timelineMode == TimelineMode_LastSteps && !globalSource.empty()) {
-            auto startTime = globalSource.back().time - toDouble(_lastSteps);
-            std::erase_if(globalSource, [&](auto const& dataPoints) { return dataPoints.time < startTime; });
-        }
+        std::lock_guard lock(statisticsHistory.getMutex());
+        globalSource = statisticsHistory.getDataRef();
     }
 
     //"all lineages" series
@@ -817,7 +825,9 @@ void EvolutionDashboardWindow::processTimelineHeader()
     if (_timelineMode == TimelineMode_LastSteps) {
         ImGui::SameLine(0, scale(20.0f));
         if (ImGui::BeginChild("##lastSteps", {scale(320.0f), ImGui::GetFrameHeight()})) {
-            AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Steps").min(1000).max(1000000000).logarithmic(true).textWidth(100.0f), &_lastSteps);
+            AlienGui::SliderInt(
+                AlienGui::SliderIntParameters().name("Steps").min(1000).max(TimelineLiveStatistics::MaxLiveSteps).logarithmic(true).textWidth(100.0f),
+                &_lastSteps);
             validateAndCorrect();
         }
         ImGui::EndChild();
@@ -1028,7 +1038,7 @@ void EvolutionDashboardWindow::validateAndCorrect()
 {
     _timelinesHeight = std::max(scale(100.0f), _timelinesHeight);
     _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_EntireHistory));
-    _lastSteps = std::clamp(_lastSteps, 1000, 1000000000);
+    _lastSteps = std::clamp(_lastSteps, 1000, TimelineLiveStatistics::MaxLiveSteps);
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, TimelineLiveStatistics::MaxLiveHistory);
     _colorFilter &= (1 << MAX_COLORS) - 1;
     if (_colorFilter == 0) {
