@@ -802,6 +802,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
     if (_selectedLineageIds.empty()) {
         modeValues.emplace_back("Entire history");
     }
+    _timelineMode = std::min(toInt(modeValues.size()) - 1, _timelineMode);
     AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values(modeValues), &_timelineMode);
     if (_timelineMode == TimelineMode_RealTime) {
         ImGui::SameLine(0, scale(20.0f));
