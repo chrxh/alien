@@ -27,9 +27,8 @@
 
 namespace
 {
-    auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
-    auto constexpr RateAveragingInterval = 30.0;  //in seconds
-    auto constexpr MinRateTimesteps = 1000.0;     //at the start of the history, rates are already shown once this many time steps are covered
+    auto constexpr LiveStatisticsDeltaTime = 50;     //in millisec
+    auto constexpr RateAveragingTimesteps = 1000.0;  //rate reference sample: the most recent sample at least this many time steps older
 
     auto constexpr ColorChipSize = 22.0f;
     auto constexpr SwatchSize = 11.0f;
@@ -217,12 +216,12 @@ namespace
         return snprintf(buff, size, "%s", StringHelper::formatInThousands(value).c_str());
     }
 
-    //most recent sample that is at least RateAveragingInterval older; falls back to the oldest sample
-    size_t findRateReferenceIndex(std::vector<DataPointCollection> const& history, double time)
+    //most recent sample that is at least RateAveragingTimesteps older; falls back to the oldest sample
+    size_t findRateReferenceIndex(std::vector<DataPointCollection> const& history, double timestep)
     {
         size_t result = 0;
         for (size_t i = 0; i < history.size(); ++i) {
-            if (history.at(i).time + RateAveragingInterval > time) {
+            if (history.at(i).timestep + RateAveragingTimesteps > timestep) {
                 break;
             }
             result = i;
@@ -231,19 +230,11 @@ namespace
     }
 
     //builds the x points and metric series of one timeline; reference samples for the rate metrics are selected
-    //via a trailing ~30s window: the live buffer carries the time since simulation start while the long-term
-    //history only provides the system clock
+    //via a trailing window of RateAveragingTimesteps time steps
     template <typename Target, typename Sample, typename MetricEvaluator>
-    void buildPlotSeries(
-        Target& target,
-        std::vector<Sample> const& source,
-        size_t firstIndex,
-        bool useTimeAsX,
-        bool useSystemClockForRateWindow,
-        MetricEvaluator const& evaluateMetric)
+    void buildPlotSeries(Target& target, std::vector<Sample> const& source, size_t firstIndex, bool useTimeAsX, MetricEvaluator const& evaluateMetric)
     {
         auto getX = [&](Sample const& sample) { return useTimeAsX ? sample.time : sample.timestep; };
-        auto getRateWindowClock = [&](Sample const& sample) { return useSystemClockForRateWindow ? sample.systemClock : sample.time; };
 
         target.series = {};
         target.timePoints.clear();
@@ -252,16 +243,12 @@ namespace
         size_t referenceIndex = 0;  //reference samples may also lie before the visible range
         for (auto sampleIndex = firstIndex; sampleIndex < source.size(); ++sampleIndex) {
             auto const& sample = source.at(sampleIndex);
-            auto rateWindowClock = getRateWindowClock(sample);
-            while (referenceIndex + 1 < sampleIndex && getRateWindowClock(source.at(referenceIndex + 1)) + RateAveragingInterval <= rateWindowClock) {
+            while (referenceIndex + 1 < sampleIndex && source.at(referenceIndex + 1).timestep + RateAveragingTimesteps <= sample.timestep) {
                 ++referenceIndex;
             }
-            //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples;
-            //at the start of the timeline the oldest sample serves as reference once it is at least MinRateTimesteps old (like in the table)
+            //rates over references younger than the averaging window would produce spikes at the left plot border; NaN suppresses those samples
             auto const& referenceSample = source.at(referenceIndex);
-            auto referenceIsOldEnough = referenceIndex < sampleIndex
-                && (getRateWindowClock(referenceSample) + RateAveragingInterval <= rateWindowClock
-                    || (referenceIndex == 0 && referenceSample.timestep + MinRateTimesteps <= sample.timestep));
+            auto referenceIsOldEnough = referenceIndex < sampleIndex && referenceSample.timestep + RateAveragingTimesteps <= sample.timestep;
             auto const* reference = referenceIsOldEnough ? &referenceSample : nullptr;
             target.timePoints.emplace_back(getX(sample));
             if (!useTimeAsX) {
@@ -383,7 +370,7 @@ void EvolutionDashboardWindow::updateTableData()
         return;
     }
     auto const& lastSample = liveHistory.back();
-    auto referenceIndex = findRateReferenceIndex(liveHistory, lastSample.time);
+    auto referenceIndex = findRateReferenceIndex(liveHistory, lastSample.timestep);
     for (auto const& [lineageId, entry] : lastSample.lineages) {
         LineageDisplayData lineage;
         lineage.id = toInt(lineageId);
@@ -480,7 +467,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
 
     //"all lineages" series (the current values are maintained by updateTableData)
     _allLineages.id = -1;
-    buildPlotSeries(_allLineages, source, firstIndex, useTimeAsX, false, getOverallMetricValue<DataPointCollection>);
+    buildPlotSeries(_allLineages, source, firstIndex, useTimeAsX, getOverallMetricValue<DataPointCollection>);
 
     //per-lineage series for the selected lineages
     _plottedLineages.clear();
@@ -489,7 +476,6 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
         lineage.id = selectedId;
         struct RateReference
         {
-            double windowClock = 0;
             double timestep = 0;
             LineageDataPoint const* entry = nullptr;
         };
@@ -502,9 +488,8 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 continue;
             }
             lineage.colorBitset = toInt(entry->colorBitset);
-            auto windowClock = sample.time;
             while (rateReferenceIndex + 1 < rateReferences.size()
-                   && rateReferences.at(rateReferenceIndex + 1).windowClock + RateAveragingInterval <= windowClock) {
+                   && rateReferences.at(rateReferenceIndex + 1).timestep + RateAveragingTimesteps <= sample.timestep) {
                 ++rateReferenceIndex;
             }
             if (sampleIndex >= firstIndex) {
@@ -512,18 +497,16 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 if (!useTimeAsX) {
                     lineage.systemClockPoints.emplace_back(sample.systemClock);
                 }
-                //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples;
-                //at the start of the lineage the oldest sample serves as reference once it is at least MinRateTimesteps old (like in the table)
-                auto referenceIsOldEnough = !rateReferences.empty()
-                    && (rateReferences.at(rateReferenceIndex).windowClock + RateAveragingInterval <= windowClock
-                        || (rateReferenceIndex == 0 && rateReferences.at(0).timestep + MinRateTimesteps <= sample.timestep));
+                //rates over references younger than the averaging window would produce spikes at the left plot border; NaN suppresses those samples
+                auto referenceIsOldEnough =
+                    !rateReferences.empty() && rateReferences.at(rateReferenceIndex).timestep + RateAveragingTimesteps <= sample.timestep;
                 auto const* lastEntry = referenceIsOldEnough ? rateReferences.at(rateReferenceIndex).entry : nullptr;
                 auto deltaKSteps = referenceIsOldEnough ? (sample.timestep - rateReferences.at(rateReferenceIndex).timestep) / 1000.0 : 0.0;
                 for (int i = 0; i < NumMetrics; ++i) {
                     lineage.series.at(i).emplace_back(getLineageMetricValue(*entry, lastEntry, deltaKSteps, i));
                 }
             }
-            rateReferences.push_back({windowClock, sample.timestep, entry});
+            rateReferences.push_back({sample.timestep, entry});
         }
         if (lineage.colorBitset == 0) {
             for (auto const& tableLineage : _lineages) {
@@ -555,7 +538,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
 
     //"all lineages" series (the current values are maintained by updateTableData)
     _allLineages.id = -1;
-    buildPlotSeries(_allLineages, source.overall, 0, false, true, getOverallMetricValue<OverallSample>);
+    buildPlotSeries(_allLineages, source.overall, 0, false, getOverallMetricValue<OverallSample>);
 
     //per-lineage series for the selected lineages
     _plottedLineages.clear();
@@ -564,7 +547,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
         lineage.id = selectedId;
         if (auto timelineIt = source.lineages.find(toUInt32(selectedId)); timelineIt != source.lineages.end() && !timelineIt->second.empty()) {
             lineage.colorBitset = toInt(timelineIt->second.back().data.colorBitset);
-            buildPlotSeries(lineage, timelineIt->second, 0, false, true, getLineageSampleMetricValue);
+            buildPlotSeries(lineage, timelineIt->second, 0, false, getLineageSampleMetricValue);
         }
         if (lineage.colorBitset == 0) {
             for (auto const& tableLineage : _lineages) {
@@ -885,10 +868,13 @@ void EvolutionDashboardWindow::processTimelineSection()
         }
     }
 
-    //in entire-history mode the time axis is pinned below the scrolling plot area so it stays visible
+    //in entire-history mode the time axis is pinned below the scrolling plot area so it stays visible;
+    //reserve its full height (axis plot + table cell padding + item spacing), otherwise the section gets its own scrollbar
     auto pinnedTimeAxis = _timelineMode == TimelineMode_EntireHistory;
+    auto const& style = ImGui::GetStyle();
+    auto timeAxisHeight = scale(TimeAxisExtraHeight) + style.CellPadding.y * 2.0f + style.ItemSpacing.y;
     auto scrollbarWidth = 0.0f;
-    if (ImGui::BeginChild("##timelinePlots", {0, pinnedTimeAxis ? -scale(TimeAxisExtraHeight) : 0.0f})) {
+    if (ImGui::BeginChild("##timelinePlots", {0, pinnedTimeAxis ? -timeAxisHeight : 0.0f})) {
         processTimelinePlots(plottedLineages);
         if (ImGui::GetScrollMaxY() > 0.0f) {
             scrollbarWidth = ImGui::GetStyle().ScrollbarSize;
