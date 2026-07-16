@@ -1,6 +1,8 @@
 #pragma once
 
 #include <optional>
+#include <unordered_map>
+#include <vector>
 
 #include <Base/Singleton.h>
 
@@ -21,8 +23,29 @@ public:
 private:
     static auto constexpr DefaultTimeStepDelta = 10.0;
 
-    double _longtermTimestepDelta = DefaultTimeStepDelta;
-    int _numDataPoints = 0;
-    std::optional<DataPointCollection> _accumulatedDataPoint;
+    template <typename DataPoint>
+    struct TimelineState
+    {
+        double longtermTimestepDelta = DefaultTimeStepDelta;
+        int numDataPoints = 0;
+        std::optional<TimedSample<DataPoint>> accumulatedSample;
+    };
+
+    template <typename DataPoint>
+    void updateTimeline(
+        std::vector<TimedSample<DataPoint>>& samples,
+        TimelineState<DataPoint>& state,
+        TimedSample<DataPoint> const& rawSample,
+        double time,
+        bool forceSampling);
+
+    template <typename DataPoint>
+    void emitSample(std::vector<TimedSample<DataPoint>>& samples, TimelineState<DataPoint>& state, double time);
+
+    template <typename DataPoint>
+    void resetTimelineTime(std::vector<TimedSample<DataPoint>>& samples, TimelineState<DataPoint>& state, double time);
+
+    TimelineState<OverallDataPoint> _overallState;
+    std::unordered_map<uint32_t, TimelineState<LineageDataPoint>> _lineageStates;
     std::optional<uint64_t> _lastTimestep;
 };
