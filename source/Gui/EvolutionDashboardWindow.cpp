@@ -808,8 +808,25 @@ void EvolutionDashboardWindow::processLineageTable()
             }
             ImGui::PushID(toInt(lineage.id));
             ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
 
+            //genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row;
+            //submitted before the row selectable, otherwise the selectable resets the hover timer and the tooltip never shows
+            ImGui::TableSetColumnIndex(1);
+            auto lineHeight = ImGui::GetTextLineHeight();
+            ImGui::SetWindowFontScale(0.75f);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(3.0f), 0.0f});
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight - ImGui::GetTextLineHeight());
+            auto triggerOpenGenome =
+                AlienGui::ActionButton(AlienGui::ActionButtonParameters()
+                                           .buttonText(ICON_FA_DNA)
+                                           .tooltip("Open the genome of a representative creature (highest generation) in the genome editor"));
+            ImGui::PopStyleVar();
+            ImGui::SetWindowFontScale(1.0f);
+            if (triggerOpenGenome && lineage.representativeCellId != 0) {
+                onOpenRepresentativeGenome(lineage.representativeCellId);
+            }
+
+            ImGui::TableSetColumnIndex(0);
             drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSlotWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
@@ -830,24 +847,6 @@ void EvolutionDashboardWindow::processLineageTable()
             }
             for (int i = 0; i < NumMetrics; ++i) {
                 ImGui::TableSetColumnIndex(i + 1);
-                if (i == 0) {
-                    //genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row
-                    auto cellPos = ImGui::GetCursorPos();
-                    auto lineHeight = ImGui::GetTextLineHeight();
-                    ImGui::SetWindowFontScale(0.75f);
-                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(3.0f), 0.0f});
-                    ImGui::SetCursorPosY(cellPos.y + lineHeight - ImGui::GetTextLineHeight());
-                    auto triggerOpenGenome =
-                        AlienGui::ActionButton(AlienGui::ActionButtonParameters()
-                                                   .buttonText(ICON_FA_DNA)
-                                                   .tooltip("Open the genome of a representative creature (highest generation) in the genome editor"));
-                    ImGui::PopStyleVar();
-                    ImGui::SetWindowFontScale(1.0f);
-                    if (triggerOpenGenome && lineage.representativeCellId != 0) {
-                        onOpenRepresentativeGenome(lineage.representativeCellId);
-                    }
-                    ImGui::SetCursorPos(cellPos);
-                }
                 rightAlignedText(formatMetricValue(lineage.currentValues.at(i), Metrics[i].tableDecimals));
             }
             ImGui::PopID();
