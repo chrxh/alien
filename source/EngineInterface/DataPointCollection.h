@@ -27,6 +27,7 @@ struct OverallDataPoint
 struct LineageDataPoint
 {
     uint32_t colorBitset = 0;
+    uint64_t representativeCellId = 0;  // Cell of a creature with the highest generation; only meaningful in recent samples
     double numCreatures = 0;
     double numGenomes = 0;
     double sumCreatureCells = 0;

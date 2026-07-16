@@ -74,7 +74,7 @@ void _GeneEditorWidget::processHeaderData()
     if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
 
-        _editData->updateGeometry(gene._shape);  // Do it every time in order to avoid check for changes
+        _editData->updateGeometry();  // Do it every time in order to avoid check for changes
 
         AlienGui::DynamicTableLayout table(HeaderMinColumnWidth);
         if (table.begin()) {

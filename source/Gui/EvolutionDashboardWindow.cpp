@@ -16,10 +16,13 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
 #include "AlienGui.h"
+#include "GenomeEditorWindow.h"
+#include "OverlayController.h"
 #include "StyleRepository.h"
 
 namespace
@@ -385,6 +388,7 @@ void EvolutionDashboardWindow::updateTableData()
         LineageDisplayData lineage;
         lineage.id = toInt(lineageId);
         lineage.colorBitset = toInt(entry.colorBitset);
+        lineage.representativeCellId = entry.representativeCellId;
         LineageDataPoint const* referenceEntry = nullptr;
         auto referenceTimestep = 0.0;
         for (auto sampleIndex = referenceIndex; sampleIndex + 1 < liveHistory.size(); ++sampleIndex) {  //young lineages: use their oldest sample
@@ -805,8 +809,14 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::PushID(toInt(lineage.id));
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
+
+            drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSlotWidth + scale(4.0f));
+            AlienGui::Text("Lineage #" + std::to_string(lineage.id));
+
+            ImGui::SameLine();
             auto selected = _selectedLineageIds.contains(lineage.id);
-            if (ImGui::Selectable("##row", selected, ImGuiSelectableFlags_SpanAllColumns)) {
+            if (ImGui::Selectable("##row", selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)) {
                 if (ImGui::GetIO().KeyCtrl) {
                     if (selected) {
                         _selectedLineageIds.erase(lineage.id);
@@ -818,18 +828,45 @@ void EvolutionDashboardWindow::processLineageTable()
                     _selectedLineageIds.insert(lineage.id);
                 }
             }
-            ImGui::SameLine(0, 0);
-            drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSlotWidth + scale(4.0f));
-            AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             for (int i = 0; i < NumMetrics; ++i) {
                 ImGui::TableSetColumnIndex(i + 1);
+                if (i == 0) {
+                    //genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row
+                    auto cellPos = ImGui::GetCursorPos();
+                    auto lineHeight = ImGui::GetTextLineHeight();
+                    ImGui::SetWindowFontScale(0.75f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(3.0f), 0.0f});
+                    ImGui::SetCursorPosY(cellPos.y + lineHeight - ImGui::GetTextLineHeight());
+                    auto triggerOpenGenome =
+                        AlienGui::ActionButton(AlienGui::ActionButtonParameters()
+                                                   .buttonText(ICON_FA_DNA)
+                                                   .tooltip("Open the genome of a representative creature (highest generation) in the genome editor"));
+                    ImGui::PopStyleVar();
+                    ImGui::SetWindowFontScale(1.0f);
+                    if (triggerOpenGenome && lineage.representativeCellId != 0) {
+                        onOpenRepresentativeGenome(lineage.representativeCellId);
+                    }
+                    ImGui::SetCursorPos(cellPos);
+                }
                 rightAlignedText(formatMetricValue(lineage.currentValues.at(i), Metrics[i].tableDecimals));
             }
             ImGui::PopID();
         }
         ImGui::EndTable();
     }
+}
+
+void EvolutionDashboardWindow::onOpenRepresentativeGenome(uint64_t cellId)
+{
+    auto inspectedData = _SimulationFacade::get()->getInspectedSimulationData({cellId});
+    for (auto const& object : inspectedData._objects) {
+        if (object._id == cellId && object.getObjectType() == ObjectType_Cell) {
+            auto const& creature = inspectedData.getCreatureRef(object.getCellRef()._creatureId);
+            GenomeEditorWindow::get().openTab(inspectedData.getGenomeRef(creature._genomeId));
+            return;
+        }
+    }
+    printOverlayMessage("The creature no longer exists");
 }
 
 void EvolutionDashboardWindow::processTimelineSection()
@@ -840,10 +877,28 @@ void EvolutionDashboardWindow::processTimelineSection()
     //x-axis shows a gap on the left for one frame because the series are still trimmed to the old horizon
     updatePlotData();
 
-    if (ImGui::BeginChild("##timelinePlots", {0, 0})) {
-        processTimelinePlots();
+    std::vector<LineageDisplayData const*> plottedLineages;
+    if (_selectedLineageIds.empty()) {
+        plottedLineages.emplace_back(&_allLineages);
+    } else {
+        for (auto const& lineage : _plottedLineages) {
+            plottedLineages.emplace_back(&lineage);
+        }
+    }
+
+    //in entire-history mode the time axis is pinned below the scrolling plot area so it stays visible
+    auto pinnedTimeAxis = _timelineMode == TimelineMode_EntireHistory;
+    auto scrollbarWidth = 0.0f;
+    if (ImGui::BeginChild("##timelinePlots", {0, pinnedTimeAxis ? -scale(TimeAxisExtraHeight) : 0.0f})) {
+        processTimelinePlots(plottedLineages);
+        if (ImGui::GetScrollMaxY() > 0.0f) {
+            scrollbarWidth = ImGui::GetStyle().ScrollbarSize;
+        }
     }
     ImGui::EndChild();
+    if (pinnedTimeAxis) {
+        processTimeAxis(plottedLineages, scrollbarWidth);
+    }
 }
 
 void EvolutionDashboardWindow::processTimelineHeader()
@@ -902,26 +957,16 @@ void EvolutionDashboardWindow::processTimelineHeader()
     ImGui::Spacing();
 }
 
-void EvolutionDashboardWindow::processTimelinePlots()
+void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayData const*> const& plottedLineages)
 {
-    std::vector<LineageDisplayData const*> plottedLineages;
-    if (_selectedLineageIds.empty()) {
-        plottedLineages.emplace_back(&_allLineages);
-    } else {
-        for (auto const& lineage : _plottedLineages) {
-            plottedLineages.emplace_back(&lineage);
-        }
-    }
-
     //labels and current values are placed to the right of the widgets, matching the general ALIEN layout
     if (ImGui::BeginTable("##plots", 2, ImGuiTableFlags_None)) {
         ImGui::TableSetupColumn("##plot");
         ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth));
         for (int i = 0; i < NumMetrics; ++i) {
-            auto showTimeAxis = i == NumMetrics - 1 && _timelineMode == TimelineMode_EntireHistory;
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            processTimelinePlot(plottedLineages, i, showTimeAxis);
+            processTimelinePlot(plottedLineages, i);
 
             ImGui::TableSetColumnIndex(1);
             AlienGui::Text(Metrics[i].plotName);
@@ -940,7 +985,7 @@ void EvolutionDashboardWindow::processTimelinePlots()
     }
 }
 
-void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex, bool showTimeAxis)
+void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex)
 {
     auto upperBound = 0.0;
     auto minTime = std::numeric_limits<double>::max();
@@ -976,13 +1021,9 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextAxesLimits(minTime, maxTime, 0, upperBound + NEAR_ZERO, ImGuiCond_Always);
 
-    auto height = _plotHeight + (showTimeAxis ? TimeAxisExtraHeight : 0.0f);
     if (ImPlot::BeginPlot(
-            "##plot", ImVec2(-1, scale(height)), ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText)) {
-        ImPlot::SetupAxis(ImAxis_X1, "", showTimeAxis ? ImPlotAxisFlags_None : ImPlotAxisFlags_NoTickLabels);
-        if (showTimeAxis) {
-            ImPlot::SetupAxisFormat(ImAxis_X1, formatTimestepsInThousands, nullptr);
-        }
+            "##plot", ImVec2(-1, scale(_plotHeight)), ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText)) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
         auto seriesIndex = 0;
@@ -1038,6 +1079,48 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin)
+{
+    auto minTime = std::numeric_limits<double>::max();
+    auto maxTime = std::numeric_limits<double>::lowest();
+    auto hasData = false;
+    for (auto const* lineage : plottedLineages) {
+        if (lineage->timePoints.size() < 2) {
+            continue;
+        }
+        hasData = true;
+        minTime = std::min(minTime, lineage->timePoints.front());
+        maxTime = std::max(maxTime, lineage->timePoints.back());
+    }
+    if (!hasData) {
+        minTime = 0.0;
+        maxTime = 1.0;
+    }
+
+    //the label column mirrors the plot table above (widened by the scrollbar if present) so the axis stays aligned with the plots
+    if (ImGui::BeginTable("##timeAxis", 2, ImGuiTableFlags_None)) {
+        ImGui::TableSetupColumn("##axis");
+        ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth) + rightMargin);
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
+        ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, 0.0f));
+        ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, 0.0f));
+        ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.0f, 0.0f, 0.0f, 0.0f));
+        ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
+        ImPlot::SetNextAxesLimits(minTime, maxTime, 0, 1.0, ImGuiCond_Always);
+        if (ImPlot::BeginPlot("##timeAxis", ImVec2(-1, scale(TimeAxisExtraHeight)), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
+            ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoHighlight);
+            ImPlot::SetupAxisFormat(ImAxis_X1, formatTimestepsInThousands, nullptr);
+            ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoHighlight);
+            ImPlot::EndPlot();
+        }
+        ImPlot::PopStyleVar();
+        ImPlot::PopStyleColor(3);
+        ImGui::EndTable();
+    }
 }
 
 void EvolutionDashboardWindow::drawValuesAtMouseCursor(

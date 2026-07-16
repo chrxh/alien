@@ -53,6 +53,19 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     EXPECT_FLOAT_EQ(5.0f, entry43->sumCreatureGenerations);
 }
 
+TEST_F(EvolutionStatisticsTests, representativeCell)
+{
+    auto data = Desc()
+                    .addCreature({ObjectDesc().id(1), ObjectDesc().id(2).pos({1.0f, 0.0f})}, CreatureDesc().lineageId(42).generation(3), GenomeDesc())
+                    .addCreature({ObjectDesc().id(3).pos({10.0f, 10.0f})}, CreatureDesc().lineageId(42).generation(5), GenomeDesc());
+
+    _simulationFacade->setSimulationData(data);
+
+    auto entries = _simulationFacade->getStatisticsEntry();
+    ASSERT_EQ(1, entries.entries.size());
+    EXPECT_EQ(3u, entries.entries.front().representativeCellId);  //cell of the creature with the highest generation
+}
+
 TEST_F(EvolutionStatisticsTests, genomeNodesAndMutationRates)
 {
     auto genome = createTestGenome();

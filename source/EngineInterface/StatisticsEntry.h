@@ -34,6 +34,7 @@ struct LineageStatisticsEntry
     float sumGenomeNodes = 0;
     float sumMutationRates = 0;
     float sumCreatureEnergy = 0;
+    uint64_t representativeCellId = 0;  // Cell of a creature with the highest generation; 0 = not set
 
     uint64_t numCreatedCreatures = 0;  // Accumulated, never reset
     double totalMutations = 0;         // Accumulated, never reset

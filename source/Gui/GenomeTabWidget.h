@@ -11,6 +11,9 @@ class _GenomeTabWidget
 public:
     static GenomeTabWidget create(GenomeWindowEditData const& genomeEditData, GenomeDesc const& genome, GenomeTabLayoutData const& layoutData = nullptr);
 
+    // Validated genome with normalized derived geometry, as it is maintained by the editor widgets
+    static GenomeDesc normalizeForEditor(GenomeDesc genome);
+
     void process();
 
     int getTabId() const;

@@ -21,7 +21,7 @@ void SpatialControlWindow::initIntern()
     ResizeWorldDialog::get().setup();
 
     auto& settings = GlobalSettings::get();
-    Viewport::get().setZoomSensitivity(settings.getValue("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));
+    Viewport::get().setZoomSensitivity(settings.getValue("windows.spatial control.zoom sensitivity", Viewport::get().getZoomSensitivity()));
 }
 
 SpatialControlWindow::SpatialControlWindow()

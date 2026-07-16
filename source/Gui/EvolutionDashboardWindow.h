@@ -49,10 +49,12 @@ private:
         float height);
     void processFilterBar();
     void processLineageTable();
+    void onOpenRepresentativeGenome(uint64_t cellId);
     void processTimelineSection();
     void processTimelineHeader();
-    void processTimelinePlots();
-    void processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex, bool showTimeAxis);
+    void processTimelinePlots(std::vector<LineageDisplayData const*> const& plottedLineages);
+    void processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex);
+    void processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin);
     void drawValuesAtMouseCursor(
         std::vector<double> const& series,
         std::vector<double> const& timePoints,
@@ -68,6 +70,7 @@ private:
     {
         int64_t id = 0;  //-1 = "all lineages"
         int colorBitset = 0;
+        uint64_t representativeCellId = 0;  //cell of a creature with the highest generation; 0 = not available
         std::array<double, NumMetrics> currentValues = {};
         std::array<std::vector<double>, NumMetrics> series = {};  //only filled for plotted lineages
         std::vector<double> timePoints;                           //only filled for plotted lineages
