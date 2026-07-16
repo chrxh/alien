@@ -4,6 +4,7 @@
 #include <cmath>
 #include <filesystem>
 #include <optional>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 
@@ -1898,7 +1899,7 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
 
         {
             zstr::ofstream stream(filename.string(), std::ios::binary);
@@ -1934,7 +1935,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
 
         if (!deserializeDescription(data.mainData, filename)) {
             return false;
@@ -1966,7 +1967,9 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
+        std::filesystem::path legacyStatisticsFilename(filename);
+        legacyStatisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
 
         if (!std::filesystem::remove(filename)) {
             return false;
@@ -1974,9 +1977,10 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
         if (!std::filesystem::remove(settingsFilename)) {
             return false;
         }
-        if (!std::filesystem::remove(statisticsFilename)) {
-            return false;
-        }
+
+        //statistics files are optional
+        std::filesystem::remove(statisticsFilename);
+        std::filesystem::remove(legacyStatisticsFilename);
         return true;
     } catch (...) {
         return false;
@@ -2251,13 +2255,303 @@ void SerializerService::deserializeSimulationParameters(SimulationParameters& pa
     parameters = SettingsParserService::get().decodeSimulationParameters(tree);
 }
 
+/************************************************************************/
+/* Statistics history                                                   */
+/************************************************************************/
+namespace
+{
+    auto constexpr Id_StatisticsHistory_Overall = 0;
+    auto constexpr Id_StatisticsHistory_Lineages = 1;
+
+    auto constexpr Id_Timeline_Time = 0;
+    auto constexpr Id_Timeline_Timestep = 1;
+    auto constexpr Id_Timeline_SystemClock = 2;
+
+    auto constexpr Id_OverallTimeline_NumCreatures = 3;
+    auto constexpr Id_OverallTimeline_AverageCreatureCells = 4;
+    auto constexpr Id_OverallTimeline_AverageGenomeNodes = 5;
+    auto constexpr Id_OverallTimeline_CreatureEnergy = 6;
+    auto constexpr Id_OverallTimeline_AverageMutationRate = 7;
+    auto constexpr Id_OverallTimeline_AverageGeneration = 8;
+    auto constexpr Id_OverallTimeline_NumLineages = 9;
+    auto constexpr Id_OverallTimeline_NumSolidObjects = 10;
+    auto constexpr Id_OverallTimeline_NumFluidObjects = 11;
+    auto constexpr Id_OverallTimeline_NumCellObjects = 12;
+    auto constexpr Id_OverallTimeline_NumEnergyParticles = 13;
+    auto constexpr Id_OverallTimeline_AccumCreatedCreatures = 14;
+    auto constexpr Id_OverallTimeline_AccumMutations = 15;
+
+    auto constexpr Id_LineageTimeline_ColorBitset = 3;
+    auto constexpr Id_LineageTimeline_RepresentativeCellId = 4;
+    auto constexpr Id_LineageTimeline_NumCreatures = 5;
+    auto constexpr Id_LineageTimeline_NumGenomes = 6;
+    auto constexpr Id_LineageTimeline_SumCreatureCells = 7;
+    auto constexpr Id_LineageTimeline_SumCreatureGenerations = 8;
+    auto constexpr Id_LineageTimeline_SumGenomeNodes = 9;
+    auto constexpr Id_LineageTimeline_SumMutationRates = 10;
+    auto constexpr Id_LineageTimeline_SumCreatureEnergy = 11;
+    auto constexpr Id_LineageTimeline_NumCreatedCreatures = 12;
+    auto constexpr Id_LineageTimeline_TotalMutations = 13;
+
+    //timelines are stored column-wise: each column is an individually tagged block so that
+    //added fields load as defaults from old files and unknown fields from new files are skipped
+    struct OverallTimeline
+    {
+        std::vector<double> time;
+        std::vector<double> timestep;
+        std::vector<double> systemClock;
+        std::vector<double> numCreatures;
+        std::vector<double> averageCreatureCells;
+        std::vector<double> averageGenomeNodes;
+        std::vector<double> creatureEnergy;
+        std::vector<double> averageMutationRate;
+        std::vector<double> averageGeneration;
+        std::vector<double> numLineages;
+        std::vector<double> numSolidObjects;
+        std::vector<double> numFluidObjects;
+        std::vector<double> numCellObjects;
+        std::vector<double> numEnergyParticles;
+        std::vector<double> accumCreatedCreatures;
+        std::vector<double> accumMutations;
+    };
+
+    struct LineageTimeline
+    {
+        std::vector<double> time;
+        std::vector<double> timestep;
+        std::vector<double> systemClock;
+        std::vector<uint32_t> colorBitset;
+        std::vector<uint64_t> representativeCellId;
+        std::vector<double> numCreatures;
+        std::vector<double> numGenomes;
+        std::vector<double> sumCreatureCells;
+        std::vector<double> sumCreatureGenerations;
+        std::vector<double> sumGenomeNodes;
+        std::vector<double> sumMutationRates;
+        std::vector<double> sumCreatureEnergy;
+        std::vector<double> numCreatedCreatures;
+        std::vector<double> totalMutations;
+    };
+
+    struct StatisticsTimelines
+    {
+        OverallTimeline overall;
+        std::unordered_map<uint32_t, LineageTimeline> lineages;
+    };
+
+    struct OverallColumn
+    {
+        int id;
+        std::vector<double> OverallTimeline::* column;
+        double OverallDataPoint::* field;
+    };
+    std::vector<OverallColumn> const OverallColumns = {
+        {Id_OverallTimeline_NumCreatures, &OverallTimeline::numCreatures, &OverallDataPoint::numCreatures},
+        {Id_OverallTimeline_AverageCreatureCells, &OverallTimeline::averageCreatureCells, &OverallDataPoint::averageCreatureCells},
+        {Id_OverallTimeline_AverageGenomeNodes, &OverallTimeline::averageGenomeNodes, &OverallDataPoint::averageGenomeNodes},
+        {Id_OverallTimeline_CreatureEnergy, &OverallTimeline::creatureEnergy, &OverallDataPoint::creatureEnergy},
+        {Id_OverallTimeline_AverageMutationRate, &OverallTimeline::averageMutationRate, &OverallDataPoint::averageMutationRate},
+        {Id_OverallTimeline_AverageGeneration, &OverallTimeline::averageGeneration, &OverallDataPoint::averageGeneration},
+        {Id_OverallTimeline_NumLineages, &OverallTimeline::numLineages, &OverallDataPoint::numLineages},
+        {Id_OverallTimeline_NumSolidObjects, &OverallTimeline::numSolidObjects, &OverallDataPoint::numSolidObjects},
+        {Id_OverallTimeline_NumFluidObjects, &OverallTimeline::numFluidObjects, &OverallDataPoint::numFluidObjects},
+        {Id_OverallTimeline_NumCellObjects, &OverallTimeline::numCellObjects, &OverallDataPoint::numCellObjects},
+        {Id_OverallTimeline_NumEnergyParticles, &OverallTimeline::numEnergyParticles, &OverallDataPoint::numEnergyParticles},
+        {Id_OverallTimeline_AccumCreatedCreatures, &OverallTimeline::accumCreatedCreatures, &OverallDataPoint::accumCreatedCreatures},
+        {Id_OverallTimeline_AccumMutations, &OverallTimeline::accumMutations, &OverallDataPoint::accumMutations},
+    };
+
+    struct LineageColumn
+    {
+        int id;
+        std::vector<double> LineageTimeline::* column;
+        double LineageDataPoint::* field;
+    };
+    std::vector<LineageColumn> const LineageColumns = {
+        {Id_LineageTimeline_NumCreatures, &LineageTimeline::numCreatures, &LineageDataPoint::numCreatures},
+        {Id_LineageTimeline_NumGenomes, &LineageTimeline::numGenomes, &LineageDataPoint::numGenomes},
+        {Id_LineageTimeline_SumCreatureCells, &LineageTimeline::sumCreatureCells, &LineageDataPoint::sumCreatureCells},
+        {Id_LineageTimeline_SumCreatureGenerations, &LineageTimeline::sumCreatureGenerations, &LineageDataPoint::sumCreatureGenerations},
+        {Id_LineageTimeline_SumGenomeNodes, &LineageTimeline::sumGenomeNodes, &LineageDataPoint::sumGenomeNodes},
+        {Id_LineageTimeline_SumMutationRates, &LineageTimeline::sumMutationRates, &LineageDataPoint::sumMutationRates},
+        {Id_LineageTimeline_SumCreatureEnergy, &LineageTimeline::sumCreatureEnergy, &LineageDataPoint::sumCreatureEnergy},
+        {Id_LineageTimeline_NumCreatedCreatures, &LineageTimeline::numCreatedCreatures, &LineageDataPoint::numCreatedCreatures},
+        {Id_LineageTimeline_TotalMutations, &LineageTimeline::totalMutations, &LineageDataPoint::totalMutations},
+    };
+
+    template <typename Timeline, typename Sample>
+    void extractTimingColumns(Timeline& timeline, std::vector<Sample> const& samples)
+    {
+        timeline.time.reserve(samples.size());
+        timeline.timestep.reserve(samples.size());
+        timeline.systemClock.reserve(samples.size());
+        for (auto const& sample : samples) {
+            timeline.time.emplace_back(sample.time);
+            timeline.timestep.emplace_back(sample.timestep);
+            timeline.systemClock.emplace_back(sample.systemClock);
+        }
+    }
+
+    template <typename Sample, typename Timeline>
+    std::vector<Sample> createSamplesWithTiming(Timeline const& timeline)
+    {
+        std::vector<Sample> result(timeline.time.size());
+        for (auto&& [sample, value] : std::views::zip(result, timeline.time)) {
+            sample.time = value;
+        }
+        for (auto&& [sample, value] : std::views::zip(result, timeline.timestep)) {
+            sample.timestep = value;
+        }
+        for (auto&& [sample, value] : std::views::zip(result, timeline.systemClock)) {
+            sample.systemClock = value;
+        }
+        return result;
+    }
+
+    template <typename Timeline, typename Sample, typename Columns>
+    void extractDataColumns(Timeline& timeline, std::vector<Sample> const& samples, Columns const& columns)
+    {
+        for (auto const& [id, column, field] : columns) {
+            auto& values = timeline.*column;
+            values.reserve(samples.size());
+            for (auto const& sample : samples) {
+                values.emplace_back(sample.data.*field);
+            }
+        }
+    }
+
+    template <typename Sample, typename Timeline, typename Columns>
+    void applyDataColumns(std::vector<Sample>& samples, Timeline const& timeline, Columns const& columns)
+    {
+        for (auto const& [id, column, field] : columns) {
+            for (auto&& [sample, value] : std::views::zip(samples, timeline.*column)) {
+                sample.data.*field = value;
+            }
+        }
+    }
+
+    OverallTimeline toTimeline(std::vector<OverallSample> const& samples)
+    {
+        OverallTimeline result;
+        extractTimingColumns(result, samples);
+        extractDataColumns(result, samples, OverallColumns);
+        return result;
+    }
+
+    std::vector<OverallSample> toSamples(OverallTimeline const& timeline)
+    {
+        auto result = createSamplesWithTiming<OverallSample>(timeline);
+        applyDataColumns(result, timeline, OverallColumns);
+        return result;
+    }
+
+    LineageTimeline toTimeline(std::vector<LineageSample> const& samples)
+    {
+        LineageTimeline result;
+        extractTimingColumns(result, samples);
+        extractDataColumns(result, samples, LineageColumns);
+        result.colorBitset.reserve(samples.size());
+        result.representativeCellId.reserve(samples.size());
+        for (auto const& sample : samples) {
+            result.colorBitset.emplace_back(sample.data.colorBitset);
+            result.representativeCellId.emplace_back(sample.data.representativeCellId);
+        }
+        return result;
+    }
+
+    std::vector<LineageSample> toSamples(LineageTimeline const& timeline)
+    {
+        auto result = createSamplesWithTiming<LineageSample>(timeline);
+        applyDataColumns(result, timeline, LineageColumns);
+        for (auto&& [sample, value] : std::views::zip(result, timeline.colorBitset)) {
+            sample.data.colorBitset = value;
+        }
+        for (auto&& [sample, value] : std::views::zip(result, timeline.representativeCellId)) {
+            sample.data.representativeCellId = value;
+        }
+        return result;
+    }
+}
+
+namespace cereal
+{
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, OverallTimeline& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        scope.addDesc(Id_Timeline_Time, data.time);
+        scope.addDesc(Id_Timeline_Timestep, data.timestep);
+        scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
+        for (auto const& [id, column, field] : OverallColumns) {
+            scope.addDesc(id, data.*column);
+        }
+    }
+    SPLIT_SERIALIZATION(OverallTimeline)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, LineageTimeline& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        scope.addDesc(Id_Timeline_Time, data.time);
+        scope.addDesc(Id_Timeline_Timestep, data.timestep);
+        scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
+        scope.addDesc(Id_LineageTimeline_ColorBitset, data.colorBitset);
+        scope.addDesc(Id_LineageTimeline_RepresentativeCellId, data.representativeCellId);
+        for (auto const& [id, column, field] : LineageColumns) {
+            scope.addDesc(id, data.*column);
+        }
+    }
+    SPLIT_SERIALIZATION(LineageTimeline)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, StatisticsTimelines& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        scope.addDesc(Id_StatisticsHistory_Overall, data.overall);
+        scope.addDesc(Id_StatisticsHistory_Lineages, data.lineages);
+    }
+    SPLIT_SERIALIZATION(StatisticsTimelines)
+}
+
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
 {
+    StatisticsTimelines timelines;
+    timelines.overall = toTimeline(statistics.overall);
+    for (auto const& [lineageId, samples] : statistics.lineages) {
+        timelines.lineages.emplace(lineageId, toTimeline(samples));
+    }
+
+    zstr::ostream compressedStream(stream);
+    cereal::PortableBinaryOutputArchive archive(compressedStream);
+    archive(Const::ProgramVersion);
+    archive(timelines);
+    compressedStream.flush();
 }
 
 void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const
 {
+    //the statistics history is auxiliary data: an unreadable or outdated file yields an empty history instead of failing the simulation load
     statistics = StatisticsHistoryData();
+    try {
+        zstr::istream decompressedStream(stream);
+        cereal::PortableBinaryInputArchive archive(decompressedStream);
+
+        std::string version;
+        archive(version);
+        if (!VersionParserService::get().isVersionValid(version) || VersionParserService::get().isVersionOutdated(version)) {
+            return;
+        }
+
+        StatisticsTimelines timelines;
+        archive(timelines);
+
+        statistics.overall = toSamples(timelines.overall);
+        for (auto const& [lineageId, timeline] : timelines.lineages) {
+            statistics.lineages.emplace(lineageId, toSamples(timeline));
+        }
+    } catch (...) {
+        statistics = StatisticsHistoryData();
+    }
 }
 
 bool SerializerService::wrapGenome(Desc& output, GenomeDesc const& input) const
