@@ -128,31 +128,44 @@ namespace
         return std::max(0.0, (accumValue - lastAccumValue) / delta);  //negative deltas occur after accumulated statistics have been reset
     }
 
-    double getGlobalMetricValue(DataPointCollection const& dataPoints, DataPointCollection const* lastDataPoints, int metricIndex)
+    OverallDataPoint const& overallDataOf(DataPointCollection const& sample)
     {
+        return sample.overall;
+    }
+
+    OverallDataPoint const& overallDataOf(OverallSample const& sample)
+    {
+        return sample.data;
+    }
+
+    template <typename Sample>
+    double getOverallMetricValue(Sample const& sample, Sample const* referenceSample, int metricIndex)
+    {
+        auto const& data = overallDataOf(sample);
         switch (metricIndex) {
         case 0:
-            return dataPoints.overall.numCreatures;
+            return data.numCreatures;
         case 1:
-            return dataPoints.overall.averageCreatureCells;
+            return data.averageCreatureCells;
         case 2:
-            return dataPoints.overall.averageGenomeNodes;
+            return data.averageGenomeNodes;
         case 3:
-            return dataPoints.overall.creatureEnergy;
+            return data.creatureEnergy;
         case 4:
-            return dataPoints.overall.averageMutationRate;
+            return data.averageMutationRate;
         case 5:
-            return dataPoints.overall.averageGeneration;
+            return data.averageGeneration;
         case 6:
         case 7: {
-            if (!lastDataPoints) {
+            if (!referenceSample) {
                 return std::numeric_limits<double>::quiet_NaN();
             }
-            auto deltaKSteps = (dataPoints.timestep - lastDataPoints->timestep) / 1000.0;
+            auto const& referenceData = overallDataOf(*referenceSample);
+            auto deltaKSteps = (sample.timestep - referenceSample->timestep) / 1000.0;
             if (metricIndex == 6) {
-                return calcRate(dataPoints.overall.accumCreatedCreatures, lastDataPoints->overall.accumCreatedCreatures, deltaKSteps);
+                return calcRate(data.accumCreatedCreatures, referenceData.accumCreatedCreatures, deltaKSteps);
             } else {
-                return calcRate(dataPoints.overall.accumMutations, lastDataPoints->overall.accumMutations, deltaKSteps);
+                return calcRate(data.accumMutations, referenceData.accumMutations, deltaKSteps);
             }
         }
         default:
@@ -184,6 +197,12 @@ namespace
         }
     }
 
+    double getLineageSampleMetricValue(LineageSample const& sample, LineageSample const* referenceSample, int metricIndex)
+    {
+        auto deltaKSteps = referenceSample ? (sample.timestep - referenceSample->timestep) / 1000.0 : 0.0;
+        return getLineageMetricValue(sample.data, referenceSample ? &referenceSample->data : nullptr, deltaKSteps, metricIndex);
+    }
+
     LineageDataPoint const* findLineageEntry(DataPointCollection const& sample, uint32_t lineageId)
     {
         auto it = sample.lineages.find(lineageId);
@@ -206,6 +225,49 @@ namespace
             result = i;
         }
         return result;
+    }
+
+    //builds the x points and metric series of one timeline; reference samples for the rate metrics are selected
+    //via a trailing ~30s window: the live buffer carries the time since simulation start while the long-term
+    //history only provides the system clock
+    template <typename Target, typename Sample, typename MetricEvaluator>
+    void buildPlotSeries(
+        Target& target,
+        std::vector<Sample> const& source,
+        size_t firstIndex,
+        bool useTimeAsX,
+        bool useSystemClockForRateWindow,
+        MetricEvaluator const& evaluateMetric)
+    {
+        auto getX = [&](Sample const& sample) { return useTimeAsX ? sample.time : sample.timestep; };
+        auto getRateWindowClock = [&](Sample const& sample) { return useSystemClockForRateWindow ? sample.systemClock : sample.time; };
+
+        target.series = {};
+        target.timePoints.clear();
+        target.systemClockPoints.clear();
+
+        size_t referenceIndex = 0;  //reference samples may also lie before the visible range
+        for (auto sampleIndex = firstIndex; sampleIndex < source.size(); ++sampleIndex) {
+            auto const& sample = source.at(sampleIndex);
+            auto rateWindowClock = getRateWindowClock(sample);
+            while (referenceIndex + 1 < sampleIndex && getRateWindowClock(source.at(referenceIndex + 1)) + RateAveragingInterval <= rateWindowClock) {
+                ++referenceIndex;
+            }
+            //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples;
+            //at the start of the timeline the oldest sample serves as reference once it is at least MinRateTimesteps old (like in the table)
+            auto const& referenceSample = source.at(referenceIndex);
+            auto referenceIsOldEnough = referenceIndex < sampleIndex
+                && (getRateWindowClock(referenceSample) + RateAveragingInterval <= rateWindowClock
+                    || (referenceIndex == 0 && referenceSample.timestep + MinRateTimesteps <= sample.timestep));
+            auto const* reference = referenceIsOldEnough ? &referenceSample : nullptr;
+            target.timePoints.emplace_back(getX(sample));
+            if (!useTimeAsX) {
+                target.systemClockPoints.emplace_back(sample.systemClock);
+            }
+            for (int i = 0; i < EvolutionDashboardWindow::NumMetrics; ++i) {
+                target.series.at(i).emplace_back(evaluateMetric(sample, reference, i));
+            }
+        }
     }
 }
 
@@ -342,7 +404,7 @@ void EvolutionDashboardWindow::updateTableData()
     //current values for the table summary row
     DataPointCollection const* referenceDataPoints = liveHistory.size() >= 2 ? &liveHistory.at(referenceIndex) : nullptr;
     for (int i = 0; i < NumMetrics; ++i) {
-        _allLineages.currentValues.at(i) = getGlobalMetricValue(lastSample, referenceDataPoints, i);
+        _allLineages.currentValues.at(i) = getOverallMetricValue(lastSample, referenceDataPoints, i);
     }
 }
 
@@ -394,10 +456,6 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
     auto useTimeAsX = _timelineMode == TimelineMode_RealTime;
     auto getX = [&](DataPointCollection const& sample) { return useTimeAsX ? sample.time : sample.timestep; };
 
-    //reference samples for the rate metrics are selected via a trailing ~30s window; the live buffer carries the
-    //time since simulation start while the long-term history only provides the system clock
-    auto getRateWindowClock = [&](DataPointCollection const& sample) { return _timelineMode == TimelineMode_EntireHistory ? sample.systemClock : sample.time; };
-
     size_t firstIndex = 0;
     if (!source.empty()) {
         auto startX = std::numeric_limits<double>::lowest();
@@ -418,31 +476,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
 
     //"all lineages" series (the current values are maintained by updateTableData)
     _allLineages.id = -1;
-    _allLineages.series = {};
-    _allLineages.timePoints.clear();
-    _allLineages.systemClockPoints.clear();
-    size_t globalReferenceIndex = 0;  //reference samples may also lie before the visible range
-    for (auto sampleIndex = firstIndex; sampleIndex < source.size(); ++sampleIndex) {
-        auto const& dataPoints = source.at(sampleIndex);
-        auto rateWindowClock = getRateWindowClock(dataPoints);
-        while (globalReferenceIndex + 1 < sampleIndex && getRateWindowClock(source.at(globalReferenceIndex + 1)) + RateAveragingInterval <= rateWindowClock) {
-            ++globalReferenceIndex;
-        }
-        //rates over references younger than the averaging interval would produce spikes at the left plot border; NaN suppresses those samples;
-        //at the start of the history the oldest sample serves as reference once it is at least MinRateTimesteps old (like in the table)
-        auto const& referenceSample = source.at(globalReferenceIndex);
-        auto referenceIsOldEnough = globalReferenceIndex < sampleIndex
-            && (getRateWindowClock(referenceSample) + RateAveragingInterval <= rateWindowClock
-                || (globalReferenceIndex == 0 && referenceSample.timestep + MinRateTimesteps <= dataPoints.timestep));
-        auto const* referenceDataPoints = referenceIsOldEnough ? &source.at(globalReferenceIndex) : nullptr;
-        _allLineages.timePoints.emplace_back(getX(dataPoints));
-        if (!useTimeAsX) {
-            _allLineages.systemClockPoints.emplace_back(dataPoints.systemClock);
-        }
-        for (int i = 0; i < NumMetrics; ++i) {
-            _allLineages.series.at(i).emplace_back(getGlobalMetricValue(dataPoints, referenceDataPoints, i));
-        }
-    }
+    buildPlotSeries(_allLineages, source, firstIndex, useTimeAsX, false, getOverallMetricValue<DataPointCollection>);
 
     //per-lineage series for the selected lineages
     _plottedLineages.clear();
@@ -464,7 +498,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 continue;
             }
             lineage.colorBitset = toInt(entry->colorBitset);
-            auto windowClock = getRateWindowClock(sample);
+            auto windowClock = sample.time;
             while (rateReferenceIndex + 1 < rateReferences.size()
                    && rateReferences.at(rateReferenceIndex + 1).windowClock + RateAveragingInterval <= windowClock) {
                 ++rateReferenceIndex;
@@ -486,6 +520,47 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 }
             }
             rateReferences.push_back({windowClock, sample.timestep, entry});
+        }
+        if (lineage.colorBitset == 0) {
+            for (auto const& tableLineage : _lineages) {
+                if (tableLineage.id == selectedId) {
+                    lineage.colorBitset = tableLineage.colorBitset;
+                }
+            }
+        }
+        _plottedLineages.emplace_back(std::move(lineage));
+    }
+}
+
+void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& source)
+{
+    //rebuild only when the underlying data or view settings have changed; the lineage timelines are
+    //sampled independently of the overall timeline and therefore contribute their own back times
+    auto sourceBackTime = !source.overall.empty() ? source.overall.back().time : -1.0;
+    std::vector<double> lineageBackTimes;
+    lineageBackTimes.reserve(_selectedLineageIds.size());
+    for (auto const& selectedId : _selectedLineageIds) {
+        auto timelineIt = source.lineages.find(toUInt32(selectedId));
+        lineageBackTimes.emplace_back(timelineIt != source.lineages.end() && !timelineIt->second.empty() ? timelineIt->second.back().time : -1.0);
+    }
+    RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, sourceBackTime, _selectedLineageIds, std::move(lineageBackTimes)};
+    if (_lastRebuildKey && *_lastRebuildKey == key) {
+        return;
+    }
+    _lastRebuildKey = std::move(key);
+
+    //"all lineages" series (the current values are maintained by updateTableData)
+    _allLineages.id = -1;
+    buildPlotSeries(_allLineages, source.overall, 0, false, true, getOverallMetricValue<OverallSample>);
+
+    //per-lineage series for the selected lineages
+    _plottedLineages.clear();
+    for (auto const& selectedId : _selectedLineageIds) {
+        LineageDisplayData lineage;
+        lineage.id = selectedId;
+        if (auto timelineIt = source.lineages.find(toUInt32(selectedId)); timelineIt != source.lineages.end() && !timelineIt->second.empty()) {
+            lineage.colorBitset = toInt(timelineIt->second.back().data.colorBitset);
+            buildPlotSeries(lineage, timelineIt->second, 0, false, true, getLineageSampleMetricValue);
         }
         if (lineage.colorBitset == 0) {
             for (auto const& tableLineage : _lineages) {

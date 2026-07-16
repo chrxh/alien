@@ -39,6 +39,7 @@ private:
     void sortLineages();
     void updatePlotData();
     void rebuildPlotSeries(std::vector<DataPointCollection> const& source);
+    void rebuildPlotSeries(StatisticsHistoryData const& source);
     void processHeader();
     void processCard(
         std::string const& label,
@@ -107,6 +108,7 @@ private:
         float timeHorizon = 0;
         double sourceBackTime = 0;
         std::set<int64_t> selectedLineageIds;
+        std::vector<double> lineageBackTimes;  //only used for the long-term history where each lineage has its own timeline
 
         bool operator==(RebuildKey const&) const = default;
     };

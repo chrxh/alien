@@ -2257,7 +2257,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
 
 void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const
 {
-    statistics.clear();
+    statistics = StatisticsHistoryData();
 }
 
 bool SerializerService::wrapGenome(Desc& output, GenomeDesc const& input) const
