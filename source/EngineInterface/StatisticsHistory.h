@@ -10,7 +10,7 @@
 template <typename DataPoint>
 struct TimedSample
 {
-    double time = 0;
+    double time = 0;         // Time since simulation start
     double timestep = 0;
     double systemClock = 0;
     DataPoint data;
