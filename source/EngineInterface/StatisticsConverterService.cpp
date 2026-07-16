@@ -35,6 +35,7 @@ DataPointCollection StatisticsConverterService::convert(
     for (auto const& entry : statisticsEntry.entries) {
         LineageDataPoint point;
         point.colorBitset = entry.colorBitset;
+        point.representativeCellId = entry.representativeCellId;
         point.numCreatures = toDouble(entry.numCreatures);
         point.numGenomes = toDouble(entry.numGenomes);
         point.sumCreatureCells = toDouble(entry.sumCreatureCells);

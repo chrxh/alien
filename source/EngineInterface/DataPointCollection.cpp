@@ -42,6 +42,7 @@ LineageDataPoint LineageDataPoint::operator+(LineageDataPoint const& other) cons
 {
     LineageDataPoint result;
     result.colorBitset = colorBitset | other.colorBitset;
+    result.representativeCellId = representativeCellId != 0 ? representativeCellId : other.representativeCellId;
     result.numCreatures = numCreatures + other.numCreatures;
     result.numGenomes = numGenomes + other.numGenomes;
     result.sumCreatureCells = sumCreatureCells + other.sumCreatureCells;
@@ -58,6 +59,7 @@ LineageDataPoint LineageDataPoint::operator/(double divisor) const
 {
     LineageDataPoint result;
     result.colorBitset = colorBitset;
+    result.representativeCellId = representativeCellId;
     result.numCreatures = numCreatures / divisor;
     result.numGenomes = numGenomes / divisor;
     result.sumCreatureCells = sumCreatureCells / divisor;

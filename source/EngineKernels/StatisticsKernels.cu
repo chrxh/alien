@@ -150,6 +150,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
         statistics.addCreatureEnergy(energy);
         if (slotIndex >= 0) {
             statistics.addLineageEnergy(slotIndex, energy);
+            statistics.updateLineageRepresentativeCell(slotIndex, creature->generation, object->id);
         }
     }
 }

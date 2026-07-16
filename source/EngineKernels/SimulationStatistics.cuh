@@ -121,6 +121,8 @@ public:
         slot.sumGenomeNodes = 0;
         slot.sumMutationRates = 0;
         slot.sumCreatureEnergy = 0;
+        slot.maxCreatureGeneration = 0;
+        slot.representativeCellId = 0;
     }
     __inline__ __device__ void resetCompactLineageCounter() { _lineageAccumulatorMapControl->numCompactEntries = 0; }
 
@@ -159,6 +161,14 @@ public:
         atomicAdd(&slot.numCreatures, 1u);
         atomicAdd(&slot.sumCreatureCells, toFloat(numCells));
         atomicAdd(&slot.sumCreatureGenerations, toFloat(generation));
+        atomicMax(&slot.maxCreatureGeneration, generation);
+    }
+    __inline__ __device__ void updateLineageRepresentativeCell(int slotIndex, uint32_t generation, uint64_t cellId)
+    {
+        auto& slot = _lineageMap[slotIndex];
+        if (generation == slot.maxCreatureGeneration) {
+            atomicCAS(reinterpret_cast<unsigned long long*>(&slot.representativeCellId), 0ull, static_cast<unsigned long long>(cellId));
+        }
     }
     __inline__ __device__ void addLineageGenomeData(int slotIndex, float numNodes, float meanMutationRate, uint32_t nodeColorBitset)
     {
@@ -190,6 +200,7 @@ public:
         entry.sumGenomeNodes = slot.sumGenomeNodes;
         entry.sumMutationRates = slot.sumMutationRates;
         entry.sumCreatureEnergy = slot.sumCreatureEnergy;
+        entry.representativeCellId = slot.representativeCellId;
         entry.numCreatedCreatures = 0;
         entry.totalMutations = 0;
         auto accumulatorIndex = findAccumulatorSlot(slot.lineageId);
@@ -262,6 +273,8 @@ private:
         float sumGenomeNodes;
         float sumMutationRates;
         float sumCreatureEnergy;
+        uint32_t maxCreatureGeneration;
+        uint64_t representativeCellId;  // Cell of a creature with the highest generation; 0 = not set
     };
     struct LineageAccumulatorMapEntry
     {
