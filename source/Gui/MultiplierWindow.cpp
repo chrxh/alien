@@ -90,7 +90,7 @@ void MultiplierWindow::shutdownIntern()
 }
 
 MultiplierWindow::MultiplierWindow()
-    : AlienWindow("Multiplier", "editors.multiplier", false)
+    : AlienWindow(_("Multiplier"), "editors.multiplier", false)
 {}
 
 void MultiplierWindow::processIntern()
@@ -119,7 +119,7 @@ void MultiplierWindow::processIntern()
     ImGui::BeginDisabled(
         EditorModel::get().isSelectionEmpty()
         || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareSizes(EditorModel::get().getSelectionShallowData())));
-    if (AlienGui::Button("Build")) {
+    if (AlienGui::Button(_("Build"))) {
         onBuild();
     }
     ImGui::EndDisabled();
@@ -128,7 +128,7 @@ void MultiplierWindow::processIntern()
     ImGui::BeginDisabled(
         EditorModel::get().isSelectionEmpty() || !_selectionDataAfterMultiplication
         || !_selectionDataAfterMultiplication->compareSizes(EditorModel::get().getSelectionShallowData()));
-    if (AlienGui::Button("Undo")) {
+    if (AlienGui::Button(_("Undo"))) {
         onUndo();
     }
     ImGui::EndDisabled();
@@ -180,22 +180,22 @@ void MultiplierWindow::processGridPanel()
 
 void MultiplierWindow::processRandomPanel()
 {
-    AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of copies").textWidth(RightColumnWidth), _randomParameters._number);
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min angle").textWidth(RightColumnWidth).format("%.1f"), _randomParameters._minAngle);
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max angle").textWidth(RightColumnWidth).format("%.1f"), _randomParameters._maxAngle);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Number of copies")).textWidth(RightColumnWidth), _randomParameters._number);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Min angle")).textWidth(RightColumnWidth).format("%.1f"), _randomParameters._minAngle);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Max angle")).textWidth(RightColumnWidth).format("%.1f"), _randomParameters._maxAngle);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Min velocity X").textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._minVelX);
+        AlienGui::InputFloatParameters().name(_("Min velocity X")).textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._minVelX);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Max velocity X").textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._maxVelX);
+        AlienGui::InputFloatParameters().name(_("Max velocity X")).textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._maxVelX);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Min velocity Y").textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._minVelY);
+        AlienGui::InputFloatParameters().name(_("Min velocity Y")).textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._minVelY);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Max velocity Y").textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._maxVelY);
+        AlienGui::InputFloatParameters().name(_("Max velocity Y")).textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._maxVelY);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Min angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f), _randomParameters._minAngularVel);
+        AlienGui::InputFloatParameters().name(_("Min angular velocity")).textWidth(RightColumnWidth).format("%.1f").step(0.1f), _randomParameters._minAngularVel);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Max angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f), _randomParameters._maxAngularVel);
-    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Overlapping check").textWidth(RightColumnWidth), _randomParameters._overlappingCheck);
+        AlienGui::InputFloatParameters().name(_("Max angular velocity")).textWidth(RightColumnWidth).format("%.1f").step(0.1f), _randomParameters._maxAngularVel);
+    AlienGui::Checkbox(AlienGui::CheckboxParameters().name(_("Overlapping check")).textWidth(RightColumnWidth), _randomParameters._overlappingCheck);
 }
 
 void MultiplierWindow::validateAndCorrect()

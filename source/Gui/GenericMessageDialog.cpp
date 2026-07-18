@@ -56,7 +56,7 @@ void GenericMessageDialog::yesNo(std::string const& title, std::string const& me
 }
 
 GenericMessageDialog::GenericMessageDialog()
-    : AlienDialog("Message")
+    : AlienDialog(_("Message"))
 {}
 
 void GenericMessageDialog::processInformation()
@@ -71,7 +71,7 @@ void GenericMessageDialog::processInformation()
     processMessageText();
     AlienGui::Separator();
 
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         close();
     }
 }
@@ -88,12 +88,12 @@ void GenericMessageDialog::processYesNo()
     processMessageText();
     AlienGui::Separator();
 
-    if (AlienGui::Button("Yes")) {
+    if (AlienGui::Button(_("Yes"))) {
         close();
         _execFunction();
     }
     ImGui::SameLine();
-    if (AlienGui::Button("No")) {
+    if (AlienGui::Button(_("No"))) {
         close();
     }
 }

@@ -26,22 +26,22 @@ void ActivateUserDialog::open(std::string const& userName, std::string const& pa
 }
 
 ActivateUserDialog::ActivateUserDialog()
-    : AlienDialog("Activate user")
+    : AlienDialog(_("Activate user"))
 {}
 
 void ActivateUserDialog::processIntern()
 {
-    AlienGui::Text("Please enter the confirmation code sent to your email address.");
+    AlienGui::Text(_("Please enter the confirmation code sent to your email address."));
     AlienGui::HelpMarker(
-        "Please check your spam folder if you did not find an email. If you did not receive an email there, try signing up with possibly another "
-        "email address. If this still does not work, please contact info@alien-project.org.");
+        _("Please check your spam folder if you did not find an email. If you did not receive an email there, try signing up with possibly another "
+          "email address. If this still does not work, please contact info@alien-project.org."));
     AlienGui::Separator();
-    AlienGui::InputText(AlienGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint(_("Code (case sensitive)")).textWidth(0), _confirmationCode);
 
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_confirmationCode.empty());
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         close();
         onActivateUser();
     }
@@ -52,12 +52,12 @@ void ActivateUserDialog::processIntern()
     AlienGui::VerticalSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Resend")) {
+    if (AlienGui::Button(_("Resend"))) {
         CreateUserDialog::get().onCreateUser();
     }
 
     ImGui::SameLine();
-    if (AlienGui::Button("Resend to other email address")) {
+    if (AlienGui::Button(_("Resend to other email address"))) {
         close();
         CreateUserDialog::get().open(_userName, _password, _userInfo);
     }
@@ -66,7 +66,7 @@ void ActivateUserDialog::processIntern()
     AlienGui::VerticalSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }
@@ -79,10 +79,10 @@ void ActivateUserDialog::onActivateUser()
         result |= NetworkService::get().login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
-        GenericMessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
+        GenericMessageDialog::get().information(_("Error"), _("An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again."));
     } else {
         GenericMessageDialog::get().information(
-            "Information",
+            _("Information"),
             "The user '" + _userName
                 + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor upvote others by likes.");
         BrowserWindow::get().onRefresh();

@@ -1,5 +1,7 @@
 #include "FpsController.h"
 
+#include <thread>
+
 void FpsController::processForceFps(int fps)
 {
     auto callTimepoint = std::chrono::steady_clock::now();
@@ -8,7 +10,11 @@ void FpsController::processForceFps(int fps)
         auto actualDuration = std::chrono::duration_cast<std::chrono::milliseconds>(callTimepoint - *_lastCallTimepoint);
         auto remainingTime = desiredDuration - actualDuration;
         if (remainingTime.count() > 0) {
-            while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - callTimepoint) < remainingTime) {
+            auto sleepEnd = callTimepoint + remainingTime - std::chrono::milliseconds(1);
+            if (sleepEnd > callTimepoint) {
+                std::this_thread::sleep_until(sleepEnd);
+            }
+            while (std::chrono::steady_clock::now() < callTimepoint + remainingTime) {
             }
         }
     }

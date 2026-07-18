@@ -174,7 +174,9 @@ PUBLIC
     Viewport.cpp
     Viewport.h
     WindowController.cpp
-    WindowController.h)
+    WindowController.h
+    TranslationService.cpp
+    TranslationService.h)
 
 target_link_libraries(alien Base)
 target_link_libraries(alien EngineKernels)

@@ -25,6 +25,8 @@ private:
     int _origSelectionIndex = 0;
     int _selectionIndex = 0;
     int _origFps = 33;
+    int _languageIndex = 0;
+    int _origLanguageIndex = 0;
 
     bool _pendingIsFullscreen = false;
     int _pendingSelectionIndex = 0;

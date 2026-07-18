@@ -29,7 +29,7 @@ namespace
 }
 
 AutosaveWindow::AutosaveWindow()
-    : AlienWindow("Autosave", "windows.autosave", false, true)
+    : AlienWindow(_("Autosave"), "windows.autosave", false, true)
 {}
 
 void AutosaveWindow::initIntern()
@@ -95,7 +95,7 @@ void AutosaveWindow::processIntern()
 
         validateAndCorrect();
     } catch (std::runtime_error const& error) {
-        GenericMessageDialog::get().information("Error", error.what());
+        GenericMessageDialog::get().information(_("Error"), error.what());
     }
 }
 
@@ -116,22 +116,22 @@ void AutosaveWindow::processToolbar()
         onCreateSavepoint(false);
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Create save point");
+    AlienGui::Tooltip(_("Create save point"));
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry));
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteSavepoint(_selectedEntry);
     }
-    AlienGui::Tooltip("Delete save point");
+    AlienGui::Tooltip(_("Delete save point"));
     ImGui::EndDisabled();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
-        GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
+        GenericMessageDialog::get().yesNo(_("Delete"), _("Do you really want to delete all savepoints?"), [&]() { scheduleCleanup(); });
     }
-    AlienGui::Tooltip("Delete all save points");
+    AlienGui::Tooltip(_("Delete all save points"));
     ImGui::EndDisabled();
 
     AlienGui::Separator();
@@ -142,16 +142,16 @@ void AutosaveWindow::processHeader() {}
 void AutosaveWindow::processTable()
 {
     if (!_savepointTable.has_value()) {
-        AlienGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
+        AlienGui::Text(_("Error: Savepoint files could not be read or created in the specified directory."));
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Save files", 3, flags, ImVec2(-1, -1), 0.0f)) {
-        ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Time step", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupColumn(_("Simulation"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn(_("Timestamp"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn(_("Time step"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         //ImGui::TableSetupColumn("Peak value", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
@@ -170,15 +170,15 @@ void AutosaveWindow::processTable()
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-                    AlienGui::Text("In queue");
+                    AlienGui::Text(_("In queue"));
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_InProgress) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-                    AlienGui::Text("In progress");
+                    AlienGui::Text(_("In progress"));
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-                    AlienGui::Tooltip("Load save point", false);
+                    AlienGui::Tooltip(_("Load save point"), false);
                     if (triggerLoadSavepoint) {
                         onLoadSavepoint(entry);
                     }
@@ -186,7 +186,7 @@ void AutosaveWindow::processTable()
                     ImGui::SameLine();
                     AlienGui::Text(entry->name);
                 } else if (entry->state == SavepointState_Error) {
-                    AlienGui::Text("Error");
+                    AlienGui::Text(_("Error"));
                 }
                 ImGui::SameLine();
                 ImGui::Dummy({0, scale(22.0f)});
@@ -237,11 +237,11 @@ void AutosaveWindow::processSettings()
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
-    _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
+    _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(_("Settings")).rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
             if (AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
+                    AlienGui::InputIntParameters().name(_("Autosave interval (min)")).textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
                     _autosaveInterval,
                     &_autosaveEnabled)) {
                 if (_autosaveEnabled) {
@@ -266,25 +266,25 @@ void AutosaveWindow::processSettings()
 
             if (AlienGui::InputText(
                     AlienGui::InputTextParameters()
-                        .name("Directory")
+                        .name(_("Directory"))
                         .textWidth(RightColumnWidth)
                         .defaultValue(_origDirectory)
                         .folderButton(true)
-                        .tooltip("The directory where the savepoints are stored can be chosen here. This allows the savepoints to be created in a separate "
-                                 "directory for a simulation run. The savepoints are named using the current time step."),
+                        .tooltip(_("The directory where the savepoints are stored can be chosen here. This allows the savepoints to be created in a separate "
+                                  "directory for a simulation run. The savepoints are named using the current time step.")),
                     _directory)) {
                 updateSavepointTableFromFile();
             }
             AlienGui::Switcher(
                 AlienGui::SwitcherParameters()
-                    .name("Mode")
-                    .values({"Limited save files", "Unlimited save files"})
+                    .name(_("Mode"))
+                    .values({_("Limited save files"), _("Unlimited save files")})
                     .textWidth(RightColumnWidth)
                     .defaultValue(_origSaveMode),
                 &_saveMode);
             if (_saveMode == SaveMode_Circular) {
                 AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
+                    AlienGui::InputIntParameters().name(_("Number of files")).textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
             }
         }
         ImGui::EndChild();
@@ -296,9 +296,9 @@ void AutosaveWindow::processStatusBar()
 {
     std::vector<std::string> statusItems;
     if (!_savepointTable.has_value()) {
-        statusItems.emplace_back("No valid directory");
+        statusItems.emplace_back(_("No valid directory"));
     } else if (!_autosaveEnabled) {
-        statusItems.emplace_back("No autosave scheduled");
+        statusItems.emplace_back(_("No autosave scheduled"));
     } else {
         auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint);
         statusItems.emplace_back("Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave));
@@ -312,7 +312,7 @@ void AutosaveWindow::processStatusBar()
 
 void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
 {
-    printOverlayMessage("Creating save point ...");
+    printOverlayMessage(_("Creating save point ..."));
 
     if (_saveMode == SaveMode_Circular) {
         auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), _numberOfFiles - 1);
@@ -342,7 +342,7 @@ void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
 
 void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
 {
-    printOverlayMessage("Deleting save point ...");
+    printOverlayMessage(_("Deleting save point ..."));
 
     SavepointTableService::get().deleteEntry(_savepointTable.value(), entry);
 
@@ -370,7 +370,7 @@ void AutosaveWindow::processStateUpdates()
 void AutosaveWindow::processCleanup()
 {
     if (_scheduleCleanup) {
-        printOverlayMessage("Cleaning up save points ...");
+        printOverlayMessage(_("Cleaning up save points ..."));
 
         auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), 0);
         scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
@@ -410,7 +410,7 @@ void AutosaveWindow::processAutomaticSavepoints()
                             .center = Viewport::get().getCenterInWorldPos()});
                 },
                 [&](auto const& requestId) {},
-                [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+                [](auto const& errors) { GenericMessageDialog::get().information(_("Error"), errors); });
             _lastPeakTimepoint = std::chrono::steady_clock::now();
         }
     }

@@ -76,7 +76,7 @@ namespace
 
 void ImageToPatternDialog::show()
 {
-    GenericFileDialog::get().showOpenFileDialog("Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
+    GenericFileDialog::get().showOpenFileDialog(_("Open image"), "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;

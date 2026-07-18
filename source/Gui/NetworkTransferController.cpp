@@ -29,7 +29,7 @@ void NetworkTransferController::init()
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
 {
-    printOverlayMessage("Downloading ...");
+    printOverlayMessage(_("Downloading ..."));
 
     _downloadProcessor->executeTask(
         [&](auto const& senderId) {
@@ -93,7 +93,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
 void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const& requestData)
 {
-    printOverlayMessage("Uploading ...");
+    printOverlayMessage(_("Uploading ..."));
 
     _uploadProcessor->executeTask(
         [&](auto const& senderId) {
@@ -109,7 +109,7 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
 
 void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData const& requestData)
 {
-    printOverlayMessage("Replacing ...");
+    printOverlayMessage(_("Replacing ..."));
 
     _replaceProcessor->executeTask(
         [&](auto const& senderId) {
@@ -125,7 +125,7 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
 
 void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const& requestData)
 {
-    printOverlayMessage("Deleting ...");
+    printOverlayMessage(_("Deleting ..."));
 
     _deleteProcessor->executeTask(
         [&](auto const& senderId) {
@@ -141,7 +141,7 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
 
 void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& requestData)
 {
-    printOverlayMessage("Applying changes ...");
+    printOverlayMessage(_("Applying changes ..."));
 
     _editProcessor->executeTask(
         [&](auto const& senderId) {
@@ -156,7 +156,7 @@ void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& req
 
 void NetworkTransferController::onMove(MoveNetworkResourceRequestData const& requestData)
 {
-    printOverlayMessage("Changing visibility ...");
+    printOverlayMessage(_("Changing visibility ..."));
 
     _moveProcessor->executeTask(
         [&](auto const& senderId) {
