@@ -895,6 +895,8 @@ void EvolutionDashboardWindow::processTimelineHeader()
     //sliders keep their default width and only shrink when the window gets too narrow
     auto numSliders = _timelineMode == TimelineMode_EntireHistory ? 1.0f : 2.0f;
     ImGui::SameLine(0, scale(20.0f));
+    AlienGui::VerticalSeparator();
+    ImGui::SameLine(0, scale(20.0f));
     auto sliderWidth = std::clamp((ImGui::GetContentRegionAvail().x - scale(20.0f) * (numSliders - 1.0f)) / numSliders, scale(140.0f), scale(320.0f));
     if (_timelineMode == TimelineMode_RealTime) {
         if (ImGui::BeginChild("##timeHorizon", {sliderWidth, ImGui::GetFrameHeight()})) {
@@ -905,6 +907,8 @@ void EvolutionDashboardWindow::processTimelineHeader()
         }
         ImGui::EndChild();
         ImGui::SameLine(0, scale(20.0f));
+        AlienGui::VerticalSeparator();
+        ImGui::SameLine(0, scale(20.0f));
     }
     if (_timelineMode == TimelineMode_LastSteps) {
         if (ImGui::BeginChild("##lastSteps", {sliderWidth, ImGui::GetFrameHeight()})) {
@@ -914,6 +918,8 @@ void EvolutionDashboardWindow::processTimelineHeader()
             validateAndCorrect();
         }
         ImGui::EndChild();
+        ImGui::SameLine(0, scale(20.0f));
+        AlienGui::VerticalSeparator();
         ImGui::SameLine(0, scale(20.0f));
     }
     if (ImGui::BeginChild("##plotHeight", {sliderWidth, ImGui::GetFrameHeight()})) {
