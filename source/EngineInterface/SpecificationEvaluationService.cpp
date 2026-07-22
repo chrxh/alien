@@ -329,7 +329,7 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             }
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
-            if (std::holds_alternative<ColorVectorFloatBaseLayerMember>(floatSpec._member)
+            if (std::holds_alternative<FloatBaseLayerMember>(floatSpec._member) || std::holds_alternative<ColorVectorFloatBaseLayerMember>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatBaseLayerMember>(floatSpec._member) || std::holds_alternative<FloatLayerMember>(floatSpec._member)) {
                 return true;
             }
