@@ -21,7 +21,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
     auto time = toDouble(timestep);
     if (!historyData.overall.empty() && historyData.overall.back().time > time + NEAR_ZERO) {
         historyData = StatisticsHistoryData();
-        _overallState = TimelineState<OverallDataPoint>();
+        _overallState = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
         _lineageStates.clear();
     }
 
@@ -105,7 +105,7 @@ void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
 
 void StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
 {
-    _overallState = TimelineState<OverallDataPoint>();
+    _overallState = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
     _lineageStates.clear();
     _lastTimestep.reset();
 

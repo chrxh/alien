@@ -36,7 +36,49 @@ struct TimedSample
     }
 };
 
-using OverallSample = TimedSample<OverallDataPoint>;
+//the overall timeline stores the whole per-colorBitset breakdown in a single sample, so summing and averaging
+//two samples means merging their color buckets; std::unordered_map carries no such operators of its own
+template <>
+struct TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>
+{
+    double time = 0;
+    double timestep = 0;
+    double systemClock = 0;
+    std::unordered_map<uint32_t, ColorOverallDataPoint> data;
+
+    TimedSample operator+(TimedSample const& other) const
+    {
+        TimedSample result;
+        result.time = time + other.time;
+        result.timestep = timestep + other.timestep;
+        result.systemClock = systemClock + other.systemClock;
+        result.data = data;
+        for (auto const& [colorBitset, dataPoint] : other.data) {
+            auto it = result.data.find(colorBitset);
+            if (it != result.data.end()) {
+                it->second = it->second + dataPoint;
+            } else {
+                result.data.emplace(colorBitset, dataPoint);
+            }
+        }
+        return result;
+    }
+
+    TimedSample operator/(double divisor) const
+    {
+        TimedSample result;
+        result.time = time / divisor;
+        result.timestep = timestep / divisor;
+        result.systemClock = systemClock / divisor;
+        result.data = data;
+        for (auto& [colorBitset, dataPoint] : result.data) {
+            dataPoint = dataPoint / divisor;
+        }
+        return result;
+    }
+};
+
+using OverallSample = TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>;
 using LineageSample = TimedSample<LineageDataPoint>;
 
 //the overall data and each lineage have separate timelines so that sampling density and compression

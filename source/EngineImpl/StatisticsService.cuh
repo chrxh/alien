@@ -45,7 +45,7 @@ private:
     template <typename DataPoint>
     void resetTimelineTime(std::vector<TimedSample<DataPoint>>& samples, TimelineState<DataPoint>& state, double time);
 
-    TimelineState<OverallDataPoint> _overallState;
+    TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>> _overallState;
     std::unordered_map<uint32_t, TimelineState<LineageDataPoint>> _lineageStates;
     std::optional<uint64_t> _lastTimestep;
 };
