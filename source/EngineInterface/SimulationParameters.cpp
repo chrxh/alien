@@ -565,6 +565,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Same lineage protection")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRelatedLineageProtection).min(0.0f).max(1.0f)),
                     ParameterSpec()
+                        .name("Size protection")
+                        .reference(FloatSpec().member(&SimulationParameters::attackerSizeProtection).min(0.0f).max(1.0f).format("%.2f"))
+                        .description(
+                            "If the attacked creature consists of more cells than the attacking creature, the obtained energy is reduced by this factor. "
+                            "This compensates for the systematic advantage smaller creatures would otherwise have."),
+                    ParameterSpec()
                         .name("Attack radius")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(4.0f))
                         .description("The maximum distance over which an attacker cell can attack another cell."),
