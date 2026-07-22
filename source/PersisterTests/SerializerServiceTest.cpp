@@ -41,19 +41,21 @@ namespace
         result.time = base;
         result.timestep = base + 1;
         result.systemClock = base + 2;
-        result.data.numCreatures = base + 3;
-        result.data.averageCreatureCells = base + 4;
-        result.data.averageGenomeNodes = base + 5;
-        result.data.creatureEnergy = base + 6;
-        result.data.averageMutationRate = base + 7;
-        result.data.averageGeneration = base + 8;
-        result.data.numLineages = base + 9;
-        result.data.numSolidObjects = base + 10;
-        result.data.numFluidObjects = base + 11;
-        result.data.numCellObjects = base + 12;
-        result.data.numEnergyParticles = base + 13;
-        result.data.accumCreatedCreatures = base + 14;
-        result.data.accumMutations = base + 15;
+
+        //the same set of color combinations in every sample, so the column-wise round-trip is exact
+        for (auto&& [colorBitset, offset] : {std::pair{0x1u, 3.0}, std::pair{0x6u, 12.0}}) {
+            ColorOverallDataPoint colorPoint;
+            colorPoint.numCreatures = base + offset;
+            colorPoint.numGenomes = base + offset + 1;
+            colorPoint.sumCreatureCells = base + offset + 2;
+            colorPoint.sumCreatureGenerations = base + offset + 3;
+            colorPoint.sumGenomeNodes = base + offset + 4;
+            colorPoint.sumMutationRates = base + offset + 5;
+            colorPoint.sumCreatureEnergy = base + offset + 6;
+            colorPoint.numCreatedCreatures = base + offset + 7;
+            colorPoint.totalMutations = base + offset + 8;
+            result.data.emplace(colorBitset, colorPoint);
+        }
         return result;
     }
 
@@ -82,19 +84,22 @@ namespace
         EXPECT_EQ(expected.time, actual.time);
         EXPECT_EQ(expected.timestep, actual.timestep);
         EXPECT_EQ(expected.systemClock, actual.systemClock);
-        EXPECT_EQ(expected.data.numCreatures, actual.data.numCreatures);
-        EXPECT_EQ(expected.data.averageCreatureCells, actual.data.averageCreatureCells);
-        EXPECT_EQ(expected.data.averageGenomeNodes, actual.data.averageGenomeNodes);
-        EXPECT_EQ(expected.data.creatureEnergy, actual.data.creatureEnergy);
-        EXPECT_EQ(expected.data.averageMutationRate, actual.data.averageMutationRate);
-        EXPECT_EQ(expected.data.averageGeneration, actual.data.averageGeneration);
-        EXPECT_EQ(expected.data.numLineages, actual.data.numLineages);
-        EXPECT_EQ(expected.data.numSolidObjects, actual.data.numSolidObjects);
-        EXPECT_EQ(expected.data.numFluidObjects, actual.data.numFluidObjects);
-        EXPECT_EQ(expected.data.numCellObjects, actual.data.numCellObjects);
-        EXPECT_EQ(expected.data.numEnergyParticles, actual.data.numEnergyParticles);
-        EXPECT_EQ(expected.data.accumCreatedCreatures, actual.data.accumCreatedCreatures);
-        EXPECT_EQ(expected.data.accumMutations, actual.data.accumMutations);
+
+        ASSERT_EQ(expected.data.size(), actual.data.size());
+        for (auto const& [colorBitset, expectedColor] : expected.data) {
+            auto actualColorIt = actual.data.find(colorBitset);
+            ASSERT_TRUE(actualColorIt != actual.data.end());
+            auto const& actualColor = actualColorIt->second;
+            EXPECT_EQ(expectedColor.numCreatures, actualColor.numCreatures);
+            EXPECT_EQ(expectedColor.numGenomes, actualColor.numGenomes);
+            EXPECT_EQ(expectedColor.sumCreatureCells, actualColor.sumCreatureCells);
+            EXPECT_EQ(expectedColor.sumCreatureGenerations, actualColor.sumCreatureGenerations);
+            EXPECT_EQ(expectedColor.sumGenomeNodes, actualColor.sumGenomeNodes);
+            EXPECT_EQ(expectedColor.sumMutationRates, actualColor.sumMutationRates);
+            EXPECT_EQ(expectedColor.sumCreatureEnergy, actualColor.sumCreatureEnergy);
+            EXPECT_EQ(expectedColor.numCreatedCreatures, actualColor.numCreatedCreatures);
+            EXPECT_EQ(expectedColor.totalMutations, actualColor.totalMutations);
+        }
     }
 
     void compare(LineageSample const& expected, LineageSample const& actual)

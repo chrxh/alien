@@ -2267,19 +2267,17 @@ namespace
     auto constexpr Id_Timeline_Timestep = 1;
     auto constexpr Id_Timeline_SystemClock = 2;
 
-    auto constexpr Id_OverallTimeline_NumCreatures = 3;
-    auto constexpr Id_OverallTimeline_AverageCreatureCells = 4;
-    auto constexpr Id_OverallTimeline_AverageGenomeNodes = 5;
-    auto constexpr Id_OverallTimeline_CreatureEnergy = 6;
-    auto constexpr Id_OverallTimeline_AverageMutationRate = 7;
-    auto constexpr Id_OverallTimeline_AverageGeneration = 8;
-    auto constexpr Id_OverallTimeline_NumLineages = 9;
-    auto constexpr Id_OverallTimeline_NumSolidObjects = 10;
-    auto constexpr Id_OverallTimeline_NumFluidObjects = 11;
-    auto constexpr Id_OverallTimeline_NumCellObjects = 12;
-    auto constexpr Id_OverallTimeline_NumEnergyParticles = 13;
-    auto constexpr Id_OverallTimeline_AccumCreatedCreatures = 14;
-    auto constexpr Id_OverallTimeline_AccumMutations = 15;
+    auto constexpr Id_OverallTimeline_ByColor = 16;
+
+    auto constexpr Id_ColorColumns_NumCreatures = 0;
+    auto constexpr Id_ColorColumns_NumGenomes = 1;
+    auto constexpr Id_ColorColumns_SumCreatureCells = 2;
+    auto constexpr Id_ColorColumns_SumCreatureGenerations = 3;
+    auto constexpr Id_ColorColumns_SumGenomeNodes = 4;
+    auto constexpr Id_ColorColumns_SumMutationRates = 5;
+    auto constexpr Id_ColorColumns_SumCreatureEnergy = 6;
+    auto constexpr Id_ColorColumns_NumCreatedCreatures = 7;
+    auto constexpr Id_ColorColumns_TotalMutations = 8;
 
     auto constexpr Id_LineageTimeline_ColorBitset = 3;
     auto constexpr Id_LineageTimeline_RepresentativeCellId = 4;
@@ -2293,26 +2291,25 @@ namespace
     auto constexpr Id_LineageTimeline_NumCreatedCreatures = 12;
     auto constexpr Id_LineageTimeline_TotalMutations = 13;
 
-    //timelines are stored column-wise: each column is an individually tagged block so that
-    //added fields load as defaults from old files and unknown fields from new files are skipped
+    struct ColorTimeline
+    {
+        std::vector<double> numCreatures;
+        std::vector<double> numGenomes;
+        std::vector<double> sumCreatureCells;
+        std::vector<double> sumCreatureGenerations;
+        std::vector<double> sumGenomeNodes;
+        std::vector<double> sumMutationRates;
+        std::vector<double> sumCreatureEnergy;
+        std::vector<double> numCreatedCreatures;
+        std::vector<double> totalMutations;
+    };
+
     struct OverallTimeline
     {
         std::vector<double> time;
         std::vector<double> timestep;
         std::vector<double> systemClock;
-        std::vector<double> numCreatures;
-        std::vector<double> averageCreatureCells;
-        std::vector<double> averageGenomeNodes;
-        std::vector<double> creatureEnergy;
-        std::vector<double> averageMutationRate;
-        std::vector<double> averageGeneration;
-        std::vector<double> numLineages;
-        std::vector<double> numSolidObjects;
-        std::vector<double> numFluidObjects;
-        std::vector<double> numCellObjects;
-        std::vector<double> numEnergyParticles;
-        std::vector<double> accumCreatedCreatures;
-        std::vector<double> accumMutations;
+        std::unordered_map<uint32_t, ColorTimeline> colorTimelines;
     };
 
     struct LineageTimeline
@@ -2335,39 +2332,17 @@ namespace
 
     struct StatisticsTimelines
     {
-        OverallTimeline overall;
-        std::unordered_map<uint32_t, LineageTimeline> lineages;
+        OverallTimeline overallTimeline;
+        std::unordered_map<uint32_t, LineageTimeline> lineageTimelines;
     };
 
-    struct OverallColumn
-    {
-        int id;
-        std::vector<double> OverallTimeline::* column;
-        double OverallDataPoint::* field;
-    };
-    std::vector<OverallColumn> const OverallColumns = {
-        {Id_OverallTimeline_NumCreatures, &OverallTimeline::numCreatures, &OverallDataPoint::numCreatures},
-        {Id_OverallTimeline_AverageCreatureCells, &OverallTimeline::averageCreatureCells, &OverallDataPoint::averageCreatureCells},
-        {Id_OverallTimeline_AverageGenomeNodes, &OverallTimeline::averageGenomeNodes, &OverallDataPoint::averageGenomeNodes},
-        {Id_OverallTimeline_CreatureEnergy, &OverallTimeline::creatureEnergy, &OverallDataPoint::creatureEnergy},
-        {Id_OverallTimeline_AverageMutationRate, &OverallTimeline::averageMutationRate, &OverallDataPoint::averageMutationRate},
-        {Id_OverallTimeline_AverageGeneration, &OverallTimeline::averageGeneration, &OverallDataPoint::averageGeneration},
-        {Id_OverallTimeline_NumLineages, &OverallTimeline::numLineages, &OverallDataPoint::numLineages},
-        {Id_OverallTimeline_NumSolidObjects, &OverallTimeline::numSolidObjects, &OverallDataPoint::numSolidObjects},
-        {Id_OverallTimeline_NumFluidObjects, &OverallTimeline::numFluidObjects, &OverallDataPoint::numFluidObjects},
-        {Id_OverallTimeline_NumCellObjects, &OverallTimeline::numCellObjects, &OverallDataPoint::numCellObjects},
-        {Id_OverallTimeline_NumEnergyParticles, &OverallTimeline::numEnergyParticles, &OverallDataPoint::numEnergyParticles},
-        {Id_OverallTimeline_AccumCreatedCreatures, &OverallTimeline::accumCreatedCreatures, &OverallDataPoint::accumCreatedCreatures},
-        {Id_OverallTimeline_AccumMutations, &OverallTimeline::accumMutations, &OverallDataPoint::accumMutations},
-    };
-
-    struct LineageColumn
+    struct LineageColumnDesc
     {
         int id;
         std::vector<double> LineageTimeline::* column;
         double LineageDataPoint::* field;
     };
-    std::vector<LineageColumn> const LineageColumns = {
+    std::vector<LineageColumnDesc> const LineageColumnDescs = {
         {Id_LineageTimeline_NumCreatures, &LineageTimeline::numCreatures, &LineageDataPoint::numCreatures},
         {Id_LineageTimeline_NumGenomes, &LineageTimeline::numGenomes, &LineageDataPoint::numGenomes},
         {Id_LineageTimeline_SumCreatureCells, &LineageTimeline::sumCreatureCells, &LineageDataPoint::sumCreatureCells},
@@ -2377,6 +2352,24 @@ namespace
         {Id_LineageTimeline_SumCreatureEnergy, &LineageTimeline::sumCreatureEnergy, &LineageDataPoint::sumCreatureEnergy},
         {Id_LineageTimeline_NumCreatedCreatures, &LineageTimeline::numCreatedCreatures, &LineageDataPoint::numCreatedCreatures},
         {Id_LineageTimeline_TotalMutations, &LineageTimeline::totalMutations, &LineageDataPoint::totalMutations},
+    };
+
+    struct ColorColumnDesc
+    {
+        int id;
+        std::vector<double> ColorTimeline::* column;
+        double ColorOverallDataPoint::* field;
+    };
+    std::vector<ColorColumnDesc> const ColorColumnDescs = {
+        {Id_ColorColumns_NumCreatures, &ColorTimeline::numCreatures, &ColorOverallDataPoint::numCreatures},
+        {Id_ColorColumns_NumGenomes, &ColorTimeline::numGenomes, &ColorOverallDataPoint::numGenomes},
+        {Id_ColorColumns_SumCreatureCells, &ColorTimeline::sumCreatureCells, &ColorOverallDataPoint::sumCreatureCells},
+        {Id_ColorColumns_SumCreatureGenerations, &ColorTimeline::sumCreatureGenerations, &ColorOverallDataPoint::sumCreatureGenerations},
+        {Id_ColorColumns_SumGenomeNodes, &ColorTimeline::sumGenomeNodes, &ColorOverallDataPoint::sumGenomeNodes},
+        {Id_ColorColumns_SumMutationRates, &ColorTimeline::sumMutationRates, &ColorOverallDataPoint::sumMutationRates},
+        {Id_ColorColumns_SumCreatureEnergy, &ColorTimeline::sumCreatureEnergy, &ColorOverallDataPoint::sumCreatureEnergy},
+        {Id_ColorColumns_NumCreatedCreatures, &ColorTimeline::numCreatedCreatures, &ColorOverallDataPoint::numCreatedCreatures},
+        {Id_ColorColumns_TotalMutations, &ColorTimeline::totalMutations, &ColorOverallDataPoint::totalMutations},
     };
 
     template <typename Timeline, typename Sample>
@@ -2430,26 +2423,48 @@ namespace
         }
     }
 
-    OverallTimeline toTimeline(std::vector<OverallSample> const& samples)
+    OverallTimeline convertToTimeline(std::vector<OverallSample> const& samples)
     {
         OverallTimeline result;
         extractTimingColumns(result, samples);
-        extractDataColumns(result, samples, OverallColumns);
+
+        for (auto const& sample : samples) {
+            for (auto const& [colorBitset, dataPoint] : sample.data) {
+                result.colorTimelines.try_emplace(colorBitset);
+            }
+        }
+        for (auto& [colorBitset, columns] : result.colorTimelines) {
+            for (auto const& [id, column, field] : ColorColumnDescs) {
+                auto& values = columns.*column;
+                values.reserve(samples.size());
+                for (auto const& sample : samples) {
+                    auto it = sample.data.find(colorBitset);
+                    values.emplace_back(it != sample.data.end() ? it->second.*field : 0.0);
+                }
+            }
+        }
         return result;
     }
 
-    std::vector<OverallSample> toSamples(OverallTimeline const& timeline)
+    std::vector<OverallSample> convertToSamples(OverallTimeline const& timeline)
     {
         auto result = createSamplesWithTiming<OverallSample>(timeline);
-        applyDataColumns(result, timeline, OverallColumns);
+
+        for (auto const& [colorBitset, columns] : timeline.colorTimelines) {
+            for (auto const& [id, column, field] : ColorColumnDescs) {
+                for (auto&& [sample, value] : std::views::zip(result, columns.*column)) {
+                    sample.data[colorBitset].*field = value;
+                }
+            }
+        }
         return result;
     }
 
-    LineageTimeline toTimeline(std::vector<LineageSample> const& samples)
+    LineageTimeline convertToTimeline(std::vector<LineageSample> const& samples)
     {
         LineageTimeline result;
         extractTimingColumns(result, samples);
-        extractDataColumns(result, samples, LineageColumns);
+        extractDataColumns(result, samples, LineageColumnDescs);
         result.colorBitset.reserve(samples.size());
         result.representativeCellId.reserve(samples.size());
         for (auto const& sample : samples) {
@@ -2459,10 +2474,10 @@ namespace
         return result;
     }
 
-    std::vector<LineageSample> toSamples(LineageTimeline const& timeline)
+    std::vector<LineageSample> convertToSamples(LineageTimeline const& timeline)
     {
         auto result = createSamplesWithTiming<LineageSample>(timeline);
-        applyDataColumns(result, timeline, LineageColumns);
+        applyDataColumns(result, timeline, LineageColumnDescs);
         for (auto&& [sample, value] : std::views::zip(result, timeline.colorBitset)) {
             sample.data.colorBitset = value;
         }
@@ -2476,15 +2491,23 @@ namespace
 namespace cereal
 {
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ColorTimeline& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        for (auto const& [id, column, field] : ColorColumnDescs) {
+            scope.addDesc(id, data.*column);
+        }
+    }
+    SPLIT_SERIALIZATION(ColorTimeline)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, OverallTimeline& data)
     {
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_Timeline_Time, data.time);
         scope.addDesc(Id_Timeline_Timestep, data.timestep);
         scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
-        for (auto const& [id, column, field] : OverallColumns) {
-            scope.addDesc(id, data.*column);
-        }
+        scope.addDesc(Id_OverallTimeline_ByColor, data.colorTimelines);
     }
     SPLIT_SERIALIZATION(OverallTimeline)
 
@@ -2497,7 +2520,7 @@ namespace cereal
         scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
         scope.addDesc(Id_LineageTimeline_ColorBitset, data.colorBitset);
         scope.addDesc(Id_LineageTimeline_RepresentativeCellId, data.representativeCellId);
-        for (auto const& [id, column, field] : LineageColumns) {
+        for (auto const& [id, column, field] : LineageColumnDescs) {
             scope.addDesc(id, data.*column);
         }
     }
@@ -2507,8 +2530,8 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, StatisticsTimelines& data)
     {
         auto scope = getSerializationScope(task, ar);
-        scope.addDesc(Id_StatisticsHistory_Overall, data.overall);
-        scope.addDesc(Id_StatisticsHistory_Lineages, data.lineages);
+        scope.addDesc(Id_StatisticsHistory_Overall, data.overallTimeline);
+        scope.addDesc(Id_StatisticsHistory_Lineages, data.lineageTimelines);
     }
     SPLIT_SERIALIZATION(StatisticsTimelines)
 }
@@ -2516,9 +2539,9 @@ namespace cereal
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
 {
     StatisticsTimelines timelines;
-    timelines.overall = toTimeline(statistics.overall);
+    timelines.overallTimeline = convertToTimeline(statistics.overall);
     for (auto const& [lineageId, samples] : statistics.lineages) {
-        timelines.lineages.emplace(lineageId, toTimeline(samples));
+        timelines.lineageTimelines.emplace(lineageId, convertToTimeline(samples));
     }
 
     zstr::ostream compressedStream(stream);
@@ -2545,9 +2568,9 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
         StatisticsTimelines timelines;
         archive(timelines);
 
-        statistics.overall = toSamples(timelines.overall);
-        for (auto const& [lineageId, timeline] : timelines.lineages) {
-            statistics.lineages.emplace(lineageId, toSamples(timeline));
+        statistics.overall = convertToSamples(timelines.overallTimeline);
+        for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
+            statistics.lineages.emplace(lineageId, convertToSamples(timeline));
         }
     } catch (...) {
         statistics = StatisticsHistoryData();

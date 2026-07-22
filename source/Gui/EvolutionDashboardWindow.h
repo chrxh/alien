@@ -10,6 +10,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/StatisticsHistory.h>
 
 #include "AlienWindow.h"
@@ -109,6 +110,7 @@ private:
         int timelineMode = 0;
         int lastSteps = 0;
         float timeHorizon = 0;
+        int colorFilter = 0;
         double sourceBackTime = 0;
         std::set<int64_t> selectedLineageIds;
         std::vector<double> lineageBackTimes;  //only used for the long-term history where each lineage has its own timeline
@@ -117,9 +119,11 @@ private:
     };
     std::optional<RebuildKey> _lastRebuildKey;
     std::optional<double> _lastTableBackTime;
+    int _lastTableColorFilter = -1;
 
     // Live statistics
     TimelineLiveStatistics _timelineLiveStatistics;
+    StatisticsEntry _lastStatisticsEntry;  //latest raw engine snapshot for the header's global (non-per-color) counts
     std::optional<int> _lastSessionId;
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
 };

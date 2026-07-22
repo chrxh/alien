@@ -130,52 +130,21 @@ namespace
         return std::max(0.0, (accumValue - lastAccumValue) / delta);  //negative deltas occur after accumulated statistics have been reset
     }
 
-    OverallDataPoint const& overallDataOf(DataPointCollection const& sample)
+    std::unordered_map<uint32_t, ColorOverallDataPoint> const& overallDataOf(DataPointCollection const& sample)
     {
         return sample.overall;
     }
 
-    OverallDataPoint const& overallDataOf(OverallSample const& sample)
+    std::unordered_map<uint32_t, ColorOverallDataPoint> const& overallDataOf(OverallSample const& sample)
     {
         return sample.data;
     }
 
-    template <typename Sample>
-    double getOverallMetricValue(Sample const& sample, Sample const* referenceSample, int metricIndex)
-    {
-        auto const& data = overallDataOf(sample);
-        switch (metricIndex) {
-        case 0:
-            return data.numCreatures;
-        case 1:
-            return data.averageCreatureCells;
-        case 2:
-            return data.averageGenomeNodes;
-        case 3:
-            return data.creatureEnergy;
-        case 4:
-            return data.averageMutationRate;
-        case 5:
-            return data.averageGeneration;
-        case 6:
-        case 7: {
-            if (!referenceSample) {
-                return std::numeric_limits<double>::quiet_NaN();
-            }
-            auto const& referenceData = overallDataOf(*referenceSample);
-            auto deltaKSteps = (sample.timestep - referenceSample->timestep) / 1000.0;
-            if (metricIndex == 6) {
-                return calcRate(data.accumCreatedCreatures, referenceData.accumCreatedCreatures, deltaKSteps);
-            } else {
-                return calcRate(data.accumMutations, referenceData.accumMutations, deltaKSteps);
-            }
-        }
-        default:
-            return 0.0;
-        }
-    }
-
-    double getLineageMetricValue(LineageDataPoint const& entry, LineageDataPoint const* lastEntry, double rateDelta, int metricIndex)
+    //works on any data point that carries the aggregatable creature fields (LineageDataPoint or the
+    //summed per-color ColorOverallDataPoint), so the same metric derivation serves single lineages and
+    //color-filtered overall statistics
+    template <typename DataPoint>
+    double getAggregatableMetricValue(DataPoint const& entry, DataPoint const* lastEntry, double rateDelta, int metricIndex)
     {
         switch (metricIndex) {
         case 0:
@@ -202,7 +171,35 @@ namespace
     double getLineageSampleMetricValue(LineageSample const& sample, LineageSample const* referenceSample, int metricIndex)
     {
         auto deltaKSteps = referenceSample ? (sample.timestep - referenceSample->timestep) / 1000.0 : 0.0;
-        return getLineageMetricValue(sample.data, referenceSample ? &referenceSample->data : nullptr, deltaKSteps, metricIndex);
+        return getAggregatableMetricValue(sample.data, referenceSample ? &referenceSample->data : nullptr, deltaKSteps, metricIndex);
+    }
+
+    //sum of the per-color buckets whose colorBitset intersects the filter; a lineage falls into exactly one
+    //bucket (its full colorBitset), so this matches the "colorBitset & filter" row filter without double counting
+    ColorOverallDataPoint aggregateFilteredColors(std::unordered_map<uint32_t, ColorOverallDataPoint> const& data, int colorFilter)
+    {
+        ColorOverallDataPoint result;
+        for (auto const& [colorBitset, dataPoint] : data) {
+            if ((colorFilter & static_cast<int>(colorBitset)) != 0) {
+                result = result + dataPoint;
+            }
+        }
+        return result;
+    }
+
+    template <typename Sample>
+    double getFilteredOverallMetricValue(Sample const& sample, Sample const* referenceSample, int colorFilter, int metricIndex)
+    {
+        auto aggregate = aggregateFilteredColors(overallDataOf(sample), colorFilter);
+        ColorOverallDataPoint referenceAggregate;
+        ColorOverallDataPoint const* reference = nullptr;
+        auto deltaKSteps = 0.0;
+        if (referenceSample) {
+            referenceAggregate = aggregateFilteredColors(overallDataOf(*referenceSample), colorFilter);
+            reference = &referenceAggregate;
+            deltaKSteps = (sample.timestep - referenceSample->timestep) / 1000.0;
+        }
+        return getAggregatableMetricValue(aggregate, reference, deltaKSteps, metricIndex);
     }
 
     LineageDataPoint const* findLineageEntry(DataPointCollection const& sample, uint32_t lineageId)
@@ -307,6 +304,7 @@ void EvolutionDashboardWindow::processBackground()
     _lastSessionId = sessionId;
 
     auto overallStatistics = _SimulationFacade::get()->getStatisticsEntry();
+    _lastStatisticsEntry = overallStatistics;  //latest raw snapshot for the header's global (non-per-color) counts
     _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
 }
 
@@ -359,10 +357,11 @@ void EvolutionDashboardWindow::updateTableData()
 {
     auto const& liveHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
     auto liveBackTime = !liveHistory.empty() ? liveHistory.back().time : -1.0;
-    if (_lastTableBackTime.has_value() && *_lastTableBackTime == liveBackTime) {
+    if (_lastTableBackTime.has_value() && *_lastTableBackTime == liveBackTime && _lastTableColorFilter == _colorFilter) {
         return;
     }
     _lastTableBackTime = liveBackTime;
+    _lastTableColorFilter = _colorFilter;
 
     //table rows from the latest live sample (rates per 1K time steps)
     _lineages.clear();
@@ -386,7 +385,7 @@ void EvolutionDashboardWindow::updateTableData()
             }
         }
         for (int i = 0; i < NumMetrics; ++i) {
-            lineage.currentValues.at(i) = getLineageMetricValue(entry, referenceEntry, (lastSample.timestep - referenceTimestep) / 1000.0, i);
+            lineage.currentValues.at(i) = getAggregatableMetricValue(entry, referenceEntry, (lastSample.timestep - referenceTimestep) / 1000.0, i);
         }
         _lineages.emplace_back(std::move(lineage));
     }
@@ -395,7 +394,7 @@ void EvolutionDashboardWindow::updateTableData()
     //current values for the table summary row
     DataPointCollection const* referenceDataPoints = liveHistory.size() >= 2 ? &liveHistory.at(referenceIndex) : nullptr;
     for (int i = 0; i < NumMetrics; ++i) {
-        _allLineages.currentValues.at(i) = getOverallMetricValue(lastSample, referenceDataPoints, i);
+        _allLineages.currentValues.at(i) = getFilteredOverallMetricValue(lastSample, referenceDataPoints, _colorFilter, i);
     }
 }
 
@@ -438,7 +437,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
 {
     //rebuild only when the underlying data or view settings have changed
     auto sourceBackTime = !source.empty() ? source.back().time : -1.0;
-    RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, sourceBackTime, _selectedLineageIds};
+    RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, _colorFilter, sourceBackTime, _selectedLineageIds};
     if (_lastRebuildKey && *_lastRebuildKey == key) {
         return;
     }
@@ -465,9 +464,11 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
         }
     }
 
-    //"all lineages" series (the current values are maintained by updateTableData)
+    //"all lineages" series honoring the color filter (the current values are maintained by updateTableData)
     _allLineages.id = -1;
-    buildPlotSeries(_allLineages, source, firstIndex, useTimeAsX, getOverallMetricValue<DataPointCollection>);
+    buildPlotSeries(_allLineages, source, firstIndex, useTimeAsX, [colorFilter = _colorFilter](auto const& sample, auto const* reference, int metricIndex) {
+        return getFilteredOverallMetricValue(sample, reference, colorFilter, metricIndex);
+    });
 
     //per-lineage series for the selected lineages
     _plottedLineages.clear();
@@ -503,7 +504,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 auto const* lastEntry = referenceIsOldEnough ? rateReferences.at(rateReferenceIndex).entry : nullptr;
                 auto deltaKSteps = referenceIsOldEnough ? (sample.timestep - rateReferences.at(rateReferenceIndex).timestep) / 1000.0 : 0.0;
                 for (int i = 0; i < NumMetrics; ++i) {
-                    lineage.series.at(i).emplace_back(getLineageMetricValue(*entry, lastEntry, deltaKSteps, i));
+                    lineage.series.at(i).emplace_back(getAggregatableMetricValue(*entry, lastEntry, deltaKSteps, i));
                 }
             }
             rateReferences.push_back({sample.timestep, entry});
@@ -530,15 +531,17 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
         auto timelineIt = source.lineages.find(toUInt32(selectedId));
         lineageBackTimes.emplace_back(timelineIt != source.lineages.end() && !timelineIt->second.empty() ? timelineIt->second.back().time : -1.0);
     }
-    RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, sourceBackTime, _selectedLineageIds, std::move(lineageBackTimes)};
+    RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, _colorFilter, sourceBackTime, _selectedLineageIds, std::move(lineageBackTimes)};
     if (_lastRebuildKey && *_lastRebuildKey == key) {
         return;
     }
     _lastRebuildKey = std::move(key);
 
-    //"all lineages" series (the current values are maintained by updateTableData)
+    //"all lineages" series honoring the color filter (the current values are maintained by updateTableData)
     _allLineages.id = -1;
-    buildPlotSeries(_allLineages, source.overall, 0, false, getOverallMetricValue<OverallSample>);
+    buildPlotSeries(_allLineages, source.overall, 0, false, [colorFilter = _colorFilter](auto const& sample, auto const* reference, int metricIndex) {
+        return getFilteredOverallMetricValue(sample, reference, colorFilter, metricIndex);
+    });
 
     //per-lineage series for the selected lineages
     _plottedLineages.clear();
@@ -567,15 +570,15 @@ void EvolutionDashboardWindow::processHeader()
     auto cardHeight =
         style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
 
-    auto const& liveGlobalHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
-    auto const* lastDataPoints = !liveGlobalHistory.empty() ? &liveGlobalHistory.back() : nullptr;
+    //the header shows the current global state; these counts are not per-color and come from the raw engine snapshot
+    auto const& overallEntry = _lastStatisticsEntry.overallEntry;
 
-    auto solids = lastDataPoints ? lastDataPoints->overall.numSolidObjects : 0.0;
-    auto fluids = lastDataPoints ? lastDataPoints->overall.numFluidObjects : 0.0;
-    auto cells = lastDataPoints ? lastDataPoints->overall.numCellObjects : 0.0;
-    auto creatureCells = lastDataPoints ? lastDataPoints->overall.numCreatures * lastDataPoints->overall.averageCreatureCells : 0.0;
+    auto solids = toDouble(overallEntry.numSolidObjects);
+    auto fluids = toDouble(overallEntry.numFluidObjects);
+    auto cells = toDouble(overallEntry.numCellObjects);
+    auto creatureCells = toDouble(overallEntry.sumCreatureCells);
     auto freeCells = std::max(0.0, cells - creatureCells);
-    auto energyParticles = lastDataPoints ? lastDataPoints->overall.numEnergyParticles : 0.0;
+    auto energyParticles = toDouble(overallEntry.numEnergyParticles);
     processCard(
         "Entities",
         formatMetricValue(solids + fluids + cells + energyParticles, 0),
@@ -588,17 +591,15 @@ void EvolutionDashboardWindow::processHeader()
         cardHeight);
     ImGui::SameLine();
 
-    auto numLineages = lastDataPoints ? lastDataPoints->overall.numLineages : 0.0;
+    auto numLineages = toDouble(overallEntry.numActiveLineages);
     auto numLineagesAbove5Percent = 0;
     auto numLineagesAbove1Percent = 0;
-    if (lastDataPoints) {
-        for (auto const& [lineageId, entry] : lastDataPoints->lineages) {
-            if (entry.numCreatures >= lastDataPoints->overall.numCreatures / 20) {
-                ++numLineagesAbove5Percent;
-            }
-            if (entry.numCreatures >= lastDataPoints->overall.numCreatures / 100) {
-                ++numLineagesAbove1Percent;
-            }
+    for (auto const& entry : _lastStatisticsEntry.entries) {
+        if (toDouble(entry.numCreatures) >= toDouble(overallEntry.numCreatures) / 20) {
+            ++numLineagesAbove5Percent;
+        }
+        if (toDouble(entry.numCreatures) >= toDouble(overallEntry.numCreatures) / 100) {
+            ++numLineagesAbove1Percent;
         }
     }
     processCard(
@@ -610,10 +611,10 @@ void EvolutionDashboardWindow::processHeader()
         cardHeight);
     ImGui::SameLine();
 
-    processCard("Creatures", formatMetricValue(_allLineages.currentValues.at(0), 0), {}, cardWidth, cardHeight);
+    processCard("Creatures", formatMetricValue(toDouble(overallEntry.numCreatures), 0), {}, cardWidth, cardHeight);
     ImGui::SameLine();
 
-    auto internalEnergy = lastDataPoints ? lastDataPoints->overall.creatureEnergy : 0.0;
+    auto internalEnergy = toDouble(overallEntry.sumCreatureEnergy);
     auto externalEnergy = toDouble(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value);
     processCard(
         "Total energy",
