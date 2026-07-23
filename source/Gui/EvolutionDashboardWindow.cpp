@@ -232,7 +232,14 @@ namespace
     template <typename Target, typename Sample, typename MetricEvaluator>
     void buildPlotSeries(Target& target, std::vector<Sample> const& source, size_t firstIndex, bool useTimeAsX, MetricEvaluator const& evaluateMetric)
     {
-        auto getX = [&](Sample const& sample) { return useTimeAsX ? sample.time : sample.timestep; };
+        //only the live DataPointCollection carries a real-time axis; the long-term history is always plotted over time steps
+        auto getX = [&](Sample const& sample) {
+            if constexpr (requires { sample.time; }) {
+                return useTimeAsX ? sample.time : sample.timestep;
+            } else {
+                return sample.timestep;
+            }
+        };
 
         target.series = {};
         target.timePoints.clear();
@@ -533,12 +540,12 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
 {
     //rebuild only when the underlying data or view settings have changed; the lineage timelines are
     //sampled independently of the overall timeline and therefore contribute their own back times
-    auto sourceBackTime = !source.overall.empty() ? source.overall.back().time : -1.0;
+    auto sourceBackTime = !source.overall.empty() ? source.overall.back().timestep : -1.0;
     std::vector<double> lineageBackTimes;
     lineageBackTimes.reserve(_selectedLineageIds.size());
     for (auto const& selectedId : _selectedLineageIds) {
         auto timelineIt = source.lineages.find(toUInt32(selectedId));
-        lineageBackTimes.emplace_back(timelineIt != source.lineages.end() && !timelineIt->second.empty() ? timelineIt->second.back().time : -1.0);
+        lineageBackTimes.emplace_back(timelineIt != source.lineages.end() && !timelineIt->second.empty() ? timelineIt->second.back().timestep : -1.0);
     }
     RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, _colorFilter, sourceBackTime, _selectedLineageIds, std::move(lineageBackTimes)};
     if (_lastRebuildKey && *_lastRebuildKey == key) {

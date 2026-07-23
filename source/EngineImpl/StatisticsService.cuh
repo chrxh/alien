@@ -16,7 +16,7 @@ class StatisticsService
     MAKE_SINGLETON(StatisticsService);
 
 public:
-    void addDataPoint(StatisticsHistory& history, StatisticsEntry const& overallStatistics, uint64_t timestep);
+    void addDataPoint(StatisticsHistory& history, StatisticsEntry const& statisticsEntry, uint64_t timestep);
     void resetTime(StatisticsHistory& history, uint64_t timestep);
     void rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep);
 
@@ -45,7 +45,7 @@ private:
     template <typename DataPoint>
     void resetTimelineTime(std::vector<TimedSample<DataPoint>>& samples, TimelineState<DataPoint>& state, double time);
 
-    TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>> _overallState;
+    TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>> _colorOverallStates;
     std::unordered_map<uint32_t, TimelineState<LineageDataPoint>> _lineageStates;
     std::optional<uint64_t> _lastTimestep;
 };

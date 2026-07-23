@@ -10,7 +10,6 @@
 template <typename DataPoint>
 struct TimedSample
 {
-    double time = 0;         // Time since simulation start
     double timestep = 0;
     double systemClock = 0;
     DataPoint data;
@@ -18,7 +17,6 @@ struct TimedSample
     TimedSample operator+(TimedSample const& other) const
     {
         TimedSample result;
-        result.time = time + other.time;
         result.timestep = timestep + other.timestep;
         result.systemClock = systemClock + other.systemClock;
         result.data = data + other.data;
@@ -28,7 +26,6 @@ struct TimedSample
     TimedSample operator/(double divisor) const
     {
         TimedSample result;
-        result.time = time / divisor;
         result.timestep = timestep / divisor;
         result.systemClock = systemClock / divisor;
         result.data = data / divisor;
@@ -41,7 +38,6 @@ struct TimedSample
 template <>
 struct TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>
 {
-    double time = 0;
     double timestep = 0;
     double systemClock = 0;
     std::unordered_map<uint32_t, ColorOverallDataPoint> data;
@@ -49,7 +45,6 @@ struct TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>
     TimedSample operator+(TimedSample const& other) const
     {
         TimedSample result;
-        result.time = time + other.time;
         result.timestep = timestep + other.timestep;
         result.systemClock = systemClock + other.systemClock;
         result.data = data;
@@ -67,7 +62,6 @@ struct TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>
     TimedSample operator/(double divisor) const
     {
         TimedSample result;
-        result.time = time / divisor;
         result.timestep = timestep / divisor;
         result.systemClock = systemClock / divisor;
         result.data = data;
