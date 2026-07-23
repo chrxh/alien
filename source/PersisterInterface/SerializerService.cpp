@@ -2267,7 +2267,8 @@ namespace
     auto constexpr Id_Timeline_Timestep = 1;
     auto constexpr Id_Timeline_SystemClock = 2;
 
-    auto constexpr Id_OverallTimeline_ByColor = 16;
+    auto constexpr Id_OverallTimeline_UniqueColorTimelines = 16;
+    auto constexpr Id_OverallTimeline_ColorBitsetGroups = 17;
 
     auto constexpr Id_ColorColumns_NumCreatures = 0;
     auto constexpr Id_ColorColumns_NumGenomes = 1;
@@ -2291,17 +2292,18 @@ namespace
     auto constexpr Id_LineageTimeline_NumCreatedCreatures = 12;
     auto constexpr Id_LineageTimeline_TotalMutations = 13;
 
+    //metric columns are plot statistics and are stored as float to halve the serialized size; the exact values stay double in memory
     struct ColorTimeline
     {
-        std::vector<double> numCreatures;
-        std::vector<double> numGenomes;
-        std::vector<double> sumCreatureCells;
-        std::vector<double> sumCreatureGenerations;
-        std::vector<double> sumGenomeNodes;
-        std::vector<double> sumMutationRates;
-        std::vector<double> sumCreatureEnergy;
-        std::vector<double> numCreatedCreatures;
-        std::vector<double> totalMutations;
+        std::vector<float> numCreatures;
+        std::vector<float> numGenomes;
+        std::vector<float> sumCreatureCells;
+        std::vector<float> sumCreatureGenerations;
+        std::vector<float> sumGenomeNodes;
+        std::vector<float> sumMutationRates;
+        std::vector<float> sumCreatureEnergy;
+        std::vector<float> numCreatedCreatures;
+        std::vector<float> totalMutations;
     };
 
     struct OverallTimeline
@@ -2319,15 +2321,15 @@ namespace
         std::vector<double> systemClock;
         std::vector<uint32_t> colorBitset;
         std::vector<uint64_t> representativeCellId;
-        std::vector<double> numCreatures;
-        std::vector<double> numGenomes;
-        std::vector<double> sumCreatureCells;
-        std::vector<double> sumCreatureGenerations;
-        std::vector<double> sumGenomeNodes;
-        std::vector<double> sumMutationRates;
-        std::vector<double> sumCreatureEnergy;
-        std::vector<double> numCreatedCreatures;
-        std::vector<double> totalMutations;
+        std::vector<float> numCreatures;
+        std::vector<float> numGenomes;
+        std::vector<float> sumCreatureCells;
+        std::vector<float> sumCreatureGenerations;
+        std::vector<float> sumGenomeNodes;
+        std::vector<float> sumMutationRates;
+        std::vector<float> sumCreatureEnergy;
+        std::vector<float> numCreatedCreatures;
+        std::vector<float> totalMutations;
     };
 
     struct StatisticsTimelines
@@ -2339,7 +2341,7 @@ namespace
     struct LineageColumnDesc
     {
         int id;
-        std::vector<double> LineageTimeline::* column;
+        std::vector<float> LineageTimeline::* column;
         double LineageDataPoint::* field;
     };
     std::vector<LineageColumnDesc> const LineageColumnDescs = {
@@ -2357,7 +2359,7 @@ namespace
     struct ColorColumnDesc
     {
         int id;
-        std::vector<double> ColorTimeline::* column;
+        std::vector<float> ColorTimeline::* column;
         double ColorOverallDataPoint::* field;
     };
     std::vector<ColorColumnDesc> const ColorColumnDescs = {
@@ -2371,6 +2373,84 @@ namespace
         {Id_ColorColumns_NumCreatedCreatures, &ColorTimeline::numCreatedCreatures, &ColorOverallDataPoint::numCreatedCreatures},
         {Id_ColorColumns_TotalMutations, &ColorTimeline::totalMutations, &ColorOverallDataPoint::totalMutations},
     };
+
+    bool colorTimelinesEqual(ColorTimeline const& left, ColorTimeline const& right)
+    {
+        for (auto const& [id, column, field] : ColorColumnDescs) {
+            if (left.*column != right.*column) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    size_t hashColorTimeline(ColorTimeline const& timeline)
+    {
+        size_t seed = 0;
+        auto combine = [&seed](size_t value) { seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2); };
+        for (auto const& [id, column, field] : ColorColumnDescs) {
+            auto const& values = timeline.*column;
+            combine(values.size());
+            for (auto const value : values) {
+                combine(std::hash<float>{}(value));
+            }
+        }
+        return seed;
+    }
+
+    // Many color combinations share the same (often all-zero) ColorTimeline. Storing each distinct timeline once
+    // together with the color combinations that map to it saves a lot of space (there are up to 2^colors - 1 combinations).
+    struct DeduplicatedColorTimelines
+    {
+        std::vector<ColorTimeline> uniqueTimelines;
+        std::vector<std::vector<uint32_t>> colorBitsetGroups;  // parallel to uniqueTimelines
+    };
+
+    DeduplicatedColorTimelines deduplicateColorTimelines(std::unordered_map<uint32_t, ColorTimeline> const& colorTimelines)
+    {
+        DeduplicatedColorTimelines result;
+        std::unordered_map<size_t, std::vector<size_t>> hashToUniqueIndices;
+
+        //sort color combinations for deterministic output
+        std::vector<uint32_t> sortedColorBitsets;
+        sortedColorBitsets.reserve(colorTimelines.size());
+        for (auto const& [colorBitset, timeline] : colorTimelines) {
+            sortedColorBitsets.emplace_back(colorBitset);
+        }
+        std::sort(sortedColorBitsets.begin(), sortedColorBitsets.end());
+
+        for (auto const colorBitset : sortedColorBitsets) {
+            auto const& timeline = colorTimelines.at(colorBitset);
+            auto& candidateIndices = hashToUniqueIndices[hashColorTimeline(timeline)];
+
+            std::optional<size_t> matchIndex;
+            for (auto const index : candidateIndices) {
+                if (colorTimelinesEqual(result.uniqueTimelines.at(index), timeline)) {
+                    matchIndex = index;
+                    break;
+                }
+            }
+            if (!matchIndex) {
+                matchIndex = result.uniqueTimelines.size();
+                result.uniqueTimelines.emplace_back(timeline);
+                result.colorBitsetGroups.emplace_back();
+                candidateIndices.emplace_back(*matchIndex);
+            }
+            result.colorBitsetGroups.at(*matchIndex).emplace_back(colorBitset);
+        }
+        return result;
+    }
+
+    std::unordered_map<uint32_t, ColorTimeline> expandColorTimelines(DeduplicatedColorTimelines const& deduplicated)
+    {
+        std::unordered_map<uint32_t, ColorTimeline> result;
+        for (auto&& [timeline, colorBitsets] : std::views::zip(deduplicated.uniqueTimelines, deduplicated.colorBitsetGroups)) {
+            for (auto const colorBitset : colorBitsets) {
+                result.emplace(colorBitset, timeline);
+            }
+        }
+        return result;
+    }
 
     template <typename Timeline, typename Sample>
     void extractTimingColumns(Timeline& timeline, std::vector<Sample> const& samples)
@@ -2408,7 +2488,7 @@ namespace
             auto& values = timeline.*column;
             values.reserve(samples.size());
             for (auto const& sample : samples) {
-                values.emplace_back(sample.data.*field);
+                values.emplace_back(static_cast<float>(sample.data.*field));
             }
         }
     }
@@ -2439,7 +2519,7 @@ namespace
                 values.reserve(samples.size());
                 for (auto const& sample : samples) {
                     auto it = sample.data.find(colorBitset);
-                    values.emplace_back(it != sample.data.end() ? it->second.*field : 0.0);
+                    values.emplace_back(static_cast<float>(it != sample.data.end() ? it->second.*field : 0.0));
                 }
             }
         }
@@ -2503,11 +2583,21 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, OverallTimeline& data)
     {
-        auto scope = getSerializationScope(task, ar);
-        scope.addDesc(Id_Timeline_Time, data.time);
-        scope.addDesc(Id_Timeline_Timestep, data.timestep);
-        scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
-        scope.addDesc(Id_OverallTimeline_ByColor, data.colorTimelines);
+        DeduplicatedColorTimelines deduplicated;
+        if (task == SerializationTask::Save) {
+            deduplicated = deduplicateColorTimelines(data.colorTimelines);
+        }
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addDesc(Id_Timeline_Time, data.time);
+            scope.addDesc(Id_Timeline_Timestep, data.timestep);
+            scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
+            scope.addDesc(Id_OverallTimeline_UniqueColorTimelines, deduplicated.uniqueTimelines);
+            scope.addDesc(Id_OverallTimeline_ColorBitsetGroups, deduplicated.colorBitsetGroups);
+        }
+        if (task == SerializationTask::Load) {
+            data.colorTimelines = expandColorTimelines(deduplicated);
+        }
     }
     SPLIT_SERIALIZATION(OverallTimeline)
 

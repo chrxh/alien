@@ -68,12 +68,10 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
             updateTimeline(historyData.lineages[lineageId], _lineageStates[lineageId], lineageSample, time, forceSampling);
         }
 
-        // Finalize timelines of vanished lineages with their pending samples
+        // Drop extinct lineages (no longer present in the current statistics) so their history is neither kept nor serialized
         for (auto stateIt = _lineageStates.begin(); stateIt != _lineageStates.end();) {
             if (!dataPoints.lineages.contains(stateIt->first)) {
-                if (stateIt->second.accumulatedSample.has_value()) {
-                    emitSample(historyData.lineages[stateIt->first], stateIt->second, time);
-                }
+                historyData.lineages.erase(stateIt->first);
                 stateIt = _lineageStates.erase(stateIt);
             } else {
                 ++stateIt;
