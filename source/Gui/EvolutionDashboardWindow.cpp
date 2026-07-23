@@ -33,6 +33,10 @@ namespace
     auto constexpr ColorChipSize = 22.0f;
     auto constexpr SwatchSize = 11.0f;
     auto constexpr SwatchGap = 3.0f;
+
+    int constexpr LineageColumn = 0;
+    int constexpr CustomizationsColumn = 1;
+    int constexpr FirstMetricColumn = 2;
     auto constexpr PlotLabelColumnWidth = 150.0f;
     auto constexpr MinPlotHeight = 40.0f;
     auto constexpr MaxPlotHeight = 300.0f;
@@ -108,19 +112,34 @@ namespace
         ImGui::TextUnformatted(text.c_str());
     }
 
-    float drawColorSwatches(ImDrawList* drawList, ImVec2 const& pos, int colorBitset, float lineHeight, std::array<uint32_t, MAX_COLORS> const& cellColors)
+    float drawColorSwatches(
+        ImDrawList* drawList,
+        ImVec2 const& pos,
+        int colorBitset,
+        float lineHeight,
+        std::array<uint32_t, MAX_COLORS> const& cellColors,
+        float maxX = FLT_MAX,
+        bool rightAligned = false)
     {
         auto swatchSize = scale(SwatchSize);
         auto gap = scale(SwatchGap);
         auto offsetY = (lineHeight - swatchSize) / 2;
-        auto x = pos.x;
+        auto count = std::popcount(static_cast<unsigned>(colorBitset) & ((1u << MAX_COLORS) - 1));
+        auto startX = pos.x;
+        if (rightAligned && count > 0) {
+            auto swatchesWidth = count * swatchSize + (count - 1) * gap;
+            startX = std::max(pos.x, maxX - swatchesWidth);
+        }
+        auto x = startX;
+        drawList->PushClipRect({pos.x, pos.y}, {maxX, pos.y + lineHeight}, true);
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (colorBitset & (1 << i)) {
                 drawList->AddRectFilled({x, pos.y + offsetY}, {x + swatchSize, pos.y + offsetY + swatchSize}, toImColor(cellColors.at(i)), scale(3.0f));
                 x += swatchSize + gap;
             }
         }
-        return x - pos.x;
+        drawList->PopClipRect();
+        return x - startX;
     }
 
     double calcRate(double accumValue, double lastAccumValue, double delta)
@@ -417,11 +436,17 @@ void EvolutionDashboardWindow::updateTableData()
 void EvolutionDashboardWindow::sortLineages()
 {
     std::sort(_lineages.begin(), _lineages.end(), [column = _sortColumnIndex, ascending = _sortAscending](auto const& lhs, auto const& rhs) {
-        if (column == 0) {
+        if (column == LineageColumn) {
             return ascending ? lhs.id < rhs.id : lhs.id > rhs.id;
         }
-        auto lhsValue = lhs.currentValues.at(column - 1);
-        auto rhsValue = rhs.currentValues.at(column - 1);
+        if (column == CustomizationsColumn) {
+            if (lhs.colorBitset != rhs.colorBitset) {
+                return ascending ? lhs.colorBitset < rhs.colorBitset : lhs.colorBitset > rhs.colorBitset;
+            }
+            return lhs.id < rhs.id;
+        }
+        auto lhsValue = lhs.currentValues.at(column - FirstMetricColumn);
+        auto rhsValue = rhs.currentValues.at(column - FirstMetricColumn);
         auto lhsIsNan = std::isnan(lhsValue);
         auto rhsIsNan = std::isnan(rhsValue);
         if (lhsIsNan || rhsIsNan) {
@@ -729,9 +754,10 @@ void EvolutionDashboardWindow::processFilterBar()
 void EvolutionDashboardWindow::processLineageTable()
 {
     auto flags = ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
-    if (ImGui::BeginTable("##lineages", NumMetrics + 1, flags)) {
+    if (ImGui::BeginTable("##lineages", NumMetrics + FirstMetricColumn, flags)) {
         ImGui::TableSetupScrollFreeze(1, 2);
-        ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(180.0f));
+        ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
+        ImGui::TableSetupColumn("Customizations", ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
         for (auto const& metric : Metrics) {
             ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(metric.tableColumnWidth));
         }
@@ -741,7 +767,7 @@ void EvolutionDashboardWindow::processLineageTable()
         //header row with labels centered within the visible part of each column; columns can be
         //partially hidden behind the frozen lineage column or cut off at the right window border
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-        for (int column = 0; column < NumMetrics + 1; ++column) {
+        for (int column = 0; column < NumMetrics + FirstMetricColumn; ++column) {
             ImGui::TableSetColumnIndex(column);
             ImGui::PushID(column);
             std::string label = ImGui::TableGetColumnName(column);
@@ -756,7 +782,7 @@ void EvolutionDashboardWindow::processLineageTable()
                     _sortAscending = !_sortAscending;
                 } else {
                     _sortColumnIndex = column;
-                    _sortAscending = column == 0;  //metric columns show the largest values on top by default
+                    _sortAscending = column < FirstMetricColumn;  //metric columns show the largest values on top by default
                 }
                 sortLineages();
             }
@@ -770,7 +796,7 @@ void EvolutionDashboardWindow::processLineageTable()
         //summary row
         ImGui::TableNextRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImColor(0.13f, 0.16f, 0.23f, 1.0f));
-        ImGui::TableSetColumnIndex(0);
+        ImGui::TableSetColumnIndex(LineageColumn);
         auto allSelected = _selectedLineageIds.empty();
         if (ImGui::Selectable("##rowAll", allSelected, ImGuiSelectableFlags_SpanAllColumns)) {
             _selectedLineageIds.clear();
@@ -791,11 +817,13 @@ void EvolutionDashboardWindow::processLineageTable()
         auto numFilteredLineages = std::ranges::count_if(_lineages, [this](auto const& lineage) { return (_colorFilter & lineage.colorBitset) != 0; });
         AlienGui::Text("All filtered (" + std::to_string(numFilteredLineages) + ")");
         if (_allLineages.colorBitset != 0) {
-            ImGui::SameLine(0, scale(4.0f));
-            drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+            ImGui::TableSetColumnIndex(CustomizationsColumn);
+            auto pos = ImGui::GetCursorScreenPos();
+            auto rightEdge = pos.x + ImGui::GetContentRegionAvail().x;
+            drawColorSwatches(drawList, pos, _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors, rightEdge, true);
         }
         for (int i = 0; i < NumMetrics; ++i) {
-            ImGui::TableSetColumnIndex(i + 1);
+            ImGui::TableSetColumnIndex(i + FirstMetricColumn);
             rightAlignedText(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].tableDecimals));
         }
 
@@ -809,7 +837,7 @@ void EvolutionDashboardWindow::processLineageTable()
 
             //genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row;
             //submitted before the row selectable, otherwise the selectable resets the hover timer and the tooltip never shows
-            ImGui::TableSetColumnIndex(1);
+            ImGui::TableSetColumnIndex(FirstMetricColumn);
             auto lineHeight = ImGui::GetTextLineHeight();
             ImGui::SetWindowFontScale(0.75f);
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(3.0f), 0.0f});
@@ -824,13 +852,8 @@ void EvolutionDashboardWindow::processLineageTable()
                 onOpenRepresentativeGenome(lineage.representativeCellId);
             }
 
-            ImGui::TableSetColumnIndex(0);
+            ImGui::TableSetColumnIndex(LineageColumn);
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
-            if (lineage.colorBitset != 0) {
-                ImGui::SameLine(0, scale(4.0f));
-                drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-            }
-
             ImGui::SameLine();
             auto selected = _selectedLineageIds.contains(lineage.id);
             if (ImGui::Selectable("##row", selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)) {
@@ -845,8 +868,15 @@ void EvolutionDashboardWindow::processLineageTable()
                     _selectedLineageIds.insert(lineage.id);
                 }
             }
+
+            if (lineage.colorBitset != 0) {
+                ImGui::TableSetColumnIndex(CustomizationsColumn);
+                auto pos = ImGui::GetCursorScreenPos();
+                auto rightEdge = pos.x + ImGui::GetContentRegionAvail().x;
+                drawColorSwatches(drawList, pos, lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors, rightEdge, true);
+            }
             for (int i = 0; i < NumMetrics; ++i) {
-                ImGui::TableSetColumnIndex(i + 1);
+                ImGui::TableSetColumnIndex(i + FirstMetricColumn);
                 rightAlignedText(formatMetricValue(lineage.currentValues.at(i), Metrics[i].tableDecimals));
             }
             ImGui::PopID();
@@ -909,17 +939,24 @@ void EvolutionDashboardWindow::processTimelineHeader()
 
     //timeline filter shown above the mode/slider row
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-    AlienGui::Text("Timeline filter");
+    AlienGui::Text("Lineage filter");
     ImGui::PopStyleColor();
     ImGui::SameLine(0, scale(12.0f));
     if (_selectedLineageIds.empty()) {
-        AlienGui::Text("All filtered lineages");
+        AlienGui::Text("All filtered");
+        if (_allLineages.colorBitset != 0) {
+            ImGui::SameLine(0, scale(4.0f));
+            drawColorSwatches(ImGui::GetWindowDrawList(), ImGui::GetCursorScreenPos(), _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+        }
     } else {
         auto drawList = ImGui::GetWindowDrawList();
         for (auto const& lineage : _plottedLineages) {
-            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
+            if (lineage.colorBitset != 0) {
+                ImGui::SameLine(0, scale(4.0f));
+                auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth);
+            }
             ImGui::SameLine(0, scale(14.0f));
         }
         ImGui::NewLine();
@@ -1199,6 +1236,6 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _lastSteps = std::clamp(_lastSteps, 1000, TimelineLiveStatistics::MaxLiveSteps);
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, TimelineLiveStatistics::MaxLiveHistory);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
-    _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics);
+    _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics + FirstMetricColumn - 1);
     _colorFilter &= (1 << MAX_COLORS) - 1;  //an empty filter is allowed and simply shows no lineages
 }
