@@ -33,6 +33,8 @@
 
 #include <zstr.hpp>
 
+#include "ZstdStream.h"
+
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
     void save(Archive& ar, Classname const& data) \
@@ -1902,7 +1904,7 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
         statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
 
         {
-            zstr::ofstream stream(filename.string(), std::ios::binary);
+            zstd::ofstream stream(filename.string(), std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
             if (!stream) {
                 return false;
             }
@@ -1992,7 +1994,7 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
     try {
         {
             std::stringstream stdStream;
-            zstr::ostream stream(stdStream, std::ios::binary);
+            zstd::ostream stream(stdStream, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
             if (!stream) {
                 return false;
             }
@@ -2051,7 +2053,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
             return false;
         }
 
-        zstr::ofstream stream(filename.string(), std::ios::binary);
+        zstd::ofstream stream(filename.string(), std::ios::binary);
         if (!stream) {
             return false;
         }
@@ -2084,7 +2086,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
 {
     try {
         std::stringstream stdStream;
-        zstr::ostream stream(stdStream, std::ios::binary);
+        zstd::ostream stream(stdStream);
         if (!stream) {
             return false;
         }
@@ -2175,7 +2177,7 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
 bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, Desc const& content) const
 {
     try {
-        zstr::ofstream fileStream(filename.string(), std::ios::binary);
+        zstd::ofstream fileStream(filename.string(), std::ios::binary);
         if (!fileStream) {
             return false;
         }
@@ -2634,7 +2636,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
         timelines.lineageTimelines.emplace(lineageId, convertToTimeline(samples));
     }
 
-    zstr::ostream compressedStream(stream);
+    zstd::ostream compressedStream(stream);
     cereal::PortableBinaryOutputArchive archive(compressedStream);
     archive(Const::ProgramVersion);
     archive(timelines);
