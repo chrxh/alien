@@ -48,18 +48,19 @@ namespace
         char const* plotName;
         int tableDecimals;
         int plotDecimals;
+        float tableColumnWidth;
     };
 
     //the last two metrics are rates per 1K time steps, both in the table and in the timeline plots
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
-        {"Creatures", "Creatures", 0, 0},
-        {"Avg cells", "Avg cells", 1, 1},
-        {"Avg nodes", "Avg nodes", 1, 1},
-        {"Internal energy", "Internal energy", 0, 0},
-        {"Avg mut. rate", "Avg mutation rate", 4, 4},
-        {"Avg generation", "Avg generation", 0, 0},
-        {"Created /1K", "Created /1K", 2, 2},
-        {"Mutations /1K", "Mutations /1K", 4, 4},
+        {"Creatures", "Creatures", 0, 0, 82.0f},
+        {"Avg cells", "Avg cells", 1, 1, 82.0f},
+        {"Avg nodes", "Avg nodes", 1, 1, 82.0f},
+        {"Internal energy", "Internal energy", 0, 0, 105.0f},
+        {"Avg mut. rate", "Avg mutation rate", 4, 4, 105.0f},
+        {"Avg generation", "Avg generation", 0, 0, 105.0f},
+        {"Created /1K", "Created /1K", 2, 2, 105.0f},
+        {"Mutations /1K", "Mutations /1K", 4, 4, 105.0f},
     };
 
     ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
@@ -396,6 +397,14 @@ void EvolutionDashboardWindow::updateTableData()
     for (int i = 0; i < NumMetrics; ++i) {
         _allLineages.currentValues.at(i) = getFilteredOverallMetricValue(lastSample, referenceDataPoints, _colorFilter, i);
     }
+
+    //union of colors over all lineages matching the current filter, shown as swatches on the summary row
+    _allLineages.colorBitset = 0;
+    for (auto const& lineage : _lineages) {
+        if ((_colorFilter & lineage.colorBitset) != 0) {
+            _allLineages.colorBitset |= lineage.colorBitset;
+        }
+    }
 }
 
 void EvolutionDashboardWindow::sortLineages()
@@ -715,9 +724,9 @@ void EvolutionDashboardWindow::processLineageTable()
     auto flags = ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
     if (ImGui::BeginTable("##lineages", NumMetrics + 1, flags)) {
         ImGui::TableSetupScrollFreeze(1, 2);
-        ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
+        ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(180.0f));
         for (auto const& metric : Metrics) {
-            ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
+            ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(metric.tableColumnWidth));
         }
 
         auto drawList = ImGui::GetWindowDrawList();
@@ -772,7 +781,12 @@ void EvolutionDashboardWindow::processLineageTable()
             ICON_FA_THUMBTACK);
         auto iconWidth = ImGui::GetFont()->CalcTextSizeA(iconSize, FLT_MAX, 0.0f, ICON_FA_THUMBTACK).x;
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconWidth + scale(7.0f));
-        AlienGui::Text("All lineages (" + std::to_string(_lineages.size()) + ")");
+        auto allSwatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+        if (allSwatchesWidth > 0) {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + allSwatchesWidth + scale(4.0f));
+        }
+        auto numFilteredLineages = std::ranges::count_if(_lineages, [this](auto const& lineage) { return (_colorFilter & lineage.colorBitset) != 0; });
+        AlienGui::Text("All filtered (" + std::to_string(numFilteredLineages) + ")");
         for (int i = 0; i < NumMetrics; ++i) {
             ImGui::TableSetColumnIndex(i + 1);
             rightAlignedText(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].tableDecimals));
@@ -890,6 +904,26 @@ void EvolutionDashboardWindow::processTimelineSection()
 void EvolutionDashboardWindow::processTimelineHeader()
 {
     ImGui::Spacing();
+
+    //timeline filter shown above the mode/slider row
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+    AlienGui::Text("Timeline filter");
+    ImGui::PopStyleColor();
+    ImGui::SameLine(0, scale(12.0f));
+    if (_selectedLineageIds.empty()) {
+        AlienGui::Text("All lineages");
+    } else {
+        auto drawList = ImGui::GetWindowDrawList();
+        for (auto const& lineage : _plottedLineages) {
+            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
+            AlienGui::Text("Lineage #" + std::to_string(lineage.id));
+            ImGui::SameLine(0, scale(14.0f));
+        }
+        ImGui::NewLine();
+    }
+    ImGui::Spacing();
+
     std::vector<std::string> modeValues{"Real-time", "Last time steps", "Entire history"};
     AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values(modeValues), &_timelineMode);
 
@@ -929,23 +963,6 @@ void EvolutionDashboardWindow::processTimelineHeader()
         validateAndCorrect();
     }
     ImGui::EndChild();
-
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-    AlienGui::Text("Timeline filter");
-    ImGui::PopStyleColor();
-    ImGui::SameLine(0, scale(12.0f));
-    if (_selectedLineageIds.empty()) {
-        AlienGui::Text("All lineages");
-    } else {
-        auto drawList = ImGui::GetWindowDrawList();
-        for (auto const& lineage : _plottedLineages) {
-            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
-            AlienGui::Text("Lineage #" + std::to_string(lineage.id));
-            ImGui::SameLine(0, scale(14.0f));
-        }
-        ImGui::NewLine();
-    }
     ImGui::Spacing();
 }
 
@@ -1181,8 +1198,5 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, TimelineLiveStatistics::MaxLiveHistory);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
     _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics);
-    _colorFilter &= (1 << MAX_COLORS) - 1;
-    if (_colorFilter == 0) {
-        _colorFilter = (1 << MAX_COLORS) - 1;
-    }
+    _colorFilter &= (1 << MAX_COLORS) - 1;  //an empty filter is allowed and simply shows no lineages
 }
