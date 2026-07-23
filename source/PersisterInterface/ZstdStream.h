@@ -11,10 +11,9 @@
 
 #include <zstd.h>
 
-// Drop-in, iostream-based wrapper around Zstandard mirroring the parts of the zstr
-// API used in this project: ostream/ofstream for compression, istream/ifstream for
-// decompression. This lets call sites keep the familiar stream-based usage while
-// switching the codec from zlib (zstr) to zstd.
+// Lightweight, iostream-based wrapper around Zstandard: ostream/ofstream for
+// compression, istream/ifstream for decompression. Lets call sites compress and
+// decompress through ordinary std::ostream/std::istream interfaces.
 namespace zstd
 {
     inline constexpr int DefaultCompressionLevel = 13;
