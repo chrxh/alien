@@ -15,6 +15,20 @@
 #include "Viewport.h"
 #include <EngineInterface/SimulationFacade.h>
 
+namespace
+{
+    void drawCoordinatePair(std::string const& first, std::string const& second)
+    {
+        ImGui::TextUnformatted(first.c_str());
+        ImGui::SameLine(0, 0);
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
+        ImGui::TextUnformatted(" | ");
+        ImGui::PopStyleColor();
+        ImGui::SameLine(0, 0);
+        ImGui::TextUnformatted(second.c_str());
+    }
+}
+
 void SpatialControlWindow::initIntern()
 {
 
@@ -59,7 +73,7 @@ void SpatialControlWindow::processIntern()
         ImGui::PopStyleColor();
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         auto worldSize = _SimulationFacade::get()->getWorldSize();
-        ImGui::TextUnformatted((StringHelper::format(worldSize.x) + ", " + StringHelper::format(worldSize.y)).c_str());
+        drawCoordinatePair(StringHelper::format(worldSize.x), StringHelper::format(worldSize.y));
         ImGui::PopFont();
 
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
@@ -74,7 +88,7 @@ void SpatialControlWindow::processIntern()
         ImGui::PopStyleColor();
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         auto centerPos = Viewport::get().getCenterInWorldPos();
-        ImGui::TextUnformatted((StringHelper::format(centerPos.x, 1) + ", " + StringHelper::format(centerPos.y, 1)).c_str());
+        drawCoordinatePair(StringHelper::format(centerPos.x, 1), StringHelper::format(centerPos.y, 1));
         ImGui::PopFont();
 
         AlienGui::Separator();
