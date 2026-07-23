@@ -38,7 +38,6 @@ namespace
     OverallSample createOverallSample(double base)
     {
         OverallSample result;
-        result.time = base;
         result.timestep = base + 1;
         result.systemClock = base + 2;
 
@@ -62,7 +61,6 @@ namespace
     LineageSample createLineageSample(double base)
     {
         LineageSample result;
-        result.time = base;
         result.timestep = base + 1;
         result.systemClock = base + 2;
         result.data.colorBitset = static_cast<uint32_t>(base) + 3;
@@ -81,7 +79,6 @@ namespace
 
     void compare(OverallSample const& expected, OverallSample const& actual)
     {
-        EXPECT_EQ(expected.time, actual.time);
         EXPECT_EQ(expected.timestep, actual.timestep);
         EXPECT_EQ(expected.systemClock, actual.systemClock);
 
@@ -104,7 +101,6 @@ namespace
 
     void compare(LineageSample const& expected, LineageSample const& actual)
     {
-        EXPECT_EQ(expected.time, actual.time);
         EXPECT_EQ(expected.timestep, actual.timestep);
         EXPECT_EQ(expected.systemClock, actual.systemClock);
         EXPECT_EQ(expected.data.colorBitset, actual.data.colorBitset);
@@ -162,7 +158,6 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
     //many color combinations share the same timeline; a few carry distinct data
     auto createSample = [](double base) {
         OverallSample result;
-        result.time = base;
         result.timestep = base + 1;
         result.systemClock = base + 2;
         for (uint32_t colorBitset = 1; colorBitset < 64; ++colorBitset) {

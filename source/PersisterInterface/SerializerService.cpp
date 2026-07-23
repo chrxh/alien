@@ -2263,7 +2263,6 @@ namespace
     auto constexpr Id_StatisticsHistory_Overall = 0;
     auto constexpr Id_StatisticsHistory_Lineages = 1;
 
-    auto constexpr Id_Timeline_Time = 0;
     auto constexpr Id_Timeline_Timestep = 1;
     auto constexpr Id_Timeline_SystemClock = 2;
 
@@ -2308,7 +2307,6 @@ namespace
 
     struct OverallTimeline
     {
-        std::vector<double> time;
         std::vector<double> timestep;
         std::vector<double> systemClock;
         std::unordered_map<uint32_t, ColorTimeline> colorTimelines;
@@ -2316,7 +2314,6 @@ namespace
 
     struct LineageTimeline
     {
-        std::vector<double> time;
         std::vector<double> timestep;
         std::vector<double> systemClock;
         std::vector<uint32_t> colorBitset;
@@ -2455,11 +2452,9 @@ namespace
     template <typename Timeline, typename Sample>
     void extractTimingColumns(Timeline& timeline, std::vector<Sample> const& samples)
     {
-        timeline.time.reserve(samples.size());
         timeline.timestep.reserve(samples.size());
         timeline.systemClock.reserve(samples.size());
         for (auto const& sample : samples) {
-            timeline.time.emplace_back(sample.time);
             timeline.timestep.emplace_back(sample.timestep);
             timeline.systemClock.emplace_back(sample.systemClock);
         }
@@ -2468,10 +2463,7 @@ namespace
     template <typename Sample, typename Timeline>
     std::vector<Sample> createSamplesWithTiming(Timeline const& timeline)
     {
-        std::vector<Sample> result(timeline.time.size());
-        for (auto&& [sample, value] : std::views::zip(result, timeline.time)) {
-            sample.time = value;
-        }
+        std::vector<Sample> result(timeline.timestep.size());
         for (auto&& [sample, value] : std::views::zip(result, timeline.timestep)) {
             sample.timestep = value;
         }
@@ -2589,7 +2581,6 @@ namespace cereal
         }
         {
             auto scope = getSerializationScope(task, ar);
-            scope.addDesc(Id_Timeline_Time, data.time);
             scope.addDesc(Id_Timeline_Timestep, data.timestep);
             scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
             scope.addDesc(Id_OverallTimeline_UniqueColorTimelines, deduplicated.uniqueTimelines);
@@ -2605,7 +2596,6 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, LineageTimeline& data)
     {
         auto scope = getSerializationScope(task, ar);
-        scope.addDesc(Id_Timeline_Time, data.time);
         scope.addDesc(Id_Timeline_Timestep, data.timestep);
         scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
         scope.addDesc(Id_LineageTimeline_ColorBitset, data.colorBitset);
