@@ -781,25 +781,18 @@ void EvolutionDashboardWindow::processLineageTable()
             ICON_FA_THUMBTACK);
         auto iconWidth = ImGui::GetFont()->CalcTextSizeA(iconSize, FLT_MAX, 0.0f, ICON_FA_THUMBTACK).x;
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconWidth + scale(7.0f));
-        auto allSwatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-        if (allSwatchesWidth > 0) {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + allSwatchesWidth + scale(4.0f));
-        }
         auto numFilteredLineages = std::ranges::count_if(_lineages, [this](auto const& lineage) { return (_colorFilter & lineage.colorBitset) != 0; });
         AlienGui::Text("All filtered (" + std::to_string(numFilteredLineages) + ")");
+        if (_allLineages.colorBitset != 0) {
+            ImGui::SameLine(0, scale(4.0f));
+            drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+        }
         for (int i = 0; i < NumMetrics; ++i) {
             ImGui::TableSetColumnIndex(i + 1);
             rightAlignedText(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].tableDecimals));
         }
 
         //lineage rows
-        auto maxNumColors = 1;
-        for (auto const& lineage : _lineages) {
-            if (_colorFilter & lineage.colorBitset) {
-                maxNumColors = std::max(maxNumColors, std::popcount(static_cast<unsigned>(lineage.colorBitset)));
-            }
-        }
-        auto swatchSlotWidth = toFloat(maxNumColors) * (scale(SwatchSize) + scale(SwatchGap));
         for (auto const& lineage : _lineages) {
             if ((_colorFilter & lineage.colorBitset) == 0) {
                 continue;
@@ -825,9 +818,11 @@ void EvolutionDashboardWindow::processLineageTable()
             }
 
             ImGui::TableSetColumnIndex(0);
-            drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSlotWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
+            if (lineage.colorBitset != 0) {
+                ImGui::SameLine(0, scale(4.0f));
+                drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+            }
 
             ImGui::SameLine();
             auto selected = _selectedLineageIds.contains(lineage.id);
