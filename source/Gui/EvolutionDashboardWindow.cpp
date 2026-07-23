@@ -906,7 +906,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
     ImGui::PopStyleColor();
     ImGui::SameLine(0, scale(12.0f));
     if (_selectedLineageIds.empty()) {
-        AlienGui::Text("All lineages");
+        AlienGui::Text("All filtered lineages");
     } else {
         auto drawList = ImGui::GetWindowDrawList();
         for (auto const& lineage : _plottedLineages) {
