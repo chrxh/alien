@@ -57,13 +57,9 @@ add_library(PersisterInterface
 target_link_libraries(PersisterInterface Base)
 
 target_link_libraries(PersisterInterface Boost::boost)
-target_link_libraries(PersisterInterface ZLIB::ZLIB)
 
 find_package(zstd CONFIG REQUIRED)
 target_link_libraries(PersisterInterface zstd::libzstd)
-
-find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
-target_include_directories(PersisterInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
 target_precompile_headers(PersisterInterface PRIVATE
     <algorithm>

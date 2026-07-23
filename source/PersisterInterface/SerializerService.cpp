@@ -31,8 +31,6 @@
 
 #include "SettingsParserService.h"
 
-#include <zstr.hpp>
-
 #include "ZstdStream.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
@@ -2023,7 +2021,7 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
     try {
         {
             std::stringstream stdStream(input.mainData);
-            zstr::istream stream(stdStream, std::ios::binary);
+            zstd::istream stream(stdStream);
             if (!stream) {
                 return false;
             }
@@ -2109,7 +2107,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
 {
     try {
         std::stringstream stdStream(input);
-        zstr::istream stream(stdStream, std::ios::binary);
+        zstd::istream stream(stdStream);
         if (!stream) {
             return false;
         }
@@ -2210,7 +2208,7 @@ void SerializerService::serializeDescription(Desc const& description, std::ostre
 
 bool SerializerService::deserializeDescription(Desc& description, std::filesystem::path const& filename) const
 {
-    zstr::ifstream stream(filename.string(), std::ios::binary);
+    zstd::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
         return false;
     }
@@ -2648,7 +2646,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     //the statistics history is auxiliary data: an unreadable or outdated file yields an empty history instead of failing the simulation load
     statistics = StatisticsHistoryData();
     try {
-        zstr::istream decompressedStream(stream);
+        zstd::istream decompressedStream(stream);
         cereal::PortableBinaryInputArchive archive(decompressedStream);
 
         std::string version;
