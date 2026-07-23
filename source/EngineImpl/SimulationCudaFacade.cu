@@ -49,9 +49,6 @@
 
 namespace
 {
-    // The evolution statistics kernels are heavy; running them at wall-clock-throttled (i.e. run-to-run varying)
-    // timesteps perturbs the simulation's GPU execution timing and makes simulation runs non-reproducible.
-    // They are therefore scheduled at deterministic timestep intervals instead.
     auto constexpr EvolutionStatisticsUpdateInterval = 10;
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
