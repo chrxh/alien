@@ -57,6 +57,9 @@
       "name": "zstr"
     },
     {
+      "name": "zstd"
+    },
+    {
       "name": "openssl",
       "version>=": "3.3.1"
     },
