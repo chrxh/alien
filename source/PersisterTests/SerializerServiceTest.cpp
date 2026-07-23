@@ -157,6 +157,40 @@ TEST_F(SerializerServiceTests, statisticsHistory)
     compare(before.statistics, after.statistics);
 }
 
+TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
+{
+    //many color combinations share the same timeline; a few carry distinct data
+    auto createSample = [](double base) {
+        OverallSample result;
+        result.time = base;
+        result.timestep = base + 1;
+        result.systemClock = base + 2;
+        for (uint32_t colorBitset = 1; colorBitset < 64; ++colorBitset) {
+            ColorOverallDataPoint colorPoint;
+            if (colorBitset == 0x1u) {
+                colorPoint.numCreatures = base + 100;
+            } else if (colorBitset == 0x2u) {
+                colorPoint.numCreatures = base + 200;
+            }
+            result.data.emplace(colorBitset, colorPoint);
+        }
+        return result;
+    };
+
+    DeserializedSimulation before;
+    for (int i = 0; i < 5; ++i) {
+        before.statistics.overall.emplace_back(createSample(toDouble(i) * 100));
+    }
+
+    SerializedSimulation serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+
+    DeserializedSimulation after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+
+    compare(before.statistics, after.statistics);
+}
+
 TEST_F(SerializerServiceTests, emptyStatisticsHistory)
 {
     DeserializedSimulation before;
