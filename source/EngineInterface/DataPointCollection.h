@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <unordered_map>
 
-//summable statistics of all creatures sharing one colorBitset; the fields mirror the aggregatable part of
-//LineageDataPoint (everything except colorBitset and representativeCellId) so that the same metric derivation
-//serves single lineages and color-filtered overall statistics
+// Summable statistics of all creatures sharing one colorBitset; the fields mirror the aggregatable part of
+// LineageDataPoint (everything except colorBitset and representativeCellId) so that the same metric derivation
+// serves single lineages and color-filtered overall statistics
 struct ColorOverallDataPoint
 {
     double numCreatures = 0;
@@ -47,8 +47,8 @@ struct DataPointCollection
     double timestep = 0;
     double systemClock = 0;
 
-    //overall statistics broken down by colorBitset; overall statistics for a color filter are assembled by summing
-    //the buckets whose colorBitset intersects the filter (each creature falls into exactly one bucket)
+    // Overall statistics broken down by colorBitset; overall statistics for a color filter are assembled by summing
+    // the buckets whose colorBitset intersects the filter (each creature falls into exactly one bucket)
     std::unordered_map<uint32_t, ColorOverallDataPoint> overall;
     std::unordered_map<uint32_t, LineageDataPoint> lineages;
 

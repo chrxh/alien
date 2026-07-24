@@ -18,7 +18,7 @@ class StatisticsService
 public:
     void addDataPoint(StatisticsHistory& history, StatisticsEntry const& statisticsEntry, uint64_t timestep);
     void resetTime(StatisticsHistory& history, uint64_t timestep);
-    void rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep);
+    void setStatisticsHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep);
 
 private:
     static auto constexpr DefaultTimeStepDelta = 10.0;
