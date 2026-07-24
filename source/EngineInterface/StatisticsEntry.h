@@ -43,5 +43,5 @@ struct LineageStatisticsEntry
 struct StatisticsEntry
 {
     OverallStatisticsEntry overallEntry;
-    std::vector<LineageStatisticsEntry> entries;  // Per-lineage statistics, sorted by lineageId
+    std::vector<LineageStatisticsEntry> lineageEntries;  // Per-lineage statistics, sorted by lineageId
 };

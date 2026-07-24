@@ -156,7 +156,7 @@ namespace
         return sample.overall;
     }
 
-    std::unordered_map<uint32_t, ColorOverallDataPoint> const& overallDataOf(OverallSample const& sample)
+    std::unordered_map<uint32_t, ColorOverallDataPoint> const& overallDataOf(ColorSamples const& sample)
     {
         return sample.data;
     }
@@ -571,7 +571,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
 {
     //rebuild only when the underlying data or view settings have changed; the lineage timelines are
     //sampled independently of the overall timeline and therefore contribute their own back times
-    auto sourceBackTime = !source.overall.empty() ? source.overall.back().timestep : -1.0;
+    auto sourceBackTime = !source.colors.empty() ? source.colors.back().timestep : -1.0;
     std::vector<double> lineageBackTimes;
     lineageBackTimes.reserve(_selectedLineageIds.size());
     for (auto const& selectedId : _selectedLineageIds) {
@@ -586,7 +586,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
 
     //"all lineages" series honoring the color filter (the current values are maintained by updateTableData)
     _allLineages.id = -1;
-    buildPlotSeries(_allLineages, source.overall, 0, false, [colorFilter = _colorFilter](auto const& sample, auto const* reference, int metricIndex) {
+    buildPlotSeries(_allLineages, source.colors, 0, false, [colorFilter = _colorFilter](auto const& sample, auto const* reference, int metricIndex) {
         return getFilteredOverallMetricValue(sample, reference, colorFilter, metricIndex);
     });
 
@@ -641,7 +641,7 @@ void EvolutionDashboardWindow::processHeader()
     auto numLineages = toDouble(overallEntry.numActiveLineages);
     auto numLineagesAbove5Percent = 0;
     auto numLineagesAbove1Percent = 0;
-    for (auto const& entry : _lastStatisticsEntry.entries) {
+    for (auto const& entry : _lastStatisticsEntry.lineageEntries) {
         if (toDouble(entry.numCreatures) >= toDouble(overallEntry.numCreatures) / 20) {
             ++numLineagesAbove5Percent;
         }

@@ -17,7 +17,7 @@ DataPointCollection StatisticsConverterService::convert(
     auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
     result.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
 
-    for (auto const& entry : statisticsEntry.entries) {
+    for (auto const& entry : statisticsEntry.lineageEntries) {
         LineageDataPoint point;
         point.colorBitset = entry.colorBitset;
         point.representativeCellId = entry.representativeCellId;

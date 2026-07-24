@@ -33,8 +33,6 @@ struct TimedSample
     }
 };
 
-//the overall timeline stores the whole per-colorBitset breakdown in a single sample, so summing and averaging
-//two samples means merging their color buckets; std::unordered_map carries no such operators of its own
 template <>
 struct TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>
 {
@@ -72,14 +70,14 @@ struct TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>
     }
 };
 
-using OverallSample = TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>;
+using ColorSamples = TimedSample<std::unordered_map<uint32_t, ColorOverallDataPoint>>;
 using LineageSample = TimedSample<LineageDataPoint>;
 
-//the overall data and each lineage have separate timelines so that sampling density and compression
-//can be controlled independently: young lineages keep a high sampling rate even in old simulations
+// The overall data and each lineage have separate timelines so that sampling density and compression
+// can be controlled independently: young lineages keep a high sampling rate even in old simulations
 struct StatisticsHistoryData
 {
-    std::vector<OverallSample> overall;
+    std::vector<ColorSamples> colors;
     std::unordered_map<uint32_t, std::vector<LineageSample>> lineages;
 };
 

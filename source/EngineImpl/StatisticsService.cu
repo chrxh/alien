@@ -19,20 +19,20 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
     auto& historyData = history.getDataRef();
 
     auto timestepAsDouble = toDouble(timestep);
-    if (!historyData.overall.empty() && historyData.overall.back().timestep > timestepAsDouble + NEAR_ZERO) {
+    if (!historyData.colors.empty() && historyData.colors.back().timestep > timestepAsDouble + NEAR_ZERO) {
         historyData = StatisticsHistoryData();
         _colorOverallStates = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
         _lineageStates.clear();
     }
 
     auto firstSampling = !_lastTimestep.has_value();
-    if (firstSampling && !historyData.overall.empty()) {
+    if (firstSampling && !historyData.colors.empty()) {
 
         // Reuse last entries if no statistics is available
-        auto overallBackTime = historyData.overall.back().timestep;
-        auto overallSample = historyData.overall.back();
+        auto overallBackTime = historyData.colors.back().timestep;
+        auto overallSample = historyData.colors.back();
         overallSample.timestep = timestepAsDouble;
-        updateTimeline(historyData.overall, _colorOverallStates, overallSample, timestepAsDouble, true);
+        updateTimeline(historyData.colors, _colorOverallStates, overallSample, timestepAsDouble, true);
 
         // Only lineages that were still sampled at the end of the history are continued; extinct ones keep their last entry
         for (auto& [lineageId, samples] : historyData.lineages) {
@@ -50,11 +50,11 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
     } else {
         auto dataPoints = StatisticsConverterService::get().convert(statisticsEntry, timestep, timestepAsDouble);
 
-        OverallSample overallSample;
+        ColorSamples overallSample;
         overallSample.timestep = dataPoints.timestep;
         overallSample.systemClock = dataPoints.systemClock;
         overallSample.data = dataPoints.overall;
-        updateTimeline(historyData.overall, _colorOverallStates, overallSample, timestepAsDouble, firstSampling);
+        updateTimeline(historyData.colors, _colorOverallStates, overallSample, timestepAsDouble, firstSampling);
 
         for (auto const& [lineageId, lineageDataPoint] : dataPoints.lineages) {
             LineageSample lineageSample;
@@ -84,7 +84,7 @@ void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
     auto& historyData = history.getDataRef();
     auto timestepAsDouble = toDouble(timestep);
 
-    resetTimelineTime(historyData.overall, _colorOverallStates, timestepAsDouble);
+    resetTimelineTime(historyData.colors, _colorOverallStates, timestepAsDouble);
 
     for (auto timelineIt = historyData.lineages.begin(); timelineIt != historyData.lineages.end();) {
         auto& samples = timelineIt->second;
@@ -103,9 +103,9 @@ void StatisticsService::setStatisticsHistory(StatisticsHistory& history, Statist
     _lineageStates.clear();
     _lastTimestep.reset();
 
-    if (!newHistoryData.overall.empty()) {
+    if (!newHistoryData.colors.empty()) {
         _colorOverallStates.longtermTimestepDelta =
-            std::max(DefaultTimeStepDelta, (toDouble(timestep) - newHistoryData.overall.front().timestep) / toDouble(newHistoryData.overall.size()));
+            std::max(DefaultTimeStepDelta, (toDouble(timestep) - newHistoryData.colors.front().timestep) / toDouble(newHistoryData.colors.size()));
     }
     for (auto const& [lineageId, samples] : newHistoryData.lineages) {
         if (!samples.empty()) {

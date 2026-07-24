@@ -2495,7 +2495,7 @@ namespace
         }
     }
 
-    OverallTimeline convertToTimeline(std::vector<OverallSample> const& samples)
+    OverallTimeline convertToTimeline(std::vector<ColorSamples> const& samples)
     {
         OverallTimeline result;
         extractTimingColumns(result, samples);
@@ -2518,9 +2518,9 @@ namespace
         return result;
     }
 
-    std::vector<OverallSample> convertToSamples(OverallTimeline const& timeline)
+    std::vector<ColorSamples> convertToSamples(OverallTimeline const& timeline)
     {
-        auto result = createSamplesWithTiming<OverallSample>(timeline);
+        auto result = createSamplesWithTiming<ColorSamples>(timeline);
 
         for (auto const& [colorBitset, columns] : timeline.colorTimelines) {
             for (auto const& [id, column, field] : ColorColumnDescs) {
@@ -2619,7 +2619,7 @@ namespace cereal
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
 {
     StatisticsTimelines timelines;
-    timelines.overallTimeline = convertToTimeline(statistics.overall);
+    timelines.overallTimeline = convertToTimeline(statistics.colors);
     for (auto const& [lineageId, samples] : statistics.lineages) {
         timelines.lineageTimelines.emplace(lineageId, convertToTimeline(samples));
     }
@@ -2648,7 +2648,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
         StatisticsTimelines timelines;
         archive(timelines);
 
-        statistics.overall = convertToSamples(timelines.overallTimeline);
+        statistics.colors = convertToSamples(timelines.overallTimeline);
         for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
             statistics.lineages.emplace(lineageId, convertToSamples(timeline));
         }
