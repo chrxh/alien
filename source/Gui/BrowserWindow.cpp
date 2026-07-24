@@ -502,10 +502,22 @@ void BrowserWindow::processUserList()
                             }
 
                             ImGui::TableNextColumn();
-                            processShortenedText(std::to_string(item->starsReceived), isBoldFont);
+                            if (isBoldFont) {
+                                ImGui::PushFont(styleRepository.getSmallBoldFont());
+                            }
+                            AlienGui::Text(AlienGui::TextParameters().text(std::to_string(item->starsReceived)).rightAligned(true));
+                            if (isBoldFont) {
+                                ImGui::PopFont();
+                            }
 
                             ImGui::TableNextColumn();
-                            processShortenedText(std::to_string(item->starsGiven), isBoldFont);
+                            if (isBoldFont) {
+                                ImGui::PushFont(styleRepository.getSmallBoldFont());
+                            }
+                            AlienGui::Text(AlienGui::TextParameters().text(std::to_string(item->starsGiven)).rightAligned(true));
+                            if (isBoldFont) {
+                                ImGui::PopFont();
+                            }
 
                             ImGui::PopID();
                         }
@@ -931,7 +943,7 @@ void BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(std::to_string(leaf.rawTO->numDownloads));
+        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(leaf.rawTO->numDownloads)).rightAligned(true));
     }
 }
 
@@ -939,7 +951,7 @@ void BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(std::to_string(leaf.rawTO->width));
+        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(leaf.rawTO->width)).rightAligned(true));
     }
 }
 
@@ -947,7 +959,7 @@ void BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(std::to_string(leaf.rawTO->height));
+        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(leaf.rawTO->height)).rightAligned(true));
     }
 }
 
@@ -958,7 +970,7 @@ void BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, 
         if (kobjects) {
             AlienGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
         } else {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->particles));
+            AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(leaf.rawTO->particles)).rightAligned(true));
         }
     }
 }

@@ -716,9 +716,8 @@ void EvolutionDashboardWindow::processCard(
 void EvolutionDashboardWindow::processFilterBar()
 {
     ImGui::Spacing();
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+    AlienGui::Separator();
     AlienGui::Text("Filter by customizations");
-    ImGui::PopStyleColor();
     ImGui::SameLine(0, scale(12.0f));
 
     auto drawList = ImGui::GetWindowDrawList();
@@ -764,9 +763,10 @@ void EvolutionDashboardWindow::processLineageTable()
 
         auto drawList = ImGui::GetWindowDrawList();
 
-        //header row with labels centered within the visible part of each column; columns can be
+        //header row: all labels are left-aligned and clamped to the visible part of each column, which can be
         //partially hidden behind the frozen lineage column or cut off at the right window border
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
         for (int column = 0; column < NumMetrics + FirstMetricColumn; ++column) {
             ImGui::TableSetColumnIndex(column);
             ImGui::PushID(column);
@@ -788,7 +788,7 @@ void EvolutionDashboardWindow::processLineageTable()
             }
             auto visibleMinX = std::max(cellPos.x, drawList->GetClipRectMin().x);
             auto visibleMaxX = std::min(cellMaxX, drawList->GetClipRectMax().x);
-            auto textPosX = std::clamp((visibleMinX + visibleMaxX - textWidth) / 2, cellPos.x, std::max(cellPos.x, cellMaxX - textWidth));
+            auto textPosX = std::clamp(cellPos.x, visibleMinX, std::max(visibleMinX, visibleMaxX - textWidth));
             drawList->AddText({textPosX, cellPos.y}, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
             ImGui::PopID();
         }
@@ -935,32 +935,6 @@ void EvolutionDashboardWindow::processTimelineSection()
 
 void EvolutionDashboardWindow::processTimelineHeader()
 {
-    ImGui::Spacing();
-
-    //timeline filter shown above the mode/slider row
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-    AlienGui::Text("Lineage filter");
-    ImGui::PopStyleColor();
-    ImGui::SameLine(0, scale(12.0f));
-    if (_selectedLineageIds.empty()) {
-        AlienGui::Text("All filtered");
-        if (_allLineages.colorBitset != 0) {
-            ImGui::SameLine(0, scale(4.0f));
-            drawColorSwatches(ImGui::GetWindowDrawList(), ImGui::GetCursorScreenPos(), _allLineages.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-        }
-    } else {
-        auto drawList = ImGui::GetWindowDrawList();
-        for (auto const& lineage : _plottedLineages) {
-            AlienGui::Text("Lineage #" + std::to_string(lineage.id));
-            if (lineage.colorBitset != 0) {
-                ImGui::SameLine(0, scale(4.0f));
-                auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth);
-            }
-            ImGui::SameLine(0, scale(14.0f));
-        }
-        ImGui::NewLine();
-    }
     ImGui::Spacing();
 
     std::vector<std::string> modeValues{"Real-time", "Last time steps", "Entire history"};
@@ -1157,6 +1131,7 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
         ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, 0.0f));
         ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, 0.0f));
         ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.0f, 0.0f, 0.0f, 0.0f));
+        ImPlot::PushStyleColor(ImPlotCol_AxisText, (ImU32)Const::TextDecentColor);
         ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
         ImPlot::SetNextAxesLimits(minTime, maxTime, 0, 1.0, ImGuiCond_Always);
         if (ImPlot::BeginPlot("##timeAxis", ImVec2(-1, scale(TimeAxisExtraHeight)), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
@@ -1166,7 +1141,7 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
             ImPlot::EndPlot();
         }
         ImPlot::PopStyleVar();
-        ImPlot::PopStyleColor(3);
+        ImPlot::PopStyleColor(4);
         ImGui::EndTable();
     }
 }

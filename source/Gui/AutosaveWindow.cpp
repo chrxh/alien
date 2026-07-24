@@ -210,7 +210,7 @@ void AutosaveWindow::processTable()
                 // timestep
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienGui::Text(StringHelper::format(entry->timestep));
+                    AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(entry->timestep)).rightAligned(true));
                 }
 
                 // peak

@@ -1253,6 +1253,13 @@ void AlienGui::Text(TextParameters const& parameters)
         break;
     }
 
+    if (parameters._rightAligned) {
+        auto offset = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(parameters._text.c_str()).x;
+        if (offset > 0.0f) {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+        }
+    }
+
     auto refPos = ImGui::GetCursorScreenPos();
 
     ImGui::TextUnformatted(parameters._text.c_str());
