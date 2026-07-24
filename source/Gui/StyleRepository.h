@@ -39,10 +39,10 @@ namespace Const
     ImColor const ImportantButtonHoveredColor = ImColor::HSV(0.0f, 0.6f, 0.8f);
     ImColor const ImportantButtonActiveColor = ImColor::HSV(0.0f, 0.6f, 1.0f);
 
-    ImColor const TreeNodeHighColor = ImColor::HSV(0.5f, 0.6f, 0.40f);
-    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.5f, 0.6f, 0.60f);
-    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.5f, 0.6f, 0.70f);
-    ImColor const TreeNodeDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const TreeNodeHighColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
+    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeDefaultColor = ImColor(0.19f, 0.19f, 0.20f, 1.00f);  //same dark gray as TableHeaderColor
     ImColor const TreeNodeDefaultHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeDefaultActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
     ImColor const TreeNodeLowColor = ImColor::HSV(0.0, 0.0f, 0.20f);
@@ -52,14 +52,14 @@ namespace Const
     ImColor const DisabledOverlayColor1 = ImColor::HSV(0.0f, 0.0f, 0.35f, 0.5f);
     ImColor const DisabledOverlayColor2 = ImColor::HSV(0.0f, 0.0f, 0.06f, 0.2f);
 
-    ImColor const GroupDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
-    ImColor const GroupHighColor = ImColor::HSV(0.5f, 0.6f, 0.40f);
+    ImColor const GroupDefaultColor = ImColor(0.19f, 0.19f, 0.20f, 1.00f);  //same dark gray as TableHeaderColor
+    ImColor const GroupHighColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
 
     ImColor const MovableSeparatorColor = ImColor::HSV(0.5f, 0.6f, 0.6f);
     ImColor const MovableSeparatorHoveredColor = ImColor::HSV(0.5f, 0.6f, 0.7f);
     ImColor const MovableSeparatorActiveColor = ImColor::HSV(0.5f, 0.6f, 0.8f);
 
-    ImColor const TableHeaderColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const TableHeaderColor = ImColor(0.19f, 0.19f, 0.20f, 1.00f);  //matches the ImGui default ImGuiCol_TableHeaderBg
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 

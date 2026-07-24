@@ -205,7 +205,7 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 3: Angle
                     ImGui::TableNextColumn();
-                    AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
+                    AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(node._referenceAngle, 1)).rightAligned(true));
 
                     // Column 4: Color
                     ImGui::TableNextColumn();

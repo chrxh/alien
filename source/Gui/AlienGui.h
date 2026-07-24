@@ -340,6 +340,7 @@ public:
         MEMBER(TextParameters, std::string, text, "");
         MEMBER(TextParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(TextParameters, TextStyle, style, TextStyle::Normal);
+        MEMBER(TextParameters, bool, rightAligned, false);
     };
     static void Text(TextParameters const& parameters);
     static void Text(std::string const& text);
