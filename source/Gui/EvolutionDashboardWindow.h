@@ -55,6 +55,7 @@ private:
     void processTimelineHeader();
     void processTimelinePlots(std::vector<LineageDisplayData const*> const& plottedLineages);
     void processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex);
+    std::pair<double, double> computePlotTimeRange(std::vector<LineageDisplayData const*> const& plottedLineages) const;
     void processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin);
     void drawValuesAtMouseCursor(
         std::vector<double> const& series,

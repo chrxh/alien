@@ -82,22 +82,22 @@ void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& historyData = history.getDataRef();
-    auto time = toDouble(timestep);
+    auto timestepAsDouble = toDouble(timestep);
 
-    resetTimelineTime(historyData.overall, _colorOverallStates, time);
+    resetTimelineTime(historyData.overall, _colorOverallStates, timestepAsDouble);
 
     for (auto timelineIt = historyData.lineages.begin(); timelineIt != historyData.lineages.end();) {
         auto& samples = timelineIt->second;
         if (auto stateIt = _lineageStates.find(timelineIt->first); stateIt != _lineageStates.end()) {
-            resetTimelineTime(samples, stateIt->second, time);
+            resetTimelineTime(samples, stateIt->second, timestepAsDouble);
         } else {
-            std::erase_if(samples, [&](LineageSample const& sample) { return sample.timestep >= time; });
+            std::erase_if(samples, [&](LineageSample const& sample) { return sample.timestep >= timestepAsDouble; });
         }
         timelineIt = samples.empty() ? historyData.lineages.erase(timelineIt) : std::next(timelineIt);
     }
 }
 
-void StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
+void StatisticsService::setStatisticsHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
 {
     _colorOverallStates = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
     _lineageStates.clear();

@@ -464,7 +464,7 @@ StatisticsEntry _SimulationCudaFacade::getStatisticsEntry()
 
 void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
 {
-    StatisticsService::get().rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
+    StatisticsService::get().setStatisticsHistory(_statisticsHistory, data, getCurrentTimestep());
 }
 
 uint64_t _SimulationCudaFacade::getCurrentTimestep() const

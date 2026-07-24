@@ -5,6 +5,7 @@
 #include <cmath>
 #include <ctime>
 #include <limits>
+#include <utility>
 #include <cstdio>
 
 #include <imgui.h>
@@ -231,6 +232,11 @@ namespace
     int formatTimestepsInThousands(double value, char* buff, int size, void*)
     {
         return snprintf(buff, size, "%s", StringHelper::formatInThousands(value).c_str());
+    }
+
+    int formatRealTimeSeconds(double value, char* buff, int size, void*)
+    {
+        return snprintf(buff, size, "%s s", StringHelper::format(value, 0).c_str());
     }
 
     //most recent sample that is at least RateAveragingTimesteps older; falls back to the oldest sample
@@ -915,22 +921,19 @@ void EvolutionDashboardWindow::processTimelineSection()
         }
     }
 
-    //in entire-history mode the time axis is pinned below the scrolling plot area so it stays visible;
-    //reserve its full height (axis plot + table cell padding + item spacing), otherwise the section gets its own scrollbar
-    auto pinnedTimeAxis = _timelineMode == TimelineMode_EntireHistory;
+    //the time axis is pinned below the scrolling plot area so it stays visible in every mode; reserve its full
+    //height (axis plot + table cell padding + item spacing), otherwise the section gets its own scrollbar
     auto const& style = ImGui::GetStyle();
     auto timeAxisHeight = scale(TimeAxisExtraHeight) + style.CellPadding.y * 2.0f + style.ItemSpacing.y;
     auto scrollbarWidth = 0.0f;
-    if (ImGui::BeginChild("##timelinePlots", {0, pinnedTimeAxis ? -timeAxisHeight : 0.0f})) {
+    if (ImGui::BeginChild("##timelinePlots", {0, -timeAxisHeight})) {
         processTimelinePlots(plottedLineages);
         if (ImGui::GetScrollMaxY() > 0.0f) {
             scrollbarWidth = ImGui::GetStyle().ScrollbarSize;
         }
     }
     ImGui::EndChild();
-    if (pinnedTimeAxis) {
-        processTimeAxis(plottedLineages, scrollbarWidth);
-    }
+    processTimeAxis(plottedLineages, scrollbarWidth);
 }
 
 void EvolutionDashboardWindow::processTimelineHeader()
@@ -1009,30 +1012,17 @@ void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayDa
 
 void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex)
 {
+    auto [minTime, maxTime] = computePlotTimeRange(plottedLineages);
     auto upperBound = 0.0;
-    auto minTime = std::numeric_limits<double>::max();
-    auto maxTime = std::numeric_limits<double>::lowest();
-    auto hasData = false;
     for (auto const* lineage : plottedLineages) {
         if (lineage->timePoints.size() < 2) {
             continue;
         }
-        hasData = true;
-        minTime = std::min(minTime, lineage->timePoints.front());
-        maxTime = std::max(maxTime, lineage->timePoints.back());
         for (auto const& value : lineage->series.at(metricIndex)) {
             if (std::isfinite(value)) {
                 upperBound = std::max(upperBound, value);
             }
         }
-    }
-    if (!hasData) {
-        minTime = 0.0;
-        maxTime = 1.0;
-    } else if (_timelineMode == TimelineMode_RealTime) {
-        minTime = maxTime - toDouble(_timeHorizon);
-    } else if (_timelineMode == TimelineMode_LastSteps) {
-        minTime = maxTime - toDouble(_lastSteps);
     }
     upperBound *= 1.35;
 
@@ -1103,7 +1093,7 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
     ImGui::PopID();
 }
 
-void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin)
+std::pair<double, double> EvolutionDashboardWindow::computePlotTimeRange(std::vector<LineageDisplayData const*> const& plottedLineages) const
 {
     auto minTime = std::numeric_limits<double>::max();
     auto maxTime = std::numeric_limits<double>::lowest();
@@ -1119,7 +1109,17 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
     if (!hasData) {
         minTime = 0.0;
         maxTime = 1.0;
+    } else if (_timelineMode == TimelineMode_RealTime) {
+        minTime = maxTime - toDouble(_timeHorizon);
+    } else if (_timelineMode == TimelineMode_LastSteps) {
+        minTime = maxTime - toDouble(_lastSteps);
     }
+    return {minTime, maxTime};
+}
+
+void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin)
+{
+    auto [minTime, maxTime] = computePlotTimeRange(plottedLineages);
 
     //the label column mirrors the plot table above (widened by the scrollbar if present) so the axis stays aligned with the plots
     if (ImGui::BeginTable("##timeAxis", 2, ImGuiTableFlags_None)) {
@@ -1136,7 +1136,8 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
         ImPlot::SetNextAxesLimits(minTime, maxTime, 0, 1.0, ImGuiCond_Always);
         if (ImPlot::BeginPlot("##timeAxis", ImVec2(-1, scale(TimeAxisExtraHeight)), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
             ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoHighlight);
-            ImPlot::SetupAxisFormat(ImAxis_X1, formatTimestepsInThousands, nullptr);
+            //the real-time axis is in seconds; the step-based modes label their x-axis in thousands of time steps
+            ImPlot::SetupAxisFormat(ImAxis_X1, _timelineMode == TimelineMode_RealTime ? formatRealTimeSeconds : formatTimestepsInThousands, nullptr);
             ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoHighlight);
             ImPlot::EndPlot();
         }
