@@ -28,9 +28,9 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     EXPECT_FLOAT_EQ(8.0f, entries.overallEntry.sumCreatureGenerations);
     EXPECT_GT(entries.overallEntry.sumCreatureEnergy, 0.0f);
 
-    ASSERT_EQ(2, entries.entries.size());
+    ASSERT_EQ(2, entries.lineageEntries.size());
     auto findEntry = [&](uint32_t lineageId) -> LineageStatisticsEntry const* {
-        for (auto const& entry : entries.entries) {
+        for (auto const& entry : entries.lineageEntries) {
             if (entry.lineageId == lineageId) {
                 return &entry;
             }
@@ -62,8 +62,8 @@ TEST_F(EvolutionStatisticsTests, representativeCell)
     _simulationFacade->setSimulationData(data);
 
     auto entries = _simulationFacade->getStatisticsEntry();
-    ASSERT_EQ(1, entries.entries.size());
-    EXPECT_EQ(3u, entries.entries.front().representativeCellId);  //cell of the creature with the highest generation
+    ASSERT_EQ(1, entries.lineageEntries.size());
+    EXPECT_EQ(3u, entries.lineageEntries.front().representativeCellId);  //cell of the creature with the highest generation
 }
 
 TEST_F(EvolutionStatisticsTests, genomeNodesAndMutationRates)
@@ -106,7 +106,7 @@ TEST_F(EvolutionStatisticsTests, accumulatedMutations)
     EXPECT_GT(entries.overallEntry.sumAccumulatedMutations, 0.0f);
     EXPECT_GT(entries.overallEntry.totalMutations, 0.0f);
 
-    ASSERT_EQ(1, entries.entries.size());
-    EXPECT_EQ(42, entries.entries.front().lineageId);
-    EXPECT_GT(entries.entries.front().totalMutations, 0.0f);
+    ASSERT_EQ(1, entries.lineageEntries.size());
+    EXPECT_EQ(42, entries.lineageEntries.front().lineageId);
+    EXPECT_GT(entries.lineageEntries.front().totalMutations, 0.0f);
 }

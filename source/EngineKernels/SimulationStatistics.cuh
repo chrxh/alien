@@ -52,12 +52,12 @@ public:
         CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result.overallEntry, _overallStatisticsEntry, sizeof(OverallStatisticsEntry), cudaMemcpyDeviceToHost));
 
         auto control = getLineageMapControl();
-        result.entries.resize(control.numCompactEntries);
+        result.lineageEntries.resize(control.numCompactEntries);
         if (control.numCompactEntries > 0) {
             CHECK_FOR_DEVICE_ERRORS(
-                cudaMemcpy(result.entries.data(), _lineageStatisticsEntries, sizeof(LineageStatisticsEntry) * control.numCompactEntries, cudaMemcpyDeviceToHost));
+                cudaMemcpy(result.lineageEntries.data(), _lineageStatisticsEntries, sizeof(LineageStatisticsEntry) * control.numCompactEntries, cudaMemcpyDeviceToHost));
         }
-        std::sort(result.entries.begin(), result.entries.end(), [](auto const& lhs, auto const& rhs) { return lhs.lineageId < rhs.lineageId; });
+        std::sort(result.lineageEntries.begin(), result.lineageEntries.end(), [](auto const& lhs, auto const& rhs) { return lhs.lineageId < rhs.lineageId; });
         return result;
     }
 

@@ -35,9 +35,9 @@ protected:
 
 namespace
 {
-    OverallSample createOverallSample(double base)
+    ColorSamples createOverallSample(double base)
     {
-        OverallSample result;
+        ColorSamples result;
         result.timestep = base + 1;
         result.systemClock = base + 2;
 
@@ -77,7 +77,7 @@ namespace
         return result;
     }
 
-    void compare(OverallSample const& expected, OverallSample const& actual)
+    void compare(ColorSamples const& expected, ColorSamples const& actual)
     {
         EXPECT_EQ(expected.timestep, actual.timestep);
         EXPECT_EQ(expected.systemClock, actual.systemClock);
@@ -118,8 +118,8 @@ namespace
 
     void compare(StatisticsHistoryData const& expected, StatisticsHistoryData const& actual)
     {
-        ASSERT_EQ(expected.overall.size(), actual.overall.size());
-        for (auto const& [expectedSample, actualSample] : std::views::zip(expected.overall, actual.overall)) {
+        ASSERT_EQ(expected.colors.size(), actual.colors.size());
+        for (auto const& [expectedSample, actualSample] : std::views::zip(expected.colors, actual.colors)) {
             compare(expectedSample, actualSample);
         }
         ASSERT_EQ(expected.lineages.size(), actual.lineages.size());
@@ -138,7 +138,7 @@ TEST_F(SerializerServiceTests, statisticsHistory)
 {
     DeserializedSimulation before;
     for (int i = 0; i < 5; ++i) {
-        before.statistics.overall.emplace_back(createOverallSample(toDouble(i) * 100));
+        before.statistics.colors.emplace_back(createOverallSample(toDouble(i) * 100));
     }
     before.statistics.lineages.emplace(7, std::vector{createLineageSample(1000), createLineageSample(2000)});
     before.statistics.lineages.emplace(42, std::vector{createLineageSample(3000)});
@@ -157,7 +157,7 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
 {
     //many color combinations share the same timeline; a few carry distinct data
     auto createSample = [](double base) {
-        OverallSample result;
+        ColorSamples result;
         result.timestep = base + 1;
         result.systemClock = base + 2;
         for (uint32_t colorBitset = 1; colorBitset < 64; ++colorBitset) {
@@ -174,7 +174,7 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
 
     DeserializedSimulation before;
     for (int i = 0; i < 5; ++i) {
-        before.statistics.overall.emplace_back(createSample(toDouble(i) * 100));
+        before.statistics.colors.emplace_back(createSample(toDouble(i) * 100));
     }
 
     SerializedSimulation serialized;
@@ -196,7 +196,7 @@ TEST_F(SerializerServiceTests, emptyStatisticsHistory)
     DeserializedSimulation after;
     ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
 
-    EXPECT_TRUE(after.statistics.overall.empty());
+    EXPECT_TRUE(after.statistics.colors.empty());
     EXPECT_TRUE(after.statistics.lineages.empty());
 }
 
