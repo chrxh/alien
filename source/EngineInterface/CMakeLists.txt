@@ -13,6 +13,8 @@ add_library(EngineInterface
     Desc.cpp
     Desc.h
     EngineConstants.h
+    ExtinctLineageAccumulator.cpp
+    ExtinctLineageAccumulator.h
     GenomeDesc.cpp
     GenomeDesc.h
     GenomeDescEditService.cpp

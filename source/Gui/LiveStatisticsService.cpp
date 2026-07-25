@@ -20,6 +20,7 @@ void LiveStatisticsService::addDataPoint(LiveStatisticsHistory& history, Statist
     _timeSinceSimStart += toDouble(duration) / 1000;
 
     auto newDataPoint = StatisticsConverterService::get().convert(statisticsEntry, timestep, _timeSinceSimStart);
+    _extinctLineageAccumulator.addExtinctLineageValues(newDataPoint);
     history.getDataRef().emplace_back(newDataPoint);
     _lastTimepoint = timepoint;
 }
@@ -27,6 +28,7 @@ void LiveStatisticsService::addDataPoint(LiveStatisticsHistory& history, Statist
 void LiveStatisticsService::clear(LiveStatisticsHistory& history)
 {
     history.getDataRef().clear();
+    _extinctLineageAccumulator.reset();
 }
 
 void LiveStatisticsService::truncate(LiveStatisticsHistory& history)
