@@ -39,7 +39,7 @@ namespace
 __global__ void cudaUpdateEvolutionStatistics_substep1(SimulationData data, SimulationStatistics statistics)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        statistics.resetEvolutionStatistics();
+        statistics.resetObjectStatistics();
         statistics.resetCompactLineageCounter();
     }
     {
@@ -72,8 +72,9 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
         auto& particles = data.entities.energies;
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            if (particles.at(index)) {
+            if (auto& particle = particles.at(index)) {
                 statistics.incNumEnergyParticles();
+                statistics.addInternalEnergy(particle->energy);
             }
         }
     }
@@ -86,9 +87,13 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
             statistics.incNumSolidObjects();
         } else if (object->type == ObjectType_Fluid) {
             statistics.incNumFluidObjects();
+        } else if (object->type == ObjectType_FreeCell) {
+            statistics.incNumFreeCellObjects();
         } else if (object->type == ObjectType_Cell) {
             statistics.incNumCellObjects();
         }
+        statistics.addInternalEnergy(object->getEnergy());
+
         if (object->type != ObjectType_Cell) {
             continue;
         }
@@ -98,9 +103,8 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
         }
         auto origCreatureIndex = alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
-            statistics.addCreatureStatistics(creature->numCells, creature->generation, creature->accumulatedMutations);
             auto slotIndex = statistics.insertOrFindLineageSlot(creature->lineageId);
-            if (slotIndex >= 0) {
+            if (slotIndex != -1) {
                 statistics.addLineageCreatureData(slotIndex, creature->numCells, creature->generation);
                 alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(slotIndex) + 1);
             }
@@ -129,7 +133,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
 
         auto genome = creature->genome;
         auto origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));
-        if (origGenomeIndex == VALUE_NOT_SET_UINT64) {
+        if (origGenomeIndex == VALUE_NOT_SET_UINT64 && slotIndex != -1) {
             auto numNodes = 0;
             auto nodeColorBitset = 0u;
             for (int i = 0; i < genome->numGenes; ++i) {
@@ -139,17 +143,11 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
                     nodeColorBitset |= 1u << gene.nodes[j].color;
                 }
             }
-            auto meanMutationRate = calcMeanMutationRate(genome->mutationRates);
-            statistics.addGenomeStatistics(toFloat(numNodes), meanMutationRate);
-            if (slotIndex >= 0) {
-                statistics.addLineageGenomeData(slotIndex, toFloat(numNodes), meanMutationRate, nodeColorBitset);
-            }
+            statistics.addLineageGenomeData(slotIndex, toFloat(numNodes), calcMeanMutationRate(genome->mutationRates), nodeColorBitset);
         }
 
-        auto energy = object->getEnergy();
-        statistics.addCreatureEnergy(energy);
-        if (slotIndex >= 0) {
-            statistics.addLineageEnergy(slotIndex, energy);
+        if (slotIndex != -1) {
+            statistics.addLineageEnergy(slotIndex, object->getEnergy());
             statistics.updateLineageRepresentativeCell(slotIndex, creature->generation, object->id);
         }
     }
@@ -161,11 +159,6 @@ __global__ void cudaUpdateEvolutionStatistics_substep4(SimulationData data, Simu
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         statistics.compactLineageSlot(index);
     }
-}
-
-__global__ void cudaUpdateEvolutionStatistics_substep5(SimulationData data, SimulationStatistics statistics)
-{
-    statistics.finalizeLineageStatistics();
 }
 
 __global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics)

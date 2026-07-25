@@ -14,7 +14,7 @@ public:
     {
         _lineageArrayCapacity = 1 << 18;
 
-        CudaMemoryManager::getInstance().acquireMemory<OverallStatisticsEntry>(1, _overallStatisticsEntry);
+        CudaMemoryManager::getInstance().acquireMemory<ObjectStatisticsEntry>(1, _objectStatisticsEntry);
         CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageArrayCapacity, _lineageStatisticsEntries);
 
         CudaMemoryManager::getInstance().acquireMemory<LineageMapEntry>(_lineageArrayCapacity, _lineageMap);
@@ -22,7 +22,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapControl>(1, _lineageAccumulatorMapControl);
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapEntry>(_lineageArrayCapacity, _lineageAccumulatorMaps[0]);
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapEntry>(_lineageArrayCapacity, _lineageAccumulatorMaps[1]);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_overallStatisticsEntry, 0, sizeof(OverallStatisticsEntry)));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_objectStatisticsEntry, 0, sizeof(ObjectStatisticsEntry)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMapControl, 0, sizeof(LineageAccumulatorMapControl)));
 
         // Values must start at zero; the lineageId key column (first member) is set to LineageIdEmpty
@@ -36,7 +36,7 @@ public:
 
     __host__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory<OverallStatisticsEntry>(_overallStatisticsEntry);
+        CudaMemoryManager::getInstance().freeMemory<ObjectStatisticsEntry>(_objectStatisticsEntry);
         CudaMemoryManager::getInstance().freeMemory(_lineageStatisticsEntries);
 
         CudaMemoryManager::getInstance().freeMemory(_lineageMap);
@@ -49,7 +49,7 @@ public:
     __host__ StatisticsEntry getStatisticsEntry()
     {
         StatisticsEntry result;
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result.overallEntry, _overallStatisticsEntry, sizeof(OverallStatisticsEntry), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result.objectStatistics, _objectStatisticsEntry, sizeof(ObjectStatisticsEntry), cudaMemcpyDeviceToHost));
 
         auto control = getLineageMapControl();
         result.lineageEntries.resize(control.numCompactEntries);
@@ -67,45 +67,23 @@ public:
         return control.numUsedAccumulatorSlots[control.activeAccumulatorBuffer] > static_cast<uint32_t>(_lineageArrayCapacity) / 2;
     }
 
-    //evolution statistics (timestep)
-    __inline__ __device__ void resetEvolutionStatistics()
+    //object statistics (timestep)
+    __inline__ __device__ void resetObjectStatistics()
     {
-        // numCreatedCreatures and totalMutations are accumulated, never reset here
-        auto& overall = *_overallStatisticsEntry;
-        overall.numCreatures = 0;
-        overall.numGenomes = 0;
-        overall.sumCreatureCells = 0;
-        overall.sumCreatureGenerations = 0;
-        overall.sumGenomeNodes = 0;
-        overall.sumMutationRates = 0;
-        overall.sumCreatureEnergy = 0;
-        overall.sumAccumulatedMutations = 0;
-        overall.numSolidObjects = 0;
-        overall.numFluidObjects = 0;
-        overall.numCellObjects = 0;
-        overall.numEnergyParticles = 0;
-        overall.numActiveLineages = 0;
+        auto& objectStatistics = *_objectStatisticsEntry;
+        objectStatistics.numSolidObjects = 0;
+        objectStatistics.numFluidObjects = 0;
+        objectStatistics.numFreeCellObjects = 0;
+        objectStatistics.numCellObjects = 0;
+        objectStatistics.numEnergyParticles = 0;
+        objectStatistics.totalInternalEnergy = 0;
     }
-    __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_overallStatisticsEntry->numSolidObjects, 1u); }
-    __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_overallStatisticsEntry->numFluidObjects, 1u); }
-    __inline__ __device__ void incNumCellObjects() { atomicAdd(&_overallStatisticsEntry->numCellObjects, 1u); }
-    __inline__ __device__ void incNumEnergyParticles() { atomicAdd(&_overallStatisticsEntry->numEnergyParticles, 1u); }
-    __inline__ __device__ void addCreatureStatistics(uint32_t numCells, uint32_t generation, float accumulatedMutations)
-    {
-        auto& overall = *_overallStatisticsEntry;
-        atomicAdd(&overall.numCreatures, 1u);
-        atomicAdd(&overall.sumCreatureCells, toFloat(numCells));
-        atomicAdd(&overall.sumCreatureGenerations, toFloat(generation));
-        atomicAdd(&overall.sumAccumulatedMutations, accumulatedMutations);
-    }
-    __inline__ __device__ void addGenomeStatistics(float numNodes, float meanMutationRate)
-    {
-        auto& overall = *_overallStatisticsEntry;
-        atomicAdd(&overall.numGenomes, 1u);
-        atomicAdd(&overall.sumGenomeNodes, numNodes);
-        atomicAdd(&overall.sumMutationRates, meanMutationRate);
-    }
-    __inline__ __device__ void addCreatureEnergy(float value) { atomicAdd(&_overallStatisticsEntry->sumCreatureEnergy, value); }
+    __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_objectStatisticsEntry->numSolidObjects, 1u); }
+    __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_objectStatisticsEntry->numFluidObjects, 1u); }
+    __inline__ __device__ void incNumFreeCellObjects() { atomicAdd(&_objectStatisticsEntry->numFreeCellObjects, 1u); }
+    __inline__ __device__ void incNumCellObjects() { atomicAdd(&_objectStatisticsEntry->numCellObjects, 1u); }
+    __inline__ __device__ void incNumEnergyParticles() { atomicAdd(&_objectStatisticsEntry->numEnergyParticles, 1u); }
+    __inline__ __device__ void addInternalEnergy(float value) { atomicAdd(&_objectStatisticsEntry->totalInternalEnergy, toDouble(value)); }
 
     //lineage statistics
     __inline__ __device__ int getLineageMapCapacity() const { return _lineageArrayCapacity; }
@@ -204,13 +182,12 @@ public:
         entry.numCreatedCreatures = 0;
         entry.totalMutations = 0;
         auto accumulatorIndex = findAccumulatorSlot(slot.lineageId);
-        if (accumulatorIndex >= 0) {
+        if (accumulatorIndex != -1) {
             auto const& accumulatorSlot = getActiveAccumulatorMap()[accumulatorIndex];
             entry.numCreatedCreatures = accumulatorSlot.numCreatedCreatures;
             entry.totalMutations = accumulatorSlot.totalMutations;
         }
     }
-    __inline__ __device__ void finalizeLineageStatistics() { _overallStatisticsEntry->numActiveLineages = _lineageAccumulatorMapControl->numCompactEntries; }
 
     //lineage accumulator map (persistent, garbage-collected occasionally)
     __inline__ __device__ void resetInactiveAccumulatorSlot(int index)
@@ -230,11 +207,11 @@ public:
         if (slot.lineageId == LineageIdEmpty) {
             return;
         }
-        if (findLineageSlot(slot.lineageId) < 0) {
+        if (findLineageSlot(slot.lineageId) == -1) {
             return;
         }
         auto targetIndex = insertAccumulatorSlot(1 - activeBuffer, slot.lineageId);
-        if (targetIndex >= 0) {
+        if (targetIndex != -1) {
             auto& targetSlot = _lineageAccumulatorMaps[1 - activeBuffer][targetIndex];
             targetSlot.numCreatedCreatures = slot.numCreatedCreatures;
             targetSlot.totalMutations = slot.totalMutations;
@@ -244,17 +221,15 @@ public:
 
     __inline__ __device__ void incCreatedCreature(uint32_t lineageId)
     {
-        atomicAdd(&_overallStatisticsEntry->numCreatedCreatures, 1ull);
         auto slotIndex = findOrInsertAccumulatorSlot(lineageId);
-        if (slotIndex >= 0) {
+        if (slotIndex != -1) {
             atomicAdd(&getActiveAccumulatorMap()[slotIndex].numCreatedCreatures, 1ull);
         }
     }
     __inline__ __device__ void addMutations(uint32_t lineageId, float value)
     {
-        atomicAdd(&_overallStatisticsEntry->totalMutations, value);
         auto slotIndex = findOrInsertAccumulatorSlot(lineageId);
-        if (slotIndex >= 0) {
+        if (slotIndex != -1) {
             atomicAdd(&getActiveAccumulatorMap()[slotIndex].totalMutations, value);
         }
     }
@@ -340,7 +315,7 @@ private:
 
     int _lineageArrayCapacity;  // Used for all lineage maps and arrays
 
-    OverallStatisticsEntry* _overallStatisticsEntry;
+    ObjectStatisticsEntry* _objectStatisticsEntry;
     LineageStatisticsEntry* _lineageStatisticsEntries;
 
     // Lineage map for timestep values

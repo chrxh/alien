@@ -23,7 +23,7 @@ void TimelineLiveStatistics::clear()
     _dataPointCollectionHistory.clear();
 }
 
-void TimelineLiveStatistics::update(StatisticsEntry const& overallStatistics, uint64_t timestep)
+void TimelineLiveStatistics::update(StatisticsEntry const& statisticsEntry, uint64_t timestep)
 {
     truncate();
 
@@ -33,7 +33,7 @@ void TimelineLiveStatistics::update(StatisticsEntry const& overallStatistics, ui
 
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto newDataPoint = StatisticsConverterService::get().convert(overallStatistics, timestep, _timeSinceSimStart);
+    auto newDataPoint = StatisticsConverterService::get().convert(statisticsEntry, timestep, _timeSinceSimStart);
     _dataPointCollectionHistory.emplace_back(newDataPoint);
     _lastTimestep = timestep;
     _lastTimepoint = timepoint;

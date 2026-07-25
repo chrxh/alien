@@ -124,7 +124,7 @@ private:
 
     // Live statistics
     TimelineLiveStatistics _timelineLiveStatistics;
-    StatisticsEntry _lastStatisticsEntry;  //latest raw engine snapshot for the header's global (non-per-color) counts
+    StatisticsEntry _lastStatisticsEntry;  //latest raw engine snapshot for the header cards
     std::optional<int> _lastSessionId;
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
 };
