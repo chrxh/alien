@@ -223,7 +223,7 @@ public:
     {
         auto slotIndex = findOrInsertAccumulatorSlot(lineageId);
         if (slotIndex != -1) {
-            atomicAdd(&getActiveAccumulatorMap()[slotIndex].numCreatedCreatures, 1ull);
+            alienAtomicAdd64(&getActiveAccumulatorMap()[slotIndex].numCreatedCreatures, static_cast<uint64_t>(1));
         }
     }
     __inline__ __device__ void addMutations(uint32_t lineageId, float value)
@@ -254,7 +254,7 @@ private:
     struct LineageAccumulatorMapEntry
     {
         uint32_t lineageId;  // LineageIdEmpty = slot is unused
-        unsigned long long numCreatedCreatures;
+        uint64_t numCreatedCreatures;
         double totalMutations;
     };
     struct LineageAccumulatorMapControl
