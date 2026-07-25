@@ -1,4 +1,4 @@
-﻿#include "StatisticsKernels.cuh"
+#include "StatisticsKernels.cuh"
 
 namespace
 {
@@ -26,24 +26,32 @@ namespace
         return sum / 21.0f;
     }
 
-    __device__ int getCachedLineageSlot(Creature* creature, int lineageMapCapacity)
+    // The lineage slot of a creature is determined once per statistics timestep and cached in Creature::creatureIndex,
+    // a scratch member that other kernels use for different purposes (see DataAccessKernels and EditKernels).
+    // It is stored as slot index + 1, so that the sentinels 0 (currently initialized) and VALUE_NOT_SET_UINT64 keep their meaning.
+    __device__ void cacheLineageSlot(Creature* creature, int slotIndex)
+    {
+        alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(slotIndex) + 1);
+    }
+
+    __device__ int getCachedLineageSlot(Creature* creature)
     {
         auto slotIndexPlusOne = creature->creatureIndex;
-        if (slotIndexPlusOne >= 1 && slotIndexPlusOne <= static_cast<uint64_t>(lineageMapCapacity)) {
+        if (slotIndexPlusOne >= 1 && slotIndexPlusOne <= static_cast<uint64_t>(SimulationStatistics::LineageMapCapacity)) {
             return toInt(slotIndexPlusOne) - 1;
         }
-        return -1;
+        return SimulationStatistics::NoLineageSlot;
     }
 }
 
-__global__ void cudaUpdateEvolutionStatistics_substep1(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaResetStatistics(SimulationData data, SimulationStatistics statistics)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         statistics.resetObjectStatistics();
-        statistics.resetCompactLineageCounter();
+        statistics.resetLineageMapCounters();
     }
     {
-        auto const partition = calcSystemThreadPartition(statistics.getLineageMapCapacity());
+        auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             statistics.resetLineageMapSlot(index);
         }
@@ -66,7 +74,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep1(SimulationData data, Simu
     }
 }
 
-__global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, SimulationStatistics statistics)
 {
     {
         auto& particles = data.entities.energies;
@@ -104,9 +112,9 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
         auto origCreatureIndex = alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
             auto slotIndex = statistics.insertOrFindLineageSlot(creature->lineageId);
-            if (slotIndex != -1) {
+            if (slotIndex != SimulationStatistics::NoLineageSlot) {
                 statistics.addLineageCreatureData(slotIndex, creature->numCells, creature->generation);
-                alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(slotIndex) + 1);
+                cacheLineageSlot(creature, slotIndex);
             }
         } else if (origCreatureIndex != 0) {
             // Another thread already finished the initialization; restore its value (see DataAccessKernels)
@@ -115,7 +123,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
     }
 }
 
-__global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaCollectGenomeAndEnergyStatistics(SimulationData data, SimulationStatistics statistics)
 {
     auto& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -129,11 +137,11 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
         if (!creature) {
             continue;
         }
-        auto slotIndex = getCachedLineageSlot(creature, statistics.getLineageMapCapacity());
+        auto slotIndex = getCachedLineageSlot(creature);
 
         auto genome = creature->genome;
         auto origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));
-        if (origGenomeIndex == VALUE_NOT_SET_UINT64 && slotIndex != -1) {
+        if (origGenomeIndex == VALUE_NOT_SET_UINT64 && slotIndex != SimulationStatistics::NoLineageSlot) {
             auto numNodes = 0u;
             auto nodeColorBitset = 0u;
             for (int i = 0; i < genome->numGenes; ++i) {
@@ -146,16 +154,16 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
             statistics.addLineageGenomeData(slotIndex, numNodes, calcMeanMutationRate(genome->mutationRates), nodeColorBitset);
         }
 
-        if (slotIndex != -1) {
+        if (slotIndex != SimulationStatistics::NoLineageSlot) {
             statistics.addLineageEnergy(slotIndex, object->getEnergy());
             statistics.updateLineageRepresentativeCell(slotIndex, creature->generation, object->id);
         }
     }
 }
 
-__global__ void cudaUpdateEvolutionStatistics_substep4(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaCompactLineageStatistics(SimulationStatistics statistics)
 {
-    auto const partition = calcSystemThreadPartition(statistics.getLineageMapCapacity());
+    auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         statistics.compactLineageSlot(index);
     }
@@ -163,7 +171,10 @@ __global__ void cudaUpdateEvolutionStatistics_substep4(SimulationData data, Simu
 
 __global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics)
 {
-    auto const partition = calcSystemThreadPartition(statistics.getLineageMapCapacity());
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        statistics.resetInactiveAccumulatorMapCounters();
+    }
+    auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         statistics.resetInactiveAccumulatorSlot(index);
     }
@@ -171,7 +182,7 @@ __global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics)
 
 __global__ void cudaLineageAccumulatorGC(SimulationStatistics statistics)
 {
-    auto const partition = calcSystemThreadPartition(statistics.getLineageMapCapacity());
+    auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         statistics.migrateActiveAccumulatorSlot(index);
     }
@@ -179,6 +190,5 @@ __global__ void cudaLineageAccumulatorGC(SimulationStatistics statistics)
 
 __global__ void cudaFinishLineageAccumulatorGC(SimulationStatistics statistics)
 {
-    statistics.flipAccumulatorBuffers();
+    statistics.flipAccumulatorMaps();
 }
-

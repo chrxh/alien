@@ -46,6 +46,7 @@ add_library(EngineKernels
     HashMap.cuh
     HashSet.cuh
     InjectorProcessor.cuh
+    LineageIdMap.cuh
     List.cuh
     Macros.cuh
     Map.cuh
@@ -70,6 +71,7 @@ add_library(EngineKernels
     SimulationData.cuh
     SimulationKernels.cu
     SimulationKernels.cuh
+    SimulationStatistics.cu
     SimulationStatistics.cuh
     StatisticsKernels.cu
     StatisticsKernels.cuh
