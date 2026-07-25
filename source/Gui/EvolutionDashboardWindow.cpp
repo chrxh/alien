@@ -336,9 +336,9 @@ void EvolutionDashboardWindow::processBackground()
     }
     _lastSessionId = sessionId;
 
-    auto overallStatistics = _SimulationFacade::get()->getStatisticsEntry();
-    _lastStatisticsEntry = overallStatistics;  //latest raw snapshot for the header's global (non-per-color) counts
-    _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
+    auto statisticsEntry = _SimulationFacade::get()->getStatisticsEntry();
+    _lastStatisticsEntry = statisticsEntry;  // Latest raw snapshot for the header cards
+    _timelineLiveStatistics.update(statisticsEntry, _SimulationFacade::get()->getCurrentTimestep());
 }
 
 void EvolutionDashboardWindow::processIntern()
@@ -617,18 +617,23 @@ void EvolutionDashboardWindow::processHeader()
     auto cardHeight =
         style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
 
-    //the header shows the current global state; these counts are not per-color and come from the raw engine snapshot
-    auto const& overallEntry = _lastStatisticsEntry.overallEntry;
+    //the header shows the current global state; object counts and the total energy cover all objects and thus come
+    //from the raw engine snapshot, while the creature counts are accumulated over the lineages of that same snapshot
+    auto const& objectStatistics = _lastStatisticsEntry.objectStatistics;
 
-    auto solids = toDouble(overallEntry.numSolidObjects);
-    auto fluids = toDouble(overallEntry.numFluidObjects);
-    auto cells = toDouble(overallEntry.numCellObjects);
-    auto creatureCells = toDouble(overallEntry.sumCreatureCells);
-    auto freeCells = std::max(0.0, cells - creatureCells);
-    auto energyParticles = toDouble(overallEntry.numEnergyParticles);
+    auto numCreatures = 0.0;
+    for (auto const& entry : _lastStatisticsEntry.lineageEntries) {
+        numCreatures += toDouble(entry.numCreatures);
+    }
+
+    auto solids = toDouble(objectStatistics.numSolidObjects);
+    auto fluids = toDouble(objectStatistics.numFluidObjects);
+    auto cells = toDouble(objectStatistics.numCellObjects);
+    auto freeCells = toDouble(objectStatistics.numFreeCellObjects);
+    auto energyParticles = toDouble(objectStatistics.numEnergyParticles);
     processCard(
         "Entities",
-        formatMetricValue(solids + fluids + cells + energyParticles, 0),
+        formatMetricValue(solids + fluids + cells + freeCells + energyParticles, 0),
         {{"Solids", formatMetricValue(solids, 0)},
          {"Fluids", formatMetricValue(fluids, 0)},
          {"Cells", formatMetricValue(cells, 0)},
@@ -638,14 +643,14 @@ void EvolutionDashboardWindow::processHeader()
         cardHeight);
     ImGui::SameLine();
 
-    auto numLineages = toDouble(overallEntry.numActiveLineages);
+    auto numLineages = toDouble(_lastStatisticsEntry.lineageEntries.size());
     auto numLineagesAbove5Percent = 0;
     auto numLineagesAbove1Percent = 0;
     for (auto const& entry : _lastStatisticsEntry.lineageEntries) {
-        if (toDouble(entry.numCreatures) >= toDouble(overallEntry.numCreatures) / 20) {
+        if (toDouble(entry.numCreatures) >= numCreatures / 20) {
             ++numLineagesAbove5Percent;
         }
-        if (toDouble(entry.numCreatures) >= toDouble(overallEntry.numCreatures) / 100) {
+        if (toDouble(entry.numCreatures) >= numCreatures / 100) {
             ++numLineagesAbove1Percent;
         }
     }
@@ -658,10 +663,10 @@ void EvolutionDashboardWindow::processHeader()
         cardHeight);
     ImGui::SameLine();
 
-    processCard("Creatures", formatMetricValue(toDouble(overallEntry.numCreatures), 0), {}, cardWidth, cardHeight);
+    processCard("Creatures", formatMetricValue(numCreatures, 0), {}, cardWidth, cardHeight);
     ImGui::SameLine();
 
-    auto internalEnergy = toDouble(overallEntry.sumCreatureEnergy);
+    auto internalEnergy = objectStatistics.totalInternalEnergy;
     auto externalEnergy = toDouble(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value);
     processCard(
         "Total energy",

@@ -18,15 +18,10 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     _simulationFacade->setSimulationData(data);
 
     auto entries = _simulationFacade->getStatisticsEntry();
-    EXPECT_EQ(2u, entries.overallEntry.numCreatures);
-    EXPECT_EQ(2u, entries.overallEntry.numGenomes);
-    EXPECT_EQ(2u, entries.overallEntry.numActiveLineages);
-    EXPECT_EQ(3u, entries.overallEntry.numCellObjects);
-    EXPECT_EQ(0u, entries.overallEntry.numSolidObjects);
-    EXPECT_EQ(0u, entries.overallEntry.numFluidObjects);
-    EXPECT_FLOAT_EQ(3.0f, entries.overallEntry.sumCreatureCells);
-    EXPECT_FLOAT_EQ(8.0f, entries.overallEntry.sumCreatureGenerations);
-    EXPECT_GT(entries.overallEntry.sumCreatureEnergy, 0.0f);
+    EXPECT_EQ(3u, entries.objectStatistics.numCellObjects);
+    EXPECT_EQ(0u, entries.objectStatistics.numSolidObjects);
+    EXPECT_EQ(0u, entries.objectStatistics.numFluidObjects);
+    EXPECT_EQ(0u, entries.objectStatistics.numFreeCellObjects);
 
     ASSERT_EQ(2, entries.lineageEntries.size());
     auto findEntry = [&](uint32_t lineageId) -> LineageStatisticsEntry const* {
@@ -49,8 +44,34 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     auto const* entry43 = findEntry(43);
     ASSERT_TRUE(entry43 != nullptr);
     EXPECT_EQ(1, entry43->numCreatures);
+    EXPECT_EQ(1, entry43->numGenomes);
     EXPECT_FLOAT_EQ(1.0f, entry43->sumCreatureCells);
     EXPECT_FLOAT_EQ(5.0f, entry43->sumCreatureGenerations);
+    EXPECT_GT(entry43->sumCreatureEnergy, 0.0f);
+}
+
+TEST_F(EvolutionStatisticsTests, objectStatistics)
+{
+    auto data = Desc()
+                    .addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), GenomeDesc())
+                    .addObjects(
+                        {ObjectDesc().id(2).pos({10.0f, 0.0f}).type(FreeCellDesc().energy(200.0f)),
+                         ObjectDesc().id(3).pos({20.0f, 0.0f}).type(SolidDesc().energy(400.0f))})
+                    .energies({EnergyDesc().id(4).pos({30.0f, 0.0f}).energy(300.0f)});
+
+    _simulationFacade->setSimulationData(data);
+
+    auto entries = _simulationFacade->getStatisticsEntry();
+    EXPECT_EQ(1u, entries.objectStatistics.numCellObjects);
+    EXPECT_EQ(1u, entries.objectStatistics.numFreeCellObjects);
+    EXPECT_EQ(1u, entries.objectStatistics.numSolidObjects);
+    EXPECT_EQ(1u, entries.objectStatistics.numEnergyParticles);
+
+    //the total energy covers free cells, solids and energy particles, not just the cells belonging to creatures
+    ASSERT_EQ(1, entries.lineageEntries.size());
+    auto creatureEnergy = toDouble(entries.lineageEntries.front().sumCreatureEnergy);
+    EXPECT_GT(creatureEnergy, 0.0);
+    EXPECT_DOUBLE_EQ(creatureEnergy + 200.0 + 400.0 + 300.0, entries.objectStatistics.totalInternalEnergy);
 }
 
 TEST_F(EvolutionStatisticsTests, representativeCell)
@@ -79,9 +100,11 @@ TEST_F(EvolutionStatisticsTests, genomeNodesAndMutationRates)
     _simulationFacade->setSimulationData(data);
 
     auto entries = _simulationFacade->getStatisticsEntry();
-    EXPECT_EQ(1u, entries.overallEntry.numGenomes);
-    EXPECT_FLOAT_EQ(toFloat(numNodes), entries.overallEntry.sumGenomeNodes);
-    EXPECT_FLOAT_EQ(0.01f, entries.overallEntry.sumMutationRates);  //mean over 21 probability values: 0.21 / 21
+    ASSERT_EQ(1, entries.lineageEntries.size());
+    auto const& entry = entries.lineageEntries.front();
+    EXPECT_EQ(1u, entry.numGenomes);
+    EXPECT_FLOAT_EQ(toFloat(numNodes), entry.sumGenomeNodes);
+    EXPECT_FLOAT_EQ(0.01f, entry.sumMutationRates);  //mean over 21 probability values: 0.21 / 21
 }
 
 TEST_F(EvolutionStatisticsTests, accumulatedMutations)
@@ -103,9 +126,6 @@ TEST_F(EvolutionStatisticsTests, accumulatedMutations)
     _simulationFacade->calcTimesteps(1);
 
     auto entries = _simulationFacade->getStatisticsEntry();
-    EXPECT_GT(entries.overallEntry.sumAccumulatedMutations, 0.0f);
-    EXPECT_GT(entries.overallEntry.totalMutations, 0.0f);
-
     ASSERT_EQ(1, entries.lineageEntries.size());
     EXPECT_EQ(42, entries.lineageEntries.front().lineageId);
     EXPECT_GT(entries.lineageEntries.front().totalMutations, 0.0f);
