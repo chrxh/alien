@@ -134,7 +134,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
         auto genome = creature->genome;
         auto origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));
         if (origGenomeIndex == VALUE_NOT_SET_UINT64 && slotIndex != -1) {
-            auto numNodes = 0;
+            auto numNodes = 0u;
             auto nodeColorBitset = 0u;
             for (int i = 0; i < genome->numGenes; ++i) {
                 auto const& gene = genome->genes[i];
@@ -143,7 +143,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
                     nodeColorBitset |= 1u << gene.nodes[j].color;
                 }
             }
-            statistics.addLineageGenomeData(slotIndex, toFloat(numNodes), calcMeanMutationRate(genome->mutationRates), nodeColorBitset);
+            statistics.addLineageGenomeData(slotIndex, numNodes, calcMeanMutationRate(genome->mutationRates), nodeColorBitset);
         }
 
         if (slotIndex != -1) {

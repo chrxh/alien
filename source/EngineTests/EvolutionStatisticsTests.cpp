@@ -36,18 +36,18 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     ASSERT_TRUE(entry42 != nullptr);
     EXPECT_EQ(1, entry42->numCreatures);
     EXPECT_EQ(1, entry42->numGenomes);
-    EXPECT_FLOAT_EQ(2.0f, entry42->sumCreatureCells);
-    EXPECT_FLOAT_EQ(3.0f, entry42->sumCreatureGenerations);
-    EXPECT_GT(entry42->sumCreatureEnergy, 0.0f);
+    EXPECT_EQ(2u, entry42->sumCreatureCells);
+    EXPECT_EQ(3u, entry42->sumCreatureGenerations);
+    EXPECT_GT(entry42->sumCreatureEnergy, 0.0);
     EXPECT_EQ((1u << 2) | (1u << 5), entry42->colorBitset);  //derived from genome node colors, not cell colors
 
     auto const* entry43 = findEntry(43);
     ASSERT_TRUE(entry43 != nullptr);
     EXPECT_EQ(1, entry43->numCreatures);
     EXPECT_EQ(1, entry43->numGenomes);
-    EXPECT_FLOAT_EQ(1.0f, entry43->sumCreatureCells);
-    EXPECT_FLOAT_EQ(5.0f, entry43->sumCreatureGenerations);
-    EXPECT_GT(entry43->sumCreatureEnergy, 0.0f);
+    EXPECT_EQ(1u, entry43->sumCreatureCells);
+    EXPECT_EQ(5u, entry43->sumCreatureGenerations);
+    EXPECT_GT(entry43->sumCreatureEnergy, 0.0);
 }
 
 TEST_F(EvolutionStatisticsTests, objectStatistics)
@@ -69,7 +69,7 @@ TEST_F(EvolutionStatisticsTests, objectStatistics)
 
     //the total energy covers free cells, solids and energy particles, not just the cells belonging to creatures
     ASSERT_EQ(1, entries.lineageEntries.size());
-    auto creatureEnergy = toDouble(entries.lineageEntries.front().sumCreatureEnergy);
+    auto creatureEnergy = entries.lineageEntries.front().sumCreatureEnergy;
     EXPECT_GT(creatureEnergy, 0.0);
     EXPECT_DOUBLE_EQ(creatureEnergy + 200.0 + 400.0 + 300.0, entries.objectStatistics.totalInternalEnergy);
 }
@@ -90,9 +90,9 @@ TEST_F(EvolutionStatisticsTests, representativeCell)
 TEST_F(EvolutionStatisticsTests, genomeNodesAndMutationRates)
 {
     auto genome = createTestGenome();
-    auto numNodes = 0;
+    uint64_t numNodes = 0;
     for (auto const& gene : genome._genes) {
-        numNodes += toInt(gene._nodes.size());
+        numNodes += gene._nodes.size();
     }
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(0.21f);
 
@@ -103,8 +103,8 @@ TEST_F(EvolutionStatisticsTests, genomeNodesAndMutationRates)
     ASSERT_EQ(1, entries.lineageEntries.size());
     auto const& entry = entries.lineageEntries.front();
     EXPECT_EQ(1u, entry.numGenomes);
-    EXPECT_FLOAT_EQ(toFloat(numNodes), entry.sumGenomeNodes);
-    EXPECT_FLOAT_EQ(0.01f, entry.sumMutationRates);  //mean over 21 probability values: 0.21 / 21
+    EXPECT_EQ(numNodes, entry.sumGenomeNodes);
+    EXPECT_NEAR(0.01, entry.sumMutationRates, 1e-6);  //mean over 21 probability values: 0.21 / 21
 }
 
 TEST_F(EvolutionStatisticsTests, accumulatedMutations)
