@@ -23,7 +23,7 @@ class SpatialControlWindow;
 
 class SimulationParametersMainWindow;
 
-class StatisticsWindow;
+class EvolutionDashboardWindow;
 
 class SimulationInteractionController;
 

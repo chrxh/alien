@@ -38,11 +38,12 @@ void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, boo
     if (_tabs.size() == 1 && _tabs.front()->isEmpty()) {
         _tabs.clear();
     }
+    auto normalizedGenome = _GenomeTabWidget::normalizeForEditor(genome);
     std::optional<int> tabIndex;
     if (!forceNewTab) {
         for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
             auto tabGenome = tab->getGenomeDesc();
-            if (genome.equalWithoutId(tabGenome)) {
+            if (normalizedGenome.equalWithoutId(tabGenome)) {
                 tabIndex = toInt(index);
             }
         }
@@ -51,7 +52,7 @@ void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, boo
         _tabIndexToSelect = *tabIndex;
         _tabs.at(*tabIndex)->resetOriginal();
     } else {
-        onScheduleAddTab(genome);
+        onScheduleAddTab(normalizedGenome);
     }
 }
 

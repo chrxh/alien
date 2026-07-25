@@ -10,10 +10,12 @@ class StringHelper
 public:
     static std::string format(uint64_t n, char separator = ',');
     static std::string format(float v, int decimalsAfterPoint);
+    static std::string format(double v, int decimalsAfterPoint);
     static std::string format(std::chrono::seconds duration);
     static std::string format(std::chrono::milliseconds duration);
     static std::string format(std::chrono::system_clock::time_point const& timePoint);
     static std::string formatInHex(uint64_t value);
+    static std::string formatInThousands(double value);  //e.g. 12000 -> "12K", 1000000 -> "1,000K"
 
     static void copy(char* target, int maxSize, std::string const& source);
     static bool compare(char const* target, int maxSize, char const* source);

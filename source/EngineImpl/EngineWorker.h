@@ -14,6 +14,7 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
@@ -21,7 +22,6 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsHistory.h>
-#include <EngineInterface/StatisticsRawData.h>
 
 #include <EngineKernels/Definitions.h>
 
@@ -55,9 +55,9 @@ public:
     Desc getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     Desc getSelectedSimulationData(bool includeClusters);
     Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    StatisticsRawData getStatisticsRawData() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
+    StatisticsEntry getStatisticsEntry() const;
 
     void addAndSelectSimulationData(Desc&& dataToUpdate);
     void setSimulationData(Desc const& dataToUpdate);
@@ -132,7 +132,6 @@ public:
     void testOnly_syncNumberGenerator();
 
 private:
-    void resetTimeIntervalStatistics();
     void processJobs();
 
     void syncSimulationWithRenderingIfDesired();

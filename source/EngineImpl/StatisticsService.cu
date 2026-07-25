@@ -1,6 +1,9 @@
 
 #include "StatisticsService.cuh"
 
+#include <algorithm>
+#include <cmath>
+
 #include <EngineInterface/StatisticsConverterService.h>
 
 #include <EngineKernels/Base.cuh>
@@ -10,104 +13,170 @@ namespace
     auto constexpr MaxSamples = 1000;
 }
 
-void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newTimelineStatistics, uint64_t timestep)
+void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry const& statisticsEntry, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& historyData = history.getDataRef();
 
-    if (!historyData.empty() && historyData.back().time > toDouble(timestep) + NEAR_ZERO) {
-        historyData.clear();
+    auto timestepAsDouble = toDouble(timestep);
+    if (!historyData.colors.empty() && historyData.colors.back().timestep > timestepAsDouble + NEAR_ZERO) {
+        historyData = StatisticsHistoryData();
+        _colorOverallStates = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
+        _lineageStates.clear();
+        _extinctLineageAccumulator.reset();
     }
 
-    if (!_lastTimelineStatistics || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta / 100 * (_numDataPoints + 1)) {
-        auto newDataPoint = [&] {
-            if (!_lastTimelineStatistics && !historyData.empty()) {
+    auto firstSampling = !_lastTimestep.has_value();
+    if (firstSampling && !historyData.colors.empty()) {
 
-                //reuse last entry if no raw statistics is available
-                auto result = historyData.back();
-                result.time = toDouble(timestep);
-                return result;
+        // Reuse last entries if no statistics is available
+        auto overallBackTime = historyData.colors.back().timestep;
+        auto overallSample = historyData.colors.back();
+        overallSample.timestep = timestepAsDouble;
+        updateTimeline(historyData.colors, _colorOverallStates, overallSample, timestepAsDouble, true);
+
+        // Only lineages that were still sampled at the end of the history are continued; extinct ones keep their last entry
+        for (auto& [lineageId, samples] : historyData.lineages) {
+            if (samples.empty()) {
+                continue;
+            }
+            auto& state = _lineageStates[lineageId];
+            if (overallBackTime - samples.back().timestep > state.longtermTimestepDelta * 2) {
+                continue;
+            }
+            auto lineageSample = samples.back();
+            lineageSample.timestep = timestepAsDouble;
+            updateTimeline(samples, state, lineageSample, timestepAsDouble, true);
+        }
+    } else {
+        auto dataPoints = StatisticsConverterService::get().convert(statisticsEntry, timestep, timestepAsDouble);
+        _extinctLineageAccumulator.addExtinctLineageValues(dataPoints);
+
+        ColorSamples overallSample;
+        overallSample.timestep = dataPoints.timestep;
+        overallSample.systemClock = dataPoints.systemClock;
+        overallSample.data = dataPoints.overall;
+        updateTimeline(historyData.colors, _colorOverallStates, overallSample, timestepAsDouble, firstSampling);
+
+        for (auto const& [lineageId, lineageDataPoint] : dataPoints.lineages) {
+            LineageSample lineageSample;
+            lineageSample.timestep = dataPoints.timestep;
+            lineageSample.systemClock = dataPoints.systemClock;
+            lineageSample.data = lineageDataPoint;
+            updateTimeline(historyData.lineages[lineageId], _lineageStates[lineageId], lineageSample, timestepAsDouble, firstSampling);
+        }
+
+        // Drop extinct lineages (no longer present in the current statistics) so their history is neither kept nor serialized
+        for (auto stateIt = _lineageStates.begin(); stateIt != _lineageStates.end();) {
+            if (!dataPoints.lineages.contains(stateIt->first)) {
+                historyData.lineages.erase(stateIt->first);
+                stateIt = _lineageStates.erase(stateIt);
             } else {
-                return StatisticsConverterService::get().convert(newTimelineStatistics, timestep, toDouble(timestep), _lastTimelineStatistics, _lastTimestep);
+                ++stateIt;
             }
-        }();
-
-        _lastTimelineStatistics = newTimelineStatistics;
-        _lastTimestep = timestep;
-        _accumulatedDataPoint = _accumulatedDataPoint.has_value() ? *_accumulatedDataPoint + newDataPoint : newDataPoint;
-        ++_numDataPoints;
-    }
-
-    if (_accumulatedDataPoint.has_value() && (historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta)) {
-        auto newDataPoint = *_accumulatedDataPoint / _numDataPoints;
-        _numDataPoints = 0;
-        _accumulatedDataPoint.reset();
-
-        //remove last entry if timestep has not changed
-        if (!historyData.empty() && abs(historyData.back().time - toDouble(timestep)) < NEAR_ZERO) {
-            historyData.pop_back();
-        }
-        historyData.emplace_back(newDataPoint);
-
-        //compress history after MaxSamples
-        if (historyData.size() > MaxSamples) {
-            std::vector<DataPointCollection> newData;
-            newData.reserve(historyData.size() / 2);
-            for (size_t i = 0; i < (historyData.size() - 1) / 2; ++i) {
-                DataPointCollection interpolatedDataPoint = (historyData.at(i * 2) + historyData.at(i * 2 + 1)) / 2.0;
-                interpolatedDataPoint.time = historyData.at(i * 2).time;
-                newData.emplace_back(interpolatedDataPoint);
-            }
-            newData.emplace_back(historyData.back());
-            historyData.swap(newData);
-
-            _longtermTimestepDelta *= 2.0;
         }
     }
+
+    _lastTimestep = timestep;
 }
 
 void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
-    auto& data = history.getDataRef();
-    if (data.empty()) {
-        return;
-    }
+    auto& historyData = history.getDataRef();
+    auto timestepAsDouble = toDouble(timestep);
 
-    auto prevTimestep = data.back().time;
-    if (!data.empty() && prevTimestep > 0) {
-        _longtermTimestepDelta *= toDouble(timestep) / prevTimestep;
-        if (_longtermTimestepDelta < DefaultTimeStepDelta) {
-            _longtermTimestepDelta = DefaultTimeStepDelta;
-        }
-    } else {
-        _longtermTimestepDelta = DefaultTimeStepDelta;
-    }
+    resetTimelineTime(historyData.colors, _colorOverallStates, timestepAsDouble);
 
-    std::vector<DataPointCollection> newData;
-    newData.reserve(data.size());
-    for (size_t i = 0; i < data.size(); ++i) {
-        if (data.at(i).time < toDouble(timestep)) {
-            newData.emplace_back(data.at(i));
+    for (auto timelineIt = historyData.lineages.begin(); timelineIt != historyData.lineages.end();) {
+        auto& samples = timelineIt->second;
+        if (auto stateIt = _lineageStates.find(timelineIt->first); stateIt != _lineageStates.end()) {
+            resetTimelineTime(samples, stateIt->second, timestepAsDouble);
+        } else {
+            std::erase_if(samples, [&](LineageSample const& sample) { return sample.timestep >= timestepAsDouble; });
         }
+        timelineIt = samples.empty() ? historyData.lineages.erase(timelineIt) : std::next(timelineIt);
     }
-    data.swap(newData);
-    _accumulatedDataPoint.reset();
-    _numDataPoints = 0;
 }
 
-void StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
+void StatisticsService::setStatisticsHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
 {
-    _accumulatedDataPoint.reset();
-    _numDataPoints = 0;
-    _lastTimelineStatistics.reset();
+    _colorOverallStates = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
+    _lineageStates.clear();
+    _extinctLineageAccumulator.reset();
     _lastTimestep.reset();
-    if (!newHistoryData.empty()) {
-        _longtermTimestepDelta = max(DefaultTimeStepDelta, (timestep - newHistoryData.front().time) / toDouble(newHistoryData.size()));
-    } else {
-        _longtermTimestepDelta = DefaultTimeStepDelta;
+
+    if (!newHistoryData.colors.empty()) {
+        _colorOverallStates.longtermTimestepDelta =
+            std::max(DefaultTimeStepDelta, (toDouble(timestep) - newHistoryData.colors.front().timestep) / toDouble(newHistoryData.colors.size()));
+    }
+    for (auto const& [lineageId, samples] : newHistoryData.lineages) {
+        if (!samples.empty()) {
+            _lineageStates[lineageId].longtermTimestepDelta =
+                std::max(DefaultTimeStepDelta, (samples.back().timestep - samples.front().timestep) / toDouble(samples.size()));
+        }
     }
 
     std::lock_guard lock(history.getMutex());
     history.getDataRef() = newHistoryData;
+}
+
+template <typename DataPoint>
+void StatisticsService::updateTimeline(
+    std::vector<TimedSample<DataPoint>>& samples,
+    TimelineState<DataPoint>& state,
+    TimedSample<DataPoint> const& rawSample,
+    double time,
+    bool forceSampling)
+{
+    if (forceSampling || samples.empty() || time - samples.back().timestep > state.longtermTimestepDelta / 100 * (state.numDataPoints + 1)) {
+        state.accumulatedSample = state.accumulatedSample.has_value() ? *state.accumulatedSample + rawSample : rawSample;
+        ++state.numDataPoints;
+    }
+
+    if (state.accumulatedSample.has_value() && (samples.empty() || time - samples.back().timestep > state.longtermTimestepDelta)) {
+        emitSample(samples, state, time);
+    }
+}
+
+template <typename DataPoint>
+void StatisticsService::emitSample(std::vector<TimedSample<DataPoint>>& samples, TimelineState<DataPoint>& state, double time)
+{
+    auto newSample = *state.accumulatedSample / toDouble(state.numDataPoints);
+    state.numDataPoints = 0;
+    state.accumulatedSample.reset();
+
+    // Remove last entry if timestep has not changed
+    if (!samples.empty() && std::abs(samples.back().timestep - time) < NEAR_ZERO) {
+        samples.pop_back();
+    }
+    samples.emplace_back(newSample);
+
+    // Compress timeline after MaxSamples
+    if (samples.size() > MaxSamples) {
+        std::vector<TimedSample<DataPoint>> newSamples;
+        newSamples.reserve(samples.size() / 2);
+        for (size_t i = 0; i < (samples.size() - 1) / 2; ++i) {
+            auto interpolatedSample = (samples.at(i * 2) + samples.at(i * 2 + 1)) / 2.0;
+            interpolatedSample.timestep = samples.at(i * 2).timestep;
+            newSamples.emplace_back(interpolatedSample);
+        }
+        newSamples.emplace_back(samples.back());
+        samples.swap(newSamples);
+
+        state.longtermTimestepDelta *= 2.0;
+    }
+}
+
+template <typename DataPoint>
+void StatisticsService::resetTimelineTime(std::vector<TimedSample<DataPoint>>& samples, TimelineState<DataPoint>& state, double time)
+{
+    if (!samples.empty() && samples.back().timestep > 0) {
+        state.longtermTimestepDelta = std::max(DefaultTimeStepDelta, state.longtermTimestepDelta * time / samples.back().timestep);
+    } else {
+        state.longtermTimestepDelta = DefaultTimeStepDelta;
+    }
+    std::erase_if(samples, [&](TimedSample<DataPoint> const& sample) { return sample.timestep >= time; });
+    state.accumulatedSample.reset();
+    state.numDataPoints = 0;
 }

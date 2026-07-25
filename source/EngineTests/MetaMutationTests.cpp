@@ -412,7 +412,7 @@ TEST_F(MetaMutationTests, metaMutation_addNodeRatesActuallyChange)
     _simulationFacade->setSimulationData(data);
     // The add-node mutation inserts before every node, so its per-node probability grows the genome quickly; keep the pass
     // count low so the genome stays small while the meta-mutation still changes the rate.
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 3; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 

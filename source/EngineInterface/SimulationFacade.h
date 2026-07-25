@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ArraySizesForGpuEntities.h"
-#include "DataPointCollection.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
+#include "StatisticsEntry.h"
 #include "PreviewDesc.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
@@ -103,9 +103,9 @@ public:
     //************
     //* Statistics
     //************
-    virtual StatisticsRawData getStatisticsRawData() const = 0;
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;
     virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
+    virtual StatisticsEntry getStatisticsEntry() const = 0;
 
     //********************
     //* Preview simulation

@@ -29,6 +29,7 @@
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
+#include "EvolutionDashboardWindow.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
 #include "FpsController.h"
@@ -52,7 +53,6 @@
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
-#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
@@ -406,8 +406,13 @@ void MainLoopController::processMenubar()
             .closeMenuWhenItemClicked(false),
         [&] { SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Statistics").keyAlt(true).key(ImGuiKey_3).selected(StatisticsWindow::get().isOn()).closeMenuWhenItemClicked(false),
-        [&] { StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn()); });
+        AlienGui::MenuItemParameters()
+            .name("Evolution dashboard")
+            .keyAlt(true)
+            .key(ImGuiKey_3)
+            .selected(EvolutionDashboardWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { EvolutionDashboardWindow::get().setOn(!EvolutionDashboardWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Simulation parameters")

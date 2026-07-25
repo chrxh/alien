@@ -238,7 +238,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 30.0f * TIMESTEPS_PER_CELL_FUNCTION;
     applyAcceleration(object, acceleration);
 
-    statistics.incNumMuscleActivities(object->color);
     radiate(data, object, activation);
 }
 
@@ -330,7 +329,6 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 30.0f * TIMESTEPS_PER_CELL_FUNCTION;
     applyAcceleration(object, acceleration);
 
-    statistics.incNumMuscleActivities(object->color);
     radiate(data, object, activation);
 }
 
@@ -383,7 +381,6 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
     object->typeData.cell.frontAngle -= angleDelta;
 
-    statistics.incNumMuscleActivities(object->color);
     radiate(data, object, activation);
 }
 
@@ -457,7 +454,6 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     applyAcceleration(object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
-    statistics.incNumMuscleActivities(object->color);
     radiate(data, object, activation);
 }
 
@@ -526,7 +522,6 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     applyAcceleration(object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
-    statistics.incNumMuscleActivities(object->color);
     radiate(data, object, activation);
 }
 
@@ -543,7 +538,6 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     object->vel += direction;
     object->typeData.cell.cellTypeData.muscle.lastMovementX = direction.x;
     object->typeData.cell.cellTypeData.muscle.lastMovementY = direction.y;
-    statistics.incNumMuscleActivities(object->color);
     radiate(data, object, activation);
 }
 

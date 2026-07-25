@@ -213,7 +213,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // There is a slight systematic disadvantage for smaller creatures. This factor balances that out.
                     if (otherCell->creature->numCells > cell->creature->numCells) {
-                        energyToTransfer *= 0.7f;
+                        energyToTransfer *= 1.0f - ParameterCalculator::calcParameter(cudaSimulationParameters.attackerSizeProtection, data, object->pos);
                     }
 
                     if (energyToTransfer > NEAR_ZERO) {
@@ -236,7 +236,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             cell->event = CellEvent_Attacking;
             cell->eventCounter = 6;
-            statistics.incNumAttacks(object->color);
         }
 
         // Radiation
@@ -304,7 +303,6 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
         }
         if (connectedObject->typeData.cell.cellType == CellType_Defender
             && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
-            statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
     }

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <filesystem>
 #include <optional>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 
@@ -30,7 +31,7 @@
 
 #include "SettingsParserService.h"
 
-#include <zstr.hpp>
+#include "ZstdStream.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -1127,6 +1128,7 @@ namespace
     auto constexpr Id_Creature_MutationState = 7;
     auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_AccumulatedMutations = 9;
+    auto constexpr Id_Creature_AccumulatedMutationsInLineage = 10;
 
     auto constexpr Id_Solid_Energy = 0;
 
@@ -1856,6 +1858,7 @@ namespace cereal
         scope.addMember(Id_Creature_MutationState, data._mutationState, defaultObject._mutationState);
         scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         scope.addMember(Id_Creature_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
+        scope.addMember(Id_Creature_AccumulatedMutationsInLineage, data._accumulatedMutationsInLineage, defaultObject._accumulatedMutationsInLineage);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 
@@ -1896,10 +1899,10 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
 
         {
-            zstr::ofstream stream(filename.string(), std::ios::binary);
+            zstd::ofstream stream(filename.string(), std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
             if (!stream) {
                 return false;
             }
@@ -1932,7 +1935,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
 
         if (!deserializeDescription(data.mainData, filename)) {
             return false;
@@ -1964,7 +1967,9 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
+        std::filesystem::path legacyStatisticsFilename(filename);
+        legacyStatisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
 
         if (!std::filesystem::remove(filename)) {
             return false;
@@ -1972,9 +1977,10 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
         if (!std::filesystem::remove(settingsFilename)) {
             return false;
         }
-        if (!std::filesystem::remove(statisticsFilename)) {
-            return false;
-        }
+
+        //statistics files are optional
+        std::filesystem::remove(statisticsFilename);
+        std::filesystem::remove(legacyStatisticsFilename);
         return true;
     } catch (...) {
         return false;
@@ -1986,7 +1992,7 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
     try {
         {
             std::stringstream stdStream;
-            zstr::ostream stream(stdStream, std::ios::binary);
+            zstd::ostream stream(stdStream, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
             if (!stream) {
                 return false;
             }
@@ -2015,7 +2021,7 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
     try {
         {
             std::stringstream stdStream(input.mainData);
-            zstr::istream stream(stdStream, std::ios::binary);
+            zstd::istream stream(stdStream);
             if (!stream) {
                 return false;
             }
@@ -2045,7 +2051,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
             return false;
         }
 
-        zstr::ofstream stream(filename.string(), std::ios::binary);
+        zstd::ofstream stream(filename.string(), std::ios::binary);
         if (!stream) {
             return false;
         }
@@ -2078,7 +2084,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
 {
     try {
         std::stringstream stdStream;
-        zstr::ostream stream(stdStream, std::ios::binary);
+        zstd::ostream stream(stdStream);
         if (!stream) {
             return false;
         }
@@ -2101,7 +2107,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
 {
     try {
         std::stringstream stdStream(input);
-        zstr::istream stream(stdStream, std::ios::binary);
+        zstd::istream stream(stdStream);
         if (!stream) {
             return false;
         }
@@ -2169,7 +2175,7 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
 bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, Desc const& content) const
 {
     try {
-        zstr::ofstream fileStream(filename.string(), std::ios::binary);
+        zstd::ofstream fileStream(filename.string(), std::ios::binary);
         if (!fileStream) {
             return false;
         }
@@ -2202,7 +2208,7 @@ void SerializerService::serializeDescription(Desc const& description, std::ostre
 
 bool SerializerService::deserializeDescription(Desc& description, std::filesystem::path const& filename) const
 {
-    zstr::ifstream stream(filename.string(), std::ios::binary);
+    zstd::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
         return false;
     }
@@ -2249,278 +2255,405 @@ void SerializerService::deserializeSimulationParameters(SimulationParameters& pa
     parameters = SettingsParserService::get().decodeSimulationParameters(tree);
 }
 
+/************************************************************************/
+/* Statistics history                                                   */
+/************************************************************************/
 namespace
 {
-    std::string toString(double value)
-    {
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(9) << value;
-        return ss.str();
-    }
+    auto constexpr Id_StatisticsHistory_Overall = 0;
+    auto constexpr Id_StatisticsHistory_Lineages = 1;
 
-    struct ColumnDescription
+    auto constexpr Id_Timeline_Timestep = 1;
+    auto constexpr Id_Timeline_SystemClock = 2;
+
+    auto constexpr Id_OverallTimeline_UniqueColorTimelines = 16;
+    auto constexpr Id_OverallTimeline_ColorBitsetGroups = 17;
+
+    auto constexpr Id_ColorColumns_NumCreatures = 0;
+    auto constexpr Id_ColorColumns_NumGenomes = 1;
+    auto constexpr Id_ColorColumns_SumCreatureCells = 2;
+    auto constexpr Id_ColorColumns_SumCreatureGenerations = 3;
+    auto constexpr Id_ColorColumns_SumGenomeNodes = 4;
+    auto constexpr Id_ColorColumns_SumMutationRates = 5;
+    auto constexpr Id_ColorColumns_SumCreatureEnergy = 6;
+    auto constexpr Id_ColorColumns_NumCreatedCreatures = 7;
+    auto constexpr Id_ColorColumns_TotalMutations = 8;
+
+    auto constexpr Id_LineageTimeline_ColorBitset = 3;
+    auto constexpr Id_LineageTimeline_RepresentativeCellId = 4;
+    auto constexpr Id_LineageTimeline_NumCreatures = 5;
+    auto constexpr Id_LineageTimeline_NumGenomes = 6;
+    auto constexpr Id_LineageTimeline_SumCreatureCells = 7;
+    auto constexpr Id_LineageTimeline_SumCreatureGenerations = 8;
+    auto constexpr Id_LineageTimeline_SumGenomeNodes = 9;
+    auto constexpr Id_LineageTimeline_SumMutationRates = 10;
+    auto constexpr Id_LineageTimeline_SumCreatureEnergy = 11;
+    auto constexpr Id_LineageTimeline_NumCreatedCreatures = 12;
+    auto constexpr Id_LineageTimeline_TotalMutations = 13;
+
+    //metric columns are plot statistics and are stored as float to halve the serialized size; the exact values stay double in memory
+    struct ColorTimeline
     {
-        std::string name;
-        bool colorDependent = false;
+        std::vector<float> numCreatures;
+        std::vector<float> numGenomes;
+        std::vector<float> sumCreatureCells;
+        std::vector<float> sumCreatureGenerations;
+        std::vector<float> sumGenomeNodes;
+        std::vector<float> sumMutationRates;
+        std::vector<float> sumCreatureEnergy;
+        std::vector<float> numCreatedCreatures;
+        std::vector<float> totalMutations;
     };
-    std::vector<ColumnDescription> const ColumnDescriptions = {
-        {"Time step", false},
-        {"Cells", true},
-        {"Self-replicators", true},
-        {"Viruses", true},
-        {"Free cells", true},
-        {"Energy particles", true},
-        {"Average genome cells", true},
-        {"Total energy", true},
-        {"Created cells", true},
-        {"Attacks", true},
-        {"Muscle activities", true},
-        {"Depot activities", true},
-        {"Defender activities", true},
-        {"Injection activities", true},
-        {"Completed injections", true},
-        {"Generator pulses", true},
-        {"Neuron activities", true},
-        {"Sensor activities", true},
-        {"Sensor matches", true},
-        {"Reconnector creations", true},
-        {"Reconnector deletions", true},
-        {"Detonations", true},
-        {"Colonies", true},
-        {"Genome complexity average", true},
-        {"Genome complexity Maximum", true},
-        {"Genome complexity variance", true},
-        {"System clock", false}};
 
-    std::variant<DataPoint*, double*> getDataRef(int colIndex, DataPointCollection& dataPoints)
+    struct OverallTimeline
     {
-        if (colIndex == 0) {
-            return &dataPoints.time;
-        } else if (colIndex == 1) {
-            return &dataPoints.numObjects;
-        } else if (colIndex == 2) {
-            return &dataPoints.numSelfReplicators;
-        } else if (colIndex == 3) {
-            return &dataPoints.numViruses;
-        } else if (colIndex == 4) {
-            return &dataPoints.numFreeCells;
-        } else if (colIndex == 5) {
-            return &dataPoints.numEnergyParticles;
-        } else if (colIndex == 6) {
-            return &dataPoints.averageGenomeCells;
-        } else if (colIndex == 7) {
-            return &dataPoints.totalEnergy;
-        } else if (colIndex == 8) {
-            return &dataPoints.numCreatedCells;
-        } else if (colIndex == 9) {
-            return &dataPoints.numAttacks;
-        } else if (colIndex == 10) {
-            return &dataPoints.numMuscleActivities;
-        } else if (colIndex == 11) {
-            return &dataPoints.numDefenderActivities;
-        } else if (colIndex == 12) {
-            return &dataPoints.numDepotActivities;
-        } else if (colIndex == 13) {
-            return &dataPoints.numInjectionActivities;
-        } else if (colIndex == 14) {
-            return &dataPoints.numCompletedInjections;
-        } else if (colIndex == 15) {
-            return &dataPoints.numGeneratorPulses;
-        } else if (colIndex == 16) {
-            return &dataPoints.numNeuronActivities;
-        } else if (colIndex == 17) {
-            return &dataPoints.numSensorActivities;
-        } else if (colIndex == 18) {
-            return &dataPoints.numSensorMatches;
-        } else if (colIndex == 19) {
-            return &dataPoints.numReconnectorCreated;
-        } else if (colIndex == 20) {
-            return &dataPoints.numReconnectorRemoved;
-        } else if (colIndex == 21) {
-            return &dataPoints.numDetonations;
-        } else if (colIndex == 22) {
-            return &dataPoints.numColonies;
-        } else if (colIndex == 23) {
-            return &dataPoints.averageNumCells;
-        } else if (colIndex == 24) {
-            return &dataPoints.maxNumCellsOfColonies;
-        } else if (colIndex == 25) {
-            return &dataPoints.varianceNumCells;
-        } else if (colIndex == 26) {
-            return &dataPoints.systemClock;
-        }
-        THROW_NOT_IMPLEMENTED();
-    }
-
-    void load(int startIndex, std::vector<std::string>& serializedData, double& value)
-    {
-        if (startIndex < serializedData.size()) {
-            value = std::stod(serializedData.at(startIndex));
-        }
-    }
-
-    void save(std::vector<std::string>& serializedData, double& value)
-    {
-        serializedData.emplace_back(toString(value));
-    }
-
-    void load(int startIndex, std::vector<std::string>& serializedData, DataPoint& dataPoint)
-    {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            auto index = startIndex + i;
-            if (index < serializedData.size()) {
-                dataPoint.values[i] = std::stod(serializedData.at(index));
-            }
-        }
-        if (startIndex + MAX_COLORS < serializedData.size()) {
-            dataPoint.summedValues = std::stod(serializedData.at(startIndex + MAX_COLORS));
-        }
-    }
-
-    void save(std::vector<std::string>& serializedData, DataPoint& dataPoint)
-    {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            serializedData.emplace_back(toString(dataPoint.values[i]));
-        }
-        serializedData.emplace_back(toString(dataPoint.summedValues));
-    }
-
-    struct ParsedColumnInfo
-    {
-        std::string name;
-        std::optional<int> colIndex;
-        int size = 0;
+        std::vector<double> timestep;
+        std::vector<double> systemClock;
+        std::unordered_map<uint32_t, ColorTimeline> colorTimelines;
     };
-    void load(std::vector<ParsedColumnInfo> const& colInfos, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+
+    struct LineageTimeline
     {
-        int startIndex = 0;
-        for (auto const& colInfo : colInfos) {
-            if (!colInfo.colIndex.has_value()) {
-                startIndex += colInfo.size;
-                continue;
+        std::vector<double> timestep;
+        std::vector<double> systemClock;
+        std::vector<uint32_t> colorBitset;
+        std::vector<uint64_t> representativeCellId;
+        std::vector<float> numCreatures;
+        std::vector<float> numGenomes;
+        std::vector<float> sumCreatureCells;
+        std::vector<float> sumCreatureGenerations;
+        std::vector<float> sumGenomeNodes;
+        std::vector<float> sumMutationRates;
+        std::vector<float> sumCreatureEnergy;
+        std::vector<float> numCreatedCreatures;
+        std::vector<float> totalMutations;
+    };
+
+    struct StatisticsTimelines
+    {
+        OverallTimeline overallTimeline;
+        std::unordered_map<uint32_t, LineageTimeline> lineageTimelines;
+    };
+
+    struct LineageColumnDesc
+    {
+        int id;
+        std::vector<float> LineageTimeline::* column;
+        double LineageDataPoint::* field;
+    };
+    std::vector<LineageColumnDesc> const LineageColumnDescs = {
+        {Id_LineageTimeline_NumCreatures, &LineageTimeline::numCreatures, &LineageDataPoint::numCreatures},
+        {Id_LineageTimeline_NumGenomes, &LineageTimeline::numGenomes, &LineageDataPoint::numGenomes},
+        {Id_LineageTimeline_SumCreatureCells, &LineageTimeline::sumCreatureCells, &LineageDataPoint::sumCreatureCells},
+        {Id_LineageTimeline_SumCreatureGenerations, &LineageTimeline::sumCreatureGenerations, &LineageDataPoint::sumCreatureGenerations},
+        {Id_LineageTimeline_SumGenomeNodes, &LineageTimeline::sumGenomeNodes, &LineageDataPoint::sumGenomeNodes},
+        {Id_LineageTimeline_SumMutationRates, &LineageTimeline::sumMutationRates, &LineageDataPoint::sumMutationRates},
+        {Id_LineageTimeline_SumCreatureEnergy, &LineageTimeline::sumCreatureEnergy, &LineageDataPoint::sumCreatureEnergy},
+        {Id_LineageTimeline_NumCreatedCreatures, &LineageTimeline::numCreatedCreatures, &LineageDataPoint::numCreatedCreatures},
+        {Id_LineageTimeline_TotalMutations, &LineageTimeline::totalMutations, &LineageDataPoint::totalMutations},
+    };
+
+    struct ColorColumnDesc
+    {
+        int id;
+        std::vector<float> ColorTimeline::* column;
+        double ColorOverallDataPoint::* field;
+    };
+    std::vector<ColorColumnDesc> const ColorColumnDescs = {
+        {Id_ColorColumns_NumCreatures, &ColorTimeline::numCreatures, &ColorOverallDataPoint::numCreatures},
+        {Id_ColorColumns_NumGenomes, &ColorTimeline::numGenomes, &ColorOverallDataPoint::numGenomes},
+        {Id_ColorColumns_SumCreatureCells, &ColorTimeline::sumCreatureCells, &ColorOverallDataPoint::sumCreatureCells},
+        {Id_ColorColumns_SumCreatureGenerations, &ColorTimeline::sumCreatureGenerations, &ColorOverallDataPoint::sumCreatureGenerations},
+        {Id_ColorColumns_SumGenomeNodes, &ColorTimeline::sumGenomeNodes, &ColorOverallDataPoint::sumGenomeNodes},
+        {Id_ColorColumns_SumMutationRates, &ColorTimeline::sumMutationRates, &ColorOverallDataPoint::sumMutationRates},
+        {Id_ColorColumns_SumCreatureEnergy, &ColorTimeline::sumCreatureEnergy, &ColorOverallDataPoint::sumCreatureEnergy},
+        {Id_ColorColumns_NumCreatedCreatures, &ColorTimeline::numCreatedCreatures, &ColorOverallDataPoint::numCreatedCreatures},
+        {Id_ColorColumns_TotalMutations, &ColorTimeline::totalMutations, &ColorOverallDataPoint::totalMutations},
+    };
+
+    bool colorTimelinesEqual(ColorTimeline const& left, ColorTimeline const& right)
+    {
+        for (auto const& [id, column, field] : ColorColumnDescs) {
+            if (left.*column != right.*column) {
+                return false;
             }
-            auto col = colInfo.colIndex.value();
-            auto data = getDataRef(col, dataPoints);
-            if (std::holds_alternative<DataPoint*>(data)) {
-                load(startIndex, serializedData, *std::get<DataPoint*>(data));
+        }
+        return true;
+    }
+
+    size_t hashColorTimeline(ColorTimeline const& timeline)
+    {
+        size_t seed = 0;
+        auto combine = [&seed](size_t value) { seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2); };
+        for (auto const& [id, column, field] : ColorColumnDescs) {
+            auto const& values = timeline.*column;
+            combine(values.size());
+            for (auto const value : values) {
+                combine(std::hash<float>{}(value));
             }
-            if (std::holds_alternative<double*>(data)) {
-                load(startIndex, serializedData, *std::get<double*>(data));
+        }
+        return seed;
+    }
+
+    // Many color combinations share the same (often all-zero) ColorTimeline. Storing each distinct timeline once
+    // together with the color combinations that map to it saves a lot of space (there are up to 2^colors - 1 combinations).
+    struct DeduplicatedColorTimelines
+    {
+        std::vector<ColorTimeline> uniqueTimelines;
+        std::vector<std::vector<uint32_t>> colorBitsetGroups;  // parallel to uniqueTimelines
+    };
+
+    DeduplicatedColorTimelines deduplicateColorTimelines(std::unordered_map<uint32_t, ColorTimeline> const& colorTimelines)
+    {
+        DeduplicatedColorTimelines result;
+        std::unordered_map<size_t, std::vector<size_t>> hashToUniqueIndices;
+
+        //sort color combinations for deterministic output
+        std::vector<uint32_t> sortedColorBitsets;
+        sortedColorBitsets.reserve(colorTimelines.size());
+        for (auto const& [colorBitset, timeline] : colorTimelines) {
+            sortedColorBitsets.emplace_back(colorBitset);
+        }
+        std::sort(sortedColorBitsets.begin(), sortedColorBitsets.end());
+
+        for (auto const colorBitset : sortedColorBitsets) {
+            auto const& timeline = colorTimelines.at(colorBitset);
+            auto& candidateIndices = hashToUniqueIndices[hashColorTimeline(timeline)];
+
+            std::optional<size_t> matchIndex;
+            for (auto const index : candidateIndices) {
+                if (colorTimelinesEqual(result.uniqueTimelines.at(index), timeline)) {
+                    matchIndex = index;
+                    break;
+                }
             }
-            startIndex += colInfo.size;
+            if (!matchIndex) {
+                matchIndex = result.uniqueTimelines.size();
+                result.uniqueTimelines.emplace_back(timeline);
+                result.colorBitsetGroups.emplace_back();
+                candidateIndices.emplace_back(*matchIndex);
+            }
+            result.colorBitsetGroups.at(*matchIndex).emplace_back(colorBitset);
+        }
+        return result;
+    }
+
+    std::unordered_map<uint32_t, ColorTimeline> expandColorTimelines(DeduplicatedColorTimelines const& deduplicated)
+    {
+        std::unordered_map<uint32_t, ColorTimeline> result;
+        for (auto&& [timeline, colorBitsets] : std::views::zip(deduplicated.uniqueTimelines, deduplicated.colorBitsetGroups)) {
+            for (auto const colorBitset : colorBitsets) {
+                result.emplace(colorBitset, timeline);
+            }
+        }
+        return result;
+    }
+
+    template <typename Timeline, typename Sample>
+    void extractTimingColumns(Timeline& timeline, std::vector<Sample> const& samples)
+    {
+        timeline.timestep.reserve(samples.size());
+        timeline.systemClock.reserve(samples.size());
+        for (auto const& sample : samples) {
+            timeline.timestep.emplace_back(sample.timestep);
+            timeline.systemClock.emplace_back(sample.systemClock);
         }
     }
 
-    void save(std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    template <typename Sample, typename Timeline>
+    std::vector<Sample> createSamplesWithTiming(Timeline const& timeline)
     {
-        int index = 0;
-        for (auto const& column : ColumnDescriptions) {
-            auto data = getDataRef(index, dataPoints);
-            if (std::holds_alternative<DataPoint*>(data)) {
-                save(serializedData, *std::get<DataPoint*>(data));
+        std::vector<Sample> result(timeline.timestep.size());
+        for (auto&& [sample, value] : std::views::zip(result, timeline.timestep)) {
+            sample.timestep = value;
+        }
+        for (auto&& [sample, value] : std::views::zip(result, timeline.systemClock)) {
+            sample.systemClock = value;
+        }
+        return result;
+    }
+
+    template <typename Timeline, typename Sample, typename Columns>
+    void extractDataColumns(Timeline& timeline, std::vector<Sample> const& samples, Columns const& columns)
+    {
+        for (auto const& [id, column, field] : columns) {
+            auto& values = timeline.*column;
+            values.reserve(samples.size());
+            for (auto const& sample : samples) {
+                values.emplace_back(static_cast<float>(sample.data.*field));
             }
-            if (std::holds_alternative<double*>(data)) {
-                save(serializedData, *std::get<double*>(data));
-            }
-            ++index;
         }
     }
 
-    std::string getPrincipalPart(std::string const& colName)
+    template <typename Sample, typename Timeline, typename Columns>
+    void applyDataColumns(std::vector<Sample>& samples, Timeline const& timeline, Columns const& columns)
     {
-        auto colNameTrimmed = boost::algorithm::trim_left_copy(colName);
-        size_t pos = colNameTrimmed.find(" (");
-        if (pos != std::string::npos) {
-            return colNameTrimmed.substr(0, pos);
-        } else {
-            return colNameTrimmed;
+        for (auto const& [id, column, field] : columns) {
+            for (auto&& [sample, value] : std::views::zip(samples, timeline.*column)) {
+                sample.data.*field = value;
+            }
         }
     }
 
-    std::optional<int> getColumnIndex(std::string const& colName)
+    OverallTimeline convertToTimeline(std::vector<ColorSamples> const& samples)
     {
-        for (auto const& [index, colDescription] : ColumnDescriptions | boost::adaptors::indexed(0)) {
-            if (colDescription.name == colName) {
-                return toInt(index);
+        OverallTimeline result;
+        extractTimingColumns(result, samples);
+
+        for (auto const& sample : samples) {
+            for (auto const& [colorBitset, dataPoint] : sample.data) {
+                result.colorTimelines.try_emplace(colorBitset);
             }
         }
-        return std::nullopt;
+        for (auto& [colorBitset, columns] : result.colorTimelines) {
+            for (auto const& [id, column, field] : ColorColumnDescs) {
+                auto& values = columns.*column;
+                values.reserve(samples.size());
+                for (auto const& sample : samples) {
+                    auto it = sample.data.find(colorBitset);
+                    values.emplace_back(static_cast<float>(it != sample.data.end() ? it->second.*field : 0.0));
+                }
+            }
+        }
+        return result;
     }
+
+    std::vector<ColorSamples> convertToSamples(OverallTimeline const& timeline)
+    {
+        auto result = createSamplesWithTiming<ColorSamples>(timeline);
+
+        for (auto const& [colorBitset, columns] : timeline.colorTimelines) {
+            for (auto const& [id, column, field] : ColorColumnDescs) {
+                for (auto&& [sample, value] : std::views::zip(result, columns.*column)) {
+                    sample.data[colorBitset].*field = value;
+                }
+            }
+        }
+        return result;
+    }
+
+    LineageTimeline convertToTimeline(std::vector<LineageSample> const& samples)
+    {
+        LineageTimeline result;
+        extractTimingColumns(result, samples);
+        extractDataColumns(result, samples, LineageColumnDescs);
+        result.colorBitset.reserve(samples.size());
+        result.representativeCellId.reserve(samples.size());
+        for (auto const& sample : samples) {
+            result.colorBitset.emplace_back(sample.data.colorBitset);
+            result.representativeCellId.emplace_back(sample.data.representativeCellId);
+        }
+        return result;
+    }
+
+    std::vector<LineageSample> convertToSamples(LineageTimeline const& timeline)
+    {
+        auto result = createSamplesWithTiming<LineageSample>(timeline);
+        applyDataColumns(result, timeline, LineageColumnDescs);
+        for (auto&& [sample, value] : std::views::zip(result, timeline.colorBitset)) {
+            sample.data.colorBitset = value;
+        }
+        for (auto&& [sample, value] : std::views::zip(result, timeline.representativeCellId)) {
+            sample.data.representativeCellId = value;
+        }
+        return result;
+    }
+}
+
+namespace cereal
+{
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ColorTimeline& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        for (auto const& [id, column, field] : ColorColumnDescs) {
+            scope.addDesc(id, data.*column);
+        }
+    }
+    SPLIT_SERIALIZATION(ColorTimeline)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, OverallTimeline& data)
+    {
+        DeduplicatedColorTimelines deduplicated;
+        if (task == SerializationTask::Save) {
+            deduplicated = deduplicateColorTimelines(data.colorTimelines);
+        }
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addDesc(Id_Timeline_Timestep, data.timestep);
+            scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
+            scope.addDesc(Id_OverallTimeline_UniqueColorTimelines, deduplicated.uniqueTimelines);
+            scope.addDesc(Id_OverallTimeline_ColorBitsetGroups, deduplicated.colorBitsetGroups);
+        }
+        if (task == SerializationTask::Load) {
+            data.colorTimelines = expandColorTimelines(deduplicated);
+        }
+    }
+    SPLIT_SERIALIZATION(OverallTimeline)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, LineageTimeline& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        scope.addDesc(Id_Timeline_Timestep, data.timestep);
+        scope.addDesc(Id_Timeline_SystemClock, data.systemClock);
+        scope.addDesc(Id_LineageTimeline_ColorBitset, data.colorBitset);
+        scope.addDesc(Id_LineageTimeline_RepresentativeCellId, data.representativeCellId);
+        for (auto const& [id, column, field] : LineageColumnDescs) {
+            scope.addDesc(id, data.*column);
+        }
+    }
+    SPLIT_SERIALIZATION(LineageTimeline)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, StatisticsTimelines& data)
+    {
+        auto scope = getSerializationScope(task, ar);
+        scope.addDesc(Id_StatisticsHistory_Overall, data.overallTimeline);
+        scope.addDesc(Id_StatisticsHistory_Lineages, data.lineageTimelines);
+    }
+    SPLIT_SERIALIZATION(StatisticsTimelines)
 }
 
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
 {
-    //header row
-    auto writeLabelAllColors = [&stream](auto const& name) {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            if (i != 0) {
-                stream << ",";
-            }
-            stream << name << " (color " << i << ")";
-        }
-        stream << "," << name << " (accumulated)";
-    };
-
-    int index = 0;
-    for (auto const& [colName, colorDependent] : ColumnDescriptions) {
-        if (index != 0) {
-            stream << ", ";
-        }
-        if (!colorDependent) {
-            stream << colName;
-        } else {
-            writeLabelAllColors(colName);
-        }
-        ++index;
+    StatisticsTimelines timelines;
+    timelines.overallTimeline = convertToTimeline(statistics.colors);
+    for (auto const& [lineageId, samples] : statistics.lineages) {
+        timelines.lineageTimelines.emplace(lineageId, convertToTimeline(samples));
     }
-    stream << std::endl;
 
-    //content
-    for (auto dataPoints : statistics) {
-        std::vector<std::string> entries;
-        save(entries, dataPoints);
-        stream << boost::join(entries, ",") << std::endl;
-    }
+    zstd::ostream compressedStream(stream);
+    cereal::PortableBinaryOutputArchive archive(compressedStream);
+    archive(Const::ProgramVersion);
+    archive(timelines);
+    compressedStream.flush();
 }
 
 void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const
 {
-    statistics.clear();
+    //the statistics history is auxiliary data: an unreadable or outdated file yields an empty history instead of failing the simulation load
+    statistics = StatisticsHistoryData();
+    try {
+        zstd::istream decompressedStream(stream);
+        cereal::PortableBinaryInputArchive archive(decompressedStream);
 
-    std::vector<std::vector<std::string>> data;
-
-    // header line
-    std::string header;
-    std::getline(stream, header);
-
-    std::vector<std::string> colNames;
-    boost::split(colNames, header, boost::is_any_of(","));
-
-    std::vector<ParsedColumnInfo> colInfos;
-    for (auto const& colName : colNames) {
-        auto principalPart = getPrincipalPart(colName);
-
-        if (colInfos.empty()) {
-            colInfos.emplace_back(principalPart, getColumnIndex(principalPart), 1);
-        } else {
-            auto& lastColInfo = colInfos.back();
-            if (lastColInfo.name == principalPart) {
-                ++lastColInfo.size;
-            } else {
-                colInfos.emplace_back(principalPart, getColumnIndex(principalPart), 1);
-            }
+        std::string version;
+        archive(version);
+        if (!VersionParserService::get().isVersionValid(version) || VersionParserService::get().isVersionOutdated(version)) {
+            return;
         }
-    }
 
-    // data lines
-    while (std::getline(stream, header)) {
-        std::vector<std::string> entries;
-        boost::split(entries, header, boost::is_any_of(","));
+        StatisticsTimelines timelines;
+        archive(timelines);
 
-        DataPointCollection dataPoints;
-        load(colInfos, entries, dataPoints);
-
-        statistics.emplace_back(dataPoints);
+        statistics.colors = convertToSamples(timelines.overallTimeline);
+        for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
+            statistics.lineages.emplace(lineageId, convertToSamples(timeline));
+        }
+    } catch (...) {
+        statistics = StatisticsHistoryData();
     }
 }
 

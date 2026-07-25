@@ -13,7 +13,6 @@
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
 #include "OverlayController.h"
-#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include <EngineInterface/SimulationFacade.h>
 
@@ -74,34 +73,34 @@ void TemporalControlWindow::processIntern()
 
 void TemporalControlWindow::processTpsInfo()
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::Text("Time steps per second");
+    ImGui::PopStyleColor();
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value /*0xffa07050*/);
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getTps(), 1).c_str());
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 
 void TemporalControlWindow::processTotalTimestepsInfo()
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::Text("Total time steps");
+    ImGui::PopStyleColor();
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getCurrentTimestep()).c_str());
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 
 void TemporalControlWindow::processRealTimeInfo()
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::Text("Real-time");
+    ImGui::PopStyleColor();
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getRealTime()).c_str());
-    ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 
@@ -252,11 +251,6 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     }
 
     parameters.externalEnergy = origParameters.externalEnergy;
-    if (parameters.maxCellAgeBalancerInterval.enabled || origParameters.maxCellAgeBalancerInterval.enabled) {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            parameters.maxCellAge.value[i] = origParameters.maxCellAge.value[i];
-        }
-    }
     auto simRunning = _SimulationFacade::get()->isSimulationRunning();
     if (simRunning) {
         _SimulationFacade::get()->pauseSimulation();

@@ -68,18 +68,21 @@ struct _GenomeTabEditData
         return gene._nodes.at(nodeIndex.value());
     }
 
-    void updateGeometry(ConstructorShape shape)
+    // The reference angles of the middle nodes are derived data: the constructor regenerates them
+    // from the gene's shape during construction
+    static void updateGeneGeometry(GeneDesc& gene)
     {
         ShapeGenerator shapeGenerator;
-        auto& gene = getSelectedGeneRef();
         auto numNodes = gene._nodes.size();
         int index = 0;
         for (auto& node : gene._nodes) {
-            auto shapeGenerationResult = shapeGenerator.generateNextConstructionData(shape);
+            auto shapeGenerationResult = shapeGenerator.generateNextConstructionData(gene._shape);
             if (index > 0 && index < numNodes - 1) {
                 node._referenceAngle = shapeGenerationResult.angle;
             }
             ++index;
         }
     }
+
+    void updateGeometry() { updateGeneGeometry(getSelectedGeneRef()); }
 };
