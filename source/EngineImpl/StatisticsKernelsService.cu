@@ -11,10 +11,10 @@ void StatisticsKernelsService::updateStatistics(
     SimulationData const& data,
     SimulationStatistics const& simulationStatistics)
 {
-    KERNEL_CALL(cudaUpdateEvolutionStatistics_substep1, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateEvolutionStatistics_substep2, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateEvolutionStatistics_substep3, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateEvolutionStatistics_substep4, data, simulationStatistics);
+    KERNEL_CALL(cudaResetStatistics, data, simulationStatistics);
+    KERNEL_CALL(cudaCollectObjectAndCreatureStatistics, data, simulationStatistics);
+    KERNEL_CALL(cudaCollectGenomeAndEnergyStatistics, data, simulationStatistics);
+    KERNEL_CALL(cudaCompactLineageStatistics, simulationStatistics);
     if (simulationStatistics.isLineageAccumulatorGCNeeded()) {
         KERNEL_CALL(cudaPrepareLineageAccumulatorGC, simulationStatistics);
         KERNEL_CALL(cudaLineageAccumulatorGC, simulationStatistics);
