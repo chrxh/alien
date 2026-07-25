@@ -195,7 +195,6 @@ The following external libraries are used:
 - [stb](https://github.com/nothings/stb)
 - [cereal](https://github.com/USCiLab/cereal)
 - [zlib](https://www.zlib.net)
-- [zstr](https://github.com/mateidavid/zstr)
 - [OpenSSL](https://github.com/openssl/openssl)
 - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 - [googletest](https://github.com/google/googletest)

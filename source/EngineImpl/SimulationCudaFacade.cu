@@ -29,7 +29,6 @@
 #include <EngineKernels/GarbageCollectorKernels.cuh>
 #include <EngineKernels/GeometryKernels.cuh>
 #include <EngineKernels/Map.cuh>
-#include <EngineKernels/MaxAgeBalancer.cuh>
 #include <EngineKernels/SelectionResult.cuh>
 #include <EngineKernels/SimulationData.cuh>
 #include <EngineKernels/SimulationStatistics.cuh>
@@ -50,7 +49,7 @@
 
 namespace
 {
-    std::chrono::milliseconds const StatisticsUpdate(30);
+    auto constexpr EvolutionStatisticsUpdateInterval = 10;
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
 }
@@ -76,7 +75,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();
     _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
     _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
-    _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
     _simulationTimestep = timestep;
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
@@ -112,6 +110,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
             _cudaSimulationData->free();
             _cudaPreviewData->free();
             _cudaSimulationStatistics->free();
+            _cudaPreviewStatistics->free();
             _cudaSelectionResult->free();
 
             SimulationKernelsService::get().shutdown();
@@ -430,26 +429,17 @@ ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
     return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.cudaSettings, getSimulationDataPtrCopy());
 }
 
-StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
-{
-    std::lock_guard lock(_mutexForStatistics);
-    if (_statisticsData) {
-        return *_statisticsData;
-    } else {
-        return StatisticsRawData();
-    }
-}
-
 void _SimulationCudaFacade::updateStatistics()
 {
     StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
+    auto statisticsEntry = _cudaSimulationStatistics->getStatisticsEntry();
     {
         std::lock_guard lock(_mutexForStatistics);
-        _statisticsData = _cudaSimulationStatistics->getStatistics();
+        _statisticsEntry = statisticsEntry;
     }
-    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, statisticsEntry, getCurrentTimestep());
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -457,14 +447,19 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
     return _statisticsHistory;
 }
 
-void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
+StatisticsEntry _SimulationCudaFacade::getStatisticsEntry()
 {
-    StatisticsService::get().rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
+    std::lock_guard lock(_mutexForStatistics);
+    if (_statisticsEntry) {
+        return *_statisticsEntry;
+    } else {
+        return StatisticsEntry();
+    }
 }
 
-void _SimulationCudaFacade::resetTimeIntervalStatistics()
+void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
 {
-    _cudaSimulationStatistics->resetAccumulatedStatistics();
+    StatisticsService::get().setStatisticsHistory(_statisticsHistory, data, getCurrentTimestep());
 }
 
 uint64_t _SimulationCudaFacade::getCurrentTimestep() const
@@ -582,7 +577,7 @@ TOs _SimulationCudaFacade::getPreviewData()
 void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics, objectId);
     syncAndCheck();
 
     resizeArraysIfNecessary();
@@ -811,18 +806,14 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
             resizeArraysIfNecessary();
         }
 
-        auto statistics = getStatisticsRawData();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
-            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(
-                    _settings, _maxAgeBalancer, simulationData, getCurrentTimestep(), statistics)) {
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, simulationData, getCurrentTimestep())) {
                 CHECK_FOR_DEVICE_ERRORS(
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
-        auto now = std::chrono::steady_clock::now();
-        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-            _lastStatisticsUpdateTime = now;
+        if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
             updateStatistics();
         }
     }

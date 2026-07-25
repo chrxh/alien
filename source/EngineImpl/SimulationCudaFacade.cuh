@@ -13,12 +13,12 @@
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsHistory.h>
-#include <EngineInterface/StatisticsRawData.h>
 
 #include <EngineKernels/Definitions.cuh>
 #include <EngineKernels/TOs.cuh>
@@ -83,12 +83,11 @@ public:
 
     ArraySizesForTOs estimateCapacityNeededForTO() const;
 
-    StatisticsRawData getStatisticsRawData();
     void updateStatistics();
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
+    StatisticsEntry getStatisticsEntry();
 
-    void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
 
@@ -153,10 +152,8 @@ private:
     TOProvider _collectionTOProvider;
 
     mutable std::mutex _mutexForStatistics;
-    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    std::optional<StatisticsRawData> _statisticsData;
     StatisticsHistory _statisticsHistory;
+    std::optional<StatisticsEntry> _statisticsEntry;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
-    MaxAgeBalancer _maxAgeBalancer;
 };

@@ -41,6 +41,7 @@ add_library(PersisterInterface
     SenderInfo.h
     SerializerService.cpp
     SerializerService.h
+    ZstdStream.h
     SerializedSimulation.h
     SettingsForSerialization.h
     SettingsParserService.cpp
@@ -56,10 +57,9 @@ add_library(PersisterInterface
 target_link_libraries(PersisterInterface Base)
 
 target_link_libraries(PersisterInterface Boost::boost)
-target_link_libraries(PersisterInterface ZLIB::ZLIB)
 
-find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
-target_include_directories(PersisterInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
+find_package(zstd CONFIG REQUIRED)
+target_link_libraries(PersisterInterface zstd::libzstd)
 
 target_precompile_headers(PersisterInterface PRIVATE
     <algorithm>

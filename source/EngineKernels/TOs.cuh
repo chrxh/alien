@@ -497,6 +497,7 @@ struct CreatureTO
 
     uint32_t lineageId;
     float accumulatedMutations;
+    float accumulatedMutationsInLineage;
 
     // Process data
     uint32_t headUpdateId;

@@ -132,7 +132,6 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             if (object->numConnections < MAX_OBJECT_CONNECTIONS && closestCell->numConnections < MAX_OBJECT_CONNECTIONS) {
                 ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, closestCell);
                 object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 1;
-                statistics.incNumReconnectorCreated(object->color);
             }
             lock.releaseLock();
         }
@@ -161,7 +160,6 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         if (shouldRemove) {
             ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
             object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 1;
-            statistics.incNumReconnectorRemoved(object->color);
         }
     }
     object->releaseLock();

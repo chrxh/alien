@@ -936,6 +936,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     result._lineageId = creatureTO.lineageId;
     NumberGenerator::get().adaptMaxLineageId(creatureTO.lineageId);
     result._accumulatedMutations = creatureTO.accumulatedMutations;
+    result._accumulatedMutationsInLineage = creatureTO.accumulatedMutationsInLineage;
     result._headUpdateId = creatureTO.headUpdateId;
 
     return result;
@@ -1258,6 +1259,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.mutationState = creatureDesc._mutationState;
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.accumulatedMutations = creatureDesc._accumulatedMutations;
+    creatureTO.accumulatedMutationsInLineage = creatureDesc._accumulatedMutationsInLineage;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 

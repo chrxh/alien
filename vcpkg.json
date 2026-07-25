@@ -51,10 +51,7 @@
       "version>=": "1.11.0"
     },
     {
-      "name": "zlib"
-    },
-    {
-      "name": "zstr"
+      "name": "zstd"
     },
     {
       "name": "openssl",

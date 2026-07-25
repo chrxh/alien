@@ -25,13 +25,18 @@ std::string StringHelper::format(uint64_t n, char separator)
 
 std::string StringHelper::format(float v, int fracPartDecimals)
 {
+    return format(static_cast<double>(v), fracPartDecimals);
+}
+
+std::string StringHelper::format(double v, int fracPartDecimals)
+{
     std::string result;
     if (v < 0) {
         result = "-";
         v = -v;
     }
     auto scale = static_cast<uint64_t>(std::llround(std::pow(10.0, fracPartDecimals)));
-    auto scaled = static_cast<uint64_t>(std::llround(static_cast<double>(v) * scale));
+    auto scaled = static_cast<uint64_t>(std::llround(v * scale));
     result += format(scaled / scale);
     if (fracPartDecimals > 0) {
         result += ".";
@@ -103,6 +108,23 @@ std::string StringHelper::formatInHex(uint64_t value)
     std::stringstream ss;
     ss << "0x" << std::hex << std::uppercase << value;
     return ss.str();
+}
+
+std::string StringHelper::formatInThousands(double value)
+{
+    if (value == 0.0) {
+        return "0";
+    }
+    auto result = format(value / 1000, 3);
+    if (result.find('.') != std::string::npos) {
+        while (result.back() == '0') {
+            result.pop_back();
+        }
+        if (result.back() == '.') {
+            result.pop_back();
+        }
+    }
+    return result + "K";
 }
 
 void StringHelper::copy(char* target, int maxSize, std::string const& source)

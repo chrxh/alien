@@ -1,4 +1,7 @@
 ﻿#include "GeometryKernels.cuh"
+
+#include <EngineInterface/ObjectColoring.h>
+
 #include "ParameterCalculator.cuh"
 
 namespace
@@ -40,74 +43,6 @@ __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 vis
 
 namespace
 {
-    __device__ __inline__ uint32_t hsvToRgb(float h, float s, float v)
-    {
-        float c = v * s;
-        float x = c * (1.0f - fabsf(fmodf(h * 6.0f, 2.0f) - 1.0f));
-        float m = v - c;
-        float r, g, b;
-        int hi = static_cast<int>(h * 6.0f) % 6;
-        switch (hi) {
-        case 0:
-            r = c;
-            g = x;
-            b = 0;
-            break;
-        case 1:
-            r = x;
-            g = c;
-            b = 0;
-            break;
-        case 2:
-            r = 0;
-            g = c;
-            b = x;
-            break;
-        case 3:
-            r = 0;
-            g = x;
-            b = c;
-            break;
-        case 4:
-            r = x;
-            g = 0;
-            b = c;
-            break;
-        default:
-            r = c;
-            g = 0;
-            b = x;
-            break;
-        }
-        auto ri = min(255u, static_cast<uint32_t>((r + m) * 255.0f + 0.5f));
-        auto gi = min(255u, static_cast<uint32_t>((g + m) * 255.0f + 0.5f));
-        auto bi = min(255u, static_cast<uint32_t>((b + m) * 255.0f + 0.5f));
-        return (ri << 16) | (gi << 8) | bi;
-    }
-
-    __device__ __inline__ void rgbToHsv(float r, float g, float b, float& h, float& s, float& v)
-    {
-        float maxC = fmaxf(r, fmaxf(g, b));
-        float minC = fminf(r, fminf(g, b));
-        float delta = maxC - minC;
-        h = 0.0f;
-        if (delta > 0.0f) {
-            if (maxC == r) {
-                h = fmodf((g - b) / delta, 6.0f);
-            } else if (maxC == g) {
-                h = (b - r) / delta + 2.0f;
-            } else {
-                h = (r - g) / delta + 4.0f;
-            }
-            h /= 6.0f;
-            if (h < 0.0f) {
-                h += 1.0f;
-            }
-        }
-        s = maxC <= 0.0f ? 0.0f : delta / maxC;
-        v = maxC;
-    }
-
     __device__ __inline__ uint32_t getCustomizationColor(int colorCode)
     {
         auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(colorCode, MAX_COLORS)];
@@ -137,39 +72,25 @@ namespace
             float g = fminf(1.0f, fmaxf(0.0f, color.g));
             float b = fminf(1.0f, fmaxf(0.0f, color.b));
             float h, s, v;
-            rgbToHsv(r, g, b, h, s, v);
+            ObjectColoring::rgbToHsv(r, g, b, h, s, v);
             auto lineageId = object->typeData.cell.creature->lineageId;
             uint32_t hash = lineageId * 2654435761u;
             float hueOffset = (static_cast<float>(hash & 0xFFFFu) / 65535.0f) * 0.2f - 0.1f;
             h += hueOffset;
             h -= floorf(h);
-            return hsvToRgb(h, s, v);
+            return ObjectColoring::hsvToRgb(h, s, v);
         }
         if (coloring == CellColoring_Lineage) {
             if (object->type != ObjectType_Cell) {
                 return getCustomizationColor(object->color);
             }
-            auto lineageId = object->typeData.cell.creature->lineageId;
-            uint32_t hash1 = lineageId * 2654435761u;
-            uint32_t hash2 = lineageId * 2246822519u;
-            uint32_t hash3 = lineageId * 3266489917u;
-            float h = static_cast<float>(hash1 & 0xFFFFu) / 65535.0f;
-            float s = 0.7f + 0.3f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
-            float v = 0.6f + 0.1f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
-            return hsvToRgb(h, s, v);
+            return ObjectColoring::getColorFromId(object->typeData.cell.creature->lineageId);
         }
         if (coloring == CellColoring_Creature) {
             if (object->type != ObjectType_Cell) {
                 return getCustomizationColor(object->color);
             }
-            auto creatureId = static_cast<uint32_t>(object->typeData.cell.creature->id);
-            uint32_t hash1 = creatureId * 2654435761u;
-            uint32_t hash2 = creatureId * 2246822519u;
-            uint32_t hash3 = creatureId * 3266489917u;
-            float h = static_cast<float>(hash1 & 0xFFFFu) / 65535.0f;
-            float s = 0.7f + 0.3f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
-            float v = 0.6f + 0.1f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
-            return hsvToRgb(h, s, v);
+            return ObjectColoring::getColorFromId(static_cast<uint32_t>(object->typeData.cell.creature->id));
         }
         return getCustomizationColor(object->color);
     }

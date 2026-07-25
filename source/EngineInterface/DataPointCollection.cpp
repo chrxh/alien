@@ -1,22 +1,66 @@
 #include "DataPointCollection.h"
 
-DataPoint DataPoint::operator+(DataPoint const& other) const
+ColorOverallDataPoint ColorOverallDataPoint::operator+(ColorOverallDataPoint const& other) const
 {
-    DataPoint result;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        result.values[i] = values[i] + other.values[i];
-    }
-    result.summedValues = summedValues + other.summedValues;
+    ColorOverallDataPoint result;
+    result.numCreatures = numCreatures + other.numCreatures;
+    result.numGenomes = numGenomes + other.numGenomes;
+    result.sumCreatureCells = sumCreatureCells + other.sumCreatureCells;
+    result.sumCreatureGenerations = sumCreatureGenerations + other.sumCreatureGenerations;
+    result.sumGenomeNodes = sumGenomeNodes + other.sumGenomeNodes;
+    result.sumMutationRates = sumMutationRates + other.sumMutationRates;
+    result.sumCreatureEnergy = sumCreatureEnergy + other.sumCreatureEnergy;
+    result.numCreatedCreatures = numCreatedCreatures + other.numCreatedCreatures;
+    result.totalMutations = totalMutations + other.totalMutations;
     return result;
 }
 
-DataPoint DataPoint::operator/(double divisor) const
+ColorOverallDataPoint ColorOverallDataPoint::operator/(double divisor) const
 {
-    DataPoint result;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        result.values[i] = values[i] / divisor;
-    }
-    result.summedValues = summedValues / divisor;
+    ColorOverallDataPoint result;
+    result.numCreatures = numCreatures / divisor;
+    result.numGenomes = numGenomes / divisor;
+    result.sumCreatureCells = sumCreatureCells / divisor;
+    result.sumCreatureGenerations = sumCreatureGenerations / divisor;
+    result.sumGenomeNodes = sumGenomeNodes / divisor;
+    result.sumMutationRates = sumMutationRates / divisor;
+    result.sumCreatureEnergy = sumCreatureEnergy / divisor;
+    result.numCreatedCreatures = numCreatedCreatures / divisor;
+    result.totalMutations = totalMutations / divisor;
+    return result;
+}
+
+LineageDataPoint LineageDataPoint::operator+(LineageDataPoint const& other) const
+{
+    LineageDataPoint result;
+    result.colorBitset = colorBitset | other.colorBitset;
+    result.representativeCellId = representativeCellId != 0 ? representativeCellId : other.representativeCellId;
+    result.numCreatures = numCreatures + other.numCreatures;
+    result.numGenomes = numGenomes + other.numGenomes;
+    result.sumCreatureCells = sumCreatureCells + other.sumCreatureCells;
+    result.sumCreatureGenerations = sumCreatureGenerations + other.sumCreatureGenerations;
+    result.sumGenomeNodes = sumGenomeNodes + other.sumGenomeNodes;
+    result.sumMutationRates = sumMutationRates + other.sumMutationRates;
+    result.sumCreatureEnergy = sumCreatureEnergy + other.sumCreatureEnergy;
+    result.numCreatedCreatures = numCreatedCreatures + other.numCreatedCreatures;
+    result.totalMutations = totalMutations + other.totalMutations;
+    return result;
+}
+
+LineageDataPoint LineageDataPoint::operator/(double divisor) const
+{
+    LineageDataPoint result;
+    result.colorBitset = colorBitset;
+    result.representativeCellId = representativeCellId;
+    result.numCreatures = numCreatures / divisor;
+    result.numGenomes = numGenomes / divisor;
+    result.sumCreatureCells = sumCreatureCells / divisor;
+    result.sumCreatureGenerations = sumCreatureGenerations / divisor;
+    result.sumGenomeNodes = sumGenomeNodes / divisor;
+    result.sumMutationRates = sumMutationRates / divisor;
+    result.sumCreatureEnergy = sumCreatureEnergy / divisor;
+    result.numCreatedCreatures = numCreatedCreatures / divisor;
+    result.totalMutations = totalMutations / divisor;
     return result;
 }
 
@@ -24,32 +68,26 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
 {
     DataPointCollection result;
     result.time = time + other.time;
+    result.timestep = timestep + other.timestep;
     result.systemClock = systemClock + other.systemClock;
-    result.numObjects = numObjects + other.numObjects;
-    result.numSelfReplicators = numSelfReplicators + other.numSelfReplicators;
-    result.numColonies = numColonies + other.numColonies;
-    result.numViruses = numViruses + other.numViruses;
-    result.numFreeCells = numFreeCells + other.numFreeCells;
-    result.numEnergyParticles = numEnergyParticles + other.numEnergyParticles;
-    result.averageGenomeCells = averageGenomeCells + other.averageGenomeCells;
-    result.averageNumCells = averageNumCells + other.averageNumCells;
-    result.varianceNumCells = varianceNumCells + other.varianceNumCells;
-    result.maxNumCellsOfColonies = maxNumCellsOfColonies + other.maxNumCellsOfColonies;
-    result.totalEnergy = totalEnergy + other.totalEnergy;
-    result.numCreatedCells = numCreatedCells + other.numCreatedCells;
-    result.numAttacks = numAttacks + other.numAttacks;
-    result.numMuscleActivities = numMuscleActivities + other.numMuscleActivities;
-    result.numDefenderActivities = numDefenderActivities + other.numDefenderActivities;
-    result.numDepotActivities = numDepotActivities + other.numDepotActivities;
-    result.numInjectionActivities = numInjectionActivities + other.numInjectionActivities;
-    result.numCompletedInjections = numCompletedInjections + other.numCompletedInjections;
-    result.numGeneratorPulses = numGeneratorPulses + other.numGeneratorPulses;
-    result.numNeuronActivities = numNeuronActivities + other.numNeuronActivities;
-    result.numSensorActivities = numSensorActivities + other.numSensorActivities;
-    result.numSensorMatches = numSensorMatches + other.numSensorMatches;
-    result.numReconnectorCreated = numReconnectorCreated + other.numReconnectorCreated;
-    result.numReconnectorRemoved = numReconnectorRemoved + other.numReconnectorRemoved;
-    result.numDetonations = numDetonations + other.numDetonations;
+    result.overall = overall;
+    for (auto const& [colorBitset, dataPoint] : other.overall) {
+        auto it = result.overall.find(colorBitset);
+        if (it != result.overall.end()) {
+            it->second = it->second + dataPoint;
+        } else {
+            result.overall.emplace(colorBitset, dataPoint);
+        }
+    }
+    result.lineages = lineages;
+    for (auto const& [lineageId, dataPoint] : other.lineages) {
+        auto it = result.lineages.find(lineageId);
+        if (it != result.lineages.end()) {
+            it->second = it->second + dataPoint;
+        } else {
+            result.lineages.emplace(lineageId, dataPoint);
+        }
+    }
     return result;
 }
 
@@ -57,31 +95,15 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
 {
     DataPointCollection result;
     result.time = time / divisor;
+    result.timestep = timestep / divisor;
     result.systemClock = systemClock / divisor;
-    result.numObjects = numObjects / divisor;
-    result.numSelfReplicators = numSelfReplicators / divisor;
-    result.numColonies = numColonies / divisor;
-    result.numViruses = numViruses / divisor;
-    result.numFreeCells = numFreeCells / divisor;
-    result.numEnergyParticles = numEnergyParticles / divisor;
-    result.averageGenomeCells = averageGenomeCells / divisor;
-    result.averageNumCells = averageNumCells / divisor;
-    result.varianceNumCells = varianceNumCells / divisor;
-    result.maxNumCellsOfColonies = maxNumCellsOfColonies / divisor;
-    result.totalEnergy = totalEnergy / divisor;
-    result.numCreatedCells = numCreatedCells / divisor;
-    result.numAttacks = numAttacks / divisor;
-    result.numMuscleActivities = numMuscleActivities / divisor;
-    result.numDefenderActivities = numDefenderActivities / divisor;
-    result.numDepotActivities = numDepotActivities / divisor;
-    result.numInjectionActivities = numInjectionActivities / divisor;
-    result.numCompletedInjections = numCompletedInjections / divisor;
-    result.numGeneratorPulses = numGeneratorPulses / divisor;
-    result.numNeuronActivities = numNeuronActivities / divisor;
-    result.numSensorActivities = numSensorActivities / divisor;
-    result.numSensorMatches = numSensorMatches / divisor;
-    result.numReconnectorCreated = numReconnectorCreated / divisor;
-    result.numReconnectorRemoved = numReconnectorRemoved / divisor;
-    result.numDetonations = numDetonations / divisor;
+    result.overall = overall;
+    for (auto& [colorBitset, dataPoint] : result.overall) {
+        dataPoint = dataPoint / divisor;
+    }
+    result.lineages = lineages;
+    for (auto& [lineageId, dataPoint] : result.lineages) {
+        dataPoint = dataPoint / divisor;
+    }
     return result;
 }

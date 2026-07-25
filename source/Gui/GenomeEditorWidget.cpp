@@ -209,7 +209,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 5: Node count
                     ImGui::TableNextColumn();
-                    AlienGui::Text(std::to_string(gene._nodes.size()));
+                    AlienGui::Text(AlienGui::TextParameters().text(std::to_string(gene._nodes.size())).rightAligned(true));
 
                     if (isUnreachable) {
                         ImGui::PopStyleColor();

@@ -88,9 +88,9 @@ public:
     bool updateSelectionIfNecessary() override;
 
     IntVector2D getWorldSize() const override;
-    StatisticsRawData getStatisticsRawData() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
+    StatisticsEntry getStatisticsEntry() const override;
 
     std::optional<int> getTpsRestriction() const override;
     void setTpsRestriction(std::optional<int> const& value) override;

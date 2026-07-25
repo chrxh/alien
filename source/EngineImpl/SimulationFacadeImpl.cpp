@@ -320,11 +320,6 @@ IntVector2D _SimulationFacadeImpl::getWorldSize() const
     return _worldSize;
 }
 
-StatisticsRawData _SimulationFacadeImpl::getStatisticsRawData() const
-{
-    return _worker.getStatisticsRawData();
-}
-
 StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const
 {
     return _worker.getStatisticsHistory();
@@ -333,6 +328,11 @@ StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const
 void _SimulationFacadeImpl::setStatisticsHistory(StatisticsHistoryData const& data)
 {
     _worker.setStatisticsHistory(data);
+}
+
+StatisticsEntry _SimulationFacadeImpl::getStatisticsEntry() const
+{
+    return _worker.getStatisticsEntry();
 }
 
 std::optional<int> _SimulationFacadeImpl::getTpsRestriction() const

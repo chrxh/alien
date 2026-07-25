@@ -23,6 +23,15 @@ GenomeTabWidget _GenomeTabWidget::create(GenomeWindowEditData const& genomeEditD
     return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, genome, layoutData));
 }
 
+GenomeDesc _GenomeTabWidget::normalizeForEditor(GenomeDesc genome)
+{
+    DescValidationService::get().validateAndCorrect(genome);
+    for (auto& gene : genome._genes) {
+        _GenomeTabEditData::updateGeneGeometry(gene);
+    }
+    return genome;
+}
+
 void _GenomeTabWidget::process()
 {
     doLayout();
@@ -131,11 +140,10 @@ _GenomeTabWidget::_GenomeTabWidget(
     _editData = std::make_shared<_GenomeTabEditData>(++_sequence, genome);
     _editData->id = ++_sequence;
 
-    auto validatedGenome = genome;
-    DescValidationService::get().validateAndCorrect(validatedGenome);
+    auto normalizedGenome = normalizeForEditor(genome);
 
-    _editData->genome = validatedGenome;
-    _editData->origGenome = validatedGenome;
+    _editData->genome = normalizedGenome;
+    _editData->origGenome = normalizedGenome;
 
     if (!genome._genes.empty()) {
         _editData->selectedGeneIndex = 0;

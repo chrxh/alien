@@ -6,12 +6,18 @@ void StatisticsKernelsService::init() {}
 
 void StatisticsKernelsService::shutdown() {}
 
-void StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics)
+void StatisticsKernelsService::updateStatistics(
+    CudaSettings const& gpuSettings,
+    SimulationData const& data,
+    SimulationStatistics const& simulationStatistics)
 {
-    KERNEL_CALL(cudaUpdateTimestepStatistics_substep1, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateTimestepStatistics_substep2, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateTimestepStatistics_substep3, data, simulationStatistics);
-    KERNEL_CALL_1_1(cudaUpdateHistogramData_substep1, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateHistogramData_substep2, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateHistogramData_substep3, data, simulationStatistics);
+    KERNEL_CALL(cudaResetStatistics, data, simulationStatistics);
+    KERNEL_CALL(cudaCollectObjectAndCreatureStatistics, data, simulationStatistics);
+    KERNEL_CALL(cudaCollectGenomeAndEnergyStatistics, data, simulationStatistics);
+    KERNEL_CALL(cudaCompactLineageStatistics, simulationStatistics);
+    if (simulationStatistics.isLineageAccumulatorGCNeeded()) {
+        KERNEL_CALL(cudaPrepareLineageAccumulatorGC, simulationStatistics);
+        KERNEL_CALL(cudaLineageAccumulatorGC, simulationStatistics);
+        KERNEL_CALL_1_1(cudaFinishLineageAccumulatorGC, simulationStatistics);
+    }
 }

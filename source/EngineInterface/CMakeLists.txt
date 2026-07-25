@@ -13,6 +13,8 @@ add_library(EngineInterface
     Desc.cpp
     Desc.h
     EngineConstants.h
+    ExtinctLineageAccumulator.cpp
+    ExtinctLineageAccumulator.h
     GenomeDesc.cpp
     GenomeDesc.h
     GenomeDescEditService.cpp
@@ -31,6 +33,7 @@ add_library(EngineInterface
     NeuralNetWeight.h
     NumberGenerator.cpp
     NumberGenerator.h
+    StatisticsEntry.h
     ParametersEditService.cpp
     ParametersEditService.h
     ParametersFilter.h
@@ -60,8 +63,7 @@ add_library(EngineInterface
     StatisticsConverterService.cpp
     StatisticsConverterService.h
     StatisticsHistory.cpp
-    StatisticsHistory.h
-    StatisticsRawData.h)
+    StatisticsHistory.h)
 
 target_link_libraries(EngineInterface Base)
 

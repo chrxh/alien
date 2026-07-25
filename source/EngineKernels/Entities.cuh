@@ -450,7 +450,8 @@ struct Creature
     MutationState mutationState;
 
     uint32_t lineageId;
-    float accumulatedMutations;
+    float accumulatedMutations;             // Never reset, total over the whole ancestry
+    float accumulatedMutationsInLineage;    // Reset when a new lineage is formed
 
     // Process data
     uint32_t headUpdateId;  // Will be updated regularly to trigger head updates
