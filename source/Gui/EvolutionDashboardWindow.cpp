@@ -18,6 +18,7 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/Desc.h>
+#include <EngineInterface/ObjectColoring.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
@@ -33,6 +34,7 @@ namespace
     auto constexpr RateAveragingTimesteps = 1000.0;  //rate reference sample: the most recent sample at least this many time steps older
 
     auto constexpr ColorChipSize = 22.0f;
+    auto constexpr LineageChipSize = 11.0f;
     auto constexpr SwatchSize = 11.0f;
     auto constexpr SwatchGap = 3.0f;
 
@@ -864,7 +866,16 @@ void EvolutionDashboardWindow::processLineageTable()
                 onOpenRepresentativeGenome(lineage.representativeCellId);
             }
 
+            // The lineage color matches the rendering of the simulation with lineage coloring enabled
             ImGui::TableSetColumnIndex(LineageColumn);
+            auto chipSize = scale(LineageChipSize);
+            auto chipPos = ImGui::GetCursorScreenPos();
+            drawList->AddRectFilled(
+                {chipPos.x, chipPos.y + (lineHeight - chipSize) / 2},
+                {chipPos.x + chipSize, chipPos.y + (lineHeight + chipSize) / 2},
+                toImColor(ObjectColoring::getColorFromId(toUInt32(lineage.id))),
+                scale(3.0f));
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + chipSize + scale(6.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             ImGui::SameLine();
             auto selected = _selectedLineageIds.contains(lineage.id);
