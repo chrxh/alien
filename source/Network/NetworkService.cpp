@@ -1,6 +1,7 @@
 #include "NetworkService.h"
 
 #include <boost/property_tree/json_parser.hpp>
+#include <cereal/external/base64.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
@@ -73,6 +74,12 @@ namespace
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         return tree.get<T>(key);
+    }
+
+    // The statistics are compressed binary data. The server stores this field as text, so it is transferred base64-encoded.
+    std::string encodeStatistics(std::string const& statistics)
+    {
+        return cereal::base64::encode(reinterpret_cast<unsigned char const*>(statistics.data()), statistics.size());
     }
 
     bool parseBoolResult(std::string const& serverResponse)
@@ -466,7 +473,7 @@ bool NetworkService::uploadResource(
         {"settings", settings, "", ""},
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
-        {"statistics", statistics, "", ""},
+        {"statistics", encodeStatistics(statistics), "", ""},
     };
 
     try {
@@ -507,7 +514,7 @@ bool NetworkService::replaceResource(
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
         {"settings", settings, "", ""},
-        {"statistics", statistics, "", ""},
+        {"statistics", encodeStatistics(statistics), "", ""},
     };
 
     try {
@@ -551,7 +558,7 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
             }
             {
                 auto result = executeRequest([&] { return client.Get("/downloadstatistics", params, {}); });
-                statistics = result->body;
+                statistics = cereal::base64::decode(result->body);
             }
             _downloadCache.insertOrAssign(simId, ResourceData{mainData, auxiliaryData, statistics});
             return true;
