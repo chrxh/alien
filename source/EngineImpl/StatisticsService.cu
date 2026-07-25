@@ -23,6 +23,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
         historyData = StatisticsHistoryData();
         _colorOverallStates = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
         _lineageStates.clear();
+        _extinctLineageAccumulator.reset();
     }
 
     auto firstSampling = !_lastTimestep.has_value();
@@ -49,6 +50,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
         }
     } else {
         auto dataPoints = StatisticsConverterService::get().convert(statisticsEntry, timestep, timestepAsDouble);
+        _extinctLineageAccumulator.addExtinctLineageValues(dataPoints);
 
         ColorSamples overallSample;
         overallSample.timestep = dataPoints.timestep;
@@ -101,6 +103,7 @@ void StatisticsService::setStatisticsHistory(StatisticsHistory& history, Statist
 {
     _colorOverallStates = TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>>();
     _lineageStates.clear();
+    _extinctLineageAccumulator.reset();
     _lastTimestep.reset();
 
     if (!newHistoryData.colors.empty()) {

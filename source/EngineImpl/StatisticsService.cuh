@@ -6,6 +6,7 @@
 
 #include <Base/Singleton.h>
 
+#include <EngineInterface/ExtinctLineageAccumulator.h>
 #include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/StatisticsHistory.h>
 
@@ -47,5 +48,6 @@ private:
 
     TimelineState<std::unordered_map<uint32_t, ColorOverallDataPoint>> _colorOverallStates;
     std::unordered_map<uint32_t, TimelineState<LineageDataPoint>> _lineageStates;
+    ExtinctLineageAccumulator _extinctLineageAccumulator;
     std::optional<uint64_t> _lastTimestep;
 };
