@@ -9,13 +9,14 @@
 
 #include <Base/Singleton.h>
 
+#include <EngineInterface/DataPointCollection.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/StatisticsHistory.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
-#include "TimelineLiveStatistics.h"
+#include "LiveStatisticsHistory.h"
 
 class EvolutionDashboardWindow : public AlienWindow
 {
@@ -123,8 +124,8 @@ private:
     int _lastTableColorFilter = -1;
 
     // Live statistics
-    TimelineLiveStatistics _timelineLiveStatistics;
-    StatisticsEntry _lastStatisticsEntry;  //latest raw engine snapshot for the header cards
+    LiveStatisticsHistory _liveHistory;
+    StatisticsEntry _lastStatisticsEntry;  // Latest raw engine snapshot for the header cards
     std::optional<int> _lastSessionId;
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
 };
