@@ -29,12 +29,6 @@ public:
     }
 
 protected:
-    DescTestDataFactory* _descTestDataFactory;
-    SerializerService* _serializerService;
-};
-
-namespace
-{
     ColorSamples createOverallSample(double base)
     {
         ColorSamples result;
@@ -132,7 +126,10 @@ namespace
             }
         }
     }
-}
+
+    DescTestDataFactory* _descTestDataFactory;
+    SerializerService* _serializerService;
+};
 
 TEST_F(SerializerServiceTests, statisticsHistory)
 {
