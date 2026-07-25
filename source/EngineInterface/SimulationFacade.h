@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ArraySizesForGpuEntities.h"
-#include "DataPointCollection.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
 #include "StatisticsEntry.h"

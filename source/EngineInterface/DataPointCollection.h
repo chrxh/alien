@@ -43,7 +43,7 @@ struct LineageDataPoint
 
 struct DataPointCollection
 {
-    double time = 0;
+    double time = 0;    // Used for live statistics
     double timestep = 0;
     double systemClock = 0;
 
