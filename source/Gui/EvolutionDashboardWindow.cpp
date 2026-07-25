@@ -80,13 +80,32 @@ namespace
             toInt(alpha * 255.0f));
     }
 
-    //palette as used by the former statistics window; one colormap color per plot row,
-    //or one per selected lineage if multiple lineages are plotted together;
+    auto constexpr LineageHueShift = 0.03f;    //hue offset between consecutive plot rows of a lineage
+    auto constexpr LineageBrightening = 1.5f;  //the identifying colors of the renderer are too dark on the dark GUI background
+    auto constexpr LineageSaturationFactor = 0.85f;
+
+    //palette as used by the former statistics window; one colormap color per plot row;
     //stepping through the colormap with an alternating stride of 1 and 2 makes adjacent rows distinct
-    ImColor getPlotColor(int metricIndex, int seriesIndex, int numSeries)
+    ImColor getOverallPlotColor(int metricIndex)
     {
-        auto index = numSeries > 1 ? seriesIndex : metricIndex;
-        return ImColor(ImPlot::GetColormapColor((index / 2 * 3 + index % 2) % 11, ImPlotColormap_Cool));
+        return ImColor(ImPlot::GetColormapColor((metricIndex / 2 * 3 + metricIndex % 2) % 11, ImPlotColormap_Cool));
+    }
+
+    //identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
+    //hueShiftSteps shifts the hue slightly so that consecutive plot rows of a lineage remain distinguishable
+    ImColor getLineageColor(int64_t lineageId, int hueShiftSteps = 0)
+    {
+        auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId));
+        float h, s, v;
+        ObjectColoring::rgbToHsv(toFloat((rgb >> 16) & 0xff) / 255.0f, toFloat((rgb >> 8) & 0xff) / 255.0f, toFloat(rgb & 0xff) / 255.0f, h, s, v);
+        h = std::fmod(h + toFloat(hueShiftSteps) * LineageHueShift, 1.0f);
+        return toImColor(ObjectColoring::hsvToRgb(h, s * LineageSaturationFactor, std::min(1.0f, v * LineageBrightening)));
+    }
+
+    //the "all filtered" row keeps the colormap palette, single lineages are colored by their identity
+    ImColor getPlotColor(int64_t lineageId, int metricIndex)
+    {
+        return lineageId < 0 ? getOverallPlotColor(metricIndex) : getLineageColor(lineageId, metricIndex);
     }
 
     std::string formatMetricValue(double value, int decimals)
@@ -866,14 +885,14 @@ void EvolutionDashboardWindow::processLineageTable()
                 onOpenRepresentativeGenome(lineage.representativeCellId);
             }
 
-            // The lineage color matches the rendering of the simulation with lineage coloring enabled
+            // The lineage color corresponds to the rendering of the simulation with lineage coloring enabled
             ImGui::TableSetColumnIndex(LineageColumn);
             auto chipSize = scale(LineageChipSize);
             auto chipPos = ImGui::GetCursorScreenPos();
             drawList->AddRectFilled(
                 {chipPos.x, chipPos.y + (lineHeight - chipSize) / 2},
                 {chipPos.x + chipSize, chipPos.y + (lineHeight + chipSize) / 2},
-                toImColor(ObjectColoring::getColorFromId(toUInt32(lineage.id))),
+                getLineageColor(lineage.id),
                 scale(3.0f));
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + chipSize + scale(6.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
@@ -1012,15 +1031,13 @@ void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayDa
 
             ImGui::TableSetColumnIndex(1);
             AlienGui::Text(Metrics[i].plotName);
-            auto seriesIndex = 0;
             for (auto const* lineage : plottedLineages) {
                 ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
-                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)getPlotColor(i, seriesIndex, toInt(plottedLineages.size())));
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)getPlotColor(lineage->id, i));
                 auto const& series = lineage->series.at(i);
                 AlienGui::Text(!series.empty() ? formatMetricValue(series.back(), Metrics[i].plotDecimals) : "-");
                 ImGui::PopStyleColor();
                 ImGui::PopFont();
-                ++seriesIndex;
             }
         }
         ImGui::EndTable();
@@ -1055,7 +1072,6 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
         ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
-        auto seriesIndex = 0;
         for (auto const* lineage : plottedLineages) {
             auto count = toInt(lineage->timePoints.size());
             auto const& series = lineage->series.at(metricIndex);
@@ -1067,11 +1083,10 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
             }
             count -= offset;
             if (count < 2) {
-                ++seriesIndex;
                 continue;
             }
             ImGui::PushID(toInt(lineage->id) + 1);
-            auto color = getPlotColor(metricIndex, seriesIndex, toInt(plottedLineages.size()));
+            auto color = getPlotColor(lineage->id, metricIndex);
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
             ImPlot::PushStyleColor(ImPlotCol_Fill, (ImU32)color);
             ImPlot::PlotLine("##line", lineage->timePoints.data() + offset, series.data() + offset, count);
@@ -1090,7 +1105,6 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
                     formatMetricValue(series.back(), Metrics[metricIndex].plotDecimals).c_str());
             }
             ImGui::PopID();
-            ++seriesIndex;
         }
         if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered() && plottedLineages.size() == 1 && plottedLineages.front()->timePoints.size() >= 2) {
             auto const* lineage = plottedLineages.front();
