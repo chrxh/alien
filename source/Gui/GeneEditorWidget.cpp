@@ -137,12 +137,11 @@ void _GeneEditorWidget::processNodeList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Node list", 5, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Node list", 4, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("Node index", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
             ImGui::TableSetupColumn("Construction", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
             ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
-            ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -183,6 +182,10 @@ void _GeneEditorWidget::processNodeList()
                     // Column 1: Node type
                     ImGui::TableNextColumn();
                     {
+                        float h, s, v;
+                        AlienGui::ConvertRGBtoHSV(customizationColors.values[node._color].toRgbColor(), h, s, v);
+                        AlienGui::ColorChip(ImColor::HSV(h, s, v));
+
                         auto nodeType = gene._homogeneousCellType ? gene._nodes.front().getCellType() : node.getCellType();
                         auto text = Const::CellTypeStrings.at(nodeType);
                         AlienGui::Text(text);
@@ -206,13 +209,6 @@ void _GeneEditorWidget::processNodeList()
                     // Column 3: Angle
                     ImGui::TableNextColumn();
                     AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(node._referenceAngle, 1)).rightAligned(true));
-
-                    // Column 4: Color
-                    ImGui::TableNextColumn();
-                    if (ImGui::BeginChild("color", {0, ImGui::GetTextLineHeight()}, 0, ImGuiWindowFlags_NoInputs)) {
-                        AlienGui::ColorField(customizationColors.values[node._color].toRgbColor(), 40.0f, ImGui::GetTextLineHeight());
-                    }
-                    ImGui::EndChild();
 
                     ImGui::PopID();
                 }

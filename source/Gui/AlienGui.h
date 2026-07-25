@@ -151,6 +151,8 @@ public:
 
     static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
 
+    static void ColorChip(ImColor const& color, float size = 11.0f, float spacing = 6.0f);
+
     struct CheckboxColorMatrixParameters
     {
         MEMBER(CheckboxColorMatrixParameters, std::string, name, "");
