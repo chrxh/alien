@@ -28,6 +28,7 @@
 namespace
 {
     auto constexpr HoveredTimer = 0.5f;
+    auto constexpr ColorChipRounding = 3.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -422,6 +423,15 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     ImGui::PopStyleColor(3);
 
     return result;
+}
+
+void AlienGui::ColorChip(ImColor const& color, float size, float spacing)
+{
+    auto chipSize = scale(size);
+    auto pos = ImGui::GetCursorScreenPos();
+    auto offsetY = (ImGui::GetTextLineHeight() - chipSize) / 2;
+    ImGui::GetWindowDrawList()->AddRectFilled({pos.x, pos.y + offsetY}, {pos.x + chipSize, pos.y + offsetY + chipSize}, color, scale(ColorChipRounding));
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + chipSize + scale(spacing));
 }
 
 void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
