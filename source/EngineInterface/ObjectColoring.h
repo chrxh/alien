@@ -6,20 +6,10 @@
 #include "Definitions.h"
 
 // Color derivations shared by the renderer (see getObjectColor in GeometryKernels.cu) and the GUI
-namespace ObjectColoring
+class ObjectColoring
 {
-    HOST_DEVICE uint32_t toRgbByte(float value)
-    {
-        auto result = static_cast<int>(value * 255.0f + 0.5f);
-        if (result < 0) {
-            result = 0;
-        } else if (result > 255) {
-            result = 255;
-        }
-        return static_cast<uint32_t>(result);
-    }
-
-    HOST_DEVICE uint32_t hsvToRgb(float h, float s, float v)
+public:
+    HOST_DEVICE static uint32_t hsvToRgb(float h, float s, float v)
     {
         float c = v * s;
         float x = c * (1.0f - fabsf(fmodf(h * 6.0f, 2.0f) - 1.0f));
@@ -61,7 +51,7 @@ namespace ObjectColoring
         return (toRgbByte(r + m) << 16) | (toRgbByte(g + m) << 8) | toRgbByte(b + m);
     }
 
-    HOST_DEVICE void rgbToHsv(float r, float g, float b, float& h, float& s, float& v)
+    HOST_DEVICE static void rgbToHsv(float r, float g, float b, float& h, float& s, float& v)
     {
         float maxC = fmaxf(r, fmaxf(g, b));
         float minC = fminf(r, fminf(g, b));
@@ -85,7 +75,7 @@ namespace ObjectColoring
     }
 
     // Identifying color of a lineage or creature, derived from its id
-    HOST_DEVICE uint32_t getColorFromId(uint32_t id)
+    HOST_DEVICE static uint32_t getColorFromId(uint32_t id)
     {
         uint32_t hash1 = id * 2654435761u;
         uint32_t hash2 = id * 2246822519u;
@@ -95,4 +85,16 @@ namespace ObjectColoring
         float v = 0.6f + 0.1f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
         return hsvToRgb(h, s, v);
     }
-}
+
+private:
+    HOST_DEVICE static uint32_t toRgbByte(float value)
+    {
+        auto result = static_cast<int>(value * 255.0f + 0.5f);
+        if (result < 0) {
+            result = 0;
+        } else if (result > 255) {
+            result = 255;
+        }
+        return static_cast<uint32_t>(result);
+    }
+};
