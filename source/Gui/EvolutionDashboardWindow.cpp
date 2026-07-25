@@ -23,6 +23,7 @@
 
 #include "AlienGui.h"
 #include "GenomeEditorWindow.h"
+#include "LiveStatisticsService.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
 
@@ -332,13 +333,13 @@ void EvolutionDashboardWindow::processBackground()
 
     auto sessionId = _SimulationFacade::get()->getSessionId();
     if (_lastSessionId.has_value() && *_lastSessionId != sessionId) {
-        _timelineLiveStatistics.clear();
+        LiveStatisticsService::get().clear(_liveHistory);
     }
     _lastSessionId = sessionId;
 
     auto statisticsEntry = _SimulationFacade::get()->getStatisticsEntry();
     _lastStatisticsEntry = statisticsEntry;  // Latest raw snapshot for the header cards
-    _timelineLiveStatistics.update(statisticsEntry, _SimulationFacade::get()->getCurrentTimestep());
+    LiveStatisticsService::get().addDataPoint(_liveHistory, statisticsEntry, _SimulationFacade::get()->getCurrentTimestep());
 }
 
 void EvolutionDashboardWindow::processIntern()
@@ -388,7 +389,7 @@ void EvolutionDashboardWindow::updateDisplayData()
 
 void EvolutionDashboardWindow::updateTableData()
 {
-    auto const& liveHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
+    auto const& liveHistory = _liveHistory.getDataRef();
     auto liveBackTime = !liveHistory.empty() ? liveHistory.back().time : -1.0;
     if (_lastTableBackTime.has_value() && *_lastTableBackTime == liveBackTime && _lastTableColorFilter == _colorFilter) {
         return;
@@ -476,7 +477,7 @@ void EvolutionDashboardWindow::updatePlotData()
         std::lock_guard lock(statisticsHistory.getMutex());
         rebuildPlotSeries(statisticsHistory.getDataRef());
     } else {
-        rebuildPlotSeries(_timelineLiveStatistics.getDataPointCollectionHistory());
+        rebuildPlotSeries(_liveHistory.getDataRef());
     }
 }
 
@@ -957,7 +958,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
     if (_timelineMode == TimelineMode_RealTime) {
         if (ImGui::BeginChild("##timeHorizon", {sliderWidth, ImGui::GetFrameHeight()})) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Time horizon").min(1.0f).max(TimelineLiveStatistics::MaxLiveHistory).format("%.1f s").textWidth(100.0f),
+                AlienGui::SliderFloatParameters().name("Time horizon").min(1.0f).max(LiveStatisticsService::MaxLiveHistory).format("%.1f s").textWidth(100.0f),
                 &_timeHorizon);
             validateAndCorrect();
         }
@@ -969,7 +970,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
     if (_timelineMode == TimelineMode_LastSteps) {
         if (ImGui::BeginChild("##lastSteps", {sliderWidth, ImGui::GetFrameHeight()})) {
             AlienGui::SliderInt(
-                AlienGui::SliderIntParameters().name("Steps").min(1000).max(TimelineLiveStatistics::MaxLiveSteps).logarithmic(true).textWidth(100.0f),
+                AlienGui::SliderIntParameters().name("Steps").min(1000).max(LiveStatisticsService::MaxLiveSteps).logarithmic(true).textWidth(100.0f),
                 &_lastSteps);
             validateAndCorrect();
         }
@@ -1214,8 +1215,8 @@ void EvolutionDashboardWindow::validateAndCorrect()
 {
     _timelinesHeight = std::max(scale(100.0f), _timelinesHeight);
     _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_EntireHistory));
-    _lastSteps = std::clamp(_lastSteps, 1000, TimelineLiveStatistics::MaxLiveSteps);
-    _timeHorizon = std::clamp(_timeHorizon, 1.0f, TimelineLiveStatistics::MaxLiveHistory);
+    _lastSteps = std::clamp(_lastSteps, 1000, LiveStatisticsService::MaxLiveSteps);
+    _timeHorizon = std::clamp(_timeHorizon, 1.0f, LiveStatisticsService::MaxLiveHistory);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
     _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics + FirstMetricColumn - 1);
     _colorFilter &= (1 << MAX_COLORS) - 1;  //an empty filter is allowed and simply shows no lineages

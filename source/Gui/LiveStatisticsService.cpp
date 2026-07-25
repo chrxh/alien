@@ -1,8 +1,4 @@
-#include "TimelineLiveStatistics.h"
-
-#include <cmath>
-
-#include <imgui.h>
+#include "LiveStatisticsService.h"
 
 #include <Base/Definitions.h>
 
@@ -13,19 +9,9 @@ namespace
     auto constexpr MaxSampleCount = 20000;  //hard cap to bound memory when the simulation stalls
 }
 
-std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointCollectionHistory() const
+void LiveStatisticsService::addDataPoint(LiveStatisticsHistory& history, StatisticsEntry const& statisticsEntry, uint64_t timestep)
 {
-    return _dataPointCollectionHistory;
-}
-
-void TimelineLiveStatistics::clear()
-{
-    _dataPointCollectionHistory.clear();
-}
-
-void TimelineLiveStatistics::update(StatisticsEntry const& statisticsEntry, uint64_t timestep)
-{
-    truncate();
+    truncate(history);
 
     auto timepoint = std::chrono::steady_clock::now();
     auto duration =
@@ -34,24 +20,29 @@ void TimelineLiveStatistics::update(StatisticsEntry const& statisticsEntry, uint
     _timeSinceSimStart += toDouble(duration) / 1000;
 
     auto newDataPoint = StatisticsConverterService::get().convert(statisticsEntry, timestep, _timeSinceSimStart);
-    _dataPointCollectionHistory.emplace_back(newDataPoint);
-    _lastTimestep = timestep;
+    history.getDataRef().emplace_back(newDataPoint);
     _lastTimepoint = timepoint;
 }
 
-void TimelineLiveStatistics::truncate()
+void LiveStatisticsService::clear(LiveStatisticsHistory& history)
+{
+    history.getDataRef().clear();
+}
+
+void LiveStatisticsService::truncate(LiveStatisticsHistory& history)
 {
     //keep enough history to cover both the real-time window (time-based) and the "Last time steps" window
     //(step-based); a sample is only dropped once it is no longer needed by either, with a hard count cap
     //to bound memory if the simulation stalls (timestep barely advancing over real time)
-    while (_dataPointCollectionHistory.size() > 1) {
-        auto const& front = _dataPointCollectionHistory.front();
-        auto const& back = _dataPointCollectionHistory.back();
-        auto exceedsSampleCount = toInt(_dataPointCollectionHistory.size()) > MaxSampleCount;
+    auto& dataPoints = history.getDataRef();
+    while (dataPoints.size() > 1) {
+        auto const& front = dataPoints.front();
+        auto const& back = dataPoints.back();
+        auto exceedsSampleCount = toInt(dataPoints.size()) > MaxSampleCount;
         auto exceedsTimeAndStepWindow = back.time - front.time > (MaxLiveHistory + 1.0) && back.timestep - front.timestep > MaxLiveSteps;
         if (!exceedsSampleCount && !exceedsTimeAndStepWindow) {
             break;
         }
-        _dataPointCollectionHistory.erase(_dataPointCollectionHistory.begin());
+        dataPoints.erase(dataPoints.begin());
     }
 }

@@ -73,6 +73,10 @@ PUBLIC
     LastSessionBrowserData.h
     LayerColorPalette.cpp
     LayerColorPalette.h
+    LiveStatisticsHistory.cpp
+    LiveStatisticsHistory.h
+    LiveStatisticsService.cpp
+    LiveStatisticsService.h
     LocationController.cpp
     LocationController.h
     LocationWidget.h
@@ -161,8 +165,6 @@ PUBLIC
     StyleRepository.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
-    TimelineLiveStatistics.cpp
-    TimelineLiveStatistics.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp
