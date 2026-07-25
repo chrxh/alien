@@ -137,8 +137,8 @@ public:
     {
         auto& slot = _lineageMap[slotIndex];
         atomicAdd(&slot.numCreatures, 1u);
-        atomicAdd(&slot.sumCreatureCells, toFloat(numCells));
-        atomicAdd(&slot.sumCreatureGenerations, toFloat(generation));
+        alienAtomicAdd64(&slot.sumCreatureCells, static_cast<uint64_t>(numCells));
+        alienAtomicAdd64(&slot.sumCreatureGenerations, static_cast<uint64_t>(generation));
         atomicMax(&slot.maxCreatureGeneration, generation);
     }
     __inline__ __device__ void updateLineageRepresentativeCell(int slotIndex, uint32_t generation, uint64_t cellId)
@@ -148,18 +148,18 @@ public:
             atomicCAS(reinterpret_cast<unsigned long long*>(&slot.representativeCellId), 0ull, static_cast<unsigned long long>(cellId));
         }
     }
-    __inline__ __device__ void addLineageGenomeData(int slotIndex, float numNodes, float meanMutationRate, uint32_t nodeColorBitset)
+    __inline__ __device__ void addLineageGenomeData(int slotIndex, uint32_t numNodes, float meanMutationRate, uint32_t nodeColorBitset)
     {
         auto& slot = _lineageMap[slotIndex];
         atomicAdd(&slot.numGenomes, 1u);
-        atomicAdd(&slot.sumGenomeNodes, numNodes);
-        atomicAdd(&slot.sumMutationRates, meanMutationRate);
+        alienAtomicAdd64(&slot.sumGenomeNodes, static_cast<uint64_t>(numNodes));
+        atomicAdd(&slot.sumMutationRates, toDouble(meanMutationRate));
         atomicOr(&slot.colorBitset, nodeColorBitset);
     }
     __inline__ __device__ void addLineageEnergy(int slotIndex, float energy)
     {
         auto& slot = _lineageMap[slotIndex];
-        atomicAdd(&slot.sumCreatureEnergy, energy);
+        atomicAdd(&slot.sumCreatureEnergy, toDouble(energy));
     }
     __inline__ __device__ void compactLineageSlot(int index)
     {
@@ -243,11 +243,11 @@ private:
         uint32_t colorBitset;
         uint32_t numCreatures;
         uint32_t numGenomes;
-        float sumCreatureCells;
-        float sumCreatureGenerations;
-        float sumGenomeNodes;
-        float sumMutationRates;
-        float sumCreatureEnergy;
+        uint64_t sumCreatureCells;
+        uint64_t sumCreatureGenerations;
+        uint64_t sumGenomeNodes;
+        double sumMutationRates;
+        double sumCreatureEnergy;
         uint32_t maxCreatureGeneration;
         uint64_t representativeCellId;  // Cell of a creature with the highest generation; 0 = not set
     };
