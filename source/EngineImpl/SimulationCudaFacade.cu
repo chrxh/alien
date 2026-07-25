@@ -431,11 +431,6 @@ ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
 
 void _SimulationCudaFacade::updateStatistics()
 {
-    updateEvolutionStatistics();
-}
-
-void _SimulationCudaFacade::updateEvolutionStatistics()
-{
     StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
@@ -819,7 +814,7 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
             }
         }
         if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
-            updateEvolutionStatistics();
+            updateStatistics();
         }
     }
     if (forceUpdateStatistics) {
