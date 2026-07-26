@@ -28,7 +28,7 @@ public:
         __syncthreads();
     }
 
-    //return true if key was present
+    // Return true if key was present
     __device__ __inline__ bool insertOrAssign(Key const& key, Value const& value)
     {
         int index = _hash(key) % _size;
@@ -58,7 +58,7 @@ public:
     __device__ __inline__ bool contains(Key const& key) const
     {
         int index = _hash(key) % _size;
-        for (int i = 0; i < 10; ++i, index = (++index) % _size) {  //workaround: 10 is set to avoid too long runtime
+        for (int i = 0; i < 10; ++i, index = (++index) % _size) {  // Workaround: 10 is set to avoid too long runtime
             auto& entry = _entries[index];
             entry.getLock(2);
             if (0 == entry.getFree()) {
@@ -76,7 +76,7 @@ public:
 
     __device__ __inline__ Value at(Key const& key)
     {
-        for (int i = 0; i < 10; ++i) {  //workaround: 10 is set to avoid too long runtime
+        for (int i = 0; i < 10; ++i) {  // Workaround: 10 is set to avoid too long runtime
             int index = _hash(key) % _size;
             auto& entry = _entries[index];
             entry.getLock(3);
@@ -133,8 +133,8 @@ private:
         }
 
     private:
-        int _free;    //0 = free, 1 = used
-        int _locked;  //0 = unlocked, 1 = locked
+        int _free;    // 0 = free, 1 = used
+        int _locked;  // 0 = unlocked, 1 = locked
         Value _value;
         Key _key;
     };

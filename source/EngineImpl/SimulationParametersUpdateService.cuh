@@ -20,5 +20,5 @@ public:
     bool updateSimulationParametersAfterTimestep(
         SettingsForSimulation& settings,
         SimulationData const& simulationData,
-        uint64_t timestep);  //returns true if parameters have been changed
+        uint64_t timestep);  // Returns true if parameters have been changed
 };

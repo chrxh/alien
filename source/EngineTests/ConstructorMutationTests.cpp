@@ -42,7 +42,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     _simulationFacade->testOnly_mutate(1);
     auto const actualGenome = getMutatedGenome();
     auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-    ASSERT_TRUE(constructor.has_value());  // without constructorToggleProbability the constructor must never be removed
+    ASSERT_TRUE(constructor.has_value());  // Without constructorToggleProbability the constructor must never be removed
     auto const& mutated = constructor.value();
 
     EXPECT_TRUE(mutated._autoTriggerInterval != original._autoTriggerInterval);
@@ -58,7 +58,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
 {
     auto genome = createTestGenome();
-    genome._genes.at(0)._nodes.at(0)._constructor.reset();  // node without a constructor
+    genome._genes.at(0)._nodes.at(0)._constructor.reset();  // Node without a constructor
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).constructorToggleProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
@@ -93,7 +93,7 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 1000.0f;
-    _parameters.newLineageThreshold.value = 100.0f;  // keep accumulatedMutationsInLineage from resetting
+    _parameters.newLineageThreshold.value = 100.0f;  // Keep accumulatedMutationsInLineage from resetting
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
@@ -103,7 +103,7 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(2, actualData.getNumObjects());  // offspring cell was constructed
+    ASSERT_EQ(2, actualData.getNumObjects());  // Offspring cell was constructed
     auto hostCreatureId = actualData.getObjectRef(1).getCellRef()._creatureId;
     EXPECT_GT(actualData.getCreatureRef(hostCreatureId)._accumulatedMutations, 0.0f);
 
@@ -151,17 +151,17 @@ TEST_F(ConstructorMutationTests, constructorMutation_keepOtherAttributesUnchange
 TEST_F(ConstructorMutationTests, constructorMutation_existProbabilityTogglesConstructorPresence)
 {
     auto genome = createTestGenome();
-    genome._genes.at(0)._nodes.at(0)._constructor.reset();  // one node without a constructor
+    genome._genes.at(0)._nodes.at(0)._constructor.reset();  // One node without a constructor
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).constructorToggleProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);  // a single step flips the presence of every node exactly once
+    _simulationFacade->testOnly_mutate(1);  // A single step flips the presence of every node exactly once
 
     auto actualGenome = getMutatedGenome();
 
     // constructorToggleProbability alone must toggle whether a node has a constructor.
-    EXPECT_TRUE(actualGenome._genes.at(0)._nodes.at(0)._constructor.has_value());   // had none -> gained one
-    EXPECT_FALSE(actualGenome._genes.at(0)._nodes.at(1)._constructor.has_value());  // had one -> lost it
+    EXPECT_TRUE(actualGenome._genes.at(0)._nodes.at(0)._constructor.has_value());   // Had none -> gained one
+    EXPECT_FALSE(actualGenome._genes.at(0)._nodes.at(1)._constructor.has_value());  // Had one -> lost it
 }

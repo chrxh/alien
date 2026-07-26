@@ -39,7 +39,7 @@ TEST_F(StatisticsTests, basicCounts)
     EXPECT_EQ(2u, entry42->sumCreatureCells);
     EXPECT_EQ(3u, entry42->sumCreatureGenerations);
     EXPECT_GT(entry42->sumCreatureEnergy, 0.0);
-    EXPECT_EQ((1u << 2) | (1u << 5), entry42->colorBitset);  //derived from genome node colors, not cell colors
+    EXPECT_EQ((1u << 2) | (1u << 5), entry42->colorBitset);  // Derived from genome node colors, not cell colors
 
     auto const* entry43 = findEntry(43);
     ASSERT_TRUE(entry43 != nullptr);
@@ -67,7 +67,7 @@ TEST_F(StatisticsTests, objectStatistics)
     EXPECT_EQ(1u, entries.objectStatistics.numSolidObjects);
     EXPECT_EQ(1u, entries.objectStatistics.numEnergyParticles);
 
-    //the total energy covers free cells, solids and energy particles, not just the cells belonging to creatures
+    // The total energy covers free cells, solids and energy particles, not just the cells belonging to creatures
     ASSERT_EQ(1, entries.lineageEntries.size());
     auto creatureEnergy = entries.lineageEntries.front().sumCreatureEnergy;
     EXPECT_GT(creatureEnergy, 0.0);
@@ -84,7 +84,7 @@ TEST_F(StatisticsTests, representativeCell)
 
     auto entries = _simulationFacade->getStatisticsEntry();
     ASSERT_EQ(1, entries.lineageEntries.size());
-    EXPECT_EQ(3u, entries.lineageEntries.front().representativeCellId);  //cell of the creature with the highest generation
+    EXPECT_EQ(3u, entries.lineageEntries.front().representativeCellId);  // Cell of the creature with the highest generation
 }
 
 TEST_F(StatisticsTests, genomeNodesAndMutationRates)
@@ -104,7 +104,7 @@ TEST_F(StatisticsTests, genomeNodesAndMutationRates)
     auto const& entry = entries.lineageEntries.front();
     EXPECT_EQ(1u, entry.numGenomes);
     EXPECT_EQ(numNodes, entry.sumGenomeNodes);
-    EXPECT_NEAR(0.01, entry.sumMutationRates, 1e-6);  //mean over 21 probability values: 0.21 / 21
+    EXPECT_NEAR(0.01, entry.sumMutationRates, 1e-6);  // Mean over 21 probability values: 0.21 / 21
 }
 
 TEST_F(StatisticsTests, accumulatedMutations)

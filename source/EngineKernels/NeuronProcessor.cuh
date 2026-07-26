@@ -162,7 +162,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
     }
     block.sync();
 
-    // matrix-vector multiplication (16x16 weights * 16 input vector)
+    // Matrix-vector multiplication (16x16 weights * 16 input vector)
     // Each thread computes one output channel
     if (laneId < NEURONS_PER_CELL) {
         int row = laneId;

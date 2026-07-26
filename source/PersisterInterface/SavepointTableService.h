@@ -22,7 +22,7 @@ public:
     {};
     std::variant<SavepointTable, Error> loadFromFile(std::string const& filename);
 
-    std::vector<SavepointEntry> truncate(SavepointTable& table, int newSize) const;  //returns non-persistent entries
+    std::vector<SavepointEntry> truncate(SavepointTable& table, int newSize) const;  // Returns non-persistent entries
     void insertEntryAtFront(SavepointTable& table, SavepointEntry const& entry) const;
     void updateEntry(SavepointTable& table, int row, SavepointEntry const& newEntry) const;
     void deleteEntry(SavepointTable& table, SavepointEntry const& entry) const;

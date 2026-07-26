@@ -16,9 +16,9 @@ protected:
     {
         auto reset = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
-                gene._homogeneousCellType = false;  // canonicalize: the cell type mutation may also flip this flag
+                gene._homogeneousCellType = false;  // Canonicalize: the cell type mutation may also flip this flag
                 for (auto& node : gene._nodes) {
-                    node._cellType = BaseGenomeDesc{};  // canonicalize so everything except the cell type is compared
+                    node._cellType = BaseGenomeDesc{};  // Canonicalize so everything except the cell type is compared
                 }
             }
         };

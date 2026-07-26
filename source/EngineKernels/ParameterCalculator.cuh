@@ -18,7 +18,7 @@ public:
     __device__ __inline__ static float2
     calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], bool (&enabled)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
 
-    //return -1 for base
+    // Return -1 for base
     template <typename T>
     __device__ __inline__ static int getFirstMatchingLayerOrBase(SimulationData const& data, float2 const& worldPos, BaseLayerParameter<T> const& parameter);
 

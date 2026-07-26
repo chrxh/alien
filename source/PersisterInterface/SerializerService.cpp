@@ -1978,7 +1978,7 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
             return false;
         }
 
-        //statistics files are optional
+        // Statistics files are optional
         std::filesystem::remove(statisticsFilename);
         std::filesystem::remove(legacyStatisticsFilename);
         return true;
@@ -2045,7 +2045,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
 {
     try {
         log(Priority::Important, "save genome to " + filename.string());
-        //wrap constructor cell around genome
+        // Wrap constructor cell around genome
         Desc description;
         if (!wrapGenome(description, genome)) {
             return false;
@@ -2291,7 +2291,7 @@ namespace
     auto constexpr Id_LineageTimeline_NumCreatedCreatures = 12;
     auto constexpr Id_LineageTimeline_TotalMutations = 13;
 
-    //metric columns are plot statistics and are stored as float to halve the serialized size; the exact values stay double in memory
+    // Metric columns are plot statistics and are stored as float to halve the serialized size; the exact values stay double in memory
     struct ColorTimeline
     {
         std::vector<float> numCreatures;
@@ -2400,7 +2400,7 @@ namespace
     struct DeduplicatedColorTimelines
     {
         std::vector<ColorTimeline> uniqueTimelines;
-        std::vector<std::vector<uint32_t>> colorBitsetGroups;  // parallel to uniqueTimelines
+        std::vector<std::vector<uint32_t>> colorBitsetGroups;  // Parallel to uniqueTimelines
     };
 
     DeduplicatedColorTimelines deduplicateColorTimelines(std::unordered_map<uint32_t, ColorTimeline> const& colorTimelines)
@@ -2408,7 +2408,7 @@ namespace
         DeduplicatedColorTimelines result;
         std::unordered_map<size_t, std::vector<size_t>> hashToUniqueIndices;
 
-        //sort color combinations for deterministic output
+        // Sort color combinations for deterministic output
         std::vector<uint32_t> sortedColorBitsets;
         sortedColorBitsets.reserve(colorTimelines.size());
         for (auto const& [colorBitset, timeline] : colorTimelines) {
@@ -2681,7 +2681,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
 
 void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const
 {
-    //the statistics history is auxiliary data: an unreadable or outdated file yields an empty history instead of failing the simulation load
+    // The statistics history is auxiliary data: an unreadable or outdated file yields an empty history instead of failing the simulation load
     statistics = StatisticsHistoryData();
     try {
         zstd::istream decompressedStream(stream);

@@ -10,7 +10,7 @@
 class ParameterParser
 {
 public:
-    //return true if value does not exist in tree
+    // Return true if value does not exist in tree
     template <typename T>
     static bool encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task);
 };

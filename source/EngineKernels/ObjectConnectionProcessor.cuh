@@ -17,14 +17,14 @@ public:
 
     __inline__ __device__ static void processDeleteObjectOperations(SimulationData& data);
 
-    // angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
+    // Angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
     // angle of object2 will be automatically determined by current geometry
     // if desiredRelAngle=0: angle of object1 will be automatically determined by current geometry
     // if desiredDistance=0: distance will be automatically determined by current geometry
     __inline__ __device__ static bool
     tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance = 0, float desiredRelAngle = 0);
 
-    // angle of object1 and object2 are given by desiredRelAngle with respect to connections[0] and between [0, +360)
+    // Angle of object1 and object2 are given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool
     tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
 
@@ -55,7 +55,7 @@ private:
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
     __inline__ __device__ static void markConnectionsForDeletion(Object* object, Object* connectedObject);
 
-    // angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
+    // Angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithRelAngle_oneWay(
         SimulationData& data,
         Object* object1,
@@ -64,7 +64,7 @@ private:
         float desiredDistance,
         float desiredRelAngle = 0);
 
-    // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
+    // Angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithAbsAngle_oneWay(Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
 };
 
@@ -368,7 +368,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithRelAng
     // process general case
     // *****
 
-    // find appropriate index for new connection
+    // Find appropriate index for new connection
     int index = 0;
     float prevAngle = 0;
     float nextAngle = 0;
@@ -405,7 +405,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithRelAng
 
     // Insert new connection
     if (index == 0) {
-        index = object1->numConnections;  // connection at index 0 should be an invariant
+        index = object1->numConnections;  // Connection at index 0 should be an invariant
     }
     for (int j = object1->numConnections; j > index; --j) {
         object1->connections[j] = object1->connections[j - 1];

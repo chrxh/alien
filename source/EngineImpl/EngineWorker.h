@@ -74,7 +74,7 @@ public:
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);
 
-    void beginShutdown();  //caller should wait for termination of thread
+    void beginShutdown();  // Caller should wait for termination of thread
     void endShutdown();
 
     int getTpsRestriction() const;
@@ -147,7 +147,7 @@ private:
     // Sync
     std::atomic<bool> _syncSimulationWithRendering{false};
     std::atomic<int> _syncSimulationWithRenderingRatio{2};
-    std::atomic<int> _accessState{0};  //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
+    std::atomic<int> _accessState{0};  // 0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isPreviewRunning{false};
     std::atomic<bool> _isShutdown{false};
@@ -168,7 +168,7 @@ private:
     std::vector<ApplyForceJob> _applyForceJobs;
 
     // Time step measurements
-    std::atomic<int> _tpsRestriction{0};  //0 = no restriction
+    std::atomic<int> _tpsRestriction{0};  // 0 = no restriction
     std::atomic<float> _tps;
     int _timestepsSinceMeasurement = 0;
     std::optional<std::chrono::steady_clock::time_point> _measureTimepoint;

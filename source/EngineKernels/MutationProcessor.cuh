@@ -93,7 +93,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_void(data, genome, accumulatedMutations);
     applyMutations_constructor(data, genome, accumulatedMutations);
 
-    // sync since following mutations may change entire genes
+    // Sync since following mutations may change entire genes
     block.sync();
     auto const& nodeRates = genome->mutationRates;
     bool anyNodeMutation = nodeRates.extendGeneMutation.geneProbability > 0 || nodeRates.addNodeMutation.nodeProbability > 0
@@ -107,7 +107,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         correctGenome(data, genome);
     }
 
-    // sync since the copy-node-section mutation reads whole genes and rebuilds target genes (changing gene->nodes and numNodes)
+    // Sync since the copy-node-section mutation reads whole genes and rebuilds target genes (changing gene->nodes and numNodes)
     block.sync();
     if (nodeRates.copyNodeSectionMutation.geneProbability > 0) {
         applyMutations_copyNodeSection(data, genome, accumulatedMutations);
@@ -115,7 +115,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         correctGenome(data, genome);
     }
 
-    // sync since the move-node-section mutation reads whole genes and rebuilds them (changing gene->nodes and numNodes)
+    // Sync since the move-node-section mutation reads whole genes and rebuilds them (changing gene->nodes and numNodes)
     block.sync();
     if (nodeRates.moveNodeSectionMutation.geneProbability > 0) {
         applyMutations_moveNodeSection(data, genome, accumulatedMutations);
@@ -123,7 +123,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         correctGenome(data, genome);
     }
 
-    // sync since the following mutations may add or remove whole genes (changing genome->genes and numGenes)
+    // Sync since the following mutations may add or remove whole genes (changing genome->genes and numGenes)
     block.sync();
     bool anyGeneMutation = nodeRates.duplicateGeneMutation.geneProbability > 0 || nodeRates.deleteGeneMutation.geneProbability > 0;
     if (anyGeneMutation) {
@@ -975,7 +975,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_extendGene(Simulati
         if (gene.numNodes >= MaxNodesPerGene || data.primaryNumberGen.random() >= rate.geneProbability) {
             continue;
         }
-        auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes;  // start or end
+        auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes;  // Start or end
         insertNode(data, genome, gene, position);
         atomicAdd_block(&accumulatedMutations, 1.0f);
     }
@@ -1016,10 +1016,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_trimGene(Simulation
 
     for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
         auto& gene = genome->genes[geneIndex];
-        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // keep at least one node
+        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // Keep at least one node
             continue;
         }
-        auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes - 1;  // start or end
+        auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes - 1;  // Start or end
         removeNode(data, gene, position);
         atomicAdd_block(&accumulatedMutations, 1.0f);
     }
@@ -1040,7 +1040,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteNode(Simulati
         // low so a deletion does not shift nodes that have not been visited yet.
         auto const oldNumNodes = gene.numNodes;
         for (int position = oldNumNodes - 1; position >= 0; --position) {
-            if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.nodeProbability) {  // keep at least one node
+            if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.nodeProbability) {  // Keep at least one node
                 continue;
             }
             removeNode(data, gene, position);
@@ -1126,7 +1126,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.duplicateGeneMutation;
-    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
         return;
     }
 
@@ -1183,7 +1183,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
             for (int nodeIndex = 0; nodeIndex < source.numNodes; ++nodeIndex) {
                 newNodes[nodeIndex] = source.nodes[nodeIndex];
             }
-            newGenes[newIndex] = source;  // shallow copy of the gene-level attributes
+            newGenes[newIndex] = source;  // Shallow copy of the gene-level attributes
             newGenes[newIndex].nodes = newNodes;
             atomicAdd_block(&accumulatedMutations, toFloat(source.numNodes));
         }
@@ -1217,7 +1217,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.deleteGeneMutation;
-    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
         return;
     }
 
@@ -1308,7 +1308,7 @@ __inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(Sim
 
     __shared__ int numGenes;
     __shared__ int newNumGenes;
-    __shared__ int* newGeneIndices;  // during marking: -1 = unreachable, 1 = reachable but not scanned yet, 2 = scanned
+    __shared__ int* newGeneIndices;  // During marking: -1 = unreachable, 1 = reachable but not scanned yet, 2 = scanned
     __shared__ bool anyGeneScanned;
 
     if (laneId == 0) {
@@ -1394,7 +1394,7 @@ __inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(Sim
             if (geneIndex < numGenes) {
                 targetIndex = newGeneIndices[geneIndex];
                 if (targetIndex == geneIndex) {
-                    targetIndex = -1;  // already in place
+                    targetIndex = -1;  // Already in place
                 } else if (targetIndex >= 0) {
                     movedGene = genome->genes[geneIndex];
                 }
@@ -1423,13 +1423,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_copyNodeSection(Sim
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.copyNodeSectionMutation;
-    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
         return;
     }
 
     __shared__ int numGenes;
     __shared__ int numOps;
-    __shared__ Node** opSourceNodes;  // captured pre-mutation node array of the source gene (never overwritten in place)
+    __shared__ Node** opSourceNodes;  // Captured pre-mutation node array of the source gene (never overwritten in place)
     __shared__ int* opSectionStart;
     __shared__ int* opSectionLength;
     __shared__ int* opTargetGene;
@@ -1532,14 +1532,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_moveNodeSection(Sim
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.moveNodeSectionMutation;
-    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
         return;
     }
 
     __shared__ int numGenes;
     __shared__ int numOps;
     __shared__ int* opSourceGene;
-    __shared__ Node** opSourceNodes;  // captured pre-mutation node array of the source gene (never overwritten in place)
+    __shared__ Node** opSourceNodes;  // Captured pre-mutation node array of the source gene (never overwritten in place)
     __shared__ int* opSectionStart;
     __shared__ int* opSectionLength;
     __shared__ int* opTargetGene;
@@ -1564,7 +1564,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_moveNodeSection(Sim
     // the genome is not modified yet and every gene still has its original node count.
     for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
         auto& gene = genome->genes[geneIndex];
-        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // need >= 2 nodes to keep one behind
+        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // Need >= 2 nodes to keep one behind
             continue;
         }
         int sectionLength = data.primaryNumberGen.random(gene.numNodes - 2) + 1;           // [1, numNodes - 1]
@@ -1618,7 +1618,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_moveNodeSection(Sim
             if (opSourceGene[op] == geneIndex && opAccepted[op]) {
                 removeStart = opSectionStart[op];
                 removeLength = opSectionLength[op];
-                break;  // at most one op per source gene
+                break;  // At most one op per source gene
             }
         }
 

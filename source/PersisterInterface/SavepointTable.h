@@ -26,7 +26,7 @@ struct _SavepointEntry
     std::string peak;
     std::string peakType;
 
-    std::string requestId;  // transient
+    std::string requestId;  // Transient
 };
 using SavepointEntry = std::shared_ptr<_SavepointEntry>;
 
