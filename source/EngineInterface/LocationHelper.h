@@ -17,7 +17,7 @@ public:
     static void decreaseOrderNumber(SimulationParameters& parameters, int orderNumber);
     static void increaseOrderNumber(SimulationParameters& parameters, int orderNumber);
 
-    // returns new by old location index
+    // Returns new by old location index
     static std::map<int, int> adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset);
 
     static std::string generateLayerName(SimulationParameters const& parameters);

@@ -16,9 +16,9 @@ public:
         std::set<std::vector<std::string>> const& collapsedFolderNames);
 
     std::vector<NetworkResourceRawTO> getMatchingRawTOs(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs);
-    void invalidateCache();  //invalidate cache for getMatchingRawTOs
+    void invalidateCache();  // Invalidate cache for getMatchingRawTOs
 
-    //folder names conversion methods
+    // Folder names conversion methods
     std::vector<std::string> getFolderNames(std::string const& resourceName);
     std::string removeFoldersFromName(std::string const& resourceName);
     std::set<std::vector<std::string>> getFolderNames(std::vector<NetworkResourceRawTO> const& browserData, int minNesting = 2);

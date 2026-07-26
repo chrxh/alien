@@ -26,14 +26,14 @@ struct ObjectVertexData
     int state;            // Bit 0..7 = cell type
                           // Bit 8..15 = object type (ObjectType_Solid, ObjectType_FreeCell, ObjectType_Cell)
                           // Bit 16 = is isolated (zero connections)
-    float signalChanges;  // signal changes in [0, 1]
+    float signalChanges;  // Signal changes in [0, 1]
 };
 
 struct FluidParticleVertexData
 {
     float pos[3];    // x, y, z position
     float color[3];  // r, g, b color
-    float glow;      // glow intensity (0.0 = no glow, 1.0 = full glow)
+    float glow;      // Glow intensity (0.0 = no glow, 1.0 = full glow)
 };
 
 struct LocationVertexData
@@ -41,10 +41,10 @@ struct LocationVertexData
     float pos[2];         // x, y position
     float color[3];       // r, g, b color
     int shapeType;        // 0 = circular, 1 = rectangular
-    float dimension1;     // radius for circular, width for rectangular
-    float dimension2;     // unused for circular, height for rectangular
-    float fadeoutRadius;  // fadeout radius for the location
-    float opacity;        // opacity/transparency of the location
+    float dimension1;     // Radius for circular, width for rectangular
+    float dimension2;     // Unused for circular, height for rectangular
+    float fadeoutRadius;  // Fadeout radius for the location
+    float opacity;        // Opacity/transparency of the location
 };
 
 struct SelectedObjectVertexData
@@ -56,8 +56,8 @@ struct ConnectionArrowVertexData
 {
     float pos[2];                     // x, y position
     float color[3];                   // r, g, b color
-    float connectionWeightToObject1;  // connection weight for arrow toward first vertex
-    float connectionWeightToObject2;  // connection weight for arrow toward second vertex
+    float connectionWeightToObject1;  // Connection weight for arrow toward first vertex
+    float connectionWeightToObject2;  // Connection weight for arrow toward second vertex
 };
 
 struct AttackEventVertexData
@@ -69,7 +69,7 @@ struct AttackEventVertexData
 struct DetonationEventVertexData
 {
     float pos[2];  // x, y position
-    float radius;  // circle radius
+    float radius;  // Circle radius
 };
 
 class _GeometryBuffers

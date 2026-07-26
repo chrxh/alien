@@ -32,7 +32,7 @@ void ResizeWorldDialog::processIntern()
 {
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
 
-        //width
+        // Width
         ImGui::TableNextRow();
 
         ImGui::TableSetColumnIndex(0);
@@ -43,7 +43,7 @@ void ResizeWorldDialog::processIntern()
         ImGui::TableSetColumnIndex(1);
         ImGui::Text("Width");
 
-        //height
+        // Height
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);

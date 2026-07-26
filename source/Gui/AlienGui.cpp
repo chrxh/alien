@@ -154,7 +154,7 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
         AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
     }
 
-    //tooltip
+    // Tooltip
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -681,14 +681,14 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
         ImGui::BeginDisabled();
     }
 
-    //enable button
+    // Enable button
     if (enabled) {
         ImGui::Checkbox("##checkbox", enabled);
         ImGui::BeginDisabled(!(*enabled));
         ImGui::SameLine();
     }
 
-    //color dependent button
+    // Color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = parameters._colorDependence && _expandedColorControlIds.contains(toggleButtonId);
     if (parameters._colorDependence) {
@@ -1010,7 +1010,7 @@ namespace
             auto startPos = ImGui::GetCursorScreenPos();
             auto height = ImGui::GetFrameHeight();
             ImVec4 frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
-            frameBgColor.w *= 0.6f;  // make it half-transparent
+            frameBgColor.w *= 0.6f;  // Make it half-transparent
 
             ImDrawList* drawList = ImGui::GetWindowDrawList();
             ImU32 bgCol = ImGui::GetColorU32(frameBgColor);
@@ -2300,7 +2300,7 @@ namespace
                 // Only use formatted separators for large values
                 if (std::abs(value) >= 1000.0f) {
                     // Extract decimal places from format string like "%.3f"
-                    int decimalPlaces = 3;  // default
+                    int decimalPlaces = 3;  // Default
                     auto dotPos = format.find('.');
                     if (dotPos != std::string::npos) {
                         auto fPos = format.find('f', dotPos);
@@ -2315,7 +2315,7 @@ namespace
                 return format;
             }
             // When not maintaining format (e.g., for display in ranges), use formatted output
-            int decimalPlaces = 3;  // default
+            int decimalPlaces = 3;  // Default
             auto dotPos = format.find('.');
             if (dotPos != std::string::npos) {
                 auto fPos = format.find('f', dotPos);
@@ -2356,7 +2356,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         style.GrabMinSize = scale(4.0f);
     }
 
-    //enable button
+    // Enable button
     if (enabled) {
         ImGui::Checkbox("##checkbox", enabled);
         if (!(*enabled)) {
@@ -2369,7 +2369,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         ImGui::SameLine();
     }
 
-    //color dependent button
+    // Color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
     if (parameters._colorDependence) {
@@ -2401,7 +2401,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
             ImGui::SetCursorPosX(sliderPosX);
         }
 
-        //color field
+        // Color field
         ImGui::PushID(color);
         auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x : 0.0f;
 
@@ -2413,7 +2413,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         auto sliderOffset = ImGui::GetCursorPosX() - sliderPosX;
         ImGui::SetNextItemWidth(width - sliderOffset - scale(parameters._textWidth) - pinnedButtonWidth);
 
-        //slider
+        // Slider
         T sliderValue;
         T minValue = value[0], maxValue = value[0];
         int sliderValueColor = 0;
@@ -2469,14 +2469,14 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 
         if (color == 0) {
 
-            //pin button
+            // Pin button
             if (pinned) {
                 ImGui::SameLine();
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
                 AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_THUMBTACK).width(PinnedButtonWidth), *pinned);
             }
 
-            //revert button
+            // Revert button
             if (parameters._defaultValue) {
                 ImGui::SameLine();
 
@@ -2602,7 +2602,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
 
         ImGui::SetCursorPos(startPos);
 
-        //color matrix
+        // Color matrix
         if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
             for (int row = 0; row < MAX_COLORS + 1; ++row) {
                 ImGui::PushID(row);
@@ -2650,7 +2650,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
         ImGui::EndGroup();
     } else {
 
-        //collapsed view
+        // Collapsed view
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
         if constexpr (std::is_same<T, bool>()) {
             static bool test = false;
@@ -2735,7 +2735,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     ImGui::PopID();
 }
 
-//RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
+// RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
 //>>>>>>>>>>
 void AlienGui::RotateStart(ImDrawList* drawList)
 {
@@ -2744,13 +2744,13 @@ void AlienGui::RotateStart(ImDrawList* drawList)
 
 ImVec2 AlienGui::RotationCenter(ImDrawList* drawList)
 {
-    ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX);  // bounds
+    ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX);  // Bounds
 
     const auto& buf = drawList->VtxBuffer;
     for (int i = _rotationStartIndex; i < buf.Size; i++)
         l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
 
-    return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2);  // or use _ClipRectStack?
+    return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2);  // Or use _ClipRectStack?
 }
 
 bool AlienGui::RevertButton(std::string const& id)
@@ -2777,8 +2777,8 @@ void AlienGui::drawTextWithInfoLabel(
         ImVec2 labelSize = ImGui::CalcTextSize(infoLabel->c_str());
         auto const& style = ImGui::GetStyle();
         labelPos.y += scale(1.0f);
-        labelSize.x += style.FramePadding.x * 2;  // padding left+right
-        labelSize.y += style.FramePadding.y * 2;  // padding top+bottom
+        labelSize.x += style.FramePadding.x * 2;  // Padding left+right
+        labelSize.y += style.FramePadding.y * 2;  // Padding top+bottom
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         ImU32 borderColor = ImGui::GetColorU32(ImGuiCol_Border);
         drawList->AddRect(
@@ -2787,7 +2787,7 @@ void AlienGui::drawTextWithInfoLabel(
             borderColor,
             4.0f,
             0,
-            2.0f  // thickness
+            2.0f  // Thickness
         );
         ImGui::SetCursorScreenPos(ImVec2(labelPos.x + style.FramePadding.x, labelPos.y));
         ImGui::TextDisabled("%s", infoLabel->c_str());

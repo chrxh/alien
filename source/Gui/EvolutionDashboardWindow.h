@@ -71,25 +71,25 @@ private:
 
     struct LineageDisplayData
     {
-        int64_t id = 0;  //-1 = "all lineages"
+        int64_t id = 0;  // -1 = "all lineages"
         int colorBitset = 0;
-        uint64_t representativeCellId = 0;  //cell of a creature with the highest generation; 0 = not available
+        uint64_t representativeCellId = 0;  // Cell of a creature with the highest generation; 0 = not available
         std::array<double, NumMetrics> currentValues = {};
-        std::array<std::vector<double>, NumMetrics> series = {};  //only filled for plotted lineages
-        std::vector<double> timePoints;                           //only filled for plotted lineages
-        std::vector<double> systemClockPoints;                    //only filled when the x-axis represents time steps
+        std::array<std::vector<double>, NumMetrics> series = {};  // Only filled for plotted lineages
+        std::vector<double> timePoints;                           // Only filled for plotted lineages
+        std::vector<double> systemClockPoints;                    // Only filled when the x-axis represents time steps
     };
 
-    std::vector<LineageDisplayData> _lineages;  //table rows from the latest sample, sorted by the selected table column
+    std::vector<LineageDisplayData> _lineages;  // Table rows from the latest sample, sorted by the selected table column
     std::vector<LineageDisplayData> _plottedLineages;
     LineageDisplayData _allLineages;
 
     std::array<uint32_t, MAX_COLORS> _cellColors = {};
 
     std::set<int64_t> _selectedLineageIds;
-    int _colorFilter = 0x3ff;  //bitset for MAX_COLORS cell colors
+    int _colorFilter = 0x3ff;  // Bitset for MAX_COLORS cell colors
 
-    int _sortColumnIndex = 1;  //0 = lineage column, 1..NumMetrics = metric columns
+    int _sortColumnIndex = 1;  // 0 = lineage column, 1..NumMetrics = metric columns
     bool _sortAscending = false;
 
     using TimelineMode = int;
@@ -102,7 +102,7 @@ private:
     TimelineMode _timelineMode = TimelineMode_EntireHistory;
 
     int _lastSteps = 100000;
-    float _timeHorizon = 10.0f;  //in seconds
+    float _timeHorizon = 10.0f;  // In seconds
     float _timelinesHeight = 0;
     float _plotHeight = 60.0f;
     std::optional<float> _lastWindowHeight;
@@ -115,7 +115,7 @@ private:
         int colorFilter = 0;
         double sourceBackTime = 0;
         std::set<int64_t> selectedLineageIds;
-        std::vector<double> lineageBackTimes;  //only used for the long-term history where each lineage has its own timeline
+        std::vector<double> lineageBackTimes;  // Only used for the long-term history where each lineage has its own timeline
 
         bool operator==(RebuildKey const&) const = default;
     };

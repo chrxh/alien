@@ -17,7 +17,7 @@ public:
     static float angle(RealVector2D const& a, RealVector2D const& b, RealVector2D const& c);  // Returns the angle ABC in degrees
     static RealVector2D rotateQuarterCounterClockwise(RealVector2D v);
     static RealVector2D unitVectorOfAngle(float angleInDeg);
-    static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise
+    static RealMatrix2D calcRotationMatrix(float angleInDeg);  // Rotation is clockwise
     static RealVector2D rotateClockwise(RealVector2D const& v, float angle);
     static void normalize(RealVector2D& v);
     static RealVector2D getNormalized(RealVector2D const& v);

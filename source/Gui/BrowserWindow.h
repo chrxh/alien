@@ -45,8 +45,8 @@ private:
     struct Workspace
     {
         std::vector<ImGuiTableColumnSortSpecs> sortSpecs;
-        std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
-        std::vector<NetworkResourceTreeTO> treeTOs;  //filtered, sorted
+        std::vector<NetworkResourceRawTO> rawTOs;    // Unfiltered, sorted
+        std::vector<NetworkResourceTreeTO> treeTOs;  // Filtered, sorted
         std::set<std::vector<std::string>> collapsedFolderNames;
     };
 
@@ -66,7 +66,7 @@ private:
 
     bool processResourceNameField(
         NetworkResourceTreeTO const& treeTO,
-        std::set<std::vector<std::string>>& collapsedFolderNames);  //return true if folder symbol clicked
+        std::set<std::vector<std::string>>& collapsedFolderNames);  // Return true if folder symbol clicked
     void processDescriptionField(NetworkResourceTreeTO const& treeTO);
     void processReactionList(NetworkResourceTreeTO const& treeTO);
     void processTimestampField(NetworkResourceTreeTO const& treeTO);
@@ -80,7 +80,7 @@ private:
 
     bool processFolderTreeSymbols(
         NetworkResourceTreeTO const& treeTO,
-        std::set<std::vector<std::string>>& collapsedFolderNames);  //return true if folder symbol clicked
+        std::set<std::vector<std::string>>& collapsedFolderNames);  // Return true if folder symbol clicked
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
 

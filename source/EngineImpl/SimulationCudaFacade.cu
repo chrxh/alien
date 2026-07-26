@@ -671,7 +671,7 @@ void _SimulationCudaFacade::initCuda()
         throw std::runtime_error("CUDA device could not be initialized.");
     }
 
-    cudaGetLastError();  //reset error code
+    cudaGetLastError();  // Reset error code
     CudaContextState::get().reset();
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
@@ -800,7 +800,7 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
         }
         syncAndCheck();
 
-        //make check after every 10th call
+        // Make check after every 10th call
         if (++counter % 10 == 0) {
             counter = 0;
             resizeArraysIfNecessary();

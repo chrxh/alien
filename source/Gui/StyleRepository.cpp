@@ -37,7 +37,7 @@ void StyleRepository::setup()
 
     ImGuiIO& io = ImGui::GetIO();
 
-    //default font (small with icons)
+    // Default font (small with icons)
     io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * scaleFactor);
     {
         static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
@@ -45,19 +45,19 @@ void StyleRepository::setup()
             FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f * scaleFactor, &configMerge, rangesIcons);
     }
 
-    //small bold font
+    // Small bold font
     _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * scaleFactor);
 
-    //medium bold font
+    // Medium bold font
     _mediumBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 24.0f * scaleFactor);
 
-    //medium font
+    // Medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * scaleFactor);
 
-    //large font
+    // Large font
     _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * scaleFactor);
 
-    //icon font
+    // Icon font
     _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * scaleFactor);
     {
         static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
@@ -66,10 +66,10 @@ void StyleRepository::setup()
         io.Fonts->Build();
     }
 
-    //monospace medium font
+    // Monospace medium font
     _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * scaleFactor);
 
-    //monospace large font
+    // Monospace large font
     _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * scaleFactor);
 
     _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * scaleFactor);

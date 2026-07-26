@@ -19,7 +19,7 @@ __global__ void cudaColorSelectedObjects(SimulationData data, unsigned char colo
     }
 }
 
-//assumes that *changeTO.numObjects == 1
+// Assumes that *changeTO.numObjects == 1
 __global__ void cudaChangeObject(SimulationData data, TOs changeTO)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -38,7 +38,7 @@ __global__ void cudaChangeObject(SimulationData data, TOs changeTO)
     }
 }
 
-//assumes that *changeTO.numEnergyParticles == 1
+// Assumes that *changeTO.numEnergyParticles == 1
 __global__ void cudaChangeParticle(SimulationData data, TOs changeTO)
 {
     auto const partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());

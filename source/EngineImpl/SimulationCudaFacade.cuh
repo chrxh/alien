@@ -26,7 +26,7 @@
 #include <vector_types.h>
 
 #if !defined(USE_HIP)
-struct cudaGraphicsResource;  // on HIP, hipGraphicsResource is declared by the HIP runtime
+struct cudaGraphicsResource;  // On HIP, hipGraphicsResource is declared by the HIP runtime
 #endif
 
 class _SimulationCudaFacade

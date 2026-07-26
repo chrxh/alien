@@ -35,7 +35,7 @@ protected:
         result.timestep = base + 1;
         result.systemClock = base + 2;
 
-        //the same set of color combinations in every sample, so the column-wise round-trip is exact
+        // The same set of color combinations in every sample, so the column-wise round-trip is exact
         for (auto&& [colorBitset, offset] : {std::pair{0x1u, 3.0}, std::pair{0x6u, 12.0}}) {
             ColorOverallDataPoint colorPoint;
             colorPoint.numCreatures = base + offset;
@@ -188,7 +188,7 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithManyLineages)
 
 TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
 {
-    //many color combinations share the same timeline; a few carry distinct data
+    // Many color combinations share the same timeline; a few carry distinct data
     auto createSample = [](double base) {
         ColorSamples result;
         result.timestep = base + 1;

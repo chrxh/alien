@@ -301,8 +301,8 @@ TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
     // Rotating the sender's front by 180 degrees flips the facing direction to north, so now a southern receiver
     // (in the opposite half-plane) receives, while a northern receiver is blocked.
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 180.0f);
-    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);  // south -> should receive
-    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);   // north -> should be blocked
+    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);  // South -> should receive
+    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);   // North -> should be blocked
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -318,8 +318,8 @@ TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
     // With an encoded angle of 0, the facing direction equals the absolute front (east). A western receiver is then
     // in the opposite half-plane and receives, while an eastern receiver is blocked.
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 0.0f, 0.0f);
-    data.add(createReceiverCreature(2, {90.0f, 100.0f}), false);   // west -> should receive
-    data.add(createReceiverCreature(3, {110.0f, 100.0f}), false);  // east -> should be blocked
+    data.add(createReceiverCreature(2, {90.0f, 100.0f}), false);   // West -> should receive
+    data.add(createReceiverCreature(3, {110.0f, 100.0f}), false);  // East -> should be blocked
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);

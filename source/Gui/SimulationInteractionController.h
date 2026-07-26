@@ -66,7 +66,7 @@ private:
     Modes _modes;
     Modes _modesAtClick;
 
-    //navigation
+    // Navigation
     std::optional<RealVector2D> _worldPosForPanning;
     std::optional<RealVector2D> _worldPosOnClick;
     std::optional<IntVector2D> _prevMousePosInt;
@@ -77,7 +77,7 @@ private:
 
     struct MouseWheelAction
     {
-        bool up;  //false=down
+        bool up;  // false=down
         float strongness;
         std::chrono::steady_clock::time_point start;
         std::chrono::steady_clock::time_point lastTime;

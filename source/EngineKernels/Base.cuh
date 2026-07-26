@@ -232,7 +232,7 @@ public:
     __device__ __inline__ void releaseLock() { atomicExch(&lock, 0); }
 
 private:
-    int lock;  //0 = unlocked, 1 = locked
+    int lock;  // 0 = unlocked, 1 = locked
 };
 
 class SystemDoubleLock

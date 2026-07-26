@@ -65,9 +65,9 @@ struct SimulationParameters
 
     // Physics: Motion
     BaseParameter<float> timestepSize = {1.0f};
-    BaseParameter<float> smoothingLength = {0.8f};    // for MotionType_Fluid
-    BaseParameter<float> viscosityStrength = {0.1f};  // for MotionType_Fluid
-    BaseParameter<float> pressureStrength = {0.1f};   // for MotionType_Fluid
+    BaseParameter<float> smoothingLength = {0.8f};    // For MotionType_Fluid
+    BaseParameter<float> viscosityStrength = {0.1f};  // For MotionType_Fluid
+    BaseParameter<float> pressureStrength = {0.1f};   // For MotionType_Fluid
     BaseLayerParameter<float> friction = {.baseValue = 0.001f};
     BaseParameter<float> innerFriction = {0.6f};
     BaseLayerParameter<float> rigidity = {.baseValue = 0.0f};
