@@ -25,7 +25,7 @@ namespace
 {
     auto constexpr RightColumnWidth = 200.0f;
     auto constexpr AutosaveSenderId = "Autosave";
-    auto constexpr PeakDetectionInterval = 30;  //in seconds
+    auto constexpr PeakDetectionInterval = 30;  // In seconds
 }
 
 AutosaveWindow::AutosaveWindow()
@@ -166,7 +166,7 @@ void AutosaveWindow::processTable()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(23.0f));
 
-                // project name
+                // Project name
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
@@ -201,19 +201,19 @@ void AutosaveWindow::processTable()
                     _selectedEntry = selected ? entry : nullptr;
                 }
 
-                // timestamp
+                // Timestamp
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
                     AlienGui::Text(entry->timestamp);
                 }
 
-                // timestep
+                // Timestep
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
                     AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(entry->timestep)).rightAligned(true));
                 }
 
-                // peak
+                // Peak
                 //ImGui::TableNextColumn();
                 //AlienGui::Text(entry->peak);
 
@@ -436,7 +436,7 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
                     SerializerService::get().deleteSimulation(saveResult->getData().filename);
                 }
             } else if (requestState.value() == PersisterRequestState::Error) {
-                // do nothing
+                // Do nothing
             } else {
                 newRequestsToDelete.emplace_back(entry);
             }

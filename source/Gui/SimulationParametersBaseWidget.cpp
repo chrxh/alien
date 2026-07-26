@@ -39,5 +39,5 @@ int _SimulationParametersBaseWidget::getOrderNumber() const
 
 void _SimulationParametersBaseWidget::setOrderNumber(int orderNumber)
 {
-    // do nothing
+    // Do nothing
 }

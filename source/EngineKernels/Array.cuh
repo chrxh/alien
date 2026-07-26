@@ -218,7 +218,7 @@ public:
 
     UnmanagedArray() {}
 
-    //methods for host
+    // Methods for host
     __host__ __inline__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
@@ -239,7 +239,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_data);
     }
 
-    //methods for device
+    // Methods for device
     __device__ __inline__ void setMemory(T* data, int size) const
     {
         *_data = data;
@@ -255,7 +255,7 @@ public:
     __device__ __inline__ T& at(int index) { return (*_data)[index]; }
     __device__ __inline__ T const& at(int index) const { return (*_data)[index]; }
 
-    //returns index if successful, otherwise -1
+    // Returns index if successful, otherwise -1
     __device__ __inline__ int tryAddEntry(T const& entry)
     {
         auto index = atomicAdd(_numEntries, 1);

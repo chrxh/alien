@@ -372,7 +372,7 @@ auto GenomeDescEditService::createSeedCollectionForPreview(
             CHECK(cachedPhenotype._creatures.size() <= 2);
             auto seedFirst = false;
             if (cachedPhenotype._creatures.front()._generation == 0) {
-                seedFirst = true;  // first Creature is seed
+                seedFirst = true;  // First Creature is seed
             }
 
             result.description.add(std::move(cachedPhenotype), false);  // Try keeping ids stable for preview selection

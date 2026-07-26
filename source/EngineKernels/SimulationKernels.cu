@@ -49,7 +49,7 @@ __global__ void cudaNextTimestep_physics_init(SimulationData data)
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 {
     ObjectProcessor::updateMap(data);
-    ObjectProcessor::radiation(data);  //do not use EnergyParticleProcessor in this calcKernel
+    ObjectProcessor::radiation(data);  // Do not use EnergyParticleProcessor in this calcKernel
     ObjectProcessor::clearDensityMap(data);
 }
 

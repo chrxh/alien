@@ -48,19 +48,19 @@ public:
 
     static PersisterFacade get();
 
-    //lifecycle control
+    // Lifecycle control
     virtual void setup() = 0;
     virtual void shutdown() = 0;
     virtual void restart() = 0;
 
-    //generic logic
+    // Generic logic
     virtual bool isBusy() const = 0;
     virtual std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const = 0;
     virtual PersisterRequestResult fetchPersisterRequestResult(PersisterRequestId const& id) = 0;
     virtual std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) = 0;
     virtual PersisterErrorInfo fetchError(PersisterRequestId const& id) = 0;
 
-    //specific request
+    // Specific request
     virtual PersisterRequestId scheduleSaveSimulation(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
     virtual SaveSimulationResultData fetchSaveSimulationData(PersisterRequestId const& id) = 0;
 

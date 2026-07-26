@@ -674,7 +674,7 @@ Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, 
         }
         auto angleDiff2 = connectionIt->_angleFromPrevious;
         if (connectionIt == object._connections.begin()) {
-            connectionIt = object._connections.end();  // connection at index 0 should be an invariant
+            connectionIt = object._connections.end();  // Connection at index 0 should be an invariant
         }
 
         auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;

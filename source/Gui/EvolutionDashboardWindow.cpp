@@ -30,7 +30,7 @@
 
 namespace
 {
-    auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
+    auto constexpr LiveStatisticsDeltaTime = 50;  // In millisec
     auto constexpr RateAveragingTimesteps = LiveStatisticsService::RateAveragingTimesteps;
 
     auto constexpr ColorChipSize = 22.0f;
@@ -58,7 +58,7 @@ namespace
         float tableColumnWidth;
     };
 
-    //the last two metrics are rates per 1K time steps, both in the table and in the timeline plots
+    // The last two metrics are rates per 1K time steps, both in the table and in the timeline plots
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
         {"Creatures", "Creatures", 0, 0, 82.0f},
         {"Avg cells", "Avg cells", 1, 1, 82.0f},
@@ -79,19 +79,19 @@ namespace
             toInt(alpha * 255.0f));
     }
 
-    auto constexpr LineageHueShift = 0.03f;    //hue offset between consecutive plot rows of a lineage
-    auto constexpr LineageBrightening = 1.5f;  //the identifying colors of the renderer are too dark on the dark GUI background
+    auto constexpr LineageHueShift = 0.03f;    // Hue offset between consecutive plot rows of a lineage
+    auto constexpr LineageBrightening = 1.5f;  // The identifying colors of the renderer are too dark on the dark GUI background
     auto constexpr LineageSaturationFactor = 0.85f;
 
-    //palette as used by the former statistics window; one colormap color per plot row;
-    //stepping through the colormap with an alternating stride of 1 and 2 makes adjacent rows distinct
+    // Palette as used by the former statistics window; one colormap color per plot row;
+    // stepping through the colormap with an alternating stride of 1 and 2 makes adjacent rows distinct
     ImColor getOverallPlotColor(int metricIndex)
     {
         return ImColor(ImPlot::GetColormapColor((metricIndex / 2 * 3 + metricIndex % 2) % 11, ImPlotColormap_Cool));
     }
 
-    //identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
-    //hueShiftSteps shifts the hue slightly so that consecutive plot rows of a lineage remain distinguishable
+    // Identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
+    // hueShiftSteps shifts the hue slightly so that consecutive plot rows of a lineage remain distinguishable
     ImColor getLineageColor(int64_t lineageId, int hueShiftSteps = 0)
     {
         auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId));
@@ -101,7 +101,7 @@ namespace
         return toImColor(ObjectColoring::hsvToRgb(h, s * LineageSaturationFactor, std::min(1.0f, v * LineageBrightening)));
     }
 
-    //the "all filtered" row keeps the colormap palette, single lineages are colored by their identity
+    // The "all filtered" row keeps the colormap palette, single lineages are colored by their identity
     ImColor getPlotColor(int64_t lineageId, int metricIndex)
     {
         return lineageId < 0 ? getOverallPlotColor(metricIndex) : getLineageColor(lineageId, metricIndex);
@@ -112,7 +112,7 @@ namespace
         if (std::isnan(value)) {
             return "-";
         }
-        if (value >= toDouble(Infinity<float>::value)) {  //parameters use FLT_MAX to represent infinity
+        if (value >= toDouble(Infinity<float>::value)) {  // Parameters use FLT_MAX to represent infinity
             return "infinity";
         }
         return StringHelper::format(value, decimals);
@@ -164,8 +164,8 @@ namespace
         return x - startX;
     }
 
-    //the accumulated statistics restart at zero when a saved simulation is loaded, which makes the rate incomputable
-    //for the samples whose reference still lies before the loading; NaN lets the callers hold the last known rate
+    // The accumulated statistics restart at zero when a saved simulation is loaded, which makes the rate incomputable
+    // for the samples whose reference still lies before the loading; NaN lets the callers hold the last known rate
     double calcRate(double accumValue, double lastAccumValue, double delta)
     {
         if (delta <= 0 || accumValue < lastAccumValue) {
@@ -174,7 +174,7 @@ namespace
         return (accumValue - lastAccumValue) / delta;
     }
 
-    //holds the last known value as long as the metric is not computable; a leading gap remains unset
+    // Holds the last known value as long as the metric is not computable; a leading gap remains unset
     void appendMetricValue(std::vector<double>& series, double value)
     {
         series.emplace_back(std::isnan(value) && !series.empty() ? series.back() : value);
@@ -190,9 +190,9 @@ namespace
         return sample.data;
     }
 
-    //works on any data point that carries the aggregatable creature fields (LineageDataPoint or the
-    //summed per-color ColorOverallDataPoint), so the same metric derivation serves single lineages and
-    //color-filtered overall statistics
+    // Works on any data point that carries the aggregatable creature fields (LineageDataPoint or the
+    // summed per-color ColorOverallDataPoint), so the same metric derivation serves single lineages and
+    // color-filtered overall statistics
     template <typename DataPoint>
     double getAggregatableMetricValue(DataPoint const& entry, DataPoint const* lastEntry, double rateDelta, int metricIndex)
     {
@@ -224,8 +224,8 @@ namespace
         return getAggregatableMetricValue(sample.data, referenceSample ? &referenceSample->data : nullptr, deltaKSteps, metricIndex);
     }
 
-    //sum of the per-color buckets whose colorBitset intersects the filter; a lineage falls into exactly one
-    //bucket (its full colorBitset), so this matches the "colorBitset & filter" row filter without double counting
+    // Sum of the per-color buckets whose colorBitset intersects the filter; a lineage falls into exactly one
+    // bucket (its full colorBitset), so this matches the "colorBitset & filter" row filter without double counting
     ColorOverallDataPoint aggregateFilteredColors(std::unordered_map<uint32_t, ColorOverallDataPoint> const& data, int colorFilter)
     {
         ColorOverallDataPoint result;
@@ -268,7 +268,7 @@ namespace
         return snprintf(buff, size, "%s s", StringHelper::format(value, 0).c_str());
     }
 
-    //most recent sample that is at least RateAveragingTimesteps older; falls back to the oldest sample
+    // Most recent sample that is at least RateAveragingTimesteps older; falls back to the oldest sample
     size_t findRateReferenceIndex(std::vector<DataPointCollection> const& history, double timestep)
     {
         size_t result = 0;
@@ -281,12 +281,12 @@ namespace
         return result;
     }
 
-    //builds the x points and metric series of one timeline; reference samples for the rate metrics are selected
-    //via a trailing window of RateAveragingTimesteps time steps
+    // Builds the x points and metric series of one timeline; reference samples for the rate metrics are selected
+    // via a trailing window of RateAveragingTimesteps time steps
     template <typename Target, typename Sample, typename MetricEvaluator>
     void buildPlotSeries(Target& target, std::vector<Sample> const& source, size_t firstIndex, bool useTimeAsX, MetricEvaluator const& evaluateMetric)
     {
-        //only the live DataPointCollection carries a real-time axis; the long-term history is always plotted over time steps
+        // Only the live DataPointCollection carries a real-time axis; the long-term history is always plotted over time steps
         auto getX = [&](Sample const& sample) {
             if constexpr (requires { sample.time; }) {
                 return useTimeAsX ? sample.time : sample.timestep;
@@ -299,13 +299,13 @@ namespace
         target.timePoints.clear();
         target.systemClockPoints.clear();
 
-        size_t referenceIndex = 0;  //reference samples may also lie before the visible range
+        size_t referenceIndex = 0;  // Reference samples may also lie before the visible range
         for (auto sampleIndex = firstIndex; sampleIndex < source.size(); ++sampleIndex) {
             auto const& sample = source.at(sampleIndex);
             while (referenceIndex + 1 < sampleIndex && source.at(referenceIndex + 1).timestep + RateAveragingTimesteps <= sample.timestep) {
                 ++referenceIndex;
             }
-            //rates over references younger than the averaging window would produce spikes at the left plot border; NaN suppresses those samples
+            // Rates over references younger than the averaging window would produce spikes at the left plot border; NaN suppresses those samples
             auto const& referenceSample = source.at(referenceIndex);
             auto referenceIsOldEnough = referenceIndex < sampleIndex && referenceSample.timestep + RateAveragingTimesteps <= sample.timestep;
             auto const* reference = referenceIsOldEnough ? &referenceSample : nullptr;
@@ -372,7 +372,7 @@ void EvolutionDashboardWindow::processBackground()
 
 void EvolutionDashboardWindow::processIntern()
 {
-    //scale the plot section proportionally when the window is resized
+    // Scale the plot section proportionally when the window is resized
     auto windowHeight = ImGui::GetWindowSize().y;
     if (_lastWindowHeight.has_value() && *_lastWindowHeight > 0 && *_lastWindowHeight != windowHeight) {
         _timelinesHeight *= windowHeight / *_lastWindowHeight;
@@ -392,7 +392,7 @@ void EvolutionDashboardWindow::processIntern()
 
     AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _timelinesHeight);
 
-    //apply selection changes from the table immediately; otherwise the plots are empty for one frame
+    // Apply selection changes from the table immediately; otherwise the plots are empty for one frame
     updateDisplayData();
 
     if (ImGui::BeginChild("##timelineSection", {0, 0})) {
@@ -425,7 +425,7 @@ void EvolutionDashboardWindow::updateTableData()
     _lastTableBackTime = liveBackTime;
     _lastTableColorFilter = _colorFilter;
 
-    //table rows from the latest live sample (rates per 1K time steps)
+    // Table rows from the latest live sample (rates per 1K time steps)
     _lineages.clear();
     if (liveHistory.empty()) {
         return;
@@ -439,7 +439,7 @@ void EvolutionDashboardWindow::updateTableData()
         lineage.representativeCellId = entry.representativeCellId;
         LineageDataPoint const* referenceEntry = nullptr;
         auto referenceTimestep = 0.0;
-        for (auto sampleIndex = referenceIndex; sampleIndex + 1 < liveHistory.size(); ++sampleIndex) {  //young lineages: use their oldest sample
+        for (auto sampleIndex = referenceIndex; sampleIndex + 1 < liveHistory.size(); ++sampleIndex) {  // Young lineages: use their oldest sample
             if (auto const* candidate = findLineageEntry(liveHistory.at(sampleIndex), lineageId)) {
                 referenceEntry = candidate;
                 referenceTimestep = liveHistory.at(sampleIndex).timestep;
@@ -453,13 +453,13 @@ void EvolutionDashboardWindow::updateTableData()
     }
     sortLineages();
 
-    //current values for the table summary row
+    // Current values for the table summary row
     DataPointCollection const* referenceDataPoints = liveHistory.size() >= 2 ? &liveHistory.at(referenceIndex) : nullptr;
     for (int i = 0; i < NumMetrics; ++i) {
         _allLineages.currentValues.at(i) = getFilteredOverallMetricValue(lastSample, referenceDataPoints, _colorFilter, i);
     }
 
-    //union of colors over all lineages matching the current filter, shown as swatches on the summary row
+    // Union of colors over all lineages matching the current filter, shown as swatches on the summary row
     _allLineages.colorBitset = 0;
     for (auto const& lineage : _lineages) {
         if ((_colorFilter & lineage.colorBitset) != 0) {
@@ -486,7 +486,7 @@ void EvolutionDashboardWindow::sortLineages()
         auto rhsIsNan = std::isnan(rhsValue);
         if (lhsIsNan || rhsIsNan) {
             if (lhsIsNan != rhsIsNan) {
-                return rhsIsNan;  //rows without a value are sorted to the bottom
+                return rhsIsNan;  // Rows without a value are sorted to the bottom
             }
             return lhs.id < rhs.id;
         }
@@ -499,7 +499,7 @@ void EvolutionDashboardWindow::sortLineages()
 
 void EvolutionDashboardWindow::updatePlotData()
 {
-    //the long-term history carries per-lineage data and is therefore expensive to copy; process it under its mutex instead
+    // The long-term history carries per-lineage data and is therefore expensive to copy; process it under its mutex instead
     if (_timelineMode == TimelineMode_EntireHistory) {
         auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
         std::lock_guard lock(statisticsHistory.getMutex());
@@ -511,7 +511,7 @@ void EvolutionDashboardWindow::updatePlotData()
 
 void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection> const& source)
 {
-    //rebuild only when the underlying data or view settings have changed
+    // Rebuild only when the underlying data or view settings have changed
     auto sourceBackTime = !source.empty() ? source.back().time : -1.0;
     RebuildKey key{_timelineMode, _lastSteps, _timeHorizon, _colorFilter, sourceBackTime, _selectedLineageIds};
     if (_lastRebuildKey && *_lastRebuildKey == key) {
@@ -533,20 +533,20 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
         while (firstIndex < source.size() && getX(source.at(firstIndex)) < startX) {
             ++firstIndex;
         }
-        //keep one sample left of the visible range so the lines extend beyond the left plot border
-        //(they are clipped there); otherwise a flickering gap remains between border and first sample
+        // Keep one sample left of the visible range so the lines extend beyond the left plot border
+        // (they are clipped there); otherwise a flickering gap remains between border and first sample
         if (firstIndex > 0) {
             --firstIndex;
         }
     }
 
-    //"all lineages" series honoring the color filter (the current values are maintained by updateTableData)
+    // "all lineages" series honoring the color filter (the current values are maintained by updateTableData)
     _allLineages.id = -1;
     buildPlotSeries(_allLineages, source, firstIndex, useTimeAsX, [colorFilter = _colorFilter](auto const& sample, auto const* reference, int metricIndex) {
         return getFilteredOverallMetricValue(sample, reference, colorFilter, metricIndex);
     });
 
-    //per-lineage series for the selected lineages
+    // Per-lineage series for the selected lineages
     _plottedLineages.clear();
     for (auto const& selectedId : _selectedLineageIds) {
         LineageDisplayData lineage;
@@ -556,7 +556,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
             double timestep = 0;
             LineageDataPoint const* entry = nullptr;
         };
-        std::vector<RateReference> rateReferences;  //already visited samples containing the lineage; may also lie before the visible range
+        std::vector<RateReference> rateReferences;  // Already visited samples containing the lineage; may also lie before the visible range
         size_t rateReferenceIndex = 0;
         for (size_t sampleIndex = 0; sampleIndex < source.size(); ++sampleIndex) {
             auto const& sample = source.at(sampleIndex);
@@ -574,7 +574,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 if (!useTimeAsX) {
                     lineage.systemClockPoints.emplace_back(sample.systemClock);
                 }
-                //rates over references younger than the averaging window would produce spikes at the left plot border; NaN suppresses those samples
+                // Rates over references younger than the averaging window would produce spikes at the left plot border; NaN suppresses those samples
                 auto referenceIsOldEnough =
                     !rateReferences.empty() && rateReferences.at(rateReferenceIndex).timestep + RateAveragingTimesteps <= sample.timestep;
                 auto const* lastEntry = referenceIsOldEnough ? rateReferences.at(rateReferenceIndex).entry : nullptr;
@@ -598,8 +598,8 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
 
 void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& source)
 {
-    //rebuild only when the underlying data or view settings have changed; the lineage timelines are
-    //sampled independently of the overall timeline and therefore contribute their own back times
+    // Rebuild only when the underlying data or view settings have changed; the lineage timelines are
+    // sampled independently of the overall timeline and therefore contribute their own back times
     auto sourceBackTime = !source.colors.empty() ? source.colors.back().timestep : -1.0;
     std::vector<double> lineageBackTimes;
     lineageBackTimes.reserve(_selectedLineageIds.size());
@@ -613,13 +613,13 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
     }
     _lastRebuildKey = std::move(key);
 
-    //"all lineages" series honoring the color filter (the current values are maintained by updateTableData)
+    // "all lineages" series honoring the color filter (the current values are maintained by updateTableData)
     _allLineages.id = -1;
     buildPlotSeries(_allLineages, source.colors, 0, false, [colorFilter = _colorFilter](auto const& sample, auto const* reference, int metricIndex) {
         return getFilteredOverallMetricValue(sample, reference, colorFilter, metricIndex);
     });
 
-    //per-lineage series for the selected lineages
+    // Per-lineage series for the selected lineages
     _plottedLineages.clear();
     for (auto const& selectedId : _selectedLineageIds) {
         LineageDisplayData lineage;
@@ -646,8 +646,8 @@ void EvolutionDashboardWindow::processHeader()
     auto cardHeight =
         style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
 
-    //the header shows the current global state; object counts and the total energy cover all objects and thus come
-    //from the raw engine snapshot, while the creature counts are accumulated over the lineages of that same snapshot
+    // The header shows the current global state; object counts and the total energy cover all objects and thus come
+    // from the raw engine snapshot, while the creature counts are accumulated over the lineages of that same snapshot
     auto const& objectStatistics = _lastStatisticsEntry.objectStatistics;
 
     auto numCreatures = 0.0;
@@ -731,7 +731,7 @@ void EvolutionDashboardWindow::processCard(
             }
             firstSubValue = false;
 
-            //draw an ellipsis instead of sub-values that do not fit into the card
+            // Draw an ellipsis instead of sub-values that do not fit into the card
             auto groupWidth = std::max(ImGui::CalcTextSize(subLabel.c_str()).x, ImGui::CalcTextSize(subValue.c_str()).x);
             if (ImGui::GetContentRegionAvail().x < groupWidth) {
                 ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
@@ -803,8 +803,8 @@ void EvolutionDashboardWindow::processLineageTable()
 
         auto drawList = ImGui::GetWindowDrawList();
 
-        //header row: all labels are left-aligned and clamped to the visible part of each column, which can be
-        //partially hidden behind the frozen lineage column or cut off at the right window border
+        // Header row: all labels are left-aligned and clamped to the visible part of each column, which can be
+        // partially hidden behind the frozen lineage column or cut off at the right window border
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
         for (int column = 0; column < NumMetrics + FirstMetricColumn; ++column) {
@@ -822,7 +822,7 @@ void EvolutionDashboardWindow::processLineageTable()
                     _sortAscending = !_sortAscending;
                 } else {
                     _sortColumnIndex = column;
-                    _sortAscending = column < FirstMetricColumn;  //metric columns show the largest values on top by default
+                    _sortAscending = column < FirstMetricColumn;  // Metric columns show the largest values on top by default
                 }
                 sortLineages();
             }
@@ -833,7 +833,7 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::PopID();
         }
 
-        //summary row
+        // Summary row
         ImGui::TableNextRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImColor(0.13f, 0.16f, 0.23f, 1.0f));
         ImGui::TableSetColumnIndex(LineageColumn);
@@ -843,7 +843,7 @@ void EvolutionDashboardWindow::processLineageTable()
         }
         ImGui::SameLine(0, 0);
 
-        //draw the pin icon slightly smaller and shifted so it aligns nicely with the row text
+        // Draw the pin icon slightly smaller and shifted so it aligns nicely with the row text
         auto iconSize = ImGui::GetFontSize() * 0.75f;
         auto iconPos = ImGui::GetCursorScreenPos();
         drawList->AddText(
@@ -867,7 +867,7 @@ void EvolutionDashboardWindow::processLineageTable()
             rightAlignedText(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].tableDecimals));
         }
 
-        //lineage rows
+        // Lineage rows
         for (auto const& lineage : _lineages) {
             if ((_colorFilter & lineage.colorBitset) == 0) {
                 continue;
@@ -875,8 +875,8 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::PushID(toInt(lineage.id));
             ImGui::TableNextRow();
 
-            //genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row;
-            //submitted before the row selectable, otherwise the selectable resets the hover timer and the tooltip never shows
+            // Genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row;
+            // submitted before the row selectable, otherwise the selectable resets the hover timer and the tooltip never shows
             ImGui::TableSetColumnIndex(FirstMetricColumn);
             auto lineHeight = ImGui::GetTextLineHeight();
             ImGui::SetWindowFontScale(0.75f);
@@ -944,8 +944,8 @@ void EvolutionDashboardWindow::processTimelineSection()
 {
     processTimelineHeader();
 
-    //rebuild the plot series right after the header widgets changed the horizon; otherwise the widened
-    //x-axis shows a gap on the left for one frame because the series are still trimmed to the old horizon
+    // Rebuild the plot series right after the header widgets changed the horizon; otherwise the widened
+    // x-axis shows a gap on the left for one frame because the series are still trimmed to the old horizon
     updatePlotData();
 
     std::vector<LineageDisplayData const*> plottedLineages;
@@ -957,8 +957,8 @@ void EvolutionDashboardWindow::processTimelineSection()
         }
     }
 
-    //the time axis is pinned below the scrolling plot area so it stays visible in every mode; reserve its full
-    //height (axis plot + table cell padding + item spacing), otherwise the section gets its own scrollbar
+    // The time axis is pinned below the scrolling plot area so it stays visible in every mode; reserve its full
+    // height (axis plot + table cell padding + item spacing), otherwise the section gets its own scrollbar
     auto const& style = ImGui::GetStyle();
     auto timeAxisHeight = scale(TimeAxisExtraHeight) + style.CellPadding.y * 2.0f + style.ItemSpacing.y;
     auto scrollbarWidth = 0.0f;
@@ -979,7 +979,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
     std::vector<std::string> modeValues{"Real-time", "Last time steps", "Entire history"};
     AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values(modeValues), &_timelineMode);
 
-    //sliders keep their default width and only shrink when the window gets too narrow
+    // Sliders keep their default width and only shrink when the window gets too narrow
     auto numSliders = _timelineMode == TimelineMode_EntireHistory ? 1.0f : 2.0f;
     ImGui::SameLine(0, scale(20.0f));
     AlienGui::VerticalSeparator();
@@ -1020,7 +1020,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
 
 void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayData const*> const& plottedLineages)
 {
-    //labels and current values are placed to the right of the widgets, matching the general ALIEN layout
+    // Labels and current values are placed to the right of the widgets, matching the general ALIEN layout
     if (ImGui::BeginTable("##plots", 2, ImGuiTableFlags_None)) {
         ImGui::TableSetupColumn("##plot");
         ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth));
@@ -1076,7 +1076,7 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
             auto count = toInt(lineage->timePoints.size());
             auto const& series = lineage->series.at(metricIndex);
 
-            //rate series start with NaN samples until a sufficiently old rate reference exists; skip them
+            // Rate series start with NaN samples until a sufficiently old rate reference exists; skip them
             auto offset = 0;
             while (offset < count && std::isnan(series.at(offset))) {
                 ++offset;
@@ -1152,7 +1152,7 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
 {
     auto [minTime, maxTime] = computePlotTimeRange(plottedLineages);
 
-    //the label column mirrors the plot table above (widened by the scrollbar if present) so the axis stays aligned with the plots
+    // The label column mirrors the plot table above (widened by the scrollbar if present) so the axis stays aligned with the plots
     if (ImGui::BeginTable("##timeAxis", 2, ImGuiTableFlags_None)) {
         ImGui::TableSetupColumn("##axis");
         ImGui::TableSetupColumn("##label", ImGuiTableColumnFlags_WidthFixed, scale(PlotLabelColumnWidth) + rightMargin);
@@ -1167,7 +1167,7 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
         ImPlot::SetNextAxesLimits(minTime, maxTime, 0, 1.0, ImGuiCond_Always);
         if (ImPlot::BeginPlot("##timeAxis", ImVec2(-1, scale(TimeAxisExtraHeight)), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
             ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoHighlight);
-            //the real-time axis is in seconds; the step-based modes label their x-axis in thousands of time steps
+            // The real-time axis is in seconds; the step-based modes label their x-axis in thousands of time steps
             ImPlot::SetupAxisFormat(ImAxis_X1, _timelineMode == TimelineMode_RealTime ? formatRealTimeSeconds : formatTimestepsInThousands, nullptr);
             ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoHighlight);
             ImPlot::EndPlot();
@@ -1203,7 +1203,7 @@ void EvolutionDashboardWindow::drawValuesAtMouseCursor(
             break;
         }
     }
-    auto valueAtCursor = mousePos.y;  //may be NaN for rate series without a sufficiently old rate reference
+    auto valueAtCursor = mousePos.y;  // May be NaN for rate series without a sufficiently old rate reference
     mousePos.y = std::isnan(mousePos.y) ? 0.0 : std::max(0.0, std::min(upperBound, mousePos.y));
 
     ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
@@ -1244,5 +1244,5 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, LiveStatisticsService::MaxLiveHistory);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
     _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics + FirstMetricColumn - 1);
-    _colorFilter &= (1 << MAX_COLORS) - 1;  //an empty filter is allowed and simply shows no lineages
+    _colorFilter &= (1 << MAX_COLORS) - 1;  // An empty filter is allowed and simply shows no lineages
 }

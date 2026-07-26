@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 
         CLI::App app{"Command-line interface for ALIEN v" + Const::ProgramVersion};
 
-        //parse command line arguments
+        // Parse command line arguments
         std::string inputFilename;
         std::string outputFilename;
         std::string statisticsFilename;
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
             KernelProfiler::get().setEnabled(true);
         }
 
-        //read input
+        // Read input
         std::cout << "Reading input" << std::endl;
         if (inputFilename.empty()) {
             std::cout << "No input file given." << std::endl;
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        //run simulation
+        // Run simulation
         auto startTimepoint = std::chrono::steady_clock::now();
 
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
         }
 
 
-        //write output simulation file
+        // Write output simulation file
         std::cout << "Writing output" << std::endl;
         simData.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
         simData.mainData = simulationFacade->getSimulationData();

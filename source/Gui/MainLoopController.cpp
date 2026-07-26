@@ -282,7 +282,7 @@ void MainLoopController::processExiting()
 
 void MainLoopController::drawLoadingScreen()
 {
-    //background color
+    // Background color
     glClearColor(0, 0, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -585,7 +585,7 @@ void MainLoopController::processMenubar()
     AlienGui::EndMenu();
     AlienGui::EndMenuBar();
 
-    //further hotkeys
+    // Further hotkeys
     if (!io.WantCaptureKeyboard) {
         if (ImGui::IsKeyPressed(ImGuiKey_F7)) {
             if (WindowController::get().isDesktopMode()) {

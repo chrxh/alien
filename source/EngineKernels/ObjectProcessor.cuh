@@ -24,7 +24,7 @@ public:
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void calcFluidBoundaryForces(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
-    __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap
+    __inline__ __device__ static void applyForces(SimulationData& data);  // Prerequisite: data from calcCollisions_reconnectCells_correctOverlap
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool calcAngularForces);
     __inline__ __device__ static void checkConnections(SimulationData& data);
@@ -573,7 +573,7 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value
                 + object->tempValue1.as_float2 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
             data.objectMap.correctPosition(object->pos);
-            object->tempValue2.as_float2 = object->tempValue1.as_float2;  // save forces from first step for averaging
+            object->tempValue2.as_float2 = object->tempValue1.as_float2;  // Save forces from first step for averaging
             object->tempValue1.as_float2 = {0, 0};
         }
     }
@@ -695,7 +695,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
                 float2 particleVel = object->vel * cudaSimulationParameters.radiationVelocityMultiplier
                     + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                 float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
-                    - particleVel;  // minus particleVel because particle will still be moved in current time step
+                    - particleVel;  // Minus particleVel because particle will still be moved in current time step
                 data.objectMap.correctPosition(particlePos);
 
                 EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);

@@ -49,13 +49,13 @@ void PatternEditorWindow::processIntern()
         _angularVel = 0;
     }
 
-    //load button
+    // Load button
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
         onOpenPattern();
     }
     AlienGui::Tooltip("Open pattern");
 
-    //save button
+    // Save button
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
@@ -67,7 +67,7 @@ void PatternEditorWindow::processIntern()
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
-    //copy button
+    // Copy button
     ImGui::SameLine();
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
@@ -76,7 +76,7 @@ void PatternEditorWindow::processIntern()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Copy pattern");
 
-    //paste button
+    // Paste button
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedSelection.has_value());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
@@ -85,7 +85,7 @@ void PatternEditorWindow::processIntern()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Paste pattern");
 
-    //delete button
+    // Delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
@@ -97,7 +97,7 @@ void PatternEditorWindow::processIntern()
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
-    //inspect objects button
+    // Inspect objects button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isObjectInspectionPossible());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MICROSCOPE))) {
@@ -106,7 +106,7 @@ void PatternEditorWindow::processIntern()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Inspect Objects");
 
-    //inspect genomes button
+    // Inspect genomes button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isGenomeInspectionPossible());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_DNA))) {
@@ -115,7 +115,7 @@ void PatternEditorWindow::processIntern()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Inspect genomes");
 
-    //inspect creatures button
+    // Inspect creatures button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isCreatureInspectionPossible());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PAW))) {

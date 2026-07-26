@@ -14,7 +14,7 @@ enum class ParserTask
 class JsonParser
 {
 public:
-    //returns true if defaultValue has been applied
+    // Returns true if defaultValue has been applied
     template <typename T>
     static bool encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task);
 

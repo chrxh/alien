@@ -111,6 +111,6 @@ void ImageToPatternDialog::show()
         DescEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(dataDesc));
-        //TODO: update pattern editor
+        // TODO: update pattern editor
     });
 }

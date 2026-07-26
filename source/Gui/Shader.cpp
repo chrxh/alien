@@ -77,25 +77,25 @@ _Shader::_Shader(
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
     std::ifstream gShaderFile;
-    // ensure ifstream objects can throw exceptions:
+    // Ensure ifstream objects can throw exceptions:
     vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try {
-        // open files
+        // Open files
         vShaderFile.open(vertexPath);
         fShaderFile.open(fragmentPath);
         std::stringstream vShaderStream, fShaderStream;
-        // read file's buffer contents into streams
+        // Read file's buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
         fShaderStream << fShaderFile.rdbuf();
-        // close file handlers
+        // Close file handlers
         vShaderFile.close();
         fShaderFile.close();
-        // convert stream into string
+        // Convert stream into string
         vertexCode = vShaderStream.str();
         fragmentCode = fShaderStream.str();
-        // if geometry shader path is present, also load a geometry shader
+        // If geometry shader path is present, also load a geometry shader
         if (!geometryPath.empty()) {
             gShaderFile.open(geometryPath);
             std::stringstream gShaderStream;

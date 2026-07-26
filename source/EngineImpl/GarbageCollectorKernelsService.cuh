@@ -27,6 +27,6 @@ public:
 private:
     GarbageCollectorKernelsService() = default;
 
-    //gpu memory
+    // GPU memory
     bool* _cudaBool = nullptr;
 };

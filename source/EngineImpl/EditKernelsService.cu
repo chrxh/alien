@@ -42,7 +42,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
 {
     bool reconnectionRequired = !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.angleDelta != 0);
 
-    //disconnect selection in case of reconnection
+    // Disconnect selection in case of reconnection
     if (reconnectionRequired) {
         int counter = 10;
         do {
@@ -54,7 +54,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
             KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
             KERNEL_CALL(cudaProcessAddConnectionChanges, data);
             cudaDeviceSynchronize();
-        } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
+        } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
     }
 
     if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velX != 0 || updateData.velY != 0) {
@@ -80,7 +80,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
         KERNEL_CALL(cudaUpdateAngleAndAngularVelForSelection, updateData, data, copyToHost(_cudaCenter));
     }
 
-    //connect selection in case of reconnection
+    // Connect selection in case of reconnection
     if (reconnectionRequired) {
         cudaDeviceSynchronize();
 
@@ -99,7 +99,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
             KERNEL_CALL(cudaCleanupMaps, data);
             cudaDeviceSynchronize();
 
-        } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat
+        } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
 
         SelectionKernelsService::get().updateSelection(gpuSettings, data);
     }
@@ -161,7 +161,7 @@ void EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationDa
         KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
         KERNEL_CALL(cudaProcessAddConnectionChanges, data);
         cudaDeviceSynchronize();
-    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
+    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
 
     cudaDeviceSynchronize();
 
@@ -180,7 +180,7 @@ void EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationDa
         KERNEL_CALL(cudaCleanupMaps, data);
         cudaDeviceSynchronize();
 
-    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat
+    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
 
     SelectionKernelsService::get().updateSelection(gpuSettings, data);
 }

@@ -18,13 +18,13 @@ struct Energy
     float2 vel;
     uint8_t color;
     float energy;
-    Object* lastAbsorbedObject;  //could be invalid
+    Object* lastAbsorbedObject;  // Could be invalid
 
     // Editing data
-    uint8_t selected;  //0 = no, 1 = selected
+    uint8_t selected;  // 0 = no, 1 = selected
 
     // Auxiliary data
-    int locked;  //0 = unlocked, 1 = locked
+    int locked;  // 0 = unlocked, 1 = locked
 
     __device__ __inline__ bool tryLock()
     {
@@ -107,14 +107,14 @@ struct DetectSolid
 struct DetectFreeCell
 {
     float minDensity;
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct DetectCreature
 {
     uint32_t minNumCells;       // 0 = no restriction
     uint32_t maxNumCells;       // 0 = no restriction
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -178,7 +178,7 @@ struct Generator
 
 struct AttackFreeCell
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct AttackCreature
@@ -296,14 +296,14 @@ struct ReconnectSolid
 
 struct ReconnectFreeCell
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct ReconnectCreature
 {
     uint32_t minNumCells;       // 0 = no restriction
     uint32_t maxNumCells;       // 0 = no restriction
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -387,7 +387,7 @@ struct Sender
 
 struct Receiver
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -699,8 +699,8 @@ struct __align__(8) LightObject
     float density;
     ObjectType type;
 
-    Object* self;         // self before nextObjectIndex keeps the pointer 8-aligned (40 bytes)
-    int nextObjectIndex;  // next object in the same cell, -1 = end of chain
+    Object* self;         // Self before nextObjectIndex keeps the pointer 8-aligned (40 bytes)
+    int nextObjectIndex;  // Next object in the same cell, -1 = end of chain
     uint8_t numConnections;
     uint8_t flags;  // bit0 = isStatic, bit1 = detached, bit2 = sticky
 

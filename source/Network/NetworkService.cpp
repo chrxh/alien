@@ -580,7 +580,7 @@ void NetworkService::incDownloadCounter(std::string const& simId)
         params.emplace("id", simId);
         executeRequest([&] { return client.Get("/incdownloadcount", params, {}); });
     } catch (...) {
-        //do nothing
+        // Do nothing
     }
 }
 
