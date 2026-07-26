@@ -30,8 +30,8 @@
 
 namespace
 {
-    auto constexpr LiveStatisticsDeltaTime = 50;     //in millisec
-    auto constexpr RateAveragingTimesteps = 1000.0;  //rate reference sample: the most recent sample at least this many time steps older
+    auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
+    auto constexpr RateAveragingTimesteps = LiveStatisticsService::RateAveragingTimesteps;
 
     auto constexpr ColorChipSize = 22.0f;
     auto constexpr SwatchSize = 11.0f;
