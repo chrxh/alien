@@ -164,12 +164,20 @@ namespace
         return x - startX;
     }
 
+    //the accumulated statistics restart at zero when a saved simulation is loaded, which makes the rate incomputable
+    //for the samples whose reference still lies before the loading; NaN lets the callers hold the last known rate
     double calcRate(double accumValue, double lastAccumValue, double delta)
     {
-        if (delta <= 0) {
-            return 0.0;
+        if (delta <= 0 || accumValue < lastAccumValue) {
+            return std::numeric_limits<double>::quiet_NaN();
         }
-        return std::max(0.0, (accumValue - lastAccumValue) / delta);  //negative deltas occur after accumulated statistics have been reset
+        return (accumValue - lastAccumValue) / delta;
+    }
+
+    //holds the last known value as long as the metric is not computable; a leading gap remains unset
+    void appendMetricValue(std::vector<double>& series, double value)
+    {
+        series.emplace_back(std::isnan(value) && !series.empty() ? series.back() : value);
     }
 
     std::unordered_map<uint32_t, ColorOverallDataPoint> const& overallDataOf(DataPointCollection const& sample)
@@ -306,7 +314,7 @@ namespace
                 target.systemClockPoints.emplace_back(sample.systemClock);
             }
             for (int i = 0; i < EvolutionDashboardWindow::NumMetrics; ++i) {
-                target.series.at(i).emplace_back(evaluateMetric(sample, reference, i));
+                appendMetricValue(target.series.at(i), evaluateMetric(sample, reference, i));
             }
         }
     }
@@ -572,7 +580,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
                 auto const* lastEntry = referenceIsOldEnough ? rateReferences.at(rateReferenceIndex).entry : nullptr;
                 auto deltaKSteps = referenceIsOldEnough ? (sample.timestep - rateReferences.at(rateReferenceIndex).timestep) / 1000.0 : 0.0;
                 for (int i = 0; i < NumMetrics; ++i) {
-                    lineage.series.at(i).emplace_back(getAggregatableMetricValue(*entry, lastEntry, deltaKSteps, i));
+                    appendMetricValue(lineage.series.at(i), getAggregatableMetricValue(*entry, lastEntry, deltaKSteps, i));
                 }
             }
             rateReferences.push_back({sample.timestep, entry});
