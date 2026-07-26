@@ -312,7 +312,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc().separation(false)).neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)));
 
     std::set<CellType> addedTypes;
-    addedTypes.insert(CellType_Base);  // first node is Base
+    addedTypes.insert(CellType_Base);  // First node is Base
     for (auto const& param : allParams) {
         if (addedTypes.find(param.cellTypeGenome) == addedTypes.end()) {
             addedTypes.insert(param.cellTypeGenome);

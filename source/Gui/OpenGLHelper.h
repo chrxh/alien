@@ -7,6 +7,6 @@
 class OpenGLHelper
 {
 public:
-    //returns id
+    // Returns id
     static TextureData loadTexture(std::filesystem::path const& filename);
 };

@@ -47,7 +47,7 @@
 
 namespace
 {
-    auto constexpr RefreshInterval = 20;  //in minutes
+    auto constexpr RefreshInterval = 20;  // In minutes
 
     auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomSpace = 41.0f;
@@ -169,7 +169,7 @@ void BrowserWindow::refreshIntern(bool withRetry)
                 auto userName = NetworkService::get().getLoggedInUserName().value_or("");
                 for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType) {
-                        //public user items should also be visible in private workspace
+                        // Public user items should also be visible in private workspace
                         if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName
                              && (rawTO->workspaceType == WorkspaceType_Private || rawTO->workspaceType == WorkspaceType_Public))
                             || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
@@ -228,7 +228,7 @@ void BrowserWindow::processToolbar()
     std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
     auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
 
-    //refresh button
+    // Refresh button
     ImGui::BeginDisabled(_refreshProcessor->pendingTasks());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SYNC))) {
         onRefresh();
@@ -236,7 +236,7 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Refresh");
 
-    //login button
+    // Login button
     ImGui::SameLine();
     ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SIGN_IN_ALT))) {
@@ -245,7 +245,7 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Login or register");
 
-    //logout button
+    // Logout button
     ImGui::SameLine();
     ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SIGN_OUT_ALT))) {
@@ -255,11 +255,11 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Logout");
 
-    //separator
+    // Separator
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
-    //upload button
+    // Upload button
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
         std::string prefix = [&] {
@@ -276,7 +276,7 @@ void BrowserWindow::processToolbar()
           "in your private workspace.\nIf you have already selected a folder, your "
         + resourceTypeString + " will be uploaded there.");
 
-    //edit button
+    // Edit button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EDIT))) {
@@ -285,7 +285,7 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Change name or description");
 
-    //replace button
+    // Replace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXCHANGE_ALT))) {
@@ -295,7 +295,7 @@ void BrowserWindow::processToolbar()
     AlienGui::Tooltip(
         "Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
 
-    //move to other workspace button
+    // Move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SHARE_ALT))) {
@@ -304,7 +304,7 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
 
-    //delete button
+    // Delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
@@ -313,18 +313,18 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Delete selected " + resourceTypeString);
 
-    //separator
+    // Separator
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
-    //expand button
+    // Expand button
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
         onExpandFolders();
     }
     AlienGui::Tooltip("Expand all folders");
 
-    //collapse button
+    // Collapse button
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
         onCollapseFolders();
@@ -332,11 +332,11 @@ void BrowserWindow::processToolbar()
     AlienGui::Tooltip("Collapse all folders");
 
 #ifdef _WIN32
-    //separator
+    // Separator
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
-    //Discord button
+    // Discord button
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMMENTS))) {
         openWeblink(Const::DiscordURL);
@@ -390,7 +390,7 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
         ImGui::TableSetColumnIndex(0);
         auto userName = NetworkService::get().getLoggedInUserName();
         auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
-        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
+        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  // Change the order for display
         if (AlienGui::Switcher(
                 AlienGui::SwitcherParameters()
                     .textWidth(48.0f)
@@ -595,7 +595,7 @@ void BrowserWindow::processSimulationList()
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
-        //create treeTOs if sorting changed
+        // Create treeTOs if sorting changed
         if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty) {
                 for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -610,7 +610,7 @@ void BrowserWindow::processSimulationList()
             }
         }
 
-        //process treeTOs
+        // Process treeTOs
         auto& workspace = _workspaces.at(_currentWorkspace);
         auto scheduleRecreateTreeTOs = false;
 
@@ -701,7 +701,7 @@ void BrowserWindow::processGenomeList()
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
-        //create treeTOs if sorting changed
+        // Create treeTOs if sorting changed
         if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty) {
                 for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -716,7 +716,7 @@ void BrowserWindow::processGenomeList()
             }
         }
 
-        //process treeTOs
+        // Process treeTOs
         auto& workspace = _workspaces.at(_currentWorkspace);
         auto scheduleRecreateTreeTOs = false;
         ImGuiListClipper clipper;
@@ -849,7 +849,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
             _emojiPopupTO = treeTO;
         }
 
-        //calc remap which allows to show most frequent like type first
+        // Calc remap which allows to show most frequent like type first
         std::map<int, int> remap;
         std::set<int> processedEmojiTypes;
 
@@ -868,7 +868,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
             ++index;
         }
 
-        //show like types with count
+        // Show like types with count
         int counter = 0;
         std::optional<int> toggleEmojiType;
         for (auto const& emojiType : remap | std::views::values) {
@@ -904,7 +904,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
                 AlienGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }, false);
             }
 
-            //separator except for last element
+            // Separator except for last element
             if (++counter < leaf.rawTO->numLikesByEmojiType.size()) {
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
             }
@@ -1240,14 +1240,14 @@ void BrowserWindow::processPendingRequestIds()
 
 void BrowserWindow::createTreeTOs(Workspace& workspace)
 {
-    //sorting
+    // Sorting
     if (workspace.rawTOs.size() > 1) {
         std::sort(workspace.rawTOs.begin(), workspace.rawTOs.end(), [&](auto const& left, auto const& right) {
             return _NetworkResourceRawTO::compare(left, right, workspace.sortSpecs) < 0;
         });
     }
 
-    //filtering
+    // Filtering
     std::vector<NetworkResourceRawTO> filteredRawTOs;
     for (auto const& rawTO : workspace.rawTOs) {
         if (rawTO->matchWithFilter(_filter)) {
@@ -1255,7 +1255,7 @@ void BrowserWindow::createTreeTOs(Workspace& workspace)
         }
     }
 
-    //create treeTOs
+    // Create treeTOs
     workspace.treeTOs = NetworkResourceService::get().createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
     _selectedTreeTO = nullptr;
 }
@@ -1332,7 +1332,7 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
         createTreeTOs(_workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType}));
     }
 
-    //apply changes to server
+    // Apply changes to server
     MoveNetworkResourceRequestData requestData;
     for (auto const& rawTO : rawTOs) {
         requestData.entries.emplace_back(rawTO->id, rawTO->workspaceType);
@@ -1347,7 +1347,7 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
     GenericMessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
-        //remove resources form workspace
+        // Remove resources form workspace
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
             auto& workspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType});
             for (auto const& rawTO : rawTOs) {
@@ -1359,7 +1359,7 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
             createTreeTOs(workspace);
         }
 
-        //apply changes to server
+        // Apply changes to server
         DeleteNetworkResourceRequestData requestData;
         for (auto const& rawTO : rawTOs) {
             requestData.entries.emplace_back(rawTO->id);
@@ -1374,7 +1374,7 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
     auto& leaf = to->getLeaf();
     if (NetworkService::get().getLoggedInUserName()) {
 
-        //remove existing like
+        // Remove existing like
         auto findResult = _ownEmojiTypeBySimId.find(leaf.rawTO->id);
         auto onlyRemoveLike = false;
         if (findResult != _ownEmojiTypeBySimId.end()) {
@@ -1383,11 +1383,11 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
                 leaf.rawTO->numLikesByEmojiType.erase(origEmojiType);
             }
             _ownEmojiTypeBySimId.erase(findResult);
-            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, origEmojiType));  //invalidate cache entry
-            onlyRemoveLike = origEmojiType == emojiType;                                             //remove like if same like icon has been clicked
+            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, origEmojiType));  // Invalidate cache entry
+            onlyRemoveLike = origEmojiType == emojiType;                                             // Remove like if same like icon has been clicked
         }
 
-        //create new like
+        // Create new like
         if (!onlyRemoveLike) {
             _ownEmojiTypeBySimId[leaf.rawTO->id] = emojiType;
             if (leaf.rawTO->numLikesByEmojiType.contains(emojiType)) {
@@ -1397,7 +1397,7 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
             }
         }
 
-        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
+        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  // Invalidate cache entry
 
         _reactionProcessor->executeTask(
             [&](auto const& senderId) {

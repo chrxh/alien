@@ -31,17 +31,17 @@ auto SavepointTableService::loadFromFile(std::string const& filename) -> std::va
     try {
         auto directory = std::filesystem::path(filename).parent_path();
 
-        // directory does not exist
+        // Directory does not exist
         if (!std::filesystem::exists(directory)) {
             return Error{};
         }
 
-        // no write access
+        // No write access
         if (!hasWriteAccess(directory)) {
             return Error{};
         }
 
-        // savepoint file does not exist
+        // Savepoint file does not exist
         if (!std::filesystem::exists(filename)) {
             return SavepointTable(filename, {});
         }
@@ -111,7 +111,7 @@ void SavepointTableService::deleteEntry(SavepointTable& table, SavepointEntry co
 
 std::filesystem::path SavepointTableService::calcAbsolutePath(SavepointTable const& table, SavepointEntry const& entry) const
 {
-    //compatibility with v4.11
+    // Compatibility with v4.11
     if (entry->filename.is_absolute()) {
         return entry->filename;
     }

@@ -233,7 +233,7 @@ namespace
                             nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
                                 node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
                         }
-                        int targetSize;  // not used
+                        int targetSize;  // Not used
                         copyDataToHeap<int>(
                             sizeof(SignalEntryGenome) * node.cellTypeData.memory.numSignalEntries,
                             reinterpret_cast<uint8_t*>(node.cellTypeData.memory.signalEntries),
@@ -533,7 +533,7 @@ namespace
                 } else if (cell.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                     cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = cell.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
                 }
-                int targetSize;  // not used
+                int targetSize;  // Not used
                 copyDataToHeap<int>(
                     sizeof(SignalEntry) * cell.cellTypeData.memory.numSignalEntries,
                     reinterpret_cast<uint8_t*>(cell.cellTypeData.memory.signalEntries),
@@ -916,7 +916,7 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
     }
 }
 
-// tags cell with objectTO index and tags objectTO connections with cell index
+// Tags cell with objectTO index and tags objectTO connections with cell index
 __global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;

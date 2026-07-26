@@ -32,8 +32,8 @@ DataPointCollection StatisticsConverterService::convert(
         point.totalMutations = entry.totalMutations;
         result.lineages[entry.lineageId] = point;
 
-        //aggregate the lineage into the overall bucket of its colorBitset; the object counts are not per-color
-        //(they also cover non-creature objects) and are read live from the engine instead
+        // Aggregate the lineage into the overall bucket of its colorBitset; the object counts are not per-color
+        // (they also cover non-creature objects) and are read live from the engine instead
         auto& colorPoint = result.overall[entry.colorBitset];
         colorPoint.numCreatures += point.numCreatures;
         colorPoint.numGenomes += point.numGenomes;

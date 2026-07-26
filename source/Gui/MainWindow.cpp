@@ -232,7 +232,7 @@ void _MainWindow::initGlfwAndOpenGL()
     //glfwSwapInterval(1);  //enable vsync
     ImGui::CreateContext();
     ImPlot::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
+    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  // Setup Platform/Renderer back-ends
     ImGui_ImplOpenGL3_Init(glslVersion);
 }
 

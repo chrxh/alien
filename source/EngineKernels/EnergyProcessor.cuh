@@ -230,7 +230,7 @@ __inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object
     auto const radiationEnergy = min(cellEnergy, energy);
     auto origEnergy = atomicAdd(&cell->typeData.cell.usableEnergy, -radiationEnergy);
     if (origEnergy < 1.0f) {
-        atomicAdd(&cell->typeData.cell.usableEnergy, radiationEnergy);  //revert
+        atomicAdd(&cell->typeData.cell.usableEnergy, radiationEnergy);  // Revert
         return;
     }
 

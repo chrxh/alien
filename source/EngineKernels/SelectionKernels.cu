@@ -126,7 +126,7 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
         if (0 != object->selected) {
             auto currentObject = object;
 
-            //heuristics to cover connected cells
+            // Heuristics to cover connected cells
             for (int i = 0; i < 30; ++i) {
                 bool found = false;
                 for (int j = 0; j < currentObject->numConnections; ++j) {

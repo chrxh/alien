@@ -283,12 +283,12 @@ void EditorController::onDelete()
 
 void EditorController::processInspectorWindows()
 {
-    //process inspector windows
+    // Process inspector windows
     for (auto const& inspectorWindow : _inspectorWindows) {
         inspectorWindow->process();
     }
 
-    //inspector windows closed?
+    // Inspector windows closed?
     std::vector<InspectionWindow> inspectorWindows;
     std::vector<ExtendedObjectOrEnergyDesc> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {

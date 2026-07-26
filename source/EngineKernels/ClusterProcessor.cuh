@@ -51,7 +51,7 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
             continue;
         }
 
-        //heuristics to cover connected cells
+        // Heuristics to cover connected cells
         for (int i = 0; i < 30; ++i) {
             bool found = false;
             for (int j = 0; j < currentObject->numConnections; ++j) {
@@ -108,7 +108,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
         atomicAdd(&cluster->typeData.solid.clusterVel.x, object->vel.x);
         atomicAdd(&cluster->typeData.solid.clusterVel.y, object->vel.y);
 
-        //topology correction
+        // Topology correction
         auto cellPos = object->pos;
         if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
@@ -138,7 +138,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
         auto clusterVel = cluster->typeData.solid.clusterVel / cluster->typeData.solid.numCellsInCluster;
         auto clusterPos = cluster->typeData.solid.clusterPos / cluster->typeData.solid.numCellsInCluster;
 
-        //topology correction
+        // Topology correction
         auto cellPos = object->pos;
         if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;

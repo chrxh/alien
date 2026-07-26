@@ -43,14 +43,14 @@ struct DetectSolidGenome
 struct DetectFreeCellGenome
 {
     float minDensity;
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct DetectCreatureGenome
 {
     uint32_t minNumCells;       // 0 = no restriction
     uint32_t maxNumCells;       // 0 = no restriction
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -114,7 +114,7 @@ struct GeneratorGenome
 
 struct AttackFreeCellGenome
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct AttackCreatureGenome
@@ -196,14 +196,14 @@ struct ReconnectSolidGenome
 
 struct ReconnectFreeCellGenome
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct ReconnectCreatureGenome
 {
     uint32_t minNumCells;       // 0 = no restriction
     uint32_t maxNumCells;       // 0 = no restriction
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -282,7 +282,7 @@ struct SenderGenome
 
 struct ReceiverGenome
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
+    uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 

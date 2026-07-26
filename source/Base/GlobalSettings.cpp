@@ -199,7 +199,7 @@ namespace
                 stream.close();
             }
         } catch (...) {
-            //do nothing
+            // Do nothing
         }
     }
 }
@@ -343,7 +343,7 @@ namespace
 
 void GlobalSettings::loadImGuiSettings(std::string const& defaultSettings)
 {
-    ImGui::GetIO().IniFilename = nullptr;  //no imgui.ini file; the state is persisted here instead
+    ImGui::GetIO().IniFilename = nullptr;  // No imgui.ini file; the state is persisted here instead
     auto settings = getValue(ImGuiSettingsKey, defaultSettings);
     if (!settings.empty()) {
         ImGui::LoadIniSettingsFromMemory(settings.c_str(), settings.size());
@@ -355,7 +355,7 @@ void GlobalSettings::saveImGuiSettingsIfDirty()
     auto& io = ImGui::GetIO();
     if (io.WantSaveIniSettings) {
         saveImGuiSettings();
-        io.WantSaveIniSettings = false;  //IniFilename is null, so we must clear the flag ourselves
+        io.WantSaveIniSettings = false;  // IniFilename is null, so we must clear the flag ourselves
     }
 }
 
@@ -383,7 +383,7 @@ GlobalSettings::GlobalSettings()
         ss << data;
         boost::property_tree::read_json(ss, _impl->_tree);
     } catch (...) {
-        //do nothing
+        // Do nothing
     }
 #endif
 }

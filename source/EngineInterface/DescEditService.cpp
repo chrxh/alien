@@ -44,7 +44,7 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
 
-            //create cell: upper layer
+            // Create cell: upper layer
             result._objects.emplace_back(ObjectDesc()
                                              .stiffness(parameters._stiffness)
                                              .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
@@ -53,7 +53,7 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
                                              .sticky(parameters._sticky)
                                              .type(parameters._objectType));
 
-            //create cell: under layer (except for 0-layer)
+            // Create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result._objects.emplace_back(ObjectDesc()
                                                  .stiffness(parameters._stiffness)
@@ -292,7 +292,7 @@ Desc DescEditService::randomMultiply(
                  toFloat(numberGen.getRandomDouble(parameters._minVelY, parameters._maxVelY))},
                 toFloat(numberGen.getRandomDouble(parameters._minAngularVel, parameters._maxAngularVel)));
 
-            //overlapping check
+            // Overlapping check
             overlapping = false;
             if (parameters._overlappingCheck) {
                 for (auto const& object : copy._objects) {

@@ -9,7 +9,7 @@
 
 namespace Const
 {
-    uint32_t constexpr CustomizationColor1 = 0x2020FF;  //for device code
+    uint32_t constexpr CustomizationColor1 = 0x2020FF;  // For device code
     uint32_t constexpr CustomizationColor2 = 0xB520FF;
     uint32_t constexpr CustomizationColor3 = 0xFF20B5;
     uint32_t constexpr CustomizationColor4 = 0xFF2020;
@@ -20,7 +20,7 @@ namespace Const
     uint32_t constexpr CustomizationColor9 = 0x20FFB5;
     uint32_t constexpr CustomizationColor10 = 0xFFFFFF;
 
-    uint32_t constexpr DefaultCustomizationColors[MAX_COLORS] = {  //array for convenience
+    uint32_t constexpr DefaultCustomizationColors[MAX_COLORS] = {  // Array for convenience
         CustomizationColor1,
         CustomizationColor2,
         CustomizationColor3,

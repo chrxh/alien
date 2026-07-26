@@ -508,8 +508,8 @@ __inline__ __device__ uint16_t SensorProcessor::convertAngleToUint16(float angle
 
 __inline__ __device__ float SensorProcessor::convertUint16ToAngle(uint16_t b)
 {
-    //0 to 32767 => 0 to 179 degree
-    //32768 to 65535 => -179 to 0 degree
+    // 0 to 32767 => 0 to 179 degree
+    // 32768 to 65535 => -179 to 0 degree
     if (b < 32768) {
         return (0.5f + static_cast<float>(b)) * (180.0f / 32768.0f);
     } else {
