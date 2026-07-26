@@ -56,6 +56,7 @@ using cudaError_t = hipError_t;
 #define cudaFree                          hipFree
 #define cudaMemcpy                        hipMemcpy
 #define cudaMemset                        hipMemset
+#define cudaMemset2D                      hipMemset2D
 #define cudaMemcpyToSymbol                hipMemcpyToSymbol
 #define cudaMemcpyHostToDevice            hipMemcpyHostToDevice
 #define cudaMemcpyDeviceToHost            hipMemcpyDeviceToHost
