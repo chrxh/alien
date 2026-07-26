@@ -71,6 +71,14 @@ protected:
         return result;
     }
 
+    LineageSample createLineageSample(double base, double numCreatures)
+    {
+        auto result = createLineageSample(base);
+        result.data.numCreatures = numCreatures;
+        return result;
+    }
+
+
     void compare(ColorSamples const& expected, ColorSamples const& actual)
     {
         EXPECT_EQ(expected.timestep, actual.timestep);
@@ -148,6 +156,34 @@ TEST_F(SerializerServiceTests, statisticsHistory)
     ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
 
     compare(before.statistics, after.statistics);
+}
+
+TEST_F(SerializerServiceTests, statisticsHistoryWithManyLineages)
+{
+    auto constexpr NumLineages = 260;
+    auto constexpr MaxSavedLineages = 250;
+
+    DeserializedSimulation before;
+    for (uint32_t lineageId = 1; lineageId <= NumLineages; ++lineageId) {
+        // The higher the lineage id, the more creatures; the history samples suggest the opposite order
+        for (uint32_t i = 0; i < lineageId; ++i) {
+            before.mainData._creatures.emplace_back(CreatureDesc().lineageId(toInt(lineageId)));
+        }
+        before.statistics.lineages.emplace(lineageId, std::vector{createLineageSample(1000, toDouble(NumLineages - lineageId))});
+    }
+
+    SerializedSimulation serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+
+    DeserializedSimulation after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+
+    // Only the lineages with the most creatures are saved
+    StatisticsHistoryData expected;
+    for (uint32_t lineageId = NumLineages - MaxSavedLineages + 1; lineageId <= NumLineages; ++lineageId) {
+        expected.lineages.emplace(lineageId, before.statistics.lineages.at(lineageId));
+    }
+    compare(expected, after.statistics);
 }
 
 TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
