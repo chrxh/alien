@@ -233,7 +233,7 @@ void _NodeEditorWidget::processNodeAttributes()
             //}
 
             AlienGui::ComboColor(
-                AlienGui::ComboColorParameters().customizationColors(customizationColors).name("Color").textWidth(rightColumnWidth), node._color);
+                AlienGui::ComboColorParameters().customizationColors(customizationColors).name("Customization").textWidth(rightColumnWidth), node._color);
 
             // Type
             auto nodeType = cellTypeNode.getCellType();
