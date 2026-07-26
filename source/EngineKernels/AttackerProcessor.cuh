@@ -184,14 +184,14 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         return;
                     }
 
+                    // Calculate energy gain
+                    auto energyToTransfer = calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
+
                     // Check if target creature is in the list of sensor-detected targets (including color restriction)
                     auto otherCreatureId = otherCell->creature->id;
                     if (!isContainedInSensorMatches(sensorTargetCreatureIds, sensorRestrictToColors, numSensorTargets, otherCreatureId, otherObject->color)) {
                         return;
                     }
-
-                    // Calculate energy gain
-                    auto energyToTransfer = calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
 
                     auto color = calcMod(object->color, MAX_COLORS);
                     auto otherColor = calcMod(otherObject->color, MAX_COLORS);
