@@ -505,7 +505,9 @@ namespace
         genome._mutationRates._geometryMutations[0] = GeometryMutationDesc();
         genome._mutationRates._geometryMutations[1] = GeometryMutationDesc();
         for (auto& gene : genome._genes) {
-            gene._homogeneousCellType = false;
+            if (!detailSimulation) {
+                gene._homogeneousCellType = false;
+            }
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
                 if (!detailSimulation) {

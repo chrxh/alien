@@ -337,6 +337,35 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     EXPECT_EQ(NeuralNetGenomeDesc(), gene0._nodes.front()._neuralNetwork);
 }
 
+class GenomeDescEditServiceTests_DetailSimulation
+    : public GenomeDescEditServiceTests
+    , public testing::WithParamInterface<bool>
+{};
+
+INSTANTIATE_TEST_SUITE_P(GenomeDescEditServiceTests_DetailSimulation, GenomeDescEditServiceTests_DetailSimulation, ::testing::Bool());
+
+TEST_P(GenomeDescEditServiceTests_DetailSimulation, createSubGenomesForPreview_homogeneousCellType)
+{
+    auto detailSimulation = GetParam();
+    auto genome = GenomeDesc().genes({
+        GeneDesc().homogeneousCellType(true).nodes({
+            NodeDesc().cellType(AttackerGenomeDesc()),
+            NodeDesc().cellType(VoidGenomeDesc()),
+            NodeDesc().cellType(SensorGenomeDesc()),
+        }),
+    });
+
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, detailSimulation);
+
+    ASSERT_EQ(1, subGenomes.size());
+    auto const& gene0 = subGenomes.at(0).genome._genes.at(0);
+    EXPECT_EQ(detailSimulation, gene0._homogeneousCellType);
+    ASSERT_EQ(3, gene0._nodes.size());
+    EXPECT_EQ(detailSimulation ? CellType_Attacker : CellType_Base, gene0._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Void, gene0._nodes.at(1).getCellType());
+    EXPECT_EQ(detailSimulation ? CellType_Sensor : CellType_Base, gene0._nodes.at(2).getCellType());
+}
+
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_complexCycles)
 {
     auto genome = createGenome_complexCycles();
