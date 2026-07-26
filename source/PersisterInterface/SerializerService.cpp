@@ -1920,7 +1920,7 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
             if (!stream) {
                 return false;
             }
-            serializeStatistics(data.statistics, stream);
+            serializeStatistics(data.statistics, data.mainData, stream);
         }
         return true;
     } catch (...) {
@@ -2007,7 +2007,7 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
         }
         {
             std::stringstream stream;
-            serializeStatistics(input.statistics, stream);
+            serializeStatistics(input.statistics, input.mainData, stream);
             output.statistics = stream.str();
         }
         return true;
@@ -2164,7 +2164,7 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
         if (!stream) {
             return false;
         }
-        serializeStatistics(statistics, stream);
+        serializeStatistics(statistics, Desc(), stream);
         stream.close();
         return true;
     } catch (...) {
@@ -2546,6 +2546,54 @@ namespace
         return result;
     }
 
+    auto constexpr MaxSavedLineages = size_t{250};
+
+    std::unordered_map<uint32_t, double> countCreaturesByLineage(Desc const& mainData)
+    {
+        std::unordered_map<uint32_t, double> result;
+        for (auto const& creature : mainData._creatures) {
+            ++result[static_cast<uint32_t>(creature._lineageId)];
+        }
+        return result;
+    }
+
+    // Size of a lineage taken from the objects being saved. The last history sample is only a fallback for lineages
+    // that are missing there (e.g. when the statistics are saved on their own): it is averaged over a sampling
+    // interval and therefore deviates from the actual creature count.
+    double getNumCreatures(
+        uint32_t lineageId,
+        std::unordered_map<uint32_t, std::vector<LineageSample>> const& lineages,
+        std::unordered_map<uint32_t, double> const& numCreaturesByLineage)
+    {
+        if (auto it = numCreaturesByLineage.find(lineageId); it != numCreaturesByLineage.end()) {
+            return it->second;
+        }
+        auto const& samples = lineages.at(lineageId);
+        return samples.empty() ? 0.0 : samples.back().data.numCreatures;
+    }
+
+    std::vector<uint32_t> selectLineagesToSave(
+        std::unordered_map<uint32_t, std::vector<LineageSample>> const& lineages,
+        std::unordered_map<uint32_t, double> const& numCreaturesByLineage)
+    {
+        std::vector<uint32_t> result;
+        result.reserve(lineages.size());
+        for (auto const lineageId : std::views::keys(lineages)) {
+            result.emplace_back(lineageId);
+        }
+        if (result.size() > MaxSavedLineages) {
+            // The lineage id decides between equally large lineages to keep the output deterministic
+            auto isLarger = [&lineages, &numCreaturesByLineage](uint32_t left, uint32_t right) {
+                auto leftNumCreatures = getNumCreatures(left, lineages, numCreaturesByLineage);
+                auto rightNumCreatures = getNumCreatures(right, lineages, numCreaturesByLineage);
+                return leftNumCreatures != rightNumCreatures ? leftNumCreatures > rightNumCreatures : left < right;
+            };
+            std::ranges::partial_sort(result, result.begin() + MaxSavedLineages, isLarger);
+            result.resize(MaxSavedLineages);
+        }
+        return result;
+    }
+
     std::vector<LineageSample> convertToSamples(LineageTimeline const& timeline)
     {
         auto result = createSamplesWithTiming<LineageSample>(timeline);
@@ -2616,12 +2664,12 @@ namespace cereal
     SPLIT_SERIALIZATION(StatisticsTimelines)
 }
 
-void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
+void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, Desc const& mainData, std::ostream& stream) const
 {
     StatisticsTimelines timelines;
     timelines.overallTimeline = convertToTimeline(statistics.colors);
-    for (auto const& [lineageId, samples] : statistics.lineages) {
-        timelines.lineageTimelines.emplace(lineageId, convertToTimeline(samples));
+    for (auto const lineageId : selectLineagesToSave(statistics.lineages, countCreaturesByLineage(mainData))) {
+        timelines.lineageTimelines.emplace(lineageId, convertToTimeline(statistics.lineages.at(lineageId)));
     }
 
     zstd::ostream compressedStream(stream);

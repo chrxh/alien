@@ -50,7 +50,7 @@ private:
     void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream) const;
     void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream) const;
 
-    void serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const;
+    void serializeStatistics(StatisticsHistoryData const& statistics, Desc const& mainData, std::ostream& stream) const;
     void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const;
 
     bool wrapGenome(Desc& output, GenomeDesc const& input) const;
