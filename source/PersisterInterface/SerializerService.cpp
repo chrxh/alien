@@ -27,6 +27,7 @@
 
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/GenomeDesc.h>
+#include <EngineInterface/ParametersValidationService.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "SettingsParserService.h"
@@ -86,7 +87,8 @@ namespace cereal
         std::vector<std::vector<uint8_t>>,
         std::vector<std::vector<int8_t>>,
         std::vector<std::vector<int>>,
-        std::vector<std::vector<float>>>;
+        std::vector<std::vector<float>>,
+        IntVector2D>;
 
     using AttributeMap = std::unordered_map<int, VariantData>;
 
@@ -1887,6 +1889,15 @@ namespace cereal
     SPLIT_SERIALIZATION(Desc)
 }
 
+namespace
+{
+    std::filesystem::path getSettingsFilename(std::filesystem::path const& simulationFilename)
+    {
+        auto result = simulationFilename;
+        return result.replace_extension(std::filesystem::path(".settings.json"));
+    }
+}
+
 bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const
 {
     try {
@@ -1896,31 +1907,21 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
             std::filesystem::create_directories(filename.parent_path());
         }
 
-        std::filesystem::path settingsFilename(filename);
-        settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
-        std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
+        auto settingsFilename = getSettingsFilename(filename);
 
         {
             zstd::ofstream stream(filename.string(), std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
             if (!stream) {
                 return false;
             }
-            serializeDescription(data.mainData, stream);
+            serializeSimulation(data, stream);
         }
         {
             std::ofstream stream(settingsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
-            serializeSettings(data.auxiliaryData, stream);
-        }
-        {
-            std::ofstream stream(statisticsFilename.string(), std::ios::binary);
-            if (!stream) {
-                return false;
-            }
-            serializeStatistics(data.statistics, data.mainData, stream);
+            serializeSettings(data.auxiliaryData.simulationParameters, stream);
         }
         return true;
     } catch (...) {
@@ -1932,14 +1933,9 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
 {
     try {
         log(Priority::Important, "load simulation from " + filename.string());
-        std::filesystem::path settingsFilename(filename);
-        settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
-        std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
+        auto settingsFilename = getSettingsFilename(filename);
 
-        if (!deserializeDescription(data.mainData, filename)) {
-            return false;
-        }
+        // The settings are read first because older simulation files take their general settings from there
         {
             std::ifstream stream(settingsFilename.string(), std::ios::binary);
             if (!stream) {
@@ -1948,12 +1944,13 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
             deserializeSettings(data.auxiliaryData, stream);
         }
         {
-            std::ifstream stream(statisticsFilename.string(), std::ios::binary);
+            zstd::ifstream stream(filename.string(), std::ios::binary);
             if (!stream) {
-                return true;
+                return false;
             }
-            deserializeStatistics(data.statistics, stream);
+            deserializeSimulation(data, stream);
         }
+        ParametersValidationService::get().validateAndCorrect({data.auxiliaryData.worldSize}, data.auxiliaryData.simulationParameters);
         return true;
     } catch (...) {
         return false;
@@ -1964,23 +1961,18 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
 {
     try {
         log(Priority::Important, "delete simulation " + filename.string());
-        std::filesystem::path settingsFilename(filename);
-        settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
-        std::filesystem::path statisticsFilename(filename);
-        statisticsFilename.replace_extension(std::filesystem::path(".statistics.bin"));
-        std::filesystem::path legacyStatisticsFilename(filename);
-        legacyStatisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
-
         if (!std::filesystem::remove(filename)) {
             return false;
         }
-        if (!std::filesystem::remove(settingsFilename)) {
+        if (!std::filesystem::remove(getSettingsFilename(filename))) {
             return false;
         }
 
-        // Statistics files are optional
-        std::filesystem::remove(statisticsFilename);
-        std::filesystem::remove(legacyStatisticsFilename);
+        // Older versions wrote the statistics to a separate file
+        for (auto const& extension : {".statistics.bin", ".statistics.csv"}) {
+            auto legacyStatisticsFilename = filename;
+            std::filesystem::remove(legacyStatisticsFilename.replace_extension(std::filesystem::path(extension)));
+        }
         return true;
     } catch (...) {
         return false;
@@ -1996,20 +1988,18 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
             if (!stream) {
                 return false;
             }
-            serializeDescription(input.mainData, stream);
+            serializeSimulation(input, stream);
             stream.flush();
             output.mainData = stdStream.str();
         }
         {
             std::stringstream stream;
-            serializeSettings(input.auxiliaryData, stream);
+            serializeSettings(input.auxiliaryData.simulationParameters, stream);
             output.auxiliaryData = stream.str();
         }
-        {
-            std::stringstream stream;
-            serializeStatistics(input.statistics, input.mainData, stream);
-            output.statistics = stream.str();
-        }
+
+        // The statistics are part of the main data
+        output.statistics.clear();
         return true;
     } catch (...) {
         return false;
@@ -2019,22 +2009,20 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
 bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const
 {
     try {
+        // The settings are read first because older simulations take their general settings from there
+        {
+            std::stringstream stream(input.auxiliaryData);
+            deserializeSettings(output.auxiliaryData, stream);
+        }
         {
             std::stringstream stdStream(input.mainData);
             zstd::istream stream(stdStream);
             if (!stream) {
                 return false;
             }
-            deserializeDescription(output.mainData, stream);
+            deserializeSimulation(output, stream);
         }
-        {
-            std::stringstream stream(input.auxiliaryData);
-            deserializeSettings(output.auxiliaryData, stream);
-        }
-        {
-            std::stringstream stream(input.statistics);
-            deserializeStatistics(output.statistics, stream);
-        }
+        ParametersValidationService::get().validateAndCorrect({output.auxiliaryData.worldSize}, output.auxiliaryData.simulationParameters);
         return true;
     } catch (...) {
         return false;
@@ -2132,7 +2120,7 @@ bool SerializerService::serializeSimulationParametersToFile(std::filesystem::pat
         if (!stream) {
             return false;
         }
-        serializeSimulationParameters(parameters, stream);
+        serializeSettings(parameters, stream);
         stream.close();
         return true;
     } catch (...) {
@@ -2148,23 +2136,9 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
         if (!stream) {
             return false;
         }
-        deserializeSimulationParameters(parameters, stream);
-        stream.close();
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics) const
-{
-    try {
-        log(Priority::Important, "save statistics history to " + filename.string());
-        std::ofstream stream(filename, std::ios::binary);
-        if (!stream) {
-            return false;
-        }
-        serializeStatistics(statistics, Desc(), stream);
+        SettingsForSerialization settings;
+        deserializeSettings(settings, stream);
+        parameters = settings.simulationParameters;
         stream.close();
         return true;
     } catch (...) {
@@ -2231,28 +2205,17 @@ void SerializerService::deserializeDescription(Desc& description, std::istream& 
     archive(description);
 }
 
-void SerializerService::serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const
+void SerializerService::serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const
 {
-    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSettings(settings));
+    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSimulationParameters(parameters));
 }
 
 void SerializerService::deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    settings = SettingsParserService::get().decodeSettings(tree);
-}
-
-void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream) const
-{
-    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSimulationParameters(parameters));
-}
-
-void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream) const
-{
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(stream, tree);
-    parameters = SettingsParserService::get().decodeSimulationParameters(tree);
+    settings.simulationParameters = SettingsParserService::get().decodeSimulationParameters(tree);
+    SettingsParserService::get().decodeLegacyGeneralSettings(settings, tree);
 }
 
 /************************************************************************/
@@ -2676,45 +2639,95 @@ namespace cereal
     SPLIT_SERIALIZATION(StatisticsTimelines)
 }
 
-void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, Desc const& mainData, std::ostream& stream) const
+/************************************************************************/
+/* Simulation                                                           */
+/************************************************************************/
+namespace
 {
-    StatisticsTimelines timelines;
-    timelines.overallTimeline = convertToTimeline(statistics.colors);
-    for (auto const lineageId : selectLineagesToSave(statistics.lineages, countCreaturesByLineage(mainData))) {
-        timelines.lineageTimelines.emplace(lineageId, convertToTimeline(statistics.lineages.at(lineageId)));
+    auto constexpr Id_Simulation_Timestep = 100;
+    auto constexpr Id_Simulation_RealTime = 101;
+    auto constexpr Id_Simulation_Zoom = 102;
+    auto constexpr Id_Simulation_Center = 103;
+    auto constexpr Id_Simulation_WorldSize = 104;
+    auto constexpr Id_Simulation_Statistics = 105;
+
+    StatisticsTimelines convertToTimelines(StatisticsHistoryData const& statistics, Desc const& mainData)
+    {
+        StatisticsTimelines result;
+        result.overallTimeline = convertToTimeline(statistics.colors);
+        for (auto const lineageId : selectLineagesToSave(statistics.lineages, countCreaturesByLineage(mainData))) {
+            result.lineageTimelines.emplace(lineageId, convertToTimeline(statistics.lineages.at(lineageId)));
+        }
+        return result;
     }
 
-    zstd::ostream compressedStream(stream);
-    cereal::PortableBinaryOutputArchive archive(compressedStream);
-    archive(Const::ProgramVersion);
-    archive(timelines);
-    compressedStream.flush();
+    StatisticsHistoryData convertToStatisticsHistory(StatisticsTimelines const& timelines)
+    {
+        StatisticsHistoryData result;
+        result.colors = convertToSamples(timelines.overallTimeline);
+        for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
+            result.lineages.emplace(lineageId, convertToSamples(timeline));
+        }
+        return result;
+    }
 }
 
-void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const
+namespace cereal
 {
-    // The statistics history is auxiliary data: an unreadable or outdated file yields an empty history instead of failing the simulation load
-    statistics = StatisticsHistoryData();
-    try {
-        zstd::istream decompressedStream(stream);
-        cereal::PortableBinaryInputArchive archive(decompressedStream);
-
-        std::string version;
-        archive(version);
-        if (!VersionParserService::get().isVersionValid(version) || VersionParserService::get().isVersionOutdated(version)) {
-            return;
-        }
-
+    // The object ids match those of Desc so that simulation files written before the merge of the statistics can still be read
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DeserializedSimulation& data)
+    {
         StatisticsTimelines timelines;
-        archive(timelines);
-
-        statistics.colors = convertToSamples(timelines.overallTimeline);
-        for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
-            statistics.lineages.emplace(lineageId, convertToSamples(timeline));
+        if (task == SerializationTask::Save) {
+            timelines = convertToTimelines(data.statistics, data.mainData);
         }
-    } catch (...) {
-        statistics = StatisticsHistoryData();
+        {
+            auto& settings = data.auxiliaryData;
+            auto scope = getSerializationScope(task, ar);
+
+            // Values that are absent are kept: for older simulations they originate from the settings file
+            scope.addMember(Id_Simulation_Timestep, settings.timestep, settings.timestep);
+            auto realTimeInMs = static_cast<uint64_t>(settings.realTime.count());
+            scope.addMember(Id_Simulation_RealTime, realTimeInMs, realTimeInMs);
+            settings.realTime = std::chrono::milliseconds(realTimeInMs);
+            scope.addMember(Id_Simulation_Zoom, settings.zoom, settings.zoom);
+            scope.addMember(Id_Simulation_Center, settings.center, settings.center);
+            scope.addMember(Id_Simulation_WorldSize, settings.worldSize, settings.worldSize);
+
+            scope.addDesc(Id_Desc_Objects, data.mainData._objects);
+            scope.addDesc(Id_Desc_Energies, data.mainData._energies);
+            scope.addDesc(Id_Desc_Creatures, data.mainData._creatures);
+            scope.addDesc(Id_Desc_Genomes, data.mainData._genomes);
+            scope.addDesc(Id_Simulation_Statistics, timelines);
+        }
+        if (task == SerializationTask::Load) {
+            data.statistics = convertToStatisticsHistory(timelines);
+        }
     }
+    SPLIT_SERIALIZATION(DeserializedSimulation)
+}
+
+void SerializerService::serializeSimulation(DeserializedSimulation const& data, std::ostream& stream) const
+{
+    cereal::PortableBinaryOutputArchive archive(stream);
+    archive(Const::ProgramVersion);
+    archive(data);
+}
+
+void SerializerService::deserializeSimulation(DeserializedSimulation& data, std::istream& stream) const
+{
+    cereal::PortableBinaryInputArchive archive(stream);
+    std::string version;
+    archive(version);
+
+    if (!VersionParserService::get().isVersionValid(version)) {
+        throw std::runtime_error("No version detected.");
+    }
+    if (VersionParserService::get().isVersionOutdated(version)) {
+        throw std::runtime_error("Version not supported.");
+    }
+    archive(data);
 }
 
 bool SerializerService::wrapGenome(Desc& output, GenomeDesc const& input) const

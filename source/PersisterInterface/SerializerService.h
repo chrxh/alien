@@ -34,8 +34,6 @@ public:
     bool serializeSimulationParametersToFile(std::filesystem::path const& filename, SimulationParameters const& parameters) const;
     bool deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::filesystem::path const& filename) const;
 
-    bool serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics) const;
-
     bool serializeContentToFile(std::filesystem::path const& filename, Desc const& content) const;
     bool deserializeContentFromFile(Desc& content, std::filesystem::path const& filename) const;
 
@@ -44,14 +42,11 @@ private:
     bool deserializeDescription(Desc& description, std::filesystem::path const& filename) const;
     void deserializeDescription(Desc& description, std::istream& stream) const;
 
-    void serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const;
+    void serializeSimulation(DeserializedSimulation const& data, std::ostream& stream) const;
+    void deserializeSimulation(DeserializedSimulation& data, std::istream& stream) const;
+
+    void serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const;
     void deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const;
-
-    void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream) const;
-    void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream) const;
-
-    void serializeStatistics(StatisticsHistoryData const& statistics, Desc const& mainData, std::ostream& stream) const;
-    void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const;
 
     bool wrapGenome(Desc& output, GenomeDesc const& input) const;
     bool unwrapGenome(GenomeDesc& output, Desc& input) const;

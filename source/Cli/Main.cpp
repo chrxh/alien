@@ -33,10 +33,7 @@ int main(int argc, char** argv)
         bool profile = false;
         app.add_option(
             "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding *.settings.json should also be available.");
-        app.add_option(
-            "-o",
-            outputFilename,
-            "Specifies the name of the output file for the simulation. The *.settings.json and *.statistics.bin file will also be saved.");
+        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation. The *.settings.json file will also be saved.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
         app.add_flag(
             "-p,--profile",
