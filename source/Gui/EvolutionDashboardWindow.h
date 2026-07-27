@@ -23,7 +23,7 @@ class EvolutionDashboardWindow : public AlienWindow
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(EvolutionDashboardWindow);
 
 public:
-    static auto constexpr NumMetrics = 8;
+    static auto constexpr NumMetrics = 10;
 
 private:
     struct LineageDisplayData;

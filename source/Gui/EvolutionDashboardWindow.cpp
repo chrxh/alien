@@ -60,7 +60,7 @@ namespace
         float tableColumnWidth;
     };
 
-    // The last two metrics are rates per 1K time steps, both in the table and in the timeline plots
+    // The last four metrics are rates per 1K time steps, both in the table and in the timeline plots
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
         {"Creatures", "Creatures", 0, 0, 82.0f},
         {"Avg cells", "Avg cells", 1, 1, 82.0f},
@@ -70,6 +70,8 @@ namespace
         {"Avg generation", "Avg generation", 0, 0, 105.0f},
         {"Created /1K", "Created /1K", 2, 2, 105.0f},
         {"Mutations /1K", "Mutations /1K", 4, 4, 105.0f},
+        {"Attacks /1K", "Attacks /1K", 2, 2, 105.0f},
+        {"Muscles /1K", "Muscles /1K", 2, 2, 105.0f},
     };
 
     ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
@@ -215,6 +217,10 @@ namespace
             return lastEntry ? calcRate(entry.numCreatedCreatures, lastEntry->numCreatedCreatures, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         case 7:
             return lastEntry ? calcRate(entry.totalMutations, lastEntry->totalMutations, rateDelta) : std::numeric_limits<double>::quiet_NaN();
+        case 8:
+            return lastEntry ? calcRate(entry.totalAttackedEnergy, lastEntry->totalAttackedEnergy, rateDelta) : std::numeric_limits<double>::quiet_NaN();
+        case 9:
+            return lastEntry ? calcRate(entry.totalMuscleActivity, lastEntry->totalMuscleActivity, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         default:
             return 0.0;
         }

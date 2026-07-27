@@ -30,7 +30,7 @@ private:
 
     __inline__ __device__ static void getChain(Object** chain, int& chainLength, Object* startCell);
     __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Object* object);
-    __inline__ __device__ static void applyAcceleration(Object* object, float2 const& acceleration);
+    __inline__ __device__ static void applyAcceleration(SimulationStatistics& statistics, Object* object, float2 const& acceleration);
 
     struct BendingInfo
     {
@@ -236,7 +236,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         angleDelta *= powf(1.0f - forwardBackwardRatio, 4.0f);
     }
     auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 30.0f * TIMESTEPS_PER_CELL_FUNCTION;
-    applyAcceleration(object, acceleration);
+    applyAcceleration(statistics, object, acceleration);
 
     radiate(data, object, activation);
 }
@@ -327,7 +327,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         angleDelta *= powf(bending.forwardBackwardRatio, 4.0f);
     }
     auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 30.0f * TIMESTEPS_PER_CELL_FUNCTION;
-    applyAcceleration(object, acceleration);
+    applyAcceleration(statistics, object, acceleration);
 
     radiate(data, object, activation);
 }
@@ -451,7 +451,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 
     auto acceleration = direction * power * cudaSimulationParameters.muscleCrawlingAcceleration.value[object->color] / 7 * TIMESTEPS_PER_CELL_FUNCTION;
-    applyAcceleration(object, acceleration);
+    applyAcceleration(statistics, object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
     radiate(data, object, activation);
@@ -519,7 +519,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
 
     auto acceleration = direction * power * cudaSimulationParameters.muscleCrawlingAcceleration.value[object->color] / 7 * TIMESTEPS_PER_CELL_FUNCTION;
-    applyAcceleration(object, acceleration);
+    applyAcceleration(statistics, object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
     radiate(data, object, activation);
@@ -536,6 +536,10 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[object->color] * activation * 0.0001f * TIMESTEPS_PER_CELL_FUNCTION;
     object->vel += direction;
+    auto velocityChange = Math::length(direction);
+    if (velocityChange > NEAR_ZERO) {
+        statistics.addMuscleActivity(object->typeData.cell.creature->lineageId, velocityChange);
+    }
     object->typeData.cell.cellTypeData.muscle.lastMovementX = direction.x;
     object->typeData.cell.cellTypeData.muscle.lastMovementY = direction.y;
     radiate(data, object, activation);
@@ -615,7 +619,7 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
     return result;
 }
 
-__inline__ __device__ void MuscleProcessor::applyAcceleration(Object* object, float2 const& acceleration)
+__inline__ __device__ void MuscleProcessor::applyAcceleration(SimulationStatistics& statistics, Object* object, float2 const& acceleration)
 {
     Object* chain[MaxChainLength];
     int chainLength;
@@ -626,6 +630,10 @@ __inline__ __device__ void MuscleProcessor::applyAcceleration(Object* object, fl
     for (int i = 0; i < chainLength; ++i) {
         atomicAdd(&chain[i]->vel.x, accPerCell.x);
         atomicAdd(&chain[i]->vel.y, accPerCell.y);
+    }
+    auto sumVelocityChanges = Math::length(accPerCell) * toFloat(chainLength);
+    if (sumVelocityChanges > NEAR_ZERO) {
+        statistics.addMuscleActivity(object->typeData.cell.creature->lineageId, sumVelocityChanges);
     }
 }
 
