@@ -1935,20 +1935,19 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         log(Priority::Important, "load simulation from " + filename.string());
         auto settingsFilename = getSettingsFilename(filename);
 
-        // The settings are read first because older simulation files take their general settings from there
-        {
-            std::ifstream stream(settingsFilename.string(), std::ios::binary);
-            if (!stream) {
-                return false;
-            }
-            deserializeSettings(data.auxiliaryData, stream);
-        }
         {
             zstd::ifstream stream(filename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
             deserializeSimulation(data, stream);
+        }
+        {
+            std::ifstream stream(settingsFilename.string(), std::ios::binary);
+            if (!stream) {
+                return false;
+            }
+            deserializeSettings(data.auxiliaryData.simulationParameters, stream);
         }
         ParametersValidationService::get().validateAndCorrect({data.auxiliaryData.worldSize}, data.auxiliaryData.simulationParameters);
         return true;
@@ -1966,12 +1965,6 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
         }
         if (!std::filesystem::remove(getSettingsFilename(filename))) {
             return false;
-        }
-
-        // Older versions wrote the statistics to a separate file
-        for (auto const& extension : {".statistics.bin", ".statistics.csv"}) {
-            auto legacyStatisticsFilename = filename;
-            std::filesystem::remove(legacyStatisticsFilename.replace_extension(std::filesystem::path(extension)));
         }
         return true;
     } catch (...) {
@@ -2009,11 +2002,6 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
 bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const
 {
     try {
-        // The settings are read first because older simulations take their general settings from there
-        {
-            std::stringstream stream(input.auxiliaryData);
-            deserializeSettings(output.auxiliaryData, stream);
-        }
         {
             std::stringstream stdStream(input.mainData);
             zstd::istream stream(stdStream);
@@ -2021,6 +2009,10 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
                 return false;
             }
             deserializeSimulation(output, stream);
+        }
+        {
+            std::stringstream stream(input.auxiliaryData);
+            deserializeSettings(output.auxiliaryData.simulationParameters, stream);
         }
         ParametersValidationService::get().validateAndCorrect({output.auxiliaryData.worldSize}, output.auxiliaryData.simulationParameters);
         return true;
@@ -2136,9 +2128,7 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
         if (!stream) {
             return false;
         }
-        SettingsForSerialization settings;
-        deserializeSettings(settings, stream);
-        parameters = settings.simulationParameters;
+        deserializeSettings(parameters, stream);
         stream.close();
         return true;
     } catch (...) {
@@ -2210,12 +2200,11 @@ void SerializerService::serializeSettings(SimulationParameters const& parameters
     boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSimulationParameters(parameters));
 }
 
-void SerializerService::deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const
+void SerializerService::deserializeSettings(SimulationParameters& parameters, std::istream& stream) const
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    settings.simulationParameters = SettingsParserService::get().decodeSimulationParameters(tree);
-    SettingsParserService::get().decodeLegacyGeneralSettings(settings, tree);
+    parameters = SettingsParserService::get().decodeSimulationParameters(tree);
 }
 
 /************************************************************************/
@@ -2674,7 +2663,6 @@ namespace
 
 namespace cereal
 {
-    // The object ids match those of Desc so that simulation files written before the merge of the statistics can still be read
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DeserializedSimulation& data)
     {
@@ -2683,17 +2671,17 @@ namespace cereal
             timelines = convertToTimelines(data.statistics, data.mainData);
         }
         {
+            SettingsForSerialization defaultSettings;
             auto& settings = data.auxiliaryData;
             auto scope = getSerializationScope(task, ar);
 
-            // Values that are absent are kept: for older simulations they originate from the settings file
-            scope.addMember(Id_Simulation_Timestep, settings.timestep, settings.timestep);
+            scope.addMember(Id_Simulation_Timestep, settings.timestep, defaultSettings.timestep);
             auto realTimeInMs = static_cast<uint64_t>(settings.realTime.count());
-            scope.addMember(Id_Simulation_RealTime, realTimeInMs, realTimeInMs);
+            scope.addMember(Id_Simulation_RealTime, realTimeInMs, static_cast<uint64_t>(defaultSettings.realTime.count()));
             settings.realTime = std::chrono::milliseconds(realTimeInMs);
-            scope.addMember(Id_Simulation_Zoom, settings.zoom, settings.zoom);
-            scope.addMember(Id_Simulation_Center, settings.center, settings.center);
-            scope.addMember(Id_Simulation_WorldSize, settings.worldSize, settings.worldSize);
+            scope.addMember(Id_Simulation_Zoom, settings.zoom, defaultSettings.zoom);
+            scope.addMember(Id_Simulation_Center, settings.center, defaultSettings.center);
+            scope.addMember(Id_Simulation_WorldSize, settings.worldSize, defaultSettings.worldSize);
 
             scope.addDesc(Id_Desc_Objects, data.mainData._objects);
             scope.addDesc(Id_Desc_Energies, data.mainData._energies);
