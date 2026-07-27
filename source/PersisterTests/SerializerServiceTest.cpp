@@ -156,12 +156,6 @@ protected:
         return result.replace_extension(std::filesystem::path(".settings.json"));
     }
 
-    void writeFile(std::filesystem::path const& filename, std::string const& content)
-    {
-        std::ofstream stream(filename, std::ios::binary);
-        stream << content;
-    }
-
     std::string readFile(std::filesystem::path const& filename)
     {
         std::ifstream stream(filename, std::ios::binary);
@@ -221,42 +215,6 @@ TEST_F(SerializerServiceTests, settingsFileEqualsSimulationParametersFile)
     auto settings = readFile(getSettingsFilename(simulationFilename));
     EXPECT_EQ(readFile(parametersFilename), settings);
     EXPECT_NE(std::string::npos, settings.find(Const::ProgramVersion));
-}
-
-TEST_F(SerializerServiceTests, legacySimulationFiles)
-{
-    auto filename = _testDirectory / "simulation.sim";
-
-    Desc mainData;
-    mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
-    ASSERT_TRUE(_serializerService->serializeContentToFile(filename, mainData));
-
-    // Older versions stored the general settings in the settings file
-    writeFile(
-        getSettingsFilename(filename),
-        R"({
-            "General": {
-                "Version": ")"
-            + Const::ProgramVersion + R"(",
-                "Time step": "1234",
-                "Real time": "5678",
-                "Zoom": "3.50000000",
-                "Center": {"X": "111.00000000", "Y": "222.00000000"},
-                "World size": {"X": "700", "Y": "300"}
-            }
-        })");
-
-    DeserializedSimulation loaded;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(loaded, filename));
-
-    EXPECT_EQ(uint64_t{1234}, loaded.auxiliaryData.timestep);
-    EXPECT_EQ(std::chrono::milliseconds(5678), loaded.auxiliaryData.realTime);
-    EXPECT_EQ(3.5f, loaded.auxiliaryData.zoom);
-    EXPECT_EQ(RealVector2D(111.0f, 222.0f), loaded.auxiliaryData.center);
-    EXPECT_EQ(IntVector2D(700, 300), loaded.auxiliaryData.worldSize);
-    EXPECT_TRUE(_descTestDataFactory->compare(mainData, loaded.mainData));
-    EXPECT_TRUE(loaded.statistics.colors.empty());
-    EXPECT_TRUE(loaded.statistics.lineages.empty());
 }
 
 TEST_F(SerializerServiceTests, statisticsHistory)

@@ -192,13 +192,3 @@ SimulationParameters SettingsParserService::decodeSimulationParameters(boost::pr
     encodeDecodeSimulationParameters(tree, result, SimulationParametersNode, ParserTask::Decode);
     return result;
 }
-
-void SettingsParserService::decodeLegacyGeneralSettings(SettingsForSerialization& data, boost::property_tree::ptree tree)
-{
-    SettingsForSerialization defaultSettings;
-    ParameterParser::encodeDecode(tree, data.timestep, defaultSettings.timestep, GeneralNode + ".Time step", ParserTask::Decode);
-    ParameterParser::encodeDecode(tree, data.realTime, defaultSettings.realTime, GeneralNode + ".Real time", ParserTask::Decode);
-    ParameterParser::encodeDecode(tree, data.zoom, defaultSettings.zoom, GeneralNode + ".Zoom", ParserTask::Decode);
-    ParameterParser::encodeDecode(tree, data.center, defaultSettings.center, GeneralNode + ".Center", ParserTask::Decode);
-    ParameterParser::encodeDecode(tree, data.worldSize, defaultSettings.worldSize, GeneralNode + ".World size", ParserTask::Decode);
-}

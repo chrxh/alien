@@ -5,8 +5,9 @@
 #include <Base/JsonParser.h>
 #include <Base/Singleton.h>
 
+#include <EngineInterface/SimulationParameters.h>
+
 #include "Definitions.h"
-#include "SettingsForSerialization.h"
 
 class SettingsParserService
 {
@@ -15,7 +16,4 @@ class SettingsParserService
 public:
     boost::property_tree::ptree encodeSimulationParameters(SimulationParameters const& data);
     SimulationParameters decodeSimulationParameters(boost::property_tree::ptree tree);
-
-    // Older versions stored the general settings in the settings file instead of the simulation file
-    void decodeLegacyGeneralSettings(SettingsForSerialization& data, boost::property_tree::ptree tree);
 };

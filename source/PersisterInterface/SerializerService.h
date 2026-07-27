@@ -46,7 +46,7 @@ private:
     void deserializeSimulation(DeserializedSimulation& data, std::istream& stream) const;
 
     void serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const;
-    void deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const;
+    void deserializeSettings(SimulationParameters& parameters, std::istream& stream) const;
 
     bool wrapGenome(Desc& output, GenomeDesc const& input) const;
     bool unwrapGenome(GenomeDesc& output, Desc& input) const;
