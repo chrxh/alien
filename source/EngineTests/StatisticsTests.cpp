@@ -148,8 +148,18 @@ namespace
     }
 }
 
-TEST_F(StatisticsTests, accumulatedAttackedEnergy)
+// Parameter: whether the cell type is activated by the neural network
+class StatisticsTests_CellTypeActivation
+    : public StatisticsTests
+    , public ::testing::WithParamInterface<bool>
+{};
+
+INSTANTIATE_TEST_SUITE_P(StatisticsTests, StatisticsTests_CellTypeActivation, ::testing::Bool());
+
+TEST_P(StatisticsTests_CellTypeActivation, accumulatedAttackedEnergy)
 {
+    auto activated = GetParam();
+
     auto parameters = _parameters;
     parameters.attackerStrength.value = 0.1f;
     for (int i = 0; i < MAX_COLORS; ++i) {
@@ -159,7 +169,7 @@ TEST_F(StatisticsTests, accumulatedAttackedEnergy)
     _simulationFacade->setSimulationParameters(parameters);
 
     NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
+    nn._biases[Channels::CellTypeActivation] = activated ? 1.0f : 0.0f;
 
     SensorLastMatchDesc lastMatch;
     lastMatch._creatureIdPart = 2 & 0xffff;
@@ -182,18 +192,25 @@ TEST_F(StatisticsTests, accumulatedAttackedEnergy)
     auto entries = _simulationFacade->getStatisticsEntry();
 
     auto const& initial42 = findLineageEntry(initialEntries, 42);
-    auto const& initial43 = findLineageEntry(initialEntries, 43);
     auto const& entry42 = findLineageEntry(entries, 42);
+    if (activated) {
+        EXPECT_GT(entry42.totalAttackedEnergy, initial42.totalAttackedEnergy);
+    } else {
+        EXPECT_DOUBLE_EQ(initial42.totalAttackedEnergy, entry42.totalAttackedEnergy);
+    }
+
+    // The attacked energy is credited to the attacker's lineage only
+    auto const& initial43 = findLineageEntry(initialEntries, 43);
     auto const& entry43 = findLineageEntry(entries, 43);
-    EXPECT_GT(entry42.totalAttackedEnergy, initial42.totalAttackedEnergy);
-    EXPECT_DOUBLE_EQ(initial42.totalMuscleActivity, entry42.totalMuscleActivity);
     EXPECT_DOUBLE_EQ(initial43.totalAttackedEnergy, entry43.totalAttackedEnergy);
 }
 
-TEST_F(StatisticsTests, accumulatedMuscleActivity)
+TEST_P(StatisticsTests_CellTypeActivation, accumulatedMuscleActivity)
 {
+    auto activated = GetParam();
+
     NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
+    nn._biases[Channels::CellTypeActivation] = activated ? 1.0f : 0.0f;
 
     auto data = Desc().addCreature(
         {
@@ -215,6 +232,9 @@ TEST_F(StatisticsTests, accumulatedMuscleActivity)
 
     auto const& initial42 = findLineageEntry(initialEntries, 42);
     auto const& entry42 = findLineageEntry(entries, 42);
-    EXPECT_GT(entry42.totalMuscleActivity, initial42.totalMuscleActivity);
-    EXPECT_DOUBLE_EQ(initial42.totalAttackedEnergy, entry42.totalAttackedEnergy);
+    if (activated) {
+        EXPECT_GT(entry42.totalMuscleActivity, initial42.totalMuscleActivity);
+    } else {
+        EXPECT_DOUBLE_EQ(initial42.totalMuscleActivity, entry42.totalMuscleActivity);
+    }
 }
