@@ -60,7 +60,8 @@ namespace
         float tableColumnWidth;
     };
 
-    // The last four metrics are rates per 1K time steps, both in the table and in the timeline plots
+    // The last four metrics are rates per 1K time steps, both in the table and in the timeline plots;
+    // the attack and muscle rates are additionally averaged over the creatures
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
         {"Creatures", "Creatures", 0, 0, 82.0f},
         {"Avg cells", "Avg cells", 1, 1, 82.0f},
@@ -70,8 +71,8 @@ namespace
         {"Avg generation", "Avg generation", 0, 0, 105.0f},
         {"Created /1K", "Created /1K", 2, 2, 105.0f},
         {"Mutations /1K", "Mutations /1K", 4, 4, 105.0f},
-        {"Attacks /1K", "Attacks /1K", 2, 2, 105.0f},
-        {"Muscles /1K", "Muscles /1K", 2, 2, 105.0f},
+        {"Avg attacks /1K", "Avg attacks /1K", 2, 2, 105.0f},
+        {"Avg muscles /1K", "Avg muscles /1K", 2, 2, 105.0f},
     };
 
     ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
@@ -87,11 +88,10 @@ namespace
     auto constexpr LineageBrightening = 1.5f;  // The identifying colors of the renderer are too dark on the dark GUI background
     auto constexpr LineageSaturationFactor = 0.85f;
 
-    // Palette as used by the former statistics window; one colormap color per plot row;
-    // stepping through the colormap with an alternating stride of 1 and 2 makes adjacent rows distinct
+    // Palette as used by the former statistics window; one colormap color per plot row
     ImColor getOverallPlotColor(int metricIndex)
     {
-        return ImColor(ImPlot::GetColormapColor((metricIndex / 2 * 3 + metricIndex % 2) % 11, ImPlotColormap_Cool));
+        return ImColor(ImPlot::GetColormapColor(metricIndex % ImPlot::GetColormapSize(ImPlotColormap_Cool), ImPlotColormap_Cool));
     }
 
     // Identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
@@ -218,9 +218,11 @@ namespace
         case 7:
             return lastEntry ? calcRate(entry.totalMutations, lastEntry->totalMutations, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         case 8:
-            return lastEntry ? calcRate(entry.totalAttackedEnergy, lastEntry->totalAttackedEnergy, rateDelta) : std::numeric_limits<double>::quiet_NaN();
+            return lastEntry && entry.numCreatures > 0 ? calcRate(entry.totalAttackedEnergy, lastEntry->totalAttackedEnergy, rateDelta) / entry.numCreatures
+                                                       : std::numeric_limits<double>::quiet_NaN();
         case 9:
-            return lastEntry ? calcRate(entry.totalMuscleActivity, lastEntry->totalMuscleActivity, rateDelta) : std::numeric_limits<double>::quiet_NaN();
+            return lastEntry && entry.numCreatures > 0 ? calcRate(entry.totalMuscleActivity, lastEntry->totalMuscleActivity, rateDelta) / entry.numCreatures
+                                                       : std::numeric_limits<double>::quiet_NaN();
         default:
             return 0.0;
         }
