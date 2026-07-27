@@ -47,6 +47,8 @@ protected:
             colorPoint.sumCreatureEnergy = base + offset + 6;
             colorPoint.numCreatedCreatures = base + offset + 7;
             colorPoint.totalMutations = base + offset + 8;
+            colorPoint.totalAttackedEnergy = base + offset + 9;
+            colorPoint.totalMuscleActivity = base + offset + 10;
             result.data.emplace(colorBitset, colorPoint);
         }
         return result;
@@ -68,6 +70,8 @@ protected:
         result.data.sumCreatureEnergy = base + 10;
         result.data.numCreatedCreatures = base + 11;
         result.data.totalMutations = base + 12;
+        result.data.totalAttackedEnergy = base + 13;
+        result.data.totalMuscleActivity = base + 14;
         return result;
     }
 
@@ -98,6 +102,8 @@ protected:
             EXPECT_EQ(expectedColor.sumCreatureEnergy, actualColor.sumCreatureEnergy);
             EXPECT_EQ(expectedColor.numCreatedCreatures, actualColor.numCreatedCreatures);
             EXPECT_EQ(expectedColor.totalMutations, actualColor.totalMutations);
+            EXPECT_EQ(expectedColor.totalAttackedEnergy, actualColor.totalAttackedEnergy);
+            EXPECT_EQ(expectedColor.totalMuscleActivity, actualColor.totalMuscleActivity);
         }
     }
 
@@ -116,6 +122,8 @@ protected:
         EXPECT_EQ(expected.data.sumCreatureEnergy, actual.data.sumCreatureEnergy);
         EXPECT_EQ(expected.data.numCreatedCreatures, actual.data.numCreatedCreatures);
         EXPECT_EQ(expected.data.totalMutations, actual.data.totalMutations);
+        EXPECT_EQ(expected.data.totalAttackedEnergy, actual.data.totalAttackedEnergy);
+        EXPECT_EQ(expected.data.totalMuscleActivity, actual.data.totalMuscleActivity);
     }
 
     void compare(StatisticsHistoryData const& expected, StatisticsHistoryData const& actual)

@@ -2278,6 +2278,8 @@ namespace
     auto constexpr Id_ColorColumns_SumCreatureEnergy = 6;
     auto constexpr Id_ColorColumns_NumCreatedCreatures = 7;
     auto constexpr Id_ColorColumns_TotalMutations = 8;
+    auto constexpr Id_ColorColumns_TotalAttackedEnergy = 9;
+    auto constexpr Id_ColorColumns_TotalMuscleActivity = 10;
 
     auto constexpr Id_LineageTimeline_ColorBitset = 3;
     auto constexpr Id_LineageTimeline_RepresentativeCellId = 4;
@@ -2290,6 +2292,8 @@ namespace
     auto constexpr Id_LineageTimeline_SumCreatureEnergy = 11;
     auto constexpr Id_LineageTimeline_NumCreatedCreatures = 12;
     auto constexpr Id_LineageTimeline_TotalMutations = 13;
+    auto constexpr Id_LineageTimeline_TotalAttackedEnergy = 14;
+    auto constexpr Id_LineageTimeline_TotalMuscleActivity = 15;
 
     // Metric columns are plot statistics and are stored as float to halve the serialized size; the exact values stay double in memory
     struct ColorTimeline
@@ -2303,6 +2307,8 @@ namespace
         std::vector<float> sumCreatureEnergy;
         std::vector<float> numCreatedCreatures;
         std::vector<float> totalMutations;
+        std::vector<float> totalAttackedEnergy;
+        std::vector<float> totalMuscleActivity;
     };
 
     struct OverallTimeline
@@ -2327,6 +2333,8 @@ namespace
         std::vector<float> sumCreatureEnergy;
         std::vector<float> numCreatedCreatures;
         std::vector<float> totalMutations;
+        std::vector<float> totalAttackedEnergy;
+        std::vector<float> totalMuscleActivity;
     };
 
     struct StatisticsTimelines
@@ -2351,6 +2359,8 @@ namespace
         {Id_LineageTimeline_SumCreatureEnergy, &LineageTimeline::sumCreatureEnergy, &LineageDataPoint::sumCreatureEnergy},
         {Id_LineageTimeline_NumCreatedCreatures, &LineageTimeline::numCreatedCreatures, &LineageDataPoint::numCreatedCreatures},
         {Id_LineageTimeline_TotalMutations, &LineageTimeline::totalMutations, &LineageDataPoint::totalMutations},
+        {Id_LineageTimeline_TotalAttackedEnergy, &LineageTimeline::totalAttackedEnergy, &LineageDataPoint::totalAttackedEnergy},
+        {Id_LineageTimeline_TotalMuscleActivity, &LineageTimeline::totalMuscleActivity, &LineageDataPoint::totalMuscleActivity},
     };
 
     struct ColorColumnDesc
@@ -2369,6 +2379,8 @@ namespace
         {Id_ColorColumns_SumCreatureEnergy, &ColorTimeline::sumCreatureEnergy, &ColorOverallDataPoint::sumCreatureEnergy},
         {Id_ColorColumns_NumCreatedCreatures, &ColorTimeline::numCreatedCreatures, &ColorOverallDataPoint::numCreatedCreatures},
         {Id_ColorColumns_TotalMutations, &ColorTimeline::totalMutations, &ColorOverallDataPoint::totalMutations},
+        {Id_ColorColumns_TotalAttackedEnergy, &ColorTimeline::totalAttackedEnergy, &ColorOverallDataPoint::totalAttackedEnergy},
+        {Id_ColorColumns_TotalMuscleActivity, &ColorTimeline::totalMuscleActivity, &ColorOverallDataPoint::totalMuscleActivity},
     };
 
     bool colorTimelinesEqual(ColorTimeline const& left, ColorTimeline const& right)

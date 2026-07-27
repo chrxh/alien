@@ -5,9 +5,10 @@
 
 #include "DataPointCollection.h"
 
-// The accumulated counters of the overall statistics (numCreatedCreatures, totalMutations) are summed up from the
-// currently living lineages only, so they would drop as soon as a lineage becomes extinct although they are meant to
-// increase monotonically. This class remembers the last known counters of extinct lineages and adds them back.
+// The accumulated counters of the overall statistics (numCreatedCreatures, totalMutations, totalAttackedEnergy,
+// totalMuscleActivity) are summed up from the currently living lineages only, so they would drop as soon as a lineage
+// becomes extinct although they are meant to increase monotonically. This class remembers the last known counters of
+// extinct lineages and adds them back.
 // Note: a lineage id that reappears after its extinction (only possible for imported objects) is counted twice.
 class ExtinctLineageAccumulator
 {
@@ -23,6 +24,8 @@ private:
     {
         double numCreatedCreatures = 0;
         double totalMutations = 0;
+        double totalAttackedEnergy = 0;
+        double totalMuscleActivity = 0;
     };
 
     struct LastLineageValues

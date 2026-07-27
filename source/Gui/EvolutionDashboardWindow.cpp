@@ -40,6 +40,8 @@ namespace
     int constexpr LineageColumn = 0;
     int constexpr CustomizationsColumn = 1;
     int constexpr FirstMetricColumn = 2;
+    int constexpr NumColumns = FirstMetricColumn + EvolutionDashboardWindow::NumMetrics;
+    int constexpr CreaturesMetric = 0;
     auto constexpr PlotLabelColumnWidth = 150.0f;
     auto constexpr MinPlotHeight = 40.0f;
     auto constexpr MaxPlotHeight = 300.0f;
@@ -58,7 +60,8 @@ namespace
         float tableColumnWidth;
     };
 
-    // The last two metrics are rates per 1K time steps, both in the table and in the timeline plots
+    // The last four metrics are rates per 1K time steps, both in the table and in the timeline plots;
+    // the attack and muscle rates are additionally averaged over the creatures
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
         {"Creatures", "Creatures", 0, 0, 82.0f},
         {"Avg cells", "Avg cells", 1, 1, 82.0f},
@@ -68,6 +71,8 @@ namespace
         {"Avg generation", "Avg generation", 0, 0, 105.0f},
         {"Created /1K", "Created /1K", 2, 2, 105.0f},
         {"Mutations /1K", "Mutations /1K", 4, 4, 105.0f},
+        {"Avg attacks /1K", "Avg attacks /1K", 2, 2, 105.0f},
+        {"Avg muscles /1K", "Avg muscles /1K", 2, 2, 105.0f},
     };
 
     ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
@@ -83,11 +88,10 @@ namespace
     auto constexpr LineageBrightening = 1.5f;  // The identifying colors of the renderer are too dark on the dark GUI background
     auto constexpr LineageSaturationFactor = 0.85f;
 
-    // Palette as used by the former statistics window; one colormap color per plot row;
-    // stepping through the colormap with an alternating stride of 1 and 2 makes adjacent rows distinct
+    // Palette as used by the former statistics window; one colormap color per plot row
     ImColor getOverallPlotColor(int metricIndex)
     {
-        return ImColor(ImPlot::GetColormapColor((metricIndex / 2 * 3 + metricIndex % 2) % 11, ImPlotColormap_Cool));
+        return ImColor(ImPlot::GetColormapColor(metricIndex % ImPlot::GetColormapSize(ImPlotColormap_Cool), ImPlotColormap_Cool));
     }
 
     // Identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
@@ -128,9 +132,9 @@ namespace
         return std::string(buffer);
     }
 
-    void rightAlignedText(std::string const& text)
+    void rightAlignedText(std::string const& text, float rightMargin = 0.0f)
     {
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text.c_str()).x);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text.c_str()).x - rightMargin);
         ImGui::TextUnformatted(text.c_str());
     }
 
@@ -213,6 +217,12 @@ namespace
             return lastEntry ? calcRate(entry.numCreatedCreatures, lastEntry->numCreatedCreatures, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         case 7:
             return lastEntry ? calcRate(entry.totalMutations, lastEntry->totalMutations, rateDelta) : std::numeric_limits<double>::quiet_NaN();
+        case 8:
+            return lastEntry && entry.numCreatures > 0 ? calcRate(entry.totalAttackedEnergy, lastEntry->totalAttackedEnergy, rateDelta) / entry.numCreatures
+                                                       : std::numeric_limits<double>::quiet_NaN();
+        case 9:
+            return lastEntry && entry.numCreatures > 0 ? calcRate(entry.totalMuscleActivity, lastEntry->totalMuscleActivity, rateDelta) / entry.numCreatures
+                                                       : std::numeric_limits<double>::quiet_NaN();
         default:
             return 0.0;
         }
@@ -780,9 +790,6 @@ void EvolutionDashboardWindow::processFilterBar()
                 0,
                 scale(1.5f));
         }
-        auto label = std::to_string(i + 1);
-        auto labelSize = ImGui::CalcTextSize(label.c_str());
-        drawList->AddText({pos.x + (chipSize - labelSize.x) / 2, pos.y + (chipSize - labelSize.y) / 2}, ImColor(0, 0, 0, active ? 220 : 120), label.c_str());
         ImGui::PopID();
         ImGui::SameLine(0, scale(5.0f));
     }
@@ -793,7 +800,7 @@ void EvolutionDashboardWindow::processFilterBar()
 void EvolutionDashboardWindow::processLineageTable()
 {
     auto flags = ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
-    if (ImGui::BeginTable("##lineages", NumMetrics + FirstMetricColumn, flags)) {
+    if (ImGui::BeginTable("##lineages", NumColumns, flags)) {
         ImGui::TableSetupScrollFreeze(1, 2);
         ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
         ImGui::TableSetupColumn("Customizations", ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
@@ -803,11 +810,15 @@ void EvolutionDashboardWindow::processLineageTable()
 
         auto drawList = ImGui::GetWindowDrawList();
 
+        // The creatures column ends with the genome button, so every value in it is shifted left by the same amount
+        auto genomeButtonWidth = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * 0.75f, FLT_MAX, 0.0f, ICON_FA_DNA).x + scale(6.0f);
+        auto metricRightMargin = [&](int metric) { return metric == CreaturesMetric ? genomeButtonWidth + scale(5.0f) : 0.0f; };
+
         // Header row: all labels are left-aligned and clamped to the visible part of each column, which can be
         // partially hidden behind the frozen lineage column or cut off at the right window border
         ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
-        for (int column = 0; column < NumMetrics + FirstMetricColumn; ++column) {
+        for (int column = 0; column < NumColumns; ++column) {
             ImGui::TableSetColumnIndex(column);
             ImGui::PushID(column);
             std::string label = ImGui::TableGetColumnName(column);
@@ -864,7 +875,7 @@ void EvolutionDashboardWindow::processLineageTable()
         }
         for (int i = 0; i < NumMetrics; ++i) {
             ImGui::TableSetColumnIndex(i + FirstMetricColumn);
-            rightAlignedText(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].tableDecimals));
+            rightAlignedText(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].tableDecimals), metricRightMargin(i));
         }
 
         // Lineage rows
@@ -875,12 +886,13 @@ void EvolutionDashboardWindow::processLineageTable()
             ImGui::PushID(toInt(lineage.id));
             ImGui::TableNextRow();
 
-            // Genome button on the left of the creatures column, shrunk like the pin icon and bottom-aligned within the row;
+            // Genome button at the right edge of the creatures column, shrunk like the pin icon and bottom-aligned within the row;
             // submitted before the row selectable, otherwise the selectable resets the hover timer and the tooltip never shows
-            ImGui::TableSetColumnIndex(FirstMetricColumn);
+            ImGui::TableSetColumnIndex(FirstMetricColumn + CreaturesMetric);
             auto lineHeight = ImGui::GetTextLineHeight();
             ImGui::SetWindowFontScale(0.75f);
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(3.0f), 0.0f});
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - genomeButtonWidth);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + lineHeight - ImGui::GetTextLineHeight());
             auto triggerOpenGenome =
                 AlienGui::ActionButton(AlienGui::ActionButtonParameters()
@@ -919,7 +931,7 @@ void EvolutionDashboardWindow::processLineageTable()
             }
             for (int i = 0; i < NumMetrics; ++i) {
                 ImGui::TableSetColumnIndex(i + FirstMetricColumn);
-                rightAlignedText(formatMetricValue(lineage.currentValues.at(i), Metrics[i].tableDecimals));
+                rightAlignedText(formatMetricValue(lineage.currentValues.at(i), Metrics[i].tableDecimals), metricRightMargin(i));
             }
             ImGui::PopID();
         }
@@ -1243,6 +1255,6 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _lastSteps = std::clamp(_lastSteps, 1000, LiveStatisticsService::MaxLiveSteps);
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, LiveStatisticsService::MaxLiveHistory);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
-    _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumMetrics + FirstMetricColumn - 1);
+    _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumColumns - 1);
     _colorFilter &= (1 << MAX_COLORS) - 1;  // An empty filter is allowed and simply shows no lineages
 }
