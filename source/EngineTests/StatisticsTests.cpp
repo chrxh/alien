@@ -130,3 +130,91 @@ TEST_F(StatisticsTests, accumulatedMutations)
     EXPECT_EQ(42, entries.lineageEntries.front().lineageId);
     EXPECT_GT(entries.lineageEntries.front().totalMutations, 0.0f);
 }
+
+// The accumulated counters survive across tests because the simulation is shared within the test suite,
+// so the following tests check the deltas caused by their own time steps
+namespace
+{
+    LineageStatisticsEntry const* findLineageEntry(StatisticsEntry const& entries, uint32_t lineageId)
+    {
+        for (auto const& entry : entries.lineageEntries) {
+            if (entry.lineageId == lineageId) {
+                return &entry;
+            }
+        }
+        return nullptr;
+    }
+}
+
+TEST_F(StatisticsTests, accumulatedAttackedEnergy)
+{
+    auto parameters = _parameters;
+    parameters.attackerStrength.value = 0.1f;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        parameters.attackerEnergyCost.baseValue[i] = 0;
+        parameters.attackerRadius.value[i] = 3.5f;
+    }
+    _simulationFacade->setSimulationParameters(parameters);
+
+    NeuralNetDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    SensorLastMatchDesc lastMatch;
+    lastMatch._creatureIdPart = 2 & 0xffff;
+    lastMatch._pos = RealVector2D{100.0f, 103.0f};
+
+    auto data = Desc()
+                    .addCreature(
+                        {ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+                         ObjectDesc()
+                             .id(2)
+                             .pos({101.0f, 100.0f})
+                             .type(CellDesc().cellType(SensorDesc().autoTrigger(false).mode(DetectCreatureDesc()).lastMatch(lastMatch)))},
+                        CreatureDesc().id(1).lineageId(42))
+                    .addCreature({ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(2).lineageId(43));
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    auto initialEntries = _simulationFacade->getStatisticsEntry();
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    auto entries = _simulationFacade->getStatisticsEntry();
+
+    auto const* initial42 = findLineageEntry(initialEntries, 42);
+    auto const* initial43 = findLineageEntry(initialEntries, 43);
+    auto const* entry42 = findLineageEntry(entries, 42);
+    auto const* entry43 = findLineageEntry(entries, 43);
+    ASSERT_TRUE(initial42 && initial43 && entry42 && entry43);
+    EXPECT_GT(entry42->totalAttackedEnergy, initial42->totalAttackedEnergy);
+    EXPECT_DOUBLE_EQ(initial42->totalMuscleActivity, entry42->totalMuscleActivity);
+    EXPECT_DOUBLE_EQ(initial43->totalAttackedEnergy, entry43->totalAttackedEnergy);
+}
+
+TEST_F(StatisticsTests, accumulatedMuscleActivity)
+{
+    NeuralNetDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc().frontAngle(0.0f).headCell(true).cellType(MuscleDesc().mode(DirectMovementDesc())).neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}),
+        },
+        CreatureDesc().id(1).lineageId(42));
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    auto initialEntries = _simulationFacade->getStatisticsEntry();
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    auto entries = _simulationFacade->getStatisticsEntry();
+
+    auto const* initial42 = findLineageEntry(initialEntries, 42);
+    auto const* entry42 = findLineageEntry(entries, 42);
+    ASSERT_TRUE(initial42 && entry42);
+    EXPECT_GT(entry42->totalMuscleActivity, initial42->totalMuscleActivity);
+    EXPECT_DOUBLE_EQ(initial42->totalAttackedEnergy, entry42->totalAttackedEnergy);
+}

@@ -46,6 +46,8 @@ public:
     // Accumulated lineage statistics (kept across timesteps)
     __inline__ __device__ void incCreatedCreature(uint32_t lineageId);
     __inline__ __device__ void addMutations(uint32_t lineageId, float value);
+    __inline__ __device__ void addAttackedEnergy(uint32_t lineageId, float value);
+    __inline__ __device__ void addMuscleActivity(uint32_t lineageId, float value);
 
     // Garbage collection: the accumulator map fills up over time because extinct lineages are never removed from it.
     // Therefore all lineages that are still alive are rebuilt into the inactive map, which then becomes the active one.
@@ -76,6 +78,8 @@ private:
         uint32_t lineageId;  // Key, EmptyLineageId = slot is unused
         uint64_t numCreatedCreatures;
         double totalMutations;
+        double totalAttackedEnergy;
+        double totalMuscleActivity;
     };
     struct StatisticsControl
     {
@@ -207,6 +211,8 @@ __inline__ __device__ void SimulationStatistics::compactLineageSlot(int index)
         auto const& accumulatorSlot = accumulatorMap.at(accumulatorIndex);
         entry.numCreatedCreatures = accumulatorSlot.numCreatedCreatures;
         entry.totalMutations = accumulatorSlot.totalMutations;
+        entry.totalAttackedEnergy = accumulatorSlot.totalAttackedEnergy;
+        entry.totalMuscleActivity = accumulatorSlot.totalMuscleActivity;
     }
 }
 
@@ -225,6 +231,24 @@ __inline__ __device__ void SimulationStatistics::addMutations(uint32_t lineageId
     auto slotIndex = map.insertOrFind(lineageId);
     if (slotIndex != NoLineageSlot) {
         atomicAdd(&map.at(slotIndex).totalMutations, value);
+    }
+}
+
+__inline__ __device__ void SimulationStatistics::addAttackedEnergy(uint32_t lineageId, float value)
+{
+    auto& map = getActiveAccumulatorMap();
+    auto slotIndex = map.insertOrFind(lineageId);
+    if (slotIndex != NoLineageSlot) {
+        atomicAdd(&map.at(slotIndex).totalAttackedEnergy, toDouble(value));
+    }
+}
+
+__inline__ __device__ void SimulationStatistics::addMuscleActivity(uint32_t lineageId, float value)
+{
+    auto& map = getActiveAccumulatorMap();
+    auto slotIndex = map.insertOrFind(lineageId);
+    if (slotIndex != NoLineageSlot) {
+        atomicAdd(&map.at(slotIndex).totalMuscleActivity, toDouble(value));
     }
 }
 
@@ -250,6 +274,8 @@ __inline__ __device__ void SimulationStatistics::migrateActiveAccumulatorSlot(in
         auto& targetSlot = targetMap.at(targetIndex);
         targetSlot.numCreatedCreatures = slot.numCreatedCreatures;
         targetSlot.totalMutations = slot.totalMutations;
+        targetSlot.totalAttackedEnergy = slot.totalAttackedEnergy;
+        targetSlot.totalMuscleActivity = slot.totalMuscleActivity;
     }
 }
 

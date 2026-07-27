@@ -11,6 +11,8 @@ void ExtinctLineageAccumulator::addExtinctLineageValues(DataPointCollection& dat
         auto& extinctValues = _extinctValues[lastIt->second.colorBitset];
         extinctValues.numCreatedCreatures += lastIt->second.values.numCreatedCreatures;
         extinctValues.totalMutations += lastIt->second.values.totalMutations;
+        extinctValues.totalAttackedEnergy += lastIt->second.values.totalAttackedEnergy;
+        extinctValues.totalMuscleActivity += lastIt->second.values.totalMuscleActivity;
         lastIt = _lastLineageValues.erase(lastIt);
     }
 
@@ -20,6 +22,8 @@ void ExtinctLineageAccumulator::addExtinctLineageValues(DataPointCollection& dat
         lastLineageValues.colorBitset = dataPoint.colorBitset;
         lastLineageValues.values.numCreatedCreatures = dataPoint.numCreatedCreatures;
         lastLineageValues.values.totalMutations = dataPoint.totalMutations;
+        lastLineageValues.values.totalAttackedEnergy = dataPoint.totalAttackedEnergy;
+        lastLineageValues.values.totalMuscleActivity = dataPoint.totalMuscleActivity;
     }
 
     // Add the archived values back to dataPoints
@@ -27,6 +31,8 @@ void ExtinctLineageAccumulator::addExtinctLineageValues(DataPointCollection& dat
         auto& colorPoint = dataPoints.overall[colorBitset];
         colorPoint.numCreatedCreatures += extinctValues.numCreatedCreatures;
         colorPoint.totalMutations += extinctValues.totalMutations;
+        colorPoint.totalAttackedEnergy += extinctValues.totalAttackedEnergy;
+        colorPoint.totalMuscleActivity += extinctValues.totalMuscleActivity;
     }
 }
 
