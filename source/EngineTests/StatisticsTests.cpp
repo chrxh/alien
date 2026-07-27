@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <stdexcept>
+
 #include <gtest/gtest.h>
 
 #include <EngineInterface/Desc.h>
@@ -135,14 +138,13 @@ TEST_F(StatisticsTests, accumulatedMutations)
 // so the following tests check the deltas caused by their own time steps
 namespace
 {
-    LineageStatisticsEntry const* findLineageEntry(StatisticsEntry const& entries, uint32_t lineageId)
+    LineageStatisticsEntry const& findLineageEntry(StatisticsEntry const& entries, uint32_t lineageId)
     {
-        for (auto const& entry : entries.lineageEntries) {
-            if (entry.lineageId == lineageId) {
-                return &entry;
-            }
+        auto result = std::ranges::find_if(entries.lineageEntries, [lineageId](auto const& entry) { return entry.lineageId == lineageId; });
+        if (result == entries.lineageEntries.end()) {
+            throw std::runtime_error("Lineage entry not found: " + std::to_string(lineageId));
         }
-        return nullptr;
+        return *result;
     }
 }
 
@@ -179,14 +181,13 @@ TEST_F(StatisticsTests, accumulatedAttackedEnergy)
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto entries = _simulationFacade->getStatisticsEntry();
 
-    auto const* initial42 = findLineageEntry(initialEntries, 42);
-    auto const* initial43 = findLineageEntry(initialEntries, 43);
-    auto const* entry42 = findLineageEntry(entries, 42);
-    auto const* entry43 = findLineageEntry(entries, 43);
-    ASSERT_TRUE(initial42 && initial43 && entry42 && entry43);
-    EXPECT_GT(entry42->totalAttackedEnergy, initial42->totalAttackedEnergy);
-    EXPECT_DOUBLE_EQ(initial42->totalMuscleActivity, entry42->totalMuscleActivity);
-    EXPECT_DOUBLE_EQ(initial43->totalAttackedEnergy, entry43->totalAttackedEnergy);
+    auto const& initial42 = findLineageEntry(initialEntries, 42);
+    auto const& initial43 = findLineageEntry(initialEntries, 43);
+    auto const& entry42 = findLineageEntry(entries, 42);
+    auto const& entry43 = findLineageEntry(entries, 43);
+    EXPECT_GT(entry42.totalAttackedEnergy, initial42.totalAttackedEnergy);
+    EXPECT_DOUBLE_EQ(initial42.totalMuscleActivity, entry42.totalMuscleActivity);
+    EXPECT_DOUBLE_EQ(initial43.totalAttackedEnergy, entry43.totalAttackedEnergy);
 }
 
 TEST_F(StatisticsTests, accumulatedMuscleActivity)
@@ -212,9 +213,8 @@ TEST_F(StatisticsTests, accumulatedMuscleActivity)
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto entries = _simulationFacade->getStatisticsEntry();
 
-    auto const* initial42 = findLineageEntry(initialEntries, 42);
-    auto const* entry42 = findLineageEntry(entries, 42);
-    ASSERT_TRUE(initial42 && entry42);
-    EXPECT_GT(entry42->totalMuscleActivity, initial42->totalMuscleActivity);
-    EXPECT_DOUBLE_EQ(initial42->totalAttackedEnergy, entry42->totalAttackedEnergy);
+    auto const& initial42 = findLineageEntry(initialEntries, 42);
+    auto const& entry42 = findLineageEntry(entries, 42);
+    EXPECT_GT(entry42.totalMuscleActivity, initial42.totalMuscleActivity);
+    EXPECT_DOUBLE_EQ(initial42.totalAttackedEnergy, entry42.totalAttackedEnergy);
 }
