@@ -1,4 +1,7 @@
+#include <filesystem>
+#include <fstream>
 #include <ranges>
+#include <sstream>
 
 #include <gtest/gtest.h>
 
@@ -14,7 +17,11 @@ public:
     {
         _descTestDataFactory = &DescTestDataFactory::get();
         _serializerService = &SerializerService::get();
+        _testDirectory = std::filesystem::temp_directory_path() / "alien-serializer-service-tests";
+        std::filesystem::create_directories(_testDirectory);
     }
+
+    ~SerializerServiceTests() override { std::filesystem::remove_all(_testDirectory); }
 
     void testSerializationAndDeserialization(Desc const& data)
     {
@@ -143,9 +150,114 @@ protected:
         }
     }
 
+    std::filesystem::path getSettingsFilename(std::filesystem::path const& simulationFilename)
+    {
+        auto result = simulationFilename;
+        return result.replace_extension(std::filesystem::path(".settings.json"));
+    }
+
+    void writeFile(std::filesystem::path const& filename, std::string const& content)
+    {
+        std::ofstream stream(filename, std::ios::binary);
+        stream << content;
+    }
+
+    std::string readFile(std::filesystem::path const& filename)
+    {
+        std::ifstream stream(filename, std::ios::binary);
+        std::stringstream result;
+        result << stream.rdbuf();
+        return result.str();
+    }
+
     DescTestDataFactory* _descTestDataFactory;
     SerializerService* _serializerService;
+    std::filesystem::path _testDirectory;
 };
+
+TEST_F(SerializerServiceTests, simulationFiles)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    DeserializedSimulation before;
+    before.mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    before.auxiliaryData.timestep = 1234;
+    before.auxiliaryData.realTime = std::chrono::milliseconds(5678);
+    before.auxiliaryData.zoom = 3.5f;
+    before.auxiliaryData.center = {111.0f, 222.0f};
+    before.auxiliaryData.worldSize = {700, 300};
+    before.statistics.colors.emplace_back(createOverallSample(100));
+
+    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
+
+    DeserializedSimulation after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
+
+    EXPECT_EQ(before.auxiliaryData.timestep, after.auxiliaryData.timestep);
+    EXPECT_EQ(before.auxiliaryData.realTime, after.auxiliaryData.realTime);
+    EXPECT_EQ(before.auxiliaryData.zoom, after.auxiliaryData.zoom);
+    EXPECT_EQ(before.auxiliaryData.center, after.auxiliaryData.center);
+    EXPECT_EQ(before.auxiliaryData.worldSize, after.auxiliaryData.worldSize);
+    EXPECT_TRUE(_descTestDataFactory->compare(before.mainData, after.mainData));
+    compare(before.statistics, after.statistics);
+
+    EXPECT_TRUE(_serializerService->deleteSimulation(filename));
+    EXPECT_FALSE(std::filesystem::exists(filename));
+    EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
+}
+
+TEST_F(SerializerServiceTests, settingsFileEqualsSimulationParametersFile)
+{
+    auto simulationFilename = _testDirectory / "simulation.sim";
+    auto parametersFilename = _testDirectory / "simulation.parameters";
+
+    DeserializedSimulation simulation;
+    simulation.auxiliaryData.timestep = 1234;
+    simulation.auxiliaryData.worldSize = {700, 300};
+
+    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(simulationFilename, simulation));
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(parametersFilename, simulation.auxiliaryData.simulationParameters));
+
+    auto settings = readFile(getSettingsFilename(simulationFilename));
+    EXPECT_EQ(readFile(parametersFilename), settings);
+    EXPECT_NE(std::string::npos, settings.find(Const::ProgramVersion));
+}
+
+TEST_F(SerializerServiceTests, legacySimulationFiles)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    Desc mainData;
+    mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    ASSERT_TRUE(_serializerService->serializeContentToFile(filename, mainData));
+
+    // Older versions stored the general settings in the settings file
+    writeFile(
+        getSettingsFilename(filename),
+        R"({
+            "General": {
+                "Version": ")"
+            + Const::ProgramVersion + R"(",
+                "Time step": "1234",
+                "Real time": "5678",
+                "Zoom": "3.50000000",
+                "Center": {"X": "111.00000000", "Y": "222.00000000"},
+                "World size": {"X": "700", "Y": "300"}
+            }
+        })");
+
+    DeserializedSimulation loaded;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(loaded, filename));
+
+    EXPECT_EQ(uint64_t{1234}, loaded.auxiliaryData.timestep);
+    EXPECT_EQ(std::chrono::milliseconds(5678), loaded.auxiliaryData.realTime);
+    EXPECT_EQ(3.5f, loaded.auxiliaryData.zoom);
+    EXPECT_EQ(RealVector2D(111.0f, 222.0f), loaded.auxiliaryData.center);
+    EXPECT_EQ(IntVector2D(700, 300), loaded.auxiliaryData.worldSize);
+    EXPECT_TRUE(_descTestDataFactory->compare(mainData, loaded.mainData));
+    EXPECT_TRUE(loaded.statistics.colors.empty());
+    EXPECT_TRUE(loaded.statistics.lineages.empty());
+}
 
 TEST_F(SerializerServiceTests, statisticsHistory)
 {
