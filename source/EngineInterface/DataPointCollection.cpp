@@ -12,6 +12,8 @@ ColorOverallDataPoint ColorOverallDataPoint::operator+(ColorOverallDataPoint con
     result.sumCreatureEnergy = sumCreatureEnergy + other.sumCreatureEnergy;
     result.numCreatedCreatures = numCreatedCreatures + other.numCreatedCreatures;
     result.totalMutations = totalMutations + other.totalMutations;
+    result.totalAttackedEnergy = totalAttackedEnergy + other.totalAttackedEnergy;
+    result.totalMuscleActivity = totalMuscleActivity + other.totalMuscleActivity;
     return result;
 }
 
@@ -27,6 +29,8 @@ ColorOverallDataPoint ColorOverallDataPoint::operator/(double divisor) const
     result.sumCreatureEnergy = sumCreatureEnergy / divisor;
     result.numCreatedCreatures = numCreatedCreatures / divisor;
     result.totalMutations = totalMutations / divisor;
+    result.totalAttackedEnergy = totalAttackedEnergy / divisor;
+    result.totalMuscleActivity = totalMuscleActivity / divisor;
     return result;
 }
 
@@ -44,6 +48,8 @@ LineageDataPoint LineageDataPoint::operator+(LineageDataPoint const& other) cons
     result.sumCreatureEnergy = sumCreatureEnergy + other.sumCreatureEnergy;
     result.numCreatedCreatures = numCreatedCreatures + other.numCreatedCreatures;
     result.totalMutations = totalMutations + other.totalMutations;
+    result.totalAttackedEnergy = totalAttackedEnergy + other.totalAttackedEnergy;
+    result.totalMuscleActivity = totalMuscleActivity + other.totalMuscleActivity;
     return result;
 }
 
@@ -61,6 +67,8 @@ LineageDataPoint LineageDataPoint::operator/(double divisor) const
     result.sumCreatureEnergy = sumCreatureEnergy / divisor;
     result.numCreatedCreatures = numCreatedCreatures / divisor;
     result.totalMutations = totalMutations / divisor;
+    result.totalAttackedEnergy = totalAttackedEnergy / divisor;
+    result.totalMuscleActivity = totalMuscleActivity / divisor;
     return result;
 }
 

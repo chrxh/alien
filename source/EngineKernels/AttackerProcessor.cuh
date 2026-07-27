@@ -233,6 +233,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         // Energy gain
         if (sumEnergyToTransfer > NEAR_ZERO) {
             atomicAdd(&cell->rawEnergy, sumEnergyToTransfer);
+            statistics.addAttackedEnergy(cell->creature->lineageId, sumEnergyToTransfer);
 
             cell->event = CellEvent_Attacking;
             cell->eventCounter = 6;

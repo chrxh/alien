@@ -17,6 +17,8 @@ struct ColorOverallDataPoint
     double sumCreatureEnergy = 0;
     double numCreatedCreatures = 0;
     double totalMutations = 0;
+    double totalAttackedEnergy = 0;
+    double totalMuscleActivity = 0;
 
     ColorOverallDataPoint operator+(ColorOverallDataPoint const& other) const;
     ColorOverallDataPoint operator/(double divisor) const;
@@ -36,6 +38,8 @@ struct LineageDataPoint
 
     double numCreatedCreatures = 0;
     double totalMutations = 0;
+    double totalAttackedEnergy = 0;
+    double totalMuscleActivity = 0;
 
     LineageDataPoint operator+(LineageDataPoint const& other) const;
     LineageDataPoint operator/(double divisor) const;

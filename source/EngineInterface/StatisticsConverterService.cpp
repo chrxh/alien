@@ -30,6 +30,8 @@ DataPointCollection StatisticsConverterService::convert(
         point.sumCreatureEnergy = toDouble(entry.sumCreatureEnergy);
         point.numCreatedCreatures = toDouble(entry.numCreatedCreatures);
         point.totalMutations = entry.totalMutations;
+        point.totalAttackedEnergy = entry.totalAttackedEnergy;
+        point.totalMuscleActivity = entry.totalMuscleActivity;
         result.lineages[entry.lineageId] = point;
 
         // Aggregate the lineage into the overall bucket of its colorBitset; the object counts are not per-color
@@ -44,6 +46,8 @@ DataPointCollection StatisticsConverterService::convert(
         colorPoint.sumCreatureEnergy += point.sumCreatureEnergy;
         colorPoint.numCreatedCreatures += point.numCreatedCreatures;
         colorPoint.totalMutations += point.totalMutations;
+        colorPoint.totalAttackedEnergy += point.totalAttackedEnergy;
+        colorPoint.totalMuscleActivity += point.totalMuscleActivity;
     }
 
     return result;

@@ -28,6 +28,8 @@ struct LineageStatisticsEntry
 
     uint64_t numCreatedCreatures = 0;  // Accumulated, never reset
     double totalMutations = 0;         // Accumulated, never reset
+    double totalAttackedEnergy = 0;    // Accumulated energy captured by attacker cells, never reset
+    double totalMuscleActivity = 0;    // Accumulated lengths of the velocity changes caused by muscle cells, never reset
 };
 
 struct StatisticsEntry
