@@ -12,7 +12,6 @@
 
 #include "IntegrationTestFramework.h"
 
-#include "PersisterInterface/DeserializedSimulation.h"
 #include "PersisterInterface/SerializerService.h"
 
 enum class Direction

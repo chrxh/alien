@@ -261,7 +261,7 @@ void AutosaveWindow::processSettings()
             //            .tooltip("If activated, the simulation is monitored continuously. When the autosave interval expires, the time at which the selected "
             //                     "measured value was particularly high is saved."),
             //        _catchPeaks)) {
-            //    _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
+            //    _peakDeserializedSimulation->setDeserializedSimulation(SimulationDesc());
             //}
 
             if (AlienGui::InputText(

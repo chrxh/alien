@@ -8,7 +8,6 @@
 
 #include "IntegrationTestFramework.h"
 
-#include "PersisterInterface/DeserializedSimulation.h"
 #include "PersisterInterface/SerializerService.h"
 
 class PhysicsTests : public IntegrationTestFramework

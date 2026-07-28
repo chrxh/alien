@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <optional>
 #include <string>
 #include <unordered_set>
@@ -13,6 +14,8 @@
 
 #include "Definitions.h"
 #include "GenomeDesc.h"
+#include "SimulationParameters.h"
+#include "StatisticsHistory.h"
 
 struct ConnectionDesc
 {
@@ -659,3 +662,15 @@ struct ExtendedObjectDesc
     std::optional<GenomeDesc> genome;
 };
 using ExtendedObjectOrEnergyDesc = std::variant<ExtendedObjectDesc, EnergyDesc>;
+
+struct SimulationDesc
+{
+    MEMBER(SimulationDesc, uint64_t, timestep, 0);
+    MEMBER(SimulationDesc, std::chrono::milliseconds, realTime, std::chrono::milliseconds(0));
+    MEMBER(SimulationDesc, float, zoom, 4.0f);
+    MEMBER(SimulationDesc, RealVector2D, center, RealVector2D(500.0f, 500.0f));
+    MEMBER(SimulationDesc, IntVector2D, worldSize, IntVector2D(1000, 1000));
+    MEMBER(SimulationDesc, SimulationParameters, simulationParameters, SimulationParameters());
+    MEMBER(SimulationDesc, ContentDesc, mainData, ContentDesc());
+    MEMBER(SimulationDesc, StatisticsHistoryData, statistics, StatisticsHistoryData());
+};

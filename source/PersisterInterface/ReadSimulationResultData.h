@@ -2,10 +2,10 @@
 
 #include <filesystem>
 
-#include <PersisterInterface/DeserializedSimulation.h>
+#include <EngineInterface/Descs.h>
 
 struct ReadSimulationResultData
 {
     std::filesystem::path filename;
-    DeserializedSimulation deserializedSimulation;
+    SimulationDesc simulationDesc;
 };

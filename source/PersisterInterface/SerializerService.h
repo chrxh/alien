@@ -10,19 +10,18 @@
 #include <EngineInterface/StatisticsHistory.h>
 
 #include "Definitions.h"
-#include "DeserializedSimulation.h"
 
 class SerializerService
 {
     MAKE_SINGLETON(SerializerService);
 
 public:
-    bool serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const;
-    bool deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename) const;
+    bool serializeSimulationToFiles(std::filesystem::path const& filename, SimulationDesc const& data) const;
+    bool deserializeSimulationFromFiles(SimulationDesc& data, std::filesystem::path const& filename) const;
     bool deleteSimulation(std::filesystem::path const& filename) const;
 
-    bool serializeSimulationToString(std::string& output, DeserializedSimulation const& input) const;
-    bool deserializeSimulationFromString(DeserializedSimulation& output, std::string const& input) const;
+    bool serializeSimulationToString(std::string& output, SimulationDesc const& input) const;
+    bool deserializeSimulationFromString(SimulationDesc& output, std::string const& input) const;
 
     bool serializeGenomeToFile(std::filesystem::path const& filename, GenomeDesc const& genome) const;
     bool deserializeGenomeFromFile(GenomeDesc& genome, std::filesystem::path const& filename) const;
@@ -41,8 +40,8 @@ private:
     bool deserializeDescription(ContentDesc& description, std::filesystem::path const& filename) const;
     void deserializeDescription(ContentDesc& description, std::istream& stream) const;
 
-    void serializeSimulation(DeserializedSimulation const& data, std::ostream& stream) const;
-    void deserializeSimulation(DeserializedSimulation& data, std::istream& stream) const;
+    void serializeSimulation(SimulationDesc const& data, std::ostream& stream) const;
+    void deserializeSimulation(SimulationDesc& data, std::istream& stream) const;
 
     void serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const;
     void deserializeSettings(SimulationParameters& parameters, std::istream& stream) const;

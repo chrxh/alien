@@ -3,19 +3,19 @@
 #include <chrono>
 #include <mutex>
 
-#include "DeserializedSimulation.h"
+#include <EngineInterface/Descs.h>
 
 class _SharedDeserializedSimulation
 {
 public:
-    void setDeserializedSimulation(DeserializedSimulation&& value)
+    void setDeserializedSimulation(SimulationDesc&& value)
     {
         std::lock_guard lock(_mutex);
         _deserializedSimulation = std::move(value);
         _timestamp = std::chrono::system_clock::now();
     }
 
-    DeserializedSimulation getDeserializedSimulation() const
+    SimulationDesc getDeserializedSimulation() const
     {
         std::lock_guard lock(_mutex);
         return _deserializedSimulation;
@@ -29,18 +29,18 @@ public:
 
     void reset()
     {
-        setDeserializedSimulation(DeserializedSimulation());
+        setDeserializedSimulation(SimulationDesc());
     }
 
     bool isEmpty() const
     {
         std::lock_guard lock(_mutex);
-        return _deserializedSimulation.mainData.isEmpty();
+        return _deserializedSimulation._mainData.isEmpty();
     }
 
 private:
     mutable std::mutex _mutex;
-    DeserializedSimulation _deserializedSimulation;
+    SimulationDesc _deserializedSimulation;
     std::chrono::system_clock::time_point _timestamp;
 };
 using SharedDeserializedSimulation = std::shared_ptr<_SharedDeserializedSimulation>;

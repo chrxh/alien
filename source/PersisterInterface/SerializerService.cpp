@@ -1902,7 +1902,7 @@ namespace cereal
     SPLIT_SERIALIZATION(ContentDesc)
 }
 
-bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const
+bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, SimulationDesc const& data) const
 {
     try {
         log(Priority::Important, "save simulation to " + filename.string());
@@ -1922,7 +1922,7 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
     }
 }
 
-bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename) const
+bool SerializerService::deserializeSimulationFromFiles(SimulationDesc& data, std::filesystem::path const& filename) const
 {
     try {
         log(Priority::Important, "load simulation from " + filename.string());
@@ -1933,7 +1933,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         }
         deserializeSimulation(data, stream);
 
-        ParametersValidationService::get().validateAndCorrect({data.worldSize}, data.simulationParameters);
+        ParametersValidationService::get().validateAndCorrect({data._worldSize}, data._simulationParameters);
         return true;
     } catch (...) {
         return false;
@@ -1950,7 +1950,7 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
     }
 }
 
-bool SerializerService::serializeSimulationToString(std::string& output, DeserializedSimulation const& input) const
+bool SerializerService::serializeSimulationToString(std::string& output, SimulationDesc const& input) const
 {
     try {
         std::stringstream stdStream;
@@ -1967,7 +1967,7 @@ bool SerializerService::serializeSimulationToString(std::string& output, Deseria
     }
 }
 
-bool SerializerService::deserializeSimulationFromString(DeserializedSimulation& output, std::string const& input) const
+bool SerializerService::deserializeSimulationFromString(SimulationDesc& output, std::string const& input) const
 {
     try {
         std::stringstream stdStream(input);
@@ -1977,7 +1977,7 @@ bool SerializerService::deserializeSimulationFromString(DeserializedSimulation& 
         }
         deserializeSimulation(output, stream);
 
-        ParametersValidationService::get().validateAndCorrect({output.worldSize}, output.simulationParameters);
+        ParametersValidationService::get().validateAndCorrect({output._worldSize}, output._simulationParameters);
         return true;
     } catch (...) {
         return false;
@@ -2667,41 +2667,41 @@ namespace cereal
     SPLIT_SERIALIZATION(SimulationParameters)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DeserializedSimulation& data)
+    void loadSave(SerializationTask task, Archive& ar, SimulationDesc& data)
     {
         StatisticsHistoryData statistics;
         if (task == SerializationTask::Save) {
-            statistics = selectStatisticsToSave(data.statistics, data.mainData);
+            statistics = selectStatisticsToSave(data._statistics, data._mainData);
         }
         {
-            DeserializedSimulation defaultData;
+            SimulationDesc defaultData;
             auto scope = getSerializationScope(task, ar);
 
-            scope.addMember(Id_Simulation_Timestep, data.timestep, defaultData.timestep);
-            scope.addMember(Id_Simulation_RealTime, data.realTime, defaultData.realTime);
-            scope.addMember(Id_Simulation_Zoom, data.zoom, defaultData.zoom);
-            scope.addMember(Id_Simulation_Center, data.center, defaultData.center);
-            scope.addMember(Id_Simulation_WorldSize, data.worldSize, defaultData.worldSize);
+            scope.addMember(Id_Simulation_Timestep, data._timestep, defaultData._timestep);
+            scope.addMember(Id_Simulation_RealTime, data._realTime, defaultData._realTime);
+            scope.addMember(Id_Simulation_Zoom, data._zoom, defaultData._zoom);
+            scope.addMember(Id_Simulation_Center, data._center, defaultData._center);
+            scope.addMember(Id_Simulation_WorldSize, data._worldSize, defaultData._worldSize);
 
-            scope.addDesc(Id_Simulation_SimulationParameters, data.simulationParameters);
-            scope.addDesc(Id_Simulation_Content, data.mainData);
+            scope.addDesc(Id_Simulation_SimulationParameters, data._simulationParameters);
+            scope.addDesc(Id_Simulation_Content, data._mainData);
             scope.addDesc(Id_Simulation_Statistics, statistics);
         }
         if (task == SerializationTask::Load) {
-            data.statistics = std::move(statistics);
+            data._statistics = std::move(statistics);
         }
     }
-    SPLIT_SERIALIZATION(DeserializedSimulation)
+    SPLIT_SERIALIZATION(SimulationDesc)
 }
 
-void SerializerService::serializeSimulation(DeserializedSimulation const& data, std::ostream& stream) const
+void SerializerService::serializeSimulation(SimulationDesc const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-void SerializerService::deserializeSimulation(DeserializedSimulation& data, std::istream& stream) const
+void SerializerService::deserializeSimulation(SimulationDesc& data, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
