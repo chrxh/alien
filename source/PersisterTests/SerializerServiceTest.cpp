@@ -180,9 +180,11 @@ TEST_F(SerializerServiceTests, simulationFiles)
     before.auxiliaryData.zoom = 3.5f;
     before.auxiliaryData.center = {111.0f, 222.0f};
     before.auxiliaryData.worldSize = {700, 300};
+    before.auxiliaryData.simulationParameters.timestepSize.value = 0.5f;
     before.statistics.colors.emplace_back(createOverallSample(100));
 
     ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
+    EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
 
     DeserializedSimulation after;
     ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
@@ -192,6 +194,7 @@ TEST_F(SerializerServiceTests, simulationFiles)
     EXPECT_EQ(before.auxiliaryData.zoom, after.auxiliaryData.zoom);
     EXPECT_EQ(before.auxiliaryData.center, after.auxiliaryData.center);
     EXPECT_EQ(before.auxiliaryData.worldSize, after.auxiliaryData.worldSize);
+    EXPECT_EQ(before.auxiliaryData.simulationParameters.timestepSize.value, after.auxiliaryData.simulationParameters.timestepSize.value);
     EXPECT_TRUE(_descTestDataFactory->compare(before.mainData, after.mainData));
     compare(before.statistics, after.statistics);
 
@@ -200,21 +203,59 @@ TEST_F(SerializerServiceTests, simulationFiles)
     EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
 }
 
-TEST_F(SerializerServiceTests, settingsFileEqualsSimulationParametersFile)
+TEST_F(SerializerServiceTests, simulationParametersFile)
 {
-    auto simulationFilename = _testDirectory / "simulation.sim";
-    auto parametersFilename = _testDirectory / "parameters.settings.json";
+    auto filename = _testDirectory / "parameters.settings.json";
 
-    DeserializedSimulation simulation;
-    simulation.auxiliaryData.timestep = 1234;
-    simulation.auxiliaryData.worldSize = {700, 300};
+    SimulationParameters before;
+    before.timestepSize.value = 0.5f;
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(filename, before));
+    EXPECT_NE(std::string::npos, readFile(filename).find(Const::ProgramVersion));
 
-    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(simulationFilename, simulation));
-    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(parametersFilename, simulation.auxiliaryData.simulationParameters));
+    SimulationParameters after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationParametersFromFile(after, filename));
 
-    auto settings = readFile(getSettingsFilename(simulationFilename));
-    EXPECT_EQ(readFile(parametersFilename), settings);
-    EXPECT_NE(std::string::npos, settings.find(Const::ProgramVersion));
+    EXPECT_EQ(before.timestepSize.value, after.timestepSize.value);
+}
+
+TEST_F(SerializerServiceTests, simulationParametersFromSimulationFile)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    DeserializedSimulation before;
+    before.auxiliaryData.simulationParameters.timestepSize.value = 0.5f;
+    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
+
+    // A settings file of an older version does not override the simulation file
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(getSettingsFilename(filename), SimulationParameters()));
+
+    DeserializedSimulation after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
+
+    EXPECT_EQ(0.5f, after.auxiliaryData.simulationParameters.timestepSize.value);
+}
+
+TEST_F(SerializerServiceTests, legacySimulationParametersFromSettingsFile)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    // Older versions stored the simulation parameters in the settings file only
+    Desc mainData;
+    mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    ASSERT_TRUE(_serializerService->serializeContentToFile(filename, mainData));
+
+    SimulationParameters parameters;
+    parameters.timestepSize.value = 0.5f;
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(getSettingsFilename(filename), parameters));
+
+    DeserializedSimulation loaded;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(loaded, filename));
+
+    EXPECT_EQ(0.5f, loaded.auxiliaryData.simulationParameters.timestepSize.value);
+    EXPECT_TRUE(_descTestDataFactory->compare(mainData, loaded.mainData));
+
+    EXPECT_TRUE(_serializerService->deleteSimulation(filename));
+    EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
 }
 
 TEST_F(SerializerServiceTests, statisticsHistory)

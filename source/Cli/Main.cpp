@@ -31,9 +31,8 @@ int main(int argc, char** argv)
         std::string statisticsFilename;
         int timesteps = 0;
         bool profile = false;
-        app.add_option(
-            "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding *.settings.json should also be available.");
-        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation. The *.settings.json file will also be saved.");
+        app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
+        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
         app.add_flag(
             "-p,--profile",
