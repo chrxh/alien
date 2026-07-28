@@ -10,8 +10,8 @@
 #include <Base/GlobalSettings.h>
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -249,7 +249,7 @@ void CreatorWindow::onDrawing()
 
     auto newEntityCount = isEnergyMaterial() ? _drawingDescription._energies.size() : _drawingDescription._objects.size();
     if (newEntityCount > prevEntityCount) {
-        Desc newEntities;
+        ContentDesc newEntities;
         for (auto i = prevEntityCount; i < newEntityCount; ++i) {
             if (isEnergyMaterial()) {
                 newEntities._energies.emplace_back(_drawingDescription._energies.at(i));
@@ -282,7 +282,7 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createEntity()
 {
-    Desc description;
+    ContentDesc description;
     if (isEnergyMaterial()) {
         description._energies.emplace_back(EnergyDesc().pos(getRandomPos()).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
     } else {
@@ -348,7 +348,7 @@ void CreatorWindow::createDisc()
         return;
     }
 
-    Desc description;
+    ContentDesc description;
     auto const color = EditorModel::get().getDefaultColorCode();
     auto const objectType = isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc();
     auto constexpr SmallValue = 0.01f;
@@ -382,9 +382,9 @@ void CreatorWindow::createDisc()
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
-Desc CreatorWindow::convertToEnergyParticles(Desc const& description) const
+ContentDesc CreatorWindow::convertToEnergyParticles(ContentDesc const& description) const
 {
-    Desc result;
+    ContentDesc result;
     auto const color = EditorModel::get().getDefaultColorCode();
     for (auto const& object : description._objects) {
         result._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(color));

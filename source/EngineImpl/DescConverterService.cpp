@@ -11,7 +11,7 @@
 
 #include <Base/AlienExceptions.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 
 #include <EngineKernels/TOProvider.cuh>
@@ -37,7 +37,7 @@ namespace
         }
     }
 
-    // Helper function to copy memory entries from Desc to TO
+    // Helper function to copy memory entries from ContentDesc to TO
     template <typename DescEntry, typename TOEntry>
     void copyMemoryEntriesToTO(TOEntry* target, std::vector<DescEntry> const& source)
     {
@@ -145,9 +145,9 @@ namespace
 
 }
 
-Desc DescConverterService::convertTOtoDescription(TOs const& to) const
+ContentDesc DescConverterService::convertTOtoDescription(TOs const& to) const
 {
-    Desc result;
+    ContentDesc result;
 
     // Genomes
     for (int i = 0; i < *to.numGenomes; ++i) {
@@ -187,7 +187,7 @@ Desc DescConverterService::convertTOtoDescription(TOs const& to) const
     return result;
 }
 
-TOs DescConverterService::convertDescriptionToTO(Desc const& description) const
+TOs DescConverterService::convertDescriptionToTO(ContentDesc const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;

@@ -3,7 +3,7 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include "Desc.h"
+#include "Descs.h"
 
 class DescEditService
 {
@@ -23,7 +23,7 @@ public:
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, isStatic, false);
     };
-    Desc createRect(CreateRectParameters const& parameters) const;
+    ContentDesc createRect(CreateRectParameters const& parameters) const;
 
     struct CreateHexParameters
     {
@@ -37,7 +37,7 @@ public:
         MEMBER(CreateHexParameters, int, color, 0);
         MEMBER(CreateHexParameters, bool, isStatic, false);
     };
-    Desc createHex(CreateHexParameters const& parameters) const;
+    ContentDesc createHex(CreateHexParameters const& parameters) const;
 
     struct CreateCircleParameters
     {
@@ -51,9 +51,9 @@ public:
         MEMBER(CreateCircleParameters, bool, isStatic, false);
         MEMBER(CreateCircleParameters, bool, sticky, false);
     };
-    Desc createCircle(CreateCircleParameters const& parameters) const;
+    ContentDesc createCircle(CreateCircleParameters const& parameters) const;
 
-    void duplicate(Desc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
+    void duplicate(ContentDesc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {
@@ -70,7 +70,7 @@ public:
         MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
         MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    Desc gridMultiply(Desc const& input, GridMultiplyParameters const& parameters) const;
+    ContentDesc gridMultiply(ContentDesc const& input, GridMultiplyParameters const& parameters) const;
 
     struct RandomMultiplyParameters
     {
@@ -85,44 +85,44 @@ public:
         MEMBER(RandomMultiplyParameters, float, maxAngularVel, 0);
         MEMBER(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    Desc randomMultiply(
-        Desc const& input,
+    ContentDesc randomMultiply(
+        ContentDesc const& input,
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
-        Desc&& existentData,
+        ContentDesc&& existentData,
         bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    void addIfSpaceAvailable(Desc& result, Occupancy& occupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const;
+    void addIfSpaceAvailable(ContentDesc& result, Occupancy& occupancy, ContentDesc const& toAdd, float distance, IntVector2D const& worldSize) const;
 
-    void flattenTopology(Desc& description, IntVector2D const& worldSize) const;
+    void flattenTopology(ContentDesc& description, IntVector2D const& worldSize) const;
 
-    void reconnectObjects(Desc& description, float maxDistance) const;  // For non-creatures
+    void reconnectObjects(ContentDesc& description, float maxDistance) const;  // For non-creatures
 
-    void randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const;
-    void randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const;
-    void randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const;
-    void randomizeAges(Desc& description, int minAge, int maxAge) const;
-    void randomizeCountdowns(Desc& description, int minValue, int maxValue) const;
-    void randomizeLineageIds(Desc& description) const;
-    void randomizeGlow(Desc& description, float minGlow, float maxGlow) const;
-    void setMutationRates(Desc& description, MutationRatesDesc const& mutationRates) const;
+    void randomizeCellColors(ContentDesc& description, std::vector<int> const& colorCodes) const;
+    void randomizeGenomeColors(ContentDesc& description, std::vector<int> const& colorCodes) const;
+    void randomizeEnergies(ContentDesc& description, float minEnergy, float maxEnergy) const;
+    void randomizeAges(ContentDesc& description, int minAge, int maxAge) const;
+    void randomizeCountdowns(ContentDesc& description, int minValue, int maxValue) const;
+    void randomizeLineageIds(ContentDesc& description) const;
+    void randomizeGlow(ContentDesc& description, float minGlow, float maxGlow) const;
+    void setMutationRates(ContentDesc& description, MutationRatesDesc const& mutationRates) const;
 
     uint64_t getId(ExtendedObjectOrEnergyDesc const& entity) const;
     RealVector2D getPos(ExtendedObjectOrEnergyDesc const& entity) const;
-    std::vector<ExtendedObjectOrEnergyDesc> getObjects(Desc const& description) const;
+    std::vector<ExtendedObjectOrEnergyDesc> getObjects(ContentDesc const& description) const;
 
-    void setCenter(Desc& collection, RealVector2D const& center) const;
-    RealVector2D calcCenter(Desc const& collection) const;
-    void shift(Desc& collection, RealVector2D const& delta) const;
-    void rotate(Desc& collection, float angle) const;
-    void accelerate(Desc& collection, RealVector2D const& velDelta, float angularVelDelta) const;
+    void setCenter(ContentDesc& collection, RealVector2D const& center) const;
+    RealVector2D calcCenter(ContentDesc const& collection) const;
+    void shift(ContentDesc& collection, RealVector2D const& delta) const;
+    void rotate(ContentDesc& collection, float angle) const;
+    void accelerate(ContentDesc& collection, RealVector2D const& velDelta, float angularVelDelta) const;
 
-    void removeCell(Desc& collection, uint64_t objectId) const;
-    void removeCellIf(Desc& collection, std::function<bool(ObjectDesc const&)> const& predicate) const;
+    void removeCell(ContentDesc& collection, uint64_t objectId) const;
+    void removeCellIf(ContentDesc& collection, std::function<bool(ObjectDesc const&)> const& predicate) const;
 
 private:
-    std::vector<std::vector<size_t>> calcClusters(Desc const& description) const;
+    std::vector<std::vector<size_t>> calcClusters(ContentDesc const& description) const;
 
     bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance) const;
 };

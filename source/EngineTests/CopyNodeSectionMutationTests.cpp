@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -27,7 +27,7 @@ TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_zeroProbabilityNoCh
     });
     genome._mutationRates._copyNodeSectionMutation = CopyNodeSectionMutationDesc().geneProbability(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -45,7 +45,7 @@ TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_insertsSectionIntoS
     auto genome = GenomeDesc().genes({GeneDesc().nodes(nodes)});
     genome._mutationRates._copyNodeSectionMutation = CopyNodeSectionMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -66,7 +66,7 @@ TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_repeatedMutationGro
     });
     genome._mutationRates._copyNodeSectionMutation = CopyNodeSectionMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 5; ++i) {

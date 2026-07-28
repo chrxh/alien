@@ -1,13 +1,13 @@
 #pragma once
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/StatisticsHistory.h>
 
 #include "SettingsForSerialization.h"
 
 struct DeserializedSimulation
 {
-    Desc mainData;
+    ContentDesc mainData;
     SettingsForSerialization auxiliaryData;
     StatisticsHistoryData statistics;
 };

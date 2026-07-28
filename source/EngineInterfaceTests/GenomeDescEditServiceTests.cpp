@@ -1037,7 +1037,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenom
     SubGenomeDesc subGenome{genome, 0, false};
 
     // Create cached phenotype with seed (generation 0) and offspring (generation 1)
-    Desc cachedPhenotype;
+    ContentDesc cachedPhenotype;
     cachedPhenotype.addCreature({ObjectDesc().pos(RealVector2D{0, 0})}, CreatureDesc().generation(0), genome);
     auto seedAncestorId = cachedPhenotype._creatures.at(0)._id;
     cachedPhenotype.addCreature({ObjectDesc().pos(RealVector2D{1, 1})}, CreatureDesc().generation(1).ancestorId(seedAncestorId), genome);
@@ -1097,7 +1097,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenom
     SubGenomeDesc subGenome{genome, 0, false};
 
     // Create cached phenotype with offspring (generation 1) first, then seed (generation 0)
-    Desc cachedPhenotype;
+    ContentDesc cachedPhenotype;
     cachedPhenotype._genomes.emplace_back(genome);
 
     auto seedCreature = CreatureDesc().generation(0).genomeId(genome._id);
@@ -1216,7 +1216,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGen
     SubGenomeDesc subGenome2{genome2, 0, false};
 
     // Create cached phenotype only for first subGenome
-    Desc cachedPhenotype;
+    ContentDesc cachedPhenotype;
     cachedPhenotype.addCreature({ObjectDesc().pos(RealVector2D{0, 0})}, CreatureDesc().generation(0), genome1);
 
     // Store original IDs from cache
@@ -1299,10 +1299,10 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGen
     SubGenomeDesc subGenome2{genome2, 0, false};
 
     // Create cached phenotypes for both subGenomes
-    Desc cachedPhenotype1;
+    ContentDesc cachedPhenotype1;
     cachedPhenotype1.addCreature({ObjectDesc().pos(RealVector2D{0, 0})}, CreatureDesc().generation(0), genome1);
 
-    Desc cachedPhenotype2;
+    ContentDesc cachedPhenotype2;
     cachedPhenotype2.addCreature({ObjectDesc().pos(RealVector2D{5, 5})}, CreatureDesc().generation(0), genome2);
 
     // Store original IDs from cache
@@ -1350,7 +1350,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGen
 
 TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
 {
-    Desc preview;
+    ContentDesc preview;
     std::vector<uint64_t> seedCreatureIds;
 
     auto result = GenomeDescEditService::get().extractPhenotypesFromPreview(std::move(preview), seedCreatureIds);
@@ -1361,7 +1361,7 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
 TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_noOffspring)
 {
     // Create preview with a single seed creature (generation 0)
-    Desc preview;
+    ContentDesc preview;
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
@@ -1396,7 +1396,7 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_noOff
 TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_withOffspring)
 {
     // Create preview with seed and its offspring
-    Desc preview;
+    ContentDesc preview;
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
@@ -1483,7 +1483,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_parentNod
 TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_withOffspring)
 {
     // Create preview with multiple seeds and their offspring
-    Desc preview;
+    ContentDesc preview;
     auto genome1 = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),

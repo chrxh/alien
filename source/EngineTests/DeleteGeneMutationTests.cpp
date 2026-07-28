@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -19,7 +19,7 @@ TEST_F(DeleteGeneMutationTests, deleteGeneMutation_keepsAtLeastOneGene)
     });
     genome._mutationRates._deleteGeneMutation = DeleteGeneMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 5; ++i) {
@@ -38,7 +38,7 @@ TEST_F(DeleteGeneMutationTests, deleteGeneMutation_zeroProbabilityNoChange)
     });
     genome._mutationRates._deleteGeneMutation = DeleteGeneMutationDesc().geneProbability(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);

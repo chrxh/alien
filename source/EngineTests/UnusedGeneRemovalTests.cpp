@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -32,7 +32,7 @@ protected:
 
 TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_removesGenesUnreachableFromRoot)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createUnreachableCyclicTestGenome());
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createUnreachableCyclicTestGenome());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_removeUnusedGenes(1);
@@ -47,7 +47,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_removesGenesUnreac
 TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsCyclicallyReferencedGenesReachableFromRoot)
 {
     auto genome = createReachableCyclicTestGenome();
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_removeUnusedGenes(1);
@@ -63,7 +63,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_allGenesReachable_
         GeneDesc().name("gene1").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),
         GeneDesc().name("gene2").nodes({NodeDesc()}),
     });
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_removeUnusedGenes(1);
@@ -81,7 +81,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_removesGeneOnlyRef
         GeneDesc().name("gene1").nodes({NodeDesc()}),
         GeneDesc().name("gene2").nodes({NodeDesc()}),
     });
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_removeUnusedGenes(1);
@@ -101,7 +101,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReference
         GeneDesc().name("gene1").nodes({NodeDesc()}),
         GeneDesc().name("gene2").nodes({NodeDesc()}),
     });
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_removeUnusedGenes(1);
@@ -120,7 +120,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReference
         GeneDesc().name("gene0").nodes({NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc()}),
         GeneDesc().name("gene1").nodes({NodeDesc()}),
     });
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_removeUnusedGenes(1);
@@ -136,7 +136,7 @@ TEST_F(UnusedGeneRemovalTests, applyMutations_doesNotRemoveUnreachableGenes)
     // performs afterwards. With all mutation rates at zero, the genome must therefore come back unchanged, even though it
     // contains genes unreachable from the root gene.
     auto genome = createUnreachableCyclicTestGenome();
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);

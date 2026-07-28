@@ -3,7 +3,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "AlienWindow.h"
@@ -45,5 +45,5 @@ private:
     float _angle = 0;
     float _angularVel = 0;
     std::optional<SelectionShallowData> _lastSelection;
-    std::optional<Desc> _copiedSelection;
+    std::optional<ContentDesc> _copiedSelection;
 };

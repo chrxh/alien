@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -24,9 +24,9 @@ public:
     ~DepotTests() = default;
 
 protected:
-    Desc createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
+    ContentDesc createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
-        auto data = Desc().addCreature({
+        auto data = ContentDesc().addCreature({
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -37,10 +37,10 @@ protected:
         return data;
     }
 
-    Desc createDepotWithIncomingNegativeSignal(float usableEnergy, float storedUsableEnergy = 0.0f)
+    ContentDesc createDepotWithIncomingNegativeSignal(float usableEnergy, float storedUsableEnergy = 0.0f)
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
-        auto data = Desc().addCreature({
+        auto data = ContentDesc().addCreature({
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         });
@@ -55,7 +55,7 @@ TEST_F(DepotTests, noSignal_noChange)
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
     // Create depot without a cell carrying a signal => no signal will be sent
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DepotDesc().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
     });
 

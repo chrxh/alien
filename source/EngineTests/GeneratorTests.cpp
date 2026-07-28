@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -52,7 +52,7 @@ TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
 {
     auto params = GetParam();
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc().headCell(true).cellType(
                 GeneratorDesc().minValue(-1.9f).maxValue(2.0f).timeOffset(params.timeOffset).mode(SquareSignalDesc().period(300)))),
@@ -105,7 +105,7 @@ TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
 {
     auto params = GetParam();
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc().headCell(true).cellType(
                 GeneratorDesc().minValue(0.2f).maxValue(2.0f).timeOffset(params.timeOffset).mode(SawtoothSignalDesc().period(300)))),
@@ -130,7 +130,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
 {
     // With non-additive mode (default), generator should set the signal value directly,
     // overriding any base signal from the neural network
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc()
                                         .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that should be overridden
@@ -151,7 +151,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
 TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
 {
     // With additive mode, generator should add to the base signal from the neural network
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc()
                                         .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that generator adds to
@@ -175,7 +175,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
 TEST_F(GeneratorTests, squareSignal_truncation)
 {
     // With additive mode, generator should add to the base signal from the neural network
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc()
                                         .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that generator adds to

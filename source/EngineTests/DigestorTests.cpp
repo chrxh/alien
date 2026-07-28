@@ -2,8 +2,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -28,7 +28,7 @@ public:
 
 TEST_F(DigestorTests, conversion_noEnergyConversion)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f)),
     });
 
@@ -47,7 +47,7 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
 
 TEST_F(DigestorTests, conversion_highEnergyConversionRate)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f)),
     });
 

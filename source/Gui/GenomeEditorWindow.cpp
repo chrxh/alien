@@ -309,7 +309,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
     auto tab = _tabs.at(_selectedTabIndex);
     auto genome = tab->getGenomeDesc();
 
-    Desc seed;
+    ContentDesc seed;
     seed.addCreature(
         {ObjectDesc()
              .pos(pos)

@@ -7,12 +7,12 @@
 #include <Base/Cache.h>
 #include <Base/Singleton.h>
 
-#include "Desc.h"
+#include "Descs.h"
 #include "GenomeDesc.h"
 #include "SimulationParameters.h"
 
 using GeneIndicesForSubGenome = std::vector<int>;
-using GenotypeToPhenotypeCache = Cache<SubGenomeDesc, Desc, 100000>;
+using GenotypeToPhenotypeCache = Cache<SubGenomeDesc, ContentDesc, 100000>;
 
 class GenomeDescEditService
 {
@@ -32,7 +32,7 @@ public:
 
     struct SeedCollectionResult
     {
-        Desc description;
+        ContentDesc description;
         std::vector<uint64_t> seedCreatureIds;
     };
 
@@ -40,11 +40,11 @@ public:
         std::vector<SubGenomeDesc> const& subGenomes,
         std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache = std::nullopt) const;
 
-    std::vector<Desc> extractPhenotypesFromPreview(Desc&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
-    void removeSeedFromPhenotype(Desc& phenotype) const;
+    std::vector<ContentDesc> extractPhenotypesFromPreview(ContentDesc&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
+    void removeSeedFromPhenotype(ContentDesc& phenotype) const;
 
 private:
-    Desc createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const;
+    ContentDesc createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const;
 
     void adaptDescriptionForPreview(GenomeDesc& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation) const;
 };

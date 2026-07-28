@@ -41,6 +41,6 @@ private:
     DescEditService::GridMultiplyParameters _gridParameters;
     DescEditService::RandomMultiplyParameters _randomParameters;
 
-    Desc _origSelection;
+    ContentDesc _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;
 };

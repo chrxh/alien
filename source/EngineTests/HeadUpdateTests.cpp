@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/ShapeGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -25,7 +25,7 @@ TEST_F(HeadUpdateTests, noUpdate_noHeadCell)
     auto const FrontAngle = 45.0f;
     auto const InitialHeadUpdateId = 4;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId)),
             ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId)),
@@ -56,7 +56,7 @@ TEST_F(HeadUpdateTests, higherHeadUpdateIdLeadsToUpdate)
     auto const FrontAngle = 45.0f;
     auto const InitialHeadUpdateId = 4;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).headCell(true)),
             ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId)),
@@ -110,7 +110,7 @@ TEST_F(HeadUpdateTests, headUpdate)
     auto const FrontAngle = 45.0f;
     auto const InitialHeadUpdateId = 4;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).frontAngle(7.0f).headCell(true)),
             ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).frontAngle(42.0f)),
@@ -141,7 +141,7 @@ TEST_F(HeadUpdateTests, updateRestrictedToSameCreature)
     auto const FrontAngle = 45.0f;
     auto const InitialHeadUpdateId = 4;
 
-    Desc data;
+    ContentDesc data;
 
     data.addCreature(
         {
@@ -208,7 +208,7 @@ TEST_P(HeadUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_twoConne
         else
             return AngleBendingDesc().initialAngle(180.0f);
     }();
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).headCell(true)),
             ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).cellType(MuscleDesc().mode(muscleMode))),
@@ -259,7 +259,7 @@ TEST_P(HeadUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_oneConne
         else
             return AngleBendingDesc().initialAngle(180.0f);
     }();
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).cellType(MuscleDesc().mode(muscleMode)).headCell(true)),
             ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId)),
@@ -306,7 +306,7 @@ TEST_P(HeadUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_initialA
         else
             return AngleBendingDesc();
     }();
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).headCell(true)),
             ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().headUpdateId(InitialHeadUpdateId).cellType(MuscleDesc().mode(muscleMode))),

@@ -3,7 +3,7 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 
 #include "Definitions.h"
 #include "LocationWindow.h"

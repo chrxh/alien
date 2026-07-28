@@ -5,7 +5,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include <EngineKernels/Definitions.h>
@@ -18,8 +18,8 @@ class DescConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescConverterService);
 
 public:
-    Desc convertTOtoDescription(TOs const& to) const;
-    TOs convertDescriptionToTO(Desc const& description) const;
+    ContentDesc convertTOtoDescription(TOs const& to) const;
+    TOs convertDescriptionToTO(ContentDesc const& description) const;
     TOs convertDescriptionToTO(ExtendedObjectDesc const& extendedObject) const;
     TOs convertDescriptionToTO(EnergyDesc const& particle) const;
     TOs convertDescriptionToTO(GenomeDesc const& genome) const;

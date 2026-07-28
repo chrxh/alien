@@ -2,7 +2,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -27,7 +27,7 @@ public:
 
 TEST_F(VoidTests, doNothing_underConstruction)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_Constructing)),
     });
 
@@ -40,7 +40,7 @@ TEST_F(VoidTests, doNothing_underConstruction)
 
 TEST_F(VoidTests, doNothing_activating)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_Activating).activationTime(10)),
     });
 
@@ -53,7 +53,7 @@ TEST_F(VoidTests, doNothing_activating)
 
 TEST_F(VoidTests, destroyWhenReady_singleCell)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_Ready)),
     });
 
@@ -76,7 +76,7 @@ class VoidTests_SimulationMode
     , public testing::WithParamInterface<VoidSimulationMode>
 {
 public:
-    void runTimesteps(Desc& data, int timesteps)
+    void runTimesteps(ContentDesc& data, int timesteps)
     {
         auto mode = GetParam();
         if (mode == VoidSimulationMode::Normal) {
@@ -88,7 +88,7 @@ public:
         }
     }
 
-    Desc getResult()
+    ContentDesc getResult()
     {
         auto mode = GetParam();
         if (mode == VoidSimulationMode::Normal) {
@@ -106,7 +106,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(VoidTests_SimulationMode, destroyWhenReady_neighborsNotDetaching)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
                         ObjectDesc().id(2).pos({10.5f, 10.866f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),

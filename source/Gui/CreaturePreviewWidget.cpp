@@ -40,7 +40,7 @@ _CreaturePreviewWidget::create(GenomeWindowEditData const& genomeEditData, Genom
     return CreaturePreviewWidget(new _CreaturePreviewWidget(genomeEditData, editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& genome, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float width)
 {
     auto phenotypeWithoutSeed = phenotype;
     GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
@@ -370,7 +370,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 }
 
-void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)
+void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult)
 {
     auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(410) : scale(250);
     auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
@@ -511,7 +511,7 @@ void _CreaturePreviewWidget::moveCenter(
     _worldCenter = startWorldPosition - deltaWorldPos;
 }
 
-void _CreaturePreviewWidget::updatePhenotype(Desc& phenotype, CellPreviewDesc const& editedCell) const
+void _CreaturePreviewWidget::updatePhenotype(ContentDesc& phenotype, CellPreviewDesc const& editedCell) const
 {
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
