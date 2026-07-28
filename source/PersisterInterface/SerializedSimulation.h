@@ -4,6 +4,5 @@
 
 struct SerializedSimulation
 {
-    std::string mainData;       // Binary, includes the statistics
-    std::string auxiliaryData;  // JSON
+    std::string mainData;  // Binary, includes the statistics and the simulation parameters
 };

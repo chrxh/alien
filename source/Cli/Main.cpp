@@ -28,7 +28,6 @@ int main(int argc, char** argv)
         // Parse command line arguments
         std::string inputFilename;
         std::string outputFilename;
-        std::string statisticsFilename;
         int timesteps = 0;
         bool profile = false;
         app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");

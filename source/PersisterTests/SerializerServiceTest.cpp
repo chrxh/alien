@@ -150,12 +150,6 @@ protected:
         }
     }
 
-    std::filesystem::path getSettingsFilename(std::filesystem::path const& simulationFilename)
-    {
-        auto result = simulationFilename;
-        return result.replace_extension(std::filesystem::path(".settings.json"));
-    }
-
     std::string readFile(std::filesystem::path const& filename)
     {
         std::ifstream stream(filename, std::ios::binary);
@@ -184,7 +178,6 @@ TEST_F(SerializerServiceTests, simulationFiles)
     before.statistics.colors.emplace_back(createOverallSample(100));
 
     ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
-    EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
 
     DeserializedSimulation after;
     ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
@@ -200,7 +193,6 @@ TEST_F(SerializerServiceTests, simulationFiles)
 
     EXPECT_TRUE(_serializerService->deleteSimulation(filename));
     EXPECT_FALSE(std::filesystem::exists(filename));
-    EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
 }
 
 TEST_F(SerializerServiceTests, simulationParametersFile)
@@ -216,46 +208,6 @@ TEST_F(SerializerServiceTests, simulationParametersFile)
     ASSERT_TRUE(_serializerService->deserializeSimulationParametersFromFile(after, filename));
 
     EXPECT_EQ(before.timestepSize.value, after.timestepSize.value);
-}
-
-TEST_F(SerializerServiceTests, simulationParametersFromSimulationFile)
-{
-    auto filename = _testDirectory / "simulation.sim";
-
-    DeserializedSimulation before;
-    before.auxiliaryData.simulationParameters.timestepSize.value = 0.5f;
-    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
-
-    // A settings file of an older version does not override the simulation file
-    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(getSettingsFilename(filename), SimulationParameters()));
-
-    DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
-
-    EXPECT_EQ(0.5f, after.auxiliaryData.simulationParameters.timestepSize.value);
-}
-
-TEST_F(SerializerServiceTests, legacySimulationParametersFromSettingsFile)
-{
-    auto filename = _testDirectory / "simulation.sim";
-
-    // Older versions stored the simulation parameters in the settings file only
-    Desc mainData;
-    mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
-    ASSERT_TRUE(_serializerService->serializeContentToFile(filename, mainData));
-
-    SimulationParameters parameters;
-    parameters.timestepSize.value = 0.5f;
-    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(getSettingsFilename(filename), parameters));
-
-    DeserializedSimulation loaded;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(loaded, filename));
-
-    EXPECT_EQ(0.5f, loaded.auxiliaryData.simulationParameters.timestepSize.value);
-    EXPECT_TRUE(_descTestDataFactory->compare(mainData, loaded.mainData));
-
-    EXPECT_TRUE(_serializerService->deleteSimulation(filename));
-    EXPECT_FALSE(std::filesystem::exists(getSettingsFilename(filename)));
 }
 
 TEST_F(SerializerServiceTests, statisticsHistory)

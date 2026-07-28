@@ -346,7 +346,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
     SerializedSimulation serializedSim;
     if (!cachedSimulation.has_value()) {
-        if (!NetworkService::get().downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, requestData.resourceId)) {
+        if (!NetworkService::get().downloadResource(serializedSim.mainData, requestData.resourceId)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to download " + dataTypeString + "."});
         }
@@ -393,7 +393,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     DownloadNetworkResourceResultData resultData;
 
     std::string mainData;
-    std::string settings;
     IntVector2D size;
     int numObjects = 0;
 
@@ -424,7 +423,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for uploading."});
         }
         mainData = serializedSim.mainData;
-        settings = serializedSim.auxiliaryData;
         size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
@@ -451,7 +449,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             size,
             numObjects,
             mainData,
-            settings,
             resourceType,
             requestData.workspaceType)) {
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -481,7 +478,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     auto resourceType = std::holds_alternative<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data) ? NetworkResourceType_Simulation
                                                                                                                     : NetworkResourceType_Genome;
     std::string mainData;
-    std::string settings;
     IntVector2D worldSize;
     int numObjects = 0;
 
@@ -510,14 +506,13 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for replacing."});
         }
         mainData = serializedSim.mainData;
-        settings = serializedSim.auxiliaryData;
         worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
     }
 
-    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, settings)) {
+    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData)) {
 
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         return std::make_shared<_PersisterRequestError>(
