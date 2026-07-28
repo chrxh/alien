@@ -1990,9 +1990,6 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
             serializeSettings(input.auxiliaryData.simulationParameters, stream);
             output.auxiliaryData = stream.str();
         }
-
-        // The statistics are part of the main data
-        output.statistics.clear();
         return true;
     } catch (...) {
         return false;

@@ -346,7 +346,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
     SerializedSimulation serializedSim;
     if (!cachedSimulation.has_value()) {
-        if (!NetworkService::get().downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, requestData.resourceId)) {
+        if (!NetworkService::get().downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, requestData.resourceId)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to download " + dataTypeString + "."});
         }
@@ -394,7 +394,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     std::string mainData;
     std::string settings;
-    std::string statistics;
     IntVector2D size;
     int numObjects = 0;
 
@@ -426,7 +425,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         mainData = serializedSim.mainData;
         settings = serializedSim.auxiliaryData;
-        statistics = serializedSim.statistics;
         size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
@@ -454,7 +452,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             numObjects,
             mainData,
             settings,
-            statistics,
             resourceType,
             requestData.workspaceType)) {
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -485,7 +482,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                                                                                                                     : NetworkResourceType_Genome;
     std::string mainData;
     std::string settings;
-    std::string statistics;
     IntVector2D worldSize;
     int numObjects = 0;
 
@@ -515,14 +511,13 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         mainData = serializedSim.mainData;
         settings = serializedSim.auxiliaryData;
-        statistics = serializedSim.statistics;
         worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
     }
 
-    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, settings, statistics)) {
+    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, settings)) {
 
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         return std::make_shared<_PersisterRequestError>(

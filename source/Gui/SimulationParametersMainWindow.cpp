@@ -431,7 +431,10 @@ void SimulationParametersMainWindow::processExpertSettings()
 void SimulationParametersMainWindow::onOpenParameters()
 {
     GenericFileDialog::get().showOpenFileDialog(
-        "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
+        "Open simulation parameters",
+        "Simulation settings (*.settings.json){.settings.json,.json},.*",
+        _fileDialogPath,
+        [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _fileDialogPath = firstFilenameCopy.remove_filename().string();
@@ -449,7 +452,10 @@ void SimulationParametersMainWindow::onOpenParameters()
 void SimulationParametersMainWindow::onSaveParameters()
 {
     GenericFileDialog::get().showSaveFileDialog(
-        "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
+        "Save simulation parameters",
+        "Simulation settings (*.settings.json){.settings.json,.json},.*",
+        _fileDialogPath,
+        [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _fileDialogPath = firstFilenameCopy.remove_filename().string();

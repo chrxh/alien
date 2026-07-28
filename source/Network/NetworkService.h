@@ -59,17 +59,10 @@ public:
         int numObjects,
         std::string const& data,
         std::string const& settings,
-        std::string const& statistics,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
-    bool replaceResource(
-        std::string const& resourceId,
-        IntVector2D const& worldSize,
-        int numObjects,
-        std::string const& data,
-        std::string const& settings,
-        std::string const& statistics);
-    bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
+    bool replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& data, std::string const& settings);
+    bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string const& simId);
     void incDownloadCounter(std::string const& simId);
     bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);
     bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
@@ -85,7 +78,6 @@ private:
     {
         std::string content;
         std::string auxiliaryData;
-        std::string statistics;
     };
     Cache<std::string, ResourceData, 20> _downloadCache;
 };
