@@ -2,6 +2,8 @@
 
 #include <thread>
 
+#include <filesystem>
+
 #include <glad/glad.h>
 
 #include <imgui.h>
@@ -164,6 +166,11 @@ void MainLoopController::processLoadingScreen()
         }
         if (requestedSimState.value() == PersisterRequestState::Error) {
             GenericMessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
+
+            try {
+                std::filesystem::remove_all(Const::AutosavePath);
+            } catch (...) {
+            }
 
             DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.worldSize.x = 1000;
