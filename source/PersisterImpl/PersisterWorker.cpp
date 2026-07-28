@@ -209,12 +209,12 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     try {
         timestamp = std::chrono::system_clock::now();
         deserializedData.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
-        deserializedData.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
-        deserializedData.auxiliaryData.zoom = requestData.zoom;
-        deserializedData.auxiliaryData.center = requestData.center;
-        deserializedData.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
-        deserializedData.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
-        deserializedData.auxiliaryData.timestep = _SimulationFacade::get()->getCurrentTimestep();
+        deserializedData.realTime = _SimulationFacade::get()->getRealTime();
+        deserializedData.zoom = requestData.zoom;
+        deserializedData.center = requestData.center;
+        deserializedData.worldSize = _SimulationFacade::get()->getWorldSize();
+        deserializedData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+        deserializedData.timestep = _SimulationFacade::get()->getCurrentTimestep();
         deserializedData.mainData = _SimulationFacade::get()->getSimulationData();
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
@@ -226,7 +226,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     try {
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
-            filename = generateFilename(filename, deserializedData.auxiliaryData.timestep);
+            filename = generateFilename(filename, deserializedData.timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             return std::make_shared<_PersisterRequestError>(
@@ -239,8 +239,8 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
             request->getRequestId(),
             SaveSimulationResultData{
                 .filename = filename,
-                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName.value,
-                .timestep = deserializedData.auxiliaryData.timestep,
+                .projectName = deserializedData.simulationParameters.projectName.value,
+                .timestep = deserializedData.timestep,
                 .timestamp = timestamp});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
@@ -265,11 +265,10 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
         if (requestData.initSimulation) {
             try {
                 _SimulationFacade::get()->closeSimulation();
-                _SimulationFacade::get()->newSimulation(
-                    deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.worldSize, deserializedData.auxiliaryData.simulationParameters);
+                _SimulationFacade::get()->newSimulation(deserializedData.timestep, deserializedData.worldSize, deserializedData.simulationParameters);
                 _SimulationFacade::get()->setSimulationData(deserializedData.mainData);
                 _SimulationFacade::get()->setStatisticsHistory(deserializedData.statistics);
-                _SimulationFacade::get()->setRealTime(deserializedData.auxiliaryData.realTime);
+                _SimulationFacade::get()->setRealTime(deserializedData.realTime);
             } catch (CudaMemoryAllocationException const& exception) {
                 return std::make_shared<_PersisterRequestError>(
                     request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{exception.what()});
@@ -402,12 +401,12 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = _SimulationFacade::get()->getCurrentTimestep();
-            deserializedSim.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
-            deserializedSim.auxiliaryData.zoom = simulationData.zoom;
-            deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
-            deserializedSim.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+            deserializedSim.timestep = _SimulationFacade::get()->getCurrentTimestep();
+            deserializedSim.realTime = _SimulationFacade::get()->getRealTime();
+            deserializedSim.zoom = simulationData.zoom;
+            deserializedSim.center = simulationData.center;
+            deserializedSim.worldSize = _SimulationFacade::get()->getWorldSize();
+            deserializedSim.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
             deserializedSim.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
             deserializedSim.mainData = _SimulationFacade::get()->getSimulationData();
         } catch (...) {
@@ -421,7 +420,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for uploading."});
         }
-        size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
+        size = {deserializedSim.worldSize.x, deserializedSim.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
@@ -483,12 +482,12 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = _SimulationFacade::get()->getCurrentTimestep();
-            deserializedSim.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
-            deserializedSim.auxiliaryData.zoom = simulationData.zoom;
-            deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
-            deserializedSim.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+            deserializedSim.timestep = _SimulationFacade::get()->getCurrentTimestep();
+            deserializedSim.realTime = _SimulationFacade::get()->getRealTime();
+            deserializedSim.zoom = simulationData.zoom;
+            deserializedSim.center = simulationData.center;
+            deserializedSim.worldSize = _SimulationFacade::get()->getWorldSize();
+            deserializedSim.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
             deserializedSim.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
             deserializedSim.mainData = _SimulationFacade::get()->getSimulationData();
         } catch (...) {
@@ -502,7 +501,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for replacing."});
         }
-        worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
+        worldSize = {deserializedSim.worldSize.x, deserializedSim.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
@@ -635,7 +634,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
-            filename = generateFilename(filename, deserializedData.auxiliaryData.timestep);
+            filename = generateFilename(filename, deserializedData.timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             return std::make_shared<_PersisterRequestError>(
@@ -647,8 +646,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             request->getRequestId(),
             SaveDeserializedSimulationResultData{
                 .filename = filename,
-                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName.value,
-                .timestep = deserializedData.auxiliaryData.timestep,
+                .projectName = deserializedData.simulationParameters.projectName.value,
+                .timestep = deserializedData.timestep,
                 .timestamp = requestData.sharedDeserializedSimulation->getTimestamp()});
 
         if (requestData.resetDeserializedSimulation) {

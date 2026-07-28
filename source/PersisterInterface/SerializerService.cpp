@@ -1,6 +1,7 @@
 #include "SerializerService.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <optional>
@@ -88,7 +89,8 @@ namespace cereal
         std::vector<std::vector<int8_t>>,
         std::vector<std::vector<int>>,
         std::vector<std::vector<float>>,
-        IntVector2D>;
+        IntVector2D,
+        std::chrono::milliseconds>;
 
     using AttributeMap = std::unordered_map<int, VariantData>;
 
@@ -277,6 +279,17 @@ namespace cereal
     {
         ar(data.x, data.y);
     }
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, std::chrono::milliseconds& data)
+    {
+        auto count = static_cast<uint64_t>(data.count());
+        ar(count);
+        if (task == SerializationTask::Load) {
+            data = std::chrono::milliseconds(count);
+        }
+    }
+    SPLIT_SERIALIZATION(std::chrono::milliseconds)
 }
 
 /************************************************************************/
@@ -1920,7 +1933,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         }
         deserializeSimulation(data, stream);
 
-        ParametersValidationService::get().validateAndCorrect({data.auxiliaryData.worldSize}, data.auxiliaryData.simulationParameters);
+        ParametersValidationService::get().validateAndCorrect({data.worldSize}, data.simulationParameters);
         return true;
     } catch (...) {
         return false;
@@ -1964,7 +1977,7 @@ bool SerializerService::deserializeSimulationFromString(DeserializedSimulation& 
         }
         deserializeSimulation(output, stream);
 
-        ParametersValidationService::get().validateAndCorrect({output.auxiliaryData.worldSize}, output.auxiliaryData.simulationParameters);
+        ParametersValidationService::get().validateAndCorrect({output.worldSize}, output.simulationParameters);
         return true;
     } catch (...) {
         return false;
@@ -2621,20 +2634,17 @@ namespace cereal
         std::string encodedSimulationParameters;
         if (task == SerializationTask::Save) {
             timelines = convertToTimelines(data.statistics, data.mainData);
-            encodedSimulationParameters = SettingsParserService::get().encodeSimulationParametersToString(data.auxiliaryData.simulationParameters);
+            encodedSimulationParameters = SettingsParserService::get().encodeSimulationParametersToString(data.simulationParameters);
         }
         {
-            SettingsForSerialization defaultSettings;
-            auto& settings = data.auxiliaryData;
+            DeserializedSimulation defaultData;
             auto scope = getSerializationScope(task, ar);
 
-            scope.addMember(Id_Simulation_Timestep, settings.timestep, defaultSettings.timestep);
-            auto realTimeInMs = static_cast<uint64_t>(settings.realTime.count());
-            scope.addMember(Id_Simulation_RealTime, realTimeInMs, static_cast<uint64_t>(defaultSettings.realTime.count()));
-            settings.realTime = std::chrono::milliseconds(realTimeInMs);
-            scope.addMember(Id_Simulation_Zoom, settings.zoom, defaultSettings.zoom);
-            scope.addMember(Id_Simulation_Center, settings.center, defaultSettings.center);
-            scope.addMember(Id_Simulation_WorldSize, settings.worldSize, defaultSettings.worldSize);
+            scope.addMember(Id_Simulation_Timestep, data.timestep, defaultData.timestep);
+            scope.addMember(Id_Simulation_RealTime, data.realTime, defaultData.realTime);
+            scope.addMember(Id_Simulation_Zoom, data.zoom, defaultData.zoom);
+            scope.addMember(Id_Simulation_Center, data.center, defaultData.center);
+            scope.addMember(Id_Simulation_WorldSize, data.worldSize, defaultData.worldSize);
             scope.addMember(Id_Simulation_SimulationParameters, encodedSimulationParameters, std::string());
 
             scope.addDesc(Id_Desc_Objects, data.mainData._objects);
@@ -2646,7 +2656,7 @@ namespace cereal
         if (task == SerializationTask::Load) {
             data.statistics = convertToStatisticsHistory(timelines);
             if (!encodedSimulationParameters.empty()) {
-                data.auxiliaryData.simulationParameters = SettingsParserService::get().decodeSimulationParametersFromString(encodedSimulationParameters);
+                data.simulationParameters = SettingsParserService::get().decodeSimulationParametersFromString(encodedSimulationParameters);
             }
         }
     }

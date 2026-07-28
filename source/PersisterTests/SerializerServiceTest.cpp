@@ -169,12 +169,12 @@ TEST_F(SerializerServiceTests, simulationFiles)
 
     DeserializedSimulation before;
     before.mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
-    before.auxiliaryData.timestep = 1234;
-    before.auxiliaryData.realTime = std::chrono::milliseconds(5678);
-    before.auxiliaryData.zoom = 3.5f;
-    before.auxiliaryData.center = {111.0f, 222.0f};
-    before.auxiliaryData.worldSize = {700, 300};
-    before.auxiliaryData.simulationParameters.timestepSize.value = 0.5f;
+    before.timestep = 1234;
+    before.realTime = std::chrono::milliseconds(5678);
+    before.zoom = 3.5f;
+    before.center = {111.0f, 222.0f};
+    before.worldSize = {700, 300};
+    before.simulationParameters.timestepSize.value = 0.5f;
     before.statistics.colors.emplace_back(createOverallSample(100));
 
     ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
@@ -182,12 +182,12 @@ TEST_F(SerializerServiceTests, simulationFiles)
     DeserializedSimulation after;
     ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
 
-    EXPECT_EQ(before.auxiliaryData.timestep, after.auxiliaryData.timestep);
-    EXPECT_EQ(before.auxiliaryData.realTime, after.auxiliaryData.realTime);
-    EXPECT_EQ(before.auxiliaryData.zoom, after.auxiliaryData.zoom);
-    EXPECT_EQ(before.auxiliaryData.center, after.auxiliaryData.center);
-    EXPECT_EQ(before.auxiliaryData.worldSize, after.auxiliaryData.worldSize);
-    EXPECT_EQ(before.auxiliaryData.simulationParameters.timestepSize.value, after.auxiliaryData.simulationParameters.timestepSize.value);
+    EXPECT_EQ(before.timestep, after.timestep);
+    EXPECT_EQ(before.realTime, after.realTime);
+    EXPECT_EQ(before.zoom, after.zoom);
+    EXPECT_EQ(before.center, after.center);
+    EXPECT_EQ(before.worldSize, after.worldSize);
+    EXPECT_EQ(before.simulationParameters.timestepSize.value, after.simulationParameters.timestepSize.value);
     EXPECT_TRUE(_descTestDataFactory->compare(before.mainData, after.mainData));
     compare(before.statistics, after.statistics);
 

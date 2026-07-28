@@ -11,7 +11,6 @@
 
 #include "Definitions.h"
 #include "DeserializedSimulation.h"
-#include "SettingsForSerialization.h"
 
 class SerializerService
 {

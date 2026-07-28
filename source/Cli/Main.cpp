@@ -61,10 +61,10 @@ int main(int argc, char** argv)
         auto startTimepoint = std::chrono::steady_clock::now();
 
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-        simulationFacade->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.worldSize, simData.auxiliaryData.simulationParameters);
+        simulationFacade->newSimulation(simData.timestep, simData.worldSize, simData.simulationParameters);
         simulationFacade->setSimulationData(simData.mainData);
         simulationFacade->setStatisticsHistory(simData.statistics);
-        simulationFacade->setRealTime(simData.auxiliaryData.realTime);
+        simulationFacade->setRealTime(simData.realTime);
         std::cout << "Device: " << simulationFacade->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
@@ -82,11 +82,11 @@ int main(int argc, char** argv)
 
         // Write output simulation file
         std::cout << "Writing output" << std::endl;
-        simData.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
+        simData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
         simData.mainData = simulationFacade->getSimulationData();
-        simData.auxiliaryData.simulationParameters = simulationFacade->getSimulationParameters();
+        simData.simulationParameters = simulationFacade->getSimulationParameters();
         simData.statistics = simulationFacade->getStatisticsHistory().getCopiedData();
-        simData.auxiliaryData.realTime = simulationFacade->getRealTime();
+        simData.realTime = simulationFacade->getRealTime();
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;

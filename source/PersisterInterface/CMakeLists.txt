@@ -42,7 +42,6 @@ add_library(PersisterInterface
     SerializerService.cpp
     SerializerService.h
     ZstdStream.h
-    SettingsForSerialization.h
     SettingsParserService.cpp
     SettingsParserService.h
     SharedDeserializedSimulation.h
