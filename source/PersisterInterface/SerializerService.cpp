@@ -2533,6 +2533,26 @@ namespace
         }
         return result;
     }
+
+    StatisticsTimelines convertToTimelines(StatisticsHistoryData const& statistics)
+    {
+        StatisticsTimelines result;
+        result.overallTimeline = convertToTimeline(statistics.colors);
+        for (auto const& [lineageId, samples] : statistics.lineages) {
+            result.lineageTimelines.emplace(lineageId, convertToTimeline(samples));
+        }
+        return result;
+    }
+
+    StatisticsHistoryData convertToStatisticsHistory(StatisticsTimelines const& timelines)
+    {
+        StatisticsHistoryData result;
+        result.colors = convertToSamples(timelines.overallTimeline);
+        for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
+            result.lineages.emplace(lineageId, convertToSamples(timeline));
+        }
+        return result;
+    }
 }
 
 namespace cereal
@@ -2582,13 +2602,22 @@ namespace cereal
     SPLIT_SERIALIZATION(LineageTimeline)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, StatisticsTimelines& data)
+    void loadSave(SerializationTask task, Archive& ar, StatisticsHistoryData& data)
     {
-        auto scope = getSerializationScope(task, ar);
-        scope.addDesc(Id_StatisticsHistory_Overall, data.overallTimeline);
-        scope.addDesc(Id_StatisticsHistory_Lineages, data.lineageTimelines);
+        StatisticsTimelines timelines;
+        if (task == SerializationTask::Save) {
+            timelines = convertToTimelines(data);
+        }
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addDesc(Id_StatisticsHistory_Overall, timelines.overallTimeline);
+            scope.addDesc(Id_StatisticsHistory_Lineages, timelines.lineageTimelines);
+        }
+        if (task == SerializationTask::Load) {
+            data = convertToStatisticsHistory(timelines);
+        }
     }
-    SPLIT_SERIALIZATION(StatisticsTimelines)
+    SPLIT_SERIALIZATION(StatisticsHistoryData)
 }
 
 /************************************************************************/
@@ -2603,23 +2632,16 @@ namespace
     auto constexpr Id_Simulation_WorldSize = 104;
     auto constexpr Id_Simulation_Statistics = 105;
     auto constexpr Id_Simulation_SimulationParameters = 106;
+    auto constexpr Id_Simulation_Content = 107;
 
-    StatisticsTimelines convertToTimelines(StatisticsHistoryData const& statistics, ContentDesc const& mainData)
-    {
-        StatisticsTimelines result;
-        result.overallTimeline = convertToTimeline(statistics.colors);
-        for (auto const lineageId : selectLineagesToSave(statistics.lineages, countCreaturesByLineage(mainData))) {
-            result.lineageTimelines.emplace(lineageId, convertToTimeline(statistics.lineages.at(lineageId)));
-        }
-        return result;
-    }
+    auto constexpr Id_SimulationParameters_Encoded = 0;
 
-    StatisticsHistoryData convertToStatisticsHistory(StatisticsTimelines const& timelines)
+    StatisticsHistoryData selectStatisticsToSave(StatisticsHistoryData const& statistics, ContentDesc const& mainData)
     {
         StatisticsHistoryData result;
-        result.colors = convertToSamples(timelines.overallTimeline);
-        for (auto const& [lineageId, timeline] : timelines.lineageTimelines) {
-            result.lineages.emplace(lineageId, convertToSamples(timeline));
+        result.colors = statistics.colors;
+        for (auto const lineageId : selectLineagesToSave(statistics.lineages, countCreaturesByLineage(mainData))) {
+            result.lineages.emplace(lineageId, statistics.lineages.at(lineageId));
         }
         return result;
     }
@@ -2628,33 +2650,63 @@ namespace
 namespace cereal
 {
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SimulationParameters& data)
+    {
+        std::string encodedParameters;
+        if (task == SerializationTask::Save) {
+            encodedParameters = SettingsParserService::get().encodeSimulationParametersToString(data);
+        }
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addMember(Id_SimulationParameters_Encoded, encodedParameters, std::string());
+        }
+        if (task == SerializationTask::Load && !encodedParameters.empty()) {
+            data = SettingsParserService::get().decodeSimulationParametersFromString(encodedParameters);
+        }
+    }
+    SPLIT_SERIALIZATION(SimulationParameters)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DeserializedSimulation& data)
     {
-        StatisticsTimelines timelines;
+        StatisticsHistoryData statistics;
         std::string encodedSimulationParameters;
         if (task == SerializationTask::Save) {
-            timelines = convertToTimelines(data.statistics, data.mainData);
-            encodedSimulationParameters = SettingsParserService::get().encodeSimulationParametersToString(data.simulationParameters);
+            statistics = selectStatisticsToSave(data.statistics, data.mainData);
         }
         {
             DeserializedSimulation defaultData;
             auto scope = getSerializationScope(task, ar);
 
             scope.addMember(Id_Simulation_Timestep, data.timestep, defaultData.timestep);
-            scope.addMember(Id_Simulation_RealTime, data.realTime, defaultData.realTime);
+
+            // Migration: loading still expects the old format, saving already writes the new one
+            if (task == SerializationTask::Load) {
+                uint64_t realTimeInMs = 0;
+                scope.addMember(Id_Simulation_RealTime, realTimeInMs, static_cast<uint64_t>(defaultData.realTime.count()));
+                data.realTime = std::chrono::milliseconds(realTimeInMs);
+            } else {
+                scope.addMember(Id_Simulation_RealTime, data.realTime, defaultData.realTime);
+            }
             scope.addMember(Id_Simulation_Zoom, data.zoom, defaultData.zoom);
             scope.addMember(Id_Simulation_Center, data.center, defaultData.center);
             scope.addMember(Id_Simulation_WorldSize, data.worldSize, defaultData.worldSize);
-            scope.addMember(Id_Simulation_SimulationParameters, encodedSimulationParameters, std::string());
 
-            scope.addDesc(Id_Desc_Objects, data.mainData._objects);
-            scope.addDesc(Id_Desc_Energies, data.mainData._energies);
-            scope.addDesc(Id_Desc_Creatures, data.mainData._creatures);
-            scope.addDesc(Id_Desc_Genomes, data.mainData._genomes);
-            scope.addDesc(Id_Simulation_Statistics, timelines);
+            // Migration: loading still expects the old format, saving already writes the new one
+            if (task == SerializationTask::Load) {
+                scope.addMember(Id_Simulation_SimulationParameters, encodedSimulationParameters, std::string());
+                scope.addDesc(Id_Desc_Objects, data.mainData._objects);
+                scope.addDesc(Id_Desc_Energies, data.mainData._energies);
+                scope.addDesc(Id_Desc_Creatures, data.mainData._creatures);
+                scope.addDesc(Id_Desc_Genomes, data.mainData._genomes);
+            } else {
+                scope.addDesc(Id_Simulation_SimulationParameters, data.simulationParameters);
+                scope.addDesc(Id_Simulation_Content, data.mainData);
+            }
+            scope.addDesc(Id_Simulation_Statistics, statistics);
         }
         if (task == SerializationTask::Load) {
-            data.statistics = convertToStatisticsHistory(timelines);
+            data.statistics = std::move(statistics);
             if (!encodedSimulationParameters.empty()) {
                 data.simulationParameters = SettingsParserService::get().decodeSimulationParametersFromString(encodedSimulationParameters);
             }
