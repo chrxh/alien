@@ -2670,7 +2670,6 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DeserializedSimulation& data)
     {
         StatisticsHistoryData statistics;
-        std::string encodedSimulationParameters;
         if (task == SerializationTask::Save) {
             statistics = selectStatisticsToSave(data.statistics, data.mainData);
         }
@@ -2679,37 +2678,17 @@ namespace cereal
             auto scope = getSerializationScope(task, ar);
 
             scope.addMember(Id_Simulation_Timestep, data.timestep, defaultData.timestep);
-
-            // Migration: loading still expects the old format, saving already writes the new one
-            if (task == SerializationTask::Load) {
-                uint64_t realTimeInMs = 0;
-                scope.addMember(Id_Simulation_RealTime, realTimeInMs, static_cast<uint64_t>(defaultData.realTime.count()));
-                data.realTime = std::chrono::milliseconds(realTimeInMs);
-            } else {
-                scope.addMember(Id_Simulation_RealTime, data.realTime, defaultData.realTime);
-            }
+            scope.addMember(Id_Simulation_RealTime, data.realTime, defaultData.realTime);
             scope.addMember(Id_Simulation_Zoom, data.zoom, defaultData.zoom);
             scope.addMember(Id_Simulation_Center, data.center, defaultData.center);
             scope.addMember(Id_Simulation_WorldSize, data.worldSize, defaultData.worldSize);
 
-            // Migration: loading still expects the old format, saving already writes the new one
-            if (task == SerializationTask::Load) {
-                scope.addMember(Id_Simulation_SimulationParameters, encodedSimulationParameters, std::string());
-                scope.addDesc(Id_Desc_Objects, data.mainData._objects);
-                scope.addDesc(Id_Desc_Energies, data.mainData._energies);
-                scope.addDesc(Id_Desc_Creatures, data.mainData._creatures);
-                scope.addDesc(Id_Desc_Genomes, data.mainData._genomes);
-            } else {
-                scope.addDesc(Id_Simulation_SimulationParameters, data.simulationParameters);
-                scope.addDesc(Id_Simulation_Content, data.mainData);
-            }
+            scope.addDesc(Id_Simulation_SimulationParameters, data.simulationParameters);
+            scope.addDesc(Id_Simulation_Content, data.mainData);
             scope.addDesc(Id_Simulation_Statistics, statistics);
         }
         if (task == SerializationTask::Load) {
             data.statistics = std::move(statistics);
-            if (!encodedSimulationParameters.empty()) {
-                data.simulationParameters = SettingsParserService::get().decodeSimulationParametersFromString(encodedSimulationParameters);
-            }
         }
     }
     SPLIT_SERIALIZATION(DeserializedSimulation)
