@@ -344,9 +344,9 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (requestData.resourceType == NetworkResourceType_Simulation) {
         cachedSimulation = requestData.downloadCache->find(requestData.resourceId);
     }
-    SerializedSimulation serializedSim;
+    std::string serializedSim;
     if (!cachedSimulation.has_value()) {
-        if (!NetworkService::get().downloadResource(serializedSim.mainData, requestData.resourceId)) {
+        if (!NetworkService::get().downloadResource(serializedSim, requestData.resourceId)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to download " + dataTypeString + "."});
         }
@@ -355,7 +355,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (requestData.resourceType == NetworkResourceType_Simulation) {
         DeserializedSimulation deserializedSimulation;
         if (!cachedSimulation.has_value()) {
-            if (!SerializerService::get().deserializeSimulationFromStrings(deserializedSimulation, serializedSim)) {
+            if (!SerializerService::get().deserializeSimulationFromString(deserializedSimulation, serializedSim)) {
                 return std::make_shared<_PersisterRequestError>(
                     request->getRequestId(),
                     request->getSenderInfo().senderId,
@@ -371,7 +371,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     } else {
         THROW_NOT_IMPLEMENTED();
         //std::vector<uint8_t> genome;
-        //if (!SerializerService::get().deserializeGenomeFromString(genome, serializedSim.mainData)) {
+        //if (!SerializerService::get().deserializeGenomeFromString(genome, serializedSim)) {
         //    return std::make_shared<_PersisterRequestError>(
         //        request->getRequestId(),
         //        request->getSenderInfo().senderId,
@@ -417,12 +417,10 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 PersisterErrorInfo{"The simulation could not be uploaded because no valid data could be obtained from the GPU."});
         }
 
-        SerializedSimulation serializedSim;
-        if (!SerializerService::get().serializeSimulationToStrings(serializedSim, deserializedSim)) {
+        if (!SerializerService::get().serializeSimulationToString(mainData, deserializedSim)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for uploading."});
         }
-        mainData = serializedSim.mainData;
         size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
@@ -500,12 +498,10 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 PersisterErrorInfo{"The simulation could not be replaced because no valid data could be obtained from the GPU."});
         }
 
-        SerializedSimulation serializedSim;
-        if (!SerializerService::get().serializeSimulationToStrings(serializedSim, deserializedSim)) {
+        if (!SerializerService::get().serializeSimulationToString(mainData, deserializedSim)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for replacing."});
         }
-        mainData = serializedSim.mainData;
         worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {

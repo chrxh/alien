@@ -26,11 +26,11 @@ public:
     void testSerializationAndDeserialization(Desc const& data)
     {
         DeserializedSimulation deserializedSimulationBefore{.mainData = data};
-        SerializedSimulation serializedSimulation;
-        _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
+        std::string serializedSimulation;
+        _serializerService->serializeSimulationToString(serializedSimulation, deserializedSimulationBefore);
 
         DeserializedSimulation deserializedSimulationAfter;
-        _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
+        _serializerService->deserializeSimulationFromString(deserializedSimulationAfter, serializedSimulation);
 
         EXPECT_TRUE(_descTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
     }
@@ -220,11 +220,11 @@ TEST_F(SerializerServiceTests, statisticsHistory)
     before.statistics.lineages.emplace(42, std::vector{createLineageSample(3000)});
     before.statistics.lineages.emplace(43, std::vector<LineageSample>{});
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
     DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
     compare(before.statistics, after.statistics);
 }
@@ -243,11 +243,11 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithManyLineages)
         before.statistics.lineages.emplace(lineageId, std::vector{createLineageSample(1000, toDouble(NumLineages - lineageId))});
     }
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
     DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
     // Only the lineages with the most creatures are saved
     StatisticsHistoryData expected;
@@ -281,11 +281,11 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
         before.statistics.colors.emplace_back(createSample(toDouble(i) * 100));
     }
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
     DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
     compare(before.statistics, after.statistics);
 }
@@ -294,11 +294,11 @@ TEST_F(SerializerServiceTests, emptyStatisticsHistory)
 {
     DeserializedSimulation before;
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
     DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
     EXPECT_TRUE(after.statistics.colors.empty());
     EXPECT_TRUE(after.statistics.lineages.empty());
