@@ -1937,7 +1937,7 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
     }
 }
 
-bool SerializerService::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input) const
+bool SerializerService::serializeSimulationToString(std::string& output, DeserializedSimulation const& input) const
 {
     try {
         std::stringstream stdStream;
@@ -1947,17 +1947,17 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
         }
         serializeSimulation(input, stream);
         stream.flush();
-        output.mainData = stdStream.str();
+        output = stdStream.str();
         return true;
     } catch (...) {
         return false;
     }
 }
 
-bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const
+bool SerializerService::deserializeSimulationFromString(DeserializedSimulation& output, std::string const& input) const
 {
     try {
-        std::stringstream stdStream(input.mainData);
+        std::stringstream stdStream(input);
         zstd::istream stream(stdStream);
         if (!stream) {
             return false;

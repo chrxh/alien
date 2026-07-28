@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
@@ -10,7 +11,6 @@
 
 #include "Definitions.h"
 #include "DeserializedSimulation.h"
-#include "SerializedSimulation.h"
 #include "SettingsForSerialization.h"
 
 class SerializerService
@@ -22,8 +22,8 @@ public:
     bool deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename) const;
     bool deleteSimulation(std::filesystem::path const& filename) const;
 
-    bool serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input) const;
-    bool deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const;
+    bool serializeSimulationToString(std::string& output, DeserializedSimulation const& input) const;
+    bool deserializeSimulationFromString(DeserializedSimulation& output, std::string const& input) const;
 
     bool serializeGenomeToFile(std::filesystem::path const& filename, GenomeDesc const& genome) const;
     bool deserializeGenomeFromFile(GenomeDesc& genome, std::filesystem::path const& filename) const;
