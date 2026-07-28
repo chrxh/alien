@@ -51,7 +51,7 @@ int main(int argc, char** argv)
             std::cout << "No input file given." << std::endl;
             return 1;
         }
-        DeserializedSimulation simData;
+        SimulationDesc simData;
         if (!SerializerService::get().deserializeSimulationFromFiles(simData, inputFilename)) {
             std::cout << "Could not read from input files." << std::endl;
             return 1;
@@ -61,10 +61,10 @@ int main(int argc, char** argv)
         auto startTimepoint = std::chrono::steady_clock::now();
 
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-        simulationFacade->newSimulation(simData.timestep, simData.worldSize, simData.simulationParameters);
-        simulationFacade->setSimulationData(simData.mainData);
-        simulationFacade->setStatisticsHistory(simData.statistics);
-        simulationFacade->setRealTime(simData.realTime);
+        simulationFacade->newSimulation(simData._timestep, simData._worldSize, simData._simulationParameters);
+        simulationFacade->setSimulationData(simData._mainData);
+        simulationFacade->setStatisticsHistory(simData._statistics);
+        simulationFacade->setRealTime(simData._realTime);
         std::cout << "Device: " << simulationFacade->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
@@ -82,11 +82,11 @@ int main(int argc, char** argv)
 
         // Write output simulation file
         std::cout << "Writing output" << std::endl;
-        simData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
-        simData.mainData = simulationFacade->getSimulationData();
-        simData.simulationParameters = simulationFacade->getSimulationParameters();
-        simData.statistics = simulationFacade->getStatisticsHistory().getCopiedData();
-        simData.realTime = simulationFacade->getRealTime();
+        simData.timestep(simulationFacade->getCurrentTimestep())
+            .mainData(simulationFacade->getSimulationData())
+            .simulationParameters(simulationFacade->getSimulationParameters())
+            .statistics(simulationFacade->getStatisticsHistory().getCopiedData())
+            .realTime(simulationFacade->getRealTime());
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;

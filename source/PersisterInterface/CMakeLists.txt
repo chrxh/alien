@@ -3,7 +3,6 @@ add_library(PersisterInterface
     Definitions.h
     DeleteNetworkResourceRequestData.h
     DeleteNetworkResourceResultData.h
-    DeserializedSimulation.h
     DownloadCache.h
     DownloadNetworkResourceRequestData.h
     DownloadNetworkResourceResultData.h

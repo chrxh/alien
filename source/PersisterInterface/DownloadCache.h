@@ -4,7 +4,7 @@
 
 #include <Base/Cache.h>
 
-#include "DeserializedSimulation.h"
+#include <EngineInterface/Descs.h>
 
-using _DownloadCache = Cache<std::string, DeserializedSimulation, 5>;
+using _DownloadCache = Cache<std::string, SimulationDesc, 5>;
 using DownloadCache = std::shared_ptr<_DownloadCache>;

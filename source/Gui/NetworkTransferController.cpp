@@ -43,13 +43,13 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 _PersisterFacade::get()->shutdown();
                 _SimulationFacade::get()->closeSimulation();
                 std::optional<std::string> errorMessage;
-                auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
+                auto const& deserializedSimulation = std::get<SimulationDesc>(data.resourceData);
                 try {
                     _SimulationFacade::get()->newSimulation(
-                        deserializedSimulation.timestep, deserializedSimulation.worldSize, deserializedSimulation.simulationParameters);
-                    _SimulationFacade::get()->setRealTime(deserializedSimulation.realTime);
-                    _SimulationFacade::get()->setSimulationData(deserializedSimulation.mainData);
-                    _SimulationFacade::get()->setStatisticsHistory(deserializedSimulation.statistics);
+                        deserializedSimulation._timestep, deserializedSimulation._worldSize, deserializedSimulation._simulationParameters);
+                    _SimulationFacade::get()->setRealTime(deserializedSimulation._realTime);
+                    _SimulationFacade::get()->setSimulationData(deserializedSimulation._mainData);
+                    _SimulationFacade::get()->setStatisticsHistory(deserializedSimulation._statistics);
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();
                 } catch (...) {
@@ -59,12 +59,12 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                     showMessage("Error", *errorMessage);
                     _SimulationFacade::get()->closeSimulation();
                     _SimulationFacade::get()->newSimulation(
-                        deserializedSimulation.timestep, deserializedSimulation.worldSize, deserializedSimulation.simulationParameters);
+                        deserializedSimulation._timestep, deserializedSimulation._worldSize, deserializedSimulation._simulationParameters);
                 }
                 _PersisterFacade::get()->restart();
 
-                Viewport::get().setCenterInWorldPos(deserializedSimulation.center);
-                Viewport::get().setZoomFactor(deserializedSimulation.zoom);
+                Viewport::get().setCenterInWorldPos(deserializedSimulation._center);
+                Viewport::get().setZoomFactor(deserializedSimulation._zoom);
                 TemporalControlWindow::get().onSnapshot();
 
                 printOverlayMessage(data.resourceName);
