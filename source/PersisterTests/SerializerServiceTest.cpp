@@ -203,7 +203,7 @@ TEST_F(SerializerServiceTests, simulationFiles)
 TEST_F(SerializerServiceTests, settingsFileEqualsSimulationParametersFile)
 {
     auto simulationFilename = _testDirectory / "simulation.sim";
-    auto parametersFilename = _testDirectory / "simulation.parameters";
+    auto parametersFilename = _testDirectory / "parameters.settings.json";
 
     DeserializedSimulation simulation;
     simulation.auxiliaryData.timestep = 1234;
