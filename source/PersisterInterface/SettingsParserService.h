@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <boost/property_tree/ptree.hpp>
 
 #include <Base/JsonParser.h>
@@ -16,4 +18,7 @@ class SettingsParserService
 public:
     boost::property_tree::ptree encodeSimulationParameters(SimulationParameters const& data);
     SimulationParameters decodeSimulationParameters(boost::property_tree::ptree tree);
+
+    std::string encodeSimulationParametersToString(SimulationParameters const& data);
+    SimulationParameters decodeSimulationParametersFromString(std::string const& data);
 };

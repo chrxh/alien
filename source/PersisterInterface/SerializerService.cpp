@@ -1907,22 +1907,11 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
             std::filesystem::create_directories(filename.parent_path());
         }
 
-        auto settingsFilename = getSettingsFilename(filename);
-
-        {
-            zstd::ofstream stream(filename.string(), std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
-            if (!stream) {
-                return false;
-            }
-            serializeSimulation(data, stream);
+        zstd::ofstream stream(filename.string(), std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
+        if (!stream) {
+            return false;
         }
-        {
-            std::ofstream stream(settingsFilename.string(), std::ios::binary);
-            if (!stream) {
-                return false;
-            }
-            serializeSettings(data.auxiliaryData.simulationParameters, stream);
-        }
+        serializeSimulation(data, stream);
         return true;
     } catch (...) {
         return false;
@@ -1933,21 +1922,20 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
 {
     try {
         log(Priority::Important, "load simulation from " + filename.string());
-        auto settingsFilename = getSettingsFilename(filename);
 
+        // Older versions stored the simulation parameters in a separate settings file
+        {
+            std::ifstream stream(getSettingsFilename(filename).string(), std::ios::binary);
+            if (stream) {
+                deserializeSettings(data.auxiliaryData.simulationParameters, stream);
+            }
+        }
         {
             zstd::ifstream stream(filename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
             deserializeSimulation(data, stream);
-        }
-        {
-            std::ifstream stream(settingsFilename.string(), std::ios::binary);
-            if (!stream) {
-                return false;
-            }
-            deserializeSettings(data.auxiliaryData.simulationParameters, stream);
         }
         ParametersValidationService::get().validateAndCorrect({data.auxiliaryData.worldSize}, data.auxiliaryData.simulationParameters);
         return true;
@@ -1963,9 +1951,9 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename) 
         if (!std::filesystem::remove(filename)) {
             return false;
         }
-        if (!std::filesystem::remove(getSettingsFilename(filename))) {
-            return false;
-        }
+
+        // Older versions wrote the simulation parameters to a separate settings file
+        std::filesystem::remove(getSettingsFilename(filename));
         return true;
     } catch (...) {
         return false;
@@ -1999,6 +1987,11 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
 bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const
 {
     try {
+        // Older versions transferred the simulation parameters separately
+        if (!input.auxiliaryData.empty()) {
+            std::stringstream stream(input.auxiliaryData);
+            deserializeSettings(output.auxiliaryData.simulationParameters, stream);
+        }
         {
             std::stringstream stdStream(input.mainData);
             zstd::istream stream(stdStream);
@@ -2006,10 +1999,6 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
                 return false;
             }
             deserializeSimulation(output, stream);
-        }
-        {
-            std::stringstream stream(input.auxiliaryData);
-            deserializeSettings(output.auxiliaryData.simulationParameters, stream);
         }
         ParametersValidationService::get().validateAndCorrect({output.auxiliaryData.worldSize}, output.auxiliaryData.simulationParameters);
         return true;
@@ -2636,6 +2625,7 @@ namespace
     auto constexpr Id_Simulation_Center = 103;
     auto constexpr Id_Simulation_WorldSize = 104;
     auto constexpr Id_Simulation_Statistics = 105;
+    auto constexpr Id_Simulation_SimulationParameters = 106;
 
     StatisticsTimelines convertToTimelines(StatisticsHistoryData const& statistics, Desc const& mainData)
     {
@@ -2664,8 +2654,10 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DeserializedSimulation& data)
     {
         StatisticsTimelines timelines;
+        std::string encodedSimulationParameters;
         if (task == SerializationTask::Save) {
             timelines = convertToTimelines(data.statistics, data.mainData);
+            encodedSimulationParameters = SettingsParserService::get().encodeSimulationParametersToString(data.auxiliaryData.simulationParameters);
         }
         {
             SettingsForSerialization defaultSettings;
@@ -2679,6 +2671,7 @@ namespace cereal
             scope.addMember(Id_Simulation_Zoom, settings.zoom, defaultSettings.zoom);
             scope.addMember(Id_Simulation_Center, settings.center, defaultSettings.center);
             scope.addMember(Id_Simulation_WorldSize, settings.worldSize, defaultSettings.worldSize);
+            scope.addMember(Id_Simulation_SimulationParameters, encodedSimulationParameters, std::string());
 
             scope.addDesc(Id_Desc_Objects, data.mainData._objects);
             scope.addDesc(Id_Desc_Energies, data.mainData._energies);
@@ -2688,6 +2681,11 @@ namespace cereal
         }
         if (task == SerializationTask::Load) {
             data.statistics = convertToStatisticsHistory(timelines);
+
+            // Absent simulation parameters are kept: for older simulations they originate from the settings file
+            if (!encodedSimulationParameters.empty()) {
+                data.auxiliaryData.simulationParameters = SettingsParserService::get().decodeSimulationParametersFromString(encodedSimulationParameters);
+            }
         }
     }
     SPLIT_SERIALIZATION(DeserializedSimulation)

@@ -1,5 +1,9 @@
 #include "SettingsParserService.h"
 
+#include <sstream>
+
+#include <boost/property_tree/json_parser.hpp>
+
 #include <Base/Resources.h>
 
 #include <EngineInterface/SimulationParametersSpecification.h>
@@ -191,4 +195,19 @@ SimulationParameters SettingsParserService::decodeSimulationParameters(boost::pr
     SimulationParameters result;
     encodeDecodeSimulationParameters(tree, result, SimulationParametersNode, ParserTask::Decode);
     return result;
+}
+
+std::string SettingsParserService::encodeSimulationParametersToString(SimulationParameters const& data)
+{
+    std::stringstream stream;
+    boost::property_tree::json_parser::write_json(stream, encodeSimulationParameters(data));
+    return stream.str();
+}
+
+SimulationParameters SettingsParserService::decodeSimulationParametersFromString(std::string const& data)
+{
+    std::stringstream stream(data);
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(stream, tree);
+    return decodeSimulationParameters(tree);
 }
