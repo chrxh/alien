@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -32,7 +32,7 @@ TEST_F(ConnectionMutationTests, connectionWeightMutation_weightsActuallyChange)
     genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f);
     genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(0.0f).valueChangeSigma(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -77,7 +77,7 @@ TEST_F(ConnectionMutationTests, connectionWeightMutation_zeroProbabilityNoChange
     genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(0.0f).valueChangeSigma(1.0f);
     genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(0.0f).valueChangeSigma(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -105,7 +105,7 @@ TEST_F(ConnectionMutationTests, connectionWeightMutation_keepOtherAttributesUnch
     genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f);
     genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {

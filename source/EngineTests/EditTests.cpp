@@ -2,8 +2,8 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -20,7 +20,7 @@ public:
 
 TEST_F(EditTests, getSelectionShallowData_noSelection)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({50, 50}),
         ObjectDesc().id(2).pos({51, 50}),
     });
@@ -38,7 +38,7 @@ TEST_F(EditTests, getSelectionShallowData_noSelection)
 
 TEST_F(EditTests, getSelectionShallowData_selectCells)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({50, 50}),
         ObjectDesc().id(2).pos({51, 50}),
         ObjectDesc().id(3).pos({52, 50}),
@@ -58,7 +58,7 @@ TEST_F(EditTests, getSelectionShallowData_selectCells)
 
 TEST_F(EditTests, getSelectionShallowData_selectCreatures)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({50, 50}),
                         ObjectDesc().id(2).pos({51, 50}),
@@ -80,7 +80,7 @@ TEST_F(EditTests, getSelectionShallowData_selectCreatures)
 
 TEST_F(EditTests, getSelectionShallowData_selectParticles)
 {
-    auto data = Desc().energies({
+    auto data = ContentDesc().energies({
         EnergyDesc().id(1).pos({50, 50}).energy(10.0f),
         EnergyDesc().id(2).pos({51, 50}).energy(10.0f),
         EnergyDesc().id(3).pos({70, 50}).energy(10.0f),
@@ -98,7 +98,7 @@ TEST_F(EditTests, getSelectionShallowData_selectParticles)
 
 TEST_F(EditTests, getSelectionShallowData_selectMixed)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addObjects({
                         ObjectDesc().id(1).pos({50, 50}).type(SolidDesc()),
                         ObjectDesc().id(2).pos({51, 50}).type(SolidDesc()),
@@ -127,7 +127,7 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
 
 TEST_F(EditTests, getSelectionShallowData_selectMultipleCreatures)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({50, 50}),
                         ObjectDesc().id(2).pos({51, 50}),
@@ -152,7 +152,7 @@ TEST_F(EditTests, getSelectionShallowData_selectMultipleCreatures)
 
 TEST_F(EditTests, getSelectionShallowData_onlyDirectlySelectedCreatures)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({50, 50}),
                         ObjectDesc().id(2).pos({51, 50}),
@@ -177,7 +177,7 @@ TEST_F(EditTests, getSelectionShallowData_onlyDirectlySelectedCreatures)
 
 TEST_F(EditTests, injectGenomeToSelectedCreatures_noSelection)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({50, 50})}, CreatureDesc(), GenomeDesc());
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({50, 50})}, CreatureDesc(), GenomeDesc());
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->removeSelection();
@@ -194,7 +194,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_noSelection)
 
 TEST_F(EditTests, injectGenomeToSelectedCreatures_singleCreature)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({50, 50}),
             ObjectDesc().id(2).pos({51, 50}),
@@ -216,7 +216,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_singleCreature)
 
 TEST_F(EditTests, injectGenomeToSelectedCreatures_multipleCreatures_onlySelectedAffected)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(1).pos({50, 50})}, CreatureDesc(), GenomeDesc())
                     .addCreature({ObjectDesc().id(2).pos({80, 80})}, CreatureDesc(), GenomeDesc());
     _simulationFacade->setSimulationData(data);
@@ -252,7 +252,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_multipleCreatures_onlySelected
 
 TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(1).pos({50, 50})}, CreatureDesc(), GenomeDesc())
                     .addCreature({ObjectDesc().id(2).pos({60, 50})}, CreatureDesc(), GenomeDesc());
     _simulationFacade->setSimulationData(data);

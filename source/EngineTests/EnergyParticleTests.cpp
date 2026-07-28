@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -33,7 +33,7 @@ TEST_F(EnergyParticleTests, particleToFreeCell_transformationAllowed)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Create a particle with energy above normalCellEnergy
-    Desc data;
+    ContentDesc data;
     data._energies.emplace_back(EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
@@ -66,7 +66,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationDisabled)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Create a particle with energy above normalCellEnergy
-    Desc data;
+    ContentDesc data;
     data._energies.emplace_back(EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
@@ -91,7 +91,7 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Create a particle with energy below normalCellEnergy
-    Desc data;
+    ContentDesc data;
     data._energies.emplace_back(EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy - 1.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
@@ -111,7 +111,7 @@ TEST_F(EnergyParticleTests, particleAbsorptionForCells)
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
     auto particleEnergy = 10.0f;
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(CellDesc().usableEnergy(cellEnergy))})
                     .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
@@ -135,7 +135,7 @@ TEST_F(EnergyParticleTests, particleAbsorptionForFreeCells)
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
     auto particleEnergy = 10.0f;
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().energy(cellEnergy))})
                     .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
@@ -161,7 +161,7 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
     auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
     auto depotEnergy = 100.0f;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc().pos({100.4f, 100.4f}).color(0).type(CellDesc().usableEnergy(cellEnergy).cellType(DepotDesc().storedUsableEnergy(depotEnergy)))});
 
     _simulationFacade->setSimulationData(data);
@@ -188,7 +188,7 @@ TEST_F(EnergyParticleTests, freeCellToParticle_belowMinEnergy)
 
     auto freeCellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
 
-    auto data = Desc().addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().energy(freeCellEnergy))});
+    auto data = ContentDesc().addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().energy(freeCellEnergy))});
 
     _simulationFacade->setSimulationData(data);
 

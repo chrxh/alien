@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -43,7 +43,7 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_duplicatesGeneReference
     });
     genome._mutationRates._duplicateGeneMutation = DuplicateGeneMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -66,7 +66,7 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_injectorReferencesCount
     });
     genome._mutationRates._duplicateGeneMutation = DuplicateGeneMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -85,7 +85,7 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_singleReferenceNoChange
     });
     genome._mutationRates._duplicateGeneMutation = DuplicateGeneMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -105,7 +105,7 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_zeroProbabilityNoChange
     });
     genome._mutationRates._duplicateGeneMutation = DuplicateGeneMutationDesc().geneProbability(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);

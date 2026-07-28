@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -33,7 +33,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().cellType(SensorGenomeDesc().autoTrigger(false).minRange(123).maxRange(200))})});
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -52,7 +52,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHom
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -74,7 +74,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
     })});
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -94,7 +94,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsNonVoidNodesNonVoid)
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -122,7 +122,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesHomogeneousCellTypeFlag)
     auto genome = GenomeDesc().genes({GeneDesc().homogeneousCellType(false).nodes({NodeDesc().cellType(BaseGenomeDesc())})});
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);

@@ -1,6 +1,6 @@
 #include "SimulationFacadeImpl.h"
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/NumberGenerator.h>
 
@@ -71,29 +71,29 @@ void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-Desc _SimulationFacadeImpl::getSimulationData()
+ContentDesc _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-Desc _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
+ContentDesc _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-Desc _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
+ContentDesc _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationFacadeImpl::addAndSelectSimulationData(Desc&& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(ContentDesc&& dataToAdd)
 {
     _worker.addAndSelectSimulationData(std::move(dataToAdd));
 }
 
-void _SimulationFacadeImpl::setSimulationData(Desc const& dataToUpdate)
+void _SimulationFacadeImpl::setSimulationData(ContentDesc const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
@@ -351,12 +351,12 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
-Desc _SimulationFacadeImpl::getPreviewData()
+ContentDesc _SimulationFacadeImpl::getPreviewData()
 {
     return _worker.getPreviewData();
 }
 
-void _SimulationFacadeImpl::setPreviewData(Desc const& description)
+void _SimulationFacadeImpl::setPreviewData(ContentDesc const& description)
 {
     _worker.setPreviewData(description);
 }

@@ -6,7 +6,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -131,7 +131,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, Direction::Forward);
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
@@ -214,7 +214,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCreatureWithOneLegAndSpikes(muscleMode, Direction::Forward);
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
@@ -323,7 +323,7 @@ TEST_F(CreatureTests, constructMusclesVoidsSmallCreature)
 {
     auto const AutoTriggerInterval = 100;
 
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {
             ObjectDesc()
@@ -373,7 +373,7 @@ TEST_F(CreatureTests, constructMusclesVoidsLargeCreature)
 {
     auto const AutoTriggerInterval = 20;
 
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {
             ObjectDesc()
@@ -447,7 +447,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     auto [muscleMode, direction] = GetParam();
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc()
              .id(0)
              .pos({500.0f, 500.0f})
@@ -521,7 +521,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
@@ -574,7 +574,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc().id(0).pos(refPoint).type(CellDesc().headCell(true).constructor(
             ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_Free).geneIndex(0).separation(true)))},
         CreatureDesc(),
@@ -651,7 +651,7 @@ public:
 
 TEST_F(CreatureTests_NumCells, numCellsUpdatedWhenOneCellDies)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true)),
@@ -676,7 +676,7 @@ TEST_F(CreatureTests_NumCells, numCellsUpdatedWhenOneCellDies)
 
 TEST_F(CreatureTests_NumCells, numCellsUpdatedWhenMultipleCellsDie)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true)),
@@ -703,7 +703,7 @@ TEST_F(CreatureTests_NumCells, numCellsUpdatedWhenMultipleCellsDie)
 
 TEST_F(CreatureTests_NumCells, numCellsUnchangedWhenNoCellDies)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true)),
@@ -728,7 +728,7 @@ TEST_F(CreatureTests_NumCells, numCellsUnchangedWhenNoCellDies)
 
 TEST_F(CreatureTests, muscleSeed)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {
             ObjectDesc()

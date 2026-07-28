@@ -37,7 +37,7 @@ bool TestHelper::approxCompareAngles(float expected, float actual, float precisi
     return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
 }
 
-bool TestHelper::compare(Desc left, Desc right)
+bool TestHelper::compare(ContentDesc left, ContentDesc right)
 {
     std::sort(left._objects.begin(), left._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._objects.begin(), right._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });

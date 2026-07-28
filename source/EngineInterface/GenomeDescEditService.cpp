@@ -358,7 +358,7 @@ auto GenomeDescEditService::createSeedCollectionForPreview(
     SeedCollectionResult result;
 
     for (auto const& subGenome : subGenomes) {
-        std::optional<Desc> cachedValue;
+        std::optional<ContentDesc> cachedValue;
 
         // Try to get from cache if provided
         if (cache.has_value()) {
@@ -391,14 +391,14 @@ auto GenomeDescEditService::createSeedCollectionForPreview(
     return result;
 }
 
-std::vector<Desc> GenomeDescEditService::extractPhenotypesFromPreview(Desc&& preview, std::vector<uint64_t> const& seedCreatureIds) const
+std::vector<ContentDesc> GenomeDescEditService::extractPhenotypesFromPreview(ContentDesc&& preview, std::vector<uint64_t> const& seedCreatureIds) const
 {
     std::unordered_map<uint64_t, int> creatureIdToIndex;
     for (auto const& [index, creatureId] : seedCreatureIds | boost::adaptors::indexed(0)) {
         creatureIdToIndex.insert_or_assign(creatureId, toInt(index));
     }
     auto cache = preview.createCache();
-    std::vector<Desc> result(seedCreatureIds.size());
+    std::vector<ContentDesc> result(seedCreatureIds.size());
     for (auto& creature : preview._creatures) {
         if (creature._generation == 0) {
             auto genomeIndex = cache->genomeIdToIndex.at(creature._genomeId);
@@ -425,7 +425,7 @@ std::vector<Desc> GenomeDescEditService::extractPhenotypesFromPreview(Desc&& pre
     return result;
 }
 
-void GenomeDescEditService::removeSeedFromPhenotype(Desc& phenotype) const
+void GenomeDescEditService::removeSeedFromPhenotype(ContentDesc& phenotype) const
 {
     std::set<uint64_t> seedCellIds;
     std::map<uint64_t, uint64_t> creatureIdToIndex;
@@ -441,9 +441,9 @@ void GenomeDescEditService::removeSeedFromPhenotype(Desc& phenotype) const
     DescEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& object) { return seedCellIds.contains(object._id); });
 }
 
-Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const
+ContentDesc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const
 {
-    Desc result;
+    ContentDesc result;
     result._genomes.emplace_back(subGenome.genome);
     auto creature = CreatureDesc().genomeId(subGenome.genome._id);
     result._creatures.emplace_back(creature);

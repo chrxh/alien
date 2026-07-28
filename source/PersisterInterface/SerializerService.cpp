@@ -25,7 +25,7 @@
 #include <Base/Resources.h>
 #include <Base/VersionParserService.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/ParametersValidationService.h>
 #include <EngineInterface/SimulationParameters.h>
@@ -124,7 +124,7 @@ namespace cereal
                 }
                 _ar(sortedIds);
 
-                // Then write size-prefixed Desc data in sorted id order
+                // Then write size-prefixed ContentDesc data in sorted id order
                 for (auto const& op : _deferredDescOps) {
                     op.serializeFunc();
                 }
@@ -146,10 +146,10 @@ namespace cereal
                     }
 
                     if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
-                        // We want to read this Desc - execute the read
+                        // We want to read this ContentDesc - execute the read
                         _deferredDescOps.at(deferredOpIndex).serializeFunc();
                     } else {
-                        // Skip this Desc - read size and skip data
+                        // Skip this ContentDesc - read size and skip data
                         uint64_t dataSize = 0;
                         _ar(dataSize);
                         std::vector<uint8_t> buffer(dataSize);
@@ -1878,7 +1878,7 @@ namespace cereal
     SPLIT_SERIALIZATION(EnergyDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, Desc& description)
+    void loadSave(SerializationTask task, Archive& ar, ContentDesc& description)
     {
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_Desc_Objects, description._objects);
@@ -1886,7 +1886,7 @@ namespace cereal
         scope.addDesc(Id_Desc_Creatures, description._creatures);
         scope.addDesc(Id_Desc_Genomes, description._genomes);
     }
-    SPLIT_SERIALIZATION(Desc)
+    SPLIT_SERIALIZATION(ContentDesc)
 }
 
 bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const
@@ -1976,7 +1976,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
     try {
         log(Priority::Important, "save genome to " + filename.string());
         // Wrap constructor cell around genome
-        Desc description;
+        ContentDesc description;
         if (!wrapGenome(description, genome)) {
             return false;
         }
@@ -1997,7 +1997,7 @@ bool SerializerService::deserializeGenomeFromFile(GenomeDesc& genome, std::files
 {
     try {
         log(Priority::Important, "load genome from " + filename.string());
-        Desc description;
+        ContentDesc description;
         if (!deserializeDescription(description, filename)) {
             return false;
         }
@@ -2019,7 +2019,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
             return false;
         }
 
-        Desc description;
+        ContentDesc description;
         //if (!wrapGenome(description, input)) {
         //    return false;
         //}
@@ -2042,7 +2042,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
             return false;
         }
 
-        Desc description;
+        ContentDesc description;
         deserializeDescription(description, stream);
 
         //if (!unwrapGenome(output, description)) {
@@ -2086,7 +2086,7 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
     }
 }
 
-bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, Desc const& content) const
+bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, ContentDesc const& content) const
 {
     try {
         zstd::ofstream fileStream(filename.string(), std::ios::binary);
@@ -2101,7 +2101,7 @@ bool SerializerService::serializeContentToFile(std::filesystem::path const& file
     }
 }
 
-bool SerializerService::deserializeContentFromFile(Desc& content, std::filesystem::path const& filename) const
+bool SerializerService::deserializeContentFromFile(ContentDesc& content, std::filesystem::path const& filename) const
 {
     try {
         if (!deserializeDescription(content, filename)) {
@@ -2113,14 +2113,14 @@ bool SerializerService::deserializeContentFromFile(Desc& content, std::filesyste
     }
 }
 
-void SerializerService::serializeDescription(Desc const& description, std::ostream& stream) const
+void SerializerService::serializeDescription(ContentDesc const& description, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(description);
 }
 
-bool SerializerService::deserializeDescription(Desc& description, std::filesystem::path const& filename) const
+bool SerializerService::deserializeDescription(ContentDesc& description, std::filesystem::path const& filename) const
 {
     zstd::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
@@ -2130,7 +2130,7 @@ bool SerializerService::deserializeDescription(Desc& description, std::filesyste
     return true;
 }
 
-void SerializerService::deserializeDescription(Desc& description, std::istream& stream) const
+void SerializerService::deserializeDescription(ContentDesc& description, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -2462,7 +2462,7 @@ namespace
 
     auto constexpr MaxSavedLineages = size_t{250};
 
-    std::unordered_map<uint32_t, double> countCreaturesByLineage(Desc const& mainData)
+    std::unordered_map<uint32_t, double> countCreaturesByLineage(ContentDesc const& mainData)
     {
         std::unordered_map<uint32_t, double> result;
         for (auto const& creature : mainData._creatures) {
@@ -2591,7 +2591,7 @@ namespace
     auto constexpr Id_Simulation_Statistics = 105;
     auto constexpr Id_Simulation_SimulationParameters = 106;
 
-    StatisticsTimelines convertToTimelines(StatisticsHistoryData const& statistics, Desc const& mainData)
+    StatisticsTimelines convertToTimelines(StatisticsHistoryData const& statistics, ContentDesc const& mainData)
     {
         StatisticsTimelines result;
         result.overallTimeline = convertToTimeline(statistics.colors);
@@ -2675,7 +2675,7 @@ void SerializerService::deserializeSimulation(DeserializedSimulation& data, std:
     archive(data);
 }
 
-bool SerializerService::wrapGenome(Desc& output, GenomeDesc const& input) const
+bool SerializerService::wrapGenome(ContentDesc& output, GenomeDesc const& input) const
 {
     output.clear();
     output._genomes.emplace_back(input);
@@ -2683,7 +2683,7 @@ bool SerializerService::wrapGenome(Desc& output, GenomeDesc const& input) const
     return true;
 }
 
-bool SerializerService::unwrapGenome(GenomeDesc& output, Desc& input) const
+bool SerializerService::unwrapGenome(GenomeDesc& output, ContentDesc& input) const
 {
     if (input._genomes.size() != 1) {
         return false;

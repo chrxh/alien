@@ -5,7 +5,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 
 class DescTestDataFactory
@@ -60,7 +60,7 @@ public:
     NodeDesc createNonDefaultNodeDesc(NodeParameter nodeParameter) const;
     std::pair<CreatureDesc, GenomeDesc> createNonDefaultCreatureDesc(NodeParameter nodeParameter) const;
 
-    bool compare(Desc left, Desc right) const;
+    bool compare(ContentDesc left, ContentDesc right) const;
     bool compare(ObjectDesc left, ObjectDesc right) const;
     bool compare(EnergyDesc left, EnergyDesc right) const;
     bool compare(ObjectDesc const& object, NodeDesc const& node) const;

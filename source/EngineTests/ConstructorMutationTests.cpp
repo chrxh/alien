@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -32,7 +32,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     auto genome = createTestGenome();
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     auto const& original = genome._genes.at(0)._nodes.at(0)._constructor.value();
 
@@ -61,7 +61,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     genome._genes.at(0)._nodes.at(0)._constructor.reset();  // Node without a constructor
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).constructorToggleProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -83,7 +83,7 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
@@ -117,7 +117,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
     genome._mutationRates._constructorMutations[0] =
         ConstructorMutationDesc().nodeProbability(0.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -136,7 +136,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_keepOtherAttributesUnchange
     genome._mutationRates._constructorMutations[1] =
         ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -154,7 +154,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_existProbabilityTogglesCons
     genome._genes.at(0)._nodes.at(0)._constructor.reset();  // One node without a constructor
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).constructorToggleProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);  // A single step flips the presence of every node exactly once

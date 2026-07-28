@@ -2,8 +2,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -40,7 +40,7 @@ public:
 
 TEST_F(CellStateTransitionTests, ready_ready)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).isStatic(true).type(CellDesc().cellState(CellState_Ready)),
         ObjectDesc().id(2).pos({11.0f, 10.0f}).isStatic(true).type(CellDesc().cellState(CellState_Ready)),
@@ -56,7 +56,7 @@ TEST_F(CellStateTransitionTests, ready_ready)
 
 TEST_F(CellStateTransitionTests, ready_dying)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready)),
         ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_Dying)),
@@ -72,7 +72,7 @@ TEST_F(CellStateTransitionTests, ready_dying)
 
 TEST_F(CellStateTransitionTests, underConstruction_activating)
 {
-    Desc data;
+    ContentDesc data;
     data.addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing)),
         ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_Activating)),
@@ -89,7 +89,7 @@ TEST_F(CellStateTransitionTests, underConstruction_activating)
 
 TEST_F(CellStateTransitionTests, noDyingForFixedCells)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).isStatic(true).pos({10.0f, 10.0f})});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).isStatic(true).pos({10.0f, 10.0f})});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -99,7 +99,7 @@ TEST_F(CellStateTransitionTests, noDyingForFixedCells)
 
 TEST_F(CellStateTransitionTests, cellDiesWhenLastUpdateExceedsInterval)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2))});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -109,7 +109,7 @@ TEST_F(CellStateTransitionTests, cellDiesWhenLastUpdateExceedsInterval)
 
 TEST_F(CellStateTransitionTests, cellStaysAliveWhenLastUpdateBelowInterval)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(0))});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(0))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -119,7 +119,7 @@ TEST_F(CellStateTransitionTests, cellStaysAliveWhenLastUpdateBelowInterval)
 
 TEST_F(CellStateTransitionTests, fixedCellDoesNotDieFromLastUpdate)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).isStatic(true).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2))});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).isStatic(true).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -129,7 +129,7 @@ TEST_F(CellStateTransitionTests, fixedCellDoesNotDieFromLastUpdate)
 
 TEST_F(CellStateTransitionTests, isolatedConstructingNonHeadCellDies)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing).headCell(false))});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing).headCell(false))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2 * CELL_UPDATE_INTERVAL + 1);
@@ -139,7 +139,7 @@ TEST_F(CellStateTransitionTests, isolatedConstructingNonHeadCellDies)
 
 TEST_F(CellStateTransitionTests, headCellDoesNotIncrementLastUpdate)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headCell(true).lastUpdate(0))});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headCell(true).lastUpdate(0))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -162,7 +162,7 @@ TEST_P(CellStateTransitionTests_AllStates, solid_cell)
 {
     auto cellState = GetParam();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addObjects({
                         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(SolidDesc()),
                     })
@@ -186,7 +186,7 @@ TEST_P(CellStateTransitionTests_AllStates, freeCell_cell)
 {
     auto cellState = GetParam();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addObjects({
                         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(FreeCellDesc()),
                     })

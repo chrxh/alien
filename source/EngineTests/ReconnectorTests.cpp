@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -24,10 +24,10 @@ public:
     ~ReconnectorTests() = default;
 
 protected:
-    Desc
+    ContentDesc
     createReconnectorWithPositiveSignal(RealVector2D const& pos, ReconnectorModeDesc const& mode = ReconnectCreatureDesc(), int color = 0, int lineageId = 0)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc().id(1).pos(pos).color(color).type(CellDesc().cellType(ReconnectorDesc().mode(mode))),
                 ObjectDesc()
@@ -42,10 +42,10 @@ protected:
         return data;
     }
 
-    Desc
+    ContentDesc
     createReconnectorWithNegativeSignal(RealVector2D const& pos, ReconnectorModeDesc const& mode = ReconnectCreatureDesc(), int color = 0, int lineageId = 0)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc().id(1).pos(pos).color(color).type(CellDesc().cellType(ReconnectorDesc().mode(mode))),
                 ObjectDesc()
@@ -235,7 +235,7 @@ TEST_F(ReconnectorTests, creatureMode_connectToDifferentCreature)
 TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
 {
     // Create a creature with reconnector, generator, and potential target in same creature
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
@@ -561,7 +561,7 @@ TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
 TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
 {
     // Create creature with reconnector and additional object, signal on connected cell
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         ObjectDesc().id(3).pos({99.0f, 100.0f}),
@@ -591,7 +591,7 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
     // Create reconnector without active signal (no generator)
     auto reconnectorCell = ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectSolidDesc())));
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         reconnectorCell,
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
     });
@@ -676,7 +676,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     _simulationFacade->setSimulationParameters(_parameters);
 
     // Create attacker with connections that block the attack ray
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectSolidDesc()))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         // Create a connection that crosses the ray path to target at (100, 99)

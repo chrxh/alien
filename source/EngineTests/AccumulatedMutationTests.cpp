@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -94,7 +94,7 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     }
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
 
     auto parameters = _parameters;
     parameters.newLineageThreshold.value = 1.0e30f;
@@ -114,7 +114,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
 {
     auto genome = GenomeDesc();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
 
     _parameters.neuronsMetaMutationsSigma.value = 1.0f;
     _parameters.connectionsMetaMutationsSigma.value = 1.0f;
@@ -144,7 +144,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
     auto genome = createTestGenome();
 
     auto data =
-        Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(12.0f).accumulatedMutationsInLineage(12.0f), genome);
+        ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(12.0f).accumulatedMutationsInLineage(12.0f), genome);
 
     _parameters.newLineageThreshold.value = 0.1f;
     _simulationFacade->setSimulationParameters(_parameters);

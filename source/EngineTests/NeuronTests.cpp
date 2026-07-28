@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -68,7 +68,7 @@ TEST_F(NeuronTests, forwardSignalByDefault)
     auto signal1 = getExampleSignal1();
     auto signal2 = getExampleSignal2();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
                         ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1))),
@@ -89,7 +89,7 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
     auto signal1 = getExampleSignal1();
     auto signal2 = getExampleSignal2();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
                         ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1))),
@@ -108,7 +108,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
 {
     auto signal = getExampleSignal1();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeight(0, 0.0f))),
                         ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(signal)),
@@ -129,7 +129,7 @@ TEST_F(NeuronTests, forkSignal)
 {
     auto signal = getExampleSignal1();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({1, 2}),
                         ObjectDesc().id(2).pos({2, 2}).type(CellDesc().signal(SignalDesc().channels(signal))),
@@ -164,7 +164,7 @@ TEST_F(NeuronTests, mergeSignal)
     auto signal2 = getExampleSignal2();
 
     auto data =
-        Desc()
+        ContentDesc()
             .addCreature({
                 ObjectDesc().id(1).pos({1, 2}).type(CellDesc().signal(SignalDesc().channels(signal1))),  // Gets input from cell 2
                 ObjectDesc().id(2).pos({2, 2}).type(
@@ -254,7 +254,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     std::vector<float> inputSignal(NEURONS_PER_CELL, 0.0f);
     inputSignal[param.channelIndex] = param.inputValue;
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
                         ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(inputSignal)),
@@ -301,7 +301,7 @@ TEST_F(NeuronTests, truncateSignal)
     // Channel 3: -1.5 * 2 = -3.0 -> truncated to -2
     // Channel 7: 1.7 * 2 = 3.4 -> truncated to 2
     // Channel 13: 1.6 * 2 = 3.2 -> truncated to 2
-    Desc data;
+    ContentDesc data;
     data.addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
         ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f, 0, 0, 0, 0, 0, 1.6f, 0, 0})),
@@ -348,7 +348,7 @@ TEST_F(NeuronPerformanceTests, DISABLED_largeGridPerformance)
     }
 
     // Create the description with all cells as a single creature
-    Desc data;
+    ContentDesc data;
     data.addCreature(objects);
 
     // Create cache for efficient lookups

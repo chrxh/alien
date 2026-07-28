@@ -23,8 +23,8 @@ public:
     //***********************************
     virtual void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& simulationParameters) = 0;
     virtual int getSessionId() const = 0;
-    virtual Desc getSimulationData() = 0;
-    virtual void setSimulationData(Desc const& dataToUpdate) = 0;
+    virtual ContentDesc getSimulationData() = 0;
+    virtual void setSimulationData(ContentDesc const& dataToUpdate) = 0;
     virtual void clear() = 0;
 
     //*****************************
@@ -43,9 +43,9 @@ public:
     //****************************************
     //* Methods for selection and manipulation
     //****************************************
-    virtual void addAndSelectSimulationData(Desc&& dataToAdd) = 0;
-    virtual Desc getSelectedSimulationData(bool includeClusters) = 0;
-    virtual Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
+    virtual void addAndSelectSimulationData(ContentDesc&& dataToAdd) = 0;
+    virtual ContentDesc getSelectedSimulationData(bool includeClusters) = 0;
+    virtual ContentDesc getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
     virtual void removeSelectedObjects(bool includeClusters) = 0;
     virtual void relaxSelectedObjects(bool includeClusters) = 0;
     virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
@@ -110,8 +110,8 @@ public:
     //********************
     //* Preview simulation
     //********************
-    virtual Desc getPreviewData() = 0;
-    virtual void setPreviewData(Desc const& description) = 0;
+    virtual ContentDesc getPreviewData() = 0;
+    virtual void setPreviewData(ContentDesc const& description) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation = false) = 0;
     virtual void calcTimestepsForPreview(int numSteps, bool detailSimulation = false) = 0;
     virtual uint64_t getCurrentTimestepForPreview() = 0;

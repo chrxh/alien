@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -14,7 +14,7 @@ TEST_F(ExtendGeneMutationTests, extendGeneMutation_addsExactlyOneNodePerPass)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -35,7 +35,7 @@ TEST_F(ExtendGeneMutationTests, extendGeneMutation_newNodeInheritsNeighborColor)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().color(3), NodeDesc().color(3)})});
     genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -53,7 +53,7 @@ TEST_F(ExtendGeneMutationTests, extendGeneMutation_zeroProbabilityNoChange)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);

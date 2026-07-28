@@ -16,9 +16,9 @@
 #include "GenomeDesc.h"
 #include "SpaceCalculator.h"
 
-Desc DescEditService::createRect(CreateRectParameters const& parameters) const
+ContentDesc DescEditService::createRect(CreateRectParameters const& parameters) const
 {
-    Desc result;
+    ContentDesc result;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result._objects.emplace_back(ObjectDesc()
@@ -37,9 +37,9 @@ Desc DescEditService::createRect(CreateRectParameters const& parameters) const
     return result;
 }
 
-Desc DescEditService::createHex(CreateHexParameters const& parameters) const
+ContentDesc DescEditService::createHex(CreateHexParameters const& parameters) const
 {
-    Desc result;
+    ContentDesc result;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
@@ -73,9 +73,9 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
     return result;
 }
 
-Desc DescEditService::createCircle(CreateCircleParameters const& parameters) const
+ContentDesc DescEditService::createCircle(CreateCircleParameters const& parameters) const
 {
-    Desc result;
+    ContentDesc result;
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result._objects.emplace_back(ObjectDesc()
                                          .pos(parameters._center)
@@ -117,7 +117,7 @@ Desc DescEditService::createCircle(CreateCircleParameters const& parameters) con
 
 namespace
 {
-    void topologyCorrection(SpaceCalculator const& spaceCalc, Desc& description, uint64_t creatureId)
+    void topologyCorrection(SpaceCalculator const& spaceCalc, ContentDesc& description, uint64_t creatureId)
     {
         ObjectDesc* refCell = nullptr;
         for (auto& object : description._objects) {
@@ -134,7 +134,7 @@ namespace
         }
     }
 
-    void correctConnectionsForNonCreatures(Desc& description, IntVector2D const& worldSize)
+    void correctConnectionsForNonCreatures(ContentDesc& description, IntVector2D const& worldSize)
     {
         auto threshold = std::min(worldSize.x, worldSize.y) / 3;
         auto cache = description.createCache();
@@ -164,16 +164,16 @@ namespace
 
 }
 
-void DescEditService::duplicate(Desc& description, IntVector2D const& origSize, IntVector2D const& size) const
+void DescEditService::duplicate(ContentDesc& description, IntVector2D const& origSize, IntVector2D const& size) const
 {
     correctConnectionsForNonCreatures(description, origSize);
 
     SpaceCalculator spaceCalc(origSize);
 
-    Desc result;
+    ContentDesc result;
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
-            auto clone = Desc(description);
+            auto clone = ContentDesc(description);
             clone.assignNewEntityIds();
             for (auto const& creature : clone._creatures) {
                 topologyCorrection(spaceCalc, clone, creature._id);
@@ -192,13 +192,13 @@ void DescEditService::duplicate(Desc& description, IntVector2D const& origSize, 
         }
     }
 
-    description = Desc(result);
+    description = ContentDesc(result);
 }
 
 namespace
 {
     std::vector<int> getObjectIndicesWithinRadius(
-        Desc const& description,
+        ContentDesc const& description,
         std::unordered_map<int, std::unordered_map<int, std::vector<int>>> const& objectIndicesBySlot,
         RealVector2D const& pos,
         float radius)
@@ -229,9 +229,9 @@ namespace
     }
 }
 
-Desc DescEditService::gridMultiply(Desc const& input, GridMultiplyParameters const& parameters) const
+ContentDesc DescEditService::gridMultiply(ContentDesc const& input, GridMultiplyParameters const& parameters) const
 {
-    Desc result;
+    ContentDesc result;
     auto clone = input;
     auto cloneTemplate = input;
     for (int i = 0; i < parameters._horizontalNumber; ++i) {
@@ -256,11 +256,11 @@ Desc DescEditService::gridMultiply(Desc const& input, GridMultiplyParameters con
     return result;
 }
 
-Desc DescEditService::randomMultiply(
-    Desc const& input,
+ContentDesc DescEditService::randomMultiply(
+    ContentDesc const& input,
     RandomMultiplyParameters const& parameters,
     IntVector2D const& worldSize,
-    Desc&& existentData,
+    ContentDesc&& existentData,
     bool& overlappingCheckSuccessful) const
 {
     overlappingCheckSuccessful = true;
@@ -276,11 +276,11 @@ Desc DescEditService::randomMultiply(
     }
 
     // Do multiplication
-    Desc result = input;
+    ContentDesc result = input;
     auto& numberGen = NumberGenerator::get();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
-        Desc copy;
+        ContentDesc copy;
         int attempts = 0;
         do {
             copy = input;
@@ -323,7 +323,8 @@ Desc DescEditService::randomMultiply(
     return result;
 }
 
-void DescEditService::addIfSpaceAvailable(Desc& result, Occupancy& occupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const
+void DescEditService::addIfSpaceAvailable(ContentDesc& result, Occupancy& occupancy, ContentDesc const& toAdd, float distance, IntVector2D const& worldSize)
+    const
 {
     SpaceCalculator space(worldSize);
 
@@ -341,7 +342,7 @@ void DescEditService::addIfSpaceAvailable(Desc& result, Occupancy& occupancy, De
     }
 }
 
-void DescEditService::flattenTopology(Desc& description, IntVector2D const& worldSize) const
+void DescEditService::flattenTopology(ContentDesc& description, IntVector2D const& worldSize) const
 {
     SpaceCalculator space(worldSize);
     auto cache = description.createCache();
@@ -382,7 +383,7 @@ void DescEditService::flattenTopology(Desc& description, IntVector2D const& worl
     }
 }
 
-void DescEditService::reconnectObjects(Desc& description, float maxDistance) const
+void DescEditService::reconnectObjects(ContentDesc& description, float maxDistance) const
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> objectIndicesBySlot;
 
@@ -435,7 +436,7 @@ void DescEditService::reconnectObjects(Desc& description, float maxDistance) con
     }
 }
 
-void DescEditService::randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const
+void DescEditService::randomizeCellColors(ContentDesc& description, std::vector<int> const& colorCodes) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -446,7 +447,7 @@ void DescEditService::randomizeCellColors(Desc& description, std::vector<int> co
     }
 }
 
-void DescEditService::randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const
+void DescEditService::randomizeGenomeColors(ContentDesc& description, std::vector<int> const& colorCodes) const
 {
     for (auto& genome : description._genomes) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -458,7 +459,7 @@ void DescEditService::randomizeGenomeColors(Desc& description, std::vector<int> 
     }
 }
 
-void DescEditService::randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const
+void DescEditService::randomizeEnergies(ContentDesc& description, float minEnergy, float maxEnergy) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -479,7 +480,7 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
     }
 }
 
-void DescEditService::randomizeAges(Desc& description, int minAge, int maxAge) const
+void DescEditService::randomizeAges(ContentDesc& description, int minAge, int maxAge) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -496,7 +497,7 @@ void DescEditService::randomizeAges(Desc& description, int minAge, int maxAge) c
     }
 }
 
-void DescEditService::randomizeCountdowns(Desc& description, int minValue, int maxValue) const
+void DescEditService::randomizeCountdowns(ContentDesc& description, int minValue, int maxValue) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -513,14 +514,14 @@ void DescEditService::randomizeCountdowns(Desc& description, int minValue, int m
     }
 }
 
-void DescEditService::randomizeLineageIds(Desc& description) const
+void DescEditService::randomizeLineageIds(ContentDesc& description) const
 {
     for (auto& creature : description._creatures) {
         creature._lineageId = toInt(NumberGenerator::get().createLineageId());
     }
 }
 
-void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxGlow) const
+void DescEditService::randomizeGlow(ContentDesc& description, float minGlow, float maxGlow) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -534,21 +535,21 @@ void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxG
     }
 }
 
-void DescEditService::setMutationRates(Desc& description, MutationRatesDesc const& mutationRates) const
+void DescEditService::setMutationRates(ContentDesc& description, MutationRatesDesc const& mutationRates) const
 {
     for (auto& genome : description._genomes) {
         genome._mutationRates = mutationRates;
     }
 }
 
-void DescEditService::setCenter(Desc& description, RealVector2D const& center) const
+void DescEditService::setCenter(ContentDesc& description, RealVector2D const& center) const
 {
     auto origCenter = calcCenter(description);
     auto delta = center - origCenter;
     shift(description, delta);
 }
 
-RealVector2D DescEditService::calcCenter(Desc const& description) const
+RealVector2D DescEditService::calcCenter(ContentDesc const& description) const
 {
     RealVector2D result;
     auto numEntities = description._objects.size() + description._energies.size();
@@ -563,7 +564,7 @@ RealVector2D DescEditService::calcCenter(Desc const& description) const
     return result;
 }
 
-void DescEditService::shift(Desc& description, RealVector2D const& delta) const
+void DescEditService::shift(ContentDesc& description, RealVector2D const& delta) const
 {
     for (auto& object : description._objects) {
         object._pos += delta;
@@ -574,7 +575,7 @@ void DescEditService::shift(Desc& description, RealVector2D const& delta) const
     }
 }
 
-void DescEditService::rotate(Desc& description, float angle) const
+void DescEditService::rotate(ContentDesc& description, float angle) const
 {
     auto rotationMatrix = Math::calcRotationMatrix(angle);
     auto center = calcCenter(description);
@@ -592,7 +593,7 @@ void DescEditService::rotate(Desc& description, float angle) const
     }
 }
 
-void DescEditService::accelerate(Desc& description, RealVector2D const& velDelta, float angularVelDelta) const
+void DescEditService::accelerate(ContentDesc& description, RealVector2D const& velDelta, float angularVelDelta) const
 {
     auto center = calcCenter(description);
 
@@ -608,7 +609,7 @@ void DescEditService::accelerate(Desc& description, RealVector2D const& velDelta
     }
 }
 
-void DescEditService::removeCell(Desc& description, uint64_t objectId) const
+void DescEditService::removeCell(ContentDesc& description, uint64_t objectId) const
 {
     std::erase_if(description._objects, [&](auto const& object) { return object._id == objectId; });
 
@@ -651,7 +652,7 @@ void DescEditService::removeCell(Desc& description, uint64_t objectId) const
     }
 }
 
-void DescEditService::removeCellIf(Desc& description, std::function<bool(ObjectDesc const&)> const& predicate) const
+void DescEditService::removeCellIf(ContentDesc& description, std::function<bool(ObjectDesc const&)> const& predicate) const
 {
     std::unordered_set<uint64_t> removedCellIds;
     auto extPredicate = [&](ObjectDesc const& object) {
@@ -745,7 +746,7 @@ RealVector2D DescEditService::getPos(ExtendedObjectOrEnergyDesc const& entity) c
     return std::get<EnergyDesc>(entity)._pos;
 }
 
-std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& description) const
+std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(ContentDesc const& description) const
 {
     std::vector<ExtendedObjectOrEnergyDesc> result;
     for (auto const& energyParticle : description._energies) {
@@ -779,7 +780,7 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& 
     return result;
 }
 
-std::vector<std::vector<size_t>> DescEditService::calcClusters(Desc const& description) const
+std::vector<std::vector<size_t>> DescEditService::calcClusters(ContentDesc const& description) const
 {
     std::vector<std::vector<size_t>> clusters;
 

@@ -23,7 +23,7 @@ public:
 
     ~SerializerServiceTests() override { std::filesystem::remove_all(_testDirectory); }
 
-    void testSerializationAndDeserialization(Desc const& data)
+    void testSerializationAndDeserialization(ContentDesc const& data)
     {
         DeserializedSimulation deserializedSimulationBefore{.mainData = data};
         std::string serializedSimulation;
@@ -306,7 +306,7 @@ TEST_F(SerializerServiceTests, emptyStatisticsHistory)
 
 TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
-    Desc data;
+    ContentDesc data;
     data._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
 
     testSerializationAndDeserialization(data);
@@ -327,7 +327,7 @@ TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {
     auto objectParameter = GetParam();
 
-    Desc data;
+    ContentDesc data;
     if (objectParameter.objectType == ObjectType_Cell) {
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
@@ -355,7 +355,7 @@ TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 
     auto [creature, genome] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    auto data = Desc().addCreature({ObjectDesc()}, creature, genome);
+    auto data = ContentDesc().addCreature({ObjectDesc()}, creature, genome);
 
     testSerializationAndDeserialization(data);
 }

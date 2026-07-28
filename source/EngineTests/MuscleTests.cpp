@@ -4,8 +4,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -38,7 +38,7 @@ protected:
         }
     }
 
-    void setSimulationData(Desc const& data, DetailedPreview detailedPreview)
+    void setSimulationData(ContentDesc const& data, DetailedPreview detailedPreview)
     {
         if (detailedPreview == DetailedPreview::No) {
             _simulationFacade->setSimulationData(data);
@@ -56,7 +56,7 @@ protected:
         }
     }
 
-    Desc getSimulationData(DetailedPreview detailedPreview)
+    ContentDesc getSimulationData(DetailedPreview detailedPreview)
     {
         if (detailedPreview == DetailedPreview::No) {
             return _simulationFacade->getSimulationData();
@@ -68,7 +68,7 @@ protected:
 
 TEST_F(MuscleTests, noFrontAngle)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
             ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
@@ -150,7 +150,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
     nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
@@ -236,7 +236,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
     nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
             ObjectDesc().id(2).pos({10.0f, 11.0f}),
@@ -334,7 +334,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
@@ -433,7 +433,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
             ObjectDesc().id(2).pos({10.0f, 11.0f}),
@@ -553,7 +553,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
     nn._biases.at(Channels::CellTypeActivation) = 1.0f;
     nn._biases.at(Channels::MuscleAngle) = targetAngle / 180.0f;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
@@ -615,7 +615,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
     nn._biases.at(Channels::CellTypeActivation) = 1.0f;
     nn._biases.at(Channels::MuscleAngle) = targetAngle / 180.0f;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
             ObjectDesc().id(2).pos({10.0f, 11.0f}),
@@ -679,7 +679,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
     nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).headCell(true)),
             ObjectDesc()
@@ -752,7 +752,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
     nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).headCell(true)),
             ObjectDesc()
@@ -826,7 +826,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
     nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).headCell(true)),
             ObjectDesc()
@@ -886,7 +886,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
     nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).headCell(true)),
             ObjectDesc()
@@ -963,7 +963,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
     nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 2;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
             ObjectDesc()

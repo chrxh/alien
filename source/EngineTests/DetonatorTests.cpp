@@ -2,8 +2,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -29,7 +29,7 @@ public:
 
 TEST_F(DetonatorTests, doNothing)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().countdown(14))),
     });
 
@@ -48,7 +48,7 @@ TEST_F(DetonatorTests, doNothing)
 
 TEST_F(DetonatorTests, activateDetonator)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(DetonatorDesc().countdown(10))),
     });
 
@@ -67,7 +67,7 @@ TEST_F(DetonatorTests, activateDetonator)
 
 TEST_F(DetonatorTests, explosion)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().state(DetonatorState_Activated).countdown(10))),
         ObjectDesc().id(2).pos({12.0f, 10.0f}),
     });
@@ -89,7 +89,7 @@ TEST_F(DetonatorTests, explosion)
 
 TEST_F(DetonatorTests, chainExplosion)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().state(DetonatorState_Activated).countdown(10))),
         ObjectDesc().id(2).pos({12.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().state(DetonatorState_Ready).countdown(10))),
     });
@@ -108,7 +108,7 @@ TEST_F(DetonatorTests, chainExplosion)
 
 TEST_F(DetonatorTests, explosionAlsoIfDying)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc()
             .id(1)
             .pos({10.0f, 10.0f})

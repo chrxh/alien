@@ -1,8 +1,8 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescValidationService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 
 class DescValidationServiceTests : public ::testing::Test

@@ -6,8 +6,8 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -21,7 +21,7 @@ public:
     virtual ~DescriptionEditTests() = default;
 
 protected:
-    bool areAngelsCorrect(Desc const& data) const
+    bool areAngelsCorrect(ContentDesc const& data) const
     {
         for (auto const& object : data._objects) {
             if (!object._connections.empty()) {
@@ -54,7 +54,7 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({0, 0}),
         ObjectDesc().id(2).pos({1, 0}),
         ObjectDesc().id(3).pos({0, 1}),
@@ -83,7 +83,7 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({0, 0}),
         ObjectDesc().id(2).pos({1, 0}),
         ObjectDesc().id(3).pos({-1, 0}),
@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
 {
     // Create test data
-    Desc data;
+    ContentDesc data;
     if (GetParam() == CellsOnCreature::No) {
         data._objects = {ObjectDesc().id(0), ObjectDesc().id(1)};
     } else {
@@ -154,9 +154,9 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
     // Create test data
     auto createCollection = [] {
         if (GetParam() == CellsOnCreature::No) {
-            return Desc().objects({ObjectDesc().id(0), ObjectDesc().id(0)});
+            return ContentDesc().objects({ObjectDesc().id(0), ObjectDesc().id(0)});
         } else {
-            return Desc().addCreature({ObjectDesc().id(0), ObjectDesc().id(0)});
+            return ContentDesc().addCreature({ObjectDesc().id(0), ObjectDesc().id(0)});
         }
     };
     auto data = createCollection();
@@ -175,7 +175,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
 TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
 {
     // Create test data
-    Desc data;
+    ContentDesc data;
     if (GetParam() == CellsOnCreature::No) {
         for (int i = 0; i < 10; ++i) {
             data._objects.emplace_back(ObjectDesc().id(i).type(CellDesc().age(i)));
@@ -214,7 +214,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
 TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 {
     // Create test data
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(0).connections({ConnectionDesc().objectId(1)}),
                         ObjectDesc().id(1).connections({ConnectionDesc().objectId(0)}),
@@ -254,7 +254,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(0).connections({ConnectionDesc().objectId(2)}),
                         ObjectDesc().id(1),
@@ -312,7 +312,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 {
     // Create test data
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(0).connections({ConnectionDesc().objectId(3)}),
                         ObjectDesc().id(1),
@@ -370,7 +370,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
 {
     // Create test data
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(0).type(CellDesc().constructor(ConstructorDesc().lastConstructedCellId(1))),
         ObjectDesc().id(1),
     });
@@ -406,7 +406,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(0).type(CellDesc().constructor(ConstructorDesc().lastConstructedCellId(2))),
         ObjectDesc().id(1),
     });
@@ -442,7 +442,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
 TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
 {
     // Create test data
-    auto data = Desc().energies({EnergyDesc().id(0), EnergyDesc().id(1)});
+    auto data = ContentDesc().energies({EnergyDesc().id(0), EnergyDesc().id(1)});
 
     // Perform action
     data.assignNewEntityIds();
@@ -458,7 +458,7 @@ TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
 TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
 {
     // Create test data
-    auto data = Desc().energies({EnergyDesc().id(0), EnergyDesc().id(0)});
+    auto data = ContentDesc().energies({EnergyDesc().id(0), EnergyDesc().id(0)});
 
     // Perform action
     data.assignNewEntityIds();
@@ -474,7 +474,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
 TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 {
     // Create test data
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0))
                     .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(1));
 
@@ -501,7 +501,7 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 {
     // Create test data
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0))
                     .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0));
 
@@ -512,7 +512,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
-    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(2)).addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(2));
+    auto data = ContentDesc().addCreature({ObjectDesc()}, CreatureDesc().id(2)).addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(2));
 
     // Perform action
     data.assignNewEntityIds();
@@ -541,7 +541,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
-    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(2)).addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(1));
+    auto data = ContentDesc().addCreature({ObjectDesc()}, CreatureDesc().id(2)).addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(1));
 
     // Perform action
     data.assignNewEntityIds();
@@ -569,7 +569,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 
 TEST_F(DescriptionEditTests, adaptMaxIds)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(5)}, CreatureDesc().id(3))
                     .addCreature({ObjectDesc()})
                     .energies({
@@ -594,7 +594,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     for (int i = 0; i < 1000; ++i) {
         cells.emplace_back(ObjectDesc().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
     }
-    auto data = Desc().addCreature(cells);
+    auto data = ContentDesc().addCreature(cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }
@@ -624,7 +624,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     for (int i = 0; i < 1000; ++i) {
         cells.emplace_back(ObjectDesc().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
     }
-    auto data = Desc().addCreature(cells);
+    auto data = ContentDesc().addCreature(cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }

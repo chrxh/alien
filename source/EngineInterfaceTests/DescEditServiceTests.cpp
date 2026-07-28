@@ -2,15 +2,15 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 
 class DescEditServiceTests : public ::testing::Test
 {
 protected:
     DescEditService const& _service = DescEditService::get();
 
-    bool hasAnyCrossingConnections(Desc const& description) const
+    bool hasAnyCrossingConnections(ContentDesc const& description) const
     {
         auto cache = description.createCache();
 
@@ -44,7 +44,7 @@ protected:
 TEST_F(DescEditServiceTests, reconnectObjects_noCrossingConnections)
 {
     // Arrange: 4 objects in a square where diagonals would cross
-    auto desc = Desc().objects({
+    auto desc = ContentDesc().objects({
         ObjectDesc().pos({0.0f, 0.0f}).type(SolidDesc()),
         ObjectDesc().pos({1.0f, 0.0f}).type(SolidDesc()),
         ObjectDesc().pos({0.0f, 1.0f}).type(SolidDesc()),
@@ -61,7 +61,7 @@ TEST_F(DescEditServiceTests, reconnectObjects_noCrossingConnections)
 TEST_F(DescEditServiceTests, reconnectObjects_noCrossingConnections_largerGrid)
 {
     // Arrange: 3x3 grid of objects
-    auto desc = Desc().objects({
+    auto desc = ContentDesc().objects({
         ObjectDesc().pos({0.0f, 0.0f}).type(SolidDesc()),
         ObjectDesc().pos({1.0f, 0.0f}).type(SolidDesc()),
         ObjectDesc().pos({2.0f, 0.0f}).type(SolidDesc()),
@@ -83,7 +83,7 @@ TEST_F(DescEditServiceTests, reconnectObjects_noCrossingConnections_largerGrid)
 TEST_F(DescEditServiceTests, reconnectObjects_adjacentConnectionsStillCreated)
 {
     // Arrange: 4 objects in a square
-    auto desc = Desc().objects({
+    auto desc = ContentDesc().objects({
         ObjectDesc().pos({0.0f, 0.0f}).type(SolidDesc()),
         ObjectDesc().pos({1.0f, 0.0f}).type(SolidDesc()),
         ObjectDesc().pos({0.0f, 1.0f}).type(SolidDesc()),
