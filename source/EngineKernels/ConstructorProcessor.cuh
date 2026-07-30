@@ -239,6 +239,8 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
 
     if (clonedGenome != nullptr) {
         MutationProcessor::applyMutations(data, statistics, cell.creature, clonedGenome);
+        // Break cycles first: the constructors turned off there can render genes unreachable, which the following step removes.
+        MutationProcessor::removeCyclesNotThroughRoot(data, clonedGenome);
         MutationProcessor::removeUnreachableGenesFromRoot(data, clonedGenome);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
