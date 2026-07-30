@@ -8,7 +8,7 @@
 class GeneCycleRemovalTests : public MutationTestsBase
 {
 protected:
-    // The constructor target of the node-th node of the given gene, or nullopt if that node has no constructor.
+    // The constructor target of the n-th node of the given gene, or nullopt if that node has no constructor.
     std::optional<int> getConstructorTarget(GenomeDesc const& genome, size_t geneIndex, size_t nodeIndex = 0) const
     {
         auto const& constructor = genome._genes.at(geneIndex)._nodes.at(nodeIndex)._constructor;
