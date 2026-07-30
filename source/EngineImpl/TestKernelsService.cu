@@ -25,6 +25,11 @@ void TestKernelsService::testOnly_removeUnusedGenes(CudaSettings const& gpuSetti
     KERNEL_CALL_MOD(cudaTestRemoveUnreachableGenesFromRoot, NEURONS_PER_CELL, data, objectId);
 }
 
+void TestKernelsService::testOnly_removeGeneCycles(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+{
+    KERNEL_CALL_MOD(cudaTestRemoveGeneCycles, NEURONS_PER_CELL, data, objectId);
+}
+
 void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)
 {
     KERNEL_CALL_1_1(cudaTestCreateConnection, data, objectId1, objectId2);

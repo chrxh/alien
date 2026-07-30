@@ -471,6 +471,12 @@ void EngineWorker::testOnly_removeUnusedGenes(uint64_t objectId)
     _simulationCudaFacade->testOnly_removeUnusedGenes(objectId);
 }
 
+void EngineWorker::testOnly_removeGeneCycles(uint64_t objectId)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_removeGeneCycles(objectId);
+}
+
 void EngineWorker::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     EngineWorkerGuard access(this);
