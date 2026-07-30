@@ -240,6 +240,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
 
     if (clonedGenome != nullptr) {
         MutationProcessor::applyMutations(data, statistics, cell.creature, clonedGenome);
+        GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, clonedGenome);
         GeneGraphProcessor::removeCyclesNotThroughRoot(data, clonedGenome);
         GeneGraphProcessor::removeUnreachableGenesFromRoot(data, clonedGenome);
         if (threadIdx.x == 0) {

@@ -20,6 +20,11 @@ void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, Simula
     KERNEL_CALL_MOD(cudaTestMutate, NEURONS_PER_CELL, data, statistics, objectId);
 }
 
+void TestKernelsService::testOnly_voidUnreachableNodes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+{
+    KERNEL_CALL_MOD(cudaTestVoidUnreachableNodes, NEURONS_PER_CELL, data, objectId);
+}
+
 void TestKernelsService::testOnly_removeUnusedGenes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
     KERNEL_CALL_MOD(cudaTestRemoveUnreachableGenesFromRoot, NEURONS_PER_CELL, data, objectId);

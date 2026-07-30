@@ -54,6 +54,7 @@ PUBLIC
     StatisticsTests.cpp
     Testsuite.cpp
     TrimGeneMutationTests.cpp
+    UnreachableNodeVoidingTests.cpp
     UnusedGeneRemovalTests.cpp
     VoidMutationTests.cpp
     VoidTests.cpp)
