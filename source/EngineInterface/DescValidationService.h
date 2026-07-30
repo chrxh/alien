@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include "Desc.h"
+#include "Descs.h"
 #include "GenomeDesc.h"
 
 class DescValidationService

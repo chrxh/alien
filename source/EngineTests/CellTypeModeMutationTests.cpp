@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -46,7 +46,7 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_changesModeToDefaults)
         {GeneDesc().nodes({NodeDesc().cellType(MuscleGenomeDesc().mode(AutoBendingGenomeDesc().maxAngleDeviation(0.55f).forwardBackwardRatio(0.25f)))})});
     genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -65,7 +65,7 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_doesNotChangeExceptMode)
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {

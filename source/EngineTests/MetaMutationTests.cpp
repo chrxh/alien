@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -15,7 +15,7 @@ TEST_F(MetaMutationTests, metaMutation_neuronRatesActuallyChange)
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
     genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.neuronsMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -51,7 +51,7 @@ TEST_F(MetaMutationTests, metaMutation_neuronRatesZeroSigmaNoChange)
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
     genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.neuronsMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -82,7 +82,7 @@ TEST_F(MetaMutationTests, metaMutation_connectionRatesActuallyChange)
     genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f);
     genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.connectionsMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -112,7 +112,7 @@ TEST_F(MetaMutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
     genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f);
     genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.connectionsMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -139,7 +139,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
     genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f).enumChangeProbability(0.5f);
     genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().nodeProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.cellTypePropertiesMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -168,7 +168,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
     genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f).enumChangeProbability(0.5f);
     genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().nodeProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.cellTypePropertiesMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -193,7 +193,7 @@ TEST_F(MetaMutationTests, metaMutation_geometryRatesActuallyChange)
     genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().geneProbability(0.5f).valueChangeSigma(0.5f).enumChangeProbability(0.5f);
     genome._mutationRates._geometryMutations[1] = GeometryMutationDesc().geneProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.geometryMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -222,7 +222,7 @@ TEST_F(MetaMutationTests, metaMutation_geometryRatesZeroSigmaNoChange)
     genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().geneProbability(0.5f).valueChangeSigma(0.5f).enumChangeProbability(0.5f);
     genome._mutationRates._geometryMutations[1] = GeometryMutationDesc().geneProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.geometryMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -246,7 +246,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypeModeRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.cellTypeModeMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -267,7 +267,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypeModeRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.cellTypeModeMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -286,7 +286,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypeRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.cellTypeMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -307,7 +307,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypeRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.cellTypeMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -326,7 +326,7 @@ TEST_F(MetaMutationTests, metaMutation_voidRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.voidMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -345,7 +345,7 @@ TEST_F(MetaMutationTests, metaMutation_voidRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.voidMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -364,7 +364,7 @@ TEST_F(MetaMutationTests, metaMutation_extendGeneRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.extendGeneMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -385,7 +385,7 @@ TEST_F(MetaMutationTests, metaMutation_extendGeneRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.extendGeneMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -404,7 +404,7 @@ TEST_F(MetaMutationTests, metaMutation_addNodeRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.addNodeMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -427,7 +427,7 @@ TEST_F(MetaMutationTests, metaMutation_addNodeRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.addNodeMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -448,7 +448,7 @@ TEST_F(MetaMutationTests, metaMutation_trimGeneRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.trimGeneMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -469,7 +469,7 @@ TEST_F(MetaMutationTests, metaMutation_trimGeneRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.trimGeneMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -488,7 +488,7 @@ TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesActuallyChange)
     auto genome = createTestGenome();
     genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.deleteNodeMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -509,7 +509,7 @@ TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.deleteNodeMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -531,7 +531,7 @@ TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
     genome._mutationRates._constructorMutations[1] =
         ConstructorMutationDesc().nodeProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f).constructorToggleProbability(0.4f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.constructorMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -564,7 +564,7 @@ TEST_F(MetaMutationTests, metaMutation_constructorRatesZeroSigmaNoChange)
     genome._mutationRates._constructorMutations[1] =
         ConstructorMutationDesc().nodeProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f).constructorToggleProbability(0.4f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.constructorMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -592,7 +592,7 @@ TEST_F(MetaMutationTests, metaMutation_applyMetaMutationsDisabledNoRateChange)
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
     genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.neuronsMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);

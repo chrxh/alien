@@ -239,6 +239,6 @@ void MultiplierWindow::onBuild()
 void MultiplierWindow::onUndo()
 {
     _SimulationFacade::get()->removeSelectedObjects(true);
-    _SimulationFacade::get()->addAndSelectSimulationData(Desc(_origSelection));
+    _SimulationFacade::get()->addAndSelectSimulationData(ContentDesc(_origSelection));
     _selectionDataAfterMultiplication = std::nullopt;
 }

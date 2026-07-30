@@ -8,8 +8,8 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -165,7 +165,7 @@ void _PreviewWidget::processCreaturePreviews()
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Desc& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float width)
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);

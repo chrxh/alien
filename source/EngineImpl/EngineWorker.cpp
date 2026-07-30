@@ -71,7 +71,7 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
     _syncSimulationWithRenderingRatio = value;
 }
 
-Desc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+ContentDesc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     EngineWorkerGuard access(this);
 
@@ -81,7 +81,7 @@ Desc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector
     return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
-Desc EngineWorker::getSelectedSimulationData(bool includeClusters)
+ContentDesc EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
@@ -90,7 +90,7 @@ Desc EngineWorker::getSelectedSimulationData(bool includeClusters)
     return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
-Desc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
+ContentDesc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
 
@@ -114,7 +114,7 @@ StatisticsEntry EngineWorker::getStatisticsEntry() const
     return _simulationCudaFacade->getStatisticsEntry();
 }
 
-void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)
+void EngineWorker::addAndSelectSimulationData(ContentDesc&& dataToUpdate)
 {
     EngineWorkerGuard access(this);
 
@@ -128,7 +128,7 @@ void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
-void EngineWorker::setSimulationData(Desc const& dataToUpdate)
+void EngineWorker::setSimulationData(ContentDesc const& dataToUpdate)
 {
     if (!dataToUpdate.hasUniqueIds()) {
         throw AlienException("Object ids are not unique.");
@@ -405,7 +405,7 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
-Desc EngineWorker::getPreviewData()
+ContentDesc EngineWorker::getPreviewData()
 {
     EngineWorkerGuard access(this);
 
@@ -415,7 +415,7 @@ Desc EngineWorker::getPreviewData()
     return DescConverterService::get().convertTOtoDescription(preview);
 }
 
-void EngineWorker::setPreviewData(Desc const& description)
+void EngineWorker::setPreviewData(ContentDesc const& description)
 {
     if (!description.hasUniqueIds()) {
         throw std::runtime_error("Cell ids are not unique.");

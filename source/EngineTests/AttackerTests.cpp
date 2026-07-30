@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -28,7 +28,7 @@ public:
 protected:
     // Helper to create an attacker creature with neural net bias for activation and a sensor cell with lastMatch
     // For creature attack mode, the sensor's lastMatch.creatureId should match the lower 16 bits of the target creature's id
-    Desc createAttacker(
+    ContentDesc createAttacker(
         const RealVector2D& attackerPos,
         const RealVector2D& targetPos,
         uint64_t targetCreatureId = 2,
@@ -45,7 +45,7 @@ protected:
         lastMatch._creatureIdPart = targetCreatureId & 0xffff; // Sensor stores only lower 16 bits
         lastMatch._pos = targetPos;
 
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc()
                 .id(1)
@@ -66,9 +66,9 @@ protected:
     }
 
     // Helper to create a target creature at a given position
-    Desc createTargetCreature(const RealVector2D& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f, bool fixed = false)
+    ContentDesc createTargetCreature(const RealVector2D& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f, bool fixed = false)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc().id(100).pos(pos).color(color).isStatic(fixed).type(CellDesc().usableEnergy(usableEnergy)),
             },
@@ -230,7 +230,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
     lastMatch._pos = {100.0f, 103.0f};
 
     // Create a single creature with attacker, sensor, and potential targets
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
@@ -387,7 +387,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     lastMatch._pos = {100.0f, 97.0f};
 
     // Create attacker with connections that block the attack ray
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().lastMatch(lastMatch))),
@@ -431,7 +431,7 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
     lastMatch2._creatureIdPart = 3;
     lastMatch2._pos = {99.0f, 98.5f};
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch2))),
@@ -477,7 +477,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     lastMatch._pos = {100.0f, 103.0f};
 
     // Create attacker with connections that do NOT block the attack ray
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
@@ -552,7 +552,7 @@ TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker without sensor (single cell is sufficient for this test)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).color(0).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
         },
@@ -588,7 +588,7 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
     lastMatch2._creatureIdPart = 4;
     lastMatch2._pos = {100.0f, 97.0f};
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch2))),
@@ -667,7 +667,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode (single cell is sufficient)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc())).neuralNetwork(nn)),
         },
@@ -696,7 +696,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode with color restriction to color 1 (single cell is sufficient)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
             .id(1)
@@ -729,7 +729,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_mismatchingColor)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode with color restriction to color 1 (single cell is sufficient)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
             .id(1)
@@ -764,7 +764,7 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode (single cell is sufficient)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc())).neuralNetwork(nn)),
         },
@@ -800,7 +800,7 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_true)
     lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch))),
@@ -836,7 +836,7 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_false)
     lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch))),
@@ -880,7 +880,7 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_mixedSensors)
     lastMatch2._creatureIdPart = 4;
     lastMatch2._pos = {100.0f, 97.0f};
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch1))),
@@ -923,7 +923,7 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in Creature mode (single cell is sufficient)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
         },

@@ -28,7 +28,7 @@ namespace
 ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     GenomeDesc const& genome,
     int startGeneIndex,
-    Desc&& phenotype,
+    ContentDesc&& phenotype,
     std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;

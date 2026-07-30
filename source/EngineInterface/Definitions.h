@@ -14,7 +14,7 @@ struct ExpertToggles;
 struct ColorTransitionRule;
 struct ParameterSpec;
 
-struct Desc;
+struct ContentDesc;
 struct ObjectDesc;
 struct ExtendedObjectDesc;
 struct EnergyDesc;

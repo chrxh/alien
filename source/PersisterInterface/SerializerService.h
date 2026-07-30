@@ -1,29 +1,27 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/StatisticsHistory.h>
 
 #include "Definitions.h"
-#include "DeserializedSimulation.h"
-#include "SerializedSimulation.h"
-#include "SettingsForSerialization.h"
 
 class SerializerService
 {
     MAKE_SINGLETON(SerializerService);
 
 public:
-    bool serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const;
-    bool deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename) const;
+    bool serializeSimulationToFiles(std::filesystem::path const& filename, SimulationDesc const& data) const;
+    bool deserializeSimulationFromFiles(SimulationDesc& data, std::filesystem::path const& filename) const;
     bool deleteSimulation(std::filesystem::path const& filename) const;
 
-    bool serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input) const;
-    bool deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const;
+    bool serializeSimulationToString(std::string& output, SimulationDesc const& input) const;
+    bool deserializeSimulationFromString(SimulationDesc& output, std::string const& input) const;
 
     bool serializeGenomeToFile(std::filesystem::path const& filename, GenomeDesc const& genome) const;
     bool deserializeGenomeFromFile(GenomeDesc& genome, std::filesystem::path const& filename) const;
@@ -34,25 +32,20 @@ public:
     bool serializeSimulationParametersToFile(std::filesystem::path const& filename, SimulationParameters const& parameters) const;
     bool deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::filesystem::path const& filename) const;
 
-    bool serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics) const;
-
-    bool serializeContentToFile(std::filesystem::path const& filename, Desc const& content) const;
-    bool deserializeContentFromFile(Desc& content, std::filesystem::path const& filename) const;
+    bool serializeContentToFile(std::filesystem::path const& filename, ContentDesc const& content) const;
+    bool deserializeContentFromFile(ContentDesc& content, std::filesystem::path const& filename) const;
 
 private:
-    void serializeDescription(Desc const& description, std::ostream& stream) const;
-    bool deserializeDescription(Desc& description, std::filesystem::path const& filename) const;
-    void deserializeDescription(Desc& description, std::istream& stream) const;
+    void serializeDescription(ContentDesc const& description, std::ostream& stream) const;
+    bool deserializeDescription(ContentDesc& description, std::filesystem::path const& filename) const;
+    void deserializeDescription(ContentDesc& description, std::istream& stream) const;
 
-    void serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const;
-    void deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const;
+    void serializeSimulation(SimulationDesc const& data, std::ostream& stream) const;
+    void deserializeSimulation(SimulationDesc& data, std::istream& stream) const;
 
-    void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream) const;
-    void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream) const;
+    void serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const;
+    void deserializeSettings(SimulationParameters& parameters, std::istream& stream) const;
 
-    void serializeStatistics(StatisticsHistoryData const& statistics, Desc const& mainData, std::ostream& stream) const;
-    void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const;
-
-    bool wrapGenome(Desc& output, GenomeDesc const& input) const;
-    bool unwrapGenome(GenomeDesc& output, Desc& input) const;
+    bool wrapGenome(ContentDesc& output, GenomeDesc const& input) const;
+    bool unwrapGenome(GenomeDesc& output, ContentDesc& input) const;
 };

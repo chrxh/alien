@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -74,7 +74,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
         NodeDesc().cellType(MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc(), SignalEntryGenomeDesc(), SignalEntryGenomeDesc()})),
     })});
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().signalEntries({SignalEntryDesc()}))),
             ObjectDesc().pos({101.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().signalEntries({SignalEntryDesc(), SignalEntryDesc()}))),

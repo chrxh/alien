@@ -43,7 +43,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
     } else {
         NumberGenerator::get().setIds(Ids());
         _simulationFacade->clear();
-        _simulationFacade->setPreviewData(Desc());
+        _simulationFacade->setPreviewData(ContentDesc());
         _simulationFacade->setCurrentTimestepForPreview(0);
         _simulationFacade->setCurrentTimestep(0);
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -55,7 +55,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
 
 IntegrationTestFramework::~IntegrationTestFramework() {}
 
-double IntegrationTestFramework::getEnergy(Desc const& data) const
+double IntegrationTestFramework::getEnergy(ContentDesc const& data) const
 {
     auto getDepotEnergy = [](ObjectDesc const& object) -> double {
         if (object.getObjectType() == ObjectType_Cell) {
@@ -87,7 +87,7 @@ double IntegrationTestFramework::getEnergy(Desc const& data) const
     return result;
 }
 
-bool IntegrationTestFramework::compare(Desc left, Desc right) const
+bool IntegrationTestFramework::compare(ContentDesc left, ContentDesc right) const
 {
     return DescTestDataFactory::get().compare(left, right);
 }

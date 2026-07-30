@@ -75,7 +75,7 @@ void EditorController::onCloseAllInspectorWindows()
 
 void EditorController::onInspectSelectedObjects()
 {
-    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
+    ContentDesc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
     if (!onInspectObjects(DescEditService::get().getObjects(selectedData), false)) {
         std::string message = "Too many objects are selected for inspection. A maximum of ";
         message += std::to_string(Const::MaxInspectedObjects);
@@ -86,7 +86,7 @@ void EditorController::onInspectSelectedObjects()
 
 void EditorController::onInspectSelectedGenomes()
 {
-    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
+    ContentDesc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
 
     std::vector<GenomeDesc> uniqueGenomes;
     for (auto const& genome : selectedData._genomes) {
@@ -114,7 +114,7 @@ void EditorController::onInspectSelectedGenomes()
 void EditorController::onInspectSelectedCreatures()
 {
     // Collect the creature ids of the directly selected cells
-    Desc directlySelectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
+    ContentDesc directlySelectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
     std::unordered_set<uint64_t> selectedCreatureIds;
     for (auto const& object : directlySelectedData._objects) {
         if (object.getObjectType() == ObjectType_Cell) {
@@ -127,7 +127,7 @@ void EditorController::onInspectSelectedCreatures()
 
     // Consider all cells of those creatures and pick the head cell of each
     // (head cell with the smallest branch index, then smallest concatenation index)
-    Desc creatureData = _SimulationFacade::get()->getSelectedSimulationData(true);
+    ContentDesc creatureData = _SimulationFacade::get()->getSelectedSimulationData(true);
     auto entities = DescEditService::get().getObjects(creatureData);
 
     std::unordered_map<uint64_t, ExtendedObjectDesc> headCellByCreatureId;

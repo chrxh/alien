@@ -6,8 +6,8 @@
 #include <Base/GlobalSettings.h>
 
 #include <EngineInterface/Colors.h>
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/SimulationFacade.h>
 

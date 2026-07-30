@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <optional>
 #include <string>
 #include <unordered_set>
@@ -13,6 +14,8 @@
 
 #include "Definitions.h"
 #include "GenomeDesc.h"
+#include "SimulationParameters.h"
+#include "StatisticsHistory.h"
 
 struct ConnectionDesc
 {
@@ -594,54 +597,54 @@ struct CreatureDesc
     MEMBER(CreatureDesc, int, headUpdateId, 0);
 };
 
-struct _DescCache
+struct _ContentDescCache
 {
     std::unordered_map<uint64_t, int> objectIdToIndex;
     std::unordered_map<uint64_t, uint64_t> creatureIdToIndex;
     std::unordered_map<uint64_t, uint64_t> genomeIdToIndex;
 };
-using DescCache = std::shared_ptr<_DescCache>;
+using ContentDescCache = std::shared_ptr<_ContentDescCache>;
 
-struct Desc
+struct ContentDesc
 {
-    auto operator<=>(Desc const&) const = default;
+    auto operator<=>(ContentDesc const&) const = default;
 
-    MEMBER(Desc, std::vector<ObjectDesc>, objects, {});
-    MEMBER(Desc, std::vector<EnergyDesc>, energies, {});
-    MEMBER(Desc, std::vector<CreatureDesc>, creatures, {});
-    MEMBER(Desc, std::vector<GenomeDesc>, genomes, {});
+    MEMBER(ContentDesc, std::vector<ObjectDesc>, objects, {});
+    MEMBER(ContentDesc, std::vector<EnergyDesc>, energies, {});
+    MEMBER(ContentDesc, std::vector<CreatureDesc>, creatures, {});
+    MEMBER(ContentDesc, std::vector<GenomeDesc>, genomes, {});
 
     void clear();
     bool isEmpty() const;
 
-    Desc& add(Desc&& other, bool assignNewIds = true);
+    ContentDesc& add(ContentDesc&& other, bool assignNewIds = true);
 
     bool hasUniqueIds() const;
     void assignNewEntityIds();  // Preserves order of cell ids
 
-    Desc& addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature = CreatureDesc(), GenomeDesc const& genome = GenomeDesc());
-    Desc& addObjects(std::vector<ObjectDesc> const& objects);
+    ContentDesc& addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature = CreatureDesc(), GenomeDesc const& genome = GenomeDesc());
+    ContentDesc& addObjects(std::vector<ObjectDesc> const& objects);
 
     size_t getNumObjects() const;
     size_t getNumObjectsWithoutCreature() const;
     std::vector<ObjectDesc> getObjectsForCreature(uint64_t creatureId) const;
 
-    DescCache createCache() const;
-    Desc& addConnection(uint64_t const& objectId1, uint64_t const& objectId2, DescCache const& cache = nullptr);
-    Desc& addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, DescCache const& cache = nullptr);
+    ContentDescCache createCache() const;
+    ContentDesc& addConnection(uint64_t const& objectId1, uint64_t const& objectId2, ContentDescCache const& cache = nullptr);
+    ContentDesc& addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, ContentDescCache const& cache = nullptr);
 
-    ObjectDesc const& getObjectRef(uint64_t const& objectId, DescCache const& cache = nullptr) const;
-    ObjectDesc& getObjectRef(uint64_t const& objectId, DescCache const& cache = nullptr);
+    ObjectDesc const& getObjectRef(uint64_t const& objectId, ContentDescCache const& cache = nullptr) const;
+    ObjectDesc& getObjectRef(uint64_t const& objectId, ContentDescCache const& cache = nullptr);
 
     ObjectDesc& getOtherObjectRef(uint64_t id);
     ObjectDesc& getOtherObjectRef(std::set<uint64_t> const& ids);
     std::vector<ObjectDesc> getOtherObjects(std::set<uint64_t> const& ids) const;
 
-    CreatureDesc const& getCreatureRef(uint64_t id, DescCache const& cache = nullptr) const;
-    CreatureDesc& getCreatureRef(uint64_t id, DescCache const& cache = nullptr);
+    CreatureDesc const& getCreatureRef(uint64_t id, ContentDescCache const& cache = nullptr) const;
+    CreatureDesc& getCreatureRef(uint64_t id, ContentDescCache const& cache = nullptr);
     CreatureDesc& getOtherCreatureRef(uint64_t id);
 
-    GenomeDesc const& getGenomeRef(uint64_t const& genomeId, DescCache const& cache = nullptr) const;
+    GenomeDesc const& getGenomeRef(uint64_t const& genomeId, ContentDescCache const& cache = nullptr) const;
 
     bool hasConnection(uint64_t id, uint64_t otherId) const;
     bool hasConnection(ObjectDesc const& object1, ObjectDesc const& object2) const;
@@ -649,7 +652,7 @@ struct Desc
     ConnectionDesc const& getConnection(ObjectDesc const& object1, ObjectDesc const& object2) const;
 
 private:
-    uint64_t getObjectIndex(uint64_t const& objectId, DescCache const& cache) const;
+    uint64_t getObjectIndex(uint64_t const& objectId, ContentDescCache const& cache) const;
 };
 
 struct ExtendedObjectDesc
@@ -659,3 +662,15 @@ struct ExtendedObjectDesc
     std::optional<GenomeDesc> genome;
 };
 using ExtendedObjectOrEnergyDesc = std::variant<ExtendedObjectDesc, EnergyDesc>;
+
+struct SimulationDesc
+{
+    MEMBER(SimulationDesc, uint64_t, timestep, 0);
+    MEMBER(SimulationDesc, std::chrono::milliseconds, realTime, std::chrono::milliseconds(0));
+    MEMBER(SimulationDesc, float, zoom, 4.0f);
+    MEMBER(SimulationDesc, RealVector2D, center, RealVector2D(500.0f, 500.0f));
+    MEMBER(SimulationDesc, IntVector2D, worldSize, IntVector2D(1000, 1000));
+    MEMBER(SimulationDesc, SimulationParameters, simulationParameters, SimulationParameters());
+    MEMBER(SimulationDesc, ContentDesc, mainData, ContentDesc());
+    MEMBER(SimulationDesc, StatisticsHistoryData, statistics, StatisticsHistoryData());
+};

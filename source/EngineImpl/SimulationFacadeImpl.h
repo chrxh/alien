@@ -31,12 +31,12 @@ public:
     int getSyncSimulationWithRenderingRatio() const override;
     void setSyncSimulationWithRenderingRatio(int value) override;
 
-    Desc getSimulationData() override;
-    Desc getSelectedSimulationData(bool includeClusters) override;
-    Desc getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
+    ContentDesc getSimulationData() override;
+    ContentDesc getSelectedSimulationData(bool includeClusters) override;
+    ContentDesc getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
-    void addAndSelectSimulationData(Desc&& dataToAdd) override;
-    void setSimulationData(Desc const& dataToUpdate) override;
+    void addAndSelectSimulationData(ContentDesc&& dataToAdd) override;
+    void setSimulationData(ContentDesc const& dataToUpdate) override;
     void removeSelectedObjects(bool includeClusters) override;
     void relaxSelectedObjects(bool includeClusters) override;
     void uniformVelocitiesForSelectedObjects(bool includeClusters) override;
@@ -98,8 +98,8 @@ public:
     float getTps() const override;
 
     // Simulated preview
-    Desc getPreviewData() override;
-    void setPreviewData(Desc const& description) override;
+    ContentDesc getPreviewData() override;
+    void setPreviewData(ContentDesc const& description) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation) override;
     void calcTimestepsForPreview(int numSteps, bool detailSimulation) override;
     uint64_t getCurrentTimestepForPreview() override;

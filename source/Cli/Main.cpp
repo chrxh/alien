@@ -28,15 +28,10 @@ int main(int argc, char** argv)
         // Parse command line arguments
         std::string inputFilename;
         std::string outputFilename;
-        std::string statisticsFilename;
         int timesteps = 0;
         bool profile = false;
-        app.add_option(
-            "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding *.settings.json should also be available.");
-        app.add_option(
-            "-o",
-            outputFilename,
-            "Specifies the name of the output file for the simulation. The *.settings.json and *.statistics.bin file will also be saved.");
+        app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
+        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
         app.add_flag(
             "-p,--profile",
@@ -56,7 +51,7 @@ int main(int argc, char** argv)
             std::cout << "No input file given." << std::endl;
             return 1;
         }
-        DeserializedSimulation simData;
+        SimulationDesc simData;
         if (!SerializerService::get().deserializeSimulationFromFiles(simData, inputFilename)) {
             std::cout << "Could not read from input files." << std::endl;
             return 1;
@@ -66,10 +61,10 @@ int main(int argc, char** argv)
         auto startTimepoint = std::chrono::steady_clock::now();
 
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-        simulationFacade->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.worldSize, simData.auxiliaryData.simulationParameters);
-        simulationFacade->setSimulationData(simData.mainData);
-        simulationFacade->setStatisticsHistory(simData.statistics);
-        simulationFacade->setRealTime(simData.auxiliaryData.realTime);
+        simulationFacade->newSimulation(simData._timestep, simData._worldSize, simData._simulationParameters);
+        simulationFacade->setSimulationData(simData._mainData);
+        simulationFacade->setStatisticsHistory(simData._statistics);
+        simulationFacade->setRealTime(simData._realTime);
         std::cout << "Device: " << simulationFacade->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
@@ -87,11 +82,11 @@ int main(int argc, char** argv)
 
         // Write output simulation file
         std::cout << "Writing output" << std::endl;
-        simData.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
-        simData.mainData = simulationFacade->getSimulationData();
-        simData.auxiliaryData.simulationParameters = simulationFacade->getSimulationParameters();
-        simData.statistics = simulationFacade->getStatisticsHistory().getCopiedData();
-        simData.auxiliaryData.realTime = simulationFacade->getRealTime();
+        simData.timestep(simulationFacade->getCurrentTimestep())
+            .mainData(simulationFacade->getSimulationData())
+            .simulationParameters(simulationFacade->getSimulationParameters())
+            .statistics(simulationFacade->getStatisticsHistory().getCopiedData())
+            .realTime(simulationFacade->getRealTime());
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;

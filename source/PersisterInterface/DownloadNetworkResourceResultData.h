@@ -4,14 +4,13 @@
 
 #include <Network/Definitions.h>
 
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
-
-#include <PersisterInterface/DeserializedSimulation.h>
 
 struct DownloadNetworkResourceResultData
 {
     std::string resourceName;
     std::string resourceVersion;
     NetworkResourceType resourceType = NetworkResourceType_Simulation;
-    std::variant<DeserializedSimulation, GenomeDesc> resourceData;
+    std::variant<SimulationDesc, GenomeDesc> resourceData;
 };

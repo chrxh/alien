@@ -45,12 +45,10 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
             std::optional<std::string> errorMessage;
             try {
                 _SimulationFacade::get()->newSimulation(
-                    data.deserializedSimulation.auxiliaryData.timestep,
-                    data.deserializedSimulation.auxiliaryData.worldSize,
-                    data.deserializedSimulation.auxiliaryData.simulationParameters);
-                _SimulationFacade::get()->setSimulationData(data.deserializedSimulation.mainData);
-                _SimulationFacade::get()->setStatisticsHistory(data.deserializedSimulation.statistics);
-                _SimulationFacade::get()->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
+                    data.simulationDesc._timestep, data.simulationDesc._worldSize, data.simulationDesc._simulationParameters);
+                _SimulationFacade::get()->setSimulationData(data.simulationDesc._mainData);
+                _SimulationFacade::get()->setStatisticsHistory(data.simulationDesc._statistics);
+                _SimulationFacade::get()->setRealTime(data.simulationDesc._realTime);
             } catch (AlienException const& exception) {
                 errorMessage = exception.what();
             } catch (...) {
@@ -61,14 +59,12 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
                 showMessage("Error", *errorMessage);
                 _SimulationFacade::get()->closeSimulation();
                 _SimulationFacade::get()->newSimulation(
-                    data.deserializedSimulation.auxiliaryData.timestep,
-                    data.deserializedSimulation.auxiliaryData.worldSize,
-                    data.deserializedSimulation.auxiliaryData.simulationParameters);
+                    data.simulationDesc._timestep, data.simulationDesc._worldSize, data.simulationDesc._simulationParameters);
             }
             _PersisterFacade::get()->restart();
 
-            Viewport::get().setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
-            Viewport::get().setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
+            Viewport::get().setCenterInWorldPos(data.simulationDesc._center);
+            Viewport::get().setZoomFactor(data.simulationDesc._zoom);
             TemporalControlWindow::get().onSnapshot();
             printOverlayMessage(data.filename.string());
         },

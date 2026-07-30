@@ -2,7 +2,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/NumberGenerator.h>
@@ -21,11 +21,11 @@ public:
 
     ~BalanceTests() override = default;
 
-    Desc createSmallCreatureSeed()
+    ContentDesc createSmallCreatureSeed()
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
-        return Desc().addCreature(
+        return ContentDesc().addCreature(
             {
                 ObjectDesc()
                 .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
@@ -60,14 +60,14 @@ public:
         High
     };
 
-    Desc createLargeCreatureSeed(const DigestionCapability& digestionCapability)
+    ContentDesc createLargeCreatureSeed(const DigestionCapability& digestionCapability)
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
         auto highDigestion = digestionCapability == DigestionCapability::High;
         auto obligatoryDigestor = DigestorGenomeDesc().rawEnergyConductivity(0.9f);
         auto optionalDigestor = highDigestion ? CellTypeGenomeDesc(DigestorGenomeDesc()) : CellTypeGenomeDesc(BaseGenomeDesc());
-        return Desc().addCreature(
+        return ContentDesc().addCreature(
             {
                 ObjectDesc()
                 .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
@@ -116,7 +116,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
     _parameters.muscleMovementAcceleration = {ColorVector<float>::uniform(3.0f)};
     _simulationFacade->setSimulationParameters(_parameters);
 
-    Desc data;
+    ContentDesc data;
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }
@@ -154,7 +154,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
     _parameters.muscleMovementAcceleration = {ColorVector<float>::uniform(3.0f)};
     _simulationFacade->setSimulationParameters(_parameters);
 
-    Desc data;
+    ContentDesc data;
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }

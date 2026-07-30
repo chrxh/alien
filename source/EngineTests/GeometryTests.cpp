@@ -5,7 +5,7 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -55,7 +55,7 @@ TEST_F(GeometryTests, copyBuffers_emptySim)
 
 TEST_F(GeometryTests, copyBuffers_objects)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}),
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({102.0f, 100.0f}),
@@ -77,7 +77,7 @@ TEST_F(GeometryTests, copyBuffers_objects)
 
 TEST_F(GeometryTests, copyBuffers_cullsObjectsOutsideVisibleRect)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({5.0f, 5.0f}),
         ObjectDesc().id(2).pos({500.0f, 500.0f}),
     });
@@ -98,7 +98,7 @@ TEST_F(GeometryTests, copyBuffers_cullsObjectsOutsideVisibleRect)
 
 TEST_F(GeometryTests, copyBuffers_fluidParticles)
 {
-    auto data = Desc().energies({
+    auto data = ContentDesc().energies({
         EnergyDesc().id(1).pos({100.0f, 100.0f}).energy(10.0f),
         EnergyDesc().id(2).pos({101.0f, 100.0f}).energy(10.0f),
         EnergyDesc().id(3).pos({102.0f, 100.0f}).energy(10.0f),
@@ -120,7 +120,7 @@ TEST_F(GeometryTests, copyBuffers_fluidParticles)
 
 TEST_F(GeometryTests, copyBuffers_cullsFluidParticlesOutsideVisibleRect)
 {
-    auto data = Desc().energies({
+    auto data = ContentDesc().energies({
         EnergyDesc().id(1).pos({5.0f, 5.0f}).energy(10.0f),
         EnergyDesc().id(2).pos({500.0f, 500.0f}).energy(10.0f),
     });
@@ -141,7 +141,7 @@ TEST_F(GeometryTests, copyBuffers_cullsFluidParticlesOutsideVisibleRect)
 
 TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}),
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
     });
@@ -164,7 +164,7 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 
 TEST_F(GeometryTests, copyBuffers_cullsConnectionsOutsideVisibleRect)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({5.0f, 5.0f}),
         ObjectDesc().id(2).pos({6.0f, 5.0f}),
         ObjectDesc().id(3).pos({500.0f, 500.0f}),
@@ -189,7 +189,7 @@ TEST_F(GeometryTests, copyBuffers_cullsConnectionsOutsideVisibleRect)
 
 TEST_F(GeometryTests, copyBuffers_triangle)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}),
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({100.5f, 100.866f}),
@@ -218,7 +218,7 @@ TEST_F(GeometryTests, copyBuffers_triangle)
 
 TEST_F(GeometryTests, copyBuffers_quad)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}),
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({101.0f, 101.0f}),
@@ -249,7 +249,7 @@ TEST_F(GeometryTests, copyBuffers_quad)
 
 TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({100.0f, 100.0f}),
                         ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -279,7 +279,7 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
 TEST_F(GeometryTests, copyBuffers_creature)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),

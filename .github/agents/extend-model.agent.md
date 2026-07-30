@@ -25,7 +25,7 @@ When a new member belongs to entities, update all relevant layers consistently.
 
 ### Data structures
 Add the member where appropriate in:
-- `Desc.h`
+- `Descs.h`
 - `TOs.cuh`
 - `Entities.cuh`
 

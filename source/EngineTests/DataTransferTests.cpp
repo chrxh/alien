@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -41,7 +41,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
 {
     auto objectParameter = GetParam();
 
-    Desc data;
+    ContentDesc data;
     if (objectParameter.objectType == ObjectType_Cell) {
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
@@ -60,7 +60,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
 {
     auto objectParameter = GetParam();
 
-    Desc data;
+    ContentDesc data;
     if (objectParameter.objectType == ObjectType_Cell) {
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
@@ -100,7 +100,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode)
     auto [creature1, genome1] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
     auto [creature2, genome2] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    Desc data;
+    ContentDesc data;
     data.addCreature({ObjectDesc()}, creature1, genome1);
     data.addCreature({ObjectDesc()}, creature2, genome2);
 
@@ -117,7 +117,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 
     auto [creature, genome] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    Desc data;
+    ContentDesc data;
     data.addCreature({ObjectDesc()}, creature, genome);
 
     _simulationFacade->setPreviewData(data);
@@ -132,7 +132,7 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
     auto hexagon = DescEditService::get().createHex(DescEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
 
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         hexagon._objects,
         CreatureDesc(),
         GenomeDesc().genes({
@@ -149,8 +149,9 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data =
-        Desc().objects({ObjectDesc().id(0).type(SolidDesc()), ObjectDesc().id(1).type(FreeCellDesc())}).energies({EnergyDesc().id(2), EnergyDesc().id(3)});
+    auto data = ContentDesc()
+                    .objects({ObjectDesc().id(0).type(SolidDesc()), ObjectDesc().id(1).type(FreeCellDesc())})
+                    .energies({EnergyDesc().id(2), EnergyDesc().id(3)});
     data.addCreature({ObjectDesc().id(5)}, CreatureDesc().id(4), GenomeDesc());
     data.addCreature({ObjectDesc().id(6)}, CreatureDesc().id(5), GenomeDesc());
 
@@ -193,8 +194,9 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data =
-        Desc().objects({ObjectDesc().id(0).type(FreeCellDesc()), ObjectDesc().id(1).type(FreeCellDesc())}).energies({EnergyDesc().id(2), EnergyDesc().id(3)});
+    auto data = ContentDesc()
+                    .objects({ObjectDesc().id(0).type(FreeCellDesc()), ObjectDesc().id(1).type(FreeCellDesc())})
+                    .energies({EnergyDesc().id(2), EnergyDesc().id(3)});
     data.addCreature({ObjectDesc().id(5)}, CreatureDesc().id(4), GenomeDesc());
     data.addCreature({ObjectDesc().id(6)}, CreatureDesc().id(5), GenomeDesc());
 
@@ -227,7 +229,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_singleCreature)
 {
     auto constexpr CreatureId = 1;
 
-    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
+    auto data = ContentDesc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
 
@@ -255,7 +257,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_noSelection)
     auto constexpr CreatureId = 1;
 
     auto originalGenome = GenomeDesc();
-    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), originalGenome);
+    auto data = ContentDesc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), originalGenome);
 
     _simulationFacade->setSimulationData(data);
 
@@ -280,7 +282,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_multipleCreatures_only
     auto originalGenome1 = GenomeDesc();
     auto originalGenome2 = GenomeDesc();
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId1), originalGenome1)
                     .addCreature({ObjectDesc().pos({200, 200})}, CreatureDesc().id(CreatureId2), originalGenome2);
 
@@ -313,7 +315,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_multipleCreatures_only
 TEST_F(DataTransferTests, changeCell_creatureLineage)
 {
     auto genome = GenomeDesc();
-    Desc data;
+    ContentDesc data;
     data.addCreature({ObjectDesc().id(1)}, CreatureDesc().id(1).lineageId(5), genome);
     _simulationFacade->setSimulationData(data);
 
@@ -347,7 +349,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     auto genome2 = GenomeDesc();
 
-    Desc data;
+    ContentDesc data;
     data.addCreature({ObjectDesc().id(1), ObjectDesc().id(2)}, CreatureDesc().id(CreatureId1), genome);
     data.addCreature({ObjectDesc().id(3)}, CreatureDesc().id(CreatureId2), genome2);
 
@@ -376,7 +378,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 TEST_F(DataTransferTests, adaptIdGenerator_objects)
 {
     auto constexpr HighId = 1000000;
-    auto data = Desc().objects({ObjectDesc().id(HighId).type(SolidDesc())});
+    auto data = ContentDesc().objects({ObjectDesc().id(HighId).type(SolidDesc())});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -390,7 +392,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_objects)
 TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
 {
     auto constexpr HighId = 1000000;
-    auto data = Desc().energies({EnergyDesc().id(HighId)});
+    auto data = ContentDesc().energies({EnergyDesc().id(HighId)});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -404,7 +406,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
 TEST_F(DataTransferTests, adaptIdGenerator_creatures)
 {
     auto constexpr HighId = 1000000;
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().id(HighId));
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc().id(HighId));
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -418,7 +420,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_creatures)
 TEST_F(DataTransferTests, adaptIdGenerator_genomes)
 {
     auto constexpr HighId = 1000000;
-    auto data = Desc().addCreature({ObjectDesc().id(2)}, CreatureDesc().id(1), GenomeDesc().id(HighId));
+    auto data = ContentDesc().addCreature({ObjectDesc().id(2)}, CreatureDesc().id(1), GenomeDesc().id(HighId));
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -434,7 +436,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_injectGenomeToSelectedCreatures)
     auto constexpr CreatureId = 1;
     auto constexpr HighId = 1000000;
 
-    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
+    auto data = ContentDesc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSelection({99, 99}, {101, 101});
 

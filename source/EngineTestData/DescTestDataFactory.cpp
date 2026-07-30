@@ -232,7 +232,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
     return {creature, genome};
 }
 
-bool DescTestDataFactory::compare(Desc left, Desc right) const
+bool DescTestDataFactory::compare(ContentDesc left, ContentDesc right) const
 {
     return TestHelper::compare(left, right);
 }

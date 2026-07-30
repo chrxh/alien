@@ -5,7 +5,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "AlienWindow.h"
@@ -41,7 +41,7 @@ private:
         uint64_t timestep;
         std::chrono::milliseconds realTime;
         SimulationParameters parameters;
-        Desc data;
+        ContentDesc data;
     };
     Snapshot createSnapshot();
     void applySnapshot(Snapshot const& snapshot);

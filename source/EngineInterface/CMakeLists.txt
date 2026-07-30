@@ -10,8 +10,8 @@ add_library(EngineInterface
     Definitions.h
     DescEditService.cpp
     DescEditService.h
-    Desc.cpp
-    Desc.h
+    Descs.cpp
+    Descs.h
     EngineConstants.h
     ExtinctLineageAccumulator.cpp
     ExtinctLineageAccumulator.h

@@ -2,8 +2,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -35,9 +35,9 @@ protected:
     }
 
     // Helper to create a large creature (10x10 grid) at the specified position
-    Desc createCreature(RealVector2D const& startPos = RealVector2D{95.0f, 80.0f}, int diameterCount = 10)
+    ContentDesc createCreature(RealVector2D const& startPos = RealVector2D{95.0f, 80.0f}, int diameterCount = 10)
     {
-        Desc result;
+        ContentDesc result;
         std::vector<ObjectDesc> target;
         for (int j = 0; j < diameterCount; ++j) {
             for (int i = 0; i < diameterCount; ++i) {
@@ -56,7 +56,7 @@ protected:
     int _nextSolidId = 10000;
 
     // Helper to add detection targets
-    void addDetectionTargets(Desc& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
+    void addDetectionTargets(ContentDesc& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
     {
         if (mode == SensorMode_DetectEnergy) {
             for (int i = 0; i < count; ++i) {
@@ -98,7 +98,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -127,7 +127,7 @@ TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
 
 TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -146,7 +146,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
 
 TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -166,7 +166,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
 
 TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -186,7 +186,7 @@ TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
 
 TEST_P(SensorTests_AllDetectionModes, targetAbove)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -215,7 +215,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove)
 
 TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -244,7 +244,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
 
 TEST_P(SensorTests_AllDetectionModes, targetBelow)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -274,7 +274,7 @@ TEST_P(SensorTests_AllDetectionModes, targetBelow)
 
 TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -308,7 +308,7 @@ TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
 
 TEST_P(SensorTests_AllDetectionModes, minRange_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -333,7 +333,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_found)
 
 TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -358,7 +358,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
 
 TEST_P(SensorTests_AllDetectionModes, maxRange_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -383,7 +383,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_found)
 
 TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -408,7 +408,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
 
 TEST_F(SensorTests, detectCreature_nearRangeCornerTargetDetected)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -431,7 +431,7 @@ TEST_F(SensorTests, detectCreature_nearRangeCornerTargetDetected)
 
 TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -459,7 +459,7 @@ TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
 
 TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {ObjectDesc()
                              .id(1)
@@ -500,7 +500,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidFar_targetFar)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -533,7 +533,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidF
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidNear_targetFar)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -566,7 +566,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidN
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidNear_targetNear)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -599,7 +599,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidN
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_behind)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -632,7 +632,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_beh
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_differentAngle)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -668,7 +668,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetStationary)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -720,7 +720,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -783,7 +783,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_aboveMax
 {
     // First scan - target is detected and position stored (within maxRange of 60)
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -844,7 +844,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_belowMin
 {
     // First scan - target is detected and position stored (beyond minRange of 40)
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -904,7 +904,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_belowMin
 TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_forceInitialScan)
 {
     // First scan - target is detected and position stored
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -964,7 +964,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetDisappeared)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1017,7 +1017,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetBlocked)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc()
@@ -1070,7 +1070,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetBlocked)
  */
 TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1096,7 +1096,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
  */
 TEST_F(SensorTests, detectSolid_ignoreDifferentCellTypes)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1121,7 +1121,7 @@ TEST_F(SensorTests, detectSolid_ignoreDifferentCellTypes)
 
 TEST_F(SensorTests, detectSolid_ignoreFluidParticles)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1146,7 +1146,7 @@ TEST_F(SensorTests, detectSolid_ignoreFluidParticles)
 
 TEST_F(SensorTests, rayNotBlockedByFluidParticles)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1181,7 +1181,7 @@ TEST_F(SensorTests, rayNotBlockedByFluidParticles)
  */
 TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1204,7 +1204,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 
 TEST_F(SensorTests, detectFreeCell_restrictToColors)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1241,7 +1241,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColors)
 
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1293,7 +1293,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
 {
     auto angle = GetParam();
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1339,7 +1339,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
 
 TEST_F(SensorTests, detectCreature_restrictToColors_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1372,7 +1372,7 @@ TEST_F(SensorTests, detectCreature_restrictToColors_found)
 
 TEST_F(SensorTests, detectCreature_restrictToColors_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1397,7 +1397,7 @@ TEST_F(SensorTests, detectCreature_restrictToColors_notFound)
 
 TEST_F(SensorTests, detectCreature_minNumCells_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1422,7 +1422,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_found)
 
 TEST_F(SensorTests, detectCreature_minNumCells_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1446,7 +1446,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
 
 TEST_F(SensorTests, detectCreature_maxNumCells_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1471,7 +1471,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_found)
 
 TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1495,7 +1495,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1525,7 +1525,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_found)
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1554,7 +1554,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_found)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1584,7 +1584,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_found)
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1613,7 +1613,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
 
 TEST_F(SensorTests, detectCreature_ignoreSolidObjects)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1639,7 +1639,7 @@ TEST_F(SensorTests, detectCreature_ignoreSolidObjects)
 
 TEST_F(SensorTests, detectCreature_ignoreFreeCells)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1665,7 +1665,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
 
 TEST_F(SensorTests, detectCreature_ignoreSameCreature)
 {
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1705,7 +1705,7 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
 TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
 {
     // Create sensor creature
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1737,7 +1737,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
 TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
 {
     // Create sensor creature
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1769,7 +1769,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
 TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
 {
     // Create sensor creature
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -1801,7 +1801,7 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
 {
     // First scan - target creature is detected
     // Using negative signal in channel #0 to enable relocation
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)
@@ -1857,7 +1857,7 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
 TEST_F(SensorTests, telemetry_allOutputs)
 {
     // Test with a cell that has energy and velocity to verify all telemetry outputs
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
                 .id(1)

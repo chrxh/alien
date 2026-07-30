@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -34,7 +34,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
     }
     objects.at(0).getCellRef()._usableEnergy = 1000.0f;
 
-    Desc data;
+    ContentDesc data;
     data.addCreature(objects);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
@@ -67,7 +67,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     }
     cells.at(0).getCellRef()._usableEnergy = 1000.0f;
 
-    Desc data;
+    ContentDesc data;
     data.addCreature(cells, CreatureDesc(), genome);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
@@ -114,7 +114,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     }
     cells.at(0).getCellRef()._usableEnergy = 1000.0f;
 
-    Desc data;
+    ContentDesc data;
     data.addCreature(cells, CreatureDesc(), genome);
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
@@ -156,7 +156,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     }
     cells.at(0).getCellRef()._usableEnergy = 1000.0f;
 
-    Desc data;
+    ContentDesc data;
     data.addCreature(cells, CreatureDesc(), genome);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
@@ -175,7 +175,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsBranches)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(0).pos({100.0f, 99.0f}).type(CellDesc().headCell(true).usableEnergy(100.0f)),
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(240.0f)),
         ObjectDesc().id(2).pos({100.0f, 101.0f}).type(CellDesc().usableEnergy(100.0f)),
@@ -211,7 +211,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {ObjectDesc()
              .id(1)
@@ -244,7 +244,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    Desc data;
+    ContentDesc data;
     data.addCreature(
         {ObjectDesc()
              .id(1)
@@ -277,7 +277,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsPrioritizeLowEnergyCell)
     // Test that energy flows preferentially to cells with low energy (below normal energy threshold)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 5.0f)),  // High energy cell
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.5f)),  // Low energy cell (below normal)
         ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy)),         // Normal energy cell
@@ -310,7 +310,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEqualizeLowEnergyCells)
     // Test that when connected cell has low energy, energy flows to equalize
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.8f)),  // Below normal
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.55f)),                // Much lower
     });
@@ -338,7 +338,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsFromHighToLowEnergyInChain)
     // Test energy flow prioritization in a chain with one low energy cell
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 2)),  // High
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy)),                     // Normal
         ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.55f)),             // Low
@@ -367,7 +367,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
     // Test that multiple low energy cells all receive energy
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 10)),  // Very high energy
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.55f)),              // Low
         ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.6f)),               // Low
@@ -397,7 +397,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_nonDigestor)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().rawEnergy(100.0f)),
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
     });
@@ -414,7 +414,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_nonDigestor)
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_digestor)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().rawEnergy(10.0f)),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc())),
     });
@@ -432,7 +432,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_digestor)
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_nonDigestor)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc()).rawEnergy(10.0f)),
         ObjectDesc().id(2).pos({101.0f, 100.0f}),
     });
@@ -450,7 +450,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_nonDigestor)
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_digestor)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc().rawEnergyConductivity(0.7f)).rawEnergy(10.0f)),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc().rawEnergyConductivity(0.3f))),
     });
@@ -469,8 +469,8 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_digestor)
 TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
 {
     // Test that higher rawEnergyConductivity increases flow rate
-    Desc dataLowConductivity;
-    Desc dataHighConductivity;
+    ContentDesc dataLowConductivity;
+    ContentDesc dataHighConductivity;
 
     // Setup two identical scenarios with different conductivity
     for (int scenario = 0; scenario < 2; ++scenario) {
@@ -516,7 +516,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_exceedRawEnergyThreshold)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})

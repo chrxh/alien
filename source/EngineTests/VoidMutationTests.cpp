@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -22,7 +22,7 @@ TEST_F(VoidMutationTests, voidMutation_nonVoidBecomesVoid)
     })});
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -44,7 +44,7 @@ TEST_F(VoidMutationTests, voidMutation_voidBecomesNonVoid)
     })});
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
@@ -70,7 +70,7 @@ TEST_F(VoidMutationTests, voidMutation_zeroProbabilityNoChange)
     })});
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {

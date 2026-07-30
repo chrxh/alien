@@ -6,7 +6,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 
 #include "AlienDialog.h"
