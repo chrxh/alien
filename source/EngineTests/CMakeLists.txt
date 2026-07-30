@@ -30,6 +30,7 @@ PUBLIC
     EnergyParticleTests.cpp
     HeadUpdateTests.cpp
     GarbageCollectorTests.cpp
+    GeneCycleRemovalTests.cpp
     GeneratorTests.cpp
     GeometryMutationTests.cpp
     GeometryTests.cpp
