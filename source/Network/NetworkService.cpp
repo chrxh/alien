@@ -1,7 +1,6 @@
 #include "NetworkService.h"
 
 #include <boost/property_tree/json_parser.hpp>
-#include <cereal/external/base64.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
@@ -74,12 +73,6 @@ namespace
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         return tree.get<T>(key);
-    }
-
-    // The statistics are compressed binary data. The server stores this field as text, so it is transferred base64-encoded.
-    std::string encodeStatistics(std::string const& statistics)
-    {
-        return cereal::base64::encode(reinterpret_cast<unsigned char const*>(statistics.data()), statistics.size());
     }
 
     bool parseBoolResult(std::string const& serverResponse)
@@ -451,8 +444,6 @@ bool NetworkService::uploadResource(
     IntVector2D const& worldSize,
     int numObjects,
     std::string const& mainData,
-    std::string const& settings,
-    std::string const& statistics,
     NetworkResourceType resourceType,
     WorkspaceType workspaceType)
 {
@@ -470,10 +461,12 @@ bool NetworkService::uploadResource(
         {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
-        {"settings", settings, "", ""},
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
-        {"statistics", encodeStatistics(statistics), "", ""},
+
+        // Obsolete fields, kept for server compatibility
+        {"settings", "", "", ""},
+        {"statistics", "", "", ""},
     };
 
     try {
@@ -487,18 +480,12 @@ bool NetworkService::uploadResource(
         logNetworkError();
         return false;
     }
-    _downloadCache.insertOrAssign(resourceId, ResourceData{mainData, settings, statistics});
+    _downloadCache.insertOrAssign(resourceId, ResourceData{mainData});
 
     return true;
 }
 
-bool NetworkService::replaceResource(
-    std::string const& resourceId,
-    IntVector2D const& worldSize,
-    int numObjects,
-    std::string const& mainData,
-    std::string const& settings,
-    std::string const& statistics)
+bool NetworkService::replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& mainData)
 {
     log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
 
@@ -513,8 +500,10 @@ bool NetworkService::replaceResource(
         {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
-        {"settings", settings, "", ""},
-        {"statistics", encodeStatistics(statistics), "", ""},
+
+        // Obsolete fields, kept for server compatibility
+        {"settings", "", "", ""},
+        {"statistics", "", "", ""},
     };
 
     try {
@@ -526,19 +515,17 @@ bool NetworkService::replaceResource(
         logNetworkError();
         return false;
     }
-    _downloadCache.insertOrAssign(resourceId, ResourceData{mainData, settings, statistics});
+    _downloadCache.insertOrAssign(resourceId, ResourceData{mainData});
 
     return true;
 }
 
-bool NetworkService::downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+bool NetworkService::downloadResource(std::string& mainData, std::string const& simId)
 {
     try {
         if (auto cachedEntry = _downloadCache.find(simId)) {
             log(Priority::Important, "network: get resource with id=" + simId + " from download cache");
             mainData = cachedEntry->content;
-            auxiliaryData = cachedEntry->auxiliaryData;
-            statistics = cachedEntry->statistics;
             incDownloadCounter(simId);
             return true;
         } else {
@@ -548,19 +535,10 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
 
             httplib::Params params;
             params.emplace("id", simId);
-            {
-                auto result = executeRequest([&] { return client.Get("/downloadcontent", params, {}); });
-                mainData = result->body;
-            }
-            {
-                auto result = executeRequest([&] { return client.Get("/downloadsettings", params, {}); });
-                auxiliaryData = result->body;
-            }
-            {
-                auto result = executeRequest([&] { return client.Get("/downloadstatistics", params, {}); });
-                statistics = cereal::base64::decode(result->body);
-            }
-            _downloadCache.insertOrAssign(simId, ResourceData{mainData, auxiliaryData, statistics});
+            auto result = executeRequest([&] { return client.Get("/downloadcontent", params, {}); });
+            mainData = result->body;
+
+            _downloadCache.insertOrAssign(simId, ResourceData{mainData});
             return true;
         }
     } catch (...) {

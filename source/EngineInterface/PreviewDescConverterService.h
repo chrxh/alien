@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/PreviewDesc.h>
 
 struct ConversionResult
@@ -19,6 +19,9 @@ class PreviewDescConverterService
     MAKE_SINGLETON(PreviewDescConverterService);
 
 public:
-    ConversionResult
-    convertToPreviewDesc(GenomeDesc const& genome, int startGeneIndex, Desc&& phenotype, std::optional<float> const& lastVisualFrontAngle = std::nullopt) const;
+    ConversionResult convertToPreviewDesc(
+        GenomeDesc const& genome,
+        int startGeneIndex,
+        ContentDesc&& phenotype,
+        std::optional<float> const& lastVisualFrontAngle = std::nullopt) const;
 };

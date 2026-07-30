@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -26,9 +26,9 @@ public:
 
 protected:
     // Helper to create an injector creature with a generator that triggers it
-    Desc createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
+    ContentDesc createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc()
                     .id(1)
@@ -43,9 +43,9 @@ protected:
     }
 
     // Helper to create a target creature with a constructor at a given position
-    Desc createTargetCreatureWithConstructor(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f)
+    ContentDesc createTargetCreatureWithConstructor(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc().id(100).pos(pos).color(color).type(CellDesc().usableEnergy(usableEnergy).constructor(ConstructorDesc())),
                 ObjectDesc().id(101).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().usableEnergy(usableEnergy)),
@@ -110,7 +110,7 @@ TEST_F(InjectorTests, successfulInjection)
 TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
 {
     // Create a single creature with injector and constructor
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
@@ -168,7 +168,7 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
 TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
 {
     // Create injector with connections that block the injection ray
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),

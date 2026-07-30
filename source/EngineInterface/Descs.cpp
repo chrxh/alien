@@ -1,4 +1,4 @@
-#include "Desc.h"
+#include "Descs.h"
 
 #include <algorithm>
 #include <cmath>
@@ -313,7 +313,7 @@ CreatureDesc CreatureDesc::id(uint64_t id)
     return *this;
 }
 
-void Desc::clear()
+void ContentDesc::clear()
 {
     _objects.clear();
     _energies.clear();
@@ -321,12 +321,12 @@ void Desc::clear()
     _genomes.clear();
 }
 
-bool Desc::isEmpty() const
+bool ContentDesc::isEmpty() const
 {
     return _objects.empty() && _energies.empty();
 }
 
-Desc& Desc::add(Desc&& other, bool assignNewIds /*= true*/)
+ContentDesc& ContentDesc::add(ContentDesc&& other, bool assignNewIds /*= true*/)
 {
     if (assignNewIds) {
         other.assignNewEntityIds();
@@ -338,7 +338,7 @@ Desc& Desc::add(Desc&& other, bool assignNewIds /*= true*/)
     return *this;
 }
 
-bool Desc::hasUniqueIds() const
+bool ContentDesc::hasUniqueIds() const
 {
     std::unordered_set<uint64_t> cellIds;
     for (auto const& object : _objects) {
@@ -374,7 +374,7 @@ bool Desc::hasUniqueIds() const
     return true;
 }
 
-void Desc::assignNewEntityIds()
+void ContentDesc::assignNewEntityIds()
 {
     // Create (index, oldCellId) vector sorted by cell id
     std::vector<std::pair<int, uint64_t>> indexToOldCellId;
@@ -528,7 +528,7 @@ void Desc::assignNewEntityIds()
     }
 }
 
-Desc& Desc::addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature, GenomeDesc const& genome)
+ContentDesc& ContentDesc::addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature, GenomeDesc const& genome)
 {
     // Add genome to genomes array if not already present
     auto genomeIt = std::find_if(_genomes.begin(), _genomes.end(), [&genome](auto const& g) { return g._id == genome._id; });
@@ -554,23 +554,23 @@ Desc& Desc::addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc con
     return *this;
 }
 
-Desc& Desc::addObjects(std::vector<ObjectDesc> const& objects)
+ContentDesc& ContentDesc::addObjects(std::vector<ObjectDesc> const& objects)
 {
     _objects.insert(_objects.end(), objects.begin(), objects.end());
     return *this;
 }
 
-size_t Desc::getNumObjects() const
+size_t ContentDesc::getNumObjects() const
 {
     return _objects.size();
 }
 
-size_t Desc::getNumObjectsWithoutCreature() const
+size_t ContentDesc::getNumObjectsWithoutCreature() const
 {
     return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return object.getObjectType() != ObjectType_Cell; });
 }
 
-std::vector<ObjectDesc> Desc::getObjectsForCreature(uint64_t creatureId) const
+std::vector<ObjectDesc> ContentDesc::getObjectsForCreature(uint64_t creatureId) const
 {
     std::vector<ObjectDesc> result;
     for (auto const& object : _objects) {
@@ -584,9 +584,9 @@ std::vector<ObjectDesc> Desc::getObjectsForCreature(uint64_t creatureId) const
     return result;
 }
 
-DescCache Desc::createCache() const
+ContentDescCache ContentDesc::createCache() const
 {
-    DescCache result = std::make_shared<_DescCache>();
+    ContentDescCache result = std::make_shared<_ContentDescCache>();
     for (auto const& [objectIndex, object] : _objects | boost::adaptors::indexed(0)) {
         result->objectIdToIndex.emplace(object._id, toInt(objectIndex));
     }
@@ -599,13 +599,13 @@ DescCache Desc::createCache() const
     return result;
 }
 
-Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, DescCache const& cache)
+ContentDesc& ContentDesc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, ContentDescCache const& cache)
 {
     auto& object2 = getObjectRef(objectId2, cache);
     return addConnection(objectId1, objectId2, object2._pos, cache);
 }
 
-Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, DescCache const& cache)
+ContentDesc& ContentDesc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, ContentDescCache const& cache)
 {
     auto& object1 = getObjectRef(objectId1, cache);
     auto& object2 = getObjectRef(objectId2, cache);
@@ -693,7 +693,7 @@ Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, 
     return *this;
 }
 
-ObjectDesc const& Desc::getObjectRef(uint64_t const& objectId, DescCache const& cache) const
+ObjectDesc const& ContentDesc::getObjectRef(uint64_t const& objectId, ContentDescCache const& cache) const
 {
     if (cache != nullptr) {
         auto index = getObjectIndex(objectId, cache);
@@ -708,7 +708,7 @@ ObjectDesc const& Desc::getObjectRef(uint64_t const& objectId, DescCache const& 
     }
 }
 
-ObjectDesc& Desc::getObjectRef(uint64_t const& objectId, DescCache const& cache)
+ObjectDesc& ContentDesc::getObjectRef(uint64_t const& objectId, ContentDescCache const& cache)
 {
     if (cache != nullptr) {
         auto index = getObjectIndex(objectId, cache);
@@ -723,12 +723,12 @@ ObjectDesc& Desc::getObjectRef(uint64_t const& objectId, DescCache const& cache)
     }
 }
 
-ObjectDesc& Desc::getOtherObjectRef(uint64_t id)
+ObjectDesc& ContentDesc::getOtherObjectRef(uint64_t id)
 {
     return getOtherObjectRef(std::set<uint64_t>{id});
 }
 
-ObjectDesc& Desc::getOtherObjectRef(std::set<uint64_t> const& ids)
+ObjectDesc& ContentDesc::getOtherObjectRef(std::set<uint64_t> const& ids)
 {
     std::vector<uint64_t> matchingCells;
     for (auto& object : _objects) {
@@ -746,7 +746,7 @@ ObjectDesc& Desc::getOtherObjectRef(std::set<uint64_t> const& ids)
     CHECK(false);
 }
 
-std::vector<ObjectDesc> Desc::getOtherObjects(std::set<uint64_t> const& ids) const
+std::vector<ObjectDesc> ContentDesc::getOtherObjects(std::set<uint64_t> const& ids) const
 {
     std::vector<ObjectDesc> result;
     for (auto const& object : _objects) {
@@ -757,7 +757,7 @@ std::vector<ObjectDesc> Desc::getOtherObjects(std::set<uint64_t> const& ids) con
     return result;
 }
 
-CreatureDesc const& Desc::getCreatureRef(uint64_t id, DescCache const& cache) const
+CreatureDesc const& ContentDesc::getCreatureRef(uint64_t id, ContentDescCache const& cache) const
 {
     if (cache != nullptr) {
         auto findResult = cache->creatureIdToIndex.find(id);
@@ -774,7 +774,7 @@ CreatureDesc const& Desc::getCreatureRef(uint64_t id, DescCache const& cache) co
     CHECK(false);
 }
 
-CreatureDesc& Desc::getCreatureRef(uint64_t id, DescCache const& cache)
+CreatureDesc& ContentDesc::getCreatureRef(uint64_t id, ContentDescCache const& cache)
 {
     if (cache != nullptr) {
         auto findResult = cache->creatureIdToIndex.find(id);
@@ -791,7 +791,7 @@ CreatureDesc& Desc::getCreatureRef(uint64_t id, DescCache const& cache)
     CHECK(false);
 }
 
-CreatureDesc& Desc::getOtherCreatureRef(uint64_t id)
+CreatureDesc& ContentDesc::getOtherCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id != id) {
@@ -801,7 +801,7 @@ CreatureDesc& Desc::getOtherCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-GenomeDesc const& Desc::getGenomeRef(uint64_t const& genomeId, DescCache const& cache) const
+GenomeDesc const& ContentDesc::getGenomeRef(uint64_t const& genomeId, ContentDescCache const& cache) const
 {
     if (cache != nullptr) {
         auto index = cache->genomeIdToIndex.at(genomeId);
@@ -816,7 +816,7 @@ GenomeDesc const& Desc::getGenomeRef(uint64_t const& genomeId, DescCache const& 
     }
 }
 
-bool Desc::hasConnection(uint64_t id, uint64_t otherId) const
+bool ContentDesc::hasConnection(uint64_t id, uint64_t otherId) const
 {
     auto const& object = getObjectRef(id);
     for (auto const& connection : object._connections) {
@@ -827,12 +827,12 @@ bool Desc::hasConnection(uint64_t id, uint64_t otherId) const
     return false;
 }
 
-bool Desc::hasConnection(ObjectDesc const& object1, ObjectDesc const& object2) const
+bool ContentDesc::hasConnection(ObjectDesc const& object1, ObjectDesc const& object2) const
 {
     return hasConnection(object1._id, object2._id);
 }
 
-ConnectionDesc& Desc::getConnectionRef(uint64_t id, uint64_t otherId)
+ConnectionDesc& ContentDesc::getConnectionRef(uint64_t id, uint64_t otherId)
 {
     auto& object = getObjectRef(id);
     for (auto& connection : object._connections) {
@@ -843,7 +843,7 @@ ConnectionDesc& Desc::getConnectionRef(uint64_t id, uint64_t otherId)
     CHECK(false);
 }
 
-ConnectionDesc const& Desc::getConnection(ObjectDesc const& object1, ObjectDesc const& object2) const
+ConnectionDesc const& ContentDesc::getConnection(ObjectDesc const& object1, ObjectDesc const& object2) const
 {
     for (auto const& connection : object1._connections) {
         if (connection._objectId == object2._id) {
@@ -853,7 +853,7 @@ ConnectionDesc const& Desc::getConnection(ObjectDesc const& object1, ObjectDesc 
     CHECK(false);
 }
 
-uint64_t Desc::getObjectIndex(uint64_t const& objectId, DescCache const& cache) const
+uint64_t ContentDesc::getObjectIndex(uint64_t const& objectId, ContentDescCache const& cache) const
 {
     auto findResult = cache->objectIdToIndex.find(objectId);
     if (findResult != cache->objectIdToIndex.end()) {

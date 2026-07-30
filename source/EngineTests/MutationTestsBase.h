@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <EngineTestData/DescTestDataFactory.h>

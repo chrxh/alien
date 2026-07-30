@@ -2,13 +2,12 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
 
-#include "PersisterInterface/DeserializedSimulation.h"
 #include "PersisterInterface/SerializerService.h"
 
 class PhysicsTests : public IntegrationTestFramework
@@ -81,7 +80,7 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
     auto pos2 = RealVector2D{100.0f, 100.0f};
     auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle2) * 1.5f;
     auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle1 + refAngle) * 1.5f;
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos(pos1).type(CellDesc().headCell(true)),
         ObjectDesc().id(2).pos(pos2),
         ObjectDesc().id(3).pos(pos3),
@@ -111,7 +110,7 @@ TEST_F(PhysicsTests, noGhostRotations)
     auto pos2 = RealVector2D{100.0f, 100.0f};
     auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle2);
     auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle1 + RefAngle);
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos(pos1).type(CellDesc().headCell(true)),
         ObjectDesc().id(2).pos(pos2),
         ObjectDesc().id(3).pos(pos3),
@@ -143,7 +142,7 @@ TEST_F(PhysicsTests, noGhostMovements)
     _parameters.friction.baseValue = 0.001f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({34.97, 11.14}).type(CellDesc().headCell(true)),
                     })
@@ -174,7 +173,7 @@ TEST_F(PhysicsTests, noGhostMovements)
 
 TEST_F(PhysicsTests, angularForcesBetweenFixedAndNonFixedObject)
 {
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).isStatic(true),
         ObjectDesc().id(2).pos({10.0f, 11.0f}).isStatic(true),
         ObjectDesc().id(3).pos({11.0f, 11.0f}).type(CellDesc().headCell(true)),

@@ -2,8 +2,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -27,10 +27,10 @@ public:
 
 protected:
     // Helper to create a memory cell with custom memory entries and settings
-    Desc
+    ContentDesc
     createMemoryCellWithIncomingSignal(MemoryModeDesc const& mode, std::vector<float> const& signal, std::vector<SignalEntryDesc> const& signalEntries = {})
     {
-        auto data = Desc().addCreature({
+        auto data = ContentDesc().addCreature({
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(signal)),
         });
@@ -67,7 +67,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
     std::vector<float> incomingSignal = {0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     float newSignalWeight = 0.25f;
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
@@ -96,7 +96,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
     std::vector<float> storedSignal = {1.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     std::vector<float> incomingSignal = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
@@ -122,7 +122,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
     std::vector<float> storedSignal = {1.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     std::vector<float> incomingSignal = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    auto data = Desc().addCreature({
+    auto data = ContentDesc().addCreature({
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})

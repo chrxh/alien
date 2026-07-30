@@ -1,4 +1,7 @@
+#include <filesystem>
+#include <fstream>
 #include <ranges>
+#include <sstream>
 
 #include <gtest/gtest.h>
 
@@ -14,18 +17,22 @@ public:
     {
         _descTestDataFactory = &DescTestDataFactory::get();
         _serializerService = &SerializerService::get();
+        _testDirectory = std::filesystem::temp_directory_path() / "alien-serializer-service-tests";
+        std::filesystem::create_directories(_testDirectory);
     }
 
-    void testSerializationAndDeserialization(Desc const& data)
+    ~SerializerServiceTests() override { std::filesystem::remove_all(_testDirectory); }
+
+    void testSerializationAndDeserialization(ContentDesc const& data)
     {
-        DeserializedSimulation deserializedSimulationBefore{.mainData = data};
-        SerializedSimulation serializedSimulation;
-        _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
+        auto deserializedSimulationBefore = SimulationDesc().mainData(data);
+        std::string serializedSimulation;
+        _serializerService->serializeSimulationToString(serializedSimulation, deserializedSimulationBefore);
 
-        DeserializedSimulation deserializedSimulationAfter;
-        _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
+        SimulationDesc deserializedSimulationAfter;
+        _serializerService->deserializeSimulationFromString(deserializedSimulationAfter, serializedSimulation);
 
-        EXPECT_TRUE(_descTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
+        EXPECT_TRUE(_descTestDataFactory->compare(deserializedSimulationBefore._mainData, deserializedSimulationAfter._mainData));
     }
 
 protected:
@@ -143,27 +150,83 @@ protected:
         }
     }
 
+    std::string readFile(std::filesystem::path const& filename)
+    {
+        std::ifstream stream(filename, std::ios::binary);
+        std::stringstream result;
+        result << stream.rdbuf();
+        return result.str();
+    }
+
     DescTestDataFactory* _descTestDataFactory;
     SerializerService* _serializerService;
+    std::filesystem::path _testDirectory;
 };
+
+TEST_F(SerializerServiceTests, simulationFiles)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    SimulationDesc before;
+    before._mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    before._timestep = 1234;
+    before._realTime = std::chrono::milliseconds(5678);
+    before._zoom = 3.5f;
+    before._center = {111.0f, 222.0f};
+    before._worldSize = {700, 300};
+    before._simulationParameters.timestepSize.value = 0.5f;
+    before._statistics.colors.emplace_back(createOverallSample(100));
+
+    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
+
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
+
+    EXPECT_EQ(before._timestep, after._timestep);
+    EXPECT_EQ(before._realTime, after._realTime);
+    EXPECT_EQ(before._zoom, after._zoom);
+    EXPECT_EQ(before._center, after._center);
+    EXPECT_EQ(before._worldSize, after._worldSize);
+    EXPECT_EQ(before._simulationParameters.timestepSize.value, after._simulationParameters.timestepSize.value);
+    EXPECT_TRUE(_descTestDataFactory->compare(before._mainData, after._mainData));
+    compare(before._statistics, after._statistics);
+
+    EXPECT_TRUE(_serializerService->deleteSimulation(filename));
+    EXPECT_FALSE(std::filesystem::exists(filename));
+}
+
+TEST_F(SerializerServiceTests, simulationParametersFile)
+{
+    auto filename = _testDirectory / "parameters.settings.json";
+
+    SimulationParameters before;
+    before.timestepSize.value = 0.5f;
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(filename, before));
+    EXPECT_NE(std::string::npos, readFile(filename).find(Const::ProgramVersion));
+
+    SimulationParameters after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationParametersFromFile(after, filename));
+
+    EXPECT_EQ(before.timestepSize.value, after.timestepSize.value);
+}
 
 TEST_F(SerializerServiceTests, statisticsHistory)
 {
-    DeserializedSimulation before;
+    SimulationDesc before;
     for (int i = 0; i < 5; ++i) {
-        before.statistics.colors.emplace_back(createOverallSample(toDouble(i) * 100));
+        before._statistics.colors.emplace_back(createOverallSample(toDouble(i) * 100));
     }
-    before.statistics.lineages.emplace(7, std::vector{createLineageSample(1000), createLineageSample(2000)});
-    before.statistics.lineages.emplace(42, std::vector{createLineageSample(3000)});
-    before.statistics.lineages.emplace(43, std::vector<LineageSample>{});
+    before._statistics.lineages.emplace(7, std::vector{createLineageSample(1000), createLineageSample(2000)});
+    before._statistics.lineages.emplace(42, std::vector{createLineageSample(3000)});
+    before._statistics.lineages.emplace(43, std::vector<LineageSample>{});
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
-    DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
-    compare(before.statistics, after.statistics);
+    compare(before._statistics, after._statistics);
 }
 
 TEST_F(SerializerServiceTests, statisticsHistoryWithManyLineages)
@@ -171,27 +234,27 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithManyLineages)
     auto constexpr NumLineages = 260;
     auto constexpr MaxSavedLineages = 250;
 
-    DeserializedSimulation before;
+    SimulationDesc before;
     for (uint32_t lineageId = 1; lineageId <= NumLineages; ++lineageId) {
         // The higher the lineage id, the more creatures; the history samples suggest the opposite order
         for (uint32_t i = 0; i < lineageId; ++i) {
-            before.mainData._creatures.emplace_back(CreatureDesc().lineageId(toInt(lineageId)));
+            before._mainData._creatures.emplace_back(CreatureDesc().lineageId(toInt(lineageId)));
         }
-        before.statistics.lineages.emplace(lineageId, std::vector{createLineageSample(1000, toDouble(NumLineages - lineageId))});
+        before._statistics.lineages.emplace(lineageId, std::vector{createLineageSample(1000, toDouble(NumLineages - lineageId))});
     }
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
-    DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
     // Only the lineages with the most creatures are saved
     StatisticsHistoryData expected;
     for (uint32_t lineageId = NumLineages - MaxSavedLineages + 1; lineageId <= NumLineages; ++lineageId) {
-        expected.lineages.emplace(lineageId, before.statistics.lineages.at(lineageId));
+        expected.lineages.emplace(lineageId, before._statistics.lineages.at(lineageId));
     }
-    compare(expected, after.statistics);
+    compare(expected, after._statistics);
 }
 
 TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
@@ -213,37 +276,37 @@ TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
         return result;
     };
 
-    DeserializedSimulation before;
+    SimulationDesc before;
     for (int i = 0; i < 5; ++i) {
-        before.statistics.colors.emplace_back(createSample(toDouble(i) * 100));
+        before._statistics.colors.emplace_back(createSample(toDouble(i) * 100));
     }
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
-    DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
-    compare(before.statistics, after.statistics);
+    compare(before._statistics, after._statistics);
 }
 
 TEST_F(SerializerServiceTests, emptyStatisticsHistory)
 {
-    DeserializedSimulation before;
+    SimulationDesc before;
 
-    SerializedSimulation serialized;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serialized, before));
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
 
-    DeserializedSimulation after;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(after, serialized));
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
 
-    EXPECT_TRUE(after.statistics.colors.empty());
-    EXPECT_TRUE(after.statistics.lineages.empty());
+    EXPECT_TRUE(after._statistics.colors.empty());
+    EXPECT_TRUE(after._statistics.lineages.empty());
 }
 
 TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
-    Desc data;
+    ContentDesc data;
     data._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
 
     testSerializationAndDeserialization(data);
@@ -264,7 +327,7 @@ TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {
     auto objectParameter = GetParam();
 
-    Desc data;
+    ContentDesc data;
     if (objectParameter.objectType == ObjectType_Cell) {
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
@@ -292,7 +355,7 @@ TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 
     auto [creature, genome] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    auto data = Desc().addCreature({ObjectDesc()}, creature, genome);
+    auto data = ContentDesc().addCreature({ObjectDesc()}, creature, genome);
 
     testSerializationAndDeserialization(data);
 }

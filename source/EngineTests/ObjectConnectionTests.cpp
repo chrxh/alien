@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -36,7 +36,7 @@ TEST_F(ObjectConnectionTests, decay)
 
 TEST_F(ObjectConnectionTests, addFirstConnection)
 {
-    auto data = Desc().objects({
+    auto data = ContentDesc().objects({
         ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
         ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
     });
@@ -61,7 +61,7 @@ TEST_F(ObjectConnectionTests, addFirstConnection)
 
 TEST_F(ObjectConnectionTests, addSecondConnection)
 {
-    auto data = Desc().objects({
+    auto data = ContentDesc().objects({
         ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
         ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
         ObjectDesc().id(3).pos({0, 1}).type(SolidDesc()),
@@ -87,7 +87,7 @@ TEST_F(ObjectConnectionTests, addSecondConnection)
 
 TEST_F(ObjectConnectionTests, addThirdConnection1)
 {
-    auto data = Desc().objects({
+    auto data = ContentDesc().objects({
         ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
         ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
         ObjectDesc().id(3).pos({0, 1}).type(SolidDesc()),
@@ -120,7 +120,7 @@ TEST_F(ObjectConnectionTests, addThirdConnection1)
 
 TEST_F(ObjectConnectionTests, addThirdConnection2)
 {
-    auto data = Desc().objects({
+    auto data = ContentDesc().objects({
         ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
         ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
         ObjectDesc().id(3).pos({-1, 0}).type(SolidDesc()),
@@ -152,7 +152,7 @@ TEST_F(ObjectConnectionTests, addThirdConnection2)
 
 TEST_F(ObjectConnectionTests, addConnectionWithZeroAbsAngleInsertsBeforeReferenceConnection)
 {
-    auto data = Desc().objects({
+    auto data = ContentDesc().objects({
         ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
         ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
         ObjectDesc().id(3).pos({0, 1}).type(SolidDesc()),

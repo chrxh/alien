@@ -5,7 +5,7 @@
 #include <Base/Definitions.h>
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/PreviewDescConverterService.h>
 #include <EngineInterface/SpaceCalculator.h>
@@ -68,7 +68,7 @@ public:
 
 TEST_F(PreviewDescConverterServiceTests, convertEmptyCollection)
 {
-    Desc input;
+    ContentDesc input;
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(GenomeDesc(), 0, std::move(input));
 
@@ -82,7 +82,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature)
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -117,7 +117,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_marksConnectionI
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().cellType(VoidGenomeDesc())}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -147,7 +147,7 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature_homogeneousCel
         GeneDesc().homogeneousCellType(true).nodes({NodeDesc().color(2).cellType(MuscleGenomeDesc()), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc().color(3)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -180,7 +180,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCel
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3).cellType(MuscleGenomeDesc())}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -207,7 +207,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_setsVisualFrontA
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -229,7 +229,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_smoothsVisualFro
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -252,7 +252,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_nonRootGene)
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
@@ -285,7 +285,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_defaultGenome)
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -318,7 +318,7 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3), NodeDesc().color(4)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
@@ -360,7 +360,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
         GeneDesc().nodes({NodeDesc().color(3)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(2).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
@@ -410,7 +410,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_multipleNodes_
         GeneDesc().nodes({NodeDesc().color(3), NodeDesc().color(4)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(2).pos({10.0f, 3.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
@@ -465,7 +465,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
         GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true))}),
     });
 
-    Desc inputCreature1;
+    ContentDesc inputCreature1;
     inputCreature1.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2).separation(true))),
@@ -473,7 +473,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
         CreatureDesc(),
         genome);
 
-    Desc inputCreature2;
+    ContentDesc inputCreature2;
     inputCreature2.addCreature(
         {
             ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2).separation(true))),
@@ -507,7 +507,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparat
         GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false))}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).separation(false))),
@@ -537,7 +537,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
 
     std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).signal(signal)),
@@ -567,7 +567,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_connectionWeight
         GeneDesc().nodes({NodeDesc().color(2).neuralNetwork(nn1), NodeDesc().color(3).neuralNetwork(nn2)}),
     });
 
-    Desc input;
+    ContentDesc input;
     input.addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),

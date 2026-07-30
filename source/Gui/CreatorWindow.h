@@ -2,8 +2,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -48,7 +48,7 @@ private:
     void createHexagon();
     void createDisc();
 
-    Desc convertToEnergyParticles(Desc const& description) const;
+    ContentDesc convertToEnergyParticles(ContentDesc const& description) const;
 
     void validateAndCorrect();
     bool isEnergyMaterial() const;
@@ -77,7 +77,7 @@ private:
 
     // Drawing data
     CreationMaterial _material = CreationMaterial_Solid;
-    Desc _drawingDescription;
+    ContentDesc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 

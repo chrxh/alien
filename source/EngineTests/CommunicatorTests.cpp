@@ -4,8 +4,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -32,7 +32,7 @@ protected:
     // The sender is connected to a helper cell to the east, so its reference direction is (1, 0).
     // With frontAngle and the encoded angle in signal.channels[CommunicatorAngle] (= angleChannel), the
     // absolute facing direction defaults to south (0, +1): refAngle(90) + frontAngle(0) + angleChannel(0.5) * 180 = 180.
-    Desc createSenderCreature(
+    ContentDesc createSenderCreature(
         uint64_t creatureId,
         RealVector2D pos,
         int range = 50,
@@ -40,7 +40,7 @@ protected:
         std::optional<float> frontAngle = 0.0f,
         float angleChannel = 0.5f)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc()
                     .id(creatureId * 100)
@@ -58,7 +58,7 @@ protected:
     }
 
     // Helper to create a receiver creature with 2 cells (receiver + helper for reference direction).
-    Desc createReceiverCreature(
+    ContentDesc createReceiverCreature(
         uint64_t creatureId,
         RealVector2D pos,
         int restrictToColors = 0x3ff,
@@ -66,7 +66,7 @@ protected:
         int color = 0,
         std::optional<float> frontAngle = 0.0f)
     {
-        auto data = Desc().addCreature(
+        auto data = ContentDesc().addCreature(
             {
                 ObjectDesc()
                     .id(creatureId * 100)
@@ -140,7 +140,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
 TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
 {
     // Create sender and receiver in the same creature (both connected)
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
@@ -221,7 +221,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
 TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
 {
     // Create sender without active signal
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             // No signal set, so signal is not active
@@ -247,7 +247,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
 {
     // Create two senders (both facing south) and a receiver between them; only the sender for which the receiver
     // lies in the opposite half-plane should transmit.
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
@@ -433,7 +433,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     uint64_t senderLineageId = 12345;
     uint64_t receiverLineageId = params.relatedLineage ? 12345 : 67890;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),

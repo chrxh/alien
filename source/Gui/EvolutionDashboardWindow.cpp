@@ -17,7 +17,7 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/ObjectColoring.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParametersTypes.h>

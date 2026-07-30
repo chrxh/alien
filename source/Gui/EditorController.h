@@ -3,7 +3,7 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
@@ -49,5 +49,5 @@ private:
     bool _on = false;
 
     std::vector<InspectionWindow> _inspectorWindows;
-    Desc _drawing;
+    ContentDesc _drawing;
 };

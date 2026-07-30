@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -43,7 +43,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
@@ -86,7 +86,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {
                             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
@@ -128,7 +128,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     });
 
     auto data =
-        Desc()
+        ContentDesc()
             .addCreature(
                 {
                     ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
@@ -184,7 +184,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     });
 
     auto data =
-        Desc()
+        ContentDesc()
             .addCreature(
                 {
                     ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),

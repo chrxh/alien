@@ -3,7 +3,6 @@ add_library(PersisterInterface
     Definitions.h
     DeleteNetworkResourceRequestData.h
     DeleteNetworkResourceResultData.h
-    DeserializedSimulation.h
     DownloadCache.h
     DownloadNetworkResourceRequestData.h
     DownloadNetworkResourceResultData.h
@@ -42,8 +41,6 @@ add_library(PersisterInterface
     SerializerService.cpp
     SerializerService.h
     ZstdStream.h
-    SerializedSimulation.h
-    SettingsForSerialization.h
     SettingsParserService.cpp
     SettingsParserService.h
     SharedDeserializedSimulation.h

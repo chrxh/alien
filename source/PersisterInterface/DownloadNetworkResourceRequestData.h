@@ -6,8 +6,6 @@
 
 #include <Network/Definitions.h>
 
-#include <PersisterInterface/DeserializedSimulation.h>
-
 #include "DownloadCache.h"
 
 struct DownloadNetworkResourceRequestData

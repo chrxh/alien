@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "MutationTestsBase.h"
@@ -14,7 +14,7 @@ class StatisticsTests : public MutationTestsBase
 TEST_F(StatisticsTests, basicCounts)
 {
     auto genome42 = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(5)})});
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(1), ObjectDesc().id(2).pos({1.0f, 0.0f})}, CreatureDesc().lineageId(42).generation(3), genome42)
                     .addCreature({ObjectDesc().id(3).pos({10.0f, 10.0f})}, CreatureDesc().lineageId(43).generation(5), GenomeDesc());
 
@@ -55,7 +55,7 @@ TEST_F(StatisticsTests, basicCounts)
 
 TEST_F(StatisticsTests, objectStatistics)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), GenomeDesc())
                     .addObjects(
                         {ObjectDesc().id(2).pos({10.0f, 0.0f}).type(FreeCellDesc().energy(200.0f)),
@@ -79,7 +79,7 @@ TEST_F(StatisticsTests, objectStatistics)
 
 TEST_F(StatisticsTests, representativeCell)
 {
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature({ObjectDesc().id(1), ObjectDesc().id(2).pos({1.0f, 0.0f})}, CreatureDesc().lineageId(42).generation(3), GenomeDesc())
                     .addCreature({ObjectDesc().id(3).pos({10.0f, 10.0f})}, CreatureDesc().lineageId(42).generation(5), GenomeDesc());
 
@@ -99,7 +99,7 @@ TEST_F(StatisticsTests, genomeNodesAndMutationRates)
     }
     genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(0.21f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
     _simulationFacade->setSimulationData(data);
 
     auto entries = _simulationFacade->getStatisticsEntry();
@@ -116,7 +116,7 @@ TEST_F(StatisticsTests, accumulatedMutations)
     genome._mutationRates._neuronMutations[0] =
         NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f).biasChangeSigma(1.0f).actfnChangeProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
 
     auto parameters = _parameters;
     parameters.newLineageThreshold.value = 1.0e30f;
@@ -175,7 +175,7 @@ TEST_P(StatisticsTests_CellTypeActivation, accumulatedAttackedEnergy)
     lastMatch._creatureIdPart = 2 & 0xffff;
     lastMatch._pos = RealVector2D{100.0f, 103.0f};
 
-    auto data = Desc()
+    auto data = ContentDesc()
                     .addCreature(
                         {ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
                          ObjectDesc()
@@ -212,7 +212,7 @@ TEST_P(StatisticsTests_CellTypeActivation, accumulatedMuscleActivity)
     NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = activated ? 1.0f : 0.0f;
 
-    auto data = Desc().addCreature(
+    auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
             ObjectDesc()

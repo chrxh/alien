@@ -8,7 +8,7 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Desc.h>
+#include <EngineInterface/Descs.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include <EngineTestData/TestHelper.h>
@@ -22,7 +22,7 @@ public:
     static void cleanupGlobalContext();
 
 protected:
-    double getEnergy(Desc const& data) const;
+    double getEnergy(ContentDesc const& data) const;
 
     bool approxCompare(double expected, double actual, float precision = 0.001f) const { return TestHelper::approxCompare(expected, actual, precision); }
 
@@ -40,7 +40,7 @@ protected:
         return TestHelper::approxCompareAngles(expected, actual, precision);
     }
 
-    bool compare(Desc left, Desc right) const;
+    bool compare(ContentDesc left, ContentDesc right) const;
     bool compare(ObjectDesc left, ObjectDesc right) const;
     bool compare(EnergyDesc left, EnergyDesc right) const;
 

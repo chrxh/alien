@@ -1,8 +1,11 @@
 #include "SettingsParserService.h"
 
+#include <sstream>
+
+#include <boost/property_tree/json_parser.hpp>
+
 #include <Base/Resources.h>
 
-#include <EngineInterface/ParametersValidationService.h>
 #include <EngineInterface/SimulationParametersSpecification.h>
 #include <EngineInterface/SpecificationEvaluationService.h>
 
@@ -174,50 +177,37 @@ namespace
         }
     }
 
-    void encodeDecode(boost::property_tree::ptree& tree, SettingsForSerialization& data, ParserTask parserTask)
-    {
-        SettingsForSerialization defaultSettings;
-
-        // General settings
-        auto nodeBase = std::string("General");
-        auto programVersion = Const::ProgramVersion;
-        ParameterParser::encodeDecode(tree, programVersion, std::string(), nodeBase + ".Version", parserTask);
-        ParameterParser::encodeDecode(tree, data.timestep, defaultSettings.timestep, nodeBase + ".Time step", parserTask);
-        ParameterParser::encodeDecode(tree, data.realTime, defaultSettings.realTime, nodeBase + ".Real time", parserTask);
-        ParameterParser::encodeDecode(tree, data.zoom, defaultSettings.zoom, nodeBase + ".Zoom", parserTask);
-        ParameterParser::encodeDecode(tree, data.center, defaultSettings.center, nodeBase + ".Center", parserTask);
-        ParameterParser::encodeDecode(tree, data.worldSize, defaultSettings.worldSize, nodeBase + ".World size", parserTask);
-
-        encodeDecodeSimulationParameters(tree, data.simulationParameters, "Simulation parameters", parserTask);
-
-        ParametersValidationService::get().validateAndCorrect({data.worldSize}, data.simulationParameters);
-    }
-}
-
-boost::property_tree::ptree SettingsParserService::encodeSettings(SettingsForSerialization const& data)
-{
-    boost::property_tree::ptree tree;
-    encodeDecode(tree, const_cast<SettingsForSerialization&>(data), ParserTask::Encode);
-    return tree;
-}
-
-SettingsForSerialization SettingsParserService::decodeSettings(boost::property_tree::ptree tree)
-{
-    SettingsForSerialization result;
-    encodeDecode(tree, result, ParserTask::Decode);
-    return result;
+    auto const GeneralNode = std::string("General");
+    auto const SimulationParametersNode = std::string("Simulation parameters");
 }
 
 boost::property_tree::ptree SettingsParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
-    encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), "Simulation parameters", ParserTask::Encode);
+    auto programVersion = Const::ProgramVersion;
+    ParameterParser::encodeDecode(tree, programVersion, std::string(), GeneralNode + ".Version", ParserTask::Encode);
+    encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), SimulationParametersNode, ParserTask::Encode);
     return tree;
 }
 
 SimulationParameters SettingsParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
-    encodeDecodeSimulationParameters(tree, result, "Simulation parameters", ParserTask::Decode);
+    encodeDecodeSimulationParameters(tree, result, SimulationParametersNode, ParserTask::Decode);
     return result;
+}
+
+std::string SettingsParserService::encodeSimulationParametersToString(SimulationParameters const& data)
+{
+    std::stringstream stream;
+    boost::property_tree::json_parser::write_json(stream, encodeSimulationParameters(data));
+    return stream.str();
+}
+
+SimulationParameters SettingsParserService::decodeSimulationParametersFromString(std::string const& data)
+{
+    std::stringstream stream(data);
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(stream, tree);
+    return decodeSimulationParameters(tree);
 }

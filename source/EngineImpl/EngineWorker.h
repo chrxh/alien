@@ -52,15 +52,15 @@ public:
     int getSyncSimulationWithRenderingRatio() const;
     void setSyncSimulationWithRenderingRatio(int value);
 
-    Desc getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    Desc getSelectedSimulationData(bool includeClusters);
-    Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
+    ContentDesc getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    ContentDesc getSelectedSimulationData(bool includeClusters);
+    ContentDesc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
     StatisticsEntry getStatisticsEntry() const;
 
-    void addAndSelectSimulationData(Desc&& dataToUpdate);
-    void setSimulationData(Desc const& dataToUpdate);
+    void addAndSelectSimulationData(ContentDesc&& dataToUpdate);
+    void setSimulationData(ContentDesc const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
@@ -110,8 +110,8 @@ public:
     bool isSimulationRunning() const;
 
     // Simulated preview
-    Desc getPreviewData();
-    void setPreviewData(Desc const& description);
+    ContentDesc getPreviewData();
+    void setPreviewData(ContentDesc const& description);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation);
     void calcTimestepsForPreview(int numSteps, bool detailSimulation);
     uint64_t getCurrentTimestepForPreview();
