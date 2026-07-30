@@ -108,6 +108,7 @@ public:
     // For tests only
     void testOnly_mutate(uint64_t objectId) override;
     void testOnly_removeUnusedGenes(uint64_t objectId) override;
+    void testOnly_removeGeneCycles(uint64_t objectId) override;
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) override;
     void testOnly_createConnectionWithAbsAngle(uint64_t objectId1, uint64_t objectId2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2)
         override;
