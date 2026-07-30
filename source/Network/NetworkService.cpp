@@ -463,10 +463,6 @@ bool NetworkService::uploadResource(
         {"content", mainData, "content.bin", "application/octet-stream"},
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
-
-        // Obsolete fields, kept for server compatibility
-        {"settings", "", "", ""},
-        {"statistics", "", "", ""},
     };
 
     try {
@@ -500,10 +496,6 @@ bool NetworkService::replaceResource(std::string const& resourceId, IntVector2D 
         {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
-
-        // Obsolete fields, kept for server compatibility
-        {"settings", "", "", ""},
-        {"statistics", "", "", ""},
     };
 
     try {
