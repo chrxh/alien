@@ -119,6 +119,7 @@ public:
 
     // Only for tests
     void testOnly_mutate(uint64_t objectId);
+    void testOnly_voidUnreachableNodes(uint64_t objectId);
     void testOnly_removeUnusedGenes(uint64_t objectId);
     void testOnly_removeGeneCycles(uint64_t objectId);
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);

@@ -386,6 +386,11 @@ void _SimulationFacadeImpl::testOnly_mutate(uint64_t objectId)
     _worker.testOnly_mutate(objectId);
 }
 
+void _SimulationFacadeImpl::testOnly_voidUnreachableNodes(uint64_t objectId)
+{
+    _worker.testOnly_voidUnreachableNodes(objectId);
+}
+
 void _SimulationFacadeImpl::testOnly_removeUnusedGenes(uint64_t objectId)
 {
     _worker.testOnly_removeUnusedGenes(objectId);
