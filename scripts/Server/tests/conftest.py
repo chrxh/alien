@@ -141,8 +141,6 @@ def _upload_simulation(
     particles: int = 100,
     version: str = "1.0",
     content: bytes = b"\x00\x01\x02binary-payload",
-    settings: str = "{}",
-    statistics: str = "stats",
     sim_type: int = 0,
     workspace: int = 0,
 ):
@@ -156,10 +154,8 @@ def _upload_simulation(
         "particles": (None, str(particles)),
         "version": (None, version),
         "content": ("content.bin", content, "application/octet-stream"),
-        "settings": (None, settings),
         "type": (None, str(sim_type)),
         "workspace": (None, str(workspace)),
-        "statistics": (None, statistics),
     }
     return client.post("/uploadsimulation", files=files)
 

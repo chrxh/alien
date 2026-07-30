@@ -24,8 +24,6 @@ def test_upload_simulation_persists_row_and_returns_sim_id(app_client, helpers):
         particles=200,
         version="2.0",
         content=b"\x00\x01\x02payload",
-        settings='{"k":1}',
-        statistics="stats-data",
         sim_type=0,
         workspace=0,
     )
@@ -46,8 +44,6 @@ def test_upload_simulation_persists_row_and_returns_sim_id(app_client, helpers):
         assert sim.version == "2.0"
         assert sim.description == "desc"
         assert bytes(sim.content) == b"\x00\x01\x02payload"
-        assert sim.settings == '{"k":1}'
-        assert sim.statistics == "stats-data"
         assert sim.size == len(b"\x00\x01\x02payload")
         assert sim.workspace == 0
         assert sim.type == 0
@@ -94,8 +90,6 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
             "particles": (None, "1234"),
             "version": (None, "9.9"),
             "content": ("content.bin", b"NEW", "application/octet-stream"),
-            "settings": (None, "new-settings"),
-            "statistics": (None, "new-stats"),
         },
     )
     assert resp.json() == {"result": True}
@@ -108,8 +102,6 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
         assert sim.height == 50
         assert sim.particles == 1234
         assert sim.version == "9.9"
-        assert sim.settings == "new-settings"
-        assert sim.statistics == "new-stats"
         assert sim.size == 3
 
 
@@ -130,14 +122,12 @@ def test_replace_simulation_rejects_non_owner(app_client, helpers):
             "particles": (None, "1"),
             "version": (None, "v"),
             "content": ("content.bin", b"X", "application/octet-stream"),
-            "settings": (None, "s"),
-            "statistics": (None, "x"),
         },
     )
     assert resp.json() == {"result": False}
 
 
-# --- /downloadcontent, /downloadsettings, /downloadstatistics ----------------
+# --- /downloadcontent --------------------------------------------------------
 def test_download_endpoints_return_content_and_increment_counter(
     app_client, helpers
 ):
@@ -148,8 +138,6 @@ def test_download_endpoints_return_content_and_increment_counter(
             "alice",
             "pw",
             content=b"raw-bytes",
-            settings="my-settings",
-            statistics="my-stats",
         ).json()["simId"]
     )
 
@@ -163,13 +151,6 @@ def test_download_endpoints_return_content_and_increment_counter(
     )
     assert resp.status_code == 200
     assert resp.content == b""
-
-    assert app_client.get(
-        "/downloadsettings", params={"id": str(sim_id)}
-    ).text == "my-settings"
-    assert app_client.get(
-        "/downloadstatistics", params={"id": str(sim_id)}
-    ).text == "my-stats"
 
     # Each call to /downloadcontent with chunkIndex==0 increments num_downloads.
     main = app_client.app_module

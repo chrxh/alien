@@ -115,7 +115,6 @@ class Simulation(Base):
     version: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
-    settings: Mapped[str] = mapped_column(Text, nullable=False)
     picture: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     num_downloads: Mapped[int] = mapped_column(Integer, nullable=False)
 
@@ -136,7 +135,6 @@ class Simulation(Base):
     )
 
     type: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    statistics: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class UserLike(Base):
@@ -1092,10 +1090,8 @@ async def upload_simulation(request: Request):
     height = _parse_int(_require_field(fields, "height"))
     particles = _parse_int(_require_field(fields, "particles"))
     version = _require_field(fields, "version")
-    settings = _require_field(fields, "settings")
     sim_type = _parse_int(fields.get("type", "0"))
     workspace = _parse_int(fields.get("workspace", "0"))
-    statistics = fields.get("statistics", "")
 
     with Session(engine) as session:
         with session.begin():
@@ -1120,13 +1116,11 @@ async def upload_simulation(request: Request):
                 version=version,
                 description=simDesc,
                 content=content_bytes,
-                settings=settings,
                 picture=b"",
                 num_downloads=0,
                 workspace=workspace,
                 size=len(content_bytes),
                 type=sim_type,
-                statistics=statistics,
             )
             session.add(sim)
             session.flush()
@@ -1150,8 +1144,6 @@ async def replace_simulation(request: Request):
     height = _parse_int(_require_field(fields, "height"))
     particles = _parse_int(_require_field(fields, "particles"))
     version = _require_field(fields, "version")
-    settings = _require_field(fields, "settings")
-    statistics = fields.get("statistics", "")
 
     sim_id = _parse_int(simId)
     notify_name: str | None = None
@@ -1186,9 +1178,7 @@ async def replace_simulation(request: Request):
             sim.content = content_bytes
             sim.width = width
             sim.height = height
-            sim.settings = settings
             sim.size = len(content_bytes)
-            sim.statistics = statistics
 
     if notify_workspace != _WORKSPACE_PRIVATE and notify_name is not None:
         _discord_notify_resource(
@@ -1224,23 +1214,6 @@ def download_content(id: str, chunkIndex: int = 0):
             )
             content = sim.content or b""
     return Response(content=bytes(content), media_type="application/octet-stream")
-
-
-@app.get("/downloadsettings")
-def download_settings(id: str):
-    sim_id = _parse_int(id)
-    with Session(engine) as session:
-        sim = session.get(Simulation, sim_id)
-        return Response(content=(sim.settings if sim is not None else "") or "", media_type="text/plain")
-
-
-@app.get("/downloadstatistics")
-def download_statistics(id: str):
-    sim_id = _parse_int(id)
-    with Session(engine) as session:
-        sim = session.get(Simulation, sim_id)
-        body = (sim.statistics if sim is not None else "") or ""
-    return Response(content=body, media_type="text/plain")
 
 
 @app.get("/incdownloadcount")
