@@ -1,5 +1,6 @@
 #include <cooperative_groups.h>
 
+#include "GeneGraphProcessor.cuh"
 #include "MutationProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "TestKernels.cuh"
@@ -52,7 +53,7 @@ __global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint
         block.sync();
 
         if (shouldProcess) {
-            MutationProcessor::removeUnreachableGenesFromRoot(data, object->typeData.cell.creature->genome);
+            GeneGraphProcessor::removeUnreachableGenesFromRoot(data, object->typeData.cell.creature->genome);
         }
         block.sync();
     }
@@ -79,7 +80,7 @@ __global__ void cudaTestRemoveGeneCycles(SimulationData data, uint64_t objectId)
         block.sync();
 
         if (shouldProcess) {
-            MutationProcessor::removeCyclesNotThroughRoot(data, object->typeData.cell.creature->genome);
+            GeneGraphProcessor::removeCyclesNotThroughRoot(data, object->typeData.cell.creature->genome);
         }
         block.sync();
     }
