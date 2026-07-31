@@ -18,7 +18,7 @@ namespace
 {
     auto constexpr GraphRowSpacing = 19.0f;
     auto constexpr GraphGroupSpacing = 14.0f;
-    auto constexpr GraphHeaderHeight = 22.0f;
+    auto constexpr GraphHeaderHeight = 29.0f;
     auto constexpr GraphSideMargin = 85.0f;
     auto constexpr NodeRadius = 5.0f;
     auto constexpr NodeClickPadding = 3.0f;
@@ -26,6 +26,7 @@ namespace
     auto constexpr CardWidth = 260.0f;
     auto constexpr CardPadding = 9.0f;
     auto constexpr CardMinWidth = 170.0f;
+    auto constexpr CardResetButtonWidth = 16.0f;
     auto constexpr CardTextWidth = 45.0f;
     auto constexpr CardItemSpacing = 5.0f;
     auto constexpr CardTopMargin = 6.0f;
@@ -145,6 +146,16 @@ namespace
             points.emplace_back(point);
         }
         drawList->AddPolyline(points.data(), toInt(points.size()), color, 0, scale(1.3f));
+    }
+
+    // Small button next to a slider that resets its value
+    bool resetButton(char const* id, float height)
+    {
+        ImGui::SameLine();
+        ImGui::SetWindowFontScale(0.5f);
+        auto result = ImGui::Button(id, {scale(CardResetButtonWidth), height});
+        ImGui::SetWindowFontScale(1.0f);
+        return result;
     }
 
     // Invisible button around a node center; returns true if clicked
@@ -430,12 +441,22 @@ void _NeuralNetEditorWidget::processInspectorCard(
     auto itemSpacing = scale(CardItemSpacing);
 
     // Shrink the card in narrow windows so that it does not cover the node columns
-    auto spaceBetweenNodeColumns = graphWidth / scale(1.0f) - 2 * GraphSideMargin;
+    auto scaleFactor = scale(1.0f);
+    auto spaceBetweenNodeColumns = graphWidth / scaleFactor - 2 * GraphSideMargin;
     auto cardTotalWidth = std::clamp(spaceBetweenNodeColumns, CardMinWidth, CardWidth);
     auto cardContentWidth = cardTotalWidth - 2 * CardPadding;
     auto cardWidth = scale(cardTotalWidth);
     auto cardHeight = 2 * scale(CardPadding) + lineHeight + 3 * itemSpacing + 2 * frameHeight + scale(ActivationIconHeight);
-    ImVec2 cardMin{graphOrigin.x + (graphWidth - cardWidth) / 2, graphOrigin.y + scale(CardTopMargin)};
+
+    // Keep the card inside the visible area when the editor is scrolled
+    auto cardY = graphOrigin.y + scale(CardTopMargin);
+    auto clipMin = drawList->GetClipRectMin();
+    auto clipMax = drawList->GetClipRectMax();
+    if (clipMax.y - clipMin.y > cardHeight + 2 * scale(CardTopMargin)) {
+        cardY = std::clamp(cardY, clipMin.y + scale(CardTopMargin), clipMax.y - cardHeight - scale(CardTopMargin));
+    }
+
+    ImVec2 cardMin{graphOrigin.x + (graphWidth - cardWidth) / 2, cardY};
     ImVec2 cardMax{cardMin.x + cardWidth, cardMin.y + cardHeight};
 
     drawList->AddRectFilled(cardMin, cardMax, CardBackgroundColor, scale(4.0f));
@@ -458,18 +479,27 @@ void _NeuralNetEditorWidget::processInspectorCard(
 
     ImGui::PushID("InspectorCard");
 
-    auto weight = weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex).getValue();
+    auto sliderWidth = cardContentWidth - CardResetButtonWidth - ImGui::GetStyle().ItemSpacing.x / scaleFactor;
+
+    auto& weightValue = weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex);
+    auto weight = weightValue.getValue();
     ImGui::SetCursorScreenPos({contentX, posY});
     if (AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Weight").format("%.2f").width(cardContentWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f), &weight)) {
-        weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex) = weight;
+            AlienGui::SliderFloatParameters().name("Weight").format("%.2f").width(sliderWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f), &weight)) {
+        weightValue = weight;
+    }
+    if (resetButton(ICON_FA_TIMES "##weightReset", frameHeight)) {
+        weightValue = NeuralNetWeight(0);
     }
     posY += frameHeight + itemSpacing;
 
     ImGui::SetCursorScreenPos({contentX, posY});
     AlienGui::SliderFloat(
-        AlienGui::SliderFloatParameters().name("Bias").format("%.2f").width(cardContentWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f),
+        AlienGui::SliderFloatParameters().name("Bias").format("%.2f").width(sliderWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f),
         &biases.at(outputIndex));
+    if (resetButton(ICON_FA_TIMES "##biasReset", frameHeight)) {
+        biases.at(outputIndex) = 0.0f;
+    }
     posY += frameHeight + itemSpacing;
 
     // Activation function chooser: one button per function showing its graph
