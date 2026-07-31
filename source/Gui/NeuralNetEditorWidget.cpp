@@ -26,8 +26,7 @@ namespace
     auto constexpr CardWidth = 260.0f;
     auto constexpr CardPadding = 9.0f;
     auto constexpr CardMinWidth = 170.0f;
-    auto constexpr CardResetButtonWidth = 16.0f;
-    auto constexpr CardTextWidth = 45.0f;
+    auto constexpr ResetButtonFontScale = 0.5f;
     auto constexpr CardItemSpacing = 5.0f;
     auto constexpr CardTopMargin = 6.0f;
     auto constexpr ActivationIconHeight = 18.0f;
@@ -148,12 +147,19 @@ namespace
         drawList->AddPolyline(points.data(), toInt(points.size()), color, 0, scale(1.3f));
     }
 
+    float resetButtonWidth()
+    {
+        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * ResetButtonFontScale, FLT_MAX, 0.0f, ICON_FA_TIMES).x
+            + 2 * ImGui::GetStyle().FramePadding.x;
+    }
+
     // Small button next to a slider that resets its value
-    bool resetButton(char const* id, float height)
+    bool resetButton()
     {
         ImGui::SameLine();
-        ImGui::SetWindowFontScale(0.5f);
-        auto result = ImGui::Button(id, {scale(CardResetButtonWidth), height});
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+        ImGui::SetWindowFontScale(ResetButtonFontScale);
+        auto result = ImGui::Button(ICON_FA_TIMES);
         ImGui::SetWindowFontScale(1.0f);
         return result;
     }
@@ -479,27 +485,36 @@ void _NeuralNetEditorWidget::processInspectorCard(
 
     ImGui::PushID("InspectorCard");
 
-    auto sliderWidth = cardContentWidth - CardResetButtonWidth - ImGui::GetStyle().ItemSpacing.x / scaleFactor;
+    // The label is drawn manually so that the reset button fits between slider and label
+    auto labelWidth = ImGui::CalcTextSize("Weight").x;
+    auto spacing = ImGui::GetStyle().ItemSpacing.x;
+    auto sliderWidth = (scale(cardContentWidth) - 2 * spacing + scale(7.0f) - resetButtonWidth() - labelWidth) / scaleFactor;
+    auto sliderParameters = AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-2.0f).max(2.0f);
 
     auto& weightValue = weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex);
     auto weight = weightValue.getValue();
+    ImGui::PushID("Weight");
     ImGui::SetCursorScreenPos({contentX, posY});
-    if (AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Weight").format("%.2f").width(sliderWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f), &weight)) {
+    if (AlienGui::SliderFloat(sliderParameters, &weight)) {
         weightValue = weight;
     }
-    if (resetButton(ICON_FA_TIMES "##weightReset", frameHeight)) {
+    if (resetButton()) {
         weightValue = NeuralNetWeight(0);
     }
+    ImGui::SameLine();
+    AlienGui::Text("Weight");
+    ImGui::PopID();
     posY += frameHeight + itemSpacing;
 
+    ImGui::PushID("Bias");
     ImGui::SetCursorScreenPos({contentX, posY});
-    AlienGui::SliderFloat(
-        AlienGui::SliderFloatParameters().name("Bias").format("%.2f").width(sliderWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f),
-        &biases.at(outputIndex));
-    if (resetButton(ICON_FA_TIMES "##biasReset", frameHeight)) {
+    AlienGui::SliderFloat(sliderParameters, &biases.at(outputIndex));
+    if (resetButton()) {
         biases.at(outputIndex) = 0.0f;
     }
+    ImGui::SameLine();
+    AlienGui::Text("Bias");
+    ImGui::PopID();
     posY += frameHeight + itemSpacing;
 
     // Activation function chooser: one button per function showing its graph
