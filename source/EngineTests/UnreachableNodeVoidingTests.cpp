@@ -24,27 +24,25 @@ TEST_F(UnreachableNodeVoidingTests, noVoidNodes_noChange)
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
-TEST_F(UnreachableNodeVoidingTests, voidsNodeConnectedOnlyViaVoidNodes)
+TEST_F(UnreachableNodeVoidingTests, voidsNodesConnectedOnlyViaVoidNodes)
 {
-    // In a triangle the nodes 4 and 5 are additionally connected to the nodes 1 and 2. With the nodes 2 and 4 being void, only
-    // node 3 loses its connection to the last node, while the nodes 0 and 1 are still reached via node 5.
-    auto genome = GenomeDesc().genes({GeneDesc()
-                                          .shape(ConstructorShape_Triangle)
-                                          .nodes({
-                                              NodeDesc(),
-                                              NodeDesc(),
-                                              NodeDesc().cellType(VoidGenomeDesc()),
-                                              NodeDesc(),
-                                              NodeDesc().cellType(VoidGenomeDesc()),
-                                              NodeDesc(),
-                                          })});
+    // A triangle with 15 nodes, where the void nodes 3, 8 and 12 separate the nodes 9, 10 and 11 from the last node: their only
+    // connections left are the ones among each other. The nodes 0 to 7 stay connected to the last node via the additional
+    // connections of the nodes 13 and 14.
+    std::vector<NodeDesc> nodes(15);
+    for (auto nodeIndex : {3, 8, 12}) {
+        nodes.at(nodeIndex).cellType(VoidGenomeDesc());
+    }
+    auto genome = GenomeDesc().genes({GeneDesc().shape(ConstructorShape_Triangle).nodes(nodes)});
     auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_voidUnreachableNodes(1);
 
     auto expectedGenome = genome;
-    expectedGenome._genes.at(0)._nodes.at(3).cellType(VoidGenomeDesc());
+    for (auto nodeIndex : {9, 10, 11}) {
+        expectedGenome._genes.at(0)._nodes.at(nodeIndex).cellType(VoidGenomeDesc());
+    }
 
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(expectedGenome, actualGenome);
