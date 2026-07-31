@@ -4,7 +4,6 @@
 #include <cmath>
 
 #include <imgui.h>
-#include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
 
@@ -16,11 +15,14 @@
 
 namespace
 {
-    auto constexpr GraphRowSpacing = 19.0f;
-    auto constexpr GraphGroupSpacing = 16.0f;
-    auto constexpr GraphHeaderHeight = 18.0f;
-    auto constexpr GraphSideMargin = 75.0f;
+    auto constexpr GraphRowSpacing = 22.0f;
+    auto constexpr GraphGroupSpacing = 12.0f;
+    auto constexpr GraphHeaderHeight = 26.0f;
+    auto constexpr GraphSideMargin = 120.0f;
     auto constexpr NodeRadius = 5.0f;
+    auto constexpr NodeClickPadding = 3.0f;
+    auto constexpr ConnectionNodeSpacing = 64.0f;
+    auto constexpr DetailTextWidth = 130.0f;
 
     auto const PositiveWeightColor = ImColor(77, 163, 255);
     auto const NegativeWeightColor = ImColor(255, 77, 77);
@@ -29,10 +31,18 @@ namespace
     auto const TelemetryNodeColor = ImColor(111, 220, 140);
     auto const SelectedNodeColor = ImColor(255, 210, 77);
     auto const NodeFillColor = ImColor(18, 21, 27);
+    auto const ZeroWeightColor = ImColor(90, 97, 110);
     auto const LabelColor = ImColor(170, 178, 194);
-    auto const HeaderColorAlpha = 200;
 
     std::vector<std::string> const TelemetryLabels = {"Energy", "Attacked", "Age", "Speed"};
+    std::vector<std::string> const ActivationFunctionShortStrings = {"tanh", "step", "id", "abs", "gauss", "mod"};
+
+    ImColor withAlpha(ImColor const& color, float alpha)
+    {
+        auto result = color;
+        result.Value.w = alpha;
+        return result;
+    }
 
     ImColor groupColor(int inputIndex)
     {
@@ -66,6 +76,16 @@ namespace
         }
         return result;
     }
+
+    // Invisible button around a node center; returns true if clicked
+    bool nodeClickArea(ImVec2 const& pos, char const* id, bool& hovered)
+    {
+        auto clickRadius = scale(NodeRadius + NodeClickPadding);
+        ImGui::SetCursorScreenPos({pos.x - clickRadius, pos.y - clickRadius});
+        auto result = ImGui::InvisibleButton(id, {clickRadius * 2, clickRadius * 2});
+        hovered = ImGui::IsItemHovered();
+        return result;
+    }
 }
 
 NeuralNetEditorWidget _NeuralNetEditorWidget::create()
@@ -83,8 +103,8 @@ void _NeuralNetEditorWidget::process(
     auto& selectionData = getValueRef(_dataById);
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
-        processConnectionWeightSliders(connectionWeights);
-        processGraph(weights, biases, activationFunctions, selectionData, liveData);
+        processConnectionWeights(connectionWeights, selectionData);
+        processGraph(weights, activationFunctions, selectionData, liveData);
         processDetailPanel(weights, biases, activationFunctions, selectionData);
 
         AlienGui::Separator();
@@ -94,43 +114,61 @@ void _NeuralNetEditorWidget::process(
     ImGui::EndChild();
 }
 
-void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& connectionWeights)
+void _NeuralNetEditorWidget::processConnectionWeights(std::vector<float>& connectionWeights, SelectionData& selectionData)
 {
-    AlienGui::Text("Connection weights");
+    auto rowHeight = ImGui::GetTextLineHeight() + scale(34.0f);
+    if (ImGui::BeginChild("ConnectionWeights", ImVec2(0, rowHeight), 0, 0)) {
+        auto drawList = ImGui::GetWindowDrawList();
+        auto origin = ImGui::GetCursorScreenPos();
 
-    auto width = ImGui::GetContentRegionAvail().x;
-    auto sliderAreaWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
-    auto resetButtonWidth = ImGui::CalcTextSize("x").x;
-    auto sliderWidth = sliderAreaWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x;
+        drawList->AddText({origin.x, origin.y}, withAlpha(LabelColor, 0.8f), "CONNECTIONS");
 
-    ImGui::PushID("ConnectionWeightSliders");
-    for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
-        if (i > 0) {
-            ImGui::SameLine();
+        auto nodeY = origin.y + ImGui::GetTextLineHeight() + scale(18.0f);
+        ImGui::PushID("ConnectionNodes");
+        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+            auto const& weight = connectionWeights.at(i);
+            ImVec2 pos{origin.x + scale(14.0f + toFloat(i) * ConnectionNodeSpacing), nodeY};
+
+            ImGui::PushID(i);
+            bool hovered = false;
+            if (nodeClickArea(pos, "##connectionNode", hovered)) {
+                selectionData.connectionIndex = i;
+            }
+            ImGui::PopID();
+
+            auto isSelected = i == selectionData.connectionIndex;
+            if (isSelected) {
+                drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
+            }
+            drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
+            auto borderColor = std::abs(weight) > NEAR_ZERO ? calcWeightColor(weight, 1.0f) : ZeroWeightColor;
+            drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
+
+            auto valueText = StringHelper::format(weight, 2);
+            drawList->AddText(
+                {pos.x + scale(NodeRadius + 5.0f), pos.y - ImGui::GetTextLineHeight() / 2},
+                isSelected ? ImColor(255, 255, 255) : LabelColor,
+                valueText.c_str());
         }
-        ImGui::PushID(i);
-        ImGuiStyle& style = ImGui::GetStyle();
-        auto originalGrabMinSize = style.GrabMinSize;
-        style.GrabMinSize = scale(8.0f);
-        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
-        style.GrabMinSize = originalGrabMinSize;
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
-        ImGui::SetWindowFontScale(0.5f);
-        if (ImGui::Button(ICON_FA_TIMES)) {
-            connectionWeights.at(i) = 0.0f;
-        }
-        ImGui::SetWindowFontScale(1.0f);
         ImGui::PopID();
-    }
-    ImGui::PopID();
 
-    ImGui::Dummy(ImVec2(0, scale(5.0f)));
+        // Slider for the selected connection weight
+        auto sliderX = origin.x + scale(14.0f + toFloat(MAX_OBJECT_CONNECTIONS) * ConnectionNodeSpacing);
+        ImGui::SetCursorScreenPos({sliderX, nodeY - ImGui::GetFrameHeight() / 2});
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters()
+                .name("Con " + std::to_string(selectionData.connectionIndex + 1))
+                .format("%.2f")
+                .textWidth(60.0f)
+                .min(-1.0f)
+                .max(1.0f),
+            &connectionWeights.at(selectionData.connectionIndex));
+    }
+    ImGui::EndChild();
 }
 
 void _NeuralNetEditorWidget::processGraph(
     std::vector<NeuralNetWeight>& weights,
-    std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
     std::optional<LiveData> const& liveData)
@@ -150,8 +188,8 @@ void _NeuralNetEditorWidget::processGraph(
         }
 
         drawWeightCurves(weights, selectionData, drawList, layout);
-        drawInputNodes(drawList, layout, liveData);
-        drawOutputNodes(biases, activationFunctions, selectionData, drawList, layout);
+        drawInputNodes(selectionData, drawList, layout, liveData);
+        drawOutputNodes(activationFunctions, selectionData, drawList, layout);
     }
     ImGui::EndChild();
 }
@@ -167,64 +205,81 @@ void _NeuralNetEditorWidget::drawWeightCurves(
         int inputIndex;
         int outputIndex;
         float weight;
+        bool isSelected;
     };
     std::vector<WeightCurve> curves;
     curves.reserve(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS);
     for (int row = 0; row < NEURAL_NET_OUTPUTS; ++row) {
         for (int col = 0; col < NEURAL_NET_INPUTS; ++col) {
             auto weight = weights.at(row * NEURAL_NET_INPUTS + col).getValue();
-            if (std::abs(weight) <= NEAR_ZERO) {
+            auto isSelected = row == selectionData.outputIndex && col == selectionData.inputIndex;
+            if (std::abs(weight) <= NEAR_ZERO && !isSelected) {
                 continue;
             }
-            curves.push_back({col, row, weight});
+            curves.push_back({col, row, weight, isSelected});
         }
     }
-    std::sort(curves.begin(), curves.end(), [&](auto const& a, auto const& b) {
-        if ((a.outputIndex == selectionData.neuronIndex) != (b.outputIndex == selectionData.neuronIndex)) {
-            return b.outputIndex == selectionData.neuronIndex;
+    std::sort(curves.begin(), curves.end(), [](auto const& a, auto const& b) {
+        if (a.isSelected != b.isSelected) {
+            return b.isSelected;
         }
         return std::abs(a.weight) < std::abs(b.weight);
     });
 
     for (auto const& curve : curves) {
-        auto isSelected = curve.outputIndex == selectionData.neuronIndex;
         auto start = layout.inputNodePos[curve.inputIndex];
         auto end = layout.outputNodePos[curve.outputIndex];
         auto controlOffset = (end.x - start.x) * 0.4f;
-        auto thickness = scale(std::max(0.7f, std::min(2.0f, std::abs(curve.weight)) * (isSelected ? 1.7f : 1.0f)));
+        auto thickness = scale(std::max(0.7f, std::min(2.0f, std::abs(curve.weight)) * (curve.isSelected ? 1.7f : 1.0f)));
+        auto color = std::abs(curve.weight) > NEAR_ZERO ? calcWeightColor(curve.weight, curve.isSelected ? 0.95f : 0.12f) : withAlpha(ZeroWeightColor, 0.95f);
         drawList->AddBezierCubic(
             {start.x + scale(NodeRadius), start.y},
             {start.x + controlOffset, start.y},
             {end.x - controlOffset, end.y},
             {end.x - scale(NodeRadius), end.y},
-            calcWeightColor(curve.weight, isSelected ? 0.9f : 0.13f),
+            color,
             thickness);
     }
 }
 
-void _NeuralNetEditorWidget::drawInputNodes(ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData)
+void _NeuralNetEditorWidget::drawInputNodes(
+    SelectionData& selectionData,
+    ImDrawList* drawList,
+    LayoutData const& layout,
+    std::optional<LiveData> const& liveData)
 {
-    ImGui::SetWindowFontScale(0.7f);
     auto drawGroupHeader = [&](std::string const& text, ImColor const& color, float y) {
-        auto headerColor = color;
-        headerColor.Value.w = toFloat(HeaderColorAlpha) / 255;
-        drawList->AddText({layout.inputNodePos[0].x - scale(GraphSideMargin - 5.0f), y}, headerColor, text.c_str());
+        drawList->AddText({layout.inputNodePos[0].x - scale(GraphSideMargin - 5.0f), y}, withAlpha(color, 0.8f), text.c_str());
     };
     drawGroupHeader("SIGNALS", SignalNodeColor, layout.inputNodePos[0].y - scale(GraphHeaderHeight));
     drawGroupHeader("MEMORY", MemoryNodeColor, layout.inputNodePos[STANDARD_NEURONS_PER_CELL].y - scale(GraphHeaderHeight));
     drawGroupHeader("TELEMETRY", TelemetryNodeColor, layout.inputNodePos[NEURAL_NET_OUTPUTS].y - scale(GraphHeaderHeight));
 
+    ImGui::PushID("InputNodes");
     for (int i = 0; i < NEURAL_NET_INPUTS; ++i) {
         auto const& pos = layout.inputNodePos[i];
+
+        ImGui::PushID(i);
+        bool hovered = false;
+        if (nodeClickArea(pos, "##inputNode", hovered)) {
+            selectionData.inputIndex = i;
+        }
+        ImGui::PopID();
+
+        auto isSelected = i == selectionData.inputIndex;
+        if (isSelected) {
+            drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
+        }
         drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
-        drawList->AddCircle(pos, scale(NodeRadius), groupColor(i), 0, scale(1.5f));
+        drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : groupColor(i), 0, scale(1.5f));
         if (i >= STANDARD_NEURONS_PER_CELL && i < NEURAL_NET_OUTPUTS) {
             drawList->AddCircleFilled(pos, scale(2.0f), MemoryNodeColor);
         }
 
         auto label = getInputLabel(i);
         auto textSize = ImGui::CalcTextSize(label.c_str());
-        drawList->AddText({pos.x - scale(NodeRadius + 5.0f) - textSize.x, pos.y - textSize.y / 2}, LabelColor, label.c_str());
+        drawList->AddText(
+            {pos.x - scale(NodeRadius + 6.0f) - textSize.x, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label.c_str());
 
         // Live values next to memory and telemetry inputs
         if (liveData.has_value() && i >= STANDARD_NEURONS_PER_CELL) {
@@ -251,64 +306,56 @@ void _NeuralNetEditorWidget::drawInputNodes(ImDrawList* drawList, LayoutData con
                 }
             }
             if (!value.empty()) {
-                auto valueColor = LabelColor;
-                valueColor.Value.w = 0.6f;
-                drawList->AddText({pos.x + scale(NodeRadius + 5.0f), pos.y - textSize.y / 2}, valueColor, value.c_str());
+                drawList->AddText({pos.x + scale(NodeRadius + 6.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.6f), value.c_str());
             }
         }
     }
-    ImGui::SetWindowFontScale(1.0f);
+    ImGui::PopID();
 }
 
 void _NeuralNetEditorWidget::drawOutputNodes(
-    std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
     ImDrawList* drawList,
     LayoutData const& layout)
 {
-    ImGui::SetWindowFontScale(0.7f);
     auto drawGroupHeader = [&](std::string const& text, ImColor const& color, float y) {
-        auto headerColor = color;
-        headerColor.Value.w = toFloat(HeaderColorAlpha) / 255;
-        drawList->AddText({layout.outputNodePos[0].x + scale(NodeRadius + 5.0f), y}, headerColor, text.c_str());
+        drawList->AddText({layout.outputNodePos[0].x + scale(NodeRadius + 5.0f), y}, withAlpha(color, 0.8f), text.c_str());
     };
     drawGroupHeader("OUTPUTS", SignalNodeColor, layout.outputNodePos[0].y - scale(GraphHeaderHeight));
     drawGroupHeader("MEMORY", MemoryNodeColor, layout.outputNodePos[STANDARD_NEURONS_PER_CELL].y - scale(GraphHeaderHeight));
 
+    ImGui::PushID("OutputNodes");
     for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         auto const& pos = layout.outputNodePos[i];
-        auto isSelected = i == selectionData.neuronIndex;
 
-        // Click area
-        ImGui::SetCursorScreenPos({pos.x - scale(NodeRadius + 3.0f), pos.y - scale(NodeRadius + 3.0f)});
         ImGui::PushID(i);
-        if (ImGui::InvisibleButton("##outputNode", {scale((NodeRadius + 3.0f) * 2), scale((NodeRadius + 3.0f) * 2)})) {
-            selectionData.neuronIndex = i;
+        bool hovered = false;
+        if (nodeClickArea(pos, "##outputNode", hovered)) {
+            selectionData.outputIndex = i;
         }
-        auto isHovered = ImGui::IsItemHovered();
         ImGui::PopID();
 
+        auto isSelected = i == selectionData.outputIndex;
         if (isSelected) {
             drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
         }
         drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
-        auto borderColor = isSelected ? SelectedNodeColor : (i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor);
-        drawList->AddCircle(pos, scale(NodeRadius), isHovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
+        auto borderColor = i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor;
+        drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
         if (i >= STANDARD_NEURONS_PER_CELL) {
             drawList->AddCircleFilled(pos, scale(2.0f), MemoryNodeColor);
         }
 
         auto label = getOutputLabel(i);
         auto textSize = ImGui::CalcTextSize(label.c_str());
-        drawList->AddText({pos.x + scale(NodeRadius + 5.0f), pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label.c_str());
+        drawList->AddText({pos.x + scale(NodeRadius + 6.0f), pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label.c_str());
 
-        auto actfnLabel = Const::ActivationFunctionStrings.at(activationFunctions.at(i));
-        auto actfnColor = LabelColor;
-        actfnColor.Value.w = 0.55f;
-        drawList->AddText({pos.x + scale(NodeRadius + 5.0f) + textSize.x + scale(6.0f), pos.y - textSize.y / 2}, actfnColor, actfnLabel.c_str());
+        auto const& actfnLabel = ActivationFunctionShortStrings.at(activationFunctions.at(i));
+        drawList->AddText(
+            {pos.x + scale(NodeRadius + 6.0f) + textSize.x + scale(8.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel.c_str());
     }
-    ImGui::SetWindowFontScale(1.0f);
+    ImGui::PopID();
 }
 
 void _NeuralNetEditorWidget::processDetailPanel(
@@ -317,53 +364,36 @@ void _NeuralNetEditorWidget::processDetailPanel(
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData)
 {
-    auto& neuronIndex = selectionData.neuronIndex;
-    neuronIndex = std::clamp(neuronIndex, 0, NEURAL_NET_OUTPUTS - 1);
+    auto& inputIndex = selectionData.inputIndex;
+    auto& outputIndex = selectionData.outputIndex;
+    inputIndex = std::clamp(inputIndex, 0, NEURAL_NET_INPUTS - 1);
+    outputIndex = std::clamp(outputIndex, 0, NEURAL_NET_OUTPUTS - 1);
 
-    AlienGui::Text(getOutputLabel(neuronIndex) + " - incoming weights");
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    auto originalGrabMinSize = style.GrabMinSize;
-    style.GrabMinSize = scale(8.0f);
-
-    auto columnWidth = ImGui::GetContentRegionAvail().x / 2;
-    auto sliderTextWidth = scale(55.0f);
-    auto sliderWidth = columnWidth - sliderTextWidth - 2 * ImGui::GetStyle().FramePadding.x;
-
-    ImGui::PushID("WeightSliders");
-    ImGui::SetWindowFontScale(0.8f);
-    for (int col = 0; col < NEURAL_NET_INPUTS; ++col) {
-        auto columnIndex = col % 2;
-        if (columnIndex > 0) {
-            ImGui::SameLine(columnWidth);
-        }
-        ImGui::PushID(col);
-        auto weight = weights.at(neuronIndex * NEURAL_NET_INPUTS + col).getValue();
-        if (AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name(getInputLabel(col)).format("%.2f").width(sliderWidth).textWidth(sliderTextWidth).min(-2.0f).max(2.0f),
-                &weight)) {
-            weights.at(neuronIndex * NEURAL_NET_INPUTS + col) = weight;
-        }
-        ImGui::PopID();
-    }
-    ImGui::SetWindowFontScale(1.0f);
-    ImGui::PopID();
-
-    AlienGui::Separator();
-
-    auto bias = biases.at(neuronIndex);
+    auto weight = weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex).getValue();
     if (AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Bias").format("%.2f").width(sliderWidth).textWidth(sliderTextWidth).min(-2.0f).max(2.0f), &bias)) {
-        biases.at(neuronIndex) = bias;
-    }
-    ImGui::SameLine(columnWidth);
-    int activationFunction = activationFunctions.at(neuronIndex);
-    if (AlienGui::Combo(
-            AlienGui::ComboParameters().name("Activation").values(Const::ActivationFunctionStrings).textWidth(sliderTextWidth), activationFunction)) {
-        activationFunctions.at(neuronIndex) = static_cast<ActivationFunction>(activationFunction);
+            AlienGui::SliderFloatParameters()
+                .name(getInputLabel(inputIndex) + " -> " + getOutputLabel(outputIndex))
+                .format("%.2f")
+                .textWidth(DetailTextWidth)
+                .min(-2.0f)
+                .max(2.0f),
+            &weight)) {
+        weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex) = weight;
     }
 
-    style.GrabMinSize = originalGrabMinSize;
+    AlienGui::SliderFloat(
+        AlienGui::SliderFloatParameters().name("Bias (" + getOutputLabel(outputIndex) + ")").format("%.2f").textWidth(DetailTextWidth).min(-2.0f).max(2.0f),
+        &biases.at(outputIndex));
+
+    int activationFunction = activationFunctions.at(outputIndex);
+    if (AlienGui::Combo(
+            AlienGui::ComboParameters()
+                .name("Activation (" + getOutputLabel(outputIndex) + ")")
+                .values(Const::ActivationFunctionStrings)
+                .textWidth(DetailTextWidth),
+            activationFunction)) {
+        activationFunctions.at(outputIndex) = static_cast<ActivationFunction>(activationFunction);
+    }
 }
 
 _NeuralNetEditorWidget::_NeuralNetEditorWidget() {}

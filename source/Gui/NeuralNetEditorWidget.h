@@ -36,7 +36,9 @@ private:
 
     struct SelectionData
     {
-        int neuronIndex = 0;
+        int inputIndex = 0;
+        int outputIndex = 0;
+        int connectionIndex = 0;
     };
 
     struct LayoutData
@@ -45,21 +47,15 @@ private:
         ImVec2 outputNodePos[NEURAL_NET_OUTPUTS];
     };
 
-    void processConnectionWeightSliders(std::vector<float>& connectionWeights);
+    void processConnectionWeights(std::vector<float>& connectionWeights, SelectionData& selectionData);
     void processGraph(
         std::vector<NeuralNetWeight>& weights,
-        std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         SelectionData& selectionData,
         std::optional<LiveData> const& liveData);
     void drawWeightCurves(std::vector<NeuralNetWeight>& weights, SelectionData const& selectionData, ImDrawList* drawList, LayoutData const& layout);
-    void drawInputNodes(ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData);
-    void drawOutputNodes(
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions,
-        SelectionData& selectionData,
-        ImDrawList* drawList,
-        LayoutData const& layout);
+    void drawInputNodes(SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData);
+    void drawOutputNodes(std::vector<ActivationFunction>& activationFunctions, SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout);
     void processDetailPanel(
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
