@@ -78,11 +78,10 @@ namespace
         return result;
     }
 
+    // The output rows use the same spacing as the input rows and therefore end above the telemetry inputs
     float outputNodeOffsetY(int outputIndex)
     {
-        auto graphHeight = inputNodeOffsetY(NEURAL_NET_INPUTS - 1) + GraphRowSpacing;
-        auto stretch = (graphHeight - 2 * GraphHeaderHeight - GraphGroupSpacing) / toFloat(NEURAL_NET_OUTPUTS);
-        auto result = GraphHeaderHeight + toFloat(outputIndex) * stretch;
+        auto result = GraphHeaderHeight + toFloat(outputIndex) * GraphRowSpacing;
         if (outputIndex >= STANDARD_NEURONS_PER_CELL) {
             result += GraphHeaderHeight + GraphGroupSpacing;
         }
@@ -191,11 +190,14 @@ void _NeuralNetEditorWidget::process(
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         processConnectionWeightSliders(connectionWeights);
-        processGraph(weights, biases, activationFunctions, selectionData, liveData);
+        auto graphGeometry = processGraph(weights, activationFunctions, selectionData, liveData);
 
         AlienGui::Separator();
 
         processActionButtons(weights, biases, activationFunctions);
+
+        // Processed last so that the card is above the other widgets
+        processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry);
     }
     ImGui::EndChild();
 }
@@ -234,13 +236,13 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     ImGui::Dummy(ImVec2(0, scale(5.0f)));
 }
 
-void _NeuralNetEditorWidget::processGraph(
+_NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
     std::vector<NeuralNetWeight>& weights,
-    std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
     std::optional<LiveData> const& liveData)
 {
+    GraphGeometry result;
     auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1) + GraphRowSpacing);
     if (ImGui::BeginChild("NeuralNetGraph", ImVec2(0, graphHeight), 0, 0)) {
         auto drawList = ImGui::GetWindowDrawList();
@@ -259,10 +261,12 @@ void _NeuralNetEditorWidget::processGraph(
         drawInputNodes(selectionData, drawList, layout, liveData);
         drawOutputNodes(activationFunctions, selectionData, drawList, layout);
 
-        // Drawn last so that the card and its widgets are above the graph
-        processInspectorCard(weights, biases, activationFunctions, selectionData, drawList, origin, width);
+        result.origin = origin;
+        result.width = width;
     }
     ImGui::EndChild();
+
+    return result;
 }
 
 void _NeuralNetEditorWidget::drawWeightCurves(
@@ -433,9 +437,7 @@ void _NeuralNetEditorWidget::processInspectorCard(
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
-    ImDrawList* drawList,
-    ImVec2 const& graphOrigin,
-    float graphWidth)
+    GraphGeometry const& graphGeometry)
 {
     auto& inputIndex = selectionData.inputIndex;
     auto& outputIndex = selectionData.outputIndex;
@@ -448,21 +450,27 @@ void _NeuralNetEditorWidget::processInspectorCard(
 
     // Shrink the card in narrow windows so that it does not cover the node columns
     auto scaleFactor = scale(1.0f);
-    auto spaceBetweenNodeColumns = graphWidth / scaleFactor - 2 * GraphSideMargin;
+    auto spaceBetweenNodeColumns = graphGeometry.width / scaleFactor - 2 * GraphSideMargin;
     auto cardTotalWidth = std::clamp(spaceBetweenNodeColumns, CardMinWidth, CardWidth);
     auto cardContentWidth = cardTotalWidth - 2 * CardPadding;
     auto cardWidth = scale(cardTotalWidth);
     auto cardHeight = 2 * scale(CardPadding) + lineHeight + 3 * itemSpacing + 2 * frameHeight + scale(ActivationIconHeight);
+    auto cardMargin = scale(CardTopMargin);
 
     // Keep the card inside the visible area when the editor is scrolled
-    auto cardY = graphOrigin.y + scale(CardTopMargin);
-    auto clipMin = drawList->GetClipRectMin();
-    auto clipMax = drawList->GetClipRectMax();
-    if (clipMax.y - clipMin.y > cardHeight + 2 * scale(CardTopMargin)) {
-        cardY = std::clamp(cardY, clipMin.y + scale(CardTopMargin), clipMax.y - cardHeight - scale(CardTopMargin));
-    }
+    auto clipMin = ImGui::GetWindowDrawList()->GetClipRectMin();
+    auto clipMax = ImGui::GetWindowDrawList()->GetClipRectMax();
+    auto cardY = graphGeometry.origin.y + cardMargin;
+    auto lowestCardY = clipMax.y - cardHeight - cardMargin;
+    cardY = lowestCardY > clipMin.y + cardMargin ? std::clamp(cardY, clipMin.y + cardMargin, lowestCardY) : clipMin.y + cardMargin;
 
-    ImVec2 cardMin{graphOrigin.x + (graphWidth - cardWidth) / 2, cardY};
+    // An own child window is needed so that the card is rendered above the graph and stays independent of its scroll position
+    auto cursorBackup = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos({graphGeometry.origin.x + (graphGeometry.width - cardWidth) / 2, cardY});
+    ImGui::BeginChild("InspectorCard", {cardWidth, cardHeight}, 0, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    auto drawList = ImGui::GetWindowDrawList();
+    ImVec2 cardMin = ImGui::GetWindowPos();
     ImVec2 cardMax{cardMin.x + cardWidth, cardMin.y + cardHeight};
 
     drawList->AddRectFilled(cardMin, cardMax, CardBackgroundColor, scale(4.0f));
@@ -553,6 +561,9 @@ void _NeuralNetEditorWidget::processInspectorCard(
     }
 
     ImGui::PopID();
+
+    ImGui::EndChild();
+    ImGui::SetCursorScreenPos(cursorBackup);
 }
 
 _NeuralNetEditorWidget::_NeuralNetEditorWidget() {}
