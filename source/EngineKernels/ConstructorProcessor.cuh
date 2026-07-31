@@ -83,8 +83,8 @@ private:
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
     // One thread block per constructor cell so that the whole block is available for genome mutation (see processCell).
-    // The mutation requires NEURONS_PER_CELL threads, so the kernel is always launched with that block size.
-    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+    // The mutation requires NEURAL_NET_INPUTS threads, so the kernel is always launched with that block size.
+    DEVICE_CHECK(blockDim.x == NEURAL_NET_INPUTS);
 
     auto const partition = calcBlockPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {

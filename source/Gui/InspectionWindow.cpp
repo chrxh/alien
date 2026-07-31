@@ -6,6 +6,8 @@
 
 #include <imgui.h>
 
+#include <Base/Math.h>
+
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/DescValidationService.h>
@@ -541,7 +543,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
         }
 
         processSignalsNode(cell);
-        processNeuralNetNode(cell);
+        processNeuralNetNode(object);
     }
     AlienGui::EndTreeNode();
 }
@@ -604,10 +606,10 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto& channels = cell._signal._channels;
-        if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
-            channels.resize(NEURONS_PER_CELL, 0.0f);
+        if (static_cast<int>(channels.size()) < STANDARD_NEURONS_PER_CELL) {
+            channels.resize(STANDARD_NEURONS_PER_CELL, 0.0f);
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth), &channels.at(i));
         }
@@ -615,11 +617,22 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
     AlienGui::EndTreeNode();
 }
 
-void _InspectionWindow::processNeuralNetNode(CellDesc& cell)
+void _InspectionWindow::processNeuralNetNode(ObjectDesc& object)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
+        auto& cell = object.getCellRef();
+        _NeuralNetEditorWidget::LiveData liveData;
+        liveData.memoryActivities = cell._memoryActivities;
+        liveData.energy = cell._usableEnergy;
+        liveData.attacked = cell._event == CellEvent_Attacked && cell._eventCounter > 0;
+        liveData.age = cell._age;
+        liveData.speed = Math::length(object._vel);
         _neuralNetWidget->process(
-            cell._neuralNetwork._weights, cell._neuralNetwork._biases, cell._neuralNetwork._activationFunctions, cell._neuralNetwork._connectionWeights);
+            cell._neuralNetwork._weights,
+            cell._neuralNetwork._biases,
+            cell._neuralNetwork._activationFunctions,
+            cell._neuralNetwork._connectionWeights,
+            liveData);
     }
     AlienGui::EndTreeNode();
 }
@@ -628,18 +641,14 @@ namespace
 {
     void processMemoryChannelBits(uint16_t& bitMask)
     {
-        bool bits[NEURONS_PER_CELL];
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        bool bits[STANDARD_NEURONS_PER_CELL];
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             bits[i] = (bitMask & (1 << i)) != 0;
         }
         AlienGui::MultiCheckboxes(AlienGui::MultiCheckboxesParameters().name("Channel mask bit 0-3").textWidth(TextWidth), bits[0], bits[1], bits[2], bits[3]);
         AlienGui::MultiCheckboxes(AlienGui::MultiCheckboxesParameters().name("Channel mask bit 4-7").textWidth(TextWidth), bits[4], bits[5], bits[6], bits[7]);
-        AlienGui::MultiCheckboxes(
-            AlienGui::MultiCheckboxesParameters().name("Channel mask bit 8-11").textWidth(TextWidth), bits[8], bits[9], bits[10], bits[11]);
-        AlienGui::MultiCheckboxes(
-            AlienGui::MultiCheckboxesParameters().name("Channel mask bit 12-15").textWidth(TextWidth), bits[12], bits[13], bits[14], bits[15]);
         bitMask = 0;
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             if (bits[i]) {
                 bitMask |= 1 << i;
             }

@@ -7,14 +7,14 @@
 
 NeuralNetGenomeDesc::NeuralNetGenomeDesc()
 {
-    _weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-        _weights[i * NEURONS_PER_CELL + i] = 1.0f;
+    _weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+        _weights[i * NEURAL_NET_INPUTS + i] = 1.0f;
     }
 
-    _biases.resize(NEURONS_PER_CELL, 0);
+    _biases.resize(NEURAL_NET_OUTPUTS, 0);
 
-    _activationFunctions.resize(NEURONS_PER_CELL, ActivationFunction_Identity);
+    _activationFunctions.resize(NEURAL_NET_OUTPUTS, ActivationFunction_Identity);
 
     _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
     _connectionWeights.at(0) = 1.0f;
@@ -22,7 +22,7 @@ NeuralNetGenomeDesc::NeuralNetGenomeDesc()
 
 NeuralNetGenomeDesc& NeuralNetGenomeDesc::weight(int row, int col, NeuralNetWeight value)
 {
-    _weights.at(row * NEURONS_PER_CELL + col) = value;
+    _weights.at(row * NEURAL_NET_INPUTS + col) = value;
     return *this;
 }
 
@@ -127,7 +127,7 @@ GeneratorMode GeneratorGenomeDesc::getMode() const
 
 SignalEntryGenomeDesc::SignalEntryGenomeDesc()
 {
-    _channels.resize(NEURONS_PER_CELL, 0);
+    _channels.resize(STANDARD_NEURONS_PER_CELL, 0);
 }
 
 MemoryMode MemoryGenomeDesc::getMode() const

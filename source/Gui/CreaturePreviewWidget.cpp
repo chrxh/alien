@@ -400,7 +400,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
 
             auto& channels = selectedCell->_signal._channels;
             int index = 0;
-            for (int i = 0; i < NEURONS_PER_CELL / 4; ++i) {
+            for (int i = 0; i < STANDARD_NEURONS_PER_CELL / 4; ++i) {
                 ImGui::PushID(i);
                 if (ImGui::BeginChild("", ImVec2(scale(95), scale(0)))) {
                     for (int j = 0; j < 4; ++j) {
@@ -413,7 +413,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
                 }
                 ImGui::EndChild();
                 ImGui::PopID();
-                if (i < NEURONS_PER_CELL / 4 - 1) {
+                if (i < STANDARD_NEURONS_PER_CELL / 4 - 1) {
                     ImGui::SameLine();
                 }
             }

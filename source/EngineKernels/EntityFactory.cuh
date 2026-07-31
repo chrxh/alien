@@ -151,10 +151,10 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             auto& node = nodes[i];
             node.referenceAngle = nodeTO.referenceAngle;
             node.color = nodeTO.color;
-            for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                 node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];
             }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
                 node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
             }
@@ -289,7 +289,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.memory.signalEntries = signalEntries;
                 auto const& entriesTO = reinterpret_cast<SignalEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.signalEntriesDataIndex);
                 for (int k = 0; k < numSignalEntries; ++k) {
-                    for (int l = 0; l < NEURONS_PER_CELL; ++l) {
+                    for (int l = 0; l < STANDARD_NEURONS_PER_CELL; ++l) {
                         signalEntries[k].channels[l] = entriesTO[k].channels[l];
                     }
                 }
@@ -414,8 +414,12 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->eventCounter = cellTO.eventCounter;
         cell->eventPos = cellTO.eventPos;
 
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             cell->signal.channels[i] = cellTO.signal.channels[i];
+        }
+        for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+            cell->memoryActivities[i] = cellTO.memoryActivities[i];
+            cell->futureMemoryActivities[i] = cellTO.memoryActivities[i];
         }
         cell->signalChanges = cellTO.signalChanges;
 
@@ -425,10 +429,10 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         {
             auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
             cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
-            for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                 cell->neuralNetwork->weights[i] = nnTO->weights[i];
             }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                 cell->neuralNetwork->biases[i] = nnTO->biases[i];
                 cell->neuralNetwork->activationFunctions[i] = nnTO->activationFunctions[i];
             }
@@ -769,19 +773,23 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.branchIndex = branchIndex;
     cell.headUpdateId = 0;
     cell.headCell = false;
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
         cell.signal.channels[i] = 0.0f;
+    }
+    for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+        cell.memoryActivities[i] = 0.0f;
+        cell.futureMemoryActivities[i] = 0.0f;
     }
     cell.signalChanges = 0;
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
-    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
         cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
     }
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         cell.neuralNetwork->biases[i] = node->neuralNetwork.biases[i];
     }
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         cell.neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
     }
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -955,7 +963,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         }
         memory.signalEntries = _data->entities.heap.getTypedSubArray<SignalEntry>(nodeMemory.numSignalEntries);
         for (int i = 0, j = nodeMemory.numSignalEntries; i < j; ++i) {
-            for (int k = 0; k < NEURONS_PER_CELL; ++k) {
+            for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
                 memory.signalEntries[i].channels[k] = nodeMemory.signalEntries[i].channels[k];
             }
         }

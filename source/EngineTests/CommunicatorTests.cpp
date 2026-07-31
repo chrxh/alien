@@ -48,7 +48,7 @@ protected:
                     .color(color)
                     .type(CellDesc()
                               .frontAngle(frontAngle)
-                              .neuralNetwork(NeuralNetDesc().biases({1.0f, angleChannel, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
+                              .neuralNetwork(NeuralNetDesc().biases({1.0f, angleChannel, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
                               .cellType(CommunicatorDesc().mode(SenderDesc().range(range)))),
                 ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
             },
@@ -142,7 +142,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     // Create sender and receiver in the same creature (both connected)
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0})),
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(2).pos({100.0f, 90.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
@@ -250,7 +250,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
@@ -258,7 +258,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     data.addCreature(
         {
             ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().signal(SignalDesc().channels({-1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().signal(SignalDesc().channels({-1.0f, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(2));
     data.addConnection(200, 201);
@@ -436,7 +436,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1).lineageId(senderLineageId),
         GenomeDesc());

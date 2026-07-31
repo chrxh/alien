@@ -17,6 +17,15 @@ namespace Channels
     auto constexpr CellTypeActivation = 0;
 }
 
+// Indices within the telemetry part of the neural net input vector
+namespace TelemetryInputs
+{
+    auto constexpr Energy = 0;
+    auto constexpr Attacked = 1;
+    auto constexpr Age = 2;
+    auto constexpr Speed = 3;
+}
+
 using ObjectType = int;
 enum ObjectType_
 {

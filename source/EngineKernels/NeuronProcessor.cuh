@@ -2,6 +2,7 @@
 
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
+#include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
 #include <sm_60_atomic_functions.h>
 
@@ -23,13 +24,17 @@ public:
 private:
     // Process a single cell's neural network using classic CUDA FP32 matrix-vector multiplication
     // Neural network computation: output[row] = activation(sum(weights[row][i] * input[i]) + bias[row])
-    // where input[i] = sum over all connections of (connectionWeight * connectedCell.signal[i])
+    // The input vector consists of the accumulated signals of the connected cells, the cell's memory activities and its telemetry data
     __inline__ __device__ static void processCell(Object* cell, bool initMatrices);
 
+    __inline__ __device__ static float calcTelemetryInput(Object* object, int telemetryIndex);
     __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);
 
     // Block dimension (one warp)
     static constexpr int BlockDim = 32;
+
+    // Age at which the telemetry input saturates to 1
+    static constexpr float TelemetryReferenceAge = 100000.0f;
 };
 
 /************************************************************************/
@@ -76,12 +81,15 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         cell.signalChanges = static_cast<uint8_t>(min(255.0f, channelDeviations * 255 / 2));
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
+        for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+            cell.memoryActivities[i] = cell.futureMemoryActivities[i];
+        }
     }
 }
 
 __inline__ __device__ void NeuronProcessor::clearSignal(Object* object)
 {
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
         object->typeData.cell.signal.channels[i] = 0;
     }
 }
@@ -136,46 +144,46 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
     auto& cell = object->typeData.cell;
     int numConnections = object->numConnections;
 
-    __shared__ __align__(16) float sharedAccumulatedInput[NEURONS_PER_CELL];
+    __shared__ __align__(16) float sharedInput[NEURAL_NET_INPUTS];
 
-    // Init variables
-    if (laneId < NEURONS_PER_CELL) {
-        sharedAccumulatedInput[laneId] = 0.0f;
+    // Assemble the input vector: [accumulated signals from connected cells | own memory activities | telemetry data]
+    if (laneId < STANDARD_NEURONS_PER_CELL) {
+        float accumulatedInput = 0.0f;
+        for (int connIdx = 0; connIdx < numConnections; ++connIdx) {
+            auto const& connectedObject = object->connections[connIdx].object;
+
+            if (connectedObject->type != ObjectType_Cell) {
+                continue;
+            }
+            auto& connectedCell = connectedObject->typeData.cell;
+            if (connectedCell.cellState == CellState_Constructing) {
+                continue;
+            }
+            accumulatedInput += connectedCell.signal.channels[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
+        }
+        sharedInput[laneId] = accumulatedInput;
+    } else if (laneId < NEURAL_NET_INPUTS) {
+        if (laneId < NEURAL_NET_OUTPUTS) {
+            sharedInput[laneId] = cell.memoryActivities[laneId - STANDARD_NEURONS_PER_CELL];
+        } else {
+            sharedInput[laneId] = calcTelemetryInput(object, laneId - NEURAL_NET_OUTPUTS);
+        }
     }
     block.sync();
 
-    // Accumulate weighted inputs from all connected cells
-    for (int connIdx = 0; connIdx < numConnections; ++connIdx) {
-        auto const& connectedObject = object->connections[connIdx].object;
-
-        if (connectedObject->type != ObjectType_Cell) {
-            continue;
-        }
-        auto& connectedCell = connectedObject->typeData.cell;
-        if (connectedCell.cellState == CellState_Constructing) {
-            continue;
-        }
-
-        if (laneId < NEURONS_PER_CELL) {
-            sharedAccumulatedInput[laneId] += connectedCell.signal.channels[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
-        }
-    }
-    block.sync();
-
-    // Matrix-vector multiplication (16x16 weights * 16 input vector)
-    // Each thread computes one output channel
-    if (laneId < NEURONS_PER_CELL) {
+    // Matrix-vector multiplication (12x16 weights * 16 input vector)
+    // Each thread computes one output value
+    if (laneId < NEURAL_NET_OUTPUTS) {
         int row = laneId;
         float result = 0.0f;
 
-        // Compute dot product: weights[row][0:15] * input[0:15]
-        // Weights are stored row-major, so weights[row][col] = weights[row * MAX_CHANNELS + col]
-        auto const* weightsRow = &cell.neuralNetwork->weights[row * NEURONS_PER_CELL];
+        // Weights are stored row-major, so weights[row][col] = weights[row * NEURAL_NET_INPUTS + col]
+        auto const* weightsRow = &cell.neuralNetwork->weights[row * NEURAL_NET_INPUTS];
 
 // Unroll the inner loop for better performance
 #pragma unroll
-        for (int col = 0; col < NEURONS_PER_CELL; ++col) {
-            result += weightsRow[col].getValue() * sharedAccumulatedInput[col];
+        for (int col = 0; col < NEURAL_NET_INPUTS; ++col) {
+            result += weightsRow[col].getValue() * sharedInput[col];
         }
 
         // Add bias
@@ -185,8 +193,32 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         result = applyActivationFunction(cell.neuralNetwork->activationFunctions[row], result);
         result = max(-2.0f, min(2.0f, result));
 
-        cell.futureSignal.channels[row] = result;
+        // The memory outputs are not visible to other cells and serve as inputs for the next execution
+        if (row < STANDARD_NEURONS_PER_CELL) {
+            cell.futureSignal.channels[row] = result;
+        } else {
+            cell.futureMemoryActivities[row - STANDARD_NEURONS_PER_CELL] = result;
+        }
     }
+}
+
+__inline__ __device__ float NeuronProcessor::calcTelemetryInput(Object* object, int telemetryIndex)
+{
+    auto const& cell = object->typeData.cell;
+    switch (telemetryIndex) {
+    case TelemetryInputs::Energy: {
+        // 1 corresponds to the normal cell energy
+        auto normalEnergy = max(NEAR_ZERO, cudaSimulationParameters.normalCellEnergy.value[object->color]);
+        return min(2.0f, cell.usableEnergy / normalEnergy);
+    }
+    case TelemetryInputs::Attacked:
+        return cell.event == CellEvent_Attacked && cell.eventCounter > 0 ? 1.0f : 0.0f;
+    case TelemetryInputs::Age:
+        return min(1.0f, toFloat(cell.age) / TelemetryReferenceAge);
+    case TelemetryInputs::Speed:
+        return min(2.0f, Math::length(object->vel));
+    }
+    return 0;
 }
 
 __inline__ __device__ float NeuronProcessor::applyActivationFunction(ActivationFunction activationFunction, float x)

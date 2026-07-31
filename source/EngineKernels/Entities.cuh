@@ -51,9 +51,9 @@ struct ObjectConnection
 
 struct __align__(16) NeuralNet
 {
-    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
-    float biases[NEURONS_PER_CELL];
-    ActivationFunction activationFunctions[NEURONS_PER_CELL];
+    NeuralNetWeight weights[NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS];
+    float biases[NEURAL_NET_OUTPUTS];
+    ActivationFunction activationFunctions[NEURAL_NET_OUTPUTS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -366,7 +366,7 @@ union MemoryModeData
 
 struct __align__(16) SignalEntry
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct Memory
@@ -423,7 +423,7 @@ union CellTypeData
 
 struct __align__(16) Signal
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct uint32_float
@@ -520,11 +520,13 @@ struct Cell
     bool constructorAvailable;  // If true, constructor holds valid data
     Constructor constructor;    // Optional constructor data
     Signal signal;
+    float memoryActivities[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
 
     // Process data
     Signal futureSignal;
+    float futureMemoryActivities[MEMORY_NEURONS_PER_CELL];
     uint32_t headUpdateId;
     bool headCell;
 
