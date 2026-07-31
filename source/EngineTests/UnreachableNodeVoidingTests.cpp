@@ -52,6 +52,14 @@ TEST_F(UnreachableNodeVoidingTests, voidsNodesConnectedOnlyViaVoidNodes)
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(expectedGenome, actualGenome);
     EXPECT_EQ(std::nullopt, actualGenome._genes.at(0)._nodes.at(9)._constructor);
+
+    auto const& actualNodes = actualGenome._genes.at(0)._nodes;
+    for (auto nodeIndex : {9, 10, 11}) {
+        EXPECT_EQ(CellType_Void, actualNodes.at(nodeIndex).getCellType()) << "node " << nodeIndex << " should be void";
+    }
+    for (auto nodeIndex : {0, 1, 2, 4, 5, 6, 7, 13, 14}) {
+        EXPECT_NE(CellType_Void, actualNodes.at(nodeIndex).getCellType()) << "node " << nodeIndex << " should not be void";
+    }
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
