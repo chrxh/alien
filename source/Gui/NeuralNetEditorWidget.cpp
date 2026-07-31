@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
 
@@ -15,14 +16,23 @@
 
 namespace
 {
-    auto constexpr GraphRowSpacing = 22.0f;
-    auto constexpr GraphGroupSpacing = 12.0f;
-    auto constexpr GraphHeaderHeight = 26.0f;
-    auto constexpr GraphSideMargin = 120.0f;
+    auto constexpr GraphRowSpacing = 19.0f;
+    auto constexpr GraphGroupSpacing = 14.0f;
+    auto constexpr GraphHeaderHeight = 22.0f;
+    auto constexpr GraphSideMargin = 85.0f;
     auto constexpr NodeRadius = 5.0f;
     auto constexpr NodeClickPadding = 3.0f;
-    auto constexpr ConnectionNodeSpacing = 64.0f;
-    auto constexpr DetailTextWidth = 130.0f;
+    auto constexpr NodeLabelFontScale = 0.7f;
+    auto constexpr CardWidth = 260.0f;
+    auto constexpr CardPadding = 9.0f;
+    auto constexpr CardMinWidth = 170.0f;
+    auto constexpr CardTextWidth = 45.0f;
+    auto constexpr CardItemSpacing = 5.0f;
+    auto constexpr CardTopMargin = 6.0f;
+    auto constexpr ActivationIconHeight = 18.0f;
+    auto constexpr ActivationIconSamples = 48;
+    auto constexpr ActivationIconDomain = 2.0f;
+    auto constexpr ActivationIconRange = 1.3f;
 
     auto const PositiveWeightColor = ImColor(77, 163, 255);
     auto const NegativeWeightColor = ImColor(255, 77, 77);
@@ -33,6 +43,8 @@ namespace
     auto const NodeFillColor = ImColor(18, 21, 27);
     auto const ZeroWeightColor = ImColor(90, 97, 110);
     auto const LabelColor = ImColor(170, 178, 194);
+    auto const CardBackgroundColor = ImColor(23, 28, 38, 242);
+    auto const CardBorderColor = ImColor(58, 65, 82);
 
     std::vector<std::string> const TelemetryLabels = {"Energy", "Attacked", "Age", "Speed"};
     std::vector<std::string> const ActivationFunctionShortStrings = {"tanh", "step", "id", "abs", "gauss", "mod"};
@@ -77,6 +89,64 @@ namespace
         return result;
     }
 
+    float nodeLabelFontSize()
+    {
+        return ImGui::GetFontSize() * NodeLabelFontScale;
+    }
+
+    ImVec2 calcNodeLabelSize(std::string const& text)
+    {
+        return ImGui::GetFont()->CalcTextSizeA(nodeLabelFontSize(), FLT_MAX, 0.0f, text.c_str());
+    }
+
+    void addNodeLabel(ImDrawList* drawList, ImVec2 const& pos, ImColor const& color, std::string const& text)
+    {
+        drawList->AddText(ImGui::GetFont(), nodeLabelFontSize(), pos, color, text.c_str());
+    }
+
+    float evalActivationFunction(ActivationFunction activationFunction, float x)
+    {
+        switch (activationFunction) {
+        case ActivationFunction_Tanh:
+            return std::tanh(x);
+        case ActivationFunction_BinaryStep:
+            return x >= 0.0f ? 1.0f : 0.0f;
+        case ActivationFunction_Identity:
+            return x;
+        case ActivationFunction_Abs:
+            return std::abs(x);
+        case ActivationFunction_Gaussian:
+            return std::exp(-2 * x * x);
+        case ActivationFunction_Mod:
+            return std::fmod(std::fmod(x + 1.0f, 2.0f) + 2.0f, 2.0f) - 1.0f;
+        }
+        return 0.0f;
+    }
+
+    // Draws the graph of an activation function into the given rectangle
+    void drawActivationFunctionIcon(ImDrawList* drawList, ImVec2 const& min, ImVec2 const& max, ActivationFunction activationFunction, ImColor const& color)
+    {
+        auto centerY = (min.y + max.y) / 2;
+        auto halfHeight = (max.y - min.y) / 2;
+        drawList->AddLine({min.x, centerY}, {max.x, centerY}, withAlpha(LabelColor, 0.25f), scale(1.0f));
+
+        std::vector<ImVec2> points;
+        for (int i = 0; i <= ActivationIconSamples; ++i) {
+            auto t = toFloat(i) / ActivationIconSamples;
+            auto x = -ActivationIconDomain + 2 * ActivationIconDomain * t;
+            auto y = std::clamp(evalActivationFunction(activationFunction, x), -ActivationIconRange, ActivationIconRange);
+            ImVec2 point{min.x + t * (max.x - min.x), centerY - y / ActivationIconRange * halfHeight};
+
+            // Do not connect the branches of a discontinuous function
+            if (!points.empty() && std::abs(point.y - points.back().y) > halfHeight) {
+                drawList->AddPolyline(points.data(), toInt(points.size()), color, 0, scale(1.3f));
+                points.clear();
+            }
+            points.emplace_back(point);
+        }
+        drawList->AddPolyline(points.data(), toInt(points.size()), color, 0, scale(1.3f));
+    }
+
     // Invisible button around a node center; returns true if clicked
     bool nodeClickArea(ImVec2 const& pos, char const* id, bool& hovered)
     {
@@ -103,9 +173,8 @@ void _NeuralNetEditorWidget::process(
     auto& selectionData = getValueRef(_dataById);
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
-        processConnectionWeights(connectionWeights, selectionData);
-        processGraph(weights, activationFunctions, selectionData, liveData);
-        processDetailPanel(weights, biases, activationFunctions, selectionData);
+        processConnectionWeightSliders(connectionWeights);
+        processGraph(weights, biases, activationFunctions, selectionData, liveData);
 
         AlienGui::Separator();
 
@@ -114,61 +183,43 @@ void _NeuralNetEditorWidget::process(
     ImGui::EndChild();
 }
 
-void _NeuralNetEditorWidget::processConnectionWeights(std::vector<float>& connectionWeights, SelectionData& selectionData)
+void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& connectionWeights)
 {
-    auto rowHeight = ImGui::GetTextLineHeight() + scale(34.0f);
-    if (ImGui::BeginChild("ConnectionWeights", ImVec2(0, rowHeight), 0, 0)) {
-        auto drawList = ImGui::GetWindowDrawList();
-        auto origin = ImGui::GetCursorScreenPos();
+    AlienGui::Text("Connection weights");
 
-        drawList->AddText({origin.x, origin.y}, withAlpha(LabelColor, 0.8f), "CONNECTIONS");
+    auto width = ImGui::GetContentRegionAvail().x;
+    auto sliderAreaWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
+    auto resetButtonWidth = ImGui::CalcTextSize("x").x;
+    auto sliderWidth = sliderAreaWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x;
 
-        auto nodeY = origin.y + ImGui::GetTextLineHeight() + scale(18.0f);
-        ImGui::PushID("ConnectionNodes");
-        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
-            auto const& weight = connectionWeights.at(i);
-            ImVec2 pos{origin.x + scale(14.0f + toFloat(i) * ConnectionNodeSpacing), nodeY};
-
-            ImGui::PushID(i);
-            bool hovered = false;
-            if (nodeClickArea(pos, "##connectionNode", hovered)) {
-                selectionData.connectionIndex = i;
-            }
-            ImGui::PopID();
-
-            auto isSelected = i == selectionData.connectionIndex;
-            if (isSelected) {
-                drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
-            }
-            drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
-            auto borderColor = std::abs(weight) > NEAR_ZERO ? calcWeightColor(weight, 1.0f) : ZeroWeightColor;
-            drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
-
-            auto valueText = StringHelper::format(weight, 2);
-            drawList->AddText(
-                {pos.x + scale(NodeRadius + 5.0f), pos.y - ImGui::GetTextLineHeight() / 2},
-                isSelected ? ImColor(255, 255, 255) : LabelColor,
-                valueText.c_str());
+    ImGui::PushID("ConnectionWeightSliders");
+    for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+        if (i > 0) {
+            ImGui::SameLine();
         }
+        ImGui::PushID(i);
+        ImGuiStyle& style = ImGui::GetStyle();
+        auto originalGrabMinSize = style.GrabMinSize;
+        style.GrabMinSize = scale(8.0f);
+        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
+        style.GrabMinSize = originalGrabMinSize;
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+        ImGui::SetWindowFontScale(0.5f);
+        if (ImGui::Button(ICON_FA_TIMES)) {
+            connectionWeights.at(i) = 0.0f;
+        }
+        ImGui::SetWindowFontScale(1.0f);
         ImGui::PopID();
-
-        // Slider for the selected connection weight
-        auto sliderX = origin.x + scale(14.0f + toFloat(MAX_OBJECT_CONNECTIONS) * ConnectionNodeSpacing);
-        ImGui::SetCursorScreenPos({sliderX, nodeY - ImGui::GetFrameHeight() / 2});
-        AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Con " + std::to_string(selectionData.connectionIndex + 1))
-                .format("%.2f")
-                .textWidth(60.0f)
-                .min(-1.0f)
-                .max(1.0f),
-            &connectionWeights.at(selectionData.connectionIndex));
     }
-    ImGui::EndChild();
+    ImGui::PopID();
+
+    ImGui::Dummy(ImVec2(0, scale(5.0f)));
 }
 
 void _NeuralNetEditorWidget::processGraph(
     std::vector<NeuralNetWeight>& weights,
+    std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
     std::optional<LiveData> const& liveData)
@@ -190,6 +241,9 @@ void _NeuralNetEditorWidget::processGraph(
         drawWeightCurves(weights, selectionData, drawList, layout);
         drawInputNodes(selectionData, drawList, layout, liveData);
         drawOutputNodes(activationFunctions, selectionData, drawList, layout);
+
+        // Drawn last so that the card and its widgets are above the graph
+        processInspectorCard(weights, biases, activationFunctions, selectionData, drawList, origin, width);
     }
     ImGui::EndChild();
 }
@@ -277,9 +331,9 @@ void _NeuralNetEditorWidget::drawInputNodes(
         }
 
         auto label = getInputLabel(i);
-        auto textSize = ImGui::CalcTextSize(label.c_str());
-        drawList->AddText(
-            {pos.x - scale(NodeRadius + 6.0f) - textSize.x, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label.c_str());
+        auto textSize = calcNodeLabelSize(label);
+        addNodeLabel(
+            drawList, {pos.x - scale(NodeRadius + 5.0f) - textSize.x, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
 
         // Live values next to memory and telemetry inputs
         if (liveData.has_value() && i >= STANDARD_NEURONS_PER_CELL) {
@@ -306,7 +360,7 @@ void _NeuralNetEditorWidget::drawInputNodes(
                 }
             }
             if (!value.empty()) {
-                drawList->AddText({pos.x + scale(NodeRadius + 6.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.6f), value.c_str());
+                addNodeLabel(drawList, {pos.x + scale(NodeRadius + 5.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.6f), value);
             }
         }
     }
@@ -348,52 +402,112 @@ void _NeuralNetEditorWidget::drawOutputNodes(
         }
 
         auto label = getOutputLabel(i);
-        auto textSize = ImGui::CalcTextSize(label.c_str());
-        drawList->AddText({pos.x + scale(NodeRadius + 6.0f), pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label.c_str());
+        auto textSize = calcNodeLabelSize(label);
+        addNodeLabel(drawList, {pos.x + scale(NodeRadius + 5.0f), pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
 
         auto const& actfnLabel = ActivationFunctionShortStrings.at(activationFunctions.at(i));
-        drawList->AddText(
-            {pos.x + scale(NodeRadius + 6.0f) + textSize.x + scale(8.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel.c_str());
+        addNodeLabel(drawList, {pos.x + scale(NodeRadius + 5.0f) + textSize.x + scale(6.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel);
     }
     ImGui::PopID();
 }
 
-void _NeuralNetEditorWidget::processDetailPanel(
+void _NeuralNetEditorWidget::processInspectorCard(
     std::vector<NeuralNetWeight>& weights,
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
-    SelectionData& selectionData)
+    SelectionData& selectionData,
+    ImDrawList* drawList,
+    ImVec2 const& graphOrigin,
+    float graphWidth)
 {
     auto& inputIndex = selectionData.inputIndex;
     auto& outputIndex = selectionData.outputIndex;
     inputIndex = std::clamp(inputIndex, 0, NEURAL_NET_INPUTS - 1);
     outputIndex = std::clamp(outputIndex, 0, NEURAL_NET_OUTPUTS - 1);
 
+    auto lineHeight = ImGui::GetTextLineHeight();
+    auto frameHeight = ImGui::GetFrameHeight();
+    auto itemSpacing = scale(CardItemSpacing);
+
+    // Shrink the card in narrow windows so that it does not cover the node columns
+    auto spaceBetweenNodeColumns = graphWidth / scale(1.0f) - 2 * GraphSideMargin;
+    auto cardTotalWidth = std::clamp(spaceBetweenNodeColumns, CardMinWidth, CardWidth);
+    auto cardContentWidth = cardTotalWidth - 2 * CardPadding;
+    auto cardWidth = scale(cardTotalWidth);
+    auto cardHeight = 2 * scale(CardPadding) + lineHeight + 3 * itemSpacing + 2 * frameHeight + scale(ActivationIconHeight);
+    ImVec2 cardMin{graphOrigin.x + (graphWidth - cardWidth) / 2, graphOrigin.y + scale(CardTopMargin)};
+    ImVec2 cardMax{cardMin.x + cardWidth, cardMin.y + cardHeight};
+
+    drawList->AddRectFilled(cardMin, cardMax, CardBackgroundColor, scale(4.0f));
+    drawList->AddRect(cardMin, cardMax, CardBorderColor, scale(4.0f), 0, scale(1.0f));
+
+    auto contentX = cardMin.x + scale(CardPadding);
+    auto posY = cardMin.y + scale(CardPadding);
+
+    // Header showing the selected connection
+    auto headerText = getInputLabel(inputIndex) + "  " ICON_FA_LONG_ARROW_ALT_RIGHT "  " + getOutputLabel(outputIndex);
+    auto dotOffset = scale(NodeRadius + 4.0f);
+    drawList->AddCircleFilled({contentX + scale(3.0f), posY + lineHeight / 2}, scale(3.5f), groupColor(inputIndex));
+    drawList->AddText({contentX + dotOffset, posY}, ImColor(255, 255, 255), headerText.c_str());
+    auto headerSize = ImGui::CalcTextSize(headerText.c_str());
+    drawList->AddCircleFilled(
+        {contentX + dotOffset + headerSize.x + scale(6.0f), posY + lineHeight / 2},
+        scale(3.5f),
+        outputIndex < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor);
+    posY += lineHeight + itemSpacing;
+
+    ImGui::PushID("InspectorCard");
+
     auto weight = weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex).getValue();
+    ImGui::SetCursorScreenPos({contentX, posY});
     if (AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name(getInputLabel(inputIndex) + " -> " + getOutputLabel(outputIndex))
-                .format("%.2f")
-                .textWidth(DetailTextWidth)
-                .min(-2.0f)
-                .max(2.0f),
-            &weight)) {
+            AlienGui::SliderFloatParameters().name("Weight").format("%.2f").width(cardContentWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f), &weight)) {
         weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex) = weight;
     }
+    posY += frameHeight + itemSpacing;
 
+    ImGui::SetCursorScreenPos({contentX, posY});
     AlienGui::SliderFloat(
-        AlienGui::SliderFloatParameters().name("Bias (" + getOutputLabel(outputIndex) + ")").format("%.2f").textWidth(DetailTextWidth).min(-2.0f).max(2.0f),
+        AlienGui::SliderFloatParameters().name("Bias").format("%.2f").width(cardContentWidth).textWidth(CardTextWidth).min(-2.0f).max(2.0f),
         &biases.at(outputIndex));
+    posY += frameHeight + itemSpacing;
 
-    int activationFunction = activationFunctions.at(outputIndex);
-    if (AlienGui::Combo(
-            AlienGui::ComboParameters()
-                .name("Activation (" + getOutputLabel(outputIndex) + ")")
-                .values(Const::ActivationFunctionStrings)
-                .textWidth(DetailTextWidth),
-            activationFunction)) {
-        activationFunctions.at(outputIndex) = static_cast<ActivationFunction>(activationFunction);
+    // Activation function chooser: one button per function showing its graph
+    auto buttonSpacing = ImGui::GetStyle().ItemSpacing.x;
+    auto numActivationFunctions = toFloat(ActivationFunction_Count);
+    auto buttonWidth = (scale(cardContentWidth) - buttonSpacing * (numActivationFunctions - 1)) / numActivationFunctions;
+    auto buttonHeight = scale(ActivationIconHeight);
+    for (int i = 0; i < ActivationFunction_Count; ++i) {
+        auto isSelected = activationFunctions.at(outputIndex) == i;
+        ImGui::PushID(i);
+        ImGui::SetCursorScreenPos({contentX + toFloat(i) * (buttonWidth + buttonSpacing), posY});
+        if (isSelected) {
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(withAlpha(SelectedNodeColor, 0.18f)));
+        }
+        if (ImGui::Button("##activationFunction", {buttonWidth, buttonHeight})) {
+            activationFunctions.at(outputIndex) = static_cast<ActivationFunction>(i);
+        }
+        if (isSelected) {
+            ImGui::PopStyleColor();
+        }
+        AlienGui::Tooltip(Const::ActivationFunctionStrings.at(i));
+
+        auto iconMin = ImGui::GetItemRectMin();
+        auto iconMax = ImGui::GetItemRectMax();
+        auto iconPadding = scale(3.0f);
+        if (isSelected) {
+            drawList->AddRect(iconMin, iconMax, SelectedNodeColor, ImGui::GetStyle().FrameRounding, 0, scale(1.0f));
+        }
+        drawActivationFunctionIcon(
+            drawList,
+            {iconMin.x + iconPadding, iconMin.y + iconPadding},
+            {iconMax.x - iconPadding, iconMax.y - iconPadding},
+            static_cast<ActivationFunction>(i),
+            isSelected ? SelectedNodeColor : LabelColor);
+        ImGui::PopID();
     }
+
+    ImGui::PopID();
 }
 
 _NeuralNetEditorWidget::_NeuralNetEditorWidget() {}
