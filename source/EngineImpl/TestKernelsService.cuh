@@ -15,6 +15,7 @@ public:
     void shutdown();
 
     void testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& statistics, uint64_t objectId);
+    void testOnly_voidUnreachableNodes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId);
     void testOnly_removeUnusedGenes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId);
     void testOnly_removeGeneCycles(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId);
     void testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2);

@@ -465,6 +465,12 @@ void EngineWorker::testOnly_mutate(uint64_t objectId)
     _simulationCudaFacade->testOnly_mutate(objectId);
 }
 
+void EngineWorker::testOnly_voidUnreachableNodes(uint64_t objectId)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_voidUnreachableNodes(objectId);
+}
+
 void EngineWorker::testOnly_removeUnusedGenes(uint64_t objectId)
 {
     EngineWorkerGuard access(this);

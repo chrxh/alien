@@ -583,6 +583,13 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
     resizeArraysIfNecessary();
 }
 
+void _SimulationCudaFacade::testOnly_voidUnreachableNodes(uint64_t objectId)
+{
+    checkAndProcessSimulationParameterChanges();
+    TestKernelsService::get().testOnly_voidUnreachableNodes(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    syncAndCheck();
+}
+
 void _SimulationCudaFacade::testOnly_removeUnusedGenes(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();

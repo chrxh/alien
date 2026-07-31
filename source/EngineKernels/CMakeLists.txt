@@ -38,6 +38,7 @@ add_library(EngineKernels
     ForceFieldKernels.cuh
     GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
+    GeneGraphProcessor.cuh
     GeneratorProcessor.cuh
     Genome.cuh
     GenomeTO.cuh
