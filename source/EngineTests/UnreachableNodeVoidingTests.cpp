@@ -33,6 +33,10 @@ TEST_F(UnreachableNodeVoidingTests, voidsNodesConnectedOnlyViaVoidNodes)
     for (auto nodeIndex : {3, 8, 12}) {
         nodes.at(nodeIndex).cellType(VoidGenomeDesc());
     }
+    // A voided node loses its constructor, while the constructor of a node that stays connected is kept.
+    nodes.at(5).constructor(ConstructorGenomeDesc().geneIndex(0));
+    nodes.at(9).constructor(ConstructorGenomeDesc().geneIndex(0));
+
     auto genome = GenomeDesc().genes({GeneDesc().shape(ConstructorShape_Triangle).nodes(nodes)});
     auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -43,37 +47,11 @@ TEST_F(UnreachableNodeVoidingTests, voidsNodesConnectedOnlyViaVoidNodes)
     for (auto nodeIndex : {9, 10, 11}) {
         expectedGenome._genes.at(0)._nodes.at(nodeIndex).cellType(VoidGenomeDesc());
     }
+    expectedGenome._genes.at(0)._nodes.at(9).constructor(std::nullopt);
 
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(expectedGenome, actualGenome);
-    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
-}
-
-TEST_F(UnreachableNodeVoidingTests, voidedNodeLosesItsConstructor)
-{
-    auto genome = GenomeDesc().genes({
-        GeneDesc()
-            .shape(ConstructorShape_Triangle)
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc().cellType(VoidGenomeDesc()),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc().cellType(VoidGenomeDesc()),
-                NodeDesc(),
-            }),
-        GeneDesc().nodes({NodeDesc()}),
-    });
-    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_voidUnreachableNodes(1);
-
-    auto actualGenome = getMutatedGenome();
-    ASSERT_EQ(2, actualGenome._genes.size());
-    auto const& actualNode = actualGenome._genes.at(0)._nodes.at(3);
-    EXPECT_EQ(CellType_Void, actualNode.getCellType());
-    EXPECT_EQ(std::nullopt, actualNode._constructor);
+    EXPECT_EQ(std::nullopt, actualGenome._genes.at(0)._nodes.at(9)._constructor);
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
