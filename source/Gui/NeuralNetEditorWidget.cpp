@@ -32,7 +32,7 @@ namespace
     auto constexpr ActivationIconHeight = 18.0f;
     auto constexpr ActivationIconSamples = 48;
     auto constexpr ActivationIconDomain = 2.0f;
-    auto constexpr ActivationIconRange = 1.3f;
+    auto constexpr ActivationIconMinRange = 1.0f;
 
     auto const PositiveWeightColor = ImColor(77, 163, 255);
     auto const NegativeWeightColor = ImColor(255, 77, 77);
@@ -46,7 +46,7 @@ namespace
     auto const CardBackgroundColor = ImColor(23, 28, 38, 242);
     auto const CardBorderColor = ImColor(58, 65, 82);
 
-    std::vector<std::string> const TelemetryLabels = {"Energy", "Attacked", "Age", "Speed"};
+    std::vector<std::string> const TelemetryLabels = {"Energy", "Attacked", "Age", "Velocity"};
     std::vector<std::string> const ActivationFunctionShortStrings = {"tanh", "step", "id", "abs", "gauss", "mod"};
 
     ImColor withAlpha(ImColor const& color, float alpha)
@@ -129,12 +129,21 @@ namespace
         auto halfHeight = (max.y - min.y) / 2;
         drawList->AddLine({min.x, centerY}, {max.x, centerY}, withAlpha(LabelColor, 0.25f), scale(1.0f));
 
+        auto sampleAt = [&](int index) {
+            auto t = toFloat(index) / ActivationIconSamples;
+            return evalActivationFunction(activationFunction, -ActivationIconDomain + 2 * ActivationIconDomain * t);
+        };
+
+        // Scale the graph such that it fills the rectangle without being cut off
+        auto range = ActivationIconMinRange;
+        for (int i = 0; i <= ActivationIconSamples; ++i) {
+            range = std::max(range, std::abs(sampleAt(i)));
+        }
+
         std::vector<ImVec2> points;
         for (int i = 0; i <= ActivationIconSamples; ++i) {
             auto t = toFloat(i) / ActivationIconSamples;
-            auto x = -ActivationIconDomain + 2 * ActivationIconDomain * t;
-            auto y = std::clamp(evalActivationFunction(activationFunction, x), -ActivationIconRange, ActivationIconRange);
-            ImVec2 point{min.x + t * (max.x - min.x), centerY - y / ActivationIconRange * halfHeight};
+            ImVec2 point{min.x + t * (max.x - min.x), centerY - sampleAt(i) / range * halfHeight};
 
             // Do not connect the branches of a discontinuous function
             if (!points.empty() && std::abs(point.y - points.back().y) > halfHeight) {
