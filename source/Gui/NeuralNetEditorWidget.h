@@ -38,7 +38,6 @@ private:
     {
         int inputIndex = 0;
         int outputIndex = 0;
-        int connectionIndex = 0;
     };
 
     struct LayoutData
@@ -47,20 +46,24 @@ private:
         ImVec2 outputNodePos[NEURAL_NET_OUTPUTS];
     };
 
-    void processConnectionWeights(std::vector<float>& connectionWeights, SelectionData& selectionData);
+    void processConnectionWeightSliders(std::vector<float>& connectionWeights);
     void processGraph(
         std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         SelectionData& selectionData,
         std::optional<LiveData> const& liveData);
     void drawWeightCurves(std::vector<NeuralNetWeight>& weights, SelectionData const& selectionData, ImDrawList* drawList, LayoutData const& layout);
     void drawInputNodes(SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData);
     void drawOutputNodes(std::vector<ActivationFunction>& activationFunctions, SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout);
-    void processDetailPanel(
+    void processInspectorCard(
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
-        SelectionData& selectionData);
+        SelectionData& selectionData,
+        ImDrawList* drawList,
+        ImVec2 const& graphOrigin,
+        float graphWidth);
     void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
