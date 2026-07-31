@@ -18,7 +18,7 @@ namespace
 {
     auto constexpr GraphRowSpacing = 19.0f;
     auto constexpr GraphGroupSpacing = 14.0f;
-    auto constexpr GraphHeaderHeight = 29.0f;
+    auto constexpr GraphHeaderHeight = 24.0f;
     auto constexpr GraphSideMargin = 85.0f;
     auto constexpr NodeRadius = 5.0f;
     auto constexpr NodeClickPadding = 3.0f;
@@ -320,7 +320,7 @@ void _NeuralNetEditorWidget::drawInputNodes(
     std::optional<LiveData> const& liveData)
 {
     auto drawGroupHeader = [&](std::string const& text, ImColor const& color, float y) {
-        drawList->AddText({layout.inputNodePos[0].x - scale(GraphSideMargin - 5.0f), y}, withAlpha(color, 0.8f), text.c_str());
+        addNodeLabel(drawList, {layout.inputNodePos[0].x - scale(GraphSideMargin - 5.0f), y}, withAlpha(color, 0.8f), text);
     };
     drawGroupHeader("SIGNALS", SignalNodeColor, layout.inputNodePos[0].y - scale(GraphHeaderHeight));
     drawGroupHeader("MEMORY", MemoryNodeColor, layout.inputNodePos[STANDARD_NEURONS_PER_CELL].y - scale(GraphHeaderHeight));
@@ -391,7 +391,7 @@ void _NeuralNetEditorWidget::drawOutputNodes(
     LayoutData const& layout)
 {
     auto drawGroupHeader = [&](std::string const& text, ImColor const& color, float y) {
-        drawList->AddText({layout.outputNodePos[0].x + scale(NodeRadius + 5.0f), y}, withAlpha(color, 0.8f), text.c_str());
+        addNodeLabel(drawList, {layout.outputNodePos[0].x + scale(NodeRadius + 5.0f), y}, withAlpha(color, 0.8f), text);
     };
     drawGroupHeader("OUTPUTS", SignalNodeColor, layout.outputNodePos[0].y - scale(GraphHeaderHeight));
     drawGroupHeader("MEMORY", MemoryNodeColor, layout.outputNodePos[STANDARD_NEURONS_PER_CELL].y - scale(GraphHeaderHeight));
