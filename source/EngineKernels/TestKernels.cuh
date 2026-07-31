@@ -7,6 +7,7 @@
 #include "SimulationStatistics.cuh"
 
 __global__ void cudaTestMutate(SimulationData data, SimulationStatistics statistics, uint64_t objectId);
+__global__ void cudaTestVoidUnreachableNodes(SimulationData data, uint64_t objectId);
 __global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint64_t objectId);
 __global__ void cudaTestRemoveGeneCycles(SimulationData data, uint64_t objectId);
 __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1, uint64_t objectId2);

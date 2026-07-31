@@ -1,5 +1,6 @@
 #include <cooperative_groups.h>
 
+#include "GeneGraphProcessor.cuh"
 #include "MutationProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "TestKernels.cuh"
@@ -31,6 +32,33 @@ __global__ void cudaTestMutate(SimulationData data, SimulationStatistics statist
     }
 }
 
+__global__ void cudaTestVoidUnreachableNodes(SimulationData data, uint64_t objectId)
+{
+    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+
+    auto block = cooperative_groups::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    auto& objects = data.entities.objects;
+    auto partition = calcBlockPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& object = objects.at(index);
+
+        __shared__ bool shouldProcess;
+        if (laneId == 0) {
+            DEVICE_CHECK(object->type == ObjectType_Cell);
+            shouldProcess = (object->id == objectId);
+        }
+        block.sync();
+
+        if (shouldProcess) {
+            GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, object->typeData.cell.creature->genome);
+        }
+        block.sync();
+    }
+}
+
 __global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint64_t objectId)
 {
     DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
@@ -52,7 +80,7 @@ __global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint
         block.sync();
 
         if (shouldProcess) {
-            MutationProcessor::removeUnreachableGenesFromRoot(data, object->typeData.cell.creature->genome);
+            GeneGraphProcessor::removeUnreachableGenesFromRoot(data, object->typeData.cell.creature->genome);
         }
         block.sync();
     }
@@ -79,7 +107,7 @@ __global__ void cudaTestRemoveGeneCycles(SimulationData data, uint64_t objectId)
         block.sync();
 
         if (shouldProcess) {
-            MutationProcessor::removeCyclesNotThroughRoot(data, object->typeData.cell.creature->genome);
+            GeneGraphProcessor::removeCyclesNotThroughRoot(data, object->typeData.cell.creature->genome);
         }
         block.sync();
     }

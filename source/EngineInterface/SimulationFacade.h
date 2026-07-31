@@ -121,6 +121,7 @@ public:
     //* Only for tests
     //****************
     virtual void testOnly_mutate(uint64_t objectId) = 0;
+    virtual void testOnly_voidUnreachableNodes(uint64_t objectId) = 0;
     virtual void testOnly_removeUnusedGenes(uint64_t objectId) = 0;
     virtual void testOnly_removeGeneCycles(uint64_t objectId) = 0;
     virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
