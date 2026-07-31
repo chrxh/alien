@@ -216,7 +216,7 @@ __inline__ __device__ float NeuronProcessor::calcTelemetryInput(Object* object, 
     case TelemetryInputs::Age:
         return min(1.0f, toFloat(cell.age) / TelemetryReferenceAge);
     case TelemetryInputs::Speed:
-        return min(2.0f, Math::length(object->vel));
+        return min(2.0f, Math::length(object->vel) * 20);
     }
     return 0;
 }
