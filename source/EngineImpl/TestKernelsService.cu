@@ -17,22 +17,22 @@ void TestKernelsService::shutdown()
 
 void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& statistics, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestMutate, NEURONS_PER_CELL, data, statistics, objectId);
+    KERNEL_CALL_MOD(cudaTestMutate, NEURAL_NET_INPUTS, data, statistics, objectId);
 }
 
 void TestKernelsService::testOnly_voidUnreachableNodes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestVoidUnreachableNodes, NEURONS_PER_CELL, data, objectId);
+    KERNEL_CALL_MOD(cudaTestVoidUnreachableNodes, NEURAL_NET_INPUTS, data, objectId);
 }
 
 void TestKernelsService::testOnly_removeUnusedGenes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestRemoveUnreachableGenesFromRoot, NEURONS_PER_CELL, data, objectId);
+    KERNEL_CALL_MOD(cudaTestRemoveUnreachableGenesFromRoot, NEURAL_NET_INPUTS, data, objectId);
 }
 
 void TestKernelsService::testOnly_removeGeneCycles(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestRemoveGeneCycles, NEURONS_PER_CELL, data, objectId);
+    KERNEL_CALL_MOD(cudaTestRemoveGeneCycles, NEURAL_NET_INPUTS, data, objectId);
 }
 
 void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)

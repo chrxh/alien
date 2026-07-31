@@ -535,7 +535,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
-    std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f};
 
     ContentDesc input;
     input.addCreature(

@@ -34,7 +34,7 @@ protected:
                     .id(2)
                     .pos({pos.x + 1.0f, pos.y})
                     .color(color)
-                    .type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
+                    .type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
             },
             CreatureDesc().lineageId(lineageId),
             GenomeDesc());
@@ -52,7 +52,7 @@ protected:
                     .id(2)
                     .pos({pos.x + 1.0f, pos.y})
                     .color(color)
-                    .type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
+                    .type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
             },
             CreatureDesc().lineageId(lineageId),
             GenomeDesc());
@@ -563,7 +563,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
     // Create creature with reconnector and additional object, signal on connected cell
     auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),
         ObjectDesc().id(3).pos({99.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -678,7 +678,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     // Create attacker with connections that block the attack ray
     auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectSolidDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),
         // Create a connection that crosses the ray path to target at (100, 99)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
         ObjectDesc().id(4).pos({101.0f, 99.0f}),

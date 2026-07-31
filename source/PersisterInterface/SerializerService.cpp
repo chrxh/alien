@@ -499,6 +499,15 @@ namespace
 
 namespace cereal
 {
+    // Files saved with a different neural net layout may contain differently sized vectors: truncate or pad them to the current layout
+    template <typename T>
+    void resizeOnLoad(SerializationTask task, std::vector<T>& data, size_t size, T const& fillValue)
+    {
+        if (task == SerializationTask::Load) {
+            data.resize(size, fillValue);
+        }
+    }
+
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetGenomeDesc& data)
     {
@@ -508,6 +517,10 @@ namespace cereal
         scope.addMember(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
         scope.addMember(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
         scope.addMember(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        resizeOnLoad(task, data._weights, NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
+        resizeOnLoad(task, data._biases, NEURAL_NET_OUTPUTS, 0.0f);
+        resizeOnLoad(task, data._activationFunctions, NEURAL_NET_OUTPUTS, ActivationFunction(ActivationFunction_Identity));
+        resizeOnLoad(task, data._connectionWeights, MAX_OBJECT_CONNECTIONS, 0.0f);
     }
     SPLIT_SERIALIZATION(NeuralNetGenomeDesc)
 
@@ -846,6 +859,7 @@ namespace cereal
         SignalEntryGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
+        resizeOnLoad(task, data._channels, STANDARD_NEURONS_PER_CELL, 0.0f);
     }
     SPLIT_SERIALIZATION(SignalEntryGenomeDesc)
 
@@ -1310,6 +1324,7 @@ namespace
     auto constexpr Id_Cell_Constructor = 22;
     auto constexpr Id_Cell_Signal = 23;
     auto constexpr Id_Cell_NeuralNetwork = 24;
+    auto constexpr Id_Cell_MemoryActivities = 26;
 
     auto constexpr Id_Object_Connections = 7;
     auto constexpr Id_Object_Type = 8;
@@ -1351,6 +1366,7 @@ namespace cereal
         SignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Signal_Channels, data._channels, defaultObject._channels);
+        resizeOnLoad(task, data._channels, STANDARD_NEURONS_PER_CELL, 0.0f);
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
@@ -1363,6 +1379,10 @@ namespace cereal
         scope.addMember(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
         scope.addMember(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
         scope.addMember(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        resizeOnLoad(task, data._weights, NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
+        resizeOnLoad(task, data._biases, NEURAL_NET_OUTPUTS, 0.0f);
+        resizeOnLoad(task, data._activationFunctions, NEURAL_NET_OUTPUTS, ActivationFunction(ActivationFunction_Identity));
+        resizeOnLoad(task, data._connectionWeights, MAX_OBJECT_CONNECTIONS, 0.0f);
     }
     SPLIT_SERIALIZATION(NeuralNetDesc)
 
@@ -1732,6 +1752,7 @@ namespace cereal
         SignalEntryDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
+        resizeOnLoad(task, data._channels, STANDARD_NEURONS_PER_CELL, 0.0f);
     }
     SPLIT_SERIALIZATION(SignalEntryDesc)
 
@@ -1838,6 +1859,8 @@ namespace cereal
         scope.addDesc(Id_Cell_CellType, data._cellType);
         scope.addDesc(Id_Cell_Constructor, data._constructor);
         scope.addDesc(Id_Cell_Signal, data._signal);
+        scope.addMember(Id_Cell_MemoryActivities, data._memoryActivities, defaultObject._memoryActivities);
+        resizeOnLoad(task, data._memoryActivities, MEMORY_NEURONS_PER_CELL, 0.0f);
         scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
