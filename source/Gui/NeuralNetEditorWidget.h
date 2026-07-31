@@ -46,10 +46,15 @@ private:
         ImVec2 outputNodePos[NEURAL_NET_OUTPUTS];
     };
 
+    struct GraphGeometry
+    {
+        ImVec2 origin;
+        float width = 0;
+    };
+
     void processConnectionWeightSliders(std::vector<float>& connectionWeights);
-    void processGraph(
+    GraphGeometry processGraph(
         std::vector<NeuralNetWeight>& weights,
-        std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         SelectionData& selectionData,
         std::optional<LiveData> const& liveData);
@@ -61,9 +66,7 @@ private:
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         SelectionData& selectionData,
-        ImDrawList* drawList,
-        ImVec2 const& graphOrigin,
-        float graphWidth);
+        GraphGeometry const& graphGeometry);
     void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
