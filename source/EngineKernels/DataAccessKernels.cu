@@ -92,10 +92,10 @@ namespace
                     auto const& node = gene.nodes[i];
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
-                    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+                    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                         nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
                     }
-                    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+                    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
@@ -357,8 +357,11 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
+            }
+            for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+                cellTO.memoryActivities[i] = cell.memoryActivities[i];
             }
             cellTO.activationTime = cell.activationTime;
             cellTO.lastUpdate = cell.lastUpdate;
@@ -383,10 +386,10 @@ namespace
                     ABORT();
                 }
                 auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
-                for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+                for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                     nnTO->weights[i] = cell.neuralNetwork->weights[i];
                 }
-                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+                for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                     nnTO->biases[i] = cell.neuralNetwork->biases[i];
                     nnTO->activationFunctions[i] = cell.neuralNetwork->activationFunctions[i];
                 }

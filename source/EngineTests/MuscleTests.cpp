@@ -146,7 +146,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
     nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
 
@@ -232,7 +232,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
     nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
 
@@ -331,7 +331,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
     auto data = ContentDesc().addCreature(
@@ -430,7 +430,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
     auto data = ContentDesc().addCreature(
@@ -549,7 +549,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = 1.0f;
     nn._biases.at(Channels::MuscleAngle) = targetAngle / 180.0f;
 
@@ -611,7 +611,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = 1.0f;
     nn._biases.at(Channels::MuscleAngle) = targetAngle / 180.0f;
 
@@ -676,7 +676,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
     auto data = ContentDesc().addCreature(
@@ -749,7 +749,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
     auto data = ContentDesc().addCreature(
@@ -823,7 +823,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
     auto data = ContentDesc().addCreature(
@@ -883,7 +883,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
 
     auto data = ContentDesc().addCreature(
@@ -959,7 +959,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 
     NeuralNetDesc nn;
     nn._weights.clear();
-    nn._weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
+    nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
     nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 2;
 

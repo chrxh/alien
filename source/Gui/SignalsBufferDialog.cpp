@@ -58,7 +58,7 @@ void SignalsBufferDialog::processIntern()
         int numEntries = static_cast<int>(_channelsBuffer.size());
         if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of signals").textWidth(DialogTextWidth), numEntries)) {
             numEntries = std::clamp(numEntries, 0, MAX_CELL_MEMORY_ENTRIES);
-            _channelsBuffer.resize(numEntries, std::vector<float>(NEURONS_PER_CELL, 0.0f));
+            _channelsBuffer.resize(numEntries, std::vector<float>(STANDARD_NEURONS_PER_CELL, 0.0f));
         }
         if (!_channelsBuffer.empty()) {
             std::vector<std::string> entryTexts;
@@ -71,10 +71,10 @@ void SignalsBufferDialog::processIntern()
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
             auto& channels = _channelsBuffer.at(_selectedEntry);
-            if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
-                channels.resize(NEURONS_PER_CELL, 0.0f);
+            if (static_cast<int>(channels.size()) < STANDARD_NEURONS_PER_CELL) {
+                channels.resize(STANDARD_NEURONS_PER_CELL, 0.0f);
             }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).format("%.2f").textWidth(DialogTextWidth).min(-2.0f).max(2.0f),
                     &channels.at(i));

@@ -350,14 +350,11 @@ __device__ __inline__ void bubbleSort(Container& container, int size, LessFunc l
 }
 
 // Efficient channel copy using float4 vectorized operations
-// Copies MAX_CHANNELS (16) floats from src to dst using 4x float4 operations
 __device__ __forceinline__ void copyChannels(float* __restrict__ dst, float const* __restrict__ src)
 {
-    static_assert(NEURONS_PER_CELL == 16, "copyChannels requires MAX_CHANNELS == 16 for float4 optimization");
+    static_assert(STANDARD_NEURONS_PER_CELL == 8, "copyChannels requires STANDARD_NEURONS_PER_CELL == 8 for float4 optimization");
     float4 const* src4 = reinterpret_cast<float4 const*>(src);
     float4* dst4 = reinterpret_cast<float4*>(dst);
     dst4[0] = src4[0];
     dst4[1] = src4[1];
-    dst4[2] = src4[2];
-    dst4[3] = src4[3];
 }

@@ -7,7 +7,7 @@
 
 __global__ void cudaTestMutate(SimulationData data, SimulationStatistics statistics, uint64_t objectId)
 {
-    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+    DEVICE_CHECK(blockDim.x == NEURAL_NET_INPUTS);
 
     auto block = cooperative_groups::this_thread_block();
     auto laneId = block.thread_rank();
@@ -34,7 +34,7 @@ __global__ void cudaTestMutate(SimulationData data, SimulationStatistics statist
 
 __global__ void cudaTestVoidUnreachableNodes(SimulationData data, uint64_t objectId)
 {
-    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+    DEVICE_CHECK(blockDim.x == NEURAL_NET_INPUTS);
 
     auto block = cooperative_groups::this_thread_block();
     auto laneId = block.thread_rank();
@@ -61,7 +61,7 @@ __global__ void cudaTestVoidUnreachableNodes(SimulationData data, uint64_t objec
 
 __global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint64_t objectId)
 {
-    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+    DEVICE_CHECK(blockDim.x == NEURAL_NET_INPUTS);
 
     auto block = cooperative_groups::this_thread_block();
     auto laneId = block.thread_rank();
@@ -88,7 +88,7 @@ __global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint
 
 __global__ void cudaTestRemoveGeneCycles(SimulationData data, uint64_t objectId)
 {
-    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+    DEVICE_CHECK(blockDim.x == NEURAL_NET_INPUTS);
 
     auto block = cooperative_groups::this_thread_block();
     auto laneId = block.thread_rank();

@@ -31,7 +31,7 @@ namespace
     {
         target.resize(numEntries);
         for (int i = 0; i < numEntries; ++i) {
-            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
+            for (int j = 0; j < STANDARD_NEURONS_PER_CELL; ++j) {
                 target[i]._channels[j] = source[i].channels[j];
             }
         }
@@ -43,7 +43,7 @@ namespace
     {
         for (int i = 0, j = toInt(source.size()); i < j; ++i) {
             auto numChannels = source[i]._channels.size();
-            for (int k = 0; k < NEURONS_PER_CELL && k < numChannels; ++k) {
+            for (int k = 0; k < STANDARD_NEURONS_PER_CELL && k < numChannels; ++k) {
                 target[i].channels[k] = source[i]._channels[k];
             }
         }
@@ -68,13 +68,13 @@ namespace
     NeuralNetGenomeDesc convert(NeuralNetGenomeTO const& neuralNetworkGenomeTO)
     {
         NeuralNetGenomeDesc result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._biases[i] = neuralNetworkGenomeTO.biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._activationFunctions[i] = neuralNetworkGenomeTO.activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -86,13 +86,13 @@ namespace
     NeuralNetDesc convert(NeuralNetTO const& neuralNetworkTO)
     {
         NeuralNetDesc result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result._weights[i] = neuralNetworkTO.weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._biases[i] = neuralNetworkTO.biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._activationFunctions[i] = neuralNetworkTO.activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -104,13 +104,13 @@ namespace
     NeuralNetGenomeTO convert(NeuralNetGenomeDesc const& neuralNetworkDesc)
     {
         NeuralNetGenomeTO result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -121,19 +121,19 @@ namespace
 
     NeuralNetTO convert(NeuralNetDesc const& neuralNetworkDesc)
     {
-        CHECK(neuralNetworkDesc._weights.size() == NEURONS_PER_CELL * NEURONS_PER_CELL);
-        CHECK(neuralNetworkDesc._biases.size() == NEURONS_PER_CELL);
-        CHECK(neuralNetworkDesc._activationFunctions.size() == NEURONS_PER_CELL);
+        CHECK(neuralNetworkDesc._weights.size() == NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS);
+        CHECK(neuralNetworkDesc._biases.size() == NEURAL_NET_OUTPUTS);
+        CHECK(neuralNetworkDesc._activationFunctions.size() == NEURAL_NET_OUTPUTS);
         CHECK(neuralNetworkDesc._connectionWeights.size() == MAX_OBJECT_CONNECTIONS);
 
         NeuralNetTO result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -609,9 +609,10 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         auto const& neuralNetworkTO = getFromHeap<NeuralNetTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
+        cellDesc._memoryActivities.assign(objectTO.typeData.cell.memoryActivities, objectTO.typeData.cell.memoryActivities + MEMORY_NEURONS_PER_CELL);
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -1568,8 +1569,12 @@ void DescConverterService::convertObjectToTO(
         }
 
         auto numChannels = cellDesc._signal._channels.size();
-        for (int i = 0; i < NEURONS_PER_CELL && i < numChannels; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL && i < numChannels; ++i) {
             objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
+        }
+        auto numMemoryActivities = cellDesc._memoryActivities.size();
+        for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+            objectTO.typeData.cell.memoryActivities[i] = i < numMemoryActivities ? cellDesc._memoryActivities[i] : 0.0f;
         }
     } else {
         CHECK(false);

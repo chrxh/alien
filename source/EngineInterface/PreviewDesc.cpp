@@ -4,5 +4,5 @@
 
 SignalPreviewDesc::SignalPreviewDesc()
 {
-    _channels.resize(NEURONS_PER_CELL, 0);
+    _channels.resize(STANDARD_NEURONS_PER_CELL, 0);
 }
