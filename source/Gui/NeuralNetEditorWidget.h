@@ -75,7 +75,8 @@ private:
         std::vector<ActivationFunction>& activationFunctions,
         std::vector<CellFunctionModule> const& cellFunctionModules,
         SelectionData& selectionData,
-        std::optional<LiveData> const& liveData);
+        std::optional<LiveData> const& liveData,
+        bool narrowLayout);
     void drawGroupBlock(ImDrawList* drawList, std::string const& name, ImColor const& color, ImVec2 const& min, ImVec2 const& max, bool leftSide);
     void drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout);
     void drawCellFunctionBlocks(
@@ -96,10 +97,20 @@ private:
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         SelectionData& selectionData,
-        GraphGeometry const& graphGeometry);
+        GraphGeometry const& graphGeometry,
+        bool narrowLayout);
+    void processInspectorCardContent(
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        SelectionData const& selectionData,
+        float cardWidth,
+        float cardHeight);
     void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
+    static bool isNarrowLayout(float availableWidth, std::vector<CellFunctionModule> const& cellFunctionModules);
+    static float calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
     static float calcInputNodeMargin();
     static float calcOutputNodeMargin();
     static float calcCellFunctionLaneWidth(CellFunctionModule const& cellFunctionModule);
