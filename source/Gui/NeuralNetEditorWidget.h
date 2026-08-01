@@ -44,23 +44,36 @@ private:
     {
         ImVec2 inputNodePos[NEURAL_NET_INPUTS];
         ImVec2 outputNodePos[NEURAL_NET_OUTPUTS];
+        float leftBlockMinX = 0;
+        float leftBlockMaxX = 0;
+        float rightBlockMinX = 0;
+        float rightBlockMaxX = 0;
     };
 
     struct GraphGeometry
     {
         ImVec2 origin;
         float width = 0;
+        float groupBlockGapMinX = 0;
+        float groupBlockGapWidth = 0;
     };
 
     void processConnectionWeightSliders(std::vector<float>& connectionWeights);
     GraphGeometry processGraph(
         std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         SelectionData& selectionData,
         std::optional<LiveData> const& liveData);
+    void drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout);
     void drawWeightCurves(std::vector<NeuralNetWeight>& weights, SelectionData const& selectionData, ImDrawList* drawList, LayoutData const& layout);
     void drawInputNodes(SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData);
-    void drawOutputNodes(std::vector<ActivationFunction>& activationFunctions, SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout);
+    void drawOutputNodes(
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        SelectionData& selectionData,
+        ImDrawList* drawList,
+        LayoutData const& layout);
     void processInspectorCard(
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
@@ -70,6 +83,8 @@ private:
     void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
+    static float calcInputNodeMargin();
+    static float calcOutputNodeMargin();
     static std::string getInputLabel(int inputIndex);
     static std::string getOutputLabel(int outputIndex);
 
