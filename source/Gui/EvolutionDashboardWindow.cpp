@@ -47,6 +47,9 @@ namespace
     auto constexpr MaxPlotHeight = 300.0f;
     auto constexpr TimeAxisExtraHeight = 20.0f;
     auto constexpr DefaultTimelinesHeight = 380.0f;
+    auto constexpr MinTimelinesHeight = 100.0f;
+    auto constexpr MinLineageTableHeight = 40.0f;
+    auto constexpr SeparatorHeight = 5.0f;  // Height of AlienGui::MovableHorizontalSeparator
 
     ImColor const CardBackgroundColor = ImColor(0.095f, 0.117f, 0.165f, 1.0f);
     ImColor const CardBorderColor = ImColor(0.165f, 0.196f, 0.270f, 1.0f);
@@ -394,6 +397,7 @@ void EvolutionDashboardWindow::processIntern()
     updateDisplayData();
     processHeader();
     processFilterBar();
+    limitTimelinesHeight();
 
     if (ImGui::BeginChild("##lineageTable", {0, -_timelinesHeight})) {
         processLineageTable();
@@ -795,6 +799,15 @@ void EvolutionDashboardWindow::processFilterBar()
     }
     ImGui::NewLine();
     ImGui::Spacing();
+}
+
+void EvolutionDashboardWindow::limitTimelinesHeight()
+{
+    // The separator can only be dragged as far as the sections can actually shrink. Without clamping here, the height would keep
+    // accumulating invisibly and the separator would not react until the same distance has been dragged back.
+    auto minHeight = scale(MinTimelinesHeight);
+    auto maxHeight = std::max(minHeight, ImGui::GetContentRegionAvail().y - scale(MinLineageTableHeight + SeparatorHeight));
+    _timelinesHeight = std::clamp(_timelinesHeight, minHeight, maxHeight);
 }
 
 void EvolutionDashboardWindow::processLineageTable()
@@ -1250,7 +1263,7 @@ void EvolutionDashboardWindow::drawValuesAtMouseCursor(
 
 void EvolutionDashboardWindow::validateAndCorrect()
 {
-    _timelinesHeight = std::max(scale(100.0f), _timelinesHeight);
+    _timelinesHeight = std::max(scale(MinTimelinesHeight), _timelinesHeight);
     _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_EntireHistory));
     _lastSteps = std::clamp(_lastSteps, 1000, LiveStatisticsService::MaxLiveSteps);
     _timeHorizon = std::clamp(_timeHorizon, 1.0f, LiveStatisticsService::MaxLiveHistory);
