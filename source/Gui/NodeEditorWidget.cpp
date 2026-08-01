@@ -715,7 +715,9 @@ void _NodeEditorWidget::processNeuralNetEditor()
 {
     AlienGui::MoveTickUp();
     AlienGui::MoveTickUp();
-    AlienGui::Group(AlienGui::GroupParameters().text("Neural network"));
+    if (AlienGui::Group(AlienGui::GroupParameters().text("Neural network").expandButton(true))) {
+        _neuralNetWidget->openDialog();
+    }
 
     auto& node = _editData->getSelectedNodeRef();
     _neuralNetWidget->process(

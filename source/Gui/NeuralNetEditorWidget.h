@@ -33,6 +33,9 @@ public:
         std::vector<CellFunctionModule> const& cellFunctionModules = {},
         std::optional<LiveData> const& liveData = std::nullopt);
 
+    // Shows the editor additionally in a modal dialog until it is closed there
+    void openDialog();
+
 private:
     _NeuralNetEditorWidget();
 
@@ -68,6 +71,14 @@ private:
         float groupBlockGapWidth = 0;
     };
 
+    void processEditor(
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        std::vector<float>& connectionWeights,
+        std::vector<CellFunctionModule> const& cellFunctionModules,
+        std::optional<LiveData> const& liveData,
+        SelectionData& selectionData);
     void processConnectionWeightSliders(std::vector<float>& connectionWeights);
     GraphGeometry processGraph(
         std::vector<NeuralNetWeight>& weights,
@@ -130,4 +141,6 @@ private:
         std::vector<ActivationFunction> activationFunctions;
     };
     std::optional<NetData> _copiedNet;
+
+    NeuralNetEditorDialog _dialog;
 };

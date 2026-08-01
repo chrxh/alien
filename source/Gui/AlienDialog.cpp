@@ -34,6 +34,11 @@ void AlienDialog::processNested()
     }
 }
 
+bool AlienDialog::isOpen() const
+{
+    return _state != DialogState::Closed;
+}
+
 void AlienDialog::close()
 {
     delayedExecution([this] {
@@ -97,6 +102,9 @@ void AlienDialog::processDialog()
         ImGui::PopID();
 
         ImGui::EndPopup();
+    } else if (_state == DialogState::Open) {
+        // The popup can also be closed from outside, for instance by pressing escape
+        _state = DialogState::Closed;
     }
 
     style.WindowMinSize = origWindowMinSize;

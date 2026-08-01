@@ -14,6 +14,7 @@
 #include <EngineInterface/NumberGenerator.h>
 
 #include "AlienGui.h"
+#include "NeuralNetEditorDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -339,6 +340,28 @@ void _NeuralNetEditorWidget::process(
 {
     auto& selectionData = getValueRef(_dataById);
 
+    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData);
+
+    // The dialog is modal and edits the same data with the same selection as the embedded editor
+    if (_dialog->isOpen()) {
+        _dialog->process([&] { processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData); });
+    }
+}
+
+void _NeuralNetEditorWidget::openDialog()
+{
+    _dialog->open();
+}
+
+void _NeuralNetEditorWidget::processEditor(
+    std::vector<NeuralNetWeight>& weights,
+    std::vector<float>& biases,
+    std::vector<ActivationFunction>& activationFunctions,
+    std::vector<float>& connectionWeights,
+    std::vector<CellFunctionModule> const& cellFunctionModules,
+    std::optional<LiveData> const& liveData,
+    SelectionData& selectionData)
+{
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
 
@@ -866,7 +889,10 @@ void _NeuralNetEditorWidget::processInspectorCardContent(
     ImGui::PopID();
 }
 
-_NeuralNetEditorWidget::_NeuralNetEditorWidget() {}
+_NeuralNetEditorWidget::_NeuralNetEditorWidget()
+{
+    _dialog = _NeuralNetEditorDialog::create();
+}
 
 void _NeuralNetEditorWidget::processActionButtons(
     std::vector<NeuralNetWeight>& weights,
