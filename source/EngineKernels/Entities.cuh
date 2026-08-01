@@ -530,11 +530,11 @@ struct Cell
     uint32_t headUpdateId;
     bool headCell;
 
-    // Additional rendering data
+    // Events
     CellEvent event;
     uint8_t eventCounter;
-    uint8_t signalChanges;
     float2 eventPos;
+    uint8_t highlightIntensity;
 
     __device__ __inline__ bool isSameCreature(Cell* otherCell) { return otherCell->creature->id == this->creature->id; }
 

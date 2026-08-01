@@ -72,13 +72,13 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         }
         auto& cell = object->typeData.cell;
         if (object->typeData.cell.cellState == CellState_Constructing) {
-            cell.signalChanges = 0;
+            cell.highlightIntensity = 0;
             continue;
         }
 
         float channelDeviations = abs(cell.signal.channels[0] - cell.futureSignal.channels[0]);
-        channelDeviations += abs(cell.signal.channels[Channels::AttackerNotify] - cell.futureSignal.channels[Channels::AttackerNotify]);
-        cell.signalChanges = static_cast<uint8_t>(min(255.0f, channelDeviations * 255 / 2));
+        channelDeviations += cell.event == CellEvent_Attacked && cell.eventCounter > 0;
+        cell.highlightIntensity = static_cast<uint8_t>(min(255.0f, channelDeviations * 255 / 2));
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
