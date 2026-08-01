@@ -1,5 +1,6 @@
 #include "CreaturePreviewWidget.h"
 
+#include <algorithm>
 #include <cmath>
 #include <ranges>
 
@@ -29,10 +30,34 @@ namespace
     auto constexpr ZoomLevelForGeneReferences = 16.0f;
     auto constexpr ZoomLevelForNodeIndices = 32.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
-    auto constexpr SignalTextWidth = 45.0f;
-    auto constexpr SignalColumnWidth = 100.0f;
+    auto constexpr SignalTextMargin = 15.0f;
+    auto constexpr SignalSliderWidth = 55.0f;
     auto constexpr SignalSlidersPerColumn = 4;
     auto constexpr MaxCellFunctionTextSize = 16.0f;
+
+    std::string getSignalEditorOutLabel(int index)
+    {
+        return "Out " + std::to_string(index);
+    }
+
+    std::string getSignalEditorMemoryLabel(int index)
+    {
+        return "Mem " + std::to_string(index);
+    }
+
+    // The labels are placed right of the sliders and would be clipped by the column boundary if the text column were too narrow
+    float calcSignalTextWidth()
+    {
+        auto outLabel = getSignalEditorOutLabel(STANDARD_NEURONS_PER_CELL - 1);
+        auto memoryLabel = getSignalEditorMemoryLabel(MEMORY_NEURONS_PER_CELL - 1);
+        auto labelWidth = std::max(ImGui::CalcTextSize(outLabel.c_str()).x, ImGui::CalcTextSize(memoryLabel.c_str()).x);
+        return scaleInverse(labelWidth) + SignalTextMargin;
+    }
+
+    float calcSignalColumnWidth()
+    {
+        return SignalSliderWidth + calcSignalTextWidth();
+    }
 
     // The signal editor exposes the outgoing signal channels and the memory activities of the selected cell
     int calcNumSignalEditorColumns()
@@ -380,7 +405,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult)
 {
-    auto editorWidth = SignalColumnWidth * toFloat(calcNumSignalEditorColumns()) + 30.0f;
+    auto editorWidth = calcSignalColumnWidth() * toFloat(calcNumSignalEditorColumns()) + 30.0f;
     auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(editorWidth) : scale(250);
     auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
     auto contentAvailable = ImGui::GetContentRegionAvail();
@@ -414,20 +439,21 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
             };
             std::vector<SignalEditorEntry> entries;
             for (auto index : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
-                entries.emplace_back("Out " + std::to_string(index), &selectedCell->_signal._channels.at(index));
+                entries.emplace_back(getSignalEditorOutLabel(index), &selectedCell->_signal._channels.at(index));
             }
             for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
-                entries.emplace_back("Mem " + std::to_string(index), &selectedCell->_memoryActivities.at(index));
+                entries.emplace_back(getSignalEditorMemoryLabel(index), &selectedCell->_memoryActivities.at(index));
             }
 
+            auto textWidth = calcSignalTextWidth();
             auto numColumns = calcNumSignalEditorColumns();
             for (auto column : std::views::iota(0, numColumns)) {
                 ImGui::PushID(column);
-                if (ImGui::BeginChild("", ImVec2(scale(SignalColumnWidth - 5.0f), scale(0)))) {
+                if (ImGui::BeginChild("", ImVec2(scale(calcSignalColumnWidth() - 5.0f), scale(0)))) {
                     for (auto row : std::views::iota(0, SignalSlidersPerColumn)) {
                         auto const& entry = entries.at(column * SignalSlidersPerColumn + row);
                         phenotypeChanged |= AlienGui::SliderFloat(
-                            AlienGui::SliderFloatParameters().name(entry.name).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f), entry.value);
+                            AlienGui::SliderFloatParameters().name(entry.name).format("%.3f").textWidth(textWidth).min(-2.0f).max(2.0f), entry.value);
                     }
                 }
                 ImGui::EndChild();
