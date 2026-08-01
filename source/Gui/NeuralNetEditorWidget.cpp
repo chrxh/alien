@@ -32,10 +32,16 @@ namespace
     auto constexpr NodeClickPadding = 3.0f;
     auto constexpr NodeLabelMargin = 5.0f;
     auto constexpr ActivationLabelMargin = 6.0f;
-    auto constexpr BiasFillMinIntensity = 0.2f;
-    auto constexpr BiasFillMaxIntensity = 0.9f;
+    auto constexpr BiasMarkerWidth = 4.0f;
+    auto constexpr BiasMarkerHeight = 9.0f;
+    auto constexpr BiasMarkerMargin = 5.0f;
+    auto constexpr BiasMarkerRounding = 1.0f;
+    auto constexpr BiasMarkerMinAlpha = 0.35f;
+    auto constexpr BiasMarkerMaxAlpha = 1.0f;
+    auto constexpr BiasMarkerZeroAlpha = 0.3f;
     auto constexpr BiasMaxValue = 2.0f;
     auto constexpr BiasLogScale = 30.0f;
+    auto constexpr OutputBlockNodeMargin = BiasMarkerMargin + BiasMarkerWidth + GroupBlockPadding;
     auto constexpr NodeLabelFontScale = 0.7f;
     auto constexpr CellFunctionAreaMargin = 6.0f;
     auto constexpr CellFunctionLaneSpacing = 3.0f;
@@ -185,18 +191,27 @@ namespace
         return std::log1p(BiasLogScale * normalized) / std::log1p(BiasLogScale);
     }
 
-    // The node interior is tinted towards the weight colors, so the bias is read in the same visual language as the weights
-    ImColor calcBiasFillColor(float bias)
+    // The marker uses the weight colors, so the bias is read in the same visual language as the weights
+    ImColor calcBiasMarkerColor(float bias)
     {
         if (std::abs(bias) <= NEAR_ZERO) {
-            return NodeFillColor;
+            return withAlpha(ZeroWeightColor, BiasMarkerZeroAlpha);
         }
-        auto intensity = BiasFillMinIntensity + calcBiasFraction(bias) * (BiasFillMaxIntensity - BiasFillMinIntensity);
-        auto const& target = bias > 0 ? PositiveWeightColor : NegativeWeightColor;
-        return ImColor(
-            NodeFillColor.Value.x + (target.Value.x - NodeFillColor.Value.x) * intensity,
-            NodeFillColor.Value.y + (target.Value.y - NodeFillColor.Value.y) * intensity,
-            NodeFillColor.Value.z + (target.Value.z - NodeFillColor.Value.z) * intensity);
+        auto alpha = BiasMarkerMinAlpha + calcBiasFraction(bias) * (BiasMarkerMaxAlpha - BiasMarkerMinAlpha);
+        return withAlpha(bias > 0 ? PositiveWeightColor : NegativeWeightColor, alpha);
+    }
+
+    // Small block in front of an output node, placed inside the surrounding group block
+    void addBiasMarker(ImDrawList* drawList, ImVec2 const& nodePos, float bias)
+    {
+        auto maxX = nodePos.x - scale(NodeRadius + BiasMarkerMargin);
+        auto halfHeight = scale(BiasMarkerHeight) / 2;
+        ImVec2 min{maxX - scale(BiasMarkerWidth), nodePos.y - halfHeight};
+        ImVec2 max{maxX, nodePos.y + halfHeight};
+
+        // Opaque backdrop so that the weight curves running below do not shine through
+        drawList->AddRectFilled(min, max, NodeFillColor, scale(BiasMarkerRounding));
+        drawList->AddRectFilled(min, max, calcBiasMarkerColor(bias), scale(BiasMarkerRounding));
     }
 
     // Draws the graph of an activation function into the given rectangle
@@ -413,7 +428,7 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
         }
         layout.leftBlockMinX = origin.x;
         layout.leftBlockMaxX = inputNodeX + scale(NodeRadius + GroupBlockNodeMargin);
-        layout.rightBlockMinX = outputNodeX - scale(NodeRadius + GroupBlockNodeMargin);
+        layout.rightBlockMinX = outputNodeX - scale(NodeRadius + OutputBlockNodeMargin);
         layout.rightBlockMaxX = origin.x + width - cellFunctionAreaWidth;
 
         // The cell function blocks are lined up outside of the outgoing block, the first one closest to it
@@ -675,7 +690,8 @@ void _NeuralNetEditorWidget::drawOutputNodes(
         if (isSelected) {
             drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
         }
-        drawList->AddCircleFilled(pos, scale(NodeRadius), calcBiasFillColor(biases.at(i)));
+        addBiasMarker(drawList, pos, biases.at(i));
+        drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
         auto borderColor = i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor;
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
         if (i >= STANDARD_NEURONS_PER_CELL) {
