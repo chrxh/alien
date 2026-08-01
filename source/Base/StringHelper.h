@@ -21,6 +21,7 @@ public:
     static bool compare(char const* target, int maxSize, char const* source);
 
     static bool containsCaseInsensitive(std::string const& str, std::string const& toMatch);
+    static std::string toUpper(std::string const& str);
 
     struct Decomposition
     {

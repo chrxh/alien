@@ -7,6 +7,7 @@
 
 #include <EngineInterface/GenomeDesc.h>
 
+#include "CellFunctionChannels.h"
 #include "Definitions.h"
 
 class _NeuralNetEditorWidget
@@ -29,6 +30,7 @@ public:
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         std::vector<float>& connectionWeights,
+        std::vector<CellFunctionModule> const& cellFunctionModules = {},
         std::optional<LiveData> const& liveData = std::nullopt);
 
 private:
@@ -40,6 +42,13 @@ private:
         int outputIndex = 0;
     };
 
+    // Horizontal extent of the block of one cell function, located outside of the outgoing block
+    struct CellFunctionLane
+    {
+        float minX = 0;
+        float maxX = 0;
+    };
+
     struct LayoutData
     {
         ImVec2 inputNodePos[NEURAL_NET_INPUTS];
@@ -48,6 +57,7 @@ private:
         float leftBlockMaxX = 0;
         float rightBlockMinX = 0;
         float rightBlockMaxX = 0;
+        std::vector<CellFunctionLane> cellFunctionLanes;
     };
 
     struct GraphGeometry
@@ -63,9 +73,16 @@ private:
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
+        std::vector<CellFunctionModule> const& cellFunctionModules,
         SelectionData& selectionData,
         std::optional<LiveData> const& liveData);
+    void drawGroupBlock(ImDrawList* drawList, std::string const& name, ImColor const& color, ImVec2 const& min, ImVec2 const& max, bool leftSide);
     void drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout);
+    void drawCellFunctionBlocks(
+        ImDrawList* drawList,
+        LayoutData const& layout,
+        std::vector<CellFunctionModule> const& cellFunctionModules,
+        SelectionData const& selectionData);
     void drawWeightCurves(std::vector<NeuralNetWeight>& weights, SelectionData const& selectionData, ImDrawList* drawList, LayoutData const& layout);
     void drawInputNodes(SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData);
     void drawOutputNodes(
@@ -85,6 +102,8 @@ private:
     static ImColor calcWeightColor(float value, float alpha);
     static float calcInputNodeMargin();
     static float calcOutputNodeMargin();
+    static float calcCellFunctionLaneWidth(CellFunctionModule const& cellFunctionModule);
+    static float calcCellFunctionAreaWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
     static std::string getInputLabel(int inputIndex);
     static std::string getOutputLabel(int outputIndex);
 

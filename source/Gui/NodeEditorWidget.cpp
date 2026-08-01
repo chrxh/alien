@@ -721,5 +721,9 @@ void _NodeEditorWidget::processNeuralNetEditor()
 
     auto& node = _editData->getSelectedNodeRef();
     _neuralNetWidget->process(
-        node._neuralNetwork._weights, node._neuralNetwork._biases, node._neuralNetwork._activationFunctions, node._neuralNetwork._connectionWeights);
+        node._neuralNetwork._weights,
+        node._neuralNetwork._biases,
+        node._neuralNetwork._activationFunctions,
+        node._neuralNetwork._connectionWeights,
+        CellFunctionChannels::getModules(node));
 }

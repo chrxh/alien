@@ -14,6 +14,8 @@ PUBLIC
     AutosaveWindow.h
     BrowserWindow.cpp
     BrowserWindow.h
+    CellFunctionChannels.cpp
+    CellFunctionChannels.h
     ChangeColorDialog.cpp
     ChangeColorDialog.h
     CreateUserDialog.cpp

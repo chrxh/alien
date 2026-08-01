@@ -37,6 +37,19 @@ namespace
     auto constexpr BiasMaxValue = 2.0f;
     auto constexpr BiasLogScale = 30.0f;
     auto constexpr NodeLabelFontScale = 0.7f;
+    auto constexpr CellFunctionAreaMargin = 6.0f;
+    auto constexpr CellFunctionLaneSpacing = 3.0f;
+    auto constexpr CellFunctionMarkerMargin = 9.0f;
+    auto constexpr CellFunctionLabelMargin = 19.0f;
+    auto constexpr CellFunctionLabelPadding = 4.0f;
+    auto constexpr CellFunctionMarkerWidth = 4.5f;
+    auto constexpr CellFunctionMarkerHeight = 4.0f;
+    auto constexpr CellFunctionMarkerGap = 0.5f;
+    auto constexpr CellFunctionTapOverlap = 3.0f;
+    auto constexpr CellFunctionDualLabelScale = 0.85f;
+    auto constexpr CellFunctionLabelAlpha = 0.95f;
+    auto constexpr CellFunctionTapAlpha = 0.45f;
+    auto constexpr CellFunctionOuterTapAlpha = 0.28f;
     auto constexpr CardWidth = 260.0f;
     auto constexpr CardPadding = 9.0f;
     auto constexpr CardMinWidth = 170.0f;
@@ -53,6 +66,8 @@ namespace
     auto const SignalNodeColor = ImColor(77, 163, 255);
     auto const MemoryNodeColor = ImColor(180, 140, 255);
     auto const TelemetryNodeColor = ImColor(111, 220, 140);
+    auto const CellFunctionColor = ImColor(255, 140, 66);
+    auto const SelectedCellFunctionColor = ImColor(255, 196, 153);
     auto const SelectedNodeColor = ImColor(255, 210, 77);
     auto const NodeFillColor = ImColor(18, 21, 27);
     auto const ZeroWeightColor = ImColor(90, 97, 110);
@@ -102,19 +117,19 @@ namespace
         return result;
     }
 
-    float nodeLabelFontSize()
+    float nodeLabelFontSize(float fontScale = 1.0f)
     {
-        return ImGui::GetFontSize() * NodeLabelFontScale;
+        return ImGui::GetFontSize() * NodeLabelFontScale * fontScale;
     }
 
-    ImVec2 calcNodeLabelSize(std::string const& text)
+    ImVec2 calcNodeLabelSize(std::string const& text, float fontScale = 1.0f)
     {
-        return ImGui::GetFont()->CalcTextSizeA(nodeLabelFontSize(), FLT_MAX, 0.0f, text.c_str());
+        return ImGui::GetFont()->CalcTextSizeA(nodeLabelFontSize(fontScale), FLT_MAX, 0.0f, text.c_str());
     }
 
-    void addNodeLabel(ImDrawList* drawList, ImVec2 const& pos, ImColor const& color, std::string const& text)
+    void addNodeLabel(ImDrawList* drawList, ImVec2 const& pos, ImColor const& color, std::string const& text, float fontScale = 1.0f)
     {
-        drawList->AddText(ImGui::GetFont(), nodeLabelFontSize(), pos, color, text.c_str());
+        drawList->AddText(ImGui::GetFont(), nodeLabelFontSize(fontScale), pos, color, text.c_str());
     }
 
     // ImGui cannot render rotated text, therefore the text is written horizontally and its vertices are rotated afterwards.
@@ -231,6 +246,41 @@ namespace
         return result;
     }
 
+    // Marker in front of a cell function label: a triangle pointing away from the outgoing node if the cell function
+    // reads the channel and back towards it if the cell function overwrites the channel
+    void addChannelMarker(ImDrawList* drawList, ImVec2 const& center, bool isRead, bool isWrite, ImColor const& color)
+    {
+        auto width = scale(CellFunctionMarkerWidth);
+        auto height = scale(CellFunctionMarkerHeight);
+        auto gap = scale(CellFunctionMarkerGap);
+
+        auto addReadMarker = [&](float minX, float maxX) {
+            drawList->AddTriangleFilled({minX, center.y - height}, {maxX, center.y}, {minX, center.y + height}, color);
+        };
+        auto addWriteMarker = [&](float minX, float maxX) {
+            drawList->AddTriangleFilled({maxX, center.y - height}, {maxX, center.y + height}, {minX, center.y}, color);
+        };
+
+        if (isRead && isWrite) {
+            addWriteMarker(center.x - width - gap, center.x - gap);
+            addReadMarker(center.x + gap, center.x + width + gap);
+        } else if (isRead) {
+            addReadMarker(center.x - width, center.x + width);
+        } else {
+            addWriteMarker(center.x - width, center.x + width);
+        }
+    }
+
+    // A channel that is read and overwritten shows both roles below each other and therefore uses a smaller font
+    float calcChannelLabelWidth(CellFunctionChannel const& channel)
+    {
+        if (!channel.readLabel.empty() && !channel.writeLabel.empty()) {
+            return std::max(
+                calcNodeLabelSize(channel.writeLabel, CellFunctionDualLabelScale).x, calcNodeLabelSize(channel.readLabel, CellFunctionDualLabelScale).x);
+        }
+        return calcNodeLabelSize(channel.readLabel.empty() ? channel.writeLabel : channel.readLabel).x;
+    }
+
     // Invisible button around a node center; returns true if clicked
     bool nodeClickArea(ImVec2 const& pos, char const* id, bool& hovered)
     {
@@ -252,13 +302,14 @@ void _NeuralNetEditorWidget::process(
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     std::vector<float>& connectionWeights,
+    std::vector<CellFunctionModule> const& cellFunctionModules,
     std::optional<LiveData> const& liveData)
 {
     auto& selectionData = getValueRef(_dataById);
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         processConnectionWeightSliders(connectionWeights);
-        auto graphGeometry = processGraph(weights, biases, activationFunctions, selectionData, liveData);
+        auto graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData);
 
         AlienGui::Separator();
 
@@ -309,6 +360,7 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
     std::vector<NeuralNetWeight>& weights,
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
+    std::vector<CellFunctionModule> const& cellFunctionModules,
     SelectionData& selectionData,
     std::optional<LiveData> const& liveData)
 {
@@ -320,8 +372,9 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
         auto width = ImGui::GetContentRegionAvail().x;
 
         LayoutData layout;
+        auto cellFunctionAreaWidth = calcCellFunctionAreaWidth(cellFunctionModules);
         auto inputNodeX = origin.x + calcInputNodeMargin();
-        auto outputNodeX = origin.x + width - calcOutputNodeMargin();
+        auto outputNodeX = origin.x + width - cellFunctionAreaWidth - calcOutputNodeMargin();
         for (int i = 0; i < NEURAL_NET_INPUTS; ++i) {
             layout.inputNodePos[i] = {inputNodeX, origin.y + scale(inputNodeOffsetY(i))};
         }
@@ -331,9 +384,18 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
         layout.leftBlockMinX = origin.x;
         layout.leftBlockMaxX = inputNodeX + scale(NodeRadius + GroupBlockNodeMargin);
         layout.rightBlockMinX = outputNodeX - scale(NodeRadius + GroupBlockNodeMargin);
-        layout.rightBlockMaxX = origin.x + width;
+        layout.rightBlockMaxX = origin.x + width - cellFunctionAreaWidth;
+
+        // The cell function blocks are lined up outside of the outgoing block, the first one closest to it
+        auto laneMinX = layout.rightBlockMaxX + scale(CellFunctionAreaMargin);
+        for (auto const& functionModule : cellFunctionModules) {
+            auto laneWidth = calcCellFunctionLaneWidth(functionModule);
+            layout.cellFunctionLanes.emplace_back(laneMinX, laneMinX + laneWidth);
+            laneMinX += laneWidth + scale(CellFunctionLaneSpacing);
+        }
 
         drawGroupBlocks(drawList, layout);
+        drawCellFunctionBlocks(drawList, layout, cellFunctionModules, selectionData);
         drawWeightCurves(weights, selectionData, drawList, layout);
         drawInputNodes(selectionData, drawList, layout, liveData);
         drawOutputNodes(biases, activationFunctions, selectionData, drawList, layout);
@@ -348,24 +410,33 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
     return result;
 }
 
+void _NeuralNetEditorWidget::drawGroupBlock(
+    ImDrawList* drawList,
+    std::string const& name,
+    ImColor const& color,
+    ImVec2 const& min,
+    ImVec2 const& max,
+    bool leftSide)
+{
+    // Only the corners facing the graph are rounded, the outer corners are flush with the editor border
+    auto rounding = scale(GroupBlockRounding);
+    auto cornerFlags = leftSide ? ImDrawFlags_RoundCornersRight : ImDrawFlags_RoundCornersLeft;
+    drawList->AddRectFilled(min, max, withAlpha(color, GroupBlockAlpha), rounding, cornerFlags);
+
+    auto railMinX = leftSide ? min.x : max.x - scale(GroupLabelRailWidth);
+    auto railMaxX = leftSide ? min.x + scale(GroupLabelRailWidth) : max.x;
+    drawList->AddRectFilled({railMinX, min.y}, {railMaxX, max.y}, withAlpha(color, GroupLabelRailAlpha), rounding, cornerFlags);
+
+    addRotatedNodeLabel(drawList, {(railMinX + railMaxX) / 2, (min.y + max.y) / 2}, withAlpha(color, 0.9f), name, !leftSide);
+}
+
 void _NeuralNetEditorWidget::drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout)
 {
     auto drawBlock = [&](std::string const& name, ImColor const& color, ImVec2 const& firstNodePos, ImVec2 const& lastNodePos, bool leftSide) {
         auto minX = leftSide ? layout.leftBlockMinX : layout.rightBlockMinX;
         auto maxX = leftSide ? layout.leftBlockMaxX : layout.rightBlockMaxX;
-        auto minY = firstNodePos.y - scale(GraphRowSpacing / 2 + GroupBlockPadding);
-        auto maxY = lastNodePos.y + scale(GraphRowSpacing / 2 + GroupBlockPadding);
-
-        // Only the corners facing the graph are rounded, the outer corners are flush with the editor border
-        auto rounding = scale(GroupBlockRounding);
-        auto cornerFlags = leftSide ? ImDrawFlags_RoundCornersRight : ImDrawFlags_RoundCornersLeft;
-        drawList->AddRectFilled({minX, minY}, {maxX, maxY}, withAlpha(color, GroupBlockAlpha), rounding, cornerFlags);
-
-        auto railMinX = leftSide ? minX : maxX - scale(GroupLabelRailWidth);
-        auto railMaxX = leftSide ? minX + scale(GroupLabelRailWidth) : maxX;
-        drawList->AddRectFilled({railMinX, minY}, {railMaxX, maxY}, withAlpha(color, GroupLabelRailAlpha), rounding, cornerFlags);
-
-        addRotatedNodeLabel(drawList, {(railMinX + railMaxX) / 2, (minY + maxY) / 2}, withAlpha(color, 0.9f), name, !leftSide);
+        auto padding = scale(GraphRowSpacing / 2 + GroupBlockPadding);
+        drawGroupBlock(drawList, name, color, {minX, firstNodePos.y - padding}, {maxX, lastNodePos.y + padding}, leftSide);
     };
 
     drawBlock("INCOMING", SignalNodeColor, layout.inputNodePos[0], layout.inputNodePos[STANDARD_NEURONS_PER_CELL - 1], true);
@@ -374,6 +445,60 @@ void _NeuralNetEditorWidget::drawGroupBlocks(ImDrawList* drawList, LayoutData co
 
     drawBlock("OUTGOING", SignalNodeColor, layout.outputNodePos[0], layout.outputNodePos[STANDARD_NEURONS_PER_CELL - 1], false);
     drawBlock("MEMORY", MemoryNodeColor, layout.outputNodePos[STANDARD_NEURONS_PER_CELL], layout.outputNodePos[NEURAL_NET_OUTPUTS - 1], false);
+}
+
+// The cell functions read and overwrite the outgoing signal after the neural net has been evaluated. Each of them is
+// drawn as an own block outside of the outgoing block, listing the channels it accesses together with their meaning.
+void _NeuralNetEditorWidget::drawCellFunctionBlocks(
+    ImDrawList* drawList,
+    LayoutData const& layout,
+    std::vector<CellFunctionModule> const& cellFunctionModules,
+    SelectionData const& selectionData)
+{
+    auto isInnermostLane = true;
+    for (auto const& [functionModule, lane] : std::views::zip(cellFunctionModules, layout.cellFunctionLanes)) {
+        if (functionModule.channels.empty()) {
+            continue;
+        }
+        auto padding = scale(GraphRowSpacing / 2 + GroupBlockPadding);
+        auto minY = layout.outputNodePos[functionModule.channels.front().channel].y - padding;
+        auto maxY = layout.outputNodePos[functionModule.channels.back().channel].y + padding;
+
+        // The name is drawn vertically, therefore a block covering only few channels is extended around its center
+        auto name = StringHelper::toUpper(functionModule.name);
+        auto minHeight = calcNodeLabelSize(name).x + 2 * scale(GroupBlockPadding);
+        if (maxY - minY < minHeight) {
+            auto centerY = (minY + maxY) / 2;
+            minY = centerY - minHeight / 2;
+            maxY = centerY + minHeight / 2;
+        }
+        drawGroupBlock(drawList, name, CellFunctionColor, {lane.minX, minY}, {lane.maxX, maxY}, false);
+
+        // The connection of an outer block crosses the blocks in front of it and is therefore drawn more faintly
+        auto tapAlpha = isInnermostLane ? CellFunctionTapAlpha : CellFunctionOuterTapAlpha;
+        for (auto const& channel : functionModule.channels) {
+            auto nodeY = layout.outputNodePos[channel.channel].y;
+            drawList->AddLine(
+                {layout.rightBlockMaxX, nodeY}, {lane.minX + scale(CellFunctionTapOverlap), nodeY}, withAlpha(CellFunctionColor, tapAlpha), scale(1.0f));
+
+            auto isRead = !channel.readLabel.empty();
+            auto isWrite = !channel.writeLabel.empty();
+            auto isSelected = channel.channel == selectionData.outputIndex;
+            auto color = withAlpha(isSelected ? SelectedCellFunctionColor : CellFunctionColor, CellFunctionLabelAlpha);
+            addChannelMarker(drawList, {lane.minX + scale(CellFunctionMarkerMargin), nodeY}, isRead, isWrite, color);
+
+            auto labelX = lane.minX + scale(CellFunctionLabelMargin);
+            if (isRead && isWrite) {
+                auto lineHeight = nodeLabelFontSize(CellFunctionDualLabelScale);
+                addNodeLabel(drawList, {labelX, nodeY - lineHeight}, color, channel.writeLabel, CellFunctionDualLabelScale);
+                addNodeLabel(drawList, {labelX, nodeY}, color, channel.readLabel, CellFunctionDualLabelScale);
+            } else {
+                auto const& label = isWrite ? channel.writeLabel : channel.readLabel;
+                addNodeLabel(drawList, {labelX, nodeY - calcNodeLabelSize(label).y / 2}, color, label);
+            }
+        }
+        isInnermostLane = false;
+    }
 }
 
 void _NeuralNetEditorWidget::drawWeightCurves(
@@ -747,6 +872,27 @@ float _NeuralNetEditorWidget::calcOutputNodeMargin()
         maxActfnLabelWidth = std::max(maxActfnLabelWidth, calcNodeLabelSize(actfnLabel).x);
     }
     return scale(GroupLabelRailWidth + GroupLabelRailMargin + ActivationLabelMargin + NodeLabelMargin + NodeRadius) + maxLabelWidth + maxActfnLabelWidth;
+}
+
+float _NeuralNetEditorWidget::calcCellFunctionLaneWidth(CellFunctionModule const& cellFunctionModule)
+{
+    auto maxLabelWidth = 0.0f;
+    for (auto const& channel : cellFunctionModule.channels) {
+        maxLabelWidth = std::max(maxLabelWidth, calcChannelLabelWidth(channel));
+    }
+    return scale(CellFunctionLabelMargin + CellFunctionLabelPadding + GroupLabelRailWidth) + maxLabelWidth;
+}
+
+float _NeuralNetEditorWidget::calcCellFunctionAreaWidth(std::vector<CellFunctionModule> const& cellFunctionModules)
+{
+    if (cellFunctionModules.empty()) {
+        return 0.0f;
+    }
+    auto result = scale(CellFunctionAreaMargin) + scale(CellFunctionLaneSpacing) * toFloat(cellFunctionModules.size() - 1);
+    for (auto const& functionModule : cellFunctionModules) {
+        result += calcCellFunctionLaneWidth(functionModule);
+    }
+    return result;
 }
 
 std::string _NeuralNetEditorWidget::getInputLabel(int inputIndex)
