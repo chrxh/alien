@@ -2,13 +2,9 @@
 
 #include <imgui.h>
 
-#include "AlienGui.h"
-#include "StyleRepository.h"
-
 namespace
 {
-    auto const DefaultSize = RealVector2D(900.0f, 640.0f);
-    auto constexpr ButtonAreaHeight = 50.0f;
+    auto const DefaultSize = RealVector2D(700.0f, 500.0f);
 }
 
 NeuralNetEditorDialog _NeuralNetEditorDialog::create()
@@ -17,7 +13,7 @@ NeuralNetEditorDialog _NeuralNetEditorDialog::create()
 }
 
 _NeuralNetEditorDialog::_NeuralNetEditorDialog()
-    : AlienDialog("Neural network", DefaultSize, true)
+    : AlienDialog("Neural network", DefaultSize)
 {}
 
 void _NeuralNetEditorDialog::open()
@@ -33,19 +29,10 @@ void _NeuralNetEditorDialog::process(std::function<void()> const& contentFunc)
     _contentFunc = nullptr;
 }
 
+// The editor brings its own action row, therefore the dialog adds nothing around the content
 void _NeuralNetEditorDialog::processIntern()
 {
-    if (ImGui::BeginChild("NeuralNetEditorDialogContent", ImVec2(0, -scale(ButtonAreaHeight)))) {
-        if (_contentFunc) {
-            _contentFunc();
-        }
-    }
-    ImGui::EndChild();
-
-    AlienGui::Separator();
-
-    if (AlienGui::Button("Close")) {
-        ImGui::CloseCurrentPopup();
-        close();
+    if (_contentFunc) {
+        _contentFunc();
     }
 }

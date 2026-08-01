@@ -20,8 +20,10 @@
 namespace
 {
     auto constexpr GraphRowSpacing = 19.0f;
+    auto constexpr GraphRowStretchMax = 1.8f;
     auto constexpr GraphGroupSpacing = 18.0f;
     auto constexpr GraphVerticalMargin = 14.0f;
+    auto constexpr GraphHorizontalMargin = 6.0f;
     auto constexpr GroupBlockPadding = 4.0f;
     auto constexpr GroupBlockRounding = 4.0f;
     auto constexpr GroupBlockNodeMargin = 9.0f;
@@ -43,7 +45,6 @@ namespace
     auto constexpr BiasMaxValue = 2.0f;
     auto constexpr BiasLogScale = 30.0f;
     auto constexpr OutputBlockNodeMargin = BiasMarkerMargin + BiasMarkerWidth + GroupBlockPadding;
-    auto constexpr NodeLabelFontScale = 0.7f;
     auto constexpr CellFunctionAreaMargin = 6.0f;
     auto constexpr CellFunctionLaneSpacing = 3.0f;
     auto constexpr CellFunctionMarkerMargin = 9.0f;
@@ -60,9 +61,12 @@ namespace
     auto constexpr CardWidth = 260.0f;
     auto constexpr CardPadding = 9.0f;
     auto constexpr CardOverlayMargin = 10.0f;
-    auto constexpr ResetButtonFontScale = 0.5f;
     auto constexpr ResetButtonOverlap = 7.0f;
     auto constexpr ConnectionWeightSliderMinWidth = 42.0f;
+    auto constexpr ConnectionWeightIndexMargin = 4.0f;
+    auto constexpr ConnectionWeightIndexAlpha = 0.6f;
+    auto constexpr ToolButtonSeparatorMargin = 5.0f;
+    auto constexpr ToolButtonSeparatorPadding = 3.0f;
     auto constexpr GraphMinCurveWidth = 30.0f;
     auto constexpr CardItemSpacing = 5.0f;
     auto constexpr CardTopMargin = 6.0f;
@@ -105,9 +109,9 @@ namespace
         return TelemetryNodeColor;
     }
 
-    float inputNodeOffsetY(int inputIndex)
+    float inputNodeOffsetY(int inputIndex, float rowSpacing)
     {
-        auto result = GraphVerticalMargin + (toFloat(inputIndex) + 0.5f) * GraphRowSpacing;
+        auto result = GraphVerticalMargin + (toFloat(inputIndex) + 0.5f) * rowSpacing;
         if (inputIndex >= STANDARD_NEURONS_PER_CELL) {
             result += GraphGroupSpacing;
         }
@@ -118,28 +122,34 @@ namespace
     }
 
     // The output rows use the same spacing as the input rows and therefore end above the telemetry inputs
-    float outputNodeOffsetY(int outputIndex)
+    float outputNodeOffsetY(int outputIndex, float rowSpacing)
     {
-        auto result = GraphVerticalMargin + (toFloat(outputIndex) + 0.5f) * GraphRowSpacing;
+        auto result = GraphVerticalMargin + (toFloat(outputIndex) + 0.5f) * rowSpacing;
         if (outputIndex >= STANDARD_NEURONS_PER_CELL) {
             result += GraphGroupSpacing;
         }
         return result;
     }
 
+    // Drawn with a font that is rasterized at this size, otherwise thin strokes are lost when the glyphs are scaled down
+    ImFont* nodeLabelFont()
+    {
+        return StyleRepository::get().getTinyFont();
+    }
+
     float nodeLabelFontSize(float fontScale = 1.0f)
     {
-        return ImGui::GetFontSize() * NodeLabelFontScale * fontScale;
+        return nodeLabelFont()->FontSize * fontScale;
     }
 
     ImVec2 calcNodeLabelSize(std::string const& text, float fontScale = 1.0f)
     {
-        return ImGui::GetFont()->CalcTextSizeA(nodeLabelFontSize(fontScale), FLT_MAX, 0.0f, text.c_str());
+        return nodeLabelFont()->CalcTextSizeA(nodeLabelFontSize(fontScale), FLT_MAX, 0.0f, text.c_str());
     }
 
     void addNodeLabel(ImDrawList* drawList, ImVec2 const& pos, ImColor const& color, std::string const& text, float fontScale = 1.0f)
     {
-        drawList->AddText(ImGui::GetFont(), nodeLabelFontSize(fontScale), pos, color, text.c_str());
+        drawList->AddText(nodeLabelFont(), nodeLabelFontSize(fontScale), pos, color, text.c_str());
     }
 
     // ImGui cannot render rotated text, therefore the text is written horizontally and its vertices are rotated afterwards.
@@ -250,8 +260,8 @@ namespace
 
     float resetButtonWidth()
     {
-        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * ResetButtonFontScale, FLT_MAX, 0.0f, ICON_FA_TIMES).x
-            + 2 * ImGui::GetStyle().FramePadding.x;
+        auto font = nodeLabelFont();
+        return font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, ICON_FA_TIMES).x + 2 * ImGui::GetStyle().FramePadding.x;
     }
 
     // Small button next to a slider that resets its value
@@ -259,17 +269,17 @@ namespace
     {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(ResetButtonOverlap));
-        ImGui::SetWindowFontScale(ResetButtonFontScale);
+        ImGui::PushFont(nodeLabelFont());
         auto result = ImGui::Button(ICON_FA_TIMES);
-        ImGui::SetWindowFontScale(1.0f);
+        ImGui::PopFont();
         return result;
     }
 
     // The connection weight sliders are wrapped into several rows if they would become too small. Only divisors of the
     // number of connections are used as row length so that all rows are equally filled.
-    int calcConnectionWeightSlidersPerRow(float availableWidth)
+    int calcConnectionWeightSlidersPerRow(float availableWidth, float indexWidth)
     {
-        auto minSliderAreaWidth = scale(ConnectionWeightSliderMinWidth) + resetButtonWidth() + ImGui::GetStyle().ItemSpacing.x;
+        auto minSliderAreaWidth = scale(ConnectionWeightSliderMinWidth) + indexWidth + resetButtonWidth() + ImGui::GetStyle().ItemSpacing.x;
         auto maxPerRow = std::min(MAX_OBJECT_CONNECTIONS, std::max(1, toInt(availableWidth / minSliderAreaWidth)));
         for (auto perRow = maxPerRow; perRow > 1; --perRow) {
             if (MAX_OBJECT_CONNECTIONS % perRow == 0) {
@@ -314,6 +324,22 @@ namespace
         return calcNodeLabelSize(channel.readLabel.empty() ? channel.writeLabel : channel.readLabel).x;
     }
 
+    // Divides the buttons of a row into groups
+    void addToolButtonSeparator()
+    {
+        auto drawList = ImGui::GetWindowDrawList();
+        auto pos = ImGui::GetCursorScreenPos();
+        auto centerX = pos.x + scale(ToolButtonSeparatorMargin);
+        auto padding = scale(ToolButtonSeparatorPadding);
+        drawList->AddLine({centerX, pos.y + padding}, {centerX, pos.y + ImGui::GetFrameHeight() - padding}, withAlpha(LabelColor, 0.25f), scale(1.0f));
+        ImGui::Dummy({2 * scale(ToolButtonSeparatorMargin), ImGui::GetFrameHeight()});
+    }
+
+    float buttonWidth(std::string const& text)
+    {
+        return ImGui::CalcTextSize(text.c_str()).x + 2 * ImGui::GetStyle().FramePadding.x;
+    }
+
     // Invisible button around a node center; returns true if clicked
     bool nodeClickArea(ImVec2 const& pos, char const* id, bool& hovered)
     {
@@ -340,17 +366,43 @@ void _NeuralNetEditorWidget::process(
 {
     auto& selectionData = getValueRef(_dataById);
 
-    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData);
+    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData, false);
 
-    // The dialog is modal and edits the same data with the same selection as the embedded editor
+    // Opened here and not at the call site because the data to be copied is only available in this method
+    if (_openDialogRequested) {
+        _pendingNet = NetData{weights, biases, activationFunctions};
+        _pendingConnectionWeights = connectionWeights;
+        _adopted = false;
+        _dialog->open();
+        _openDialogRequested = false;
+    }
+
+    // The dialog is modal and edits a copy of the net, but shares the selection with the embedded editor
     if (_dialog->isOpen()) {
-        _dialog->process([&] { processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData); });
+        _dialog->process([&] {
+            processEditor(
+                _pendingNet.weights,
+                _pendingNet.biases,
+                _pendingNet.activationFunctions,
+                _pendingConnectionWeights,
+                cellFunctionModules,
+                liveData,
+                selectionData,
+                true);
+        });
+        if (_adopted) {
+            weights = _pendingNet.weights;
+            biases = _pendingNet.biases;
+            activationFunctions = _pendingNet.activationFunctions;
+            connectionWeights = _pendingConnectionWeights;
+            _adopted = false;
+        }
     }
 }
 
 void _NeuralNetEditorWidget::openDialog()
 {
-    _dialog->open();
+    _openDialogRequested = true;
 }
 
 void _NeuralNetEditorWidget::processEditor(
@@ -360,22 +412,41 @@ void _NeuralNetEditorWidget::processEditor(
     std::vector<float>& connectionWeights,
     std::vector<CellFunctionModule> const& cellFunctionModules,
     std::optional<LiveData> const& liveData,
-    SelectionData& selectionData)
+    SelectionData& selectionData,
+    bool inDialog)
 {
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
 
         processConnectionWeightSliders(connectionWeights);
-        auto graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData, narrowLayout);
+        ImGui::Separator();
+
+        // The graph takes the height that is left over after the fixed parts have been placed
+        auto itemSpacing = ImGui::GetStyle().ItemSpacing.y;
+        auto reservedHeight = itemSpacing + (_actionAreaHeight > 0 ? _actionAreaHeight : calcActionAreaHeight());
+        if (narrowLayout) {
+            reservedHeight += 2 * itemSpacing + scale(CardTopMargin) + calcInspectorCardHeight();
+        }
+        auto rowSpacing = calcGraphRowSpacing(ImGui::GetContentRegionAvail().y - reservedHeight);
+
+        auto graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData, narrowLayout, rowSpacing);
 
         // There is no room for the card on top of the graph, therefore it is placed below it and does not cover any nodes
         if (narrowLayout) {
             processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry, narrowLayout);
         }
 
-        AlienGui::Separator();
+        // The rows are only stretched up to a limit, therefore the action row is kept at the bottom
+        auto remainingHeight = ImGui::GetContentRegionAvail().y - itemSpacing - calcActionAreaHeight();
+        if (remainingHeight > 0) {
+            ImGui::Dummy({0, remainingHeight});
+        }
 
-        processActionButtons(weights, biases, activationFunctions);
+        // The height of the action area depends on the style and is therefore taken over to the next frame
+        auto actionAreaStartY = ImGui::GetCursorPosY();
+        ImGui::Separator();
+        processActionButtons(weights, biases, activationFunctions, inDialog);
+        _actionAreaHeight = ImGui::GetCursorPosY() - actionAreaStartY;
 
         // Processed last so that the card is above the other widgets
         if (!narrowLayout) {
@@ -385,23 +456,49 @@ void _NeuralNetEditorWidget::processEditor(
     ImGui::EndChild();
 }
 
+// The label shares the line with the sliders so that the graph below keeps as much height as possible
 void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& connectionWeights)
 {
-    AlienGui::Text("Connection weights");
+    auto& style = ImGui::GetStyle();
+    auto frameHeight = ImGui::GetFrameHeight();
 
-    auto width = ImGui::GetContentRegionAvail().x;
-    auto slidersPerRow = calcConnectionWeightSlidersPerRow(width);
-    auto sliderAreaWidth = (width - ImGui::GetStyle().ItemSpacing.x * toFloat(slidersPerRow - 1)) / toFloat(slidersPerRow);
+    // Aligned with the group blocks of the graph below
+    auto horizontalMargin = scale(GraphHorizontalMargin);
+    ImGui::Indent(horizontalMargin);
+
+    ImGui::AlignTextToFramePadding();
+    AlienGui::Text("Connection weights");
+    ImGui::SameLine();
+
+    auto contentMin = ImGui::GetCursorScreenPos();
+    auto contentWidth = ImGui::GetContentRegionAvail().x - horizontalMargin;
+
+    auto indexWidth = calcNodeLabelSize(std::to_string(MAX_OBJECT_CONNECTIONS)).x + scale(ConnectionWeightIndexMargin);
+    auto slidersPerRow = calcConnectionWeightSlidersPerRow(contentWidth, indexWidth);
+    auto numRows = MAX_OBJECT_CONNECTIONS / slidersPerRow;
+    auto contentHeight = toFloat(numRows) * frameHeight + toFloat(numRows - 1) * style.ItemSpacing.y;
+
+    auto drawList = ImGui::GetWindowDrawList();
+    auto cellWidth = (contentWidth - style.ItemSpacing.x * toFloat(slidersPerRow - 1)) / toFloat(slidersPerRow);
     // AlienGui scales the slider width itself, therefore it is passed unscaled
-    auto sliderWidth = scaleInverse(sliderAreaWidth - resetButtonWidth() - ImGui::GetStyle().ItemSpacing.x + scale(ResetButtonOverlap));
+    auto sliderWidth = scaleInverse(cellWidth - indexWidth - resetButtonWidth() - style.ItemSpacing.x + scale(ResetButtonOverlap));
 
     ImGui::PushID("ConnectionWeightSliders");
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
-        if (i % slidersPerRow != 0) {
-            ImGui::SameLine();
-        }
+        ImVec2 cellPos{
+            contentMin.x + toFloat(i % slidersPerRow) * (cellWidth + style.ItemSpacing.x),
+            contentMin.y + toFloat(i / slidersPerRow) * (frameHeight + style.ItemSpacing.y)};
+
+        auto indexLabel = std::to_string(i + 1);
+        auto indexSize = calcNodeLabelSize(indexLabel);
+        addNodeLabel(
+            drawList,
+            {cellPos.x + indexWidth - scale(ConnectionWeightIndexMargin) - indexSize.x, cellPos.y + (frameHeight - indexSize.y) / 2},
+            withAlpha(LabelColor, ConnectionWeightIndexAlpha),
+            indexLabel);
+
         ImGui::PushID(i);
-        ImGuiStyle& style = ImGui::GetStyle();
+        ImGui::SetCursorScreenPos({cellPos.x + indexWidth, cellPos.y});
         auto originalGrabMinSize = style.GrabMinSize;
         style.GrabMinSize = scale(8.0f);
         AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
@@ -413,7 +510,11 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     }
     ImGui::PopID();
 
-    ImGui::Dummy(ImVec2(0, scale(5.0f)));
+    // The sliders are placed manually, therefore the whole block is registered afterwards
+    ImGui::SetCursorScreenPos(contentMin);
+    ImGui::Dummy({contentWidth, contentHeight});
+
+    ImGui::Unindent(horizontalMargin);
 }
 
 _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
@@ -423,10 +524,11 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
     std::vector<CellFunctionModule> const& cellFunctionModules,
     SelectionData& selectionData,
     std::optional<LiveData> const& liveData,
-    bool narrowLayout)
+    bool narrowLayout,
+    float rowSpacing)
 {
     GraphGeometry result;
-    auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1) + GraphRowSpacing / 2 + GraphVerticalMargin);
+    auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1, rowSpacing) + rowSpacing / 2 + GraphVerticalMargin);
 
     // The labels of the nodes and cell functions have a fixed width, therefore the graph is scrolled horizontally if it cannot be shrunk any further
     auto minWidth = calcGraphMinWidth(cellFunctionModules);
@@ -440,19 +542,20 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
         auto width = std::max(ImGui::GetContentRegionAvail().x, minWidth);
 
         LayoutData layout;
+        auto horizontalMargin = scale(GraphHorizontalMargin);
         auto cellFunctionAreaWidth = calcCellFunctionAreaWidth(cellFunctionModules);
-        auto inputNodeX = origin.x + calcInputNodeMargin();
-        auto outputNodeX = origin.x + width - cellFunctionAreaWidth - calcOutputNodeMargin();
+        auto inputNodeX = origin.x + horizontalMargin + calcInputNodeMargin();
+        auto outputNodeX = origin.x + width - horizontalMargin - cellFunctionAreaWidth - calcOutputNodeMargin();
         for (int i = 0; i < NEURAL_NET_INPUTS; ++i) {
-            layout.inputNodePos[i] = {inputNodeX, origin.y + scale(inputNodeOffsetY(i))};
+            layout.inputNodePos[i] = {inputNodeX, origin.y + scale(inputNodeOffsetY(i, rowSpacing))};
         }
         for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
-            layout.outputNodePos[i] = {outputNodeX, origin.y + scale(outputNodeOffsetY(i))};
+            layout.outputNodePos[i] = {outputNodeX, origin.y + scale(outputNodeOffsetY(i, rowSpacing))};
         }
-        layout.leftBlockMinX = origin.x;
+        layout.leftBlockMinX = origin.x + horizontalMargin;
         layout.leftBlockMaxX = inputNodeX + scale(NodeRadius + GroupBlockNodeMargin);
         layout.rightBlockMinX = outputNodeX - scale(NodeRadius + OutputBlockNodeMargin);
-        layout.rightBlockMaxX = origin.x + width - cellFunctionAreaWidth;
+        layout.rightBlockMaxX = origin.x + width - horizontalMargin - cellFunctionAreaWidth;
 
         // The cell function blocks are lined up outside of the outgoing block, the first one closest to it
         auto laneMinX = layout.rightBlockMaxX + scale(CellFunctionAreaMargin);
@@ -462,8 +565,8 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
             laneMinX += laneWidth + scale(CellFunctionLaneSpacing);
         }
 
-        drawGroupBlocks(drawList, layout);
-        drawCellFunctionBlocks(drawList, layout, cellFunctionModules, selectionData);
+        drawGroupBlocks(drawList, layout, rowSpacing);
+        drawCellFunctionBlocks(drawList, layout, cellFunctionModules, selectionData, rowSpacing);
         drawWeightCurves(weights, selectionData, drawList, layout);
         drawInputNodes(selectionData, drawList, layout, liveData);
         drawOutputNodes(biases, activationFunctions, selectionData, drawList, layout);
@@ -504,12 +607,12 @@ void _NeuralNetEditorWidget::drawGroupBlock(
     addRotatedNodeLabel(drawList, {(railMinX + railMaxX) / 2, (min.y + max.y) / 2}, withAlpha(color, 0.9f), name, !leftSide);
 }
 
-void _NeuralNetEditorWidget::drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout)
+void _NeuralNetEditorWidget::drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout, float rowSpacing)
 {
     auto drawBlock = [&](std::string const& name, ImColor const& color, ImVec2 const& firstNodePos, ImVec2 const& lastNodePos, bool leftSide) {
         auto minX = leftSide ? layout.leftBlockMinX : layout.rightBlockMinX;
         auto maxX = leftSide ? layout.leftBlockMaxX : layout.rightBlockMaxX;
-        auto padding = scale(GraphRowSpacing / 2 + GroupBlockPadding);
+        auto padding = scale(rowSpacing / 2 + GroupBlockPadding);
         drawGroupBlock(drawList, name, color, {minX, firstNodePos.y - padding}, {maxX, lastNodePos.y + padding}, leftSide);
     };
 
@@ -527,14 +630,15 @@ void _NeuralNetEditorWidget::drawCellFunctionBlocks(
     ImDrawList* drawList,
     LayoutData const& layout,
     std::vector<CellFunctionModule> const& cellFunctionModules,
-    SelectionData const& selectionData)
+    SelectionData const& selectionData,
+    float rowSpacing)
 {
     auto isInnermostLane = true;
     for (auto const& [functionModule, lane] : std::views::zip(cellFunctionModules, layout.cellFunctionLanes)) {
         if (functionModule.channels.empty()) {
             continue;
         }
-        auto padding = scale(GraphRowSpacing / 2 + GroupBlockPadding);
+        auto padding = scale(rowSpacing / 2 + GroupBlockPadding);
         auto minY = layout.outputNodePos[functionModule.channels.front().channel].y - padding;
         auto maxY = layout.outputNodePos[functionModule.channels.back().channel].y + padding;
 
@@ -743,11 +847,7 @@ void _NeuralNetEditorWidget::processInspectorCard(
     selectionData.inputIndex = std::clamp(selectionData.inputIndex, 0, NEURAL_NET_INPUTS - 1);
     selectionData.outputIndex = std::clamp(selectionData.outputIndex, 0, NEURAL_NET_OUTPUTS - 1);
 
-    auto lineHeight = ImGui::GetTextLineHeight();
-    auto frameHeight = ImGui::GetFrameHeight();
-    auto itemSpacing = scale(CardItemSpacing);
-
-    auto cardHeight = 2 * scale(CardPadding) + lineHeight + 3 * itemSpacing + 2 * frameHeight + scale(ActivationIconHeight);
+    auto cardHeight = calcInspectorCardHeight();
     auto cardMargin = scale(CardTopMargin);
 
     auto cursorBackup = ImGui::GetCursorScreenPos();
@@ -894,56 +994,85 @@ _NeuralNetEditorWidget::_NeuralNetEditorWidget()
     _dialog = _NeuralNetEditorDialog::create();
 }
 
+// The dialog is closed from here so that its buttons and the net tools share one row
 void _NeuralNetEditorWidget::processActionButtons(
+    std::vector<NeuralNetWeight>& weights,
+    std::vector<float>& biases,
+    std::vector<ActivationFunction>& activationFunctions,
+    bool inDialog)
+{
+    if (inDialog) {
+        if (AlienGui::Button("Adopt")) {
+            _adopted = true;
+            ImGui::CloseCurrentPopup();
+            _dialog->close();
+        }
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if (AlienGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+            _dialog->close();
+        }
+
+        // The net tools belong to the content and are therefore set off from the dialog buttons
+        ImGui::SameLine();
+        auto offset = ImGui::GetContentRegionAvail().x - calcNetToolButtonsWidth();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, offset));
+    }
+    processNetToolButtons(weights, biases, activationFunctions);
+}
+
+void _NeuralNetEditorWidget::processNetToolButtons(
     std::vector<NeuralNetWeight>& weights,
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions)
 {
-    if (ImGui::BeginChild("ActionButtons", ImVec2(0, scale(50.0f)))) {
-        if (AlienGui::Button("Clear")) {
-            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
-                for (int j = 0; j < NEURAL_NET_INPUTS; ++j) {
-                    weights[i * NEURAL_NET_INPUTS + j] = NeuralNetWeight(0);
-                }
-                biases[i] = 0;
-                activationFunctions[i] = ActivationFunction_Identity;
+    if (AlienGui::Button("Clear")) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+            for (int j = 0; j < NEURAL_NET_INPUTS; ++j) {
+                weights[i * NEURAL_NET_INPUTS + j] = NeuralNetWeight(0);
             }
+            biases[i] = 0;
+            activationFunctions[i] = ActivationFunction_Identity;
         }
-        ImGui::SameLine();
-        if (AlienGui::Button("Identity")) {
-            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
-                for (int j = 0; j < NEURAL_NET_INPUTS; ++j) {
-                    weights[i * NEURAL_NET_INPUTS + j] = (i == j) ? NeuralNetWeight(1.0f) : NeuralNetWeight(0);
-                }
-                biases[i] = 0.0f;
-                activationFunctions[i] = ActivationFunction_Identity;
-            }
-        }
-        ImGui::SameLine();
-        if (AlienGui::Button("Randomize")) {
-            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
-                for (int j = 0; j < NEURAL_NET_INPUTS; ++j) {
-                    weights[i * NEURAL_NET_INPUTS + j] = NeuralNetWeight(NumberGenerator::get().getRandomFloat(-2.0f, 2.0f));
-                }
-                biases[i] = NumberGenerator::get().getRandomFloat(-0.2f, 0.2f);
-                activationFunctions[i] = NumberGenerator::get().getRandomInt(ActivationFunction_Count);
-            }
-        }
-        ImGui::SameLine();
-        if (AlienGui::Button("Copy")) {
-            NetData copiedNet{weights, biases, activationFunctions};
-            _copiedNet = copiedNet;
-        }
-        ImGui::SameLine();
-        ImGui::BeginDisabled(!_copiedNet.has_value());
-        if (AlienGui::Button("Paste")) {
-            weights = _copiedNet->weights;
-            biases = _copiedNet->biases;
-            activationFunctions = _copiedNet->activationFunctions;
-        }
-        ImGui::EndDisabled();
     }
-    ImGui::EndChild();
+    ImGui::SameLine();
+    if (AlienGui::Button("Identity")) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+            for (int j = 0; j < NEURAL_NET_INPUTS; ++j) {
+                weights[i * NEURAL_NET_INPUTS + j] = (i == j) ? NeuralNetWeight(1.0f) : NeuralNetWeight(0);
+            }
+            biases[i] = 0.0f;
+            activationFunctions[i] = ActivationFunction_Identity;
+        }
+    }
+    ImGui::SameLine();
+    if (AlienGui::Button("Randomize")) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+            for (int j = 0; j < NEURAL_NET_INPUTS; ++j) {
+                weights[i * NEURAL_NET_INPUTS + j] = NeuralNetWeight(NumberGenerator::get().getRandomFloat(-2.0f, 2.0f));
+            }
+            biases[i] = NumberGenerator::get().getRandomFloat(-0.2f, 0.2f);
+            activationFunctions[i] = NumberGenerator::get().getRandomInt(ActivationFunction_Count);
+        }
+    }
+
+    ImGui::SameLine();
+    addToolButtonSeparator();
+
+    ImGui::SameLine();
+    if (AlienGui::Button("Copy")) {
+        NetData copiedNet{weights, biases, activationFunctions};
+        _copiedNet = copiedNet;
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!_copiedNet.has_value());
+    if (AlienGui::Button("Paste")) {
+        weights = _copiedNet->weights;
+        biases = _copiedNet->biases;
+        activationFunctions = _copiedNet->activationFunctions;
+    }
+    ImGui::EndDisabled();
 }
 
 ImColor _NeuralNetEditorWidget::calcWeightColor(float value, float alpha)
@@ -963,7 +1092,35 @@ bool _NeuralNetEditorWidget::isNarrowLayout(float availableWidth, std::vector<Ce
 
 float _NeuralNetEditorWidget::calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules)
 {
-    return calcInputNodeMargin() + calcOutputNodeMargin() + calcCellFunctionAreaWidth(cellFunctionModules) + scale(GraphMinCurveWidth);
+    return 2 * scale(GraphHorizontalMargin) + calcInputNodeMargin() + calcOutputNodeMargin() + calcCellFunctionAreaWidth(cellFunctionModules)
+        + scale(GraphMinCurveWidth);
+}
+
+float _NeuralNetEditorWidget::calcGraphRowSpacing(float availableHeight)
+{
+    auto fixedHeight = 2 * GraphVerticalMargin + 2 * GraphGroupSpacing;
+    auto rowSpacing = (scaleInverse(availableHeight) - fixedHeight) / toFloat(NEURAL_NET_INPUTS);
+    return std::clamp(rowSpacing, GraphRowSpacing, GraphRowSpacing * GraphRowStretchMax);
+}
+
+// Separator and one row of buttons below the graph. Only used until the actual height has been measured.
+float _NeuralNetEditorWidget::calcActionAreaHeight()
+{
+    return ImGui::GetStyle().ItemSpacing.y + scale(1.0f) + ImGui::GetFrameHeight();
+}
+
+float _NeuralNetEditorWidget::calcNetToolButtonsWidth()
+{
+    auto& style = ImGui::GetStyle();
+    auto result = buttonWidth("Clear") + buttonWidth("Identity") + buttonWidth("Randomize") + buttonWidth("Copy") + buttonWidth("Paste");
+    result += 2 * scale(ToolButtonSeparatorMargin) + 5 * style.ItemSpacing.x;
+    return result;
+}
+
+float _NeuralNetEditorWidget::calcInspectorCardHeight()
+{
+    auto itemSpacing = scale(CardItemSpacing);
+    return 2 * scale(CardPadding) + ImGui::GetTextLineHeight() + 3 * itemSpacing + 2 * ImGui::GetFrameHeight() + scale(ActivationIconHeight);
 }
 
 // The group blocks are only as wide as their content requires, therefore the node columns follow the widest label

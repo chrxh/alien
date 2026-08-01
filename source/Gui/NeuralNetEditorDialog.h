@@ -5,8 +5,8 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-// Modal dialog that shows the neural net editor in a larger window. The content is drawn by the owning widget so that
-// the edited data is only referenced within the frame in which it is passed.
+// Modal dialog that shows the neural net editor in a larger window. The content is drawn by the owning widget, which
+// also provides the buttons that close the dialog.
 class _NeuralNetEditorDialog : public AlienDialog
 {
 public:
@@ -14,6 +14,7 @@ public:
 
     void open();
     void process(std::function<void()> const& contentFunc);
+    using AlienDialog::close;
 
 private:
     _NeuralNetEditorDialog();
