@@ -2,10 +2,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ranges>
 
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/Math.h>
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/CellTypeConstants.h>
@@ -17,11 +19,23 @@
 namespace
 {
     auto constexpr GraphRowSpacing = 19.0f;
-    auto constexpr GraphGroupSpacing = 14.0f;
-    auto constexpr GraphHeaderHeight = 24.0f;
-    auto constexpr GraphSideMargin = 85.0f;
+    auto constexpr GraphGroupSpacing = 18.0f;
+    auto constexpr GraphVerticalMargin = 14.0f;
+    auto constexpr GroupBlockPadding = 4.0f;
+    auto constexpr GroupBlockRounding = 4.0f;
+    auto constexpr GroupBlockNodeMargin = 9.0f;
+    auto constexpr GroupLabelRailWidth = 17.0f;
+    auto constexpr GroupLabelRailMargin = 4.0f;
+    auto constexpr GroupBlockAlpha = 0.1f;
+    auto constexpr GroupLabelRailAlpha = 0.18f;
     auto constexpr NodeRadius = 5.0f;
     auto constexpr NodeClickPadding = 3.0f;
+    auto constexpr NodeLabelMargin = 5.0f;
+    auto constexpr ActivationLabelMargin = 6.0f;
+    auto constexpr BiasFillMinIntensity = 0.2f;
+    auto constexpr BiasFillMaxIntensity = 0.9f;
+    auto constexpr BiasMaxValue = 2.0f;
+    auto constexpr BiasLogScale = 30.0f;
     auto constexpr NodeLabelFontScale = 0.7f;
     auto constexpr CardWidth = 260.0f;
     auto constexpr CardPadding = 9.0f;
@@ -68,12 +82,12 @@ namespace
 
     float inputNodeOffsetY(int inputIndex)
     {
-        auto result = GraphHeaderHeight + toFloat(inputIndex) * GraphRowSpacing;
+        auto result = GraphVerticalMargin + (toFloat(inputIndex) + 0.5f) * GraphRowSpacing;
         if (inputIndex >= STANDARD_NEURONS_PER_CELL) {
-            result += GraphHeaderHeight + GraphGroupSpacing;
+            result += GraphGroupSpacing;
         }
         if (inputIndex >= NEURAL_NET_OUTPUTS) {
-            result += GraphHeaderHeight + GraphGroupSpacing;
+            result += GraphGroupSpacing;
         }
         return result;
     }
@@ -81,9 +95,9 @@ namespace
     // The output rows use the same spacing as the input rows and therefore end above the telemetry inputs
     float outputNodeOffsetY(int outputIndex)
     {
-        auto result = GraphHeaderHeight + toFloat(outputIndex) * GraphRowSpacing;
+        auto result = GraphVerticalMargin + (toFloat(outputIndex) + 0.5f) * GraphRowSpacing;
         if (outputIndex >= STANDARD_NEURONS_PER_CELL) {
-            result += GraphHeaderHeight + GraphGroupSpacing;
+            result += GraphGroupSpacing;
         }
         return result;
     }
@@ -103,6 +117,29 @@ namespace
         drawList->AddText(ImGui::GetFont(), nodeLabelFontSize(), pos, color, text.c_str());
     }
 
+    // ImGui cannot render rotated text, therefore the text is written horizontally and its vertices are rotated afterwards.
+    // Glyphs outside the clip rectangle would be dropped before the rotation, therefore the text is written at the center
+    // of the visible area and moved to its final position together with the rotation.
+    void addRotatedNodeLabel(ImDrawList* drawList, ImVec2 const& center, ImColor const& color, std::string const& text, bool clockwise)
+    {
+        auto clipRectMin = drawList->GetClipRectMin();
+        auto clipRectMax = drawList->GetClipRectMax();
+        ImVec2 pivot((clipRectMin.x + clipRectMax.x) / 2, (clipRectMin.y + clipRectMax.y) / 2);
+
+        auto textSize = calcNodeLabelSize(text);
+        auto firstVertex = drawList->VtxBuffer.Size;
+        addNodeLabel(drawList, {pivot.x - textSize.x / 2, pivot.y - textSize.y / 2}, color, text);
+        auto lastVertex = drawList->VtxBuffer.Size;
+
+        auto angle = clockwise ? Const::Pi / 2 : -Const::Pi / 2;
+        auto cosAngle = std::cos(angle);
+        auto sinAngle = std::sin(angle);
+        for (auto* vertex = drawList->VtxBuffer.Data + firstVertex; vertex != drawList->VtxBuffer.Data + lastVertex; ++vertex) {
+            ImVec2 offset(vertex->pos.x - pivot.x, vertex->pos.y - pivot.y);
+            vertex->pos = {center.x + offset.x * cosAngle - offset.y * sinAngle, center.y + offset.x * sinAngle + offset.y * cosAngle};
+        }
+    }
+
     float evalActivationFunction(ActivationFunction activationFunction, float x)
     {
         switch (activationFunction) {
@@ -120,6 +157,28 @@ namespace
             return std::fmod(std::fmod(x + 1.0f, 2.0f) + 2.0f, 2.0f) - 1.0f;
         }
         return 0.0f;
+    }
+
+    // Biases are usually far below the maximum, therefore the magnitude grows logarithmically and resolves the range around zero.
+    // Returns the visual magnitude relative to its maximum.
+    float calcBiasFraction(float bias)
+    {
+        auto normalized = std::min(1.0f, std::abs(bias) / BiasMaxValue);
+        return std::log1p(BiasLogScale * normalized) / std::log1p(BiasLogScale);
+    }
+
+    // The node interior is tinted towards the weight colors, so the bias is read in the same visual language as the weights
+    ImColor calcBiasFillColor(float bias)
+    {
+        if (std::abs(bias) <= NEAR_ZERO) {
+            return NodeFillColor;
+        }
+        auto intensity = BiasFillMinIntensity + calcBiasFraction(bias) * (BiasFillMaxIntensity - BiasFillMinIntensity);
+        auto const& target = bias > 0 ? PositiveWeightColor : NegativeWeightColor;
+        return ImColor(
+            NodeFillColor.Value.x + (target.Value.x - NodeFillColor.Value.x) * intensity,
+            NodeFillColor.Value.y + (target.Value.y - NodeFillColor.Value.y) * intensity,
+            NodeFillColor.Value.z + (target.Value.z - NodeFillColor.Value.z) * intensity);
     }
 
     // Draws the graph of an activation function into the given rectangle
@@ -199,7 +258,7 @@ void _NeuralNetEditorWidget::process(
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         processConnectionWeightSliders(connectionWeights);
-        auto graphGeometry = processGraph(weights, activationFunctions, selectionData, liveData);
+        auto graphGeometry = processGraph(weights, biases, activationFunctions, selectionData, liveData);
 
         AlienGui::Separator();
 
@@ -218,7 +277,8 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     auto width = ImGui::GetContentRegionAvail().x;
     auto sliderAreaWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
     auto resetButtonWidth = ImGui::CalcTextSize("x").x;
-    auto sliderWidth = sliderAreaWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x;
+    // AlienGui scales the slider width itself, therefore it is passed unscaled
+    auto sliderWidth = scaleInverse(sliderAreaWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x);
 
     ImGui::PushID("ConnectionWeightSliders");
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -247,35 +307,73 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
 
 _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
     std::vector<NeuralNetWeight>& weights,
+    std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
     std::optional<LiveData> const& liveData)
 {
     GraphGeometry result;
-    auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1) + GraphRowSpacing);
+    auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1) + GraphRowSpacing / 2 + GraphVerticalMargin);
     if (ImGui::BeginChild("NeuralNetGraph", ImVec2(0, graphHeight), 0, 0)) {
         auto drawList = ImGui::GetWindowDrawList();
         auto origin = ImGui::GetCursorScreenPos();
         auto width = ImGui::GetContentRegionAvail().x;
 
         LayoutData layout;
+        auto inputNodeX = origin.x + calcInputNodeMargin();
+        auto outputNodeX = origin.x + width - calcOutputNodeMargin();
         for (int i = 0; i < NEURAL_NET_INPUTS; ++i) {
-            layout.inputNodePos[i] = {origin.x + scale(GraphSideMargin), origin.y + scale(inputNodeOffsetY(i))};
+            layout.inputNodePos[i] = {inputNodeX, origin.y + scale(inputNodeOffsetY(i))};
         }
         for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
-            layout.outputNodePos[i] = {origin.x + width - scale(GraphSideMargin), origin.y + scale(outputNodeOffsetY(i))};
+            layout.outputNodePos[i] = {outputNodeX, origin.y + scale(outputNodeOffsetY(i))};
         }
+        layout.leftBlockMinX = origin.x;
+        layout.leftBlockMaxX = inputNodeX + scale(NodeRadius + GroupBlockNodeMargin);
+        layout.rightBlockMinX = outputNodeX - scale(NodeRadius + GroupBlockNodeMargin);
+        layout.rightBlockMaxX = origin.x + width;
 
+        drawGroupBlocks(drawList, layout);
         drawWeightCurves(weights, selectionData, drawList, layout);
         drawInputNodes(selectionData, drawList, layout, liveData);
-        drawOutputNodes(activationFunctions, selectionData, drawList, layout);
+        drawOutputNodes(biases, activationFunctions, selectionData, drawList, layout);
 
         result.origin = origin;
         result.width = width;
+        result.groupBlockGapMinX = layout.leftBlockMaxX;
+        result.groupBlockGapWidth = layout.rightBlockMinX - layout.leftBlockMaxX;
     }
     ImGui::EndChild();
 
     return result;
+}
+
+void _NeuralNetEditorWidget::drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout)
+{
+    auto drawBlock = [&](std::string const& name, ImColor const& color, ImVec2 const& firstNodePos, ImVec2 const& lastNodePos, bool leftSide) {
+        auto minX = leftSide ? layout.leftBlockMinX : layout.rightBlockMinX;
+        auto maxX = leftSide ? layout.leftBlockMaxX : layout.rightBlockMaxX;
+        auto minY = firstNodePos.y - scale(GraphRowSpacing / 2 + GroupBlockPadding);
+        auto maxY = lastNodePos.y + scale(GraphRowSpacing / 2 + GroupBlockPadding);
+
+        // Only the corners facing the graph are rounded, the outer corners are flush with the editor border
+        auto rounding = scale(GroupBlockRounding);
+        auto cornerFlags = leftSide ? ImDrawFlags_RoundCornersRight : ImDrawFlags_RoundCornersLeft;
+        drawList->AddRectFilled({minX, minY}, {maxX, maxY}, withAlpha(color, GroupBlockAlpha), rounding, cornerFlags);
+
+        auto railMinX = leftSide ? minX : maxX - scale(GroupLabelRailWidth);
+        auto railMaxX = leftSide ? minX + scale(GroupLabelRailWidth) : maxX;
+        drawList->AddRectFilled({railMinX, minY}, {railMaxX, maxY}, withAlpha(color, GroupLabelRailAlpha), rounding, cornerFlags);
+
+        addRotatedNodeLabel(drawList, {(railMinX + railMaxX) / 2, (minY + maxY) / 2}, withAlpha(color, 0.9f), name, !leftSide);
+    };
+
+    drawBlock("INCOMING", SignalNodeColor, layout.inputNodePos[0], layout.inputNodePos[STANDARD_NEURONS_PER_CELL - 1], true);
+    drawBlock("MEMORY", MemoryNodeColor, layout.inputNodePos[STANDARD_NEURONS_PER_CELL], layout.inputNodePos[NEURAL_NET_OUTPUTS - 1], true);
+    drawBlock("TELEMETRY", TelemetryNodeColor, layout.inputNodePos[NEURAL_NET_OUTPUTS], layout.inputNodePos[NEURAL_NET_INPUTS - 1], true);
+
+    drawBlock("OUTGOING", SignalNodeColor, layout.outputNodePos[0], layout.outputNodePos[STANDARD_NEURONS_PER_CELL - 1], false);
+    drawBlock("MEMORY", MemoryNodeColor, layout.outputNodePos[STANDARD_NEURONS_PER_CELL], layout.outputNodePos[NEURAL_NET_OUTPUTS - 1], false);
 }
 
 void _NeuralNetEditorWidget::drawWeightCurves(
@@ -332,13 +430,6 @@ void _NeuralNetEditorWidget::drawInputNodes(
     LayoutData const& layout,
     std::optional<LiveData> const& liveData)
 {
-    auto drawGroupHeader = [&](std::string const& text, ImColor const& color, float y) {
-        addNodeLabel(drawList, {layout.inputNodePos[0].x - scale(GraphSideMargin - 5.0f), y}, withAlpha(color, 0.8f), text);
-    };
-    drawGroupHeader("SIGNALS", SignalNodeColor, layout.inputNodePos[0].y - scale(GraphHeaderHeight));
-    drawGroupHeader("MEMORY", MemoryNodeColor, layout.inputNodePos[STANDARD_NEURONS_PER_CELL].y - scale(GraphHeaderHeight));
-    drawGroupHeader("TELEMETRY", TelemetryNodeColor, layout.inputNodePos[NEURAL_NET_OUTPUTS].y - scale(GraphHeaderHeight));
-
     ImGui::PushID("InputNodes");
     for (int i = 0; i < NEURAL_NET_INPUTS; ++i) {
         auto const& pos = layout.inputNodePos[i];
@@ -363,7 +454,10 @@ void _NeuralNetEditorWidget::drawInputNodes(
         auto label = getInputLabel(i);
         auto textSize = calcNodeLabelSize(label);
         addNodeLabel(
-            drawList, {pos.x - scale(NodeRadius + 5.0f) - textSize.x, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
+            drawList,
+            {pos.x - scale(NodeRadius + NodeLabelMargin) - textSize.x, pos.y - textSize.y / 2},
+            isSelected ? ImColor(255, 255, 255) : LabelColor,
+            label);
 
         // Live values next to memory and telemetry inputs
         if (liveData.has_value() && i >= STANDARD_NEURONS_PER_CELL) {
@@ -390,7 +484,8 @@ void _NeuralNetEditorWidget::drawInputNodes(
                 }
             }
             if (!value.empty()) {
-                addNodeLabel(drawList, {pos.x + scale(NodeRadius + 5.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.6f), value);
+                addNodeLabel(
+                    drawList, {pos.x + scale(NodeRadius + GroupBlockNodeMargin + NodeLabelMargin), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.6f), value);
             }
         }
     }
@@ -398,17 +493,12 @@ void _NeuralNetEditorWidget::drawInputNodes(
 }
 
 void _NeuralNetEditorWidget::drawOutputNodes(
+    std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
     ImDrawList* drawList,
     LayoutData const& layout)
 {
-    auto drawGroupHeader = [&](std::string const& text, ImColor const& color, float y) {
-        addNodeLabel(drawList, {layout.outputNodePos[0].x + scale(NodeRadius + 5.0f), y}, withAlpha(color, 0.8f), text);
-    };
-    drawGroupHeader("OUTPUTS", SignalNodeColor, layout.outputNodePos[0].y - scale(GraphHeaderHeight));
-    drawGroupHeader("MEMORY", MemoryNodeColor, layout.outputNodePos[STANDARD_NEURONS_PER_CELL].y - scale(GraphHeaderHeight));
-
     ImGui::PushID("OutputNodes");
     for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         auto const& pos = layout.outputNodePos[i];
@@ -424,7 +514,7 @@ void _NeuralNetEditorWidget::drawOutputNodes(
         if (isSelected) {
             drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
         }
-        drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
+        drawList->AddCircleFilled(pos, scale(NodeRadius), calcBiasFillColor(biases.at(i)));
         auto borderColor = i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor;
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
         if (i >= STANDARD_NEURONS_PER_CELL) {
@@ -433,10 +523,11 @@ void _NeuralNetEditorWidget::drawOutputNodes(
 
         auto label = getOutputLabel(i);
         auto textSize = calcNodeLabelSize(label);
-        addNodeLabel(drawList, {pos.x + scale(NodeRadius + 5.0f), pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
+        auto labelX = pos.x + scale(NodeRadius + NodeLabelMargin);
+        addNodeLabel(drawList, {labelX, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
 
         auto const& actfnLabel = ActivationFunctionShortStrings.at(activationFunctions.at(i));
-        addNodeLabel(drawList, {pos.x + scale(NodeRadius + 5.0f) + textSize.x + scale(6.0f), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel);
+        addNodeLabel(drawList, {labelX + textSize.x + scale(ActivationLabelMargin), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel);
     }
     ImGui::PopID();
 }
@@ -457,10 +548,9 @@ void _NeuralNetEditorWidget::processInspectorCard(
     auto frameHeight = ImGui::GetFrameHeight();
     auto itemSpacing = scale(CardItemSpacing);
 
-    // Shrink the card in narrow windows so that it does not cover the node columns
+    // Shrink the card in narrow windows so that it does not cover the group blocks
     auto scaleFactor = scale(1.0f);
-    auto spaceBetweenNodeColumns = graphGeometry.width / scaleFactor - 2 * GraphSideMargin;
-    auto cardTotalWidth = std::clamp(spaceBetweenNodeColumns, CardMinWidth, CardWidth);
+    auto cardTotalWidth = std::clamp(graphGeometry.groupBlockGapWidth / scaleFactor, CardMinWidth, CardWidth);
     auto cardContentWidth = cardTotalWidth - 2 * CardPadding;
     auto cardWidth = scale(cardTotalWidth);
     auto cardHeight = 2 * scale(CardPadding) + lineHeight + 3 * itemSpacing + 2 * frameHeight + scale(ActivationIconHeight);
@@ -475,7 +565,7 @@ void _NeuralNetEditorWidget::processInspectorCard(
 
     // An own child window is needed so that the card is rendered above the graph and stays independent of its scroll position
     auto cursorBackup = ImGui::GetCursorScreenPos();
-    ImGui::SetCursorScreenPos({graphGeometry.origin.x + (graphGeometry.width - cardWidth) / 2, cardY});
+    ImGui::SetCursorScreenPos({graphGeometry.groupBlockGapMinX + (graphGeometry.groupBlockGapWidth - cardWidth) / 2, cardY});
     ImGui::BeginChild("InspectorCard", {cardWidth, cardHeight}, 0, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
     auto drawList = ImGui::GetWindowDrawList();
@@ -634,6 +724,29 @@ ImColor _NeuralNetEditorWidget::calcWeightColor(float value, float alpha)
     auto result = value > 0 ? PositiveWeightColor : NegativeWeightColor;
     result.Value.w = alpha;
     return result;
+}
+
+// The group blocks are only as wide as their content requires, therefore the node columns follow the widest label
+float _NeuralNetEditorWidget::calcInputNodeMargin()
+{
+    auto maxLabelWidth = 0.0f;
+    for (auto index : std::views::iota(0, NEURAL_NET_INPUTS)) {
+        maxLabelWidth = std::max(maxLabelWidth, calcNodeLabelSize(getInputLabel(index)).x);
+    }
+    return scale(GroupLabelRailWidth + GroupLabelRailMargin + NodeLabelMargin + NodeRadius) + maxLabelWidth;
+}
+
+float _NeuralNetEditorWidget::calcOutputNodeMargin()
+{
+    auto maxLabelWidth = 0.0f;
+    for (auto index : std::views::iota(0, NEURAL_NET_OUTPUTS)) {
+        maxLabelWidth = std::max(maxLabelWidth, calcNodeLabelSize(getOutputLabel(index)).x);
+    }
+    auto maxActfnLabelWidth = 0.0f;
+    for (auto const& actfnLabel : ActivationFunctionShortStrings) {
+        maxActfnLabelWidth = std::max(maxActfnLabelWidth, calcNodeLabelSize(actfnLabel).x);
+    }
+    return scale(GroupLabelRailWidth + GroupLabelRailMargin + ActivationLabelMargin + NodeLabelMargin + NodeRadius) + maxLabelWidth + maxActfnLabelWidth;
 }
 
 std::string _NeuralNetEditorWidget::getInputLabel(int inputIndex)
