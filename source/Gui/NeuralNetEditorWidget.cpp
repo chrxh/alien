@@ -52,8 +52,11 @@ namespace
     auto constexpr CellFunctionOuterTapAlpha = 0.28f;
     auto constexpr CardWidth = 260.0f;
     auto constexpr CardPadding = 9.0f;
-    auto constexpr CardMinWidth = 170.0f;
+    auto constexpr CardOverlayMargin = 10.0f;
     auto constexpr ResetButtonFontScale = 0.5f;
+    auto constexpr ResetButtonOverlap = 7.0f;
+    auto constexpr ConnectionWeightSliderMinWidth = 42.0f;
+    auto constexpr GraphMinCurveWidth = 30.0f;
     auto constexpr CardItemSpacing = 5.0f;
     auto constexpr CardTopMargin = 6.0f;
     auto constexpr ActivationIconHeight = 18.0f;
@@ -239,11 +242,25 @@ namespace
     bool resetButton()
     {
         ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(ResetButtonOverlap));
         ImGui::SetWindowFontScale(ResetButtonFontScale);
         auto result = ImGui::Button(ICON_FA_TIMES);
         ImGui::SetWindowFontScale(1.0f);
         return result;
+    }
+
+    // The connection weight sliders are wrapped into several rows if they would become too small. Only divisors of the
+    // number of connections are used as row length so that all rows are equally filled.
+    int calcConnectionWeightSlidersPerRow(float availableWidth)
+    {
+        auto minSliderAreaWidth = scale(ConnectionWeightSliderMinWidth) + resetButtonWidth() + ImGui::GetStyle().ItemSpacing.x;
+        auto maxPerRow = std::min(MAX_OBJECT_CONNECTIONS, std::max(1, toInt(availableWidth / minSliderAreaWidth)));
+        for (auto perRow = maxPerRow; perRow > 1; --perRow) {
+            if (MAX_OBJECT_CONNECTIONS % perRow == 0) {
+                return perRow;
+            }
+        }
+        return 1;
     }
 
     // Marker in front of a cell function label: a triangle pointing away from the outgoing node if the cell function
@@ -308,15 +325,24 @@ void _NeuralNetEditorWidget::process(
     auto& selectionData = getValueRef(_dataById);
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
+        auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
+
         processConnectionWeightSliders(connectionWeights);
-        auto graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData);
+        auto graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData, narrowLayout);
+
+        // There is no room for the card on top of the graph, therefore it is placed below it and does not cover any nodes
+        if (narrowLayout) {
+            processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry, narrowLayout);
+        }
 
         AlienGui::Separator();
 
         processActionButtons(weights, biases, activationFunctions);
 
         // Processed last so that the card is above the other widgets
-        processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry);
+        if (!narrowLayout) {
+            processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry, narrowLayout);
+        }
     }
     ImGui::EndChild();
 }
@@ -326,14 +352,14 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     AlienGui::Text("Connection weights");
 
     auto width = ImGui::GetContentRegionAvail().x;
-    auto sliderAreaWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
-    auto resetButtonWidth = ImGui::CalcTextSize("x").x;
+    auto slidersPerRow = calcConnectionWeightSlidersPerRow(width);
+    auto sliderAreaWidth = (width - ImGui::GetStyle().ItemSpacing.x * toFloat(slidersPerRow - 1)) / toFloat(slidersPerRow);
     // AlienGui scales the slider width itself, therefore it is passed unscaled
-    auto sliderWidth = scaleInverse(sliderAreaWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x);
+    auto sliderWidth = scaleInverse(sliderAreaWidth - resetButtonWidth() - ImGui::GetStyle().ItemSpacing.x + scale(ResetButtonOverlap));
 
     ImGui::PushID("ConnectionWeightSliders");
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
-        if (i > 0) {
+        if (i % slidersPerRow != 0) {
             ImGui::SameLine();
         }
         ImGui::PushID(i);
@@ -342,13 +368,9 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
         style.GrabMinSize = scale(8.0f);
         AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
         style.GrabMinSize = originalGrabMinSize;
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
-        ImGui::SetWindowFontScale(0.5f);
-        if (ImGui::Button(ICON_FA_TIMES)) {
+        if (resetButton()) {
             connectionWeights.at(i) = 0.0f;
         }
-        ImGui::SetWindowFontScale(1.0f);
         ImGui::PopID();
     }
     ImGui::PopID();
@@ -362,14 +384,22 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
     std::vector<ActivationFunction>& activationFunctions,
     std::vector<CellFunctionModule> const& cellFunctionModules,
     SelectionData& selectionData,
-    std::optional<LiveData> const& liveData)
+    std::optional<LiveData> const& liveData,
+    bool narrowLayout)
 {
     GraphGeometry result;
     auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1) + GraphRowSpacing / 2 + GraphVerticalMargin);
-    if (ImGui::BeginChild("NeuralNetGraph", ImVec2(0, graphHeight), 0, 0)) {
+
+    // The labels of the nodes and cell functions have a fixed width, therefore the graph is scrolled horizontally if it cannot be shrunk any further
+    auto minWidth = calcGraphMinWidth(cellFunctionModules);
+    auto scrollHorizontally = narrowLayout && ImGui::GetContentRegionAvail().x < minWidth;
+    if (scrollHorizontally) {
+        graphHeight += ImGui::GetStyle().ScrollbarSize;
+    }
+    if (ImGui::BeginChild("NeuralNetGraph", ImVec2(0, graphHeight), 0, scrollHorizontally ? ImGuiWindowFlags_HorizontalScrollbar : 0)) {
         auto drawList = ImGui::GetWindowDrawList();
         auto origin = ImGui::GetCursorScreenPos();
-        auto width = ImGui::GetContentRegionAvail().x;
+        auto width = std::max(ImGui::GetContentRegionAvail().x, minWidth);
 
         LayoutData layout;
         auto cellFunctionAreaWidth = calcCellFunctionAreaWidth(cellFunctionModules);
@@ -399,6 +429,12 @@ _NeuralNetEditorWidget::GraphGeometry _NeuralNetEditorWidget::processGraph(
         drawWeightCurves(weights, selectionData, drawList, layout);
         drawInputNodes(selectionData, drawList, layout, liveData);
         drawOutputNodes(biases, activationFunctions, selectionData, drawList, layout);
+
+        // Only the drawn content extends to the right border, therefore the scroll range is defined explicitly
+        if (scrollHorizontally) {
+            ImGui::SetCursorScreenPos(origin);
+            ImGui::Dummy({width, 0.0f});
+        }
 
         result.origin = origin;
         result.width = width;
@@ -662,36 +698,63 @@ void _NeuralNetEditorWidget::processInspectorCard(
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
     SelectionData& selectionData,
-    GraphGeometry const& graphGeometry)
+    GraphGeometry const& graphGeometry,
+    bool narrowLayout)
 {
-    auto& inputIndex = selectionData.inputIndex;
-    auto& outputIndex = selectionData.outputIndex;
-    inputIndex = std::clamp(inputIndex, 0, NEURAL_NET_INPUTS - 1);
-    outputIndex = std::clamp(outputIndex, 0, NEURAL_NET_OUTPUTS - 1);
+    selectionData.inputIndex = std::clamp(selectionData.inputIndex, 0, NEURAL_NET_INPUTS - 1);
+    selectionData.outputIndex = std::clamp(selectionData.outputIndex, 0, NEURAL_NET_OUTPUTS - 1);
 
     auto lineHeight = ImGui::GetTextLineHeight();
     auto frameHeight = ImGui::GetFrameHeight();
     auto itemSpacing = scale(CardItemSpacing);
 
-    // Shrink the card in narrow windows so that it does not cover the group blocks
-    auto scaleFactor = scale(1.0f);
-    auto cardTotalWidth = std::clamp(graphGeometry.groupBlockGapWidth / scaleFactor, CardMinWidth, CardWidth);
-    auto cardContentWidth = cardTotalWidth - 2 * CardPadding;
-    auto cardWidth = scale(cardTotalWidth);
     auto cardHeight = 2 * scale(CardPadding) + lineHeight + 3 * itemSpacing + 2 * frameHeight + scale(ActivationIconHeight);
     auto cardMargin = scale(CardTopMargin);
 
-    // Keep the card inside the visible area when the editor is scrolled
-    auto clipMin = ImGui::GetWindowDrawList()->GetClipRectMin();
-    auto clipMax = ImGui::GetWindowDrawList()->GetClipRectMax();
-    auto cardY = graphGeometry.origin.y + cardMargin;
-    auto lowestCardY = clipMax.y - cardHeight - cardMargin;
-    cardY = lowestCardY > clipMin.y + cardMargin ? std::clamp(cardY, clipMin.y + cardMargin, lowestCardY) : clipMin.y + cardMargin;
+    auto cursorBackup = ImGui::GetCursorScreenPos();
+    float cardWidth;
+    if (narrowLayout) {
+        // The card is placed below the graph and uses the whole width there
+        cardWidth = ImGui::GetContentRegionAvail().x;
+        ImGui::Dummy({0, cardMargin});
+    } else {
+        cardWidth = scale(CardWidth);
+
+        // Keep the card inside the visible area when the editor is scrolled
+        auto clipMin = ImGui::GetWindowDrawList()->GetClipRectMin();
+        auto clipMax = ImGui::GetWindowDrawList()->GetClipRectMax();
+        auto cardY = graphGeometry.origin.y + cardMargin;
+        auto lowestCardY = clipMax.y - cardHeight - cardMargin;
+        cardY = lowestCardY > clipMin.y + cardMargin ? std::clamp(cardY, clipMin.y + cardMargin, lowestCardY) : clipMin.y + cardMargin;
+
+        ImGui::SetCursorScreenPos({graphGeometry.groupBlockGapMinX + (graphGeometry.groupBlockGapWidth - cardWidth) / 2, cardY});
+    }
 
     // An own child window is needed so that the card is rendered above the graph and stays independent of its scroll position
-    auto cursorBackup = ImGui::GetCursorScreenPos();
-    ImGui::SetCursorScreenPos({graphGeometry.groupBlockGapMinX + (graphGeometry.groupBlockGapWidth - cardWidth) / 2, cardY});
     ImGui::BeginChild("InspectorCard", {cardWidth, cardHeight}, 0, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    processInspectorCardContent(weights, biases, activationFunctions, selectionData, cardWidth, cardHeight);
+    ImGui::EndChild();
+
+    if (!narrowLayout) {
+        ImGui::SetCursorScreenPos(cursorBackup);
+    }
+}
+
+void _NeuralNetEditorWidget::processInspectorCardContent(
+    std::vector<NeuralNetWeight>& weights,
+    std::vector<float>& biases,
+    std::vector<ActivationFunction>& activationFunctions,
+    SelectionData const& selectionData,
+    float cardWidth,
+    float cardHeight)
+{
+    auto inputIndex = selectionData.inputIndex;
+    auto outputIndex = selectionData.outputIndex;
+
+    auto lineHeight = ImGui::GetTextLineHeight();
+    auto frameHeight = ImGui::GetFrameHeight();
+    auto itemSpacing = scale(CardItemSpacing);
+    auto cardContentWidth = cardWidth - 2 * scale(CardPadding);
 
     auto drawList = ImGui::GetWindowDrawList();
     ImVec2 cardMin = ImGui::GetWindowPos();
@@ -720,7 +783,7 @@ void _NeuralNetEditorWidget::processInspectorCard(
     // The label is drawn manually so that the reset button fits between slider and label
     auto labelWidth = ImGui::CalcTextSize("Weight").x;
     auto spacing = ImGui::GetStyle().ItemSpacing.x;
-    auto sliderWidth = (scale(cardContentWidth) - 2 * spacing + scale(7.0f) - resetButtonWidth() - labelWidth) / scaleFactor;
+    auto sliderWidth = scaleInverse(cardContentWidth - 2 * spacing + scale(ResetButtonOverlap) - resetButtonWidth() - labelWidth);
     auto sliderParameters = AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-2.0f).max(2.0f);
 
     auto& weightValue = weights.at(outputIndex * NEURAL_NET_INPUTS + inputIndex);
@@ -752,7 +815,7 @@ void _NeuralNetEditorWidget::processInspectorCard(
     // Activation function chooser: one button per function showing its graph
     auto buttonSpacing = ImGui::GetStyle().ItemSpacing.x;
     auto numActivationFunctions = toFloat(ActivationFunction_Count);
-    auto buttonWidth = (scale(cardContentWidth) - buttonSpacing * (numActivationFunctions - 1)) / numActivationFunctions;
+    auto buttonWidth = (cardContentWidth - buttonSpacing * (numActivationFunctions - 1)) / numActivationFunctions;
     auto buttonHeight = scale(ActivationIconHeight);
     for (int i = 0; i < ActivationFunction_Count; ++i) {
         auto isSelected = activationFunctions.at(outputIndex) == i;
@@ -785,9 +848,6 @@ void _NeuralNetEditorWidget::processInspectorCard(
     }
 
     ImGui::PopID();
-
-    ImGui::EndChild();
-    ImGui::SetCursorScreenPos(cursorBackup);
 }
 
 _NeuralNetEditorWidget::_NeuralNetEditorWidget() {}
@@ -849,6 +909,19 @@ ImColor _NeuralNetEditorWidget::calcWeightColor(float value, float alpha)
     auto result = value > 0 ? PositiveWeightColor : NegativeWeightColor;
     result.Value.w = alpha;
     return result;
+}
+
+// The inspector card is only drawn on top of the graph if it fits into the gap between the incoming and the outgoing block.
+// Otherwise the editor switches to a narrow layout in which the card is placed below the graph.
+bool _NeuralNetEditorWidget::isNarrowLayout(float availableWidth, std::vector<CellFunctionModule> const& cellFunctionModules)
+{
+    auto requiredWidth = calcGraphMinWidth(cellFunctionModules) - scale(GraphMinCurveWidth) + scale(CardWidth + 2 * CardOverlayMargin);
+    return availableWidth < requiredWidth;
+}
+
+float _NeuralNetEditorWidget::calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules)
+{
+    return calcInputNodeMargin() + calcOutputNodeMargin() + calcCellFunctionAreaWidth(cellFunctionModules) + scale(GraphMinCurveWidth);
 }
 
 // The group blocks are only as wide as their content requires, therefore the node columns follow the widest label
