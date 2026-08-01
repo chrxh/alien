@@ -33,7 +33,7 @@ public:
         std::vector<CellFunctionModule> const& cellFunctionModules = {},
         std::optional<LiveData> const& liveData = std::nullopt);
 
-    // Shows the editor additionally in a modal dialog until it is closed there
+    // Shows the editor additionally in a modal dialog which edits a copy until it is adopted there
     void openDialog();
 
 private:
@@ -78,7 +78,8 @@ private:
         std::vector<float>& connectionWeights,
         std::vector<CellFunctionModule> const& cellFunctionModules,
         std::optional<LiveData> const& liveData,
-        SelectionData& selectionData);
+        SelectionData& selectionData,
+        bool inDialog);
     void processConnectionWeightSliders(std::vector<float>& connectionWeights);
     GraphGeometry processGraph(
         std::vector<NeuralNetWeight>& weights,
@@ -87,14 +88,16 @@ private:
         std::vector<CellFunctionModule> const& cellFunctionModules,
         SelectionData& selectionData,
         std::optional<LiveData> const& liveData,
-        bool narrowLayout);
+        bool narrowLayout,
+        float rowSpacing);
     void drawGroupBlock(ImDrawList* drawList, std::string const& name, ImColor const& color, ImVec2 const& min, ImVec2 const& max, bool leftSide);
-    void drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout);
+    void drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout, float rowSpacing);
     void drawCellFunctionBlocks(
         ImDrawList* drawList,
         LayoutData const& layout,
         std::vector<CellFunctionModule> const& cellFunctionModules,
-        SelectionData const& selectionData);
+        SelectionData const& selectionData,
+        float rowSpacing);
     void drawWeightCurves(std::vector<NeuralNetWeight>& weights, SelectionData const& selectionData, ImDrawList* drawList, LayoutData const& layout);
     void drawInputNodes(SelectionData& selectionData, ImDrawList* drawList, LayoutData const& layout, std::optional<LiveData> const& liveData);
     void drawOutputNodes(
@@ -117,11 +120,21 @@ private:
         SelectionData const& selectionData,
         float cardWidth,
         float cardHeight);
-    void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void processActionButtons(
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        bool inDialog);
+    void processNetToolButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
     static bool isNarrowLayout(float availableWidth, std::vector<CellFunctionModule> const& cellFunctionModules);
     static float calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
+    // Stretches the rows until the graph fills the given height, but never below its natural spacing
+    static float calcGraphRowSpacing(float availableHeight);
+    static float calcActionAreaHeight();
+    static float calcNetToolButtonsWidth();
+    static float calcInspectorCardHeight();
     static float calcInputNodeMargin();
     static float calcOutputNodeMargin();
     static float calcCellFunctionLaneWidth(CellFunctionModule const& cellFunctionModule);
@@ -141,6 +154,15 @@ private:
         std::vector<ActivationFunction> activationFunctions;
     };
     std::optional<NetData> _copiedNet;
+
+    // Measured instead of calculated so that the graph can be fitted exactly into the remaining height
+    float _actionAreaHeight = 0;
+
+    // The dialog edits a copy of the net so that its changes can be discarded
+    NetData _pendingNet;
+    std::vector<float> _pendingConnectionWeights;
+    bool _openDialogRequested = false;
+    bool _adopted = false;
 
     NeuralNetEditorDialog _dialog;
 };
