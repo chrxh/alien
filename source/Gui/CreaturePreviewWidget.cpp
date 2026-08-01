@@ -29,8 +29,16 @@ namespace
     auto constexpr ZoomLevelForGeneReferences = 16.0f;
     auto constexpr ZoomLevelForNodeIndices = 32.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
-    auto constexpr SignalTextWidth = 40.0f;
+    auto constexpr SignalTextWidth = 45.0f;
+    auto constexpr SignalColumnWidth = 100.0f;
+    auto constexpr SignalSlidersPerColumn = 4;
     auto constexpr MaxCellFunctionTextSize = 16.0f;
+
+    // The signal editor exposes the outgoing signal channels and the memory activities of the selected cell
+    int calcNumSignalEditorColumns()
+    {
+        return (STANDARD_NEURONS_PER_CELL + MEMORY_NEURONS_PER_CELL) / SignalSlidersPerColumn;
+    }
 }
 
 
@@ -372,7 +380,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult)
 {
-    auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(410) : scale(250);
+    auto editorWidth = SignalColumnWidth * toFloat(calcNumSignalEditorColumns()) + 30.0f;
+    auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(editorWidth) : scale(250);
     auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
     auto contentAvailable = ImGui::GetContentRegionAvail();
     if (contentAvailable.x < scale(480.0f) || contentAvailable.y < scale(250.0f)) {
@@ -398,22 +407,32 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(8.0f);
 
-            auto& channels = selectedCell->_signal._channels;
-            int index = 0;
-            for (int i = 0; i < STANDARD_NEURONS_PER_CELL / 4; ++i) {
-                ImGui::PushID(i);
-                if (ImGui::BeginChild("", ImVec2(scale(95), scale(0)))) {
-                    for (int j = 0; j < 4; ++j) {
-                        auto& channel = channels.at(i * 4 + j);
+            struct SignalEditorEntry
+            {
+                std::string name;
+                float* value;
+            };
+            std::vector<SignalEditorEntry> entries;
+            for (auto index : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
+                entries.emplace_back("Out " + std::to_string(index), &selectedCell->_signal._channels.at(index));
+            }
+            for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
+                entries.emplace_back("Mem " + std::to_string(index), &selectedCell->_memoryActivities.at(index));
+            }
+
+            auto numColumns = calcNumSignalEditorColumns();
+            for (auto column : std::views::iota(0, numColumns)) {
+                ImGui::PushID(column);
+                if (ImGui::BeginChild("", ImVec2(scale(SignalColumnWidth - 5.0f), scale(0)))) {
+                    for (auto row : std::views::iota(0, SignalSlidersPerColumn)) {
+                        auto const& entry = entries.at(column * SignalSlidersPerColumn + row);
                         phenotypeChanged |= AlienGui::SliderFloat(
-                            AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f),
-                            &channel);
-                        ++index;
+                            AlienGui::SliderFloatParameters().name(entry.name).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f), entry.value);
                     }
                 }
                 ImGui::EndChild();
                 ImGui::PopID();
-                if (i < STANDARD_NEURONS_PER_CELL / 4 - 1) {
+                if (column < numColumns - 1) {
                     ImGui::SameLine();
                 }
             }
@@ -516,6 +535,7 @@ void _CreaturePreviewWidget::updatePhenotype(ContentDesc& phenotype, CellPreview
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
             object.getCellRef()._signal = SignalDesc().channels(editedCell._signal._channels);
+            object.getCellRef()._memoryActivities = editedCell._memoryActivities;
         }
     }
 }

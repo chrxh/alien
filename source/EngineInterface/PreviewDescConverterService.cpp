@@ -134,6 +134,7 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
                                .cellType(getCellType(object));
 
         previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
+        previewCell._memoryActivities = object.getCellRef()._memoryActivities;
         if (node != nullptr && node->_constructor.has_value()) {
             if (!genome._genes.empty()) {
                 auto nodeConstructor = node->_constructor.value();

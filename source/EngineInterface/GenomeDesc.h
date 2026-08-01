@@ -61,11 +61,6 @@ struct ConstructorGenomeDesc
     MEMBER(ConstructorGenomeDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
 };
 
-struct TelemetryGenomeDesc
-{
-    auto operator<=>(TelemetryGenomeDesc const&) const = default;
-};
-
 struct DetectEnergyGenomeDesc
 {
     auto operator<=>(DetectEnergyGenomeDesc const&) const = default;
@@ -96,8 +91,7 @@ struct DetectCreatureGenomeDesc
     MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeGenomeDesc =
-    std::variant<TelemetryGenomeDesc, DetectEnergyGenomeDesc, DetectSolidGenomeDesc, DetectFreeCellGenomeDesc, DetectCreatureGenomeDesc>;
+using SensorModeGenomeDesc = std::variant<DetectEnergyGenomeDesc, DetectSolidGenomeDesc, DetectFreeCellGenomeDesc, DetectCreatureGenomeDesc>;
 
 struct SensorGenomeDesc
 {

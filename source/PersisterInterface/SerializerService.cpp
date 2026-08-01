@@ -560,14 +560,6 @@ namespace cereal
     SPLIT_SERIALIZATION(ConstructorGenomeDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TelemetryGenomeDesc& data)
-    {
-        //TelemetryGenomeDesc defaultObject;
-        auto scope = getSerializationScope(task, ar);
-    }
-    SPLIT_SERIALIZATION(TelemetryGenomeDesc)
-
-    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyGenomeDesc& data)
     {
         DetectEnergyGenomeDesc defaultObject;
@@ -1421,14 +1413,6 @@ namespace cereal
         scope.addMember(Id_Constructor_NumConcatenations, data._numConcatenations, defaultObject._numConcatenations);
     }
     SPLIT_SERIALIZATION(ConstructorDesc)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TelemetryDesc& data)
-    {
-        //TelemetryDesc defaultObject;
-        auto scope = getSerializationScope(task, ar);
-    }
-    SPLIT_SERIALIZATION(TelemetryDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyDesc& data)

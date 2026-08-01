@@ -364,10 +364,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             sensor._minRange = objectTO.typeData.cell.cellTypeData.sensor.minRange;
             sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
-            if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                TelemetryDesc telemetry;
-                sensor._mode = telemetry;
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                 DetectEnergyDesc detectEnergy;
                 detectEnergy._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 sensor._mode = detectEnergy;
@@ -649,10 +646,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
-        if (nodeTO->cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            TelemetryGenomeDesc telemetry;
-            sensorDesc._mode = telemetry;
-        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+        if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyGenomeDesc detectEnergy;
             detectEnergy._minDensity = nodeTO->cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensorDesc._mode = detectEnergy;
@@ -1053,10 +1047,7 @@ void DescConverterService::convertGenomeToTO(
                 sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
 
-                if (sensorTO.mode == SensorMode_Telemetry) {
-                    //auto const& telemetryDesc = std::get<TelemetryGenomeDesc>(sensorDesc._mode);
-                    //auto& telemetryTO = sensorTO.modeData.telemetry;
-                } else if (sensorTO.mode == SensorMode_DetectEnergy) {
+                if (sensorTO.mode == SensorMode_DetectEnergy) {
                     auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDesc>(sensorDesc._mode);
                     auto& detectEnergyTO = sensorTO.modeData.detectEnergy;
                     detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
@@ -1365,10 +1356,7 @@ void DescConverterService::convertObjectToTO(
             sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
             sensorTO.mode = sensorDesc.getMode();
 
-            if (sensorTO.mode == SensorMode_Telemetry) {
-                //auto const& telemetryDesc = std::get<TelemetryDesc>(sensorDesc._mode);
-                //TelemetryTO& telemetryTO = sensorTO.modeData.telemetry;
-            } else if (sensorTO.mode == SensorMode_DetectEnergy) {
+            if (sensorTO.mode == SensorMode_DetectEnergy) {
                 auto const& detectEnergyDesc = std::get<DetectEnergyDesc>(sensorDesc._mode);
                 DetectEnergyTO& detectEnergyTO = sensorTO.modeData.detectEnergy;
                 detectEnergyTO.minDensity = detectEnergyDesc._minDensity;

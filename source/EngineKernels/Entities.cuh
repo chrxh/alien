@@ -93,9 +93,6 @@ struct Constructor
     bool energyNeeded;
 };
 
-struct Telemetry
-{};
-
 struct DetectEnergy
 {
     float minDensity;
@@ -120,7 +117,6 @@ struct DetectCreature
 
 union SensorModeData
 {
-    Telemetry telemetry;
     DetectEnergy detectEnergy;
     DetectSolid detectSolid;
     DetectFreeCell detectFreeCell;

@@ -82,11 +82,6 @@ struct ConstructorDesc
     static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
-struct TelemetryDesc
-{
-    auto operator<=>(TelemetryDesc const&) const = default;
-};
-
 struct DetectEnergyDesc
 {
     auto operator<=>(DetectEnergyDesc const&) const = default;
@@ -117,7 +112,7 @@ struct DetectCreatureDesc
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeDesc = std::variant<TelemetryDesc, DetectEnergyDesc, DetectSolidDesc, DetectFreeCellDesc, DetectCreatureDesc>;
+using SensorModeDesc = std::variant<DetectEnergyDesc, DetectSolidDesc, DetectFreeCellDesc, DetectCreatureDesc>;
 
 struct SensorLastMatchDesc
 {

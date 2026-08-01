@@ -177,8 +177,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
                 node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
-                if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     node.cellTypeData.sensor.modeData.detectEnergy.minDensity = nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -454,8 +453,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
             cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
             cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
-            if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                 cell->cellTypeData.sensor.modeData.detectEnergy.minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -817,8 +815,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         sensor.minRange = nodeSensor.minRange;
         sensor.maxRange = nodeSensor.maxRange;
         sensor.mode = nodeSensor.mode;
-        if (nodeSensor.mode == SensorMode_Telemetry) {
-        } else if (nodeSensor.mode == SensorMode_DetectEnergy) {
+        if (nodeSensor.mode == SensorMode_DetectEnergy) {
             sensor.modeData.detectEnergy.minDensity = nodeSensor.modeData.detectEnergy.minDensity;
         } else if (nodeSensor.mode == SensorMode_DetectSolid) {
         } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {

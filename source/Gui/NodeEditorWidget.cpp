@@ -116,8 +116,6 @@ namespace
     SensorModeGenomeDesc createSensorModeGenomeDesc(SensorMode mode)
     {
         switch (mode) {
-        case SensorMode_Telemetry:
-            return TelemetryGenomeDesc();
         case SensorMode_DetectEnergy:
             return DetectEnergyGenomeDesc();
         case SensorMode_DetectSolid:

@@ -898,9 +898,9 @@ float _NeuralNetEditorWidget::calcCellFunctionAreaWidth(std::vector<CellFunction
 std::string _NeuralNetEditorWidget::getInputLabel(int inputIndex)
 {
     if (inputIndex < STANDARD_NEURONS_PER_CELL) {
-        return "Sig " + std::to_string(inputIndex + 1);
+        return "In " + std::to_string(inputIndex);
     } else if (inputIndex < NEURAL_NET_OUTPUTS) {
-        return "Mem " + std::to_string(inputIndex - STANDARD_NEURONS_PER_CELL + 1);
+        return "Mem " + std::to_string(inputIndex - STANDARD_NEURONS_PER_CELL);
     }
     return TelemetryLabels.at(inputIndex - NEURAL_NET_OUTPUTS);
 }
@@ -908,9 +908,9 @@ std::string _NeuralNetEditorWidget::getInputLabel(int inputIndex)
 std::string _NeuralNetEditorWidget::getOutputLabel(int outputIndex)
 {
     if (outputIndex < STANDARD_NEURONS_PER_CELL) {
-        return "Out " + std::to_string(outputIndex + 1);
+        return "Out " + std::to_string(outputIndex);
     }
-    return "Mem " + std::to_string(outputIndex - STANDARD_NEURONS_PER_CELL + 1);
+    return "Mem " + std::to_string(outputIndex - STANDARD_NEURONS_PER_CELL);
 }
 
 template <typename T>
