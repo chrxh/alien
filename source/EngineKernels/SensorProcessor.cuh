@@ -11,7 +11,6 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static void processDetection(SimulationData& data, SimulationStatistics& statistics, Object* object);
-    __inline__ __device__ static void processTelemetry(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void initialScan(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
@@ -70,11 +69,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     if (isTriggered) {
-        if (object->typeData.cell.cellTypeData.sensor.mode != SensorMode_Telemetry) {
-            processDetection(data, statistics, object);
-        } else {
-            processTelemetry(data, statistics, object);
-        }
+        processDetection(data, statistics, object);
     }
 }
 
@@ -89,37 +84,6 @@ __inline__ __device__ void SensorProcessor::processDetection(SimulationData& dat
         }
     } else {
         initialScan(data, statistics, object);
-    }
-}
-
-__inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& data, SimulationStatistics& statistics, Object* object)
-{
-    if (threadIdx.x == 0) {
-
-        // Measure cell energy level
-        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
-        auto energyAboveMin = max(object->typeData.cell.usableEnergy - cellMinEnergy, 0.0f);
-        // Mapping energyAboveMin to [0.0, 1.0]
-        // 0    -> 0
-        // 10   -> 0.21
-        // 50   -> 0.32
-        // 100  -> 0.36
-        // 1000 -> 0.5
-        object->typeData.cell.signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(object->typeData.cell.usableEnergy + 1.0f, 0.1f);
-
-        // Measure cell velocity with respect to front angle. Angle: between -1.0 and 1.0
-        object->typeData.cell.signal.channels[Channels::SensorTelemetryCellVelAngle] =
-            ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, object, object->vel);
-
-        // Measure cell velocity with
-        auto vel = Math::length(object->vel);
-        // Mapping velocity to [0.0, 1.0]
-        // 0     -> 0
-        // 0.001 -> 0.014
-        // 0.01  -> 0.12
-        // 0.1   -> 0.52
-        // 0.5   -> 0.94
-        object->typeData.cell.signal.channels[Channels::SensorTelemetryCellVelStrength] = min(log10f(1.0f + vel * 50) / 1.5f, 1.0f);
     }
 }
 

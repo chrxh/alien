@@ -45,7 +45,6 @@ ALIEN_MUTATION_FIELD_COUNT(CommunicatorGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(VoidGenomeDesc, 0);
 
 // --- Sensor modes (switch (node.cellTypeData.sensor.mode)) ---
-ALIEN_MUTATION_FIELD_COUNT(TelemetryGenomeDesc, 0);
 ALIEN_MUTATION_FIELD_COUNT(DetectEnergyGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(DetectSolidGenomeDesc, 0);
 ALIEN_MUTATION_FIELD_COUNT(DetectFreeCellGenomeDesc, 2);
@@ -83,7 +82,7 @@ ALIEN_MUTATION_FIELD_COUNT(SenderGenomeDesc, 2);
 ALIEN_MUTATION_FIELD_COUNT(ReceiverGenomeDesc, 2);
 
 // --- Number of modes per cell type ---
-ALIEN_MUTATION_MODE_COUNT(SensorModeGenomeDesc, 5);
+ALIEN_MUTATION_MODE_COUNT(SensorModeGenomeDesc, 4);
 ALIEN_MUTATION_MODE_COUNT(GeneratorModeGenomeDesc, 2);
 ALIEN_MUTATION_MODE_COUNT(AttackerModeGenomeDesc, 2);
 ALIEN_MUTATION_MODE_COUNT(MuscleModeGenomeDesc, 6);

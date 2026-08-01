@@ -69,9 +69,6 @@ struct ConstructorTO
     uint16_t currentOffspring;
 };
 
-struct TelemetryTO
-{};
-
 struct DetectEnergyTO
 {
     float minDensity;
@@ -96,7 +93,6 @@ struct DetectCreatureTO
 
 union SensorModeTO
 {
-    TelemetryTO telemetry;
     DetectEnergyTO detectEnergy;
     DetectSolidTO detectSolid;
     DetectFreeCellTO detectFreeCell;

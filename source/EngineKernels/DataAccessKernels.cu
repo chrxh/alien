@@ -116,8 +116,7 @@ namespace
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
                         nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
-                        if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                        } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                        if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                             nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = node.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -412,8 +411,7 @@ namespace
                 cellTO.cellTypeData.sensor.minRange = cell.cellTypeData.sensor.minRange;
                 cellTO.cellTypeData.sensor.maxRange = cell.cellTypeData.sensor.maxRange;
                 cellTO.cellTypeData.sensor.mode = cell.cellTypeData.sensor.mode;
-                if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {

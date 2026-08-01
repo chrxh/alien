@@ -29,9 +29,6 @@ struct DepotGenome
     float initialStoredUsableEnergy;
 };
 
-struct TelemetryGenome
-{};
-
 struct DetectEnergyGenome
 {
     float minDensity;
@@ -56,7 +53,6 @@ struct DetectCreatureGenome
 
 union SensorModeGenome
 {
-    TelemetryGenome telemetry;
     DetectEnergyGenome detectEnergy;
     DetectSolidGenome detectSolid;
     DetectFreeCellGenome detectFreeCell;

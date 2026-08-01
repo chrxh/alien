@@ -302,8 +302,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     mutateNumber(node.cellTypeData.sensor.minRange, Const::SensorRange_Min, Const::SensorRange_Max);
                     mutateNumber(node.cellTypeData.sensor.maxRange, Const::SensorRange_Min, Const::SensorRange_Max);
                     switch (node.cellTypeData.sensor.mode) {
-                    case SensorMode_Telemetry:
-                        break;
                     case SensorMode_DetectEnergy:
                         mutateNumber(
                             node.cellTypeData.sensor.modeData.detectEnergy.minDensity, Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
@@ -547,9 +545,6 @@ __inline__ __device__ void MutationProcessor::resetCellTypeModeToDefault(Node& n
     case CellType_Sensor: {
         auto& sensor = node.cellTypeData.sensor;
         switch (sensor.mode) {
-        case SensorMode_Telemetry:
-            sensor.modeData.telemetry = {};
-            break;
         case SensorMode_DetectEnergy:
             sensor.modeData.detectEnergy = {Const::DetectEnergyMinDensity_Default};
             break;

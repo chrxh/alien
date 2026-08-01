@@ -10,8 +10,6 @@ namespace
     struct CellProperties
     {
         CellType cellType = CellType_Base;
-        SensorMode sensorMode = SensorMode_DetectCreature;
-        bool sensorAutoTrigger = Const::SensorAutoTrigger_Default;
         MuscleMode muscleMode = MuscleMode_AutoBending;
         MemoryMode memoryMode = MemoryMode_SignalDelay;
         uint16_t memoryChannelBitMask = Const::MemoryChannelBitMask_Max;
@@ -30,19 +28,8 @@ namespace
         return {channel, "", label};
     }
 
-    std::vector<CellFunctionChannel> getSensorChannels(CellProperties const& properties)
+    std::vector<CellFunctionChannel> getSensorChannels()
     {
-        if (properties.sensorMode == SensorMode_Telemetry) {
-            std::vector<CellFunctionChannel> result;
-            if (!properties.sensorAutoTrigger) {
-                result.emplace_back(readChannel(Channels::CellTypeActivation, "trigger"));
-            }
-            result.emplace_back(writeChannel(Channels::SensorTelemetryCellEnergy, "energy"));
-            result.emplace_back(writeChannel(Channels::SensorTelemetryCellVelAngle, "vel angle"));
-            result.emplace_back(writeChannel(Channels::SensorTelemetryCellVelStrength, "vel speed"));
-            return result;
-        }
-
         // The trigger channel also selects the relocation scan and is therefore read even with auto triggering
         return {
             {Channels::SensorFoundResult, "trigger", "found"},
@@ -110,7 +97,7 @@ namespace
         case CellType_Depot:
             return {readChannel(Channels::CellTypeActivation, "transfer")};
         case CellType_Sensor:
-            return getSensorChannels(properties);
+            return getSensorChannels();
         case CellType_Generator:
             return {writeChannel(Channels::GeneratorOutput, "value")};
         case CellType_Attacker:
@@ -178,10 +165,6 @@ std::vector<CellFunctionModule> CellFunctionChannels::getModules(NodeDesc const&
 {
     CellProperties properties;
     properties.cellType = node.getCellType();
-    if (auto const* sensor = std::get_if<SensorGenomeDesc>(&node._cellType)) {
-        properties.sensorMode = sensor->getMode();
-        properties.sensorAutoTrigger = sensor->_autoTrigger;
-    }
     if (auto const* muscle = std::get_if<MuscleGenomeDesc>(&node._cellType)) {
         properties.muscleMode = muscle->getMode();
     }
@@ -202,10 +185,6 @@ std::vector<CellFunctionModule> CellFunctionChannels::getModules(CellDesc const&
 {
     CellProperties properties;
     properties.cellType = cell.getCellType();
-    if (auto const* sensor = std::get_if<SensorDesc>(&cell._cellType)) {
-        properties.sensorMode = sensor->getMode();
-        properties.sensorAutoTrigger = sensor->_autoTrigger;
-    }
     if (auto const* muscle = std::get_if<MuscleDesc>(&cell._cellType)) {
         properties.muscleMode = muscle->getMode();
     }

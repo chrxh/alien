@@ -14,7 +14,6 @@ std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObj
         ObjectParameter{ObjectType_FreeCell},
         ObjectParameter{ObjectType_Cell, CellType_Base},
         ObjectParameter{ObjectType_Cell, CellType_Depot},
-        ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectSolid}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
@@ -114,7 +113,6 @@ std::vector<DescTestDataFactory::NodeParameter> DescTestDataFactory::getAllNodeP
     return {
         NodeParameter{CellType_Base},
         NodeParameter{CellType_Depot},
-        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectSolid}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
@@ -697,9 +695,6 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
     case CellType_Sensor: {
         SensorModeDesc sensorModeDesc;
         switch (sensorMode) {
-        case SensorMode_Telemetry:
-            sensorModeDesc = TelemetryDesc();
-            break;
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyDesc().minDensity(0.3f);
             break;
@@ -869,9 +864,6 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
     case CellType_Sensor: {
         SensorModeGenomeDesc sensorModeDesc;
         switch (sensorMode) {
-        case SensorMode_Telemetry:
-            sensorModeDesc = TelemetryGenomeDesc();
-            break;
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyGenomeDesc().minDensity(0.25f);
             break;

@@ -58,9 +58,7 @@ SignalDesc& SignalDesc::channels(std::vector<float> const& value)
 
 SensorMode SensorDesc::getMode() const
 {
-    if (std::holds_alternative<TelemetryDesc>(_mode)) {
-        return SensorMode_Telemetry;
-    } else if (std::holds_alternative<DetectEnergyDesc>(_mode)) {
+    if (std::holds_alternative<DetectEnergyDesc>(_mode)) {
         return SensorMode_DetectEnergy;
     } else if (std::holds_alternative<DetectSolidDesc>(_mode)) {
         return SensorMode_DetectSolid;

@@ -117,8 +117,6 @@ namespace
     SensorModeDesc createSensorModeDesc(SensorMode mode)
     {
         switch (mode) {
-        case SensorMode_Telemetry:
-            return TelemetryDesc();
         case SensorMode_DetectEnergy:
             return DetectEnergyDesc();
         case SensorMode_DetectSolid:

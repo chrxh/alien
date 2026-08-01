@@ -61,9 +61,7 @@ bool GenomeDesc::equalWithoutId(GenomeDesc const& other) const
 
 SensorMode SensorGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<TelemetryGenomeDesc>(_mode)) {
-        return SensorMode_Telemetry;
-    } else if (std::holds_alternative<DetectEnergyGenomeDesc>(_mode)) {
+    if (std::holds_alternative<DetectEnergyGenomeDesc>(_mode)) {
         return SensorMode_DetectEnergy;
     } else if (std::holds_alternative<DetectSolidGenomeDesc>(_mode)) {
         return SensorMode_DetectSolid;
