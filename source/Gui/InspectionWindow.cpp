@@ -632,6 +632,7 @@ void _InspectionWindow::processNeuralNetNode(ObjectDesc& object)
             cell._neuralNetwork._biases,
             cell._neuralNetwork._activationFunctions,
             cell._neuralNetwork._connectionWeights,
+            CellFunctionChannels::getModules(cell),
             liveData);
     }
     AlienGui::EndTreeNode();
