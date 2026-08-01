@@ -16,6 +16,7 @@ public:
 
     virtual void open();
     void processNested();
+    bool isOpen() const;
 
 protected:
     virtual void processIntern() {}

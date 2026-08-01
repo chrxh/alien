@@ -111,6 +111,8 @@ PUBLIC
     NetworkSettingsDialog.h
     NetworkTransferController.cpp
     NetworkTransferController.h
+    NeuralNetEditorDialog.cpp
+    NeuralNetEditorDialog.h
     NeuralNetEditorWidget.cpp
     NeuralNetEditorWidget.h
     NewSimulationDialog.cpp

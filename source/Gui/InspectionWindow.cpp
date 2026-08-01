@@ -617,7 +617,9 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
 
 void _InspectionWindow::processNeuralNetNode(ObjectDesc& object)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
+    auto expandButtonClicked = false;
+    if (AlienGui::BeginTreeNode(
+            AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false), &expandButtonClicked)) {
         auto& cell = object.getCellRef();
         _NeuralNetEditorWidget::LiveData liveData;
         liveData.memoryActivities = cell._memoryActivities;
@@ -634,6 +636,10 @@ void _InspectionWindow::processNeuralNetNode(ObjectDesc& object)
             liveData);
     }
     AlienGui::EndTreeNode();
+
+    if (expandButtonClicked) {
+        _neuralNetWidget->openDialog();
+    }
 }
 
 namespace
