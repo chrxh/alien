@@ -50,6 +50,7 @@ private:
         float width,
         float height);
     void processFilterBar();
+    void limitTimelinesHeight();
     void processLineageTable();
     void onOpenRepresentativeGenome(uint64_t cellId);
     void processTimelineSection();
