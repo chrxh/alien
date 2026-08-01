@@ -446,11 +446,11 @@ struct CellTO
     uint32_t headUpdateId;
     bool headCell;
 
-    // Additional rendering data
+    // Events
     CellEvent event;
     uint8_t eventCounter;
-    uint8_t signalChanges;
     float2 eventPos;
+    uint8_t highlightIntensity;
 };
 
 union ObjectTypeDataTO

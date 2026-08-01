@@ -21,12 +21,12 @@ struct NumRenderObjects
 
 struct ObjectVertexData
 {
-    float pos[3];         // x, y, z position (z used for lighting)
-    float color[3];       // r, g, b color
-    int state;            // Bit 0..7 = cell type
-                          // Bit 8..15 = object type (ObjectType_Solid, ObjectType_FreeCell, ObjectType_Cell)
-                          // Bit 16 = is isolated (zero connections)
-    float signalChanges;  // Signal changes in [0, 1]
+    float pos[3];              // x, y, z position (z used for lighting)
+    float color[3];            // r, g, b color
+    int state;                 // Bit 0..7 = cell type
+                               // Bit 8..15 = object type (ObjectType_Solid, ObjectType_FreeCell, ObjectType_Cell)
+                               // Bit 16 = is isolated (zero connections)
+    float highlightIntensity;  // Highlight intensity in [0, 1]
 };
 
 struct FluidParticleVertexData

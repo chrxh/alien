@@ -523,11 +523,11 @@ struct CellDesc
     MEMBER(CellDesc, int, headUpdateId, 0);
     MEMBER(CellDesc, bool, headCell, false);
 
-    // Additional rendering data
+    // Events
     MEMBER(CellDesc, CellEvent, event, CellEvent_No);
     MEMBER(CellDesc, int, eventCounter, 0);
-    MEMBER(CellDesc, uint8_t, signalChanges, 0);
     MEMBER(CellDesc, RealVector2D, eventPos, RealVector2D());
+    MEMBER(CellDesc, uint8_t, highlightIntensity, 0);
 
     CellType getCellType() const;
 };
