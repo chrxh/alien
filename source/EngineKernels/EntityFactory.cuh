@@ -421,7 +421,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->memoryActivities[i] = cellTO.memoryActivities[i];
             cell->futureMemoryActivities[i] = cellTO.memoryActivities[i];
         }
-        cell->signalChanges = cellTO.signalChanges;
+        cell->highlightIntensity = cellTO.highlightIntensity;
 
         cell->cellType = cellTO.cellType;
 
@@ -780,7 +780,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.memoryActivities[i] = 0.0f;
         cell.futureMemoryActivities[i] = 0.0f;
     }
-    cell.signalChanges = 0;
+    cell.highlightIntensity = 0;
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
     for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {

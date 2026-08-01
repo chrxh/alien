@@ -336,7 +336,6 @@ namespace Const
 namespace Channels
 {
     auto constexpr AttackerSuccess = 2;
-    auto constexpr AttackerNotify = 7;
 }
 
 using AttackerMode = int;

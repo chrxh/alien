@@ -163,15 +163,15 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             objectData[idx].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
             objectData[idx].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-            // Compute signal changes from cell
-            float signalChanges = 0.0f;
+            // Compute highlight intensity from cell
+            float highlightIntensity = 0.0f;
             if (object->type == ObjectType_Cell) {
-                signalChanges = toFloat(object->typeData.cell.signalChanges) / 255.0f;
+                highlightIntensity = toFloat(object->typeData.cell.highlightIntensity) / 255.0f;
             }
 
             // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolatedOrTail (bit 16) into state field
             objectData[idx].state = cellType | (object->type << 8) | (isIsolatedOrTail << 16);
-            objectData[idx].signalChanges = signalChanges;
+            objectData[idx].highlightIntensity = highlightIntensity;
 
             object->tempValue1.as_uint64 = idx;
         }
