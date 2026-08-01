@@ -70,6 +70,7 @@ namespace
     auto constexpr GraphMinCurveWidth = 30.0f;
     auto constexpr CardItemSpacing = 5.0f;
     auto constexpr CardTopMargin = 6.0f;
+    auto constexpr ButtonAreaHeight = 50.0f;
     auto constexpr ActivationIconHeight = 18.0f;
     auto constexpr ActivationIconSamples = 48;
     auto constexpr ActivationIconDomain = 2.0f;
@@ -418,35 +419,32 @@ void _NeuralNetEditorWidget::processEditor(
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
 
-        processConnectionWeightSliders(connectionWeights);
-        ImGui::Separator();
+        // Use a child window for the content, reserving space for the action buttons
+        auto buttonAreaHeight = scale(ButtonAreaHeight);
+        GraphGeometry graphGeometry;
+        if (ImGui::BeginChild("NeuralNetEditorContent", ImVec2(0, -buttonAreaHeight), false)) {
+            processConnectionWeightSliders(connectionWeights);
+            ImGui::Separator();
 
-        // The graph takes the height that is left over after the fixed parts have been placed
-        auto itemSpacing = ImGui::GetStyle().ItemSpacing.y;
-        auto reservedHeight = itemSpacing + (_actionAreaHeight > 0 ? _actionAreaHeight : calcActionAreaHeight());
-        if (narrowLayout) {
-            reservedHeight += 2 * itemSpacing + scale(CardTopMargin) + calcInspectorCardHeight();
+            // The graph takes the height that is left over after the fixed parts have been placed
+            auto reservedHeight = 0.0f;
+            if (narrowLayout) {
+                reservedHeight = 2 * ImGui::GetStyle().ItemSpacing.y + scale(CardTopMargin) + calcInspectorCardHeight();
+            }
+            auto rowSpacing = calcGraphRowSpacing(ImGui::GetContentRegionAvail().y - reservedHeight);
+
+            graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData, narrowLayout, rowSpacing);
+
+            // There is no room for the card on top of the graph, therefore it is placed below it and does not cover any nodes
+            if (narrowLayout) {
+                processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry, narrowLayout);
+            }
         }
-        auto rowSpacing = calcGraphRowSpacing(ImGui::GetContentRegionAvail().y - reservedHeight);
+        ImGui::EndChild();
 
-        auto graphGeometry = processGraph(weights, biases, activationFunctions, cellFunctionModules, selectionData, liveData, narrowLayout, rowSpacing);
+        AlienGui::Separator();
 
-        // There is no room for the card on top of the graph, therefore it is placed below it and does not cover any nodes
-        if (narrowLayout) {
-            processInspectorCard(weights, biases, activationFunctions, selectionData, graphGeometry, narrowLayout);
-        }
-
-        // The rows are only stretched up to a limit, therefore the action row is kept at the bottom
-        auto remainingHeight = ImGui::GetContentRegionAvail().y - itemSpacing - calcActionAreaHeight();
-        if (remainingHeight > 0) {
-            ImGui::Dummy({0, remainingHeight});
-        }
-
-        // The height of the action area depends on the style and is therefore taken over to the next frame
-        auto actionAreaStartY = ImGui::GetCursorPosY();
-        ImGui::Separator();
         processActionButtons(weights, biases, activationFunctions, inDialog);
-        _actionAreaHeight = ImGui::GetCursorPosY() - actionAreaStartY;
 
         // Processed last so that the card is above the other widgets
         if (!narrowLayout) {
@@ -1101,12 +1099,6 @@ float _NeuralNetEditorWidget::calcGraphRowSpacing(float availableHeight)
     auto fixedHeight = 2 * GraphVerticalMargin + 2 * GraphGroupSpacing;
     auto rowSpacing = (scaleInverse(availableHeight) - fixedHeight) / toFloat(NEURAL_NET_INPUTS);
     return std::clamp(rowSpacing, GraphRowSpacing, GraphRowSpacing * GraphRowStretchMax);
-}
-
-// Separator and one row of buttons below the graph. Only used until the actual height has been measured.
-float _NeuralNetEditorWidget::calcActionAreaHeight()
-{
-    return ImGui::GetStyle().ItemSpacing.y + scale(1.0f) + ImGui::GetFrameHeight();
 }
 
 float _NeuralNetEditorWidget::calcNetToolButtonsWidth()
