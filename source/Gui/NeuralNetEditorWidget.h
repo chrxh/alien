@@ -132,7 +132,6 @@ private:
     static float calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
     // Stretches the rows until the graph fills the given height, but never below its natural spacing
     static float calcGraphRowSpacing(float availableHeight);
-    static float calcActionAreaHeight();
     static float calcNetToolButtonsWidth();
     static float calcInspectorCardHeight();
     static float calcInputNodeMargin();
@@ -154,9 +153,6 @@ private:
         std::vector<ActivationFunction> activationFunctions;
     };
     std::optional<NetData> _copiedNet;
-
-    // Measured instead of calculated so that the graph can be fitted exactly into the remaining height
-    float _actionAreaHeight = 0;
 
     // The dialog edits a copy of the net so that its changes can be discarded
     NetData _pendingNet;
