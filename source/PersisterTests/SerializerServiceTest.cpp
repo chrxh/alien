@@ -304,6 +304,22 @@ TEST_F(SerializerServiceTests, emptyStatisticsHistory)
     EXPECT_TRUE(after._statistics.lineages.empty());
 }
 
+TEST_F(SerializerServiceTests, truncatedSimulationIsRejected)
+{
+    SimulationDesc before;
+    before._mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    before._statistics.colors.emplace_back(createOverallSample(100));
+
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
+
+    // Reads that fail in a deferred operation must be reported as an error instead of terminating the process
+    for (auto length = size_t(0); length < serialized.size(); length += 7) {
+        SimulationDesc after;
+        EXPECT_FALSE(_serializerService->deserializeSimulationFromString(after, serialized.substr(0, length)));
+    }
+}
+
 TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
     ContentDesc data;
