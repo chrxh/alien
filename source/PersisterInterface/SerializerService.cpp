@@ -54,6 +54,26 @@ namespace
         Load,
         Save
     };
+
+    // Deferred read operations are executed in a destructor, which must not throw: failures are collected here instead
+    thread_local bool deserializationFailed = false;
+
+    // Provides the context for one deserialization
+    class DeserializationContext
+    {
+    public:
+        DeserializationContext() { deserializationFailed = false; }
+
+        DeserializationContext(DeserializationContext const&) = delete;
+        DeserializationContext& operator=(DeserializationContext const&) = delete;
+
+        void throwOnFailure() const
+        {
+            if (deserializationFailed) {
+                throw std::runtime_error("The file could not be read.");
+            }
+        }
+    };
 }
 
 namespace cereal
@@ -110,54 +130,17 @@ namespace cereal
 
         ~SerializationScope()
         {
-            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+            if (_task == SerializationTask::Load && deserializationFailed) {
 
-            // Process deferred operations
-            if (_task == SerializationTask::Save) {
+                // Reading further would only operate on garbage
+                return;
+            }
+            try {
+                processDeferredDescOps();
+            } catch (...) {
 
-                // Save map first
-                _ar(_attributeMap);
-
-                // Save sorted ids
-                std::vector<int> sortedIds;
-                sortedIds.reserve(_deferredDescOps.size());
-                for (const auto& op : _deferredDescOps) {
-                    sortedIds.push_back(op.id);
-                }
-                _ar(sortedIds);
-
-                // Then write size-prefixed ContentDesc data in sorted id order
-                for (auto const& op : _deferredDescOps) {
-                    op.serializeFunc();
-                }
-            } else {
-
-                // Read sorted ids
-                std::vector<int> savedIds;
-                _ar(savedIds);
-
-                // For each id, check if we have a deferred read operation, otherwise skip bytes
-                auto deferredOpIndex = 0;
-                auto deferredOpSize = _deferredDescOps.size();
-                for (int savedId : savedIds) {
-                    // deferredOpIndex is an optimization to avoid
-                    // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
-                    // for each savedId (savedIds and _deferredDescOps are sorted)
-                    while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
-                        ++deferredOpIndex;
-                    }
-
-                    if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
-                        // We want to read this ContentDesc - execute the read
-                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
-                    } else {
-                        // Skip this ContentDesc - read size and skip data
-                        uint64_t dataSize = 0;
-                        _ar(dataSize);
-                        std::vector<uint8_t> buffer(dataSize);
-                        _ar(cereal::binary_data(buffer.data(), dataSize));
-                    }
-                }
+                // A destructor must not throw: the failure is reported by the enclosing DeserializationContext
+                deserializationFailed = true;
             }
         }
 
@@ -249,6 +232,59 @@ namespace cereal
         }
 
     private:
+        void processDeferredDescOps()
+        {
+            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+
+            // Process deferred operations
+            if (_task == SerializationTask::Save) {
+
+                // Save map first
+                _ar(_attributeMap);
+
+                // Save sorted ids
+                std::vector<int> sortedIds;
+                sortedIds.reserve(_deferredDescOps.size());
+                for (const auto& op : _deferredDescOps) {
+                    sortedIds.push_back(op.id);
+                }
+                _ar(sortedIds);
+
+                // Then write size-prefixed ContentDesc data in sorted id order
+                for (auto const& op : _deferredDescOps) {
+                    op.serializeFunc();
+                }
+            } else {
+
+                // Read sorted ids
+                std::vector<int> savedIds;
+                _ar(savedIds);
+
+                // For each id, check if we have a deferred read operation, otherwise skip bytes
+                auto deferredOpIndex = 0;
+                auto deferredOpSize = _deferredDescOps.size();
+                for (int savedId : savedIds) {
+                    // deferredOpIndex is an optimization to avoid
+                    // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
+                    // for each savedId (savedIds and _deferredDescOps are sorted)
+                    while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
+                        ++deferredOpIndex;
+                    }
+
+                    if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
+                        // We want to read this ContentDesc - execute the read
+                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
+                    } else {
+                        // Skip this ContentDesc - read size and skip data
+                        uint64_t dataSize = 0;
+                        _ar(dataSize);
+                        std::vector<uint8_t> buffer(dataSize);
+                        _ar(cereal::binary_data(buffer.data(), dataSize));
+                    }
+                }
+            }
+        }
+
         void addDeferredDescOp(int id, std::function<void()> serializeFunc) { _deferredDescOps.push_back({id, std::move(serializeFunc)}); }
 
         struct DeferredOperation
@@ -2162,7 +2198,10 @@ void SerializerService::deserializeDescription(ContentDesc& description, std::is
     if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
+
+    DeserializationContext context;
     archive(description);
+    context.throwOnFailure();
 }
 
 void SerializerService::serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const
@@ -2720,7 +2759,10 @@ void SerializerService::deserializeSimulation(SimulationDesc& data, std::istream
     if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
+
+    DeserializationContext context;
     archive(data);
+    context.throwOnFailure();
 }
 
 bool SerializerService::wrapGenome(ContentDesc& output, GenomeDesc const& input) const
