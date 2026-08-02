@@ -132,39 +132,40 @@ namespace
         return result;
     }
 
-    // Drawn with a font that is rasterized at this size, otherwise thin strokes are lost when the glyphs are scaled down
-    ImFont* nodeLabelFont()
+    // Used for the markers accompanying the sliders, which stay small regardless of the label font
+    ImFont* smallLabelFont()
     {
         return StyleRepository::get().getTinyFont();
     }
 
-    float nodeLabelFontSize(float fontScale = 1.0f)
+    // The labels are drawn with a font that is rasterized at the used size, otherwise thin strokes are lost when the glyphs are scaled
+    float nodeLabelFontSize(ImFont* font, float fontScale = 1.0f)
     {
-        return nodeLabelFont()->FontSize * fontScale;
+        return font->FontSize * fontScale;
     }
 
-    ImVec2 calcNodeLabelSize(std::string const& text, float fontScale = 1.0f)
+    ImVec2 calcNodeLabelSize(ImFont* font, std::string const& text, float fontScale = 1.0f)
     {
-        return nodeLabelFont()->CalcTextSizeA(nodeLabelFontSize(fontScale), FLT_MAX, 0.0f, text.c_str());
+        return font->CalcTextSizeA(nodeLabelFontSize(font, fontScale), FLT_MAX, 0.0f, text.c_str());
     }
 
-    void addNodeLabel(ImDrawList* drawList, ImVec2 const& pos, ImColor const& color, std::string const& text, float fontScale = 1.0f)
+    void addNodeLabel(ImDrawList* drawList, ImFont* font, ImVec2 const& pos, ImColor const& color, std::string const& text, float fontScale = 1.0f)
     {
-        drawList->AddText(nodeLabelFont(), nodeLabelFontSize(fontScale), pos, color, text.c_str());
+        drawList->AddText(font, nodeLabelFontSize(font, fontScale), pos, color, text.c_str());
     }
 
     // ImGui cannot render rotated text, therefore the text is written horizontally and its vertices are rotated afterwards.
     // Glyphs outside the clip rectangle would be dropped before the rotation, therefore the text is written at the center
     // of the visible area and moved to its final position together with the rotation.
-    void addRotatedNodeLabel(ImDrawList* drawList, ImVec2 const& center, ImColor const& color, std::string const& text, bool clockwise)
+    void addRotatedNodeLabel(ImDrawList* drawList, ImFont* font, ImVec2 const& center, ImColor const& color, std::string const& text, bool clockwise)
     {
         auto clipRectMin = drawList->GetClipRectMin();
         auto clipRectMax = drawList->GetClipRectMax();
         ImVec2 pivot((clipRectMin.x + clipRectMax.x) / 2, (clipRectMin.y + clipRectMax.y) / 2);
 
-        auto textSize = calcNodeLabelSize(text);
+        auto textSize = calcNodeLabelSize(font, text);
         auto firstVertex = drawList->VtxBuffer.Size;
-        addNodeLabel(drawList, {pivot.x - textSize.x / 2, pivot.y - textSize.y / 2}, color, text);
+        addNodeLabel(drawList, font, {pivot.x - textSize.x / 2, pivot.y - textSize.y / 2}, color, text);
         auto lastVertex = drawList->VtxBuffer.Size;
 
         auto angle = clockwise ? Const::Pi / 2 : -Const::Pi / 2;
@@ -261,7 +262,7 @@ namespace
 
     float resetButtonWidth()
     {
-        auto font = nodeLabelFont();
+        auto font = smallLabelFont();
         return font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, ICON_FA_TIMES).x + 2 * ImGui::GetStyle().FramePadding.x;
     }
 
@@ -270,7 +271,7 @@ namespace
     {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(ResetButtonOverlap));
-        ImGui::PushFont(nodeLabelFont());
+        ImGui::PushFont(smallLabelFont());
         auto result = ImGui::Button(ICON_FA_TIMES);
         ImGui::PopFont();
         return result;
@@ -316,13 +317,14 @@ namespace
     }
 
     // A channel that is read and overwritten shows both roles below each other and therefore uses a smaller font
-    float calcChannelLabelWidth(CellFunctionChannel const& channel)
+    float calcChannelLabelWidth(ImFont* font, CellFunctionChannel const& channel)
     {
         if (!channel.readLabel.empty() && !channel.writeLabel.empty()) {
             return std::max(
-                calcNodeLabelSize(channel.writeLabel, CellFunctionDualLabelScale).x, calcNodeLabelSize(channel.readLabel, CellFunctionDualLabelScale).x);
+                calcNodeLabelSize(font, channel.writeLabel, CellFunctionDualLabelScale).x,
+                calcNodeLabelSize(font, channel.readLabel, CellFunctionDualLabelScale).x);
         }
-        return calcNodeLabelSize(channel.readLabel.empty() ? channel.writeLabel : channel.readLabel).x;
+        return calcNodeLabelSize(font, channel.readLabel.empty() ? channel.writeLabel : channel.readLabel).x;
     }
 
     // Divides the buttons of a row into groups
@@ -416,6 +418,9 @@ void _NeuralNetEditorWidget::processEditor(
     SelectionData& selectionData,
     bool inDialog)
 {
+    // The dialog offers more room than the embedded editor and therefore labels the graph with the larger default font
+    _labelFont = inDialog ? StyleRepository::get().getDefaultFont() : StyleRepository::get().getTinyFont();
+
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
 
@@ -471,7 +476,7 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     auto contentMin = ImGui::GetCursorScreenPos();
     auto contentWidth = ImGui::GetContentRegionAvail().x - horizontalMargin;
 
-    auto indexWidth = calcNodeLabelSize(std::to_string(MAX_OBJECT_CONNECTIONS)).x + scale(ConnectionWeightIndexMargin);
+    auto indexWidth = calcNodeLabelSize(smallLabelFont(), std::to_string(MAX_OBJECT_CONNECTIONS)).x + scale(ConnectionWeightIndexMargin);
     auto slidersPerRow = calcConnectionWeightSlidersPerRow(contentWidth, indexWidth);
     auto numRows = MAX_OBJECT_CONNECTIONS / slidersPerRow;
     auto contentHeight = toFloat(numRows) * frameHeight + toFloat(numRows - 1) * style.ItemSpacing.y;
@@ -488,9 +493,10 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
             contentMin.y + toFloat(i / slidersPerRow) * (frameHeight + style.ItemSpacing.y)};
 
         auto indexLabel = std::to_string(i + 1);
-        auto indexSize = calcNodeLabelSize(indexLabel);
+        auto indexSize = calcNodeLabelSize(smallLabelFont(), indexLabel);
         addNodeLabel(
             drawList,
+            smallLabelFont(),
             {cellPos.x + indexWidth - scale(ConnectionWeightIndexMargin) - indexSize.x, cellPos.y + (frameHeight - indexSize.y) / 2},
             withAlpha(LabelColor, ConnectionWeightIndexAlpha),
             indexLabel);
@@ -602,7 +608,7 @@ void _NeuralNetEditorWidget::drawGroupBlock(
     auto railMaxX = leftSide ? min.x + scale(GroupLabelRailWidth) : max.x;
     drawList->AddRectFilled({railMinX, min.y}, {railMaxX, max.y}, withAlpha(color, GroupLabelRailAlpha), rounding, cornerFlags);
 
-    addRotatedNodeLabel(drawList, {(railMinX + railMaxX) / 2, (min.y + max.y) / 2}, withAlpha(color, 0.9f), name, !leftSide);
+    addRotatedNodeLabel(drawList, _labelFont, {(railMinX + railMaxX) / 2, (min.y + max.y) / 2}, withAlpha(color, 0.9f), name, !leftSide);
 }
 
 void _NeuralNetEditorWidget::drawGroupBlocks(ImDrawList* drawList, LayoutData const& layout, float rowSpacing)
@@ -642,7 +648,7 @@ void _NeuralNetEditorWidget::drawCellFunctionBlocks(
 
         // The name is drawn vertically, therefore a block covering only few channels is extended around its center
         auto name = StringHelper::toUpper(functionModule.name);
-        auto minHeight = calcNodeLabelSize(name).x + 2 * scale(GroupBlockPadding);
+        auto minHeight = calcNodeLabelSize(_labelFont, name).x + 2 * scale(GroupBlockPadding);
         if (maxY - minY < minHeight) {
             auto centerY = (minY + maxY) / 2;
             minY = centerY - minHeight / 2;
@@ -665,12 +671,12 @@ void _NeuralNetEditorWidget::drawCellFunctionBlocks(
 
             auto labelX = lane.minX + scale(CellFunctionLabelMargin);
             if (isRead && isWrite) {
-                auto lineHeight = nodeLabelFontSize(CellFunctionDualLabelScale);
-                addNodeLabel(drawList, {labelX, nodeY - lineHeight}, color, channel.writeLabel, CellFunctionDualLabelScale);
-                addNodeLabel(drawList, {labelX, nodeY}, color, channel.readLabel, CellFunctionDualLabelScale);
+                auto lineHeight = nodeLabelFontSize(_labelFont, CellFunctionDualLabelScale);
+                addNodeLabel(drawList, _labelFont, {labelX, nodeY - lineHeight}, color, channel.writeLabel, CellFunctionDualLabelScale);
+                addNodeLabel(drawList, _labelFont, {labelX, nodeY}, color, channel.readLabel, CellFunctionDualLabelScale);
             } else {
                 auto const& label = isWrite ? channel.writeLabel : channel.readLabel;
-                addNodeLabel(drawList, {labelX, nodeY - calcNodeLabelSize(label).y / 2}, color, label);
+                addNodeLabel(drawList, _labelFont, {labelX, nodeY - calcNodeLabelSize(_labelFont, label).y / 2}, color, label);
             }
         }
         isInnermostLane = false;
@@ -753,9 +759,10 @@ void _NeuralNetEditorWidget::drawInputNodes(
         }
 
         auto label = getInputLabel(i);
-        auto textSize = calcNodeLabelSize(label);
+        auto textSize = calcNodeLabelSize(_labelFont, label);
         addNodeLabel(
             drawList,
+            _labelFont,
             {pos.x - scale(NodeRadius + NodeLabelMargin) - textSize.x, pos.y - textSize.y / 2},
             isSelected ? ImColor(255, 255, 255) : LabelColor,
             label);
@@ -786,7 +793,11 @@ void _NeuralNetEditorWidget::drawInputNodes(
             }
             if (!value.empty()) {
                 addNodeLabel(
-                    drawList, {pos.x + scale(NodeRadius + GroupBlockNodeMargin + NodeLabelMargin), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.6f), value);
+                    drawList,
+                    _labelFont,
+                    {pos.x + scale(NodeRadius + GroupBlockNodeMargin + NodeLabelMargin), pos.y - textSize.y / 2},
+                    withAlpha(LabelColor, 0.6f),
+                    value);
             }
         }
     }
@@ -824,12 +835,13 @@ void _NeuralNetEditorWidget::drawOutputNodes(
         }
 
         auto label = getOutputLabel(i);
-        auto textSize = calcNodeLabelSize(label);
+        auto textSize = calcNodeLabelSize(_labelFont, label);
         auto labelX = pos.x + scale(NodeRadius + NodeLabelMargin);
-        addNodeLabel(drawList, {labelX, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
+        addNodeLabel(drawList, _labelFont, {labelX, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
 
         auto const& actfnLabel = ActivationFunctionShortStrings.at(activationFunctions.at(i));
-        addNodeLabel(drawList, {labelX + textSize.x + scale(ActivationLabelMargin), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel);
+        addNodeLabel(
+            drawList, _labelFont, {labelX + textSize.x + scale(ActivationLabelMargin), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel);
     }
     ImGui::PopID();
 }
@@ -1120,7 +1132,7 @@ float _NeuralNetEditorWidget::calcInputNodeMargin()
 {
     auto maxLabelWidth = 0.0f;
     for (auto index : std::views::iota(0, NEURAL_NET_INPUTS)) {
-        maxLabelWidth = std::max(maxLabelWidth, calcNodeLabelSize(getInputLabel(index)).x);
+        maxLabelWidth = std::max(maxLabelWidth, calcNodeLabelSize(_labelFont, getInputLabel(index)).x);
     }
     return scale(GroupLabelRailWidth + GroupLabelRailMargin + NodeLabelMargin + NodeRadius) + maxLabelWidth;
 }
@@ -1129,11 +1141,11 @@ float _NeuralNetEditorWidget::calcOutputNodeMargin()
 {
     auto maxLabelWidth = 0.0f;
     for (auto index : std::views::iota(0, NEURAL_NET_OUTPUTS)) {
-        maxLabelWidth = std::max(maxLabelWidth, calcNodeLabelSize(getOutputLabel(index)).x);
+        maxLabelWidth = std::max(maxLabelWidth, calcNodeLabelSize(_labelFont, getOutputLabel(index)).x);
     }
     auto maxActfnLabelWidth = 0.0f;
     for (auto const& actfnLabel : ActivationFunctionShortStrings) {
-        maxActfnLabelWidth = std::max(maxActfnLabelWidth, calcNodeLabelSize(actfnLabel).x);
+        maxActfnLabelWidth = std::max(maxActfnLabelWidth, calcNodeLabelSize(_labelFont, actfnLabel).x);
     }
     return scale(GroupLabelRailWidth + GroupLabelRailMargin + ActivationLabelMargin + NodeLabelMargin + NodeRadius) + maxLabelWidth + maxActfnLabelWidth;
 }
@@ -1142,7 +1154,7 @@ float _NeuralNetEditorWidget::calcCellFunctionLaneWidth(CellFunctionModule const
 {
     auto maxLabelWidth = 0.0f;
     for (auto const& channel : cellFunctionModule.channels) {
-        maxLabelWidth = std::max(maxLabelWidth, calcChannelLabelWidth(channel));
+        maxLabelWidth = std::max(maxLabelWidth, calcChannelLabelWidth(_labelFont, channel));
     }
     return scale(CellFunctionLabelMargin + CellFunctionLabelPadding + GroupLabelRailWidth) + maxLabelWidth;
 }

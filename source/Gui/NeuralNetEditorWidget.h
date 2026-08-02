@@ -128,16 +128,18 @@ private:
     void processNetToolButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
-    static bool isNarrowLayout(float availableWidth, std::vector<CellFunctionModule> const& cellFunctionModules);
-    static float calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
     // Stretches the rows until the graph fills the given height, but never below its natural spacing
     static float calcGraphRowSpacing(float availableHeight);
     static float calcNetToolButtonsWidth();
     static float calcInspectorCardHeight();
-    static float calcInputNodeMargin();
-    static float calcOutputNodeMargin();
-    static float calcCellFunctionLaneWidth(CellFunctionModule const& cellFunctionModule);
-    static float calcCellFunctionAreaWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
+
+    // Depend on the label font and are therefore no static helpers
+    bool isNarrowLayout(float availableWidth, std::vector<CellFunctionModule> const& cellFunctionModules);
+    float calcGraphMinWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
+    float calcInputNodeMargin();
+    float calcOutputNodeMargin();
+    float calcCellFunctionLaneWidth(CellFunctionModule const& cellFunctionModule);
+    float calcCellFunctionAreaWidth(std::vector<CellFunctionModule> const& cellFunctionModules);
     static std::string getInputLabel(int inputIndex);
     static std::string getOutputLabel(int outputIndex);
 
@@ -145,6 +147,9 @@ private:
     SelectionData& getValueRef(std::unordered_map<unsigned int, T>& idToValueMap);
 
     std::unordered_map<unsigned int, SelectionData> _dataById;
+
+    // Chosen at the beginning of an editor pass, since the dialog labels the graph larger than the embedded editor
+    ImFont* _labelFont = nullptr;
 
     struct NetData
     {
