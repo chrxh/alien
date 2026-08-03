@@ -42,6 +42,7 @@ namespace
     auto constexpr BiasMarkerMinAlpha = 0.35f;
     auto constexpr BiasMarkerMaxAlpha = 1.0f;
     auto constexpr BiasMarkerZeroAlpha = 0.3f;
+    auto constexpr BiasMarkerSelectedBrightening = 0.35f;
     auto constexpr BiasMaxValue = 2.0f;
     auto constexpr BiasLogScale = 30.0f;
     auto constexpr OutputBlockNodeMargin = BiasMarkerMargin + BiasMarkerWidth + GroupBlockPadding;
@@ -97,6 +98,17 @@ namespace
     {
         auto result = color;
         result.Value.w = alpha;
+        return result;
+    }
+
+    // Shifts a color towards opaque white, used to highlight elements belonging to the selection
+    ImColor brighten(ImColor const& color, float amount)
+    {
+        auto result = color;
+        result.Value.x += (1.0f - result.Value.x) * amount;
+        result.Value.y += (1.0f - result.Value.y) * amount;
+        result.Value.z += (1.0f - result.Value.z) * amount;
+        result.Value.w += (1.0f - result.Value.w) * amount;
         return result;
     }
 
@@ -205,17 +217,20 @@ namespace
     }
 
     // The marker uses the weight colors, so the bias is read in the same visual language as the weights
-    ImColor calcBiasMarkerColor(float bias)
+    ImColor calcBiasMarkerColor(float bias, bool isSelected)
     {
-        if (std::abs(bias) <= NEAR_ZERO) {
-            return withAlpha(ZeroWeightColor, BiasMarkerZeroAlpha);
-        }
-        auto alpha = BiasMarkerMinAlpha + calcBiasFraction(bias) * (BiasMarkerMaxAlpha - BiasMarkerMinAlpha);
-        return withAlpha(bias > 0 ? PositiveWeightColor : NegativeWeightColor, alpha);
+        auto result = [&] {
+            if (std::abs(bias) <= NEAR_ZERO) {
+                return withAlpha(ZeroWeightColor, BiasMarkerZeroAlpha);
+            }
+            auto alpha = BiasMarkerMinAlpha + calcBiasFraction(bias) * (BiasMarkerMaxAlpha - BiasMarkerMinAlpha);
+            return withAlpha(bias > 0 ? PositiveWeightColor : NegativeWeightColor, alpha);
+        }();
+        return isSelected ? brighten(result, BiasMarkerSelectedBrightening) : result;
     }
 
     // Small block in front of an output node, placed inside the surrounding group block
-    void addBiasMarker(ImDrawList* drawList, ImVec2 const& nodePos, float bias)
+    void addBiasMarker(ImDrawList* drawList, ImVec2 const& nodePos, float bias, bool isSelected)
     {
         auto maxX = nodePos.x - scale(NodeRadius + BiasMarkerMargin);
         auto halfHeight = scale(BiasMarkerHeight) / 2;
@@ -224,7 +239,7 @@ namespace
 
         // Opaque backdrop so that the weight curves running below do not shine through
         drawList->AddRectFilled(min, max, NodeFillColor, scale(BiasMarkerRounding));
-        drawList->AddRectFilled(min, max, calcBiasMarkerColor(bias), scale(BiasMarkerRounding));
+        drawList->AddRectFilled(min, max, calcBiasMarkerColor(bias, isSelected), scale(BiasMarkerRounding));
     }
 
     // Draws the graph of an activation function into the given rectangle
@@ -826,7 +841,7 @@ void _NeuralNetEditorWidget::drawOutputNodes(
         if (isSelected) {
             drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
         }
-        addBiasMarker(drawList, pos, biases.at(i));
+        addBiasMarker(drawList, pos, biases.at(i), isSelected);
         drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
         auto borderColor = i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor;
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
