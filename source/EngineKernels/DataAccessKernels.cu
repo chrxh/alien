@@ -92,10 +92,10 @@ namespace
                     auto const& node = gene.nodes[i];
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
-                    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+                    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                         nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
                     }
-                    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+                    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
@@ -116,8 +116,7 @@ namespace
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
                         nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
-                        if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                        } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                        if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                             nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = node.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -357,8 +356,11 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
+            }
+            for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+                cellTO.memory[i] = cell.memory[i];
             }
             cellTO.activationTime = cell.activationTime;
             cellTO.lastUpdate = cell.lastUpdate;
@@ -371,7 +373,7 @@ namespace
             cellTO.headCell = cell.headCell;
             cellTO.event = cell.event;
             cellTO.eventCounter = cell.eventCounter;
-            cellTO.signalChanges = cell.signalChanges;
+            cellTO.highlightIntensity = cell.highlightIntensity;
             cellTO.eventPos = cell.eventPos;
 
             // Copy NeuralNet to NeuralNetTO
@@ -383,10 +385,10 @@ namespace
                     ABORT();
                 }
                 auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
-                for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+                for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                     nnTO->weights[i] = cell.neuralNetwork->weights[i];
                 }
-                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+                for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                     nnTO->biases[i] = cell.neuralNetwork->biases[i];
                     nnTO->activationFunctions[i] = cell.neuralNetwork->activationFunctions[i];
                 }
@@ -409,8 +411,7 @@ namespace
                 cellTO.cellTypeData.sensor.minRange = cell.cellTypeData.sensor.minRange;
                 cellTO.cellTypeData.sensor.maxRange = cell.cellTypeData.sensor.maxRange;
                 cellTO.cellTypeData.sensor.mode = cell.cellTypeData.sensor.mode;
-                if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {

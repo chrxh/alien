@@ -31,9 +31,9 @@ struct ConnectionTO
 
 struct NeuralNetTO
 {
-    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
-    float biases[NEURONS_PER_CELL];
-    ActivationFunction activationFunctions[NEURONS_PER_CELL];
+    NeuralNetWeight weights[NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS];
+    float biases[NEURAL_NET_OUTPUTS];
+    ActivationFunction activationFunctions[NEURAL_NET_OUTPUTS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -69,9 +69,6 @@ struct ConstructorTO
     uint16_t currentOffspring;
 };
 
-struct TelemetryTO
-{};
-
 struct DetectEnergyTO
 {
     float minDensity;
@@ -96,7 +93,6 @@ struct DetectCreatureTO
 
 union SensorModeTO
 {
-    TelemetryTO telemetry;
     DetectEnergyTO detectEnergy;
     DetectSolidTO detectSolid;
     DetectFreeCellTO detectFreeCell;
@@ -337,7 +333,7 @@ union MemoryModeDataTO
 
 struct SignalEntryTO
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct MemoryTO
@@ -394,7 +390,7 @@ union CellTypeDataTO
 
 struct SignalTO
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct SolidTO
@@ -438,6 +434,7 @@ struct CellTO
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
     SignalTO signal;
+    float memory[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;
 
@@ -445,11 +442,11 @@ struct CellTO
     uint32_t headUpdateId;
     bool headCell;
 
-    // Additional rendering data
+    // Events
     CellEvent event;
     uint8_t eventCounter;
-    uint8_t signalChanges;
     float2 eventPos;
+    uint8_t highlightIntensity;
 };
 
 union ObjectTypeDataTO

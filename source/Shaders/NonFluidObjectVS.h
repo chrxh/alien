@@ -9,7 +9,7 @@ namespace Shaders
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
 layout (location = 2) in int state;
-layout (location = 3) in float signalChanges;
+layout (location = 3) in float highlightIntensity;
 
 out vec3 vColor;
 
@@ -48,9 +48,9 @@ void main()
     }
     float sizeFactor = isIsolatedOrTail ? max(1.0, min(2.0, zoom * 2)): 1.0;
     
-    float visibleSignalChanges = zoom < DetailZoom ? 0.0 : signalChanges;
-    vColor = mix(aColor, vec3(1.0), visibleSignalChanges * 0.2);
-    gl_PointSize = radius * (0.4 + visibleSignalChanges * 0.2) * sizeFactor;
+    float visibleHighlightIntensity = zoom < DetailZoom ? 0.0 : highlightIntensity;
+    vColor = mix(aColor, vec3(1.0), visibleHighlightIntensity * 0.2);
+    gl_PointSize = radius * (0.4 + visibleHighlightIntensity * 0.2) * sizeFactor;
 }
 )";
 }

@@ -82,11 +82,6 @@ struct ConstructorDesc
     static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
-struct TelemetryDesc
-{
-    auto operator<=>(TelemetryDesc const&) const = default;
-};
-
 struct DetectEnergyDesc
 {
     auto operator<=>(DetectEnergyDesc const&) const = default;
@@ -117,7 +112,7 @@ struct DetectCreatureDesc
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeDesc = std::variant<TelemetryDesc, DetectEnergyDesc, DetectSolidDesc, DetectFreeCellDesc, DetectCreatureDesc>;
+using SensorModeDesc = std::variant<DetectEnergyDesc, DetectSolidDesc, DetectFreeCellDesc, DetectCreatureDesc>;
 
 struct SensorLastMatchDesc
 {
@@ -515,6 +510,7 @@ struct CellDesc
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
     MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
     CellDesc& signal(std::vector<float> const& value);
+    MEMBER(CellDesc, std::vector<float>, memory, std::vector<float>(MEMORY_NEURONS_PER_CELL, 0.0f));
     MEMBER(CellDesc, int, activationTime, 0);
     MEMBER(CellDesc, int, lastUpdate, 0);
 
@@ -522,11 +518,11 @@ struct CellDesc
     MEMBER(CellDesc, int, headUpdateId, 0);
     MEMBER(CellDesc, bool, headCell, false);
 
-    // Additional rendering data
+    // Events
     MEMBER(CellDesc, CellEvent, event, CellEvent_No);
     MEMBER(CellDesc, int, eventCounter, 0);
-    MEMBER(CellDesc, uint8_t, signalChanges, 0);
     MEMBER(CellDesc, RealVector2D, eventPos, RealVector2D());
+    MEMBER(CellDesc, uint8_t, highlightIntensity, 0);
 
     CellType getCellType() const;
 };

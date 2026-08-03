@@ -151,10 +151,10 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             auto& node = nodes[i];
             node.referenceAngle = nodeTO.referenceAngle;
             node.color = nodeTO.color;
-            for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                 node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];
             }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
                 node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
             }
@@ -177,8 +177,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
                 node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
-                if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     node.cellTypeData.sensor.modeData.detectEnergy.minDensity = nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -289,7 +288,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.memory.signalEntries = signalEntries;
                 auto const& entriesTO = reinterpret_cast<SignalEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.signalEntriesDataIndex);
                 for (int k = 0; k < numSignalEntries; ++k) {
-                    for (int l = 0; l < NEURONS_PER_CELL; ++l) {
+                    for (int l = 0; l < STANDARD_NEURONS_PER_CELL; ++l) {
                         signalEntries[k].channels[l] = entriesTO[k].channels[l];
                     }
                 }
@@ -414,10 +413,14 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->eventCounter = cellTO.eventCounter;
         cell->eventPos = cellTO.eventPos;
 
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
-        cell->signalChanges = cellTO.signalChanges;
+        for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+            cell->memory[i] = cellTO.memory[i];
+            cell->futureMemory[i] = cellTO.memory[i];
+        }
+        cell->highlightIntensity = cellTO.highlightIntensity;
 
         cell->cellType = cellTO.cellType;
 
@@ -425,10 +428,10 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         {
             auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
             cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
-            for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                 cell->neuralNetwork->weights[i] = nnTO->weights[i];
             }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
                 cell->neuralNetwork->biases[i] = nnTO->biases[i];
                 cell->neuralNetwork->activationFunctions[i] = nnTO->activationFunctions[i];
             }
@@ -450,8 +453,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
             cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
             cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
-            if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                 cell->cellTypeData.sensor.modeData.detectEnergy.minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -769,19 +771,23 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.branchIndex = branchIndex;
     cell.headUpdateId = 0;
     cell.headCell = false;
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
         cell.signal.channels[i] = 0.0f;
     }
-    cell.signalChanges = 0;
+    for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+        cell.memory[i] = 0.0f;
+        cell.futureMemory[i] = 0.0f;
+    }
+    cell.highlightIntensity = 0;
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
-    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
         cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
     }
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         cell.neuralNetwork->biases[i] = node->neuralNetwork.biases[i];
     }
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         cell.neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
     }
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -809,8 +815,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         sensor.minRange = nodeSensor.minRange;
         sensor.maxRange = nodeSensor.maxRange;
         sensor.mode = nodeSensor.mode;
-        if (nodeSensor.mode == SensorMode_Telemetry) {
-        } else if (nodeSensor.mode == SensorMode_DetectEnergy) {
+        if (nodeSensor.mode == SensorMode_DetectEnergy) {
             sensor.modeData.detectEnergy.minDensity = nodeSensor.modeData.detectEnergy.minDensity;
         } else if (nodeSensor.mode == SensorMode_DetectSolid) {
         } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {
@@ -955,7 +960,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         }
         memory.signalEntries = _data->entities.heap.getTypedSubArray<SignalEntry>(nodeMemory.numSignalEntries);
         for (int i = 0, j = nodeMemory.numSignalEntries; i < j; ++i) {
-            for (int k = 0; k < NEURONS_PER_CELL; ++k) {
+            for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
                 memory.signalEntries[i].channels[k] = nodeMemory.signalEntries[i].channels[k];
             }
         }

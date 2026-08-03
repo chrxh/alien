@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <optional>
+#include <ranges>
 
 #include <gtest/gtest.h>
 
@@ -38,21 +40,30 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
 
     _simulationFacade->setSimulationData(data);
 
-    // Every mutable constructor attribute must change at least once (provideEnergy is intentionally not mutated).
-    _simulationFacade->testOnly_mutate(1);
-    auto const actualGenome = getMutatedGenome();
-    auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-    ASSERT_TRUE(constructor.has_value());  // Without constructorToggleProbability the constructor must never be removed
-    auto const& mutated = constructor.value();
+    // A single mutation can leave an attribute at its previous value, e.g. when the Gaussian step of a small
+    // integer range rounds to zero, therefore several rounds are collected.
+    std::vector<ConstructorGenomeDesc> mutations;
+    for ([[maybe_unused]] auto round : std::views::iota(0, 10)) {
+        _simulationFacade->testOnly_mutate(1);
+        auto const actualGenome = getMutatedGenome();
+        auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+        ASSERT_TRUE(constructor.has_value());  // Without constructorToggleProbability the constructor must never be removed
+        mutations.emplace_back(constructor.value());
+    }
 
-    EXPECT_TRUE(mutated._autoTriggerInterval != original._autoTriggerInterval);
-    EXPECT_TRUE(mutated._geneIndex != original._geneIndex);
-    EXPECT_TRUE(mutated._constructionActivationTime != original._constructionActivationTime);
-    EXPECT_TRUE(mutated._constructionAngle != original._constructionAngle);
-    EXPECT_TRUE(mutated._reservedEnergy != original._reservedEnergy);
-    EXPECT_TRUE(mutated._separation != original._separation);
-    EXPECT_TRUE(mutated._numBranches != original._numBranches);
-    EXPECT_TRUE(mutated._numConcatenations != original._numConcatenations);
+    // Every mutable constructor attribute must change at least once (provideEnergy is intentionally not mutated).
+    auto changedAtLeastOnce = [&](auto attribute) {
+        return std::ranges::any_of(mutations, [&](auto const& mutated) { return attribute(mutated) != attribute(original); });
+    };
+
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._autoTriggerInterval; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._geneIndex; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._constructionActivationTime; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._constructionAngle; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._reservedEnergy; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._separation; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._numBranches; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._numConcatenations; }));
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)

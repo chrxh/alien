@@ -1717,7 +1717,24 @@ void AlienGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const
     }
 }
 
-void AlienGui::Group(GroupParameters const& parameters)
+namespace
+{
+    // Draws the expand button at the right end of the given header rectangle without moving the cursor
+    bool drawExpandButton(ImVec2 const& headerMin, ImVec2 const& headerMax, float rightMargin)
+    {
+        auto savedCursorPos = ImGui::GetCursorScreenPos();
+        auto iconSize = ImGui::GetFontSize();
+        auto iconPos = ImVec2(headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f);
+
+        auto result = AlienGui::MaximizeButton(iconPos, iconSize, false);
+        AlienGui::Tooltip("Open in a separate window");
+
+        ImGui::SetCursorScreenPos(savedCursorPos);
+        return result;
+    }
+}
+
+bool AlienGui::Group(GroupParameters const& parameters)
 {
     auto drawList = ImGui::GetWindowDrawList();
     auto style = ImGui::GetStyle();
@@ -1726,6 +1743,7 @@ void AlienGui::Group(GroupParameters const& parameters)
     ImGui::Spacing();
 
     auto cursorPos = ImGui::GetCursorScreenPos();
+    auto groupWidth = ImGui::GetContentRegionAvail().x;
     auto color = parameters._highlighted ? Const::GroupHighColor : Const::GroupDefaultColor;
     drawList->AddRectFilled(
         ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y),
@@ -1737,8 +1755,17 @@ void AlienGui::Group(GroupParameters const& parameters)
         AlienGui::HelpMarker(*parameters._tooltip);
     }
 
+    auto result = false;
+    if (parameters._expandButton) {
+        ImGui::PushID(parameters._text.c_str());
+        result = drawExpandButton(cursorPos, ImVec2(cursorPos.x + groupWidth, cursorPos.y + ImGui::GetTextLineHeight()), style.FramePadding.x);
+        ImGui::PopID();
+    }
+
     ImGui::Spacing();
     ImGui::Spacing();
+
+    return result;
 }
 
 void AlienGui::ListBox(ListBoxParameters const& parameters)
@@ -1965,7 +1992,7 @@ bool AlienGui::MaximizeButton(ImVec2 const& pos, float iconSize, bool maximized)
     return clicked;
 }
 
-bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
+bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked)
 {
     auto id = ImGui::GetID(parameters._name.c_str());
     ImGui::PushID(id);
@@ -1981,6 +2008,12 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
         auto it = _savedTreeNodeStatesByName.find(parameters._name);
         bool open = (it != _savedTreeNodeStatesByName.end()) ? it->second : parameters._defaultOpen;
         ImGui::SetNextItemOpen(open);
+    }
+
+    // The content of a collapsed tree node is not processed, therefore the tree node opens itself after a click on the expand button
+    if (treeNodeInfo.openRequested) {
+        ImGui::SetNextItemOpen(true);
+        treeNodeInfo.openRequested = false;
     }
 
     int highlightCountdown = 0;
@@ -2032,6 +2065,9 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     auto refPos = ImGui::GetCursorScreenPos();
     refPos.x += scale(28.0f);
 
+    if (expandButtonClicked) {
+        ImGui::SetNextItemAllowOverlap();
+    }
     bool result = ImGui::TreeNodeEx(parameters._name.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
 
     if (parameters._highlightedSubString.has_value()) {
@@ -2041,6 +2077,13 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
 
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
+
+    if (expandButtonClicked) {
+        *expandButtonClicked = drawExpandButton(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), scale(7.0f));
+        if (*expandButtonClicked) {
+            treeNodeInfo.openRequested = true;
+        }
+    }
 
     treeNodeInfo.isOpen = result;
     _savedTreeNodeStatesByName[parameters._name] = result;
@@ -2261,7 +2304,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
         style.GrabMinSize = scale(8.0f);
 
         AlienGui::BeginIndent();
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).format("%.2f").textWidth(parameters._textWidth).min(-2.0f).max(2.0f),
                 &entries.at(selectedEntry)._channels.at(i));

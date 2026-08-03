@@ -174,7 +174,8 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
 
     // Attack should happen at full strength
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
-    EXPECT_EQ(1.0f, actualTarget.getCellRef()._signal._channels.at(Channels::AttackerNotify)); // Notify attacked cell
+    EXPECT_EQ(CellEvent_Attacked, actualTarget.getCellRef()._event);  // Notify attacked cell
+    EXPECT_TRUE(actualTarget.getCellRef()._eventCounter > 0);
 }
 
 TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)

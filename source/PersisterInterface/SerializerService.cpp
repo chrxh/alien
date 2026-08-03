@@ -54,6 +54,26 @@ namespace
         Load,
         Save
     };
+
+    // Deferred read operations are executed in a destructor, which must not throw: failures are collected here instead
+    thread_local bool deserializationFailed = false;
+
+    // Provides the context for one deserialization
+    class DeserializationContext
+    {
+    public:
+        DeserializationContext() { deserializationFailed = false; }
+
+        DeserializationContext(DeserializationContext const&) = delete;
+        DeserializationContext& operator=(DeserializationContext const&) = delete;
+
+        void throwOnFailure() const
+        {
+            if (deserializationFailed) {
+                throw std::runtime_error("The file could not be read.");
+            }
+        }
+    };
 }
 
 namespace cereal
@@ -110,54 +130,17 @@ namespace cereal
 
         ~SerializationScope()
         {
-            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+            if (_task == SerializationTask::Load && deserializationFailed) {
 
-            // Process deferred operations
-            if (_task == SerializationTask::Save) {
+                // Reading further would only operate on garbage
+                return;
+            }
+            try {
+                processDeferredDescOps();
+            } catch (...) {
 
-                // Save map first
-                _ar(_attributeMap);
-
-                // Save sorted ids
-                std::vector<int> sortedIds;
-                sortedIds.reserve(_deferredDescOps.size());
-                for (const auto& op : _deferredDescOps) {
-                    sortedIds.push_back(op.id);
-                }
-                _ar(sortedIds);
-
-                // Then write size-prefixed ContentDesc data in sorted id order
-                for (auto const& op : _deferredDescOps) {
-                    op.serializeFunc();
-                }
-            } else {
-
-                // Read sorted ids
-                std::vector<int> savedIds;
-                _ar(savedIds);
-
-                // For each id, check if we have a deferred read operation, otherwise skip bytes
-                auto deferredOpIndex = 0;
-                auto deferredOpSize = _deferredDescOps.size();
-                for (int savedId : savedIds) {
-                    // deferredOpIndex is an optimization to avoid
-                    // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
-                    // for each savedId (savedIds and _deferredDescOps are sorted)
-                    while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
-                        ++deferredOpIndex;
-                    }
-
-                    if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
-                        // We want to read this ContentDesc - execute the read
-                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
-                    } else {
-                        // Skip this ContentDesc - read size and skip data
-                        uint64_t dataSize = 0;
-                        _ar(dataSize);
-                        std::vector<uint8_t> buffer(dataSize);
-                        _ar(cereal::binary_data(buffer.data(), dataSize));
-                    }
-                }
+                // A destructor must not throw: the failure is reported by the enclosing DeserializationContext
+                deserializationFailed = true;
             }
         }
 
@@ -224,6 +207,19 @@ namespace cereal
             }
         }
 
+        // For vectors whose size is fixed: files saved with a different layout may contain differently
+        // sized vectors, so the loaded values are merged into a default-sized vector
+        template <typename T>
+        void addFixedSizeMember(int key, std::vector<T>& value, std::vector<T> const& defaultValue)
+        {
+            addMember(key, value, defaultValue);
+            if (_task == SerializationTask::Load && value.size() != defaultValue.size()) {
+                auto adaptedValue = defaultValue;
+                std::copy_n(value.begin(), std::min(value.size(), adaptedValue.size()), adaptedValue.begin());
+                value = std::move(adaptedValue);
+            }
+        }
+
         // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
         void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
         {
@@ -249,6 +245,59 @@ namespace cereal
         }
 
     private:
+        void processDeferredDescOps()
+        {
+            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+
+            // Process deferred operations
+            if (_task == SerializationTask::Save) {
+
+                // Save map first
+                _ar(_attributeMap);
+
+                // Save sorted ids
+                std::vector<int> sortedIds;
+                sortedIds.reserve(_deferredDescOps.size());
+                for (const auto& op : _deferredDescOps) {
+                    sortedIds.push_back(op.id);
+                }
+                _ar(sortedIds);
+
+                // Then write size-prefixed ContentDesc data in sorted id order
+                for (auto const& op : _deferredDescOps) {
+                    op.serializeFunc();
+                }
+            } else {
+
+                // Read sorted ids
+                std::vector<int> savedIds;
+                _ar(savedIds);
+
+                // For each id, check if we have a deferred read operation, otherwise skip bytes
+                auto deferredOpIndex = 0;
+                auto deferredOpSize = _deferredDescOps.size();
+                for (int savedId : savedIds) {
+                    // deferredOpIndex is an optimization to avoid
+                    // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
+                    // for each savedId (savedIds and _deferredDescOps are sorted)
+                    while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
+                        ++deferredOpIndex;
+                    }
+
+                    if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
+                        // We want to read this ContentDesc - execute the read
+                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
+                    } else {
+                        // Skip this ContentDesc - read size and skip data
+                        uint64_t dataSize = 0;
+                        _ar(dataSize);
+                        std::vector<uint8_t> buffer(dataSize);
+                        _ar(cereal::binary_data(buffer.data(), dataSize));
+                    }
+                }
+            }
+        }
+
         void addDeferredDescOp(int id, std::function<void()> serializeFunc) { _deferredDescOps.push_back({id, std::move(serializeFunc)}); }
 
         struct DeferredOperation
@@ -504,10 +553,10 @@ namespace cereal
     {
         NeuralNetGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
-        scope.addMember(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
-        scope.addMember(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        scope.addMember(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
     }
     SPLIT_SERIALIZATION(NeuralNetGenomeDesc)
 
@@ -545,14 +594,6 @@ namespace cereal
         scope.addMember(Id_ConstructorGenome_NumConcatenations, data._numConcatenations, defaultObject._numConcatenations);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDesc)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TelemetryGenomeDesc& data)
-    {
-        //TelemetryGenomeDesc defaultObject;
-        auto scope = getSerializationScope(task, ar);
-    }
-    SPLIT_SERIALIZATION(TelemetryGenomeDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyGenomeDesc& data)
@@ -845,7 +886,7 @@ namespace cereal
     {
         SignalEntryGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
+        scope.addFixedSizeMember(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryGenomeDesc)
 
@@ -1169,7 +1210,7 @@ namespace
     auto constexpr Id_Cell_Event = 14;
     auto constexpr Id_Cell_EventCounter = 15;
     auto constexpr Id_Cell_EventPos = 16;
-    auto constexpr Id_Cell_SignalChanges = 25;
+    auto constexpr Id_Cell_HighlightIntensity = 25;
     auto constexpr Id_Cell_LastUpdate = 18;
     auto constexpr Id_Cell_ConcatenationIndex = 19;
     auto constexpr Id_Cell_BranchIndex = 20;
@@ -1310,6 +1351,7 @@ namespace
     auto constexpr Id_Cell_Constructor = 22;
     auto constexpr Id_Cell_Signal = 23;
     auto constexpr Id_Cell_NeuralNetwork = 24;
+    auto constexpr Id_Cell_Memory = 26;
 
     auto constexpr Id_Object_Connections = 7;
     auto constexpr Id_Object_Type = 8;
@@ -1350,7 +1392,7 @@ namespace cereal
     {
         SignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_Signal_Channels, data._channels, defaultObject._channels);
+        scope.addFixedSizeMember(Id_Signal_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
@@ -1359,10 +1401,10 @@ namespace cereal
     {
         NeuralNetDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_NeuralNet_Weights, data._weights, defaultObject._weights);
-        scope.addMember(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
-        scope.addMember(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        scope.addMember(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        scope.addFixedSizeMember(Id_NeuralNet_Weights, data._weights, defaultObject._weights);
+        scope.addFixedSizeMember(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
+        scope.addFixedSizeMember(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        scope.addFixedSizeMember(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
     }
     SPLIT_SERIALIZATION(NeuralNetDesc)
 
@@ -1401,14 +1443,6 @@ namespace cereal
         scope.addMember(Id_Constructor_NumConcatenations, data._numConcatenations, defaultObject._numConcatenations);
     }
     SPLIT_SERIALIZATION(ConstructorDesc)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TelemetryDesc& data)
-    {
-        //TelemetryDesc defaultObject;
-        auto scope = getSerializationScope(task, ar);
-    }
-    SPLIT_SERIALIZATION(TelemetryDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyDesc& data)
@@ -1731,7 +1765,7 @@ namespace cereal
     {
         SignalEntryDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
+        scope.addFixedSizeMember(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryDesc)
 
@@ -1832,12 +1866,13 @@ namespace cereal
         scope.addMember(Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         scope.addMember(Id_Cell_Event, data._event, defaultObject._event);
         scope.addMember(Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
-        scope.addMember(Id_Cell_SignalChanges, data._signalChanges, defaultObject._signalChanges);
+        scope.addMember(Id_Cell_HighlightIntensity, data._highlightIntensity, defaultObject._highlightIntensity);
         scope.addMember(Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         scope.addMember(Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
         scope.addDesc(Id_Cell_CellType, data._cellType);
         scope.addDesc(Id_Cell_Constructor, data._constructor);
         scope.addDesc(Id_Cell_Signal, data._signal);
+        scope.addFixedSizeMember(Id_Cell_Memory, data._memory, defaultObject._memory);
         scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
@@ -2155,7 +2190,10 @@ void SerializerService::deserializeDescription(ContentDesc& description, std::is
     if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
+
+    DeserializationContext context;
     archive(description);
+    context.throwOnFailure();
 }
 
 void SerializerService::serializeSettings(SimulationParameters const& parameters, std::ostream& stream) const
@@ -2713,7 +2751,10 @@ void SerializerService::deserializeSimulation(SimulationDesc& data, std::istream
     if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
+
+    DeserializationContext context;
     archive(data);
+    context.throwOnFailure();
 }
 
 bool SerializerService::wrapGenome(ContentDesc& output, GenomeDesc const& input) const

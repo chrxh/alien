@@ -161,6 +161,13 @@ bool StringHelper::containsCaseInsensitive(std::string const& str, std::string c
     return strLower.find(toMatchLower) != std::string::npos;
 }
 
+std::string StringHelper::toUpper(std::string const& str)
+{
+    std::string result = str;
+    std::transform(str.begin(), str.end(), result.begin(), ::toupper);
+    return result;
+}
+
 StringHelper::Decomposition StringHelper::decomposeCaseInsensitiveMatch(std::string const& str, std::string const& toMatch)
 {
     std::string strLower = str;

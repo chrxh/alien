@@ -31,7 +31,7 @@ namespace
     {
         target.resize(numEntries);
         for (int i = 0; i < numEntries; ++i) {
-            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
+            for (int j = 0; j < STANDARD_NEURONS_PER_CELL; ++j) {
                 target[i]._channels[j] = source[i].channels[j];
             }
         }
@@ -43,7 +43,7 @@ namespace
     {
         for (int i = 0, j = toInt(source.size()); i < j; ++i) {
             auto numChannels = source[i]._channels.size();
-            for (int k = 0; k < NEURONS_PER_CELL && k < numChannels; ++k) {
+            for (int k = 0; k < STANDARD_NEURONS_PER_CELL && k < numChannels; ++k) {
                 target[i].channels[k] = source[i]._channels[k];
             }
         }
@@ -68,13 +68,13 @@ namespace
     NeuralNetGenomeDesc convert(NeuralNetGenomeTO const& neuralNetworkGenomeTO)
     {
         NeuralNetGenomeDesc result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._biases[i] = neuralNetworkGenomeTO.biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._activationFunctions[i] = neuralNetworkGenomeTO.activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -86,13 +86,13 @@ namespace
     NeuralNetDesc convert(NeuralNetTO const& neuralNetworkTO)
     {
         NeuralNetDesc result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result._weights[i] = neuralNetworkTO.weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._biases[i] = neuralNetworkTO.biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result._activationFunctions[i] = neuralNetworkTO.activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -104,13 +104,13 @@ namespace
     NeuralNetGenomeTO convert(NeuralNetGenomeDesc const& neuralNetworkDesc)
     {
         NeuralNetGenomeTO result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -121,19 +121,19 @@ namespace
 
     NeuralNetTO convert(NeuralNetDesc const& neuralNetworkDesc)
     {
-        CHECK(neuralNetworkDesc._weights.size() == NEURONS_PER_CELL * NEURONS_PER_CELL);
-        CHECK(neuralNetworkDesc._biases.size() == NEURONS_PER_CELL);
-        CHECK(neuralNetworkDesc._activationFunctions.size() == NEURONS_PER_CELL);
+        CHECK(neuralNetworkDesc._weights.size() == NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS);
+        CHECK(neuralNetworkDesc._biases.size() == NEURAL_NET_OUTPUTS);
+        CHECK(neuralNetworkDesc._activationFunctions.size() == NEURAL_NET_OUTPUTS);
         CHECK(neuralNetworkDesc._connectionWeights.size() == MAX_OBJECT_CONNECTIONS);
 
         NeuralNetTO result;
-        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];
         }
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -340,7 +340,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         cellDesc._headCell = objectTO.typeData.cell.headCell;
         cellDesc._event = objectTO.typeData.cell.event;
         cellDesc._eventCounter = objectTO.typeData.cell.eventCounter;
-        cellDesc._signalChanges = objectTO.typeData.cell.signalChanges;
+        cellDesc._highlightIntensity = objectTO.typeData.cell.highlightIntensity;
         cellDesc._eventPos = {objectTO.typeData.cell.eventPos.x, objectTO.typeData.cell.eventPos.y};
         cellDesc._lastUpdate = objectTO.typeData.cell.lastUpdate;
         cellDesc._concatenationIndex = objectTO.typeData.cell.concatenationIndex;
@@ -364,10 +364,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             sensor._minRange = objectTO.typeData.cell.cellTypeData.sensor.minRange;
             sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
-            if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                TelemetryDesc telemetry;
-                sensor._mode = telemetry;
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                 DetectEnergyDesc detectEnergy;
                 detectEnergy._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 sensor._mode = detectEnergy;
@@ -609,9 +606,10 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         auto const& neuralNetworkTO = getFromHeap<NeuralNetTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
+        cellDesc._memory.assign(objectTO.typeData.cell.memory, objectTO.typeData.cell.memory + MEMORY_NEURONS_PER_CELL);
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -648,10 +646,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
-        if (nodeTO->cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            TelemetryGenomeDesc telemetry;
-            sensorDesc._mode = telemetry;
-        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+        if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyGenomeDesc detectEnergy;
             detectEnergy._minDensity = nodeTO->cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensorDesc._mode = detectEnergy;
@@ -1052,10 +1047,7 @@ void DescConverterService::convertGenomeToTO(
                 sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
 
-                if (sensorTO.mode == SensorMode_Telemetry) {
-                    //auto const& telemetryDesc = std::get<TelemetryGenomeDesc>(sensorDesc._mode);
-                    //auto& telemetryTO = sensorTO.modeData.telemetry;
-                } else if (sensorTO.mode == SensorMode_DetectEnergy) {
+                if (sensorTO.mode == SensorMode_DetectEnergy) {
                     auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDesc>(sensorDesc._mode);
                     auto& detectEnergyTO = sensorTO.modeData.detectEnergy;
                     detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
@@ -1332,7 +1324,7 @@ void DescConverterService::convertObjectToTO(
         objectTO.typeData.cell.activationTime = cellDesc._activationTime;
         objectTO.typeData.cell.event = cellDesc._event;
         objectTO.typeData.cell.eventCounter = cellDesc._eventCounter;
-        objectTO.typeData.cell.signalChanges = cellDesc._signalChanges;
+        objectTO.typeData.cell.highlightIntensity = cellDesc._highlightIntensity;
         objectTO.typeData.cell.eventPos = {cellDesc._eventPos.x, cellDesc._eventPos.y};
         objectTO.typeData.cell.lastUpdate = cellDesc._lastUpdate;
         objectTO.typeData.cell.concatenationIndex = cellDesc._concatenationIndex;
@@ -1364,10 +1356,7 @@ void DescConverterService::convertObjectToTO(
             sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
             sensorTO.mode = sensorDesc.getMode();
 
-            if (sensorTO.mode == SensorMode_Telemetry) {
-                //auto const& telemetryDesc = std::get<TelemetryDesc>(sensorDesc._mode);
-                //TelemetryTO& telemetryTO = sensorTO.modeData.telemetry;
-            } else if (sensorTO.mode == SensorMode_DetectEnergy) {
+            if (sensorTO.mode == SensorMode_DetectEnergy) {
                 auto const& detectEnergyDesc = std::get<DetectEnergyDesc>(sensorDesc._mode);
                 DetectEnergyTO& detectEnergyTO = sensorTO.modeData.detectEnergy;
                 detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
@@ -1568,8 +1557,12 @@ void DescConverterService::convertObjectToTO(
         }
 
         auto numChannels = cellDesc._signal._channels.size();
-        for (int i = 0; i < NEURONS_PER_CELL && i < numChannels; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL && i < numChannels; ++i) {
             objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
+        }
+        auto numMemoryValues = cellDesc._memory.size();
+        for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+            objectTO.typeData.cell.memory[i] = i < numMemoryValues ? cellDesc._memory[i] : 0.0f;
         }
     } else {
         CHECK(false);

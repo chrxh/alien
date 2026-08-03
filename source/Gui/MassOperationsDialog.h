@@ -8,6 +8,7 @@
 
 #include "AlienDialog.h"
 #include "Definitions.h"
+#include "MutationRatesWidget.h"
 
 class MassOperationsDialog : public AlienDialog
 {
@@ -52,6 +53,7 @@ private:
 
     bool _randomizeMutationRates = false;
     MutationRatesDesc _mutationRates;
+    MutationRatesWidget _mutationRatesWidget;
 
     bool _restrictToSelectedCreatures = true;
 };
