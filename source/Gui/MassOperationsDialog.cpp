@@ -57,7 +57,7 @@ void MassOperationsDialog::initIntern()
     _maxGlow = settings.getValue(settingsPrefix + "maximum glow", _maxGlow);
 
     _randomizeMutationRates = settings.getValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
-    MutationRatesDialog::get().loadSettings(_mutationRates, settingsPrefix + "mutation rates.");
+    MutationRatesDialog::loadSettings(_mutationRates, settingsPrefix + "mutation rates.");
 
     _restrictToSelectedCreatures = settings.getValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
     validateAndCorrect();
@@ -97,7 +97,7 @@ void MassOperationsDialog::shutdownIntern()
     settings.setValue(settingsPrefix + "maximum glow", _maxGlow);
 
     settings.setValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
-    MutationRatesDialog::get().saveSettings(_mutationRates, settingsPrefix + "mutation rates.");
+    MutationRatesDialog::saveSettings(_mutationRates, settingsPrefix + "mutation rates.");
 
     settings.setValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
 }
@@ -209,9 +209,7 @@ void MassOperationsDialog::processIntern()
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
             ImGui::Checkbox("##mutationRates", &_randomizeMutationRates);
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-            ImGui::BeginDisabled(!_randomizeMutationRates);
-            MutationRatesWidget::process(_mutationRates, RightColumnWidth, true);
-            ImGui::EndDisabled();
+            _mutationRatesWidget.process(_mutationRates, RightColumnWidth, !_randomizeMutationRates);
 
             table.next();
 
@@ -236,7 +234,6 @@ void MassOperationsDialog::processIntern()
     }
 
     validateAndCorrect();
-    MutationRatesDialog::get().processNested();
 }
 
 MassOperationsDialog::MassOperationsDialog()

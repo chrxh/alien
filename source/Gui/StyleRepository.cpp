@@ -45,7 +45,7 @@ void StyleRepository::setup()
             FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f * scaleFactor, &configMerge, rangesIcons);
     }
 
-    // Tiny font, rasterized at its target size so that labels below the default size stay sharp
+    // Tiny font
     _tinyFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 11.0f * scaleFactor);
     {
         static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};

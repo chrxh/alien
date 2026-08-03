@@ -14,7 +14,6 @@
 #include <EngineInterface/NumberGenerator.h>
 
 #include "AlienGui.h"
-#include "NeuralNetEditorDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -76,6 +75,8 @@ namespace
     auto constexpr ActivationIconSamples = 48;
     auto constexpr ActivationIconDomain = 2.0f;
     auto constexpr ActivationIconMinRange = 1.0f;
+
+    auto const DialogSize = RealVector2D(700.0f, 500.0f);
 
     auto const PositiveWeightColor = ImColor(77, 163, 255);
     auto const NegativeWeightColor = ImColor(255, 77, 77);
@@ -384,43 +385,55 @@ void _NeuralNetEditorWidget::process(
 {
     auto& selectionData = getValueRef(_dataById);
 
-    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData, false);
-
-    // Opened here and not at the call site because the data to be copied is only available in this method
-    if (_openDialogRequested) {
-        _pendingNet = NetData{weights, biases, activationFunctions};
-        _pendingConnectionWeights = connectionWeights;
-        _adopted = false;
-        _dialog->open();
-        _openDialogRequested = false;
-    }
-
-    // The dialog is modal and edits a copy of the net, but shares the selection with the embedded editor
-    if (_dialog->isOpen()) {
-        _dialog->process([&] {
-            processEditor(
-                _pendingNet.weights,
-                _pendingNet.biases,
-                _pendingNet.activationFunctions,
-                _pendingConnectionWeights,
-                cellFunctionModules,
-                liveData,
-                selectionData,
-                true);
-        });
-        if (_adopted) {
-            weights = _pendingNet.weights;
-            biases = _pendingNet.biases;
-            activationFunctions = _pendingNet.activationFunctions;
-            connectionWeights = _pendingConnectionWeights;
-            _adopted = false;
-        }
-    }
+    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData, EditorMode::Embedded);
+    processDialog(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData);
 }
 
 void _NeuralNetEditorWidget::openDialog()
 {
     _openDialogRequested = true;
+}
+
+// The dialog is modal and edits a copy of the net, but shares the selection with the embedded editor
+void _NeuralNetEditorWidget::processDialog(
+    std::vector<NeuralNetWeight>& weights,
+    std::vector<float>& biases,
+    std::vector<ActivationFunction>& activationFunctions,
+    std::vector<float>& connectionWeights,
+    std::vector<CellFunctionModule> const& cellFunctionModules,
+    std::optional<LiveData> const& liveData,
+    SelectionData& selectionData)
+{
+    if (_openDialogRequested) {
+        _openDialogRequested = false;
+        _dialogNet = NetData{weights, biases, activationFunctions};
+        _dialogConnectionWeights = connectionWeights;
+        _adopted = false;
+        _dialog.open();
+    }
+    if (!_dialog.isOpen()) {
+        return;
+    }
+
+    _dialog.process([&] {
+        processEditor(
+            _dialogNet.weights,
+            _dialogNet.biases,
+            _dialogNet.activationFunctions,
+            _dialogConnectionWeights,
+            cellFunctionModules,
+            liveData,
+            selectionData,
+            EditorMode::Dialog);
+    });
+
+    if (_adopted) {
+        _adopted = false;
+        weights = _dialogNet.weights;
+        biases = _dialogNet.biases;
+        activationFunctions = _dialogNet.activationFunctions;
+        connectionWeights = _dialogConnectionWeights;
+    }
 }
 
 void _NeuralNetEditorWidget::processEditor(
@@ -431,10 +444,10 @@ void _NeuralNetEditorWidget::processEditor(
     std::vector<CellFunctionModule> const& cellFunctionModules,
     std::optional<LiveData> const& liveData,
     SelectionData& selectionData,
-    bool inDialog)
+    EditorMode mode)
 {
     // The dialog offers more room than the embedded editor and therefore labels the graph with the larger default font
-    _labelFont = inDialog ? StyleRepository::get().getDefaultFont() : StyleRepository::get().getTinyFont();
+    _labelFont = mode == EditorMode::Dialog ? StyleRepository::get().getDefaultFont() : StyleRepository::get().getTinyFont();
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
@@ -466,7 +479,7 @@ void _NeuralNetEditorWidget::processEditor(
 
         // The floating card may reach below the graph and is therefore bounded by the position of the action buttons
         _actionButtonsMinY = ImGui::GetCursorScreenPos().y;
-        processActionButtons(weights, biases, activationFunctions, inDialog);
+        processActionButtons(weights, biases, activationFunctions, mode);
 
         // Processed last so that the card is above the other widgets
         if (!narrowLayout) {
@@ -1018,28 +1031,25 @@ void _NeuralNetEditorWidget::processInspectorCardContent(
 }
 
 _NeuralNetEditorWidget::_NeuralNetEditorWidget()
-{
-    _dialog = _NeuralNetEditorDialog::create();
-}
+    : _dialog("Neural network", DialogSize)
+{}
 
 // The dialog is closed from here so that its buttons and the net tools share one row
 void _NeuralNetEditorWidget::processActionButtons(
     std::vector<NeuralNetWeight>& weights,
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
-    bool inDialog)
+    EditorMode mode)
 {
-    if (inDialog) {
+    if (mode == EditorMode::Dialog) {
         if (AlienGui::Button("Adopt")) {
             _adopted = true;
-            ImGui::CloseCurrentPopup();
-            _dialog->close();
+            _dialog.close();
         }
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if (AlienGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _dialog->close();
+            _dialog.close();
         }
 
         // The net tools belong to the content and are therefore set off from the dialog buttons

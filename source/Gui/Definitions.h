@@ -134,9 +134,6 @@ using NodeEditorWidget = std::shared_ptr<_NodeEditorWidget>;
 class _NeuralNetEditorWidget;
 using NeuralNetEditorWidget = std::shared_ptr<_NeuralNetEditorWidget>;
 
-class _NeuralNetEditorDialog;
-using NeuralNetEditorDialog = std::shared_ptr<_NeuralNetEditorDialog>;
-
 class _PreviewWidget;
 using PreviewWidget = std::shared_ptr<_PreviewWidget>;
 
