@@ -18,7 +18,7 @@ public:
     // Live activity values shown in the graph when a simulated cell (instead of a genome node) is edited
     struct LiveData
     {
-        std::vector<float> memoryActivities;
+        std::vector<float> memory;
         float energy = 0;
         bool attacked = false;
         int age = 0;

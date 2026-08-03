@@ -434,7 +434,7 @@ struct CellTO
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
     SignalTO signal;
-    float memoryActivities[MEMORY_NEURONS_PER_CELL];
+    float memory[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;
 

@@ -360,7 +360,7 @@ namespace
                 cellTO.signal.channels[i] = cell.signal.channels[i];
             }
             for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-                cellTO.memoryActivities[i] = cell.memoryActivities[i];
+                cellTO.memory[i] = cell.memory[i];
             }
             cellTO.activationTime = cell.activationTime;
             cellTO.lastUpdate = cell.lastUpdate;

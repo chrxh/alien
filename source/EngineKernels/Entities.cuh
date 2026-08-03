@@ -516,13 +516,13 @@ struct Cell
     bool constructorAvailable;  // If true, constructor holds valid data
     Constructor constructor;    // Optional constructor data
     Signal signal;
-    float memoryActivities[MEMORY_NEURONS_PER_CELL];
+    float memory[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
 
     // Process data
     Signal futureSignal;
-    float futureMemoryActivities[MEMORY_NEURONS_PER_CELL];
+    float futureMemory[MEMORY_NEURONS_PER_CELL];
     uint32_t headUpdateId;
     bool headCell;
 

@@ -789,8 +789,8 @@ void _NeuralNetEditorWidget::drawInputNodes(
             std::string value;
             if (i < NEURAL_NET_OUTPUTS) {
                 auto memoryIndex = i - STANDARD_NEURONS_PER_CELL;
-                if (memoryIndex < toInt(liveData->memoryActivities.size())) {
-                    value = StringHelper::format(liveData->memoryActivities.at(memoryIndex), 2);
+                if (memoryIndex < toInt(liveData->memory.size())) {
+                    value = StringHelper::format(liveData->memory.at(memoryIndex), 2);
                 }
             } else {
                 switch (i - NEURAL_NET_OUTPUTS) {

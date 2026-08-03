@@ -1717,6 +1717,23 @@ void AlienGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const
     }
 }
 
+namespace
+{
+    // Draws the expand button at the right end of the given header rectangle without moving the cursor
+    bool drawExpandButton(ImVec2 const& headerMin, ImVec2 const& headerMax, float rightMargin)
+    {
+        auto savedCursorPos = ImGui::GetCursorScreenPos();
+        auto iconSize = ImGui::GetFontSize();
+        auto iconPos = ImVec2(headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f);
+
+        auto result = AlienGui::MaximizeButton(iconPos, iconSize, false);
+        AlienGui::Tooltip("Open in a separate window");
+
+        ImGui::SetCursorScreenPos(savedCursorPos);
+        return result;
+    }
+}
+
 bool AlienGui::Group(GroupParameters const& parameters)
 {
     auto drawList = ImGui::GetWindowDrawList();
@@ -1740,16 +1757,9 @@ bool AlienGui::Group(GroupParameters const& parameters)
 
     auto result = false;
     if (parameters._expandButton) {
-        auto savedCursorPos = ImGui::GetCursorScreenPos();
-        auto iconSize = ImGui::GetFontSize();
-        auto iconPos = ImVec2(cursorPos.x + groupWidth - iconSize - style.FramePadding.x, cursorPos.y + (ImGui::GetTextLineHeight() - iconSize) * 0.5f);
-
         ImGui::PushID(parameters._text.c_str());
-        result = AlienGui::MaximizeButton(iconPos, iconSize, false);
-        AlienGui::Tooltip("Open in a separate window");
+        result = drawExpandButton(cursorPos, ImVec2(cursorPos.x + groupWidth, cursorPos.y + ImGui::GetTextLineHeight()), style.FramePadding.x);
         ImGui::PopID();
-
-        ImGui::SetCursorScreenPos(savedCursorPos);
     }
 
     ImGui::Spacing();
@@ -2069,19 +2079,10 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters, bool* expandB
     ImGui::PopStyleColor(3);
 
     if (expandButtonClicked) {
-        auto savedCursorPos = ImGui::GetCursorScreenPos();
-        auto headerMin = ImGui::GetItemRectMin();
-        auto headerMax = ImGui::GetItemRectMax();
-        auto iconSize = ImGui::GetFontSize();
-        auto iconPos = ImVec2(headerMax.x - iconSize - scale(7.0f), headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f);
-
-        *expandButtonClicked = AlienGui::MaximizeButton(iconPos, iconSize, false);
-        AlienGui::Tooltip("Open in a separate window");
+        *expandButtonClicked = drawExpandButton(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), scale(7.0f));
         if (*expandButtonClicked) {
             treeNodeInfo.openRequested = true;
         }
-
-        ImGui::SetCursorScreenPos(savedCursorPos);
     }
 
     treeNodeInfo.isOpen = result;

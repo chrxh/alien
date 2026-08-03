@@ -609,7 +609,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
-        cellDesc._memoryActivities.assign(objectTO.typeData.cell.memoryActivities, objectTO.typeData.cell.memoryActivities + MEMORY_NEURONS_PER_CELL);
+        cellDesc._memory.assign(objectTO.typeData.cell.memory, objectTO.typeData.cell.memory + MEMORY_NEURONS_PER_CELL);
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -1560,9 +1560,9 @@ void DescConverterService::convertObjectToTO(
         for (int i = 0; i < STANDARD_NEURONS_PER_CELL && i < numChannels; ++i) {
             objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
-        auto numMemoryActivities = cellDesc._memoryActivities.size();
+        auto numMemoryValues = cellDesc._memory.size();
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-            objectTO.typeData.cell.memoryActivities[i] = i < numMemoryActivities ? cellDesc._memoryActivities[i] : 0.0f;
+            objectTO.typeData.cell.memory[i] = i < numMemoryValues ? cellDesc._memory[i] : 0.0f;
         }
     } else {
         CHECK(false);

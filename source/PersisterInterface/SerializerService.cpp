@@ -1352,7 +1352,7 @@ namespace
     auto constexpr Id_Cell_Constructor = 22;
     auto constexpr Id_Cell_Signal = 23;
     auto constexpr Id_Cell_NeuralNetwork = 24;
-    auto constexpr Id_Cell_MemoryActivities = 26;
+    auto constexpr Id_Cell_Memory = 26;
 
     auto constexpr Id_Object_Connections = 7;
     auto constexpr Id_Object_Type = 8;
@@ -1879,8 +1879,8 @@ namespace cereal
         scope.addDesc(Id_Cell_CellType, data._cellType);
         scope.addDesc(Id_Cell_Constructor, data._constructor);
         scope.addDesc(Id_Cell_Signal, data._signal);
-        scope.addMember(Id_Cell_MemoryActivities, data._memoryActivities, defaultObject._memoryActivities);
-        resizeOnLoad(task, data._memoryActivities, MEMORY_NEURONS_PER_CELL, 0.0f);
+        scope.addMember(Id_Cell_Memory, data._memory, defaultObject._memory);
+        resizeOnLoad(task, data._memory, MEMORY_NEURONS_PER_CELL, 0.0f);
         scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)

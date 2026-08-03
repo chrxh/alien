@@ -510,7 +510,7 @@ struct CellDesc
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
     MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
     CellDesc& signal(std::vector<float> const& value);
-    MEMBER(CellDesc, std::vector<float>, memoryActivities, std::vector<float>(MEMORY_NEURONS_PER_CELL, 0.0f));
+    MEMBER(CellDesc, std::vector<float>, memory, std::vector<float>(MEMORY_NEURONS_PER_CELL, 0.0f));
     MEMBER(CellDesc, int, activationTime, 0);
     MEMBER(CellDesc, int, lastUpdate, 0);
 

@@ -315,34 +315,13 @@ TEST_F(NeuronTests, truncateSignal)
 }
 
 // The default identity weight matrix maps each memory input to the corresponding memory output
-TEST_F(NeuronTests, memoryNeuronsRetainActivity)
+TEST_F(NeuronTests, memoryNeuronsRetainActivityAndStayLocal)
 {
-    std::vector<float> memoryActivities = {0.5f, -0.3f, 0.25f, 1.0f};
+    std::vector<float> memory = {0.5f, -0.3f, 0.25f, 1.0f};
 
     auto data = ContentDesc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().memoryActivities(memoryActivities)),
-                        ObjectDesc().id(2).pos({0, 1}),
-                    })
-                    .addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
-    EXPECT_TRUE(approxCompare(memoryActivities, actualData.getObjectRef(1).getCellRef()._memoryActivities));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
-}
-
-TEST_F(NeuronTests, memoryNeuronsNotVisibleToConnectedCells)
-{
-    std::vector<float> memoryActivities = {0.5f, -0.3f, 0.25f, 1.0f};
-
-    auto data = ContentDesc()
-                    .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().memoryActivities(memoryActivities)),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().memory(memory)),
                         ObjectDesc().id(2).pos({0, 1}),
                     })
                     .addConnection(1, 2);
@@ -354,8 +333,10 @@ TEST_F(NeuronTests, memoryNeuronsNotVisibleToConnectedCells)
 
     std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
     std::vector<float> emptyMemory(MEMORY_NEURONS_PER_CELL, 0);
+    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._memory));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptyMemory, actualData.getObjectRef(2).getCellRef()._memoryActivities));
+    EXPECT_TRUE(approxCompare(emptyMemory, actualData.getObjectRef(2).getCellRef()._memory));
 }
 
 TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
@@ -375,7 +356,7 @@ TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::vector<float> expectedMemory = {0.5f, 0, 0, 0};
-    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memoryActivities));
+    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memory));
 }
 
 TEST_F(NeuronTests, telemetryEnergyInput)
