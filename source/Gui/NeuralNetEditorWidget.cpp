@@ -464,6 +464,8 @@ void _NeuralNetEditorWidget::processEditor(
 
         AlienGui::Separator();
 
+        // The floating card may reach below the graph and is therefore bounded by the position of the action buttons
+        _actionButtonsMinY = ImGui::GetCursorScreenPos().y;
         processActionButtons(weights, biases, activationFunctions, inDialog);
 
         // Processed last so that the card is above the other widgets
@@ -884,12 +886,13 @@ void _NeuralNetEditorWidget::processInspectorCard(
     } else {
         cardWidth = scale(CardWidth);
 
-        // Keep the card inside the visible area when the editor is scrolled
+        // The card starts at the top of the graph, is kept inside the visible area when the editor is scrolled and is
+        // moved up as far as needed to leave the action buttons below the graph uncovered
         auto clipMin = ImGui::GetWindowDrawList()->GetClipRectMin();
         auto clipMax = ImGui::GetWindowDrawList()->GetClipRectMax();
-        auto cardY = graphGeometry.origin.y + cardMargin;
-        auto lowestCardY = clipMax.y - cardHeight - cardMargin;
-        cardY = lowestCardY > clipMin.y + cardMargin ? std::clamp(cardY, clipMin.y + cardMargin, lowestCardY) : clipMin.y + cardMargin;
+        auto highestCardY = std::max(graphGeometry.origin.y, clipMin.y) + cardMargin;
+        auto lowestCardY = std::min(_actionButtonsMinY, clipMax.y) - cardHeight - cardMargin;
+        auto cardY = std::max(std::min(highestCardY, lowestCardY), clipMin.y + cardMargin);
 
         ImGui::SetCursorScreenPos({graphGeometry.groupBlockGapMinX + (graphGeometry.groupBlockGapWidth - cardWidth) / 2, cardY});
     }

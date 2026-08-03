@@ -151,6 +151,9 @@ private:
     // Chosen at the beginning of an editor pass, since the dialog labels the graph larger than the embedded editor
     ImFont* _labelFont = nullptr;
 
+    // Upper border of the action button row, taken during an editor pass to keep the floating card above it
+    float _actionButtonsMinY = 0;
+
     struct NetData
     {
         std::vector<NeuralNetWeight> weights;
