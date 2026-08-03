@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Definitions.h"
+#include "MutationRatesWidget.h"
 
 class _GenomeEditorWidget
 {
@@ -24,6 +25,8 @@ private:
     void removeGeneIntern();
     void moveGeneUpwardIntern();
     void moveGeneDownwardIntern();
+
+    MutationRatesWidget _mutationRatesWidget;
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;

@@ -101,6 +101,8 @@ PUBLIC
     MainWindow.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
+    ModalWindow.cpp
+    ModalWindow.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     MutationRatesDialog.cpp
@@ -111,8 +113,6 @@ PUBLIC
     NetworkSettingsDialog.h
     NetworkTransferController.cpp
     NetworkTransferController.h
-    NeuralNetEditorDialog.cpp
-    NeuralNetEditorDialog.h
     NeuralNetEditorWidget.cpp
     NeuralNetEditorWidget.h
     NewSimulationDialog.cpp

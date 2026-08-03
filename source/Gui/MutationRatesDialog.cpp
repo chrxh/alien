@@ -13,6 +13,8 @@ namespace
     auto constexpr MinTreeNodeWidth = 300.0f;
     auto constexpr RightColumnWidth = 195.0f;
 
+    auto const DialogSize = RealVector2D(800.0f, 400.0f);
+
     void processConnectionMutationRate(std::string const& name, std::string const& id, ConnectionMutationDesc& mutation, float rightColumnWidth)
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
@@ -265,14 +267,10 @@ namespace
 }
 
 MutationRatesDialog::MutationRatesDialog()
-    : AlienDialog("Mutation rates", {800.0f, 400.0f}, true)
+    : _modalWindow("Mutation rates", DialogSize, true)
 {}
 
-void MutationRatesDialog::initIntern() {}
-
-void MutationRatesDialog::shutdownIntern() {}
-
-void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const
+void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix)
 {
     auto& settings = GlobalSettings::get();
 
@@ -355,7 +353,7 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
     }
 }
 
-void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
+void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix)
 {
     auto& settings = GlobalSettings::get();
 
@@ -416,7 +414,12 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     }
 }
 
-void MutationRatesDialog::processIntern()
+void MutationRatesDialog::process()
+{
+    _modalWindow.process([this] { processContent(); });
+}
+
+void MutationRatesDialog::processContent()
 {
     // Use a child window with scrolling for the content, reserving space for buttons
     auto buttonAreaHeight = scale(50.0f);
@@ -585,16 +588,14 @@ void MutationRatesDialog::processIntern()
     AlienGui::Separator();
 
     if (AlienGui::Button("Adopt")) {
-        ImGui::CloseCurrentPopup();
         onAdopt();
-        close();
+        _modalWindow.close();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
     if (AlienGui::Button("Cancel")) {
-        ImGui::CloseCurrentPopup();
-        close();
+        _modalWindow.close();
     }
 }
 
@@ -602,17 +603,8 @@ void MutationRatesDialog::open(MutationRatesDesc const& mutationRates, std::func
 {
     _mutation = mutationRates;
     _onAdoptCallback = onAdoptCallback;
-    AlienDialog::open();
+    _modalWindow.open();
 }
-
-void MutationRatesDialog::openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
-{
-    _mutation = mutationRates;
-    _onAdoptCallback = onAdoptCallback;
-    AlienDialog::openNested();
-}
-
-void MutationRatesDialog::openIntern() {}
 
 void MutationRatesDialog::onAdopt()
 {

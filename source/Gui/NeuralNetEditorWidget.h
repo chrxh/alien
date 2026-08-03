@@ -9,6 +9,7 @@
 
 #include "CellFunctionChannels.h"
 #include "Definitions.h"
+#include "ModalWindow.h"
 
 class _NeuralNetEditorWidget
 {
@@ -38,6 +39,12 @@ public:
 
 private:
     _NeuralNetEditorWidget();
+
+    enum class EditorMode
+    {
+        Embedded,
+        Dialog
+    };
 
     struct SelectionData
     {
@@ -79,7 +86,15 @@ private:
         std::vector<CellFunctionModule> const& cellFunctionModules,
         std::optional<LiveData> const& liveData,
         SelectionData& selectionData,
-        bool inDialog);
+        EditorMode mode);
+    void processDialog(
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        std::vector<float>& connectionWeights,
+        std::vector<CellFunctionModule> const& cellFunctionModules,
+        std::optional<LiveData> const& liveData,
+        SelectionData& selectionData);
     void processConnectionWeightSliders(std::vector<float>& connectionWeights);
     GraphGeometry processGraph(
         std::vector<NeuralNetWeight>& weights,
@@ -124,7 +139,7 @@ private:
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
-        bool inDialog);
+        EditorMode mode);
     void processNetToolButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     static ImColor calcWeightColor(float value, float alpha);
@@ -162,11 +177,13 @@ private:
     };
     std::optional<NetData> _copiedNet;
 
+    ModalWindow _dialog;
+
     // The dialog edits a copy of the net so that its changes can be discarded
-    NetData _pendingNet;
-    std::vector<float> _pendingConnectionWeights;
+    NetData _dialogNet;
+    std::vector<float> _dialogConnectionWeights;
+
+    // The net can only be copied during an editor pass, therefore the opening is deferred until then
     bool _openDialogRequested = false;
     bool _adopted = false;
-
-    NeuralNetEditorDialog _dialog;
 };
