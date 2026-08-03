@@ -1,6 +1,7 @@
 #include "InspectionWindow.h"
 
 #include <iomanip>
+#include <ranges>
 #include <sstream>
 #include <variant>
 
@@ -607,9 +608,20 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
         if (static_cast<int>(channels.size()) < STANDARD_NEURONS_PER_CELL) {
             channels.resize(STANDARD_NEURONS_PER_CELL, 0.0f);
         }
-        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
+        for (auto index : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth), &channels.at(i));
+                AlienGui::SliderFloatParameters().name("#" + std::to_string(index + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
+                &channels.at(index));
+        }
+
+        auto& memory = cell._memory;
+        if (static_cast<int>(memory.size()) < MEMORY_NEURONS_PER_CELL) {
+            memory.resize(MEMORY_NEURONS_PER_CELL, 0.0f);
+        }
+        for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Mem #" + std::to_string(index + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
+                &memory.at(index));
         }
     }
     AlienGui::EndTreeNode();

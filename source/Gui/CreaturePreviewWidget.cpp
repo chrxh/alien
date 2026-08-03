@@ -435,14 +435,14 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
             struct SignalEditorEntry
             {
                 std::string name;
-                float* value;
+                float value;
             };
             std::vector<SignalEditorEntry> entries;
             for (auto index : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
-                entries.emplace_back(getSignalEditorOutLabel(index), &selectedCell->_signal._channels.at(index));
+                entries.emplace_back(getSignalEditorOutLabel(index), selectedCell->_signal._channels.at(index));
             }
             for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
-                entries.emplace_back(getSignalEditorMemoryLabel(index), &selectedCell->_memory.at(index));
+                entries.emplace_back(getSignalEditorMemoryLabel(index), selectedCell->_memory.at(index));
             }
 
             auto textWidth = calcSignalTextWidth();
@@ -451,9 +451,9 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
                 ImGui::PushID(column);
                 if (ImGui::BeginChild("", ImVec2(scale(calcSignalColumnWidth() - 5.0f), scale(0)))) {
                     for (auto row : std::views::iota(0, SignalSlidersPerColumn)) {
-                        auto const& entry = entries.at(column * SignalSlidersPerColumn + row);
+                        auto& entry = entries.at(column * SignalSlidersPerColumn + row);
                         phenotypeChanged |= AlienGui::SliderFloat(
-                            AlienGui::SliderFloatParameters().name(entry.name).format("%.3f").textWidth(textWidth).min(-2.0f).max(2.0f), entry.value);
+                            AlienGui::SliderFloatParameters().name(entry.name).format("%.3f").textWidth(textWidth).min(-2.0f).max(2.0f), &entry.value);
                     }
                 }
                 ImGui::EndChild();
@@ -461,6 +461,13 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
                 if (column < numColumns - 1) {
                     ImGui::SameLine();
                 }
+            }
+
+            for (auto [channel, entry] : std::views::zip(selectedCell->_signal._channels, entries)) {
+                channel = entry.value;
+            }
+            for (auto [memory, entry] : std::views::zip(selectedCell->_memory, entries | std::views::drop(STANDARD_NEURONS_PER_CELL))) {
+                memory = entry.value;
             }
 
             style.GrabMinSize = originalGrabMinSize;
