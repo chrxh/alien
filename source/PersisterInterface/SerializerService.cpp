@@ -207,6 +207,19 @@ namespace cereal
             }
         }
 
+        // For vectors whose size is fixed: files saved with a different layout may contain differently
+        // sized vectors, so the loaded values are merged into a default-sized vector
+        template <typename T>
+        void addFixedSizeMember(int key, std::vector<T>& value, std::vector<T> const& defaultValue)
+        {
+            addMember(key, value, defaultValue);
+            if (_task == SerializationTask::Load && value.size() != defaultValue.size()) {
+                auto adaptedValue = defaultValue;
+                std::copy_n(value.begin(), std::min(value.size(), adaptedValue.size()), adaptedValue.begin());
+                value = std::move(adaptedValue);
+            }
+        }
+
         // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
         void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
         {
@@ -535,28 +548,15 @@ namespace
 
 namespace cereal
 {
-    // Files saved with a different neural net layout may contain differently sized vectors: truncate or pad them to the current layout
-    template <typename T>
-    void resizeOnLoad(SerializationTask task, std::vector<T>& data, size_t size, T const& fillValue)
-    {
-        if (task == SerializationTask::Load) {
-            data.resize(size, fillValue);
-        }
-    }
-
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetGenomeDesc& data)
     {
         NeuralNetGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
-        scope.addMember(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
-        scope.addMember(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        scope.addMember(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
-        resizeOnLoad(task, data._weights, NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
-        resizeOnLoad(task, data._biases, NEURAL_NET_OUTPUTS, 0.0f);
-        resizeOnLoad(task, data._activationFunctions, NEURAL_NET_OUTPUTS, ActivationFunction(ActivationFunction_Identity));
-        resizeOnLoad(task, data._connectionWeights, MAX_OBJECT_CONNECTIONS, 0.0f);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        scope.addFixedSizeMember(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
     }
     SPLIT_SERIALIZATION(NeuralNetGenomeDesc)
 
@@ -886,8 +886,7 @@ namespace cereal
     {
         SignalEntryGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
-        resizeOnLoad(task, data._channels, STANDARD_NEURONS_PER_CELL, 0.0f);
+        scope.addFixedSizeMember(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryGenomeDesc)
 
@@ -1393,8 +1392,7 @@ namespace cereal
     {
         SignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_Signal_Channels, data._channels, defaultObject._channels);
-        resizeOnLoad(task, data._channels, STANDARD_NEURONS_PER_CELL, 0.0f);
+        scope.addFixedSizeMember(Id_Signal_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
@@ -1403,14 +1401,10 @@ namespace cereal
     {
         NeuralNetDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_NeuralNet_Weights, data._weights, defaultObject._weights);
-        scope.addMember(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
-        scope.addMember(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        scope.addMember(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
-        resizeOnLoad(task, data._weights, NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
-        resizeOnLoad(task, data._biases, NEURAL_NET_OUTPUTS, 0.0f);
-        resizeOnLoad(task, data._activationFunctions, NEURAL_NET_OUTPUTS, ActivationFunction(ActivationFunction_Identity));
-        resizeOnLoad(task, data._connectionWeights, MAX_OBJECT_CONNECTIONS, 0.0f);
+        scope.addFixedSizeMember(Id_NeuralNet_Weights, data._weights, defaultObject._weights);
+        scope.addFixedSizeMember(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
+        scope.addFixedSizeMember(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        scope.addFixedSizeMember(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
     }
     SPLIT_SERIALIZATION(NeuralNetDesc)
 
@@ -1771,8 +1765,7 @@ namespace cereal
     {
         SignalEntryDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
-        resizeOnLoad(task, data._channels, STANDARD_NEURONS_PER_CELL, 0.0f);
+        scope.addFixedSizeMember(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryDesc)
 
@@ -1879,8 +1872,7 @@ namespace cereal
         scope.addDesc(Id_Cell_CellType, data._cellType);
         scope.addDesc(Id_Cell_Constructor, data._constructor);
         scope.addDesc(Id_Cell_Signal, data._signal);
-        scope.addMember(Id_Cell_Memory, data._memory, defaultObject._memory);
-        resizeOnLoad(task, data._memory, MEMORY_NEURONS_PER_CELL, 0.0f);
+        scope.addFixedSizeMember(Id_Cell_Memory, data._memory, defaultObject._memory);
         scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
