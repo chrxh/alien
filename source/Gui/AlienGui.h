@@ -26,6 +26,7 @@ struct TreeNodeStackElement
 struct TreeNodeInfo
 {
     bool isOpen = false;
+    bool openRequested = false;
     std::optional<std::chrono::steady_clock::time_point> startBlinkingTimepoint;
 };
 
@@ -416,8 +417,10 @@ public:
         MEMBER(GroupParameters, std::string, text, "");
         MEMBER(GroupParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER(GroupParameters, bool, highlighted, false);
+        MEMBER(GroupParameters, bool, expandButton, false);
     };
-    static void Group(GroupParameters const& parameters);
+    // Returns true if the expand button has been clicked
+    static bool Group(GroupParameters const& parameters);
 
     struct ListBoxParameters
     {
@@ -460,7 +463,7 @@ public:
         MEMBER(TreeNodeParameters, bool, enableBlinking, false);
         MEMBER(TreeNodeParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
     };
-    static bool BeginTreeNode(TreeNodeParameters const& parameters);
+    static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);   // Returns true if the tree node is open.
     static void EndTreeNode();
 
     struct ButtonParameters

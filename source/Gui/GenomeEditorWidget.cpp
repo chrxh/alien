@@ -93,7 +93,7 @@ void _GenomeEditorWidget::processHeaderData()
 
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 
-            MutationRatesWidget::process(_editData->genome._mutationRates, rightColumnWidth);
+            _mutationRatesWidget.process(_editData->genome._mutationRates, rightColumnWidth);
 
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
 

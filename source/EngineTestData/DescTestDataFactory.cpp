@@ -14,7 +14,6 @@ std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObj
         ObjectParameter{ObjectType_FreeCell},
         ObjectParameter{ObjectType_Cell, CellType_Base},
         ObjectParameter{ObjectType_Cell, CellType_Depot},
-        ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectSolid}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
@@ -78,7 +77,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .headUpdateId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
@@ -95,7 +94,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .branchIndex(2)
                       .event(CellEvent_Attacking)
                       .eventCounter(3)
-                      .signalChanges(17)
+                      .highlightIntensity(17)
                       .eventPos({1.5f, 2.5f})
                       .cellType(cellTypeDesc));
     }
@@ -114,7 +113,6 @@ std::vector<DescTestDataFactory::NodeParameter> DescTestDataFactory::getAllNodeP
     return {
         NodeParameter{CellType_Base},
         NodeParameter{CellType_Depot},
-        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectSolid}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
@@ -259,12 +257,12 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
     }
     auto const& cell = object.getCellRef();
 
-    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
         if (cell._neuralNetwork._weights[i] != node._neuralNetwork._weights[i]) {
             return false;
         }
     }
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         if (cell._neuralNetwork._biases[i] != node._neuralNetwork._biases[i]) {
             return false;
         }
@@ -697,9 +695,6 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
     case CellType_Sensor: {
         SensorModeDesc sensorModeDesc;
         switch (sensorMode) {
-        case SensorMode_Telemetry:
-            sensorModeDesc = TelemetryDesc();
-            break;
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyDesc().minDensity(0.3f);
             break;
@@ -817,8 +812,8 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDesc entry;
-            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
-                entry._channels[j] = static_cast<float>(i * NEURONS_PER_CELL + j) * 0.15f;
+            for (int j = 0; j < STANDARD_NEURONS_PER_CELL; ++j) {
+                entry._channels[j] = static_cast<float>(i * STANDARD_NEURONS_PER_CELL + j) * 0.15f;
             }
             memory._signalEntries.emplace_back(entry);
         }
@@ -869,9 +864,6 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
     case CellType_Sensor: {
         SensorModeGenomeDesc sensorModeDesc;
         switch (sensorMode) {
-        case SensorMode_Telemetry:
-            sensorModeDesc = TelemetryGenomeDesc();
-            break;
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyGenomeDesc().minDensity(0.25f);
             break;
@@ -983,8 +975,8 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDesc entry;
-            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
-                entry._channels[j] = static_cast<float>(i * NEURONS_PER_CELL + j) * 0.15f;
+            for (int j = 0; j < STANDARD_NEURONS_PER_CELL; ++j) {
+                entry._channels[j] = static_cast<float>(i * STANDARD_NEURONS_PER_CELL + j) * 0.15f;
             }
             memory._signalEntries.emplace_back(entry);
         }

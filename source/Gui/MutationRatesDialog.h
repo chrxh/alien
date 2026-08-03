@@ -3,34 +3,29 @@
 #include <functional>
 #include <string>
 
-#include <Base/Singleton.h>
-
 #include <EngineInterface/GenomeDesc.h>
 
-#include "AlienDialog.h"
 #include "Definitions.h"
+#include "ModalWindow.h"
 
-class MutationRatesDialog : public AlienDialog
+// Modal dialog for editing mutation rates. It is processed by its owner, which allows it to be opened from within
+// another dialog as well.
+class MutationRatesDialog
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MutationRatesDialog);
-
 public:
-    void loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const;
-    void saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const;
-
-    void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
-    void openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
-
-private:
     MutationRatesDialog();
 
-    void initIntern() override;
-    void shutdownIntern() override;
-    void processIntern() override;
-    void openIntern() override;
+    static void loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix);
+    static void saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix);
 
+    void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
+    void process();
+
+private:
+    void processContent();
     void onAdopt();
 
+    ModalWindow _modalWindow;
     MutationRatesDesc _mutation;
     std::function<void(MutationRatesDesc const&)> _onAdoptCallback;
 };

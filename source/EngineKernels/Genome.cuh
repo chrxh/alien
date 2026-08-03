@@ -11,9 +11,9 @@
 
 struct NeuralNetGenome
 {
-    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
-    float biases[NEURONS_PER_CELL];
-    ActivationFunction activationFunctions[NEURONS_PER_CELL];
+    NeuralNetWeight weights[NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS];
+    float biases[NEURAL_NET_OUTPUTS];
+    ActivationFunction activationFunctions[NEURAL_NET_OUTPUTS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -28,9 +28,6 @@ struct DepotGenome
     float storageLimit;
     float initialStoredUsableEnergy;
 };
-
-struct TelemetryGenome
-{};
 
 struct DetectEnergyGenome
 {
@@ -56,7 +53,6 @@ struct DetectCreatureGenome
 
 union SensorModeGenome
 {
-    TelemetryGenome telemetry;
     DetectEnergyGenome detectEnergy;
     DetectSolidGenome detectSolid;
     DetectFreeCellGenome detectFreeCell;
@@ -261,7 +257,7 @@ union MemoryModeDataGenome
 
 struct SignalEntryGenome
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct MemoryGenome

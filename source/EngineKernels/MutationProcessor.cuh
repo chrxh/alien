@@ -149,20 +149,20 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
             auto& gene = genome->genes[geneIndex];
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
-                if (laneId < NEURONS_PER_CELL) {
+                if (laneId < NEURAL_NET_OUTPUTS) {
                     int neuronIndex = laneId;
                     if (data.primaryNumberGen.random() < rate.nodeProbability) {
                         if (rate.weightChangeSigma > 0) {
                             auto accumulatedWeightLocal = 0.0f;
-                            for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
-                                auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
+                            for (int weightIndex = 0; weightIndex < NEURAL_NET_INPUTS; ++weightIndex) {
+                                auto& weight = node.neuralNetwork.weights[neuronIndex * NEURAL_NET_INPUTS + weightIndex];
                                 auto delta = generateGaussian(data) * rate.weightChangeSigma;
                                 float newValue = weight.getValue() + delta;
                                 newValue = max(-2.0f, min(2.0f, newValue));
                                 weight = NeuralNetWeight(newValue);
                                 accumulatedWeightLocal += abs(delta);
                             }
-                            atomicAdd_block(&accumulatedMutations, accumulatedWeightLocal / (NEURONS_PER_CELL * NEURONS_PER_CELL));
+                            atomicAdd_block(&accumulatedMutations, accumulatedWeightLocal / (NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS));
                         }
                         if (rate.biasChangeSigma > 0) {
                             auto& bias = node.neuralNetwork.biases[neuronIndex];
@@ -170,12 +170,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                             float newBias = bias + delta;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
-                            atomicAdd_block(&accumulatedMutations, abs(delta) / NEURONS_PER_CELL);
+                            atomicAdd_block(&accumulatedMutations, abs(delta) / NEURAL_NET_OUTPUTS);
                         }
                         if (rate.actfnChangeProbability > 0 && data.primaryNumberGen.random() < rate.actfnChangeProbability) {
                             node.neuralNetwork.activationFunctions[neuronIndex] =
                                 static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
-                            atomicAdd_block(&accumulatedMutations, 1.0f / NEURONS_PER_CELL);
+                            atomicAdd_block(&accumulatedMutations, 1.0f / NEURAL_NET_OUTPUTS);
                         }
                     }
                 }
@@ -302,8 +302,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     mutateNumber(node.cellTypeData.sensor.minRange, Const::SensorRange_Min, Const::SensorRange_Max);
                     mutateNumber(node.cellTypeData.sensor.maxRange, Const::SensorRange_Min, Const::SensorRange_Max);
                     switch (node.cellTypeData.sensor.mode) {
-                    case SensorMode_Telemetry:
-                        break;
                     case SensorMode_DetectEnergy:
                         mutateNumber(
                             node.cellTypeData.sensor.modeData.detectEnergy.minDensity, Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
@@ -425,7 +423,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         if (newNumSignalEntries > oldNumSignalEntries) {
                             auto newSignalEntries = data.entities.heap.getTypedSubArray<SignalEntryGenome>(newNumSignalEntries);
                             for (int entryIndex = 0; entryIndex < newNumSignalEntries; ++entryIndex) {
-                                for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
+                                for (int channelIndex = 0; channelIndex < STANDARD_NEURONS_PER_CELL; ++channelIndex) {
                                     newSignalEntries[entryIndex].channels[channelIndex] =
                                         entryIndex < oldNumSignalEntries ? memory.signalEntries[entryIndex].channels[channelIndex] : 0.0f;
                                 }
@@ -439,7 +437,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                             float signalMutations = 0.0f;
                             for (int entryIndex = 0; entryIndex < newNumSignalEntries; ++entryIndex) {
                                 auto& entry = memory.signalEntries[entryIndex];
-                                for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
+                                for (int channelIndex = 0; channelIndex < STANDARD_NEURONS_PER_CELL; ++channelIndex) {
                                     auto delta = generateGaussian(data) * rate.valueChangeSigma;
                                     auto newValue = max(-2.0f, min(2.0f, entry.channels[channelIndex] + delta));
                                     signalMutations += abs(newValue - entry.channels[channelIndex]);
@@ -547,9 +545,6 @@ __inline__ __device__ void MutationProcessor::resetCellTypeModeToDefault(Node& n
     case CellType_Sensor: {
         auto& sensor = node.cellTypeData.sensor;
         switch (sensor.mode) {
-        case SensorMode_Telemetry:
-            sensor.modeData.telemetry = {};
-            break;
         case SensorMode_DetectEnergy:
             sensor.modeData.detectEnergy = {Const::DetectEnergyMinDensity_Default};
             break;
@@ -890,11 +885,11 @@ __inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, 
     // A freshly created node uses the shared default attribute values (mirrors NodeDesc / NeuralNetGenomeDesc defaults).
     node.referenceAngle = 0.0f;
     node.color = color;
-    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
         node.neuralNetwork.weights[i] = NeuralNetWeight(0.0f);
     }
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-        node.neuralNetwork.weights[i * NEURONS_PER_CELL + i] = NeuralNetWeight(1.0f);
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+        node.neuralNetwork.weights[i * NEURAL_NET_INPUTS + i] = NeuralNetWeight(1.0f);
         node.neuralNetwork.biases[i] = 0.0f;
         node.neuralNetwork.activationFunctions[i] = ActivationFunction_Identity;
     }

@@ -55,9 +55,9 @@ namespace Const
     ImColor const GroupDefaultColor = ImColor(0.19f, 0.19f, 0.20f, 1.00f);  // Same dark gray as TableHeaderColor
     ImColor const GroupHighColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
 
-    ImColor const MovableSeparatorColor = ImColor::HSV(0.5f, 0.6f, 0.6f);
-    ImColor const MovableSeparatorHoveredColor = ImColor::HSV(0.5f, 0.6f, 0.7f);
-    ImColor const MovableSeparatorActiveColor = ImColor::HSV(0.5f, 0.6f, 0.8f);
+    ImColor const MovableSeparatorColor = ImColor::HSV(0.55f, 0.6f, 0.6f);
+    ImColor const MovableSeparatorHoveredColor = ImColor::HSV(0.55f, 0.6f, 0.7f);
+    ImColor const MovableSeparatorActiveColor = ImColor::HSV(0.55f, 0.6f, 0.8f);
 
     ImColor const TableHeaderColor = ImColor(0.19f, 0.19f, 0.20f, 1.00f);  // Matches the ImGui default ImGuiCol_TableHeaderBg
 
@@ -132,6 +132,9 @@ public:
 
     ImFont* getDefaultFont() const;
 
+    // Rasterized below the default size, for labels that would otherwise be drawn as a scaled down default font
+    ImFont* getTinyFont() const;
+
     ImFont* getSmallBoldFont() const;
     ImFont* getMediumBoldFont() const;
 
@@ -149,6 +152,7 @@ public:
 
 private:
     ImFont* _iconFont = nullptr;
+    ImFont* _tinyFont = nullptr;
     ImFont* _smallBoldFont = nullptr;
     ImFont* _mediumBoldFont = nullptr;
     ImFont* _mediumFont = nullptr;

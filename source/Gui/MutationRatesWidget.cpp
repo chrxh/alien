@@ -11,7 +11,6 @@
 #include <EngineInterface/GenomeDesc.h>
 
 #include "AlienGui.h"
-#include "MutationRatesDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -63,17 +62,13 @@ namespace
     }
 }
 
-void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool nested)
+void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool disabled)
 {
+    ImGui::BeginDisabled(disabled);
     ImGui::BeginGroup();
 
     if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Click to edit").textWidth(rightColumnWidth))) {
-        auto onAdopt = [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; };
-        if (nested) {
-            MutationRatesDialog::get().openNested(mutationRates, onAdopt);
-        } else {
-            MutationRatesDialog::get().open(mutationRates, onAdopt);
-        }
+        _dialog.open(mutationRates, [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; });
     }
 
     for (auto const& [name, probabilities] : getActiveMutationTypes(mutationRates)) {
@@ -81,4 +76,9 @@ void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightC
         AlienGui::InputText(AlienGui::InputTextParameters().name(name).readOnly(true).textWidth(rightColumnWidth), value);
     }
     ImGui::EndGroup();
+    ImGui::EndDisabled();
+
+    // The dialog is opened from here and therefore also processed here, but outside of the disabled scope, since
+    // BeginDisabled() also applies to popups that are begun inside of it
+    _dialog.process();
 }

@@ -12,14 +12,14 @@
 
 NeuralNetDesc::NeuralNetDesc()
 {
-    _weights.resize(NEURONS_PER_CELL * NEURONS_PER_CELL, NeuralNetWeight(0));
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-        _weights[i * NEURONS_PER_CELL + i] = 1.0f;
+    _weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+        _weights[i * NEURAL_NET_INPUTS + i] = 1.0f;
     }
 
-    _biases.resize(NEURONS_PER_CELL, 0);
+    _biases.resize(NEURAL_NET_OUTPUTS, 0);
 
-    _activationFunctions.resize(NEURONS_PER_CELL, ActivationFunction_Identity);
+    _activationFunctions.resize(NEURAL_NET_OUTPUTS, ActivationFunction_Identity);
 
     _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
     _connectionWeights.at(0) = 1.0f;
@@ -27,7 +27,7 @@ NeuralNetDesc::NeuralNetDesc()
 
 NeuralNetDesc& NeuralNetDesc::weight(int row, int col, NeuralNetWeight value)
 {
-    _weights[row * NEURONS_PER_CELL + col] = value;
+    _weights[row * NEURAL_NET_INPUTS + col] = value;
     return *this;
 }
 
@@ -46,21 +46,19 @@ NeuralNetDesc& NeuralNetDesc::connectionWeight(int connectionIndex, float value)
 
 SignalDesc::SignalDesc()
 {
-    _channels.resize(NEURONS_PER_CELL, 0);
+    _channels.resize(STANDARD_NEURONS_PER_CELL, 0);
 }
 
 SignalDesc& SignalDesc::channels(std::vector<float> const& value)
 {
-    CHECK(value.size() == NEURONS_PER_CELL);
+    CHECK(value.size() == STANDARD_NEURONS_PER_CELL);
     _channels = value;
     return *this;
 }
 
 SensorMode SensorDesc::getMode() const
 {
-    if (std::holds_alternative<TelemetryDesc>(_mode)) {
-        return SensorMode_Telemetry;
-    } else if (std::holds_alternative<DetectEnergyDesc>(_mode)) {
+    if (std::holds_alternative<DetectEnergyDesc>(_mode)) {
         return SensorMode_DetectEnergy;
     } else if (std::holds_alternative<DetectSolidDesc>(_mode)) {
         return SensorMode_DetectSolid;
@@ -114,7 +112,7 @@ GeneratorMode GeneratorDesc::getMode() const
 
 SignalEntryDesc::SignalEntryDesc()
 {
-    _channels.resize(NEURONS_PER_CELL, 0);
+    _channels.resize(STANDARD_NEURONS_PER_CELL, 0);
 }
 
 AttackerMode AttackerDesc::getMode() const
@@ -189,7 +187,7 @@ CellType CellDesc::getCellType() const
 
 CellDesc& CellDesc::signal(std::vector<float> const& value)
 {
-    CHECK(value.size() == NEURONS_PER_CELL);
+    CHECK(value.size() == STANDARD_NEURONS_PER_CELL);
 
     SignalDesc newSignal;
     newSignal._channels = value;

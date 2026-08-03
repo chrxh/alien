@@ -152,7 +152,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1849,48 +1849,4 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
     auto relocationDensity = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(relocationDensity > 0.70f);
     EXPECT_TRUE(relocationDensity < 0.80f);
-}
-
-/**
- * Tests for SensorMode_Telemetry (mode-specific tests)
- */
-TEST_F(SensorTests, telemetry_allOutputs)
-{
-    // Test with a cell that has energy and velocity to verify all telemetry outputs
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .vel({0.1f, 0.05f})
-                .type(CellDesc().frontAngle(0.0f).usableEnergy(100.0f).cellType(
-                    SensorDesc().autoTrigger(true).mode(TelemetryDesc()))),  // Moving with both x and y components
-        },
-        CreatureDesc().id(0));
-    _simulationFacade->setSimulationData(data);
-
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-
-    // Sensor detected something (signal has non-zero values)
-
-    // Verify cell energy channel is populated and within expected range
-    // Formula: 1.0 - 1.0 / pow(energy + 1.0, 0.1)
-    // For energy=100: 1.0 - 1.0 / pow(101, 0.1) ≈ 0.36
-    auto energySignal = actualSensor.getCellRef()._signal._channels[Channels::SensorTelemetryCellEnergy];
-    EXPECT_TRUE(energySignal > 0.3f);
-    EXPECT_TRUE(energySignal < 0.4f);
-
-    // Verify velocity angle channel is populated
-    // Range: [-1.0, 1.0] representing angle relative to front angle
-    auto velAngle = actualSensor.getCellRef()._signal._channels[Channels::SensorTelemetryCellVelAngle];
-    EXPECT_TRUE(velAngle >= -1.0f);
-    EXPECT_TRUE(velAngle <= 1.0f);
-
-    // Verify velocity strength channel is populated and within expected range
-    // Formula: min(log(1.0 + vel * 50) / 1.5, 1.0)
-    // For vel ≈ 0.112: log(1 + 5.6) / 1.5 ≈ 0.63
-    auto velStrength = actualSensor.getCellRef()._signal._channels[Channels::SensorTelemetryCellVelStrength];
-    EXPECT_TRUE(velStrength > 0.5f);
-    EXPECT_TRUE(velStrength < 0.7f);
 }

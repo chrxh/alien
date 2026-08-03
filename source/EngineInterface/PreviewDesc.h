@@ -27,6 +27,7 @@ struct CellPreviewDesc
     MEMBER(CellPreviewDesc, int, nodeIndex, 0);
     MEMBER(CellPreviewDesc, int, cellType, 0);
     MEMBER(CellPreviewDesc, SignalPreviewDesc, signal, SignalPreviewDesc());
+    MEMBER(CellPreviewDesc, std::vector<float>, memory, std::vector<float>(MEMORY_NEURONS_PER_CELL, 0.0f));
     MEMBER(CellPreviewDesc, std::optional<int>, constructorGeneIndex, std::nullopt);
 };
 

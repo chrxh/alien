@@ -14,6 +14,8 @@ PUBLIC
     AutosaveWindow.h
     BrowserWindow.cpp
     BrowserWindow.h
+    CellFunctionChannels.cpp
+    CellFunctionChannels.h
     ChangeColorDialog.cpp
     ChangeColorDialog.h
     CreateUserDialog.cpp
@@ -99,6 +101,8 @@ PUBLIC
     MainWindow.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
+    ModalWindow.cpp
+    ModalWindow.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     MutationRatesDialog.cpp

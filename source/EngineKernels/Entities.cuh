@@ -51,9 +51,9 @@ struct ObjectConnection
 
 struct __align__(16) NeuralNet
 {
-    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
-    float biases[NEURONS_PER_CELL];
-    ActivationFunction activationFunctions[NEURONS_PER_CELL];
+    NeuralNetWeight weights[NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS];
+    float biases[NEURAL_NET_OUTPUTS];
+    ActivationFunction activationFunctions[NEURAL_NET_OUTPUTS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -93,9 +93,6 @@ struct Constructor
     bool energyNeeded;
 };
 
-struct Telemetry
-{};
-
 struct DetectEnergy
 {
     float minDensity;
@@ -120,7 +117,6 @@ struct DetectCreature
 
 union SensorModeData
 {
-    Telemetry telemetry;
     DetectEnergy detectEnergy;
     DetectSolid detectSolid;
     DetectFreeCell detectFreeCell;
@@ -366,7 +362,7 @@ union MemoryModeData
 
 struct __align__(16) SignalEntry
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct Memory
@@ -423,7 +419,7 @@ union CellTypeData
 
 struct __align__(16) Signal
 {
-    float channels[NEURONS_PER_CELL];
+    float channels[STANDARD_NEURONS_PER_CELL];
 };
 
 struct uint32_float
@@ -520,19 +516,21 @@ struct Cell
     bool constructorAvailable;  // If true, constructor holds valid data
     Constructor constructor;    // Optional constructor data
     Signal signal;
+    float memory[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
 
     // Process data
     Signal futureSignal;
+    float futureMemory[MEMORY_NEURONS_PER_CELL];
     uint32_t headUpdateId;
     bool headCell;
 
-    // Additional rendering data
+    // Events
     CellEvent event;
     uint8_t eventCounter;
-    uint8_t signalChanges;
     float2 eventPos;
+    uint8_t highlightIntensity;
 
     __device__ __inline__ bool isSameCreature(Cell* otherCell) { return otherCell->creature->id == this->creature->id; }
 

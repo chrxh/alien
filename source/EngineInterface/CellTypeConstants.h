@@ -17,6 +17,14 @@ namespace Channels
     auto constexpr CellTypeActivation = 0;
 }
 
+namespace TelemetryInputs
+{
+    auto constexpr Energy = 0;
+    auto constexpr Attacked = 1;
+    auto constexpr Age = 2;
+    auto constexpr Speed = 3;
+}
+
 using ObjectType = int;
 enum ObjectType_
 {
@@ -235,11 +243,8 @@ namespace Channels
     auto constexpr SensorWithRelocationScan = 0;
     auto constexpr SensorFoundResult = 0;
     auto constexpr SensorAngle = 1;
-    auto constexpr SensorMass = 2;  // numCells for SensorMode_DetectCreature and density for other modes except SensorMode_Telemetry
+    auto constexpr SensorMass = 2;  // numCells for SensorMode_DetectCreature and density for the other modes
     auto constexpr SensorDistance = 3;
-    auto constexpr SensorTelemetryCellEnergy = 1;
-    auto constexpr SensorTelemetryCellVelAngle = 2;
-    auto constexpr SensorTelemetryCellVelStrength = 3;
 }
 namespace Const
 {
@@ -273,7 +278,6 @@ enum LineageRestriction_
 using SensorMode = int;
 enum SensorMode_
 {
-    SensorMode_Telemetry,
     SensorMode_DetectEnergy,
     SensorMode_DetectSolid,
     SensorMode_DetectFreeCell,
@@ -283,7 +287,7 @@ enum SensorMode_
 
 namespace Const
 {
-    std::vector<std::string> const SensorModeStrings = {"Telemetry", "Detect energy", "Detect solid", "Detect free cell", "Detect creature"};
+    std::vector<std::string> const SensorModeStrings = {"Detect energy", "Detect solid", "Detect free cell", "Detect creature"};
 }
 
 //********************
@@ -327,7 +331,6 @@ namespace Const
 namespace Channels
 {
     auto constexpr AttackerSuccess = 2;
-    auto constexpr AttackerNotify = 7;
 }
 
 using AttackerMode = int;

@@ -49,14 +49,14 @@ protected:
         }
     }
 
-    std::vector<float> getExampleSignal1() const { return {0.2f, -0.25f, 0.2f, 0.3f, 0.4f, -0.4f, -0.25, 0.5f, 0, 0.4f, 0.2f, 0.2f, -0.1f, 0.05f, 0, 0.25f}; }
-    std::vector<float> getExampleSignal2() const { return {-0.5f, 0.3f, 0.4f, -0.4f, 0, 0, 0.4f, 0.35f, 0, 0.4f, 0, -0.2f, 0, 0.2f, 0.2f, -0.5f}; }
+    std::vector<float> getExampleSignal1() const { return {0.2f, -0.25f, 0.2f, 0.3f, 0.4f, -0.4f, -0.25, 0.5f}; }
+    std::vector<float> getExampleSignal2() const { return {-0.5f, 0.3f, 0.4f, -0.4f, 0, 0, 0.4f, 0.35f}; }
     std::vector<float> addSignals(std::vector<float> const& signal1, std::vector<float> const& signal2)
     {
         CHECK(signal1.size() == signal2.size());
-        CHECK(signal1.size() == NEURONS_PER_CELL);
+        CHECK(signal1.size() == STANDARD_NEURONS_PER_CELL);
         std::vector<float> result;
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             result.emplace_back(signal1.at(i) + signal2.at(i));
         }
         return result;
@@ -120,7 +120,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::vector<float> emptySignal(NEURONS_PER_CELL, 0);
+    std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
 }
@@ -149,7 +149,7 @@ TEST_F(NeuronTests, forkSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::vector<float> emptySignal(NEURONS_PER_CELL, 0);
+    std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
     EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(3).getCellRef()._signal._channels));
@@ -187,7 +187,7 @@ TEST_F(NeuronTests, mergeSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::vector<float> emptySignal(NEURONS_PER_CELL, 0);
+    std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
     auto sumSignal = addSignals(signal1, signal2);
     sumSignal = addSignals(sumSignal, signal2);
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
@@ -210,7 +210,7 @@ inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
     std::vector<ApplyNeuralNetParameter> params;
 
     for (int af = 0; af < ActivationFunction_Count; ++af) {
-        for (int c = 0; c < NEURONS_PER_CELL; ++c) {
+        for (int c = 0; c < STANDARD_NEURONS_PER_CELL; ++c) {
             for (int i = 0; i <= 20; ++i) {
                 float inputValue = -2.0f + i * 0.2f;
                 params.push_back({static_cast<ActivationFunction>(af), c, inputValue});
@@ -240,7 +240,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     // - Channel 'c' uses the specified activation function with custom weight and bias
     // - All other channels use Identity activation with identity weight (1.0) and zero bias
     NeuralNetDesc nn;
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         nn._activationFunctions[i] = (i == param.channelIndex) ? param.activationFunction : ActivationFunction_Identity;
         nn.weight(i, i, (i == param.channelIndex) ? ApplyNeuralNetWeight : 1.0f);
         nn._biases[i] = (i == param.channelIndex) ? ApplyNeuralNetBias : 0.0f;
@@ -251,7 +251,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     // Setup input signal:
     // - Channel 'c' has the specified input value
     // - All other channels have 0 input
-    std::vector<float> inputSignal(NEURONS_PER_CELL, 0.0f);
+    std::vector<float> inputSignal(STANDARD_NEURONS_PER_CELL, 0.0f);
     inputSignal[param.channelIndex] = param.inputValue;
 
     auto data = ContentDesc()
@@ -271,7 +271,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     //   preActivation = weight * inputValue + bias
     //   output = activation(preActivation), clamped to [-2, 2]
     // All other channels: Identity(0) = 0
-    std::vector<float> expected(NEURONS_PER_CELL, 0.0f);
+    std::vector<float> expected(STANDARD_NEURONS_PER_CELL, 0.0f);
 
     float preActivation = ApplyNeuralNetWeight * param.inputValue + ApplyNeuralNetBias;
     float rawOutput = applyActivationFunction(param.activationFunction, preActivation);
@@ -280,7 +280,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     auto& actual = actualData.getObjectRef(1).getCellRef()._signal._channels;
 
     constexpr float precision = 0.1f;
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
         EXPECT_TRUE(approxCompare(expected[i], actual[i], precision))
             << "Mismatch at channel " << i << ": expected=" << expected[i] << ", actual=" << actual[i];
     }
@@ -290,21 +290,19 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
 TEST_F(NeuronTests, truncateSignal)
 {
     NeuralNetDesc nn;
-    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
         nn.weight(i, i, 2.0f);
     }
     nn._connectionWeights[0] = 1.0f;  // Enable signal forwarding from first connection
 
-    // Input signal: {1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f, 0, 0, 0, 0, 0, 1.6f, 0, 0}
     // With weight 2.0f on diagonal, outputs are:
     // Channel 0: 1.5 * 2 = 3.0 -> truncated to 2
     // Channel 3: -1.5 * 2 = -3.0 -> truncated to -2
     // Channel 7: 1.7 * 2 = 3.4 -> truncated to 2
-    // Channel 13: 1.6 * 2 = 3.2 -> truncated to 2
     ContentDesc data;
     data.addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f, 0, 0, 0, 0, 0, 1.6f, 0, 0})),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
     });
     data.addConnection(1, 2);
 
@@ -313,7 +311,72 @@ TEST_F(NeuronTests, truncateSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0}, actualData.getObjectRef(1).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2}, actualData.getObjectRef(1).getCellRef()._signal._channels));
+}
+
+// The default identity weight matrix maps each memory input to the corresponding memory output
+TEST_F(NeuronTests, memoryNeuronsRetainActivityAndStayLocal)
+{
+    std::vector<float> memory = {0.5f, -0.3f, 0.25f, 1.0f};
+
+    auto data = ContentDesc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().memory(memory)),
+                        ObjectDesc().id(2).pos({0, 1}),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
+    std::vector<float> emptyMemory(MEMORY_NEURONS_PER_CELL, 0);
+    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._memory));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(emptyMemory, actualData.getObjectRef(2).getCellRef()._memory));
+}
+
+TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
+{
+    auto nn = NeuralNetDesc().weight(STANDARD_NEURONS_PER_CELL, 0, 1.0f);  // First memory neuron reads signal channel 0
+
+    auto data = ContentDesc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({0.5f, 0, 0, 0, 0, 0, 0, 0})),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::vector<float> expectedMemory = {0.5f, 0, 0, 0};
+    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memory));
+}
+
+TEST_F(NeuronTests, telemetryEnergyInput)
+{
+    // Signal channel 0 reads the energy telemetry input (1 corresponds to the normal cell energy)
+    auto nn = NeuralNetDesc().weight(0, 0, 0.0f).weight(0, STANDARD_NEURONS_PER_CELL + MEMORY_NEURONS_PER_CELL + TelemetryInputs::Energy, 1.0f);
+
+    auto data = ContentDesc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).usableEnergy(150.0f)),
+                        ObjectDesc().id(2).pos({0, 1}),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(1.5f, actualData.getObjectRef(1).getCellRef()._signal._channels.at(0), 0.05f));
 }
 
 // Performance test: ~100K connected cells (1000x100 rectangle) for 10000 time steps

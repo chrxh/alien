@@ -59,7 +59,7 @@ __inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& da
     } else {
         auto const& newSignalWeight = memory.modeData.signalIntegrator.newSignalWeight;
         auto const& channelBitMask = memory.channelBitMask;
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             memory.signalEntries->channels[i] =
                 (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * object->typeData.cell.signal.channels[i];
             if (channelBitMask & (1 << i)) {
@@ -99,7 +99,7 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     // Write output
     if (signalDelay.numSignalEntriesInitialized == memory.numSignalEntries) {
         auto const& channelBitMask = memory.channelBitMask;
-        for (int k = 0; k < NEURONS_PER_CELL; ++k) {
+        for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
             if (channelBitMask & (1 << k)) {
                 object->typeData.cell.signal.channels[k] = output.channels[k];
             }
@@ -168,7 +168,7 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
         // Read recorded memory entry at index numReadSignalEntries
         if (numReadSignalEntries < numWrittenSignalEntries) {
             auto const& channelBitMask = memory.channelBitMask;
-            for (int k = 0; k < NEURONS_PER_CELL; ++k) {
+            for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
                 if (channelBitMask & (1 << k)) {
                     object->typeData.cell.signal.channels[k] = memory.signalEntries[numReadSignalEntries].channels[k];
                 }
@@ -209,14 +209,14 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
     auto const& channelBitMask = memory.channelBitMask;
     if (signalStorage.readOnly) {
         // In readonly mode, always read regardless of sign
-        for (int k = 0; k < NEURONS_PER_CELL; ++k) {
+        for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
             if (channelBitMask & (1 << k)) {
                 object->typeData.cell.signal.channels[k] = memory.signalEntries[index].channels[k];
             }
         }
     } else if (inputValue >= 0) {
         // Read mode: channel[0] >= 0
-        for (int k = 0; k < NEURONS_PER_CELL; ++k) {
+        for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
             if (channelBitMask & (1 << k)) {
                 object->typeData.cell.signal.channels[k] = memory.signalEntries[index].channels[k];
             }

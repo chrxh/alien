@@ -6,6 +6,7 @@
 #include "DelayedExecutionController.h"
 #include "MainLoopEntity.h"
 #include "MainLoopEntityController.h"
+#include "ModalWindow.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
 
@@ -15,7 +16,7 @@ public:
     AlienDialog(std::string const& title, RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f), bool maximizable = false);
 
     virtual void open();
-    void processNested();
+    bool isOpen() const;
 
 protected:
     virtual void processIntern() {}
@@ -23,7 +24,6 @@ protected:
     virtual void shutdownIntern() {}
 
     virtual void openIntern() {}
-    void openNested();
 
     void changeTitle(std::string const& title);
     virtual void close();
@@ -31,29 +31,7 @@ protected:
 private:
     void init() override;
     void process() override;
-    void processDialog();
-    void processMaximizeButton();
     void shutdown() override;
 
-    bool _sizeInitialized = false;
-    bool _nested = false;
-    enum class DialogState
-    {
-        Closed,
-        JustOpened,
-        Open
-    };
-    DialogState _state = DialogState::Closed;
-    std::string _title;
-    RealVector2D _defaultSize;
-
-    bool _isMaximizable = false;
-    enum class DialogWindowState
-    {
-        Normal,
-        Maximized
-    };
-    DialogWindowState _windowState = DialogWindowState::Normal;
-    ImVec2 _savedPos;
-    ImVec2 _savedSize;
+    ModalWindow _modalWindow;
 };
