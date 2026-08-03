@@ -463,9 +463,7 @@ public:
         MEMBER(TreeNodeParameters, bool, enableBlinking, false);
         MEMBER(TreeNodeParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
     };
-    // Returns true if the tree node is open. If expandButtonClicked is given, an expand button is shown in the header
-    // and the tree node opens itself when it is clicked.
-    static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);
+    static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);   // Returns true if the tree node is open.
     static void EndTreeNode();
 
     struct ButtonParameters

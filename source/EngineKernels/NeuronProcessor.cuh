@@ -82,7 +82,7 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-            cell.memoryActivities[i] = cell.futureMemoryActivities[i];
+            cell.memory[i] = cell.futureMemory[i];
         }
     }
 }
@@ -164,7 +164,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         sharedInput[laneId] = accumulatedInput;
     } else if (laneId < NEURAL_NET_INPUTS) {
         if (laneId < NEURAL_NET_OUTPUTS) {
-            sharedInput[laneId] = cell.memoryActivities[laneId - STANDARD_NEURONS_PER_CELL];
+            sharedInput[laneId] = cell.memory[laneId - STANDARD_NEURONS_PER_CELL];
         } else {
             sharedInput[laneId] = calcTelemetryInput(object, laneId - NEURAL_NET_OUTPUTS);
         }
@@ -197,7 +197,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         if (row < STANDARD_NEURONS_PER_CELL) {
             cell.futureSignal.channels[row] = result;
         } else {
-            cell.futureMemoryActivities[row - STANDARD_NEURONS_PER_CELL] = result;
+            cell.futureMemory[row - STANDARD_NEURONS_PER_CELL] = result;
         }
     }
 }

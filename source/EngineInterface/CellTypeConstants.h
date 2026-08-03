@@ -17,7 +17,6 @@ namespace Channels
     auto constexpr CellTypeActivation = 0;
 }
 
-// Indices within the telemetry part of the neural net input vector
 namespace TelemetryInputs
 {
     auto constexpr Energy = 0;

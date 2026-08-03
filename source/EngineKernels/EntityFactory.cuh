@@ -417,8 +417,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-            cell->memoryActivities[i] = cellTO.memoryActivities[i];
-            cell->futureMemoryActivities[i] = cellTO.memoryActivities[i];
+            cell->memory[i] = cellTO.memory[i];
+            cell->futureMemory[i] = cellTO.memory[i];
         }
         cell->highlightIntensity = cellTO.highlightIntensity;
 
@@ -775,8 +775,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.signal.channels[i] = 0.0f;
     }
     for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-        cell.memoryActivities[i] = 0.0f;
-        cell.futureMemoryActivities[i] = 0.0f;
+        cell.memory[i] = 0.0f;
+        cell.futureMemory[i] = 0.0f;
     }
     cell.highlightIntensity = 0;
 

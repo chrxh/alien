@@ -622,7 +622,7 @@ void _InspectionWindow::processNeuralNetNode(ObjectDesc& object)
             AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false), &expandButtonClicked)) {
         auto& cell = object.getCellRef();
         _NeuralNetEditorWidget::LiveData liveData;
-        liveData.memoryActivities = cell._memoryActivities;
+        liveData.memory = cell._memory;
         liveData.energy = cell._usableEnergy;
         liveData.attacked = cell._event == CellEvent_Attacked && cell._eventCounter > 0;
         liveData.age = cell._age;

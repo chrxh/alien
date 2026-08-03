@@ -442,7 +442,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
                 entries.emplace_back(getSignalEditorOutLabel(index), &selectedCell->_signal._channels.at(index));
             }
             for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
-                entries.emplace_back(getSignalEditorMemoryLabel(index), &selectedCell->_memoryActivities.at(index));
+                entries.emplace_back(getSignalEditorMemoryLabel(index), &selectedCell->_memory.at(index));
             }
 
             auto textWidth = calcSignalTextWidth();
@@ -561,7 +561,7 @@ void _CreaturePreviewWidget::updatePhenotype(ContentDesc& phenotype, CellPreview
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
             object.getCellRef()._signal = SignalDesc().channels(editedCell._signal._channels);
-            object.getCellRef()._memoryActivities = editedCell._memoryActivities;
+            object.getCellRef()._memory = editedCell._memory;
         }
     }
 }
