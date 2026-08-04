@@ -38,6 +38,8 @@ add_library(PersisterInterface
     SaveSimulationResultData.h
     SenderId.h
     SenderInfo.h
+    SerializationScope.h
+    SerializedTypeIds.h
     SerializerService.cpp
     SerializerService.h
     ZstdStream.h
