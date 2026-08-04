@@ -9,6 +9,17 @@ void _SimulationFacadeImpl::set(SimulationFacade const& instance)
     _instance = instance;
 }
 
+_SimulationFacadeImpl::~_SimulationFacadeImpl()
+{
+    // The worker thread accesses members of this object, so it must be terminated before they are destroyed
+    try {
+        closeSimulation();
+    } catch (...) {
+
+        // A destructor must not throw
+    }
+}
+
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
     _worldSize = worldSize;
@@ -202,6 +213,7 @@ void _SimulationFacadeImpl::closeSimulation()
         _worker.beginShutdown();
         _thread->join();
         delete _thread;
+        _thread = nullptr;
         _worker.endShutdown();
         _selectionNeedsUpdate = true;
     }
