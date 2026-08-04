@@ -75,6 +75,7 @@ PUBLIC
     LastSessionBrowserData.h
     LayerColorPalette.cpp
     LayerColorPalette.h
+    LineageColors.h
     LiveStatisticsHistory.cpp
     LiveStatisticsHistory.h
     LiveStatisticsService.cpp

@@ -24,6 +24,7 @@
 
 #include "AlienGui.h"
 #include "GenomeEditorWindow.h"
+#include "LineageColors.h"
 #include "LiveStatisticsService.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
@@ -87,25 +88,10 @@ namespace
             toInt(alpha * 255.0f));
     }
 
-    auto constexpr LineageHueShift = 0.03f;    // Hue offset between consecutive plot rows of a lineage
-    auto constexpr LineageBrightening = 1.5f;  // The identifying colors of the renderer are too dark on the dark GUI background
-    auto constexpr LineageSaturationFactor = 0.85f;
-
     // Palette as used by the former statistics window; one colormap color per plot row
     ImColor getOverallPlotColor(int metricIndex)
     {
         return ImColor(ImPlot::GetColormapColor(metricIndex % ImPlot::GetColormapSize(ImPlotColormap_Cool), ImPlotColormap_Cool));
-    }
-
-    // Identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
-    // hueShiftSteps shifts the hue slightly so that consecutive plot rows of a lineage remain distinguishable
-    ImColor getLineageColor(int64_t lineageId, int hueShiftSteps = 0)
-    {
-        auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId));
-        float h, s, v;
-        ObjectColoring::rgbToHsv(toFloat((rgb >> 16) & 0xff) / 255.0f, toFloat((rgb >> 8) & 0xff) / 255.0f, toFloat(rgb & 0xff) / 255.0f, h, s, v);
-        h = std::fmod(h + toFloat(hueShiftSteps) * LineageHueShift, 1.0f);
-        return toImColor(ObjectColoring::hsvToRgb(h, s * LineageSaturationFactor, std::min(1.0f, v * LineageBrightening)));
     }
 
     // The "all filtered" row keeps the colormap palette, single lineages are colored by their identity
@@ -958,7 +944,7 @@ void EvolutionDashboardWindow::onOpenRepresentativeGenome(uint64_t cellId)
     for (auto const& object : inspectedData._objects) {
         if (object._id == cellId && object.getObjectType() == ObjectType_Cell) {
             auto const& creature = inspectedData.getCreatureRef(object.getCellRef()._creatureId);
-            GenomeEditorWindow::get().openTab(inspectedData.getGenomeRef(creature._genomeId));
+            GenomeEditorWindow::get().openTab(inspectedData.getGenomeRef(creature._genomeId), false, true, creature._lineageId);
             return;
         }
     }

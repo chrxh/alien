@@ -1740,17 +1740,27 @@ bool AlienGui::Group(GroupParameters const& parameters)
     auto style = ImGui::GetStyle();
 
     ImGui::Spacing();
-    ImGui::Spacing();
 
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto groupWidth = ImGui::GetContentRegionAvail().x;
     auto color = parameters._highlighted ? Const::GroupHighColor : Const::GroupDefaultColor;
-    drawList->AddRectFilled(
-        ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y),
-        ImVec2(cursorPos.x + scale(ImGui::GetContentRegionAvail().x), cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y),
-        color,
-        2.0f);
-    ImGui::TextUnformatted((" " + parameters._text).c_str());
+    auto upperLeft = ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y);
+    auto lowerRight = ImVec2(cursorPos.x + groupWidth, cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y);
+    drawList->AddRectFilled(upperLeft, lowerRight, color, style.FrameRounding);
+
+    // Accent bar marking the primary section of a panel
+    auto textIndent = scale(8.0f);
+    if (parameters._highlighted) {
+        auto barWidth = scale(3.0f);
+        drawList->AddRectFilled(
+            upperLeft, ImVec2(upperLeft.x + barWidth, lowerRight.y), Const::GroupAccentBarColor, style.FrameRounding, ImDrawFlags_RoundCornersLeft);
+        textIndent += barWidth;
+    }
+
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textIndent);
+    ImGui::PushStyleColor(ImGuiCol_Text, parameters._highlighted ? Const::GroupHighTextColor.Value : Const::GroupTextColor.Value);
+    ImGui::TextUnformatted(parameters._text.c_str());
+    ImGui::PopStyleColor();
     if (parameters._tooltip.has_value()) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -1843,15 +1853,12 @@ bool AlienGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 
     ImGui::PushFont(StyleRepository::get().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-    auto color = Const::ToolbarButtonTextColor;
-    float h, s, v;
-    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
 
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(h, s, v * 0.3f)));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(h, s, v * 0.45f)));
-
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(Const::AccentDeepColor));
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(Const::ToolbarButtonTextColor));
+
     auto buttonSize = scale(40.0f);
 
     ImGui::BeginDisabled(parameters._disabled);
@@ -1937,6 +1944,31 @@ void AlienGui::VerticalSeparator(float height)
 void AlienGui::ToolbarSeparator()
 {
     VerticalSeparator(40.0f);
+}
+
+void AlienGui::Chip(ChipParameters const& parameters)
+{
+    auto drawList = ImGui::GetWindowDrawList();
+
+    auto textSize = ImGui::CalcTextSize(parameters._text.c_str());
+    auto paddingX = scale(8.0f);
+    auto paddingY = scale(2.0f);
+    auto dotSize = scale(6.0f);
+    auto dotWidth = parameters._dotColor.has_value() ? dotSize + scale(6.0f) : 0.0f;
+    auto size = ImVec2(textSize.x + paddingX * 2 + dotWidth, textSize.y + paddingY * 2);
+
+    auto pos = ImGui::GetCursorScreenPos();
+    drawList->AddRectFilled(pos, {pos.x + size.x, pos.y + size.y}, parameters._backgroundColor, size.y / 2);
+    if (parameters._dotColor.has_value()) {
+        drawList->AddRectFilled(
+            {pos.x + paddingX, pos.y + size.y / 2 - dotSize / 2},
+            {pos.x + paddingX + dotSize, pos.y + size.y / 2 + dotSize / 2},
+            *parameters._dotColor,
+            scale(2.0f));
+    }
+    drawList->AddText({pos.x + paddingX + dotWidth, pos.y + paddingY}, parameters._textColor, parameters._text.c_str());
+
+    ImGui::Dummy(size);
 }
 
 bool AlienGui::Button(std::string const& text, float size)
