@@ -1,6 +1,7 @@
 #include "SerializerService.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <filesystem>
@@ -8,6 +9,7 @@
 #include <ranges>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -19,7 +21,6 @@
 #include <cereal/types/optional.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
-#include <cereal/types/variant.hpp>
 #include <cereal/types/vector.hpp>
 
 #include <Base/LoggingService.h>
@@ -114,6 +115,276 @@ namespace cereal
 
     using AttributeMap = std::unordered_map<int, VariantData>;
 
+    /************************************************************************/
+    /* Serialized type ids for std::variant                                 */
+    /************************************************************************/
+
+    // A std::variant is written as a type id followed by the value. The type id is part of the file format:
+    // the alternatives of a variant may be reordered or removed at any time, but an id must never change its
+    // meaning and must never be reused for another type. New alternatives get the next free id of their variant.
+    // An unregistered type does not compile.
+    template <typename T>
+    struct SerializedTypeId;
+
+#define REGISTER_SERIALIZED_TYPE(Type, Id) \
+    template <> \
+    struct SerializedTypeId<Type> \
+    { \
+        static constexpr int32_t value = Id; \
+    };
+
+    // VariantData
+    REGISTER_SERIALIZED_TYPE(int, 0)
+    REGISTER_SERIALIZED_TYPE(float, 1)
+    REGISTER_SERIALIZED_TYPE(bool, 2)
+    REGISTER_SERIALIZED_TYPE(double, 3)
+    REGISTER_SERIALIZED_TYPE(std::string, 4)
+    REGISTER_SERIALIZED_TYPE(uint64_t, 5)
+    REGISTER_SERIALIZED_TYPE(uint32_t, 6)
+    REGISTER_SERIALIZED_TYPE(uint16_t, 7)
+    REGISTER_SERIALIZED_TYPE(uint8_t, 8)
+    REGISTER_SERIALIZED_TYPE(int64_t, 9)
+    REGISTER_SERIALIZED_TYPE(int16_t, 10)
+    REGISTER_SERIALIZED_TYPE(int8_t, 11)
+    REGISTER_SERIALIZED_TYPE(RealVector2D, 12)
+    REGISTER_SERIALIZED_TYPE(std::optional<bool>, 13)
+    REGISTER_SERIALIZED_TYPE(std::optional<uint64_t>, 14)
+    REGISTER_SERIALIZED_TYPE(std::optional<uint8_t>, 15)
+    REGISTER_SERIALIZED_TYPE(std::optional<int8_t>, 16)
+    REGISTER_SERIALIZED_TYPE(std::optional<int>, 17)
+    REGISTER_SERIALIZED_TYPE(std::optional<float>, 18)
+    REGISTER_SERIALIZED_TYPE(std::optional<RealVector2D>, 19)
+    REGISTER_SERIALIZED_TYPE(std::vector<bool>, 20)
+    REGISTER_SERIALIZED_TYPE(std::vector<uint8_t>, 21)
+    REGISTER_SERIALIZED_TYPE(std::vector<int8_t>, 22)
+    REGISTER_SERIALIZED_TYPE(std::vector<int>, 23)
+    REGISTER_SERIALIZED_TYPE(std::vector<float>, 24)
+    REGISTER_SERIALIZED_TYPE(std::vector<RealVector2D>, 25)
+    REGISTER_SERIALIZED_TYPE(std::vector<std::vector<uint8_t>>, 26)
+    REGISTER_SERIALIZED_TYPE(std::vector<std::vector<int8_t>>, 27)
+    REGISTER_SERIALIZED_TYPE(std::vector<std::vector<int>>, 28)
+    REGISTER_SERIALIZED_TYPE(std::vector<std::vector<float>>, 29)
+    REGISTER_SERIALIZED_TYPE(IntVector2D, 30)
+    REGISTER_SERIALIZED_TYPE(std::chrono::milliseconds, 31)
+
+    // CellTypeDesc
+    REGISTER_SERIALIZED_TYPE(BaseDesc, 0)
+    REGISTER_SERIALIZED_TYPE(DepotDesc, 1)
+    REGISTER_SERIALIZED_TYPE(SensorDesc, 2)
+    REGISTER_SERIALIZED_TYPE(GeneratorDesc, 3)
+    REGISTER_SERIALIZED_TYPE(AttackerDesc, 4)
+    REGISTER_SERIALIZED_TYPE(InjectorDesc, 5)
+    REGISTER_SERIALIZED_TYPE(MuscleDesc, 6)
+    REGISTER_SERIALIZED_TYPE(DefenderDesc, 7)
+    REGISTER_SERIALIZED_TYPE(ReconnectorDesc, 8)
+    REGISTER_SERIALIZED_TYPE(DetonatorDesc, 9)
+    REGISTER_SERIALIZED_TYPE(DigestorDesc, 10)
+    REGISTER_SERIALIZED_TYPE(MemoryDesc, 11)
+    REGISTER_SERIALIZED_TYPE(CommunicatorDesc, 12)
+    REGISTER_SERIALIZED_TYPE(VoidDesc, 13)
+
+    // CellTypeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(BaseGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(DepotGenomeDesc, 1)
+    REGISTER_SERIALIZED_TYPE(SensorGenomeDesc, 2)
+    REGISTER_SERIALIZED_TYPE(GeneratorGenomeDesc, 3)
+    REGISTER_SERIALIZED_TYPE(AttackerGenomeDesc, 4)
+    REGISTER_SERIALIZED_TYPE(InjectorGenomeDesc, 5)
+    REGISTER_SERIALIZED_TYPE(MuscleGenomeDesc, 6)
+    REGISTER_SERIALIZED_TYPE(DefenderGenomeDesc, 7)
+    REGISTER_SERIALIZED_TYPE(ReconnectorGenomeDesc, 8)
+    REGISTER_SERIALIZED_TYPE(DetonatorGenomeDesc, 9)
+    REGISTER_SERIALIZED_TYPE(DigestorGenomeDesc, 10)
+    REGISTER_SERIALIZED_TYPE(MemoryGenomeDesc, 11)
+    REGISTER_SERIALIZED_TYPE(CommunicatorGenomeDesc, 12)
+    REGISTER_SERIALIZED_TYPE(VoidGenomeDesc, 13)
+
+    // SensorModeDesc / SensorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(DetectEnergyDesc, 0)
+    REGISTER_SERIALIZED_TYPE(DetectSolidDesc, 1)
+    REGISTER_SERIALIZED_TYPE(DetectFreeCellDesc, 2)
+    REGISTER_SERIALIZED_TYPE(DetectCreatureDesc, 3)
+    REGISTER_SERIALIZED_TYPE(DetectEnergyGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(DetectSolidGenomeDesc, 1)
+    REGISTER_SERIALIZED_TYPE(DetectFreeCellGenomeDesc, 2)
+    REGISTER_SERIALIZED_TYPE(DetectCreatureGenomeDesc, 3)
+
+    // GeneratorModeDesc / GeneratorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(SquareSignalDesc, 0)
+    REGISTER_SERIALIZED_TYPE(SawtoothSignalDesc, 1)
+    REGISTER_SERIALIZED_TYPE(SquareSignalGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(SawtoothSignalGenomeDesc, 1)
+
+    // AttackerModeDesc / AttackerModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(AttackFreeCellDesc, 0)
+    REGISTER_SERIALIZED_TYPE(AttackCreatureDesc, 1)
+    REGISTER_SERIALIZED_TYPE(AttackFreeCellGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(AttackCreatureGenomeDesc, 1)
+
+    // MuscleModeDesc / MuscleModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(AutoBendingDesc, 0)
+    REGISTER_SERIALIZED_TYPE(ManualBendingDesc, 1)
+    REGISTER_SERIALIZED_TYPE(AngleBendingDesc, 2)
+    REGISTER_SERIALIZED_TYPE(AutoCrawlingDesc, 3)
+    REGISTER_SERIALIZED_TYPE(ManualCrawlingDesc, 4)
+    REGISTER_SERIALIZED_TYPE(DirectMovementDesc, 5)
+    REGISTER_SERIALIZED_TYPE(AutoBendingGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(ManualBendingGenomeDesc, 1)
+    REGISTER_SERIALIZED_TYPE(AngleBendingGenomeDesc, 2)
+    REGISTER_SERIALIZED_TYPE(AutoCrawlingGenomeDesc, 3)
+    REGISTER_SERIALIZED_TYPE(ManualCrawlingGenomeDesc, 4)
+    REGISTER_SERIALIZED_TYPE(DirectMovementGenomeDesc, 5)
+
+    // ReconnectorModeDesc / ReconnectorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(ReconnectSolidDesc, 0)
+    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellDesc, 1)
+    REGISTER_SERIALIZED_TYPE(ReconnectCreatureDesc, 2)
+    REGISTER_SERIALIZED_TYPE(ReconnectSolidGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellGenomeDesc, 1)
+    REGISTER_SERIALIZED_TYPE(ReconnectCreatureGenomeDesc, 2)
+
+    // MemoryModeDesc / MemoryModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(SignalDelayDesc, 0)
+    REGISTER_SERIALIZED_TYPE(SignalRecorderDesc, 1)
+    REGISTER_SERIALIZED_TYPE(SignalStorageDesc, 2)
+    REGISTER_SERIALIZED_TYPE(SignalIntegratorDesc, 3)
+    REGISTER_SERIALIZED_TYPE(SignalDelayGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(SignalRecorderGenomeDesc, 1)
+    REGISTER_SERIALIZED_TYPE(SignalStorageGenomeDesc, 2)
+    REGISTER_SERIALIZED_TYPE(SignalIntegratorGenomeDesc, 3)
+
+    // CommunicatorModeDesc / CommunicatorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(SenderDesc, 0)
+    REGISTER_SERIALIZED_TYPE(ReceiverDesc, 1)
+    REGISTER_SERIALIZED_TYPE(SenderGenomeDesc, 0)
+    REGISTER_SERIALIZED_TYPE(ReceiverGenomeDesc, 1)
+
+    // ObjectTypeDesc
+    REGISTER_SERIALIZED_TYPE(SolidDesc, 0)
+    REGISTER_SERIALIZED_TYPE(FluidDesc, 1)
+    REGISTER_SERIALIZED_TYPE(FreeCellDesc, 2)
+    REGISTER_SERIALIZED_TYPE(CellDesc, 3)
+
+    template <typename... Ts>
+    constexpr bool hasUniqueSerializedTypeIds(std::variant<Ts...> const*)
+    {
+        std::array typeIds = {SerializedTypeId<Ts>::value...};
+        std::ranges::sort(typeIds);
+        return std::ranges::adjacent_find(typeIds) == typeIds.end();
+    }
+
+    template <class Archive, typename Variant, size_t... Indices>
+    bool loadVariantAlternative(Archive& ar, int32_t typeId, Variant& data, std::index_sequence<Indices...>)
+    {
+        auto loadIfMatching = [&]<size_t Index>() {
+            using Alternative = std::variant_alternative_t<Index, Variant>;
+            if (SerializedTypeId<Alternative>::value != typeId) {
+                return false;
+            }
+            data.template emplace<Index>();
+            ar(std::get<Index>(data));
+            return true;
+        };
+        return (loadIfMatching.template operator()<Indices>() || ...);
+    }
+
+    template <class Archive, typename... Ts>
+    void save(Archive& ar, std::variant<Ts...> const& data)
+    {
+        static_assert(hasUniqueSerializedTypeIds(static_cast<std::variant<Ts...> const*>(nullptr)), "Serialized type ids must be unique.");
+
+        auto typeId = std::visit([](auto const& value) { return SerializedTypeId<std::decay_t<decltype(value)>>::value; }, data);
+        ar(typeId);
+        std::visit([&ar](auto const& value) { ar(value); }, data);
+    }
+
+    template <class Archive, typename... Ts>
+    void load(Archive& ar, std::variant<Ts...>& data)
+    {
+        static_assert(hasUniqueSerializedTypeIds(static_cast<std::variant<Ts...> const*>(nullptr)), "Serialized type ids must be unique.");
+
+        int32_t typeId = 0;
+        ar(typeId);
+        if (!loadVariantAlternative(ar, typeId, data, std::index_sequence_for<Ts...>())) {
+            throw Exception("Unknown type id when deserializing std::variant.");
+        }
+    }
+
+    /************************************************************************/
+    /* Type conversion for attribute values                                 */
+    /************************************************************************/
+
+    template <typename T>
+    struct IsOptional : std::false_type
+    {};
+    template <typename T>
+    struct IsOptional<std::optional<T>> : std::true_type
+    {};
+
+    template <typename T>
+    struct IsVector : std::false_type
+    {};
+    template <typename T>
+    struct IsVector<std::vector<T>> : std::true_type
+    {};
+
+    template <typename T>
+    struct IsScalar : std::bool_constant<std::is_arithmetic_v<T> || std::is_enum_v<T>>
+    {};
+
+    // Converts a value read from a file to the type the corresponding member has today. This keeps files
+    // readable when the type of a member changes (e.g. int -> uint8_t). Returns false if there is no conversion.
+    template <typename From, typename To>
+    bool convertValue(From const& from, To& to)
+    {
+        if constexpr (std::is_same_v<From, To>) {
+            to = from;
+            return true;
+        } else if constexpr (IsOptional<From>::value && IsOptional<To>::value) {
+            if (!from.has_value()) {
+                to.reset();
+                return true;
+            }
+            typename To::value_type converted{};
+            if (!convertValue(*from, converted)) {
+                return false;
+            }
+            to = std::move(converted);
+            return true;
+        } else if constexpr (IsOptional<From>::value) {
+            return from.has_value() && convertValue(*from, to);
+        } else if constexpr (IsOptional<To>::value) {
+            typename To::value_type converted{};
+            if (!convertValue(from, converted)) {
+                return false;
+            }
+            to = std::move(converted);
+            return true;
+        } else if constexpr (IsVector<From>::value && IsVector<To>::value) {
+            to.clear();
+            to.reserve(from.size());
+            for (auto const& element : from) {
+                typename To::value_type converted{};
+                if (!convertValue(element, converted)) {
+                    return false;
+                }
+                to.push_back(std::move(converted));
+            }
+            return true;
+        } else if constexpr (IsScalar<From>::value && IsScalar<To>::value) {
+            to = static_cast<To>(from);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    template <typename T>
+    bool convertVariantData(VariantData const& variantData, T& result)
+    {
+        return std::visit([&result](auto const& value) { return convertValue(value, result); }, variantData);
+    }
+
     // RAII pattern
     template <class Archive>
     class SerializationScope
@@ -158,10 +429,7 @@ namespace cereal
         {
             if (_task == SerializationTask::Load) {
                 auto findResult = _attributeMap.find(key);
-                if (findResult != _attributeMap.end()) {
-                    auto const& variantData = findResult->second;
-                    value = std::get<T>(variantData);
-                } else {
+                if (findResult == _attributeMap.end() || !convertVariantData(findResult->second, value)) {
                     value = defaultValue;
                 }
             } else {
@@ -224,23 +492,23 @@ namespace cereal
         void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
         {
             if (_task == SerializationTask::Load) {
+                std::vector<int8_t> rawValues;
                 auto findResult = _attributeMap.find(key);
-                if (findResult != _attributeMap.end()) {
-                    auto const& variantData = findResult->second;
-                    auto& int8Vec = std::get<std::vector<int8_t>>(variantData);
-                    value.resize(int8Vec.size());
-                    for (size_t i = 0; i < int8Vec.size(); ++i) {
-                        value[i] = NeuralNetWeight::fromRawValue(static_cast<uint8_t>(int8Vec[i]));
-                    }
-                } else {
+                if (findResult == _attributeMap.end() || !convertVariantData(findResult->second, rawValues)) {
                     value = defaultValue;
+                    return;
+                }
+                value.resize(rawValues.size());
+                for (auto const& [weight, rawValue] : std::views::zip(value, rawValues)) {
+                    weight = NeuralNetWeight::fromRawValue(static_cast<uint8_t>(rawValue));
                 }
             } else {
-                std::vector<int8_t> int8Vec(value.size());
-                for (size_t i = 0; i < value.size(); ++i) {
-                    int8Vec[i] = value[i].rawValue;
+                std::vector<int8_t> rawValues;
+                rawValues.reserve(value.size());
+                for (auto const& weight : value) {
+                    rawValues.push_back(weight.rawValue);
                 }
-                _attributeMap.emplace(key, int8Vec);
+                _attributeMap.emplace(key, rawValues);
             }
         }
 
