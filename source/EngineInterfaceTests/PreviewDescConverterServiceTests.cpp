@@ -540,7 +540,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
     ContentDesc input;
     input.addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).signal(signal)),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).neuralActivity(signal)),
             ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),

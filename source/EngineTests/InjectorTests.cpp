@@ -74,7 +74,7 @@ TEST_F(InjectorTests, noTargetFound)
     auto actualInjector = actualData.getObjectRef(1);
 
     // Injector should have a signal with success value = 0
-    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._neuralActivity._signals[Channels::InjectorSuccess]));
 }
 
 /**
@@ -97,7 +97,7 @@ TEST_F(InjectorTests, successfulInjection)
     auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Injector should have a signal with success value > 0
-    EXPECT_TRUE(actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualInjector.getCellRef()._neuralActivity._signals[Channels::InjectorSuccess] > NEAR_ZERO);
 
     // Target constructor should have the injector's geneIndex
     EXPECT_EQ(2, actualTargetConstructor._geneIndex);
@@ -265,5 +265,5 @@ TEST_F(InjectorTests, noInjectionOnResistantCreature)
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
 
     // Injector should report failure
-    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._neuralActivity._signals[Channels::InjectorSuccess]));
 }

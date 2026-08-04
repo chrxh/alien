@@ -414,11 +414,11 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->eventPos = cellTO.eventPos;
 
         for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
-            cell->signal.channels[i] = cellTO.signal.channels[i];
+            cell->neuralActivity.signals[i] = cellTO.neuralActivity.signals[i];
         }
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-            cell->memory[i] = cellTO.memory[i];
-            cell->futureMemory[i] = cellTO.memory[i];
+            cell->neuralActivity.memory[i] = cellTO.neuralActivity.memory[i];
+            cell->futureNeuralActivity.memory[i] = cellTO.neuralActivity.memory[i];
         }
         cell->highlightIntensity = cellTO.highlightIntensity;
 
@@ -772,11 +772,11 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.headUpdateId = 0;
     cell.headCell = false;
     for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
-        cell.signal.channels[i] = 0.0f;
+        cell.neuralActivity.signals[i] = 0.0f;
     }
     for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-        cell.memory[i] = 0.0f;
-        cell.futureMemory[i] = 0.0f;
+        cell.neuralActivity.memory[i] = 0.0f;
+        cell.futureNeuralActivity.memory[i] = 0.0f;
     }
     cell.highlightIntensity = 0;
 

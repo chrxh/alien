@@ -159,7 +159,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Injection should succeed because defender is in anti-attacker mode (not anti-injector)
-    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._neuralActivity._signals[Channels::InjectorSuccess]));
     EXPECT_EQ(2, actualTargetConstructor._geneIndex);
 
     // Verify the injector's genome was injected into the target creature
@@ -215,7 +215,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Injection should fail because defender increases cost beyond what the injector can afford
-    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._neuralActivity._signals[Channels::InjectorSuccess]));
     EXPECT_EQ(0, actualConstructor._geneIndex);
 
     // Verify the injector's genome was NOT injected — target still has original genome

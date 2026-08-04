@@ -450,13 +450,16 @@ using CellTypeDesc = std::variant<
     CommunicatorDesc,
     VoidDesc>;
 
-struct SignalDesc
+struct NeuralActivityDesc
 {
-    SignalDesc();
-    auto operator<=>(SignalDesc const&) const = default;
+    NeuralActivityDesc();
+    auto operator<=>(NeuralActivityDesc const&) const = default;
 
-    SignalDesc& channels(std::vector<float> const& value);
-    std::vector<float> _channels;
+    NeuralActivityDesc& signals(std::vector<float> const& value);
+    std::vector<float> _signals;
+
+    NeuralActivityDesc& memory(std::vector<float> const& value);
+    std::vector<float> _memory;
 };
 
 struct SolidDesc
@@ -504,13 +507,14 @@ struct CellDesc
     MEMBER(CellDesc, int, concatenationIndex, 0);
     MEMBER(CellDesc, int, branchIndex, 0);
 
-    // Cell type-specific data
+    // Neural network data
     MEMBER(CellDesc, NeuralNetDesc, neuralNetwork, NeuralNetDesc());
+    MEMBER(CellDesc, NeuralActivityDesc, neuralActivity, NeuralActivityDesc());
+    CellDesc& neuralActivity(std::vector<float> const& value);
+
+    // Cell type-specific data
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
-    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
-    CellDesc& signal(std::vector<float> const& value);
-    MEMBER(CellDesc, std::vector<float>, memory, std::vector<float>(MEMORY_NEURONS_PER_CELL, 0.0f));
     MEMBER(CellDesc, int, activationTime, 0);
     MEMBER(CellDesc, int, lastUpdate, 0);
 

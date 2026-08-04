@@ -63,7 +63,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         senderPos = object->pos;
         senderFrontValid = cell.frontAngle != VALUE_NOT_SET_FLOAT;
         if (senderFrontValid) {
-            auto encodedAngle = cell.signal.channels[Channels::CommunicatorAngle];
+            auto encodedAngle = cell.neuralActivity.signals[Channels::CommunicatorAngle];
             senderFacing = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, encodedAngle);
         }
     }
@@ -165,12 +165,12 @@ CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObj
     receiverObject->getLock();
 
     // Copy signal to receiver
-    copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
+    copyChannels(receiverObject->typeData.cell.neuralActivity.signals, senderObject->typeData.cell.neuralActivity.signals);
 
     // The encoded angle is relative to each cell's absolute front direction. senderFacing is the sender's absolute
     // encoded direction; convert it back into the receiver's frame so the absolute direction is preserved.
     auto receiverAngle = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, senderFacing);
-    receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = receiverAngle;
+    receiverObject->typeData.cell.neuralActivity.signals[Channels::CommunicatorAngle] = receiverAngle;
 
     receiverObject->releaseLock();
     return true;

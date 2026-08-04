@@ -30,7 +30,7 @@ private:
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
 
-    __inline__ __device__ static void writeSignal(Signal& signal, float angle, float density, float distance);
+    __inline__ __device__ static void writeSignal(NeuralActivity& neuralActivity, float angle, float density, float distance);
 
     __inline__ __device__ static uint16_t convertAngleToUint16(float angle);
     __inline__ __device__ static float convertUint16ToAngle(uint16_t b);
@@ -75,7 +75,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 
 __inline__ __device__ void SensorProcessor::processDetection(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto enableRelocationScan = object->typeData.cell.signal.channels[Channels::SensorWithRelocationScan] < -NEAR_ZERO;
+    auto enableRelocationScan = object->typeData.cell.neuralActivity.signals[Channels::SensorWithRelocationScan] < -NEAR_ZERO;
     if (enableRelocationScan) {
         if (!object->typeData.cell.cellTypeData.sensor.lastMatchAvailable) {
             initialScan(data, statistics, object);
@@ -189,7 +189,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
             auto refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);
-            writeSignal(object->typeData.cell.signal, relAngle, density, distance);
+            writeSignal(object->typeData.cell.neuralActivity, relAngle, density, distance);
 
             auto matchPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
             data.objectMap.correctPosition(matchPos);
@@ -202,7 +202,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             }
         } else {
             object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = false;
-            object->typeData.cell.signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
+            object->typeData.cell.neuralActivity.signals[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
 }
@@ -283,7 +283,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
             auto targetPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);
-            writeSignal(object->typeData.cell.signal, relAngle, density, distance);
+            writeSignal(object->typeData.cell.neuralActivity, relAngle, density, distance);
 
 
             object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = true;
@@ -291,7 +291,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             object->typeData.cell.cellTypeData.sensor.lastMatch.pos = targetPos;
         } else {
             object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = false;
-            object->typeData.cell.signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
+            object->typeData.cell.neuralActivity.signals[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
 }
@@ -455,12 +455,12 @@ __inline__ __device__ void SensorProcessor::unpack(float& distance, float& angle
     misc = static_cast<int16_t>(bytes & 0xFFFF);
 }
 
-__inline__ __device__ void SensorProcessor::writeSignal(Signal& signal, float angle, float density, float distance)
+__inline__ __device__ void SensorProcessor::writeSignal(NeuralActivity& neuralActivity, float angle, float density, float distance)
 {
-    signal.channels[Channels::SensorFoundResult] = 1;                              // Something found
-    signal.channels[Channels::SensorAngle] = angle / 180.0f;                       // Angle: between -1.0 and 1.0
-    signal.channels[Channels::SensorMass] = min(1.0f, density);                    // Normalized density (1.0 = 64 cells in 8x8 region)
-    signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+    neuralActivity.signals[Channels::SensorFoundResult] = 1;                              // Something found
+    neuralActivity.signals[Channels::SensorAngle] = angle / 180.0f;                       // Angle: between -1.0 and 1.0
+    neuralActivity.signals[Channels::SensorMass] = min(1.0f, density);                    // Normalized density (1.0 = 64 cells in 8x8 region)
+    neuralActivity.signals[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
 }
 
 __inline__ __device__ uint16_t SensorProcessor::convertAngleToUint16(float angle)

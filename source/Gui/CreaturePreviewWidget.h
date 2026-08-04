@@ -29,7 +29,7 @@ private:
 
     void processMouseNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);
-    void processSignalEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult);
+    void processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult);
     void processActionButtons();
     void processScrollbars();
     void processTitle(ConversionResult const& conversionResult);

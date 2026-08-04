@@ -50,14 +50,14 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         // Set the output signal
 
         if (generator.additive) {
-            object->typeData.cell.signal.channels[Channels::GeneratorOutput] += outputValue;
+            object->typeData.cell.neuralActivity.signals[Channels::GeneratorOutput] += outputValue;
         } else {
-            object->typeData.cell.signal.channels[Channels::GeneratorOutput] = outputValue;
+            object->typeData.cell.neuralActivity.signals[Channels::GeneratorOutput] = outputValue;
         }
 
         // Clamp final signal to valid range [-2.0, 2.0]
-        object->typeData.cell.signal.channels[Channels::GeneratorOutput] =
-            max(-2.0f, min(2.0f, object->typeData.cell.signal.channels[Channels::GeneratorOutput]));
+        object->typeData.cell.neuralActivity.signals[Channels::GeneratorOutput] =
+            max(-2.0f, min(2.0f, object->typeData.cell.neuralActivity.signals[Channels::GeneratorOutput]));
 
         // Increment timestep counter and wrap around at period
         generator.numPulses += TIMESTEPS_PER_CELL_FUNCTION;

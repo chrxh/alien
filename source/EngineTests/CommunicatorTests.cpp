@@ -30,7 +30,7 @@ public:
 protected:
     // Helper to create a sender creature with 2 cells (sender + helper for reference direction).
     // The sender is connected to a helper cell to the east, so its reference direction is (1, 0).
-    // With frontAngle and the encoded angle in signal.channels[CommunicatorAngle] (= angleChannel), the
+    // With frontAngle and the encoded angle in signal.signals[CommunicatorAngle] (= angleChannel), the
     // absolute facing direction defaults to south (0, +1): refAngle(90) + frontAngle(0) + angleChannel(0.5) * 180 = 180.
     ContentDesc createSenderCreature(
         uint64_t creatureId,
@@ -95,7 +95,7 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
     auto sender = result.getObjectRef(100);
 
     // Sender should have signal channels populated
-    EXPECT_TRUE(sender.getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_TRUE(sender.getCellRef()._neuralActivity._signals[0] != 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
@@ -114,9 +114,9 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
 
     // Receiver should have received the signal. Sender and receiver share the same absolute front direction,
     // so the encoded angle is transmitted unchanged.
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[0], 1.0f);
-    EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], 0.5f, 1e-4f);
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[2], 2.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[0], 1.0f);
+    EXPECT_NEAR(receiver.getCellRef()._neuralActivity._signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[2], 2.0f);
 }
 
 TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
@@ -134,7 +134,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (channels should be zero)
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
@@ -142,7 +142,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     // Create sender and receiver in the same creature (both connected)
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().neuralActivity({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0})),
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(2).pos({100.0f, 90.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
@@ -157,7 +157,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto receiver = result.getObjectRef(2);
 
     // Since they're in the same creature, CommunicatorProcessor should NOT transmit (channels should be zero from transmitter).
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
@@ -178,7 +178,7 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
     // All receivers should have received the signal
     for (uint64_t id : {200, 300, 400}) {
         auto receiver = result.getObjectRef(id);
-        EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+        EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
     }
 }
 
@@ -197,7 +197,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should have received the signal (color matches)
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
@@ -215,7 +215,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (color doesn't match)
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
@@ -240,7 +240,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (sender has no active signal)
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
@@ -250,7 +250,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
@@ -258,7 +258,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     data.addCreature(
         {
             ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().signal(SignalDesc().channels({-1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({-1.0f, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(2));
     data.addConnection(200, 201);
@@ -273,7 +273,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     auto receiver = result.getObjectRef(300);
 
     // Receiver should have received the signal from sender 2
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[0], -1.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[0], -1.0f);
 }
 
 /**
@@ -293,7 +293,7 @@ TEST_F(CommunicatorTests, sender_receiverInFacingHalfPlane_noSignalTransmitted)
     auto receiver = result.getObjectRef(200);
 
     // Receiver in the facing half-plane should NOT receive the signal
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
@@ -309,8 +309,8 @@ TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
 
     auto result = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._signal._channels[0] != 0.0f);
-    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._neuralActivity._signals[0] != 0.0f);
+    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
@@ -326,8 +326,8 @@ TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
 
     auto result = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._signal._channels[0] != 0.0f);
-    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._neuralActivity._signals[0] != 0.0f);
+    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_frontAngleNotInitialized_noSignalTransmitted)
@@ -342,7 +342,7 @@ TEST_F(CommunicatorTests, sender_frontAngleNotInitialized_noSignalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
 
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 TEST_F(CommunicatorTests, receiver_frontAngleNotInitialized_noSignalTransmitted)
@@ -357,7 +357,7 @@ TEST_F(CommunicatorTests, receiver_frontAngleNotInitialized_noSignalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
 
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
 /**
@@ -391,13 +391,13 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
 
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
 
     // Absolute encoded angle = senderRefAngle(90) + senderFrontAngle + encodedAngle(0.5) * 180.
     // Receiver angle = absolute angle - receiverRefAngle(90) - receiverFrontAngle, normalized to [-1, 1].
     auto absoluteAngle = 90.0f + senderFrontAngle + 0.5f * 180.0f;
     auto expectedAngle = Math::getNormalizedAngle(absoluteAngle - 90.0f - receiverFrontAngle, -180.0f) / 180.0f;
-    EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], expectedAngle, 0.001f);
+    EXPECT_NEAR(receiver.getCellRef()._neuralActivity._signals[Channels::CommunicatorAngle], expectedAngle, 0.001f);
 }
 
 /**
@@ -436,7 +436,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0.5f, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1).lineageId(senderLineageId),
         GenomeDesc());
@@ -462,9 +462,9 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     auto receiver = result.getObjectRef(200);
 
     if (params.expectedAccept) {
-        EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
-        EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], 0.5f, 1e-4f);
+        EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
+        EXPECT_NEAR(receiver.getCellRef()._neuralActivity._signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
     } else {
-        EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+        EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
     }
 }

@@ -55,15 +55,15 @@ __inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& da
     if (memory.numSignalEntries != 1) {
         memory.numSignalEntries = 1;
         memory.signalEntries = data.entities.heap.getTypedSubArray<SignalEntry>(1);
-        copyChannels(memory.signalEntries->channels, object->typeData.cell.signal.channels);
+        copyChannels(memory.signalEntries->channels, object->typeData.cell.neuralActivity.signals);
     } else {
         auto const& newSignalWeight = memory.modeData.signalIntegrator.newSignalWeight;
         auto const& channelBitMask = memory.channelBitMask;
         for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
             memory.signalEntries->channels[i] =
-                (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * object->typeData.cell.signal.channels[i];
+                (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * object->typeData.cell.neuralActivity.signals[i];
             if (channelBitMask & (1 << i)) {
-                object->typeData.cell.signal.channels[i] = memory.signalEntries->channels[i];
+                object->typeData.cell.neuralActivity.signals[i] = memory.signalEntries->channels[i];
             }
         }
     }
@@ -87,21 +87,21 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     }
 
     // Store output from the oldest memory entry (at ringBufferIndex)
-    Signal output;
+    NeuralActivity output;
     if (signalDelay.numSignalEntriesInitialized == memory.numSignalEntries) {
         auto ringBufferIndex = signalDelay.ringBufferIndex;
-        copyChannels(output.channels, memory.signalEntries[ringBufferIndex].channels);
+        copyChannels(output.signals, memory.signalEntries[ringBufferIndex].channels);
     }
 
     // Store current signal at ringBufferIndex (this position contains the oldest entry which we just output)
-    copyChannels(memory.signalEntries[signalDelay.ringBufferIndex].channels, object->typeData.cell.signal.channels);
+    copyChannels(memory.signalEntries[signalDelay.ringBufferIndex].channels, object->typeData.cell.neuralActivity.signals);
 
     // Write output
     if (signalDelay.numSignalEntriesInitialized == memory.numSignalEntries) {
         auto const& channelBitMask = memory.channelBitMask;
         for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
             if (channelBitMask & (1 << k)) {
-                object->typeData.cell.signal.channels[k] = output.channels[k];
+                object->typeData.cell.neuralActivity.signals[k] = output.signals[k];
             }
         }
     }
@@ -141,13 +141,13 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
     // State machine for recording/reading
     if (state == SignalRecorderState_Idle) {
         // Check channel[0] to initiate recording or reading
-        if (object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction] > TRIGGER_THRESHOLD && !signalRecorder.readOnly) {
+        if (object->typeData.cell.neuralActivity.signals[Channels::MemoryReadWriteAction] > TRIGGER_THRESHOLD && !signalRecorder.readOnly) {
             // Reset numRecorded to start fresh
             numWrittenSignalEntries = 0;
             state = SignalRecorderState_Recording;
         } else if (
-            object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction] < -TRIGGER_THRESHOLD
-            || (signalRecorder.readOnly && abs(object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction]) > TRIGGER_THRESHOLD)) {
+            object->typeData.cell.neuralActivity.signals[Channels::MemoryReadWriteAction] < -TRIGGER_THRESHOLD
+            || (signalRecorder.readOnly && abs(object->typeData.cell.neuralActivity.signals[Channels::MemoryReadWriteAction]) > TRIGGER_THRESHOLD)) {
             // Start reading - reset numReadSignalEntries
             numReadSignalEntries = 0;
             state = SignalRecorderState_Reading;
@@ -157,7 +157,7 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
     if (state == SignalRecorderState_Recording) {
         // Record signal to memory at index numRecorded
         if (numWrittenSignalEntries < memory.numSignalEntries) {
-            copyChannels(memory.signalEntries[numWrittenSignalEntries].channels, object->typeData.cell.signal.channels);
+            copyChannels(memory.signalEntries[numWrittenSignalEntries].channels, object->typeData.cell.neuralActivity.signals);
             ++numWrittenSignalEntries;
         }
         // Recording complete when numRecorded reaches numSignalEntries
@@ -170,7 +170,7 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
             auto const& channelBitMask = memory.channelBitMask;
             for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
                 if (channelBitMask & (1 << k)) {
-                    object->typeData.cell.signal.channels[k] = memory.signalEntries[numReadSignalEntries].channels[k];
+                    object->typeData.cell.neuralActivity.signals[k] = memory.signalEntries[numReadSignalEntries].channels[k];
                 }
             }
             ++numReadSignalEntries;
@@ -192,7 +192,7 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
         return;
     }
 
-    auto const& inputValue = object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction];
+    auto const& inputValue = object->typeData.cell.neuralActivity.signals[Channels::MemoryReadWriteAction];
     auto const numSignalEntries = toInt(memory.numSignalEntries);
 
     // Calculate the index based on |channel[0]| * (numSignalEntries - 1)
@@ -211,18 +211,18 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
         // In readonly mode, always read regardless of sign
         for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
             if (channelBitMask & (1 << k)) {
-                object->typeData.cell.signal.channels[k] = memory.signalEntries[index].channels[k];
+                object->typeData.cell.neuralActivity.signals[k] = memory.signalEntries[index].channels[k];
             }
         }
     } else if (inputValue >= 0) {
         // Read mode: channel[0] >= 0
         for (int k = 0; k < STANDARD_NEURONS_PER_CELL; ++k) {
             if (channelBitMask & (1 << k)) {
-                object->typeData.cell.signal.channels[k] = memory.signalEntries[index].channels[k];
+                object->typeData.cell.neuralActivity.signals[k] = memory.signalEntries[index].channels[k];
             }
         }
     } else {
         // Write mode: channel[0] < 0
-        copyChannels(memory.signalEntries[index].channels, object->typeData.cell.signal.channels);
+        copyChannels(memory.signalEntries[index].channels, object->typeData.cell.neuralActivity.signals);
     }
 }

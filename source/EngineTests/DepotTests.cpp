@@ -31,7 +31,7 @@ protected:
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit)).usableEnergy(usableEnergy)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity({1, 0, 0, 0, 0, 0, 0, 0})),
         });
         data.addConnection(1, 2);
         return data;
@@ -42,7 +42,7 @@ protected:
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
         auto data = ContentDesc().addCreature({
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity({-1, 0, 0, 0, 0, 0, 0, 0})),
         });
         data.addConnection(1, 2);
         return data;

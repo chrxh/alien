@@ -44,15 +44,23 @@ NeuralNetDesc& NeuralNetDesc::connectionWeight(int connectionIndex, float value)
     return *this;
 }
 
-SignalDesc::SignalDesc()
+NeuralActivityDesc::NeuralActivityDesc()
 {
-    _channels.resize(STANDARD_NEURONS_PER_CELL, 0);
+    _signals.resize(STANDARD_NEURONS_PER_CELL, 0);
+    _memory.resize(MEMORY_NEURONS_PER_CELL, 0);
 }
 
-SignalDesc& SignalDesc::channels(std::vector<float> const& value)
+NeuralActivityDesc& NeuralActivityDesc::signals(std::vector<float> const& value)
 {
     CHECK(value.size() == STANDARD_NEURONS_PER_CELL);
-    _channels = value;
+    _signals = value;
+    return *this;
+}
+
+NeuralActivityDesc& NeuralActivityDesc::memory(std::vector<float> const& value)
+{
+    CHECK(value.size() == MEMORY_NEURONS_PER_CELL);
+    _memory = value;
     return *this;
 }
 
@@ -185,13 +193,9 @@ CellType CellDesc::getCellType() const
     CHECK(false);
 }
 
-CellDesc& CellDesc::signal(std::vector<float> const& value)
+CellDesc& CellDesc::neuralActivity(std::vector<float> const& value)
 {
-    CHECK(value.size() == STANDARD_NEURONS_PER_CELL);
-
-    SignalDesc newSignal;
-    newSignal._channels = value;
-    _signal = newSignal;
+    _neuralActivity.signals(value);
     return *this;
 }
 

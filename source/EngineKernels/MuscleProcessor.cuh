@@ -173,8 +173,8 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
 
     auto bendingInfo = getBendingInfo(object);
 
-    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
-    auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
+    auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::MuscleAngle])) * 180.f;
     auto targetAngleRelToConnection0 = Math::getNormalizedAngle(targetAngle + object->typeData.cell.frontAngle, -180.0f);
 
     auto angleFactor = [&]() -> float {
@@ -281,7 +281,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
 
     // Process manual bending
     auto bendingInfo = getBendingInfo(object);
-    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
 
     // Change bending direction
     auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
@@ -352,8 +352,8 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
 
     // Process angle bending
     auto bendingInfo = getBendingInfo(object);
-    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
-    auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
+    auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::MuscleAngle])) * 180.f;
     auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + 180.0f + targetAngle, -180.0f);
 
     // Change bending direction
@@ -404,7 +404,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 
     // Process auto crawling
-    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
     auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
 
     // Change crawling direction
@@ -478,7 +478,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
 
     // Process manual crawling
     auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
-    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
 
     // Calc min and max distance
     auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));
@@ -530,10 +530,10 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
-    auto angleSignal = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle]));
+    auto angleSignal = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::MuscleAngle]));
     auto direction = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, angleSignal);
 
-    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
     direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[object->color] * activation * 0.0001f * TIMESTEPS_PER_CELL_FUNCTION;
     object->vel += direction;
     auto velocityChange = Math::length(direction);

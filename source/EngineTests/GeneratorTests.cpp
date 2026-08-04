@@ -65,7 +65,7 @@ TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(params.expectedOutput, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)))
+    EXPECT_TRUE(approxCompare(params.expectedOutput, generator.getCellRef()._neuralActivity._signals.at(Channels::GeneratorOutput)))
         << "Failed " << params.description << " (after " << params.timesteps << " timesteps)";
 }
 
@@ -118,7 +118,7 @@ TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(params.expectedOutput, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)))
+    EXPECT_TRUE(approxCompare(params.expectedOutput, generator.getCellRef()._neuralActivity._signals.at(Channels::GeneratorOutput)))
         << "Failed " << params.description << " (after " << params.timesteps << " timesteps)";
 }
 
@@ -145,7 +145,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
     auto generator = actualData.getObjectRef(1);
 
     // Expected: 1.0 + 0.15 = 1.15 (set directly, not added to the 0.6 bias)
-    EXPECT_TRUE(approxCompare(1.15f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+    EXPECT_TRUE(approxCompare(1.15f, generator.getCellRef()._neuralActivity._signals.at(Channels::GeneratorOutput)));
 }
 
 TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
@@ -166,7 +166,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
     auto generator = actualData.getObjectRef(1);
 
     // Expected: 0.6 (base from bias) + 1.15 (generator output) = 1.75
-    EXPECT_TRUE(approxCompare(1.75f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+    EXPECT_TRUE(approxCompare(1.75f, generator.getCellRef()._neuralActivity._signals.at(Channels::GeneratorOutput)));
 }
 
 //**************
@@ -190,5 +190,5 @@ TEST_F(GeneratorTests, squareSignal_truncation)
     auto generator = actualData.getObjectRef(1);
 
     // Expected: 0.6 (base from bias) + 2.0 (generator output) = 2.6 truncated to 2.0
-    EXPECT_TRUE(approxCompare(2.0f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+    EXPECT_TRUE(approxCompare(2.0f, generator.getCellRef()._neuralActivity._signals.at(Channels::GeneratorOutput)));
 }

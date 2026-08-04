@@ -541,7 +541,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             processConstructorNode(cell._constructor.value());
         }
 
-        processSignalsNode(cell);
+        processNeuralActivityNode(cell);
         processNeuralNetNode(object);
     }
     AlienGui::EndTreeNode();
@@ -601,26 +601,26 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
     AlienGui::EndTreeNode();
 }
 
-void _InspectionWindow::processSignalsNode(CellDesc& cell)
+void _InspectionWindow::processNeuralActivityNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
-        auto& channels = cell._signal._channels;
-        if (static_cast<int>(channels.size()) < STANDARD_NEURONS_PER_CELL) {
-            channels.resize(STANDARD_NEURONS_PER_CELL, 0.0f);
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural activity").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
+        auto& signals = cell._neuralActivity._signals;
+        if (static_cast<int>(signals.size()) < STANDARD_NEURONS_PER_CELL) {
+            signals.resize(STANDARD_NEURONS_PER_CELL, 0.0f);
         }
         for (auto index : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("#" + std::to_string(index + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
-                &channels.at(index));
+                AlienGui::SliderFloatParameters().name("Signal #" + std::to_string(index)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
+                &signals.at(index));
         }
 
-        auto& memory = cell._memory;
+        auto& memory = cell._neuralActivity._memory;
         if (static_cast<int>(memory.size()) < MEMORY_NEURONS_PER_CELL) {
             memory.resize(MEMORY_NEURONS_PER_CELL, 0.0f);
         }
         for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Mem #" + std::to_string(index + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
+                AlienGui::SliderFloatParameters().name("Mem #" + std::to_string(index)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
                 &memory.at(index));
         }
     }
@@ -634,7 +634,7 @@ void _InspectionWindow::processNeuralNetNode(ObjectDesc& object)
             AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false), &expandButtonClicked)) {
         auto& cell = object.getCellRef();
         _NeuralNetEditorWidget::LiveData liveData;
-        liveData.memory = cell._memory;
+        liveData.memory = cell._neuralActivity._memory;
         liveData.energy = cell._usableEnergy;
         liveData.attacked = cell._event == CellEvent_Attacked && cell._eventCounter > 0;
         liveData.age = cell._age;

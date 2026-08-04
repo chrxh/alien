@@ -34,7 +34,7 @@ protected:
                     .id(2)
                     .pos({pos.x + 1.0f, pos.y})
                     .color(color)
-                    .type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
+                    .type(CellDesc().neuralActivity({1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
             },
             CreatureDesc().lineageId(lineageId),
             GenomeDesc());
@@ -52,7 +52,7 @@ protected:
                     .id(2)
                     .pos({pos.x + 1.0f, pos.y})
                     .color(color)
-                    .type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
+                    .type(CellDesc().neuralActivity({-1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
             },
             CreatureDesc().lineageId(lineageId),
             GenomeDesc());
@@ -81,7 +81,7 @@ TEST_F(ReconnectorTests, solidMode_connectToSolid)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_TRUE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, solidMode_ignoreNonSolid)
@@ -98,7 +98,7 @@ TEST_F(ReconnectorTests, solidMode_ignoreNonSolid)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, solidMode_ignoreFluidParticle)
@@ -116,7 +116,7 @@ TEST_F(ReconnectorTests, solidMode_ignoreFluidParticle)
 
     // Should not connect to fluid particle
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, solidMode_outOfRange)
@@ -136,7 +136,7 @@ TEST_F(ReconnectorTests, solidMode_outOfRange)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 //*******************************************
@@ -157,7 +157,7 @@ TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_TRUE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
@@ -174,7 +174,7 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
@@ -229,7 +229,7 @@ TEST_F(ReconnectorTests, creatureMode_connectToDifferentCreature)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_TRUE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
@@ -254,7 +254,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
 
     // Should not connect to cell in same creature
     EXPECT_FALSE(actualData.hasConnection(1, 3));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
@@ -509,7 +509,7 @@ TEST_F(ReconnectorTests, removeConnections_removeSolidConnection)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
@@ -530,7 +530,7 @@ TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
@@ -555,7 +555,7 @@ TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
@@ -563,7 +563,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
     // Create creature with reconnector and additional object, signal on connected cell
     auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity({-1, 0, 0, 0, 0, 0, 0, 0})),
         ObjectDesc().id(3).pos({99.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -579,7 +579,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
     EXPECT_TRUE(actualData.hasConnection(1, 2));
     EXPECT_TRUE(actualData.hasConnection(1, 3));
     // No removal occurred
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 //*******************************************
@@ -649,7 +649,7 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
     // Connection should still exist but no new connection created
     EXPECT_TRUE(actualData.hasConnection(1, 10));
     // Success should be 0 because no new connection was made
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, energyConservation)
@@ -678,7 +678,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     // Create attacker with connections that block the attack ray
     auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectSolidDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity({-1, 0, 0, 0, 0, 0, 0, 0})),
         // Create a connection that crosses the ray path to target at (100, 99)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
         ObjectDesc().id(4).pos({101.0f, 99.0f}),
@@ -700,5 +700,5 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._neuralActivity._signals[Channels::ReconnectorSuccess]));
 }

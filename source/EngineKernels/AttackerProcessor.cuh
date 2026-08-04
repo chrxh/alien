@@ -55,7 +55,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto attackerEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, object->pos, object->color);
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
         if (cell->usableEnergy - attackerEnergyCost < cellMinEnergy) {
-            cell->signal.channels[Channels::AttackerSuccess] = 0;
+            cell->neuralActivity.signals[Channels::AttackerSuccess] = 0;
             return;
         }
 
@@ -244,7 +244,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // Output (signal is already present since attacker can only be manually triggered)
-        cell->signal.channels[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
+        cell->neuralActivity.signals[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
     }
 }
 

@@ -71,7 +71,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
     EXPECT_EQ(0, hostConstructor._currentOffspring);
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_F(ConstructorTests, emptyGenome)
@@ -98,7 +98,7 @@ TEST_F(ConstructorTests, emptyGenome)
 
     // Verify no active signal
     auto hostObject = actualData.getObjectRef(0);
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_F(ConstructorTests, emptyGene)
@@ -130,7 +130,7 @@ TEST_F(ConstructorTests, emptyGene)
 
     // Verify no active signal
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_F(ConstructorTests, insufficientEnergy)
@@ -159,7 +159,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
 
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
@@ -170,7 +170,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
                 .id(0)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).separation(true))),  // Not enough energy
-            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity({1, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
@@ -191,7 +191,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[Channels::ConstructorSuccess]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
@@ -204,7 +204,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy())
                           .constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).separation(false))),
-            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity({1, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
@@ -228,7 +228,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_TRUE(approxCompare(1.0f, hostObject.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
+    EXPECT_TRUE(approxCompare(1.0f, hostObject.getCellRef()._neuralActivity._signals[Channels::ConstructorSuccess]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
@@ -264,7 +264,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
 
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
@@ -301,7 +301,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
 
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 // Restriction to SimulationParameters::minObjectDistance has been removed
@@ -349,7 +349,7 @@ TEST_F(ConstructorTests, DISABLED_insufficientSpace)
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
 
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_F(ConstructorTests, crossingLinks_allowed)
@@ -436,7 +436,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(ProvideEnergy_ReduceCellEnergy, newConstructor._provideEnergy);
 
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)

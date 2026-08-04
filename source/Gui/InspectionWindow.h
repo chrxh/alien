@@ -36,7 +36,7 @@ private:
     void processCellNode(ObjectDesc& object);
     void processCreatureNode(ExtendedObjectDesc& extendedObject);
     void processCreatureProperties(ExtendedObjectDesc& extendedObject);
-    void processSignalsNode(CellDesc& cell);
+    void processNeuralActivityNode(CellDesc& cell);
     void processNeuralNetNode(ObjectDesc& object);
     void processCellTypeNode(CellDesc& cell);
     void processConstructorNode(ConstructorDesc& constructor);

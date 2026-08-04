@@ -196,7 +196,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
     auto constructionData = createConstructionData(object);
     if (tryConstructCell(data, statistics, object, constructionData)) {
-        object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
+        object->typeData.cell.neuralActivity.signals[Channels::ConstructorSuccess] = 1;  // Successful
 
         alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
         if (constructionData.isLastNodeOfLastConcatenation) {
@@ -214,7 +214,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             }
         }
     } else {
-        object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
+        object->typeData.cell.neuralActivity.signals[Channels::ConstructorSuccess] = 0;  // Failed
     }
 }
 

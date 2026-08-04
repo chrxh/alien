@@ -32,7 +32,7 @@ protected:
     {
         auto data = ContentDesc().addCreature({
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(signal)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(signal)),
         });
         data.addConnection(1, 2);
         return data;
@@ -73,7 +73,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
             .pos({100.0f, 100.0f})
             .type(CellDesc().cellType(
                 MemoryDesc().mode(SignalIntegratorDesc().newSignalWeight(newSignalWeight)).signalEntries({SignalEntryDesc().channels(storedSignal)}))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(incomingSignal)),
     });
     data.addConnection(1, 2);
 
@@ -87,7 +87,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
 
     // Expected: (1-0.25)*0.8 + 0.25*0.2 = 0.6 + 0.05 = 0.65
     std::vector<float> expectedSignal = {0.65f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    EXPECT_TRUE(approxCompare(expectedSignal, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(expectedSignal, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
@@ -102,7 +102,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
             .pos({100.0f, 100.0f})
             .type(
                 CellDesc().cellType(MemoryDesc().mode(SignalIntegratorDesc().newSignalWeight(1.0f)).signalEntries({SignalEntryDesc().channels(storedSignal)}))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(incomingSignal)),
     });
     data.addConnection(1, 2);
 
@@ -128,7 +128,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
             .pos({100.0f, 100.0f})
             .type(
                 CellDesc().cellType(MemoryDesc().mode(SignalIntegratorDesc().newSignalWeight(0.0f)).signalEntries({SignalEntryDesc().channels(storedSignal)}))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(incomingSignal)),
     });
     data.addConnection(1, 2);
 
@@ -168,7 +168,7 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
     EXPECT_TRUE(approxCompare(signal, memory._signalEntries[0]._channels));
 
     // Verify the output signal (buffer not full yet, so signal should be unchanged)
-    EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
@@ -188,7 +188,7 @@ TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
     EXPECT_EQ(0, signalDelay._numSignalEntriesInitialized);
 
     // Verify the output signal
-    EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
@@ -203,7 +203,7 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     // Second signal
     std::vector<float> signal2 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signal(signal2);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
@@ -216,7 +216,7 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
 
     // The output signal should be signal1 (the first signal, delayed by 2)
-    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
@@ -233,13 +233,13 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     // Second signal
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signal(signal2);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Third signal
     actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signal(signal3);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(signal3);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
@@ -248,16 +248,16 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     auto memoryCell = actualData.getObjectRef(1);
     auto& signalDelay = std::get<SignalDelayDesc>(std::get<MemoryDesc>(memoryCell.getCellRef()._cellType)._mode);
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
-    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._neuralActivity._signals));
 
     // Fourth signal - should output signal2
-    actualData.getObjectRef(2).getCellRef().signal(signal4);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(signal4);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
-    EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
@@ -277,10 +277,10 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     // After first signal, buffer not full yet
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
     // Signal should still be the incoming signal1 (not modified by delay output)
-    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._neuralActivity._signals));
 
     // Second signal
-    actualData.getObjectRef(2).getCellRef().signal(signal2);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
@@ -292,7 +292,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
 
     // Signal should still be the incoming signal2 (not modified by delay output)
-    EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 //*****************
@@ -333,7 +333,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
 
     // Second signal - should record and complete
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signal(signal2);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
@@ -371,7 +371,7 @@ TEST_F(MemoryTests, signalRecorder_negativeChannel0_startsReading)
     // Should be in reading state, output first stored signal
     EXPECT_EQ(SignalRecorderState_Reading, signalRecorder._state);
     EXPECT_EQ(1, signalRecorder._numReadSignalEntries);
-    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
@@ -391,7 +391,7 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
 
     // Second read - should read second entry and complete
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signal(triggerSignal);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(triggerSignal);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
@@ -403,7 +403,7 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
     // Reading should be complete, back to idle
     EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
     EXPECT_EQ(0, signalRecorder._numReadSignalEntries);
-    EXPECT_TRUE(approxCompare(storedSignal2, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal2, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
@@ -420,7 +420,7 @@ TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
 
     auto memoryCell = actualData.getObjectRef(1);
     // Should output the pre-stored signal
-    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
@@ -436,7 +436,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 
     // Send negative signal - should continue recording, not switch to reading
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signal(negativeSignal);
+    actualData.getObjectRef(2).getCellRef().neuralActivity(negativeSignal);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
@@ -488,7 +488,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
 
     // Reading should work even with readOnly = true
     EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);  // Reading completes with only 1 entry
-    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 //******************
@@ -515,7 +515,7 @@ TEST_F(MemoryTests, signalStorage_readWithPositiveInput_readsFromIndex)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With channel[0] = 0.5, index = 0.5 * (3 - 1) = 1
-    EXPECT_TRUE(approxCompare(entry1, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(entry1, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalStorage_readWithZeroInput_readsFromIndex0)
@@ -535,7 +535,7 @@ TEST_F(MemoryTests, signalStorage_readWithZeroInput_readsFromIndex0)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalStorage_readWithMaxInput_readsFromLastIndex)
@@ -558,7 +558,7 @@ TEST_F(MemoryTests, signalStorage_readWithMaxInput_readsFromLastIndex)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With channel[0] = 1.0, index = 1.0 * (3 - 1) = 2
-    EXPECT_TRUE(approxCompare(entry2, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(entry2, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalStorage_writeWithNegativeInput_writesToIndex)
@@ -607,7 +607,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithPositiveInput)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With 2 entries and input 0.4, index = 0.4 * (2 - 1)) = 0.4
-    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalStorage_readOnly_readsWithNegativeInput)
@@ -630,7 +630,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithNegativeInput)
     auto& memoryDesc = std::get<MemoryDesc>(memoryCell.getCellRef()._cellType);
 
     // With input = -1.0 and readOnly = true, index = abs(-1.0) * (2 - 1) = 1
-    EXPECT_TRUE(approxCompare(entry1, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(entry1, memoryCell.getCellRef()._neuralActivity._signals));
 
     // Memory should be unchanged (no write occurred)
     EXPECT_TRUE(approxCompare(entry0, memoryDesc._signalEntries[0]._channels));
@@ -653,7 +653,7 @@ TEST_F(MemoryTests, signalStorage_singleEntry_alwaysAccessesIndex0)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With 1 entry, index = 0.8 * (1 - 1) = 0
-    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(MemoryTests, signalStorage_writeWithMaxNegativeInput_writesToLastIndex)
