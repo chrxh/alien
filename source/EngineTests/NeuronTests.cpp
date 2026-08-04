@@ -314,7 +314,7 @@ TEST_F(NeuronTests, truncateSignal)
     EXPECT_TRUE(approxCompare(std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2}, actualData.getObjectRef(1).getCellRef()._signal._channels));
 }
 
-// The default identity weight matrix maps each memory input to the corresponding memory output
+// Without an open gate on the first input the memory outputs keep their values
 TEST_F(NeuronTests, memoryNeuronsRetainActivityAndStayLocal)
 {
     std::vector<float> memory = {0.5f, -0.3f, 0.25f, 1.0f};
@@ -341,12 +341,12 @@ TEST_F(NeuronTests, memoryNeuronsRetainActivityAndStayLocal)
 
 TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
 {
-    auto nn = NeuralNetDesc().weight(STANDARD_NEURONS_PER_CELL, 0, 1.0f);  // First memory neuron reads signal channel 0
+    auto nn = NeuralNetDesc().weight(STANDARD_NEURONS_PER_CELL, 1, 1.0f);  // First memory neuron reads signal channel 1
 
     auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({0.5f, 0, 0, 0, 0, 0, 0, 0})),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // Channel 0 opens the memory gate
                     })
                     .addConnection(1, 2);
 
@@ -356,6 +356,57 @@ TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::vector<float> expectedMemory = {0.5f, 0, 0, 0};
+    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memory));
+}
+
+// A closed memory gate on the first input leaves all memory neurons unchanged
+TEST_F(NeuronTests, memoryNeuronsKeepValuesForClosedGate)
+{
+    std::vector<float> memory = {0.5f, -0.3f, 0.25f, 1.0f};
+
+    NeuralNetDesc nn;
+    for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+        nn.weight(STANDARD_NEURONS_PER_CELL + i, 1, 1.0f);  // Each memory neuron reads signal channel 1
+    }
+
+    auto data = ContentDesc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).memory(memory)),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({TRIGGER_THRESHOLD, 0.4f, 0, 0, 0, 0, 0, 0})),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._memory));
+}
+
+// An open memory gate recalculates all memory neurons, but the gate input itself does not contribute
+TEST_F(NeuronTests, memoryNeuronsIgnoreGateInputForOpenGate)
+{
+    NeuralNetDesc nn;
+    for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
+        nn.weight(STANDARD_NEURONS_PER_CELL + i, 0, 1.0f);                              // Reading the gate input has no effect
+        nn.weight(STANDARD_NEURONS_PER_CELL + i, 1, toFloat(i));                        // Each memory neuron reads signal channel 1 with its own weight
+        nn.weight(STANDARD_NEURONS_PER_CELL + i, STANDARD_NEURONS_PER_CELL + i, 0.0f);  // Drop the default self-connection
+    }
+
+    auto data = ContentDesc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).memory({0.5f, -0.3f, 0.25f, 1.0f})),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.0f, 0.4f, 0, 0, 0, 0, 0, 0})),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::vector<float> expectedMemory = {0.0f, 0.4f, 0.8f, 1.2f};
     EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memory));
 }
 
