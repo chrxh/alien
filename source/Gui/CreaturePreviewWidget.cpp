@@ -413,7 +413,12 @@ void _CreaturePreviewWidget::processNeuralActivityEditor(bool& phenotypeChanged,
         return;
     }
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - width - scale(30.0f), ImGui::GetScrollY() + scale(13.0f)});
-    if (ImGui::BeginChild("signalEditor", ImVec2(width, height), ImGuiChildFlags_FrameStyle)) {
+
+    // The frame style derives the background of the editor from the frame color, therefore it is overridden only for the child window itself
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, static_cast<ImVec4>(Const::FloatingCardBackgroundColor));
+    auto signalEditorVisible = ImGui::BeginChild("signalEditor", ImVec2(width, height), ImGuiChildFlags_FrameStyle);
+    ImGui::PopStyleColor();
+    if (signalEditorVisible) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Neural activity editor"));
 

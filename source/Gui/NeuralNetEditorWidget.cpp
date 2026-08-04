@@ -89,8 +89,6 @@ namespace
     auto const NodeFillColor = ImColor(18, 21, 27);
     auto const ZeroWeightColor = ImColor(90, 97, 110);
     auto const LabelColor = ImColor(170, 178, 194);
-    auto const CardBackgroundColor = ImColor(23, 28, 38, 242);
-    auto const CardBorderColor = ImColor(58, 65, 82);
 
     std::vector<std::string> const TelemetryLabels = {"Energy", "Attacked", "Age", "Velocity"};
     std::vector<std::string> const ActivationFunctionShortStrings = {"tanh", "step", "id", "abs", "gauss", "mod"};
@@ -940,8 +938,8 @@ void _NeuralNetEditorWidget::processInspectorCardContent(
     ImVec2 cardMin = ImGui::GetWindowPos();
     ImVec2 cardMax{cardMin.x + cardWidth, cardMin.y + cardHeight};
 
-    drawList->AddRectFilled(cardMin, cardMax, CardBackgroundColor, scale(4.0f));
-    drawList->AddRect(cardMin, cardMax, CardBorderColor, scale(4.0f), 0, scale(1.0f));
+    drawList->AddRectFilled(cardMin, cardMax, Const::FloatingCardBackgroundColor, scale(4.0f));
+    drawList->AddRect(cardMin, cardMax, Const::FloatingCardBorderColor, scale(4.0f), 0, scale(1.0f));
 
     auto contentX = cardMin.x + scale(CardPadding);
     auto posY = cardMin.y + scale(CardPadding);
