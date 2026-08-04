@@ -607,9 +607,10 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
         for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
-            cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
+            cellDesc._neuralActivity._signals[i] = objectTO.typeData.cell.neuralActivity.signals[i];
         }
-        cellDesc._memory.assign(objectTO.typeData.cell.memory, objectTO.typeData.cell.memory + MEMORY_NEURONS_PER_CELL);
+        cellDesc._neuralActivity._memory.assign(
+            objectTO.typeData.cell.neuralActivity.memory, objectTO.typeData.cell.neuralActivity.memory + MEMORY_NEURONS_PER_CELL);
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -1556,13 +1557,13 @@ void DescConverterService::convertObjectToTO(
             constructorTO.currentOffspring = static_cast<uint16_t>(constructorDesc._currentOffspring);
         }
 
-        auto numChannels = cellDesc._signal._channels.size();
+        auto numChannels = cellDesc._neuralActivity._signals.size();
         for (int i = 0; i < STANDARD_NEURONS_PER_CELL && i < numChannels; ++i) {
-            objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
+            objectTO.typeData.cell.neuralActivity.signals[i] = cellDesc._neuralActivity._signals[i];
         }
-        auto numMemoryValues = cellDesc._memory.size();
+        auto numMemoryValues = cellDesc._neuralActivity._memory.size();
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-            objectTO.typeData.cell.memory[i] = i < numMemoryValues ? cellDesc._memory[i] : 0.0f;
+            objectTO.typeData.cell.neuralActivity.memory[i] = i < numMemoryValues ? cellDesc._neuralActivity._memory[i] : 0.0f;
         }
     } else {
         CHECK(false);

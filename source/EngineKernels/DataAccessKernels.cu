@@ -1,4 +1,4 @@
-﻿#include <Base/Macros.h>
+#include <Base/Macros.h>
 
 #include "DataAccessKernels.cuh"
 
@@ -357,10 +357,10 @@ namespace
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
             for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
-                cellTO.signal.channels[i] = cell.signal.channels[i];
+                cellTO.neuralActivity.signals[i] = cell.neuralActivity.signals[i];
             }
             for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-                cellTO.memory[i] = cell.memory[i];
+                cellTO.neuralActivity.memory[i] = cell.neuralActivity.memory[i];
             }
             cellTO.activationTime = cell.activationTime;
             cellTO.lastUpdate = cell.lastUpdate;

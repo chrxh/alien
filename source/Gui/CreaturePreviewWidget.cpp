@@ -30,39 +30,39 @@ namespace
     auto constexpr ZoomLevelForGeneReferences = 16.0f;
     auto constexpr ZoomLevelForNodeIndices = 32.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
-    auto constexpr SignalTextMargin = 15.0f;
-    auto constexpr SignalSliderWidth = 55.0f;
-    auto constexpr SignalSlidersPerColumn = 4;
+    auto constexpr NeuralActivityTextMargin = 15.0f;
+    auto constexpr NeuralActivitySliderWidth = 55.0f;
+    auto constexpr NeuralActivitySlidersPerColumn = 4;
     auto constexpr MaxCellFunctionTextSize = 16.0f;
 
-    std::string getSignalEditorOutLabel(int index)
+    std::string getNeuralActivityEditorSignalLabel(int index)
     {
-        return "Out " + std::to_string(index);
+        return "Signal " + std::to_string(index);
     }
 
-    std::string getSignalEditorMemoryLabel(int index)
+    std::string getNeuralActivityEditorMemoryLabel(int index)
     {
         return "Mem " + std::to_string(index);
     }
 
     // The labels are placed right of the sliders and would be clipped by the column boundary if the text column were too narrow
-    float calcSignalTextWidth()
+    float calcNeuralActivityTextWidth()
     {
-        auto outLabel = getSignalEditorOutLabel(STANDARD_NEURONS_PER_CELL - 1);
-        auto memoryLabel = getSignalEditorMemoryLabel(MEMORY_NEURONS_PER_CELL - 1);
+        auto outLabel = getNeuralActivityEditorSignalLabel(STANDARD_NEURONS_PER_CELL - 1);
+        auto memoryLabel = getNeuralActivityEditorMemoryLabel(MEMORY_NEURONS_PER_CELL - 1);
         auto labelWidth = std::max(ImGui::CalcTextSize(outLabel.c_str()).x, ImGui::CalcTextSize(memoryLabel.c_str()).x);
-        return scaleInverse(labelWidth) + SignalTextMargin;
+        return scaleInverse(labelWidth) + NeuralActivityTextMargin;
     }
 
-    float calcSignalColumnWidth()
+    float calcNeuralActivityColumnWidth()
     {
-        return SignalSliderWidth + calcSignalTextWidth();
+        return NeuralActivitySliderWidth + calcNeuralActivityTextWidth();
     }
 
-    // The signal editor exposes the outgoing signal channels and the memory activities of the selected cell
-    int calcNumSignalEditorColumns()
+    // The neural activity editor exposes the outgoing signal channels and the memory activities of the selected cell
+    int calcNumNeuralActivityEditorColumns()
     {
-        return (STANDARD_NEURONS_PER_CELL + MEMORY_NEURONS_PER_CELL) / SignalSlidersPerColumn;
+        return (STANDARD_NEURONS_PER_CELL + MEMORY_NEURONS_PER_CELL) / NeuralActivitySlidersPerColumn;
     }
 }
 
@@ -89,7 +89,7 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenot
         processMouseNavigation();
         processCellGraphAndSelection(conversionResult);
         processTitle(conversionResult);
-        processSignalEditor(phenotypeChanged, phenotype, conversionResult);
+        processNeuralActivityEditor(phenotypeChanged, phenotype, conversionResult);
         processActionButtons();
         processScrollbars();
     }
@@ -403,9 +403,9 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 }
 
-void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult)
+void _CreaturePreviewWidget::processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult)
 {
-    auto editorWidth = calcSignalColumnWidth() * toFloat(calcNumSignalEditorColumns()) + 30.0f;
+    auto editorWidth = calcNeuralActivityColumnWidth() * toFloat(calcNumNeuralActivityEditorColumns()) + 30.0f;
     auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(editorWidth) : scale(250);
     auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
     auto contentAvailable = ImGui::GetContentRegionAvail();
@@ -415,7 +415,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - width - scale(30.0f), ImGui::GetScrollY() + scale(13.0f)});
     if (ImGui::BeginChild("signalEditor", ImVec2(width, height), ImGuiChildFlags_FrameStyle)) {
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Signal editor"));
+        AlienGui::Group(AlienGui::GroupParameters().text("Neural activity editor"));
 
         if (_editData->detailSimulation && _selectedCellIdFromPreview.has_value()) {
             std::optional<CellPreviewDesc> selectedCell;
@@ -432,26 +432,26 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Content
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(8.0f);
 
-            struct SignalEditorEntry
+            struct NeuralActivityEditorEntry
             {
                 std::string name;
                 float value;
             };
-            std::vector<SignalEditorEntry> entries;
+            std::vector<NeuralActivityEditorEntry> entries;
             for (auto index : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
-                entries.emplace_back(getSignalEditorOutLabel(index), selectedCell->_signal._channels.at(index));
+                entries.emplace_back(getNeuralActivityEditorSignalLabel(index), selectedCell->_signal._channels.at(index));
             }
             for (auto index : std::views::iota(0, MEMORY_NEURONS_PER_CELL)) {
-                entries.emplace_back(getSignalEditorMemoryLabel(index), selectedCell->_memory.at(index));
+                entries.emplace_back(getNeuralActivityEditorMemoryLabel(index), selectedCell->_memory.at(index));
             }
 
-            auto textWidth = calcSignalTextWidth();
-            auto numColumns = calcNumSignalEditorColumns();
+            auto textWidth = calcNeuralActivityTextWidth();
+            auto numColumns = calcNumNeuralActivityEditorColumns();
             for (auto column : std::views::iota(0, numColumns)) {
                 ImGui::PushID(column);
-                if (ImGui::BeginChild("", ImVec2(scale(calcSignalColumnWidth() - 5.0f), scale(0)))) {
-                    for (auto row : std::views::iota(0, SignalSlidersPerColumn)) {
-                        auto& entry = entries.at(column * SignalSlidersPerColumn + row);
+                if (ImGui::BeginChild("", ImVec2(scale(calcNeuralActivityColumnWidth() - 5.0f), scale(0)))) {
+                    for (auto row : std::views::iota(0, NeuralActivitySlidersPerColumn)) {
+                        auto& entry = entries.at(column * NeuralActivitySlidersPerColumn + row);
                         phenotypeChanged |= AlienGui::SliderFloat(
                             AlienGui::SliderFloatParameters().name(entry.name).format("%.3f").textWidth(textWidth).min(-2.0f).max(2.0f), &entry.value);
                     }
@@ -567,8 +567,7 @@ void _CreaturePreviewWidget::updatePhenotype(ContentDesc& phenotype, CellPreview
 {
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
-            object.getCellRef()._signal = SignalDesc().channels(editedCell._signal._channels);
-            object.getCellRef()._memory = editedCell._memory;
+            object.getCellRef()._neuralActivity = NeuralActivityDesc().signals(editedCell._signal._channels).memory(editedCell._memory);
         }
     }
 }

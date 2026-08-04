@@ -70,8 +70,8 @@ TEST_F(NeuronTests, forwardSignalByDefault)
 
     auto data = ContentDesc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1))),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal2))),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal1))),
                     })
                     .addConnection(1, 2);
 
@@ -80,8 +80,8 @@ TEST_F(NeuronTests, forwardSignalByDefault)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(NeuronTests, forwardSignalByDefault_preview)
@@ -91,8 +91,8 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
 
     auto data = ContentDesc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1))),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal2))),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal1))),
                     })
                     .addConnection(1, 2);
 
@@ -100,8 +100,8 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
     _simulationFacade->calcTimestepsForPreview(TIMESTEPS_PER_CELL_FUNCTION, true);
     auto actualData = _simulationFacade->getPreviewData();
 
-    EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
@@ -111,7 +111,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
     auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeight(0, 0.0f))),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(signal)),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity(signal)),
                     })
                     .addConnection(1, 2);
 
@@ -121,8 +121,8 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(NeuronTests, forkSignal)
@@ -132,7 +132,7 @@ TEST_F(NeuronTests, forkSignal)
     auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({1, 2}),
-                        ObjectDesc().id(2).pos({2, 2}).type(CellDesc().signal(SignalDesc().channels(signal))),
+                        ObjectDesc().id(2).pos({2, 2}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal))),
                         ObjectDesc().id(3).pos({3, 2}),
                         ObjectDesc().id(4).pos({2, 3}),
                         ObjectDesc().id(5).pos({2, 1}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),
@@ -150,12 +150,12 @@ TEST_F(NeuronTests, forkSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
-    EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(1).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(3).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(4).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(5).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(6).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(3).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(4).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(5).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(6).getCellRef()._neuralActivity._signals));
 }
 
 TEST_F(NeuronTests, mergeSignal)
@@ -166,13 +166,13 @@ TEST_F(NeuronTests, mergeSignal)
     auto data =
         ContentDesc()
             .addCreature({
-                ObjectDesc().id(1).pos({1, 2}).type(CellDesc().signal(SignalDesc().channels(signal1))),  // Gets input from cell 2
+                ObjectDesc().id(1).pos({1, 2}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal1))),  // Gets input from cell 2
                 ObjectDesc().id(2).pos({2, 2}).type(
-                    CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({1, 0, 1, 1, 0, 0}))),    // Gets input from cell 1, 3, 4 and not cell 5
-                ObjectDesc().id(3).pos({3, 2}).type(CellDesc().signal(SignalDesc().channels(signal2))),  // Gets input from cell 2
-                ObjectDesc().id(4).pos({2, 3}).type(CellDesc().signal(SignalDesc().channels(signal2))),  // Gets input from cell 2
+                    CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({1, 0, 1, 1, 0, 0}))),  // Gets input from cell 1, 3, 4 and not cell 5
+                ObjectDesc().id(3).pos({3, 2}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal2))),  // Gets input from cell 2
+                ObjectDesc().id(4).pos({2, 3}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals(signal2))),  // Gets input from cell 2
                 ObjectDesc().id(5).pos({2, 1}).type(CellDesc()
-                                                        .signal(SignalDesc().channels(signal2))
+                                                        .neuralActivity(NeuralActivityDesc().signals(signal2))
                                                         .neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
                 ObjectDesc().id(6).pos({2, 0}),                                                                                  // Gets input from cell 5
             })
@@ -190,12 +190,12 @@ TEST_F(NeuronTests, mergeSignal)
     std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
     auto sumSignal = addSignals(signal1, signal2);
     sumSignal = addSignals(sumSignal, signal2);
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(sumSignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(3).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(4).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(5).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(6).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(sumSignal, actualData.getObjectRef(2).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(3).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(4).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(5).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(6).getCellRef()._neuralActivity._signals));
 }
 
 struct ApplyNeuralNetParameter
@@ -257,7 +257,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(inputSignal)),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity(inputSignal)),
                     })
                     .addConnection(1, 2);
 
@@ -277,7 +277,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     float rawOutput = applyActivationFunction(param.activationFunction, preActivation);
     expected[param.channelIndex] = std::clamp(rawOutput, -2.0f, 2.0f);
 
-    auto& actual = actualData.getObjectRef(1).getCellRef()._signal._channels;
+    auto& actual = actualData.getObjectRef(1).getCellRef()._neuralActivity._signals;
 
     constexpr float precision = 0.1f;
     for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
@@ -302,7 +302,7 @@ TEST_F(NeuronTests, truncateSignal)
     ContentDesc data;
     data.addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
     });
     data.addConnection(1, 2);
 
@@ -311,7 +311,7 @@ TEST_F(NeuronTests, truncateSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2}, actualData.getObjectRef(1).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2}, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
 }
 
 // Without an open gate on the first input the memory outputs keep their values
@@ -321,7 +321,7 @@ TEST_F(NeuronTests, memoryNeuronsRetainActivityAndStayLocal)
 
     auto data = ContentDesc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().memory(memory)),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralActivity(NeuralActivityDesc().memory(memory))),
                         ObjectDesc().id(2).pos({0, 1}),
                     })
                     .addConnection(1, 2);
@@ -333,10 +333,10 @@ TEST_F(NeuronTests, memoryNeuronsRetainActivityAndStayLocal)
 
     std::vector<float> emptySignal(STANDARD_NEURONS_PER_CELL, 0);
     std::vector<float> emptyMemory(MEMORY_NEURONS_PER_CELL, 0);
-    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._memory));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
-    EXPECT_TRUE(approxCompare(emptyMemory, actualData.getObjectRef(2).getCellRef()._memory));
+    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._neuralActivity._memory));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._neuralActivity._signals));
+    EXPECT_TRUE(approxCompare(emptyMemory, actualData.getObjectRef(2).getCellRef()._neuralActivity._memory));
 }
 
 TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
@@ -346,7 +346,7 @@ TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
     auto data = ContentDesc()
                     .addCreature({
                         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // Channel 0 opens the memory gate
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // Channel 0 opens the memory gate
                     })
                     .addConnection(1, 2);
 
@@ -356,7 +356,7 @@ TEST_F(NeuronTests, writeMemoryNeuronFromSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::vector<float> expectedMemory = {0.5f, 0, 0, 0};
-    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memory));
+    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._neuralActivity._memory));
 }
 
 // A closed memory gate on the first input leaves all memory neurons unchanged
@@ -371,8 +371,8 @@ TEST_F(NeuronTests, memoryNeuronsKeepValuesForClosedGate)
 
     auto data = ContentDesc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).memory(memory)),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({TRIGGER_THRESHOLD, 0.4f, 0, 0, 0, 0, 0, 0})),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).neuralActivity(NeuralActivityDesc().memory(memory))),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity({TRIGGER_THRESHOLD, 0.4f, 0, 0, 0, 0, 0, 0})),
                     })
                     .addConnection(1, 2);
 
@@ -381,7 +381,7 @@ TEST_F(NeuronTests, memoryNeuronsKeepValuesForClosedGate)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._memory));
+    EXPECT_TRUE(approxCompare(memory, actualData.getObjectRef(1).getCellRef()._neuralActivity._memory));
 }
 
 // An open memory gate recalculates all memory neurons, but the gate input itself does not contribute
@@ -394,12 +394,13 @@ TEST_F(NeuronTests, memoryNeuronsIgnoreGateInputForOpenGate)
         nn.weight(STANDARD_NEURONS_PER_CELL + i, STANDARD_NEURONS_PER_CELL + i, 0.0f);  // Drop the default self-connection
     }
 
-    auto data = ContentDesc()
-                    .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).memory({0.5f, -0.3f, 0.25f, 1.0f})),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal({1.0f, 0.4f, 0, 0, 0, 0, 0, 0})),
-                    })
-                    .addConnection(1, 2);
+    auto data =
+        ContentDesc()
+            .addCreature({
+                ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn).neuralActivity(NeuralActivityDesc().memory({0.5f, -0.3f, 0.25f, 1.0f}))),
+                ObjectDesc().id(2).pos({0, 1}).type(CellDesc().neuralActivity({1.0f, 0.4f, 0, 0, 0, 0, 0, 0})),
+            })
+            .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -407,7 +408,7 @@ TEST_F(NeuronTests, memoryNeuronsIgnoreGateInputForOpenGate)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::vector<float> expectedMemory = {0.0f, 0.4f, 0.8f, 1.2f};
-    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._memory));
+    EXPECT_TRUE(approxCompare(expectedMemory, actualData.getObjectRef(1).getCellRef()._neuralActivity._memory));
 }
 
 TEST_F(NeuronTests, telemetryEnergyInput)
@@ -427,7 +428,7 @@ TEST_F(NeuronTests, telemetryEnergyInput)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(1.5f, actualData.getObjectRef(1).getCellRef()._signal._channels.at(0), 0.05f));
+    EXPECT_TRUE(approxCompare(1.5f, actualData.getObjectRef(1).getCellRef()._neuralActivity._signals.at(0), 0.05f));
 }
 
 // Performance test: ~100K connected cells (1000x100 rectangle) for 10000 time steps

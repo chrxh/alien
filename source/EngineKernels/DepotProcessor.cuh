@@ -34,7 +34,7 @@ __device__ __inline__ void DepotProcessor::processCell(SimulationData& data, Sim
 {
     if (NeuronProcessor::isManuallyTriggered(data, object)) {
         auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-        if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] > 0 && object->typeData.cell.usableEnergy > normalCellEnergy) {
+        if (object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation] > 0 && object->typeData.cell.usableEnergy > normalCellEnergy) {
             auto energyToTransfer = max(min(object->typeData.cell.usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
             auto storageLimit = min(object->typeData.cell.cellTypeData.depot.storageLimit, SimulationParameters::depotStorageLimit);
             if (object->typeData.cell.cellTypeData.depot.storedUsableEnergy + energyToTransfer > storageLimit) {
@@ -43,7 +43,7 @@ __device__ __inline__ void DepotProcessor::processCell(SimulationData& data, Sim
             object->typeData.cell.usableEnergy -= energyToTransfer;
             object->typeData.cell.cellTypeData.depot.storedUsableEnergy += energyToTransfer;
         }
-        if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] < 0 && object->typeData.cell.cellTypeData.depot.storedUsableEnergy > 0) {
+        if (object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation] < 0 && object->typeData.cell.cellTypeData.depot.storedUsableEnergy > 0) {
             auto energyToTransfer = max(min(object->typeData.cell.cellTypeData.depot.storedUsableEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
             object->typeData.cell.usableEnergy += energyToTransfer;
             object->typeData.cell.cellTypeData.depot.storedUsableEnergy -= energyToTransfer;

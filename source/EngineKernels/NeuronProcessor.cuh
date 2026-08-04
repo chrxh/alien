@@ -80,13 +80,13 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
             continue;
         }
 
-        float channelDeviations = abs(cell.signal.channels[0] - cell.futureSignal.channels[0]);
-        channelDeviations += cell.event == CellEvent_Attacked && cell.eventCounter > 0;
-        cell.highlightIntensity = static_cast<uint8_t>(min(255.0f, channelDeviations * 255 / 2));
+        float signalDeviations = abs(cell.neuralActivity.signals[0] - cell.futureNeuralActivity.signals[0]);
+        signalDeviations += cell.event == CellEvent_Attacked && cell.eventCounter > 0;
+        cell.highlightIntensity = static_cast<uint8_t>(min(255.0f, signalDeviations * 255 / 2));
 
-        copyChannels(cell.signal.channels, cell.futureSignal.channels);
+        copyChannels(cell.neuralActivity.signals, cell.futureNeuralActivity.signals);
         for (int i = 0; i < MEMORY_NEURONS_PER_CELL; ++i) {
-            cell.memory[i] = cell.futureMemory[i];
+            cell.neuralActivity.memory[i] = cell.futureNeuralActivity.memory[i];
         }
     }
 }
@@ -94,7 +94,7 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
 __inline__ __device__ void NeuronProcessor::clearSignal(Object* object)
 {
     for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
-        object->typeData.cell.signal.channels[i] = 0;
+        object->typeData.cell.neuralActivity.signals[i] = 0;
     }
 }
 
@@ -112,7 +112,7 @@ __inline__ __device__ bool NeuronProcessor::isAutoTriggered(SimulationData& data
 
 __inline__ __device__ bool NeuronProcessor::isManuallyTriggered(SimulationData& data, Object* object)
 {
-    if (abs(object->typeData.cell.signal.channels[Channels::CellTypeActivation]) < TRIGGER_THRESHOLD) {
+    if (abs(object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]) < TRIGGER_THRESHOLD) {
         return false;
     }
     return true;
@@ -163,12 +163,12 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
             if (connectedCell.cellState == CellState_Constructing) {
                 continue;
             }
-            accumulatedInput += connectedCell.signal.channels[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
+            accumulatedInput += connectedCell.neuralActivity.signals[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
         }
         sharedInput[laneId] = accumulatedInput;
     } else if (laneId < NEURAL_NET_INPUTS) {
         if (laneId < NEURAL_NET_OUTPUTS) {
-            sharedInput[laneId] = cell.memory[laneId - STANDARD_NEURONS_PER_CELL];
+            sharedInput[laneId] = cell.neuralActivity.memory[laneId - STANDARD_NEURONS_PER_CELL];
         } else {
             sharedInput[laneId] = calcTelemetryInput(object, laneId - NEURAL_NET_OUTPUTS);
         }
@@ -185,7 +185,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         bool isMemoryGateOpen = sharedInput[MemoryGateInput] > TRIGGER_THRESHOLD;
 
         if (isMemoryRow && !isMemoryGateOpen) {
-            cell.futureMemory[row - STANDARD_NEURONS_PER_CELL] = cell.memory[row - STANDARD_NEURONS_PER_CELL];
+            cell.futureNeuralActivity.memory[row - STANDARD_NEURONS_PER_CELL] = cell.neuralActivity.memory[row - STANDARD_NEURONS_PER_CELL];
         } else {
             float result = 0.0f;
 
@@ -212,9 +212,9 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
 
             // The memory outputs are not visible to other cells and serve as inputs for the next execution
             if (isMemoryRow) {
-                cell.futureMemory[row - STANDARD_NEURONS_PER_CELL] = result;
+                cell.futureNeuralActivity.memory[row - STANDARD_NEURONS_PER_CELL] = result;
             } else {
-                cell.futureSignal.channels[row] = result;
+                cell.futureNeuralActivity.signals[row] = result;
             }
         }
     }

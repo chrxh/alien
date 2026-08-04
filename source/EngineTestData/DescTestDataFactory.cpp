@@ -77,7 +77,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .headUpdateId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}))
+                      .neuralActivity(NeuralActivityDesc().signals({1, 0, 0.6f, 0, 0, 0, 0, 0}).memory({0.25f, -0.5f, 0, 1.0f}))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)

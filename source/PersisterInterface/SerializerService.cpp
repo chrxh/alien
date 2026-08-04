@@ -1223,7 +1223,8 @@ namespace
     auto constexpr Id_Object_Static = 6;
     auto constexpr Id_Object_Sticky = 17;
 
-    auto constexpr Id_Signal_Channels = 0;
+    auto constexpr Id_NeuralActivity_Signals = 0;
+    auto constexpr Id_NeuralActivity_Memory = 1;
 
     auto constexpr Id_Connection_ObjectId = 0;
     auto constexpr Id_Connection_Distance = 1;
@@ -1349,9 +1350,8 @@ namespace
     // Description member keys for objects data
     auto constexpr Id_Cell_CellType = 21;
     auto constexpr Id_Cell_Constructor = 22;
-    auto constexpr Id_Cell_Signal = 23;
+    auto constexpr Id_Cell_NeuralActivity = 23;
     auto constexpr Id_Cell_NeuralNetwork = 24;
-    auto constexpr Id_Cell_Memory = 26;
 
     auto constexpr Id_Object_Connections = 7;
     auto constexpr Id_Object_Type = 8;
@@ -1388,13 +1388,14 @@ namespace cereal
     SPLIT_SERIALIZATION(ConnectionDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuralActivityDesc& data)
     {
-        SignalDesc defaultObject;
+        NeuralActivityDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addFixedSizeMember(Id_Signal_Channels, data._channels, defaultObject._channels);
+        scope.addFixedSizeMember(Id_NeuralActivity_Signals, data._signals, defaultObject._signals);
+        scope.addFixedSizeMember(Id_NeuralActivity_Memory, data._memory, defaultObject._memory);
     }
-    SPLIT_SERIALIZATION(SignalDesc)
+    SPLIT_SERIALIZATION(NeuralActivityDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetDesc& data)
@@ -1871,8 +1872,7 @@ namespace cereal
         scope.addMember(Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
         scope.addDesc(Id_Cell_CellType, data._cellType);
         scope.addDesc(Id_Cell_Constructor, data._constructor);
-        scope.addDesc(Id_Cell_Signal, data._signal);
-        scope.addFixedSizeMember(Id_Cell_Memory, data._memory, defaultObject._memory);
+        scope.addDesc(Id_Cell_NeuralActivity, data._neuralActivity);
         scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)

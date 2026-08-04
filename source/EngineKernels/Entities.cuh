@@ -417,9 +417,10 @@ union CellTypeData
     VoidCell voidCell;
 };
 
-struct __align__(16) Signal
+struct __align__(16) NeuralActivity
 {
-    float channels[STANDARD_NEURONS_PER_CELL];
+    float signals[STANDARD_NEURONS_PER_CELL];
+    float memory[MEMORY_NEURONS_PER_CELL];
 };
 
 struct uint32_float
@@ -509,20 +510,20 @@ struct Cell
     uint32_t concatenationIndex;
     uint8_t branchIndex;
 
-    // Cell type data
+    // Neural network data
     NeuralNet* neuralNetwork;
+    NeuralActivity neuralActivity;
+
+    // Cell type data
     CellType cellType;
     CellTypeData cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     Constructor constructor;    // Optional constructor data
-    Signal signal;
-    float memory[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
 
     // Process data
-    Signal futureSignal;
-    float futureMemory[MEMORY_NEURONS_PER_CELL];
+    NeuralActivity futureNeuralActivity;
     uint32_t headUpdateId;
     bool headCell;
 

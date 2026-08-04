@@ -34,7 +34,7 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     if (NeuronProcessor::isManuallyTriggered(data, object)) {
-        if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] > 0) {
+        if (object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation] > 0) {
             tryCreateConnection(data, statistics, object);
         } else {
             removeConnections(data, statistics, object);
@@ -124,14 +124,14 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             }
         });
 
-    object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 0;
+    object->typeData.cell.neuralActivity.signals[Channels::ReconnectorSuccess] = 0;
     if (closestCell) {
         SystemDoubleLock lock;
         lock.init(&object->locked, &closestCell->locked);
         if (lock.tryLock()) {
             if (object->numConnections < MAX_OBJECT_CONNECTIONS && closestCell->numConnections < MAX_OBJECT_CONNECTIONS) {
                 ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, closestCell);
-                object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 1;
+                object->typeData.cell.neuralActivity.signals[Channels::ReconnectorSuccess] = 1;
             }
             lock.releaseLock();
         }
@@ -140,7 +140,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
 __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 0;
+    object->typeData.cell.neuralActivity.signals[Channels::ReconnectorSuccess] = 0;
 
     if (!object->tryLock()) {
         return;
@@ -159,7 +159,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
 
         if (shouldRemove) {
             ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
-            object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 1;
+            object->typeData.cell.neuralActivity.signals[Channels::ReconnectorSuccess] = 1;
         }
     }
     object->releaseLock();

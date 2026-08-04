@@ -64,7 +64,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
         if (injectedCell) {
             injectorEnergyCost *= (1.0f + toFloat(numDefenders) * 0.5f);
             if (object->typeData.cell.usableEnergy - injectorEnergyCost < cellMinEnergy) {
-                object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 0;
+                object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = 0;
                 return;
             }
 
@@ -75,14 +75,14 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             injectedCell->typeData.cell.creature = cloneCreature;
             injectedCell->typeData.cell.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
             injectedCell->typeData.cell.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-            object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 1;
+            object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {
                 EnergyProcessor::radiate(data, object, injectorEnergyCost);
             }
         }
 
-        object->typeData.cell.signal.channels[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
+        object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
     }
 }
 

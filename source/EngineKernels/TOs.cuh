@@ -388,9 +388,10 @@ union CellTypeDataTO
     VoidTO voidCell;
 };
 
-struct SignalTO
+struct NeuralActivityTO
 {
-    float channels[STANDARD_NEURONS_PER_CELL];
+    float signals[STANDARD_NEURONS_PER_CELL];
+    float memory[MEMORY_NEURONS_PER_CELL];
 };
 
 struct SolidTO
@@ -427,14 +428,15 @@ struct CellTO
     uint32_t concatenationIndex;
     uint8_t branchIndex;
 
-    // Cell type data
+    // Neural network data
     uint64_t neuralNetworkDataIndex;
+    NeuralActivityTO neuralActivity;
+
+    // Cell type data
     CellType cellType;
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
-    SignalTO signal;
-    float memory[MEMORY_NEURONS_PER_CELL];
     uint32_t activationTime;
     uint8_t lastUpdate;
 

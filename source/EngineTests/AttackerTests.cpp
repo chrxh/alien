@@ -103,7 +103,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
     EXPECT_TRUE(approxCompare(actualTarget.getCellRef()._rawEnergy, origTarget.getCellRef()._rawEnergy));
 
     // Attacker should have a signal with success value > 0
-    EXPECT_TRUE(actualAttacker.getCellRef()._signal._channels[Channels::AttackerSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttacker.getCellRef()._neuralActivity._signals[Channels::AttackerSuccess] > NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
@@ -128,7 +128,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     EXPECT_TRUE(approxCompare(actualTarget.getCellRef()._rawEnergy, origTarget.getCellRef()._rawEnergy));
 
     // Attacker should have a signal with success value = 0
-    EXPECT_TRUE(approxCompare(0.0f, actualAttacker.getCellRef()._signal._channels[Channels::AttackerSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttacker.getCellRef()._neuralActivity._signals[Channels::AttackerSuccess]));
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
@@ -212,7 +212,7 @@ TEST_F(AttackerTests, outputSignal_noTarget)
     auto actualAttacker = actualData.getObjectRef(1);
 
     // Attacker may have signal from generator but AttackerSuccess should be 0
-    EXPECT_TRUE(approxCompare(0.0f, actualAttacker.getCellRef()._signal._channels[Channels::AttackerSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttacker.getCellRef()._neuralActivity._signals[Channels::AttackerSuccess]));
 }
 
 /**
