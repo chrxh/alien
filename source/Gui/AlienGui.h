@@ -15,6 +15,7 @@
 #include <EngineInterface/SimulationParametersTypes.h>
 
 #include "Definitions.h"
+#include "StyleRepository.h"
 
 struct TreeNodeStackElement
 {
@@ -440,7 +441,17 @@ public:
         MEMBER(ToolbarButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ToolbarButton(ToolbarButtonParameters const& parameters);
+
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
+
+    struct ChipParameters
+    {
+        MEMBER(ChipParameters, std::string, text, std::string());
+        MEMBER(ChipParameters, ImColor, textColor, Const::TextDimColor);
+        MEMBER(ChipParameters, ImColor, backgroundColor, Const::ChipBackgroundColor);
+        MEMBER(ChipParameters, std::optional<ImColor>, dotColor, std::nullopt);
+    };
+    static void Chip(ChipParameters const& parameters);
 
     static void VerticalSeparator(float height = 23.0f);
     static void ToolbarSeparator();
