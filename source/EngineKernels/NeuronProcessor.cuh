@@ -25,6 +25,7 @@ private:
     // Process a single cell's neural network using classic CUDA FP32 matrix-vector multiplication
     // Neural network computation: output[row] = activation(sum(weights[row][i] * input[i]) + bias[row])
     // The input vector consists of the accumulated signals of the connected cells, the cell's memory activities and its telemetry data
+    // The first input gates the memory outputs: they are only recalculated (without that input) if it exceeds the trigger threshold, otherwise they are retained
     __inline__ __device__ static void processCell(Object* cell, bool initMatrices);
 
     __inline__ __device__ static float calcTelemetryInput(Object* object, int telemetryIndex);
@@ -32,6 +33,9 @@ private:
 
     // Block dimension (one warp)
     static constexpr int BlockDim = 32;
+
+    // Input index that gates the memory outputs
+    static constexpr int MemoryGateInput = 0;
 
     // Age at which the telemetry input saturates to 1
     static constexpr float TelemetryReferenceAge = 100000.0f;
@@ -175,29 +179,43 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
     // Each thread computes one output value
     if (laneId < NEURAL_NET_OUTPUTS) {
         int row = laneId;
-        float result = 0.0f;
 
-        // Weights are stored row-major, so weights[row][col] = weights[row * NEURAL_NET_INPUTS + col]
-        auto const* weightsRow = &cell.neuralNetwork->weights[row * NEURAL_NET_INPUTS];
+        // The first input acts as a gate for the memory outputs: they are only recalculated if it exceeds the trigger threshold
+        bool isMemoryRow = row >= STANDARD_NEURONS_PER_CELL;
+        bool isMemoryGateOpen = sharedInput[MemoryGateInput] > TRIGGER_THRESHOLD;
+
+        if (isMemoryRow && !isMemoryGateOpen) {
+            cell.futureMemory[row - STANDARD_NEURONS_PER_CELL] = cell.memory[row - STANDARD_NEURONS_PER_CELL];
+        } else {
+            float result = 0.0f;
+
+            // Weights are stored row-major, so weights[row][col] = weights[row * NEURAL_NET_INPUTS + col]
+            auto const* weightsRow = &cell.neuralNetwork->weights[row * NEURAL_NET_INPUTS];
 
 // Unroll the inner loop for better performance
 #pragma unroll
-        for (int col = 0; col < NEURAL_NET_INPUTS; ++col) {
-            result += weightsRow[col].getValue() * sharedInput[col];
-        }
+            for (int col = 0; col < NEURAL_NET_INPUTS; ++col) {
 
-        // Add bias
-        result += cell.neuralNetwork->biases[row];
+                // The gate input itself does not contribute to the memory outputs
+                if (isMemoryRow && col == MemoryGateInput) {
+                    continue;
+                }
+                result += weightsRow[col].getValue() * sharedInput[col];
+            }
 
-        // Apply activation function and clamp
-        result = applyActivationFunction(cell.neuralNetwork->activationFunctions[row], result);
-        result = max(-2.0f, min(2.0f, result));
+            // Add bias
+            result += cell.neuralNetwork->biases[row];
 
-        // The memory outputs are not visible to other cells and serve as inputs for the next execution
-        if (row < STANDARD_NEURONS_PER_CELL) {
-            cell.futureSignal.channels[row] = result;
-        } else {
-            cell.futureMemory[row - STANDARD_NEURONS_PER_CELL] = result;
+            // Apply activation function and clamp
+            result = applyActivationFunction(cell.neuralNetwork->activationFunctions[row], result);
+            result = max(-2.0f, min(2.0f, result));
+
+            // The memory outputs are not visible to other cells and serve as inputs for the next execution
+            if (isMemoryRow) {
+                cell.futureMemory[row - STANDARD_NEURONS_PER_CELL] = result;
+            } else {
+                cell.futureSignal.channels[row] = result;
+            }
         }
     }
 }
