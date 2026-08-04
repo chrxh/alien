@@ -36,110 +36,6 @@
 #include "ZstdStream.h"
 
 /************************************************************************/
-/* Serialized type ids                                                  */
-/************************************************************************/
-namespace cereal
-{
-    // CellTypeDesc
-    REGISTER_SERIALIZED_TYPE(BaseDesc, 0)
-    REGISTER_SERIALIZED_TYPE(DepotDesc, 1)
-    REGISTER_SERIALIZED_TYPE(SensorDesc, 2)
-    REGISTER_SERIALIZED_TYPE(GeneratorDesc, 3)
-    REGISTER_SERIALIZED_TYPE(AttackerDesc, 4)
-    REGISTER_SERIALIZED_TYPE(InjectorDesc, 5)
-    REGISTER_SERIALIZED_TYPE(MuscleDesc, 6)
-    REGISTER_SERIALIZED_TYPE(DefenderDesc, 7)
-    REGISTER_SERIALIZED_TYPE(ReconnectorDesc, 8)
-    REGISTER_SERIALIZED_TYPE(DetonatorDesc, 9)
-    REGISTER_SERIALIZED_TYPE(DigestorDesc, 10)
-    REGISTER_SERIALIZED_TYPE(MemoryDesc, 11)
-    REGISTER_SERIALIZED_TYPE(CommunicatorDesc, 12)
-    REGISTER_SERIALIZED_TYPE(VoidDesc, 13)
-
-    // CellTypeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(BaseGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(DepotGenomeDesc, 1)
-    REGISTER_SERIALIZED_TYPE(SensorGenomeDesc, 2)
-    REGISTER_SERIALIZED_TYPE(GeneratorGenomeDesc, 3)
-    REGISTER_SERIALIZED_TYPE(AttackerGenomeDesc, 4)
-    REGISTER_SERIALIZED_TYPE(InjectorGenomeDesc, 5)
-    REGISTER_SERIALIZED_TYPE(MuscleGenomeDesc, 6)
-    REGISTER_SERIALIZED_TYPE(DefenderGenomeDesc, 7)
-    REGISTER_SERIALIZED_TYPE(ReconnectorGenomeDesc, 8)
-    REGISTER_SERIALIZED_TYPE(DetonatorGenomeDesc, 9)
-    REGISTER_SERIALIZED_TYPE(DigestorGenomeDesc, 10)
-    REGISTER_SERIALIZED_TYPE(MemoryGenomeDesc, 11)
-    REGISTER_SERIALIZED_TYPE(CommunicatorGenomeDesc, 12)
-    REGISTER_SERIALIZED_TYPE(VoidGenomeDesc, 13)
-
-    // SensorModeDesc / SensorModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(DetectEnergyDesc, 0)
-    REGISTER_SERIALIZED_TYPE(DetectSolidDesc, 1)
-    REGISTER_SERIALIZED_TYPE(DetectFreeCellDesc, 2)
-    REGISTER_SERIALIZED_TYPE(DetectCreatureDesc, 3)
-    REGISTER_SERIALIZED_TYPE(DetectEnergyGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(DetectSolidGenomeDesc, 1)
-    REGISTER_SERIALIZED_TYPE(DetectFreeCellGenomeDesc, 2)
-    REGISTER_SERIALIZED_TYPE(DetectCreatureGenomeDesc, 3)
-
-    // GeneratorModeDesc / GeneratorModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(SquareSignalDesc, 0)
-    REGISTER_SERIALIZED_TYPE(SawtoothSignalDesc, 1)
-    REGISTER_SERIALIZED_TYPE(SquareSignalGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(SawtoothSignalGenomeDesc, 1)
-
-    // AttackerModeDesc / AttackerModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(AttackFreeCellDesc, 0)
-    REGISTER_SERIALIZED_TYPE(AttackCreatureDesc, 1)
-    REGISTER_SERIALIZED_TYPE(AttackFreeCellGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(AttackCreatureGenomeDesc, 1)
-
-    // MuscleModeDesc / MuscleModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(AutoBendingDesc, 0)
-    REGISTER_SERIALIZED_TYPE(ManualBendingDesc, 1)
-    REGISTER_SERIALIZED_TYPE(AngleBendingDesc, 2)
-    REGISTER_SERIALIZED_TYPE(AutoCrawlingDesc, 3)
-    REGISTER_SERIALIZED_TYPE(ManualCrawlingDesc, 4)
-    REGISTER_SERIALIZED_TYPE(DirectMovementDesc, 5)
-    REGISTER_SERIALIZED_TYPE(AutoBendingGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(ManualBendingGenomeDesc, 1)
-    REGISTER_SERIALIZED_TYPE(AngleBendingGenomeDesc, 2)
-    REGISTER_SERIALIZED_TYPE(AutoCrawlingGenomeDesc, 3)
-    REGISTER_SERIALIZED_TYPE(ManualCrawlingGenomeDesc, 4)
-    REGISTER_SERIALIZED_TYPE(DirectMovementGenomeDesc, 5)
-
-    // ReconnectorModeDesc / ReconnectorModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(ReconnectSolidDesc, 0)
-    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellDesc, 1)
-    REGISTER_SERIALIZED_TYPE(ReconnectCreatureDesc, 2)
-    REGISTER_SERIALIZED_TYPE(ReconnectSolidGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellGenomeDesc, 1)
-    REGISTER_SERIALIZED_TYPE(ReconnectCreatureGenomeDesc, 2)
-
-    // MemoryModeDesc / MemoryModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(SignalDelayDesc, 0)
-    REGISTER_SERIALIZED_TYPE(SignalRecorderDesc, 1)
-    REGISTER_SERIALIZED_TYPE(SignalStorageDesc, 2)
-    REGISTER_SERIALIZED_TYPE(SignalIntegratorDesc, 3)
-    REGISTER_SERIALIZED_TYPE(SignalDelayGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(SignalRecorderGenomeDesc, 1)
-    REGISTER_SERIALIZED_TYPE(SignalStorageGenomeDesc, 2)
-    REGISTER_SERIALIZED_TYPE(SignalIntegratorGenomeDesc, 3)
-
-    // CommunicatorModeDesc / CommunicatorModeGenomeDesc
-    REGISTER_SERIALIZED_TYPE(SenderDesc, 0)
-    REGISTER_SERIALIZED_TYPE(ReceiverDesc, 1)
-    REGISTER_SERIALIZED_TYPE(SenderGenomeDesc, 0)
-    REGISTER_SERIALIZED_TYPE(ReceiverGenomeDesc, 1)
-
-    // ObjectTypeDesc
-    REGISTER_SERIALIZED_TYPE(SolidDesc, 0)
-    REGISTER_SERIALIZED_TYPE(FluidDesc, 1)
-    REGISTER_SERIALIZED_TYPE(FreeCellDesc, 2)
-    REGISTER_SERIALIZED_TYPE(CellDesc, 3)
-}
-
-/************************************************************************/
 /* Genome data                                                          */
 /************************************************************************/
 namespace
@@ -342,10 +238,109 @@ namespace
     auto constexpr Id_MemoryGenome_Mode = 1;
     auto constexpr Id_MemoryGenome_SignalEntries = 2;
     auto constexpr Id_CommunicatorGenome_Mode = 0;
+
+    // Serialized type ids
+    auto constexpr Id_CellTypeGenome_Base = 0;
+    auto constexpr Id_CellTypeGenome_Depot = 1;
+    auto constexpr Id_CellTypeGenome_Sensor = 2;
+    auto constexpr Id_CellTypeGenome_Generator = 3;
+    auto constexpr Id_CellTypeGenome_Attacker = 4;
+    auto constexpr Id_CellTypeGenome_Injector = 5;
+    auto constexpr Id_CellTypeGenome_Muscle = 6;
+    auto constexpr Id_CellTypeGenome_Defender = 7;
+    auto constexpr Id_CellTypeGenome_Reconnector = 8;
+    auto constexpr Id_CellTypeGenome_Detonator = 9;
+    auto constexpr Id_CellTypeGenome_Digestor = 10;
+    auto constexpr Id_CellTypeGenome_Memory = 11;
+    auto constexpr Id_CellTypeGenome_Communicator = 12;
+    auto constexpr Id_CellTypeGenome_Void = 13;
+
+    auto constexpr Id_SensorModeGenome_DetectEnergy = 0;
+    auto constexpr Id_SensorModeGenome_DetectSolid = 1;
+    auto constexpr Id_SensorModeGenome_DetectFreeCell = 2;
+    auto constexpr Id_SensorModeGenome_DetectCreature = 3;
+
+    auto constexpr Id_GeneratorModeGenome_SquareSignal = 0;
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal = 1;
+
+    auto constexpr Id_AttackerModeGenome_AttackFreeCell = 0;
+    auto constexpr Id_AttackerModeGenome_AttackCreature = 1;
+
+    auto constexpr Id_MuscleModeGenome_AutoBending = 0;
+    auto constexpr Id_MuscleModeGenome_ManualBending = 1;
+    auto constexpr Id_MuscleModeGenome_AngleBending = 2;
+    auto constexpr Id_MuscleModeGenome_AutoCrawling = 3;
+    auto constexpr Id_MuscleModeGenome_ManualCrawling = 4;
+    auto constexpr Id_MuscleModeGenome_DirectMovement = 5;
+
+    auto constexpr Id_ReconnectorModeGenome_ReconnectSolid = 0;
+    auto constexpr Id_ReconnectorModeGenome_ReconnectFreeCell = 1;
+    auto constexpr Id_ReconnectorModeGenome_ReconnectCreature = 2;
+
+    auto constexpr Id_MemoryModeGenome_SignalDelay = 0;
+    auto constexpr Id_MemoryModeGenome_SignalRecorder = 1;
+    auto constexpr Id_MemoryModeGenome_SignalStorage = 2;
+    auto constexpr Id_MemoryModeGenome_SignalIntegrator = 3;
+
+    auto constexpr Id_CommunicatorModeGenome_Sender = 0;
+    auto constexpr Id_CommunicatorModeGenome_Receiver = 1;
 }
 
 namespace cereal
 {
+    // CellTypeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(BaseGenomeDesc, Id_CellTypeGenome_Base)
+    REGISTER_SERIALIZED_TYPE(DepotGenomeDesc, Id_CellTypeGenome_Depot)
+    REGISTER_SERIALIZED_TYPE(SensorGenomeDesc, Id_CellTypeGenome_Sensor)
+    REGISTER_SERIALIZED_TYPE(GeneratorGenomeDesc, Id_CellTypeGenome_Generator)
+    REGISTER_SERIALIZED_TYPE(AttackerGenomeDesc, Id_CellTypeGenome_Attacker)
+    REGISTER_SERIALIZED_TYPE(InjectorGenomeDesc, Id_CellTypeGenome_Injector)
+    REGISTER_SERIALIZED_TYPE(MuscleGenomeDesc, Id_CellTypeGenome_Muscle)
+    REGISTER_SERIALIZED_TYPE(DefenderGenomeDesc, Id_CellTypeGenome_Defender)
+    REGISTER_SERIALIZED_TYPE(ReconnectorGenomeDesc, Id_CellTypeGenome_Reconnector)
+    REGISTER_SERIALIZED_TYPE(DetonatorGenomeDesc, Id_CellTypeGenome_Detonator)
+    REGISTER_SERIALIZED_TYPE(DigestorGenomeDesc, Id_CellTypeGenome_Digestor)
+    REGISTER_SERIALIZED_TYPE(MemoryGenomeDesc, Id_CellTypeGenome_Memory)
+    REGISTER_SERIALIZED_TYPE(CommunicatorGenomeDesc, Id_CellTypeGenome_Communicator)
+    REGISTER_SERIALIZED_TYPE(VoidGenomeDesc, Id_CellTypeGenome_Void)
+
+    // SensorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(DetectEnergyGenomeDesc, Id_SensorModeGenome_DetectEnergy)
+    REGISTER_SERIALIZED_TYPE(DetectSolidGenomeDesc, Id_SensorModeGenome_DetectSolid)
+    REGISTER_SERIALIZED_TYPE(DetectFreeCellGenomeDesc, Id_SensorModeGenome_DetectFreeCell)
+    REGISTER_SERIALIZED_TYPE(DetectCreatureGenomeDesc, Id_SensorModeGenome_DetectCreature)
+
+    // GeneratorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(SquareSignalGenomeDesc, Id_GeneratorModeGenome_SquareSignal)
+    REGISTER_SERIALIZED_TYPE(SawtoothSignalGenomeDesc, Id_GeneratorModeGenome_SawtoothSignal)
+
+    // AttackerModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(AttackFreeCellGenomeDesc, Id_AttackerModeGenome_AttackFreeCell)
+    REGISTER_SERIALIZED_TYPE(AttackCreatureGenomeDesc, Id_AttackerModeGenome_AttackCreature)
+
+    // MuscleModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(AutoBendingGenomeDesc, Id_MuscleModeGenome_AutoBending)
+    REGISTER_SERIALIZED_TYPE(ManualBendingGenomeDesc, Id_MuscleModeGenome_ManualBending)
+    REGISTER_SERIALIZED_TYPE(AngleBendingGenomeDesc, Id_MuscleModeGenome_AngleBending)
+    REGISTER_SERIALIZED_TYPE(AutoCrawlingGenomeDesc, Id_MuscleModeGenome_AutoCrawling)
+    REGISTER_SERIALIZED_TYPE(ManualCrawlingGenomeDesc, Id_MuscleModeGenome_ManualCrawling)
+    REGISTER_SERIALIZED_TYPE(DirectMovementGenomeDesc, Id_MuscleModeGenome_DirectMovement)
+
+    // ReconnectorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(ReconnectSolidGenomeDesc, Id_ReconnectorModeGenome_ReconnectSolid)
+    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellGenomeDesc, Id_ReconnectorModeGenome_ReconnectFreeCell)
+    REGISTER_SERIALIZED_TYPE(ReconnectCreatureGenomeDesc, Id_ReconnectorModeGenome_ReconnectCreature)
+
+    // MemoryModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(SignalDelayGenomeDesc, Id_MemoryModeGenome_SignalDelay)
+    REGISTER_SERIALIZED_TYPE(SignalRecorderGenomeDesc, Id_MemoryModeGenome_SignalRecorder)
+    REGISTER_SERIALIZED_TYPE(SignalStorageGenomeDesc, Id_MemoryModeGenome_SignalStorage)
+    REGISTER_SERIALIZED_TYPE(SignalIntegratorGenomeDesc, Id_MemoryModeGenome_SignalIntegrator)
+
+    // CommunicatorModeGenomeDesc
+    REGISTER_SERIALIZED_TYPE(SenderGenomeDesc, Id_CommunicatorModeGenome_Sender)
+    REGISTER_SERIALIZED_TYPE(ReceiverGenomeDesc, Id_CommunicatorModeGenome_Receiver)
+
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetGenomeDesc& data)
     {
@@ -1168,11 +1163,119 @@ namespace
     auto constexpr Id_Desc_Energies = 1;
     auto constexpr Id_Desc_Creatures = 2;
     auto constexpr Id_Desc_Genomes = 3;
+
+    // Serialized type ids
+    auto constexpr Id_ObjectType_Solid = 0;
+    auto constexpr Id_ObjectType_Fluid = 1;
+    auto constexpr Id_ObjectType_FreeCell = 2;
+    auto constexpr Id_ObjectType_Cell = 3;
+
+    auto constexpr Id_CellType_Base = 0;
+    auto constexpr Id_CellType_Depot = 1;
+    auto constexpr Id_CellType_Sensor = 2;
+    auto constexpr Id_CellType_Generator = 3;
+    auto constexpr Id_CellType_Attacker = 4;
+    auto constexpr Id_CellType_Injector = 5;
+    auto constexpr Id_CellType_Muscle = 6;
+    auto constexpr Id_CellType_Defender = 7;
+    auto constexpr Id_CellType_Reconnector = 8;
+    auto constexpr Id_CellType_Detonator = 9;
+    auto constexpr Id_CellType_Digestor = 10;
+    auto constexpr Id_CellType_Memory = 11;
+    auto constexpr Id_CellType_Communicator = 12;
+    auto constexpr Id_CellType_Void = 13;
+
+    auto constexpr Id_SensorMode_DetectEnergy = 0;
+    auto constexpr Id_SensorMode_DetectSolid = 1;
+    auto constexpr Id_SensorMode_DetectFreeCell = 2;
+    auto constexpr Id_SensorMode_DetectCreature = 3;
+
+    auto constexpr Id_GeneratorMode_SquareSignal = 0;
+    auto constexpr Id_GeneratorMode_SawtoothSignal = 1;
+
+    auto constexpr Id_AttackerMode_AttackFreeCell = 0;
+    auto constexpr Id_AttackerMode_AttackCreature = 1;
+
+    auto constexpr Id_MuscleMode_AutoBending = 0;
+    auto constexpr Id_MuscleMode_ManualBending = 1;
+    auto constexpr Id_MuscleMode_AngleBending = 2;
+    auto constexpr Id_MuscleMode_AutoCrawling = 3;
+    auto constexpr Id_MuscleMode_ManualCrawling = 4;
+    auto constexpr Id_MuscleMode_DirectMovement = 5;
+
+    auto constexpr Id_ReconnectorMode_ReconnectSolid = 0;
+    auto constexpr Id_ReconnectorMode_ReconnectFreeCell = 1;
+    auto constexpr Id_ReconnectorMode_ReconnectCreature = 2;
+
+    auto constexpr Id_MemoryMode_SignalDelay = 0;
+    auto constexpr Id_MemoryMode_SignalRecorder = 1;
+    auto constexpr Id_MemoryMode_SignalStorage = 2;
+    auto constexpr Id_MemoryMode_SignalIntegrator = 3;
+
+    auto constexpr Id_CommunicatorMode_Sender = 0;
+    auto constexpr Id_CommunicatorMode_Receiver = 1;
 }
 
 namespace cereal
 {
+    // ObjectTypeDesc
+    REGISTER_SERIALIZED_TYPE(SolidDesc, Id_ObjectType_Solid)
+    REGISTER_SERIALIZED_TYPE(FluidDesc, Id_ObjectType_Fluid)
+    REGISTER_SERIALIZED_TYPE(FreeCellDesc, Id_ObjectType_FreeCell)
+    REGISTER_SERIALIZED_TYPE(CellDesc, Id_ObjectType_Cell)
 
+    // CellTypeDesc
+    REGISTER_SERIALIZED_TYPE(BaseDesc, Id_CellType_Base)
+    REGISTER_SERIALIZED_TYPE(DepotDesc, Id_CellType_Depot)
+    REGISTER_SERIALIZED_TYPE(SensorDesc, Id_CellType_Sensor)
+    REGISTER_SERIALIZED_TYPE(GeneratorDesc, Id_CellType_Generator)
+    REGISTER_SERIALIZED_TYPE(AttackerDesc, Id_CellType_Attacker)
+    REGISTER_SERIALIZED_TYPE(InjectorDesc, Id_CellType_Injector)
+    REGISTER_SERIALIZED_TYPE(MuscleDesc, Id_CellType_Muscle)
+    REGISTER_SERIALIZED_TYPE(DefenderDesc, Id_CellType_Defender)
+    REGISTER_SERIALIZED_TYPE(ReconnectorDesc, Id_CellType_Reconnector)
+    REGISTER_SERIALIZED_TYPE(DetonatorDesc, Id_CellType_Detonator)
+    REGISTER_SERIALIZED_TYPE(DigestorDesc, Id_CellType_Digestor)
+    REGISTER_SERIALIZED_TYPE(MemoryDesc, Id_CellType_Memory)
+    REGISTER_SERIALIZED_TYPE(CommunicatorDesc, Id_CellType_Communicator)
+    REGISTER_SERIALIZED_TYPE(VoidDesc, Id_CellType_Void)
+
+    // SensorModeDesc
+    REGISTER_SERIALIZED_TYPE(DetectEnergyDesc, Id_SensorMode_DetectEnergy)
+    REGISTER_SERIALIZED_TYPE(DetectSolidDesc, Id_SensorMode_DetectSolid)
+    REGISTER_SERIALIZED_TYPE(DetectFreeCellDesc, Id_SensorMode_DetectFreeCell)
+    REGISTER_SERIALIZED_TYPE(DetectCreatureDesc, Id_SensorMode_DetectCreature)
+
+    // GeneratorModeDesc
+    REGISTER_SERIALIZED_TYPE(SquareSignalDesc, Id_GeneratorMode_SquareSignal)
+    REGISTER_SERIALIZED_TYPE(SawtoothSignalDesc, Id_GeneratorMode_SawtoothSignal)
+
+    // AttackerModeDesc
+    REGISTER_SERIALIZED_TYPE(AttackFreeCellDesc, Id_AttackerMode_AttackFreeCell)
+    REGISTER_SERIALIZED_TYPE(AttackCreatureDesc, Id_AttackerMode_AttackCreature)
+
+    // MuscleModeDesc
+    REGISTER_SERIALIZED_TYPE(AutoBendingDesc, Id_MuscleMode_AutoBending)
+    REGISTER_SERIALIZED_TYPE(ManualBendingDesc, Id_MuscleMode_ManualBending)
+    REGISTER_SERIALIZED_TYPE(AngleBendingDesc, Id_MuscleMode_AngleBending)
+    REGISTER_SERIALIZED_TYPE(AutoCrawlingDesc, Id_MuscleMode_AutoCrawling)
+    REGISTER_SERIALIZED_TYPE(ManualCrawlingDesc, Id_MuscleMode_ManualCrawling)
+    REGISTER_SERIALIZED_TYPE(DirectMovementDesc, Id_MuscleMode_DirectMovement)
+
+    // ReconnectorModeDesc
+    REGISTER_SERIALIZED_TYPE(ReconnectSolidDesc, Id_ReconnectorMode_ReconnectSolid)
+    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellDesc, Id_ReconnectorMode_ReconnectFreeCell)
+    REGISTER_SERIALIZED_TYPE(ReconnectCreatureDesc, Id_ReconnectorMode_ReconnectCreature)
+
+    // MemoryModeDesc
+    REGISTER_SERIALIZED_TYPE(SignalDelayDesc, Id_MemoryMode_SignalDelay)
+    REGISTER_SERIALIZED_TYPE(SignalRecorderDesc, Id_MemoryMode_SignalRecorder)
+    REGISTER_SERIALIZED_TYPE(SignalStorageDesc, Id_MemoryMode_SignalStorage)
+    REGISTER_SERIALIZED_TYPE(SignalIntegratorDesc, Id_MemoryMode_SignalIntegrator)
+
+    // CommunicatorModeDesc
+    REGISTER_SERIALIZED_TYPE(SenderDesc, Id_CommunicatorMode_Sender)
+    REGISTER_SERIALIZED_TYPE(ReceiverDesc, Id_CommunicatorMode_Receiver)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConnectionDesc& data)
