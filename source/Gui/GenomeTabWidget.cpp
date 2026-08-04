@@ -18,9 +18,13 @@
 #include "PreviewWidget.h"
 #include "StyleRepository.h"
 
-GenomeTabWidget _GenomeTabWidget::create(GenomeWindowEditData const& genomeEditData, GenomeDesc const& genome, GenomeTabLayoutData const& layoutData)
+GenomeTabWidget _GenomeTabWidget::create(
+    GenomeWindowEditData const& genomeEditData,
+    GenomeDesc const& genome,
+    GenomeTabLayoutData const& layoutData,
+    std::optional<int> lineageId)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, genome, layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, genome, layoutData, lineageId));
 }
 
 GenomeDesc _GenomeTabWidget::normalizeForEditor(GenomeDesc genome)
@@ -70,6 +74,16 @@ std::string _GenomeTabWidget::getName() const
     }
     result += _editData->genome._name;
     return result;
+}
+
+std::optional<int> _GenomeTabWidget::getLineageId() const
+{
+    return _lineageId;
+}
+
+void _GenomeTabWidget::setLineageId(std::optional<int> value)
+{
+    _lineageId = value;
 }
 
 GenomeTabEditData const& _GenomeTabWidget::getEditData() const
@@ -133,7 +147,9 @@ void _GenomeTabWidget::revertChanges()
 _GenomeTabWidget::_GenomeTabWidget(
     GenomeWindowEditData const& genomeEditData,
     GenomeDesc const& genome,
-    GenomeTabLayoutData const& layoutData)
+    GenomeTabLayoutData const& layoutData,
+    std::optional<int> lineageId)
+    : _lineageId(lineageId)
 {
     static int _sequence = 0;
 

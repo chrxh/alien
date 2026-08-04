@@ -589,7 +589,7 @@ void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedOb
     inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
     inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No");
     if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
-        GenomeEditorWindow::get().openTab(genome, false);
+        GenomeEditorWindow::get().openTab(genome, false, true, creature._lineageId);
     }
 }
 
