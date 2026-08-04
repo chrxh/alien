@@ -98,11 +98,12 @@ namespace Const
 
     ImColor const SelectedObjectOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
 
-    ImColor const ToolbarButtonTextColor = TextDimColor;
+    // Icon buttons keep a light blue tint so they stand out against the neutral panels
+    ImColor const ToolbarButtonTextColor = ImColor::HSV(0.530f, 0.320f, 0.950f);
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.0f);
     ImColor const ToolbarButtonHoveredColor = RaisedColor;
 
-    ImColor const ActionButtonTextColor = TextDimColor;
+    ImColor const ActionButtonTextColor = ImColor::HSV(0.530f, 0.400f, 0.950f);
     ImColor const ActionButtonHighlightedTextColor = AccentColor;
     ImColor const ActionButtonBackgroundColor = RaisedColor;
     ImColor const ActionButtonHoveredColor = ImColor::HSV(0.583f, 0.321f, 0.220f);
