@@ -19,7 +19,6 @@
 #include <cereal/types/optional.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
-#include <cereal/types/variant.hpp>
 #include <cereal/types/vector.hpp>
 
 #include <Base/LoggingService.h>
@@ -31,315 +30,10 @@
 #include <EngineInterface/ParametersValidationService.h>
 #include <EngineInterface/SimulationParameters.h>
 
+#include "SerializationScope.h"
 #include "SettingsParserService.h"
 
 #include "ZstdStream.h"
-
-#define SPLIT_SERIALIZATION(Classname) \
-    template <class Archive> \
-    void save(Archive& ar, Classname const& data) \
-    { \
-        loadSave(SerializationTask::Save, ar, const_cast<Classname&>(data)); \
-    } \
-    template <class Archive> \
-    void load(Archive& ar, Classname& data) \
-    { \
-        loadSave(SerializationTask::Load, ar, data); \
-    }
-
-namespace
-{
-    enum class SerializationTask
-    {
-        Load,
-        Save
-    };
-
-    // Deferred read operations are executed in a destructor, which must not throw: failures are collected here instead
-    thread_local bool deserializationFailed = false;
-
-    // Provides the context for one deserialization
-    class DeserializationContext
-    {
-    public:
-        DeserializationContext() { deserializationFailed = false; }
-
-        DeserializationContext(DeserializationContext const&) = delete;
-        DeserializationContext& operator=(DeserializationContext const&) = delete;
-
-        void throwOnFailure() const
-        {
-            if (deserializationFailed) {
-                throw std::runtime_error("The file could not be read.");
-            }
-        }
-    };
-}
-
-namespace cereal
-{
-    using VariantData = std::variant<
-        int,
-        float,
-        bool,
-        double,
-        std::string,
-        uint64_t,
-        uint32_t,
-        uint16_t,
-        uint8_t,
-        int64_t,
-        int16_t,
-        int8_t,
-        RealVector2D,
-        std::optional<bool>,
-        std::optional<uint64_t>,
-        std::optional<uint8_t>,
-        std::optional<int8_t>,
-        std::optional<int>,
-        std::optional<float>,
-        std::optional<RealVector2D>,
-        std::vector<bool>,
-        std::vector<uint8_t>,
-        std::vector<int8_t>,
-        std::vector<int>,
-        std::vector<float>,
-        std::vector<RealVector2D>,
-        std::vector<std::vector<uint8_t>>,
-        std::vector<std::vector<int8_t>>,
-        std::vector<std::vector<int>>,
-        std::vector<std::vector<float>>,
-        IntVector2D,
-        std::chrono::milliseconds>;
-
-    using AttributeMap = std::unordered_map<int, VariantData>;
-
-    // RAII pattern
-    template <class Archive>
-    class SerializationScope
-    {
-    public:
-        SerializationScope(SerializationTask task, Archive& ar)
-            : _task(task)
-            , _ar(ar)
-        {
-            if (_task == SerializationTask::Load) {
-                _ar(_attributeMap);
-            }
-        }
-
-        ~SerializationScope()
-        {
-            if (_task == SerializationTask::Load && deserializationFailed) {
-
-                // Reading further would only operate on garbage
-                return;
-            }
-            try {
-                processDeferredDescOps();
-            } catch (...) {
-
-                // A destructor must not throw: the failure is reported by the enclosing DeserializationContext
-                deserializationFailed = true;
-            }
-        }
-
-        SerializationScope(const SerializationScope&) = delete;
-        SerializationScope& operator=(const SerializationScope&) = delete;
-
-        SerializationScope(SerializationScope&&) = default;
-        SerializationScope& operator=(SerializationScope&&) = default;
-
-        // Implicit conversion to reference
-        operator std::unordered_map<int, VariantData>&() & { return _attributeMap; }
-
-        template <typename T>
-        void addMember(int key, T& value, T const& defaultValue)
-        {
-            if (_task == SerializationTask::Load) {
-                auto findResult = _attributeMap.find(key);
-                if (findResult != _attributeMap.end()) {
-                    auto const& variantData = findResult->second;
-                    value = std::get<T>(variantData);
-                } else {
-                    value = defaultValue;
-                }
-            } else {
-                _attributeMap.emplace(key, value);
-            }
-        }
-
-        template <typename T>
-        void addDesc(int key, T& value)
-        {
-            if (_task == SerializationTask::Save) {
-                // Defer the save operation
-                addDeferredDescOp(key, [this, &value]() {
-                    // Serialize to buffer
-                    std::ostringstream ss(std::ios::binary);
-                    {
-                        cereal::PortableBinaryOutputArchive bufferAr(ss);
-                        bufferAr(value);
-                    }
-                    auto serializedData = std::move(ss).str();
-                    uint64_t dataSize = serializedData.size();
-
-                    // Write size-prefixed data
-                    _ar(dataSize);
-                    _ar(cereal::binary_data(serializedData.data(), dataSize));
-                });
-            } else {
-                // Defer the load operation
-                addDeferredDescOp(key, [this, &value]() {
-                    // Read size-prefixed data
-                    uint64_t dataSize = 0;
-                    _ar(dataSize);
-
-                    // Read serialized data into buffer
-                    std::string serializedData(dataSize, '\0');
-                    _ar(cereal::binary_data(serializedData.data(), dataSize));
-
-                    // Deserialize from buffer
-                    std::istringstream ss(std::move(serializedData), std::ios::binary);
-                    cereal::PortableBinaryInputArchive bufferAr(ss);
-                    bufferAr(value);
-                });
-            }
-        }
-
-        // For vectors whose size is fixed: files saved with a different layout may contain differently
-        // sized vectors, so the loaded values are merged into a default-sized vector
-        template <typename T>
-        void addFixedSizeMember(int key, std::vector<T>& value, std::vector<T> const& defaultValue)
-        {
-            addMember(key, value, defaultValue);
-            if (_task == SerializationTask::Load && value.size() != defaultValue.size()) {
-                auto adaptedValue = defaultValue;
-                std::copy_n(value.begin(), std::min(value.size(), adaptedValue.size()), adaptedValue.begin());
-                value = std::move(adaptedValue);
-            }
-        }
-
-        // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
-        void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
-        {
-            if (_task == SerializationTask::Load) {
-                auto findResult = _attributeMap.find(key);
-                if (findResult != _attributeMap.end()) {
-                    auto const& variantData = findResult->second;
-                    auto& int8Vec = std::get<std::vector<int8_t>>(variantData);
-                    value.resize(int8Vec.size());
-                    for (size_t i = 0; i < int8Vec.size(); ++i) {
-                        value[i] = NeuralNetWeight::fromRawValue(static_cast<uint8_t>(int8Vec[i]));
-                    }
-                } else {
-                    value = defaultValue;
-                }
-            } else {
-                std::vector<int8_t> int8Vec(value.size());
-                for (size_t i = 0; i < value.size(); ++i) {
-                    int8Vec[i] = value[i].rawValue;
-                }
-                _attributeMap.emplace(key, int8Vec);
-            }
-        }
-
-    private:
-        void processDeferredDescOps()
-        {
-            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
-
-            // Process deferred operations
-            if (_task == SerializationTask::Save) {
-
-                // Save map first
-                _ar(_attributeMap);
-
-                // Save sorted ids
-                std::vector<int> sortedIds;
-                sortedIds.reserve(_deferredDescOps.size());
-                for (const auto& op : _deferredDescOps) {
-                    sortedIds.push_back(op.id);
-                }
-                _ar(sortedIds);
-
-                // Then write size-prefixed ContentDesc data in sorted id order
-                for (auto const& op : _deferredDescOps) {
-                    op.serializeFunc();
-                }
-            } else {
-
-                // Read sorted ids
-                std::vector<int> savedIds;
-                _ar(savedIds);
-
-                // For each id, check if we have a deferred read operation, otherwise skip bytes
-                auto deferredOpIndex = 0;
-                auto deferredOpSize = _deferredDescOps.size();
-                for (int savedId : savedIds) {
-                    // deferredOpIndex is an optimization to avoid
-                    // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
-                    // for each savedId (savedIds and _deferredDescOps are sorted)
-                    while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
-                        ++deferredOpIndex;
-                    }
-
-                    if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
-                        // We want to read this ContentDesc - execute the read
-                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
-                    } else {
-                        // Skip this ContentDesc - read size and skip data
-                        uint64_t dataSize = 0;
-                        _ar(dataSize);
-                        std::vector<uint8_t> buffer(dataSize);
-                        _ar(cereal::binary_data(buffer.data(), dataSize));
-                    }
-                }
-            }
-        }
-
-        void addDeferredDescOp(int id, std::function<void()> serializeFunc) { _deferredDescOps.push_back({id, std::move(serializeFunc)}); }
-
-        struct DeferredOperation
-        {
-            int id;
-            std::function<void()> serializeFunc;
-        };
-
-        SerializationTask _task;
-        Archive& _ar;
-        AttributeMap _attributeMap;
-        std::vector<DeferredOperation> _deferredDescOps;
-    };
-
-    template <class Archive>
-    SerializationScope<Archive> getSerializationScope(SerializationTask task, Archive& ar)
-    {
-        return SerializationScope<Archive>(task, ar);
-    }
-
-    template <class Archive>
-    void serialize(Archive& ar, IntVector2D& data)
-    {
-        ar(data.x, data.y);
-    }
-    template <class Archive>
-    void serialize(Archive& ar, RealVector2D& data)
-    {
-        ar(data.x, data.y);
-    }
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, std::chrono::milliseconds& data)
-    {
-        auto count = static_cast<uint64_t>(data.count());
-        ar(count);
-        if (task == SerializationTask::Load) {
-            data = std::chrono::milliseconds(count);
-        }
-    }
-    SPLIT_SERIALIZATION(std::chrono::milliseconds)
-}
 
 /************************************************************************/
 /* Genome data                                                          */
@@ -544,6 +238,52 @@ namespace
     auto constexpr Id_MemoryGenome_Mode = 1;
     auto constexpr Id_MemoryGenome_SignalEntries = 2;
     auto constexpr Id_CommunicatorGenome_Mode = 0;
+
+    // Serialized type ids
+    auto constexpr Id_CellTypeGenome_Base = 0;
+    auto constexpr Id_CellTypeGenome_Depot = 1;
+    auto constexpr Id_CellTypeGenome_Sensor = 2;
+    auto constexpr Id_CellTypeGenome_Generator = 3;
+    auto constexpr Id_CellTypeGenome_Attacker = 4;
+    auto constexpr Id_CellTypeGenome_Injector = 5;
+    auto constexpr Id_CellTypeGenome_Muscle = 6;
+    auto constexpr Id_CellTypeGenome_Defender = 7;
+    auto constexpr Id_CellTypeGenome_Reconnector = 8;
+    auto constexpr Id_CellTypeGenome_Detonator = 9;
+    auto constexpr Id_CellTypeGenome_Digestor = 10;
+    auto constexpr Id_CellTypeGenome_Memory = 11;
+    auto constexpr Id_CellTypeGenome_Communicator = 12;
+    auto constexpr Id_CellTypeGenome_Void = 13;
+
+    auto constexpr Id_SensorModeGenome_DetectEnergy = 0;
+    auto constexpr Id_SensorModeGenome_DetectSolid = 1;
+    auto constexpr Id_SensorModeGenome_DetectFreeCell = 2;
+    auto constexpr Id_SensorModeGenome_DetectCreature = 3;
+
+    auto constexpr Id_GeneratorModeGenome_SquareSignal = 0;
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal = 1;
+
+    auto constexpr Id_AttackerModeGenome_AttackFreeCell = 0;
+    auto constexpr Id_AttackerModeGenome_AttackCreature = 1;
+
+    auto constexpr Id_MuscleModeGenome_AutoBending = 0;
+    auto constexpr Id_MuscleModeGenome_ManualBending = 1;
+    auto constexpr Id_MuscleModeGenome_AngleBending = 2;
+    auto constexpr Id_MuscleModeGenome_AutoCrawling = 3;
+    auto constexpr Id_MuscleModeGenome_ManualCrawling = 4;
+    auto constexpr Id_MuscleModeGenome_DirectMovement = 5;
+
+    auto constexpr Id_ReconnectorModeGenome_ReconnectSolid = 0;
+    auto constexpr Id_ReconnectorModeGenome_ReconnectFreeCell = 1;
+    auto constexpr Id_ReconnectorModeGenome_ReconnectCreature = 2;
+
+    auto constexpr Id_MemoryModeGenome_SignalDelay = 0;
+    auto constexpr Id_MemoryModeGenome_SignalRecorder = 1;
+    auto constexpr Id_MemoryModeGenome_SignalStorage = 2;
+    auto constexpr Id_MemoryModeGenome_SignalIntegrator = 3;
+
+    auto constexpr Id_CommunicatorModeGenome_Sender = 0;
+    auto constexpr Id_CommunicatorModeGenome_Receiver = 1;
 }
 
 namespace cereal
@@ -566,6 +306,7 @@ namespace cereal
         BaseGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(BaseGenomeDesc, Id_CellTypeGenome_Base)
     SPLIT_SERIALIZATION(BaseGenomeDesc)
 
     template <class Archive>
@@ -576,6 +317,7 @@ namespace cereal
         scope.addMember(Id_DepotGenome_storageLimit, data._storageLimit, defaultObject._storageLimit);
         scope.addMember(Id_DepotGenome_InitialStoredUsableEnergy, data._initialStoredUsableEnergy, defaultObject._initialStoredUsableEnergy);
     }
+    REGISTER_SERIALIZED_TYPE(DepotGenomeDesc, Id_CellTypeGenome_Depot)
     SPLIT_SERIALIZATION(DepotGenomeDesc)
 
     template <class Archive>
@@ -602,6 +344,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SensorModeGenome_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
     }
+    REGISTER_SERIALIZED_TYPE(DetectEnergyGenomeDesc, Id_SensorModeGenome_DetectEnergy)
     SPLIT_SERIALIZATION(DetectEnergyGenomeDesc)
 
     template <class Archive>
@@ -609,6 +352,7 @@ namespace cereal
     {
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(DetectSolidGenomeDesc, Id_SensorModeGenome_DetectSolid)
     SPLIT_SERIALIZATION(DetectSolidGenomeDesc)
 
     template <class Archive>
@@ -619,6 +363,7 @@ namespace cereal
         scope.addMember(Id_SensorModeGenome_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         scope.addMember(Id_SensorModeGenome_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
+    REGISTER_SERIALIZED_TYPE(DetectFreeCellGenomeDesc, Id_SensorModeGenome_DetectFreeCell)
     SPLIT_SERIALIZATION(DetectFreeCellGenomeDesc)
 
     template <class Archive>
@@ -631,6 +376,7 @@ namespace cereal
         scope.addMember(Id_SensorModeGenome_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         scope.addMember(Id_SensorModeGenome_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
+    REGISTER_SERIALIZED_TYPE(DetectCreatureGenomeDesc, Id_SensorModeGenome_DetectCreature)
     SPLIT_SERIALIZATION(DetectCreatureGenomeDesc)
 
     template <class Archive>
@@ -644,6 +390,7 @@ namespace cereal
         scope.addMember(Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         scope.addDesc(Id_SensorGenome_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(SensorGenomeDesc, Id_CellTypeGenome_Sensor)
     SPLIT_SERIALIZATION(SensorGenomeDesc)
 
     template <class Archive>
@@ -653,6 +400,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
     }
+    REGISTER_SERIALIZED_TYPE(SquareSignalGenomeDesc, Id_GeneratorModeGenome_SquareSignal)
     SPLIT_SERIALIZATION(SquareSignalGenomeDesc)
 
     template <class Archive>
@@ -662,6 +410,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
     }
+    REGISTER_SERIALIZED_TYPE(SawtoothSignalGenomeDesc, Id_GeneratorModeGenome_SawtoothSignal)
     SPLIT_SERIALIZATION(SawtoothSignalGenomeDesc)
 
     template <class Archive>
@@ -675,6 +424,7 @@ namespace cereal
         scope.addMember(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         scope.addDesc(Id_GeneratorGenome_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(GeneratorGenomeDesc, Id_CellTypeGenome_Generator)
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
     template <class Archive>
@@ -684,6 +434,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_AttackerModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
+    REGISTER_SERIALIZED_TYPE(AttackFreeCellGenomeDesc, Id_AttackerModeGenome_AttackFreeCell)
     SPLIT_SERIALIZATION(AttackFreeCellGenomeDesc)
 
     template <class Archive>
@@ -692,6 +443,7 @@ namespace cereal
         AttackCreatureGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(AttackCreatureGenomeDesc, Id_AttackerModeGenome_AttackCreature)
     SPLIT_SERIALIZATION(AttackCreatureGenomeDesc)
 
     template <class Archive>
@@ -701,6 +453,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_AttackerGenome_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(AttackerGenomeDesc, Id_CellTypeGenome_Attacker)
     SPLIT_SERIALIZATION(AttackerGenomeDesc)
 
     template <class Archive>
@@ -710,6 +463,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_InjectorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
     }
+    REGISTER_SERIALIZED_TYPE(InjectorGenomeDesc, Id_CellTypeGenome_Injector)
     SPLIT_SERIALIZATION(InjectorGenomeDesc)
 
     template <class Archive>
@@ -720,6 +474,7 @@ namespace cereal
         scope.addMember(Id_MuscleModeGenome_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         scope.addMember(Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
+    REGISTER_SERIALIZED_TYPE(AutoBendingGenomeDesc, Id_MuscleModeGenome_AutoBending)
     SPLIT_SERIALIZATION(AutoBendingGenomeDesc)
 
     template <class Archive>
@@ -730,6 +485,7 @@ namespace cereal
         scope.addMember(Id_MuscleModeGenome_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         scope.addMember(Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
+    REGISTER_SERIALIZED_TYPE(ManualBendingGenomeDesc, Id_MuscleModeGenome_ManualBending)
     SPLIT_SERIALIZATION(ManualBendingGenomeDesc)
 
     template <class Archive>
@@ -740,6 +496,7 @@ namespace cereal
         scope.addMember(Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         scope.addMember(Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
     }
+    REGISTER_SERIALIZED_TYPE(AngleBendingGenomeDesc, Id_MuscleModeGenome_AngleBending)
     SPLIT_SERIALIZATION(AngleBendingGenomeDesc)
 
     template <class Archive>
@@ -750,6 +507,7 @@ namespace cereal
         scope.addMember(Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         scope.addMember(Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
+    REGISTER_SERIALIZED_TYPE(AutoCrawlingGenomeDesc, Id_MuscleModeGenome_AutoCrawling)
     SPLIT_SERIALIZATION(AutoCrawlingGenomeDesc)
 
     template <class Archive>
@@ -760,6 +518,7 @@ namespace cereal
         scope.addMember(Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         scope.addMember(Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
+    REGISTER_SERIALIZED_TYPE(ManualCrawlingGenomeDesc, Id_MuscleModeGenome_ManualCrawling)
     SPLIT_SERIALIZATION(ManualCrawlingGenomeDesc)
 
     template <class Archive>
@@ -768,6 +527,7 @@ namespace cereal
         DirectMovementGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(DirectMovementGenomeDesc, Id_MuscleModeGenome_DirectMovement)
     SPLIT_SERIALIZATION(DirectMovementGenomeDesc)
 
     template <class Archive>
@@ -777,6 +537,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_MuscleGenome_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(MuscleGenomeDesc, Id_CellTypeGenome_Muscle)
     SPLIT_SERIALIZATION(MuscleGenomeDesc)
 
     template <class Archive>
@@ -786,6 +547,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_DefenderGenome_Mode, data._mode, defaultObject._mode);
     }
+    REGISTER_SERIALIZED_TYPE(DefenderGenomeDesc, Id_CellTypeGenome_Defender)
     SPLIT_SERIALIZATION(DefenderGenomeDesc)
 
     template <class Archive>
@@ -794,6 +556,7 @@ namespace cereal
         ReconnectSolidGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectSolidGenomeDesc, Id_ReconnectorModeGenome_ReconnectSolid)
     SPLIT_SERIALIZATION(ReconnectSolidGenomeDesc)
 
     template <class Archive>
@@ -803,6 +566,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_ReconnectorModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellGenomeDesc, Id_ReconnectorModeGenome_ReconnectFreeCell)
     SPLIT_SERIALIZATION(ReconnectFreeCellGenomeDesc)
 
     template <class Archive>
@@ -815,6 +579,7 @@ namespace cereal
         scope.addMember(Id_ReconnectorModeGenome_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         scope.addMember(Id_ReconnectorModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectCreatureGenomeDesc, Id_ReconnectorModeGenome_ReconnectCreature)
     SPLIT_SERIALIZATION(ReconnectCreatureGenomeDesc)
 
     template <class Archive>
@@ -824,6 +589,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_ReconnectorGenome_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectorGenomeDesc, Id_CellTypeGenome_Reconnector)
     SPLIT_SERIALIZATION(ReconnectorGenomeDesc)
 
     template <class Archive>
@@ -833,6 +599,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_DetonatorGenome_Countdown, data._countdown, defaultObject._countdown);
     }
+    REGISTER_SERIALIZED_TYPE(DetonatorGenomeDesc, Id_CellTypeGenome_Detonator)
     SPLIT_SERIALIZATION(DetonatorGenomeDesc)
 
     template <class Archive>
@@ -842,6 +609,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_DigestorGenome_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
     }
+    REGISTER_SERIALIZED_TYPE(DigestorGenomeDesc, Id_CellTypeGenome_Digestor)
     SPLIT_SERIALIZATION(DigestorGenomeDesc)
 
     template <class Archive>
@@ -851,6 +619,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalDelayGenome_Delay, data._delay, defaultObject._delay);
     }
+    REGISTER_SERIALIZED_TYPE(SignalDelayGenomeDesc, Id_MemoryModeGenome_SignalDelay)
     SPLIT_SERIALIZATION(SignalDelayGenomeDesc)
 
     template <class Archive>
@@ -861,6 +630,7 @@ namespace cereal
         scope.addMember(Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
         scope.addMember(Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
     }
+    REGISTER_SERIALIZED_TYPE(SignalRecorderGenomeDesc, Id_MemoryModeGenome_SignalRecorder)
     SPLIT_SERIALIZATION(SignalRecorderGenomeDesc)
 
     template <class Archive>
@@ -870,6 +640,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalStorageGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
     }
+    REGISTER_SERIALIZED_TYPE(SignalStorageGenomeDesc, Id_MemoryModeGenome_SignalStorage)
     SPLIT_SERIALIZATION(SignalStorageGenomeDesc)
 
     template <class Archive>
@@ -879,6 +650,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
     }
+    REGISTER_SERIALIZED_TYPE(SignalIntegratorGenomeDesc, Id_MemoryModeGenome_SignalIntegrator)
     SPLIT_SERIALIZATION(SignalIntegratorGenomeDesc)
 
     template <class Archive>
@@ -899,6 +671,7 @@ namespace cereal
         scope.addDesc(Id_MemoryGenome_Mode, data._mode);
         scope.addDesc(Id_MemoryGenome_SignalEntries, data._signalEntries);
     }
+    REGISTER_SERIALIZED_TYPE(MemoryGenomeDesc, Id_CellTypeGenome_Memory)
     SPLIT_SERIALIZATION(MemoryGenomeDesc)
 
     template <class Archive>
@@ -909,6 +682,7 @@ namespace cereal
         scope.addMember(Id_SenderGenome_Range, data._range, defaultObject._range);
         scope.addMember(Id_SenderGenome_Oneway, data._oneway, defaultObject._oneway);
     }
+    REGISTER_SERIALIZED_TYPE(SenderGenomeDesc, Id_CommunicatorModeGenome_Sender)
     SPLIT_SERIALIZATION(SenderGenomeDesc)
 
     template <class Archive>
@@ -919,6 +693,7 @@ namespace cereal
         scope.addMember(Id_ReceiverGenome_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         scope.addMember(Id_ReceiverGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
+    REGISTER_SERIALIZED_TYPE(ReceiverGenomeDesc, Id_CommunicatorModeGenome_Receiver)
     SPLIT_SERIALIZATION(ReceiverGenomeDesc)
 
     template <class Archive>
@@ -928,6 +703,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_CommunicatorGenome_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(CommunicatorGenomeDesc, Id_CellTypeGenome_Communicator)
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
     template <class Archive>
@@ -935,6 +711,7 @@ namespace cereal
     {
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(VoidGenomeDesc, Id_CellTypeGenome_Void)
     SPLIT_SERIALIZATION(VoidGenomeDesc)
 
     template <class Archive>
@@ -1370,12 +1147,61 @@ namespace
     auto constexpr Id_Desc_Energies = 1;
     auto constexpr Id_Desc_Creatures = 2;
     auto constexpr Id_Desc_Genomes = 3;
+
+    // Serialized type ids
+    auto constexpr Id_ObjectType_Solid = 0;
+    auto constexpr Id_ObjectType_Fluid = 1;
+    auto constexpr Id_ObjectType_FreeCell = 2;
+    auto constexpr Id_ObjectType_Cell = 3;
+
+    auto constexpr Id_CellType_Base = 0;
+    auto constexpr Id_CellType_Depot = 1;
+    auto constexpr Id_CellType_Sensor = 2;
+    auto constexpr Id_CellType_Generator = 3;
+    auto constexpr Id_CellType_Attacker = 4;
+    auto constexpr Id_CellType_Injector = 5;
+    auto constexpr Id_CellType_Muscle = 6;
+    auto constexpr Id_CellType_Defender = 7;
+    auto constexpr Id_CellType_Reconnector = 8;
+    auto constexpr Id_CellType_Detonator = 9;
+    auto constexpr Id_CellType_Digestor = 10;
+    auto constexpr Id_CellType_Memory = 11;
+    auto constexpr Id_CellType_Communicator = 12;
+    auto constexpr Id_CellType_Void = 13;
+
+    auto constexpr Id_SensorMode_DetectEnergy = 0;
+    auto constexpr Id_SensorMode_DetectSolid = 1;
+    auto constexpr Id_SensorMode_DetectFreeCell = 2;
+    auto constexpr Id_SensorMode_DetectCreature = 3;
+
+    auto constexpr Id_GeneratorMode_SquareSignal = 0;
+    auto constexpr Id_GeneratorMode_SawtoothSignal = 1;
+
+    auto constexpr Id_AttackerMode_AttackFreeCell = 0;
+    auto constexpr Id_AttackerMode_AttackCreature = 1;
+
+    auto constexpr Id_MuscleMode_AutoBending = 0;
+    auto constexpr Id_MuscleMode_ManualBending = 1;
+    auto constexpr Id_MuscleMode_AngleBending = 2;
+    auto constexpr Id_MuscleMode_AutoCrawling = 3;
+    auto constexpr Id_MuscleMode_ManualCrawling = 4;
+    auto constexpr Id_MuscleMode_DirectMovement = 5;
+
+    auto constexpr Id_ReconnectorMode_ReconnectSolid = 0;
+    auto constexpr Id_ReconnectorMode_ReconnectFreeCell = 1;
+    auto constexpr Id_ReconnectorMode_ReconnectCreature = 2;
+
+    auto constexpr Id_MemoryMode_SignalDelay = 0;
+    auto constexpr Id_MemoryMode_SignalRecorder = 1;
+    auto constexpr Id_MemoryMode_SignalStorage = 2;
+    auto constexpr Id_MemoryMode_SignalIntegrator = 3;
+
+    auto constexpr Id_CommunicatorMode_Sender = 0;
+    auto constexpr Id_CommunicatorMode_Receiver = 1;
 }
 
 namespace cereal
 {
-
-
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConnectionDesc& data)
     {
@@ -1414,6 +1240,7 @@ namespace cereal
     {
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(BaseDesc, Id_CellType_Base)
     SPLIT_SERIALIZATION(BaseDesc)
 
     template <class Archive>
@@ -1424,6 +1251,7 @@ namespace cereal
         scope.addMember(Id_Depot_storageLimit, data._storageLimit, defaultObject._storageLimit);
         scope.addMember(Id_Depot_StoredUsableEnergy, data._storedUsableEnergy, defaultObject._storedUsableEnergy);
     }
+    REGISTER_SERIALIZED_TYPE(DepotDesc, Id_CellType_Depot)
     SPLIT_SERIALIZATION(DepotDesc)
 
     template <class Archive>
@@ -1452,6 +1280,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SensorMode_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
     }
+    REGISTER_SERIALIZED_TYPE(DetectEnergyDesc, Id_SensorMode_DetectEnergy)
     SPLIT_SERIALIZATION(DetectEnergyDesc)
 
     template <class Archive>
@@ -1459,6 +1288,7 @@ namespace cereal
     {
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(DetectSolidDesc, Id_SensorMode_DetectSolid)
     SPLIT_SERIALIZATION(DetectSolidDesc)
 
     template <class Archive>
@@ -1469,6 +1299,7 @@ namespace cereal
         scope.addMember(Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         scope.addMember(Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
+    REGISTER_SERIALIZED_TYPE(DetectFreeCellDesc, Id_SensorMode_DetectFreeCell)
     SPLIT_SERIALIZATION(DetectFreeCellDesc)
 
     template <class Archive>
@@ -1481,6 +1312,7 @@ namespace cereal
         scope.addMember(Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         scope.addMember(Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
+    REGISTER_SERIALIZED_TYPE(DetectCreatureDesc, Id_SensorMode_DetectCreature)
     SPLIT_SERIALIZATION(DetectCreatureDesc)
 
     template <class Archive>
@@ -1505,6 +1337,7 @@ namespace cereal
         scope.addDesc(Id_Sensor_Mode, data._mode);
         scope.addDesc(Id_Sensor_LastMatch, data._lastMatch);
     }
+    REGISTER_SERIALIZED_TYPE(SensorDesc, Id_CellType_Sensor)
     SPLIT_SERIALIZATION(SensorDesc)
 
     template <class Archive>
@@ -1514,6 +1347,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
     }
+    REGISTER_SERIALIZED_TYPE(SquareSignalDesc, Id_GeneratorMode_SquareSignal)
     SPLIT_SERIALIZATION(SquareSignalDesc)
 
     template <class Archive>
@@ -1523,6 +1357,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
     }
+    REGISTER_SERIALIZED_TYPE(SawtoothSignalDesc, Id_GeneratorMode_SawtoothSignal)
     SPLIT_SERIALIZATION(SawtoothSignalDesc)
 
     template <class Archive>
@@ -1537,6 +1372,7 @@ namespace cereal
         scope.addMember(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         scope.addDesc(Id_Generator_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(GeneratorDesc, Id_CellType_Generator)
     SPLIT_SERIALIZATION(GeneratorDesc)
 
     template <class Archive>
@@ -1546,6 +1382,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
+    REGISTER_SERIALIZED_TYPE(AttackFreeCellDesc, Id_AttackerMode_AttackFreeCell)
     SPLIT_SERIALIZATION(AttackFreeCellDesc)
 
     template <class Archive>
@@ -1554,6 +1391,7 @@ namespace cereal
         AttackCreatureDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(AttackCreatureDesc, Id_AttackerMode_AttackCreature)
     SPLIT_SERIALIZATION(AttackCreatureDesc)
 
     template <class Archive>
@@ -1563,6 +1401,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_Attacker_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(AttackerDesc, Id_CellType_Attacker)
     SPLIT_SERIALIZATION(AttackerDesc)
 
     template <class Archive>
@@ -1572,6 +1411,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Injector_GeneIndex, data._geneIndex, defaultObject._geneIndex);
     }
+    REGISTER_SERIALIZED_TYPE(InjectorDesc, Id_CellType_Injector)
     SPLIT_SERIALIZATION(InjectorDesc)
 
     template <class Archive>
@@ -1584,6 +1424,7 @@ namespace cereal
         scope.addMember(Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         scope.addMember(Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
     }
+    REGISTER_SERIALIZED_TYPE(AutoBendingDesc, Id_MuscleMode_AutoBending)
     SPLIT_SERIALIZATION(AutoBendingDesc)
 
     template <class Archive>
@@ -1596,6 +1437,7 @@ namespace cereal
         scope.addMember(Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         scope.addMember(Id_MuscleMode_ManualBending_LastAngleDelta, data._lastAngleDelta, defaultObject._lastAngleDelta);
     }
+    REGISTER_SERIALIZED_TYPE(ManualBendingDesc, Id_MuscleMode_ManualBending)
     SPLIT_SERIALIZATION(ManualBendingDesc)
 
     template <class Archive>
@@ -1607,6 +1449,7 @@ namespace cereal
         scope.addMember(Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
         scope.addMember(Id_MuscleMode_AngleBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
     }
+    REGISTER_SERIALIZED_TYPE(AngleBendingDesc, Id_MuscleMode_AngleBending)
     SPLIT_SERIALIZATION(AngleBendingDesc)
 
     template <class Archive>
@@ -1620,6 +1463,7 @@ namespace cereal
         scope.addMember(Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         scope.addMember(Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
     }
+    REGISTER_SERIALIZED_TYPE(AutoCrawlingDesc, Id_MuscleMode_AutoCrawling)
     SPLIT_SERIALIZATION(AutoCrawlingDesc)
 
     template <class Archive>
@@ -1633,6 +1477,7 @@ namespace cereal
         scope.addMember(Id_MuscleMode_ManualCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         scope.addMember(Id_MuscleMode_ManualCrawling_LastDistanceDelta, data._lastDistanceDelta, defaultObject._lastDistanceDelta);
     }
+    REGISTER_SERIALIZED_TYPE(ManualCrawlingDesc, Id_MuscleMode_ManualCrawling)
     SPLIT_SERIALIZATION(ManualCrawlingDesc)
 
     template <class Archive>
@@ -1641,6 +1486,7 @@ namespace cereal
         DirectMovementDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(DirectMovementDesc, Id_MuscleMode_DirectMovement)
     SPLIT_SERIALIZATION(DirectMovementDesc)
 
     template <class Archive>
@@ -1652,6 +1498,7 @@ namespace cereal
         scope.addMember(Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
         scope.addDesc(Id_Muscle_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(MuscleDesc, Id_CellType_Muscle)
     SPLIT_SERIALIZATION(MuscleDesc)
 
     template <class Archive>
@@ -1661,6 +1508,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Defender_Mode, data._mode, defaultObject._mode);
     }
+    REGISTER_SERIALIZED_TYPE(DefenderDesc, Id_CellType_Defender)
     SPLIT_SERIALIZATION(DefenderDesc)
 
     template <class Archive>
@@ -1669,6 +1517,7 @@ namespace cereal
         ReconnectSolidDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectSolidDesc, Id_ReconnectorMode_ReconnectSolid)
     SPLIT_SERIALIZATION(ReconnectSolidDesc)
 
     template <class Archive>
@@ -1678,6 +1527,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectFreeCellDesc, Id_ReconnectorMode_ReconnectFreeCell)
     SPLIT_SERIALIZATION(ReconnectFreeCellDesc)
 
     template <class Archive>
@@ -1690,6 +1540,7 @@ namespace cereal
         scope.addMember(Id_ReconnectorMode_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         scope.addMember(Id_ReconnectorMode_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectCreatureDesc, Id_ReconnectorMode_ReconnectCreature)
     SPLIT_SERIALIZATION(ReconnectCreatureDesc)
 
     template <class Archive>
@@ -1699,6 +1550,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_Reconnector_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(ReconnectorDesc, Id_CellType_Reconnector)
     SPLIT_SERIALIZATION(ReconnectorDesc)
 
     template <class Archive>
@@ -1709,6 +1561,7 @@ namespace cereal
         scope.addMember(Id_Detonator_State, data._state, defaultObject._state);
         scope.addMember(Id_Detonator_Countdown, data._countdown, defaultObject._countdown);
     }
+    REGISTER_SERIALIZED_TYPE(DetonatorDesc, Id_CellType_Detonator)
     SPLIT_SERIALIZATION(DetonatorDesc)
 
     template <class Archive>
@@ -1718,6 +1571,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Digestor_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
     }
+    REGISTER_SERIALIZED_TYPE(DigestorDesc, Id_CellType_Digestor)
     SPLIT_SERIALIZATION(DigestorDesc)
 
     template <class Archive>
@@ -1729,6 +1583,7 @@ namespace cereal
         scope.addMember(Id_SignalDelay_NumMemoryEntriesInitialized, data._numSignalEntriesInitialized, defaultObject._numSignalEntriesInitialized);
         scope.addMember(Id_SignalDelay_RingBufferIndex, data._ringBufferIndex, defaultObject._ringBufferIndex);
     }
+    REGISTER_SERIALIZED_TYPE(SignalDelayDesc, Id_MemoryMode_SignalDelay)
     SPLIT_SERIALIZATION(SignalDelayDesc)
 
     template <class Archive>
@@ -1741,6 +1596,7 @@ namespace cereal
         scope.addMember(Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
         scope.addMember(Id_SignalRecorder_NumReadSignalEntries, data._numReadSignalEntries, defaultObject._numReadSignalEntries);
     }
+    REGISTER_SERIALIZED_TYPE(SignalRecorderDesc, Id_MemoryMode_SignalRecorder)
     SPLIT_SERIALIZATION(SignalRecorderDesc)
 
     template <class Archive>
@@ -1750,6 +1606,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalStorage_ReadOnly, data._readOnly, defaultObject._readOnly);
     }
+    REGISTER_SERIALIZED_TYPE(SignalStorageDesc, Id_MemoryMode_SignalStorage)
     SPLIT_SERIALIZATION(SignalStorageDesc)
 
     template <class Archive>
@@ -1759,6 +1616,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
     }
+    REGISTER_SERIALIZED_TYPE(SignalIntegratorDesc, Id_MemoryMode_SignalIntegrator)
     SPLIT_SERIALIZATION(SignalIntegratorDesc)
 
     template <class Archive>
@@ -1779,6 +1637,7 @@ namespace cereal
         scope.addDesc(Id_Memory_Mode, data._mode);
         scope.addDesc(Id_Memory_SignalEntries, data._signalEntries);
     }
+    REGISTER_SERIALIZED_TYPE(MemoryDesc, Id_CellType_Memory)
     SPLIT_SERIALIZATION(MemoryDesc)
 
     template <class Archive>
@@ -1789,6 +1648,7 @@ namespace cereal
         scope.addMember(Id_Sender_Range, data._range, defaultObject._range);
         scope.addMember(Id_Sender_Oneway, data._oneway, defaultObject._oneway);
     }
+    REGISTER_SERIALIZED_TYPE(SenderDesc, Id_CommunicatorMode_Sender)
     SPLIT_SERIALIZATION(SenderDesc)
 
     template <class Archive>
@@ -1799,6 +1659,7 @@ namespace cereal
         scope.addMember(Id_Receiver_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         scope.addMember(Id_Receiver_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
+    REGISTER_SERIALIZED_TYPE(ReceiverDesc, Id_CommunicatorMode_Receiver)
     SPLIT_SERIALIZATION(ReceiverDesc)
 
     template <class Archive>
@@ -1808,6 +1669,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addDesc(Id_Communicator_Mode, data._mode);
     }
+    REGISTER_SERIALIZED_TYPE(CommunicatorDesc, Id_CellType_Communicator)
     SPLIT_SERIALIZATION(CommunicatorDesc)
 
     template <class Archive>
@@ -1815,6 +1677,7 @@ namespace cereal
     {
         auto scope = getSerializationScope(task, ar);
     }
+    REGISTER_SERIALIZED_TYPE(VoidDesc, Id_CellType_Void)
     SPLIT_SERIALIZATION(VoidDesc)
 
     template <class Archive>
@@ -1824,6 +1687,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Solid_Energy, data._energy, defaultObject._energy);
     }
+    REGISTER_SERIALIZED_TYPE(SolidDesc, Id_ObjectType_Solid)
     SPLIT_SERIALIZATION(SolidDesc)
 
     template <class Archive>
@@ -1834,6 +1698,7 @@ namespace cereal
         scope.addMember(Id_Fluid_Energy, data._energy, defaultObject._energy);
         scope.addMember(Id_Fluid_Glow, data._glow, defaultObject._glow);
     }
+    REGISTER_SERIALIZED_TYPE(FluidDesc, Id_ObjectType_Fluid)
     SPLIT_SERIALIZATION(FluidDesc)
 
     template <class Archive>
@@ -1844,6 +1709,7 @@ namespace cereal
         scope.addMember(Id_FreeCell_Energy, data._energy, defaultObject._energy);
         scope.addMember(Id_FreeCell_Age, data._age, defaultObject._age);
     }
+    REGISTER_SERIALIZED_TYPE(FreeCellDesc, Id_ObjectType_FreeCell)
     SPLIT_SERIALIZATION(FreeCellDesc)
 
     template <class Archive>
@@ -1875,6 +1741,7 @@ namespace cereal
         scope.addDesc(Id_Cell_NeuralActivity, data._neuralActivity);
         scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
+    REGISTER_SERIALIZED_TYPE(CellDesc, Id_ObjectType_Cell)
     SPLIT_SERIALIZATION(CellDesc)
 
     template <class Archive>
