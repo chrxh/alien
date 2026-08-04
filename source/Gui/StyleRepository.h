@@ -106,6 +106,9 @@ namespace Const
     ImColor const GenomePreviewMultipleConstructorColor = ImColor::HSV(0.375f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewSelfReplicatorColor = ImColor::HSV(0.79f, 0.8f, 1.0f, 1.0f);
 
+    ImColor const FloatingCardBackgroundColor = ImColor::HSV(0.611f, 0.395f, 0.149f, 0.949f);
+    ImColor const FloatingCardBorderColor = ImColor::HSV(0.618f, 0.293f, 0.322f, 1.0f);
+
     ImColor const NeuronEditorConnectionColor = ImColor::HSV(0.0f, 0.0f, 0.1f);
     ImColor const NeuronEditorGridColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
     ImColor const NeuronEditorZeroLinePlotColor = ImColor::HSV(0.6f, 1.0f, 0.7f);
