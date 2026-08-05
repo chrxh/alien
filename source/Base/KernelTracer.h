@@ -9,10 +9,11 @@
 
 #include "Singleton.h"
 
-// Traces kernel calls into a file that keeps only the last few calls. Fed by the kernel-call macros in debug mode,
-// where each launch is followed by a stream sync. Each call overwrites one fixed-size record in a ring, first when it
-// starts and again when it completes, so a kernel that hangs stays visible as "running". The records are written
-// unbuffered: they reach the file even if the process is killed without unwinding, as happens on a driver timeout.
+// Traces kernel calls into a file. Fed by the kernel-call macros in debug mode, where each launch is followed by a
+// stream sync. Every call is written when it starts and again when it completes, both into a fixed record at the top
+// of the file and into a ring holding the preceding calls, so a kernel that hangs stays visible as running. The
+// records are written unbuffered: they reach the file even if the process is killed without unwinding, as happens on
+// a driver timeout.
 class KernelTracer
 {
     MAKE_SINGLETON(KernelTracer);
@@ -30,7 +31,8 @@ public:
     void traceEnd(std::chrono::steady_clock::duration duration);
 
 private:
-    void writeRecord(std::string const& status);
+    void writeEntry(std::string const& status, bool intoHistory);
+    void writeRecord(int recordIndex, std::string const& text);
     void reportProgress(uint64_t timestep);
 
     struct Report
