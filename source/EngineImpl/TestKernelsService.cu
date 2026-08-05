@@ -35,6 +35,11 @@ void TestKernelsService::testOnly_removeGeneCycles(CudaSettings const& gpuSettin
     KERNEL_CALL_MOD(cudaTestRemoveGeneCycles, NEURAL_NET_INPUTS, data, objectId);
 }
 
+void TestKernelsService::testOnly_limitGenesWithSeparation(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+{
+    KERNEL_CALL_MOD(cudaTestLimitGenesWithSeparation, NEURAL_NET_INPUTS, data, objectId);
+}
+
 void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)
 {
     KERNEL_CALL_1_1(cudaTestCreateConnection, data, objectId1, objectId2);

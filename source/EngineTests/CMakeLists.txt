@@ -50,6 +50,7 @@ PUBLIC
     RadiationTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
+    SeparationLimitTests.cpp
     SimulationControlTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp

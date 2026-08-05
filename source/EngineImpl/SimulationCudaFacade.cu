@@ -604,6 +604,13 @@ void _SimulationCudaFacade::testOnly_removeGeneCycles(uint64_t objectId)
     syncAndCheck();
 }
 
+void _SimulationCudaFacade::testOnly_limitGenesWithSeparation(uint64_t objectId)
+{
+    checkAndProcessSimulationParameterChanges();
+    TestKernelsService::get().testOnly_limitGenesWithSeparation(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    syncAndCheck();
+}
+
 void _SimulationCudaFacade::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     checkAndProcessSimulationParameterChanges();
