@@ -239,12 +239,13 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
 
     if (clonedGenome != nullptr) {
         MutationProcessor::applyMutations(data, statistics, cell.creature, clonedGenome);
-        GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, clonedGenome);
-        GeneGraphProcessor::removeCyclesNotThroughRoot(data, clonedGenome);
-        GeneGraphProcessor::removeUnreachableGenesFromRoot(data, clonedGenome);
-        GeneGraphProcessor::limitGenesWithSeparation(data, clonedGenome);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
+
+            // DIAGNOSTIC: the gene graph passes are executed by their own kernels (see cudaNextTimestep_geneGraph_*) so that
+            // a non-returning kernel can be attributed to a single pass. They therefore run at the end of this timestep
+            // instead of directly after the mutation.
+            data.mutatedGenomes.tryAddEntry(clonedGenome);
         }
     }
     __syncthreads();
