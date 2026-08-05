@@ -186,8 +186,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     if (threadIdx.x != 0) {
         return;
     }
-    while (true) {
-    }
     constructor.offspring = findOrCreateNewCreature(data, statistics, object);
 
     // Check again after cloning the creature, because the offspring genome may diverge from the host genome.
