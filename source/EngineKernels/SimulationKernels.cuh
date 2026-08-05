@@ -23,6 +23,13 @@ __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStat
 __global__ void cudaNextTimestep_constructor_countConstructorsNeedingEnergy(SimulationData data);
 __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(SimulationData data);
 __global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationData data);
+
+// DIAGNOSTIC: one kernel per gene graph pass, see ConstructorProcessor::mutateGenome
+__global__ void cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode(SimulationData data);
+__global__ void cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot(SimulationData data);
+__global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(SimulationData data);
+__global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationData data);
+
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_defender(SimulationData data, SimulationStatistics statistics);
