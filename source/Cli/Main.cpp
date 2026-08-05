@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <filesystem>
 #include <iostream>
 
 #include <CLI/CLI.hpp>
@@ -31,8 +32,7 @@ int main(int argc, char** argv)
         std::string outputFilename;
         int timesteps = 0;
         bool profile = false;
-        bool trace = false;
-        std::string traceFilename = "kernel-trace.log";
+        std::string traceFilename;  // Stays empty if --trace is given without a file name
         app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
         app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
@@ -41,15 +41,16 @@ int main(int argc, char** argv)
             profile,
             "Enables debug mode and measures the wall-clock time of each simulation kernel. A profiling report is printed after the run. This bypasses CUDA "
             "graphs and synchronizes after every kernel, so the absolute timings are slower than normal but reveal where the time is spent.");
-        app.add_flag(
-            "--trace",
-            trace,
+        auto traceOption = app.add_option(
+            "--trace,--trace-file",
+            traceFilename,
             "Enables debug mode and writes the name and duration of every kernel call to a trace file, which keeps the last 100 calls. Intended for locating "
             "kernels that hang or trigger a driver timeout: such a kernel is the entry that is still marked as running. The entries are written unbuffered, so "
-            "they survive a process that is killed instead of shut down.");
-        app.add_option("--trace-file", traceFilename, "Specifies the name of the trace file written by --trace.");
+            "they survive a process that is killed instead of shut down. The file name is optional and defaults to kernel-trace.log.");
+        traceOption->expected(0, 1);
         CLI11_PARSE(app, argc, argv);
 
+        auto trace = traceOption->count() > 0;
         if (profile || trace) {
             GlobalSettings::get().setDebugMode(true);
         }
@@ -57,8 +58,9 @@ int main(int argc, char** argv)
             KernelProfiler::get().setEnabled(true);
         }
         if (trace) {
-            KernelTracer::get().init(traceFilename);
-            std::cout << "Writing kernel trace to " << traceFilename << std::endl;
+            auto filename = !traceFilename.empty() ? traceFilename : std::string("kernel-trace.log");
+            KernelTracer::get().init(filename);
+            std::cout << "Writing kernel trace to " << std::filesystem::absolute(filename).string() << std::endl;
         }
 
         // Read input
