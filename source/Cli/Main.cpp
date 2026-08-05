@@ -32,6 +32,7 @@ int main(int argc, char** argv)
         int timesteps = 0;
         bool profile = false;
         bool trace = false;
+        std::string traceFilename = "kernel-trace.log";
         app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
         app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
@@ -43,9 +44,10 @@ int main(int argc, char** argv)
         app.add_flag(
             "--trace",
             trace,
-            "Enables debug mode and prints one line per kernel call with its name and duration as soon as it has completed. Intended for locating kernels that "
-            "hang or trigger a driver timeout: the name is written before the launch, so a kernel that never returns is the one on the last unfinished line. "
-            "This produces a lot of output, so redirecting it to a file is recommended.");
+            "Enables debug mode and writes the name and duration of every kernel call to a trace file, which keeps the last 100 calls. Intended for locating "
+            "kernels that hang or trigger a driver timeout: such a kernel is the entry that is still marked as running. The entries are written unbuffered, so "
+            "they survive a process that is killed instead of shut down.");
+        app.add_option("--trace-file", traceFilename, "Specifies the name of the trace file written by --trace.");
         CLI11_PARSE(app, argc, argv);
 
         if (profile || trace) {
@@ -55,7 +57,8 @@ int main(int argc, char** argv)
             KernelProfiler::get().setEnabled(true);
         }
         if (trace) {
-            KernelTracer::get().setEnabled(true);
+            KernelTracer::get().init(traceFilename);
+            std::cout << "Writing kernel trace to " << traceFilename << std::endl;
         }
 
         // Read input
