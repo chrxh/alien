@@ -109,6 +109,7 @@ public:
     void testOnly_voidUnreachableNodes(uint64_t objectId);
     void testOnly_removeUnusedGenes(uint64_t objectId);
     void testOnly_removeGeneCycles(uint64_t objectId);
+    void testOnly_limitGenesWithSeparation(uint64_t objectId);
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
     void testOnly_createConnectionWithAbsAngle(uint64_t objectId1, uint64_t objectId2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
     void testOnly_cleanupAfterTimestep();

@@ -413,6 +413,11 @@ void _SimulationFacadeImpl::testOnly_removeGeneCycles(uint64_t objectId)
     _worker.testOnly_removeGeneCycles(objectId);
 }
 
+void _SimulationFacadeImpl::testOnly_limitGenesWithSeparation(uint64_t objectId)
+{
+    _worker.testOnly_limitGenesWithSeparation(objectId);
+}
+
 void _SimulationFacadeImpl::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     _worker.testOnly_createConnection(objectId1, objectId2);

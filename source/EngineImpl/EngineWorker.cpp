@@ -483,6 +483,12 @@ void EngineWorker::testOnly_removeGeneCycles(uint64_t objectId)
     _simulationCudaFacade->testOnly_removeGeneCycles(objectId);
 }
 
+void EngineWorker::testOnly_limitGenesWithSeparation(uint64_t objectId)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_limitGenesWithSeparation(objectId);
+}
+
 void EngineWorker::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     EngineWorkerGuard access(this);

@@ -243,6 +243,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
         GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, clonedGenome);
         GeneGraphProcessor::removeCyclesNotThroughRoot(data, clonedGenome);
         GeneGraphProcessor::removeUnreachableGenesFromRoot(data, clonedGenome);
+        GeneGraphProcessor::limitGenesWithSeparation(data, clonedGenome);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
         }

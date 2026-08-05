@@ -14,9 +14,12 @@ namespace cg_geneGraph = cooperative_groups;
 class GeneGraphProcessor
 {
 public:
+    static int constexpr MaxGenesWithSeparation = 2;
+
     __inline__ __device__ static void voidNodesUnreachableFromLastNode(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeCyclesNotThroughRoot(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void limitGenesWithSeparation(SimulationData& data, Genome* genome);
 
 private:
     __inline__ __device__ static bool voidUnreachableNodes(SimulationData& data, Gene& gene);
@@ -278,6 +281,98 @@ __inline__ __device__ void GeneGraphProcessor::removeCyclesNotThroughRoot(Simula
                     ++stackSize;
                 }
                 // A finished target is a cross or forward edge and does not close a cycle.
+            }
+        }
+    }
+    block.sync();
+}
+
+__inline__ __device__ void GeneGraphProcessor::limitGenesWithSeparation(SimulationData& data, Genome* genome)
+{
+    // A constructor with separation starts a new creature from the gene it references, so the genes referenced this way are the
+    // creature types a genome can produce. At most MaxGenesWithSeparation different genes may be built with separation.
+    //
+    // A depth-first search starting at the root gene encounters the constructors in construction order. The first
+    // MaxGenesWithSeparation different genes found there keep their separation, every further constructor referencing another
+    // gene loses it. The gene itself remains reachable in that case, it is only built as part of the same creature.
+    auto block = cg_geneGraph::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    __shared__ int numGenes;
+    if (laneId == 0) {
+        numGenes = genome->numGenes;
+    }
+    block.sync();
+    if (numGenes == 0) {  // Uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ int* visited;
+    __shared__ int* stackGenes;
+    __shared__ int* stackNodeIndices;  // Next node of the gene on that stack level that still needs to be examined
+
+    if (laneId == 0) {
+        visited = data.entities.heap.getTypedSubArray<int>(numGenes);
+        // A gene is pushed at most once because only unvisited genes are pushed and they are marked immediately, so the DFS stack
+        // never holds more than numGenes entries.
+        stackGenes = data.entities.heap.getTypedSubArray<int>(numGenes);
+        stackNodeIndices = data.entities.heap.getTypedSubArray<int>(numGenes);
+    }
+    block.sync();
+
+    for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
+        visited[geneIndex] = 0;
+    }
+    block.sync();
+
+    // The search is inherently sequential, but it visits every gene and every node only once, which is cheaper than the passes
+    // that already scan the genome per gene.
+    if (laneId == 0) {
+        int genesWithSeparation[MaxGenesWithSeparation];
+        int numGenesWithSeparation = 0;
+
+        visited[0] = 1;
+        stackGenes[0] = 0;
+        stackNodeIndices[0] = 0;
+        int stackSize = 1;
+
+        while (stackSize > 0) {
+            auto& gene = genome->genes[stackGenes[stackSize - 1]];
+            auto nodeIndex = stackNodeIndices[stackSize - 1];
+            if (nodeIndex >= gene.numNodes) {
+                --stackSize;
+                continue;
+            }
+            stackNodeIndices[stackSize - 1] = nodeIndex + 1;
+
+            auto& node = gene.nodes[nodeIndex];
+            if (!node.constructorAvailable) {
+                continue;
+            }
+            auto targetGene = node.constructor.geneIndex;
+
+            if (node.constructor.separation) {
+                bool alreadyKnown = false;
+                for (int i = 0; i < numGenesWithSeparation; ++i) {
+                    if (genesWithSeparation[i] == targetGene) {
+                        alreadyKnown = true;
+                        break;
+                    }
+                }
+                if (!alreadyKnown) {
+                    if (numGenesWithSeparation < MaxGenesWithSeparation) {
+                        genesWithSeparation[numGenesWithSeparation++] = targetGene;
+                    } else {
+                        node.constructor.separation = false;
+                    }
+                }
+            }
+
+            if (visited[targetGene] == 0) {
+                visited[targetGene] = 1;
+                stackGenes[stackSize] = targetGene;
+                stackNodeIndices[stackSize] = 0;
+                ++stackSize;
             }
         }
     }
