@@ -7,6 +7,7 @@
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
@@ -30,6 +31,7 @@ int main(int argc, char** argv)
         std::string outputFilename;
         int timesteps = 0;
         bool profile = false;
+        bool trace = false;
         app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
         app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
@@ -38,11 +40,22 @@ int main(int argc, char** argv)
             profile,
             "Enables debug mode and measures the wall-clock time of each simulation kernel. A profiling report is printed after the run. This bypasses CUDA "
             "graphs and synchronizes after every kernel, so the absolute timings are slower than normal but reveal where the time is spent.");
+        app.add_flag(
+            "--trace",
+            trace,
+            "Enables debug mode and prints one line per kernel call with its name and duration as soon as it has completed. Intended for locating kernels that "
+            "hang or trigger a driver timeout: the name is written before the launch, so a kernel that never returns is the one on the last unfinished line. "
+            "This produces a lot of output, so redirecting it to a file is recommended.");
         CLI11_PARSE(app, argc, argv);
 
-        if (profile) {
+        if (profile || trace) {
             GlobalSettings::get().setDebugMode(true);
+        }
+        if (profile) {
             KernelProfiler::get().setEnabled(true);
+        }
+        if (trace) {
+            KernelTracer::get().setEnabled(true);
         }
 
         // Read input
