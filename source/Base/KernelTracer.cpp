@@ -1,14 +1,17 @@
 #include "KernelTracer.h"
 
+#include <iostream>
 #include <ranges>
 #include <format>
 
 #include "AlienExceptions.h"
+#include "StringHelper.h"
 
 namespace
 {
     auto constexpr NumEntries = 100;
     auto constexpr RecordSize = 128;
+    auto constexpr TimestepReportInterval = 100;
 
     std::string toRecord(std::string const& text)
     {
@@ -43,6 +46,18 @@ void KernelTracer::init(std::string const& filename)
     std::fwrite(content.data(), 1, content.size(), _file);
 }
 
+void KernelTracer::setTimestep(uint64_t value)
+{
+    if (!_file) {
+        return;
+    }
+    std::lock_guard lock(_mutex);
+    _timestep = value;
+    if (value % TimestepReportInterval == 0) {
+        reportProgress(value);
+    }
+}
+
 void KernelTracer::traceBegin(char const* name)
 {
     if (!_file) {
@@ -63,6 +78,20 @@ void KernelTracer::traceEnd(std::chrono::steady_clock::duration duration)
 
     std::lock_guard lock(_mutex);
     writeRecord(std::format("done {:>10.3f} ms", milliseconds));
+}
+
+void KernelTracer::reportProgress(uint64_t timestep)
+{
+    auto now = std::chrono::steady_clock::now();
+
+    std::cout << "Timestep " << StringHelper::format(timestep);
+    if (_lastReport) {
+        auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastReport->timepoint).count();
+        std::cout << " (" << StringHelper::format(timestep - _lastReport->timestep) << " steps in " << StringHelper::format(milliseconds) << " ms)";
+    }
+    std::cout << std::endl;
+
+    _lastReport = Report{now, timestep};
 }
 
 void KernelTracer::writeRecord(std::string const& status)
