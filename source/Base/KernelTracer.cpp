@@ -9,7 +9,7 @@
 
 namespace
 {
-    auto constexpr NumEntries = 100;
+    auto constexpr NumEntries = 10;
     auto constexpr RecordSize = 160;
     auto constexpr TimestepReportInterval = 100;
 
