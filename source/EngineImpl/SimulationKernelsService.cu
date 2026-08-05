@@ -2,6 +2,8 @@
 
 #include <ranges>
 
+#include <Base/KernelTracer.h>
+
 #include <EngineInterface/SpaceCalculator.h>
 
 #include <EngineKernels/ForceFieldKernels.cuh>
@@ -188,6 +190,7 @@ void SimulationKernelsService::calcTimestep(
 
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
+        KernelTracer::get().setTimestep(timestep);
         launchTimestepKernels(config, settings, data, statistics);
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(_stream));
     } else {
@@ -361,6 +364,7 @@ void SimulationKernelsService::calcTimestepForPreview(
 
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
+        KernelTracer::get().setTimestep(timestep);
         launchPreviewKernels(config, settings, data, statistics);
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(_stream));
     } else {
