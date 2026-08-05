@@ -42,11 +42,19 @@ jobs:
     - name: Package deployment
       shell: pwsh
       run: |
-        # alien.exe, resources/ and imgui.ini are already laid out next to the
-        # build output by the CMake POST_BUILD step, so the Release dir is the
-        # complete deployment payload.
+        # alien.exe, resources/, imgui.ini and the CUDA / MSVC / vcpkg runtime DLLs
+        # are already laid out next to the build output by the CMake POST_BUILD
+        # steps, so the Release dir is the complete deployment payload.
+        $payload = "build-ninja/${{ env.BUILD_TYPE }}"
+
+        # Guard against shipping an archive that only runs on a machine which has
+        # the CUDA toolkit or the Visual C++ redistributable installed.
+        $required = @("alien.exe", "cudart64_*.dll", "msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll", "resources")
+        $missing = $required | Where-Object { -not (Get-ChildItem -Path "$payload/$_" -ErrorAction SilentlyContinue) }
+        if ($missing) { throw "Deployment payload is incomplete, missing: $($missing -join ', ')" }
+
         New-Item -ItemType Directory -Force -Path "deploy" | Out-Null
-        Compress-Archive -Path "build-ninja/${{ env.BUILD_TYPE }}/*" -DestinationPath "deploy/alien-develop.zip" -Force
+        Compress-Archive -Path "$payload/*" -DestinationPath "deploy/alien-develop.zip" -Force
 
     - name: Upload to FTP (overwrite alien-develop.zip)
       shell: pwsh

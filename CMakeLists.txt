@@ -316,3 +316,45 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/resources
         $<TARGET_FILE_DIR:alien>/resources)
+
+# The build output directory doubles as the deployment payload
+# (see .github/workflows/windows-nightly-deploy.yml), so every dependency that is
+# not part of Windows itself has to end up next to the executables. The vcpkg
+# libraries are handled by vcpkg's applocal deployment; the two runtimes below are
+# not. The Universal CRT (ucrtbase.dll, api-ms-win-crt-*) ships with Windows 10 and
+# newer and is deliberately not deployed.
+
+# The CUDA runtime is linked dynamically, so the executables need cudart64_*.dll
+# at run time. It is part of the CUDA toolkit and not of the NVIDIA driver, so a
+# machine without the toolkit installed only has it if it is deployed with the
+# binaries.
+if(WIN32 AND NOT USE_HIP)
+    get_filename_component(CUDA_BIN_DIR ${CMAKE_CUDA_COMPILER} DIRECTORY)
+    file(GLOB CUDA_RUNTIME_DLL "${CUDA_BIN_DIR}/cudart64_*.dll")
+    if(NOT CUDA_RUNTIME_DLL)
+        message(FATAL_ERROR "Could not find cudart64_*.dll in ${CUDA_BIN_DIR}")
+    endif()
+    add_custom_command(
+        TARGET alien POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CUDA_RUNTIME_DLL}
+            $<TARGET_FILE_DIR:alien>)
+endif()
+
+# The MSVC runtime (msvcp140.dll, vcruntime140*.dll) comes with the Visual C++
+# redistributable rather than with Windows, so it can be missing on a machine
+# without development tools. InstallRequiredSystemLibraries locates the matching
+# redistributable of the compiler in use; _SKIP keeps it from adding install()
+# rules, which this project does not use, so it only fills the variable below.
+if(MSVC)
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+    include(InstallRequiredSystemLibraries)
+    if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+        message(FATAL_ERROR "Could not locate the MSVC runtime redistributable")
+    endif()
+    add_custom_command(
+        TARGET alien POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+            $<TARGET_FILE_DIR:alien>)
+endif()
