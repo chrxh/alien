@@ -62,6 +62,17 @@ project(alien-project LANGUAGES C CXX)
 if(USE_HIP)
   enable_language(HIP)
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
+  # The custom Windows link commands below embed the offload targets literally, so
+  # every architecture needs its own --offload-arch flag: a bare
+  # ${CMAKE_HIP_ARCHITECTURES} would expand to one semicolon-joined argument.
+  # All listed targets end up in the same fat binary, so a single executable runs
+  # on all of them -- the generic targets (gfx11-generic, ...) each already cover a
+  # whole GPU family with one code object.
+  set(_HIP_OFFLOAD_ARCH_FLAGS "")
+  foreach(_arch IN LISTS CMAKE_HIP_ARCHITECTURES)
+    string(APPEND _HIP_OFFLOAD_ARCH_FLAGS "--offload-arch=${_arch} ")
+  endforeach()
+  string(STRIP "${_HIP_OFFLOAD_ARCH_FLAGS}" _HIP_OFFLOAD_ARCH_FLAGS)
 else()
   enable_language(CUDA)
 endif()
@@ -106,7 +117,7 @@ if(USE_HIP)
       # device link. Pass --allow-multiple-definition to the amdgcn linker
       # (-Xoffload-linker) so it keeps the first definition silently.
       set(CMAKE_HIP_LINK_EXECUTABLE
-        "python3 ${_HIP_LINK_WRAP} ${_CLANG_GCC} --target=x86_64-pc-windows-msvc -fms-compatibility --offload-arch=${CMAKE_HIP_ARCHITECTURES} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
+        "python3 ${_HIP_LINK_WRAP} ${_CLANG_GCC} --target=x86_64-pc-windows-msvc -fms-compatibility ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
   else()
     set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -ffast-math")
@@ -122,7 +133,7 @@ if(USE_HIP)
       # add --allow-multiple-definition for the ROCm 7.13 this_cluster() issue.
       set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/external/hip/hip_link_win.py")
       set(CMAKE_HIP_LINK_EXECUTABLE
-        "python3 ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} --offload-arch=${CMAKE_HIP_ARCHITECTURES} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
+        "python3 ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
   endif()
 endif()
@@ -338,6 +349,22 @@ if(WIN32 AND NOT USE_HIP)
         TARGET alien POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CUDA_RUNTIME_DLL}
+            $<TARGET_FILE_DIR:alien>)
+endif()
+
+# The HIP counterpart: the executables link the HIP runtime dynamically and need
+# amdhip64_*.dll at run time. It belongs to the HIP SDK, so deploy it alongside
+# the binaries for the same reason as the CUDA runtime above.
+if(WIN32 AND USE_HIP)
+    get_filename_component(HIP_BIN_DIR ${CMAKE_HIP_COMPILER} DIRECTORY)
+    file(GLOB HIP_RUNTIME_DLL "${HIP_BIN_DIR}/amdhip64*.dll")
+    if(NOT HIP_RUNTIME_DLL)
+        message(FATAL_ERROR "Could not find amdhip64*.dll in ${HIP_BIN_DIR}")
+    endif()
+    add_custom_command(
+        TARGET alien POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${HIP_RUNTIME_DLL}
             $<TARGET_FILE_DIR:alien>)
 endif()
 

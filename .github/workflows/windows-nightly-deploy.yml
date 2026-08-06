@@ -10,6 +10,10 @@ env:
   BUILD_TYPE: Release
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+  # AMD build: the generic targets each cover a whole GPU family and all of them
+  # go into one fat binary, so the AMD archive holds a single alien.exe that runs
+  # on RDNA2, RDNA3 and RDNA4.
+  HIP_ARCHS: gfx10-3-generic;gfx11-generic;gfx12-generic
 
 jobs:
   windows-deploy:
@@ -68,5 +72,84 @@ jobs:
         curl.exe --fail-with-body --silent --show-error `
           --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}" `
           --upload-file "deploy/alien-develop.zip" `
+          $url
+        if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }
+
+  # The AMD build is a separate job on purpose: the Windows HIP toolchain is much
+  # younger than the CUDA one, and a failure there must not hold back the NVIDIA
+  # nightly deployment above.
+  windows-deploy-amd:
+    runs-on: [self-hosted, Windows]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        clean: true
+
+    - name: Check ROCm/HIP prerequisites
+      shell: pwsh
+      run: |
+        if (-not $env:HIP_PATH) {
+          throw "HIP_PATH is not set. Install the AMD HIP SDK for Windows on the runner."
+        }
+        # external/hip/hip_link_win.py wraps the HIP link step on Windows.
+        if (-not (Get-Command python3 -ErrorAction SilentlyContinue)) {
+          throw "python3 was not found on PATH; it is required by external/hip/hip_link_win.py."
+        }
+
+    - name: Unshallow vcpkg submodule
+      shell: pwsh
+      run: |
+        cd external/vcpkg
+        git fetch --unshallow 2>$null; if (-not $?) { Write-Host "Already unshallowed or fetch failed (continuing)" }
+        exit 0
+
+    - name: Bootstrap vcpkg
+      shell: pwsh
+      run: |
+        Push-Location external/vcpkg
+        .\bootstrap-vcpkg.bat -disableMetrics
+        Pop-Location
+
+    - name: Build (Ninja, HIP)
+      shell: cmd
+      env:
+        ALIEN_HIP_ARCH: ${{ env.HIP_ARCHS }}
+      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }} HIP
+
+    - name: Package deployment
+      shell: pwsh
+      run: |
+        # Same layout as the CUDA payload, except that the HIP runtime
+        # (amdhip64_*.dll) takes the place of the CUDA runtime.
+        $payload = "build-ninja-hip/${{ env.BUILD_TYPE }}"
+
+        $required = @("alien.exe", "amdhip64*.dll", "msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll", "resources")
+        $missing = $required | Where-Object { -not (Get-ChildItem -Path "$payload/$_" -ErrorAction SilentlyContinue) }
+        if ($missing) { throw "AMD deployment payload is incomplete, missing: $($missing -join ', ')" }
+
+        New-Item -ItemType Directory -Force -Path "deploy" | Out-Null
+        Compress-Archive -Path "$payload/*" -DestinationPath "deploy/alien-develop-amd.zip" -Force
+
+    - name: Upload to FTP (overwrite alien-develop-amd.zip)
+      shell: pwsh
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
+      run: |
+        # FTP_REMOTE_PATH points at the CUDA archive; the AMD one lives next to it.
+        # The secret may name the file explicitly or just the target directory.
+        if ($env:FTP_REMOTE_PATH -match '\.zip$') {
+          $remotePath = $env:FTP_REMOTE_PATH -replace '\.zip$', '-amd.zip'
+        } else {
+          $remotePath = "$($env:FTP_REMOTE_PATH.TrimEnd('/'))/alien-develop-amd.zip"
+        }
+        $url = "ftp://$($env:FTP_HOST):21/$remotePath"
+        curl.exe --fail-with-body --silent --show-error `
+          --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}" `
+          --upload-file "deploy/alien-develop-amd.zip" `
           $url
         if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }

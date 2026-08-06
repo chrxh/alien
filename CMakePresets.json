@@ -13,6 +13,16 @@
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build-ninja",
       "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "ninja-hip",
+      "displayName": "Ninja Multi-Config (HIP / AMD)",
+      "description": "Same as the 'ninja' preset, but builds the GPU engine for AMD GPUs with ROCm/HIP instead of CUDA. Uses a separate binary directory so a CUDA build in build-ninja stays intact. Requires a ROCm/HIP installation; without an explicit -DCMAKE_HIP_ARCHITECTURES the target architecture is auto-detected from the GPUs of the host.",
+      "inherits": "ninja",
+      "binaryDir": "${sourceDir}/build-ninja-hip",
+      "cacheVariables": {
+        "USE_HIP": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -26,6 +36,18 @@
       "name": "ninja-debug",
       "displayName": "Ninja - Debug",
       "configurePreset": "ninja",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ninja-hip-release",
+      "displayName": "Ninja (HIP / AMD) - Release",
+      "configurePreset": "ninja-hip",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja-hip-debug",
+      "displayName": "Ninja (HIP / AMD) - Debug",
+      "configurePreset": "ninja-hip",
       "configuration": "Debug"
     }
   ]
