@@ -43,8 +43,11 @@ if(USE_HIP)
   # is known (set below after enable_language(HIP)).
 else()
   # Default CUDA target architectures
+  # DIAGNOSTIC: 120 (Blackwell) added to check whether the hanging constructor kernel is an artifact of the PTX JIT
+  # compilation that a compute_75-only build goes through on such a GPU. A Blackwell card now runs native SASS instead,
+  # while every other card keeps working via the compute_75 PTX. Building 120 requires CUDA 12.8 or newer.
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES 75)
+    set(CMAKE_CUDA_ARCHITECTURES 75 120)
   endif()
 
   set(CMAKE_CUDA_STANDARD 20)
