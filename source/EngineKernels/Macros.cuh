@@ -79,7 +79,14 @@ void checkAndThrowError(T result)
 
 #define CHECK_FOR_DEVICE_ERRORS(val) checkAndThrowError((val))
 
-#define ABORT() (*((int*)0) = 0)
+// Writing through a null pointer is undefined behavior that clang removes instead
+// of trapping (-Wnull-dereference), which would turn an aborted kernel into silent
+// memory corruption. Use the trap intrinsic of the respective backend.
+#ifdef USE_HIP
+#define ABORT() __builtin_trap()
+#else
+#define ABORT() __trap()
+#endif
 
 #define NEAR_ZERO 1.0e-4f
 
