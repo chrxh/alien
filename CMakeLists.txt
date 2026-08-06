@@ -73,6 +73,12 @@ if(USE_HIP)
     string(APPEND _HIP_OFFLOAD_ARCH_FLAGS "--offload-arch=${_arch} ")
   endforeach()
   string(STRIP "${_HIP_OFFLOAD_ARCH_FLAGS}" _HIP_OFFLOAD_ARCH_FLAGS)
+  if(WIN32)
+    # The link commands below run external/hip/hip_link_win.py. Use the interpreter
+    # CMake locates rather than a bare "python3", which a Windows installation
+    # usually does not provide under that name.
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  endif()
 else()
   enable_language(CUDA)
 endif()
@@ -117,7 +123,7 @@ if(USE_HIP)
       # device link. Pass --allow-multiple-definition to the amdgcn linker
       # (-Xoffload-linker) so it keeps the first definition silently.
       set(CMAKE_HIP_LINK_EXECUTABLE
-        "python3 ${_HIP_LINK_WRAP} ${_CLANG_GCC} --target=x86_64-pc-windows-msvc -fms-compatibility ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
+        "\"${Python3_EXECUTABLE}\" ${_HIP_LINK_WRAP} ${_CLANG_GCC} --target=x86_64-pc-windows-msvc -fms-compatibility ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
   else()
     set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -ffast-math")
@@ -133,7 +139,7 @@ if(USE_HIP)
       # add --allow-multiple-definition for the ROCm 7.13 this_cluster() issue.
       set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/external/hip/hip_link_win.py")
       set(CMAKE_HIP_LINK_EXECUTABLE
-        "python3 ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
+        "\"${Python3_EXECUTABLE}\" ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
   endif()
 endif()
