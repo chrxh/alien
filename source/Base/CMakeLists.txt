@@ -14,6 +14,8 @@ add_library(Base
     JsonParser.h
     KernelProfiler.cpp
     KernelProfiler.h
+    KernelTracer.cpp
+    KernelTracer.h
     LoggingService.cpp
     LoggingService.h
     Macros.h
