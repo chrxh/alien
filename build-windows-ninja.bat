@@ -101,17 +101,50 @@ if not defined ALIEN_HIP_ARCH set "ALIEN_HIP_ARCH=gfx10-3-generic;gfx11-generic;
 if /i "%CONFIG%"=="Debug" (set "BUILD_PRESET=ninja-hip-debug") else (set "BUILD_PRESET=ninja-hip-release")
 
 rem find_package(hip) does not see the HIP SDK through the vcpkg toolchain unless
-rem its install root is on CMAKE_PREFIX_PATH.
-set "HIP_PREFIX_ARG="
-if defined HIP_PATH set "HIP_PREFIX_ARG=-DCMAKE_PREFIX_PATH=%HIP_PATH%"
+rem its install root is on CMAKE_PREFIX_PATH. HIP_PATH points into "Program Files"
+rem and ends in a backslash, so the argument has to be quoted as a whole and the
+rem trailing backslash dropped -- it would otherwise escape the closing quote.
+set "HIP_ROOT=%HIP_PATH%"
+if not defined HIP_ROOT (
+    echo [build] HIP_PATH is not set. Install the AMD HIP SDK for Windows.
+    exit /b 1
+)
+if "%HIP_ROOT:~-1%"=="\" set "HIP_ROOT=%HIP_ROOT:~0,-1%"
+set "HIP_ROOT=%HIP_ROOT:\=/%"
 
-echo [build] AMD/ROCm build for architectures: %ALIEN_HIP_ARCH%
-cmake --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES="%ALIEN_HIP_ARCH%" %HIP_PREFIX_ARG% || exit /b 1
+rem CMake compares the compiler id across C, CXX and HIP and refuses a mixture
+rem (Windows-Clang.cmake, __verify_same_language_values), so the whole build has to
+rem use the clang-cl of the HIP SDK -- pointing only the HIP language at it fails.
+set "HIP_CLANG_CL=%HIP_ROOT%/bin/clang-cl.exe"
+
+rem The CMake bundled with Visual Studio (3.31) derives MSVC_VERSION only from the
+rem C / CXX / CUDA simulate version and never from CMAKE_HIP_SIMULATE_VERSION, so
+rem its HIP-only ABI check aborts with "MSVC compiler version not detected
+rem properly". A standalone CMake 4.x covers the HIP case; prefer it here.
+set "CMAKE_EXE=cmake"
+if exist "%ProgramFiles%\CMake\bin\cmake.exe" set "CMAKE_EXE=%ProgramFiles%\CMake\bin\cmake.exe"
+rem Route the version through a file: a quoted program path inside for /f gets
+rem mangled by the cmd /c that runs the nested command.
+set "CMAKE_VER="
+"%CMAKE_EXE%" --version > "%TEMP%\alien-cmake-version.txt" 2>nul
+for /f "tokens=3" %%v in ('findstr /r /c:"^cmake version" "%TEMP%\alien-cmake-version.txt"') do set "CMAKE_VER=%%v"
+del "%TEMP%\alien-cmake-version.txt" >nul 2>nul
+for /f "tokens=1 delims=." %%v in ("%CMAKE_VER%") do set "CMAKE_MAJOR=%%v"
+if not defined CMAKE_MAJOR set "CMAKE_MAJOR=0"
+if %CMAKE_MAJOR% LSS 4 (
+    echo [build] The AMD build needs CMake 4.0 or newer, found "%CMAKE_VER%".
+    echo [build] Install it from https://cmake.org/download/ ^(the CMake shipped with
+    echo [build] Visual Studio does not detect MSVC_VERSION for the HIP language^).
+    exit /b 1
+)
+
+echo [build] AMD/ROCm build for architectures: %ALIEN_HIP_ARCH% ^(CMake %CMAKE_VER%^)
+"%CMAKE_EXE%" --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES="%ALIEN_HIP_ARCH%" "-DCMAKE_PREFIX_PATH=%HIP_ROOT%" "-DCMAKE_C_COMPILER=%HIP_CLANG_CL%" "-DCMAKE_CXX_COMPILER=%HIP_CLANG_CL%" "-DCMAKE_HIP_COMPILER=%HIP_CLANG_CL%" || exit /b 1
 if defined JOBS (
     echo [build] Limiting build to %JOBS% parallel jobs.
-    cmake --build --preset %BUILD_PRESET% -j %JOBS% || exit /b 1
+    "%CMAKE_EXE%" --build --preset %BUILD_PRESET% -j %JOBS% || exit /b 1
 ) else (
-    cmake --build --preset %BUILD_PRESET% || exit /b 1
+    "%CMAKE_EXE%" --build --preset %BUILD_PRESET% || exit /b 1
 )
 
 echo [build] Done. Executables are under build-ninja-hip\%CONFIG%.
