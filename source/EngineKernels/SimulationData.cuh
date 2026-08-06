@@ -35,9 +35,6 @@ struct SimulationData
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
 
-    // Diagnostics: genomes cloned and mutated in the current timestep, worked on by the separate gene graph kernels
-    UnmanagedArray<Genome*> mutatedGenomes;
-
     // Number generators
     CudaNumberGenerator primaryNumberGen;
     CudaNumberGenerator

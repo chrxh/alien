@@ -12,18 +12,6 @@
 
 #include "GarbageCollectorKernelsService.cuh"
 
-namespace
-{
-    // DIAGNOSTIC: the gene graph passes were extracted from cudaNextTimestep_constructor into their own kernels so that the
-    // kernel trace shows which pass does not return.
-    void launchGeneGraphKernels(cudaStream_t stream, int numBlocks, SimulationData const& data)
-    {
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode, stream, numBlocks, NEURAL_NET_INPUTS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot, stream, numBlocks, NEURAL_NET_INPUTS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot, stream, numBlocks, NEURAL_NET_INPUTS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_geneGraph_limitGenesWithSeparation, stream, numBlocks, NEURAL_NET_INPUTS, data);
-    }
-}
 
 void SimulationKernelsService::init()
 {
@@ -127,7 +115,6 @@ void SimulationKernelsService::launchTimestepKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
         // The constructor mutates the host genome before cloning; the mutation needs NEURAL_NET_INPUTS threads per block.
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, false);
-        launchGeneGraphKernels(_stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_constructor_prepareExternalEnergyInflow, _stream, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, data);
@@ -277,7 +264,6 @@ void SimulationKernelsService::launchPreviewKernels(
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, true);
-            launchGeneGraphKernels(_stream, numBlocks, data);
         }
 
         if (considerInnerFriction) {
@@ -323,7 +309,6 @@ void SimulationKernelsService::launchPreviewKernels(
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, true);
-            launchGeneGraphKernels(_stream, numBlocks, data);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
         }
