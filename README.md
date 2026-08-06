@@ -118,6 +118,8 @@ cmake --build . --config Release -j8
 ```
 The default build targets NVIDIA GPUs via CUDA and is unchanged; `-DUSE_HIP=ON` selects the AMD path. The `-DCMAKE_PREFIX_PATH=/opt/rocm` entry lets `find_package(hip)` locate the ROCm install when CMake uses the vcpkg toolchain; adjust the path if ROCm is installed elsewhere or already on `PATH`.
 
+Windows shortcut: `build-windows-ninja.bat HIP`, building into `build-ninja-hip/Release/` covering RDNA2, RDNA3 and RDNA4 architectures.
+
 # ⌨️ Command-line interface
 
 This repository also contains a CLI for ALIEN. It can be used to run simulations without using a GUI. This is useful for performance measurements as well as for automatic execution and evaluation of simulations for different parameters.
