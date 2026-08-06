@@ -31,7 +31,6 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
-    data.mutatedGenomes.setMemory(data.processMemory.getTypedSubArray<Genome*>(maxCellTypeOperations), maxCellTypeOperations);
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
     for (int i = 0; i < MAX_COLORS; ++i) {
         data.numConstructorsNeedingEnergyByColor[i] = 0;
@@ -166,40 +165,6 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
 __global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationData data)
 {
     ConstructorProcessor::provideExternalEnergy(data);
-}
-
-// DIAGNOSTIC: each gene graph pass gets its own kernel so that a kernel which does not return identifies the pass that
-// hangs. One block works on one genome at a time, exactly as inside the constructor kernel before.
-__global__ void cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode(SimulationData data)
-{
-    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, data.mutatedGenomes.at(i));
-    }
-}
-
-__global__ void cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot(SimulationData data)
-{
-    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        GeneGraphProcessor::removeCyclesNotThroughRoot(data, data.mutatedGenomes.at(i));
-    }
-}
-
-__global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(SimulationData data)
-{
-    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        GeneGraphProcessor::removeUnreachableGenesFromRoot(data, data.mutatedGenomes.at(i));
-    }
-}
-
-__global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationData data)
-{
-    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        GeneGraphProcessor::limitGenesWithSeparation(data, data.mutatedGenomes.at(i));
-    }
 }
 
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
