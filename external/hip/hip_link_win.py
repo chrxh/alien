@@ -14,6 +14,7 @@ understood by clang++ in --hip-link (device-link) mode. This script:
 Usage (set as CMAKE_HIP_LINK_EXECUTABLE):
   python3 <this_script> <clang_exe> [args...]
 """
+import os
 import subprocess
 import sys
 
@@ -55,11 +56,51 @@ def transform(args):
     return out
 
 
+def tokenize_response_file(text):
+    """Split response file content on unquoted whitespace, keeping the quotes so
+    the tokens can be written back verbatim."""
+    tokens = []
+    current = ''
+    in_quotes = False
+    for char in text:
+        if char == '"':
+            in_quotes = not in_quotes
+            current += char
+        elif char in ' \t\r\n' and not in_quotes:
+            if current:
+                tokens.append(current)
+                current = ''
+        else:
+            current += char
+    if current:
+        tokens.append(current)
+    return tokens
+
+
+def rewrite_response_files(args):
+    """CMake moves long link lines into @response files, whose contents clang
+    expands on its own -- the transformations above would never see the bare .lib
+    names in there. Rewrite each response file next to the original instead."""
+    out = []
+    for a in args:
+        if a.startswith('@') and os.path.isfile(a[1:]):
+            path = a[1:]
+            with open(path, encoding='utf-8', errors='replace') as f:
+                tokens = tokenize_response_file(f.read())
+            rewritten = path + '.hiplink'
+            with open(rewritten, 'w', encoding='utf-8') as f:
+                f.write(' '.join(transform(tokens)))
+            out.append('@' + rewritten)
+        else:
+            out.append(a)
+    return out
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("Usage: hip_link_win.py <clang_exe> [args...]")
     clang = sys.argv[1]
-    transformed = transform(sys.argv[2:])
+    transformed = rewrite_response_files(transform(sys.argv[2:]))
     sys.exit(subprocess.run([clang] + transformed).returncode)
 
 

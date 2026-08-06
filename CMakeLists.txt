@@ -125,8 +125,11 @@ if(USE_HIP)
       # gets a definition, causing duplicate-symbol errors in the -fgpu-rdc
       # device link. Pass --allow-multiple-definition to the amdgcn linker
       # (-Xoffload-linker) so it keeps the first definition silently.
+      # Long object lists are passed via a response file. The GCC-driver clang
+      # parses those with POSIX quoting, where the backslashes of the Windows
+      # paths are escape characters and vanish; --rsp-quoting=windows keeps them.
       set(CMAKE_HIP_LINK_EXECUTABLE
-        "\"${Python3_EXECUTABLE}\" ${_HIP_LINK_WRAP} ${_CLANG_GCC} --target=x86_64-pc-windows-msvc -fms-compatibility ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
+        "\"${Python3_EXECUTABLE}\" ${_HIP_LINK_WRAP} ${_CLANG_GCC} --rsp-quoting=windows --target=x86_64-pc-windows-msvc -fms-compatibility ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
   else()
     set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -ffast-math")
@@ -142,7 +145,7 @@ if(USE_HIP)
       # add --allow-multiple-definition for the ROCm 7.13 this_cluster() issue.
       set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/external/hip/hip_link_win.py")
       set(CMAKE_HIP_LINK_EXECUTABLE
-        "\"${Python3_EXECUTABLE}\" ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
+        "\"${Python3_EXECUTABLE}\" ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} --rsp-quoting=windows ${_HIP_OFFLOAD_ARCH_FLAGS} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
   endif()
 endif()
@@ -263,6 +266,16 @@ function(alien_link_hip_rdc target)
                 ole32.lib oleaut32.lib
                 uuid.lib winspool.lib
                 comdlg32.lib)
+            # The C runtime is not added either, which surfaces as unresolved
+            # __imp_ symbols for everything from expf to _beginthreadex. These are
+            # the import libraries of the dynamic CRT that /MD selects. A ROCm
+            # library pulls in the static CRT on top of that (LNK4098), so exclude
+            # it -- the whole project is built against the dynamic one.
+            target_link_options(${target} PRIVATE
+                $<IF:$<CONFIG:Debug>,msvcrtd.lib,msvcrt.lib>
+                $<IF:$<CONFIG:Debug>,ucrtd.lib,ucrt.lib>
+                $<IF:$<CONFIG:Debug>,vcruntimed.lib,vcruntime.lib>
+                $<IF:$<CONFIG:Debug>,/NODEFAULTLIB:libcmtd,/NODEFAULTLIB:libcmt>)
         endif()
     endif()
 endfunction()
