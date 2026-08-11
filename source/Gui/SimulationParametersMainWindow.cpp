@@ -292,12 +292,19 @@ void SimulationParametersMainWindow::startFilterTypingIfNeeded()
     }
 
     for (auto const& c : ImGui::GetIO().InputQueueCharacters) {
+        // A leading space must not start the filter typing, it is reserved for the run/pause hotkey
+        if (c == ' ' && _pendingFilterChars.empty()) {
+            continue;
+        }
         if (c >= 32 && c != 127) {
             _pendingFilterChars.push_back(c);
         }
     }
     if (!_pendingFilterChars.empty()) {
         ImGui::SetKeyboardFocusHere();
+
+        // The filter field becomes active only on the next frame, so global hotkeys (e.g. run/pause on space) need to be suppressed there explicitly
+        ImGui::SetNextFrameWantCaptureKeyboard(true);
     }
 }
 
