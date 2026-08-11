@@ -23,6 +23,7 @@ public:
 
 private:
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
+    __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
 
     static auto constexpr MaxFusionEnergy = 5.0f;
     static auto constexpr MinEnergyPerSourceParticle = 10.0f;
@@ -302,7 +303,14 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
 
 __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(SimulationData& data)
 {
-    if (!cudaSimulationParameters.externalEnergyControlToggle.value || cudaSimulationParameters.externalEnergyInflowForSources.value < NEAR_ZERO) {
+    if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
+        return;
+    }
+    auto totalInflow = 0.0f;
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        totalInflow += cudaSimulationParameters.externalEnergyInflowForSources.value[color];
+    }
+    if (totalInflow < NEAR_ZERO) {
         return;
     }
 
@@ -313,34 +321,43 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
     auto const partition = calcSystemThreadPartition(numActiveSources);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(index);
-        auto energy =
-            cudaSimulationParameters.externalEnergyInflowForSources.value * cudaSimulationParameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
-        if (energy < NEAR_ZERO) {
-            continue;
-        }
+        auto relativeStrength = cudaSimulationParameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
 
-        if (*data.externalEnergy != Infinity<float>::value) {
-            auto availableEnergy = atomicAdd(data.externalEnergy, -toDouble(energy));
-            if (availableEnergy < toDouble(energy)) {
-                auto grantedEnergy = max(0.0, availableEnergy);
-                atomicAdd(data.externalEnergy, toDouble(energy) - grantedEnergy);  // Return the energy that is not available
-                energy = toFloat(grantedEnergy);
-                if (energy < NEAR_ZERO) {
-                    continue;
-                }
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            auto requestedEnergy = cudaSimulationParameters.externalEnergyInflowForSources.value[color] * relativeStrength;
+            if (requestedEnergy < NEAR_ZERO) {
+                continue;
+            }
+            auto energy = takeExternalEnergy(data, requestedEnergy);
+            if (energy < NEAR_ZERO) {
+                continue;
+            }
+
+            auto numParticles = max(1, min(MaxNumParticlesPerSource, toInt(energy / MinEnergyPerSourceParticle)));
+            auto particleEnergy = energy / toFloat(numParticles);
+            for (int i = 0; i < numParticles; ++i) {
+                float2 pos{0, 0};
+                float2 vel{0, 0};
+                calcPositionAndVelocityInSource(data, sourceIndex, pos, vel);
+                data.objectMap.correctPosition(pos);
+                factory.createEnergy(particleEnergy, pos, vel, color);
             }
         }
-
-        auto numParticles = max(1, min(MaxNumParticlesPerSource, toInt(energy / MinEnergyPerSourceParticle)));
-        auto particleEnergy = energy / toFloat(numParticles);
-        for (int i = 0; i < numParticles; ++i) {
-            float2 pos{0, 0};
-            float2 vel{0, 0};
-            calcPositionAndVelocityInSource(data, sourceIndex, pos, vel);
-            data.objectMap.correctPosition(pos);
-            factory.createEnergy(particleEnergy, pos, vel, 0);
-        }
     }
+}
+
+__inline__ __device__ float EnergyProcessor::takeExternalEnergy(SimulationData& data, float energy)
+{
+    if (*data.externalEnergy == Infinity<float>::value) {
+        return energy;
+    }
+    auto availableEnergy = atomicAdd(data.externalEnergy, -toDouble(energy));
+    if (availableEnergy >= toDouble(energy)) {
+        return energy;
+    }
+    auto grantedEnergy = max(0.0, availableEnergy);
+    atomicAdd(data.externalEnergy, toDouble(energy) - grantedEnergy);  // Return the energy that is not available
+    return toFloat(grantedEnergy);
 }
 
 __inline__ __device__ void EnergyProcessor::calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel)
