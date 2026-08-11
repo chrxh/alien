@@ -154,7 +154,7 @@ __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(Simulatio
         }
         auto& cell = object->typeData.cell;
         if (cell.constructorAvailable && cell.constructor.energyNeeded) {
-            cell.usableEnergy += data.externalEnergyInflowPerConstructorByColor[object->color];
+            cell.constructor.reservedEnergy += data.externalEnergyInflowPerConstructorByColor[object->color];
         }
     }
 }
@@ -162,6 +162,10 @@ __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(Simulatio
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
     auto& constructor = object->typeData.cell.constructor;
+
+    // The block can still be split from the previous constructor cell: the construction itself runs on thread 0 while the other threads already
+    // continue the loop. They must arrive here before readyToConstruct is overwritten, otherwise they read the value of the previous cell.
+    __syncthreads();
 
     __shared__ bool readyToConstruct;
     if (threadIdx.x == 0) {

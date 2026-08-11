@@ -3503,8 +3503,10 @@ TEST_F(ConstructorTests, externalEnergyInflow_distributedProportionally)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData._creatures.size());
-    EXPECT_TRUE(approxCompare(normalEnergy + 25.0f, actualData.getObjectRef(0).getCellRef()._usableEnergy));
-    EXPECT_TRUE(approxCompare(normalEnergy + 25.0f, actualData.getObjectRef(1).getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(normalEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(normalEnergy, actualData.getObjectRef(1).getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(25.0f, getReservedEnergy(actualData.getObjectRef(0).getCellRef())));
+    EXPECT_TRUE(approxCompare(25.0f, getReservedEnergy(actualData.getObjectRef(1).getCellRef())));
 }
 
 TEST_F(ConstructorTests, finishedConstructorDoesNotRequestExternalEnergy)
@@ -3530,4 +3532,5 @@ TEST_F(ConstructorTests, finishedConstructorDoesNotRequestExternalEnergy)
     // A finished constructor has nothing left to build and must not pull in external energy
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(normalEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualData.getObjectRef(0).getCellRef())));
 }
