@@ -76,20 +76,20 @@ namespace
 
 __global__ void cudaApplyForceFields(SimulationData data)
 {
-    float2 accelerations[MAX_LAYERS];
-    bool enabled[MAX_LAYERS];
+    auto const timestep = *data.timestep;
 
+    // The per-layer accelerations are blended in layer order, so they are accumulated on the fly. Keeping
+    // them in a MAX_LAYERS array would put them into local memory, since the index is not a compile-time constant.
     auto calcResultingAcceleration = [&](float2 const& pos, float const& mass) {
-        auto timestep = *data.timestep;
+        float2 result{0, 0};
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-            enabled[i] = cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled;
-            if (enabled[i]) {
-                accelerations[i] = calcAcceleration(data.objectMap, pos, mass, i, timestep);
-            } else {
-                accelerations[i] = {0, 0};
+            if (!cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
+                continue;
             }
+            auto acceleration = calcAcceleration(data.objectMap, pos, mass, i, timestep);
+            result = ParameterCalculator::blendLayerValue(result, acceleration, data, pos, i);
         }
-        return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, enabled, data, pos);
+        return result;
     };
     {
         auto& objects = data.entities.objects;
