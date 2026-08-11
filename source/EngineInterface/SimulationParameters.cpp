@@ -741,7 +741,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description(
                             "Here one can specify the fraction of energy that constructor cells must provide by themselves before constructing with external "
                             "energy inflow.\n\nFor example, a value of 0.6 means that a constructor cell needs energy amounting to at least 60% of the "
-                            "energy required to build the new cell by itself. Otherwise, external energy inflow is requested."),
+                            "energy required to build the new cell by itself. Otherwise, no external energy inflow is requested."),
                     ParameterSpec()
                         .name("Inflow only for first offspring")
                         .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))
