@@ -19,9 +19,14 @@ public:
 
     __inline__ __device__ static void radiate(SimulationData& data, Object* cell, float energy);
     __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
+    __inline__ __device__ static void provideExternalEnergyForSources(SimulationData& data);
 
 private:
+    __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
+
     static auto constexpr MaxFusionEnergy = 5.0f;
+    static auto constexpr MinEnergyPerSourceParticle = 10.0f;
+    static auto constexpr MaxNumParticlesPerSource = 1000;
 };
 
 /************************************************************************/
@@ -268,74 +273,7 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
                 }
             }
             if (matchSource) {
-
-                pos.x = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].x;
-                pos.y = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].y;
-
-                if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Circular) {
-                    auto radius = max(1.0f, cudaSimulationParameters.sourceCircularRadius.sourceValues[sourceIndex]);
-                    float2 delta{0, 0};
-                    for (int i = 0; i < 10; ++i) {
-                        delta.x = data.primaryNumberGen.random() * radius * 2 - radius;
-                        delta.y = data.primaryNumberGen.random() * radius * 2 - radius;
-                        if (Math::length(delta) <= radius) {
-                            break;
-                        }
-                    }
-                    pos += delta;
-                    if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
-                        vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
-                            * data.primaryNumberGen.random(0.5f, 1.0f);
-                    } else {
-                        vel = Math::getNormalized(delta) * data.primaryNumberGen.random(0.5f, 1.0f);
-                    }
-                }
-                if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Rectangular) {
-                    auto const& rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[sourceIndex];
-                    float2 delta;
-                    delta.x = data.primaryNumberGen.random() * rect.x - rect.x / 2;
-                    delta.y = data.primaryNumberGen.random() * rect.y - rect.y / 2;
-                    pos += delta;
-                    if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
-                        vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
-                            * data.primaryNumberGen.random(0.5f, 1.0f);
-                    } else {
-                        auto roundSize = min(rect.x, rect.y) / 2;
-                        float2 corner1{-rect.x / 2, -rect.y / 2};
-                        float2 corner2{rect.x / 2, -rect.y / 2};
-                        float2 corner3{-rect.x / 2, rect.y / 2};
-                        float2 corner4{rect.x / 2, rect.y / 2};
-                        if (Math::lengthMax(corner1 - delta) <= roundSize) {
-                            vel = Math::getNormalized(delta - (corner1 + float2{roundSize, roundSize}));
-                        } else if (Math::lengthMax(corner2 - delta) <= roundSize) {
-                            vel = Math::getNormalized(delta - (corner2 + float2{-roundSize, roundSize}));
-                        } else if (Math::lengthMax(corner3 - delta) <= roundSize) {
-                            vel = Math::getNormalized(delta - (corner3 + float2{roundSize, -roundSize}));
-                        } else if (Math::lengthMax(corner4 - delta) <= roundSize) {
-                            vel = Math::getNormalized(delta - (corner4 + float2{-roundSize, -roundSize}));
-                        } else {
-                            vel.x = 0;
-                            vel.y = 0;
-                            auto dx1 = rect.x / 2 + delta.x;
-                            auto dx2 = rect.x / 2 - delta.x;
-                            auto dy1 = rect.y / 2 + delta.y;
-                            auto dy2 = rect.y / 2 - delta.y;
-                            if (dx1 <= dy1 && dx1 <= dy2 && delta.x <= 0) {
-                                vel.x = -1;
-                            }
-                            if (dy1 <= dx1 && dy1 <= dx2 && delta.y <= 0) {
-                                vel.y = -1;
-                            }
-                            if (dx2 <= dy1 && dx2 <= dy2 && delta.x > 0) {
-                                vel.x = 1;
-                            }
-                            if (dy2 <= dx1 && dy2 <= dx2 && delta.y > 0) {
-                                vel.y = 1;
-                            }
-                        }
-                        vel = vel * data.primaryNumberGen.random(0.5f, 1.0f);
-                    }
-                }
+                calcPositionAndVelocityInSource(data, sourceIndex, pos, vel);
             }
         }
     }
@@ -359,5 +297,119 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
         factory.init(&data);
         data.objectMap.correctPosition(pos);
         factory.createEnergy(particleEnergy, pos, vel, color);
+    }
+}
+
+__inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(SimulationData& data)
+{
+    if (!cudaSimulationParameters.externalEnergyControlToggle.value || cudaSimulationParameters.externalEnergyInflowForSources.value < NEAR_ZERO) {
+        return;
+    }
+
+    EntityFactory factory;
+    factory.init(&data);
+
+    auto numActiveSources = data.preprocessedSimulationData.activeRadiationSources.getNumActiveSources();
+    auto const partition = calcSystemThreadPartition(numActiveSources);
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(index);
+        auto energy =
+            cudaSimulationParameters.externalEnergyInflowForSources.value * cudaSimulationParameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
+        if (energy < NEAR_ZERO) {
+            continue;
+        }
+
+        if (*data.externalEnergy != Infinity<float>::value) {
+            auto availableEnergy = atomicAdd(data.externalEnergy, -toDouble(energy));
+            if (availableEnergy < toDouble(energy)) {
+                auto grantedEnergy = max(0.0, availableEnergy);
+                atomicAdd(data.externalEnergy, toDouble(energy) - grantedEnergy);  // Return the energy that is not available
+                energy = toFloat(grantedEnergy);
+                if (energy < NEAR_ZERO) {
+                    continue;
+                }
+            }
+        }
+
+        auto numParticles = max(1, min(MaxNumParticlesPerSource, toInt(energy / MinEnergyPerSourceParticle)));
+        auto particleEnergy = energy / toFloat(numParticles);
+        for (int i = 0; i < numParticles; ++i) {
+            float2 pos{0, 0};
+            float2 vel{0, 0};
+            calcPositionAndVelocityInSource(data, sourceIndex, pos, vel);
+            data.objectMap.correctPosition(pos);
+            factory.createEnergy(particleEnergy, pos, vel, 0);
+        }
+    }
+}
+
+__inline__ __device__ void EnergyProcessor::calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel)
+{
+    pos.x = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].x;
+    pos.y = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].y;
+
+    if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Circular) {
+        auto radius = max(1.0f, cudaSimulationParameters.sourceCircularRadius.sourceValues[sourceIndex]);
+        float2 delta{0, 0};
+        for (int i = 0; i < 10; ++i) {
+            delta.x = data.primaryNumberGen.random() * radius * 2 - radius;
+            delta.y = data.primaryNumberGen.random() * radius * 2 - radius;
+            if (Math::length(delta) <= radius) {
+                break;
+            }
+        }
+        pos += delta;
+        if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
+            vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
+                * data.primaryNumberGen.random(0.5f, 1.0f);
+        } else {
+            vel = Math::getNormalized(delta) * data.primaryNumberGen.random(0.5f, 1.0f);
+        }
+    }
+    if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Rectangular) {
+        auto const& rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[sourceIndex];
+        float2 delta;
+        delta.x = data.primaryNumberGen.random() * rect.x - rect.x / 2;
+        delta.y = data.primaryNumberGen.random() * rect.y - rect.y / 2;
+        pos += delta;
+        if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
+            vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
+                * data.primaryNumberGen.random(0.5f, 1.0f);
+        } else {
+            auto roundSize = min(rect.x, rect.y) / 2;
+            float2 corner1{-rect.x / 2, -rect.y / 2};
+            float2 corner2{rect.x / 2, -rect.y / 2};
+            float2 corner3{-rect.x / 2, rect.y / 2};
+            float2 corner4{rect.x / 2, rect.y / 2};
+            if (Math::lengthMax(corner1 - delta) <= roundSize) {
+                vel = Math::getNormalized(delta - (corner1 + float2{roundSize, roundSize}));
+            } else if (Math::lengthMax(corner2 - delta) <= roundSize) {
+                vel = Math::getNormalized(delta - (corner2 + float2{-roundSize, roundSize}));
+            } else if (Math::lengthMax(corner3 - delta) <= roundSize) {
+                vel = Math::getNormalized(delta - (corner3 + float2{roundSize, -roundSize}));
+            } else if (Math::lengthMax(corner4 - delta) <= roundSize) {
+                vel = Math::getNormalized(delta - (corner4 + float2{-roundSize, -roundSize}));
+            } else {
+                vel.x = 0;
+                vel.y = 0;
+                auto dx1 = rect.x / 2 + delta.x;
+                auto dx2 = rect.x / 2 - delta.x;
+                auto dy1 = rect.y / 2 + delta.y;
+                auto dy2 = rect.y / 2 - delta.y;
+                if (dx1 <= dy1 && dx1 <= dy2 && delta.x <= 0) {
+                    vel.x = -1;
+                }
+                if (dy1 <= dx1 && dy1 <= dx2 && delta.y <= 0) {
+                    vel.y = -1;
+                }
+                if (dx2 <= dy1 && dx2 <= dy2 && delta.x > 0) {
+                    vel.x = 1;
+                }
+                if (dy2 <= dx1 && dy2 <= dx2 && delta.y > 0) {
+                    vel.y = 1;
+                }
+            }
+            vel = vel * data.primaryNumberGen.random(0.5f, 1.0f);
+        }
     }
 }
