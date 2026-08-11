@@ -750,10 +750,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Inflow for sources")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::externalEnergyInflowForSources).min(0.0f).max(1000000.0f).format("%.1f").logarithmic(true))
+                            FloatSpec().member(&SimulationParameters::externalEnergyInflowForSources).min(0.0f).max(10000.0f).format("%.1f").logarithmic(true))
                         .description("The absolute amount of energy that is transferred from the external energy pool to the radiation sources in each time "
-                                     "step. Each radiation source receives this amount multiplied by its relative strength and emits it as energy "
-                                     "particles. If the external energy pool does not contain enough energy, only the remaining energy is distributed."),
+                                     "step. Each color entry defines the energy that is emitted in the corresponding color.\n\nEach radiation source receives "
+                                     "these amounts multiplied by its relative strength and emits them as energy particles. If the external energy pool does "
+                                     "not contain enough energy, only the remaining energy is distributed."),
                     ParameterSpec()
                         .name("Backflow")
                         .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
