@@ -76,8 +76,6 @@ int main(int argc, char** argv)
         }
 
         // Run simulation
-        auto startTimepoint = std::chrono::steady_clock::now();
-
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
         simulationFacade->newSimulation(simData._timestep, simData._worldSize, simData._simulationParameters);
         simulationFacade->setSimulationData(simData._mainData);
@@ -86,6 +84,8 @@ int main(int argc, char** argv)
         std::cout << "Device: " << simulationFacade->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
+        // Measure the simulation loop only: loading and uploading the data would otherwise distort the TPS
+        auto startTimepoint = std::chrono::steady_clock::now();
         simulationFacade->calcTimesteps(timesteps);
 
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();

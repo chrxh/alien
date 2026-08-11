@@ -20,7 +20,7 @@ private:
         RelocateLastMatch
     };
     __inline__ __device__ static uint64_t
-    getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float absAngle, float distance, ScanType scanType);
+    getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float2 const& delta, float distance, ScanType scanType);
 
     __inline__ __device__ static bool
     isRayBlockedByCreatureConnections(Object** nearSameCreatureCells, int numNearSameCreatureCells, float2 const& rayOrigin, float angle);
@@ -126,13 +126,13 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
             auto delta = float2{dx, dy};
             auto distance = Math::length(delta);
-            auto angle = Math::angleOfVector(delta);
             float2 scanPos = object->pos + delta;
             data.objectMap.correctPosition(scanPos);
 
             // Check all cells at this position (including overlapping cells)
-            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
+            uint64_t matchInfo = getMatchInfo(data, object, scanPos, delta, distance, ScanType::LocateMatch);
             if (matchInfo != 0xffffffffffffffff) {
+                auto angle = Math::angleOfVector(delta);
                 if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
                     && !isRayBlockedBySolid(data, object->pos, angle, distance, object->typeData.cell.cellTypeData.sensor.mode)) {
                     alienAtomicMin64(&lookupResult, matchInfo);
@@ -160,7 +160,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     data.objectMap.correctPosition(scanPos);
 
                     if (distance > startRadius) {
-                        uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
+                        uint64_t matchInfo = getMatchInfo(data, object, scanPos, delta, distance, ScanType::LocateMatch);
                         if (matchInfo != 0xffffffffffffffff) {
                             if (!isRayBlockedBySolid(data, object->pos, angle, distance, object->typeData.cell.cellTypeData.sensor.mode)) {
                                 alienAtomicMin64(&lookupResult, matchInfo);
@@ -232,9 +232,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
             auto delta = float2{toFloat(deltaX), toFloat(deltaY)};
             auto scanPos = centerScanPos + delta;
-            auto distance = Math::length(delta);
-            auto angle = Math::angleOfVector(delta);
-            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::RelocateLastMatch);
+            uint64_t matchInfo = getMatchInfo(data, object, scanPos, delta, 0.0f, ScanType::RelocateLastMatch);
             if (matchInfo != 0xffffffffffffffff) {
                 alienAtomicMin64(&lookupResult, matchInfo);
                 break;
@@ -297,14 +295,17 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 }
 
 __inline__ __device__ uint64_t
-SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
+SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float2 const& delta, float distance, ScanType scanType)
 {
+    auto matchDelta = delta;
     if (scanType == ScanType::RelocateLastMatch) {
-        auto delta = data.objectMap.getCorrectedDirection(scanPos - object->pos);
-        distance = Math::length(delta);
-        absAngle = Math::angleOfVector(delta);
+        matchDelta = data.objectMap.getCorrectedDirection(scanPos - object->pos);
+        distance = Math::length(matchDelta);
     }
-    absAngle = Math::getNormalizedAngle(absAngle, -180.0f);
+
+    // The angle is derived from the direction only where a match is actually packed: angleOfVector uses asinf,
+    // which is expensive compared to the position test that discards the vast majority of the scanned positions.
+    auto absAngle = [&] { return Math::getNormalizedAngle(Math::angleOfVector(matchDelta), -180.0f); };
     auto const& cell = &object->typeData.cell;
 
     auto const& mode = cell->cellTypeData.sensor.mode;
@@ -314,18 +315,18 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
         auto const& minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
         auto density = densityMap.getEnergyParticleDensity(scanPos);
         if (density >= minDensity) {
-            return pack(distance, absAngle, density);
+            return pack(distance, absAngle(), density);
         }
     } else if (mode == SensorMode_DetectSolid) {
         if (densityMap.getSolidDensity(scanPos) > 0) {
-            return pack(distance, absAngle, 1.0f);
+            return pack(distance, absAngle(), 1.0f);
         }
     } else if (mode == SensorMode_DetectFreeCell) {
         auto const& minDensity = cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
         auto const& restrictToColors = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
         auto density = densityMap.getFreeCellDensity(scanPos, restrictToColors);
         if (density >= minDensity) {
-            return pack(distance, absAngle, density);
+            return pack(distance, absAngle(), density);
         }
     } else if (mode == SensorMode_DetectCreature) {
         if (scanType == ScanType::LocateMatch) {
@@ -368,7 +369,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                     if (matches) {
                         uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xFFFF);
                         float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
-                        return pack(distance, absAngle, density, creatureIdPart);
+                        return pack(distance, absAngle(), density, creatureIdPart);
                     }
                 }
                 otherIndex = otherRecord.nextObjectIndex;
@@ -385,7 +386,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                 if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart) {
                     uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
                     float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
-                    return pack(distance, absAngle, density, creatureIdPart);
+                    return pack(distance, absAngle(), density, creatureIdPart);
                 }
                 otherIndex = otherRecord.nextObjectIndex;
             }
