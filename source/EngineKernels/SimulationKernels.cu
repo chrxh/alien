@@ -107,6 +107,7 @@ __global__ void cudaNextTimestep_signal_setSignal(SimulationData data)
 __global__ void cudaNextTimestep_energyFlow(SimulationData data)
 {
     CellProcessor::performEnergyFlow(data);
+    EnergyProcessor::provideExternalEnergyForSources(data);
 }
 
 __global__ void cudaNextTimestep_cellState_substep1(SimulationData data)

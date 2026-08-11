@@ -192,6 +192,7 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {ColorVector<float>::uniform(1.0f)};
     BaseParameter<ColorVector<float>> externalEnergyInflowThresholdFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
+    BaseParameter<float> externalEnergyInflowForSources = {0.0f};
     BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
 

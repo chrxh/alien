@@ -748,6 +748,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("If activated, external energy can only be transferred to constructor cells that have not yet produced any offspring. "
                                      "This option can be used to foster the evolution of additional body parts."),
                     ParameterSpec()
+                        .name("Inflow for sources")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::externalEnergyInflowForSources).min(0.0f).max(1000000.0f).format("%.1f").logarithmic(true))
+                        .description("The absolute amount of energy that is transferred from the external energy pool to the radiation sources in each time "
+                                     "step. Each radiation source receives this amount multiplied by its relative strength and emits it as energy "
+                                     "particles. If the external energy pool does not contain enough energy, only the remaining energy is distributed."),
+                    ParameterSpec()
                         .name("Backflow")
                         .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
                         .description("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
