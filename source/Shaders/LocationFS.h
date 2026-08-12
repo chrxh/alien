@@ -2,6 +2,8 @@
 
 #include <string_view>
 
+#include <EngineInterface/PerlinNoiseSource.h>
+
 namespace Shaders
 {
     std::string_view const LocationFS = R"(
@@ -15,12 +17,58 @@ in float gDimension1;
 in float gDimension2;
 in float gFadeoutRadius;
 in float gOpacity;
+flat in int gFieldType;
+in float gFieldParam1;
+in float gFieldParam2;
 in vec2 gQuadCoord;
 
 uniform float zoom;
 uniform vec2 worldSize;
 uniform float radius;
 uniform bool borderlessRendering;
+
+const int ForceField_None = 0;
+const int ForceField_Radial = 1;
+const int ForceField_Central = 2;
+const int ForceField_Linear = 3;
+const int ForceField_PerlinNoise = 4;
+
+const float DegToRad = 0.0174532925;
+const float CentralForceFieldOffset = 50.0;
+const float MaxDarkening = 0.4;
+)" PERLIN_NOISE_GLSL R"(
+
+// Returns the height of the Perlin noise height map in [0, 1]
+float perlinNoiseHeight(vec2 relPos)
+{
+    vec2 scaledPos = relPos / max(gFieldParam1, 0.1);
+    int timeIndex = int(floor(gFieldParam2));
+    float timeFraction = gFieldParam2 - float(timeIndex);
+    float height0 = perlinNoise(scaledPos.x, scaledPos.y, perlinHash(timeIndex));
+    float height1 = perlinNoise(scaledPos.x, scaledPos.y, perlinHash(timeIndex + 1));
+    return mix(height0, height1, timeFraction) + 0.5;
+}
+
+// Returns the height map of the force field in [0, 1], normalized over the extent of the layer
+float fieldHeight(vec2 relPos, float outerRadius)
+{
+    if (gFieldType == ForceField_Radial) {
+        float height = sqrt(length(relPos) / outerRadius);
+        return gFieldParam1 > 0.0 ? height : 1.0 - height;
+    }
+    if (gFieldType == ForceField_Central) {
+        float distSquared = dot(relPos, relPos);
+        float outerDistSquared = outerRadius * outerRadius;
+        return log(1.0 + distSquared / CentralForceFieldOffset) / log(1.0 + outerDistSquared / CentralForceFieldOffset);
+    }
+    if (gFieldType == ForceField_Linear) {
+        // The height map is the stream function of the field, hence its contour lines follow the flow
+        float angle = gFieldParam1 * DegToRad;
+        vec2 gradientDirection = vec2(-cos(angle), -sin(angle));
+        return 0.5 + dot(relPos, gradientDirection) / (2.0 * outerRadius);
+    }
+    return perlinNoiseHeight(relPos);
+}
 
 void main()
 {
@@ -108,8 +156,15 @@ void main()
     
     // Apply layer opacity to the calculated alpha
     alpha *= gOpacity;
-    
-    FragColor = vec4(gColor, alpha);
+
+    // Darken the color where the height map of the force field is high
+    vec3 color = gColor;
+    if (gFieldType != ForceField_None) {
+        float outerRadius = (gShapeType == 0) ? gDimension1 + gFadeoutRadius : length(vec2(gDimension1, gDimension2)) * 0.5 + gFadeoutRadius;
+        color *= 1.0 - MaxDarkening * clamp(fieldHeight(pixelOffset, max(outerRadius, 1.0)), 0.0, 1.0);
+    }
+
+    FragColor = vec4(color, alpha);
 }
 )";
 }

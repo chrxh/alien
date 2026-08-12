@@ -45,6 +45,9 @@ struct LocationVertexData
     float dimension2;     // Unused for circular, height for rectangular
     float fadeoutRadius;  // Fadeout radius for the location
     float opacity;        // Opacity/transparency of the location
+    int fieldType;        // Force field whose height map shades the background (ForceField_None = no shading)
+    float fieldParam1;    // Orientation sign (radial), angle (linear), spatial size (Perlin noise)
+    float fieldParam2;    // Time coordinate (Perlin noise)
 };
 
 struct SelectedObjectVertexData

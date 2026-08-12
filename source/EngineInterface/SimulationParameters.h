@@ -37,6 +37,7 @@ struct SimulationParameters
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};
     SourceParameter<bool> sourceShowRadiationCenter = {true};
+    LayerParameter<bool> layerShowForceField = {{true}};
 
     // Location
     LayerParameter<RealVector2D> layerPosition;

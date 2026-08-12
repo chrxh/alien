@@ -13,6 +13,9 @@ layout (location = 3) in float aDimension1;
 layout (location = 4) in float aDimension2;
 layout (location = 5) in float aFadeoutRadius;
 layout (location = 6) in float aOpacity;
+layout (location = 7) in int aFieldType;
+layout (location = 8) in float aFieldParam1;
+layout (location = 9) in float aFieldParam2;
 
 out vec3 vColor;
 out vec2 vWorldPos;
@@ -21,6 +24,9 @@ out float vDimension1;
 out float vDimension2;
 out float vFadeoutRadius;
 out float vOpacity;
+flat out int vFieldType;
+out float vFieldParam1;
+out float vFieldParam2;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -37,7 +43,10 @@ void main()
     vDimension2 = aDimension2;
     vFadeoutRadius = aFadeoutRadius;
     vOpacity = aOpacity;
-    
+    vFieldType = aFieldType;
+    vFieldParam1 = aFieldParam1;
+    vFieldParam2 = aFieldParam2;
+
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos - rectUpperLeft;
     vec2 screenPos = relativePos * zoom;
