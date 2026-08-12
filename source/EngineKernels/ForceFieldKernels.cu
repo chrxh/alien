@@ -1,3 +1,4 @@
+#include <EngineInterface/PerlinNoiseSource.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "ForceFieldKernels.cuh"
@@ -16,59 +17,7 @@ namespace
         }
     }
 
-    __device__ __inline__ float perlinFade(float t)
-    {
-        return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
-    }
-
-    __device__ __inline__ int perlinHash(int x)
-    {
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = (x >> 16) ^ x;
-        return x;
-    }
-
-    __device__ __inline__ float2 perlinGradient(int ix, int iy, int seed)
-    {
-        int h = perlinHash(perlinHash(ix) + iy + seed) & 3;
-        switch (h) {
-        case 0:
-            return {1.0f, 0.0f};
-        case 1:
-            return {-1.0f, 0.0f};
-        case 2:
-            return {0.0f, 1.0f};
-        default:
-            return {0.0f, -1.0f};
-        }
-    }
-
-    __device__ __inline__ float perlinNoise(float x, float y, int seed)
-    {
-        int ix = __float2int_rd(x);
-        int iy = __float2int_rd(y);
-        float fx = x - ix;
-        float fy = y - iy;
-
-        float u = perlinFade(fx);
-        float v = perlinFade(fy);
-
-        float2 g00 = perlinGradient(ix, iy, seed);
-        float2 g10 = perlinGradient(ix + 1, iy, seed);
-        float2 g01 = perlinGradient(ix, iy + 1, seed);
-        float2 g11 = perlinGradient(ix + 1, iy + 1, seed);
-
-        float n00 = g00.x * fx + g00.y * fy;
-        float n10 = g10.x * (fx - 1.0f) + g10.y * fy;
-        float n01 = g01.x * fx + g01.y * (fy - 1.0f);
-        float n11 = g11.x * (fx - 1.0f) + g11.y * (fy - 1.0f);
-
-        float nx0 = n00 + u * (n10 - n00);
-        float nx1 = n01 + u * (n11 - n01);
-
-        return nx0 + v * (nx1 - nx0);
-    }
+    PERLIN_NOISE_SOURCE(__device__ __inline__)
 
     __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, float const& mass, int const& index, uint64_t timestep)
     {

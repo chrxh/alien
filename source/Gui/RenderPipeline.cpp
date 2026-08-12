@@ -126,6 +126,18 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         // Opacity (1 float)
         glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(8 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(6);
+
+        // Force field type (1 int)
+        glVertexAttribIPointer(7, 1, GL_INT, sizeof(LocationVertexData), (void*)(9 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(7);
+
+        // Force field parameter 1 (1 float)
+        glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(9 * sizeof(float) + 2 * sizeof(int)));
+        glEnableVertexAttribArray(8);
+
+        // Force field parameter 2 (1 float)
+        glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(10 * sizeof(float) + 2 * sizeof(int)));
+        glEnableVertexAttribArray(9);
     }
     {
         auto vao = _geometryBuffers->getVaoForSelectedObjects();

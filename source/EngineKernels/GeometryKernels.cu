@@ -364,6 +364,28 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         auto fadeoutRadius = cudaSimulationParameters.layerFadeoutRadius.layerValues[i];
         auto opacity = cudaSimulationParameters.layerOpacity.layerValues[i];
 
+        // Vary the background brightness along the height map of the force field
+        auto const& forceFieldType = cudaSimulationParameters.layerForceFieldType.layerValues[i];
+        ForceField fieldType = ForceField_None;
+        auto fieldParam1 = 0.0f;
+        auto fieldParam2 = 0.0f;
+        if (forceFieldType.enabled && cudaSimulationParameters.layerShowForceField.layerValues[i]) {
+            fieldType = forceFieldType.value;
+            switch (fieldType) {
+            case ForceField_Radial:
+                fieldParam1 = Orientation_Clockwise == cudaSimulationParameters.layerRadialForceFieldOrientation.layerValues[i] ? 1.0f : -1.0f;
+                break;
+            case ForceField_Linear:
+                fieldParam1 = cudaSimulationParameters.layerLinearForceFieldAngle.layerValues[i];
+                break;
+            case ForceField_PerlinNoise: {
+                fieldParam1 = cudaSimulationParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[i];
+                auto temporalSize = cudaSimulationParameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[i];
+                fieldParam2 = toFloat(*data.timestep) / max(temporalSize, 1.0f);
+            } break;
+            }
+        }
+
         // Render at 9 positions for periodic boundaries
         auto worldSizeX = toFloat(worldSize.x);
         auto worldSizeY = toFloat(worldSize.y);
@@ -396,6 +418,9 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                 }
                 locationData[*numLocations].fadeoutRadius = fadeoutRadius;
                 locationData[*numLocations].opacity = opacity;
+                locationData[*numLocations].fieldType = fieldType;
+                locationData[*numLocations].fieldParam1 = fieldParam1;
+                locationData[*numLocations].fieldParam2 = fieldParam2;
             }
             ++(*numLocations);
         }
@@ -443,6 +468,9 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                     locationData[*numLocations].fadeoutRadius = radius / min(rect.x, rect.y) / 5.0f;
                 }
                 locationData[*numLocations].opacity = 1.0f;  // Sources are fully opaque
+                locationData[*numLocations].fieldType = ForceField_None;
+                locationData[*numLocations].fieldParam1 = 0.0f;
+                locationData[*numLocations].fieldParam2 = 0.0f;
             }
             ++(*numLocations);
         }

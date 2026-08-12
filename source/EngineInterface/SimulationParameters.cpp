@@ -113,6 +113,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Show radiation center")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
                         .description("This option draws a red cross in the center of the radiation source."),
+                    ParameterSpec()
+                        .name("Show force field")
+                        .reference(BoolSpec().member(&SimulationParameters::layerShowForceField))
+                        .description("If activated, the background color of the layer is darkened according to the height map of its force field. The "
+                                     "higher the value in the height map, the darker the background."),
                 }),
             ParameterGroupSpec()
                 .name("Location")

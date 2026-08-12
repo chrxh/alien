@@ -39,6 +39,7 @@ add_library(EngineInterface
     ParametersFilter.h
     ParametersValidationService.cpp
     ParametersValidationService.h
+    PerlinNoiseSource.h
     PreviewDesc.cpp
     PreviewDesc.h
     PreviewDescConverterService.cpp
