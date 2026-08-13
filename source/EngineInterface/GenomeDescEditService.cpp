@@ -1,7 +1,6 @@
 #include "GenomeDescEditService.h"
 
 #include <algorithm>
-#include <deque>
 #include <iterator>
 #include <map>
 #include <set>
@@ -109,196 +108,159 @@ void GenomeDescEditService::swapNodes(GeneDesc& gene, int index) const
 
 namespace
 {
-    struct GeneNodeInfo
+    void castrateConstructor(GenomeDesc& genome, ConstructorGenomeDesc& constructor)
     {
-        int geneIndex;
-        int depth;  // Distance from start gene (for BFS ordering)
-        int parentGeneIndex = -1;
-        int parentNodeIndex = -1;
-        int numBranches = 1;
-        int numConcatenations = 1;
-    };
-
-    int multiplyAndClamp(int left, int right)
-    {
-        if (left == std::numeric_limits<int>::max() || right == std::numeric_limits<int>::max()) {
-            return std::numeric_limits<int>::max();
-        }
-        auto result = static_cast<int64_t>(left) * right;
-        return result > std::numeric_limits<int>::max() ? std::numeric_limits<int>::max() : toInt(result);
+        constructor._geneIndex = toInt(genome._genes.size());
     }
 
-    // Collects all genes in the reference tree using breadth-first search
-    std::vector<GeneNodeInfo> collectGenesInBFS(GenomeDesc const& genome, int startGeneIndex)
+    int getEffectiveNumBranches(ConstructorGenomeDesc const& constructor)
     {
-        std::vector<GeneNodeInfo> result;
-        std::set<int> visited;
-        std::deque<GeneNodeInfo> queue;
+        return std::max(1, constructor._separation ? 1 : constructor._numBranches);
+    }
 
-        queue.push_back({startGeneIndex, 0});
-        visited.insert(startGeneIndex);
+    // Trims the nodes of the gene and of all genes referenced by it such that a single instance of the gene results in at most nodeLimit cells
+    // when every constructor builds its referenced gene exactly once. Returns the number of cells resulting from one instance of the gene.
+    int trimNodesOfGene(GenomeDesc& genome, int geneIndex, int nodeLimit, std::set<int>& activeGeneIndices, bool& trimmed)
+    {
+        if (geneIndex >= toInt(genome._genes.size())) {
+            return 0;
+        }
 
-        while (!queue.empty()) {
-            auto current = queue.front();
-            queue.pop_front();
-            result.push_back(current);
+        auto& gene = genome._genes.at(geneIndex);
+        if (toInt(gene._nodes.size()) > nodeLimit) {
+            gene._nodes.resize(nodeLimit);
+            trimmed = true;
 
-            if (current.geneIndex >= genome._genes.size()) {
+            // No budget left for referenced genes
+            for (auto& node : gene._nodes) {
+                if (node._constructor.has_value()) {
+                    castrateConstructor(genome, node._constructor.value());
+                }
+            }
+            return nodeLimit;
+        }
+
+        activeGeneIndices.insert(geneIndex);
+
+        std::vector<int> constructorNodeIndices;
+        for (auto const& [nodeIndex, node] : gene._nodes | boost::adaptors::indexed(0)) {
+            if (node._constructor.has_value()) {
+                constructorNodeIndices.emplace_back(toInt(nodeIndex));
+            }
+        }
+
+        auto numCells = toInt(gene._nodes.size());
+        auto remainingBudget = nodeLimit - numCells;
+        auto numRemainingConstructors = toInt(constructorNodeIndices.size());
+
+        for (auto const& nodeIndex : constructorNodeIndices) {
+            auto budgetShare = remainingBudget / numRemainingConstructors;
+            --numRemainingConstructors;
+
+            auto& constructor = genome._genes.at(geneIndex)._nodes.at(nodeIndex)._constructor.value();
+            auto referencedGeneIndex = constructor._geneIndex;
+            if (referencedGeneIndex >= toInt(genome._genes.size())) {
+                continue;
+            }
+            if (activeGeneIndices.contains(referencedGeneIndex)) {
+                castrateConstructor(genome, constructor);  // Recursive reference => perform castration
+                trimmed = true;
                 continue;
             }
 
-            auto const& gene = genome._genes.at(current.geneIndex);
-            for (auto const& [nodeIndex, node] : gene._nodes | boost::adaptors::indexed(0)) {
-                if (node._constructor.has_value()) {
-                    auto const& constructor = node._constructor.value();
-                    if (constructor._geneIndex < genome._genes.size() && !visited.contains(constructor._geneIndex)) {
-                        auto const effectiveNumBranches = constructor._separation ? 1 : constructor._numBranches;
-                        queue.push_back(
-                            {constructor._geneIndex,
-                             current.depth + 1,
-                             current.geneIndex,
-                             toInt(nodeIndex),
-                             multiplyAndClamp(current.numBranches, effectiveNumBranches),
-                             multiplyAndClamp(current.numConcatenations, constructor._numConcatenations)});
-                        visited.insert(constructor._geneIndex);
-                    }
-                }
+            auto numBranches = getEffectiveNumBranches(constructor);
+            auto budgetPerBranch = budgetShare / numBranches;
+            if (budgetPerBranch == 0) {
+                castrateConstructor(genome, constructor);  // No budget left => perform castration
+                trimmed = true;
+                continue;
+            }
+
+            // The referenced gene is built once per branch, i.e. its cells count multiple times
+            auto numCellsForReference = numBranches * trimNodesOfGene(genome, referencedGeneIndex, budgetPerBranch, activeGeneIndices, trimmed);
+            numCells += numCellsForReference;
+            remainingBudget -= numCellsForReference;
+        }
+
+        activeGeneIndices.erase(geneIndex);
+        return numCells;
+    }
+
+    // Returns the number of cells resulting from one instance of the gene if all constructors are limited to maxNumConcatenations concatenations.
+    // The result is clamped to upperBound + 1.
+    int64_t getNumCells(GenomeDesc const& genome, int geneIndex, int maxNumConcatenations, int64_t upperBound, std::set<int>& activeGeneIndices)
+    {
+        if (geneIndex >= toInt(genome._genes.size()) || activeGeneIndices.contains(geneIndex)) {
+            return 0;
+        }
+        activeGeneIndices.insert(geneIndex);
+
+        auto const& gene = genome._genes.at(geneIndex);
+        int64_t result = toInt(gene._nodes.size());
+        for (auto const& node : gene._nodes) {
+            if (result > upperBound) {
+                break;
+            }
+            if (node._constructor.has_value()) {
+                auto const& constructor = node._constructor.value();
+                auto numConcatenations = std::min(constructor._numConcatenations, maxNumConcatenations);
+                result += static_cast<int64_t>(getEffectiveNumBranches(constructor)) * numConcatenations
+                    * getNumCells(genome, constructor._geneIndex, maxNumConcatenations, upperBound, activeGeneIndices);
             }
         }
 
+        activeGeneIndices.erase(geneIndex);
+        return std::min(result, upperBound + 1);
+    }
+
+    // Returns true if concatenations have been reduced
+    bool applyMaxNumConcatenations(GenomeDesc& genome, int geneIndex, int maxNumConcatenations, std::set<int>& visitedGeneIndices)
+    {
+        if (geneIndex >= toInt(genome._genes.size()) || visitedGeneIndices.contains(geneIndex)) {
+            return false;
+        }
+        visitedGeneIndices.insert(geneIndex);
+
+        auto result = false;
+        for (auto& node : genome._genes.at(geneIndex)._nodes) {
+            if (node._constructor.has_value()) {
+                auto& constructor = node._constructor.value();
+                if (constructor._geneIndex >= toInt(genome._genes.size())) {
+                    continue;
+                }
+                if (constructor._numConcatenations > maxNumConcatenations) {
+                    constructor._numConcatenations = maxNumConcatenations;
+                    result = true;
+                }
+                result |= applyMaxNumConcatenations(genome, constructor._geneIndex, maxNumConcatenations, visitedGeneIndices);
+            }
+        }
         return result;
     }
 
     // Returns true if genome has been trimmed
-    bool trimNodes(GenomeDesc& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    bool trimNodes(GenomeDesc& genome, int startGeneIndex, int nodeLimit)
     {
-        // Collect all genes in breadth-first order
-        auto genesInBFS = collectGenesInBFS(genome, startGeneIndex);
-
-        // Calculate total nodes needed (with bounded concatenations)
-        int64_t totalNodesNeeded = 0;
-        for (auto const& geneInfo : genesInBFS) {
-            if (geneInfo.geneIndex >= genome._genes.size()) {
-                continue;
-            }
-            auto const& gene = genome._genes.at(geneInfo.geneIndex);
-            auto truncatedNumConcatenations = std::min(1000000, geneInfo.numConcatenations);  // Prevent overflow
-            totalNodesNeeded += static_cast<int64_t>(gene._nodes.size()) * geneInfo.numBranches * truncatedNumConcatenations;
-        }
-
-        // If we're under the limit, no trimming needed
-        if (totalNodesNeeded <= nodeLimit) {
-            nodeCounter = static_cast<int>(totalNodesNeeded);
-            return false;
-        }
-
-        // We need to trim - distribute budget proportionally across all genes
         bool trimmed = false;
-        int remainingBudget = nodeLimit;
+        std::set<int> activeGeneIndices;
+        trimNodesOfGene(genome, startGeneIndex, nodeLimit, activeGeneIndices, trimmed);
 
-        // Allocate budget to each gene proportionally, ensuring genes at each depth get adequate representation
-        std::map<int, int> geneNodeBudget;
-
-        // First, ensure every gene gets at least one full copy of its nodes if possible
-        for (auto const& geneInfo : genesInBFS) {
-            if (geneInfo.geneIndex >= genome._genes.size()) {
-                continue;
-            }
-
-            auto& gene = genome._genes.at(geneInfo.geneIndex);
-            if (gene._nodes.empty()) {
-                geneNodeBudget[geneInfo.geneIndex] = 0;
-                continue;
-            }
-
-            int nodesInGene = toInt(gene._nodes.size());
-            if (remainingBudget >= nodesInGene) {
-                geneNodeBudget[geneInfo.geneIndex] = nodesInGene;
-                remainingBudget -= nodesInGene;
+        // Search for the largest number of concatenations that all constructors can use uniformly.
+        // Concatenations multiply along the reference chain, thus a uniform limit distributes the cells evenly over all nesting levels.
+        auto lowerLimit = 1;
+        auto upperLimit = std::max(1, nodeLimit);
+        while (lowerLimit < upperLimit) {
+            auto middleLimit = lowerLimit + (upperLimit - lowerLimit + 1) / 2;
+            activeGeneIndices.clear();
+            if (getNumCells(genome, startGeneIndex, middleLimit, nodeLimit, activeGeneIndices) <= nodeLimit) {
+                lowerLimit = middleLimit;
             } else {
-                geneNodeBudget[geneInfo.geneIndex] = remainingBudget;
-                remainingBudget = 0;
+                upperLimit = middleLimit - 1;
             }
         }
 
-        // Then, distribute remaining budget proportionally
-        if (remainingBudget > 0) {
-            for (auto const& geneInfo : genesInBFS) {
-                if (geneInfo.geneIndex >= genome._genes.size()) {
-                    continue;
-                }
-
-                auto& gene = genome._genes.at(geneInfo.geneIndex);
-                if (gene._nodes.empty()) {
-                    continue;
-                }
-
-                // Calculate additional budget proportionally
-                auto truncatedNumConcatenations = std::min(1000000, geneInfo.numConcatenations);
-                int64_t idealNodes = static_cast<int64_t>(gene._nodes.size()) * geneInfo.numBranches * truncatedNumConcatenations;
-                int64_t additionalBudget = (idealNodes * remainingBudget) / std::max(static_cast<int64_t>(1), totalNodesNeeded);
-
-                geneNodeBudget[geneInfo.geneIndex] += static_cast<int>(additionalBudget);
-            }
-        }
-
-        // Apply the budget to each gene
-        for (auto const& geneInfo : genesInBFS) {
-            if (geneInfo.geneIndex >= genome._genes.size()) {
-                continue;
-            }
-
-            auto& gene = genome._genes.at(geneInfo.geneIndex);
-            int budget = geneNodeBudget[geneInfo.geneIndex];
-
-            if (budget == 0) {
-                // No budget for this gene - remove all nodes
-                gene._nodes.clear();
-                trimmed = true;
-                continue;
-            }
-
-            int nodesPerCopy = toInt(gene._nodes.size());
-            if (nodesPerCopy == 0) {
-                continue;
-            }
-
-            // Calculate how many concatenations we can afford
-            auto nodesPerConcatenation = nodesPerCopy * geneInfo.numBranches;
-            auto affordableConcatenations = budget / nodesPerConcatenation;
-
-            // Guard: parent node may have been trimmed away earlier in this loop
-            auto const parentNodeValid = geneInfo.parentGeneIndex != -1
-                && geneInfo.parentNodeIndex < toInt(genome._genes.at(geneInfo.parentGeneIndex)._nodes.size());
-
-            // If we can't afford even one full copy, trim nodes
-            if (affordableConcatenations == 0) {
-                gene._nodes.resize(budget / geneInfo.numBranches);
-                if (parentNodeValid) {
-                    genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = 1;
-                }
-                trimmed = true;
-
-                // Castrate constructors in trimmed nodes
-                for (auto& node : gene._nodes) {
-                    if (node._constructor.has_value()) {
-                        auto& constructor = node._constructor.value();
-                        constructor._geneIndex = toInt(genome._genes.size());
-                    }
-                }
-            } else if (
-                parentNodeValid
-                && affordableConcatenations < genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations) {
-                // Reduce concatenations to fit budget
-                genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = affordableConcatenations;
-                trimmed = true;
-            }
-
-            auto actualNumConcatenations = geneInfo.parentGeneIndex == -1
-                ? geneInfo.numConcatenations
-                : (parentNodeValid ? genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations : 0);
-            nodeCounter += toInt(gene._nodes.size()) * geneInfo.numBranches * actualNumConcatenations;
-        }
+        std::set<int> visitedGeneIndices;
+        trimmed |= applyMaxNumConcatenations(genome, startGeneIndex, lowerLimit, visitedGeneIndices);
 
         return trimmed;
     }
@@ -331,16 +293,9 @@ std::vector<SubGenomeDesc> GenomeDescEditService::createSubGenomesForPreview(
         }
     }
     if (sumNumResultingCells > PREVIEW_MAX_CELLS) {
-
-        for (int i = 0, numSubGenomes = toInt(result.size()); i < numSubGenomes; ++i) {
-            auto& subGenome = result.at(i).genome;
-            auto startGeneIndex = result.at(i).startIndex;
-
-            int nodeCounter = 0;
-            auto trimmed = trimNodes(subGenome, nodeCounter, startGeneIndex, PREVIEW_MAX_CELLS / numSubGenomes);
-            if (trimmed) {
-                result.at(i).trimmed = true;
-            }
+        auto numSubGenomes = toInt(result.size());
+        for (auto& subGenome : result) {
+            subGenome.trimmed = trimNodes(subGenome.genome, subGenome.startIndex, PREVIEW_MAX_CELLS / numSubGenomes);
         }
     }
 
