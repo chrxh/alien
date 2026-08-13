@@ -60,6 +60,7 @@ void SavePictureDialog::processIntern()
     _width = std::max(1, _width);
     _height = std::max(1, _height);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
     if (AlienGui::Button("OK")) {
