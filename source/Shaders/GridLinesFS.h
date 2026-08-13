@@ -17,6 +17,7 @@ uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
 uniform vec2 rectLowerRight;
 uniform bool gridLines;
+uniform float renderScale;
 
 float modulo(float x, float y) {
     return x - y * floor(x / y);
@@ -47,11 +48,11 @@ void main()
             float distanceY = modulo(worldPos.y + gridDistance / 2.0, gridDistance) - gridDistance / 2.0;
             
             if (abs(distanceX) <= PixelInWorldSize * 8.0) {
-                float viewDistance = max(0.0, 0.1 - abs(distanceX) * zoom / 10.0) * gridRemainder * 0.7;
+                float viewDistance = max(0.0, 0.1 - abs(distanceX) * zoom / (10.0 * renderScale)) * gridRemainder * 0.7;
                 finalColor += vec3(viewDistance, viewDistance, viewDistance);
             }
             if (abs(distanceY) <= PixelInWorldSize * 8.0) {
-                float viewDistance = max(0.0, 0.1 - abs(distanceY) * zoom / 10.0) * gridRemainder * 0.7;
+                float viewDistance = max(0.0, 0.1 - abs(distanceY) * zoom / (10.0 * renderScale)) * gridRemainder * 0.7;
                 finalColor += vec3(viewDistance, viewDistance, viewDistance);
             }
         }
@@ -62,11 +63,11 @@ void main()
             float distanceY = modulo(worldPos.y + gridDistance / 20.0, gridDistance / 10.0) - gridDistance / 20.0;
             
             if (abs(distanceX) <= PixelInWorldSize * 8.0) {
-                float viewDistance = max(0.0, 0.1 - abs(distanceX) * zoom / 10.0) * (1.0 - gridRemainder) * 0.7;
+                float viewDistance = max(0.0, 0.1 - abs(distanceX) * zoom / (10.0 * renderScale)) * (1.0 - gridRemainder) * 0.7;
                 finalColor += vec3(viewDistance, viewDistance, viewDistance);
             }
             if (abs(distanceY) <= PixelInWorldSize * 8.0) {
-                float viewDistance = max(0.0, 0.1 - abs(distanceY) * zoom / 10.0) * (1.0 - gridRemainder) * 0.7;
+                float viewDistance = max(0.0, 0.1 - abs(distanceY) * zoom / (10.0 * renderScale)) * (1.0 - gridRemainder) * 0.7;
                 finalColor += vec3(viewDistance, viewDistance, viewDistance);
             }
         }

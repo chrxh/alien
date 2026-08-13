@@ -14,6 +14,7 @@ in vec2 gQuadCoord;
 uniform float zoom;
 uniform vec2 worldSize;
 uniform float radius;
+uniform float renderScale;
 
 const float AlphaForFadeout = 0.1;
 const float AlphaForCircle = 0.3;
@@ -26,13 +27,13 @@ void main()
     // Circle radius in normalized quad space (0.5 = edge)
     float outerRadius = 0.5;
     float middleRadius = 0.4;
-    float innerRadius = middleRadius - 3.0 / zoom; // Thin circle (2 pixels)
+    float innerRadius = middleRadius - 3.0 * renderScale / zoom; // Thin circle (2 pixels)
 
     if (dist > outerRadius || dist < innerRadius) {
         discard;
     }
 
-    float zoomFadeout = min(1.0, zoom / 8);
+    float zoomFadeout = min(1.0, zoom / renderScale / 8);
     FragColor = vec4(1.0, 1.0, 1.0, dist > middleRadius ? AlphaForFadeout * zoomFadeout : AlphaForCircle * zoomFadeout);
 }
 )";

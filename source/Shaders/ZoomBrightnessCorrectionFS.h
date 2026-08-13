@@ -14,12 +14,13 @@ uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
 uniform float zoom;
 uniform float strength;
+uniform float renderScale;
 
 void main()
 {
     vec2 texelSize = 1.0 / viewportSize;
-    
-    FragColor = texture(inputTexture1, texCoord) * min(1.0, zoom * strength);
+
+    FragColor = texture(inputTexture1, texCoord) * min(1.0, zoom / renderScale * strength);
 }
 )";
 }

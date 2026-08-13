@@ -47,6 +47,7 @@
 #include "OpenGLHelper.h"
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
+#include "SavePictureDialog.h"
 #include "SelectionWindow.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
@@ -343,6 +344,7 @@ void MainLoopController::processMenubar()
         AlienGui::MenuItemParameters().name("Open").keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulationDialog(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { FileTransferController::get().onSaveSimulationDialog(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Save picture"), [&] { SavePictureDialog::get().open(); });
     AlienGui::MenuSeparator();
     auto running = _SimulationFacade::get()->isSimulationRunning();
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Run").key(ImGuiKey_Space).disabled(running).closeMenuWhenItemClicked(false), [&] {

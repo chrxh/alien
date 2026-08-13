@@ -1,11 +1,17 @@
 #include "SimulationView.h"
 
 #include <algorithm>
+#include <vector>
 
 #include <glad/glad.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 #include <imgui.h>
 
+#include <Base/AlienExceptions.h>
+#include <Base/ExitScopeGuard.h>
 #include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
 
@@ -166,6 +172,86 @@ void SimulationView::setMotionBlur(float value)
 
 void SimulationView::updateMotionBlur() {}
 
+namespace
+{
+    void initPictureTarget(TextureTarget const& target, IntVector2D const& resolution)
+    {
+        glGenTextures(1, &target->texture);
+        glBindTexture(GL_TEXTURE_2D, target->texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, resolution.x, resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+        glGenRenderbuffers(1, &target->depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, target->depthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution.x, resolution.y);
+
+        glGenFramebuffers(1, &target->fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target->texture, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->depthBuffer);
+
+        target->initialized = true;
+    }
+}
+
+void SimulationView::savePicture(std::filesystem::path const& filename, IntVector2D const& resolution)
+{
+    GLint maxTextureSize = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    if (resolution.x > maxTextureSize || resolution.y > maxTextureSize) {
+        throw AlienException("The resolution must not exceed " + std::to_string(maxTextureSize) + " pixels per dimension on this GPU.");
+    }
+
+    auto origViewSize = Viewport::get().getViewSize();
+    auto origZoomFactor = Viewport::get().getZoomFactor();
+    GLint origFbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
+
+    auto target = _TextureTarget::create();
+    ExitScopeGuard restoreState([&] {
+        glBindFramebuffer(GL_FRAMEBUFFER, origFbo);
+        glDeleteFramebuffers(1, &target->fbo);
+        glDeleteRenderbuffers(1, &target->depthBuffer);
+        glDeleteTextures(1, &target->texture);
+
+        Viewport::get().setViewSize(origViewSize);
+        Viewport::get().setZoomFactor(origZoomFactor);
+        Viewport::get().setRenderScale(1.0f);
+        _renderPipeline->resize(origViewSize);
+    });
+
+    initPictureTarget(target, resolution);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw AlienException("The offscreen framebuffer for the picture could not be created.");
+    }
+
+    // The visible world rect equals view size / zoom factor. Thus, scaling both by the same amount keeps the
+    // horizontally visible world range while the vertical range follows from the aspect ratio of the picture.
+    // The render scale lets the render steps enlarge all effects with a size in pixels accordingly.
+    auto renderScale = toFloat(resolution.x) / toFloat(origViewSize.x);
+    Viewport::get().setViewSize(resolution);
+    Viewport::get().setZoomFactor(origZoomFactor * renderScale);
+    Viewport::get().setRenderScale(renderScale);
+
+    _renderPipeline->resize(resolution);
+    _renderPipeline->execute(target);
+
+    std::vector<unsigned char> pixels(static_cast<size_t>(resolution.x) * resolution.y * 3);
+    glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+
+    // OpenGL provides the rows bottom-up
+    stbi_flip_vertically_on_write(1);
+    if (stbi_write_png(filename.string().c_str(), resolution.x, resolution.y, 3, pixels.data(), resolution.x * 3) == 0) {
+        throw AlienException("The file could not be written.");
+    }
+}
+
 void SimulationView::setupRenderPipeline()
 {
     // Define lambdas for render pipeline
@@ -184,9 +270,10 @@ void SimulationView::setupRenderPipeline()
         return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
     };
 
-    // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality
+    // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality.
+    // The screen zoom factor is used so that a picture rendered at a higher resolution keeps the same appearance.
     auto blurStrengthFunc = [](SimulationParameters const& parameters) {
-        auto zoom = Viewport::get().getZoomFactor();
+        auto zoom = Viewport::get().getScreenZoomFactor();
         float strength = 0.035f;
         if (zoom < 100.0f) {
             strength *= 3.5f;
@@ -206,7 +293,7 @@ void SimulationView::setupRenderPipeline()
         return UniformValueMap{{"strength", strength}};
     };
     auto blurRepetitionsFunc = [] {
-        auto zoom = Viewport::get().getZoomFactor();
+        auto zoom = Viewport::get().getScreenZoomFactor();
         auto result = 7;
         if (zoom < 100.0f) {
             --result;

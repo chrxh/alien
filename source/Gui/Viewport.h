@@ -14,8 +14,16 @@ class Viewport
 public:
     void setup();
 
+    // Rendered pixels per world unit
     float getZoomFactor();
     void setZoomFactor(float zoomFactor);
+
+    // Rendered pixels per screen pixel (greater than 1 if picture is rendered with a higher resolution)
+    float getRenderScale();
+    void setRenderScale(float value);
+
+    // Screen pixels per world unit
+    float getScreenZoomFactor();
 
     RealVector2D getCenterInWorldPos();
     void setCenterInWorldPos(RealVector2D const& worldCenter);
@@ -35,6 +43,7 @@ public:
 
 private:
     float _zoomFactor = 1.0f;
+    float _renderScale = 1.0f;
     float _zoomSensitivity = 1.04f;
     RealVector2D _centerInWorldPos;
     IntVector2D _viewSize;
