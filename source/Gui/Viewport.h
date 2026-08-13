@@ -14,17 +14,15 @@ class Viewport
 public:
     void setup();
 
-    // World units to rendered pixels
+    // Rendered pixels per world unit
     float getZoomFactor();
     void setZoomFactor(float zoomFactor);
 
-    // Rendered pixels per screen pixel. Greater than 1 while a picture is rendered with a higher resolution
-    // than the view. Everything with a size in pixels needs to be scaled by this factor to keep its appearance.
+    // Rendered pixels per screen pixel (greater than 1 if picture is rendered with a higher resolution)
     float getRenderScale();
     void setRenderScale(float value);
 
-    // World units to screen pixels, i.e. the zoom factor an equivalent view on screen would have.
-    // Should be used for decisions that depend on the visual zoom level instead of the rendered resolution.
+    // Screen pixels per world unit
     float getScreenZoomFactor();
 
     RealVector2D getCenterInWorldPos();
