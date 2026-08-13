@@ -15,14 +15,15 @@ uniform vec2 viewportSize;
 uniform float zoom;
 uniform float strength;
 uniform bool zoomDependent;
+uniform float renderScale;
 
 void main()
 {
     vec2 texelSize = 1.0 / viewportSize;
     vec4 result = vec4(0.0);
     float totalWeight = 0.0;
-    float blurRadius = zoomDependent ? zoom * strength : strength;
-    
+    float blurRadius = zoomDependent ? zoom * strength : strength * renderScale;
+
     if (blurRadius < 1.0) {
         FragColor = texture(inputTexture1, texCoord);
     } else {

@@ -18,6 +18,7 @@ uniform float zoom;
 uniform float radius;
 uniform vec2 viewportSize;
 uniform bool onBackground;
+uniform float renderScale;
 
 void main()
 {
@@ -32,7 +33,7 @@ void main()
     if (onBackground) {
         ballSize = 15.0;
     } else {
-        ballSize = zoom < 7.0 ? 0.0 : 0.2;
+        ballSize = zoom / renderScale < 7.0 ? 0.0 : 0.2;
     }
 
     float g = clamp(aGlow, 0.0, 1.0);

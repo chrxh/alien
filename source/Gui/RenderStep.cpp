@@ -60,11 +60,13 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     auto worldRect = Viewport::get().getVisibleWorldRect();
     auto viewSize = Viewport::get().getViewSize();
     auto zoom = Viewport::get().getZoomFactor();
+    auto renderScale = Viewport::get().getRenderScale();
     //auto timestep = simulationFacade->getCurrentTimestep();
 
     _shader->use();
     _shader->setFloat("zoom", zoom);
-    _shader->setFloat("radius", std::max(parameters._minBallRadius, zoom));
+    _shader->setFloat("renderScale", renderScale);
+    _shader->setFloat("radius", std::max(parameters._minBallRadius * renderScale, zoom));
     _shader->setVec2("worldSize", toRealVector2D(worldSize));
     _shader->setVec2("rectUpperLeft", worldRect.topLeft);
     _shader->setVec2("rectLowerRight", worldRect.bottomRight);
@@ -397,7 +399,7 @@ _CellTypeOverlayRenderStep::~_CellTypeOverlayRenderStep()
 void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 {
     // Only render if zoom exceeds threshold and overlay is active
-    auto zoom = Viewport::get().getZoomFactor();
+    auto zoom = Viewport::get().getScreenZoomFactor();
     auto overlayActive = SimulationView::get().isOverlayActive();
 
     if (zoom <= ZoomFactorForCellDetails || !overlayActive) {
@@ -570,7 +572,7 @@ SelectedConnectionRenderStep _SelectedConnectionRenderStep::create(StepParameter
 
 void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
 {
-    auto zoom = Viewport::get().getZoomFactor();
+    auto zoom = Viewport::get().getScreenZoomFactor();
     if (zoom <= ZoomFactorForCellDetails) {
         return;
     }
