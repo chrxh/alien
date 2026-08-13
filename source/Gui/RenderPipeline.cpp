@@ -244,8 +244,10 @@ namespace
     }
 }
 
-void _RenderPipeline::execute()
+void _RenderPipeline::execute(RenderTarget const& finalTarget)
 {
+    _finalTarget = finalTarget;
+
     // Copy vertex buffer from Cuda to OpenGL
     _SimulationFacade::get()->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers, Viewport::get().getVisibleWorldRect());
 
@@ -394,7 +396,7 @@ RenderTarget _RenderPipeline::determineRenderTarget(
         }
     } else {
         if (!subsequentStepsHaveTarget(sequence, stepIndex) && isLastBlock) {
-            target = RenderTarget(ScreenTarget());
+            target = _finalTarget;
         } else {
 
             auto reuseTarget = false;
