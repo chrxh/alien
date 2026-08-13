@@ -46,7 +46,6 @@ public:
 
     void resize(IntVector2D const& size);
 
-    // The last render step writes to `finalTarget`
     void execute(RenderTarget const& finalTarget = ScreenTarget());
 
 private:
