@@ -62,10 +62,10 @@ float fieldHeight(vec2 relPos, float outerRadius)
         return log(1.0 + distSquared / CentralForceFieldOffset) / log(1.0 + outerDistSquared / CentralForceFieldOffset);
     }
     if (gFieldType == ForceField_Linear) {
-        // The height map is the stream function of the field, hence its contour lines follow the flow
+        // The height increases along the field direction, where an angle of 0 points upwards
         float angle = gFieldParam1 * DegToRad;
-        vec2 gradientDirection = vec2(-cos(angle), -sin(angle));
-        return 0.5 + dot(relPos, gradientDirection) / (2.0 * outerRadius);
+        vec2 direction = vec2(sin(angle), -cos(angle));
+        return 0.5 + dot(relPos, direction) / (2.0 * outerRadius);
     }
     return perlinNoiseHeight(relPos);
 }
