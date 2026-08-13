@@ -797,6 +797,45 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
+TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_chainedInfiniteConcatenations)
+{
+    // Concatenations multiply along the reference chain, i.e. gene 0 -> gene 1 -> gene 2 must be trimmed as a whole
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(std::numeric_limits<int>::max())),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+    });
+
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
+
+    ASSERT_EQ(1, subGenomes.size());
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    auto const& subGenome = subGenomes.at(0).genome;
+
+    ASSERT_EQ(3, subGenome._genes.size());
+    EXPECT_EQ(2, subGenome._genes.at(0)._nodes.size());
+    EXPECT_EQ(2, subGenome._genes.at(1)._nodes.size());
+    EXPECT_EQ(1, subGenome._genes.at(2)._nodes.size());
+
+    // Both nesting levels should be built repeatedly and equally often
+    auto numConcatenations0 = subGenome._genes.at(0)._nodes.at(1)._constructor->_numConcatenations;
+    auto numConcatenations1 = subGenome._genes.at(1)._nodes.at(1)._constructor->_numConcatenations;
+    EXPECT_GT(numConcatenations0, 1);
+    EXPECT_EQ(numConcatenations0, numConcatenations1);
+
+    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
+    EXPECT_GT(resultingCells, PREVIEW_MAX_CELLS * 3 / 4);
+}
+
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneTree)
 {
     // Test trimming with a deep gene reference tree (3 levels)
@@ -1446,10 +1485,10 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_withO
     EXPECT_TRUE(cellCreatureIds.contains(offspringId));
 }
 
-TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_parentNodeIndexOutOfBounds)
+TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_branchesWithNestedGene)
 {
     // Gene 0→1 (numBranches=6), gene 1→2 via node 18. Total 721 > PREVIEW_MAX_CELLS=500.
-    // Trimming resizes gene 1 to 13 nodes, making parentNodeIndex=18 of gene 2 out of bounds.
+    // Gene 1 is instantiated 6 times, so only its nested gene 2 has to be trimmed.
     std::vector<NodeDesc> gene1Nodes;
     for (int i = 0; i < 20; ++i) {
         if (i == 18) {
@@ -1475,7 +1514,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_parentNod
     EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
     ASSERT_EQ(3, subGenome._genes.size());
-    EXPECT_LT(subGenome._genes.at(1)._nodes.size(), 20);
+    EXPECT_EQ(20, subGenome._genes.at(1)._nodes.size());
     EXPECT_LT(subGenome._genes.at(2)._nodes.size(), 100);
     EXPECT_LE(GenomeDescInfoService::get().getNumberOfResultingCells(subGenome), PREVIEW_MAX_CELLS);
 }
