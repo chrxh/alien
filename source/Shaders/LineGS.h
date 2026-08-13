@@ -18,6 +18,7 @@ flat out float aaMargin;
 
 uniform vec2 viewportSize;
 uniform float zoom;
+uniform float renderScale;
 
 vec2 transform(vec2 v)
 {
@@ -39,10 +40,10 @@ void main()
     vec2 perp = vec2(-dir.y, dir.x);
 
     // Core half-width in pixels (same as original line width)
-    float coreWidth = max(zoom * 0.15 * 0.5, 0.5);
+    float coreWidth = max(zoom * 0.15 * 0.5, 0.5 * renderScale);
 
     // Add AA margin for smooth edges without shrinking the visible line
-    float aaWidth = 1.5;
+    float aaWidth = 1.5 * renderScale;
 
     float totalHalfWidth = coreWidth + aaWidth;
     vec2 offset = perp * totalHalfWidth;

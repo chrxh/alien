@@ -68,6 +68,7 @@
 #include "PatternEditorWindow.h"
 #include "PreviewSettingsDialog.h"
 #include "ResetPasswordDialog.h"
+#include "SavePictureDialog.h"
 #include "SelectionWindow.h"
 #include "SignalsBufferDialog.h"
 #include "SimulationInteractionController.h"
@@ -157,6 +158,7 @@ _MainWindow::_MainWindow()
     ResetPasswordDialog::get().setup();
     GenericMessageDialog::get().setup();
     GenericFileDialog::get().setup();
+    SavePictureDialog::get().setup();
     SignalsBufferDialog::get().setup();
     DelayedExecutionController::get().setup();
     UiController::get().setup();

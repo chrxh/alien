@@ -16,6 +16,7 @@ uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
 uniform float zoom;
 uniform vec2 viewportSize;
+uniform float renderScale;
 
 void main()
 {
@@ -28,7 +29,7 @@ void main()
     gl_Position = vec4(ndc, aPos.z, 1.0);
     
     // At zoom 3 there are not individual cells visible anymore, so no need to highlight the polygone more
-    vertexColor = zoom < 3.0 ? aColor * 1.4 : aColor;
+    vertexColor = zoom / renderScale < 3.0 ? aColor * 1.4 : aColor;
 }
 )";
 }

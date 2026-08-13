@@ -26,6 +26,7 @@ uniform float zoom;
 uniform vec2 worldSize;
 uniform float radius;
 uniform bool borderlessRendering;
+uniform float renderScale;
 
 const int ForceField_None = 0;
 const int ForceField_Radial = 1;
@@ -81,7 +82,7 @@ void main()
     // } else {
     //     maxDim = vec2(gDimension1 + gFadeoutRadius * 2.0, gDimension2 + gFadeoutRadius * 2.0);
     // }
-    float padding = 4.0 / zoom;
+    float padding = 4.0 * renderScale / zoom;
     float halfSize = maxDim * 0.5 + padding;
     vec2 pixelOffset = gQuadCoord * 2.0 * halfSize;
     vec2 pixelWorldPos = gWorldPos + pixelOffset;
@@ -109,7 +110,7 @@ void main()
         // Calculate alpha based on distance
         if (distFromCenter <= gDimension1) {
             // Inside core radius - full opacity with anti-aliasing at edge
-            float edgeStart = gDimension1 - 2.0 / zoom;
+            float edgeStart = gDimension1 - 2.0 * renderScale / zoom;
             float edgeEnd = gDimension1;
             alpha = 1.0;// - smoothstep(edgeStart, edgeEnd, distFromCenter);
         } else {

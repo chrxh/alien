@@ -45,7 +45,9 @@ public:
     _RenderPipeline(RenderBlocks&& blocks);
 
     void resize(IntVector2D const& size);
-    void execute();
+
+    // The last render step writes to `finalTarget`
+    void execute(RenderTarget const& finalTarget = ScreenTarget());
 
 private:
     void resizeTarget(TextureTarget const& target);
@@ -73,6 +75,8 @@ private:
         std::map<RenderTarget, TargetInfo>& usedTargets);
 
     RenderBlocks _blocks;
+
+    RenderTarget _finalTarget = ScreenTarget();
 
     GeometryBuffers _geometryBuffers;
     std::vector<TextureTarget> _textureTargets;

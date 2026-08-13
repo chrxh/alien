@@ -22,6 +22,7 @@ out vec2 gWorldPos;
 uniform vec2 viewportSize;
 uniform float zoom;
 uniform float radius;
+uniform float renderScale;
 
 // Object type constants (matching ObjectType_ enum)
 const int ObjectType_Solid = 0;
@@ -57,9 +58,9 @@ void main()
     gWorldPos = vWorldPos[0];
     
     // Calculate size in NDC coordinates
-    float clampedZoom = min(40, zoom);
-    float ndcWidth = 480.0 / viewportSize.x * 2.0 * clampedZoom / 30;
-    float ndcHeight = 20.0 / viewportSize.y * 2.0 * clampedZoom / 30;
+    float clampedZoom = min(40, zoom / renderScale);
+    float ndcWidth = 480.0 * renderScale / viewportSize.x * 2.0 * clampedZoom / 30;
+    float ndcHeight = 20.0 * renderScale / viewportSize.y * 2.0 * clampedZoom / 30;
     
     // Get center position (cell position)
     vec4 center = gl_in[0].gl_Position;

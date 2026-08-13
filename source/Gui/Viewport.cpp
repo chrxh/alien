@@ -26,6 +26,21 @@ void Viewport::setZoomFactor(float zoomFactor)
     _zoomFactor = zoomFactor;
 }
 
+float Viewport::getRenderScale()
+{
+    return _renderScale;
+}
+
+void Viewport::setRenderScale(float value)
+{
+    _renderScale = value;
+}
+
+float Viewport::getScreenZoomFactor()
+{
+    return _zoomFactor / _renderScale;
+}
+
 RealVector2D Viewport::getCenterInWorldPos()
 {
     return _centerInWorldPos;

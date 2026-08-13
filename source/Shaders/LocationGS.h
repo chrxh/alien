@@ -34,6 +34,7 @@ out vec2 gQuadCoord;  // Coordinates within the quad, from -0.5 to 0.5
 
 uniform vec2 viewportSize;
 uniform float zoom;
+uniform float renderScale;
 
 void main()
 {
@@ -60,7 +61,7 @@ void main()
     }
     
     // Add some padding for anti-aliasing (4 pixels worth in world space)
-    float padding = 4.0 / zoom;
+    float padding = 4.0 * renderScale / zoom;
     float halfSize = maxDim * 0.5 + padding;
     
     // Calculate size in NDC coordinates
