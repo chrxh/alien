@@ -47,6 +47,7 @@
 #include "GettingStartedWindow.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
+#include "SavePictureDialog.h"
 #include "SelectionWindow.h"
 #include "PatternEditorWindow.h"
 #include "WindowController.h"
@@ -155,6 +156,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     ResetPasswordDialog::get().setup();
     GenericMessageDialog::get().setup();
     GenericFileDialog::get().setup();
+    SavePictureDialog::get().setup();
     DelayedExecutionController::get().setup();
     UiController::get().setup();
 

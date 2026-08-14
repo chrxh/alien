@@ -222,9 +222,89 @@ namespace
         }
     }
 
-    __device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool shaded = true, bool inverted = false)
+    // Smallest radius in pixels an object is drawn with. Below that it would fall between the samples and flicker.
+    auto constexpr MinObjectRadius = 1.0f;
+
+    // Radius in screen pixels that the dot cross of the fallback below covers at render scale 1.
+    auto constexpr SmallObjectScreenRadius = 1.5f;
+
+    // How much of the additional resolution of a picture is spent on sharpness instead of on reproducing the
+    // appearance of the view. 0 draws objects below a pixel as large as they appear on screen: the brightness then
+    // matches the view, but the picture merely magnifies the artifact of the missing resolution. 1 draws them with the
+    // radius they really have, which is as sharp as the resolution allows but darker, because the tone mapping takes a
+    // square root per pixel and the same brightness therefore appears dimmer the fewer pixels it sits on. The two
+    // cannot be had at once for isolated objects, so values in between trade one for the other. Reproducing the view
+    // is what the picture is for, hence 0.
+    auto constexpr SmallObjectSharpness = 0.0f;
+
+    // Objects below about two screen pixels cannot be rasterized as a disc and are approximated by a cross of single
+    // dots: the center with `color` plus four neighbors weighted with `neighborWeight`. That cross has a fixed size in
+    // pixels, so a picture rendered with a higher resolution has to spread renderScale^2 times its brightness to keep
+    // the same appearance. The additional pixels are spent on sharpness rather than on a magnified cross: the object
+    // is drawn with the radius it actually has in the picture, widened only if it would fall below a pixel.
+    __device__ __inline__ void drawSmallObject(
+        uint64_t* imageData,
+        int2 const& imageSize,
+        float2 const& pos,
+        float3 const& color,
+        float extentRadius,
+        float neighborWeight,
+        float renderScale)
     {
-        if (radius > 2.0 - NEAR_ZERO) {
+        if (renderScale < 1.5f) {
+            drawDot(imageData, imageSize, pos, color);
+            auto neighborColor = color * neighborWeight;
+            drawDot(imageData, imageSize, pos + float2{1, 0}, neighborColor);
+            drawDot(imageData, imageSize, pos + float2{-1, 0}, neighborColor);
+            drawDot(imageData, imageSize, pos + float2{0, 1}, neighborColor);
+            drawDot(imageData, imageSize, pos + float2{0, -1}, neighborColor);
+            return;
+        }
+
+        auto visualRadius = SmallObjectScreenRadius * renderScale;
+        auto radius = max(MinObjectRadius, max(extentRadius, visualRadius + (extentRadius - visualRadius) * SmallObjectSharpness));
+        auto radiusSquared = radius * radius;
+
+        // Normalizing by the sum of the actual samples instead of by the integral of the falloff keeps the brightness
+        // exact for radii of only a few pixels, where the two differ considerably
+        auto weightSum = 0.0f;
+        for (float x = -radius; x <= radius; x += 1.0f) {
+            for (float y = -radius; y <= radius; y += 1.0f) {
+                auto rSquared = x * x + y * y;
+                if (rSquared <= radiusSquared) {
+                    weightSum += (1.0f - rSquared / radiusSquared) * 2;
+                }
+            }
+        }
+        if (weightSum < NEAR_ZERO) {
+            drawDot(imageData, imageSize, pos, color * ((1.0f + 4.0f * neighborWeight) * renderScale * renderScale));
+            return;
+        }
+
+        auto discColor = color * ((1.0f + 4.0f * neighborWeight) * renderScale * renderScale / weightSum);
+        for (float x = -radius; x <= radius; x += 1.0f) {
+            for (float y = -radius; y <= radius; y += 1.0f) {
+                auto rSquared = x * x + y * y;
+                if (rSquared <= radiusSquared) {
+                    drawDot(imageData, imageSize, pos + float2{x, y}, discColor * (1.0f - rSquared / radiusSquared) * 2);
+                }
+            }
+        }
+    }
+
+    __device__ __inline__ void drawCircle(
+        uint64_t* imageData,
+        int2 const& imageSize,
+        float2 pos,
+        float3 color,
+        float radius,
+        float renderScale,
+        bool shaded = true,
+        bool inverted = false)
+    {
+        // The threshold refers to screen pixels, so that a picture rendered with a higher resolution takes the same
+        // branch as the view it is derived from
+        if (radius > 2.0 * renderScale - NEAR_ZERO) {
             auto radiusSquared = radius * radius;
             for (float x = -radius; x <= radius; x += 1.0f) {
                 for (float y = -radius; y <= radius; y += 1.0f) {
@@ -244,7 +324,7 @@ namespace
 
                             factor = min(factor, 1.0f);
                         }
-                        if (inverted && sqrt(rSquared) > radius - 2.0f) {
+                        if (inverted && sqrt(rSquared) > radius - 2.0f * renderScale) {
                             factor = 1.5f;
                         }
                         drawDot(imageData, imageSize, pos + float2{x, y}, color * factor);
@@ -252,19 +332,13 @@ namespace
                 }
             }
         } else {
-            color *= radius * 2;
-            drawDot(imageData, imageSize, pos, color);
-            color *= 0.45f;
-            drawDot(imageData, imageSize, pos + float2{1, 0}, color);
-            drawDot(imageData, imageSize, pos + float2{-1, 0}, color);
-            drawDot(imageData, imageSize, pos + float2{0, 1}, color);
-            drawDot(imageData, imageSize, pos + float2{0, -1}, color);
+            drawSmallObject(imageData, imageSize, pos, color * (radius / renderScale * 2), radius, 0.45f, renderScale);
         }
     }
 
-    __device__ __inline__ void drawCircle_block(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius)
+    __device__ __inline__ void drawCircle_block(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, float renderScale)
     {
-        if (radius > 2.0 - NEAR_ZERO) {
+        if (radius > 2.0 * renderScale - NEAR_ZERO) {
             auto radiusSquared = radius * radius;
             auto length = 2 * toInt(radius) + 1;
             auto const partition = calcPartition(length * length, threadIdx.x, blockDim.x);
@@ -279,20 +353,14 @@ namespace
             }
         } else {
             if (threadIdx.x == 0) {
-                color = color * radius * 2;
-                drawDot(imageData, imageSize, pos, color);
-                color = color * 0.3f;
-                drawDot(imageData, imageSize, pos + float2{1, 0}, color);
-                drawDot(imageData, imageSize, pos + float2{-1, 0}, color);
-                drawDot(imageData, imageSize, pos + float2{0, 1}, color);
-                drawDot(imageData, imageSize, pos + float2{0, -1}, color);
+                drawSmallObject(imageData, imageSize, pos, color * (radius / renderScale) * 2, radius, 0.3f, renderScale);
             }
         }
     }
 
-    __device__ __inline__ void drawDisc(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius1, float radius2)
+    __device__ __inline__ void drawDisc(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius1, float radius2, float renderScale)
     {
-        if (radius2 > 2.5 - NEAR_ZERO) {
+        if (radius2 > 2.5 * renderScale - NEAR_ZERO) {
             auto radiusSquared1 = radius1 * radius1;
             auto radiusSquared2 = radius2 * radius2;
             auto middleRadiusSquared = (radiusSquared1 + radiusSquared2) / 2;
@@ -308,26 +376,38 @@ namespace
                 }
             }
         } else {
-            color = color * (radius2 - radius1) * 2;
-            drawDot(imageData, imageSize, pos, color);
-            color = color * 0.3f;
-            drawDot(imageData, imageSize, pos + float2{1, 0}, color);
-            drawDot(imageData, imageSize, pos + float2{-1, 0}, color);
-            drawDot(imageData, imageSize, pos + float2{0, 1}, color);
-            drawDot(imageData, imageSize, pos + float2{0, -1}, color);
+            drawSmallObject(imageData, imageSize, pos, color * ((radius2 - radius1) / renderScale) * 2, radius2, 0.3f, renderScale);
         }
     }
 
-    __device__ __inline__ void
-    drawLine(float2 const& start, float2 const& end, float3 const& color, uint64_t* imageData, int2 imageSize, float pixelDistance = 1.5f)
+    // `thickness` is the line width in pixels. It has to grow with the render scale, otherwise a line stays one pixel
+    // wide and thus becomes relatively thinner and darker when a picture is rendered with a higher resolution.
+    __device__ __inline__ void drawLine(
+        float2 const& start,
+        float2 const& end,
+        float3 const& color,
+        uint64_t* imageData,
+        int2 imageSize,
+        float pixelDistance = 1.5f,
+        int thickness = 1)
     {
         float dist = Math::length(end - start);
-        float2 const v = {static_cast<float>(end.x - start.x) / dist * pixelDistance, static_cast<float>(end.y - start.y) / dist * pixelDistance};
-        float2 pos = start;
+        float2 const direction = {static_cast<float>(end.x - start.x) / dist, static_cast<float>(end.y - start.y) / dist};
+        float2 const v = direction * pixelDistance;
+        float2 const perpendicular = {-direction.y, direction.x};
 
-        for (float d = 0; d <= dist; d += pixelDistance) {
-            drawDot(imageData, imageSize, pos, color);
-            pos = pos + v;
+        // Half pixel steps across the width keep the edges of a widened line smooth. The color is distributed over the
+        // steps, so the total brightness does not depend on how many of them there are.
+        auto steps = thickness > 1 ? thickness * 2 : 1;
+        auto stepDistance = thickness > 1 ? 0.5f : 1.0f;
+        auto stepColor = color * (toFloat(thickness) / toFloat(steps));
+
+        for (int i = 0; i < steps; ++i) {
+            float2 pos = start + perpendicular * ((toFloat(i) - toFloat(steps - 1) / 2) * stepDistance);
+            for (float d = 0; d <= dist; d += pixelDistance) {
+                drawDot(imageData, imageSize, pos, stepColor);
+                pos = pos + v;
+            }
         }
     }
 
@@ -340,7 +420,8 @@ namespace
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-__global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight)
+__global__ void
+cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float renderScale, float2 rectUpperLeft, float2 rectLowerRight)
 {
     BaseMap map;
     map.init(worldSize);
@@ -379,12 +460,12 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
                 auto distanceY = Math::modulo(worldPos.y + gridDistance / 2, gridDistance) - gridDistance / 2;
                 if (abs(distanceX) <= PixelInWorldSize * 8) {
 
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * gridRemainder * 0.7f;
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / (10 * renderScale)) * gridRemainder * 0.7f;
                     drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
                 }
                 if (abs(distanceY) <= PixelInWorldSize * 8) {
 
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * gridRemainder * 0.7f;
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / (10 * renderScale)) * gridRemainder * 0.7f;
                     drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
                 }
             }
@@ -393,12 +474,12 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
                 auto distanceY = Math::modulo(worldPos.y + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
                 if (abs(distanceX) <= PixelInWorldSize * 8) {
 
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / (10 * renderScale)) * (1.0f - gridRemainder) * 0.7f;
                     drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
                 }
                 if (abs(distanceY) <= PixelInWorldSize * 8) {
 
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / (10 * renderScale)) * (1.0f - gridRemainder) * 0.7f;
                     drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
                 }
             }
@@ -462,14 +543,19 @@ __global__ void cudaDrawCells(
     Array<Cell*> cells,
     uint64_t* imageData,
     int2 imageSize,
-    float zoom)
+    float zoom,
+    float renderScale)
 {
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     BaseMap map;
     map.init(worldSize);
 
-    auto shadedCells = zoom >= ZoomLevelForShadedCells;
+    // Zoom levels describe the visual zoom and must not be affected by the resolution the picture is rendered with
+    auto screenZoom = zoom / renderScale;
+    auto lineThickness = max(1, toInt(renderScale));
+
+    auto shadedCells = screenZoom >= ZoomLevelForShadedCells;
     auto universeImageSize = toFloat2(worldSize) * zoom;
     auto coloring = cudaSimulationParameters.cellColoring;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -482,30 +568,30 @@ __global__ void cudaDrawCells(
 
         //draw primary color for cell
         auto primaryColor = calcColor(cell, cell->selected, coloring, true) * 0.85f;
-        drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, cellRadius * 8 / 5, false, false);
+        drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, cellRadius * 8 / 5, renderScale, false, false);
 
         //draw secondary color for cell
         auto secondaryColor =
             coloring == CellColoring_MutationId_AllCellFunctions ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
-        drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
+        drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, renderScale, shadedCells, true);
 
         //draw signal
-        if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
-            drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
+        if (cell->isActive() && screenZoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
+            drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, renderScale, shadedCells);
         }
 
         //draw events
         if (cell->eventCounter > 0) {
             if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacking) {
-                drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, cellRadius * 1.4f, cellRadius * 2.0f);
+                drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, cellRadius * 1.4f, cellRadius * 2.0f, renderScale);
             }
             if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacked) {
                 float3 color{0.5f, 0.0f, 0.0f};
-                drawDisc(imageData, imageSize, cellImagePos, color, cellRadius * 1.4f, cellRadius * 2.0f);
+                drawDisc(imageData, imageSize, cellImagePos, color, cellRadius * 1.4f, cellRadius * 2.0f, renderScale);
 
                 auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->eventPos, universeImageSize, zoom);
                 if (isLineVisible(cellImagePos, endImagePos, universeImageSize) && Math::length(cell->eventPos - cell->pos) < 10.0f) {
-                    drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
+                    drawLine(cellImagePos, endImagePos, color, imageData, imageSize, 1.5f, lineThickness);
                 }
             }
         }
@@ -519,23 +605,23 @@ __global__ void cudaDrawCells(
                 lastMovement = lastMovement / lastMovementLength * 0.05f;
             }
 
-            auto color = float3{0.7f, 0.7f, 0.7f} * min(1.0f, zoom * 0.1f);
+            auto color = float3{0.7f, 0.7f, 0.7f} * min(1.0f, screenZoom * 0.1f);
             auto endPos = cell->pos + lastMovement * 100;
             auto endImagePos = mapWorldPosToImagePos(rectUpperLeft, endPos, universeImageSize, zoom);
             if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
-                drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
+                drawLine(cellImagePos, endImagePos, color, imageData, imageSize, 1.5f, lineThickness);
             }
 
             auto arrowPos1 = endPos + float2{-lastMovement.x + lastMovement.y, -lastMovement.x - lastMovement.y} * 20;
             auto arrowImagePos1 = mapWorldPosToImagePos(rectUpperLeft, arrowPos1, universeImageSize, zoom);
             if (isLineVisible(arrowImagePos1, endImagePos, universeImageSize)) {
-                drawLine(arrowImagePos1, endImagePos, color, imageData, imageSize);
+                drawLine(arrowImagePos1, endImagePos, color, imageData, imageSize, 1.5f, lineThickness);
             }
 
             auto arrowPos2 = endPos + float2{-lastMovement.x - lastMovement.y, +lastMovement.x - lastMovement.y} * 20;
             auto arrowImagePos2 = mapWorldPosToImagePos(rectUpperLeft, arrowPos2, universeImageSize, zoom);
             if (isLineVisible(arrowImagePos2, endImagePos, universeImageSize)) {
-                drawLine(arrowImagePos2, endImagePos, color, imageData, imageSize);
+                drawLine(arrowImagePos2, endImagePos, color, imageData, imageSize, 1.5f, lineThickness);
             }
         }
 
@@ -546,13 +632,13 @@ __global__ void cudaDrawCells(
                 auto radius = toFloat((timestep - cell->executionOrderNumber + 5) % 6 + (6 - detonator.countdown * 6));
                 radius *= radius;
                 radius *= cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * zoom / 36;
-                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.0f}, radius, shadedCells);
+                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.0f}, radius, renderScale, shadedCells);
             }
         }
 
         //draw connections
-        auto lineColor = primaryColor * min((zoom - 1.0f) / 3, 1.0f) * 2 * 0.7f;
-        if (zoom >= ZoomLevelForConnections) {
+        auto lineColor = primaryColor * min((screenZoom - 1.0f) / 3, 1.0f) * 2 * 0.7f;
+        if (screenZoom >= ZoomLevelForConnections) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const otherCell = cell->connections[i].cell;
                 auto otherCellPos = otherCell->pos;
@@ -563,13 +649,13 @@ __global__ void cudaDrawCells(
                 auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                 auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                 if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
-                    drawLine(startImagePos, endImagePos, lineColor, imageData, imageSize);
+                    drawLine(startImagePos, endImagePos, lineColor, imageData, imageSize, 1.5f, lineThickness);
                 }
             }
         }
 
         //draw arrows
-        if (zoom >= ZoomLevelForArrows) {
+        if (screenZoom >= ZoomLevelForArrows) {
             auto inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
             if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
                 for (int i = 0; i < cell->numConnections; ++i) {
@@ -593,14 +679,14 @@ __global__ void cudaDrawCells(
                             float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
                             arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
                             if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-                                drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
+                                drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f, lineThickness);
                             }
                         }
                         {
                             float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
                             arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
                             if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-                                drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
+                                drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f, lineThickness);
                             }
                         }
                     }
@@ -611,7 +697,7 @@ __global__ void cudaDrawCells(
 }
 
 
-__global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom, float renderScale)
 {
     __shared__ float2 cellImagePos;
     __shared__ bool isContained;
@@ -645,12 +731,25 @@ __global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cel
             __syncthreads();
 
             drawCircle_block(
-                imageData, imageSize, cellImagePos, color * cudaSimulationParameters.cellGlowStrength * 0.1f, zoom * cudaSimulationParameters.cellGlowRadius);
+                imageData,
+                imageSize,
+                cellImagePos,
+                color * cudaSimulationParameters.cellGlowStrength * 0.1f,
+                zoom * cudaSimulationParameters.cellGlowRadius,
+                renderScale);
         }
     }
 }
 
-__global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawParticles(
+    int2 worldSize,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    Array<Particle*> particles,
+    uint64_t* imageData,
+    int2 imageSize,
+    float zoom,
+    float renderScale)
 {
     BaseMap map;
     map.init(worldSize);
@@ -666,31 +765,37 @@ __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 r
         auto const particleImagePos = mapWorldPosToImagePos(rectUpperLeft, particlePos, universeImageSize, zoom);
         auto const color = calcColor(particle, 0 != particle->selected);
         auto radius = zoom / 3;
-        drawCircle(imageData, imageSize, particleImagePos, color, radius);
+        drawCircle(imageData, imageSize, particleImagePos, color, radius, renderScale);
     }
 }
 
-__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom)
+__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom, float renderScale)
 {
     auto universeImageSize = toFloat2(worldSize) * zoom;
+    auto extent = max(1, toInt(5 * renderScale));
+    auto halfThickness = max(0, toInt(renderScale) / 2);
     for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
         float2 sourcePos{cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY};
         auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
-            for (int dx = -5; dx <= 5; ++dx) {
-                auto drawX = toInt(imagePos.x) + dx;
-                auto drawY = toInt(imagePos.y);
-                if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
-                    int index = drawX + drawY * imageSize.x;
-                    targetImage[index] = 0x0000000001ff;
+            for (int dx = -extent; dx <= extent; ++dx) {
+                for (int dy = -halfThickness; dy <= halfThickness; ++dy) {
+                    auto drawX = toInt(imagePos.x) + dx;
+                    auto drawY = toInt(imagePos.y) + dy;
+                    if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                        int index = drawX + drawY * imageSize.x;
+                        targetImage[index] = 0x0000000001ff;
+                    }
                 }
             }
-            for (int dy = -5; dy <= 5; ++dy) {
-                auto drawX = toInt(imagePos.x);
-                auto drawY = toInt(imagePos.y) + dy;
-                if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
-                    int index = drawX + drawY * imageSize.x;
-                    targetImage[index] = 0x0000000001ff;
+            for (int dy = -extent; dy <= extent; ++dy) {
+                for (int dx = -halfThickness; dx <= halfThickness; ++dx) {
+                    auto drawX = toInt(imagePos.x) + dx;
+                    auto drawY = toInt(imagePos.y) + dy;
+                    if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                        int index = drawX + drawY * imageSize.x;
+                        targetImage[index] = 0x0000000001ff;
+                    }
                 }
             }
         }

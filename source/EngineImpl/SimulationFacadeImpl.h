@@ -32,7 +32,8 @@ public:
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
-        double zoom) override;
+        double zoom,
+        float renderScale) override;
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,

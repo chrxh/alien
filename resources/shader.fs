@@ -13,6 +13,10 @@ uniform float motionBlurFactor;
 uniform float brightness;
 uniform float contrast;
 
+// Rendered pixels per screen pixel. Greater than 1 while a picture is rendered with a higher resolution than the
+// view. The glow radius is defined in texels, so it has to be stretched by this factor to keep its visual size.
+uniform float renderScale = 1.0;
+
 uniform float weights[14] = float[](0.15, 0.15, 0.09, 0.06, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02);
 
 vec3 mapColor(vec3 color)
@@ -25,14 +29,23 @@ void main()
     vec2 texelSize = 1.0 / textureSize(texture1, 0);
     vec2 mirroredCoord = vec2(texCoord.x, 1.0 - texCoord.y);
 
+    // Every weight covers `renderScale` texels instead of one. Averaging that many sub samples per weight keeps the
+    // kernel dense, a single tap per weight would skip texels and make the glow band at higher resolutions.
+    int subSamples = max(1, int(renderScale + 0.5));
+
     //horizontal blur
     if (phase == 0) {
         vec3 result;
         if (glowEffect) {
             result = vec3(texture(texture1, mirroredCoord).rgb * weights[0]);
             for (int i = 1; i < 14; ++i) {
-                result += texture(texture1, mirroredCoord + vec2(texelSize.x * i, 0.0)).rgb * weights[i];
-                result += texture(texture1, mirroredCoord - vec2(texelSize.x * i, 0.0)).rgb * weights[i];
+                vec3 sum = vec3(0.0);
+                for (int s = 0; s < subSamples; ++s) {
+                    float offset = texelSize.x * (float(i) * renderScale - float(s));
+                    sum += texture(texture1, mirroredCoord + vec2(offset, 0.0)).rgb;
+                    sum += texture(texture1, mirroredCoord - vec2(offset, 0.0)).rgb;
+                }
+                result += sum / float(subSamples) * weights[i];
             }
         } else {
             result = vec3(texture(texture1, mirroredCoord).rgb);
@@ -49,8 +62,13 @@ void main()
             result =
                 vec3(texture(texture2, texCoord).rgb * weights[0]);
             for (int i = 1; i < 14; ++i) {
-                result += texture(texture2, texCoord + vec2(0.0, texelSize.y * i)).rgb * weights[i];
-                result += texture(texture2, texCoord - vec2(0.0, texelSize.y * i)).rgb * weights[i];
+                vec3 sum = vec3(0.0);
+                for (int s = 0; s < subSamples; ++s) {
+                    float offset = texelSize.y * (float(i) * renderScale - float(s));
+                    sum += texture(texture2, texCoord + vec2(0.0, offset)).rgb;
+                    sum += texture(texture2, texCoord - vec2(0.0, offset)).rgb;
+                }
+                result += sum / float(subSamples) * weights[i];
             }
         } else {
             result = vec3(texture(texture2, texCoord).rgb);

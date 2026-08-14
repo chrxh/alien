@@ -106,6 +106,8 @@ PUBLIC
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
     ResizeWorldDialog.h
+    SavePictureDialog.cpp
+    SavePictureDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
     Shader.cpp

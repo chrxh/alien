@@ -173,7 +173,8 @@ void _SimulationCudaFacade::drawVectorGraphics(
     float2 const& rectLowerRight,
     void* cudaResource,
     int2 const& imageSize,
-    double zoom)
+    double zoom,
+    float renderScale)
 {
     checkAndProcessSimulationParameterChanges();
 
@@ -185,7 +186,8 @@ void _SimulationCudaFacade::drawVectorGraphics(
 
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
-    _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
+    _renderingKernels->drawImage(
+        _settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), renderScale, getSimulationDataIntern(), *_cudaRenderingData);
     syncAndCheck();
 
     const size_t widthBytes = sizeof(uint64_t) * imageSize.x;

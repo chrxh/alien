@@ -44,9 +44,10 @@ void _SimulationFacadeImpl::tryDrawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
-    double zoom)
+    double zoom,
+    float renderScale)
 {
-    _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
+    _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom, renderScale);
 }
 
 std::optional<OverlayDescription> _SimulationFacadeImpl::tryDrawVectorGraphicsAndReturnOverlay(

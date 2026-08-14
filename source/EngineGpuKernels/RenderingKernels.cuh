@@ -14,7 +14,8 @@
 #include <cuda_runtime_api.h>
 #include <cuda_runtime.h>
 
-__global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight);
+__global__ void
+cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float renderScale, float2 rectUpperLeft, float2 rectLowerRight);
 __global__ void cudaPrepareFilteringForRendering(Array<Cell*> filteredCells, Array<Particle*> filteredParticles);
 __global__ void cudaFilterCellsForRendering(
     int2 worldSize,
@@ -38,9 +39,19 @@ __global__ void cudaDrawCells(
     Array<Cell*> cells,
     uint64_t* imageData,
     int2 imageSize,
-    float zoom);
-__global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom);
+    float zoom,
+    float renderScale);
+__global__ void
+cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom, float renderScale);
 
-__global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom);
-__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom);
+__global__ void cudaDrawParticles(
+    int2 worldSize,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    Array<Particle*> particles,
+    uint64_t* imageData,
+    int2 imageSize,
+    float zoom,
+    float renderScale);
+__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom, float renderScale);
 __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUpperLeft, float2 rectLowerRight, uint64_t* imageData, float zoom);

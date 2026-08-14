@@ -13,8 +13,16 @@ class Viewport
 public:
     void setup(SimulationFacade const& simulationFacade);
 
+    //rendered pixels per world unit
     float getZoomFactor();
     void setZoomFactor(float zoomFactor);
+
+    //rendered pixels per screen pixel (greater than 1 if a picture is rendered with a higher resolution)
+    float getRenderScale();
+    void setRenderScale(float value);
+
+    //screen pixels per world unit; to be used for decisions that depend on the visual zoom level
+    float getScreenZoomFactor();
 
     RealVector2D getCenterInWorldPos();
     void setCenterInWorldPos(RealVector2D const& worldCenter);
@@ -36,6 +44,7 @@ private:
     SimulationFacade _simulationFacade;
 
     float _zoomFactor = 1.0f;
+    float _renderScale = 1.0f;
     float _zoomSensitivity = 1.07f;
     RealVector2D _worldCenter;
     IntVector2D _viewSize;

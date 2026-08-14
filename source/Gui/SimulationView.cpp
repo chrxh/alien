@@ -1,8 +1,14 @@
 #include "SimulationView.h"
 
 #include <algorithm>
+#include <stdexcept>
+#include <vector>
+
 #include <glad/glad.h>
 #include <imgui.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
@@ -83,6 +89,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _shader->setInt("texture3", 2);
     _shader->setBool("glowEffect", true);
     _shader->setBool("motionEffect", true);
+    _shader->setFloat("renderScale", 1.0f);
     updateMotionBlur();
     setBrightness(1.0f);
     setContrast(1.0f);
@@ -98,14 +105,15 @@ void SimulationView::shutdown()
 
 void SimulationView::resize(IntVector2D const& size)
 {
-    if (_areTexturesInitialized) {
-        glDeleteFramebuffers(1, &_fbo1);
-        glDeleteFramebuffers(1, &_fbo2);
-        glDeleteTextures(1, &_textureSimulationId);
-        glDeleteTextures(1, &_textureFramebufferId1);
-        glDeleteTextures(1, &_textureFramebufferId2);
-        _areTexturesInitialized = true;
-    }
+    //the previous objects are released after the new simulation texture has been registered, because registering
+    //unregisters the Cuda resource that still refers to the previous one
+    auto prevTexturesInitialized = _areTexturesInitialized;
+    auto prevFbo1 = _fbo1;
+    auto prevFbo2 = _fbo2;
+    auto prevTextureSimulationId = _textureSimulationId;
+    auto prevTextureFramebufferId1 = _textureFramebufferId1;
+    auto prevTextureFramebufferId2 = _textureFramebufferId2;
+
     glGenTextures(1, &_textureSimulationId);
     glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -139,7 +147,16 @@ void SimulationView::resize(IntVector2D const& size)
     glGenFramebuffers(1, &_fbo2);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId2, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    if (prevTexturesInitialized) {
+        glDeleteFramebuffers(1, &prevFbo1);
+        glDeleteFramebuffers(1, &prevFbo2);
+        glDeleteTextures(1, &prevTextureSimulationId);
+        glDeleteTextures(1, &prevTextureFramebufferId1);
+        glDeleteTextures(1, &prevTextureFramebufferId2);
+    }
+    _areTexturesInitialized = true;
 
     Viewport::get().setViewSize(size);
 }
@@ -356,6 +373,106 @@ void SimulationView::updateImageFromSimulation()
                 }
             }
         }
+    }
+}
+
+void SimulationView::savePicture(std::filesystem::path const& filename, IntVector2D const& resolution)
+{
+    GLint maxTextureSize = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    if (resolution.x > maxTextureSize || resolution.y > maxTextureSize) {
+        throw std::runtime_error("The resolution must not exceed " + std::to_string(maxTextureSize) + " pixels per dimension on this GPU.");
+    }
+
+    auto origViewSize = Viewport::get().getViewSize();
+    auto origZoomFactor = Viewport::get().getZoomFactor();
+    GLint origFbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
+
+    //the visible world rect equals view size / zoom factor, so scaling both by the same amount keeps the horizontally
+    //visible world range while the vertical range follows from the aspect ratio of the picture
+    auto renderScale = toFloat(resolution.x) / toFloat(origViewSize.x);
+    Viewport::get().setZoomFactor(origZoomFactor * renderScale);
+    Viewport::get().setRenderScale(renderScale);
+    resize(resolution);
+
+    unsigned int captureTexture = 0;
+    unsigned int captureFbo = 0;
+    glGenTextures(1, &captureTexture);
+    glBindTexture(GL_TEXTURE_2D, captureTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, resolution.x, resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    glGenFramebuffers(1, &captureFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, captureTexture, 0);
+    auto framebufferComplete = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+
+    std::vector<unsigned char> pixels;
+    if (framebufferComplete) {
+        auto worldRect = Viewport::get().getVisibleWorldRect();
+        _simulationFacade->tryDrawVectorGraphics(
+            worldRect.topLeft, worldRect.bottomRight, resolution, Viewport::get().getZoomFactor(), renderScale);
+
+        glViewport(0, 0, resolution.x, resolution.y);
+        _shader->use();
+        _shader->setFloat("renderScale", renderScale);
+
+        //the motion blur of phase 1 would mix in the previous frame, but the framebuffer textures were just recreated
+        _shader->setBool("motionEffect", false);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
+        _shader->setInt("phase", 0);
+        glBindVertexArray(_vao);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+        _shader->setInt("phase", 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
+        _shader->setInt("phase", 2);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        pixels.resize(static_cast<size_t>(resolution.x) * resolution.y * 3);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+
+        _shader->setBool("motionEffect", true);
+        _shader->setFloat("renderScale", 1.0f);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, origFbo);
+    glDeleteFramebuffers(1, &captureFbo);
+    glDeleteTextures(1, &captureTexture);
+
+    Viewport::get().setZoomFactor(origZoomFactor);
+    Viewport::get().setRenderScale(1.0f);
+    resize(origViewSize);
+    glViewport(0, 0, origViewSize.x, origViewSize.y);
+
+    if (!framebufferComplete) {
+        throw std::runtime_error("The offscreen framebuffer for the picture could not be created.");
+    }
+
+    //OpenGL provides the rows bottom-up
+    stbi_flip_vertically_on_write(1);
+    if (stbi_write_png(filename.string().c_str(), resolution.x, resolution.y, 3, pixels.data(), resolution.x * 3) == 0) {
+        throw std::runtime_error("The file could not be written.");
     }
 }
 
