@@ -556,8 +556,13 @@ __inline__ __device__ void MuscleProcessor::restoreInitialAngleFromPreviousInter
     auto& nextAngle = pivotObject->connections[(connectionIndex + 1) % pivotObject->numConnections].angleFromPrevious;
     auto diff = initialAngle - angle;
 
-    // Check for enough angle space
-    if (!(diff > 0 && nextAngle <= diff)) {
+    // The correction is taken from the following connection, so it is clamped to the angle space that this connection can give up.
+    // Dropping it instead would leave the muscle distortion in the geometry, where the next construction step bakes it into the reference angles.
+    auto availableAngle = max(0.0f, nextAngle - NEAR_ZERO);
+    if (diff > availableAngle) {
+        angle += availableAngle;
+        nextAngle -= availableAngle;
+    } else {
         angle = initialAngle;
         nextAngle -= diff;
     }
