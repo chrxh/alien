@@ -48,14 +48,15 @@ void EngineWorker::tryDrawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
-    double zoom)
+    double zoom,
+    float renderScale)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
         registerImageResource();
         _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
+            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom, renderScale);
         syncSimulationWithRenderingIfDesired();
     }
 }

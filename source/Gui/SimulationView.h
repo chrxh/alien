@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <filesystem>
 
 #include "Base/Singleton.h"
 #include "Base/Definitions.h"
@@ -36,6 +37,9 @@ public:
     void setMotionBlur(float value);
 
     void updateMotionBlur();
+
+    //renders the currently visible world region offscreen and writes it as PNG file
+    void savePicture(std::filesystem::path const& filename, IntVector2D const& resolution);
 
     static auto constexpr DefaultBrightness = 1.0f;
     static auto constexpr DefaultContrast = 1.0f;

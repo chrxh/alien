@@ -64,6 +64,8 @@ class WindowController;
 
 class ResizeWorldDialog;
 
+class SavePictureDialog;
+
 class _InspectorWindow;
 using InspectorWindow = std::shared_ptr<_InspectorWindow>;
 
