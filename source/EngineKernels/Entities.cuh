@@ -495,43 +495,40 @@ struct FreeCell
 
 struct Cell
 {
-    // General
+    // Members are ordered for cache optimization
     float usableEnergy;
     float rawEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;
+    uint32_t activationTime;
+    uint32_t headUpdateId;
+    uint32_t concatenationIndex;
 
-    // Creature/genome data
-    Creature* creature;
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;
     uint16_t geneIndex;
-    uint32_t concatenationIndex;
     uint8_t branchIndex;
-
-    // Neural network data
-    NeuralNet* neuralNetwork;
-    NeuralActivity neuralActivity;
-
-    // Cell type data
-    CellType cellType;
-    CellTypeData cellTypeData;
-    bool constructorAvailable;  // If true, constructor holds valid data
-    Constructor constructor;    // Optional constructor data
-    uint32_t activationTime;
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
-
-    // Process data
-    NeuralActivity futureNeuralActivity;
-    uint32_t headUpdateId;
     bool headCell;
+    bool constructorAvailable;  // If true, constructor holds valid data
+    CellType cellType;
+
+    Creature* creature;
+    NeuralNet* neuralNetwork;
+
+    NeuralActivity neuralActivity;
+    NeuralActivity futureNeuralActivity;
 
     // Events
     CellEvent event;
     uint8_t eventCounter;
-    float2 eventPos;
     uint8_t highlightIntensity;
+    float2 eventPos;
+
+    // Cell type data
+    CellTypeData cellTypeData;
+    Constructor constructor;  // Optional constructor data
 
     __device__ __inline__ bool isSameCreature(Cell* otherCell) { return otherCell->creature->id == this->creature->id; }
 
@@ -558,7 +555,7 @@ union ObjectTypeData
 
 struct Object
 {
-    // Hot fields first to keep them in one cache line.
+    // Members are ordered for cache optimization
     float2 pos;
     float2 vel;
     float density;
@@ -569,7 +566,12 @@ struct Object
     uint8_t color;
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
     uint8_t flags;     // bit0 = isStatic, bit1 = detached, bit2 = sticky
-    int locked;        // 0 = unlocked, 1 = locked
+
+    // Internal algorithm data
+    TempValue tempValue1;
+    TempValue tempValue2;
+
+    int locked;  // 0 = unlocked, 1 = locked
 
     // General
     uint64_t id;
@@ -582,10 +584,6 @@ struct Object
     __device__ __inline__ void setStatic(bool value) { flags = value ? (flags | 1) : (flags & ~1); }
     __device__ __inline__ void setDetached(bool value) { flags = value ? (flags | 2) : (flags & ~2); }
     __device__ __inline__ void setSticky(bool value) { flags = value ? (flags | 4) : (flags & ~4); }
-
-    // Internal algorithm data
-    TempValue tempValue1;
-    TempValue tempValue2;
 
     ObjectTypeData typeData;
 

@@ -7,12 +7,14 @@
 class BaseMap
 {
 public:
-    __inline__ __host__ __device__ void init(int2 const& size) { _size = size; }
-
-    __inline__ __host__ __device__ void correctPosition(int2& pos) const
+    __inline__ __host__ __device__ void init(int2 const& size)
     {
-        pos = {((pos.x % _size.x) + _size.x) % _size.x, ((pos.y % _size.y) + _size.y) % _size.y};
+        _size = size;
+        _sizeFloat = {toFloat(size.x), toFloat(size.y)};
+        _invSizeFloat = {1.0f / _sizeFloat.x, 1.0f / _sizeFloat.y};
     }
+
+    __inline__ __host__ __device__ void correctPosition(int2& pos) const { pos = {wrapCoordinate(pos.x, _size.x), wrapCoordinate(pos.y, _size.y)}; }
 
     __inline__ __host__ __device__ void correctPosition(float2& pos) const
     {
@@ -31,13 +33,13 @@ public:
 
     __inline__ __device__ void correctDirection(float2& disp) const
     {
-        disp.x = remainderf(disp.x, toFloat(_size.x));
-        disp.y = remainderf(disp.y, toFloat(_size.y));
+        disp.x = wrapDisplacement(disp.x, _sizeFloat.x, _invSizeFloat.x);
+        disp.y = wrapDisplacement(disp.y, _sizeFloat.y, _invSizeFloat.y);
     }
 
     __inline__ __device__ float2 getCorrectedDirection(float2 const& disp) const
     {
-        return {remainderf(disp.x, toFloat(_size.x)), remainderf(disp.y, toFloat(_size.y))};
+        return {wrapDisplacement(disp.x, _sizeFloat.x, _invSizeFloat.x), wrapDisplacement(disp.y, _sizeFloat.y, _invSizeFloat.y)};
     }
 
     __inline__ __device__ float getDistance(float2 const& p, float2 const& q) const
@@ -56,7 +58,25 @@ public:
     __inline__ __device__ int getMaxRadius() const { return min(_size.x, _size.y) / 4; }
 
 protected:
+    __inline__ __host__ __device__ static int wrapCoordinate(int value, int size)
+    {
+        if (value < 0) {
+            value += size;
+            return value >= 0 ? value : ((value % size) + size) % size;
+        }
+        if (value >= size) {
+            value -= size;
+            return value < size ? value : value % size;
+        }
+        return value;
+    }
+
+    // Minimum image convention, equivalent to remainderf(disp, size)
+    __inline__ __device__ static float wrapDisplacement(float disp, float size, float invSize) { return fmaf(-size, rintf(disp * invSize), disp); }
+
     int2 _size;
+    float2 _sizeFloat;
+    float2 _invSizeFloat;
 };
 
 class ObjectMap : public BaseMap
