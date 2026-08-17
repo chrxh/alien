@@ -10,7 +10,7 @@ struct PreprocessedSimulationData
 
     __host__ __inline__ void init(int2 const& worldSize)
     {
-        densityMap.init(worldSize, 8);
+        densityMap.init(worldSize);
         activeRadiationSources.init();
     }
 
