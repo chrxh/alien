@@ -162,12 +162,11 @@ __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 
 __inline__ __device__ float Math::angleOfVector(float2 const& v)
 {
-    auto lengthOfVector = length(v);
-    if (lengthOfVector < NEAR_ZERO) {
+    if (length(v) < NEAR_ZERO) {
         return 0;
     }
 
-    auto normalizedVy = -v.y / lengthOfVector;
+    auto normalizedVy = -v.y / length(v);
     normalizedVy = max(-1.0f, min(1.0f, normalizedVy));
     float angleSin = asinf(normalizedVy) * Const::RAD_TO_DEG;
     if (v.x >= 0.0f) {
@@ -414,14 +413,7 @@ __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 con
 
 __inline__ __device__ float Math::modulo(float value, float boundary)
 {
-    // fmodf is emulated in software, whereas floorf and the division are single instructions
-    auto result = value - boundary * floorf(value / boundary);
-    if (result < 0.0f) {
-        result += boundary;
-    } else if (result >= boundary) {
-        result -= boundary;
-    }
-    return result;
+    return fmodf(fmodf(value, boundary) + boundary, boundary);
 }
 
 __inline__ __device__ float3 Math::cross(float2 const& a, float2 const& b)

@@ -15,10 +15,8 @@ public:
     calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
     __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
 
-    // Blends a single layer value onto an accumulated result, so that callers computing their layer values on
-    // the fly do not need to keep them in an array
     __device__ __inline__ static float2
-    blendLayerValue(float2 const& accumulated, float2 const& layerValue, SimulationData const& data, float2 const& worldPos, int index);
+    calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], bool (&enabled)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
 
     // Return -1 for base
     template <typename T>
@@ -85,12 +83,23 @@ __device__ __inline__ float ParameterCalculator::calcParameter(
 }
 
 __device__ __inline__ float2
-ParameterCalculator::blendLayerValue(float2 const& accumulated, float2 const& layerValue, SimulationData const& data, float2 const& worldPos, int index)
+ParameterCalculator::calcParameter(
+    float2 const& baseValue,
+    float2 (&layerValues)[MAX_LAYERS],
+    bool (&enabled)[MAX_LAYERS],
+    SimulationData const& data,
+    float2 const& worldPos)
 {
-    float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y};
-    auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
-    auto weight = calcWeight(delta, index);
-    return accumulated * weight + layerValue * (1.0f - weight);
+    auto result = baseValue;
+    for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
+        if (enabled[i]) {
+            float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+            auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
+            auto weight = calcWeight(delta, i);
+            result = result * weight + layerValues[i] * (1.0f - weight);
+        }
+    }
+    return result;
 }
 
 __device__ __inline__ FloatColorRGB

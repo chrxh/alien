@@ -262,11 +262,6 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
-    // Every possible connection count divides 60, so reducing the timestep modulo 60 up front yields the same
-    // connection index while replacing a 64 bit division per cell by a 32 bit one
-    static_assert(MAX_OBJECT_CONNECTIONS <= 6, "60 must stay a multiple of every possible connection count");
-    auto const timestepMod = toInt(*data.timestep % 60);
-
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type != ObjectType_Cell) {
@@ -278,7 +273,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         //if (object->typeData.cell.cellState == CellState_Constructing || object->typeData.cell.cellState == CellState_Activating) {
         //    continue;
         //}
-        auto i = timestepMod % object->numConnections;
+        auto i = *data.timestep % object->numConnections;
         auto& connectedObject = object->connections[i].object;
         // Skip if connected object is not a Cell
         if (connectedObject->type != ObjectType_Cell) {
