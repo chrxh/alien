@@ -5,7 +5,7 @@
 class DensityMap
 {
 public:
-N    static int constexpr SlotSize = 8;
+    static int constexpr SlotSize = 8;
 
     __host__ __inline__ void init(int2 const& worldSize)
     {
