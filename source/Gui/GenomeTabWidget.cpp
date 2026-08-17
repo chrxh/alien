@@ -7,6 +7,7 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/DescValidationService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"
@@ -43,18 +44,16 @@ void _GenomeTabWidget::process()
     if (ImGui::BeginChild("CreatureTab")) {
         ImGui::PushID(_editData->id);
 
-        if (ImGui::BeginChild("Editors", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight), 0)) {
+        processBreadcrumb();
+
+        auto statusBarHeight = ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
+        if (ImGui::BeginChild("Editors", ImVec2(0, -statusBarHeight), 0)) {
             processEditors();
             DescValidationService::get().validateAndCorrect(_editData->genome);
         }
         ImGui::EndChild();
 
-        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->previewsHeight);
-
-        if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-            processPreview();
-        }
-        ImGui::EndChild();
+        processStatusBar();
 
         ImGui::PopID();
     }
@@ -179,8 +178,27 @@ _GenomeTabWidget::_GenomeTabWidget(
     _simulatedPreviewWidget = _PreviewWidget::create(genomeEditData, _editData);
 }
 
+void _GenomeTabWidget::processBreadcrumb()
+{
+    std::vector<std::string> items;
+    items.emplace_back(_editData->genome._name.empty() ? "(unnamed genome)" : _editData->genome._name);
+
+    if (_editData->selectedGeneIndex.has_value() && _editData->hasValidGeneIndex(_editData->selectedGeneIndex.value())) {
+        auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
+        items.emplace_back(gene._name.empty() ? "Gene " + std::to_string(_editData->selectedGeneIndex.value()) : gene._name);
+
+        if (_editData->isNodeLevelSelected()) {
+            items.emplace_back("Node " + std::to_string(_editData->getSelectedNodeIndex().value()));
+        }
+    }
+
+    AlienGui::Breadcrumb(items);
+    AlienGui::Separator();
+}
+
 void _GenomeTabWidget::processEditors()
 {
+    // Left field: genome properties, mutation rates and the gene/node tree
     _genomeEditorWidget->process();
 
     ImGui::SameLine();
@@ -188,16 +206,28 @@ void _GenomeTabWidget::processEditors()
     AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->genomeEditorWidth);
     ImGui::PopID();
 
+    // Middle field: the inspector follows the selection and shows either the gene or the node level
     ImGui::SameLine();
-    _geneEditorWidget->process();
+    if (ImGui::BeginChild("Inspector", ImVec2(_layoutData->inspectorWidth, 0))) {
+        if (_editData->isNodeLevelSelected()) {
+            _nodeEditorWidget->process();
+        } else {
+            _geneEditorWidget->process();
+        }
+    }
+    ImGui::EndChild();
 
     ImGui::SameLine();
     ImGui::PushID(2);
-    AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->geneEditorWidth);
+    AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->inspectorWidth);
     ImGui::PopID();
 
+    // Right field: the creature previews
     ImGui::SameLine();
-    _nodeEditorWidget->process();
+    if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0)) {
+        processPreview();
+    }
+    ImGui::EndChild();
 
     _editData->changesMade = !_editData->origGenome.equalWithoutId(_editData->genome);
 }
@@ -207,19 +237,37 @@ void _GenomeTabWidget::processPreview()
     _simulatedPreviewWidget->process();
 }
 
+void _GenomeTabWidget::processStatusBar()
+{
+    auto const& genome = _editData->genome;
+    auto numGenes = genome._genes.size();
+    auto numNodes = GenomeDescInfoService::get().getNumberOfNodes(genome);
+
+    std::string text =
+        std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes") + "  \xC2\xB7  " + std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes");
+    if (_editData->selectedGeneIndex.has_value()) {
+        text += "  \xC2\xB7  gene " + std::to_string(_editData->selectedGeneIndex.value());
+        if (_editData->isNodeLevelSelected()) {
+            text += ", node " + std::to_string(_editData->getSelectedNodeIndex().value());
+        }
+    }
+    AlienGui::Text(AlienGui::TextParameters().text(text).style(AlienGui::TextStyle::Decent));
+}
+
 void _GenomeTabWidget::doLayout()
 {
+    auto minColumnWidth = scale(240.0f);
+    auto minSectionHeight = scale(120.0f);
+
     // Initial layout setup
     if (!_layoutData->initialized) {
         auto width = ImGui::GetContentRegionAvail().x;
         auto height = ImGui::GetContentRegionAvail().y;
-        _layoutData->genomeEditorWidth = width / 3;
-        _layoutData->geneEditorWidth = width / 4;
-        _layoutData->previewsHeight = height / 2;
+        _layoutData->genomeEditorWidth = width / 4;
+        _layoutData->inspectorWidth = width / 4;
         _layoutData->desiredConfigurationPreviewWidth = width / 2;
-        _layoutData->geneListHeight = height / 4;
-        _layoutData->nodeListHeight = height / 4;
-        _layoutData->neuralNetEditorHeight = height / 4;
+        _layoutData->structureHeight = height / 2;
+        _layoutData->neuralNetEditorHeight = height / 3;
         _layoutData->initialized = true;
         _origLayoutData = _layoutData->clone();
 
@@ -235,35 +283,26 @@ void _GenomeTabWidget::doLayout()
             auto scalingX = windowSize.x / lastWindowSize->x;
             auto scalingY = windowSize.y / lastWindowSize->y;
             _layoutData->genomeEditorWidth *= scalingX;
-            _layoutData->geneEditorWidth *= scalingX;
-            _layoutData->previewsHeight *= scalingY;
+            _layoutData->inspectorWidth *= scalingX;
             _layoutData->desiredConfigurationPreviewWidth *= scalingX;
-            _layoutData->geneListHeight *= scalingY;
-            _layoutData->nodeListHeight *= scalingY;
+            _layoutData->structureHeight *= scalingY;
             _layoutData->neuralNetEditorHeight *= scalingY;
             *_origLayoutData = *_layoutData;
             return;
         }
     }
 
-    // Editor sizes changes
-    if (_origLayoutData->genomeEditorWidth != _layoutData->genomeEditorWidth) {
-        if (_layoutData->genomeEditorWidth < scale(200.0f) || _layoutData->geneEditorWidth < scale(200.0f)) {
-            *_layoutData = *_origLayoutData;
-            return;
-        }
-        _layoutData->geneEditorWidth += _origLayoutData->genomeEditorWidth - _layoutData->genomeEditorWidth;
-    }
-    if (_origLayoutData->geneEditorWidth != _layoutData->geneEditorWidth) {
-        auto nodeEditorWidth = ImGui::GetContentRegionAvail().x - _layoutData->genomeEditorWidth - _layoutData->geneEditorWidth;
-        if (_layoutData->geneEditorWidth < scale(200.0f) || nodeEditorWidth < scale(200.0f)) {
+    // Editor size changes
+    auto previewWidth = ImGui::GetContentRegionAvail().x - _layoutData->genomeEditorWidth - _layoutData->inspectorWidth;
+    if (_origLayoutData->genomeEditorWidth != _layoutData->genomeEditorWidth || _origLayoutData->inspectorWidth != _layoutData->inspectorWidth) {
+        if (_layoutData->genomeEditorWidth < minColumnWidth || _layoutData->inspectorWidth < minColumnWidth || previewWidth < minColumnWidth) {
             *_layoutData = *_origLayoutData;
             return;
         }
     }
-    if (_origLayoutData->previewsHeight != _layoutData->previewsHeight) {
-        auto editorHeight = ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight;
-        if (_layoutData->previewsHeight < scale(200.0f) || editorHeight < scale(200.0f)) {
+    if (_origLayoutData->structureHeight != _layoutData->structureHeight) {
+        auto headerHeight = ImGui::GetContentRegionAvail().y - _layoutData->structureHeight;
+        if (_layoutData->structureHeight < minSectionHeight || headerHeight < minSectionHeight) {
             *_layoutData = *_origLayoutData;
             return;
         }

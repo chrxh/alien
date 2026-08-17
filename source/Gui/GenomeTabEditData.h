@@ -5,6 +5,13 @@
 
 #include "Definitions.h"
 
+// Determines which of the two levels the inspector shows: a gene row or a node row was selected last
+enum class GenomeSelectionLevel
+{
+    Gene,
+    Node
+};
+
 struct _GenomeTabEditData
 {
     int id = 0;
@@ -14,6 +21,7 @@ struct _GenomeTabEditData
 
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
+    GenomeSelectionLevel selectionLevel = GenomeSelectionLevel::Gene;
     bool run = true;
     bool scheduleReload = false;
     int simulationSpeed = 50;  // In percent of full speed
@@ -57,6 +65,22 @@ struct _GenomeTabEditData
         } else {
             selectedNodeByGeneIndex.erase(geneIndex);
         }
+    }
+
+    // True if the inspector should show the node level: a node row is selected and still valid
+    bool isNodeLevelSelected() const { return selectionLevel == GenomeSelectionLevel::Node && getSelectedNodeIndex().has_value(); }
+
+    void selectGene(int geneIndex)
+    {
+        selectedGeneIndex = geneIndex;
+        selectionLevel = GenomeSelectionLevel::Gene;
+    }
+
+    void selectNode(int geneIndex, int nodeIndex)
+    {
+        selectedGeneIndex = geneIndex;
+        setSelectedNodeIndex(nodeIndex);
+        selectionLevel = GenomeSelectionLevel::Node;
     }
 
     GeneDesc& getSelectedGeneRef() { return genome._genes.at(selectedGeneIndex.value()); }

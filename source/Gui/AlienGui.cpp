@@ -1971,6 +1971,26 @@ void AlienGui::Chip(ChipParameters const& parameters)
     ImGui::Dummy(size);
 }
 
+void AlienGui::Breadcrumb(std::vector<std::string> const& items)
+{
+    auto innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x;
+    auto first = true;
+    for (auto const& item : items) {
+        if (!first) {
+            ImGui::SameLine(0, innerSpacing);
+            ImGui::PushStyleColor(ImGuiCol_Text, Const::TextFaintColor.Value);
+            ImGui::TextUnformatted(ICON_FA_ANGLE_RIGHT);
+            ImGui::PopStyleColor();
+            ImGui::SameLine(0, innerSpacing);
+        }
+        auto isLast = &item == &items.back();
+        ImGui::PushStyleColor(ImGuiCol_Text, isLast ? Const::TextBaseColor.Value : Const::TextDimColor.Value);
+        ImGui::TextUnformatted(item.c_str());
+        ImGui::PopStyleColor();
+        first = false;
+    }
+}
+
 bool AlienGui::Button(std::string const& text, float size)
 {
     /*

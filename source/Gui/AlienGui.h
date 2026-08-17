@@ -453,6 +453,9 @@ public:
     };
     static void Chip(ChipParameters const& parameters);
 
+    // Renders the selection path, e.g. genome > gene > node. The last item is emphasized.
+    static void Breadcrumb(std::vector<std::string> const& items);
+
     static void VerticalSeparator(float height = 23.0f);
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
