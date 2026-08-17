@@ -414,7 +414,6 @@ __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 con
 
 __inline__ __device__ float Math::modulo(float value, float boundary)
 {
-    // fmodf is emulated in software, whereas floorf and the division are single instructions
     auto result = value - boundary * floorf(value / boundary);
     if (result < 0.0f) {
         result += boundary;

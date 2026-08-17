@@ -384,8 +384,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
 
-        // Only fluid objects receive a boundary force. The condition is uniform for the whole block, so
-        // skipping here also spares the barriers and the cross-warp reduction below.
         if (object->type != ObjectType_Fluid) {
             continue;
         }
@@ -413,9 +411,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
         for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
             int2 scanPos = calcScanPos(cellPosInt, scanIndex, scanLength, invScanLength);
 
-            // The distance below is measured against the live position, which the overlap correction of
-            // calcFluidForces may have nudged slightly out of its map cell. A neighbor missed that way sits at
-            // the very edge of the interaction range, where the smoothing kernel and thus its force are zero.
             if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
                 continue;
             }
@@ -554,8 +549,6 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 Math::rotateQuarterClockwise(r1);
                 Math::rotateQuarterCounterClockwise(r2);
 
-                // The displacement of this iteration becomes the previous one of the next, so its angle is
-                // carried over instead of being calculated twice
                 auto angle = Math::angleOfVector(displacement);
                 auto theta = Math::getNormalizedAngle(angle - prevAngle, 0.0f);
                 prevAngle = angle;

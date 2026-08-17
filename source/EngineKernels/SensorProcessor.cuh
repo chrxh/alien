@@ -303,8 +303,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
         distance = Math::length(matchDelta);
     }
 
-    // The angle is derived from the direction only where a match is actually packed: angleOfVector uses asinf,
-    // which is expensive compared to the position test that discards the vast majority of the scanned positions.
+    // Calculate angle only when needed (due to expensive asinf)
     auto absAngle = [&] { return Math::getNormalizedAngle(Math::angleOfVector(matchDelta), -180.0f); };
     auto const& cell = &object->typeData.cell;
 
