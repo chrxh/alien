@@ -113,33 +113,6 @@ namespace
         result *= 3.0f / (2.0f * Const::PI);
         return result;
     }
-
-    // An object is registered in the map cell that contains its position, so all objects of a cell lie within
-    // its unit square. If that square is entirely farther away than the interaction cutoff, the cell cannot
-    // contribute and neither its map lookup nor its object chain has to be touched. The scan rectangle is a
-    // square around a circular interaction range, so this skips its corners.
-    __inline__ __device__ bool isCellInRange(float2 const& pos, int cellPosX, int cellPosY, float cutoffSquared)
-    {
-        auto deltaX = fmaxf(fmaxf(toFloat(cellPosX) - pos.x, pos.x - toFloat(cellPosX + 1)), 0.0f);
-        auto deltaY = fmaxf(fmaxf(toFloat(cellPosY) - pos.y, pos.y - toFloat(cellPosY + 1)), 0.0f);
-        return deltaX * deltaX + deltaY * deltaY <= cutoffSquared;
-    }
-
-    // Splits the linear scan index into a row and a column without an integer division, which the GPU
-    // emulates in software. The rounding of the float division is corrected by the following comparisons.
-    __inline__ __device__ int2 calcScanPos(int2 const& scanOrigin, int scanIndex, int scanLength, float invScanLength)
-    {
-        auto row = toInt(toFloat(scanIndex) * invScanLength);
-        auto column = scanIndex - row * scanLength;
-        if (column < 0) {
-            --row;
-            column += scanLength;
-        } else if (column >= scanLength) {
-            ++row;
-            column -= scanLength;
-        }
-        return {scanOrigin.x + column, scanOrigin.y + row};
-    }
 }
 
 __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
@@ -193,17 +166,9 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         float2 localCellPosDelta = {0, 0};
         float localDensity = 0;
 
-        auto const objectPos = object->pos;
-        auto const cutoffSquared = smoothingLength * smoothingLength * 4;
-
-        auto const invScanLength = 1.0f / toFloat(scanLength);
-
         auto records = data.objectMap.getRecords();
         for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
-            int2 scanPos = calcScanPos(cellPosInt, scanIndex, scanLength, invScanLength);
-            if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
-                continue;
-            }
+            int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
             data.objectMap.correctPosition(scanPos);
             int otherIndex = data.objectMap.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
@@ -384,41 +349,27 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
 
-        // Only fluid objects receive a boundary force. The condition is uniform for the whole block, so
-        // skipping here also spares the barriers and the cross-warp reduction below.
-        if (object->type != ObjectType_Fluid) {
-            continue;
-        }
-
         __shared__ int scanLength;
         __shared__ int2 cellPosInt;
         __shared__ float2 F_boundary;
 
         if (block.thread_rank() == 0) {
             F_boundary = {0, 0};
-            int radiusInt = ceilf(smoothingLength * 2);
-            scanLength = radiusInt * 2 + 1;
-            cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
+            if (object->type == ObjectType_Fluid) {
+                int radiusInt = ceilf(smoothingLength * 2);
+                scanLength = radiusInt * 2 + 1;
+                cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
+            } else {
+                scanLength = 0;
+            }
         }
         block.sync();
 
         float2 localF_boundary = {0, 0};
 
-        auto const objectPos = object->pos;
-        auto const cutoffSquared = smoothingLength * smoothingLength * 4;
-
-        auto const invScanLength = 1.0f / toFloat(scanLength);
-
         auto records = data.objectMap.getRecords();
         for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
-            int2 scanPos = calcScanPos(cellPosInt, scanIndex, scanLength, invScanLength);
-
-            // The distance below is measured against the live position, which the overlap correction of
-            // calcFluidForces may have nudged slightly out of its map cell. A neighbor missed that way sits at
-            // the very edge of the interaction range, where the smoothing kernel and thus its force are zero.
-            if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
-                continue;
-            }
+            int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
             data.objectMap.correctPosition(scanPos);
             int otherIndex = data.objectMap.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
@@ -530,7 +481,6 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
         auto cellStiffnessSquared = object->stiffness * object->stiffness;
 
         auto numConnections = object->numConnections;
-        auto prevAngle = calcAngularForces ? Math::angleOfVector(prevDisplacement) : 0.0f;
         for (int i = 0; i < numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
             auto connectedObjectStiffnessSquared = connectedObject->stiffness * connectedObject->stiffness;
@@ -541,8 +491,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
             auto actualDistance = Math::length(displacement);
             auto bondDistance = object->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            auto direction = actualDistance > NEAR_ZERO ? displacement / actualDistance : float2{1.0f, 0.0f};
-            force = force + direction * deviation * (cellStiffnessSquared + connectedObjectStiffnessSquared) / 6;
+            force = force + Math::getNormalized(displacement) * deviation * (cellStiffnessSquared + connectedObjectStiffnessSquared) / 6;
             if (calcAngularForces) {
                 auto lastIndex = (i + numConnections - 1) % numConnections;
                 auto lastConnectedObject = object->connections[lastIndex].object;
@@ -554,11 +503,9 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 Math::rotateQuarterClockwise(r1);
                 Math::rotateQuarterCounterClockwise(r2);
 
-                // The displacement of this iteration becomes the previous one of the next, so its angle is
-                // carried over instead of being calculated twice
                 auto angle = Math::angleOfVector(displacement);
+                auto prevAngle = Math::angleOfVector(prevDisplacement);
                 auto theta = Math::getNormalizedAngle(angle - prevAngle, 0.0f);
-                prevAngle = angle;
 
                 if (theta < referenceAngleFromPrevious) {
                     r1 *= -1.0f;
