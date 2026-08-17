@@ -58,11 +58,6 @@ public:
     __inline__ __device__ int getMaxRadius() const { return min(_size.x, _size.y) / 4; }
 
 protected:
-    // Integer division and remainderf are emulated in software on the GPU and both sit in the innermost
-    // loops of the neighborhood scans, so the torus wrapping avoids them.
-
-    // Equivalent to ((value % size) + size) % size, with a fast path for the single wrap step that covers
-    // every neighborhood scan and every position update
     __inline__ __host__ __device__ static int wrapCoordinate(int value, int size)
     {
         if (value < 0) {

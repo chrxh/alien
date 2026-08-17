@@ -495,9 +495,7 @@ struct FreeCell
 
 struct Cell
 {
-    // Scalars the per-timestep kernels touch, grouped into the leading cache lines. Everything behind
-    // cellTypeData is several hundred bytes away, so process data such as the head update and the future
-    // neural activity must not be placed there.
+    // Members are ordered for cache optimization
     float usableEnergy;
     float rawEnergy;
     float frontAngle;  // May be invalid
@@ -557,8 +555,7 @@ union ObjectTypeData
 
 struct Object
 {
-    // Hot fields first to keep them in one cache line. The accumulators tempValue1 and tempValue2 belong here
-    // too: the physics kernels read them together with pos and vel, so they must not land in a separate sector.
+    // Members are ordered for cache optimization
     float2 pos;
     float2 vel;
     float density;

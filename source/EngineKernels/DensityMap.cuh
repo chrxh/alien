@@ -5,9 +5,7 @@
 class DensityMap
 {
 public:
-    // Compile-time constant so that the slot lookups below become shifts instead of integer divisions,
-    // which are emulated in software on the GPU and sit in the sensor's ray marching
-    static int constexpr SlotSize = 8;
+N    static int constexpr SlotSize = 8;
 
     __host__ __inline__ void init(int2 const& worldSize)
     {
