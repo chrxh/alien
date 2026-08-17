@@ -5,14 +5,17 @@
 class DensityMap
 {
 public:
-    __host__ __inline__ void init(int2 const& worldSize, int slotSize)
+    // Compile-time constant so that the slot lookups below become shifts instead of integer divisions,
+    // which are emulated in software on the GPU and sit in the sensor's ray marching
+    static int constexpr SlotSize = 8;
+
+    __host__ __inline__ void init(int2 const& worldSize)
     {
-        _densityMapSize = {worldSize.x / slotSize, worldSize.y / slotSize};
+        _densityMapSize = {worldSize.x / SlotSize, worldSize.y / SlotSize};
         CudaMemoryManager::getInstance().acquireMemory<float>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap2);
         CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _solidDensityMap);
-        _slotSize = slotSize;
     }
 
     __host__ __inline__ void free()
@@ -36,9 +39,9 @@ public:
 
     __device__ __inline__ float getEnergyParticleDensity(float2 const& pos) const
     {
-        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(pos.x) / SlotSize + toInt(pos.y) / SlotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto slotSizeAsFlot = toFloat(_slotSize);
+            auto slotSizeAsFlot = toFloat(SlotSize);
             return _energyParticleDensityMap[index] / (slotSizeAsFlot * slotSizeAsFlot);
         }
         return 0.0f;
@@ -46,9 +49,9 @@ public:
 
     __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint16_t restrictToColors) const
     {
-        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(pos.x) / SlotSize + toInt(pos.y) / SlotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto slotSizeAsFlot = toFloat(_slotSize);
+            auto slotSizeAsFlot = toFloat(SlotSize);
             if (restrictToColors == 0x3ff) {
                 auto totalCount = (_freeCellDensityMap2[index] >> 16) & 0xff;
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
@@ -71,7 +74,7 @@ public:
 
     __device__ __inline__ uint32_t getSolidDensity(float2 const& pos) const
     {
-        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(pos.x) / SlotSize + toInt(pos.y) / SlotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             return _solidDensityMap[index];
         }
@@ -80,7 +83,7 @@ public:
 
     __device__ __inline__ void addParticle(Energy* particle)
     {
-        auto index = toInt(particle->pos.x) / _slotSize + toInt(particle->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(particle->pos.x) / SlotSize + toInt(particle->pos.y) / SlotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             atomicAdd(&_energyParticleDensityMap[index], particle->energy);
         }
@@ -88,7 +91,7 @@ public:
 
     __device__ __inline__ void addFreeCell(Object* object)
     {
-        auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(object->pos.x) / SlotSize + toInt(object->pos.y) / SlotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto color = calcMod(object->color, MAX_COLORS);
             if (color < 8) {
@@ -102,14 +105,13 @@ public:
 
     __device__ __inline__ void addSolidObject(Object* object)
     {
-        auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(object->pos.x) / SlotSize + toInt(object->pos.y) / SlotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             atomicAdd(&_solidDensityMap[index], 1u);
         }
     }
 
 private:
-    int _slotSize;
     int2 _densityMapSize;
     float* _energyParticleDensityMap;
     uint64_t* _freeCellDensityMap1;
