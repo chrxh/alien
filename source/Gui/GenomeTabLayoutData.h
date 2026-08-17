@@ -5,12 +5,10 @@
 struct _GenomeTabLayoutData
 {
     bool initialized = false;
-    float genomeEditorWidth = 0;
-    float geneEditorWidth = 0;
-    float previewsHeight = 0;
+    float genomeEditorWidth = 0;  // Left field: genome properties, mutation rates and the gene/node tree
+    float inspectorWidth = 0;     // Middle field: properties of the selected gene or node
     float desiredConfigurationPreviewWidth = 300.0f;
-    float geneListHeight = 0;
-    float nodeListHeight = 0;
+    float structureHeight = 0;  // Share of the left field taken by the gene/node tree
     float neuralNetEditorHeight = 0;
 
     GenomeTabLayoutData clone() const

@@ -144,14 +144,12 @@ void _PreviewWidget::processCreaturePreviews()
 
     // Display and edit previews
     auto phenotypeChanged = false;
-    if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+    // The sub-views are stacked vertically so that each one spans the full column width
+    if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0)) {
         auto space = ImGui::GetContentRegionAvail();
-        auto width = std::max(space.x / _creatureWidgets.size() - scale(7.0f), space.y);
+        auto height = std::max(space.y / toFloat(_creatureWidgets.size()) - scale(7.0f), space.x);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processCreaturePreview(phenotypeChanged, i, phenotypes.at(i), width);
-            if (i < size - 1) {
-                ImGui::SameLine();
-            }
+            processCreaturePreview(phenotypeChanged, i, phenotypes.at(i), height);
         }
     }
 
@@ -165,11 +163,11 @@ void _PreviewWidget::processCreaturePreviews()
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float height)
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
-    creatureWidget->process(phenotypeChanged, phenotype, _editData->genome, width);
+    creatureWidget->process(phenotypeChanged, phenotype, _editData->genome, height);
     ImGui::PopID();
 }
 
