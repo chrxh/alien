@@ -928,7 +928,6 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
         ImVec2(comboPos.x + style.FramePadding.x + colorFieldWidth2, comboPos.y + style.FramePadding.y + ImGui::GetTextLineHeight()),
         ImColor::HSV(h, s, v));
 
-
     if (enabled) {
         ImGui::EndDisabled();
     }
@@ -959,7 +958,6 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
     ImGui::PushID("color");
     AlienGui::ComboColor(AlienGui::ComboColorParameters().width(70.0f).textWidth(0).customizationColors(parameters._customizationColors), targetColor);
     ImGui::PopID();
-
 
     // Slider for transition age
     ImGui::PushID(2);
@@ -1971,26 +1969,6 @@ void AlienGui::Chip(ChipParameters const& parameters)
     ImGui::Dummy(size);
 }
 
-void AlienGui::Breadcrumb(std::vector<std::string> const& items)
-{
-    auto innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x;
-    auto first = true;
-    for (auto const& item : items) {
-        if (!first) {
-            ImGui::SameLine(0, innerSpacing);
-            ImGui::PushStyleColor(ImGuiCol_Text, Const::TextFaintColor.Value);
-            ImGui::TextUnformatted(ICON_FA_ANGLE_RIGHT);
-            ImGui::PopStyleColor();
-            ImGui::SameLine(0, innerSpacing);
-        }
-        auto isLast = &item == &items.back();
-        ImGui::PushStyleColor(ImGuiCol_Text, isLast ? Const::TextBaseColor.Value : Const::TextDimColor.Value);
-        ImGui::TextUnformatted(item.c_str());
-        ImGui::PopStyleColor();
-        first = false;
-    }
-}
-
 bool AlienGui::Button(std::string const& text, float size)
 {
     /*
@@ -2125,7 +2103,6 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters, bool* expandB
     if (parameters._highlightedSubString.has_value()) {
         hightlightSubstring(parameters._name, parameters._highlightedSubString.value(), refPos);
     }
-
 
     ImGui::PopFont();
     ImGui::PopStyleColor(3);

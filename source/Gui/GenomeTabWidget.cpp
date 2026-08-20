@@ -44,8 +44,6 @@ void _GenomeTabWidget::process()
     if (ImGui::BeginChild("CreatureTab")) {
         ImGui::PushID(_editData->id);
 
-        processBreadcrumb();
-
         auto statusBarHeight = ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
         if (ImGui::BeginChild("Editors", ImVec2(0, -statusBarHeight), 0)) {
             processEditors();
@@ -176,24 +174,6 @@ _GenomeTabWidget::_GenomeTabWidget(
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
     _simulatedPreviewWidget = _PreviewWidget::create(genomeEditData, _editData);
-}
-
-void _GenomeTabWidget::processBreadcrumb()
-{
-    std::vector<std::string> items;
-    items.emplace_back(_editData->genome._name.empty() ? "(unnamed genome)" : _editData->genome._name);
-
-    if (_editData->selectedGeneIndex.has_value() && _editData->hasValidGeneIndex(_editData->selectedGeneIndex.value())) {
-        auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
-        items.emplace_back(gene._name.empty() ? "Gene " + std::to_string(_editData->selectedGeneIndex.value()) : gene._name);
-
-        if (_editData->isNodeLevelSelected()) {
-            items.emplace_back("Node " + std::to_string(_editData->getSelectedNodeIndex().value()));
-        }
-    }
-
-    AlienGui::Breadcrumb(items);
-    AlienGui::Separator();
 }
 
 void _GenomeTabWidget::processEditors()
