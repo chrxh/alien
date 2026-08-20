@@ -224,7 +224,7 @@ void _GenomeTabWidget::processEditors()
 
     // Right field: the creature previews
     ImGui::SameLine();
-    if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0)) {
+    if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
         processPreview();
     }
     ImGui::EndChild();
