@@ -22,6 +22,12 @@
 #include "StyleRepository.h"
 #include "WindowController.h"
 
+namespace
+{
+    // Sub-views are stacked vertically and share the available height; below this they start to scroll
+    auto constexpr MinPreviewHeight = 200.0f;
+}
+
 PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
     return PreviewWidget(new _PreviewWidget(genomeEditData, editData));
@@ -147,7 +153,7 @@ void _PreviewWidget::processCreaturePreviews()
     // The sub-views are stacked vertically so that each one spans the full column width
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0)) {
         auto space = ImGui::GetContentRegionAvail();
-        auto height = std::max(space.y / toFloat(_creatureWidgets.size()) - scale(7.0f), space.x);
+        auto height = std::max(scale(MinPreviewHeight), space.y / toFloat(_creatureWidgets.size()) - scale(7.0f));
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
             processCreaturePreview(phenotypeChanged, i, phenotypes.at(i), height);
         }

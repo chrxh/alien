@@ -84,30 +84,15 @@ void StyleRepository::setup()
 
 void StyleRepository::setupSizes(ImGuiStyle& style) const
 {
-    // Spacing based on a 4 px scale
-    style.WindowPadding = {scale(12.0f), scale(12.0f)};
-    style.FramePadding = {scale(8.0f), scale(4.0f)};
-    style.CellPadding = {scale(8.0f), scale(3.0f)};
-    style.ItemSpacing = {scale(8.0f), scale(6.0f)};
-    style.ItemInnerSpacing = {scale(6.0f), scale(4.0f)};
-    style.IndentSpacing = scale(16.0f);
-
+    // Only the rounding is customized. Paddings and spacings stay at the ImGui defaults because the widget
+    // metrics of the code base are calibrated against them: panels reserve a fixed height for their bottom
+    // button row, so larger frames or item spacings push that row out of view and add spurious scrollbars.
     style.FrameRounding = scale(6.0f);
     style.ChildRounding = scale(8.0f);
     style.PopupRounding = scale(8.0f);
     style.GrabRounding = scale(6.0f);
     style.ScrollbarRounding = scale(6.0f);
     style.TabRounding = scale(6.0f);
-
-    style.WindowBorderSize = 1.0f;
-    style.ChildBorderSize = 0.0f;
-    style.FrameBorderSize = 1.0f;
-    style.PopupBorderSize = 1.0f;
-    style.TabBarBorderSize = 1.0f;
-
-    style.ScrollbarSize = scale(12.0f);
-    style.GrabMinSize = scale(12.0f);
-    style.SeparatorTextBorderSize = scale(1.0f);
 }
 
 void StyleRepository::setupColors(ImGuiStyle& style) const

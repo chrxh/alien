@@ -216,15 +216,14 @@ std::string _GenomeEditorWidget::getGeneTooltip(int geneIndex, GeneDesc const& g
 
 void _GenomeEditorWidget::processStructureButtons()
 {
-    auto hasGene = _editData->selectedGeneIndex.has_value();
-    auto nodeLevel = _editData->isNodeLevelSelected();
-
+    // The selection state is re-read before every button: an action can invalidate it within the same frame,
+    // e.g. removing the only node of a gene falls back to the gene level
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE).tooltip("Add gene"))) {
         onAddGene();
     }
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!hasGene);
+    ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value());
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_SQUARE).tooltip("Add node to the selected gene"))) {
         onAddNode();
     }
@@ -234,7 +233,8 @@ void _GenomeEditorWidget::processStructureButtons()
     AlienGui::VerticalSeparator(20.0f);
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!hasGene);
+    auto nodeLevel = _editData->isNodeLevelSelected();
+    ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value());
     if (AlienGui::ActionButton(
             AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE).tooltip(nodeLevel ? "Remove selected node" : "Remove selected gene"))) {
         if (nodeLevel) {
@@ -246,7 +246,8 @@ void _GenomeEditorWidget::processStructureButtons()
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    auto canMoveUpward = nodeLevel ? _editData->getSelectedNodeIndex().value() > 0 : hasGene && _editData->selectedGeneIndex.value() > 0;
+    nodeLevel = _editData->isNodeLevelSelected();
+    auto canMoveUpward = nodeLevel ? _editData->getSelectedNodeIndex().value() > 0 : _editData->selectedGeneIndex.value_or(0) > 0;
     ImGui::BeginDisabled(!canMoveUpward);
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
                                    .buttonText(ICON_FA_CHEVRON_CIRCLE_UP)
@@ -260,10 +261,11 @@ void _GenomeEditorWidget::processStructureButtons()
     ImGui::EndDisabled();
 
     ImGui::SameLine();
+    nodeLevel = _editData->isNodeLevelSelected();
     auto canMoveDownward = false;
     if (nodeLevel) {
         canMoveDownward = _editData->getSelectedNodeIndex().value() + 1 < toInt(_editData->getSelectedGeneRef()._nodes.size());
-    } else if (hasGene) {
+    } else if (_editData->selectedGeneIndex.has_value()) {
         canMoveDownward = _editData->selectedGeneIndex.value() + 1 < toInt(_editData->genome._genes.size());
     }
     ImGui::BeginDisabled(!canMoveDownward);
