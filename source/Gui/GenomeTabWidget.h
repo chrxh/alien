@@ -46,7 +46,6 @@ private:
         GenomeTabLayoutData const& layoutData = nullptr,
         std::optional<int> lineageId = std::nullopt);
 
-    void processBreadcrumb();
     void processEditors();
     void processPreview();
     void processStatusBar();
