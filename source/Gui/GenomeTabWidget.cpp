@@ -243,11 +243,13 @@ void _GenomeTabWidget::doLayout()
     if (!_layoutData->initialized) {
         auto width = ImGui::GetContentRegionAvail().x;
         auto height = ImGui::GetContentRegionAvail().y;
-        _layoutData->genomeEditorWidth = width / 4;
-        _layoutData->inspectorWidth = width / 4;
+        // The inspector carries the property rows and the neural net editor, so it gets the widest share
+        _layoutData->genomeEditorWidth = width * 0.25f;
+        _layoutData->inspectorWidth = width * 0.4f;
         _layoutData->desiredConfigurationPreviewWidth = width / 2;
-        _layoutData->structureHeight = height / 2;
-        _layoutData->neuralNetEditorHeight = height / 3;
+        // The tree and the neural net editor benefit from height, the property rows above them do not fill theirs
+        _layoutData->structureHeight = height * 0.6f;
+        _layoutData->neuralNetEditorHeight = height * 0.6f;
         _layoutData->initialized = true;
         _origLayoutData = _layoutData->clone();
 
