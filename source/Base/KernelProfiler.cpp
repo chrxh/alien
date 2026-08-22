@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <ranges>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 namespace
@@ -76,7 +77,21 @@ void KernelProfiler::close()
     _enabled = false;
 }
 
-void KernelProfiler::record(char const* name, std::chrono::steady_clock::duration duration)
+void KernelProfiler::setContext(std::string const& key, std::string const& value)
+{
+    if (!_enabled) {
+        return;
+    }
+    std::lock_guard lock(_mutex);
+    auto match = std::ranges::find(_context, key, &std::pair<std::string, std::string>::first);
+    if (match != _context.end()) {
+        match->second = value;
+    } else {
+        _context.emplace_back(key, value);
+    }
+}
+
+void KernelProfiler::record(char const* name, std::chrono::steady_clock::duration duration, int numBlocks, int threadsPerBlock)
 {
     if (!_enabled) {
         return;
@@ -87,6 +102,8 @@ void KernelProfiler::record(char const* name, std::chrono::steady_clock::duratio
     auto& entry = _entriesByCategory.at(static_cast<int>(_category))[name];
     ++entry.count;
     entry.totalNanoseconds += nanoseconds;
+    entry.numBlocks = numBlocks;
+    entry.threadsPerBlock = threadsPerBlock;
 
     auto now = std::chrono::steady_clock::now();
     if (now - _lastWriteTimepoint >= WriteInterval) {
@@ -125,6 +142,13 @@ std::string KernelProfiler::createReport() const
     std::ostringstream stream;
     stream << "Kernel profiling report (debug mode, wall-clock per kernel incl. launch/sync overhead)\n\n";
 
+    for (auto const& [key, value] : _context) {
+        stream << std::left << std::setw(32) << key << value << "\n";
+    }
+    if (!_context.empty()) {
+        stream << "\n";
+    }
+
     std::array<Entry, NumKernelCategories> totals;
     for (auto const& [total, entries] : std::views::zip(totals, _entriesByCategory)) {
         total = sumUp(entries);
@@ -156,14 +180,15 @@ std::string KernelProfiler::createReport() const
 
         stream << "\n" << getCategoryName(category) << "\n";
         stream << std::left << std::setw(4) << "#" << std::setw(52) << "kernel" << std::right << std::setw(10) << "calls" << std::setw(14) << "total [ms]"
-               << std::setw(12) << "avg [us]" << std::setw(9) << "share" << "\n";
+               << std::setw(12) << "avg [us]" << std::setw(9) << "share" << std::setw(10) << "blocks" << std::setw(9) << "threads" << "\n";
 
         int rank = 1;
         for (auto const& [name, entry] : sorted) {
             auto avgUs = entry.count != 0 ? entry.totalNanoseconds / 1.0e3 / static_cast<double>(entry.count) : 0.0;
             stream << std::left << std::setw(4) << rank << std::setw(52) << name << std::right << std::setw(10) << entry.count << std::setw(14) << std::fixed
                    << std::setprecision(3) << toMilliseconds(entry.totalNanoseconds) << std::setw(12) << std::setprecision(1) << avgUs << std::setw(8)
-                   << std::setprecision(1) << getShare(entry.totalNanoseconds, total.totalNanoseconds) << "%\n";
+                   << std::setprecision(1) << getShare(entry.totalNanoseconds, total.totalNanoseconds) << "%" << std::setw(9) << entry.numBlocks << std::setw(9)
+                   << entry.threadsPerBlock << "\n";
             ++rank;
         }
         stream << std::left << std::setw(4) << "" << std::setw(52) << "total" << std::right << std::setw(10) << total.count << std::setw(14) << std::fixed

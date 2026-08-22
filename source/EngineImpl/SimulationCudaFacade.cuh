@@ -130,6 +130,9 @@ private:
     void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
     void checkAndProcessSimulationParameterChanges();
 
+    // Adds the launch configuration and the entity counts to the profiling report; no-op outside debug mode
+    void reportProfilingContext();
+
     SimulationData getSimulationDataPtrCopy() const;
 
     GpuInfo _gpuInfo;
