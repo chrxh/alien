@@ -112,6 +112,18 @@ void KernelProfiler::record(char const* name, std::chrono::steady_clock::duratio
     }
 }
 
+double KernelProfiler::getAverageNanoseconds(std::string const& name) const
+{
+    std::lock_guard lock(_mutex);
+    for (auto const& entries : _entriesByCategory) {
+        auto match = entries.find(name);
+        if (match != entries.end() && match->second.count != 0) {
+            return match->second.totalNanoseconds / static_cast<double>(match->second.count);
+        }
+    }
+    return 0.0;
+}
+
 std::string KernelProfiler::getReport() const
 {
     std::lock_guard lock(_mutex);

@@ -9,6 +9,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "ConstructorHelper.cuh"
+#include "FluidKernelProfiler.cuh"
 #include "ObjectConnectionProcessor.cuh"
 
 namespace cg = cooperative_groups;
@@ -151,6 +152,24 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     auto blockPartition = calcBlockPartition(objects.getNumEntries());
     auto const& smoothingLength_base = cudaSimulationParameters.smoothingLength.value;
 
+    auto const profiling = cudaFluidKernelProfilingEnabled != 0;
+    __shared__ unsigned long long profileScanCells;
+    __shared__ unsigned long long profileRecords;
+    unsigned long long profileInitCycles = 0;
+    unsigned long long profileScanCycles = 0;
+    unsigned long long profileSyncCycles = 0;
+    unsigned long long profileTailCycles = 0;
+    unsigned long long profileObjects = 0;
+    unsigned long long threadScanCells = 0;
+    unsigned long long threadRecords = 0;
+    auto const profileBlockStartNs = profiling ? readGlobalTimer() : 0;
+    auto const profileBlockStartCycles = profiling ? readSmClock() : 0;
+    if (profiling && block.thread_rank() == 0) {
+        profileScanCells = 0;
+        profileRecords = 0;
+    }
+    auto profileMark = profiling ? readSmClock() : 0;
+
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
         auto smoothingLength = smoothingLength_base;
@@ -186,6 +205,12 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             density = 0;
         }
         block.sync();
+        if (profiling) {
+            auto const now = readSmClock();
+            profileInitCycles += now - profileMark;
+            profileMark = now;
+            ++profileObjects;
+        }
 
         // Per-thread accumulators
         float2 localF_pressure = {0, 0};
@@ -204,12 +229,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
                 continue;
             }
+            ++threadScanCells;
             data.objectMap.correctPosition(scanPos);
             int otherIndex = data.objectMap.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
                 if (otherIndex < 0) {
                     break;
                 }
+                ++threadRecords;
                 auto const& other = &records[otherIndex];
                 if ((isObjectFluid && other->type == ObjectType_Fluid) || (!isObjectFluid && other->type != ObjectType_Fluid)) {
                     auto posDelta = object->pos - other->pos;
@@ -286,6 +313,12 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             }
         }
 
+        if (profiling) {
+            auto const now = readSmClock();
+            profileScanCycles += now - profileMark;
+            profileMark = now;
+        }
+
         // Warp-level reduction followed by atomic accumulation across warps
         float sumF_pressure_x = cg::reduce(warp, localF_pressure.x, cg::plus<float>());
         float sumF_pressure_y = cg::reduce(warp, localF_pressure.y, cg::plus<float>());
@@ -306,6 +339,11 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             atomicAdd_block(&density, sumDensity);
         }
         block.sync();
+        if (profiling) {
+            auto const now = readSmClock();
+            profileSyncCycles += now - profileMark;
+            profileMark = now;
+        }
 
         // Calculate forces with fixed objects
         if (block.thread_rank() == 0) {
@@ -369,6 +407,35 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             object->tempValue2.as_float2.x = density;
         }
         block.sync();
+        if (profiling) {
+            auto const now = readSmClock();
+            profileTailCycles += now - profileMark;
+            profileMark = now;
+        }
+    }
+
+    if (profiling) {
+        auto const blockEndNs = readGlobalTimer();
+        auto const blockEndCycles = readSmClock();
+        atomicAdd(&profileScanCells, threadScanCells);
+        atomicAdd(&profileRecords, threadRecords);
+        block.sync();
+        if (block.thread_rank() == 0) {
+            auto& profile = cudaFluidKernelProfile;
+            atomicAdd(&profile.initCycles, profileInitCycles);
+            atomicAdd(&profile.scanCycles, profileScanCycles);
+            atomicAdd(&profile.syncAndReduceCycles, profileSyncCycles);
+            atomicAdd(&profile.tailCycles, profileTailCycles);
+            atomicAdd(&profile.blockCycles, blockEndCycles - profileBlockStartCycles);
+            atomicAdd(&profile.blockNanoseconds, blockEndNs - profileBlockStartNs);
+            atomicAdd(&profile.numBlocks, 1);
+            atomicAdd(&profile.numObjects, profileObjects);
+            atomicAdd(&profile.numScanCells, profileScanCells);
+            atomicAdd(&profile.numRecords, profileRecords);
+            if (blockIdx.x == 0) {
+                atomicAdd(&profile.numLaunches, 1);
+            }
+        }
     }
 }
 

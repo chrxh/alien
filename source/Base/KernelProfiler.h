@@ -58,6 +58,9 @@ public:
     // launch configuration and the entity counts, which the timings alone do not reveal.
     void setContext(std::string const& key, std::string const& value);
 
+    // Average wall-clock time of one launch, or 0 if the kernel was never recorded
+    double getAverageNanoseconds(std::string const& name) const;
+
     std::string getReport() const;
 
 private:

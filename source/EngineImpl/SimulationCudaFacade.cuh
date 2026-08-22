@@ -133,6 +133,9 @@ private:
     // Adds the launch configuration and the entity counts to the profiling report; no-op outside debug mode
     void reportProfilingContext();
 
+    // Adds the phase breakdown of the fluid kernel, read back from the counters the kernel fills
+    void reportFluidKernelProfile();
+
     SimulationData getSimulationDataPtrCopy() const;
 
     GpuInfo _gpuInfo;
