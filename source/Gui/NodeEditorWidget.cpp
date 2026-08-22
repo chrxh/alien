@@ -198,7 +198,7 @@ namespace
 
 void _NodeEditorWidget::processNodeAttributes()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Selected entity: Node " + std::to_string(_editData->getSelectedNodeIndex().value())).highlighted(true));
+    AlienGui::Group(AlienGui::GroupParameters().text("Selected Node " + std::to_string(_editData->getSelectedNodeIndex().value())).highlighted(true));
 
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
@@ -698,7 +698,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
 void _NodeEditorWidget::processNoSelection()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Selected entity"));
+    AlienGui::Group(AlienGui::GroupParameters().text("Nothing selected"));
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
