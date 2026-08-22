@@ -4,6 +4,8 @@
 #include <Base/AlienExceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
@@ -47,7 +49,9 @@ int main(int argc, char** argv)
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
 
         if (inDebugMode) {
-            log(Priority::Important, "DEBUG mode");
+            log(Priority::Important, "DEBUG mode: writing " + Const::ProfileFilename.string() + " and " + Const::TraceFilename.string());
+            KernelProfiler::get().init(Const::ProfileFilename);
+            KernelTracer::get().init(Const::TraceFilename);
         }
         if (useInterop) {
             log(Priority::Important, "INTEROP mode: Using CUDA-OpenGL interop for rendering");

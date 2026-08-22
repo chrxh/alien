@@ -13,6 +13,8 @@ namespace Const
     std::filesystem::path const ImagesPath = ResourcePath / "images";
 
     std::filesystem::path const LogFilename = "log.txt";
+    std::filesystem::path const ProfileFilename = "profile.txt";
+    std::filesystem::path const TraceFilename = "trace.txt";
     std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
     std::filesystem::path const AutosaveFile = AutosavePath / AutosaveFileWithoutPath;
     std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
