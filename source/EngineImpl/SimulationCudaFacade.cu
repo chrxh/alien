@@ -19,19 +19,24 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SpaceCalculator.h>
 
+#include <iomanip>
+#include <sstream>
 #include <EngineKernels/Base.cuh>
 #include <EngineKernels/ConstantMemory.cuh>
 #include <EngineKernels/CudaGeometryBuffers.cuh>
+
 #include <EngineKernels/CudaMemoryManager.cuh>
 #include <EngineKernels/CudaTOProvider.cuh>
 #include <EngineKernels/DataAccessKernels.cuh>
 #include <EngineKernels/EditKernels.cuh>
 #include <EngineKernels/Entities.cuh>
+#include <EngineKernels/FluidKernelProfiler.cuh>
 #include <EngineKernels/GarbageCollectorKernels.cuh>
 #include <EngineKernels/GeometryKernels.cuh>
 #include <EngineKernels/Map.cuh>
 #include <EngineKernels/SelectionResult.cuh>
 #include <EngineKernels/SimulationData.cuh>
+#include <EngineKernels/SimulationKernels.cuh>
 #include <EngineKernels/SimulationStatistics.cuh>
 #include <EngineKernels/StatisticsKernels.cuh>
 #include <EngineKernels/TOProvider.cuh>
@@ -881,10 +886,97 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
 }
 
+namespace
+{
+    std::string formatShare(uint64_t part, uint64_t total)
+    {
+        if (total == 0) {
+            return "-";
+        }
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(1) << 100.0 * static_cast<double>(part) / static_cast<double>(total) << "%";
+        return stream.str();
+    }
+
+    std::string formatRatio(double value)
+    {
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(2) << value;
+        return stream.str();
+    }
+}
+
+void _SimulationCudaFacade::reportFluidKernelProfile()
+{
+    FluidKernelProfile profile;
+    if (cudaMemcpyFromSymbol(&profile, cudaFluidKernelProfile, sizeof(FluidKernelProfile)) != cudaSuccess) {
+        return;
+    }
+    if (profile.numBlocks == 0 || profile.numLaunches == 0) {
+        return;
+    }
+    auto& profiler = KernelProfiler::get();
+    auto const launches = profile.numLaunches;
+
+    // Where the time inside the kernel goes. A dominant scan phase points at the map walk, a dominant sync phase at
+    // threads arriving at very different times, a dominant tail at the serial work of thread 0.
+    auto const phaseCycles = profile.initCycles + profile.scanCycles + profile.syncAndReduceCycles + profile.tailCycles;
+    profiler.setContext("fluid phase: init", formatShare(profile.initCycles, phaseCycles));
+    profiler.setContext("fluid phase: scan", formatShare(profile.scanCycles, phaseCycles));
+    profiler.setContext("fluid phase: sync + reduce", formatShare(profile.syncAndReduceCycles, phaseCycles));
+    profiler.setContext("fluid phase: tail", formatShare(profile.tailCycles, phaseCycles));
+
+    // Cycles the SM actually executed for a block against the wall-clock time the block was alive. A block that is
+    // resident but not running shows up as a large gap between the two.
+    cudaDeviceProp prop;
+    auto const haveProp = cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess;
+    if (haveProp && prop.clockRate > 0) {
+        auto const busyNanoseconds = 1.0e6 * static_cast<double>(profile.blockCycles) / static_cast<double>(prop.clockRate);
+        // Around 100% means the block was executing whenever it was alive. Far below means it was descheduled.
+        profiler.setContext("fluid block busy vs alive", formatShare(static_cast<uint64_t>(busyNanoseconds), profile.blockNanoseconds));
+    }
+    profiler.setContext("fluid block alive [us]", formatRatio(static_cast<double>(profile.blockNanoseconds) / 1.0e3 / static_cast<double>(profile.numBlocks)));
+
+    // How many blocks ran at the same time: the block lifetimes of one launch against its wall-clock time.
+    auto const kernelNanoseconds = profiler.getAverageNanoseconds("cudaNextTimestep_physics_calcFluidForces");
+    if (kernelNanoseconds > 0.0) {
+        auto const blockNanosecondsPerLaunch = static_cast<double>(profile.blockNanoseconds) / static_cast<double>(launches);
+        profiler.setContext("fluid blocks in flight", formatRatio(blockNanosecondsPerLaunch / kernelNanoseconds));
+    }
+
+    // The occupancy the hardware allows for this kernel, to compare against the blocks actually in flight.
+    int blocksPerMultiprocessor = 0;
+    auto const scanRectLength = ceilf(_settings.simulationParameters.smoothingLength.value * 2) * 2 + 1;
+    auto const threadsPerBlock = static_cast<int>(scanRectLength * scanRectLength);
+    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, threadsPerBlock, 0) == cudaSuccess
+        && haveProp) {
+        profiler.setContext(
+            "fluid occupancy [blocks/SM]",
+            std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
+    }
+
+    // Work actually performed, so that a slow GPU can be told apart from a denser simulation state.
+    profiler.setContext("fluid objects per launch", std::to_string(profile.numObjects / launches));
+    if (profile.numObjects > 0) {
+        profiler.setContext("fluid scan cells per object", formatRatio(static_cast<double>(profile.numScanCells) / static_cast<double>(profile.numObjects)));
+        profiler.setContext("fluid map records per object", formatRatio(static_cast<double>(profile.numRecords) / static_cast<double>(profile.numObjects)));
+    }
+    profiler.setContext("fluid blocks with work", std::to_string(profile.numBlocks / launches));
+}
+
 void _SimulationCudaFacade::reportProfilingContext()
 {
     if (!KernelProfiler::get().isEnabled()) {
         return;
+    }
+
+    static auto profilingArmed = false;
+    if (!profilingArmed) {
+        profilingArmed = true;
+        FluidKernelProfile empty{};
+        cudaMemcpyToSymbol(cudaFluidKernelProfile, &empty, sizeof(FluidKernelProfile));
+        auto const enabled = 1;
+        cudaMemcpyToSymbol(cudaFluidKernelProfilingEnabled, &enabled, sizeof(int));
     }
     auto& profiler = KernelProfiler::get();
     profiler.setContext("gpu", _gpuInfo.gpuModelName);
@@ -917,6 +1009,8 @@ void _SimulationCudaFacade::reportProfilingContext()
     // Objects per block is what the block-partitioned kernels actually loop over, so it decides their cost.
     auto const numBlocks = std::max(1, _settings.cudaSettings.numBlocks);
     profiler.setContext("objects per block", std::to_string(entities.objects.getNumEntries_host() / static_cast<uint64_t>(numBlocks)));
+
+    reportFluidKernelProfile();
 }
 
 void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()

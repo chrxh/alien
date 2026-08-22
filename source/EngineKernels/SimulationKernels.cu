@@ -53,6 +53,9 @@ __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
     ObjectProcessor::clearDensityMap(data);
 }
 
+__device__ FluidKernelProfile cudaFluidKernelProfile;
+__device__ int cudaFluidKernelProfilingEnabled;
+
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
     ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
