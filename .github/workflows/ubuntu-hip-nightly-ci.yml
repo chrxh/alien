@@ -1,4 +1,4 @@
-name: hip-nightly-build
+name: ubuntu-hip-nightly-build
 
 # Nightly build of ALIEN through the ROCm/HIP path (-DUSE_HIP=ON) to catch
 # regressions in the HIP compatibility layer that the default CUDA CI cannot see.
@@ -18,7 +18,7 @@ env:
   HIP_ARCH: gfx1100
 
 jobs:
-  hip-nightly-build:
+  ubuntu-hip-nightly-build:
     runs-on: [self-hosted, Linux]
 
     steps:
