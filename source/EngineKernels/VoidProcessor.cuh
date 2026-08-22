@@ -71,7 +71,7 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
             if (!pivotObject->tryLock()) {
                 continue;
             }
-            MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, pivotObject);
+            MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject);
             pivotObject->releaseLock();
             break;
         }

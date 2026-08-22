@@ -395,12 +395,16 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
         }
         if (connectedObject->typeData.cell.cellType == CellType_Muscle && connectedObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
             connectedObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
-            MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, hostObject);
 
-            // Update newObject position and direction for corrected angle
-            anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostObject, constructionData.shapeResult.angle);
-            newObjectDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
-            newObjectPos = hostObject->pos + newObjectDirection / 2;
+            // Only muscle cells pivoting on hostObject distort its angles
+            if (connectedObject->connections[0].object == hostObject) {
+                MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject);
+
+                // Update newObject position and direction for corrected angle
+                anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostObject, constructionData.shapeResult.angle);
+                newObjectDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
+                newObjectPos = hostObject->pos + newObjectDirection / 2;
+            }
         }
     }
 
@@ -457,13 +461,16 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     // For bending muscle cells: Reset front angle and restore initial angle
     if (lastObject->typeData.cell.cellType == CellType_Muscle && lastObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
         lastObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
-        MuscleProcessor::restoreInitialAngleFromPrevious(lastObject, hostObject);
+        // If hostObject is the pivot object of lastObject => restore initial angle on lastObject
+        if (lastObject->connections[0].object == hostObject) {
+            MuscleProcessor::restoreInitialAngleFromPrevious(lastObject);
+        }
     }
     if (hostObject->typeData.cell.cellType == CellType_Muscle && hostObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
         hostObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
-        // If lastObject is also pivot object of hostObject => also restore initial angle on lastObject
+        // If lastObject is also pivot object of hostObject => also restore initial angle on hostObject
         if (hostObject->connections[0].object == lastObject) {
-            MuscleProcessor::restoreInitialAngleFromPrevious(hostObject, lastObject);
+            MuscleProcessor::restoreInitialAngleFromPrevious(hostObject);
         }
     }
 

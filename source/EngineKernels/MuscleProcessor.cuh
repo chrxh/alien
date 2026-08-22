@@ -13,7 +13,7 @@ public:
     __inline__ __device__ static float getInitialAngleFromPrevious(
         Object* object,
         int connectionIndex);  // Return the angleFromPrevious without muscle distortions
-    __inline__ __device__ static void restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell);
+    __inline__ __device__ static void restoreInitialAngleFromPrevious(Object* muscleObject);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
@@ -87,15 +87,16 @@ __device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object*
     return object->connections[connectionIndex].angleFromPrevious;
 }
 
-__device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell)
+__device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Object* muscleObject)
 {
-    auto& muscle = muscleCell->typeData.cell.cellTypeData.muscle;
+    auto pivotObject = muscleObject->connections[0].object;
+    auto& muscle = muscleObject->typeData.cell.cellTypeData.muscle;
     if (muscle.mode == MuscleMode_AutoBending) {
-        restoreInitialAngleFromPreviousIntern(muscle.modeData.autoBending.initialAngle, muscleCell, affectedCell);
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.autoBending.initialAngle, muscleObject, pivotObject);
     } else if (muscle.mode == MuscleMode_ManualBending) {
-        restoreInitialAngleFromPreviousIntern(muscle.modeData.manualBending.initialAngle, muscleCell, affectedCell);
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.manualBending.initialAngle, muscleObject, pivotObject);
     } else if (muscle.mode == MuscleMode_AngleBending) {
-        restoreInitialAngleFromPreviousIntern(muscle.modeData.angleBending.initialAngle, muscleCell, affectedCell);
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.angleBending.initialAngle, muscleObject, pivotObject);
     }
 }
 
