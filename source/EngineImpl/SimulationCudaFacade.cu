@@ -819,6 +819,7 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
 
         auto simulationData = getSimulationDataPtrCopy();
         auto timestep = getCurrentTimestep();
+        reportProfilingContext();
         SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics, timestep, forceCellFunctionExecution);
         {
             std::lock_guard lock(_mutexForSimulationData);
@@ -878,6 +879,44 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
+}
+
+void _SimulationCudaFacade::reportProfilingContext()
+{
+    if (!KernelProfiler::get().isEnabled()) {
+        return;
+    }
+    auto& profiler = KernelProfiler::get();
+    profiler.setContext("gpu", _gpuInfo.gpuModelName);
+
+    cudaDeviceProp prop;
+    if (cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess) {
+        profiler.setContext(
+            "compute capability / SMs", std::to_string(prop.major) + "." + std::to_string(prop.minor) + " / " + std::to_string(prop.multiProcessorCount));
+        profiler.setContext("total GPU memory [MB]", std::to_string(prop.totalGlobalMem / (1024 * 1024)));
+    }
+    size_t freeMemory = 0;
+    size_t totalMemory = 0;
+    if (cudaMemGetInfo(&freeMemory, &totalMemory) == cudaSuccess) {
+        profiler.setContext("free GPU memory [MB]", std::to_string(freeMemory / (1024 * 1024)));
+    }
+    profiler.setContext("acquired GPU memory [MB]", std::to_string(CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024)));
+
+    profiler.setContext("numBlocks", std::to_string(_settings.cudaSettings.numBlocks));
+    profiler.setContext("world size", std::to_string(_settings.worldSizeX) + " x " + std::to_string(_settings.worldSizeY));
+    profiler.setContext("smoothing length", std::to_string(_settings.simulationParameters.smoothingLength.value));
+
+    auto const& entities = _cudaSimulationData->entities;
+    profiler.setContext(
+        "objects (used / capacity)", std::to_string(entities.objects.getNumEntries_host()) + " / " + std::to_string(entities.objects.getCapacity_host()));
+    profiler.setContext(
+        "energy particles", std::to_string(entities.energies.getNumEntries_host()) + " / " + std::to_string(entities.energies.getCapacity_host()));
+    profiler.setContext(
+        "heap (used / capacity)", std::to_string(entities.heap.getNumEntries_host()) + " / " + std::to_string(entities.heap.getCapacity_host()));
+
+    // Objects per block is what the block-partitioned kernels actually loop over, so it decides their cost.
+    auto const numBlocks = std::max(1, _settings.cudaSettings.numBlocks);
+    profiler.setContext("objects per block", std::to_string(entities.objects.getNumEntries_host() / static_cast<uint64_t>(numBlocks)));
 }
 
 void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()

@@ -7,6 +7,8 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "Singleton.h"
 
@@ -50,7 +52,11 @@ public:
     void close();
     bool isEnabled() const { return _enabled; }
 
-    void record(char const* name, std::chrono::steady_clock::duration duration);
+    void record(char const* name, std::chrono::steady_clock::duration duration, int numBlocks, int threadsPerBlock);
+
+    // Free-form key/value lines printed above the rankings. Diagnosing a report from a foreign machine needs the
+    // launch configuration and the entity counts, which the timings alone do not reveal.
+    void setContext(std::string const& key, std::string const& value);
 
     std::string getReport() const;
 
@@ -59,6 +65,8 @@ private:
     {
         uint64_t count = 0;
         double totalNanoseconds = 0.0;
+        int numBlocks = 0;
+        int threadsPerBlock = 0;
     };
     using Entries = std::unordered_map<std::string, Entry>;
 
@@ -72,5 +80,6 @@ private:
     std::filesystem::path _filename;
     mutable std::mutex _mutex;
     std::array<Entries, NumKernelCategories> _entriesByCategory;
+    std::vector<std::pair<std::string, std::string>> _context;
     std::chrono::steady_clock::time_point _lastWriteTimepoint;
 };

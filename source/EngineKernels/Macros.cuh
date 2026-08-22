@@ -107,7 +107,7 @@ void checkAndThrowError(T result)
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
         auto profDuration = std::chrono::steady_clock::now() - profStart; \
-        KernelProfiler::get().record(#func, profDuration); \
+        KernelProfiler::get().record(#func, profDuration, gpuSettings.numBlocks, 8); \
         KernelTracer::get().traceEnd(profDuration); \
     } else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
@@ -120,7 +120,7 @@ void checkAndThrowError(T result)
         func<<<1, 1>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
         auto profDuration = std::chrono::steady_clock::now() - profStart; \
-        KernelProfiler::get().record(#func, profDuration); \
+        KernelProfiler::get().record(#func, profDuration, 1, 1); \
         KernelTracer::get().traceEnd(profDuration); \
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
@@ -133,7 +133,7 @@ void checkAndThrowError(T result)
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
         auto profDuration = std::chrono::steady_clock::now() - profStart; \
-        KernelProfiler::get().record(#func, profDuration); \
+        KernelProfiler::get().record(#func, profDuration, gpuSettings.numBlocks, threadsPerBlock); \
         KernelTracer::get().traceEnd(profDuration); \
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
@@ -149,7 +149,7 @@ void checkAndThrowError(T result)
         func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
         auto profDuration = std::chrono::steady_clock::now() - profStart; \
-        KernelProfiler::get().record(#func, profDuration); \
+        KernelProfiler::get().record(#func, profDuration, numBlocks, 8); \
         KernelTracer::get().traceEnd(profDuration); \
     } else { \
         func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
@@ -162,7 +162,7 @@ void checkAndThrowError(T result)
         func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
         auto profDuration = std::chrono::steady_clock::now() - profStart; \
-        KernelProfiler::get().record(#func, profDuration); \
+        KernelProfiler::get().record(#func, profDuration, 1, 1); \
         KernelTracer::get().traceEnd(profDuration); \
     } else { \
         func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
@@ -175,7 +175,7 @@ void checkAndThrowError(T result)
         func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
         auto profDuration = std::chrono::steady_clock::now() - profStart; \
-        KernelProfiler::get().record(#func, profDuration); \
+        KernelProfiler::get().record(#func, profDuration, numBlocks, threadsPerBlock); \
         KernelTracer::get().traceEnd(profDuration); \
     } else { \
         func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
