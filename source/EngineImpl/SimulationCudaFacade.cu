@@ -9,6 +9,7 @@
 
 #include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
 
@@ -139,6 +140,8 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
 void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     checkAndProcessSimulationParameterChanges();
+
+    KernelProfiler::CategoryScope profilerScope(KernelCategory::Rendering);
     auto simulationData = getSimulationDataPtrCopy();
 
     GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
@@ -807,6 +810,8 @@ void _SimulationCudaFacade::testOnly_zeroTransferData()
 
 void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution)
 {
+    KernelProfiler::CategoryScope profilerScope(KernelCategory::Simulation);
+
     static int counter = 0;
 
     for (uint64_t i = 0; i < timesteps; ++i) {

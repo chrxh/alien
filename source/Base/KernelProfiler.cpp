@@ -3,12 +3,50 @@
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
+#include <ranges>
 #include <sstream>
 #include <vector>
 
 namespace
 {
     auto constexpr WriteInterval = std::chrono::seconds(1);
+
+    std::array<KernelCategory, NumKernelCategories> const AllCategories = {KernelCategory::Simulation, KernelCategory::Rendering, KernelCategory::Other};
+
+    std::string getCategoryName(KernelCategory category)
+    {
+        switch (category) {
+        case KernelCategory::Simulation:
+            return "Simulation";
+        case KernelCategory::Rendering:
+            return "Rendering";
+        default:
+            return "Other";
+        }
+    }
+
+    double toMilliseconds(double nanoseconds)
+    {
+        return nanoseconds / 1.0e6;
+    }
+
+    double getShare(double nanoseconds, double totalNanoseconds)
+    {
+        return totalNanoseconds != 0.0 ? 100.0 * nanoseconds / totalNanoseconds : 0.0;
+    }
+}
+
+thread_local KernelCategory KernelProfiler::_category = KernelCategory::Other;
+
+KernelProfiler::CategoryScope::CategoryScope(KernelCategory category)
+    : _previousCategory(_category)
+{
+    _category = category;
+}
+
+KernelProfiler::CategoryScope::~CategoryScope()
+{
+    _category = _previousCategory;
 }
 
 KernelProfiler::~KernelProfiler()
@@ -21,7 +59,9 @@ void KernelProfiler::init(std::filesystem::path const& filename)
     std::lock_guard lock(_mutex);
     _filename = filename;
     _enabled = true;
-    _entries.clear();
+    for (auto& entries : _entriesByCategory) {
+        entries.clear();
+    }
     _lastWriteTimepoint = std::chrono::steady_clock::now();
     writeReport();
 }
@@ -44,7 +84,7 @@ void KernelProfiler::record(char const* name, std::chrono::steady_clock::duratio
     auto nanoseconds = std::chrono::duration<double, std::nano>(duration).count();
 
     std::lock_guard lock(_mutex);
-    auto& entry = _entries[name];
+    auto& entry = _entriesByCategory.at(static_cast<int>(_category))[name];
     ++entry.count;
     entry.totalNanoseconds += nanoseconds;
 
@@ -70,34 +110,65 @@ void KernelProfiler::writeReport() const
     file << createReport();
 }
 
+KernelProfiler::Entry KernelProfiler::sumUp(Entries const& entries)
+{
+    Entry result;
+    for (auto const& entry : entries | std::views::values) {
+        result.count += entry.count;
+        result.totalNanoseconds += entry.totalNanoseconds;
+    }
+    return result;
+}
+
 std::string KernelProfiler::createReport() const
 {
-    std::vector<std::pair<std::string, Entry>> sorted(_entries.begin(), _entries.end());
-    std::ranges::sort(sorted, [](auto const& left, auto const& right) { return left.second.totalNanoseconds > right.second.totalNanoseconds; });
-
-    double totalNanoseconds = 0.0;
-    uint64_t totalCount = 0;
-    for (auto const& [name, entry] : sorted) {
-        totalNanoseconds += entry.totalNanoseconds;
-        totalCount += entry.count;
-    }
-
     std::ostringstream stream;
-    stream << "Kernel profiling report (debug mode, wall-clock per kernel incl. launch/sync overhead)\n";
-    stream << std::left << std::setw(4) << "#" << std::setw(52) << "kernel" << std::right << std::setw(10) << "calls" << std::setw(14) << "total [ms]"
-           << std::setw(12) << "avg [us]" << std::setw(9) << "share" << "\n";
+    stream << "Kernel profiling report (debug mode, wall-clock per kernel incl. launch/sync overhead)\n\n";
 
-    int rank = 1;
-    for (auto const& [name, entry] : sorted) {
-        auto totalMs = entry.totalNanoseconds / 1.0e6;
-        auto avgUs = entry.count != 0 ? entry.totalNanoseconds / 1.0e3 / static_cast<double>(entry.count) : 0.0;
-        auto share = totalNanoseconds != 0.0 ? 100.0 * entry.totalNanoseconds / totalNanoseconds : 0.0;
-        stream << std::left << std::setw(4) << rank << std::setw(52) << name << std::right << std::setw(10) << entry.count << std::setw(14) << std::fixed
-               << std::setprecision(3) << totalMs << std::setw(12) << std::setprecision(1) << avgUs << std::setw(8) << std::setprecision(1) << share << "%\n";
-        ++rank;
+    std::array<Entry, NumKernelCategories> totals;
+    for (auto const& [total, entries] : std::views::zip(totals, _entriesByCategory)) {
+        total = sumUp(entries);
     }
-    stream << std::left << std::setw(4) << "" << std::setw(52) << "total" << std::right << std::setw(10) << totalCount << std::setw(14) << std::fixed
-           << std::setprecision(3) << (totalNanoseconds / 1.0e6) << std::setw(12) << "" << std::setw(8) << "100.0" << "%\n";
+    auto grandTotal = Entry{};
+    for (auto const& total : totals) {
+        grandTotal.count += total.count;
+        grandTotal.totalNanoseconds += total.totalNanoseconds;
+    }
+
+    // Overview of the categories
+    stream << std::left << std::setw(56) << "category" << std::right << std::setw(10) << "calls" << std::setw(14) << "total [ms]" << std::setw(21) << "share"
+           << "\n";
+    for (auto const& [category, total] : std::views::zip(AllCategories, totals)) {
+        stream << std::left << std::setw(56) << getCategoryName(category) << std::right << std::setw(10) << total.count << std::setw(14) << std::fixed
+               << std::setprecision(3) << toMilliseconds(total.totalNanoseconds) << std::setw(20) << std::setprecision(1)
+               << getShare(total.totalNanoseconds, grandTotal.totalNanoseconds) << "%\n";
+    }
+    stream << std::left << std::setw(56) << "total" << std::right << std::setw(10) << grandTotal.count << std::setw(14) << std::fixed << std::setprecision(3)
+           << toMilliseconds(grandTotal.totalNanoseconds) << std::setw(20) << "100.0" << "%\n";
+
+    // One ranking per category, with the shares relative to that category
+    for (auto const& [category, total, entries] : std::views::zip(AllCategories, totals, _entriesByCategory)) {
+        if (entries.empty()) {
+            continue;
+        }
+        std::vector<std::pair<std::string, Entry>> sorted(entries.begin(), entries.end());
+        std::ranges::sort(sorted, [](auto const& left, auto const& right) { return left.second.totalNanoseconds > right.second.totalNanoseconds; });
+
+        stream << "\n" << getCategoryName(category) << "\n";
+        stream << std::left << std::setw(4) << "#" << std::setw(52) << "kernel" << std::right << std::setw(10) << "calls" << std::setw(14) << "total [ms]"
+               << std::setw(12) << "avg [us]" << std::setw(9) << "share" << "\n";
+
+        int rank = 1;
+        for (auto const& [name, entry] : sorted) {
+            auto avgUs = entry.count != 0 ? entry.totalNanoseconds / 1.0e3 / static_cast<double>(entry.count) : 0.0;
+            stream << std::left << std::setw(4) << rank << std::setw(52) << name << std::right << std::setw(10) << entry.count << std::setw(14) << std::fixed
+                   << std::setprecision(3) << toMilliseconds(entry.totalNanoseconds) << std::setw(12) << std::setprecision(1) << avgUs << std::setw(8)
+                   << std::setprecision(1) << getShare(entry.totalNanoseconds, total.totalNanoseconds) << "%\n";
+            ++rank;
+        }
+        stream << std::left << std::setw(4) << "" << std::setw(52) << "total" << std::right << std::setw(10) << total.count << std::setw(14) << std::fixed
+               << std::setprecision(3) << toMilliseconds(total.totalNanoseconds) << std::setw(12) << "" << std::setw(8) << "100.0" << "%\n";
+    }
 
     return stream.str();
 }
