@@ -84,9 +84,9 @@ jobs:
         if ($missing) { throw "Deployment payload is incomplete, missing: $($missing -join ', ')" }
 
         New-Item -ItemType Directory -Force -Path "deploy" | Out-Null
-        Compress-Archive -Path "$payload/*" -DestinationPath "deploy/alien-develop.zip" -Force
+        Compress-Archive -Path "$payload/*" -DestinationPath "deploy/alien-performance.zip" -Force
 
-    - name: Upload to FTP (overwrite alien-develop.zip)
+    - name: Upload to FTP (overwrite alien-performance.zip)
       shell: pwsh
       env:
         FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -94,9 +94,13 @@ jobs:
         FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
       run: |
-        $url = "ftp://$($env:FTP_HOST):21/$env:FTP_REMOTE_PATH"
+        # FTP_REMOTE_PATH targets the nightly archive; keep its directory and swap the file name.
+        $remoteDir = $env:FTP_REMOTE_PATH
+        if ($remoteDir -match '\.zip$') { $remoteDir = $remoteDir -replace '[^/]*$', '' }
+        if ($remoteDir -and -not $remoteDir.EndsWith('/')) { $remoteDir += '/' }
+        $url = "ftp://$($env:FTP_HOST):21/${remoteDir}alien-performance.zip"
         curl.exe --fail-with-body --silent --show-error `
           --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}" `
-          --upload-file "deploy/alien-develop.zip" `
+          --upload-file "deploy/alien-performance.zip" `
           $url
         if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }
