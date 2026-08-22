@@ -1,6 +1,7 @@
 #include "GenomeEditorWidget.h"
 
 #include <ranges>
+#include <set>
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -27,6 +28,10 @@ namespace
 {
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
+
+    // A gene lists one chip per customization color of its nodes, so the chips are kept compact
+    auto constexpr ColorChipSize = 9.0f;
+    auto constexpr ColorChipSpacing = 3.0f;
 }
 
 
@@ -104,12 +109,34 @@ void _GenomeEditorWidget::processStructureTree()
         auto rootHull = GenomeDescInfoService::get().getReferencedGenesInRootGeneHull(_editData->genome);
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
-        for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
-            auto geneIndex = toInt(index);
-            processGeneNode(geneIndex, gene, !rootHull.contains(geneIndex), scrollToSelection, customizationColors);
+        static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
+            | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+
+        if (ImGui::BeginTable("Structure list", 4, flags, ImVec2(-1, -1), 0.0f)) {
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
+            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
+            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
+            ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableHeadersRow();
+
+            for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+                auto geneIndex = toInt(index);
+                processGeneNode(geneIndex, gene, !rootHull.contains(geneIndex), scrollToSelection, customizationColors);
+            }
+            ImGui::EndTable();
         }
     }
     ImGui::EndChild();
+}
+
+namespace
+{
+    std::string toIndexList(std::vector<int> const& indices)
+    {
+        auto strings = indices | std::views::transform([](auto const& index) { return std::to_string(index); });
+        return boost::algorithm::join(std::vector(strings.begin(), strings.end()), ", ");
+    }
 }
 
 void _GenomeEditorWidget::processGeneNode(
@@ -120,9 +147,10 @@ void _GenomeEditorWidget::processGeneNode(
     ColorVector<FloatColorRGB> const& customizationColors)
 {
     ImGui::PushID(geneIndex);
+    ImGui::TableNextRow();
 
     auto isSelectedGene = _editData->selectedGeneIndex == geneIndex;
-    auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
+    auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen;
     if (isSelectedGene && _editData->selectionLevel == GenomeSelectionLevel::Gene) {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
@@ -130,15 +158,12 @@ void _GenomeEditorWidget::processGeneNode(
         ImGui::SetNextItemOpen(true);
     }
 
-    auto name = gene._name.empty() ? "Gene " + std::to_string(geneIndex) : gene._name;
-    if (geneIndex == 0) {
-        name += " (root)";
-    }
-
+    // Column 0: identity, followed by the optional name in decent parentheses
+    ImGui::TableNextColumn();
     if (isUnreachable) {
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextConflictColor.Value);
     }
-    auto isOpen = ImGui::TreeNodeEx("##gene", flags, "%s", name.c_str());
+    auto isOpen = ImGui::TreeNodeEx("##gene", flags, "Gene %d", geneIndex);
     if (isUnreachable) {
         ImGui::PopStyleColor();
     }
@@ -146,14 +171,38 @@ void _GenomeEditorWidget::processGeneNode(
         _editData->selectGene(geneIndex);
         _selectionChangedFromTree = true;
     }
-    AlienGui::Tooltip([this, geneIndex, &gene] { return getGeneTooltip(geneIndex, gene); });
+    if (!gene._name.empty()) {
+        ImGui::SameLine();
+        AlienGui::Text(AlienGui::TextParameters().text("(" + gene._name + ")").style(AlienGui::TextStyle::Decent));
+    }
     if (scrollToSelection && isSelectedGene) {
         ImGui::SetScrollHereY();
     }
 
-    ImGui::SameLine();
-    auto summary = Const::ConstructorShapeStrings.at(gene._shape) + "   " + std::to_string(gene._nodes.size());
-    AlienGui::Text(AlienGui::TextParameters().text(summary).style(AlienGui::TextStyle::Decent).rightAligned(true));
+    // Column 1: the customization colors in use, followed by node count and shape
+    ImGui::TableNextColumn();
+    std::set<int> usedColors;
+    for (auto const& node : gene._nodes) {
+        usedColors.insert(node._color);
+    }
+    for (auto const& usedColor : usedColors) {
+        float h, s, v;
+        AlienGui::ConvertRGBtoHSV(customizationColors.values[usedColor].toRgbColor(), h, s, v);
+        AlienGui::ColorChip(ImColor::HSV(h, s, v), ColorChipSize, ColorChipSpacing);
+    }
+    AlienGui::Text(std::to_string(gene._nodes.size()) + "-" + Const::ConstructorShapeStrings.at(gene._shape));
+
+    // Column 2: referenced genes
+    ImGui::TableNextColumn();
+    AlienGui::Text(toIndexList(GenomeDescInfoService::get().getReferences(gene)));
+
+    // Column 3: referencing genes
+    ImGui::TableNextColumn();
+    auto referencedBy = toIndexList(GenomeDescInfoService::get().getReferencedBy(_editData->genome, geneIndex));
+    if (referencedBy.empty() && geneIndex > 0) {
+        referencedBy = "-";
+    }
+    AlienGui::Text(referencedBy);
 
     if (isOpen) {
         for (auto const& [index, node] : gene._nodes | boost::adaptors::indexed(0)) {
@@ -172,46 +221,46 @@ void _GenomeEditorWidget::processNodeLeaf(
     ColorVector<FloatColorRGB> const& customizationColors)
 {
     ImGui::PushID(nodeIndex);
+    ImGui::TableNextRow();
 
-    auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAvailWidth;
+    auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllColumns;
     if (_editData->selectionLevel == GenomeSelectionLevel::Node && _editData->selectedGeneIndex == geneIndex
         && _editData->getSelectedNodeIndex() == nodeIndex) {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
 
-    // With homogeneous cell type every node of the gene shows the cell type of the first node
-    auto nodeType = gene._homogeneousCellType ? gene._nodes.front().getCellType() : node.getCellType();
-    ImGui::TreeNodeEx("##node", flags, "%d   %s", nodeIndex, Const::CellTypeStrings.at(nodeType).c_str());
+    // Column 0: identity
+    ImGui::TableNextColumn();
+    ImGui::TreeNodeEx("##node", flags, "Node %d", nodeIndex);
     if (ImGui::IsItemClicked()) {
         _editData->selectNode(geneIndex, nodeIndex);
         _selectionChangedFromTree = true;
     }
 
-    ImGui::SameLine();
+    // Column 1: cell type. With homogeneous cell type every node shows the cell type of the first node
+    ImGui::TableNextColumn();
     float h, s, v;
     AlienGui::ConvertRGBtoHSV(customizationColors.values[node._color].toRgbColor(), h, s, v);
-    AlienGui::ColorChip(ImColor::HSV(h, s, v));
+    AlienGui::ColorChip(ImColor::HSV(h, s, v), ColorChipSize, ColorChipSpacing);
+    auto nodeType = gene._homogeneousCellType ? gene._nodes.front().getCellType() : node.getCellType();
+    AlienGui::Text(Const::CellTypeStrings.at(nodeType));
 
-    ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(node._referenceAngle, 1)).style(AlienGui::TextStyle::Decent).rightAligned(true));
+    // Column 2: the gene this node constructs
+    ImGui::TableNextColumn();
+    if (node._constructor.has_value()) {
+        auto constructedGeneIndex = node._constructor->_geneIndex;
+        auto text = "Gene " + std::to_string(constructedGeneIndex);
+        auto const& genes = _editData->genome._genes;
+        if (_editData->hasValidGeneIndex(constructedGeneIndex) && !genes.at(constructedGeneIndex)._name.empty()) {
+            text += ": " + genes.at(constructedGeneIndex)._name;
+        }
+        AlienGui::Text(text);
+    }
+
+    // Column 3: referencing genes -- only genes have them
+    ImGui::TableNextColumn();
 
     ImGui::PopID();
-}
-
-std::string _GenomeEditorWidget::getGeneTooltip(int geneIndex, GeneDesc const& gene) const
-{
-    auto toIndexList = [](auto const& indices) {
-        auto strings = indices | std::views::transform([](auto const& index) { return std::to_string(index); });
-        return boost::algorithm::join(std::vector(strings.begin(), strings.end()), ", ");
-    };
-
-    auto references = toIndexList(GenomeDescInfoService::get().getReferences(gene));
-    auto referencedBy = toIndexList(GenomeDescInfoService::get().getReferencedBy(_editData->genome, geneIndex));
-
-    std::string result = "Gene " + std::to_string(geneIndex);
-    result += "\nReferences: " + (references.empty() ? "-" : references);
-    result += "\nReferenced by: " + (referencedBy.empty() ? "-" : referencedBy);
-    return result;
 }
 
 void _GenomeEditorWidget::processStructureButtons()
