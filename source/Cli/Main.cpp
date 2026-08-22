@@ -31,36 +31,26 @@ int main(int argc, char** argv)
         std::string inputFilename;
         std::string outputFilename;
         int timesteps = 0;
-        bool profile = false;
-        std::string traceFilename;  // Stays empty if --trace is given without a file name
+        bool debugMode = false;
         app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
         app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
         app.add_flag(
-            "-p,--profile",
-            profile,
-            "Enables debug mode and measures the wall-clock time of each simulation kernel. A profiling report is printed after the run. This bypasses CUDA "
-            "graphs and synchronizes after every kernel, so the absolute timings are slower than normal but reveal where the time is spent.");
-        auto traceOption = app.add_option(
-            "--trace,--trace-file",
-            traceFilename,
-            "Enables debug mode and writes the name and duration of every kernel call to a trace file, which keeps the last 100 calls. Intended for locating "
-            "kernels that hang or trigger a driver timeout: such a kernel is the entry that is still marked as running. The entries are written unbuffered, so "
-            "they survive a process that is killed instead of shut down. The file name is optional and defaults to kernel-trace.log.");
-        traceOption->expected(0, 1);
+            "-d,--debug",
+            debugMode,
+            "Enables debug mode: this bypasses CUDA graphs and synchronizes after every kernel, so the simulation runs slower than normal but each kernel can "
+            "be measured and traced individually. Two files are written: '"
+                + Const::ProfileFilename.string() + "' holds the accumulated wall-clock time per kernel and '" + Const::TraceFilename.string()
+                + "' holds the last kernel calls, which locates a kernel that hangs or triggers a driver timeout as the entry that is still marked as "
+                  "running.");
         CLI11_PARSE(app, argc, argv);
 
-        auto trace = traceOption->count() > 0;
-        if (profile || trace) {
+        if (debugMode) {
             GlobalSettings::get().setDebugMode(true);
-        }
-        if (profile) {
-            KernelProfiler::get().setEnabled(true);
-        }
-        if (trace) {
-            auto filename = !traceFilename.empty() ? traceFilename : std::string("kernel-trace.log");
-            KernelTracer::get().init(filename);
-            std::cout << "Writing kernel trace to " << std::filesystem::absolute(filename).string() << std::endl;
+            KernelProfiler::get().init(Const::ProfileFilename);
+            KernelTracer::get().init(Const::TraceFilename);
+            std::cout << "Debug mode: writing " << std::filesystem::absolute(Const::ProfileFilename).string() << " and "
+                      << std::filesystem::absolute(Const::TraceFilename).string() << std::endl;
         }
 
         // Read input
@@ -93,7 +83,7 @@ int main(int argc, char** argv)
         std::cout << "Simulation finished: " << StringHelper::format(timesteps) << " time steps, " << StringHelper::format(ms) << " ms, "
                   << StringHelper::format(tps, 1) << " TPS" << std::endl;
 
-        if (profile) {
+        if (debugMode) {
             std::cout << std::endl << KernelProfiler::get().getReport() << std::endl;
         }
 

@@ -1,17 +1,14 @@
 #include "KernelTracer.h"
 
-#include <iostream>
 #include <ranges>
 #include <format>
 
 #include "AlienExceptions.h"
-#include "StringHelper.h"
 
 namespace
 {
     auto constexpr NumEntries = 10;
     auto constexpr RecordSize = 160;
-    auto constexpr TimestepReportInterval = 100;
 
     // Record layout of the trace file
     auto constexpr HeaderRecord = 0;
@@ -30,16 +27,20 @@ namespace
 
 KernelTracer::~KernelTracer()
 {
+    close();
+}
+
+void KernelTracer::init(std::filesystem::path const& filename)
+{
+    std::lock_guard lock(_mutex);
     if (_file) {
         std::fclose(_file);
     }
-}
-
-void KernelTracer::init(std::string const& filename)
-{
-    _file = std::fopen(filename.c_str(), "w+b");
+    _callIndex = 0;
+    _pendingName = nullptr;
+    _file = std::fopen(filename.string().c_str(), "w+b");
     if (!_file) {
-        throw AlienException("Could not open kernel trace file '" + filename + "'.");
+        throw AlienException("Could not open kernel trace file '" + filename.string() + "'.");
     }
     std::setvbuf(_file, nullptr, _IONBF, 0);
 
@@ -53,6 +54,15 @@ void KernelTracer::init(std::string const& filename)
     std::fwrite(content.data(), 1, content.size(), _file);
 }
 
+void KernelTracer::close()
+{
+    std::lock_guard lock(_mutex);
+    if (_file) {
+        std::fclose(_file);
+        _file = nullptr;
+    }
+}
+
 void KernelTracer::setTimestep(uint64_t value)
 {
     if (!_file) {
@@ -60,9 +70,6 @@ void KernelTracer::setTimestep(uint64_t value)
     }
     std::lock_guard lock(_mutex);
     _timestep = value;
-    if (value % TimestepReportInterval == 0) {
-        reportProgress(value);
-    }
 }
 
 void KernelTracer::traceBegin(char const* name)
@@ -85,20 +92,6 @@ void KernelTracer::traceEnd(std::chrono::steady_clock::duration duration)
 
     std::lock_guard lock(_mutex);
     writeEntry(std::format("done {:>10.3f} ms", milliseconds), true);
-}
-
-void KernelTracer::reportProgress(uint64_t timestep)
-{
-    auto now = std::chrono::steady_clock::now();
-
-    std::cout << "Timestep " << StringHelper::format(timestep);
-    if (_lastReport) {
-        auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastReport->timepoint).count();
-        std::cout << " (" << StringHelper::format(timestep - _lastReport->timestep) << " steps in " << StringHelper::format(milliseconds) << " ms)";
-    }
-    std::cout << std::endl;
-
-    _lastReport = Report{now, timestep};
 }
 
 // The record at the top of the file always holds the most recent call, the ring below keeps the calls that completed

@@ -100,6 +100,8 @@ public:
     virtual void setGpuSettings_async(CudaSettings const& gpuSettings) = 0;
     virtual std::string getGpuName() const = 0;
 
+    virtual void setDebugMode(bool value) = 0;
+
     //************
     //* Statistics
     //************

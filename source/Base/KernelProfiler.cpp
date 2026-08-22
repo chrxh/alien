@@ -1,9 +1,40 @@
 #include "KernelProfiler.h"
 
 #include <algorithm>
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <vector>
+
+namespace
+{
+    auto constexpr WriteInterval = std::chrono::seconds(1);
+}
+
+KernelProfiler::~KernelProfiler()
+{
+    close();
+}
+
+void KernelProfiler::init(std::filesystem::path const& filename)
+{
+    std::lock_guard lock(_mutex);
+    _filename = filename;
+    _enabled = true;
+    _entries.clear();
+    _lastWriteTimepoint = std::chrono::steady_clock::now();
+    writeReport();
+}
+
+void KernelProfiler::close()
+{
+    std::lock_guard lock(_mutex);
+    if (!_enabled) {
+        return;
+    }
+    writeReport();
+    _enabled = false;
+}
 
 void KernelProfiler::record(char const* name, std::chrono::steady_clock::duration duration)
 {
@@ -16,18 +47,31 @@ void KernelProfiler::record(char const* name, std::chrono::steady_clock::duratio
     auto& entry = _entries[name];
     ++entry.count;
     entry.totalNanoseconds += nanoseconds;
-}
 
-void KernelProfiler::reset()
-{
-    std::lock_guard lock(_mutex);
-    _entries.clear();
+    auto now = std::chrono::steady_clock::now();
+    if (now - _lastWriteTimepoint >= WriteInterval) {
+        _lastWriteTimepoint = now;
+        writeReport();
+    }
 }
 
 std::string KernelProfiler::getReport() const
 {
     std::lock_guard lock(_mutex);
+    return createReport();
+}
 
+void KernelProfiler::writeReport() const
+{
+    std::ofstream file(_filename, std::ios_base::trunc);
+    if (!file.is_open()) {
+        return;
+    }
+    file << createReport();
+}
+
+std::string KernelProfiler::createReport() const
+{
     std::vector<std::pair<std::string, Entry>> sorted(_entries.begin(), _entries.end());
     std::ranges::sort(sorted, [](auto const& left, auto const& right) { return left.second.totalNanoseconds > right.second.totalNanoseconds; });
 
