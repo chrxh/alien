@@ -5,6 +5,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/Resources.h>
+
 #include <EngineInterface/CellTypeConstants.h>
 
 namespace Const
@@ -23,10 +25,12 @@ namespace Const
         "configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click "
         "'Options,' and choose 'High performance'.\n\nIf these conditions are not met, ALIEN may crash unexpectedly.\n\n"
         "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-d' (or enable 'Debug mode' in the "
-        "settings menu), try to reproduce the error and then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.\n\n"
-        "Debug mode writes two further files next to log.txt that are worth attaching as well: profile.txt lists how much time each simulation kernel took, "
-        "and trace.txt holds the last kernel calls. If the error is a freeze or a driver timeout, trace.txt names the responsible kernel as the entry that is "
-        "still marked as running.";
+        "settings menu), try to reproduce the error and then create a GitHub issue on https://github.com/chrxh/alien/issues where the "
+        + Const::LogFilename.string() + " is attached.\n\n"
+        + "Debug mode writes two further files next to " + Const::LogFilename.string() + " that are worth attaching as well: "
+        + Const::ProfileFilename.string() + " lists how much time each simulation kernel took, and " + Const::TraceFilename.string()
+        + " holds the last kernel calls. If the error is a freeze or a driver timeout, " + Const::TraceFilename.string()
+        + " names the responsible kernel as the entry that is still marked as running.";
 
     std::string const NotAllowedCharacters = "Your input contains not allowed characters.";
 
