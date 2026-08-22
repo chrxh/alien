@@ -68,7 +68,7 @@ Further information and artwork:
 * [Discord](https://discord.gg/7bjyZdXXQ2)
 
 # 🖥️ Minimal system requirements
-An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
+An Nvidia graphics card with compute capability 7.5 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # 💽 Installer
 Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2025-09-06)
@@ -133,7 +133,7 @@ runs the simulation file `example.sim` for 1000 time steps.
 # 🔎 Troubleshooting
 
 Please make sure that:
-1) You have an NVIDIA graphics card with compute capability 6.0 or higher (for example GeForce 10 series).
+1) You have an NVIDIA graphics card with compute capability 7.5 or higher (for example GeForce RTX 20 series).
 2) You have the latest NVIDIA graphics driver installed.
 3) The name of the installation directory (including the parent directories) should not contain non-English characters. If this is not fulfilled, please re-install ALIEN to a suitable directory. Do not move the files manually. If you use Windows, make also sure that you install ALIEN with a Windows user that contains no non-English characters. If this is not the case, a new Windows user could be created to solve this problem.
 4) ALIEN needs write access to its own directory. This should normally be the case.
