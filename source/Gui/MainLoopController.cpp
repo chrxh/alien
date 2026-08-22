@@ -570,6 +570,10 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("CUDA settings"), [&] { GpuSettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Display settings").keyAlt(true).key(ImGuiKey_V), [&] { DisplaySettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Network settings").keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });
+    AlienGui::MenuSeparator();
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Debug mode").selected(GlobalSettings::get().isDebugMode()).closeMenuWhenItemClicked(false), [&] {
+        _SimulationFacade::get()->setDebugMode(!GlobalSettings::get().isDebugMode());
+    });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_LIFE_RING "  Help ", _helpMenuOpened);

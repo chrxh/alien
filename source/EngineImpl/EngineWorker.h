@@ -89,6 +89,7 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
     void setGpuSettings_async(CudaSettings const& gpuSettings);
+    void setDebugMode(bool value);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 

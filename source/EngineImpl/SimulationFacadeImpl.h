@@ -78,6 +78,7 @@ public:
     CudaSettings getGpuSettings() const override;
     CudaSettings getOriginalGpuSettings() const override;
     void setGpuSettings_async(CudaSettings const& gpuSettings) override;
+    void setDebugMode(bool value) override;
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
 

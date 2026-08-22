@@ -4,6 +4,10 @@
 #include <chrono>
 
 #include <Base/ExitScopeGuard.h>
+#include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
+#include <Base/Resources.h>
 
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GeometryBuffers.h>
@@ -279,6 +283,20 @@ void EngineWorker::setGpuSettings_async(CudaSettings const& gpuSettings)
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
     _updateGpuSettingsJob = gpuSettings;
+}
+
+void EngineWorker::setDebugMode(bool value)
+{
+    EngineWorkerGuard access(this);
+
+    GlobalSettings::get().setDebugMode(value);
+    if (value) {
+        KernelProfiler::get().init(Const::ProfileFilename);
+        KernelTracer::get().init(Const::TraceFilename);
+    } else {
+        KernelProfiler::get().close();
+        KernelTracer::get().close();
+    }
 }
 
 void EngineWorker::applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius)

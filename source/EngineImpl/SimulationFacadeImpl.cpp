@@ -282,6 +282,11 @@ void _SimulationFacadeImpl::setGpuSettings_async(CudaSettings const& gpuSettings
     _worker.setGpuSettings_async(gpuSettings);
 }
 
+void _SimulationFacadeImpl::setDebugMode(bool value)
+{
+    _worker.setDebugMode(value);
+}
+
 void _SimulationFacadeImpl::applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius)
 {
     _worker.applyForce_async(start, end, force, radius);
