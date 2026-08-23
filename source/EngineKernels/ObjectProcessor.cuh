@@ -146,10 +146,16 @@ namespace
 __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
 {
     auto block = cg::this_thread_block();
-    auto warp = cg::tiled_partition<32>(block);
+    auto warp = cg::tiled_partition<WARP_SIZE>(block);
+    auto const warpIndexInBlock = toInt(block.thread_rank()) / WARP_SIZE;
+
+    // The only state the lanes of a warp have to share: barrier objects are found by whichever lane happens to scan
+    // their map cell. Everything else each lane derives for itself, which is cheaper than a slot plus a barrier.
+    __shared__ Object* fixedCells[FLUID_KERNEL_WARPS][MaxBarrierCellsForCollision];
+    __shared__ int numFixedObjects[FLUID_KERNEL_WARPS];
 
     auto& objects = data.entities.objects;
-    auto blockPartition = calcBlockPartition(objects.getNumEntries());
+    auto const warpPartition = calcWarpPartition(objects.getNumEntries());
     auto const& smoothingLength_base = cudaSimulationParameters.smoothingLength.value;
 
     auto const profiling = cudaFluidKernelProfilingEnabled != 0;
@@ -165,14 +171,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     unsigned long long threadScanCells = 0;
     unsigned long long threadRecords = 0;
     auto const profileBlockStartNs = profiling ? readGlobalTimer() : 0;
-    auto const profileBlockStartCycles = profiling ? readSmClock() : 0;
+    auto const profileWarpStartCycles = profiling ? readSmClock() : 0;
     if (profiling && block.thread_rank() == 0) {
         profileScanCells = 0;
         profileRecords = 0;
     }
-    auto profileMark = profiling ? readSmClock() : 0;
+    auto profileMark = profileWarpStartCycles;
 
-    for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
+    for (int objectIndex = warpPartition.startIndex; objectIndex <= warpPartition.endIndex; ++objectIndex) {
         auto const profileObjectStartCycles = profileMark;
         auto& object = objects.at(objectIndex);
         auto smoothingLength = smoothingLength_base;
@@ -181,33 +187,16 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             smoothingLength *= 2.0f;  // Use larger smoothing length for fluids
         }
 
-        __shared__ float cellFusionVelocity;
+        auto const cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
-        __shared__ int scanLength;
-        __shared__ int2 cellPosInt;
+        int const radiusInt = ceilf(smoothingLength * 2);
+        int const scanLength = radiusInt * 2 + 1;
+        int2 const cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
 
-        __shared__ Object* fixedCells[MaxBarrierCellsForCollision];
-        __shared__ int numFixedObjects;
-
-        __shared__ float2 F_pressure;
-        __shared__ float2 F_viscosity;
-        __shared__ float2 cellPosDelta;
-        __shared__ float density;
-
-        if (block.thread_rank() == 0) {
-            cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
-
-            int radiusInt = ceilf(smoothingLength * 2);
-            scanLength = radiusInt * 2 + 1;
-            cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
-
-            numFixedObjects = 0;
-            F_pressure = {0, 0};
-            F_viscosity = {0, 0};
-            cellPosDelta = {0, 0};
-            density = 0;
+        if (warp.thread_rank() == 0) {
+            numFixedObjects[warpIndexInBlock] = 0;
         }
-        block.sync();
+        warp.sync();
         if (profiling) {
             auto const now = readSmClock();
             profileInitCycles += now - profileMark;
@@ -227,7 +216,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         auto const invScanLength = 1.0f / toFloat(scanLength);
 
         auto records = data.objectMap.getRecords();
-        for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
+        for (int scanIndex = toInt(warp.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += warp.size()) {
             int2 scanPos = calcScanPos(cellPosInt, scanIndex, scanLength, invScanLength);
             if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
                 continue;
@@ -254,9 +243,9 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     }
 
                     if (other->isStatic() && adaptedDistance <= smoothingLength * 2 && object->detached() + other->detached() != 1) {
-                        auto index = atomicAdd(&numFixedObjects, 1);
+                        auto index = atomicAdd(&numFixedObjects[warpIndexInBlock], 1);
                         if (index < MaxBarrierCellsForCollision) {
-                            fixedCells[index] = other->self;
+                            fixedCells[warpIndexInBlock][index] = other->self;
                         }
                     }
 
@@ -285,7 +274,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                             if (!isConnected) {
 
                                 // Calc forces: for simplicity pressure = density
-                                auto const& cellPressure = object->density;       // Optimization: using the density from last time step
+                                auto const& cellPressure = object->density;        // Optimization: using the density from last time step
                                 auto const& otherObjectPressure = other->density;  // Optimization: using the density from last time step
                                 auto factor = cellPressure / (object->density * object->density) + otherObjectPressure / (other->density * other->density);
 
@@ -322,26 +311,13 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             profileMark = now;
         }
 
-        // Warp-level reduction followed by atomic accumulation across warps
-        float sumF_pressure_x = cg::reduce(warp, localF_pressure.x, cg::plus<float>());
-        float sumF_pressure_y = cg::reduce(warp, localF_pressure.y, cg::plus<float>());
-        float sumF_viscosity_x = cg::reduce(warp, localF_viscosity.x, cg::plus<float>());
-        float sumF_viscosity_y = cg::reduce(warp, localF_viscosity.y, cg::plus<float>());
-        float sumCellPosDelta_x = cg::reduce(warp, localCellPosDelta.x, cg::plus<float>());
-        float sumCellPosDelta_y = cg::reduce(warp, localCellPosDelta.y, cg::plus<float>());
-        float sumDensity = cg::reduce(warp, localDensity, cg::plus<float>());
+        // The warp owns the object, so its reduction already yields the total; no accumulation across warps is needed.
+        float2 const F_pressure{cg::reduce(warp, localF_pressure.x, cg::plus<float>()), cg::reduce(warp, localF_pressure.y, cg::plus<float>())};
+        float2 const F_viscosity{cg::reduce(warp, localF_viscosity.x, cg::plus<float>()), cg::reduce(warp, localF_viscosity.y, cg::plus<float>())};
+        float2 const cellPosDelta{cg::reduce(warp, localCellPosDelta.x, cg::plus<float>()), cg::reduce(warp, localCellPosDelta.y, cg::plus<float>())};
+        float const density = cg::reduce(warp, localDensity, cg::plus<float>());
 
-        // Each warp leader adds its warp's sum to shared memory
-        if (warp.thread_rank() == 0) {
-            atomicAdd_block(&F_pressure.x, sumF_pressure_x);
-            atomicAdd_block(&F_pressure.y, sumF_pressure_y);
-            atomicAdd_block(&F_viscosity.x, sumF_viscosity_x);
-            atomicAdd_block(&F_viscosity.y, sumF_viscosity_y);
-            atomicAdd_block(&cellPosDelta.x, sumCellPosDelta_x);
-            atomicAdd_block(&cellPosDelta.y, sumCellPosDelta_y);
-            atomicAdd_block(&density, sumDensity);
-        }
-        block.sync();
+        warp.sync();
         if (profiling) {
             auto const now = readSmClock();
             profileSyncCycles += now - profileMark;
@@ -349,15 +325,15 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         }
 
         // Calculate forces with fixed objects
-        if (block.thread_rank() == 0) {
-            numFixedObjects = min(MaxBarrierCellsForCollision, numFixedObjects);
-            if (numFixedObjects > 0) {
+        if (warp.thread_rank() == 0) {
+            auto const numFixedObjectsOfWarp = min(MaxBarrierCellsForCollision, numFixedObjects[warpIndexInBlock]);
+            if (numFixedObjectsOfWarp > 0) {
 
                 // Calc forces only to the closest fixed object
                 Object* closestFixedObject = nullptr;
                 float closestFixedObjectDistance;
-                for (int i = 0; i < numFixedObjects; ++i) {
-                    auto const& fixedCell = fixedCells[i];
+                for (int i = 0; i < numFixedObjectsOfWarp; ++i) {
+                    auto const& fixedCell = fixedCells[warpIndexInBlock][i];
                     auto distance = data.objectMap.getDistance(object->pos, fixedCell->pos);
                     if (!closestFixedObject || distance < closestFixedObjectDistance) {
                         closestFixedObject = fixedCell;
@@ -409,7 +385,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 * 2.0f;
             object->tempValue2.as_float2.x = density;
         }
-        block.sync();
+        warp.sync();
         if (profiling) {
             auto const now = readSmClock();
             profileTailCycles += now - profileMark;
@@ -423,22 +399,25 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
     if (profiling) {
         auto const blockEndNs = readGlobalTimer();
-        auto const blockEndCycles = readSmClock();
+        auto const warpEndCycles = readSmClock();
         atomicAdd(&profileScanCells, threadScanCells);
         atomicAdd(&profileRecords, threadRecords);
-        block.sync();
-        if (block.thread_rank() == 0) {
-            auto& profile = cudaFluidKernelProfile;
+        auto& profile = cudaFluidKernelProfile;
+        if (warp.thread_rank() == 0) {
             atomicAdd(&profile.initCycles, profileInitCycles);
             atomicAdd(&profile.scanCycles, profileScanCycles);
             atomicAdd(&profile.syncAndReduceCycles, profileSyncCycles);
             atomicAdd(&profile.tailCycles, profileTailCycles);
-            atomicAdd(&profile.blockCycles, blockEndCycles - profileBlockStartCycles);
-            atomicAdd(&profile.blockNanoseconds, blockEndNs - profileBlockStartNs);
-            atomicAdd(&profile.numBlocks, 1);
+            atomicAdd(&profile.warpCycles, warpEndCycles - profileWarpStartCycles);
+            atomicAdd(&profile.warpOverheadCycles, warpEndCycles - profileWarpStartCycles - profileLoopCycles);
+            atomicAdd(&profile.numWarps, 1);
             atomicAdd(&profile.numObjects, profileObjects);
             atomicAdd(&profile.firstObjectCycles, profileFirstObjectCycles);
-            atomicAdd(&profile.blockOverheadCycles, blockEndCycles - profileBlockStartCycles - profileLoopCycles);
+        }
+        block.sync();
+        if (block.thread_rank() == 0) {
+            atomicAdd(&profile.blockNanoseconds, blockEndNs - profileBlockStartNs);
+            atomicAdd(&profile.numBlocks, 1);
             atomicAdd(&profile.numScanCells, profileScanCells);
             atomicAdd(&profile.numRecords, profileRecords);
             if (blockIdx.x == 0) {
@@ -451,30 +430,22 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationData& data)
 {
     auto block = cg::this_thread_block();
-    auto warp = cg::tiled_partition<32>(block);
+    auto warp = cg::tiled_partition<WARP_SIZE>(block);
 
     auto& objects = data.entities.objects;
-    auto blockPartition = calcBlockPartition(objects.getNumEntries());
+    auto const warpPartition = calcWarpPartition(objects.getNumEntries());
     auto const smoothingLength = cudaSimulationParameters.smoothingLength.value * 2.0f;  // Fluid uses 2x base smoothing length
 
-    for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
+    for (int objectIndex = warpPartition.startIndex; objectIndex <= warpPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
 
         if (object->type != ObjectType_Fluid) {
             continue;
         }
 
-        __shared__ int scanLength;
-        __shared__ int2 cellPosInt;
-        __shared__ float2 F_boundary;
-
-        if (block.thread_rank() == 0) {
-            F_boundary = {0, 0};
-            int radiusInt = ceilf(smoothingLength * 2);
-            scanLength = radiusInt * 2 + 1;
-            cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
-        }
-        block.sync();
+        int const radiusInt = ceilf(smoothingLength * 2);
+        int const scanLength = radiusInt * 2 + 1;
+        int2 const cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
 
         float2 localF_boundary = {0, 0};
 
@@ -484,7 +455,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
         auto const invScanLength = 1.0f / toFloat(scanLength);
 
         auto records = data.objectMap.getRecords();
-        for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
+        for (int scanIndex = toInt(warp.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += warp.size()) {
             int2 scanPos = calcScanPos(cellPosInt, scanIndex, scanLength, invScanLength);
 
             if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
@@ -517,7 +488,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
 
                         // Counter-force on solid: equal and opposite (Newton's 3rd law).
                         // pressureStrength is applied here directly since this force bypasses the
-                        // block-local F_boundary accumulation path (which gets pressureStrength at the end).
+                        // warp-local F_boundary accumulation path (which gets pressureStrength at the end).
                         atomicAdd(&otherObject->tempValue1.as_float2.x, -F_on_fluid.x * cudaSimulationParameters.pressureStrength.value);
                         atomicAdd(&otherObject->tempValue1.as_float2.y, -F_on_fluid.y * cudaSimulationParameters.pressureStrength.value);
                     }
@@ -526,19 +497,13 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
             }
         }
 
-        // Warp-level reduction followed by atomic accumulation across warps
-        float sumFx = cg::reduce(warp, localF_boundary.x, cg::plus<float>());
-        float sumFy = cg::reduce(warp, localF_boundary.y, cg::plus<float>());
-        if (warp.thread_rank() == 0) {
-            atomicAdd_block(&F_boundary.x, sumFx);
-            atomicAdd_block(&F_boundary.y, sumFy);
-        }
-        block.sync();
+        // The warp owns the object, so its reduction already yields the total.
+        float2 const F_boundary{cg::reduce(warp, localF_boundary.x, cg::plus<float>()), cg::reduce(warp, localF_boundary.y, cg::plus<float>())};
 
-        if (block.thread_rank() == 0) {
+        if (warp.thread_rank() == 0) {
             object->tempValue1.as_float2 += F_boundary * cudaSimulationParameters.pressureStrength.value;
         }
-        block.sync();
+        warp.sync();
     }
 }
 

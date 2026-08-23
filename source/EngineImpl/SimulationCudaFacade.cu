@@ -931,28 +931,26 @@ void _SimulationCudaFacade::reportFluidKernelProfile()
     profiler.setContext("fluid phase: sync + reduce", formatShare(profile.syncAndReduceCycles, phaseCycles));
     profiler.setContext("fluid phase: tail", formatShare(profile.tailCycles, phaseCycles));
 
-    // Cycles the SM actually executed for a block against the wall-clock time the block was alive. A block that is
-    // resident but not running shows up as a large gap between the two.
     cudaDeviceProp prop;
     auto const haveProp = cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess;
-    if (haveProp && prop.clockRate > 0) {
-        auto const busyNanoseconds = 1.0e6 * static_cast<double>(profile.blockCycles) / static_cast<double>(prop.clockRate);
-        // Around 100% means the block was executing whenever it was alive. Far below means it was descheduled.
-        profiler.setContext("fluid block busy vs alive", formatShare(static_cast<uint64_t>(busyNanoseconds), profile.blockNanoseconds));
-    }
     profiler.setContext("fluid block alive [us]", formatRatio(static_cast<double>(profile.blockNanoseconds) / 1.0e3 / static_cast<double>(profile.numBlocks)));
+    if (profile.numBlocks > 0) {
+        profiler.setContext("fluid warps per block", std::to_string(profile.numWarps / profile.numBlocks));
+    }
 
-    // How many blocks ran at the same time: the block lifetimes of one launch against its wall-clock time.
+    // How many blocks ran at the same time: the block lifetimes of one launch against its wall-clock time. A warp owns
+    // one object, so the warps in flight are the objects the GPU works on at once -- the figure that decides the runtime.
     auto const kernelNanoseconds = profiler.getAverageNanoseconds("cudaNextTimestep_physics_calcFluidForces");
-    if (kernelNanoseconds > 0.0) {
-        auto const blockNanosecondsPerLaunch = static_cast<double>(profile.blockNanoseconds) / static_cast<double>(launches);
-        profiler.setContext("fluid blocks in flight", formatRatio(blockNanosecondsPerLaunch / kernelNanoseconds));
+    if (kernelNanoseconds > 0.0 && profile.numBlocks > 0) {
+        auto const blocksInFlight = static_cast<double>(profile.blockNanoseconds) / static_cast<double>(launches) / kernelNanoseconds;
+        profiler.setContext("fluid blocks in flight", formatRatio(blocksInFlight));
+        profiler.setContext(
+            "fluid warps in flight", formatRatio(blocksInFlight * static_cast<double>(profile.numWarps) / static_cast<double>(profile.numBlocks)));
     }
 
     // The occupancy the hardware allows for this kernel, to compare against the blocks actually in flight.
     int blocksPerMultiprocessor = 0;
-    auto const scanRectLength = ceilf(_settings.simulationParameters.smoothingLength.value * 2) * 2 + 1;
-    auto const threadsPerBlock = static_cast<int>(scanRectLength * scanRectLength);
+    auto const threadsPerBlock = FLUID_KERNEL_THREADS;
     if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, threadsPerBlock, 0) == cudaSuccess
         && haveProp) {
         profiler.setContext(
@@ -978,15 +976,15 @@ void _SimulationCudaFacade::reportFluidKernelProfile()
         profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
     }
 
-    // What a block pays outside its object loop against what the objects cost. A dominant overhead would mean no
+    // What a warp pays outside its object loop against what the objects cost. A dominant overhead would mean no
     // amount of work amortizes it, which is what a run with a small simulation would otherwise have to show.
-    auto const blocks = static_cast<double>(profile.numBlocks);
-    profiler.setContext("fluid block overhead [kcycles]", formatRatio(static_cast<double>(profile.blockOverheadCycles) / 1.0e3 / blocks));
-    profiler.setContext("fluid overhead share per block", formatShare(profile.blockOverheadCycles, profile.blockCycles));
-    profiler.setContext("fluid first object [kcycles]", formatRatio(static_cast<double>(profile.firstObjectCycles) / 1.0e3 / blocks));
+    auto const warps = static_cast<double>(profile.numWarps);
+    profiler.setContext("fluid warp overhead [kcycles]", formatRatio(static_cast<double>(profile.warpOverheadCycles) / 1.0e3 / warps));
+    profiler.setContext("fluid overhead share per warp", formatShare(profile.warpOverheadCycles, profile.warpCycles));
+    profiler.setContext("fluid first object [kcycles]", formatRatio(static_cast<double>(profile.firstObjectCycles) / 1.0e3 / warps));
     if (profile.numObjects > 0) {
         profiler.setContext(
-            "fluid avg object [kcycles]", formatRatio(static_cast<double>(profile.blockCycles) / 1.0e3 / static_cast<double>(profile.numObjects)));
+            "fluid avg object [kcycles]", formatRatio(static_cast<double>(profile.warpCycles) / 1.0e3 / static_cast<double>(profile.numObjects)));
     }
 
     // Work actually performed, so that a slow GPU can be told apart from a denser simulation state.

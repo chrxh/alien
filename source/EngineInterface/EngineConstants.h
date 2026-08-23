@@ -14,6 +14,14 @@ static_assert(NEURAL_NET_INPUTS == 16);
 auto constexpr MAX_COLORS = 10;
 auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
 
+auto constexpr WARP_SIZE = 32;
+
+// Both fluid kernels give each warp an object of its own. The block size therefore no longer follows from the
+// scan rect; it decides how many objects an SM can work on at once. One warp per block left the Blackwell
+// consumer GPUs at a single resident block per SM, which is 32 of 1536 threads.
+auto constexpr FLUID_KERNEL_THREADS = 512;
+auto constexpr FLUID_KERNEL_WARPS = FLUID_KERNEL_THREADS / WARP_SIZE;
+
 auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
 
 auto constexpr MAX_LAYERS = 20;
