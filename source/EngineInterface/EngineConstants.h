@@ -16,11 +16,16 @@ auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
 
 auto constexpr WARP_SIZE = 32;
 
-// Both fluid kernels give each warp an object of its own. The block size therefore no longer follows from the
-// scan rect; it decides how many objects an SM can work on at once. One warp per block left the Blackwell
-// consumer GPUs at a single resident block per SM, which is 32 of 1536 threads.
-auto constexpr FLUID_KERNEL_THREADS = 512;
-auto constexpr FLUID_KERNEL_WARPS = FLUID_KERNEL_THREADS / WARP_SIZE;
+// Kernels that give each warp an object of its own are launched with this block size. It decides how many
+// objects an SM works on at once, since one warp per block left the Blackwell consumer GPUs at a single
+// resident block per SM, which is 32 of 1536 threads.
+auto constexpr WARP_KERNEL_THREADS = 512;
+auto constexpr WARP_KERNEL_WARPS = WARP_KERNEL_THREADS / WARP_SIZE;
+
+// Grid-stride kernels depend only on blockDim.x * gridDim.x, so a larger block with a proportionally smaller
+// grid launches the same threads. They used to run with eight, which leaves the same GPUs nearly idle.
+auto constexpr GRID_STRIDE_KERNEL_THREADS = 128;
+auto constexpr LEGACY_KERNEL_THREADS = 8;
 
 auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
 

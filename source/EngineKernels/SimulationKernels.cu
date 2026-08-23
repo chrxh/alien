@@ -56,7 +56,7 @@ __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 __device__ FluidKernelProfile cudaFluidKernelProfile;
 __device__ int cudaFluidKernelProfilingEnabled;
 
-__global__ __launch_bounds__(FLUID_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
+__global__ __launch_bounds__(WARP_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
     ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
     ObjectProcessor::fillDensityMap(data);
@@ -65,7 +65,7 @@ __global__ __launch_bounds__(FLUID_KERNEL_THREADS) void cudaNextTimestep_physics
     EnergyProcessor::updateMap(data);
 }
 
-__global__ __launch_bounds__(FLUID_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data)
+__global__ __launch_bounds__(WARP_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data)
 {
     ObjectProcessor::calcFluidBoundaryForces(data);
 }

@@ -31,8 +31,6 @@ private:
     __inline__ __device__ static float calcTelemetryInput(Object* object, int telemetryIndex);
     __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);
 
-    // Block dimension (one warp)
-    static constexpr int BlockDim = 32;
 
     // Input index that gates the memory outputs
     static constexpr int MemoryGateInput = 0;
@@ -47,10 +45,10 @@ private:
 
 __device__ __inline__ void NeuronProcessor::calcSignal(SimulationData& data, SimulationStatistics& statistics)
 {
-    DEVICE_CHECK(blockDim.x == BlockDim);
+    DEVICE_CHECK(blockDim.x % WARP_SIZE == 0);
 
     auto& objects = data.entities.objects;
-    auto partition = calcBlockPartition(objects.getNumEntries());
+    auto partition = calcWarpPartition(objects.getNumEntries());
 
     bool firstCell = true;
 
@@ -142,13 +140,16 @@ __inline__ __device__ bool NeuronProcessor::isAutoOrManuallyTriggered(Simulation
 
 __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool initMatrices)
 {
-    auto block = cg::this_thread_block();
-    auto laneId = block.thread_rank();
+    auto warp = cg::tiled_partition<WARP_SIZE>(cg::this_thread_block());
+    auto laneId = toInt(warp.thread_rank());
+    auto const warpIndexInBlock = toInt(threadIdx.x) / WARP_SIZE;
 
     auto& cell = object->typeData.cell;
     int numConnections = object->numConnections;
 
-    __shared__ __align__(16) float sharedInput[NEURAL_NET_INPUTS];
+    // One row per warp: the warps of a block work on cells of their own.
+    __shared__ __align__(16) float sharedInputPerWarp[WARP_KERNEL_WARPS][NEURAL_NET_INPUTS];
+    auto* sharedInput = sharedInputPerWarp[warpIndexInBlock];
 
     // Assemble the input vector: [accumulated signals from connected cells | own memory activities | telemetry data]
     if (laneId < STANDARD_NEURONS_PER_CELL) {
@@ -173,7 +174,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
             sharedInput[laneId] = calcTelemetryInput(object, laneId - NEURAL_NET_OUTPUTS);
         }
     }
-    block.sync();
+    warp.sync();
 
     // Matrix-vector multiplication (12x16 weights * 16 input vector)
     // Each thread computes one output value

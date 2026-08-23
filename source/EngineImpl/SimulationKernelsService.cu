@@ -41,11 +41,11 @@ void SimulationKernelsService::shutdown()
 
 namespace
 {
-    // The fluid kernels give each warp an object of its own, so the grid holds warps where it used to hold blocks.
+    // Kernels that give each warp an object of its own hold warps in the grid where it used to hold blocks.
     // Shrinking it by the warps per block keeps the work per warp -- and thus the total work -- unchanged.
-    int calcFluidGridSize(int numBlocks)
+    int calcWarpKernelGridSize(int numBlocks)
     {
-        return std::max(1, numBlocks / FLUID_KERNEL_WARPS);
+        return std::max(1, numBlocks / WARP_KERNEL_WARPS);
     }
 }
 
@@ -77,11 +77,11 @@ void SimulationKernelsService::launchTimestepKernels(
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
 
-    STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_physics_init, _stream, numBlocks, 8, data);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
 
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcFluidGridSize(numBlocks), FLUID_KERNEL_THREADS, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcFluidGridSize(numBlocks), FLUID_KERNEL_THREADS, data);
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
 
     if (config.hasLayers) {
         STREAM_KERNEL_CALL(cudaApplyForceFields, _stream, numBlocks, data);
@@ -97,23 +97,23 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
 
     // Cell state transitions and front angle updates (run every timestep)
-    STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep1, _stream, numBlocks, 8, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep2, _stream, numBlocks, 8, data);
 
 
     // Signal processing and cell type-specific functions
     if (config.executeCellFunction) {
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data, statistics);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_signal_setSignal, _stream, numBlocks, 8, data);
 
         // Cell type-specific functions
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, 8, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
         // The constructor mutates the host genome before cloning; the mutation needs NEURAL_NET_INPUTS threads per block.
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, false);
-        STREAM_KERNEL_CALL(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, 8, data);
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_constructor_prepareExternalEnergyInflow, _stream, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, 8, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_injector, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, _stream, numBlocks, 4, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, _stream, numBlocks, 4, data, statistics);
@@ -143,11 +143,11 @@ void SimulationKernelsService::launchTimestepKernels(
         STREAM_KERNEL_CALL(cudaApplyClusterData, _stream, numBlocks, data);
     }
 
-    STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, 8, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, 8, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, 8, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, 8, data);
+    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, 8, data);
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
 }
@@ -239,10 +239,10 @@ void SimulationKernelsService::launchPreviewKernels(
     if (!config.detailSimulation) {
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
 
-        STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_physics_init, _stream, numBlocks, 8, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcFluidGridSize(numBlocks), FLUID_KERNEL_THREADS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcFluidGridSize(numBlocks), FLUID_KERNEL_THREADS, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
@@ -250,12 +250,12 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
 
         // Cell state transitions and front angle updates (run every timestep)
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep1, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep2, _stream, numBlocks, 8, data);
 
         if (config.executeCellFunctions) {
             // Cell type-specific functions
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+            STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, 8, data);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, true);
         }
@@ -265,10 +265,10 @@ void SimulationKernelsService::launchPreviewKernels(
         }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
 
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, 8, data);
 
         GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
@@ -276,10 +276,10 @@ void SimulationKernelsService::launchPreviewKernels(
     } else {
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
 
-        STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_physics_init, _stream, numBlocks, 8, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcFluidGridSize(numBlocks), FLUID_KERNEL_THREADS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcFluidGridSize(numBlocks), FLUID_KERNEL_THREADS, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
@@ -290,16 +290,16 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
 
         // Cell state transitions and front angle updates (run every timestep)
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep1, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep2, _stream, numBlocks, 8, data);
 
         if (config.executeCellFunctions) {
             // Signal processing
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
-            STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
+            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data, statistics);
+            STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_signal_setSignal, _stream, numBlocks, 8, data);
 
             // Cell type-specific functions
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+            STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, 8, data);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, true);
@@ -312,10 +312,10 @@ void SimulationKernelsService::launchPreviewKernels(
         }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
 
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, 8, data);
+        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, 8, data);
 
         GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 

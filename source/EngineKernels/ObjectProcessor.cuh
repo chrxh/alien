@@ -151,8 +151,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
     // The only state the lanes of a warp have to share: barrier objects are found by whichever lane happens to scan
     // their map cell. Everything else each lane derives for itself, which is cheaper than a slot plus a barrier.
-    __shared__ Object* fixedCells[FLUID_KERNEL_WARPS][MaxBarrierCellsForCollision];
-    __shared__ int numFixedObjects[FLUID_KERNEL_WARPS];
+    __shared__ Object* fixedCells[WARP_KERNEL_WARPS][MaxBarrierCellsForCollision];
+    __shared__ int numFixedObjects[WARP_KERNEL_WARPS];
 
     auto& objects = data.entities.objects;
     auto const warpPartition = calcWarpPartition(objects.getNumEntries());
