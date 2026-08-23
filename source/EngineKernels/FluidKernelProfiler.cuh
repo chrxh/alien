@@ -18,21 +18,22 @@ struct FluidKernelProfile
     unsigned long long syncAndReduceCycles;
     unsigned long long tailCycles;
 
-    // Whole block, from its first to its last instruction. Cycles count only what the SM executed for this block,
-    // nanoseconds count what passed on the wall clock. If the two disagree, the block was descheduled rather than busy.
-    unsigned long long blockCycles;
+    // A warp owns one object at a time, so its cycles are the unit of work. The block lifetime is measured on the
+    // device-wide timer instead, which is what the concurrency of the kernel follows from.
+    unsigned long long warpCycles;
     unsigned long long blockNanoseconds;
 
     // Cost of the very first object of a block, which pays for cold caches and constant-memory fetches.
     unsigned long long firstObjectCycles;
 
-    // Cycles a block spends outside its object loop. Together with the cost per object this says whether the
+    // Cycles a warp spends outside its object loop. Together with the cost per object this says whether the
     // kernel is expensive per unit of work or pays a price no amount of work would amortize, which is what a
     // run with a small simulation would otherwise have to answer.
-    unsigned long long blockOverheadCycles;
+    unsigned long long warpOverheadCycles;
 
     // Work actually done, to tell a slow GPU apart from a simulation state that simply asks for more.
     unsigned long long numBlocks;
+    unsigned long long numWarps;
     unsigned long long numObjects;
     unsigned long long numScanCells;  // Map cells visited, summed over all threads
     unsigned long long numRecords;    // Object-map records walked, summed over all threads
