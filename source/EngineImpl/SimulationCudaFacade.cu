@@ -950,7 +950,7 @@ void _SimulationCudaFacade::reportFluidKernelProfile()
 
     // The occupancy the hardware allows for this kernel, to compare against the blocks actually in flight.
     int blocksPerMultiprocessor = 0;
-    auto const threadsPerBlock = FLUID_KERNEL_THREADS;
+    auto const threadsPerBlock = WARP_KERNEL_THREADS;
     if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, threadsPerBlock, 0) == cudaSuccess
         && haveProp) {
         profiler.setContext(

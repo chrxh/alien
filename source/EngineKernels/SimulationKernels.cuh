@@ -5,9 +5,9 @@
 __global__ void cudaNextTimestep_prepare(SimulationData data);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data);
-// The two fluid kernels give each warp an object of its own, so they require FLUID_KERNEL_THREADS threads per block.
-__global__ __launch_bounds__(FLUID_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidForces(SimulationData data);
-__global__ __launch_bounds__(FLUID_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data);
+// The two fluid kernels give each warp an object of its own, so they require WARP_KERNEL_THREADS threads per block.
+__global__ __launch_bounds__(WARP_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidForces(SimulationData data);
+__global__ __launch_bounds__(WARP_KERNEL_THREADS) void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles);

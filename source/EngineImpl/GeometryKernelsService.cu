@@ -53,14 +53,14 @@ void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation 
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    KERNEL_CALL(cudaCorrectPositionsForRendering, data, visibleTopLeft);
+    KERNEL_CALL_GRID_STRIDE(cudaCorrectPositionsForRendering, data, visibleTopLeft);
 }
 
 void GeometryKernelsService::restorePositions(SettingsForSimulation const& settings, SimulationData data)
 {
     auto const& gpuSettings = settings.cudaSettings;
 
-    KERNEL_CALL(cudaCorrectPositionsForRendering, data, float2{0, 0});
+    KERNEL_CALL_GRID_STRIDE(cudaCorrectPositionsForRendering, data, float2{0, 0});
 }
 
 NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
@@ -72,42 +72,42 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
 
     NumRenderObjects result;
     setValueToDevice(_numObjects, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractObjectData, data, nullptr, _numObjects, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractObjectData, data, nullptr, _numObjects, context);
     cudaDeviceSynchronize();
     result.objects = copyToHost(_numObjects);
 
     setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractFluidParticleData, data, nullptr, _numFluidParticles, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractFluidParticleData, data, nullptr, _numFluidParticles, context);
     cudaDeviceSynchronize();
     result.fluidParticles = copyToHost(_numFluidParticles);
 
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects, context);
     cudaDeviceSynchronize();
     result.selectedObjects = copyToHost(_numSelectedObjects);
 
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractLineIndices, data, nullptr, _numLineIndices, context);
     cudaDeviceSynchronize();
     result.lineIndices = copyToHost(_numLineIndices);
 
     setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractTriangleIndices, data, nullptr, _numTriangleIndices, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractTriangleIndices, data, nullptr, _numTriangleIndices, context);
     cudaDeviceSynchronize();
     result.triangleIndices = copyToHost(_numTriangleIndices);
 
     setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractSelectedConnectionData, data, nullptr, _numSelectedConnectionVertices, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractSelectedConnectionData, data, nullptr, _numSelectedConnectionVertices, context);
     cudaDeviceSynchronize();
     result.connectionArrowVertices = copyToHost(_numSelectedConnectionVertices);
 
     setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices, context);
     cudaDeviceSynchronize();
     result.attackEventVertices = copyToHost(_numAttackEventVertices);
 
     setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractDetonationEventData, data, nullptr, _numDetonationEventVertices, context);
+    KERNEL_CALL_GRID_STRIDE(cudaExtractDetonationEventData, data, nullptr, _numDetonationEventVertices, context);
     cudaDeviceSynchronize();
     result.detonationEventVertices = copyToHost(_numDetonationEventVertices);
 
@@ -138,7 +138,7 @@ void GeometryKernelsService::extractObjectData(
         size_t bufferSize;
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractObjectData, data, mappedCellBuffer, _numObjects, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractObjectData, data, mappedCellBuffer, _numObjects, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.fluidParticleBuffer));
@@ -147,7 +147,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedFluidParticleBuffer), &fluidParticleBufferSize, renderingData.fluidParticleBuffer));
         setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractFluidParticleData, data, mappedFluidParticleBuffer, _numFluidParticles, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractFluidParticleData, data, mappedFluidParticleBuffer, _numFluidParticles, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.fluidParticleBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
@@ -165,7 +165,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
         setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedObjectData, data, mappedSelectedObjectBuffer, _numSelectedObjects, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractSelectedObjectData, data, mappedSelectedObjectBuffer, _numSelectedObjects, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
@@ -174,7 +174,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
         setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.triangleIndexBuffer));
@@ -183,7 +183,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
         setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.selectedConnectionBuffer));
@@ -192,7 +192,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedConnectionBuffer), &selectedConnectionBufferSize, renderingData.selectedConnectionBuffer));
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.attackEventBuffer));
@@ -201,7 +201,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedAttackEventBuffer), &attackEventBufferSize, renderingData.attackEventBuffer));
         setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractAttackEventData, data, mappedAttackEventBuffer, _numAttackEventVertices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractAttackEventData, data, mappedAttackEventBuffer, _numAttackEventVertices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.detonationEventBuffer));
@@ -210,35 +210,35 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedDetonationEventBuffer), &detonationEventBufferSize, renderingData.detonationEventBuffer));
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
     } else {
         // No-interop mode: extract to device buffers
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractObjectData, data, renderingData.deviceObjectBuffer, _numObjects, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractObjectData, data, renderingData.deviceObjectBuffer, _numObjects, context);
 
         setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractFluidParticleData, data, renderingData.deviceFluidParticleBuffer, _numFluidParticles, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractFluidParticleData, data, renderingData.deviceFluidParticleBuffer, _numFluidParticles, context);
 
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);
 
         setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedObjectData, data, renderingData.deviceSelectedObjectBuffer, _numSelectedObjects, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractSelectedObjectData, data, renderingData.deviceSelectedObjectBuffer, _numSelectedObjects, context);
 
         setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractLineIndices, data, renderingData.deviceLineIndexBuffer, _numLineIndices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractLineIndices, data, renderingData.deviceLineIndexBuffer, _numLineIndices, context);
 
         setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractTriangleIndices, data, renderingData.deviceTriangleIndexBuffer, _numTriangleIndices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractTriangleIndices, data, renderingData.deviceTriangleIndexBuffer, _numTriangleIndices, context);
 
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedConnectionData, data, renderingData.deviceSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractSelectedConnectionData, data, renderingData.deviceSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
 
         setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractAttackEventData, data, renderingData.deviceAttackEventBuffer, _numAttackEventVertices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractAttackEventData, data, renderingData.deviceAttackEventBuffer, _numAttackEventVertices, context);
 
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices, context);
+        KERNEL_CALL_GRID_STRIDE(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices, context);
     }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <sstream>
@@ -99,6 +100,32 @@ void checkAndThrowError(T result)
 #define DEVICE_THROW_NOT_IMPLEMENTED() \
     printf("Not implemented error. File: %s, Line: %d\n", __FILE__, __LINE__); \
     ABORT();
+
+// Grid-stride kernels iterate with a stride of blockDim.x * gridDim.x, so trading grid size for block size leaves both
+// the number of threads and the work per thread untouched. Their historical block sizes of 8 to 32 threads leave GPUs
+// nearly idle that keep few blocks resident per SM, so the same threads are packed into fewer, larger blocks. The
+// former block size is passed in to keep the thread count exactly as it was.
+__host__ inline int calcGridStrideGridSize(int numBlocks, int formerThreadsPerBlock)
+{
+    return std::max(1, numBlocks * formerThreadsPerBlock / GRID_STRIDE_KERNEL_THREADS);
+}
+
+#define KERNEL_CALL_GRID_STRIDE(func, ...) \
+    if (GlobalSettings::get().isDebugMode()) { \
+        KernelTracer::get().traceBegin(#func); \
+        auto profStart = std::chrono::steady_clock::now(); \
+        auto const gridSize = calcGridStrideGridSize(gpuSettings.numBlocks, LEGACY_KERNEL_THREADS); \
+        func<<<gridSize, GRID_STRIDE_KERNEL_THREADS>>>(__VA_ARGS__); \
+        CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
+        auto profDuration = std::chrono::steady_clock::now() - profStart; \
+        KernelProfiler::get().record(#func, profDuration, gridSize, GRID_STRIDE_KERNEL_THREADS); \
+        KernelTracer::get().traceEnd(profDuration); \
+    } else { \
+        func<<<calcGridStrideGridSize(gpuSettings.numBlocks, LEGACY_KERNEL_THREADS), GRID_STRIDE_KERNEL_THREADS>>>(__VA_ARGS__); \
+    }
+
+#define STREAM_KERNEL_CALL_GRID_STRIDE(func, stream, numBlocks, formerThreadsPerBlock, ...) \
+    STREAM_KERNEL_CALL_MOD(func, stream, calcGridStrideGridSize(numBlocks, formerThreadsPerBlock), GRID_STRIDE_KERNEL_THREADS, __VA_ARGS__)
 
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
