@@ -160,6 +160,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     unsigned long long profileSyncCycles = 0;
     unsigned long long profileTailCycles = 0;
     unsigned long long profileObjects = 0;
+    unsigned long long profileFirstObjectCycles = 0;
+    unsigned long long profileLoopCycles = 0;
     unsigned long long threadScanCells = 0;
     unsigned long long threadRecords = 0;
     auto const profileBlockStartNs = profiling ? readGlobalTimer() : 0;
@@ -171,6 +173,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     auto profileMark = profiling ? readSmClock() : 0;
 
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
+        auto const profileObjectStartCycles = profileMark;
         auto& object = objects.at(objectIndex);
         auto smoothingLength = smoothingLength_base;
         auto isObjectFluid = object->type == ObjectType_Fluid;
@@ -410,6 +413,10 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         if (profiling) {
             auto const now = readSmClock();
             profileTailCycles += now - profileMark;
+            if (profileObjects == 1) {
+                profileFirstObjectCycles = now - profileObjectStartCycles;
+            }
+            profileLoopCycles += now - profileObjectStartCycles;
             profileMark = now;
         }
     }
@@ -430,6 +437,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             atomicAdd(&profile.blockNanoseconds, blockEndNs - profileBlockStartNs);
             atomicAdd(&profile.numBlocks, 1);
             atomicAdd(&profile.numObjects, profileObjects);
+            atomicAdd(&profile.firstObjectCycles, profileFirstObjectCycles);
+            atomicAdd(&profile.blockOverheadCycles, blockEndCycles - profileBlockStartCycles - profileLoopCycles);
             atomicAdd(&profile.numScanCells, profileScanCells);
             atomicAdd(&profile.numRecords, profileRecords);
             if (blockIdx.x == 0) {

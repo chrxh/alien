@@ -23,6 +23,14 @@ struct FluidKernelProfile
     unsigned long long blockCycles;
     unsigned long long blockNanoseconds;
 
+    // Cost of the very first object of a block, which pays for cold caches and constant-memory fetches.
+    unsigned long long firstObjectCycles;
+
+    // Cycles a block spends outside its object loop. Together with the cost per object this says whether the
+    // kernel is expensive per unit of work or pays a price no amount of work would amortize, which is what a
+    // run with a small simulation would otherwise have to answer.
+    unsigned long long blockOverheadCycles;
+
     // Work actually done, to tell a slow GPU apart from a simulation state that simply asks for more.
     unsigned long long numBlocks;
     unsigned long long numObjects;
