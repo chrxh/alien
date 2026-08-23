@@ -908,6 +908,11 @@ namespace
 
 void _SimulationCudaFacade::reportFluidKernelProfile()
 {
+#if defined(USE_HIP)
+    // The fluid kernel only misbehaves on NVIDIA hardware, and the readback would need HIP counterparts for
+    // cudaMemcpyFromSymbol and the occupancy query. Keep the AMD build free of it.
+    return;
+#else
     FluidKernelProfile profile;
     if (cudaMemcpyFromSymbol(&profile, cudaFluidKernelProfile, sizeof(FluidKernelProfile)) != cudaSuccess) {
         return;
@@ -955,6 +960,17 @@ void _SimulationCudaFacade::reportFluidKernelProfile()
             std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
     }
 
+    // What a block pays outside its object loop against what the objects cost. A dominant overhead would mean no
+    // amount of work amortizes it, which is what a run with a small simulation would otherwise have to show.
+    auto const blocks = static_cast<double>(profile.numBlocks);
+    profiler.setContext("fluid block overhead [kcycles]", formatRatio(static_cast<double>(profile.blockOverheadCycles) / 1.0e3 / blocks));
+    profiler.setContext("fluid overhead share per block", formatShare(profile.blockOverheadCycles, profile.blockCycles));
+    profiler.setContext("fluid first object [kcycles]", formatRatio(static_cast<double>(profile.firstObjectCycles) / 1.0e3 / blocks));
+    if (profile.numObjects > 0) {
+        profiler.setContext(
+            "fluid avg object [kcycles]", formatRatio(static_cast<double>(profile.blockCycles) / 1.0e3 / static_cast<double>(profile.numObjects)));
+    }
+
     // Work actually performed, so that a slow GPU can be told apart from a denser simulation state.
     profiler.setContext("fluid objects per launch", std::to_string(profile.numObjects / launches));
     if (profile.numObjects > 0) {
@@ -962,6 +978,7 @@ void _SimulationCudaFacade::reportFluidKernelProfile()
         profiler.setContext("fluid map records per object", formatRatio(static_cast<double>(profile.numRecords) / static_cast<double>(profile.numObjects)));
     }
     profiler.setContext("fluid blocks with work", std::to_string(profile.numBlocks / launches));
+#endif
 }
 
 void _SimulationCudaFacade::reportProfilingContext()
