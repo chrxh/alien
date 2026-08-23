@@ -960,6 +960,24 @@ void _SimulationCudaFacade::reportFluidKernelProfile()
             std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
     }
 
+    // Registers, shared memory and the per-SM budgets the occupancy follows from. Reporting them shows which of the
+    // four limits actually binds, instead of leaving the occupancy figure unexplained.
+    cudaFuncAttributes attributes;
+    if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {
+        profiler.setContext("fluid kernel registers", std::to_string(attributes.numRegs));
+        profiler.setContext("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
+        profiler.setContext("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));
+        profiler.setContext("fluid kernel binary / ptx", std::to_string(attributes.binaryVersion) + " / " + std::to_string(attributes.ptxVersion));
+        profiler.setContext("fluid kernel block size", std::to_string(threadsPerBlock));
+    }
+    if (haveProp) {
+        profiler.setContext("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
+        profiler.setContext("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
+        profiler.setContext("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
+        profiler.setContext("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
+        profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
+    }
+
     // What a block pays outside its object loop against what the objects cost. A dominant overhead would mean no
     // amount of work amortizes it, which is what a run with a small simulation would otherwise have to show.
     auto const blocks = static_cast<double>(profile.numBlocks);
