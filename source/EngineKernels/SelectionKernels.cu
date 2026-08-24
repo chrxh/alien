@@ -65,7 +65,7 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
     }
 }
 
-__global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
+__global__ void cudaSetSelectionAtPoint(float2 pos, float radius, SimulationData data)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
@@ -90,7 +90,7 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
     }
 }
 
-__global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData data)
+__global__ void cudaSetSelectionInArea(AreaSelectionData selectionData, SimulationData data)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
