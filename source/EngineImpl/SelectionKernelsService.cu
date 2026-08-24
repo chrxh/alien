@@ -40,21 +40,14 @@ void SelectionKernelsService::switchSelection(KernelLaunchSettings const& launch
     cudaDeviceSynchronize();
 
     if (0 == copyToHost(_cudaSwitchResult)) {
-        launchKernelOnDefaultStream(
-            "cudaSetSelection",
-            static_cast<void (*)(float2, float, SimulationData)>(cudaSetSelection),
-            LaunchConfig{launchSettings.numBlocks, 8},
-            switchData.pos,
-            switchData.radius,
-            data);
+        launchKernelOnDefaultStream(KERNEL(cudaSetSelectionAtPoint), LaunchConfig{launchSettings.numBlocks, 8}, switchData.pos, switchData.radius, data);
         rolloutSelection(launchSettings, data);
     }
 }
 
 void SelectionKernelsService::setSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, AreaSelectionData const& setData)
 {
-    launchKernelOnDefaultStream(
-        "cudaSetSelection", static_cast<void (*)(AreaSelectionData, SimulationData)>(cudaSetSelection), LaunchConfig{launchSettings.numBlocks, 8}, setData, data);
+    launchKernelOnDefaultStream(KERNEL(cudaSetSelectionInArea), LaunchConfig{launchSettings.numBlocks, 8}, setData, data);
     rolloutSelection(launchSettings, data);
 }
 

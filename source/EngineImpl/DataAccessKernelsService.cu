@@ -43,28 +43,9 @@ void DataAccessKernelsService::getData(
 {
     launchKernelOnDefaultStream(KERNEL(cudaClearDataTO), LaunchConfig{1, 1}, to);
     launchKernelOnDefaultStream(
-        "cudaPrepareCreaturesAndGenomesForConversionToTO",
-        static_cast<void (*)(int2, int2, SimulationData)>(cudaPrepareCreaturesAndGenomesForConversionToTO),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        rectUpperLeft,
-        rectLowerRight,
-        data);
-    launchKernelOnDefaultStream(
-        "cudaGetGenomeData",
-        static_cast<void (*)(int2, int2, SimulationData, TOs)>(cudaGetGenomeData),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        rectUpperLeft,
-        rectLowerRight,
-        data,
-        to);
-    launchKernelOnDefaultStream(
-        "cudaGetCreatureData",
-        static_cast<void (*)(int2, int2, SimulationData, TOs)>(cudaGetCreatureData),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        rectUpperLeft,
-        rectLowerRight,
-        data,
-        to);
+        KERNEL(cudaPrepareCreaturesAndGenomesForConversionToTO), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetGenomeData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetCreatureData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaGetObjectDataWithoutConnections), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaResolveConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaGetParticleData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
@@ -88,26 +69,9 @@ void DataAccessKernelsService::getInspectedData(
     TOs const& to)
 {
     launchKernelOnDefaultStream(KERNEL(cudaClearDataTO), LaunchConfig{1, 1}, to);
-    launchKernelOnDefaultStream(
-        "cudaPrepareCreaturesAndGenomesForConversionToTO",
-        static_cast<void (*)(InspectedEntityIds, SimulationData)>(cudaPrepareCreaturesAndGenomesForConversionToTO),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        entityIds,
-        data);
-    launchKernelOnDefaultStream(
-        "cudaGetGenomeData",
-        static_cast<void (*)(InspectedEntityIds, SimulationData, TOs)>(cudaGetGenomeData),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        entityIds,
-        data,
-        to);
-    launchKernelOnDefaultStream(
-        "cudaGetCreatureData",
-        static_cast<void (*)(InspectedEntityIds, SimulationData, TOs)>(cudaGetCreatureData),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        entityIds,
-        data,
-        to);
+    launchKernelOnDefaultStream(KERNEL(cudaPrepareInspectedCreaturesAndGenomesForConversionToTO), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetInspectedGenomeData), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetInspectedCreatureData), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaGetInspectedObjectDataWithoutConnections), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaResolveConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaGetInspectedEnergyData), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
