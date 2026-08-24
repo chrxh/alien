@@ -908,45 +908,6 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
 }
 
-void _SimulationCudaFacade::reportOccupancy()
-{
-#if defined(USE_HIP)
-    // The occupancy query would need a HIP counterpart; the kernels only misbehave on NVIDIA hardware anyway.
-    return;
-#else
-    auto& profiler = KernelProfiler::get();
-
-    cudaDeviceProp prop;
-    if (cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) != cudaSuccess) {
-        return;
-    }
-
-    // Blackwell keeps a single block resident per SM for the fluid kernels even though the budgets below allow far
-    // more, which is what made them collapse there. Reporting both makes that visible in a profile from any machine.
-    int blocksPerMultiprocessor = 0;
-    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
-        profiler.setContext(
-            "fluid occupancy [blocks/SM]",
-            std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
-    }
-
-    cudaFuncAttributes attributes;
-    if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {
-        profiler.setContext("fluid kernel registers", std::to_string(attributes.numRegs));
-        profiler.setContext("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
-        profiler.setContext("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));
-        profiler.setContext("fluid kernel binary / ptx", std::to_string(attributes.binaryVersion) + " / " + std::to_string(attributes.ptxVersion));
-        profiler.setContext("fluid warps per block", std::to_string(_settings.kernelLaunchSettings.fluidWarpsPerBlock));
-    }
-
-    profiler.setContext("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
-    profiler.setContext("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
-    profiler.setContext("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
-    profiler.setContext("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
-    profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
-#endif
-}
-
 void _SimulationCudaFacade::reportProfilingContext()
 {
     if (!KernelProfiler::get().isEnabled()) {
@@ -957,7 +918,8 @@ void _SimulationCudaFacade::reportProfilingContext()
     profiler.setContext("gpu", _gpuInfo.gpuModelName);
 
     cudaDeviceProp prop;
-    if (cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess) {
+    auto const hasDeviceProperties = cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess;
+    if (hasDeviceProperties) {
         profiler.setContext(
             "compute capability / SMs", std::to_string(prop.major) + "." + std::to_string(prop.minor) + " / " + std::to_string(prop.multiProcessorCount));
         profiler.setContext("total GPU memory [MB]", std::to_string(prop.totalGlobalMem / (1024 * 1024)));
@@ -985,7 +947,34 @@ void _SimulationCudaFacade::reportProfilingContext()
     auto const numBlocks = std::max(1, _settings.kernelLaunchSettings.numBlocks);
     profiler.setContext("objects per block", std::to_string(entities.objects.getNumEntries_host() / static_cast<uint64_t>(numBlocks)));
 
-    reportOccupancy();
+#if !defined(USE_HIP)
+    // The occupancy query would need a HIP counterpart; the kernels only misbehave on NVIDIA hardware anyway.
+    // Blackwell keeps a single block resident per SM for the fluid kernels even though the budgets below allow far
+    // more, which is what made them collapse there. Reporting both makes that visible in a profile from any machine.
+    if (hasDeviceProperties) {
+        int blocksPerMultiprocessor = 0;
+        if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
+            profiler.setContext(
+                "fluid occupancy [blocks/SM]",
+                std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
+        }
+
+        cudaFuncAttributes attributes;
+        if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {
+            profiler.setContext("fluid kernel registers", std::to_string(attributes.numRegs));
+            profiler.setContext("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
+            profiler.setContext("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));
+            profiler.setContext("fluid kernel binary / ptx", std::to_string(attributes.binaryVersion) + " / " + std::to_string(attributes.ptxVersion));
+            profiler.setContext("fluid warps per block", std::to_string(_settings.kernelLaunchSettings.fluidWarpsPerBlock));
+        }
+
+        profiler.setContext("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
+        profiler.setContext("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
+        profiler.setContext("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
+        profiler.setContext("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
+        profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
+    }
+#endif
 }
 
 void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
