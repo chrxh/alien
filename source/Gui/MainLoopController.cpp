@@ -36,7 +36,6 @@
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "GettingStartedWindow.h"
-#include "GpuSettingsDialog.h"
 #include "ImageToPatternDialog.h"
 #include "LogWindow.h"
 #include "LoginDialog.h"
@@ -567,7 +566,6 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Save on exit").selected(_saveOnExit).closeMenuWhenItemClicked(false), [&] { _saveOnExit = !_saveOnExit; });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("CUDA settings"), [&] { GpuSettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Display settings").keyAlt(true).key(ImGuiKey_V), [&] { DisplaySettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Network settings").keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });
     AlienGui::MenuSeparator();

@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 
 #include <EngineKernels/Base.cuh>
 #include <EngineKernels/Definitions.cuh>
@@ -16,7 +16,7 @@ public:
     void init();
     void shutdown();
 
-    void updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
+    void updateStatistics(KernelLaunchSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
 
 private:
     StatisticsKernelsService() = default;

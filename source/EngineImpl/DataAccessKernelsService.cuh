@@ -4,8 +4,8 @@
 
 #include <EngineInterface/ArraySizesForGpuEntities.h>
 #include <EngineInterface/ArraySizesForTOs.h>
-#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/InspectedEntityIds.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include <EngineKernels/Base.cuh>
@@ -20,15 +20,15 @@ public:
     void init();
     void shutdown();
 
-    ArraySizesForTOs estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data);
-    void getData(CudaSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TOs const& to);
-    void getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TOs const& to);
-    void getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TOs const& to);
-    void getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TOs const& to);
+    ArraySizesForTOs estimateCapacityNeededForTO(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
+    void getData(KernelLaunchSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TOs const& to);
+    void getSelectedData(KernelLaunchSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TOs const& to);
+    void getInspectedData(KernelLaunchSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TOs const& to);
+    void getOverlayData(KernelLaunchSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TOs const& to);
 
-    ArraySizesForGpuEntities estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TOs const& to);
-    void addData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to, bool selectData);
-    void clearData(CudaSettings const& gpuSettings, SimulationData const& data);
+    ArraySizesForGpuEntities estimateCapacityNeededForGpu(KernelLaunchSettings const& gpuSettings, TOs const& to);
+    void addData(KernelLaunchSettings const& gpuSettings, SimulationData const& data, TOs const& to, bool selectData);
+    void clearData(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
 
 private:
     DataAccessKernelsService() = default;

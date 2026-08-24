@@ -22,7 +22,7 @@ struct ObjectTO;
 struct ClusterAccessTO;
 struct TOs;
 struct SimulationParameters;
-struct CudaSettings;
+struct KernelLaunchSettings;
 class SimulationStatistics;
 
 class SimulationKernelsService;

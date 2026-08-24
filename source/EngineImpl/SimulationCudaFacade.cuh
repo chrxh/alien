@@ -75,7 +75,10 @@ public:
     void reconnectSelectedObjects();
     void setDetached(bool value);
 
-    void setGpuConstants(CudaSettings const& cudaConstants);
+    void setGpuConstants(KernelLaunchSettings const& cudaConstants);
+
+    // Derives the launch geometry from the device instead of taking it from a user setting
+    KernelLaunchSettings deriveKernelLaunchSettings() const;
     SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(
         SimulationParameters const& parameters,
@@ -133,8 +136,8 @@ private:
     // Adds the launch configuration and the entity counts to the profiling report; no-op outside debug mode
     void reportProfilingContext();
 
-    // Adds the phase breakdown of the fluid kernel, read back from the counters the kernel fills
-    void reportFluidKernelProfile();
+    // Adds the occupancy of the fluid kernel and the budgets it follows from
+    void reportOccupancy();
 
     SimulationData getSimulationDataPtrCopy() const;
 

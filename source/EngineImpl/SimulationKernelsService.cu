@@ -8,6 +8,7 @@
 #include <EngineInterface/SpaceCalculator.h>
 
 #include <EngineKernels/ForceFieldKernels.cuh>
+#include <EngineKernels/KernelLauncher.cuh>
 #include <EngineKernels/SimulationKernels.cuh>
 #include <EngineKernels/SimulationStatistics.cuh>
 
@@ -41,11 +42,19 @@ void SimulationKernelsService::shutdown()
 
 namespace
 {
-    // Kernels that give each warp an object of its own hold warps in the grid where it used to hold blocks.
-    // Shrinking it by the warps per block keeps the work per warp -- and thus the total work -- unchanged.
-    int calcWarpKernelGridSize(int numBlocks)
+    // The fluid kernels exist in two instantiations. Which one runs, and with which geometry, follows from how many
+    // blocks the device keeps resident for them; see KernelLaunchSettings::calcWarpsPerBlock.
+    template <typename Kernel1, typename KernelN>
+    void
+    launchFluidKernel(char const* name, Kernel1 kernel1, KernelN kernelN, KernelLaunchSettings const& settings, cudaStream_t stream, SimulationData const& data)
     {
-        return std::max(1, numBlocks / WARP_KERNEL_WARPS);
+        if (settings.fluidWarpsPerBlock == 1) {
+            launchKernel(name, kernel1, LaunchConfig{settings.numBlocks, WARP_SIZE}, stream, data);
+            ;
+        } else {
+            launchKernel(name, kernelN, LaunchConfig{std::max(1, settings.numBlocks / FLUID_WARPS_PER_BLOCK), FLUID_WARPS_PER_BLOCK * WARP_SIZE}, stream, data);
+            ;
+        }
     }
 }
 
@@ -60,7 +69,7 @@ CudaGraphConfig SimulationKernelsService::buildGraphConfig(
     config.executeCellFunction = forceCellFunctionExecution ? true : timestep % TIMESTEPS_PER_CELL_FUNCTION == 0;
     config.hasLayers = settings.simulationParameters.numLayers > 0;
     config.rigidityEnabled = isRigidityUpdateEnabled(settings);
-    config.numBlocks = settings.cudaSettings.numBlocks;
+    config.numBlocks = settings.kernelLaunchSettings.numBlocks;
     return config;
 }
 
@@ -75,81 +84,140 @@ void SimulationKernelsService::launchTimestepKernels(
     bool considerInnerFriction = (config.timestepMod3 == 0);
     bool considerRigidityUpdate = (config.timestepMod3 == 0);
 
-    STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+    launchKernel(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, _stream, data);
+    ;
 
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_physics_init, _stream, numBlocks, 8, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
+    launchKernel(KERNEL(cudaNextTimestep_physics_init), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_physics_fillMaps), LaunchConfig{numBlocks, 64}, _stream, data);
+    ;
 
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
+    launchFluidKernel(
+        "cudaNextTimestep_physics_calcFluidForces",
+        cudaNextTimestep_physics_calcFluidForces<1>,
+        cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>,
+        settings.kernelLaunchSettings,
+        _stream,
+        data);
+    launchFluidKernel(
+        "cudaNextTimestep_physics_calcFluidBoundaryForces",
+        cudaNextTimestep_physics_calcFluidBoundaryForces<1>,
+        cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>,
+        settings.kernelLaunchSettings,
+        _stream,
+        data);
 
     if (config.hasLayers) {
-        STREAM_KERNEL_CALL(cudaApplyForceFields, _stream, numBlocks, data);
+        launchKernel(KERNEL(cudaApplyForceFields), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
     }
 
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, calcAngularForces);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, calcAngularForces);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
+    launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, calcAngularForces);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, calcAngularForces);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_physics_verletVelocityUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
+    ;
 
     // Energy flow
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
+    launchKernel(KERNEL(cudaNextTimestep_energyFlow), LaunchConfig{numBlocks, 32}, _stream, data);
+    ;
 
     // Cell state transitions and front angle updates (run every timestep)
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep1, _stream, numBlocks, 8, data);
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep2, _stream, numBlocks, 8, data);
+    launchKernel(KERNEL(cudaNextTimestep_cellState_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_cellState_substep2), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
 
 
     // Signal processing and cell type-specific functions
     if (config.executeCellFunction) {
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data, statistics);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_signal_setSignal, _stream, numBlocks, 8, data);
+        launchKernel(KERNEL(cudaNextTimestep_signal_calcSignal), LaunchConfig{numBlocks, WARP_SIZE}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_signal_setSignal), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
 
         // Cell type-specific functions
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
+        launchKernel(KERNEL(cudaNextTimestep_cellType_prepare_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_generator), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
         // The constructor mutates the host genome before cloning; the mutation needs NEURAL_NET_INPUTS threads per block.
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, false);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_constructor_prepareExternalEnergyInflow, _stream, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_injector, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, _stream, numBlocks, 4, data, statistics);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, _stream, numBlocks, 4, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, _stream, numBlocks, 64, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_reconnector, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_detonator, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_digestor, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_memory, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_communicator, _stream, numBlocks, 64, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
+        launchKernel(KERNEL(cudaNextTimestep_constructor), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, false);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_constructor_countConstructorsNeedingEnergy), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_constructor_prepareExternalEnergyInflow), LaunchConfig{1, 1}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_constructor_provideExternalEnergy), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_injector), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_attacker), LaunchConfig{numBlocks, 4}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_depot), LaunchConfig{numBlocks, 4}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_muscle), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_sensor), LaunchConfig{numBlocks, 64}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_reconnector), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_detonator), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_digestor), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_memory), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_communicator), LaunchConfig{numBlocks, 64}, _stream, data, statistics);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellType_void), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+        ;
     }
 
     if (considerInnerFriction) {
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_applyInnerFriction), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
     }
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, false);
+    launchKernel(KERNEL(cudaNextTimestep_physics_applyFriction), LaunchConfig{numBlocks, 16}, _stream, data, false);
+    ;
 
     if (considerRigidityUpdate && config.rigidityEnabled) {
-        STREAM_KERNEL_CALL(cudaInitClusterData, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaFindClusterIteration, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaFindClusterIteration, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaFindClusterIteration, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaFindClusterBoundaries, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaAccumulateClusterPosAndVel, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaAccumulateClusterAngularProp, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaApplyClusterData, _stream, numBlocks, data);
+        launchKernel(KERNEL(cudaInitClusterData), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaFindClusterIteration), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaFindClusterIteration), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaFindClusterIteration), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaFindClusterBoundaries), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaAccumulateClusterPosAndVel), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaAccumulateClusterAngularProp), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaApplyClusterData), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
     }
 
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, 8, data);
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, 8, data);
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, 8, data);
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, 8, data);
-    STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, 8, data);
+    launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep2), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep3), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep4), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
+    launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep5), LaunchConfig{numBlocks, 8}, _stream, data);
+    ;
 
-    STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
+    launchKernel(KERNEL(cudaNextTimestep_incTimestep), LaunchConfig{1, 1}, _stream, data);
+    ;
 }
 
 cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
@@ -208,7 +276,7 @@ void SimulationKernelsService::calcTimestep(
     }
 
     // Garbage collection cannot be part of the graph due to dynamic behavior
-    GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
+    GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.kernelLaunchSettings, data);
 }
 
 CudaGraphPreviewConfig SimulationKernelsService::buildPreviewGraphConfig(
@@ -222,7 +290,7 @@ CudaGraphPreviewConfig SimulationKernelsService::buildPreviewGraphConfig(
     config.timestepMod3 = toInt(timestep % 3);
     config.executeCellFunctions = forceCellFunctionExecution ? true : timestep % TIMESTEPS_PER_CELL_FUNCTION == 0;
     config.detailSimulation = detailSimulation;
-    config.numBlocks = settings.cudaSettings.numBlocks;
+    config.numBlocks = settings.kernelLaunchSettings.numBlocks;
     return config;
 }
 
@@ -237,89 +305,157 @@ void SimulationKernelsService::launchPreviewKernels(
     bool considerInnerFriction = (config.timestepMod3 == 0);
 
     if (!config.detailSimulation) {
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, _stream, data);
+        ;
 
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_physics_init, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_init), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_fillMaps), LaunchConfig{numBlocks, 64}, _stream, data);
+        ;
+        launchFluidKernel(
+            "cudaNextTimestep_physics_calcFluidForces",
+            cudaNextTimestep_physics_calcFluidForces<1>,
+            cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>,
+            settings.kernelLaunchSettings,
+            _stream,
+            data);
+        launchFluidKernel(
+            "cudaNextTimestep_physics_calcFluidBoundaryForces",
+            cudaNextTimestep_physics_calcFluidBoundaryForces<1>,
+            cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>,
+            settings.kernelLaunchSettings,
+            _stream,
+            data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_verletVelocityUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
 
         // Cell state transitions and front angle updates (run every timestep)
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep1, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep2, _stream, numBlocks, 8, data);
+        launchKernel(KERNEL(cudaNextTimestep_cellState_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellState_substep2), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
 
         if (config.executeCellFunctions) {
             // Cell type-specific functions
-            STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, 8, data);
+            launchKernel(KERNEL(cudaNextTimestep_cellType_prepare_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+            ;
 
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, true);
+            launchKernel(KERNEL(cudaNextTimestep_constructor), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, true);
+            ;
         }
 
         if (considerInnerFriction) {
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
+            launchKernel(KERNEL(cudaNextTimestep_physics_applyInnerFriction), LaunchConfig{numBlocks, 16}, _stream, data);
+            ;
         }
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
+        launchKernel(KERNEL(cudaNextTimestep_physics_applyFriction), LaunchConfig{numBlocks, 16}, _stream, data, true);
+        ;
 
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, 8, data);
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep2), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep3), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep4), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
 
         GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_incTimestep), LaunchConfig{1, 1}, _stream, data);
+        ;
     } else {
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, _stream, data);
+        ;
 
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_physics_init, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_init), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_fillMaps), LaunchConfig{numBlocks, 64}, _stream, data);
+        ;
+        launchFluidKernel(
+            "cudaNextTimestep_physics_calcFluidForces",
+            cudaNextTimestep_physics_calcFluidForces<1>,
+            cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>,
+            settings.kernelLaunchSettings,
+            _stream,
+            data);
+        launchFluidKernel(
+            "cudaNextTimestep_physics_calcFluidBoundaryForces",
+            cudaNextTimestep_physics_calcFluidBoundaryForces<1>,
+            cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>,
+            settings.kernelLaunchSettings,
+            _stream,
+            data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_physics_verletVelocityUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
+        ;
 
         // Energy flow
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
+        launchKernel(KERNEL(cudaNextTimestep_energyFlow), LaunchConfig{numBlocks, 32}, _stream, data);
+        ;
 
         // Cell state transitions and front angle updates (run every timestep)
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep1, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellState_substep2, _stream, numBlocks, 8, data);
+        launchKernel(KERNEL(cudaNextTimestep_cellState_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_cellState_substep2), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
 
         if (config.executeCellFunctions) {
             // Signal processing
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, calcWarpKernelGridSize(numBlocks), WARP_KERNEL_THREADS, data, statistics);
-            STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_signal_setSignal, _stream, numBlocks, 8, data);
+            launchKernel(KERNEL(cudaNextTimestep_signal_calcSignal), LaunchConfig{numBlocks, WARP_SIZE}, _stream, data, statistics);
+            ;
+            launchKernel(KERNEL(cudaNextTimestep_signal_setSignal), LaunchConfig{numBlocks, 8}, _stream, data);
+            ;
 
             // Cell type-specific functions
-            STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, 8, data);
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
+            launchKernel(KERNEL(cudaNextTimestep_cellType_prepare_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+            ;
+            launchKernel(KERNEL(cudaNextTimestep_cellType_generator), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+            ;
 
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURAL_NET_INPUTS, data, statistics, true);
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
+            launchKernel(KERNEL(cudaNextTimestep_constructor), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, true);
+            ;
+            launchKernel(KERNEL(cudaNextTimestep_cellType_muscle), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+            ;
+            launchKernel(KERNEL(cudaNextTimestep_cellType_void), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
+            ;
         }
 
         if (considerInnerFriction) {
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
+            launchKernel(KERNEL(cudaNextTimestep_physics_applyInnerFriction), LaunchConfig{numBlocks, 16}, _stream, data);
+            ;
         }
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
+        launchKernel(KERNEL(cudaNextTimestep_physics_applyFriction), LaunchConfig{numBlocks, 16}, _stream, data, true);
+        ;
 
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep1, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, 8, data);
-        STREAM_KERNEL_CALL_GRID_STRIDE(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, 8, data);
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep2), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep3), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
+        launchKernel(KERNEL(cudaNextTimestep_structuralOperations_substep4), LaunchConfig{numBlocks, 8}, _stream, data);
+        ;
 
         GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_incTimestep), LaunchConfig{1, 1}, _stream, data);
+        ;
     }
 }
 
@@ -395,8 +531,8 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
     }
     _previewGraphCache.clear();
 
-    auto const gpuSettings = settings.cudaSettings;
-    KERNEL_CALL(cudaResetDensity, data);
+    auto const gpuSettings = settings.kernelLaunchSettings;
+    launchKernelOnDefaultStream(KERNEL(cudaResetDensity), LaunchConfig{gpuSettings.numBlocks, 8}, data);
 }
 
 bool SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const

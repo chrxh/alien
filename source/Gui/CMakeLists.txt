@@ -62,8 +62,6 @@ PUBLIC
     GenomeWindowEditData.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
-    GpuSettingsDialog.cpp
-    GpuSettingsDialog.h
     GuiLogger.cpp
     GuiLogger.h
     HelpStrings.h

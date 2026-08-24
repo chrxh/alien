@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include <EngineKernels/Base.cuh>
@@ -16,13 +16,13 @@ public:
     void init();
     void shutdown();
 
-    void removeSelection(CudaSettings const& gpuSettings, SimulationData const& data);
-    void swapSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
-    void switchSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
-    void setSelection(CudaSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData);
-    void updateSelection(CudaSettings const& gpuSettings, SimulationData const& data);
+    void removeSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
+    void swapSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
+    void switchSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
+    void setSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData);
+    void updateSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
 
-    void rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data);
+    void rolloutSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
 
 private:
     SelectionKernelsService() = default;
