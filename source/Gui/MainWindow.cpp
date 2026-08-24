@@ -48,7 +48,6 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "GettingStartedWindow.h"
-#include "GpuSettingsDialog.h"
 #include "GuiLogger.h"
 #include "ImFileDialog.h"
 #include "ImageToPatternDialog.h"
@@ -131,7 +130,6 @@ _MainWindow::_MainWindow()
     SpatialControlWindow::get().setup();
     SimulationParametersMainWindow::get().setup();
     LocationController::get().setup();
-    GpuSettingsDialog::get().setup();
     MainLoopController::get().setup();
     ExitDialog::get().setup();
     MassOperationsDialog::get().setup();

@@ -21,7 +21,7 @@ struct EnergyDesc;
 struct GenomeDesc;
 struct GeneDesc;
 
-struct CudaSettings;
+struct KernelLaunchSettings;
 
 struct SettingsForSimulation;
 

@@ -1,6 +1,7 @@
 #include "SelectionKernelsService.cuh"
 
 #include <EngineKernels/DataAccessKernels.cuh>
+#include <EngineKernels/KernelLauncher.cuh>
 #include <EngineKernels/SelectionKernels.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
@@ -19,48 +20,55 @@ void SelectionKernelsService::shutdown()
     memoryManager.freeMemory(_cudaSwitchResult);
 }
 
-void SelectionKernelsService::removeSelection(CudaSettings const& gpuSettings, SimulationData const& data)
+void SelectionKernelsService::removeSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
 {
-    KERNEL_CALL(cudaRemoveSelection, data, false);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{gpuSettings.numBlocks, 8}, data, false);
 }
 
-void SelectionKernelsService::swapSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
+void SelectionKernelsService::swapSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
 {
-    KERNEL_CALL(cudaRemoveSelection, data, true);
-    KERNEL_CALL(cudaSwapSelection, switchData.pos, switchData.radius, data);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{gpuSettings.numBlocks, 8}, data, true);
+    launchKernelOnDefaultStream(KERNEL(cudaSwapSelection), LaunchConfig{gpuSettings.numBlocks, 8}, switchData.pos, switchData.radius, data);
     rolloutSelection(gpuSettings, data);
 }
 
-void SelectionKernelsService::switchSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
+void SelectionKernelsService::switchSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
 {
     setValueToDevice(_cudaSwitchResult, 0);
 
-    KERNEL_CALL(cudaExistsSelection, switchData, data, _cudaSwitchResult);
+    launchKernelOnDefaultStream(KERNEL(cudaExistsSelection), LaunchConfig{gpuSettings.numBlocks, 8}, switchData, data, _cudaSwitchResult);
     cudaDeviceSynchronize();
 
     if (0 == copyToHost(_cudaSwitchResult)) {
-        KERNEL_CALL(cudaSetSelection, switchData.pos, switchData.radius, data);
+        launchKernelOnDefaultStream(
+            "cudaSetSelection",
+            static_cast<void (*)(float2, float, SimulationData)>(cudaSetSelection),
+            LaunchConfig{gpuSettings.numBlocks, 8},
+            switchData.pos,
+            switchData.radius,
+            data);
         rolloutSelection(gpuSettings, data);
     }
 }
 
-void SelectionKernelsService::setSelection(CudaSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData)
+void SelectionKernelsService::setSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData)
 {
-    KERNEL_CALL(cudaSetSelection, setData, data);
+    launchKernelOnDefaultStream(
+        "cudaSetSelection", static_cast<void (*)(AreaSelectionData, SimulationData)>(cudaSetSelection), LaunchConfig{gpuSettings.numBlocks, 8}, setData, data);
     rolloutSelection(gpuSettings, data);
 }
 
-void SelectionKernelsService::updateSelection(CudaSettings const& gpuSettings, SimulationData const& data)
+void SelectionKernelsService::updateSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
 {
-    KERNEL_CALL(cudaRemoveSelection, data, true);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{gpuSettings.numBlocks, 8}, data, true);
     rolloutSelection(gpuSettings, data);
 }
 
-void SelectionKernelsService::rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data)
+void SelectionKernelsService::rolloutSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
 {
     do {
         setValueToDevice(_cudaRolloutResult, 0);
-        KERNEL_CALL(cudaRolloutSelectionStep, data, _cudaRolloutResult);
+        launchKernelOnDefaultStream(KERNEL(cudaRolloutSelectionStep), LaunchConfig{gpuSettings.numBlocks, 8}, data, _cudaRolloutResult);
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaRolloutResult));

@@ -95,9 +95,9 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
-    virtual CudaSettings getGpuSettings() const = 0;
-    virtual CudaSettings getOriginalGpuSettings() const = 0;
-    virtual void setGpuSettings_async(CudaSettings const& gpuSettings) = 0;
+    virtual KernelLaunchSettings getGpuSettings() const = 0;
+    virtual KernelLaunchSettings getOriginalGpuSettings() const = 0;
+    virtual void setGpuSettings_async(KernelLaunchSettings const& gpuSettings) = 0;
     virtual std::string getGpuName() const = 0;
 
     virtual void setDebugMode(bool value) = 0;

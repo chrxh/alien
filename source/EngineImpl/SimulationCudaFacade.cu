@@ -13,9 +13,9 @@
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
 
-#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/InspectedEntityIds.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SpaceCalculator.h>
 
@@ -30,7 +30,6 @@
 #include <EngineKernels/DataAccessKernels.cuh>
 #include <EngineKernels/EditKernels.cuh>
 #include <EngineKernels/Entities.cuh>
-#include <EngineKernels/FluidKernelProfiler.cuh>
 #include <EngineKernels/GarbageCollectorKernels.cuh>
 #include <EngineKernels/GeometryKernels.cuh>
 #include <EngineKernels/Map.cuh>
@@ -69,7 +68,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
-    setGpuConstants(settings.cudaSettings);
+    setGpuConstants(deriveKernelLaunchSettings());
 
     log(Priority::Important, "initialize simulation");
 
@@ -176,7 +175,7 @@ void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateSt
 void _SimulationCudaFacade::applyCataclysm(int power)
 {
     for (int i = 0; i < power; ++i) {
-        EditKernelsService::get().applyCataclysm(_settings.cudaSettings, getSimulationDataPtrCopy());
+        EditKernelsService::get().applyCataclysm(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
         syncAndCheck();
         resizeArraysIfNecessary();
     }
@@ -185,7 +184,7 @@ void _SimulationCudaFacade::applyCataclysm(int power)
 TOs _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    DataAccessKernelsService::get().getData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
+    DataAccessKernelsService::get().getData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
@@ -197,7 +196,7 @@ TOs _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 con
 TOs _SimulationCudaFacade::getSelectedSimulationData(bool includeClusters)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    DataAccessKernelsService::get().getSelectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters, cudaTO);
+    DataAccessKernelsService::get().getSelectedData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -220,7 +219,7 @@ TOs _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint64_t> enti
     }
 
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    DataAccessKernelsService::get().getInspectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), ids, cudaTO);
+    DataAccessKernelsService::get().getInspectedData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), ids, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -232,7 +231,7 @@ TOs _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint64_t> enti
 TOs _SimulationCudaFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    DataAccessKernelsService::get().getOverlayData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
+    DataAccessKernelsService::get().getOverlayData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -246,11 +245,11 @@ void _SimulationCudaFacade::addAndSelectSimulationData(TOs const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
+    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.kernelLaunchSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
-    SelectionKernelsService::get().removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
-    DataAccessKernelsService::get().addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, true);
+    SelectionKernelsService::get().removeSelection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
+    DataAccessKernelsService::get().addData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), cudaTO, true);
     syncAndCheck();
     updateStatistics();
 }
@@ -260,11 +259,11 @@ void _SimulationCudaFacade::setSimulationData(TOs const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
+    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.kernelLaunchSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
-    DataAccessKernelsService::get().clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
-    DataAccessKernelsService::get().addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, false);
+    DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
+    DataAccessKernelsService::get().addData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), cudaTO, false);
     syncAndCheck();
 
     updateStatistics();
@@ -272,7 +271,7 @@ void _SimulationCudaFacade::setSimulationData(TOs const& to)
 
 void _SimulationCudaFacade::removeSelectedObjects(bool includeClusters)
 {
-    EditKernelsService::get().removeSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().removeSelectedObjects(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 
     updateStatistics();
@@ -280,7 +279,7 @@ void _SimulationCudaFacade::removeSelectedObjects(bool includeClusters)
 
 void _SimulationCudaFacade::relaxSelectedObjects(bool includeClusters)
 {
-    EditKernelsService::get().relaxSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().relaxSelectedObjects(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
@@ -291,25 +290,25 @@ Ids _SimulationCudaFacade::getMaxIds() const
 
 void _SimulationCudaFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
-    EditKernelsService::get().uniformVelocities(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().uniformVelocities(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::makeSticky(bool includeClusters)
 {
-    EditKernelsService::get().makeSticky(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().makeSticky(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::removeStickiness(bool includeClusters)
 {
-    EditKernelsService::get().removeStickiness(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().removeStickiness(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setBarrier(bool value, bool includeClusters)
 {
-    EditKernelsService::get().setBarrier(_settings.cudaSettings, getSimulationDataPtrCopy(), value, includeClusters);
+    EditKernelsService::get().setBarrier(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value, includeClusters);
     syncAndCheck();
 }
 
@@ -318,7 +317,7 @@ void _SimulationCudaFacade::changeInspectedSimulationData(TOs const& changeTO)
     auto cudaTO = _cudaTOProvider->provideDataTO(changeTO.capacities);
     copyDataTOtoGpu(cudaTO, changeTO);
 
-    EditKernelsService::get().changeSimulationData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
+    EditKernelsService::get().changeSimulationData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
@@ -331,7 +330,7 @@ int _SimulationCudaFacade::injectGenomeToSelectedCreatures(TOs const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto result = EditKernelsService::get().injectGenomeToSelectedCreatures(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
+    auto result = EditKernelsService::get().injectGenomeToSelectedCreatures(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
@@ -343,38 +342,38 @@ int _SimulationCudaFacade::injectGenomeToSelectedCreatures(TOs const& to)
 
 void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)
 {
-    EditKernelsService::get().applyForce(_settings.cudaSettings, getSimulationDataPtrCopy(), applyData);
+    EditKernelsService::get().applyForce(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), applyData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::switchSelection(PointSelectionData const& pointData)
 {
-    SelectionKernelsService::get().switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    SelectionKernelsService::get().switchSelection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::swapSelection(PointSelectionData const& pointData)
 {
-    SelectionKernelsService::get().swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    SelectionKernelsService::get().swapSelection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
 {
-    SelectionKernelsService::get().setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
+    SelectionKernelsService::get().setSelection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), selectionData);
     syncAndCheck();
 }
 
 SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    EditKernelsService::get().getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
+    EditKernelsService::get().getSelectionShallowData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
 void _SimulationCudaFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    EditKernelsService::get().shallowUpdateSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), shallowUpdateData);
+    EditKernelsService::get().shallowUpdateSelectedObjects(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), shallowUpdateData);
     syncAndCheck();
 
     updateStatistics();
@@ -382,7 +381,7 @@ void _SimulationCudaFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionD
 
 void _SimulationCudaFacade::removeSelection()
 {
-    SelectionKernelsService::get().removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().removeSelection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 
     updateStatistics();
@@ -390,13 +389,13 @@ void _SimulationCudaFacade::removeSelection()
 
 void _SimulationCudaFacade::updateSelection()
 {
-    SelectionKernelsService::get().updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().updateSelection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
-    EditKernelsService::get().colorSelectedCells(_settings.cudaSettings, getSimulationDataPtrCopy(), color, includeClusters);
+    EditKernelsService::get().colorSelectedCells(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), color, includeClusters);
     syncAndCheck();
 
     updateStatistics();
@@ -404,19 +403,42 @@ void _SimulationCudaFacade::colorSelectedObjects(unsigned char color, bool inclu
 
 void _SimulationCudaFacade::reconnectSelectedObjects()
 {
-    EditKernelsService::get().reconnect(_settings.cudaSettings, getSimulationDataPtrCopy());
+    EditKernelsService::get().reconnect(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setDetached(bool value)
 {
-    EditKernelsService::get().setDetached(_settings.cudaSettings, getSimulationDataPtrCopy(), value);
+    EditKernelsService::get().setDetached(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value);
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::setGpuConstants(CudaSettings const& gpuConstants)
+void _SimulationCudaFacade::setGpuConstants(KernelLaunchSettings const& gpuConstants)
 {
-    _settings.cudaSettings = gpuConstants;
+    _settings.kernelLaunchSettings = gpuConstants;
+}
+
+KernelLaunchSettings _SimulationCudaFacade::deriveKernelLaunchSettings() const
+{
+    KernelLaunchSettings result;
+
+    cudaDeviceProp prop;
+    if (cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) != cudaSuccess) {
+        return result;
+    }
+    result.numBlocks = KernelLaunchSettings::calcNumBlocks(prop.multiProcessorCount);
+
+    // How many blocks of the fluid kernel the hardware keeps resident decides whether its warps have to come from
+    // inside a block. Asking the driver covers architectures that do not exist yet.
+    int blocksPerMultiProcessor = 0;
+    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiProcessor, cudaNextTimestep_physics_calcFluidForces<1>, WARP_SIZE, 0) == cudaSuccess) {
+        result.fluidWarpsPerBlock = KernelLaunchSettings::calcWarpsPerBlock(blocksPerMultiProcessor);
+    }
+
+    log(Priority::Important,
+        "kernel launch: " + std::to_string(result.numBlocks) + " blocks, " + std::to_string(result.fluidWarpsPerBlock) + " warps per fluid block ("
+            + std::to_string(prop.multiProcessorCount) + " multiprocessors, " + std::to_string(blocksPerMultiProcessor) + " resident blocks each)");
+    return result;
 }
 
 SimulationParameters _SimulationCudaFacade::getSimulationParameters() const
@@ -434,12 +456,12 @@ void _SimulationCudaFacade::setSimulationParameters(SimulationParameters const& 
 
 ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
 {
-    return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.cudaSettings, getSimulationDataPtrCopy());
+    return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
 }
 
 void _SimulationCudaFacade::updateStatistics()
 {
-    StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    StatisticsKernelsService::get().updateStatistics(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
     auto statisticsEntry = _cudaSimulationStatistics->getStatisticsEntry();
@@ -488,7 +510,7 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 
 void _SimulationCudaFacade::clear()
 {
-    DataAccessKernelsService::get().clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
+    DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
@@ -509,7 +531,7 @@ void _SimulationCudaFacade::initSettingsPreviewData()
     }
     _settingsForPreview.worldSizeX = PREVIEW_WIDTH;
     _settingsForPreview.worldSizeY = PREVIEW_HEIGHT;
-    _settingsForPreview.cudaSettings.numBlocks = 16;
+    _settingsForPreview.kernelLaunchSettings.numBlocks = 16;
 }
 
 void _SimulationCudaFacade::newPreview(TOs const& to)
@@ -517,8 +539,8 @@ void _SimulationCudaFacade::newPreview(TOs const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    DataAccessKernelsService::get().clearData(_settings.cudaSettings, *_cudaPreviewData);
-    DataAccessKernelsService::get().addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
+    DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, *_cudaPreviewData);
+    DataAccessKernelsService::get().addData(_settings.kernelLaunchSettings, *_cudaPreviewData, cudaTO, false);
     syncAndCheck();
 }
 
@@ -573,7 +595,7 @@ TOs _SimulationCudaFacade::getPreviewData()
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(PreviewCapacityTO);
     DataAccessKernelsService::get().getData(
-        _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaTO);
+        _settings.kernelLaunchSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
@@ -585,7 +607,7 @@ TOs _SimulationCudaFacade::getPreviewData()
 void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics, objectId);
+    TestKernelsService::get().testOnly_mutate(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics, objectId);
     syncAndCheck();
 
     resizeArraysIfNecessary();
@@ -594,35 +616,35 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
 void _SimulationCudaFacade::testOnly_voidUnreachableNodes(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_voidUnreachableNodes(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_voidUnreachableNodes(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), objectId);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_removeUnusedGenes(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_removeUnusedGenes(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_removeUnusedGenes(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), objectId);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_removeGeneCycles(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_removeGeneCycles(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_removeGeneCycles(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), objectId);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_limitGenesWithSeparation(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_limitGenesWithSeparation(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_limitGenesWithSeparation(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), objectId);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_createConnection(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId1, objectId2);
+    TestKernelsService::get().testOnly_createConnection(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), objectId1, objectId2);
     syncAndCheck();
 }
 
@@ -635,21 +657,21 @@ void _SimulationCudaFacade::testOnly_createConnectionWithAbsAngle(
 {
     checkAndProcessSimulationParameterChanges();
     TestKernelsService::get().testOnly_createConnectionWithAbsAngle(
-        _settings.cudaSettings, getSimulationDataPtrCopy(), objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+        _settings.kernelLaunchSettings, getSimulationDataPtrCopy(), objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_cleanupAfterTimestep()
 {
     checkAndProcessSimulationParameterChanges();
-    GarbageCollectorKernelsService::get().cleanupAfterTimestep(_settings.cudaSettings, getSimulationDataPtrCopy());
+    GarbageCollectorKernelsService::get().cleanupAfterTimestep(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_cleanupAfterDataManipulation()
 {
     checkAndProcessSimulationParameterChanges();
-    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(_settings.cudaSettings, getSimulationDataPtrCopy());
+    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
@@ -663,7 +685,7 @@ void _SimulationCudaFacade::testOnly_resizeArrays(ArraySizesForGpuEntities const
 bool _SimulationCudaFacade::testOnly_isDataValid()
 {
     checkAndProcessSimulationParameterChanges();
-    auto result = TestKernelsService::get().testOnly_isDataValid(_settings.cudaSettings, getSimulationDataPtrCopy());
+    auto result = TestKernelsService::get().testOnly_isDataValid(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
     syncAndCheck();
     return result;
 }
@@ -861,12 +883,12 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
     _cudaSimulationData->resizeTempObjects(sizeDelta);
 
     if (!_cudaSimulationData->isEmpty()) {
-        GarbageCollectorKernelsService::get().copyArrays(_settings.cudaSettings, getSimulationDataPtrCopy());
+        GarbageCollectorKernelsService::get().copyArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
         syncAndCheck();
 
         _cudaSimulationData->resizeObjectsByMatchingTempObjects();
 
-        GarbageCollectorKernelsService::get().swapArrays(_settings.cudaSettings, getSimulationDataPtrCopy());
+        GarbageCollectorKernelsService::get().swapArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
         syncAndCheck();
     } else {
         _cudaSimulationData->resizeObjectsByMatchingTempObjects();
@@ -886,114 +908,42 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
 }
 
-namespace
-{
-    std::string formatShare(uint64_t part, uint64_t total)
-    {
-        if (total == 0) {
-            return "-";
-        }
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(1) << 100.0 * static_cast<double>(part) / static_cast<double>(total) << "%";
-        return stream.str();
-    }
-
-    std::string formatRatio(double value)
-    {
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(2) << value;
-        return stream.str();
-    }
-}
-
-void _SimulationCudaFacade::reportFluidKernelProfile()
+void _SimulationCudaFacade::reportOccupancy()
 {
 #if defined(USE_HIP)
-    // The fluid kernel only misbehaves on NVIDIA hardware, and the readback would need HIP counterparts for
-    // cudaMemcpyFromSymbol and the occupancy query. Keep the AMD build free of it.
+    // The occupancy query would need a HIP counterpart; the kernels only misbehave on NVIDIA hardware anyway.
     return;
 #else
-    FluidKernelProfile profile;
-    if (cudaMemcpyFromSymbol(&profile, cudaFluidKernelProfile, sizeof(FluidKernelProfile)) != cudaSuccess) {
-        return;
-    }
-    if (profile.numBlocks == 0 || profile.numLaunches == 0) {
-        return;
-    }
     auto& profiler = KernelProfiler::get();
-    auto const launches = profile.numLaunches;
-
-    // Where the time inside the kernel goes. A dominant scan phase points at the map walk, a dominant sync phase at
-    // threads arriving at very different times, a dominant tail at the serial work of thread 0.
-    auto const phaseCycles = profile.initCycles + profile.scanCycles + profile.syncAndReduceCycles + profile.tailCycles;
-    profiler.setContext("fluid phase: init", formatShare(profile.initCycles, phaseCycles));
-    profiler.setContext("fluid phase: scan", formatShare(profile.scanCycles, phaseCycles));
-    profiler.setContext("fluid phase: sync + reduce", formatShare(profile.syncAndReduceCycles, phaseCycles));
-    profiler.setContext("fluid phase: tail", formatShare(profile.tailCycles, phaseCycles));
 
     cudaDeviceProp prop;
-    auto const haveProp = cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess;
-    profiler.setContext("fluid block alive [us]", formatRatio(static_cast<double>(profile.blockNanoseconds) / 1.0e3 / static_cast<double>(profile.numBlocks)));
-    if (profile.numBlocks > 0) {
-        profiler.setContext("fluid warps per block", std::to_string(profile.numWarps / profile.numBlocks));
+    if (cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) != cudaSuccess) {
+        return;
     }
 
-    // How many blocks ran at the same time: the block lifetimes of one launch against its wall-clock time. A warp owns
-    // one object, so the warps in flight are the objects the GPU works on at once -- the figure that decides the runtime.
-    auto const kernelNanoseconds = profiler.getAverageNanoseconds("cudaNextTimestep_physics_calcFluidForces");
-    if (kernelNanoseconds > 0.0 && profile.numBlocks > 0) {
-        auto const blocksInFlight = static_cast<double>(profile.blockNanoseconds) / static_cast<double>(launches) / kernelNanoseconds;
-        profiler.setContext("fluid blocks in flight", formatRatio(blocksInFlight));
-        profiler.setContext(
-            "fluid warps in flight", formatRatio(blocksInFlight * static_cast<double>(profile.numWarps) / static_cast<double>(profile.numBlocks)));
-    }
-
-    // The occupancy the hardware allows for this kernel, to compare against the blocks actually in flight.
+    // Blackwell keeps a single block resident per SM for the fluid kernels even though the budgets below allow far
+    // more, which is what made them collapse there. Reporting both makes that visible in a profile from any machine.
     int blocksPerMultiprocessor = 0;
-    auto const threadsPerBlock = WARP_KERNEL_THREADS;
-    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, threadsPerBlock, 0) == cudaSuccess
-        && haveProp) {
+    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces<1>, WARP_SIZE, 0) == cudaSuccess) {
         profiler.setContext(
             "fluid occupancy [blocks/SM]",
             std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
     }
 
-    // Registers, shared memory and the per-SM budgets the occupancy follows from. Reporting them shows which of the
-    // four limits actually binds, instead of leaving the occupancy figure unexplained.
     cudaFuncAttributes attributes;
-    if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {
+    if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces<1>) == cudaSuccess) {
         profiler.setContext("fluid kernel registers", std::to_string(attributes.numRegs));
         profiler.setContext("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
         profiler.setContext("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));
         profiler.setContext("fluid kernel binary / ptx", std::to_string(attributes.binaryVersion) + " / " + std::to_string(attributes.ptxVersion));
-        profiler.setContext("fluid kernel block size", std::to_string(threadsPerBlock));
-    }
-    if (haveProp) {
-        profiler.setContext("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
-        profiler.setContext("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
-        profiler.setContext("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
-        profiler.setContext("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
-        profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
+        profiler.setContext("fluid warps per block", std::to_string(_settings.kernelLaunchSettings.fluidWarpsPerBlock));
     }
 
-    // What a warp pays outside its object loop against what the objects cost. A dominant overhead would mean no
-    // amount of work amortizes it, which is what a run with a small simulation would otherwise have to show.
-    auto const warps = static_cast<double>(profile.numWarps);
-    profiler.setContext("fluid warp overhead [kcycles]", formatRatio(static_cast<double>(profile.warpOverheadCycles) / 1.0e3 / warps));
-    profiler.setContext("fluid overhead share per warp", formatShare(profile.warpOverheadCycles, profile.warpCycles));
-    profiler.setContext("fluid first object [kcycles]", formatRatio(static_cast<double>(profile.firstObjectCycles) / 1.0e3 / warps));
-    if (profile.numObjects > 0) {
-        profiler.setContext(
-            "fluid avg object [kcycles]", formatRatio(static_cast<double>(profile.warpCycles) / 1.0e3 / static_cast<double>(profile.numObjects)));
-    }
-
-    // Work actually performed, so that a slow GPU can be told apart from a denser simulation state.
-    profiler.setContext("fluid objects per launch", std::to_string(profile.numObjects / launches));
-    if (profile.numObjects > 0) {
-        profiler.setContext("fluid scan cells per object", formatRatio(static_cast<double>(profile.numScanCells) / static_cast<double>(profile.numObjects)));
-        profiler.setContext("fluid map records per object", formatRatio(static_cast<double>(profile.numRecords) / static_cast<double>(profile.numObjects)));
-    }
-    profiler.setContext("fluid blocks with work", std::to_string(profile.numBlocks / launches));
+    profiler.setContext("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
+    profiler.setContext("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
+    profiler.setContext("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
+    profiler.setContext("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
+    profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
 #endif
 }
 
@@ -1003,14 +953,6 @@ void _SimulationCudaFacade::reportProfilingContext()
         return;
     }
 
-    static auto profilingArmed = false;
-    if (!profilingArmed) {
-        profilingArmed = true;
-        FluidKernelProfile empty{};
-        cudaMemcpyToSymbol(cudaFluidKernelProfile, &empty, sizeof(FluidKernelProfile));
-        auto const enabled = 1;
-        cudaMemcpyToSymbol(cudaFluidKernelProfilingEnabled, &enabled, sizeof(int));
-    }
     auto& profiler = KernelProfiler::get();
     profiler.setContext("gpu", _gpuInfo.gpuModelName);
 
@@ -1027,7 +969,7 @@ void _SimulationCudaFacade::reportProfilingContext()
     }
     profiler.setContext("acquired GPU memory [MB]", std::to_string(CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024)));
 
-    profiler.setContext("numBlocks", std::to_string(_settings.cudaSettings.numBlocks));
+    profiler.setContext("numBlocks", std::to_string(_settings.kernelLaunchSettings.numBlocks));
     profiler.setContext("world size", std::to_string(_settings.worldSizeX) + " x " + std::to_string(_settings.worldSizeY));
     profiler.setContext("smoothing length", std::to_string(_settings.simulationParameters.smoothingLength.value));
 
@@ -1040,10 +982,10 @@ void _SimulationCudaFacade::reportProfilingContext()
         "heap (used / capacity)", std::to_string(entities.heap.getNumEntries_host()) + " / " + std::to_string(entities.heap.getCapacity_host()));
 
     // Objects per block is what the block-partitioned kernels actually loop over, so it decides their cost.
-    auto const numBlocks = std::max(1, _settings.cudaSettings.numBlocks);
+    auto const numBlocks = std::max(1, _settings.kernelLaunchSettings.numBlocks);
     profiler.setContext("objects per block", std::to_string(entities.objects.getNumEntries_host() / static_cast<uint64_t>(numBlocks)));
 
-    reportFluidKernelProfile();
+    reportOccupancy();
 }
 
 void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()

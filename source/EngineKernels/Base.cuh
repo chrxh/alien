@@ -4,8 +4,8 @@
 
 #include <cuda_fp16.h>
 
-#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 
 #include "Definitions.cuh"
 #include "HashSet.cuh"

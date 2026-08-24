@@ -2,6 +2,7 @@
 
 #include <EngineInterface/EngineConstants.h>
 
+#include <EngineKernels/KernelLauncher.cuh>
 #include <EngineKernels/Macros.cuh>
 #include <EngineKernels/TestKernels.cuh>
 
@@ -15,38 +16,42 @@ void TestKernelsService::shutdown()
     CudaMemoryManager::getInstance().freeMemory(_cudaBoolResult);
 }
 
-void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& statistics, uint64_t objectId)
+void TestKernelsService::testOnly_mutate(
+    KernelLaunchSettings const& gpuSettings,
+    SimulationData const& data,
+    SimulationStatistics const& statistics,
+    uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestMutate, NEURAL_NET_INPUTS, data, statistics, objectId);
+    launchKernelOnDefaultStream(KERNEL(cudaTestMutate), LaunchConfig{gpuSettings.numBlocks, NEURAL_NET_INPUTS}, data, statistics, objectId);
 }
 
-void TestKernelsService::testOnly_voidUnreachableNodes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+void TestKernelsService::testOnly_voidUnreachableNodes(KernelLaunchSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestVoidUnreachableNodes, NEURAL_NET_INPUTS, data, objectId);
+    launchKernelOnDefaultStream(KERNEL(cudaTestVoidUnreachableNodes), LaunchConfig{gpuSettings.numBlocks, NEURAL_NET_INPUTS}, data, objectId);
 }
 
-void TestKernelsService::testOnly_removeUnusedGenes(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+void TestKernelsService::testOnly_removeUnusedGenes(KernelLaunchSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestRemoveUnreachableGenesFromRoot, NEURAL_NET_INPUTS, data, objectId);
+    launchKernelOnDefaultStream(KERNEL(cudaTestRemoveUnreachableGenesFromRoot), LaunchConfig{gpuSettings.numBlocks, NEURAL_NET_INPUTS}, data, objectId);
 }
 
-void TestKernelsService::testOnly_removeGeneCycles(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+void TestKernelsService::testOnly_removeGeneCycles(KernelLaunchSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestRemoveGeneCycles, NEURAL_NET_INPUTS, data, objectId);
+    launchKernelOnDefaultStream(KERNEL(cudaTestRemoveGeneCycles), LaunchConfig{gpuSettings.numBlocks, NEURAL_NET_INPUTS}, data, objectId);
 }
 
-void TestKernelsService::testOnly_limitGenesWithSeparation(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
+void TestKernelsService::testOnly_limitGenesWithSeparation(KernelLaunchSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL_MOD(cudaTestLimitGenesWithSeparation, NEURAL_NET_INPUTS, data, objectId);
+    launchKernelOnDefaultStream(KERNEL(cudaTestLimitGenesWithSeparation), LaunchConfig{gpuSettings.numBlocks, NEURAL_NET_INPUTS}, data, objectId);
 }
 
-void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)
+void TestKernelsService::testOnly_createConnection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)
 {
-    KERNEL_CALL_1_1(cudaTestCreateConnection, data, objectId1, objectId2);
+    launchKernelOnDefaultStream(KERNEL(cudaTestCreateConnection), LaunchConfig{1, 1}, data, objectId1, objectId2);
 }
 
 void TestKernelsService::testOnly_createConnectionWithAbsAngle(
-    CudaSettings const& gpuSettings,
+    KernelLaunchSettings const& gpuSettings,
     SimulationData const& data,
     uint64_t objectId1,
     uint64_t objectId2,
@@ -54,12 +59,13 @@ void TestKernelsService::testOnly_createConnectionWithAbsAngle(
     float desiredAbsAngle1,
     float desiredAbsAngle2)
 {
-    KERNEL_CALL_1_1(cudaTestCreateConnectionWithAbsAngle, data, objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaTestCreateConnectionWithAbsAngle), LaunchConfig{1, 1}, data, objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
 }
 
-bool TestKernelsService::testOnly_isDataValid(CudaSettings const& gpuSettings, SimulationData const& data)
+bool TestKernelsService::testOnly_isDataValid(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
 {
     setValueToDevice(_cudaBoolResult, true);
-    KERNEL_CALL(cudaTestIsDataValid, data, _cudaBoolResult);
+    launchKernelOnDefaultStream(KERNEL(cudaTestIsDataValid), LaunchConfig{gpuSettings.numBlocks, 8}, data, _cudaBoolResult);
     return copyToHost(_cudaBoolResult);
 }
