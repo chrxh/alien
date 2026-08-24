@@ -5,11 +5,7 @@
 __global__ void cudaNextTimestep_prepare(SimulationData data);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data);
-// The two fluid kernels work on one object per warp. WarpsPerBlock decides whether that warp is the whole block
-// or one of several, and therefore the block size they must be launched with; see KernelLaunchSettings.
-template <int WarpsPerBlock>
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data);
-template <int WarpsPerBlock>
 __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data);

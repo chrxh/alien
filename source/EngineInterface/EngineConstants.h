@@ -16,10 +16,7 @@ auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
 
 auto constexpr WARP_SIZE = 32;
 
-// Kernels that give each warp an object of its own are launched with this block size. It decides how many
-// objects an SM works on at once, since one warp per block left the Blackwell consumer GPUs at a single
-// resident block per SM, which is 32 of 1536 threads.
-auto constexpr FLUID_WARPS_PER_BLOCK = 16;
+auto constexpr MAX_FLUID_WARPS_PER_BLOCK = 16;
 
 auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
 

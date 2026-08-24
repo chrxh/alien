@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "EngineConstants.h"
+
 struct KernelLaunchSettings
 {
     int numBlocks = 16384;
@@ -18,8 +20,7 @@ struct KernelLaunchSettings
 
     static int calcWarpsPerBlock(int blocksPerMultiProcessor)
     {
-        auto constexpr WarpsPerBlockWhenBlocksAreScarce = 16;
         auto constexpr EnoughResidentBlocks = 8;
-        return blocksPerMultiProcessor >= EnoughResidentBlocks ? 1 : WarpsPerBlockWhenBlocksAreScarce;
+        return blocksPerMultiProcessor >= EnoughResidentBlocks ? 1 : MAX_FLUID_WARPS_PER_BLOCK;
     }
 };

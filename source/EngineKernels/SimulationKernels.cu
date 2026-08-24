@@ -53,27 +53,19 @@ __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
     ObjectProcessor::clearDensityMap(data);
 }
 
-template <int WarpsPerBlock>
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
-    ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap<WarpsPerBlock>(data);
+    ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
     ObjectProcessor::fillDensityMap(data);
     EnergyProcessor::fillDensityMap(data);
 
     EnergyProcessor::updateMap(data);
 }
 
-template <int WarpsPerBlock>
 __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data)
 {
-    ObjectProcessor::calcFluidBoundaryForces<WarpsPerBlock>(data);
+    ObjectProcessor::calcFluidBoundaryForces(data);
 }
-
-// Only the two regimes KernelLaunchSettings::calcWarpsPerBlock picks between are instantiated.
-template __global__ void cudaNextTimestep_physics_calcFluidForces<1>(SimulationData);
-template __global__ void cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>(SimulationData);
-template __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces<1>(SimulationData);
-template __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>(SimulationData);
 
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
 {

@@ -431,7 +431,7 @@ KernelLaunchSettings _SimulationCudaFacade::deriveKernelLaunchSettings() const
     // How many blocks of the fluid kernel the hardware keeps resident decides whether its warps have to come from
     // inside a block. Asking the driver covers architectures that do not exist yet.
     int blocksPerMultiProcessor = 0;
-    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiProcessor, cudaNextTimestep_physics_calcFluidForces<1>, WARP_SIZE, 0) == cudaSuccess) {
+    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiProcessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
         result.fluidWarpsPerBlock = KernelLaunchSettings::calcWarpsPerBlock(blocksPerMultiProcessor);
     }
 
@@ -924,14 +924,14 @@ void _SimulationCudaFacade::reportOccupancy()
     // Blackwell keeps a single block resident per SM for the fluid kernels even though the budgets below allow far
     // more, which is what made them collapse there. Reporting both makes that visible in a profile from any machine.
     int blocksPerMultiprocessor = 0;
-    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces<1>, WARP_SIZE, 0) == cudaSuccess) {
+    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
         profiler.setContext(
             "fluid occupancy [blocks/SM]",
             std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
     }
 
     cudaFuncAttributes attributes;
-    if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces<1>) == cudaSuccess) {
+    if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {
         profiler.setContext("fluid kernel registers", std::to_string(attributes.numRegs));
         profiler.setContext("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
         profiler.setContext("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));

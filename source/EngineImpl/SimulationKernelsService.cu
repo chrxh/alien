@@ -42,17 +42,12 @@ void SimulationKernelsService::shutdown()
 
 namespace
 {
-    // The fluid kernels exist in two instantiations. Which one runs, and with which geometry, follows from how many
-    // blocks the device keeps resident for them; see KernelLaunchSettings::calcWarpsPerBlock.
-    template <typename Kernel1, typename KernelN>
-    void
-    launchFluidKernel(char const* name, Kernel1 kernel1, KernelN kernelN, KernelLaunchSettings const& settings, cudaStream_t stream, SimulationData const& data)
+    // The fluid kernels work on one object per warp, so a block covers as many objects as it holds warps and the grid
+    // shrinks accordingly; see KernelLaunchSettings::calcWarpsPerBlock.
+    LaunchConfig calcFluidLaunchConfig(KernelLaunchSettings const& settings)
     {
-        if (settings.fluidWarpsPerBlock == 1) {
-            launchKernel(name, kernel1, LaunchConfig{settings.numBlocks, WARP_SIZE}, stream, data);
-        } else {
-            launchKernel(name, kernelN, LaunchConfig{std::max(1, settings.numBlocks / FLUID_WARPS_PER_BLOCK), FLUID_WARPS_PER_BLOCK * WARP_SIZE}, stream, data);
-        }
+        auto const warpsPerBlock = settings.fluidWarpsPerBlock;
+        return LaunchConfig{std::max(1, settings.numBlocks / warpsPerBlock), warpsPerBlock * WARP_SIZE};
     }
 }
 
@@ -87,20 +82,8 @@ void SimulationKernelsService::launchTimestepKernels(
     launchKernel(KERNEL(cudaNextTimestep_physics_init), LaunchConfig{numBlocks, 8}, _stream, data);
     launchKernel(KERNEL(cudaNextTimestep_physics_fillMaps), LaunchConfig{numBlocks, 64}, _stream, data);
 
-    launchFluidKernel(
-        "cudaNextTimestep_physics_calcFluidForces",
-        cudaNextTimestep_physics_calcFluidForces<1>,
-        cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>,
-        settings.kernelLaunchSettings,
-        _stream,
-        data);
-    launchFluidKernel(
-        "cudaNextTimestep_physics_calcFluidBoundaryForces",
-        cudaNextTimestep_physics_calcFluidBoundaryForces<1>,
-        cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>,
-        settings.kernelLaunchSettings,
-        _stream,
-        data);
+    launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
+    launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidBoundaryForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
 
     if (config.hasLayers) {
         launchKernel(KERNEL(cudaApplyForceFields), LaunchConfig{numBlocks, 8}, _stream, data);
@@ -260,20 +243,8 @@ void SimulationKernelsService::launchPreviewKernels(
 
         launchKernel(KERNEL(cudaNextTimestep_physics_init), LaunchConfig{numBlocks, 8}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_fillMaps), LaunchConfig{numBlocks, 64}, _stream, data);
-        launchFluidKernel(
-            "cudaNextTimestep_physics_calcFluidForces",
-            cudaNextTimestep_physics_calcFluidForces<1>,
-            cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>,
-            settings.kernelLaunchSettings,
-            _stream,
-            data);
-        launchFluidKernel(
-            "cudaNextTimestep_physics_calcFluidBoundaryForces",
-            cudaNextTimestep_physics_calcFluidBoundaryForces<1>,
-            cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>,
-            settings.kernelLaunchSettings,
-            _stream,
-            data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidBoundaryForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
         launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
@@ -309,20 +280,8 @@ void SimulationKernelsService::launchPreviewKernels(
 
         launchKernel(KERNEL(cudaNextTimestep_physics_init), LaunchConfig{numBlocks, 8}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_fillMaps), LaunchConfig{numBlocks, 64}, _stream, data);
-        launchFluidKernel(
-            "cudaNextTimestep_physics_calcFluidForces",
-            cudaNextTimestep_physics_calcFluidForces<1>,
-            cudaNextTimestep_physics_calcFluidForces<FLUID_WARPS_PER_BLOCK>,
-            settings.kernelLaunchSettings,
-            _stream,
-            data);
-        launchFluidKernel(
-            "cudaNextTimestep_physics_calcFluidBoundaryForces",
-            cudaNextTimestep_physics_calcFluidBoundaryForces<1>,
-            cudaNextTimestep_physics_calcFluidBoundaryForces<FLUID_WARPS_PER_BLOCK>,
-            settings.kernelLaunchSettings,
-            _stream,
-            data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidBoundaryForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
         launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
