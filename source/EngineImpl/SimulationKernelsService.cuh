@@ -17,7 +17,7 @@ struct CudaGraphConfig
     bool executeCellFunction;  // Cell type functions need to be executed
     bool hasLayers;            // settings.simulationParameters.numLayers > 0
     bool rigidityEnabled;      // isRigidityUpdateEnabled(settings)
-    int numBlocks;             // gpuSettings.numBlocks
+    int numBlocks;             // settings.kernelLaunchSettings.numBlocks
 
     bool operator==(CudaGraphConfig const& other) const = default;
     auto operator<=>(CudaGraphConfig const& other) const = default;
@@ -29,7 +29,7 @@ struct CudaGraphPreviewConfig
     int timestepMod3;           // Not every kernel needs to be executed each time
     bool executeCellFunctions;  // Cell type functions need to be executed each TIMESTEPS_PER_CELL_FUNCTION
     bool detailSimulation;      // Whether detail simulation is enabled
-    int numBlocks;              // gpuSettings.numBlocks
+    int numBlocks;              // settings.kernelLaunchSettings.numBlocks
 
     bool operator==(CudaGraphPreviewConfig const& other) const = default;
     auto operator<=>(CudaGraphPreviewConfig const& other) const = default;

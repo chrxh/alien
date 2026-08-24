@@ -16,7 +16,7 @@ public:
     void init();
     void shutdown();
 
-    void updateStatistics(KernelLaunchSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
+    void updateStatistics(KernelLaunchSettings const& launchSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
 
 private:
     StatisticsKernelsService() = default;

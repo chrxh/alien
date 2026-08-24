@@ -20,55 +20,55 @@ void SelectionKernelsService::shutdown()
     memoryManager.freeMemory(_cudaSwitchResult);
 }
 
-void SelectionKernelsService::removeSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
+void SelectionKernelsService::removeSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{gpuSettings.numBlocks, 8}, data, false);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, false);
 }
 
-void SelectionKernelsService::swapSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
+void SelectionKernelsService::swapSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, PointSelectionData const& switchData)
 {
-    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{gpuSettings.numBlocks, 8}, data, true);
-    launchKernelOnDefaultStream(KERNEL(cudaSwapSelection), LaunchConfig{gpuSettings.numBlocks, 8}, switchData.pos, switchData.radius, data);
-    rolloutSelection(gpuSettings, data);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, true);
+    launchKernelOnDefaultStream(KERNEL(cudaSwapSelection), LaunchConfig{launchSettings.numBlocks, 8}, switchData.pos, switchData.radius, data);
+    rolloutSelection(launchSettings, data);
 }
 
-void SelectionKernelsService::switchSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
+void SelectionKernelsService::switchSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, PointSelectionData const& switchData)
 {
     setValueToDevice(_cudaSwitchResult, 0);
 
-    launchKernelOnDefaultStream(KERNEL(cudaExistsSelection), LaunchConfig{gpuSettings.numBlocks, 8}, switchData, data, _cudaSwitchResult);
+    launchKernelOnDefaultStream(KERNEL(cudaExistsSelection), LaunchConfig{launchSettings.numBlocks, 8}, switchData, data, _cudaSwitchResult);
     cudaDeviceSynchronize();
 
     if (0 == copyToHost(_cudaSwitchResult)) {
         launchKernelOnDefaultStream(
             "cudaSetSelection",
             static_cast<void (*)(float2, float, SimulationData)>(cudaSetSelection),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             switchData.pos,
             switchData.radius,
             data);
-        rolloutSelection(gpuSettings, data);
+        rolloutSelection(launchSettings, data);
     }
 }
 
-void SelectionKernelsService::setSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData)
+void SelectionKernelsService::setSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, AreaSelectionData const& setData)
 {
     launchKernelOnDefaultStream(
-        "cudaSetSelection", static_cast<void (*)(AreaSelectionData, SimulationData)>(cudaSetSelection), LaunchConfig{gpuSettings.numBlocks, 8}, setData, data);
-    rolloutSelection(gpuSettings, data);
+        "cudaSetSelection", static_cast<void (*)(AreaSelectionData, SimulationData)>(cudaSetSelection), LaunchConfig{launchSettings.numBlocks, 8}, setData, data);
+    rolloutSelection(launchSettings, data);
 }
 
-void SelectionKernelsService::updateSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
+void SelectionKernelsService::updateSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{gpuSettings.numBlocks, 8}, data, true);
-    rolloutSelection(gpuSettings, data);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, true);
+    rolloutSelection(launchSettings, data);
 }
 
-void SelectionKernelsService::rolloutSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data)
+void SelectionKernelsService::rolloutSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
     do {
         setValueToDevice(_cudaRolloutResult, 0);
-        launchKernelOnDefaultStream(KERNEL(cudaRolloutSelectionStep), LaunchConfig{gpuSettings.numBlocks, 8}, data, _cudaRolloutResult);
+        launchKernelOnDefaultStream(KERNEL(cudaRolloutSelectionStep), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaRolloutResult);
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaRolloutResult));

@@ -68,7 +68,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
-    setGpuConstants(deriveKernelLaunchSettings());
+    setKernelLaunchSettings(deriveKernelLaunchSettings());
 
     log(Priority::Important, "initialize simulation");
 
@@ -413,9 +413,9 @@ void _SimulationCudaFacade::setDetached(bool value)
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::setGpuConstants(KernelLaunchSettings const& gpuConstants)
+void _SimulationCudaFacade::setKernelLaunchSettings(KernelLaunchSettings const& launchSettings)
 {
-    _settings.kernelLaunchSettings = gpuConstants;
+    _settings.kernelLaunchSettings = launchSettings;
 }
 
 KernelLaunchSettings _SimulationCudaFacade::deriveKernelLaunchSettings() const

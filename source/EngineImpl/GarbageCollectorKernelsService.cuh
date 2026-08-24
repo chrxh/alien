@@ -17,11 +17,11 @@ public:
     void init();
     void shutdown();
 
-    void cleanupAfterTimestep(KernelLaunchSettings const& gpuSettings, SimulationData const& simulationData);
+    void cleanupAfterTimestep(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
     void launchCleanupForPreviewInGraph(cudaStream_t stream, int numBlocks, SimulationData const& data);
-    void cleanupAfterDataManipulation(KernelLaunchSettings const& gpuSettings, SimulationData const& simulationData);
-    void copyArrays(KernelLaunchSettings const& gpuSettings, SimulationData const& simulationData);
-    void swapArrays(KernelLaunchSettings const& gpuSettings, SimulationData const& simulationData);
+    void cleanupAfterDataManipulation(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
+    void copyArrays(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
+    void swapArrays(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
 
 
 private:

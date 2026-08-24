@@ -16,13 +16,13 @@ public:
     void init();
     void shutdown();
 
-    void removeSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
-    void swapSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
-    void switchSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
-    void setSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData);
-    void updateSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
+    void removeSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data);
+    void swapSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, PointSelectionData const& switchData);
+    void switchSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, PointSelectionData const& switchData);
+    void setSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, AreaSelectionData const& setData);
+    void updateSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data);
 
-    void rolloutSelection(KernelLaunchSettings const& gpuSettings, SimulationData const& data);
+    void rolloutSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data);
 
 private:
     SelectionKernelsService() = default;
