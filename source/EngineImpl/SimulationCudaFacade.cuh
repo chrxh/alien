@@ -77,7 +77,6 @@ public:
 
     void setGpuConstants(KernelLaunchSettings const& cudaConstants);
 
-    // Derives the launch geometry from the device instead of taking it from a user setting
     KernelLaunchSettings deriveKernelLaunchSettings() const;
     SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(
