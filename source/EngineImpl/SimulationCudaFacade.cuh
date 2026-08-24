@@ -132,11 +132,9 @@ private:
     void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
     void checkAndProcessSimulationParameterChanges();
 
-    // Adds the launch configuration and the entity counts to the profiling report; no-op outside debug mode
+    // Adds the launch configuration, the entity counts and the occupancy of the fluid kernel to the profiling
+    // report; no-op outside debug mode
     void reportProfilingContext();
-
-    // Adds the occupancy of the fluid kernel and the budgets it follows from
-    void reportOccupancy();
 
     SimulationData getSimulationDataPtrCopy() const;
 
