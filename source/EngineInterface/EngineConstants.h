@@ -21,11 +21,6 @@ auto constexpr WARP_SIZE = 32;
 // resident block per SM, which is 32 of 1536 threads.
 auto constexpr FLUID_WARPS_PER_BLOCK = 16;
 
-// Grid-stride kernels depend only on blockDim.x * gridDim.x, so a larger block with a proportionally smaller
-// grid launches the same threads. They used to run with eight, which leaves the same GPUs nearly idle.
-auto constexpr GRID_STRIDE_KERNEL_THREADS = 128;
-auto constexpr LEGACY_KERNEL_THREADS = 8;
-
 auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
 
 auto constexpr MAX_LAYERS = 20;
