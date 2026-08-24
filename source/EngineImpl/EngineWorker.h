@@ -11,7 +11,6 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/ArraySizesForGpuEntities.h>
-#include <EngineInterface/KernelLaunchSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/StatisticsEntry.h>
@@ -88,7 +87,6 @@ public:
     void setSimulationParameters(
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
-    void setGpuSettings_async(KernelLaunchSettings const& gpuSettings);
     void setDebugMode(bool value);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
@@ -160,7 +158,6 @@ private:
     // Async jobs
     std::recursive_mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
-    std::optional<KernelLaunchSettings> _updateGpuSettingsJob;
 
     struct ApplyForceJob
     {

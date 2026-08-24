@@ -75,7 +75,7 @@ public:
     void reconnectSelectedObjects();
     void setDetached(bool value);
 
-    void setGpuConstants(KernelLaunchSettings const& cudaConstants);
+    void setKernelLaunchSettings(KernelLaunchSettings const& launchSettings);
 
     KernelLaunchSettings deriveKernelLaunchSettings() const;
     SimulationParameters getSimulationParameters() const;

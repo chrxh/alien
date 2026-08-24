@@ -51,66 +51,66 @@ void GeometryKernelsService::shutdown()
 
 void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
 {
-    auto const& gpuSettings = settings.kernelLaunchSettings;
+    auto const& launchSettings = settings.kernelLaunchSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    launchKernelOnDefaultStream(KERNEL(cudaCorrectPositionsForRendering), LaunchConfig{gpuSettings.numBlocks, 8}, data, visibleTopLeft);
+    launchKernelOnDefaultStream(KERNEL(cudaCorrectPositionsForRendering), LaunchConfig{launchSettings.numBlocks, 8}, data, visibleTopLeft);
 }
 
 void GeometryKernelsService::restorePositions(SettingsForSimulation const& settings, SimulationData data)
 {
-    auto const& gpuSettings = settings.kernelLaunchSettings;
+    auto const& launchSettings = settings.kernelLaunchSettings;
 
-    launchKernelOnDefaultStream(KERNEL(cudaCorrectPositionsForRendering), LaunchConfig{gpuSettings.numBlocks, 8}, data, float2{0, 0});
+    launchKernelOnDefaultStream(KERNEL(cudaCorrectPositionsForRendering), LaunchConfig{launchSettings.numBlocks, 8}, data, float2{0, 0});
 }
 
 NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
 {
-    auto const& gpuSettings = settings.kernelLaunchSettings;
+    auto const& launchSettings = settings.kernelLaunchSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
     float2 const visibleBottomRight{visibleWorldRect.bottomRight.x, visibleWorldRect.bottomRight.y};
     GeometryExtractionContext const context{visibleTopLeft, visibleBottomRight, computeCullingMargin(settings)};
 
     NumRenderObjects result;
     setValueToDevice(_numObjects, static_cast<uint64_t>(0));
-    launchKernelOnDefaultStream(KERNEL(cudaExtractObjectData), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numObjects, context);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractObjectData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numObjects, context);
     cudaDeviceSynchronize();
     result.objects = copyToHost(_numObjects);
 
     setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
-    launchKernelOnDefaultStream(KERNEL(cudaExtractFluidParticleData), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numFluidParticles, context);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractFluidParticleData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numFluidParticles, context);
     cudaDeviceSynchronize();
     result.fluidParticles = copyToHost(_numFluidParticles);
 
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-    launchKernelOnDefaultStream(KERNEL(cudaExtractSelectedObjectData), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numSelectedObjects, context);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractSelectedObjectData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numSelectedObjects, context);
     cudaDeviceSynchronize();
     result.selectedObjects = copyToHost(_numSelectedObjects);
 
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-    launchKernelOnDefaultStream(KERNEL(cudaExtractLineIndices), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numLineIndices, context);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractLineIndices), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numLineIndices, context);
     cudaDeviceSynchronize();
     result.lineIndices = copyToHost(_numLineIndices);
 
     setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
-    launchKernelOnDefaultStream(KERNEL(cudaExtractTriangleIndices), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numTriangleIndices, context);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractTriangleIndices), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numTriangleIndices, context);
     cudaDeviceSynchronize();
     result.triangleIndices = copyToHost(_numTriangleIndices);
 
     setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
     launchKernelOnDefaultStream(
-        KERNEL(cudaExtractSelectedConnectionData), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numSelectedConnectionVertices, context);
+        KERNEL(cudaExtractSelectedConnectionData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numSelectedConnectionVertices, context);
     cudaDeviceSynchronize();
     result.connectionArrowVertices = copyToHost(_numSelectedConnectionVertices);
 
     setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
-    launchKernelOnDefaultStream(KERNEL(cudaExtractAttackEventData), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numAttackEventVertices, context);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractAttackEventData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numAttackEventVertices, context);
     cudaDeviceSynchronize();
     result.attackEventVertices = copyToHost(_numAttackEventVertices);
 
     setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
     launchKernelOnDefaultStream(
-        KERNEL(cudaExtractDetonationEventData), LaunchConfig{gpuSettings.numBlocks, 8}, data, nullptr, _numDetonationEventVertices, context);
+        KERNEL(cudaExtractDetonationEventData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, _numDetonationEventVertices, context);
     cudaDeviceSynchronize();
     result.detonationEventVertices = copyToHost(_numDetonationEventVertices);
 
@@ -129,7 +129,7 @@ void GeometryKernelsService::extractObjectData(
     RealRect const& visibleWorldRect,
     bool useInterop)
 {
-    auto const& gpuSettings = settings.kernelLaunchSettings;
+    auto const& launchSettings = settings.kernelLaunchSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
     float2 const visibleBottomRight{visibleWorldRect.bottomRight.x, visibleWorldRect.bottomRight.y};
     GeometryExtractionContext const context{visibleTopLeft, visibleBottomRight, computeCullingMargin(settings)};
@@ -141,7 +141,7 @@ void GeometryKernelsService::extractObjectData(
         size_t bufferSize;
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));
-        launchKernelOnDefaultStream(KERNEL(cudaExtractObjectData), LaunchConfig{gpuSettings.numBlocks, 8}, data, mappedCellBuffer, _numObjects, context);
+        launchKernelOnDefaultStream(KERNEL(cudaExtractObjectData), LaunchConfig{launchSettings.numBlocks, 8}, data, mappedCellBuffer, _numObjects, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.fluidParticleBuffer));
@@ -151,7 +151,7 @@ void GeometryKernelsService::extractObjectData(
             reinterpret_cast<void**>(&mappedFluidParticleBuffer), &fluidParticleBufferSize, renderingData.fluidParticleBuffer));
         setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractFluidParticleData), LaunchConfig{gpuSettings.numBlocks, 8}, data, mappedFluidParticleBuffer, _numFluidParticles, context);
+            KERNEL(cudaExtractFluidParticleData), LaunchConfig{launchSettings.numBlocks, 8}, data, mappedFluidParticleBuffer, _numFluidParticles, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.fluidParticleBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
@@ -170,7 +170,7 @@ void GeometryKernelsService::extractObjectData(
             reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
         setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractSelectedObjectData), LaunchConfig{gpuSettings.numBlocks, 8}, data, mappedSelectedObjectBuffer, _numSelectedObjects, context);
+            KERNEL(cudaExtractSelectedObjectData), LaunchConfig{launchSettings.numBlocks, 8}, data, mappedSelectedObjectBuffer, _numSelectedObjects, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
@@ -180,7 +180,7 @@ void GeometryKernelsService::extractObjectData(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
         setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractLineIndices), LaunchConfig{gpuSettings.numBlocks, 8}, data, mappedLineIndexBuffer, _numLineIndices, context);
+            KERNEL(cudaExtractLineIndices), LaunchConfig{launchSettings.numBlocks, 8}, data, mappedLineIndexBuffer, _numLineIndices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.triangleIndexBuffer));
@@ -190,7 +190,7 @@ void GeometryKernelsService::extractObjectData(
             reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
         setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractTriangleIndices), LaunchConfig{gpuSettings.numBlocks, 8}, data, mappedTriangleIndexBuffer, _numTriangleIndices, context);
+            KERNEL(cudaExtractTriangleIndices), LaunchConfig{launchSettings.numBlocks, 8}, data, mappedTriangleIndexBuffer, _numTriangleIndices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.selectedConnectionBuffer));
@@ -201,7 +201,7 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractSelectedConnectionData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             mappedSelectedConnectionBuffer,
             _numSelectedConnectionVertices,
@@ -215,7 +215,7 @@ void GeometryKernelsService::extractObjectData(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedAttackEventBuffer), &attackEventBufferSize, renderingData.attackEventBuffer));
         setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractAttackEventData), LaunchConfig{gpuSettings.numBlocks, 8}, data, mappedAttackEventBuffer, _numAttackEventVertices, context);
+            KERNEL(cudaExtractAttackEventData), LaunchConfig{launchSettings.numBlocks, 8}, data, mappedAttackEventBuffer, _numAttackEventVertices, context);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
 
         CHECK_FOR_DEVICE_ERRORS(cudaGraphicsMapResources(1, &renderingData.detonationEventBuffer));
@@ -226,7 +226,7 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractDetonationEventData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             mappedDetonationEventBuffer,
             _numDetonationEventVertices,
@@ -236,12 +236,12 @@ void GeometryKernelsService::extractObjectData(
         // No-interop mode: extract to device buffers
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractObjectData), LaunchConfig{gpuSettings.numBlocks, 8}, data, renderingData.deviceObjectBuffer, _numObjects, context);
+            KERNEL(cudaExtractObjectData), LaunchConfig{launchSettings.numBlocks, 8}, data, renderingData.deviceObjectBuffer, _numObjects, context);
 
         setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractFluidParticleData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             renderingData.deviceFluidParticleBuffer,
             _numFluidParticles,
@@ -254,7 +254,7 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractSelectedObjectData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             renderingData.deviceSelectedObjectBuffer,
             _numSelectedObjects,
@@ -262,12 +262,12 @@ void GeometryKernelsService::extractObjectData(
 
         setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
-            KERNEL(cudaExtractLineIndices), LaunchConfig{gpuSettings.numBlocks, 8}, data, renderingData.deviceLineIndexBuffer, _numLineIndices, context);
+            KERNEL(cudaExtractLineIndices), LaunchConfig{launchSettings.numBlocks, 8}, data, renderingData.deviceLineIndexBuffer, _numLineIndices, context);
 
         setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractTriangleIndices),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             renderingData.deviceTriangleIndexBuffer,
             _numTriangleIndices,
@@ -276,7 +276,7 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractSelectedConnectionData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             renderingData.deviceSelectedConnectionBuffer,
             _numSelectedConnectionVertices,
@@ -285,7 +285,7 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractAttackEventData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             renderingData.deviceAttackEventBuffer,
             _numAttackEventVertices,
@@ -294,7 +294,7 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
         launchKernelOnDefaultStream(
             KERNEL(cudaExtractDetonationEventData),
-            LaunchConfig{gpuSettings.numBlocks, 8},
+            LaunchConfig{launchSettings.numBlocks, 8},
             data,
             renderingData.deviceDetonationEventBuffer,
             _numDetonationEventVertices,

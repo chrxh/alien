@@ -397,8 +397,8 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
     }
     _previewGraphCache.clear();
 
-    auto const gpuSettings = settings.kernelLaunchSettings;
-    launchKernelOnDefaultStream(KERNEL(cudaResetDensity), LaunchConfig{gpuSettings.numBlocks, 8}, data);
+    auto const launchSettings = settings.kernelLaunchSettings;
+    launchKernelOnDefaultStream(KERNEL(cudaResetDensity), LaunchConfig{launchSettings.numBlocks, 8}, data);
 }
 
 bool SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
