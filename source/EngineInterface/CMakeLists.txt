@@ -4,7 +4,7 @@ add_library(EngineInterface
     ArraySizesForTOs.h
     CellTypeConstants.h
     Colors.h
-    CudaSettings.h
+    KernelLaunchSettings.h
     DataPointCollection.cpp
     DataPointCollection.h
     Definitions.h

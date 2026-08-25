@@ -13,13 +13,11 @@
 // Captures all runtime-varying parameters that affect kernel execution
 struct CudaGraphConfig
 {
-    int timestepMod3;                // Not every kernel needs to be executed each time
-    bool executeCellFunction;        // Cell type functions need to be executed
-    bool hasLayers;                  // settings.simulationParameters.numLayers > 0
-    bool rigidityEnabled;            // isRigidityUpdateEnabled(settings)
-    int fluidKernelThreads;          // calcOptimalThreadsForFluidKernel result
-    int fluidBoundaryKernelThreads;  // calcOptimalThreadsForFluidBoundaryKernel result
-    int numBlocks;                   // gpuSettings.numBlocks
+    int timestepMod3;          // Not every kernel needs to be executed each time
+    bool executeCellFunction;  // Cell type functions need to be executed
+    bool hasLayers;            // settings.simulationParameters.numLayers > 0
+    bool rigidityEnabled;      // isRigidityUpdateEnabled(settings)
+    int numBlocks;             // settings.kernelLaunchSettings.numBlocks
 
     bool operator==(CudaGraphConfig const& other) const = default;
     auto operator<=>(CudaGraphConfig const& other) const = default;
@@ -28,12 +26,10 @@ struct CudaGraphConfig
 // Configuration key for Preview CUDA Graph caching
 struct CudaGraphPreviewConfig
 {
-    int timestepMod3;                // Not every kernel needs to be executed each time
-    bool executeCellFunctions;       // Cell type functions need to be executed each TIMESTEPS_PER_CELL_FUNCTION
-    bool detailSimulation;           // Whether detail simulation is enabled
-    int fluidKernelThreads;          // calcOptimalThreadsForFluidKernel result
-    int fluidBoundaryKernelThreads;  // calcOptimalThreadsForFluidBoundaryKernel result
-    int numBlocks;                   // gpuSettings.numBlocks
+    int timestepMod3;           // Not every kernel needs to be executed each time
+    bool executeCellFunctions;  // Cell type functions need to be executed each TIMESTEPS_PER_CELL_FUNCTION
+    bool detailSimulation;      // Whether detail simulation is enabled
+    int numBlocks;              // settings.kernelLaunchSettings.numBlocks
 
     bool operator==(CudaGraphPreviewConfig const& other) const = default;
     auto operator<=>(CudaGraphPreviewConfig const& other) const = default;
@@ -66,8 +62,6 @@ private:
     SimulationKernelsService() = default;
 
     bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
-    int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters) const;
-    int calcOptimalThreadsForFluidBoundaryKernel(SimulationParameters const& parameters) const;
 
     CudaGraphConfig buildGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, uint64_t timestep, bool forceCellFunctionExecution)
         const;

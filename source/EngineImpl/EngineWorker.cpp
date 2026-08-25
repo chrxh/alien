@@ -279,12 +279,6 @@ void EngineWorker::setSimulationParameters(SimulationParameters const& parameter
     _simulationCudaFacade->setSimulationParameters(parameters, updateConfig);
 }
 
-void EngineWorker::setGpuSettings_async(CudaSettings const& gpuSettings)
-{
-    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-    _updateGpuSettingsJob = gpuSettings;
-}
-
 void EngineWorker::setDebugMode(bool value)
 {
     EngineWorkerGuard access(this);
@@ -577,10 +571,6 @@ void EngineWorker::testOnly_syncNumberGenerator()
 void EngineWorker::processJobs()
 {
     std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
-    if (_updateGpuSettingsJob) {
-        _simulationCudaFacade->setGpuConstants(*_updateGpuSettingsJob);
-        _updateGpuSettingsJob = std::nullopt;
-    }
     if (!_applyForceJobs.empty()) {
         for (auto const& applyForceJob : _applyForceJobs) {
             _simulationCudaFacade->applyForce(

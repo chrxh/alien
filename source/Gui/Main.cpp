@@ -36,7 +36,7 @@ namespace
 int main(int argc, char** argv)
 {
     auto inDebugMode = hasArgument(argc, argv, "-d");
-    auto useInterop = hasArgument(argc, argv, "--interop");
+    auto useInterop = !hasArgument(argc, argv, "--no-interop");
     GlobalSettings::get().setDebugMode(inDebugMode);
     GlobalSettings::get().setInterop(useInterop);
 
@@ -53,8 +53,8 @@ int main(int argc, char** argv)
             KernelProfiler::get().init(Const::ProfileFilename);
             KernelTracer::get().init(Const::TraceFilename);
         }
-        if (useInterop) {
-            log(Priority::Important, "INTEROP mode: Using CUDA-OpenGL interop for rendering");
+        if (!useInterop) {
+            log(Priority::Important, "INTEROP disabled by command line: rendering data takes the detour over host memory");
         }
 
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());

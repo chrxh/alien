@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CudaSettings.h"
+#include "KernelLaunchSettings.h"
 #include "SimulationParameters.h"
 
 struct SettingsForSimulation
@@ -8,5 +8,5 @@ struct SettingsForSimulation
     int worldSizeX;
     int worldSizeY;
     SimulationParameters simulationParameters;
-    CudaSettings cudaSettings;
+    KernelLaunchSettings kernelLaunchSettings;
 };
