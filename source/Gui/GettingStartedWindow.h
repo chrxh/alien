@@ -20,8 +20,6 @@ private:
 
     void drawTitle();
     void drawHeading1(std::string const& text);
-    void drawHeading2(std::string const& text);
-    void drawItemText(std::string const& text);
     void drawParagraph(std::string const& text);
 
     bool _showAfterStartup = true;
