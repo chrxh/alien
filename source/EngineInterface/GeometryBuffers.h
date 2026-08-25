@@ -102,6 +102,8 @@ public:
 
     NumRenderObjects getNumObjects() const;
 
+    bool hasReallocatedBuffers() const;
+
     // Methods for uploading data from host memory (used in no-interop mode)
     void setCellData(ObjectVertexData const* data, uint64_t count);
     void setFluidParticleData(FluidParticleVertexData const* data, uint64_t count);
@@ -143,6 +145,7 @@ private:
     unsigned int _eboForLines = 0;
     unsigned int _eboForTriangles = 0;
 
+    bool _reallocatedBuffers = false;
     uint64_t _vertexBufferCapacity = 0;
     uint64_t _fluidParticleBufferCapacity = 0;
     uint64_t _locationBufferCapacity = 0;
