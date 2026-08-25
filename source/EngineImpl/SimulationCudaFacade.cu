@@ -915,37 +915,37 @@ void _SimulationCudaFacade::reportProfilingContext()
     }
 
     auto& profiler = KernelProfiler::get();
-    profiler.setContext("gpu", _gpuInfo.gpuModelName);
+    profiler.setReportEntry("gpu", _gpuInfo.gpuModelName);
 
     cudaDeviceProp prop;
     auto const hasDeviceProperties = cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) == cudaSuccess;
     if (hasDeviceProperties) {
-        profiler.setContext(
+        profiler.setReportEntry(
             "compute capability / SMs", std::to_string(prop.major) + "." + std::to_string(prop.minor) + " / " + std::to_string(prop.multiProcessorCount));
-        profiler.setContext("total GPU memory [MB]", std::to_string(prop.totalGlobalMem / (1024 * 1024)));
+        profiler.setReportEntry("total GPU memory [MB]", std::to_string(prop.totalGlobalMem / (1024 * 1024)));
     }
     size_t freeMemory = 0;
     size_t totalMemory = 0;
     if (cudaMemGetInfo(&freeMemory, &totalMemory) == cudaSuccess) {
-        profiler.setContext("free GPU memory [MB]", std::to_string(freeMemory / (1024 * 1024)));
+        profiler.setReportEntry("free GPU memory [MB]", std::to_string(freeMemory / (1024 * 1024)));
     }
-    profiler.setContext("acquired GPU memory [MB]", std::to_string(CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024)));
+    profiler.setReportEntry("acquired GPU memory [MB]", std::to_string(CudaMemoryManager::getInstance().getSizeOfAcquiredMemory() / (1024 * 1024)));
 
-    profiler.setContext("numBlocks", std::to_string(_settings.kernelLaunchSettings.numBlocks));
-    profiler.setContext("world size", std::to_string(_settings.worldSizeX) + " x " + std::to_string(_settings.worldSizeY));
-    profiler.setContext("smoothing length", std::to_string(_settings.simulationParameters.smoothingLength.value));
+    profiler.setReportEntry("numBlocks", std::to_string(_settings.kernelLaunchSettings.numBlocks));
+    profiler.setReportEntry("world size", std::to_string(_settings.worldSizeX) + " x " + std::to_string(_settings.worldSizeY));
+    profiler.setReportEntry("smoothing length", std::to_string(_settings.simulationParameters.smoothingLength.value));
 
     auto const& entities = _cudaSimulationData->entities;
-    profiler.setContext(
+    profiler.setReportEntry(
         "objects (used / capacity)", std::to_string(entities.objects.getNumEntries_host()) + " / " + std::to_string(entities.objects.getCapacity_host()));
-    profiler.setContext(
+    profiler.setReportEntry(
         "energy particles", std::to_string(entities.energies.getNumEntries_host()) + " / " + std::to_string(entities.energies.getCapacity_host()));
-    profiler.setContext(
+    profiler.setReportEntry(
         "heap (used / capacity)", std::to_string(entities.heap.getNumEntries_host()) + " / " + std::to_string(entities.heap.getCapacity_host()));
 
     // Objects per block is what the block-partitioned kernels actually loop over, so it decides their cost.
     auto const numBlocks = std::max(1, _settings.kernelLaunchSettings.numBlocks);
-    profiler.setContext("objects per block", std::to_string(entities.objects.getNumEntries_host() / static_cast<uint64_t>(numBlocks)));
+    profiler.setReportEntry("objects per block", std::to_string(entities.objects.getNumEntries_host() / static_cast<uint64_t>(numBlocks)));
 
 #if !defined(USE_HIP)
     // The occupancy query would need a HIP counterpart; the kernels only misbehave on NVIDIA hardware anyway.
@@ -954,25 +954,25 @@ void _SimulationCudaFacade::reportProfilingContext()
     if (hasDeviceProperties) {
         int blocksPerMultiprocessor = 0;
         if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
-            profiler.setContext(
+            profiler.setReportEntry(
                 "fluid occupancy [blocks/SM]",
                 std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
         }
 
         cudaFuncAttributes attributes;
         if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {
-            profiler.setContext("fluid kernel registers", std::to_string(attributes.numRegs));
-            profiler.setContext("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
-            profiler.setContext("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));
-            profiler.setContext("fluid kernel binary / ptx", std::to_string(attributes.binaryVersion) + " / " + std::to_string(attributes.ptxVersion));
-            profiler.setContext("fluid warps per block", std::to_string(_settings.kernelLaunchSettings.fluidWarpsPerBlock));
+            profiler.setReportEntry("fluid kernel registers", std::to_string(attributes.numRegs));
+            profiler.setReportEntry("fluid kernel shared [B]", std::to_string(attributes.sharedSizeBytes));
+            profiler.setReportEntry("fluid kernel local [B]", std::to_string(attributes.localSizeBytes));
+            profiler.setReportEntry("fluid kernel binary / ptx", std::to_string(attributes.binaryVersion) + " / " + std::to_string(attributes.ptxVersion));
+            profiler.setReportEntry("fluid warps per block", std::to_string(_settings.kernelLaunchSettings.fluidWarpsPerBlock));
         }
 
-        profiler.setContext("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
-        profiler.setContext("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
-        profiler.setContext("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
-        profiler.setContext("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
-        profiler.setContext("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
+        profiler.setReportEntry("SM budget: threads", std::to_string(prop.maxThreadsPerMultiProcessor));
+        profiler.setReportEntry("SM budget: blocks", std::to_string(prop.maxBlocksPerMultiProcessor));
+        profiler.setReportEntry("SM budget: registers", std::to_string(prop.regsPerMultiprocessor));
+        profiler.setReportEntry("SM budget: shared [B]", std::to_string(prop.sharedMemPerMultiprocessor));
+        profiler.setReportEntry("SM budget: reserved shared [B]", std::to_string(prop.reservedSharedMemPerBlock));
     }
 #endif
 }
