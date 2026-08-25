@@ -12,7 +12,10 @@ namespace
 {
     auto constexpr WriteInterval = std::chrono::seconds(1);
 
-    std::array<KernelCategory, NumKernelCategories> const AllCategories = {KernelCategory::Simulation, KernelCategory::Rendering, KernelCategory::Other};
+    std::array<KernelCategory, static_cast<int>(KernelCategory::Count)> const AllCategories = {
+        KernelCategory::Simulation,
+        KernelCategory::Rendering,
+        KernelCategory::Other};
 
     std::string getCategoryName(KernelCategory category)
     {
@@ -77,17 +80,17 @@ void KernelProfiler::close()
     _enabled = false;
 }
 
-void KernelProfiler::setContext(std::string const& key, std::string const& value)
+void KernelProfiler::setReportEntry(std::string const& key, std::string const& value)
 {
     if (!_enabled) {
         return;
     }
     std::lock_guard lock(_mutex);
-    auto match = std::ranges::find(_context, key, &std::pair<std::string, std::string>::first);
-    if (match != _context.end()) {
+    auto match = std::ranges::find(_reportEntries, key, &std::pair<std::string, std::string>::first);
+    if (match != _reportEntries.end()) {
         match->second = value;
     } else {
-        _context.emplace_back(key, value);
+        _reportEntries.emplace_back(key, value);
     }
 }
 
@@ -110,18 +113,6 @@ void KernelProfiler::record(char const* name, std::chrono::steady_clock::duratio
         _lastWriteTimepoint = now;
         writeReport();
     }
-}
-
-double KernelProfiler::getAverageNanoseconds(std::string const& name) const
-{
-    std::lock_guard lock(_mutex);
-    for (auto const& entries : _entriesByCategory) {
-        auto match = entries.find(name);
-        if (match != entries.end() && match->second.count != 0) {
-            return match->second.totalNanoseconds / static_cast<double>(match->second.count);
-        }
-    }
-    return 0.0;
 }
 
 std::string KernelProfiler::getReport() const
@@ -154,14 +145,14 @@ std::string KernelProfiler::createReport() const
     std::ostringstream stream;
     stream << "Kernel profiling report (debug mode, wall-clock per kernel incl. launch/sync overhead)\n\n";
 
-    for (auto const& [key, value] : _context) {
+    for (auto const& [key, value] : _reportEntries) {
         stream << std::left << std::setw(32) << key << value << "\n";
     }
-    if (!_context.empty()) {
+    if (!_reportEntries.empty()) {
         stream << "\n";
     }
 
-    std::array<Entry, NumKernelCategories> totals;
+    std::array<Entry, static_cast<int>(KernelCategory::Count)> totals;
     for (auto const& [total, entries] : std::views::zip(totals, _entriesByCategory)) {
         total = sumUp(entries);
     }
@@ -171,7 +162,6 @@ std::string KernelProfiler::createReport() const
         grandTotal.totalNanoseconds += total.totalNanoseconds;
     }
 
-    // Overview of the categories
     stream << std::left << std::setw(56) << "category" << std::right << std::setw(10) << "calls" << std::setw(14) << "total [ms]" << std::setw(21) << "share"
            << "\n";
     for (auto const& [category, total] : std::views::zip(AllCategories, totals)) {
@@ -182,7 +172,7 @@ std::string KernelProfiler::createReport() const
     stream << std::left << std::setw(56) << "total" << std::right << std::setw(10) << grandTotal.count << std::setw(14) << std::fixed << std::setprecision(3)
            << toMilliseconds(grandTotal.totalNanoseconds) << std::setw(20) << "100.0" << "%\n";
 
-    // One ranking per category, with the shares relative to that category
+    // The shares are relative to the category
     for (auto const& [category, total, entries] : std::views::zip(AllCategories, totals, _entriesByCategory)) {
         if (entries.empty()) {
             continue;
