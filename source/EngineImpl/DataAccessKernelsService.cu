@@ -2,6 +2,7 @@
 
 #include <EngineKernels/DataAccessKernels.cuh>
 #include <EngineKernels/DebugKernels.cuh>
+#include <EngineKernels/KernelLauncher.cuh>
 
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
@@ -23,90 +24,95 @@ void DataAccessKernelsService::shutdown()
     CudaMemoryManager::getInstance().freeMemory(_foundResult);
 }
 
-ArraySizesForTOs DataAccessKernelsService::estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data)
+ArraySizesForTOs DataAccessKernelsService::estimateCapacityNeededForTO(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
     setValueToDevice(_arraySizesTO, ArraySizesForTOs{});
-    KERNEL_CALL(cudaEstimateCapacityNeededForTO_step1, data);
-    KERNEL_CALL(cudaEstimateCapacityNeededForTO_step2, data, _arraySizesTO);
+    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForTO_step1), LaunchConfig{launchSettings.numBlocks, 8}, data);
+    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForTO_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, _arraySizesTO);
     cudaDeviceSynchronize();
 
     return copyToHost(_arraySizesTO);
 }
 
 void DataAccessKernelsService::getData(
-    CudaSettings const& gpuSettings,
+    KernelLaunchSettings const& launchSettings,
     SimulationData const& data,
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
     TOs const& to)
 {
-    KERNEL_CALL_1_1(cudaClearDataTO, to);
-    KERNEL_CALL(cudaPrepareCreaturesAndGenomesForConversionToTO, rectUpperLeft, rectLowerRight, data);
-    KERNEL_CALL(cudaGetGenomeData, rectUpperLeft, rectLowerRight, data, to);
-    KERNEL_CALL(cudaGetCreatureData, rectUpperLeft, rectLowerRight, data, to);
-    KERNEL_CALL(cudaGetObjectDataWithoutConnections, rectUpperLeft, rectLowerRight, data, to);
-    KERNEL_CALL(cudaResolveConnections, data, to);
-    KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaClearDataTO), LaunchConfig{1, 1}, to);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaPrepareCreaturesAndGenomesForConversionToTO), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetGenomeData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetCreatureData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetObjectDataWithoutConnections), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaResolveConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetParticleData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
 }
 
-void DataAccessKernelsService::getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TOs const& to)
+void DataAccessKernelsService::getSelectedData(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters, TOs const& to)
 {
-    KERNEL_CALL_1_1(cudaClearDataTO, to);
-    KERNEL_CALL(cudaPrepareSelectedCreaturesForConversionToTO, includeClusters, data);
-    KERNEL_CALL(cudaGetSelectedGenomeData, data, includeClusters, to);
-    KERNEL_CALL(cudaGetSelectedCreatureData, data, includeClusters, to);
-    KERNEL_CALL(cudaGetSelectedObjectDataWithoutConnections, data, includeClusters, to);
-    KERNEL_CALL(cudaResolveConnections, data, to);
-    KERNEL_CALL(cudaGetSelectedEnergyData, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaClearDataTO), LaunchConfig{1, 1}, to);
+    launchKernelOnDefaultStream(KERNEL(cudaPrepareSelectedCreaturesForConversionToTO), LaunchConfig{launchSettings.numBlocks, 8}, includeClusters, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectedGenomeData), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectedCreatureData), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectedObjectDataWithoutConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters, to);
+    launchKernelOnDefaultStream(KERNEL(cudaResolveConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectedEnergyData), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
 }
 
-void DataAccessKernelsService::getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TOs const& to)
+void DataAccessKernelsService::getInspectedData(
+    KernelLaunchSettings const& launchSettings,
+    SimulationData const& data,
+    InspectedEntityIds entityIds,
+    TOs const& to)
 {
-    KERNEL_CALL_1_1(cudaClearDataTO, to);
-    KERNEL_CALL(cudaPrepareCreaturesAndGenomesForConversionToTO, entityIds, data);
-    KERNEL_CALL(cudaGetGenomeData, entityIds, data, to);
-    KERNEL_CALL(cudaGetCreatureData, entityIds, data, to);
-    KERNEL_CALL(cudaGetInspectedObjectDataWithoutConnections, entityIds, data, to);
-    KERNEL_CALL(cudaResolveConnections, data, to);
-    KERNEL_CALL(cudaGetInspectedEnergyData, entityIds, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaClearDataTO), LaunchConfig{1, 1}, to);
+    launchKernelOnDefaultStream(KERNEL(cudaPrepareInspectedCreaturesAndGenomesForConversionToTO), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetInspectedGenomeData), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetInspectedCreatureData), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetInspectedObjectDataWithoutConnections), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaResolveConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetInspectedEnergyData), LaunchConfig{launchSettings.numBlocks, 8}, entityIds, data, to);
 }
 
 void DataAccessKernelsService::getOverlayData(
-    CudaSettings const& gpuSettings,
+    KernelLaunchSettings const& launchSettings,
     SimulationData const& data,
     int2 rectUpperLeft,
     int2 rectLowerRight,
     TOs const& to)
 {
-    KERNEL_CALL_1_1(cudaClearDataTO, to);
-    KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaClearDataTO), LaunchConfig{1, 1}, to);
+    launchKernelOnDefaultStream(KERNEL(cudaGetOverlayData), LaunchConfig{launchSettings.numBlocks, 8}, rectUpperLeft, rectLowerRight, data, to);
 }
 
-ArraySizesForGpuEntities DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TOs const& to)
+ArraySizesForGpuEntities DataAccessKernelsService::estimateCapacityNeededForGpu(KernelLaunchSettings const& launchSettings, TOs const& to)
 {
     setValueToDevice(_arraySizesGPU, ArraySizesForGpuEntities{});
-    KERNEL_CALL(cudaEstimateCapacityNeededForGpu, to, _arraySizesGPU);
+    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForGpu), LaunchConfig{launchSettings.numBlocks, 8}, to, _arraySizesGPU);
     cudaDeviceSynchronize();
 
     return copyToHost(_arraySizesGPU);
 }
 
-void DataAccessKernelsService::addData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to, bool selectData)
+void DataAccessKernelsService::addData(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& to, bool selectData)
 {
-    KERNEL_CALL_1_1(cudaSaveNumEntries, data);
-    KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, to);
+    launchKernelOnDefaultStream(KERNEL(cudaSaveNumEntries), LaunchConfig{1, 1}, data);
+    launchKernelOnDefaultStream(KERNEL(cudaAdaptNumberGenerator), LaunchConfig{launchSettings.numBlocks, 8}, data.primaryNumberGen, to);
 
-    KERNEL_CALL_1_1(cudaGetArraysBasedOnTO, data, to, _cudaCellArray);
-    KERNEL_CALL(cudaSetGenomeDataFromTO, data, to);
-    KERNEL_CALL(cudaSetCreatureDataFromTO, data, to);
-    KERNEL_CALL(cudaSetCellAndParticleDataFromTO, data, to, _cudaCellArray, selectData);
-    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(gpuSettings, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetArraysBasedOnTO), LaunchConfig{1, 1}, data, to, _cudaCellArray);
+    launchKernelOnDefaultStream(KERNEL(cudaSetGenomeDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaSetCreatureDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
+    launchKernelOnDefaultStream(KERNEL(cudaSetCellAndParticleDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to, _cudaCellArray, selectData);
+    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(launchSettings, data);
     if (selectData) {
-        SelectionKernelsService::get().rolloutSelection(gpuSettings, data);
+        SelectionKernelsService::get().rolloutSelection(launchSettings, data);
     }
 }
 
-void DataAccessKernelsService::clearData(CudaSettings const& gpuSettings, SimulationData const& data)
+void DataAccessKernelsService::clearData(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    KERNEL_CALL(cudaClearData, data);
+    launchKernelOnDefaultStream(KERNEL(cudaClearData), LaunchConfig{launchSettings.numBlocks, 8}, data);
 }

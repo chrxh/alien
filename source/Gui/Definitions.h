@@ -27,7 +27,6 @@ class EvolutionDashboardWindow;
 
 class SimulationInteractionController;
 
-class GpuSettingsDialog;
 
 class NewSimulationDialog;
 

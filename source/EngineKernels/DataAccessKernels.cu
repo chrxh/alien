@@ -631,7 +631,7 @@ __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeCluste
     }
 }
 
-__global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
+__global__ void cudaPrepareInspectedCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -815,7 +815,7 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
     }
 }
 
-__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TOs to)
+__global__ void cudaGetInspectedGenomeData(InspectedEntityIds ids, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -885,7 +885,7 @@ __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClu
     }
 }
 
-__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TOs to)
+__global__ void cudaGetInspectedCreatureData(InspectedEntityIds ids, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());

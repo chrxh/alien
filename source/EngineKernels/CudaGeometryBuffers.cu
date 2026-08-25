@@ -27,6 +27,10 @@ namespace
 
 void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
 {
+    if (vertexBuffer != nullptr && !buffers->hasReallocatedBuffers()) {
+        return;
+    }
+
     if (vertexBuffer != nullptr) {
         unregisterBufferResource(vertexBuffer);
     }

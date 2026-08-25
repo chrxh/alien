@@ -4,8 +4,8 @@
 
 #include <cuda_fp16.h>
 
-#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 
 #include "Definitions.cuh"
 #include "HashSet.cuh"
@@ -72,6 +72,26 @@ __device__ __inline__ PartitionData calcBlockPartition(uint64_t numEntities)
     int length = blockIdx.x < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
     result.startIndex = blockIdx.x < remainder ? (entitiesByDivisions + 1) * blockIdx.x
                                                : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (blockIdx.x - remainder);
+    result.endIndex = result.startIndex + length - 1;
+    result.step = 1;
+    return result;
+}
+
+// Splits the entities over the warps of the grid instead of its blocks, for kernels where one warp handles one
+// entity cooperatively. Requires blockDim.x to be a multiple of the warp size.
+__device__ __inline__ PartitionData calcWarpPartition(uint64_t numEntities)
+{
+    auto const numWarpsPerBlock = toInt(blockDim.x) / WARP_SIZE;
+    auto const warpIndex = toInt(blockIdx.x) * numWarpsPerBlock + toInt(threadIdx.x) / WARP_SIZE;
+    auto const numWarps = toInt(gridDim.x) * numWarpsPerBlock;
+
+    PartitionData result;
+    int entitiesByDivisions = numEntities / numWarps;
+    int remainder = numEntities % numWarps;
+
+    int length = warpIndex < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
+    result.startIndex =
+        warpIndex < remainder ? (entitiesByDivisions + 1) * warpIndex : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (warpIndex - remainder);
     result.endIndex = result.startIndex + length - 1;
     result.step = 1;
     return result;

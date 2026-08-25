@@ -14,6 +14,10 @@ static_assert(NEURAL_NET_INPUTS == 16);
 auto constexpr MAX_COLORS = 10;
 auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
 
+auto constexpr WARP_SIZE = 32;
+
+auto constexpr MAX_FLUID_WARPS_PER_BLOCK = 16;
+
 auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
 
 auto constexpr MAX_LAYERS = 20;

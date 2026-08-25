@@ -3,8 +3,8 @@
 #include <cuda_fp16.h>
 
 #include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 #include <EngineInterface/NeuralNetWeight.h>
 
 #include "Array.cuh"

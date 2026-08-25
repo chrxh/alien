@@ -67,6 +67,10 @@ IncludeCategories:
   - Regex: '^<(algorithm|array|atomic|bit|cassert|chrono|cmath|condition_variable|cstddef|cstdint|cstdlib|cstring|ctime|deque|exception|filesystem|fstream|functional|initializer_list|iomanip|iostream|iterator|limits|list|map|memory|mutex|optional|ostream|random|ranges|set|sstream|stdexcept|string|string_view|thread|tuple|type_traits|unordered_map|unordered_set|utility|variant|vector)>$'
     Priority: 1
 
+  # glad headers
+  - Regex: '^<glad/.*>$'
+    Priority: 99
+
   # Boost headers
   - Regex: '^<boost/.*>$'
     Priority: 100
@@ -80,7 +84,7 @@ IncludeCategories:
     Priority: 102
 
   # OpenGL headers
-  - Regex: '^<(GL/.*|glad/.*|glm/.*|stb_image\.h)>$'
+  - Regex: '^<(GL/.*|glm/.*|stb_image\.h)>$'
     Priority: 103
 
   # Cereal serialization headers

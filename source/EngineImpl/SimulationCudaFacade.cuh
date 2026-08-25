@@ -75,7 +75,9 @@ public:
     void reconnectSelectedObjects();
     void setDetached(bool value);
 
-    void setGpuConstants(CudaSettings const& cudaConstants);
+    void setKernelLaunchSettings(KernelLaunchSettings const& launchSettings);
+
+    KernelLaunchSettings deriveKernelLaunchSettings() const;
     SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(
         SimulationParameters const& parameters,
@@ -129,6 +131,10 @@ private:
     void calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution);
     void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
     void checkAndProcessSimulationParameterChanges();
+
+    // Adds the launch configuration, the entity counts and the occupancy of the fluid kernel to the profiling
+    // report; no-op outside debug mode
+    void reportProfilingContext();
 
     SimulationData getSimulationDataPtrCopy() const;
 

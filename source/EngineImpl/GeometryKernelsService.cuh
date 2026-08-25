@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GeometryBuffers.h>
@@ -17,6 +19,8 @@ public:
     void init();
     void shutdown();
 
+    bool checkForInterop();
+
     void correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
     void restorePositions(SettingsForSimulation const& settings, SimulationData data);
     NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
@@ -30,13 +34,6 @@ public:
 private:
     GeometryKernelsService() = default;
 
-    uint64_t* _numObjects = nullptr;
-    uint64_t* _numLineIndices = nullptr;
-    uint64_t* _numTriangleIndices = nullptr;
-    uint64_t* _numSelectedConnectionVertices = nullptr;
-    uint64_t* _numSelectedObjects = nullptr;
-    uint64_t* _numAttackEventVertices = nullptr;
-    uint64_t* _numDetonationEventVertices = nullptr;
-    uint64_t* _numLocations = nullptr;
-    uint64_t* _numFluidParticles = nullptr;
+    NumRenderObjects* _counters = nullptr;
+    std::optional<bool> _interopUsable;
 };

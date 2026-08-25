@@ -7,6 +7,8 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "Singleton.h"
 
@@ -14,22 +16,18 @@ enum class KernelCategory
 {
     Simulation,
     Rendering,
-    Other
+    Other,
+    Count
 };
-auto constexpr NumKernelCategories = 3;
 
-// Accumulates per-kernel wall-clock durations, separated by category. Only active in debug mode; fed by the
-// kernel-call macros, where each launch is followed by a stream sync so the recorded duration is the kernel's
-// execution time. The report is written to the profile file in regular intervals and again when the process shuts
-// down, so it is available even if the process is killed.
+// Accumulates per-kernel wall-clock durations by category. Only active in debug mode. The report is rewritten
+// regularly, so it survives a killed process.
 class KernelProfiler
 {
     MAKE_SINGLETON(KernelProfiler);
 
 public:
-    // Assigns every kernel call in its scope to a category and restores the previous one afterwards. Kernels outside
-    // of any scope count as KernelCategory::Other. The category is kept per thread, since rendering runs on the GUI
-    // thread while the simulation runs on the GPU worker thread.
+    // Assigns the kernel calls in its scope to a category. The category is kept per thread.
     class CategoryScope
     {
     public:
@@ -45,12 +43,14 @@ public:
 
     ~KernelProfiler();
 
-    // Starts a fresh measurement; may be called again to restart it
     void init(std::filesystem::path const& filename);
     void close();
     bool isEnabled() const { return _enabled; }
 
-    void record(char const* name, std::chrono::steady_clock::duration duration);
+    void record(char const* name, std::chrono::steady_clock::duration duration, int numBlocks, int threadsPerBlock);
+
+    // Key/value line printed above the rankings; an existing key is overwritten.
+    void setReportEntry(std::string const& key, std::string const& value);
 
     std::string getReport() const;
 
@@ -59,6 +59,8 @@ private:
     {
         uint64_t count = 0;
         double totalNanoseconds = 0.0;
+        int numBlocks = 0;
+        int threadsPerBlock = 0;
     };
     using Entries = std::unordered_map<std::string, Entry>;
 
@@ -71,6 +73,7 @@ private:
     bool _enabled = false;
     std::filesystem::path _filename;
     mutable std::mutex _mutex;
-    std::array<Entries, NumKernelCategories> _entriesByCategory;
+    std::array<Entries, static_cast<int>(KernelCategory::Count)> _entriesByCategory;
+    std::vector<std::pair<std::string, std::string>> _reportEntries;
     std::chrono::steady_clock::time_point _lastWriteTimepoint;
 };

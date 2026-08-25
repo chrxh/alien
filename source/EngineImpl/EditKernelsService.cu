@@ -2,6 +2,7 @@
 
 #include <EngineKernels/DataAccessKernels.cuh>
 #include <EngineKernels/EditKernels.cuh>
+#include <EngineKernels/KernelLauncher.cuh>
 #include <EngineKernels/SelectionKernels.cuh>
 #include <EngineKernels/SimulationKernels.cuh>
 
@@ -38,7 +39,10 @@ void EditKernelsService::shutdown()
     memoryManager.freeMemory(_genomePtr);
 }
 
-void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData)
+void EditKernelsService::shallowUpdateSelectedObjects(
+    KernelLaunchSettings const& launchSettings,
+    SimulationData const& data,
+    ShallowUpdateSelectionData const& updateData)
 {
     bool reconnectionRequired = !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.angleDelta != 0);
 
@@ -46,30 +50,38 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
     if (reconnectionRequired) {
         int counter = 10;
         do {
-            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+            launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
 
             setValueToDevice(_cudaUpdateResult, 0);
-            KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
-            KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-            KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
-            KERNEL_CALL(cudaProcessAddConnectionChanges, data);
+            launchKernelOnDefaultStream(KERNEL(cudaScheduleDisconnectSelectionFromRemainings), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
+            launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+            launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+            launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
             cudaDeviceSynchronize();
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
     }
 
     if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velX != 0 || updateData.velY != 0) {
-        KERNEL_CALL(cudaIncrementPosAndVelForSelection, updateData, data);
+        launchKernelOnDefaultStream(KERNEL(cudaIncrementPosAndVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data);
     }
     if (updateData.angleDelta != 0 || updateData.angularVel != 0) {
         setValueToDevice(_cudaCenter, float2{0, 0});
         setValueToDevice(_cudaNumEntities, 0);
 
         setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffff00000000ull);
-        KERNEL_CALL(cudaCalcObjectWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
+        launchKernelOnDefaultStream(KERNEL(cudaCalcObjectWithMinimalPosY), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaMinCellPosYAndIndex);
         cudaDeviceSynchronize();
         auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
 
-        KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, refCellIndex, _cudaCenter, nullptr, _cudaNumEntities, updateData.considerClusters);
+        launchKernelOnDefaultStream(
+            KERNEL(cudaCalcAccumulatedCenterAndVel),
+            LaunchConfig{launchSettings.numBlocks, 8},
+            data,
+            refCellIndex,
+            _cudaCenter,
+            nullptr,
+            _cudaNumEntities,
+            updateData.considerClusters);
         cudaDeviceSynchronize();
 
         auto numEntities = copyToHost(_cudaNumEntities);
@@ -77,7 +89,8 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
             auto center = copyToHost(_cudaCenter);
             setValueToDevice(_cudaCenter, float2{center.x / numEntities, center.y / numEntities});
         }
-        KERNEL_CALL(cudaUpdateAngleAndAngularVelForSelection, updateData, data, copyToHost(_cudaCenter));
+        launchKernelOnDefaultStream(
+            KERNEL(cudaUpdateAngleAndAngularVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data, copyToHost(_cudaCenter));
     }
 
     // Connect selection in case of reconnection
@@ -86,80 +99,81 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
 
         int counter = 10;
         do {
-            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+            launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
 
             setValueToDevice(_cudaUpdateResult, 0);
-            KERNEL_CALL(cudaPrepareMapForReconnection, data);
-            KERNEL_CALL(cudaUpdateMapForReconnection, data);
-            KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
-            KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-            KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
-            KERNEL_CALL(cudaProcessAddConnectionChanges, data);
+            launchKernelOnDefaultStream(KERNEL(cudaPrepareMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
+            launchKernelOnDefaultStream(KERNEL(cudaUpdateMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
+            launchKernelOnDefaultStream(KERNEL(cudaScheduleConnectSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, false, _cudaUpdateResult);
+            launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+            launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+            launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
 
-            KERNEL_CALL(cudaCleanupMaps, data);
+            launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
             cudaDeviceSynchronize();
 
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
 
-        SelectionKernelsService::get().updateSelection(gpuSettings, data);
+        SelectionKernelsService::get().updateSelection(launchSettings, data);
     }
 }
 
-void EditKernelsService::removeSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void EditKernelsService::removeSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
 {
-    KERNEL_CALL(cudaRemoveSelectedObjectConnections, data, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelectedObjectConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters);
 
-    KERNEL_CALL(cudaRemoveSelectedEntities, data, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveSelectedEntities), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters);
     cudaDeviceSynchronize();
 
-    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(gpuSettings, data);
+    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(launchSettings, data);
 }
 
-void EditKernelsService::relaxSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void EditKernelsService::relaxSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
 {
-    KERNEL_CALL(cudaRelaxSelectedEntities, data, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaRelaxSelectedEntities), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters);
 }
 
-void EditKernelsService::uniformVelocities(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void EditKernelsService::uniformVelocities(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
 {
     setValueToDevice(_cudaVelocity, float2{0, 0});
     setValueToDevice(_cudaNumEntities, 0);
-    KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, -1, nullptr, _cudaVelocity, _cudaNumEntities, includeClusters);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaCalcAccumulatedCenterAndVel), LaunchConfig{launchSettings.numBlocks, 8}, data, -1, nullptr, _cudaVelocity, _cudaNumEntities, includeClusters);
     cudaDeviceSynchronize();
 
     auto numEntities = copyToHost(_cudaNumEntities);
     if (numEntities != 0) {
         auto velocity = copyToHost(_cudaVelocity) / numEntities;
-        KERNEL_CALL(cudaSetVelocityForSelection, data, velocity, includeClusters);
+        launchKernelOnDefaultStream(KERNEL(cudaSetVelocityForSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, velocity, includeClusters);
     }
 }
 
-void EditKernelsService::makeSticky(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void EditKernelsService::makeSticky(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
 {
-    KERNEL_CALL(cudaMakeSticky, data, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaMakeSticky), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters);
 }
 
-void EditKernelsService::removeStickiness(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void EditKernelsService::removeStickiness(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
 {
-    KERNEL_CALL(cudaRemoveStickiness, data, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaRemoveStickiness), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters);
 }
 
-void EditKernelsService::setBarrier(CudaSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters)
+void EditKernelsService::setBarrier(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value, bool includeClusters)
 {
-    KERNEL_CALL(cudaSetBarrier, data, value, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaSetBarrier), LaunchConfig{launchSettings.numBlocks, 8}, data, value, includeClusters);
 }
 
-void EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationData const& data)
+void EditKernelsService::reconnect(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
     int counter = 10;
     do {
-        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
 
         setValueToDevice(_cudaUpdateResult, 0);
-        KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
-        KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-        KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
-        KERNEL_CALL(cudaProcessAddConnectionChanges, data);
+        launchKernelOnDefaultStream(KERNEL(cudaScheduleDisconnectSelectionFromRemainings), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
         cudaDeviceSynchronize();
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
 
@@ -167,84 +181,84 @@ void EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationDa
 
     counter = 10;
     do {
-        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
 
         setValueToDevice(_cudaUpdateResult, 0);
-        KERNEL_CALL(cudaPrepareMapForReconnection, data);
-        KERNEL_CALL(cudaUpdateMapForReconnection, data);
-        KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
-        KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-        KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
-        KERNEL_CALL(cudaProcessAddConnectionChanges, data);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaUpdateMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaScheduleConnectSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, false, _cudaUpdateResult);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
 
-        KERNEL_CALL(cudaCleanupMaps, data);
+        launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
 
-    SelectionKernelsService::get().updateSelection(gpuSettings, data);
+    SelectionKernelsService::get().updateSelection(launchSettings, data);
 }
 
-void EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& changeTO)
+void EditKernelsService::changeSimulationData(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& changeTO)
 {
-    KERNEL_CALL_1_1(cudaSaveNumEntries, data);
+    launchKernelOnDefaultStream(KERNEL(cudaSaveNumEntries), LaunchConfig{1, 1}, data);
 
     cudaDeviceSynchronize();
     CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
 
     if (copyToHost(changeTO.numObjects) == 1) {
-        KERNEL_CALL(cudaChangeObject, data, changeTO);
+        launchKernelOnDefaultStream(KERNEL(cudaChangeObject), LaunchConfig{launchSettings.numBlocks, 8}, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
     }
     if (copyToHost(changeTO.numEnergyParticles) == 1) {
-        KERNEL_CALL(cudaChangeParticle, data, changeTO);
+        launchKernelOnDefaultStream(KERNEL(cudaChangeParticle), LaunchConfig{launchSettings.numBlocks, 8}, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
     }
     cudaDeviceSynchronize();
 
-    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(gpuSettings, data);
+    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(launchSettings, data);
 }
 
-int EditKernelsService::injectGenomeToSelectedCreatures(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to)
+int EditKernelsService::injectGenomeToSelectedCreatures(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& to)
 {
-    KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, to);
-    KERNEL_CALL_1_1(cudaCreateGenomeFromTO, data, to, _genomePtr);
+    launchKernelOnDefaultStream(KERNEL(cudaAdaptNumberGenerator), LaunchConfig{launchSettings.numBlocks, 8}, data.primaryNumberGen, to);
+    launchKernelOnDefaultStream(KERNEL(cudaCreateGenomeFromTO), LaunchConfig{1, 1}, data, to, _genomePtr);
     setValueToDevice(_cudaInjectResult, 0);
-    KERNEL_CALL(cudaInjectGenomeToSelectedCreatures, data, _genomePtr, _cudaInjectResult);
+    launchKernelOnDefaultStream(KERNEL(cudaInjectGenomeToSelectedCreatures), LaunchConfig{launchSettings.numBlocks, 8}, data, _genomePtr, _cudaInjectResult);
     cudaDeviceSynchronize();
     return copyToHost(_cudaInjectResult);
 }
 
-void EditKernelsService::colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)
+void EditKernelsService::colorSelectedCells(KernelLaunchSettings const& launchSettings, SimulationData const& data, unsigned char color, bool includeClusters)
 {
-    KERNEL_CALL(cudaColorSelectedObjects, data, color, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaColorSelectedObjects), LaunchConfig{launchSettings.numBlocks, 8}, data, color, includeClusters);
 }
 
-void EditKernelsService::setDetached(CudaSettings const& gpuSettings, SimulationData const& data, bool value)
+void EditKernelsService::setDetached(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value)
 {
-    KERNEL_CALL(cudaSetDetached, data, value);
+    launchKernelOnDefaultStream(KERNEL(cudaSetDetached), LaunchConfig{launchSettings.numBlocks, 8}, data, value);
 }
 
-void EditKernelsService::applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData)
+void EditKernelsService::applyForce(KernelLaunchSettings const& launchSettings, SimulationData const& data, ApplyForceData const& applyData)
 {
-    KERNEL_CALL(cudaApplyForce, data, applyData);
+    launchKernelOnDefaultStream(KERNEL(cudaApplyForce), LaunchConfig{launchSettings.numBlocks, 8}, data, applyData);
 }
 
-void EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)
+void EditKernelsService::applyCataclysm(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    KERNEL_CALL(cudaApplyCataclysm, data);
+    launchKernelOnDefaultStream(KERNEL(cudaApplyCataclysm), LaunchConfig{launchSettings.numBlocks, 8}, data);
 }
 
-void EditKernelsService::getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
+void EditKernelsService::getSelectionShallowData(KernelLaunchSettings const& launchSettings, SimulationData const& data, SelectionResult const& selectionResult)
 {
-    KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
+    launchKernelOnDefaultStream(KERNEL(cudaResetSelectionResult), LaunchConfig{1, 1}, selectionResult);
     setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
-    KERNEL_CALL(cudaCalcObjectWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
+    launchKernelOnDefaultStream(KERNEL(cudaCalcObjectWithMinimalPosY), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaMinCellPosYAndIndex);
     cudaDeviceSynchronize();
     auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
-    KERNEL_CALL(cudaGetSelectionShallowData_step1, data);
-    KERNEL_CALL(cudaGetSelectionShallowData_step2, data, refCellIndex, selectionResult);
-    KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult, data.objectMap);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step1), LaunchConfig{launchSettings.numBlocks, 8}, data);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, refCellIndex, selectionResult);
+    launchKernelOnDefaultStream(KERNEL(cudaFinalizeSelectionResult), LaunchConfig{1, 1}, selectionResult, data.objectMap);
 }

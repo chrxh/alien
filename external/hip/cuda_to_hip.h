@@ -47,6 +47,8 @@ using cudaError_t = hipError_t;
 #define cudaDeviceProp                    hipDeviceProp_t
 #define cudaGetDeviceCount                hipGetDeviceCount
 #define cudaGetDeviceProperties           hipGetDeviceProperties
+#define cudaOccupancyMaxActiveBlocksPerMultiprocessor hipOccupancyMaxActiveBlocksPerMultiprocessor
+#define cudaMemGetInfo                    hipMemGetInfo
 #define cudaSetDevice                     hipSetDevice
 #define cudaDeviceSynchronize             hipDeviceSynchronize
 #define cudaDeviceReset                   hipDeviceReset

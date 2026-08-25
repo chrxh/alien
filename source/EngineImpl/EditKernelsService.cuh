@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/KernelLaunchSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include <EngineKernels/Base.cuh>
@@ -16,24 +16,24 @@ public:
     void init();
     void shutdown();
 
-    void shallowUpdateSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData);
-    void removeSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void relaxSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void uniformVelocities(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void makeSticky(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void removeStickiness(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void setBarrier(CudaSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters);
-    void reconnect(CudaSettings const& gpuSettings, SimulationData const& data);
-    void changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& changeTO);
-    int injectGenomeToSelectedCreatures(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to);  // to only contains 1 genome
-    void colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
-    void setDetached(CudaSettings const& gpuSettings, SimulationData const& data, bool value);
+    void shallowUpdateSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData);
+    void removeSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
+    void relaxSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
+    void uniformVelocities(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
+    void makeSticky(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
+    void removeStickiness(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
+    void setBarrier(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value, bool includeClusters);
+    void reconnect(KernelLaunchSettings const& launchSettings, SimulationData const& data);
+    void changeSimulationData(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& changeTO);
+    int injectGenomeToSelectedCreatures(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& to);  // to only contains 1 genome
+    void colorSelectedCells(KernelLaunchSettings const& launchSettings, SimulationData const& data, unsigned char color, bool includeClusters);
+    void setDetached(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value);
 
-    void applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);
+    void applyForce(KernelLaunchSettings const& launchSettings, SimulationData const& data, ApplyForceData const& applyData);
 
-    void applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data);
+    void applyCataclysm(KernelLaunchSettings const& launchSettings, SimulationData const& data);
 
-    void getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
+    void getSelectionShallowData(KernelLaunchSettings const& launchSettings, SimulationData const& data, SelectionResult const& selectionResult);
 
 private:
     EditKernelsService() = default;

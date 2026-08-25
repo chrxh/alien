@@ -1,5 +1,6 @@
 #include "StatisticsKernelsService.cuh"
 
+#include <EngineKernels/KernelLauncher.cuh>
 #include <EngineKernels/StatisticsKernels.cuh>
 
 void StatisticsKernelsService::init() {}
@@ -7,17 +8,17 @@ void StatisticsKernelsService::init() {}
 void StatisticsKernelsService::shutdown() {}
 
 void StatisticsKernelsService::updateStatistics(
-    CudaSettings const& gpuSettings,
+    KernelLaunchSettings const& launchSettings,
     SimulationData const& data,
     SimulationStatistics const& simulationStatistics)
 {
-    KERNEL_CALL(cudaResetStatistics, data, simulationStatistics);
-    KERNEL_CALL(cudaCollectObjectAndCreatureStatistics, data, simulationStatistics);
-    KERNEL_CALL(cudaCollectGenomeAndEnergyStatistics, data, simulationStatistics);
-    KERNEL_CALL(cudaCompactLineageStatistics, simulationStatistics);
+    launchKernelOnDefaultStream(KERNEL(cudaResetStatistics), LaunchConfig{launchSettings.numBlocks, 8}, data, simulationStatistics);
+    launchKernelOnDefaultStream(KERNEL(cudaCollectObjectAndCreatureStatistics), LaunchConfig{launchSettings.numBlocks, 8}, data, simulationStatistics);
+    launchKernelOnDefaultStream(KERNEL(cudaCollectGenomeAndEnergyStatistics), LaunchConfig{launchSettings.numBlocks, 8}, data, simulationStatistics);
+    launchKernelOnDefaultStream(KERNEL(cudaCompactLineageStatistics), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);
     if (simulationStatistics.isLineageAccumulatorGCNeeded()) {
-        KERNEL_CALL(cudaPrepareLineageAccumulatorGC, simulationStatistics);
-        KERNEL_CALL(cudaLineageAccumulatorGC, simulationStatistics);
-        KERNEL_CALL_1_1(cudaFinishLineageAccumulatorGC, simulationStatistics);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareLineageAccumulatorGC), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);
+        launchKernelOnDefaultStream(KERNEL(cudaLineageAccumulatorGC), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);
+        launchKernelOnDefaultStream(KERNEL(cudaFinishLineageAccumulatorGC), LaunchConfig{1, 1}, simulationStatistics);
     }
 }
