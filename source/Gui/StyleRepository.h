@@ -109,7 +109,12 @@ namespace Const
     ImColor const ActionButtonActiveColor = AccentDeepColor;
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
-    ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
+    ImColor const ToggleOnColor = AccentLineColor;
+    ImColor const ToggleOnHoveredColor = AccentColor;
+    ImColor const ToggleOffColor = LineSoftColor;
+    ImColor const ToggleOffHoveredColor = LineColor;
+    ImColor const ToggleKnobColor = TextBaseColor;
+    ImColor const ToggleKnobBorderColor = BackgroundColor;
     ImColor const DetailButtonColor = ImColor::HSV(0, 0, 1.0f);
 
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);

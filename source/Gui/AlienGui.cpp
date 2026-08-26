@@ -2324,7 +2324,6 @@ void AlienGui::EndIndent()
 bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& value)
 {
     auto origValue = value;
-    ImVec4* colors = ImGui::GetStyle().Colors;
     ImVec2 p = ImGui::GetCursorScreenPos();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -2338,25 +2337,17 @@ bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& valu
         value = !value;
     }
 
-    auto color = Const::ToggleColor;
-    float h, s, v;
-    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-
+    ImColor trackColor;
     if (ImGui::IsItemHovered()) {
-        drawList->AddRectFilled(
-            p,
-            ImVec2(p.x + width, p.y + height),
-            ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.8f) : (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.4f)),
-            height * 0.5f);
+        trackColor = value ? Const::ToggleOnHoveredColor : Const::ToggleOffHoveredColor;
     } else {
-        drawList->AddRectFilled(
-            p,
-            ImVec2(p.x + width, p.y + height),
-            ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.7f) : (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.3f)),
-            height * 0.50f);
+        trackColor = value ? Const::ToggleOnColor : Const::ToggleOffColor;
     }
-    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(20, 20, 20, 255));
-    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
+    drawList->AddRectFilled(p, ImVec2(p.x + width, p.y + height), trackColor, height * 0.5f);
+
+    auto knobCenter = ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius);
+    drawList->AddCircleFilled(knobCenter, radius - 1.5f, Const::ToggleKnobBorderColor);
+    drawList->AddCircleFilled(knobCenter, radius - 2.5f, Const::ToggleKnobColor);
 
     ImGui::SameLine();
     AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
