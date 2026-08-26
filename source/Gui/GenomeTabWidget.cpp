@@ -7,7 +7,6 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/DescValidationService.h>
-#include <EngineInterface/GenomeDescInfoService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"
@@ -44,14 +43,8 @@ void _GenomeTabWidget::process()
     if (ImGui::BeginChild("CreatureTab")) {
         ImGui::PushID(_editData->id);
 
-        auto statusBarHeight = ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
-        if (ImGui::BeginChild("Editors", ImVec2(0, -statusBarHeight), 0)) {
-            processEditors();
-            DescValidationService::get().validateAndCorrect(_editData->genome);
-        }
-        ImGui::EndChild();
-
-        processStatusBar();
+        processEditors();
+        DescValidationService::get().validateAndCorrect(_editData->genome);
 
         ImGui::PopID();
     }
@@ -159,9 +152,10 @@ _GenomeTabWidget::_GenomeTabWidget(
     _editData->origGenome = normalizedGenome;
 
     if (!genome._genes.empty()) {
-        _editData->selectedGeneIndex = 0;
         if (!genome._genes.front()._nodes.empty()) {
-            _editData->selectedNodeByGeneIndex.emplace(0, 0);
+            _editData->selectNode(0, 0);
+        } else {
+            _editData->selectGene(0);
         }
     }
     _layoutData = layoutData;
@@ -215,23 +209,6 @@ void _GenomeTabWidget::processEditors()
 void _GenomeTabWidget::processPreview()
 {
     _simulatedPreviewWidget->process();
-}
-
-void _GenomeTabWidget::processStatusBar()
-{
-    auto const& genome = _editData->genome;
-    auto numGenes = genome._genes.size();
-    auto numNodes = GenomeDescInfoService::get().getNumberOfNodes(genome);
-
-    std::string text =
-        std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes") + "  \xC2\xB7  " + std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes");
-    if (_editData->selectedGeneIndex.has_value()) {
-        text += "  \xC2\xB7  gene " + std::to_string(_editData->selectedGeneIndex.value());
-        if (_editData->isNodeLevelSelected()) {
-            text += ", node " + std::to_string(_editData->getSelectedNodeIndex().value());
-        }
-    }
-    AlienGui::Text(AlienGui::TextParameters().text(text).style(AlienGui::TextStyle::Decent));
 }
 
 void _GenomeTabWidget::doLayout()

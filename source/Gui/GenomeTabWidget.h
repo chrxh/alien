@@ -48,7 +48,6 @@ private:
 
     void processEditors();
     void processPreview();
-    void processStatusBar();
 
     void doLayout();
 

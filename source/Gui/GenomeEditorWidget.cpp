@@ -48,6 +48,7 @@ void _GenomeEditorWidget::process()
 
         processStructureTree();
         processStructureButtons();
+        processStatusBar();
     }
     ImGui::EndChild();
 }
@@ -99,7 +100,7 @@ void _GenomeEditorWidget::processStructureTree()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
 
-    if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()))) {
+    if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - ImGui::GetTextLineHeightWithSpacing()))) {
         auto scrollToSelection = _selectedGeneFromPreviousFrame != _editData->selectedGeneIndex && !_selectionChangedFromTree;
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
         _selectionChangedFromTree = false;
@@ -113,7 +114,7 @@ void _GenomeEditorWidget::processStructureTree()
         if (ImGui::BeginTable("Structure list", 4, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
             ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
-            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
+            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_WidthFixed, scale(75.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
@@ -324,6 +325,23 @@ void _GenomeEditorWidget::processStructureButtons()
         }
     }
     ImGui::EndDisabled();
+}
+
+void _GenomeEditorWidget::processStatusBar()
+{
+    auto const& genome = _editData->genome;
+    auto numGenes = genome._genes.size();
+    auto numNodes = GenomeDescInfoService::get().getNumberOfNodes(genome);
+
+    std::string text =
+        std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes") + "  \xC2\xB7  " + std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes");
+    if (_editData->selectedGeneIndex.has_value()) {
+        text += "  \xC2\xB7  gene " + std::to_string(_editData->selectedGeneIndex.value());
+        if (_editData->isNodeLevelSelected()) {
+            text += ", node " + std::to_string(_editData->getSelectedNodeIndex().value());
+        }
+    }
+    AlienGui::Text(AlienGui::TextParameters().text(text).style(AlienGui::TextStyle::Decent));
 }
 
 void _GenomeEditorWidget::onAddGene()
