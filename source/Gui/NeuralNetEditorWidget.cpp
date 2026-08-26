@@ -783,9 +783,6 @@ void _NeuralNetEditorWidget::drawInputNodes(
         }
         drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : groupColor(i), 0, scale(1.5f));
-        if (i >= STANDARD_NEURONS_PER_CELL && i < NEURAL_NET_OUTPUTS) {
-            drawList->AddCircleFilled(pos, scale(2.0f), MemoryNodeColor);
-        }
 
         auto label = getInputLabel(i);
         auto textSize = calcNodeLabelSize(_labelFont, label);
@@ -859,9 +856,6 @@ void _NeuralNetEditorWidget::drawOutputNodes(
         drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
         auto borderColor = i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor;
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
-        if (i >= STANDARD_NEURONS_PER_CELL) {
-            drawList->AddCircleFilled(pos, scale(2.0f), MemoryNodeColor);
-        }
 
         auto label = getOutputLabel(i);
         auto textSize = calcNodeLabelSize(_labelFont, label);
