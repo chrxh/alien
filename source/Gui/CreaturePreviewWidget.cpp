@@ -7,6 +7,7 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
@@ -148,6 +149,11 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
 
 void _CreaturePreviewWidget::processMouseNavigation()
 {
+    // The mouse wheel is reserved for zooming, otherwise ImGui would forward it to the scrollable parent window
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+        ImGui::SetKeyOwner(ImGuiKey_MouseWheelY, ImGui::GetCurrentWindow()->ID);
+    }
+
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
         RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
         RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
