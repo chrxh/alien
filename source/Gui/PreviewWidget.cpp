@@ -24,7 +24,6 @@
 
 namespace
 {
-    // Sub-views are stacked vertically and share the available height; below this they start to scroll
     auto constexpr MinPreviewHeight = 200.0f;
 }
 
@@ -150,7 +149,6 @@ void _PreviewWidget::processCreaturePreviews()
 
     // Display and edit previews
     auto phenotypeChanged = false;
-    // The sub-views are stacked vertically so that each one spans the full column width
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0)) {
         auto space = ImGui::GetContentRegionAvail();
         auto height = std::max(scale(MinPreviewHeight), space.y / toFloat(_creatureWidgets.size()) - scale(7.0f));

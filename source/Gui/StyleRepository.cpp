@@ -84,9 +84,6 @@ void StyleRepository::setup()
 
 void StyleRepository::setupSizes(ImGuiStyle& style) const
 {
-    // Only the rounding is customized. Paddings and spacings stay at the ImGui defaults because the widget
-    // metrics of the code base are calibrated against them: panels reserve a fixed height for their bottom
-    // button row, so larger frames or item spacings push that row out of view and add spurious scrollbars.
     style.FrameRounding = scale(6.0f);
     style.ChildRounding = scale(8.0f);
     style.PopupRounding = scale(8.0f);

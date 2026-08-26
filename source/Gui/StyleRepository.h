@@ -158,7 +158,6 @@ public:
 
     ImFont* getDefaultFont() const;
 
-    // Rasterized below the default size, for labels that would otherwise be drawn as a scaled down default font
     ImFont* getTinyFont() const;
 
     ImFont* getSmallBoldFont() const;
