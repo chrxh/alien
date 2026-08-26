@@ -9,7 +9,11 @@
 class _GenomeTabWidget
 {
 public:
-    static GenomeTabWidget create(GenomeWindowEditData const& genomeEditData, GenomeDesc const& genome, GenomeTabLayoutData const& layoutData = nullptr);
+    static GenomeTabWidget create(
+        GenomeWindowEditData const& genomeEditData,
+        GenomeDesc const& genome,
+        GenomeTabLayoutData const& layoutData = nullptr,
+        std::optional<int> lineageId = std::nullopt);
 
     // Validated genome with normalized derived geometry, as it is maintained by the editor widgets
     static GenomeDesc normalizeForEditor(GenomeDesc genome);
@@ -18,6 +22,10 @@ public:
 
     int getTabId() const;
     std::string getName() const;
+
+    // Set if the genome was opened from an inspected creature
+    std::optional<int> getLineageId() const;
+    void setLineageId(std::optional<int> value);
 
     GenomeTabEditData const& getEditData() const;
     GenomeTabLayoutData const& getLayoutData() const;
@@ -35,7 +43,8 @@ private:
     _GenomeTabWidget(
         GenomeWindowEditData const& genomeEditData,
         GenomeDesc const& genome,
-        GenomeTabLayoutData const& layoutData = nullptr);
+        GenomeTabLayoutData const& layoutData = nullptr,
+        std::optional<int> lineageId = std::nullopt);
 
     void processEditors();
     void processPreview();
@@ -55,6 +64,7 @@ private:
     GenomeTabLayoutData _origLayoutData;
     GenomeTabLayoutData _layoutData;
     std::optional<RealVector2D> _lastWindowSize;
+    std::optional<int> _lineageId;
 
     float _previewZoom = 30.0f;
 };

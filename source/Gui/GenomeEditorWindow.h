@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui.h>
+
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GenomeDesc.h>
@@ -13,7 +15,7 @@ class GenomeEditorWindow : public AlienWindow
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 
 public:
-    void openTab(GenomeDesc const& genome, bool forceNewTab = false, bool openEditorIfClosed = true);
+    void openTab(GenomeDesc const& genome, bool forceNewTab = false, bool openEditorIfClosed = true, std::optional<int> lineageId = std::nullopt);
     GenomeDesc getCurrentGenome() const;
 
 private:
@@ -25,6 +27,7 @@ private:
     bool isShown() override;
 
     void processToolbar();
+    void processUnsavedChangesChip(bool hasGenomeChanged);
     void processTabWidget();
 
     void onOpenGenome();
@@ -36,9 +39,7 @@ private:
     void onSavepointGenome();
     void onInjectGenome();
     void onCreateSeed(bool provideEnergy);
-    void onScheduleAddTab(GenomeDesc const& genome);
-
-    void pushStyleColorForTab(GenomeTabWidget const& genomeTab);
+    void onScheduleAddTab(GenomeDesc const& genome, std::optional<int> lineageId);
 
     GenomeDesc getDefaultGenome();
 

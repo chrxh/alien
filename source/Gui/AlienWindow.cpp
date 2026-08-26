@@ -221,7 +221,7 @@ void AlienWindow::processMaximizeButton()
     auto windowPos = ImGui::GetWindowPos();
     auto windowSize = ImGui::GetWindowSize();
     auto iconSize = ImGui::GetFontSize();
-    auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f) * 2, windowPos.y + (titlebarHeight - iconSize) * 0.5f);
+    auto iconPos = RealVector2D{windowPos.x + windowSize.x - scale(24.0f) * 2, windowPos.y + (titlebarHeight - iconSize) * 0.5f};
 
     if (AlienGui::MaximizeButton(iconPos, iconSize, _state == WindowState::Maximized)) {
         if (_state == WindowState::Maximized) {

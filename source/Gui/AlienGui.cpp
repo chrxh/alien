@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <ranges>
 
 #include <boost/algorithm/string.hpp>
@@ -28,7 +29,11 @@
 namespace
 {
     auto constexpr HoveredTimer = 0.5f;
-    auto constexpr ColorChipRounding = 3.0f;
+    auto constexpr ChipPaddingX = 8.0f;
+    auto constexpr ChipPaddingY = 2.0f;
+    auto constexpr ChipDotTextSpacing = 6.0f;
+    auto constexpr TabMarkerSize = 11.0f;
+    auto constexpr TabMarkerRounding = 3.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -423,15 +428,6 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     ImGui::PopStyleColor(3);
 
     return result;
-}
-
-void AlienGui::ColorChip(ImColor const& color, float size, float spacing)
-{
-    auto chipSize = scale(size);
-    auto pos = ImGui::GetCursorScreenPos();
-    auto offsetY = (ImGui::GetTextLineHeight() - chipSize) / 2;
-    ImGui::GetWindowDrawList()->AddRectFilled({pos.x, pos.y + offsetY}, {pos.x + chipSize, pos.y + offsetY + chipSize}, color, scale(ColorChipRounding));
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + chipSize + scale(spacing));
 }
 
 void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
@@ -928,7 +924,6 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
         ImVec2(comboPos.x + style.FramePadding.x + colorFieldWidth2, comboPos.y + style.FramePadding.y + ImGui::GetTextLineHeight()),
         ImColor::HSV(h, s, v));
 
-
     if (enabled) {
         ImGui::EndDisabled();
     }
@@ -959,7 +954,6 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
     ImGui::PushID("color");
     AlienGui::ComboColor(AlienGui::ComboColorParameters().width(70.0f).textWidth(0).customizationColors(parameters._customizationColors), targetColor);
     ImGui::PopID();
-
 
     // Slider for transition age
     ImGui::PushID(2);
@@ -1724,7 +1718,7 @@ namespace
     {
         auto savedCursorPos = ImGui::GetCursorScreenPos();
         auto iconSize = ImGui::GetFontSize();
-        auto iconPos = ImVec2(headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f);
+        auto iconPos = RealVector2D{headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f};
 
         auto result = AlienGui::MaximizeButton(iconPos, iconSize, false);
         AlienGui::Tooltip("Open in a separate window");
@@ -1740,17 +1734,27 @@ bool AlienGui::Group(GroupParameters const& parameters)
     auto style = ImGui::GetStyle();
 
     ImGui::Spacing();
-    ImGui::Spacing();
 
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto groupWidth = ImGui::GetContentRegionAvail().x;
     auto color = parameters._highlighted ? Const::GroupHighColor : Const::GroupDefaultColor;
-    drawList->AddRectFilled(
-        ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y),
-        ImVec2(cursorPos.x + scale(ImGui::GetContentRegionAvail().x), cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y),
-        color,
-        2.0f);
-    ImGui::TextUnformatted((" " + parameters._text).c_str());
+    auto upperLeft = ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y);
+    auto lowerRight = ImVec2(cursorPos.x + groupWidth, cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y);
+    drawList->AddRectFilled(upperLeft, lowerRight, color, style.FrameRounding);
+
+    // Accent bar marking the primary section of a panel
+    auto textIndent = scale(8.0f);
+    if (parameters._highlighted) {
+        auto barWidth = scale(3.0f);
+        drawList->AddRectFilled(
+            upperLeft, ImVec2(upperLeft.x + barWidth, lowerRight.y), Const::GroupAccentBarColor, style.FrameRounding, ImDrawFlags_RoundCornersLeft);
+        textIndent += barWidth;
+    }
+
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textIndent);
+    ImGui::PushStyleColor(ImGuiCol_Text, parameters._highlighted ? Const::GroupHighTextColor.Value : Const::GroupTextColor.Value);
+    ImGui::TextUnformatted(parameters._text.c_str());
+    ImGui::PopStyleColor();
     if (parameters._tooltip.has_value()) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -1843,15 +1847,12 @@ bool AlienGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 
     ImGui::PushFont(StyleRepository::get().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-    auto color = Const::ToolbarButtonTextColor;
-    float h, s, v;
-    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
 
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(h, s, v * 0.3f)));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(h, s, v * 0.45f)));
-
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(Const::AccentDeepColor));
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(Const::ToolbarButtonTextColor));
+
     auto buttonSize = scale(40.0f);
 
     ImGui::BeginDisabled(parameters._disabled);
@@ -1939,6 +1940,43 @@ void AlienGui::ToolbarSeparator()
     VerticalSeparator(40.0f);
 }
 
+void AlienGui::Chip(ChipParameters const& parameters)
+{
+    auto hasBackground = parameters._backgroundColor.has_value();
+    auto hasDot = parameters._dotColor.has_value();
+    auto hasText = !parameters._text.empty();
+
+    auto textSize = hasText ? ImGui::CalcTextSize(parameters._text.c_str()) : ImVec2(0, 0);
+    auto dotSize = hasDot ? scale(parameters._dotSize) : 0.0f;
+    auto paddingX = hasBackground ? scale(ChipPaddingX) : 0.0f;
+    auto paddingY = hasBackground ? scale(ChipPaddingY) : 0.0f;
+    auto dotWidth = hasDot ? dotSize + (hasText ? scale(ChipDotTextSpacing) : 0.0f) : 0.0f;
+
+    auto contentHeight = std::max(ImGui::GetTextLineHeight(), dotSize);
+    auto size = ImVec2(textSize.x + paddingX * 2 + dotWidth, contentHeight + paddingY * 2);
+
+    auto drawList = ImGui::GetWindowDrawList();
+    auto pos = ImGui::GetCursorScreenPos();
+    if (hasBackground) {
+        drawList->AddRectFilled(pos, {pos.x + size.x, pos.y + size.y}, *parameters._backgroundColor, size.y / 2);
+    }
+    if (hasDot) {
+        drawList->AddRectFilled(
+            {pos.x + paddingX, pos.y + (size.y - dotSize) / 2},
+            {pos.x + paddingX + dotSize, pos.y + (size.y + dotSize) / 2},
+            *parameters._dotColor,
+            dotSize / 3);
+    }
+    if (hasText) {
+        drawList->AddText({pos.x + paddingX + dotWidth, pos.y + (size.y - textSize.y) / 2}, parameters._textColor, parameters._text.c_str());
+    }
+
+    ImGui::Dummy(size);
+    if (parameters._spacing.has_value()) {
+        ImGui::SameLine(0, scale(*parameters._spacing));
+    }
+}
+
 bool AlienGui::Button(std::string const& text, float size)
 {
     /*
@@ -1965,11 +2003,11 @@ bool AlienGui::CollapseButton(bool collapsed)
     return result;
 }
 
-bool AlienGui::MaximizeButton(ImVec2 const& pos, float iconSize, bool maximized)
+bool AlienGui::MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized)
 {
     auto iconCenter = ImVec2(pos.x + iconSize * 0.5f, pos.y + iconSize * 0.5f);
 
-    ImGui::SetCursorScreenPos(pos);
+    ImGui::SetCursorScreenPos({pos.x, pos.y});
     auto clicked = ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize));
 
     auto pressed = ImGui::IsItemActive();
@@ -2074,7 +2112,6 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters, bool* expandB
         hightlightSubstring(parameters._name, parameters._highlightedSubString.value(), refPos);
     }
 
-
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
 
@@ -2106,6 +2143,57 @@ void AlienGui::EndTreeNode()
         ImGui::TreePop();
     }
     ImGui::PopID();
+}
+
+namespace
+{
+    std::string const& getTabMarkerPrefix()
+    {
+        static std::string prefix;
+        static float lastMarkerWidth = 0.0f;
+        static float lastSpaceWidth = 0.0f;
+
+        auto markerWidth = scale(TabMarkerSize) + ImGui::GetStyle().ItemInnerSpacing.x;
+        auto spaceWidth = ImGui::CalcTextSize(" ").x;
+        if (markerWidth != lastMarkerWidth || spaceWidth != lastSpaceWidth) {
+            lastMarkerWidth = markerWidth;
+            lastSpaceWidth = spaceWidth;
+            prefix = std::string(toInt(std::ceil(markerWidth / spaceWidth)), ' ');
+        }
+        return prefix;
+    }
+
+    void drawTabMarker(ImColor const& color)
+    {
+        auto tabMin = ImGui::GetItemRectMin();
+        auto tabMax = ImGui::GetItemRectMax();
+        auto markerSize = scale(TabMarkerSize);
+        auto left = tabMin.x + ImGui::GetStyle().FramePadding.x;
+        auto top = tabMin.y + (tabMax.y - tabMin.y - markerSize) / 2;
+
+        // Tabs shrink when they no longer fit, so keep the marker inside its own tab
+        auto drawList = ImGui::GetWindowDrawList();
+        drawList->PushClipRect(tabMin, tabMax, true);
+        drawList->AddRectFilled({left, top}, {left + markerSize, top + markerSize}, color, scale(TabMarkerRounding));
+        drawList->PopClipRect();
+    }
+}
+
+bool AlienGui::BeginTabItem(TabItemParameters const& parameters)
+{
+    auto label = parameters._markerColor.has_value() ? getTabMarkerPrefix() + parameters._name : parameters._name;
+    label += "###" + parameters._id;
+
+    auto result = ImGui::BeginTabItem(label.c_str(), parameters._open, parameters._selected ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None);
+    if (parameters._markerColor.has_value() && ImGui::IsItemVisible()) {
+        drawTabMarker(*parameters._markerColor);
+    }
+    return result;
+}
+
+void AlienGui::EndTabItem()
+{
+    ImGui::EndTabItem();
 }
 
 bool AlienGui::Button(ButtonParameters const& parameters)
@@ -2236,7 +2324,6 @@ void AlienGui::EndIndent()
 bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& value)
 {
     auto origValue = value;
-    ImVec4* colors = ImGui::GetStyle().Colors;
     ImVec2 p = ImGui::GetCursorScreenPos();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -2250,25 +2337,17 @@ bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& valu
         value = !value;
     }
 
-    auto color = Const::ToggleColor;
-    float h, s, v;
-    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-
+    ImColor trackColor;
     if (ImGui::IsItemHovered()) {
-        drawList->AddRectFilled(
-            p,
-            ImVec2(p.x + width, p.y + height),
-            ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.8f) : (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.4f)),
-            height * 0.5f);
+        trackColor = value ? Const::ToggleOnHoveredColor : Const::ToggleOffHoveredColor;
     } else {
-        drawList->AddRectFilled(
-            p,
-            ImVec2(p.x + width, p.y + height),
-            ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.7f) : (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.3f)),
-            height * 0.50f);
+        trackColor = value ? Const::ToggleOnColor : Const::ToggleOffColor;
     }
-    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(20, 20, 20, 255));
-    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
+    drawList->AddRectFilled(p, ImVec2(p.x + width, p.y + height), trackColor, height * 0.5f);
+
+    auto knobCenter = ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius);
+    drawList->AddCircleFilled(knobCenter, radius - 1.5f, Const::ToggleKnobBorderColor);
+    drawList->AddCircleFilled(knobCenter, radius - 2.5f, Const::ToggleKnobColor);
 
     ImGui::SameLine();
     AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));

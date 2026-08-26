@@ -70,6 +70,7 @@ namespace
     auto constexpr GraphMinCurveWidth = 30.0f;
     auto constexpr CardItemSpacing = 5.0f;
     auto constexpr CardTopMargin = 6.0f;
+    auto constexpr CardVerticalPosition = 0.75f;
     auto constexpr ButtonAreaHeight = 50.0f;
     auto constexpr ActivationIconHeight = 18.0f;
     auto constexpr ActivationIconSamples = 48;
@@ -897,13 +898,13 @@ void _NeuralNetEditorWidget::processInspectorCard(
     } else {
         cardWidth = scale(CardWidth);
 
-        // The card starts at the top of the graph, is kept inside the visible area when the editor is scrolled and is
-        // moved up as far as needed to leave the action buttons below the graph uncovered
+        // The card sits in the lower part of the graph area, is kept inside the visible area when the editor is scrolled
+        // and is moved up as far as needed to leave the action buttons below the graph uncovered
         auto clipMin = ImGui::GetWindowDrawList()->GetClipRectMin();
         auto clipMax = ImGui::GetWindowDrawList()->GetClipRectMax();
         auto highestCardY = std::max(graphGeometry.origin.y, clipMin.y) + cardMargin;
         auto lowestCardY = std::min(_actionButtonsMinY, clipMax.y) - cardHeight - cardMargin;
-        auto cardY = std::max(std::min(highestCardY, lowestCardY), clipMin.y + cardMargin);
+        auto cardY = std::max(highestCardY + (lowestCardY - highestCardY) * CardVerticalPosition, highestCardY);
 
         ImGui::SetCursorScreenPos({graphGeometry.groupBlockGapMinX + (graphGeometry.groupBlockGapWidth - cardWidth) / 2, cardY});
     }

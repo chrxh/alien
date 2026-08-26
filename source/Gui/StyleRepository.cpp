@@ -25,11 +25,9 @@ void StyleRepository::setup()
 
     auto& style = ImGui::GetStyle();
     style.ScaleAllSizes(scaleFactor);
-    style.FrameRounding = scale(4.0f);
 
-    style.Colors[ImGuiCol_Tab] = Const::TreeNodeHighColor.Value;
-    style.Colors[ImGuiCol_TabSelected] = Const::TreeNodeHighActiveColor.Value;
-    style.Colors[ImGuiCol_TabHovered] = Const::TreeNodeHighHoveredColor.Value;
+    setupSizes(style);
+    setupColors(style);
 
     ImFontConfig configMerge;
     configMerge.MergeMode = true;
@@ -82,6 +80,82 @@ void StyleRepository::setup()
 
     _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * scaleFactor);
     _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * scaleFactor);
+}
+
+void StyleRepository::setupSizes(ImGuiStyle& style) const
+{
+    style.FrameRounding = scale(6.0f);
+    style.ChildRounding = scale(8.0f);
+    style.PopupRounding = scale(8.0f);
+    style.GrabRounding = scale(6.0f);
+    style.ScrollbarRounding = scale(6.0f);
+    style.TabRounding = scale(6.0f);
+}
+
+void StyleRepository::setupColors(ImGuiStyle& style) const
+{
+    auto transparent = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.0f);
+
+    style.Colors[ImGuiCol_Text] = Const::TextBaseColor.Value;
+    style.Colors[ImGuiCol_TextDisabled] = Const::TextFaintColor.Value;
+
+    style.Colors[ImGuiCol_WindowBg] = Const::BackgroundColor.Value;
+    style.Colors[ImGuiCol_ChildBg] = transparent.Value;
+    style.Colors[ImGuiCol_PopupBg] = Const::PanelColor.Value;
+    style.Colors[ImGuiCol_Border] = Const::LineColor.Value;
+    style.Colors[ImGuiCol_BorderShadow] = transparent.Value;
+
+    style.Colors[ImGuiCol_FrameBg] = Const::InputColor.Value;
+    style.Colors[ImGuiCol_FrameBgHovered] = Const::RaisedColor.Value;
+    style.Colors[ImGuiCol_FrameBgActive] = Const::RaisedColor.Value;
+
+    style.Colors[ImGuiCol_TitleBg] = Const::PanelColor.Value;
+    style.Colors[ImGuiCol_TitleBgActive] = Const::PanelColor.Value;
+    style.Colors[ImGuiCol_TitleBgCollapsed] = Const::BackgroundColor.Value;
+    style.Colors[ImGuiCol_MenuBarBg] = Const::PanelColor.Value;
+
+    style.Colors[ImGuiCol_ScrollbarBg] = transparent.Value;
+    style.Colors[ImGuiCol_ScrollbarGrab] = Const::LineColor.Value;
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = Const::TextFaintColor.Value;
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = Const::AccentLineColor.Value;
+
+    style.Colors[ImGuiCol_CheckMark] = Const::AccentColor.Value;
+    style.Colors[ImGuiCol_SliderGrab] = Const::AccentLineColor.Value;
+    style.Colors[ImGuiCol_SliderGrabActive] = Const::AccentColor.Value;
+
+    style.Colors[ImGuiCol_Button] = Const::RaisedColor.Value;
+    style.Colors[ImGuiCol_ButtonHovered] = Const::ActionButtonHoveredColor.Value;
+    style.Colors[ImGuiCol_ButtonActive] = Const::AccentDeepColor.Value;
+
+    style.Colors[ImGuiCol_Header] = Const::HeaderColor.Value;
+    style.Colors[ImGuiCol_HeaderHovered] = Const::HeaderHoveredColor.Value;
+    style.Colors[ImGuiCol_HeaderActive] = Const::HeaderActiveColor.Value;
+
+    style.Colors[ImGuiCol_Separator] = Const::LineSoftColor.Value;
+    style.Colors[ImGuiCol_SeparatorHovered] = Const::AccentLineColor.Value;
+    style.Colors[ImGuiCol_SeparatorActive] = Const::AccentColor.Value;
+
+    style.Colors[ImGuiCol_ResizeGrip] = Const::LineColor.Value;
+    style.Colors[ImGuiCol_ResizeGripHovered] = Const::AccentLineColor.Value;
+    style.Colors[ImGuiCol_ResizeGripActive] = Const::AccentColor.Value;
+
+    style.Colors[ImGuiCol_Tab] = Const::PanelColor.Value;
+    style.Colors[ImGuiCol_TabHovered] = Const::RaisedColor.Value;
+    style.Colors[ImGuiCol_TabSelected] = Const::RaisedColor.Value;
+    style.Colors[ImGuiCol_TabSelectedOverline] = Const::AccentColor.Value;
+    style.Colors[ImGuiCol_TabDimmed] = Const::BackgroundColor.Value;
+    style.Colors[ImGuiCol_TabDimmedSelected] = Const::PanelColor.Value;
+    style.Colors[ImGuiCol_TabDimmedSelectedOverline] = Const::AccentLineColor.Value;
+
+    style.Colors[ImGuiCol_TableHeaderBg] = Const::TableHeaderColor.Value;
+    style.Colors[ImGuiCol_TableBorderStrong] = Const::LineColor.Value;
+    style.Colors[ImGuiCol_TableBorderLight] = Const::LineSoftColor.Value;
+    style.Colors[ImGuiCol_TableRowBg] = transparent.Value;
+    style.Colors[ImGuiCol_TableRowBgAlt] = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.4f).Value;
+
+    style.Colors[ImGuiCol_TextSelectedBg] = Const::AccentDeepColor.Value;
+    style.Colors[ImGuiCol_DragDropTarget] = Const::AccentColor.Value;
+    style.Colors[ImGuiCol_NavCursor] = Const::AccentLineColor.Value;
 }
 
 ImFont* StyleRepository::getIconFont() const

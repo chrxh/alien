@@ -16,17 +16,7 @@ private:
 
     void processNoSelection();
     void processHeaderData();
-    void processNodeList();
-    void processNodeListButtons();
-
-    void onAddNode();
-    void onRemoveNode();
-    void onMoveNodeUpward();
-    void onMoveNodeDownward();
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
-
-    std::optional<int> _selectedNodeFromPreviousFrame;
-    bool _nodeSelectedFromTable = false;
 };
