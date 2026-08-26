@@ -442,8 +442,6 @@ public:
 
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
 
-    // A chip consists of an optional dot and an optional text, optionally wrapped in a rounded background.
-    // Set spacing to keep the next widget on the same line separated by that gap.
     struct ChipParameters
     {
         MEMBER(ChipParameters, std::string, text, std::string());
@@ -459,7 +457,7 @@ public:
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
-    static bool MaximizeButton(ImVec2 const& pos, float iconSize, bool maximized);
+    static bool MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized);
 
     enum class TreeNodeRank
     {

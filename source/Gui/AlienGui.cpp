@@ -1715,7 +1715,7 @@ namespace
     {
         auto savedCursorPos = ImGui::GetCursorScreenPos();
         auto iconSize = ImGui::GetFontSize();
-        auto iconPos = ImVec2(headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f);
+        auto iconPos = RealVector2D{headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f};
 
         auto result = AlienGui::MaximizeButton(iconPos, iconSize, false);
         AlienGui::Tooltip("Open in a separate window");
@@ -2000,11 +2000,11 @@ bool AlienGui::CollapseButton(bool collapsed)
     return result;
 }
 
-bool AlienGui::MaximizeButton(ImVec2 const& pos, float iconSize, bool maximized)
+bool AlienGui::MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized)
 {
     auto iconCenter = ImVec2(pos.x + iconSize * 0.5f, pos.y + iconSize * 0.5f);
 
-    ImGui::SetCursorScreenPos(pos);
+    ImGui::SetCursorScreenPos({pos.x, pos.y});
     auto clicked = ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize));
 
     auto pressed = ImGui::IsItemActive();
