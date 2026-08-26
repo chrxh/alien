@@ -477,6 +477,17 @@ public:
     static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);   // Returns true if the tree node is open.
     static void EndTreeNode();
 
+    struct TabItemParameters
+    {
+        MEMBER(TabItemParameters, std::string, name, std::string());
+        MEMBER(TabItemParameters, std::string, id, std::string());  // Keeps the tab alive when its name changes
+        MEMBER(TabItemParameters, bool, selected, false);
+        MEMBER(TabItemParameters, bool*, open, nullptr);
+        MEMBER(TabItemParameters, std::optional<ImColor>, markerColor, std::nullopt);
+    };
+    static bool BeginTabItem(TabItemParameters const& parameters);
+    static void EndTabItem();
+
     struct ButtonParameters
     {
         MEMBER(ButtonParameters, std::string, buttonText, "");

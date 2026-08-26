@@ -29,7 +29,6 @@ namespace
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
 
-    // A gene lists one chip per customization color of its nodes, so the chips are kept compact
     auto constexpr ColorChipSize = 9.0f;
     auto constexpr ColorChipSpacing = 3.0f;
 }
@@ -77,7 +76,6 @@ void _GenomeEditorWidget::processHeaderData()
 
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->structureHeight), 0)) {
 
-        // The left field is narrow, so base properties and mutation rates are stacked instead of placed side by side
         auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
         AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
@@ -265,8 +263,6 @@ void _GenomeEditorWidget::processNodeLeaf(
 
 void _GenomeEditorWidget::processStructureButtons()
 {
-    // The selection state is re-read before every button: an action can invalidate it within the same frame,
-    // e.g. removing the only node of a gene falls back to the gene level
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE).tooltip("Add gene"))) {
         onAddGene();
     }

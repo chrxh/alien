@@ -1,10 +1,8 @@
 #include "GenomeEditorWindow.h"
 
-#include <cmath>
-
 #include <boost/range/adaptor/indexed.hpp>
 
-#include <imgui_internal.h>
+#include <imgui.h>
 #include <ImFileDialog.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -34,8 +32,14 @@
 
 namespace
 {
-    auto constexpr LineageMarkerSize = 11.0f;
-    auto constexpr LineageMarkerRounding = 3.0f;
+    std::optional<ImColor> getLineageMarkerColor(std::optional<int> const& lineageId)
+    {
+        if (!lineageId.has_value()) {
+            return std::nullopt;
+        }
+        auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId.value()));
+        return ImColor(toInt((rgb >> 16) & 0xff), toInt((rgb >> 8) & 0xff), toInt(rgb & 0xff));
+    }
 }
 
 void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, bool openEditorIfClosed, std::optional<int> lineageId)
@@ -245,18 +249,16 @@ void GenomeEditorWindow::processTabWidget()
                 if (_tabs.size() > 1) {
                     openPtr = &open;
                 }
-                int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
 
-                auto tabLabel = getTabLabel(genomeTab);
-
-                // ImGui derives the tab id from the label in the enclosing window scope, so it must be taken before the tab pushes its own id
-                auto tabId = ImGui::GetID(tabLabel.c_str());
-                auto tabResult = ImGui::BeginTabItem(tabLabel.c_str(), openPtr, flags);
-                processLineageMarker(genomeTab, tabId);
-                if (tabResult) {
+                if (AlienGui::BeginTabItem(AlienGui::TabItemParameters()
+                                               .name(genomeTab->getName())
+                                               .id(std::to_string(genomeTab->getTabId()))
+                                               .selected(tabIndexToSelect && *tabIndexToSelect == index)
+                                               .open(openPtr)
+                                               .markerColor(getLineageMarkerColor(genomeTab->getLineageId())))) {
                     _selectedTabIndex = toInt(index);
                     genomeTab->process();
-                    ImGui::EndTabItem();
+                    AlienGui::EndTabItem();
                 }
 
                 if (openPtr && *openPtr == false) {
@@ -282,44 +284,6 @@ void GenomeEditorWindow::processTabWidget()
         }
     }
     ImGui::EndChild();
-}
-
-std::string GenomeEditorWindow::getTabLabel(GenomeTabWidget const& genomeTab)
-{
-    std::string prefix;
-    if (genomeTab->getLineageId().has_value()) {
-        // Reserve room for the lineage marker that is drawn on top of the tab
-        auto spaceWidth = ImGui::CalcTextSize(" ").x;
-        auto numSpaces = toInt(std::ceil((scale(LineageMarkerSize) + ImGui::GetStyle().ItemInnerSpacing.x) / spaceWidth));
-        prefix = std::string(numSpaces, ' ');
-    }
-    return prefix + genomeTab->getName() + "###" + std::to_string(genomeTab->getTabId());
-}
-
-void GenomeEditorWindow::processLineageMarker(GenomeTabWidget const& genomeTab, ImGuiID tabId)
-{
-    auto lineageId = genomeTab->getLineageId();
-    if (!lineageId.has_value()) {
-        return;
-    }
-
-    auto tabBar = ImGui::GetCurrentTabBar();
-    auto tab = ImGui::TabBarFindTabByID(tabBar, tabId);
-    if (tab == nullptr) {
-        return;
-    }
-
-    auto markerSize = scale(LineageMarkerSize);
-    auto left = tabBar->BarRect.Min.x + tab->Offset - tabBar->ScrollingAnim + ImGui::GetStyle().FramePadding.x;
-    auto top = tabBar->BarRect.Min.y + (tabBar->BarRect.GetHeight() - markerSize) / 2;
-
-    // Keep the marker inside the tab bar when tabs are scrolled
-    auto drawList = ImGui::GetWindowDrawList();
-    drawList->PushClipRect(tabBar->BarRect.Min, tabBar->BarRect.Max, true);
-    auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId.value()));
-    auto markerColor = ImColor(toInt((rgb >> 16) & 0xff), toInt((rgb >> 8) & 0xff), toInt(rgb & 0xff));
-    drawList->AddRectFilled({left, top}, {left + markerSize, top + markerSize}, markerColor, scale(LineageMarkerRounding));
-    drawList->PopClipRect();
 }
 
 void GenomeEditorWindow::onOpenGenome()
