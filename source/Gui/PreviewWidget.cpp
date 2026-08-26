@@ -24,7 +24,7 @@
 
 namespace
 {
-    auto constexpr MinPreviewHeight = 200.0f;
+    auto constexpr MinPreviewHeight = 400.0f;
 }
 
 PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
