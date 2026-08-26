@@ -15,7 +15,6 @@ class GenomeEditorWindow : public AlienWindow
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 
 public:
-    // lineageId marks a genome that was opened from an inspected creature; it colors the tab marker
     void openTab(GenomeDesc const& genome, bool forceNewTab = false, bool openEditorIfClosed = true, std::optional<int> lineageId = std::nullopt);
     GenomeDesc getCurrentGenome() const;
 
@@ -30,8 +29,6 @@ private:
     void processToolbar();
     void processUnsavedChangesChip(bool hasGenomeChanged);
     void processTabWidget();
-    std::string getTabLabel(GenomeTabWidget const& genomeTab);
-    void processLineageMarker(GenomeTabWidget const& genomeTab, ImGuiID tabId);
 
     void onOpenGenome();
     void onSaveGenome();

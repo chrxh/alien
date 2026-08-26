@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <ranges>
 
 #include <boost/algorithm/string.hpp>
@@ -31,6 +32,8 @@ namespace
     auto constexpr ChipPaddingX = 8.0f;
     auto constexpr ChipPaddingY = 2.0f;
     auto constexpr ChipDotTextSpacing = 6.0f;
+    auto constexpr TabMarkerSize = 11.0f;
+    auto constexpr TabMarkerRounding = 3.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -2140,6 +2143,57 @@ void AlienGui::EndTreeNode()
         ImGui::TreePop();
     }
     ImGui::PopID();
+}
+
+namespace
+{
+    std::string const& getTabMarkerPrefix()
+    {
+        static std::string prefix;
+        static float lastMarkerWidth = 0.0f;
+        static float lastSpaceWidth = 0.0f;
+
+        auto markerWidth = scale(TabMarkerSize) + ImGui::GetStyle().ItemInnerSpacing.x;
+        auto spaceWidth = ImGui::CalcTextSize(" ").x;
+        if (markerWidth != lastMarkerWidth || spaceWidth != lastSpaceWidth) {
+            lastMarkerWidth = markerWidth;
+            lastSpaceWidth = spaceWidth;
+            prefix = std::string(toInt(std::ceil(markerWidth / spaceWidth)), ' ');
+        }
+        return prefix;
+    }
+
+    void drawTabMarker(ImColor const& color)
+    {
+        auto tabMin = ImGui::GetItemRectMin();
+        auto tabMax = ImGui::GetItemRectMax();
+        auto markerSize = scale(TabMarkerSize);
+        auto left = tabMin.x + ImGui::GetStyle().FramePadding.x;
+        auto top = tabMin.y + (tabMax.y - tabMin.y - markerSize) / 2;
+
+        // Tabs shrink when they no longer fit, so keep the marker inside its own tab
+        auto drawList = ImGui::GetWindowDrawList();
+        drawList->PushClipRect(tabMin, tabMax, true);
+        drawList->AddRectFilled({left, top}, {left + markerSize, top + markerSize}, color, scale(TabMarkerRounding));
+        drawList->PopClipRect();
+    }
+}
+
+bool AlienGui::BeginTabItem(TabItemParameters const& parameters)
+{
+    auto label = parameters._markerColor.has_value() ? getTabMarkerPrefix() + parameters._name : parameters._name;
+    label += "###" + parameters._id;
+
+    auto result = ImGui::BeginTabItem(label.c_str(), parameters._open, parameters._selected ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None);
+    if (parameters._markerColor.has_value() && ImGui::IsItemVisible()) {
+        drawTabMarker(*parameters._markerColor);
+    }
+    return result;
+}
+
+void AlienGui::EndTabItem()
+{
+    ImGui::EndTabItem();
 }
 
 bool AlienGui::Button(ButtonParameters const& parameters)

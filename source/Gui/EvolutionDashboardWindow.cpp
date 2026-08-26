@@ -92,8 +92,6 @@ namespace
             toInt(alpha * 255.0f));
     }
 
-    // Identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
-    // hueShiftSteps shifts the hue slightly so that consecutive plot rows of a lineage remain distinguishable
     ImColor getLineageColor(int64_t lineageId, int hueShiftSteps = 0)
     {
         auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId));
@@ -103,13 +101,11 @@ namespace
         return ImColor::HSV(h, s * LineageSaturationFactor, std::min(1.0f, v * LineageBrightening));
     }
 
-    // Palette as used by the former statistics window; one colormap color per plot row
     ImColor getOverallPlotColor(int metricIndex)
     {
         return ImColor(ImPlot::GetColormapColor(metricIndex % ImPlot::GetColormapSize(ImPlotColormap_Cool), ImPlotColormap_Cool));
     }
 
-    // The "all filtered" row keeps the colormap palette, single lineages are colored by their identity
     ImColor getPlotColor(int64_t lineageId, int metricIndex)
     {
         return lineageId < 0 ? getOverallPlotColor(metricIndex) : getLineageColor(lineageId, metricIndex);

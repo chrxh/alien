@@ -18,7 +18,6 @@ private:
 
     void processHeaderData();
 
-    // Genes and their nodes form one hierarchy and are therefore shown as one tree
     void processStructureTree();
     void
     processGeneNode(int geneIndex, GeneDesc const& gene, bool isUnreachable, bool scrollToSelection, ColorVector<FloatColorRGB> const& customizationColors);
