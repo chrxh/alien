@@ -22,6 +22,11 @@
 #include "StyleRepository.h"
 #include "WindowController.h"
 
+namespace
+{
+    auto constexpr MinPreviewHeight = 200.0f;
+}
+
 PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
     return PreviewWidget(new _PreviewWidget(genomeEditData, editData));
@@ -144,14 +149,11 @@ void _PreviewWidget::processCreaturePreviews()
 
     // Display and edit previews
     auto phenotypeChanged = false;
-    if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0)) {
         auto space = ImGui::GetContentRegionAvail();
-        auto width = std::max(space.x / _creatureWidgets.size() - scale(7.0f), space.y);
+        auto height = std::max(scale(MinPreviewHeight), space.y / toFloat(_creatureWidgets.size()) - scale(7.0f));
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processCreaturePreview(phenotypeChanged, i, phenotypes.at(i), width);
-            if (i < size - 1) {
-                ImGui::SameLine();
-            }
+            processCreaturePreview(phenotypeChanged, i, phenotypes.at(i), height);
         }
     }
 
@@ -165,11 +167,11 @@ void _PreviewWidget::processCreaturePreviews()
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float height)
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
-    creatureWidget->process(phenotypeChanged, phenotype, _editData->genome, width);
+    creatureWidget->process(phenotypeChanged, phenotype, _editData->genome, height);
     ImGui::PopID();
 }
 

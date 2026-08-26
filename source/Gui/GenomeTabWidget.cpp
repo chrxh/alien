@@ -18,9 +18,13 @@
 #include "PreviewWidget.h"
 #include "StyleRepository.h"
 
-GenomeTabWidget _GenomeTabWidget::create(GenomeWindowEditData const& genomeEditData, GenomeDesc const& genome, GenomeTabLayoutData const& layoutData)
+GenomeTabWidget _GenomeTabWidget::create(
+    GenomeWindowEditData const& genomeEditData,
+    GenomeDesc const& genome,
+    GenomeTabLayoutData const& layoutData,
+    std::optional<int> lineageId)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, genome, layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, genome, layoutData, lineageId));
 }
 
 GenomeDesc _GenomeTabWidget::normalizeForEditor(GenomeDesc genome)
@@ -39,18 +43,8 @@ void _GenomeTabWidget::process()
     if (ImGui::BeginChild("CreatureTab")) {
         ImGui::PushID(_editData->id);
 
-        if (ImGui::BeginChild("Editors", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight), 0)) {
-            processEditors();
-            DescValidationService::get().validateAndCorrect(_editData->genome);
-        }
-        ImGui::EndChild();
-
-        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->previewsHeight);
-
-        if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-            processPreview();
-        }
-        ImGui::EndChild();
+        processEditors();
+        DescValidationService::get().validateAndCorrect(_editData->genome);
 
         ImGui::PopID();
     }
@@ -70,6 +64,16 @@ std::string _GenomeTabWidget::getName() const
     }
     result += _editData->genome._name;
     return result;
+}
+
+std::optional<int> _GenomeTabWidget::getLineageId() const
+{
+    return _lineageId;
+}
+
+void _GenomeTabWidget::setLineageId(std::optional<int> value)
+{
+    _lineageId = value;
 }
 
 GenomeTabEditData const& _GenomeTabWidget::getEditData() const
@@ -133,7 +137,9 @@ void _GenomeTabWidget::revertChanges()
 _GenomeTabWidget::_GenomeTabWidget(
     GenomeWindowEditData const& genomeEditData,
     GenomeDesc const& genome,
-    GenomeTabLayoutData const& layoutData)
+    GenomeTabLayoutData const& layoutData,
+    std::optional<int> lineageId)
+    : _lineageId(lineageId)
 {
     static int _sequence = 0;
 
@@ -146,9 +152,10 @@ _GenomeTabWidget::_GenomeTabWidget(
     _editData->origGenome = normalizedGenome;
 
     if (!genome._genes.empty()) {
-        _editData->selectedGeneIndex = 0;
         if (!genome._genes.front()._nodes.empty()) {
-            _editData->selectedNodeByGeneIndex.emplace(0, 0);
+            _editData->selectNode(0, 0);
+        } else {
+            _editData->selectGene(0);
         }
     }
     _layoutData = layoutData;
@@ -165,6 +172,7 @@ _GenomeTabWidget::_GenomeTabWidget(
 
 void _GenomeTabWidget::processEditors()
 {
+    // Left field: genome properties, mutation rates and the gene/node tree
     _genomeEditorWidget->process();
 
     ImGui::SameLine();
@@ -172,16 +180,28 @@ void _GenomeTabWidget::processEditors()
     AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->genomeEditorWidth);
     ImGui::PopID();
 
+    // Middle field: the inspector follows the selection and shows either the gene or the node level
     ImGui::SameLine();
-    _geneEditorWidget->process();
+    if (ImGui::BeginChild("Inspector", ImVec2(_layoutData->inspectorWidth, 0))) {
+        if (_editData->isNodeLevelSelected()) {
+            _nodeEditorWidget->process();
+        } else {
+            _geneEditorWidget->process();
+        }
+    }
+    ImGui::EndChild();
 
     ImGui::SameLine();
     ImGui::PushID(2);
-    AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->geneEditorWidth);
+    AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->inspectorWidth);
     ImGui::PopID();
 
+    // Right field: the creature previews
     ImGui::SameLine();
-    _nodeEditorWidget->process();
+    if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+        processPreview();
+    }
+    ImGui::EndChild();
 
     _editData->changesMade = !_editData->origGenome.equalWithoutId(_editData->genome);
 }
@@ -193,17 +213,20 @@ void _GenomeTabWidget::processPreview()
 
 void _GenomeTabWidget::doLayout()
 {
+    auto minColumnWidth = scale(240.0f);
+    auto minSectionHeight = scale(120.0f);
+
     // Initial layout setup
     if (!_layoutData->initialized) {
         auto width = ImGui::GetContentRegionAvail().x;
         auto height = ImGui::GetContentRegionAvail().y;
-        _layoutData->genomeEditorWidth = width / 3;
-        _layoutData->geneEditorWidth = width / 4;
-        _layoutData->previewsHeight = height / 2;
+        // The inspector carries the property rows and the neural net editor, so it gets the widest share
+        _layoutData->genomeEditorWidth = width * 0.25f;
+        _layoutData->inspectorWidth = width * 0.4f;
         _layoutData->desiredConfigurationPreviewWidth = width / 2;
-        _layoutData->geneListHeight = height / 4;
-        _layoutData->nodeListHeight = height / 4;
-        _layoutData->neuralNetEditorHeight = height / 4;
+        // The tree and the neural net editor benefit from height, the property rows above them do not fill theirs
+        _layoutData->structureHeight = height * 0.6f;
+        _layoutData->neuralNetEditorHeight = height * 0.6f;
         _layoutData->initialized = true;
         _origLayoutData = _layoutData->clone();
 
@@ -219,35 +242,26 @@ void _GenomeTabWidget::doLayout()
             auto scalingX = windowSize.x / lastWindowSize->x;
             auto scalingY = windowSize.y / lastWindowSize->y;
             _layoutData->genomeEditorWidth *= scalingX;
-            _layoutData->geneEditorWidth *= scalingX;
-            _layoutData->previewsHeight *= scalingY;
+            _layoutData->inspectorWidth *= scalingX;
             _layoutData->desiredConfigurationPreviewWidth *= scalingX;
-            _layoutData->geneListHeight *= scalingY;
-            _layoutData->nodeListHeight *= scalingY;
+            _layoutData->structureHeight *= scalingY;
             _layoutData->neuralNetEditorHeight *= scalingY;
             *_origLayoutData = *_layoutData;
             return;
         }
     }
 
-    // Editor sizes changes
-    if (_origLayoutData->genomeEditorWidth != _layoutData->genomeEditorWidth) {
-        if (_layoutData->genomeEditorWidth < scale(200.0f) || _layoutData->geneEditorWidth < scale(200.0f)) {
-            *_layoutData = *_origLayoutData;
-            return;
-        }
-        _layoutData->geneEditorWidth += _origLayoutData->genomeEditorWidth - _layoutData->genomeEditorWidth;
-    }
-    if (_origLayoutData->geneEditorWidth != _layoutData->geneEditorWidth) {
-        auto nodeEditorWidth = ImGui::GetContentRegionAvail().x - _layoutData->genomeEditorWidth - _layoutData->geneEditorWidth;
-        if (_layoutData->geneEditorWidth < scale(200.0f) || nodeEditorWidth < scale(200.0f)) {
+    // Editor size changes
+    auto previewWidth = ImGui::GetContentRegionAvail().x - _layoutData->genomeEditorWidth - _layoutData->inspectorWidth;
+    if (_origLayoutData->genomeEditorWidth != _layoutData->genomeEditorWidth || _origLayoutData->inspectorWidth != _layoutData->inspectorWidth) {
+        if (_layoutData->genomeEditorWidth < minColumnWidth || _layoutData->inspectorWidth < minColumnWidth || previewWidth < minColumnWidth) {
             *_layoutData = *_origLayoutData;
             return;
         }
     }
-    if (_origLayoutData->previewsHeight != _layoutData->previewsHeight) {
-        auto editorHeight = ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight;
-        if (_layoutData->previewsHeight < scale(200.0f) || editorHeight < scale(200.0f)) {
+    if (_origLayoutData->structureHeight != _layoutData->structureHeight) {
+        auto headerHeight = ImGui::GetContentRegionAvail().y - _layoutData->structureHeight;
+        if (_layoutData->structureHeight < minSectionHeight || headerHeight < minSectionHeight) {
             *_layoutData = *_origLayoutData;
             return;
         }

@@ -87,7 +87,7 @@ void ModalWindow::processMaximizeButton()
     auto windowPos = ImGui::GetWindowPos();
     auto windowSize = ImGui::GetWindowSize();
     auto iconSize = ImGui::GetFontSize();
-    auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
+    auto iconPos = RealVector2D{windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f};
 
     // BeginPopupModal() clips widgets to the area below its native titlebar, so widen the clip rect
     // to make the button visible and clickable inside that titlebar strip.

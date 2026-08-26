@@ -11,7 +11,7 @@ public:
     static CreaturePreviewWidget
     create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
-    void process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float width);
+    void process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float height);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);

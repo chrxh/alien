@@ -73,7 +73,7 @@ _CreaturePreviewWidget::create(GenomeWindowEditData const& genomeEditData, Genom
     return CreaturePreviewWidget(new _CreaturePreviewWidget(genomeEditData, editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float height)
 {
     auto phenotypeWithoutSeed = phenotype;
     GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
@@ -85,7 +85,7 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenot
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
-    if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
+    if (ImGui::BeginChild("CellGraphWidget", ImVec2(0, height), 0, ImGuiWindowFlags_NoScrollbar)) {
         processMouseNavigation();
         processCellGraphAndSelection(conversionResult);
         processTitle(conversionResult);

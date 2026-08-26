@@ -2,6 +2,7 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
+#include <imgui.h>
 #include <ImFileDialog.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -12,6 +13,7 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/ObjectColoring.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
@@ -28,7 +30,19 @@
 #include "GenomeWindowEditData.h"
 #include "OverlayController.h"
 
-void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, bool openEditorIfClosed)
+namespace
+{
+    std::optional<ImColor> getLineageMarkerColor(std::optional<int> const& lineageId)
+    {
+        if (!lineageId.has_value()) {
+            return std::nullopt;
+        }
+        auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId.value()));
+        return ImColor(toInt((rgb >> 16) & 0xff), toInt((rgb >> 8) & 0xff), toInt(rgb & 0xff));
+    }
+}
+
+void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, bool openEditorIfClosed, std::optional<int> lineageId)
 {
     if (openEditorIfClosed) {
         setOn(false);
@@ -50,8 +64,9 @@ void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, boo
     if (tabIndex) {
         _tabIndexToSelect = *tabIndex;
         _tabs.at(*tabIndex)->resetOriginal();
+        _tabs.at(*tabIndex)->setLineageId(lineageId);
     } else {
-        onScheduleAddTab(normalizedGenome);
+        onScheduleAddTab(normalizedGenome, lineageId);
     }
 }
 
@@ -183,7 +198,31 @@ void GenomeEditorWindow::processToolbar()
         onCreateSeed(true);
     }
 
+    processUnsavedChangesChip(hasGenomeChanged);
+
     AlienGui::Separator();
+}
+
+void GenomeEditorWindow::processUnsavedChangesChip(bool hasGenomeChanged)
+{
+    if (!hasGenomeChanged) {
+        return;
+    }
+    auto text = "Unsaved changes";
+    auto chipWidth = ImGui::CalcTextSize(text).x + scale(34.0f);
+    auto chipHeight = ImGui::GetTextLineHeight() + scale(4.0f);
+    if (ImGui::GetWindowContentRegionMax().x - ImGui::GetCursorPosX() < chipWidth + scale(16.0f)) {
+        return;
+    }
+
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x - chipWidth);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (scale(40.0f) - chipHeight) / 2);
+    AlienGui::Chip(AlienGui::ChipParameters()
+                       .text(text)
+                       .textColor(Const::UnsavedChangesColor)
+                       .backgroundColor(Const::UnsavedChangesBackgroundColor)
+                       .dotColor(Const::UnsavedChangesColor));
 }
 
 void GenomeEditorWindow::processTabWidget()
@@ -194,7 +233,7 @@ void GenomeEditorWindow::processTabWidget()
                 "##GenomeTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                onScheduleAddTab(getDefaultGenome());
+                onScheduleAddTab(getDefaultGenome(), std::nullopt);
             }
             AlienGui::Tooltip("New genome");
 
@@ -210,17 +249,17 @@ void GenomeEditorWindow::processTabWidget()
                 if (_tabs.size() > 1) {
                     openPtr = &open;
                 }
-                int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
 
-                pushStyleColorForTab(genomeTab);
-                auto tabResult = ImGui::BeginTabItem((genomeTab->getName() + "###" + std::to_string(genomeTab->getTabId())).c_str(), openPtr, flags);
-                ImGui::PopStyleColor(3);
-                if (tabResult) {
+                if (AlienGui::BeginTabItem(AlienGui::TabItemParameters()
+                                               .name(genomeTab->getName())
+                                               .id(std::to_string(genomeTab->getTabId()))
+                                               .selected(tabIndexToSelect && *tabIndexToSelect == index)
+                                               .open(openPtr)
+                                               .markerColor(getLineageMarkerColor(genomeTab->getLineageId())))) {
                     _selectedTabIndex = toInt(index);
                     genomeTab->process();
-                    ImGui::EndTabItem();
+                    AlienGui::EndTabItem();
                 }
-                ImGui::PopStyleColor(3);
 
                 if (openPtr && *openPtr == false) {
                     tabToDelete = toInt(index);
@@ -328,23 +367,10 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
     printOverlayMessage("Seed created");
 }
 
-void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome)
+void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome, std::optional<int> lineageId)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabsToAdd.emplace_back(_GenomeTabWidget::create(_genomeEditData, genome, currentTab->getLayoutData()->clone()));
-}
-
-void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& genomeTab)
-{
-    auto tabId = genomeTab->getTabId();
-    auto h = 0.0f + toFloat(tabId % 20) / 20.0f * 1.0f;
-    auto s = 0.4f + toFloat(tabId % 10) / 10.0f * 0.6f;
-    ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.4f).Value);
-    ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.7f).Value);
-    ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.8f).Value);
-    ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(h, s, 0.8f).Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(h, s, 1.0f).Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(h, s, 0.9f).Value);
+    _tabsToAdd.emplace_back(_GenomeTabWidget::create(_genomeEditData, genome, currentTab->getLayoutData()->clone(), lineageId));
 }
 
 GenomeDesc GenomeEditorWindow::getDefaultGenome()

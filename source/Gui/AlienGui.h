@@ -15,6 +15,7 @@
 #include <EngineInterface/SimulationParametersTypes.h>
 
 #include "Definitions.h"
+#include "StyleRepository.h"
 
 struct TreeNodeStackElement
 {
@@ -151,8 +152,6 @@ public:
     static void InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2);
 
     static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
-
-    static void ColorChip(ImColor const& color, float size = 11.0f, float spacing = 6.0f);
 
     struct CheckboxColorMatrixParameters
     {
@@ -440,13 +439,25 @@ public:
         MEMBER(ToolbarButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ToolbarButton(ToolbarButtonParameters const& parameters);
+
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
+
+    struct ChipParameters
+    {
+        MEMBER(ChipParameters, std::string, text, std::string());
+        MEMBER(ChipParameters, ImColor, textColor, Const::TextDimColor);
+        MEMBER(ChipParameters, std::optional<ImColor>, backgroundColor, std::nullopt);
+        MEMBER(ChipParameters, std::optional<ImColor>, dotColor, std::nullopt);
+        MEMBER(ChipParameters, float, dotSize, 6.0f);
+        MEMBER(ChipParameters, std::optional<float>, spacing, std::nullopt);
+    };
+    static void Chip(ChipParameters const& parameters);
 
     static void VerticalSeparator(float height = 23.0f);
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
-    static bool MaximizeButton(ImVec2 const& pos, float iconSize, bool maximized);
+    static bool MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized);
 
     enum class TreeNodeRank
     {
@@ -465,6 +476,17 @@ public:
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);   // Returns true if the tree node is open.
     static void EndTreeNode();
+
+    struct TabItemParameters
+    {
+        MEMBER(TabItemParameters, std::string, name, std::string());
+        MEMBER(TabItemParameters, std::string, id, std::string());  // Keeps the tab alive when its name changes
+        MEMBER(TabItemParameters, bool, selected, false);
+        MEMBER(TabItemParameters, bool*, open, nullptr);
+        MEMBER(TabItemParameters, std::optional<ImColor>, markerColor, std::nullopt);
+    };
+    static bool BeginTabItem(TabItemParameters const& parameters);
+    static void EndTabItem();
 
     struct ButtonParameters
     {
@@ -536,7 +558,6 @@ public:
 private:
     template <typename Parameter, typename T>
     static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned);
-
 
     template <typename T>
     struct BasicInputColorMatrixParameters

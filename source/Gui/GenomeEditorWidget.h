@@ -1,5 +1,8 @@
 #pragma once
 
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/GenomeDesc.h>
+
 #include "Definitions.h"
 #include "MutationRatesWidget.h"
 
@@ -14,13 +17,23 @@ private:
     _GenomeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
     void processHeaderData();
-    void processGeneList();
-    void processGeneListButtons();
+
+    void processStructureTree();
+    void
+    processGeneNode(int geneIndex, GeneDesc const& gene, bool isUnreachable, bool scrollToSelection, ColorVector<FloatColorRGB> const& customizationColors);
+    void processNodeLeaf(int geneIndex, int nodeIndex, GeneDesc const& gene, NodeDesc const& node, ColorVector<FloatColorRGB> const& customizationColors);
+    void processStructureButtons();
+    void processStatusBar();
 
     void onAddGene();
     void onRemoveGene();
     void onMoveGeneUpward();
     void onMoveGeneDownward();
+
+    void onAddNode();
+    void onRemoveNode();
+    void onMoveNodeUpward();
+    void onMoveNodeDownward();
 
     void removeGeneIntern();
     void moveGeneUpwardIntern();
@@ -33,5 +46,5 @@ private:
     int _sequenceNumberForCreatedGenes = 0;
 
     std::optional<int> _selectedGeneFromPreviousFrame;
-    bool _geneSelectedFromTable = false;
+    bool _selectionChangedFromTree = false;
 };

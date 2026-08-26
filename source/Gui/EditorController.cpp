@@ -88,24 +88,44 @@ void EditorController::onInspectSelectedGenomes()
 {
     ContentDesc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
 
-    std::vector<GenomeDesc> uniqueGenomes;
-    for (auto const& genome : selectedData._genomes) {
-        auto genomeWithoutId = genome;
-        genomeWithoutId._id = 0;
-        bool alreadyCollected = false;
-        for (auto const& existing : uniqueGenomes) {
-            if (existing == genomeWithoutId) {
-                alreadyCollected = true;
-                break;
-            }
-        }
-        if (!alreadyCollected) {
-            uniqueGenomes.emplace_back(genomeWithoutId);
+    // A genome can be carried by creatures of different lineages; only an unambiguous lineage marks the tab
+    std::map<uint64_t, std::optional<int>> lineageByGenomeId;
+    for (auto const& creature : selectedData._creatures) {
+        auto [entry, inserted] = lineageByGenomeId.try_emplace(creature._genomeId, creature._lineageId);
+        if (!inserted && entry->second != creature._lineageId) {
+            entry->second.reset();
         }
     }
 
-    for (auto const& genome : uniqueGenomes) {
-        GenomeEditorWindow::get().openTab(genome);
+    struct InspectedGenome
+    {
+        GenomeDesc genome;
+        std::optional<int> lineageId;
+    };
+    std::vector<InspectedGenome> uniqueGenomes;
+    for (auto const& genome : selectedData._genomes) {
+        auto lineageId = lineageByGenomeId.contains(genome._id) ? lineageByGenomeId.at(genome._id) : std::nullopt;
+        auto genomeWithoutId = genome;
+        genomeWithoutId._id = 0;
+
+        InspectedGenome* collected = nullptr;
+        for (auto& existing : uniqueGenomes) {
+            if (existing.genome == genomeWithoutId) {
+                collected = &existing;
+                break;
+            }
+        }
+        if (collected != nullptr) {
+            if (collected->lineageId != lineageId) {
+                collected->lineageId.reset();
+            }
+        } else {
+            uniqueGenomes.emplace_back(genomeWithoutId, lineageId);
+        }
+    }
+
+    for (auto const& uniqueGenome : uniqueGenomes) {
+        GenomeEditorWindow::get().openTab(uniqueGenome.genome, false, true, uniqueGenome.lineageId);
     }
 
     printOverlayMessage(std::to_string(uniqueGenomes.size()) + (uniqueGenomes.size() == 1 ? " genome" : " genomes") + " inspected");
