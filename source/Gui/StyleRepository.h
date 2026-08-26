@@ -84,7 +84,6 @@ namespace Const
 
     ImColor const HeadlineColor = AccentColor;
 
-    ImColor const ChipBackgroundColor = RaisedColor;
     ImColor const UnsavedChangesColor = WarningColor;
     ImColor const UnsavedChangesBackgroundColor = ImColor::HSV(0.094f, 0.545f, 0.216f);
 

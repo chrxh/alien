@@ -24,7 +24,6 @@
 
 #include "AlienGui.h"
 #include "GenomeEditorWindow.h"
-#include "LineageColors.h"
 #include "LiveStatisticsService.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
@@ -35,6 +34,11 @@ namespace
     auto constexpr RateAveragingTimesteps = LiveStatisticsService::RateAveragingTimesteps;
 
     auto constexpr ColorChipSize = 22.0f;
+    auto constexpr LineageChipSize = 11.0f;
+    auto constexpr LineageChipSpacing = 6.0f;
+    auto constexpr LineageHueShift = 0.03f;    // Hue offset between consecutive plot rows of a lineage
+    auto constexpr LineageBrightening = 1.5f;  // The identifying colors of the renderer are too dark on the dark GUI background
+    auto constexpr LineageSaturationFactor = 0.85f;
     auto constexpr SwatchSize = 11.0f;
     auto constexpr SwatchGap = 3.0f;
 
@@ -86,6 +90,17 @@ namespace
             toInt(toFloat((rgb >> 8) & 0xff) * brightness),
             toInt(toFloat(rgb & 0xff) * brightness),
             toInt(alpha * 255.0f));
+    }
+
+    // Identifying color of a lineage as used by the renderer, brightened for the dark GUI background;
+    // hueShiftSteps shifts the hue slightly so that consecutive plot rows of a lineage remain distinguishable
+    ImColor getLineageColor(int64_t lineageId, int hueShiftSteps = 0)
+    {
+        auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId));
+        float h, s, v;
+        ObjectColoring::rgbToHsv(toFloat((rgb >> 16) & 0xff) / 255.0f, toFloat((rgb >> 8) & 0xff) / 255.0f, toFloat(rgb & 0xff) / 255.0f, h, s, v);
+        h = std::fmod(h + toFloat(hueShiftSteps) * LineageHueShift, 1.0f);
+        return ImColor::HSV(h, s * LineageSaturationFactor, std::min(1.0f, v * LineageBrightening));
     }
 
     // Palette as used by the former statistics window; one colormap color per plot row
@@ -905,7 +920,7 @@ void EvolutionDashboardWindow::processLineageTable()
 
             // The lineage color corresponds to the rendering of the simulation with lineage coloring enabled
             ImGui::TableSetColumnIndex(LineageColumn);
-            AlienGui::ColorChip(getLineageColor(lineage.id));
+            AlienGui::Chip(AlienGui::ChipParameters().dotColor(getLineageColor(lineage.id)).dotSize(LineageChipSize).spacing(LineageChipSpacing));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             ImGui::SameLine();
             auto selected = _selectedLineageIds.contains(lineage.id);
