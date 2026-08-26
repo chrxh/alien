@@ -188,7 +188,7 @@ void _GenomeEditorWidget::processGeneNode(
     for (auto const& usedColor : usedColors) {
         float h, s, v;
         AlienGui::ConvertRGBtoHSV(customizationColors.values[usedColor].toRgbColor(), h, s, v);
-        AlienGui::ColorChip(ImColor::HSV(h, s, v), ColorChipSize, ColorChipSpacing);
+        AlienGui::Chip(AlienGui::ChipParameters().dotColor(ImColor::HSV(h, s, v)).dotSize(ColorChipSize).spacing(ColorChipSpacing));
     }
     AlienGui::Text(std::to_string(gene._nodes.size()) + "-" + Const::ConstructorShapeStrings.at(gene._shape));
 
@@ -241,7 +241,7 @@ void _GenomeEditorWidget::processNodeLeaf(
     ImGui::TableNextColumn();
     float h, s, v;
     AlienGui::ConvertRGBtoHSV(customizationColors.values[node._color].toRgbColor(), h, s, v);
-    AlienGui::ColorChip(ImColor::HSV(h, s, v), ColorChipSize, ColorChipSpacing);
+    AlienGui::Chip(AlienGui::ChipParameters().dotColor(ImColor::HSV(h, s, v)).dotSize(ColorChipSize).spacing(ColorChipSpacing));
     auto nodeType = gene._homogeneousCellType ? gene._nodes.front().getCellType() : node.getCellType();
     AlienGui::Text(Const::CellTypeStrings.at(nodeType));
 

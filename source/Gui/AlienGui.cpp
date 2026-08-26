@@ -28,7 +28,9 @@
 namespace
 {
     auto constexpr HoveredTimer = 0.5f;
-    auto constexpr ColorChipRounding = 3.0f;
+    auto constexpr ChipPaddingX = 8.0f;
+    auto constexpr ChipPaddingY = 2.0f;
+    auto constexpr ChipDotTextSpacing = 6.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -423,15 +425,6 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     ImGui::PopStyleColor(3);
 
     return result;
-}
-
-void AlienGui::ColorChip(ImColor const& color, float size, float spacing)
-{
-    auto chipSize = scale(size);
-    auto pos = ImGui::GetCursorScreenPos();
-    auto offsetY = (ImGui::GetTextLineHeight() - chipSize) / 2;
-    ImGui::GetWindowDrawList()->AddRectFilled({pos.x, pos.y + offsetY}, {pos.x + chipSize, pos.y + offsetY + chipSize}, color, scale(ColorChipRounding));
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + chipSize + scale(spacing));
 }
 
 void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
@@ -1946,27 +1939,39 @@ void AlienGui::ToolbarSeparator()
 
 void AlienGui::Chip(ChipParameters const& parameters)
 {
+    auto hasBackground = parameters._backgroundColor.has_value();
+    auto hasDot = parameters._dotColor.has_value();
+    auto hasText = !parameters._text.empty();
+
+    auto textSize = hasText ? ImGui::CalcTextSize(parameters._text.c_str()) : ImVec2(0, 0);
+    auto dotSize = hasDot ? scale(parameters._dotSize) : 0.0f;
+    auto paddingX = hasBackground ? scale(ChipPaddingX) : 0.0f;
+    auto paddingY = hasBackground ? scale(ChipPaddingY) : 0.0f;
+    auto dotWidth = hasDot ? dotSize + (hasText ? scale(ChipDotTextSpacing) : 0.0f) : 0.0f;
+
+    auto contentHeight = std::max(ImGui::GetTextLineHeight(), dotSize);
+    auto size = ImVec2(textSize.x + paddingX * 2 + dotWidth, contentHeight + paddingY * 2);
+
     auto drawList = ImGui::GetWindowDrawList();
-
-    auto textSize = ImGui::CalcTextSize(parameters._text.c_str());
-    auto paddingX = scale(8.0f);
-    auto paddingY = scale(2.0f);
-    auto dotSize = scale(6.0f);
-    auto dotWidth = parameters._dotColor.has_value() ? dotSize + scale(6.0f) : 0.0f;
-    auto size = ImVec2(textSize.x + paddingX * 2 + dotWidth, textSize.y + paddingY * 2);
-
     auto pos = ImGui::GetCursorScreenPos();
-    drawList->AddRectFilled(pos, {pos.x + size.x, pos.y + size.y}, parameters._backgroundColor, size.y / 2);
-    if (parameters._dotColor.has_value()) {
-        drawList->AddRectFilled(
-            {pos.x + paddingX, pos.y + size.y / 2 - dotSize / 2},
-            {pos.x + paddingX + dotSize, pos.y + size.y / 2 + dotSize / 2},
-            *parameters._dotColor,
-            scale(2.0f));
+    if (hasBackground) {
+        drawList->AddRectFilled(pos, {pos.x + size.x, pos.y + size.y}, *parameters._backgroundColor, size.y / 2);
     }
-    drawList->AddText({pos.x + paddingX + dotWidth, pos.y + paddingY}, parameters._textColor, parameters._text.c_str());
+    if (hasDot) {
+        drawList->AddRectFilled(
+            {pos.x + paddingX, pos.y + (size.y - dotSize) / 2},
+            {pos.x + paddingX + dotSize, pos.y + (size.y + dotSize) / 2},
+            *parameters._dotColor,
+            dotSize / 3);
+    }
+    if (hasText) {
+        drawList->AddText({pos.x + paddingX + dotWidth, pos.y + (size.y - textSize.y) / 2}, parameters._textColor, parameters._text.c_str());
+    }
 
     ImGui::Dummy(size);
+    if (parameters._spacing.has_value()) {
+        ImGui::SameLine(0, scale(*parameters._spacing));
+    }
 }
 
 bool AlienGui::Button(std::string const& text, float size)

@@ -153,8 +153,6 @@ public:
 
     static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
 
-    static void ColorChip(ImColor const& color, float size = 11.0f, float spacing = 6.0f);
-
     struct CheckboxColorMatrixParameters
     {
         MEMBER(CheckboxColorMatrixParameters, std::string, name, "");
@@ -444,12 +442,16 @@ public:
 
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
 
+    // A chip consists of an optional dot and an optional text, optionally wrapped in a rounded background.
+    // Set spacing to keep the next widget on the same line separated by that gap.
     struct ChipParameters
     {
         MEMBER(ChipParameters, std::string, text, std::string());
         MEMBER(ChipParameters, ImColor, textColor, Const::TextDimColor);
-        MEMBER(ChipParameters, ImColor, backgroundColor, Const::ChipBackgroundColor);
+        MEMBER(ChipParameters, std::optional<ImColor>, backgroundColor, std::nullopt);
         MEMBER(ChipParameters, std::optional<ImColor>, dotColor, std::nullopt);
+        MEMBER(ChipParameters, float, dotSize, 6.0f);
+        MEMBER(ChipParameters, std::optional<float>, spacing, std::nullopt);
     };
     static void Chip(ChipParameters const& parameters);
 

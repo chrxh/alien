@@ -15,6 +15,7 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/ObjectColoring.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
@@ -29,7 +30,6 @@
 #include "GenomeTabLayoutData.h"
 #include "GenomeTabWidget.h"
 #include "GenomeWindowEditData.h"
-#include "LineageColors.h"
 #include "OverlayController.h"
 
 namespace
@@ -316,7 +316,9 @@ void GenomeEditorWindow::processLineageMarker(GenomeTabWidget const& genomeTab, 
     // Keep the marker inside the tab bar when tabs are scrolled
     auto drawList = ImGui::GetWindowDrawList();
     drawList->PushClipRect(tabBar->BarRect.Min, tabBar->BarRect.Max, true);
-    drawList->AddRectFilled({left, top}, {left + markerSize, top + markerSize}, getLineageColor(lineageId.value()), scale(LineageMarkerRounding));
+    auto rgb = ObjectColoring::getColorFromId(toUInt32(lineageId.value()));
+    auto markerColor = ImColor(toInt((rgb >> 16) & 0xff), toInt((rgb >> 8) & 0xff), toInt(rgb & 0xff));
+    drawList->AddRectFilled({left, top}, {left + markerSize, top + markerSize}, markerColor, scale(LineageMarkerRounding));
     drawList->PopClipRect();
 }
 
