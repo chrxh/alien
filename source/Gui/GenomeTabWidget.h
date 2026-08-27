@@ -48,6 +48,7 @@ private:
 
     void processEditors();
     void processPreview();
+    void processStatusBar();
 
     void doLayout();
 
@@ -65,6 +66,7 @@ private:
     GenomeTabLayoutData _layoutData;
     std::optional<RealVector2D> _lastWindowSize;
     std::optional<int> _lineageId;
+    float _statusBarHeight = 0;
 
     float _previewZoom = 30.0f;
 };

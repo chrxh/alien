@@ -48,7 +48,6 @@ void _GenomeEditorWidget::process()
 
         processStructureTree();
         processStructureButtons();
-        processStatusBar();
     }
     ImGui::EndChild();
 }
@@ -100,7 +99,7 @@ void _GenomeEditorWidget::processStructureTree()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
 
-    if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - ImGui::GetTextLineHeightWithSpacing()))) {
+    if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()))) {
         auto scrollToSelection = _selectedGeneFromPreviousFrame != _editData->selectedGeneIndex && !_selectionChangedFromTree;
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
         _selectionChangedFromTree = false;
@@ -325,23 +324,6 @@ void _GenomeEditorWidget::processStructureButtons()
         }
     }
     ImGui::EndDisabled();
-}
-
-void _GenomeEditorWidget::processStatusBar()
-{
-    auto const& genome = _editData->genome;
-    auto numGenes = genome._genes.size();
-    auto numNodes = GenomeDescInfoService::get().getNumberOfNodes(genome);
-
-    std::string text =
-        std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes") + "  \xC2\xB7  " + std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes");
-    if (_editData->selectedGeneIndex.has_value()) {
-        text += "  \xC2\xB7  gene " + std::to_string(_editData->selectedGeneIndex.value());
-        if (_editData->isNodeLevelSelected()) {
-            text += ", node " + std::to_string(_editData->getSelectedNodeIndex().value());
-        }
-    }
-    AlienGui::Text(AlienGui::TextParameters().text(text).style(AlienGui::TextStyle::Decent));
 }
 
 void _GenomeEditorWidget::onAddGene()
