@@ -23,7 +23,6 @@ private:
     processGeneNode(int geneIndex, GeneDesc const& gene, bool isUnreachable, bool scrollToSelection, ColorVector<FloatColorRGB> const& customizationColors);
     void processNodeLeaf(int geneIndex, int nodeIndex, GeneDesc const& gene, NodeDesc const& node, ColorVector<FloatColorRGB> const& customizationColors);
     void processStructureButtons();
-    void processStatusBar();
 
     void onAddGene();
     void onRemoveGene();

@@ -81,6 +81,7 @@ namespace Const
     ImColor const TableHeaderColor = PanelColor;
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
+    ImColor const StatusBarTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
 
     ImColor const HeadlineColor = AccentColor;
 

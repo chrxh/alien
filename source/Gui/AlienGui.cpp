@@ -2278,8 +2278,7 @@ void AlienGui::StatusBar(std::vector<std::string> const& textItems)
         text += " " ICON_FA_INFO_CIRCLE " " + textItem + " ";
     }
     AlienGui::Separator();
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
-    //ImGui::PushStyleColor(ImGuiCol_Text, Const::StatusBarTextColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::StatusBarTextColor);
     AlienGui::Text(AlienGui::TextParameters().text(text));
     ImGui::PopStyleColor();
 }

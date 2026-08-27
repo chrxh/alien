@@ -7,6 +7,7 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/DescValidationService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"
@@ -40,7 +41,7 @@ void _GenomeTabWidget::process()
 {
     doLayout();
 
-    if (ImGui::BeginChild("CreatureTab")) {
+    if (ImGui::BeginChild("CreatureTab", ImVec2(0, -_statusBarHeight))) {
         ImGui::PushID(_editData->id);
 
         processEditors();
@@ -49,6 +50,8 @@ void _GenomeTabWidget::process()
         ImGui::PopID();
     }
     ImGui::EndChild();
+
+    processStatusBar();
 }
 
 int _GenomeTabWidget::getTabId() const
@@ -209,6 +212,22 @@ void _GenomeTabWidget::processEditors()
 void _GenomeTabWidget::processPreview()
 {
     _simulatedPreviewWidget->process();
+}
+
+void _GenomeTabWidget::processStatusBar()
+{
+    auto startPosY = ImGui::GetCursorPosY();
+
+    auto const& genome = _editData->genome;
+    auto numGenes = toInt(genome._genes.size());
+    auto numNodes = GenomeDescInfoService::get().getNumberOfNodes(genome);
+
+    std::vector<std::string> statusItems;
+    statusItems.emplace_back(std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes"));
+    statusItems.emplace_back(std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes"));
+    AlienGui::StatusBar(statusItems);
+
+    _statusBarHeight = ImGui::GetCursorPosY() - startPosY;
 }
 
 void _GenomeTabWidget::doLayout()
