@@ -12,6 +12,8 @@ public:
 private:
     _NodeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
+    bool isVoidNodeSelected() const;
+
     void processNodeAttributes();
     void processNoSelection();
 

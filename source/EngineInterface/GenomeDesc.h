@@ -404,6 +404,8 @@ struct GeneDesc
     MEMBER(GeneDesc, float, stiffness, 1.0f);
     MEMBER(GeneDesc, float, connectionDistance, 1.0f);
     MEMBER(GeneDesc, bool, homogeneousCellType, false);
+
+    CellType getCellType(int nodeIndex) const;
 };
 
 struct NeuronMutationDesc

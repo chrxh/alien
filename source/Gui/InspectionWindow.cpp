@@ -542,7 +542,9 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
         }
 
         processNeuralActivityNode(cell);
-        processNeuralNetNode(object);
+        if (cell.getCellType() != CellType_Void) {
+            processNeuralNetNode(object);
+        }
     }
     AlienGui::EndTreeNode();
 }
