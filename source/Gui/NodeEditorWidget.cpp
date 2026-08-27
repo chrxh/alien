@@ -198,7 +198,7 @@ namespace
 
 void _NodeEditorWidget::processNodeAttributes()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Selected node " + std::to_string(_editData->getSelectedNodeIndex().value())).highlighted(true));
+    AlienGui::Group(AlienGui::GroupParameters().text("Selected: Node " + std::to_string(_editData->getSelectedNodeIndex().value())).highlighted(true));
 
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
