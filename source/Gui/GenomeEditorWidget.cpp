@@ -196,11 +196,7 @@ void _GenomeEditorWidget::processGeneNode(
 
     // Column 3: referencing genes
     ImGui::TableNextColumn();
-    auto referencedBy = toIndexList(GenomeDescInfoService::get().getReferencedBy(_editData->genome, geneIndex));
-    if (referencedBy.empty() && geneIndex > 0) {
-        referencedBy = "-";
-    }
-    AlienGui::Text(referencedBy);
+    AlienGui::Text(toIndexList(GenomeDescInfoService::get().getReferencedBy(_editData->genome, geneIndex)));
 
     if (isOpen) {
         for (auto const& [index, node] : gene._nodes | boost::adaptors::indexed(0)) {
@@ -240,7 +236,7 @@ void _GenomeEditorWidget::processNodeLeaf(
     float h, s, v;
     AlienGui::ConvertRGBtoHSV(customizationColors.values[node._color].toRgbColor(), h, s, v);
     AlienGui::Chip(AlienGui::ChipParameters().dotColor(ImColor::HSV(h, s, v)).dotSize(ColorChipSize).spacing(ColorChipSpacing));
-    auto nodeType = gene._homogeneousCellType ? gene._nodes.front().getCellType() : node.getCellType();
+    auto nodeType = gene.getCellType(nodeIndex);
     AlienGui::Text(Const::CellTypeStrings.at(nodeType));
 
     // Column 2: the gene this node constructs

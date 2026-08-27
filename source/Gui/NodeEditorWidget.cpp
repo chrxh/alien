@@ -36,9 +36,11 @@ void _NodeEditorWidget::process()
             ImGui::PushID(nodeIndex.value());
             processNodeAttributes();
 
-            AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->neuralNetEditorHeight);
+            if (!isVoidNodeSelected()) {
+                AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->neuralNetEditorHeight);
 
-            processNeuralNetEditor();
+                processNeuralNetEditor();
+            }
             ImGui::PopID();
             ImGui::PopID();
         } else {
@@ -196,11 +198,17 @@ namespace
     }
 }
 
+bool _NodeEditorWidget::isVoidNodeSelected() const
+{
+    return _editData->getSelectedGeneRef().getCellType(_editData->getSelectedNodeIndex().value()) == CellType_Void;
+}
+
 void _NodeEditorWidget::processNodeAttributes()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Selected: Node " + std::to_string(_editData->getSelectedNodeIndex().value())).highlighted(true));
 
-    if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, 0)) {
+    auto height = isVoidNodeSelected() ? 0.0f : -_layoutData->neuralNetEditorHeight;
+    if (ImGui::BeginChild("NodeData", ImVec2(0, height), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
 
@@ -234,7 +242,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::ComboColorParameters().customizationColors(customizationColors).name("Customization").textWidth(rightColumnWidth), node._color);
 
             // Type
-            auto nodeType = cellTypeNode.getCellType();
+            auto nodeType = gene.getCellType(nodeIndex.value());
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
                 if (nodeType == CellType_Void && (gene._homogeneousCellType || nodeIndex.value() == 0)) {
                     showMessage("Error", "The first node cannot be void.");

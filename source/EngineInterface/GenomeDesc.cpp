@@ -152,6 +152,11 @@ CommunicatorMode CommunicatorGenomeDesc::getMode() const
     CHECK(false);
 }
 
+CellType GeneDesc::getCellType(int nodeIndex) const
+{
+    return _nodes.at(_homogeneousCellType ? 0 : nodeIndex).getCellType();
+}
+
 CellType NodeDesc::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDesc>(_cellType)) {
