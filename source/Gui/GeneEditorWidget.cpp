@@ -57,7 +57,7 @@ void _GeneEditorWidget::processNoSelection()
 void _GeneEditorWidget::processHeaderData()
 {
     auto const& selectedGene = _editData->getSelectedGeneRef();
-    auto title = "Selected gene " + std::to_string(_editData->selectedGeneIndex.value());
+    auto title = "Selected: Gene " + std::to_string(_editData->selectedGeneIndex.value());
     if (!selectedGene._name.empty()) {
         title += " (" + selectedGene._name + ")";
     }
