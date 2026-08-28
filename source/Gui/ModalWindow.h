@@ -33,6 +33,7 @@ private:
     bool _isMaximizable = false;
 
     bool _sizeInitialized = false;
+    ImVec2 _appliedDefaultSize;
     enum class State
     {
         Closed,

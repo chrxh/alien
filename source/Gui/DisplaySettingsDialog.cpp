@@ -7,6 +7,8 @@
 #include <Base/LoggingService.h>
 
 #include "AlienGui.h"
+#include "GenericMessageDialog.h"
+#include "MainLoopController.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
 
@@ -14,7 +16,7 @@
 
 namespace
 {
-    auto const RightColumnWidth = 185.0f;
+    auto const RightColumnWidth = 270.0f;
 }
 
 void DisplaySettingsDialog::initIntern()
@@ -25,7 +27,7 @@ void DisplaySettingsDialog::initIntern()
 }
 
 DisplaySettingsDialog::DisplaySettingsDialog()
-    : AlienDialog("Display settings")
+    : AlienDialog("Display settings", {700.0f, 300.0f})
 {}
 
 void DisplaySettingsDialog::processIntern()
@@ -54,6 +56,26 @@ void DisplaySettingsDialog::processIntern()
             .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
         &_pendingFps);
 
+    AlienGui::Checkbox(
+        AlienGui::CheckboxParameters()
+            .name("Adopt scaling from OS")
+            .textWidth(RightColumnWidth)
+            .defaultValue(_origAutoContentScaleFactor)
+            .tooltip("If enabled, the scaling below is taken from the display settings of the operating system."),
+        _pendingAutoContentScaleFactor);
+
+    ImGui::BeginDisabled(_pendingAutoContentScaleFactor);
+    AlienGui::SliderFloat(
+        AlienGui::SliderFloatParameters()
+            .name("Content scaling")
+            .textWidth(RightColumnWidth)
+            .defaultValue(&_origContentScaleFactor)
+            .min(WindowController::MinContentScaleFactor)
+            .max(WindowController::MaxContentScaleFactor)
+            .format("%.2f"),
+        &_pendingContentScaleFactor);
+    ImGui::EndDisabled();
+
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
@@ -66,6 +88,12 @@ void DisplaySettingsDialog::processIntern()
         }
         WindowController::get().setFps(_pendingFps);
         _selectionIndex = _pendingSelectionIndex;
+
+        if (isContentScalingChanged()) {
+            auto automatic = _pendingAutoContentScaleFactor;
+            auto scaleFactor = _pendingContentScaleFactor;
+            delayedExecution([this, automatic, scaleFactor] { onChangeContentScaling(automatic, scaleFactor); });
+        }
     }
     ImGui::SetItemDefaultFocus();
 
@@ -81,8 +109,32 @@ void DisplaySettingsDialog::openIntern()
     _origSelectionIndex = _selectionIndex;
     _origFps = WindowController::get().getFps();
     _pendingIsFullscreen = !WindowController::get().isWindowedMode();
+    _origAutoContentScaleFactor = WindowController::get().isAutoContentScaleFactor();
+    _origContentScaleFactor = WindowController::get().getUserDefinedContentScaleFactor();
     _pendingSelectionIndex = _selectionIndex;
     _pendingFps = _origFps;
+    _pendingAutoContentScaleFactor = _origAutoContentScaleFactor;
+    _pendingContentScaleFactor = _origContentScaleFactor;
+}
+
+bool DisplaySettingsDialog::isContentScalingChanged() const
+{
+    if (_pendingAutoContentScaleFactor != _origAutoContentScaleFactor) {
+        return true;
+    }
+    return !_pendingAutoContentScaleFactor && _pendingContentScaleFactor != _origContentScaleFactor;
+}
+
+void DisplaySettingsDialog::onChangeContentScaling(bool automatic, float scaleFactor) const
+{
+    GenericMessageDialog::get().yesNo(
+        "Content scaling", "The content scaling only takes effect at program start. Do you want to save it and terminate ALIEN now?", [automatic, scaleFactor] {
+            WindowController::get().setAutoContentScaleFactor(automatic);
+            if (!automatic) {
+                WindowController::get().setUserDefinedContentScaleFactor(scaleFactor);
+            }
+            MainLoopController::get().scheduleClosing();
+        });
 }
 
 void DisplaySettingsDialog::setFullscreen(int selectionIndex)

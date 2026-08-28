@@ -170,8 +170,6 @@ void SimulationView::setMotionBlur(float value)
     _motionBlur = value;
 }
 
-void SimulationView::updateMotionBlur() {}
-
 namespace
 {
     void initPictureTarget(TextureTarget const& target, IntVector2D const& resolution)
@@ -207,6 +205,7 @@ void SimulationView::savePicture(std::filesystem::path const& filename, IntVecto
 
     auto origViewSize = Viewport::get().getViewSize();
     auto origZoomFactor = Viewport::get().getZoomFactor();
+    auto origRenderScale = Viewport::get().getRenderScale();
     GLint origFbo = 0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
 
@@ -219,7 +218,7 @@ void SimulationView::savePicture(std::filesystem::path const& filename, IntVecto
 
         Viewport::get().setViewSize(origViewSize);
         Viewport::get().setZoomFactor(origZoomFactor);
-        Viewport::get().setRenderScale(1.0f);
+        Viewport::get().setRenderScale(origRenderScale);
         _renderPipeline->resize(origViewSize);
     });
 
@@ -231,7 +230,7 @@ void SimulationView::savePicture(std::filesystem::path const& filename, IntVecto
     // The visible world rect equals view size / zoom factor. Thus, scaling both by the same amount keeps the
     // horizontally visible world range while the vertical range follows from the aspect ratio of the picture.
     // The render scale lets the render steps enlarge all effects with a size in pixels accordingly.
-    auto renderScale = toFloat(resolution.x) / toFloat(origViewSize.x);
+    auto renderScale = origRenderScale * toFloat(resolution.x) / toFloat(origViewSize.x);
     Viewport::get().setViewSize(resolution);
     Viewport::get().setZoomFactor(origZoomFactor * renderScale);
     Viewport::get().setRenderScale(renderScale);
