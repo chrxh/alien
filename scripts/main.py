@@ -94,9 +94,6 @@ class User(Base):
     # GPU model reported by the client on login
     gpu: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    # Program version reported by the client on login
-    version: Mapped[str | None] = mapped_column(String(64), nullable=True)
-
     __table_args__ = (
         CheckConstraint("char_length(name) > 0", name="ck_users_name_nonempty"),
     )
@@ -171,26 +168,16 @@ app = FastAPI()
 TIME_SPENT_MAX_GAP_SECONDS = 30 * 60
 
 
-# Columns of ``users`` that were introduced after the initial release, mapped
-# to the SQL type used by the ``ALTER TABLE`` fallback in
-# ``_ensure_users_schema``. All of them are nullable so that existing rows stay
-# valid without a backfill.
-USERS_ADDED_COLUMNS = {
-    "last_time_spent_update": "TIMESTAMP WITH TIME ZONE",
-    "version": "VARCHAR(64)",
-}
-
-
 def _ensure_users_schema():
     """Add columns introduced after the initial release.
 
     ``Base.metadata.create_all`` only creates *missing tables*; it does not
     migrate existing tables. For deployments upgrading from an earlier
-    revision we add the columns listed in ``USERS_ADDED_COLUMNS`` on startup
-    if they are not present yet. Production runs on PostgreSQL (see
-    ``README.md``); the test suite uses SQLite but always starts from a fresh
-    database, so the freshly-created schema already contains the columns and
-    these ALTERs are never executed there.
+    revision we add the ``last_time_spent_update`` column on startup if it
+    is not present yet. Production runs on PostgreSQL (see ``README.md``);
+    the test suite uses SQLite but always starts from a fresh database, so
+    the freshly-created schema already contains the column and this ALTER
+    is never executed there.
     """
     from sqlalchemy import inspect, text
 
@@ -198,16 +185,14 @@ def _ensure_users_schema():
     if not inspector.has_table("users"):
         return
     existing_cols = {col["name"] for col in inspector.get_columns("users")}
-    missing = {
-        name: sql_type
-        for name, sql_type in USERS_ADDED_COLUMNS.items()
-        if name not in existing_cols
-    }
-    if not missing:
-        return
-    with engine.begin() as conn:
-        for name, sql_type in missing.items():
-            conn.execute(text(f"ALTER TABLE users ADD COLUMN {name} {sql_type}"))
+    if "last_time_spent_update" not in existing_cols:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "ALTER TABLE users "
+                    "ADD COLUMN last_time_spent_update TIMESTAMP WITH TIME ZONE"
+                )
+            )
 
 
 @app.on_event("startup")
@@ -634,7 +619,6 @@ def login(
     userName: str = Form(...),
     password: str = Form(...),
     gpu: str | None = Form(None),
-    version: str | None = Form(None),
 ):
     # errorCode:
     #   0 -> user exists but is not activated yet
@@ -656,7 +640,6 @@ def login(
                         flags=1,
                         timestamp=func.now(),
                         gpu=(gpu or ""),
-                        version=(version or ""),
                         # Reset the 20-minute tick clock so that time spent
                         # offline (between this login and the previous logout)
                         # is never counted by /refreshlogin.

@@ -174,6 +174,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
     httplib::Params params;
     params.emplace("userName", userName);
     params.emplace("password", password);
+    params.emplace("version", Const::ProgramVersion);
     if (userInfo.gpu) {
         params.emplace("gpu", *userInfo.gpu);
     }
