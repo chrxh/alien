@@ -549,17 +549,16 @@ void BrowserWindow::processStatusBar()
     auto numSimulations = toInt(simulations.size());
     auto numGenomes = toInt(genomes.size());
 
-    statusItems.emplace_back(std::to_string(numSimulations) + " simulations found");
-    statusItems.emplace_back(std::to_string(numGenomes) + " genomes found");
-    statusItems.emplace_back(std::to_string(_userTOs.size()) + " simulators found");
+    statusItems.emplace_back("Server: " + NetworkService::get().getServerAddress());
 
     if (auto userName = NetworkService::get().getLoggedInUserName()) {
         statusItems.emplace_back("Logged in as " + *userName);
     } else {
-        statusItems.emplace_back("Not logged in to " + NetworkService::get().getServerAddress());
+        statusItems.emplace_back("Not logged in");
     }
-
-    statusItems.emplace_back("Server: " + NetworkService::get().getServerAddress());
+    statusItems.emplace_back(std::to_string(numSimulations) + " simulations found");
+    statusItems.emplace_back(std::to_string(numGenomes) + " genomes found");
+    statusItems.emplace_back(std::to_string(_userTOs.size()) + " simulators found");
 
     if (!NetworkService::get().getLoggedInUserName()) {
         statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
