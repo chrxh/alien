@@ -144,6 +144,33 @@ def test_login_success_sets_flags_and_gpu(app_client, helpers):
         assert user.gpu == "RTX 4090"
 
 
+def test_login_stores_program_version(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    resp = app_client.post(
+        "/login",
+        data={"userName": "alice", "password": "pw", "version": "5.0.0-alpha.26"},
+    )
+    assert resp.json() == {"result": True, "errorCode": 1}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.version == "5.0.0-alpha.26"
+
+
+def test_login_without_version_succeeds(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    resp = app_client.post("/login", data={"userName": "alice", "password": "pw"})
+    assert resp.json() == {"result": True, "errorCode": 1}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.version == ""
+
+
 def test_login_unknown_user_returns_error_code_1(app_client):
     resp = app_client.post("/login", data={"userName": "ghost", "password": "pw"})
     assert resp.json() == {"result": False, "errorCode": 1}
@@ -674,3 +701,29 @@ def test_send_activation_email_skips_when_smtp_host_unset(app_client, monkeypatc
     main = app_client.app_module
     monkeypatch.delenv("SMTP_HOST", raising=False)
     assert main._send_activation_email("a@b.c", "alice", "abcdef") is False
+
+
+# --- schema migration ----------------------------------------------------------
+def test_ensure_users_schema_adds_missing_columns(app_client, helpers):
+    """A database predating a column gets it added on startup."""
+    from sqlalchemy import inspect, text
+
+    main = app_client.app_module
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    with main.engine.begin() as conn:
+        for column in main.USERS_ADDED_COLUMNS:
+            conn.execute(text(f"ALTER TABLE users DROP COLUMN {column}"))
+    assert "version" not in {c["name"] for c in inspect(main.engine).get_columns("users")}
+
+    main._ensure_users_schema()
+
+    columns = {c["name"] for c in inspect(main.engine).get_columns("users")}
+    assert set(main.USERS_ADDED_COLUMNS) <= columns
+
+    resp = app_client.post(
+        "/login", data={"userName": "alice", "password": "pw", "version": "1.2.3"}
+    )
+    assert resp.json() == {"result": True, "errorCode": 1}
+    with main.Session(main.engine) as session:
+        assert main._get_user_by_name(session, "alice").version == "1.2.3"
