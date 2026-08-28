@@ -19,16 +19,22 @@ private:
     void openIntern() override;
 
     void setFullscreen(int selectionIndex);
+    bool isContentScalingChanged() const;
+    void onChangeContentScaling(bool automatic, float scaleFactor) const;
     int getSelectionIndex() const;
     std::vector<std::string> createVideoModeStrings() const;
 
     int _origSelectionIndex = 0;
     int _selectionIndex = 0;
     int _origFps = 33;
+    bool _origAutoContentScaleFactor = true;
+    float _origContentScaleFactor = 1.0f;
 
     bool _pendingIsFullscreen = false;
     int _pendingSelectionIndex = 0;
     int _pendingFps = 33;
+    bool _pendingAutoContentScaleFactor = true;
+    float _pendingContentScaleFactor = 1.0f;
 
     int _videoModesCount = 0;
     GLFWvidmode const* _videoModes = nullptr;

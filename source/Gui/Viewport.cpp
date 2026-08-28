@@ -14,6 +14,7 @@
 void Viewport::setup()
 {
     _viewSize = WindowController::get().getStartupWindowSize();
+    _renderScale = WindowController::get().getConfiguredContentScaleFactor();
 }
 
 float Viewport::getZoomFactor()

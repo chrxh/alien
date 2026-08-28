@@ -38,7 +38,8 @@ void ModalWindow::process(std::function<void()> const& contentFunc)
     }
     if (_state == State::JustOpened) {
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize({scale(_defaultSize.x), scale(_defaultSize.y)}, ImGuiCond_FirstUseEver);
+        _appliedDefaultSize = {scale(_defaultSize.x), scale(_defaultSize.y)};
+        ImGui::SetNextWindowSize(_appliedDefaultSize, ImGuiCond_FirstUseEver);
         ImGui::OpenPopup(_title.c_str());
         _state = State::Open;
         _windowState = WindowState::Normal;
@@ -58,9 +59,13 @@ void ModalWindow::process(std::function<void()> const& contentFunc)
 
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, flags)) {
         if (!_sizeInitialized) {
+            // Only geometry restored from an earlier session needs to be converted, since it was stored with the content scale factor of that session.
+            // The default size above is already expressed in the scale of the current session.
             auto size = ImGui::GetWindowSize();
-            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-            ImGui::SetWindowSize({size.x * factor, size.y * factor});
+            if (size.x != _appliedDefaultSize.x || size.y != _appliedDefaultSize.y) {
+                auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
+                ImGui::SetWindowSize({size.x * factor, size.y * factor});
+            }
             _sizeInitialized = true;
         }
 

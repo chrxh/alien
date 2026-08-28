@@ -1,5 +1,6 @@
 #include "WindowController.h"
 
+#include <algorithm>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
@@ -55,6 +56,8 @@ void WindowController::init()
     _sizeInWindowedMode.y = std::max(100, settings.getValue("settings.display.window height", _sizeInWindowedMode.y));
     _fps = settings.getValue("settings.display.fps", _fps);
     _lastContentScaleFactor = settings.getValue("settings.display.content scale factor", _lastContentScaleFactor);
+    _autoContentScaleFactor = settings.getValue("settings.display.auto content scale factor", _autoContentScaleFactor);
+    _userDefinedContentScaleFactor = settings.getValue("settings.display.user defined content scale factor", _userDefinedContentScaleFactor);
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
@@ -87,7 +90,11 @@ void WindowController::init()
     }
 
     float temp;
-    glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &_contentScaleFactor, &temp);  // Consider only horizontal content scale
+    glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &_osContentScaleFactor, &temp);  // Consider only horizontal content scale
+    if (_userDefinedContentScaleFactor <= 0.0f) {
+        _userDefinedContentScaleFactor = _osContentScaleFactor;
+    }
+    _contentScaleFactor = getConfiguredContentScaleFactor();
 }
 
 void WindowController::shutdown()
@@ -101,6 +108,8 @@ void WindowController::shutdown()
     settings.setValue("settings.display.window height", _sizeInWindowedMode.y);
     settings.setValue("settings.display.fps", _fps);
     settings.setValue("settings.display.content scale factor", _contentScaleFactor);
+    settings.setValue("settings.display.auto content scale factor", _autoContentScaleFactor);
+    settings.setValue("settings.display.user defined content scale factor", _userDefinedContentScaleFactor);
 }
 
 auto WindowController::getWindowData() -> WindowData
@@ -213,4 +222,34 @@ float WindowController::getContentScaleFactor()
 float WindowController::getLastContentScaleFactor()
 {
     return _lastContentScaleFactor;
+}
+
+float WindowController::getOsContentScaleFactor()
+{
+    return _osContentScaleFactor;
+}
+
+float WindowController::getConfiguredContentScaleFactor()
+{
+    return _autoContentScaleFactor ? _osContentScaleFactor : _userDefinedContentScaleFactor;
+}
+
+bool WindowController::isAutoContentScaleFactor()
+{
+    return _autoContentScaleFactor;
+}
+
+void WindowController::setAutoContentScaleFactor(bool value)
+{
+    _autoContentScaleFactor = value;
+}
+
+float WindowController::getUserDefinedContentScaleFactor()
+{
+    return _userDefinedContentScaleFactor;
+}
+
+void WindowController::setUserDefinedContentScaleFactor(float value)
+{
+    _userDefinedContentScaleFactor = std::clamp(value, MinContentScaleFactor, MaxContentScaleFactor);
 }

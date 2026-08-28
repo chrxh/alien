@@ -38,8 +38,6 @@ public:
     float getMotionBlur() const;
     void setMotionBlur(float value);
 
-    void updateMotionBlur();
-
     // Renders the currently visible world region offscreen and writes it as PNG file
     void savePicture(std::filesystem::path const& filename, IntVector2D const& resolution);
 

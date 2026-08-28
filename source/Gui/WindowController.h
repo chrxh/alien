@@ -40,6 +40,18 @@ public:
     float getContentScaleFactor();
     float getLastContentScaleFactor();
 
+    float getOsContentScaleFactor();
+
+    // Configured content scale factor. It becomes the content scale factor of the session at the next startup.
+    float getConfiguredContentScaleFactor();
+    bool isAutoContentScaleFactor();
+    void setAutoContentScaleFactor(bool value);
+    float getUserDefinedContentScaleFactor();
+    void setUserDefinedContentScaleFactor(float value);
+
+    static auto constexpr MinContentScaleFactor = 1.0f;
+    static auto constexpr MaxContentScaleFactor = 4.0f;
+
 private:
     void init() override;
     void process() override {}
@@ -54,6 +66,9 @@ private:
     IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
     float _contentScaleFactor = 1.0f;
     float _lastContentScaleFactor = 1.0f;
+    float _osContentScaleFactor = 1.0f;
+    float _userDefinedContentScaleFactor = 0.0f;
+    bool _autoContentScaleFactor = true;
     int _fps = 33;
 
     std::string _mode;
