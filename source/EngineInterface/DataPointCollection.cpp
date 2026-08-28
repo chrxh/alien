@@ -75,7 +75,6 @@ LineageDataPoint LineageDataPoint::operator/(double divisor) const
 DataPointCollection DataPointCollection::operator+(DataPointCollection const& other) const
 {
     DataPointCollection result;
-    result.time = time + other.time;
     result.timestep = timestep + other.timestep;
     result.systemClock = systemClock + other.systemClock;
     result.overall = overall;
@@ -102,7 +101,6 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
 DataPointCollection DataPointCollection::operator/(double divisor) const
 {
     DataPointCollection result;
-    result.time = time / divisor;
     result.timestep = timestep / divisor;
     result.systemClock = systemClock / divisor;
     result.overall = overall;

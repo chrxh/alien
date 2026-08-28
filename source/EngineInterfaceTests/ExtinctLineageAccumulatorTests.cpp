@@ -28,7 +28,7 @@ protected:
     {
         StatisticsEntry statisticsEntry;
         statisticsEntry.lineageEntries = lineageEntries;
-        auto result = StatisticsConverterService::get().convert(statisticsEntry, 0, 0.0);
+        auto result = StatisticsConverterService::get().convert(statisticsEntry, 0);
         _accumulator.addExtinctLineageValues(result);
         return result;
     }

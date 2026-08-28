@@ -78,7 +78,7 @@ private:
         std::array<double, NumMetrics> currentValues = {};
         std::array<std::vector<double>, NumMetrics> series = {};  // Only filled for plotted lineages
         std::vector<double> timePoints;                           // Only filled for plotted lineages
-        std::vector<double> systemClockPoints;                    // Only filled when the x-axis represents time steps
+        std::vector<double> systemClockPoints;                    // Only filled for plotted lineages
     };
 
     std::vector<LineageDisplayData> _lineages;  // Table rows from the latest sample, sorted by the selected table column
@@ -96,14 +96,12 @@ private:
     using TimelineMode = int;
     enum TimelineMode_
     {
-        TimelineMode_RealTime,
         TimelineMode_LastSteps,
         TimelineMode_EntireHistory
     };
     TimelineMode _timelineMode = TimelineMode_EntireHistory;
 
     int _lastSteps = 100000;
-    float _timeHorizon = 10.0f;  // In seconds
     float _timelinesHeight = 0;
     float _plotHeight = 60.0f;
     std::optional<float> _lastWindowHeight;
@@ -112,16 +110,15 @@ private:
     {
         int timelineMode = 0;
         int lastSteps = 0;
-        float timeHorizon = 0;
         int colorFilter = 0;
-        double sourceBackTime = 0;
+        double sourceBackTimestep = 0;
         std::set<int64_t> selectedLineageIds;
-        std::vector<double> lineageBackTimes;  // Only used for the long-term history where each lineage has its own timeline
+        std::vector<double> lineageBackTimesteps;  // Only used for the long-term history where each lineage has its own timeline
 
         bool operator==(RebuildKey const&) const = default;
     };
     std::optional<RebuildKey> _lastRebuildKey;
-    std::optional<double> _lastTableBackTime;
+    std::optional<double> _lastTableTimestep;
     int _lastTableColorFilter = -1;
 
     // Live statistics

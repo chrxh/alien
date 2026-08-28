@@ -49,7 +49,7 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, StatisticsEntry
             updateTimeline(samples, state, lineageSample, timestepAsDouble, true);
         }
     } else {
-        auto dataPoints = StatisticsConverterService::get().convert(statisticsEntry, timestep, timestepAsDouble);
+        auto dataPoints = StatisticsConverterService::get().convert(statisticsEntry, timestep);
         _extinctLineageAccumulator.addExtinctLineageValues(dataPoints);
 
         ColorSamples overallSample;

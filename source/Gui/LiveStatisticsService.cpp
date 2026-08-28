@@ -15,16 +15,9 @@ void LiveStatisticsService::addDataPoint(LiveStatisticsHistory& history, Statist
 {
     truncate(history);
 
-    auto timepoint = std::chrono::steady_clock::now();
-    auto duration =
-        _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
-
-    _timeSinceSimStart += toDouble(duration) / 1000;
-
-    auto newDataPoint = StatisticsConverterService::get().convert(statisticsEntry, timestep, _timeSinceSimStart);
+    auto newDataPoint = StatisticsConverterService::get().convert(statisticsEntry, timestep);
     _extinctLineageAccumulator.addExtinctLineageValues(newDataPoint);
     history.getDataRef().emplace_back(newDataPoint);
-    _lastTimepoint = timepoint;
 }
 
 void LiveStatisticsService::clear(LiveStatisticsHistory& history)
@@ -35,26 +28,21 @@ void LiveStatisticsService::clear(LiveStatisticsHistory& history)
 
 void LiveStatisticsService::truncate(LiveStatisticsHistory& history)
 {
-    // Keep enough history to cover both the real-time window (time-based) and the "Last time steps" window
-    // (step-based); a sample is only dropped once it is no longer needed by either, with a hard count cap
-    // to bound memory if the simulation stalls (timestep barely advancing over real time)
+    // Keep the samples of the "Last time steps" window, with a hard count cap to bound memory if the
+    // simulation stalls (timestep barely advancing over real time)
     auto& dataPoints = history.getDataRef();
     if (dataPoints.size() <= 1) {
         return;
     }
     auto const& back = dataPoints.back();
 
-    size_t windowStartIndex = 0;  // Oldest sample still needed by one of the two windows
-    while (windowStartIndex + 1 < dataPoints.size()) {
-        auto const& candidate = dataPoints.at(windowStartIndex);
-        if (back.time - candidate.time <= MaxLiveHistory + 1.0 || back.timestep - candidate.timestep <= MaxLiveSteps) {
-            break;
-        }
+    size_t windowStartIndex = 0;  // Oldest sample still needed by the window
+    while (windowStartIndex + 1 < dataPoints.size() && back.timestep - dataPoints.at(windowStartIndex).timestep > MaxLiveSteps) {
         ++windowStartIndex;
     }
 
-    // Also keep a rate reference for the oldest sample of the windows; otherwise the rate plots would start
-    // with a gap once the windows are set to their maximum span
+    // Also keep a rate reference for the oldest sample of the window; otherwise the rate plots would start
+    // with a gap once the window is set to its maximum span
     auto firstIndex = windowStartIndex;
     while (firstIndex > 0 && dataPoints.at(firstIndex).timestep + RateAveragingTimesteps > dataPoints.at(windowStartIndex).timestep) {
         --firstIndex;
