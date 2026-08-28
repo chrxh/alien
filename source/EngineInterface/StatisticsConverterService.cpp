@@ -4,13 +4,9 @@
 
 #include <Base/Definitions.h>
 
-DataPointCollection StatisticsConverterService::convert(
-    StatisticsEntry const& statisticsEntry,
-    uint64_t timestep,
-    double time)
+DataPointCollection StatisticsConverterService::convert(StatisticsEntry const& statisticsEntry, uint64_t timestep)
 {
     DataPointCollection result;
-    result.time = time;
     result.timestep = toDouble(timestep);
 
     auto now = std::chrono::system_clock::now();

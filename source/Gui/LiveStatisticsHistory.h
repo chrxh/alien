@@ -4,7 +4,6 @@
 
 #include <EngineInterface/DataPointCollection.h>
 
-// Short-term history sampled in real time; unlike StatisticsHistory it keeps the raw data points uncompressed
 class LiveStatisticsHistory
 {
 public:
