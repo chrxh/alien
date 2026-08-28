@@ -1,8 +1,6 @@
 #include "InspectionWindow.h"
 
-#include <iomanip>
 #include <ranges>
-#include <sstream>
 #include <variant>
 
 #include <imgui.h>
@@ -35,16 +33,9 @@ namespace
     auto constexpr TableColumnWidth = 380.0f;
     auto constexpr TextWidth = 160.0f;
 
-    std::string toHex(uint64_t id)
+    void inspectorId(std::string const& name, uint64_t id, float textWidth = TextWidth)
     {
-        std::stringstream ss;
-        ss << "0x" << std::hex << std::uppercase << id;
-        return ss.str();
-    }
-
-    void inspectorHexId(std::string const& name, uint64_t id, float textWidth = TextWidth)
-    {
-        auto text = toHex(id);
+        auto text = std::to_string(id);
         AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true), text);
     }
 
@@ -296,17 +287,15 @@ bool _InspectionWindow::isExtendedObject() const
 
 std::string _InspectionWindow::generateTitle() const
 {
-    std::stringstream ss;
     if (_creatureMode) {
         auto entity = EditorModel::get().getInspectedEntity(_entityId);
         auto const& creature = std::get<ExtendedObjectDesc>(entity).creature;
-        ss << "Creature with id 0x" << std::hex << std::uppercase << (creature.has_value() ? creature->_id : _entityId);
-    } else if (isExtendedObject()) {
-        ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
-    } else {
-        ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
+        return "Creature with id " + std::to_string(creature.has_value() ? creature->_id : _entityId);
     }
-    return ss.str();
+    if (isExtendedObject()) {
+        return "Cell with id " + std::to_string(_entityId);
+    }
+    return "Energy particle with id " + std::to_string(_entityId);
 }
 
 void _InspectionWindow::processCreature(ExtendedObjectDesc& extendedObject)
@@ -389,7 +378,7 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
     if (table.begin()) {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High))) {
             processPropertiesSubNode("Energy particle", [&] {
-                inspectorHexId("Particle id", particle._id);
+                inspectorId("Particle id", particle._id);
                 AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.3f").textWidth(TextWidth), particle._pos.x, particle._pos.y);
                 AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Velocity").format("%.3f").textWidth(TextWidth), particle._vel.x, particle._vel.y);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), particle._energy);
@@ -414,7 +403,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Object").rank(AlienGui::TreeNodeRank::High))) {
         processPropertiesSubNode("Object", [&] {
-            inspectorHexId("Object id", object._id);
+            inspectorId("Object id", object._id);
             AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.2f").textWidth(TextWidth), object._pos.x, object._pos.y);
             AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Velocity").format("%.2f").textWidth(TextWidth), object._vel.x, object._vel.y);
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(TextWidth), object._stiffness);
@@ -442,7 +431,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                     auto const connectionNumber = i + 1;
                     if (AlienGui::BeginTreeNode(
                             AlienGui::TreeNodeParameters().name("Connection #" + std::to_string(connectionNumber)).rank(AlienGui::TreeNodeRank::Low))) {
-                        inspectorHexId("Connected id", conn._objectId);
+                        inspectorId("Connected id", conn._objectId);
                         AlienGui::InputFloat(
                             AlienGui::InputFloatParameters().name("Distance").format("%.2f").textWidth(TextWidth).readOnly(true), conn._distance);
                         AlienGui::InputFloat(
@@ -580,7 +569,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedObject)
 {
     auto& creature = extendedObject.creature.value();
-    inspectorHexId("Creature id", creature._id);
+    inspectorId("Creature id", creature._id);
     inspectorText("Generation", std::to_string(creature._generation));
     inspectorText("Num cells", std::to_string(creature._numCells));
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth), creature._lineageId);
