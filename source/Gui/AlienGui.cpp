@@ -37,6 +37,7 @@ namespace
     auto constexpr TabMarkerRounding = 3.0f;
     auto constexpr MinColorMatrixWidth = 50.0f;
     auto const ColorMatrixDialogSize = RealVector2D(560.0f, 480.0f);
+    auto constexpr ColorMatrixDialogButtonAreaHeight = 50.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -2905,9 +2906,13 @@ void AlienGui::ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parame
                             &value[row - 1][col - 1]);
                     }
                     if constexpr (std::is_same<T, bool>()) {
-                        ImGui::BeginDisabled(parameters._disableDiagonal && row == col);
-                        ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
-                        ImGui::EndDisabled();
+
+                        // A customization is never mutated into itself, therefore the diagonal has no check box
+                        if (parameters._disableDiagonal && row == col) {
+                            ImGui::Dummy({0, ImGui::GetFrameHeight()});
+                        } else {
+                            ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
+                        }
                     }
                 }
                 ImGui::PopID();
@@ -2943,12 +2948,17 @@ void AlienGui::ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> co
     };
 
     getColorMatrixDialog().process([&] {
-        // The check boxes have a fixed size, therefore the matrix is limited to its natural width and centered
-        auto const& style = ImGui::GetStyle();
-        auto naturalWidth = (MAX_COLORS + 1) * (ImGui::GetFrameHeight() + 2 * style.CellPadding.x) + ImGui::GetTextLineHeight() + style.ItemSpacing.x;
-        auto blockWidth = std::min(ImGui::GetContentRegionAvail().x, naturalWidth);
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - blockWidth) / 2);
-        ColorMatrixBlock(parameters, value, blockWidth);
+        // The matrix is placed in a child window so that the buttons stay at the bottom of the dialog
+        if (ImGui::BeginChild("##matrix", ImVec2(0, -scale(ColorMatrixDialogButtonAreaHeight)), false)) {
+
+            // The check boxes have a fixed size, therefore the matrix is limited to its natural width and centered
+            auto const& style = ImGui::GetStyle();
+            auto naturalWidth = (MAX_COLORS + 1) * (ImGui::GetFrameHeight() + 2 * style.CellPadding.x) + ImGui::GetTextLineHeight() + style.ItemSpacing.x;
+            auto blockWidth = std::min(ImGui::GetContentRegionAvail().x, naturalWidth);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - blockWidth) / 2);
+            ColorMatrixBlock(parameters, value, blockWidth);
+        }
+        ImGui::EndChild();
 
         AlienGui::Separator();
 
