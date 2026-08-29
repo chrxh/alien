@@ -79,6 +79,9 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
  */
 TEST_F(DefenderTests, attackerVsAntiInjector)
 {
+    // The unblocked attack drains a large fraction of the energy, therefore the target needs enough energy to stay above minCellEnergy
+    auto targetEnergy = 1000.0f;
+
     NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
@@ -98,7 +101,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     // Target creature with anti-injector defender connected (wrong mode for blocking attacker)
     data.addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(targetEnergy)),
             ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector))),
         },
         CreatureDesc().id(2));
@@ -111,7 +114,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Attack should succeed because defender is in anti-injector mode (not anti-attacker)
-    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - 1.0f);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < targetEnergy - 1.0f);
 }
 
 /**
