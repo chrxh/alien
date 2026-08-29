@@ -107,9 +107,36 @@ public:
                 }),
             }));
     }
+
+    struct LineageStats
+    {
+        int numSmallCreatures = 0;
+        int numSmallCells = 0;
+        int numLargeCreatures = 0;
+        int numLargeCells = 0;
+    };
+
+    LineageStats calcLineageStats()
+    {
+        auto data = _simulationFacade->getSimulationData();
+
+        LineageStats result;
+        for (const auto& creature : data._creatures) {
+            if (creature._lineageId == 0) {
+                ++result.numSmallCreatures;
+                result.numSmallCells += creature._numCells;
+            } else if (creature._lineageId == 1) {
+                ++result.numLargeCreatures;
+                result.numLargeCells += creature._numCells;
+            } else {
+                CHECK(false);
+            }
+        }
+        return result;
+    }
 };
 
-// Test that small creatures dominates if large creatures have few digestion capabilities
+// Test that the large creatures die out if they have few digestion capabilities
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
 {
     _parameters.attackerRadius.value[0] = 3.0f;
@@ -127,27 +154,15 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(20000);
-    auto actualData = _simulationFacade->getSimulationData();
 
-    int numSmallCreatures = 0;
-    int numLargeCreatures = 0;
-    for (const auto& creature : actualData._creatures) {
-        auto lineageId = creature._lineageId;
-        if (lineageId == 0) {
-            ++numSmallCreatures;
-        } else if (lineageId == 1) {
-            ++numLargeCreatures;
-        } else {
-            CHECK(false);
-        }
-    }
 
-    EXPECT_GE(15, numLargeCreatures);
-    EXPECT_LT(200, numSmallCreatures);
+    auto stats = calcLineageStats();
+    EXPECT_GT(90, stats.numLargeCells);
+    EXPECT_LT(2000, stats.numSmallCells);
 }
 
 
-// Test that large creatures dominates if large creatures have high digestion capabilities
+// Test that the large creatures expand if they have high digestion capabilities
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionCapabilities)
 {
     _parameters.attackerRadius.value[0] = 3.0f;
@@ -165,19 +180,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(20000);
-    auto actualData = _simulationFacade->getSimulationData();
 
-    int numSmallCreatures = 0;
-    int numLargeCreatures = 0;
-    for (const auto& creature : actualData._creatures) {
-        auto lineageId = creature._lineageId;
-        if (lineageId == 0) {
-            ++numSmallCreatures;
-        } else if (lineageId == 1) {
-            ++numLargeCreatures;
-        } else {
-            CHECK(false);
-        }
-    }
-    EXPECT_LT(20, numLargeCreatures);
+    auto stats = calcLineageStats();
+    EXPECT_LT(90, stats.numLargeCells);
 }
