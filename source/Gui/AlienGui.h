@@ -583,9 +583,10 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
-    // Draws the labeled matrix, i.e. the color header row and column, the axis labels and the value cells
+    // Draws the labeled matrix, i.e. the color header row and column, the axis labels and the value cells.
+    // maxCellSize limits the size of the check boxes of a bool matrix, 0 means the default frame height.
     template <typename T>
-    static void ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width);
+    static void ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize = 0);
 
     // Draws the matrix editor dialog of the widget with the given id, as long as it is the dialog owner
     static void ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], unsigned int dialogId);
