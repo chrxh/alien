@@ -479,11 +479,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Customization transition matrix")
                         .reference(BoolSpec().member(&SimulationParameters::customizationTransitionMatrix))
-                        .description(
-                            "This matrix determines which customizations a customization mutation may produce. The customization of the mutated cells "
-                            "corresponds to the row number and the new customization to the column number. If an entry is enabled, the customization mutation "
-                            "may replace all cells of the row's customization by the column's customization. The target is chosen uniformly among the enabled "
-                            "entries of a row. The diagonal is unused since a customization is never mutated into itself."),
+                        .description("Determines which customizations a customization mutation may produce. Row = old customization, column = new one."),
                 }),
             ParameterGroupSpec()
                 .name("Meta-mutations")
