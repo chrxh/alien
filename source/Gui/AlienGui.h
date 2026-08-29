@@ -161,6 +161,9 @@ public:
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::vector<std::vector<bool>>>, defaultValue, std::nullopt);
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(CheckboxColorMatrixParameters, std::string, rowLabel, "[cell color]");
+        MEMBER(CheckboxColorMatrixParameters, std::string, columnLabel, "[target cell color]");
+        MEMBER(CheckboxColorMatrixParameters, bool, disableDiagonal, false);
     };
     static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
 
@@ -573,6 +576,9 @@ private:
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::string, rowLabel, "[cell color]");
+        MEMBER(BasicInputColorMatrixParameters, std::string, columnLabel, "[target cell color]");
+        MEMBER(BasicInputColorMatrixParameters, bool, disableDiagonal, false);
     };
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);

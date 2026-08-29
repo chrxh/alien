@@ -89,3 +89,15 @@ constexpr ColorVector<FloatColorRGB> getDefaultCustomizationColorVector()
     }
     return result;
 }
+
+constexpr ColorMatrix<bool> getDefaultCustomizationTransitionMatrix()
+{
+    // The diagonal is unused: a customization is never mutated into itself.
+    ColorMatrix<bool> result;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            result.values[i][j] = i != j;
+        }
+    }
+    return result;
+}
