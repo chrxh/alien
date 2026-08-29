@@ -583,6 +583,13 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
+    // Draws the labeled matrix, i.e. the color header row and column, the axis labels and the value cells
+    template <typename T>
+    static void ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width);
+
+    // Draws the matrix editor dialog of the widget with the given id, as long as it is the dialog owner
+    static void ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], unsigned int dialogId);
+
     //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));
     //static void EndTable();
 
