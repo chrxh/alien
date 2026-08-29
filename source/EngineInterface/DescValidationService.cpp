@@ -104,8 +104,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
-                sensor._minRange = std::clamp(sensor._minRange, Const::SensorRange_Min, Const::SensorRange_Max);
                 sensor._maxRange = std::clamp(sensor._maxRange, Const::SensorRange_Min, Const::SensorRange_Max);
+                sensor._minRange = std::clamp(sensor._minRange, Const::SensorRange_Min, sensor._maxRange);
 
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
@@ -356,8 +356,8 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
 
         } else if (cellType == CellType_Sensor) {
             auto& sensor = std::get<SensorDesc>(cell._cellType);
-            sensor._minRange = std::clamp(sensor._minRange, 0, 255);
-            sensor._maxRange = std::clamp(sensor._maxRange, 0, 255);
+            sensor._maxRange = std::clamp(sensor._maxRange, Const::SensorRange_Min, Const::SensorRange_Max);
+            sensor._minRange = std::clamp(sensor._minRange, Const::SensorRange_Min, sensor._maxRange);
 
             // Validate mode-specific data
             auto mode = sensor.getMode();

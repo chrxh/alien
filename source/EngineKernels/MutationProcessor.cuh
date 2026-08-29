@@ -299,8 +299,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Sensor:
                     mutateBoolField(node.cellTypeData.sensor.autoTrigger);
                     mutateBoolField(node.cellTypeData.sensor.tagForAttackers);
-                    mutateNumber(node.cellTypeData.sensor.minRange, Const::SensorRange_Min, Const::SensorRange_Max);
-                    mutateNumber(node.cellTypeData.sensor.maxRange, Const::SensorRange_Min, Const::SensorRange_Max);
+                    mutateNumber(node.cellTypeData.sensor.minRange, Const::SensorRange_Min, node.cellTypeData.sensor.maxRange);
+                    mutateNumber(node.cellTypeData.sensor.maxRange, node.cellTypeData.sensor.minRange, Const::SensorRange_Max);
                     switch (node.cellTypeData.sensor.mode) {
                     case SensorMode_DetectEnergy:
                         mutateNumber(

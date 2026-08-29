@@ -392,10 +392,14 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 // Minimum range
-                AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Min range").min(0).max(512).textWidth(rightColumnWidth), &sensor._minRange);
+                AlienGui::SliderInt(
+                    AlienGui::SliderIntParameters().name("Min range").min(Const::SensorRange_Min).max(Const::SensorRange_Max).textWidth(rightColumnWidth),
+                    &sensor._minRange);
 
                 // Maximum range
-                AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Max range").min(0).max(512).textWidth(rightColumnWidth), &sensor._maxRange);
+                AlienGui::SliderInt(
+                    AlienGui::SliderIntParameters().name("Max range").min(Const::SensorRange_Min).max(Const::SensorRange_Max).textWidth(rightColumnWidth),
+                    &sensor._maxRange);
 
                 ImGui::PopID();
 
