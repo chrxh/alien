@@ -336,8 +336,6 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
                 auto flow = 0.0f;
                 auto maxFlow = 0.0f;
-
-                // This runs every timestep, so the conductivity keeps its calibration factor instead of TIMESTEPS_PER_CELL_FUNCTION
                 if (connectedObject->typeData.cell.cellType == CellType_Digestor) {
                     maxFlow += connectedObject->typeData.cell.cellTypeData.digestor.rawEnergyConductivity
                         * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedObject->color] * 3.0f;
