@@ -705,8 +705,12 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
                 lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
                 AlienGui::Combo(lineageParams, m._restrictToLineage);
             }
-            AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Min range").min(0).max(255).textWidth(TextWidth), &sensor._minRange);
-            AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Max range").min(0).max(255).textWidth(TextWidth), &sensor._maxRange);
+            AlienGui::SliderInt(
+                AlienGui::SliderIntParameters().name("Min range").min(Const::SensorRange_Min).max(Const::SensorRange_Max).textWidth(TextWidth),
+                &sensor._minRange);
+            AlienGui::SliderInt(
+                AlienGui::SliderIntParameters().name("Max range").min(Const::SensorRange_Min).max(Const::SensorRange_Max).textWidth(TextWidth),
+                &sensor._maxRange);
         } else if (cellType == CellType_Generator) {
             auto& generator = std::get<GeneratorDesc>(cell._cellType);
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth), generator._additive);

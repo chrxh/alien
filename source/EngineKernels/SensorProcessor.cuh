@@ -126,6 +126,9 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
             auto delta = float2{dx, dy};
             auto distance = Math::length(delta);
+            if (distance <= startRadius || distance > endRadius) {
+                continue;
+            }
             float2 scanPos = object->pos + delta;
             data.objectMap.correctPosition(scanPos);
 
