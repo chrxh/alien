@@ -283,7 +283,7 @@ __inline__ __device__ float AttackerProcessor::absorbEnergy(float* energy, float
         return 0.0f;
     }
     auto origEnergy = atomicAdd(energy, -energyToTransfer);
-    if (origEnergy > energyToTransfer) {
+    if (origEnergy > energyToTransfer - NEAR_ZERO) {
         return energyToTransfer;
     }
 
