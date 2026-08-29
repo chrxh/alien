@@ -2860,8 +2860,20 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
 template <typename T>
 void AlienGui::ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width)
 {
-    auto rowLabelWidth = ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.x;
+    auto const& style = ImGui::GetStyle();
+    auto rowLabelWidth = ImGui::GetTextLineHeight() + style.ItemSpacing.x;
     auto tableWidth = std::max(width - rowLabelWidth, scale(MinColorMatrixWidth));
+
+    // Check boxes have a fixed size and would be cut off in narrow columns, therefore their frame padding is reduced to the available cell width
+    auto reduceFramePadding = false;
+    if constexpr (std::is_same<T, bool>()) {
+        auto cellWidth = tableWidth / (MAX_COLORS + 1) - 2 * style.CellPadding.x - 1.0f;
+        auto framePaddingY = std::clamp((cellWidth - ImGui::GetFontSize()) / 2, 0.0f, style.FramePadding.y);
+        reduceFramePadding = framePaddingY < style.FramePadding.y;
+        if (reduceFramePadding) {
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, framePaddingY));
+        }
+    }
 
     ImGui::BeginGroup();
 
@@ -2928,6 +2940,10 @@ void AlienGui::ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parame
 
     ImGui::SetCursorPos(tableEndPos);
     ImGui::EndGroup();
+
+    if (reduceFramePadding) {
+        ImGui::PopStyleVar();
+    }
 }
 
 void AlienGui::ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], unsigned int dialogId)
