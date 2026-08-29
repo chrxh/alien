@@ -98,8 +98,8 @@ protected:
             ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
             : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
         auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(TIMESTEPS_PER_CELL_FUNCTION)).minValue(1.0f).maxValue(1.0f)
-            : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(30 * 20 * TIMESTEPS_PER_CELL_FUNCTION)).minValue(-1.0f).maxValue(1.0f);
+            ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(3)).minValue(1.0f).maxValue(1.0f)
+            : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(30 * 20 * 3)).minValue(-1.0f).maxValue(1.0f);
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({

@@ -140,7 +140,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // Calc base energy for attacking
                     auto energyToTransfer =
-                        atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
+                        atomicAdd(&otherFreeCell->energy, 0) * min(1.0f, cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION);
 
                     if (energyToTransfer < 0) {
                         return;
@@ -185,7 +185,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     }
 
                     // Calculate energy gain
-                    auto energyToTransfer = calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
+                    auto energyToTransfer =
+                        calcAttackableEnergy(otherCell) * min(1.0f, cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION);
 
                     // Check if target creature is in the list of sensor-detected targets (including color restriction)
                     auto otherCreatureId = otherCell->creature->id;

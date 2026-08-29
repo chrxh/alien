@@ -94,10 +94,10 @@ INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SawtoothSignal,
     ::testing::Values(
         SawtoothSignalTestParams{3, 0, 0.2f, "at the beginning"},
-        SawtoothSignalTestParams{90, 0, 0.722f, "before halfway through"},
+        SawtoothSignalTestParams{90, 0, 0.704f, "before halfway through"},
         SawtoothSignalTestParams{153, 0, 1.1f, "at halfway through"},
-        SawtoothSignalTestParams{240, 0, 1.622f, "before the end"},
-        SawtoothSignalTestParams{300, 0, 1.982f, "at the end"},
+        SawtoothSignalTestParams{240, 0, 1.604f, "before the end"},
+        SawtoothSignalTestParams{300, 0, 1.964f, "at the end"},
         SawtoothSignalTestParams{303, 0, 0.2f, "after the end (wrapping)"},
         SawtoothSignalTestParams{3, 150, 1.1f, "with timeOffset at midpoint"}));
 

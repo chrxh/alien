@@ -18,7 +18,7 @@ auto constexpr WARP_SIZE = 32;
 
 auto constexpr MAX_FLUID_WARPS_PER_BLOCK = 16;
 
-auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
+auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 6;
 
 auto constexpr MAX_LAYERS = 20;
 auto constexpr MAX_SOURCES = 40;
