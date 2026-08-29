@@ -70,8 +70,8 @@ Further information and artwork:
 # 🖥️ Minimal system requirements
 An Nvidia graphics card with compute capability 7.5 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
-# 💽 Installer
-Nightly Windows build on develop branch: https://alien-project.org/files/alien-develop.zip
+# 💽 Nightly build
+Nightly Windows build on `develop` branch including support for AMD GPUs: https://alien-project.org/files/alien-develop.zip
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
