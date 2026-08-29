@@ -439,6 +439,9 @@ void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& paramete
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
+    basicParameters._rowLabel = parameters._rowLabel;
+    basicParameters._columnLabel = parameters._columnLabel;
+    basicParameters._disableDiagonal = parameters._disableDiagonal;
     BasicInputColorMatrix<bool>(basicParameters, value);
 }
 
@@ -2711,14 +2714,14 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     if (isExpanded) {
         ImGui::BeginGroup();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(115.0f));
-        ImGui::Text("[target cell color]");
+        ImGui::TextUnformatted(parameters._columnLabel.c_str());
 
         auto startPos = ImGui::GetCursorPos();
 
         ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(121)});
         auto drawList = ImGui::GetWindowDrawList();
         RotateStart(drawList);
-        ImGui::Text("[cell color]");
+        ImGui::TextUnformatted(parameters._rowLabel.c_str());
         RotateEnd(-90.0f, drawList);
 
         ImGui::SetCursorPos(startPos);
@@ -2758,7 +2761,10 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                                 &value[row - 1][col - 1]);
                         }
                         if constexpr (std::is_same<T, bool>()) {
+                            auto diagonal = parameters._disableDiagonal && row == col;
+                            ImGui::BeginDisabled(diagonal);
                             ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
+                            ImGui::EndDisabled();
                         }
                     }
                     ImGui::PopID();

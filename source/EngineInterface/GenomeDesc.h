@@ -458,6 +458,13 @@ struct CellTypeMutationDesc
     MEMBER(CellTypeMutationDesc, float, nodeProbability, 0.0f);
 };
 
+struct CustomizationMutationDesc
+{
+    auto operator<=>(CustomizationMutationDesc const&) const = default;
+
+    MEMBER(CustomizationMutationDesc, float, genomeProbability, 0.0f);
+};
+
 struct VoidMutationDesc
 {
     auto operator<=>(VoidMutationDesc const&) const = default;
@@ -569,6 +576,7 @@ struct MutationRatesDesc
              GeometryMutationDesc().valueChangeSigma(1.0f).enumChangeProbability(0.5f)}}));
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
+    MEMBER(MutationRatesDesc, CustomizationMutationDesc, customizationMutation, CustomizationMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
     MEMBER(MutationRatesDesc, ExtendGeneMutationDesc, extendGeneMutation, ExtendGeneMutationDesc());
     MEMBER(MutationRatesDesc, AddNodeMutationDesc, addNodeMutation, AddNodeMutationDesc());

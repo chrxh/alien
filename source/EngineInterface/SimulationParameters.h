@@ -109,6 +109,7 @@ struct SimulationParameters
 
     // Mutations
     BaseParameter<float> newLineageThreshold = {0.25f};
+    BaseParameter<ColorMatrix<bool>> customizationTransitionMatrix = {getDefaultCustomizationTransitionMatrix()};
 
     // Meta mutations
     BaseParameter<float> neuronsMetaMutationsSigma = {0};
@@ -117,6 +118,7 @@ struct SimulationParameters
     BaseParameter<float> geometryMetaMutationsSigma = {0};
     BaseParameter<float> cellTypeModeMetaMutationsSigma = {0};
     BaseParameter<float> cellTypeMetaMutationsSigma = {0};
+    BaseParameter<float> customizationMetaMutationsSigma = {0};
     BaseParameter<float> voidMetaMutationsSigma = {0};
     BaseParameter<float> extendGeneMetaMutationsSigma = {0};
     BaseParameter<float> addNodeMetaMutationsSigma = {0};

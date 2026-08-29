@@ -379,6 +379,11 @@ struct CellTypeMutationTO
     float nodeProbability;
 };
 
+struct CustomizationMutationTO
+{
+    float genomeProbability;
+};
+
 struct VoidMutationTO
 {
     float nodeProbability;
@@ -440,6 +445,7 @@ struct MutationRatesTO
     GeometryMutationTO geometryMutations[2];
     CellTypeModeMutationTO cellTypeModeMutation;
     CellTypeMutationTO cellTypeMutation;
+    CustomizationMutationTO customizationMutation;
     VoidMutationTO voidMutation;
     ExtendGeneMutationTO extendGeneMutation;
     AddNodeMutationTO addNodeMutation;
