@@ -185,6 +185,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                              GeometryMutationDesc().geneProbability(0.56f).valueChangeSigma(0.57f).enumChangeProbability(0.58f)})
                         .cellTypeModeMutation(CellTypeModeMutationDesc().nodeProbability(0.33f))
                         .cellTypeMutation(CellTypeMutationDesc().nodeProbability(0.22f))
+                        .customizationMutation(CustomizationMutationDesc().genomeProbability(0.23f))
                         .voidMutation(VoidMutationDesc().nodeProbability(0.11f))
                         .extendGeneMutation(ExtendGeneMutationDesc().geneProbability(0.41f))
                         .addNodeMutation(AddNodeMutationDesc().nodeProbability(0.42f))

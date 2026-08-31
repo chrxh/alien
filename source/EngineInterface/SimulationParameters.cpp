@@ -476,6 +476,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .infinity(true)
                                 .logarithmic(true)
                                 .format("%.5f")),
+                    ParameterSpec()
+                        .name("Customization transition matrix")
+                        .reference(BoolSpec().member(&SimulationParameters::customizationTransitionMatrix))
+                        .description("Determines which customizations a customization mutation may produce. Row = old customization, column = new one."),
                 }),
             ParameterGroupSpec()
                 .name("Meta-mutations")
@@ -503,6 +507,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Cell type mutation sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Customization mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::customizationMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("Void mutation sigma")
                         .reference(

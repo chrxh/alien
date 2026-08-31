@@ -16,6 +16,7 @@ PUBLIC
     ConstructorTests.cpp
     CopyNodeSectionMutationTests.cpp
     CreatureTests.cpp
+    CustomizationMutationTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
     DeleteGeneMutationTests.cpp

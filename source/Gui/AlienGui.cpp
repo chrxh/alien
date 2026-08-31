@@ -17,9 +17,9 @@
 
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationParameters.h>
 
+#include "ColorMatrixDialog.h"
 #include "GenericFileDialog.h"
 #include "HelpStrings.h"
 #include "LayerColorPalette.h"
@@ -34,6 +34,7 @@ namespace
     auto constexpr ChipDotTextSpacing = 6.0f;
     auto constexpr TabMarkerSize = 11.0f;
     auto constexpr TabMarkerRounding = 3.0f;
+    auto constexpr MinColorMatrixWidth = 50.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -71,6 +72,31 @@ namespace
         color.r = ImColor(imGuiColor).Value.x;
         color.g = ImColor(imGuiColor).Value.y;
         color.b = ImColor(imGuiColor).Value.z;
+    }
+
+    void drawVerticalText(std::string const& text, ImVec2 const& targetCenter)
+    {
+        auto origCursorPos = ImGui::GetCursorPos();
+
+        ImGui::SetCursorPos(targetCenter);
+        auto targetCenterScreenPos = ImGui::GetCursorScreenPos();
+        auto drawList = ImGui::GetWindowDrawList();
+        auto startIndex = drawList->VtxBuffer.Size;
+        ImGui::TextUnformatted(text.c_str());
+
+        auto& vertices = drawList->VtxBuffer;
+        ImVec2 lower(FLT_MAX, FLT_MAX), upper(-FLT_MAX, -FLT_MAX);
+        for (int i = startIndex; i < vertices.Size; ++i) {
+            lower = ImMin(lower, vertices[i].pos);
+            upper = ImMax(upper, vertices[i].pos);
+        }
+        ImVec2 center((lower.x + upper.x) / 2, (lower.y + upper.y) / 2);
+        for (int i = startIndex; i < vertices.Size; ++i) {
+            ImVec2 relative(vertices[i].pos.x - center.x, vertices[i].pos.y - center.y);
+            vertices[i].pos = ImVec2(targetCenterScreenPos.x + relative.y, targetCenterScreenPos.y - relative.x);
+        }
+
+        ImGui::SetCursorPos(origCursorPos);
     }
 }
 
@@ -430,7 +456,7 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     return result;
 }
 
-void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
+void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<bool>& dialog)
 {
     BasicInputColorMatrixParameters<bool> basicParameters;
     basicParameters._name = parameters._name;
@@ -439,7 +465,10 @@ void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& paramete
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<bool>(basicParameters, value);
+    basicParameters._rowLabel = parameters._rowLabel;
+    basicParameters._columnLabel = parameters._columnLabel;
+    basicParameters._disableDiagonal = parameters._disableDiagonal;
+    BasicInputColorMatrix<bool>(basicParameters, value, &dialog);
 }
 
 void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS])
@@ -455,7 +484,7 @@ void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& paramete
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<int>(basicParameters, value);
+    BasicInputColorMatrix<int>(basicParameters, value, nullptr);
 }
 
 void AlienGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
@@ -472,7 +501,7 @@ void AlienGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& para
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._disabledValue = parameters._disabledValue;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<float>(basicParameters, value, enabled);
+    BasicInputColorMatrix<float>(basicParameters, value, nullptr, enabled);
 }
 
 bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -2676,7 +2705,11 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 }
 
 template <typename T>
-void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
+void AlienGui::BasicInputColorMatrix(
+    BasicInputColorMatrixParameters<T> const& parameters,
+    T (&value)[MAX_COLORS][MAX_COLORS],
+    ColorMatrixDialog<T>* dialog,
+    bool* enabled)
 {
     ImGui::PushID(parameters._name.c_str());
 
@@ -2709,75 +2742,17 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     ImGui::SameLine();
 
     if (isExpanded) {
-        ImGui::BeginGroup();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(115.0f));
-        ImGui::Text("[target cell color]");
-
-        auto startPos = ImGui::GetCursorPos();
-
-        ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(121)});
-        auto drawList = ImGui::GetWindowDrawList();
-        RotateStart(drawList);
-        ImGui::Text("[cell color]");
-        RotateEnd(-90.0f, drawList);
-
-        ImGui::SetCursorPos(startPos);
-
-        // Color matrix
-        if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-            for (int row = 0; row < MAX_COLORS + 1; ++row) {
-                ImGui::PushID(row);
-                ImGui::SetCursorPosX(startPos.x);
-                for (int col = 0; col < MAX_COLORS + 1; ++col) {
-                    ImGui::PushID(col);
-                    ImGui::TableNextColumn();
-                    auto width = scaleInverse(ImGui::GetContentRegionAvail().x);
-                    if (col < MAX_COLORS) {
-                        width += 3.0f;
-                    }
-                    if (row == 0 && col > 0) {
-                        ColorField(parameters._customizationColors[col - 1].toRgbColor(), width);
-                    } else if (row > 0 && col == 0) {
-                        ColorField(parameters._customizationColors[row - 1].toRgbColor(), width);
-                    } else if (row > 0 && col > 0) {
-                        if constexpr (std::is_same<T, float>()) {
-                            SliderFloat(
-                                SliderFloatParameters()
-                                    .format(parameters._format)
-                                    .tiny(true)
-                                    .width(width)
-                                    .textWidth(0)
-                                    .min(parameters._min)
-                                    .max(parameters._max)
-                                    .logarithmic(parameters._logarithmic),
-                                &value[row - 1][col - 1]);
-                        }
-                        if constexpr (std::is_same<T, int>()) {
-                            SliderInt(
-                                SliderIntParameters().tiny(true).textWidth(0).min(parameters._min).max(parameters._max).logarithmic(parameters._logarithmic),
-                                &value[row - 1][col - 1]);
-                        }
-                        if constexpr (std::is_same<T, bool>()) {
-                            ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
-                        }
-                    }
-                    ImGui::PopID();
-                }
-                ImGui::TableNextRow();
-                ImGui::PopID();
-            }
-        }
-        ImGui::EndTable();
-        ImGui::EndGroup();
+        ExpandedColorMatrix(parameters, value, ImGui::GetContentRegionAvail().x - textWidth);
     } else {
-
-        // Collapsed view
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-        if constexpr (std::is_same<T, bool>()) {
-            static bool test = false;
+        if (dialog) {
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
-            if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                _expandedColorControlIds.insert(toggleButtonId);
+            if (ImGui::Button("Edit matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+                dialog->open(parameters, value, [&value](ColorMatrix<T> const& adoptedValue) {
+                    for (auto const& [valueRow, adoptedRow] : std::views::zip(value, adoptedValue.values)) {
+                        std::ranges::copy(adoptedRow, std::begin(valueRow));
+                    }
+                });
             }
             ImGui::PopStyleVar();
         } else {
@@ -2853,8 +2828,111 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
         AlienGui::HelpMarker(*parameters._tooltip);
     }
 
+    if (dialog) {
+        dialog->process();
+    }
+
     ImGui::PopID();
 }
+
+template <typename T>
+void AlienGui::ExpandedColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize)
+{
+    auto const& style = ImGui::GetStyle();
+    auto rowLabelWidth = ImGui::GetTextLineHeight() + style.ItemSpacing.x;
+    auto tableWidth = std::max(width - rowLabelWidth, scale(MinColorMatrixWidth));
+
+    if constexpr (std::is_same<T, bool>()) {
+        auto cellSizeLimit = maxCellSize > 0 ? maxCellSize : ImGui::GetFrameHeight();
+        auto cellSize = std::min(tableWidth / (MAX_COLORS + 1) - 2 * style.CellPadding.x - 1.0f, cellSizeLimit);
+        auto framePaddingY = std::max(0.0f, (cellSize - ImGui::GetFontSize()) / 2);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, framePaddingY));
+    }
+
+    ImGui::BeginGroup();
+
+    auto blockStartX = ImGui::GetCursorPosX();
+    auto columnLabelSize = ImGui::CalcTextSize(parameters._columnLabel.c_str());
+    ImGui::SetCursorPosX(blockStartX + rowLabelWidth + std::max(0.0f, (tableWidth - columnLabelSize.x) / 2));
+    ImGui::TextUnformatted(parameters._columnLabel.c_str());
+
+    auto tableStartPos = ImGui::GetCursorPos();
+    ImGui::SetCursorPos({blockStartX + rowLabelWidth, tableStartPos.y});
+
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(tableWidth, 0))) {
+        for (int row = 0; row < MAX_COLORS + 1; ++row) {
+            ImGui::PushID(row);
+            for (int col = 0; col < MAX_COLORS + 1; ++col) {
+                ImGui::PushID(col);
+                ImGui::TableNextColumn();
+                auto cellWidth = scaleInverse(ImGui::GetContentRegionAvail().x);
+                if (col < MAX_COLORS) {
+                    cellWidth += 3.0f;
+                }
+                if (row == 0 && col > 0) {
+                    ColorField(parameters._customizationColors[col - 1].toRgbColor(), cellWidth);
+                } else if (row > 0 && col == 0) {
+                    ColorField(parameters._customizationColors[row - 1].toRgbColor(), cellWidth);
+                } else if (row > 0 && col > 0) {
+                    if constexpr (std::is_same<T, float>()) {
+                        SliderFloat(
+                            SliderFloatParameters()
+                                .format(parameters._format)
+                                .tiny(true)
+                                .width(cellWidth)
+                                .textWidth(0)
+                                .min(parameters._min)
+                                .max(parameters._max)
+                                .logarithmic(parameters._logarithmic),
+                            &value[row - 1][col - 1]);
+                    }
+                    if constexpr (std::is_same<T, int>()) {
+                        SliderInt(
+                            SliderIntParameters().tiny(true).textWidth(0).min(parameters._min).max(parameters._max).logarithmic(parameters._logarithmic),
+                            &value[row - 1][col - 1]);
+                    }
+                    if constexpr (std::is_same<T, bool>()) {
+                        if (parameters._disableDiagonal && row == col) {
+                            ImGui::Dummy({0, ImGui::GetFrameHeight()});
+                        } else {
+                            ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
+                        }
+                    }
+                }
+                ImGui::PopID();
+            }
+            ImGui::TableNextRow();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+    auto tableEndPos = ImGui::GetCursorPos();
+
+    drawVerticalText(parameters._rowLabel, {blockStartX + ImGui::GetTextLineHeight() / 2, (tableStartPos.y + tableEndPos.y) / 2});
+
+    ImGui::SetCursorPos(tableEndPos);
+    ImGui::EndGroup();
+
+    if constexpr (std::is_same<T, bool>()) {
+        ImGui::PopStyleVar();
+    }
+}
+
+template void AlienGui::ExpandedColorMatrix<bool>(
+    BasicInputColorMatrixParameters<bool> const& parameters,
+    bool (&value)[MAX_COLORS][MAX_COLORS],
+    float width,
+    float maxCellSize);
+template void AlienGui::ExpandedColorMatrix<int>(
+    BasicInputColorMatrixParameters<int> const& parameters,
+    int (&value)[MAX_COLORS][MAX_COLORS],
+    float width,
+    float maxCellSize);
+template void AlienGui::ExpandedColorMatrix<float>(
+    BasicInputColorMatrixParameters<float> const& parameters,
+    float (&value)[MAX_COLORS][MAX_COLORS],
+    float width,
+    float maxCellSize);
 
 // RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
 //>>>>>>>>>>
