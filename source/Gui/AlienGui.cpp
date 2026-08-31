@@ -471,7 +471,7 @@ void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& paramete
     BasicInputColorMatrix<bool>(basicParameters, value, &dialog);
 }
 
-void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<int>* dialog)
+void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS])
 {
     BasicInputColorMatrixParameters<int> basicParameters;
     basicParameters._name = parameters._name;
@@ -484,14 +484,10 @@ void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& paramete
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<int>(basicParameters, value, dialog);
+    BasicInputColorMatrix<int>(basicParameters, value, nullptr);
 }
 
-void AlienGui::InputFloatColorMatrix(
-    InputFloatColorMatrixParameters const& parameters,
-    float (&value)[MAX_COLORS][MAX_COLORS],
-    bool* enabled,
-    ColorMatrixDialog<float>* dialog)
+void AlienGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
 {
     BasicInputColorMatrixParameters<float> basicParameters;
     basicParameters._name = parameters._name;
@@ -505,7 +501,7 @@ void AlienGui::InputFloatColorMatrix(
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._disabledValue = parameters._disabledValue;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<float>(basicParameters, value, dialog, enabled);
+    BasicInputColorMatrix<float>(basicParameters, value, nullptr, enabled);
 }
 
 bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -2927,8 +2923,11 @@ template void AlienGui::ExpandedColorMatrix<bool>(
     bool (&value)[MAX_COLORS][MAX_COLORS],
     float width,
     float maxCellSize);
-template void
-AlienGui::ExpandedColorMatrix<int>(BasicInputColorMatrixParameters<int> const& parameters, int (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize);
+template void AlienGui::ExpandedColorMatrix<int>(
+    BasicInputColorMatrixParameters<int> const& parameters,
+    int (&value)[MAX_COLORS][MAX_COLORS],
+    float width,
+    float maxCellSize);
 template void AlienGui::ExpandedColorMatrix<float>(
     BasicInputColorMatrixParameters<float> const& parameters,
     float (&value)[MAX_COLORS][MAX_COLORS],
