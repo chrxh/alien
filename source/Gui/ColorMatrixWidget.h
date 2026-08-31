@@ -11,5 +11,5 @@ public:
     void process(AlienGui::CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
 
 private:
-    ColorMatrixDialog _dialog;
+    ColorMatrixDialog<bool> _dialog;
 };

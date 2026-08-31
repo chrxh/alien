@@ -172,10 +172,8 @@ public:
         MEMBER(BasicInputColorMatrixParameters, bool, disableDiagonal, false);
     };
 
-    // Draws the labeled matrix, i.e. the color header row and column, the axis labels and the value cells.
-    // maxCellSize limits the size of the check boxes of a bool matrix, 0 means the default frame height.
     template <typename T>
-    static void ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize = 0);
+    static void ExpandedColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize = 0);
 
     struct CheckboxColorMatrixParameters
     {
@@ -189,7 +187,7 @@ public:
         MEMBER(CheckboxColorMatrixParameters, std::string, columnLabel, "[target cell color]");
         MEMBER(CheckboxColorMatrixParameters, bool, disableDiagonal, false);
     };
-    static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog& dialog);
+    static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<bool>& dialog);
 
     struct InputIntColorMatrixParameters
     {
@@ -203,7 +201,8 @@ public:
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
+    static void
+    InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<int>* dialog = nullptr);
 
     struct InputFloatColorMatrixParameters
     {
@@ -219,7 +218,11 @@ public:
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
+    static void InputFloatColorMatrix(
+        InputFloatColorMatrixParameters const& parameters,
+        float (&value)[MAX_COLORS][MAX_COLORS],
+        bool* enabled = nullptr,
+        ColorMatrixDialog<float>* dialog = nullptr);
 
     struct InputTextParameters
     {
@@ -590,7 +593,7 @@ private:
     static void BasicInputColorMatrix(
         BasicInputColorMatrixParameters<T> const& parameters,
         T (&value)[MAX_COLORS][MAX_COLORS],
-        ColorMatrixDialog* dialog = nullptr,
+        ColorMatrixDialog<T>* dialog = nullptr,
         bool* enabled = nullptr);
 
     //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));
