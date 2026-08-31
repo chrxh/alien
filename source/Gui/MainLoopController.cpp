@@ -183,6 +183,7 @@ void MainLoopController::scheduleReadingAutosave()
 
 void MainLoopController::scheduleSearchingStartupSimulation()
 {
+    OverlayController::get().activateProgressAnimation(true);
     _startupProcessor->executeTask(
         [](auto const& senderId) {
             return _PersisterFacade::get()->scheduleGetNetworkResources(
@@ -246,6 +247,8 @@ void MainLoopController::setupEmptySimulation()
 
 void MainLoopController::finishSimulationLoading(SimulationDesc const& simulationDesc)
 {
+    OverlayController::get().activateProgressAnimation(false);
+
     Viewport::get().setCenterInWorldPos(simulationDesc._center);
     Viewport::get().setZoomFactor(simulationDesc._zoom);
     TemporalControlWindow::get().onSnapshot();
