@@ -64,7 +64,8 @@ private:
     ProgramState _programState = ProgramState::FirstTick;
     bool _saveOnExit = true;
 
-    TaskProcessor _startupProcessor;
+    TaskProcessor _autosaveProcessor;
+    TaskProcessor _searchProcessor;
     TaskProcessor _downloadProcessor;
     PersisterRequestId _saveSimRequestId;
     std::string _loadedSimulationName;
