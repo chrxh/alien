@@ -25,6 +25,7 @@ private:
     void processMessage();
 
     bool _show = false;
+    bool _progressAnimationActivated = false;
     bool _withLightning = false;
     bool _on = true;
     std::string _message;
