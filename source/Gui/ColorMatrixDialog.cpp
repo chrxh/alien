@@ -46,10 +46,7 @@ void ColorMatrixDialog::process(AlienGui::BasicInputColorMatrixParameters<bool> 
 
 void ColorMatrixDialog::processContent(AlienGui::BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
 {
-    // The matrix is placed in a child window so that the buttons stay at the bottom of the dialog
     if (ImGui::BeginChild("##matrix", ImVec2(0, -scale(ButtonAreaHeight)), false)) {
-
-        // The matrix scales with the dialog, but its cells stay square and are therefore limited by the smaller extent
         auto const& style = ImGui::GetStyle();
         auto available = ImGui::GetContentRegionAvail();
         auto numCells = toFloat(MAX_COLORS + 1);
@@ -87,7 +84,6 @@ void ColorMatrixDialog::processToolButtons(AlienGui::BasicInputColorMatrixParame
         }
     };
 
-    // The matrix tools belong to the content and are therefore set off from the dialog button
     auto toolButtonsWidth =
         buttonWidth("Clear") + buttonWidth("Select all") + buttonWidth("Invert") + buttonWidth("Randomize") + 4 * ImGui::GetStyle().ItemSpacing.x;
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - toolButtonsWidth));
