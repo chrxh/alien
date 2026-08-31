@@ -1,5 +1,6 @@
 #include "MainLoopController.h"
 
+#include <ranges>
 #include <thread>
 
 #include <glad/glad.h>
@@ -15,12 +16,11 @@
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
-#include <Network/NetworkResourceRawTO.h>
-
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SerializerService.h>
+#include <PersisterInterface/TaskProcessor.h>
 
 #include "AboutDialog.h"
 #include "AlienGui.h"
@@ -70,25 +70,6 @@ namespace
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 
     auto const StartupSenderId = "Startup";
-
-    auto const StartupSimulationResourceName = std::string("Startup.sim");
-
-    std::optional<NetworkResourceRawTO> findStartupSimulation(std::vector<NetworkResourceRawTO> const& resourceTOs)
-    {
-        std::optional<NetworkResourceRawTO> result;
-        for (auto const& resourceTO : resourceTOs) {
-            if (resourceTO->resourceType != NetworkResourceType_Simulation || resourceTO->resourceName != StartupSimulationResourceName) {
-                continue;
-            }
-            if (resourceTO->workspaceType == WorkspaceType_AlienProject) {
-                return resourceTO;
-            }
-            if (!result.has_value()) {
-                result = resourceTO;
-            }
-        }
-        return result;
-    }
 }
 
 void MainLoopController::setup()
@@ -97,6 +78,9 @@ void MainLoopController::setup()
 
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
+
+    _startupProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
+    _downloadProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
 }
 
 void MainLoopController::process()
@@ -118,10 +102,6 @@ void MainLoopController::process()
         processFirstTick();
     } else if (_programState == ProgramState::LoadingScreen) {
         processLoadingScreen();
-    } else if (_programState == ProgramState::SearchingStartupSimulation) {
-        processSearchingStartupSimulation();
-    } else if (_programState == ProgramState::DownloadingStartupSimulation) {
-        processDownloadingStartupSimulation();
     } else if (_programState == ProgramState::FadeOutLoadingScreen) {
         processFadeOutLoadingScreen();
     } else if (_programState == ProgramState::FadeInUI) {
@@ -162,10 +142,11 @@ void MainLoopController::processFirstTick()
     drawLoadingScreen();
 
     if (std::filesystem::exists(Const::AutosaveFile)) {
-        scheduleLoadingAutosave();
+        scheduleReadingAutosave();
     } else {
         scheduleSearchingStartupSimulation();
     }
+    _programState = ProgramState::LoadingScreen;
 
     OverlayController::get().process();
 
@@ -176,96 +157,72 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    if (auto requestedSimState = _PersisterFacade::get()->getRequestState(_loadSimRequestId)) {
-        if (requestedSimState.value() == PersisterRequestState::Finished) {
-            auto const& data = _PersisterFacade::get()->fetchReadSimulationData(_loadSimRequestId);
+    _startupProcessor->process();
+    _downloadProcessor->process();
+
+    OverlayController::get().process();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
+
+void MainLoopController::scheduleReadingAutosave()
+{
+    _startupProcessor->executeTask(
+        [](auto const& senderId) {
+            return _PersisterFacade::get()->scheduleReadSimulation(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
+                ReadSimulationRequestData{.filename = Const::AutosaveFile, .initSimulation = true});
+        },
+        [this](auto const& requestId) {
+            auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
+            _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
             finishSimulationLoading(data.simulationDesc);
-        }
-        if (requestedSimState.value() == PersisterRequestState::Error) {
-            setupEmptySimulation("The default simulation file could not be read.\nAn empty simulation will be created.");
-        }
-    }
-    OverlayController::get().process();
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-}
-
-void MainLoopController::processSearchingStartupSimulation()
-{
-    drawLoadingScreen();
-
-    if (auto requestedState = _PersisterFacade::get()->getRequestState(_getNetworkResourcesRequestId)) {
-        if (requestedState.value() == PersisterRequestState::Finished) {
-            auto const& data = _PersisterFacade::get()->fetchGetNetworkResourcesData(_getNetworkResourcesRequestId);
-            if (auto const& resourceTO = findStartupSimulation(data.resourceTOs)) {
-                scheduleDownloadingStartupSimulation(resourceTO.value());
-            } else {
-                setupEmptySimulation(
-                    "The startup simulation '" + StartupSimulationResourceName + "' could not be found in the browser.\nAn empty simulation will be created.");
-            }
-        }
-        if (requestedState.value() == PersisterRequestState::Error) {
-            setupEmptySimulation("The browser data could not be retrieved.\nAn empty simulation will be created.");
-        }
-    }
-    OverlayController::get().process();
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-}
-
-void MainLoopController::processDownloadingStartupSimulation()
-{
-    drawLoadingScreen();
-
-    if (auto requestedState = _PersisterFacade::get()->getRequestState(_downloadSimRequestId)) {
-        if (requestedState.value() == PersisterRequestState::Finished) {
-            auto const& data = _PersisterFacade::get()->fetchDownloadNetworkResourcesData(_downloadSimRequestId);
-            auto const& deserializedSim = std::get<SimulationDesc>(data.resourceData);
-            try {
-                setupSimulation(deserializedSim);
-                _loadedSimulationName = data.resourceName;
-                finishSimulationLoading(deserializedSim);
-            } catch (...) {
-                _SimulationFacade::get()->closeSimulation();
-                setupEmptySimulation("The startup simulation could not be loaded.\nAn empty simulation will be created.");
-            }
-        }
-        if (requestedState.value() == PersisterRequestState::Error) {
-            setupEmptySimulation("The startup simulation could not be downloaded.\nAn empty simulation will be created.");
-        }
-    }
-    OverlayController::get().process();
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-}
-
-void MainLoopController::scheduleLoadingAutosave()
-{
-    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto readData = ReadSimulationRequestData{.filename = Const::AutosaveFile, .initSimulation = true};
-    _loadSimRequestId = _PersisterFacade::get()->scheduleReadSimulation(senderInfo, readData);
-    _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
-    _programState = ProgramState::LoadingScreen;
+        },
+        [this](auto const&) { setupEmptySimulation(); });
 }
 
 void MainLoopController::scheduleSearchingStartupSimulation()
 {
-    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    _getNetworkResourcesRequestId = _PersisterFacade::get()->scheduleGetNetworkResources(senderInfo, GetNetworkResourcesRequestData());
-    _programState = ProgramState::SearchingStartupSimulation;
+    _startupProcessor->executeTask(
+        [](auto const& senderId) {
+            return _PersisterFacade::get()->scheduleGetNetworkResources(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, GetNetworkResourcesRequestData());
+        },
+        [this](auto const& requestId) {
+            auto const& data = _PersisterFacade::get()->fetchGetNetworkResourcesData(requestId);
+            auto startupSimulation = std::ranges::find_if(data.resourceTOs, [](auto const& resourceTO) {
+                return resourceTO->resourceType == NetworkResourceType_Simulation && resourceTO->resourceName == Const::StartupSimulationResourceName;
+            });
+            if (startupSimulation != data.resourceTOs.end()) {
+                scheduleDownloadingStartupSimulation(*startupSimulation);
+            } else {
+                setupEmptySimulation();
+            }
+        },
+        [this](auto const&) { setupEmptySimulation(); });
 }
 
 void MainLoopController::scheduleDownloadingStartupSimulation(NetworkResourceRawTO const& resourceTO)
 {
-    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto downloadData = DownloadNetworkResourceRequestData{
-        .resourceId = resourceTO->id,
-        .resourceName = resourceTO->resourceName,
-        .resourceVersion = resourceTO->version,
-        .resourceType = NetworkResourceType_Simulation,
-        .downloadCache = BrowserWindow::get().getSimulationCache()};
-    _downloadSimRequestId = _PersisterFacade::get()->scheduleDownloadNetworkResource(senderInfo, downloadData);
-    _programState = ProgramState::DownloadingStartupSimulation;
+    _downloadProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _PersisterFacade::get()->scheduleDownloadNetworkResource(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
+                DownloadNetworkResourceRequestData{
+                    .resourceId = resourceTO->id,
+                    .resourceName = resourceTO->resourceName,
+                    .resourceVersion = resourceTO->version,
+                    .resourceType = NetworkResourceType_Simulation,
+                    .downloadCache = BrowserWindow::get().getSimulationCache()});
+        },
+        [this](auto const& requestId) {
+            auto const& data = _PersisterFacade::get()->fetchDownloadNetworkResourcesData(requestId);
+            auto const& deserializedSim = std::get<SimulationDesc>(data.resourceData);
+            _loadedSimulationName = data.resourceName;
+            setupSimulation(deserializedSim);
+            finishSimulationLoading(deserializedSim);
+        },
+        [this](auto const&) { setupEmptySimulation(); });
 }
 
 void MainLoopController::setupSimulation(SimulationDesc const& simulationDesc)
@@ -276,15 +233,14 @@ void MainLoopController::setupSimulation(SimulationDesc const& simulationDesc)
     _SimulationFacade::get()->setRealTime(simulationDesc._realTime);
 }
 
-void MainLoopController::setupEmptySimulation(std::string const& errorMessage)
+void MainLoopController::setupEmptySimulation()
 {
-    GenericMessageDialog::get().information("Error", errorMessage);
+    GenericMessageDialog::get().information("Error", "The simulation could not be loaded.\nAn empty simulation will be created.");
 
     SimulationDesc emptySim;
     emptySim.worldSize({1000, 500}).timestep(0).zoom(12.0f).center({500.0f, 250.0f}).realTime(std::chrono::milliseconds(0));
 
     setupSimulation(emptySim);
-    _loadedSimulationName.clear();
     finishSimulationLoading(emptySim);
 }
 
