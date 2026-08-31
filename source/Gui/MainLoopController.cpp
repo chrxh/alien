@@ -79,7 +79,8 @@ void MainLoopController::setup()
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
 
-    _startupProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
+    _autosaveProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
+    _searchProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
 }
 
@@ -157,7 +158,8 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    _startupProcessor->process();
+    _autosaveProcessor->process();
+    _searchProcessor->process();
     _downloadProcessor->process();
 
     OverlayController::get().process();
@@ -167,7 +169,7 @@ void MainLoopController::processLoadingScreen()
 
 void MainLoopController::scheduleReadingAutosave()
 {
-    _startupProcessor->executeTask(
+    _autosaveProcessor->executeTask(
         [](auto const& senderId) {
             return _PersisterFacade::get()->scheduleReadSimulation(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
@@ -178,13 +180,13 @@ void MainLoopController::scheduleReadingAutosave()
             _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
             finishSimulationLoading(data.simulationDesc);
         },
-        [this](auto const&) { setupEmptySimulation(); });
+        [this](auto const&) { scheduleSearchingStartupSimulation(); });
 }
 
 void MainLoopController::scheduleSearchingStartupSimulation()
 {
     OverlayController::get().activateProgressAnimation(true);
-    _startupProcessor->executeTask(
+    _searchProcessor->executeTask(
         [](auto const& senderId) {
             return _PersisterFacade::get()->scheduleGetNetworkResources(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, GetNetworkResourcesRequestData());
