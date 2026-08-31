@@ -29,19 +29,17 @@ public:
 private:
     void processFirstTick();
     void processLoadingScreen();
-    void processSearchingStartupSimulation();
-    void processDownloadingStartupSimulation();
     void processFadeOutLoadingScreen();
     void processFadeInUI();
     void processOperatingMode();
     void processScheduleExit();
     void processExiting();
 
-    void scheduleLoadingAutosave();
+    void scheduleReadingAutosave();
     void scheduleSearchingStartupSimulation();
     void scheduleDownloadingStartupSimulation(NetworkResourceRawTO const& resourceTO);
     void setupSimulation(SimulationDesc const& simulationDesc);
-    void setupEmptySimulation(std::string const& errorMessage);
+    void setupEmptySimulation();
     void finishSimulationLoading(SimulationDesc const& simulationDesc);
 
     void drawLoadingScreen();
@@ -56,8 +54,6 @@ private:
     {
         FirstTick,
         LoadingScreen,
-        SearchingStartupSimulation,
-        DownloadingStartupSimulation,
         FadeOutLoadingScreen,
         FadeInUI,
         OperatingMode,
@@ -68,9 +64,8 @@ private:
     ProgramState _programState = ProgramState::FirstTick;
     bool _saveOnExit = true;
 
-    PersisterRequestId _loadSimRequestId;
-    PersisterRequestId _getNetworkResourcesRequestId;
-    PersisterRequestId _downloadSimRequestId;
+    TaskProcessor _startupProcessor;
+    TaskProcessor _downloadProcessor;
     PersisterRequestId _saveSimRequestId;
     std::string _loadedSimulationName;
 
