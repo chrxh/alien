@@ -79,7 +79,6 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
  */
 TEST_F(DefenderTests, attackerVsAntiInjector)
 {
-    // The unblocked attack drains a large fraction of the energy, therefore the target needs enough energy to stay above minCellEnergy
     auto targetEnergy = 1000.0f;
 
     NeuralNetDesc nn;
