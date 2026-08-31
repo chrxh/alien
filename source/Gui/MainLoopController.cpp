@@ -15,6 +15,8 @@
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
+#include <Network/NetworkResourceRawTO.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/PersisterFacade.h>
@@ -68,6 +70,25 @@ namespace
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 
     auto const StartupSenderId = "Startup";
+
+    auto const StartupSimulationResourceName = std::string("Startup.sim");
+
+    std::optional<NetworkResourceRawTO> findStartupSimulation(std::vector<NetworkResourceRawTO> const& resourceTOs)
+    {
+        std::optional<NetworkResourceRawTO> result;
+        for (auto const& resourceTO : resourceTOs) {
+            if (resourceTO->resourceType != NetworkResourceType_Simulation || resourceTO->resourceName != StartupSimulationResourceName) {
+                continue;
+            }
+            if (resourceTO->workspaceType == WorkspaceType_AlienProject) {
+                return resourceTO;
+            }
+            if (!result.has_value()) {
+                result = resourceTO;
+            }
+        }
+        return result;
+    }
 }
 
 void MainLoopController::setup()
@@ -97,6 +118,10 @@ void MainLoopController::process()
         processFirstTick();
     } else if (_programState == ProgramState::LoadingScreen) {
         processLoadingScreen();
+    } else if (_programState == ProgramState::SearchingStartupSimulation) {
+        processSearchingStartupSimulation();
+    } else if (_programState == ProgramState::DownloadingStartupSimulation) {
+        processDownloadingStartupSimulation();
     } else if (_programState == ProgramState::FadeOutLoadingScreen) {
         processFadeOutLoadingScreen();
     } else if (_programState == ProgramState::FadeInUI) {
@@ -136,10 +161,11 @@ void MainLoopController::processFirstTick()
 {
     drawLoadingScreen();
 
-    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto readData = ReadSimulationRequestData{.filename = Const::AutosaveFile, .initSimulation = true};
-    _loadSimRequestId = _PersisterFacade::get()->scheduleReadSimulation(senderInfo, readData);
-    _programState = ProgramState::LoadingScreen;
+    if (std::filesystem::exists(Const::AutosaveFile)) {
+        scheduleLoadingAutosave();
+    } else {
+        scheduleSearchingStartupSimulation();
+    }
 
     OverlayController::get().process();
 
@@ -153,35 +179,123 @@ void MainLoopController::processLoadingScreen()
     if (auto requestedSimState = _PersisterFacade::get()->getRequestState(_loadSimRequestId)) {
         if (requestedSimState.value() == PersisterRequestState::Finished) {
             auto const& data = _PersisterFacade::get()->fetchReadSimulationData(_loadSimRequestId);
-            auto const& deserializedSim = data.simulationDesc;
-            Viewport::get().setCenterInWorldPos(deserializedSim._center);
-            Viewport::get().setZoomFactor(deserializedSim._zoom);
-            TemporalControlWindow::get().onSnapshot();
-
-            _simulationLoadedTimepoint = std::chrono::steady_clock::now();
-            _programState = ProgramState::FadeOutLoadingScreen;
+            finishSimulationLoading(data.simulationDesc);
         }
         if (requestedSimState.value() == PersisterRequestState::Error) {
-            GenericMessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
-
-            SimulationDesc deserializedSim;
-            deserializedSim.worldSize({1000, 500}).timestep(0).zoom(12.0f).center({500.0f, 250.0f}).realTime(std::chrono::milliseconds(0));
-
-            _SimulationFacade::get()->newSimulation(deserializedSim._timestep, deserializedSim._worldSize, deserializedSim._simulationParameters);
-            _SimulationFacade::get()->setSimulationData(deserializedSim._mainData);
-            _SimulationFacade::get()->setStatisticsHistory(deserializedSim._statistics);
-            _SimulationFacade::get()->setRealTime(deserializedSim._realTime);
-            Viewport::get().setCenterInWorldPos(deserializedSim._center);
-            Viewport::get().setZoomFactor(deserializedSim._zoom);
-            TemporalControlWindow::get().onSnapshot();
-
-            _simulationLoadedTimepoint = std::chrono::steady_clock::now();
-            _programState = ProgramState::FadeOutLoadingScreen;
+            setupEmptySimulation("The default simulation file could not be read.\nAn empty simulation will be created.");
         }
     }
     OverlayController::get().process();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
+
+void MainLoopController::processSearchingStartupSimulation()
+{
+    drawLoadingScreen();
+
+    if (auto requestedState = _PersisterFacade::get()->getRequestState(_getNetworkResourcesRequestId)) {
+        if (requestedState.value() == PersisterRequestState::Finished) {
+            auto const& data = _PersisterFacade::get()->fetchGetNetworkResourcesData(_getNetworkResourcesRequestId);
+            if (auto const& resourceTO = findStartupSimulation(data.resourceTOs)) {
+                scheduleDownloadingStartupSimulation(resourceTO.value());
+            } else {
+                setupEmptySimulation(
+                    "The startup simulation '" + StartupSimulationResourceName + "' could not be found in the browser.\nAn empty simulation will be created.");
+            }
+        }
+        if (requestedState.value() == PersisterRequestState::Error) {
+            setupEmptySimulation("The browser data could not be retrieved.\nAn empty simulation will be created.");
+        }
+    }
+    OverlayController::get().process();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
+
+void MainLoopController::processDownloadingStartupSimulation()
+{
+    drawLoadingScreen();
+
+    if (auto requestedState = _PersisterFacade::get()->getRequestState(_downloadSimRequestId)) {
+        if (requestedState.value() == PersisterRequestState::Finished) {
+            auto const& data = _PersisterFacade::get()->fetchDownloadNetworkResourcesData(_downloadSimRequestId);
+            auto const& deserializedSim = std::get<SimulationDesc>(data.resourceData);
+            try {
+                setupSimulation(deserializedSim);
+                _loadedSimulationName = data.resourceName;
+                finishSimulationLoading(deserializedSim);
+            } catch (...) {
+                _SimulationFacade::get()->closeSimulation();
+                setupEmptySimulation("The startup simulation could not be loaded.\nAn empty simulation will be created.");
+            }
+        }
+        if (requestedState.value() == PersisterRequestState::Error) {
+            setupEmptySimulation("The startup simulation could not be downloaded.\nAn empty simulation will be created.");
+        }
+    }
+    OverlayController::get().process();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
+
+void MainLoopController::scheduleLoadingAutosave()
+{
+    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
+    auto readData = ReadSimulationRequestData{.filename = Const::AutosaveFile, .initSimulation = true};
+    _loadSimRequestId = _PersisterFacade::get()->scheduleReadSimulation(senderInfo, readData);
+    _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
+    _programState = ProgramState::LoadingScreen;
+}
+
+void MainLoopController::scheduleSearchingStartupSimulation()
+{
+    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
+    _getNetworkResourcesRequestId = _PersisterFacade::get()->scheduleGetNetworkResources(senderInfo, GetNetworkResourcesRequestData());
+    _programState = ProgramState::SearchingStartupSimulation;
+}
+
+void MainLoopController::scheduleDownloadingStartupSimulation(NetworkResourceRawTO const& resourceTO)
+{
+    auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
+    auto downloadData = DownloadNetworkResourceRequestData{
+        .resourceId = resourceTO->id,
+        .resourceName = resourceTO->resourceName,
+        .resourceVersion = resourceTO->version,
+        .resourceType = NetworkResourceType_Simulation,
+        .downloadCache = BrowserWindow::get().getSimulationCache()};
+    _downloadSimRequestId = _PersisterFacade::get()->scheduleDownloadNetworkResource(senderInfo, downloadData);
+    _programState = ProgramState::DownloadingStartupSimulation;
+}
+
+void MainLoopController::setupSimulation(SimulationDesc const& simulationDesc)
+{
+    _SimulationFacade::get()->newSimulation(simulationDesc._timestep, simulationDesc._worldSize, simulationDesc._simulationParameters);
+    _SimulationFacade::get()->setSimulationData(simulationDesc._mainData);
+    _SimulationFacade::get()->setStatisticsHistory(simulationDesc._statistics);
+    _SimulationFacade::get()->setRealTime(simulationDesc._realTime);
+}
+
+void MainLoopController::setupEmptySimulation(std::string const& errorMessage)
+{
+    GenericMessageDialog::get().information("Error", errorMessage);
+
+    SimulationDesc emptySim;
+    emptySim.worldSize({1000, 500}).timestep(0).zoom(12.0f).center({500.0f, 250.0f}).realTime(std::chrono::milliseconds(0));
+
+    setupSimulation(emptySim);
+    _loadedSimulationName.clear();
+    finishSimulationLoading(emptySim);
+}
+
+void MainLoopController::finishSimulationLoading(SimulationDesc const& simulationDesc)
+{
+    Viewport::get().setCenterInWorldPos(simulationDesc._center);
+    Viewport::get().setZoomFactor(simulationDesc._zoom);
+    TemporalControlWindow::get().onSnapshot();
+
+    _simulationLoadedTimepoint = std::chrono::steady_clock::now();
+    _programState = ProgramState::FadeOutLoadingScreen;
 }
 
 void MainLoopController::processFadeOutLoadingScreen()
@@ -210,7 +324,9 @@ void MainLoopController::processFadeInUI()
 
     increaseAlphaForFadeInUI();
     if (ImGui::GetStyle().Alpha == 1.0f) {
-        printOverlayMessage(Const::AutosaveFileWithoutPath.string());
+        if (!_loadedSimulationName.empty()) {
+            printOverlayMessage(_loadedSimulationName);
+        }
         _programState = ProgramState::OperatingMode;
     }
 }
