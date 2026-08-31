@@ -17,13 +17,12 @@
 
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationParameters.h>
 
+#include "ColorMatrixDialog.h"
 #include "GenericFileDialog.h"
 #include "HelpStrings.h"
 #include "LayerColorPalette.h"
-#include "ModalWindow.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
 
@@ -36,8 +35,6 @@ namespace
     auto constexpr TabMarkerSize = 11.0f;
     auto constexpr TabMarkerRounding = 3.0f;
     auto constexpr MinColorMatrixWidth = 50.0f;
-    auto const ColorMatrixDialogSize = RealVector2D(560.0f, 480.0f);
-    auto constexpr ColorMatrixDialogButtonAreaHeight = 50.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -77,26 +74,7 @@ namespace
         color.b = ImColor(imGuiColor).Value.z;
     }
 
-    // The matrix editor dialog is shared by all color matrix widgets, therefore its owner is tracked by the widget id
-    unsigned int colorMatrixDialogOwnerId = 0;
-
-    ModalWindow& getColorMatrixDialog()
-    {
-        static ModalWindow dialog("", ColorMatrixDialogSize);
-        return dialog;
-    }
-
-    void openColorMatrixDialog(std::string const& name, unsigned int dialogId)
-    {
-        colorMatrixDialogOwnerId = dialogId;
-        getColorMatrixDialog().setTitle(name);
-        getColorMatrixDialog().open();
-    }
-
-    float buttonWidth(std::string const& text)
-    {
-        return ImGui::CalcTextSize(text.c_str()).x + 2 * ImGui::GetStyle().FramePadding.x;
-    }
+    ColorMatrixDialog colorMatrixDialog;
 
     // Draws the text rotated by 90 degrees such that its center lies on the given position in window coordinates
     void drawVerticalText(std::string const& text, ImVec2 const& targetCenter)
@@ -2774,7 +2752,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
         if constexpr (std::is_same<T, bool>()) {
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Edit matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                openColorMatrixDialog(parameters._name, dialogId);
+                colorMatrixDialog.open(parameters._name, dialogId);
             }
             ImGui::PopStyleVar();
         } else {
@@ -2851,7 +2829,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     }
 
     if constexpr (std::is_same<T, bool>()) {
-        ProcessColorMatrixDialog(parameters, value, dialogId);
+        colorMatrixDialog.process(parameters, value, dialogId);
     }
 
     ImGui::PopID();
@@ -2943,75 +2921,12 @@ void AlienGui::ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parame
     }
 }
 
-void AlienGui::ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], unsigned int dialogId)
-{
-    if (colorMatrixDialogOwnerId != dialogId) {
-        return;
-    }
-
-    auto forEachEditableEntry = [&](auto const& func) {
-        for (int row = 0; row < MAX_COLORS; ++row) {
-            for (int col = 0; col < MAX_COLORS; ++col) {
-                if (parameters._disableDiagonal && row == col) {
-                    continue;
-                }
-                func(value[row][col]);
-            }
-        }
-    };
-
-    getColorMatrixDialog().process([&] {
-        // The matrix is placed in a child window so that the buttons stay at the bottom of the dialog
-        if (ImGui::BeginChild("##matrix", ImVec2(0, -scale(ColorMatrixDialogButtonAreaHeight)), false)) {
-
-            // The matrix scales with the dialog, but its cells stay square and are therefore limited by the smaller extent
-            auto const& style = ImGui::GetStyle();
-            auto available = ImGui::GetContentRegionAvail();
-            auto numCells = toFloat(MAX_COLORS + 1);
-            auto rowLabelWidth = ImGui::GetTextLineHeight() + style.ItemSpacing.x;
-            auto cellSizeForWidth = (available.x - rowLabelWidth) / numCells - 2 * style.CellPadding.x - 1.0f;
-            auto cellSizeForHeight = (available.y - ImGui::GetTextLineHeight() - style.ItemSpacing.y) / numCells - 2 * style.CellPadding.y;
-            auto cellSize = std::max(std::min(cellSizeForWidth, cellSizeForHeight), 0.0f);
-            auto blockWidth = rowLabelWidth + numCells * (cellSize + 2 * style.CellPadding.x + 1.0f);
-            ColorMatrixBlock(parameters, value, std::min(available.x, blockWidth), cellSize);
-        }
-        ImGui::EndChild();
-
-        AlienGui::Separator();
-
-        if (AlienGui::Button("Close")) {
-            getColorMatrixDialog().close();
-            colorMatrixDialogOwnerId = 0;
-        }
-        ImGui::SetItemDefaultFocus();
-
-        // The matrix tools belong to the content and are therefore set off from the dialog button
-        ImGui::SameLine();
-        auto toolButtonsWidth =
-            buttonWidth("Clear") + buttonWidth("Select all") + buttonWidth("Invert") + buttonWidth("Randomize") + 4 * ImGui::GetStyle().ItemSpacing.x;
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - toolButtonsWidth));
-
-        if (AlienGui::Button("Clear")) {
-            forEachEditableEntry([](bool& entry) { entry = false; });
-        }
-        ImGui::SameLine();
-        if (AlienGui::Button("Select all")) {
-            forEachEditableEntry([](bool& entry) { entry = true; });
-        }
-        ImGui::SameLine();
-        if (AlienGui::Button("Invert")) {
-            forEachEditableEntry([](bool& entry) { entry = !entry; });
-        }
-        ImGui::SameLine();
-        if (AlienGui::Button("Randomize")) {
-            forEachEditableEntry([](bool& entry) { entry = NumberGenerator::get().getRandomInt(2) == 0; });
-        }
-    });
-
-    if (!getColorMatrixDialog().isOpen()) {
-        colorMatrixDialogOwnerId = 0;
-    }
-}
+// The matrix editor dialog draws the block of a bool matrix in another translation unit
+template void AlienGui::ColorMatrixBlock<bool>(
+    BasicInputColorMatrixParameters<bool> const& parameters,
+    bool (&value)[MAX_COLORS][MAX_COLORS],
+    float width,
+    float maxCellSize);
 
 // RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
 //>>>>>>>>>>

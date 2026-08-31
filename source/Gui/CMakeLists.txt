@@ -18,6 +18,8 @@ PUBLIC
     CellFunctionChannels.h
     ChangeColorDialog.cpp
     ChangeColorDialog.h
+    ColorMatrixDialog.cpp
+    ColorMatrixDialog.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp

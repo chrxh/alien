@@ -153,6 +153,30 @@ public:
 
     static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
 
+    template <typename T>
+    struct BasicInputColorMatrixParameters
+    {
+        MEMBER(BasicInputColorMatrixParameters, std::string, name, "");
+        MEMBER(BasicInputColorMatrixParameters, T, min, static_cast<T>(0));
+        MEMBER(BasicInputColorMatrixParameters, T, max, static_cast<T>(0));
+        MEMBER(BasicInputColorMatrixParameters, bool, logarithmic, false);
+        MEMBER(BasicInputColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER(BasicInputColorMatrixParameters, float, textWidth, 100);
+        MEMBER(BasicInputColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::string, rowLabel, "[cell color]");
+        MEMBER(BasicInputColorMatrixParameters, std::string, columnLabel, "[target cell color]");
+        MEMBER(BasicInputColorMatrixParameters, bool, disableDiagonal, false);
+    };
+
+    // Draws the labeled matrix, i.e. the color header row and column, the axis labels and the value cells.
+    // maxCellSize limits the size of the check boxes of a bool matrix, 0 means the default frame height.
+    template <typename T>
+    static void ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize = 0);
+
     struct CheckboxColorMatrixParameters
     {
         MEMBER(CheckboxColorMatrixParameters, std::string, name, "");
@@ -563,33 +587,7 @@ private:
     static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned);
 
     template <typename T>
-    struct BasicInputColorMatrixParameters
-    {
-        MEMBER(BasicInputColorMatrixParameters, std::string, name, "");
-        MEMBER(BasicInputColorMatrixParameters, T, min, static_cast<T>(0));
-        MEMBER(BasicInputColorMatrixParameters, T, max, static_cast<T>(0));
-        MEMBER(BasicInputColorMatrixParameters, bool, logarithmic, false);
-        MEMBER(BasicInputColorMatrixParameters, std::string, format, "%.2f");
-        MEMBER(BasicInputColorMatrixParameters, float, textWidth, 100);
-        MEMBER(BasicInputColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::string, rowLabel, "[cell color]");
-        MEMBER(BasicInputColorMatrixParameters, std::string, columnLabel, "[target cell color]");
-        MEMBER(BasicInputColorMatrixParameters, bool, disableDiagonal, false);
-    };
-    template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
-
-    // Draws the labeled matrix, i.e. the color header row and column, the axis labels and the value cells.
-    // maxCellSize limits the size of the check boxes of a bool matrix, 0 means the default frame height.
-    template <typename T>
-    static void ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize = 0);
-
-    // Draws the matrix editor dialog of the widget with the given id, as long as it is the dialog owner
-    static void ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], unsigned int dialogId);
 
     //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));
     //static void EndTable();
