@@ -183,7 +183,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     auto origRef = evaluationService.getRef(boolSpec._member, origParameters, orderNumber);
     if (ref.colorDependence == ColorDependence::ColorMatrix) {
 
-        _colorMatrixWidgetById[ImGui::GetID("colorMatrix")].process(
+        AlienGui::CheckboxColorMatrix(
             AlienGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)
@@ -194,7 +194,8 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
                 .rowLabel("[customization]")
                 .columnLabel("[target customization]")
                 .disableDiagonal(true),
-            *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
+            *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value),
+            _colorMatrixDialogById[ImGui::GetID("colorMatrix")]);
 
     } else {
         AlienGui::Checkbox(

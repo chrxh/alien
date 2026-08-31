@@ -109,8 +109,6 @@ class MutationRatesDialog;
 template <typename T>
 class ColorMatrixDialog;
 
-class ColorMatrixWidget;
-
 class FileTransferController;
 
 class _LocationWidget;
