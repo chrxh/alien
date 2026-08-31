@@ -183,7 +183,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     auto origRef = evaluationService.getRef(boolSpec._member, origParameters, orderNumber);
     if (ref.colorDependence == ColorDependence::ColorMatrix) {
 
-        AlienGui::CheckboxColorMatrix(
+        _colorMatrixWidgetById[ImGui::GetID("colorMatrix")].process(
             AlienGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)

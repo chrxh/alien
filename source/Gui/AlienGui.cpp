@@ -74,8 +74,6 @@ namespace
         color.b = ImColor(imGuiColor).Value.z;
     }
 
-    ColorMatrixDialog colorMatrixDialog;
-
     // Draws the text rotated by 90 degrees such that its center lies on the given position in window coordinates
     void drawVerticalText(std::string const& text, ImVec2 const& targetCenter)
     {
@@ -461,7 +459,7 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     return result;
 }
 
-void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
+void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog& dialog)
 {
     BasicInputColorMatrixParameters<bool> basicParameters;
     basicParameters._name = parameters._name;
@@ -473,7 +471,7 @@ void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& paramete
     basicParameters._rowLabel = parameters._rowLabel;
     basicParameters._columnLabel = parameters._columnLabel;
     basicParameters._disableDiagonal = parameters._disableDiagonal;
-    BasicInputColorMatrix<bool>(basicParameters, value);
+    BasicInputColorMatrix<bool>(basicParameters, value, &dialog);
 }
 
 void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS])
@@ -506,7 +504,7 @@ void AlienGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& para
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._disabledValue = parameters._disabledValue;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<float>(basicParameters, value, enabled);
+    BasicInputColorMatrix<float>(basicParameters, value, nullptr, enabled);
 }
 
 bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -2710,7 +2708,11 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 }
 
 template <typename T>
-void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
+void AlienGui::BasicInputColorMatrix(
+    BasicInputColorMatrixParameters<T> const& parameters,
+    T (&value)[MAX_COLORS][MAX_COLORS],
+    ColorMatrixDialog* dialog,
+    bool* enabled)
 {
     ImGui::PushID(parameters._name.c_str());
 
@@ -2738,7 +2740,6 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
             _expandedColorControlIds.insert(toggleButtonId);
         }
     }
-    auto dialogId = ImGui::GetID("matrixDialog");
     auto textWidth = scale(parameters._textWidth);
 
     ImGui::SameLine();
@@ -2752,7 +2753,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
         if constexpr (std::is_same<T, bool>()) {
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Edit matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                colorMatrixDialog.open(parameters._name, dialogId);
+                dialog->open(parameters._name);
             }
             ImGui::PopStyleVar();
         } else {
@@ -2829,7 +2830,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     }
 
     if constexpr (std::is_same<T, bool>()) {
-        colorMatrixDialog.process(parameters, value, dialogId);
+        dialog->process(parameters, value);
     }
 
     ImGui::PopID();

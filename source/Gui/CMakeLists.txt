@@ -20,6 +20,8 @@ PUBLIC
     ChangeColorDialog.h
     ColorMatrixDialog.cpp
     ColorMatrixDialog.h
+    ColorMatrixWidget.cpp
+    ColorMatrixWidget.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
