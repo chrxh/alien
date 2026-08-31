@@ -106,6 +106,9 @@ class PreviewSettingsDialog;
 
 class MutationRatesDialog;
 
+template <typename T>
+class ColorMatrixDialog;
+
 class FileTransferController;
 
 class _LocationWidget;

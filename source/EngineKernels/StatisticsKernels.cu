@@ -14,6 +14,7 @@ namespace
         }
         sum += rates.cellTypeModeMutation.nodeProbability;
         sum += rates.cellTypeMutation.nodeProbability;
+        sum += rates.customizationMutation.genomeProbability;
         sum += rates.voidMutation.nodeProbability;
         sum += rates.extendGeneMutation.geneProbability;
         sum += rates.addNodeMutation.nodeProbability;

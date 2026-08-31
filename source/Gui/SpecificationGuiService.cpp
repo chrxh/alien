@@ -190,8 +190,12 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
                 .customizationColors(parameters.customizationColors.value)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
                 .highlightedSubString(filter.containedText)
-                .tooltip(parameterSpec._description),
-            *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
+                .tooltip(parameterSpec._description)
+                .rowLabel("[customization]")
+                .columnLabel("[target customization]")
+                .disableDiagonal(true),
+            *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value),
+            _colorMatrixDialogById[ImGui::GetID("colorMatrix")]);
 
     } else {
         AlienGui::Checkbox(

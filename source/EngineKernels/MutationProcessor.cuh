@@ -31,6 +31,7 @@ private:
     __inline__ __device__ static void applyMutations_geometry(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_customization(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_extendGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -89,6 +90,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_geometry(data, genome, accumulatedMutations);
     applyMutations_cellTypeMode(data, genome, accumulatedMutations);
     applyMutations_cellType(data, genome, accumulatedMutations);
+    applyMutations_customization(data, genome, accumulatedMutations);
     applyMutations_void(data, genome, accumulatedMutations);
     applyMutations_constructor(data, genome, accumulatedMutations);
 
@@ -785,6 +787,73 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
             resetCellTypeToDefault(node);
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_customization(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    __shared__ int sourceColor;
+    __shared__ int targetColor;
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    if (laneId == 0) {
+        sourceColor = -1;
+        targetColor = -1;
+
+        auto const& rate = genome->mutationRates.customizationMutation;
+        if (rate.genomeProbability > 0 && data.primaryNumberGen.random() < rate.genomeProbability) {
+
+            // The mutation is genome-wide: one used customization is chosen as source and replaced everywhere by one target customization.
+            uint32_t usedColorMask = 0;
+            for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+                auto const& gene = genome->genes[geneIndex];
+                for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                    usedColorMask |= 1 << gene.nodes[nodeIndex].color;
+                }
+            }
+            int usedColors[MAX_COLORS];
+            int numUsedColors = 0;
+            for (int color = 0; color < MAX_COLORS; ++color) {
+                if ((usedColorMask & (1 << color)) != 0) {
+                    usedColors[numUsedColors++] = color;
+                }
+            }
+
+            if (numUsedColors > 0) {
+                auto candidateSourceColor = usedColors[data.primaryNumberGen.random(numUsedColors - 1)];
+
+                int allowedColors[MAX_COLORS];
+                int numAllowedColors = 0;
+                for (int color = 0; color < MAX_COLORS; ++color) {
+                    if (color != candidateSourceColor && cudaSimulationParameters.customizationTransitionMatrix.value[candidateSourceColor][color]) {
+                        allowedColors[numAllowedColors++] = color;
+                    }
+                }
+                if (numAllowedColors > 0) {
+                    sourceColor = candidateSourceColor;
+                    targetColor = allowedColors[data.primaryNumberGen.random(numAllowedColors - 1)];
+                }
+            }
+        }
+    }
+    block.sync();
+
+    if (sourceColor == -1) {
+        return;
+    }
+
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        auto& gene = genome->genes[geneIndex];
+        for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            auto& node = gene.nodes[nodeIndex];
+            if (node.color == sourceColor) {
+                node.color = targetColor;
+            }
+        }
+    }
+    if (laneId == 0) {
+        atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
 
@@ -1686,6 +1755,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (cellTypeMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeMutationSigma)); };
             mutateFloat(genome->mutationRates.cellTypeMutation.nodeProbability);
+        }
+
+        float customizationSigma = cudaSimulationParameters.customizationMetaMutationsSigma.value;
+        if (customizationSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * customizationSigma)); };
+            mutateFloat(genome->mutationRates.customizationMutation.genomeProbability);
         }
 
         float voidMutationSigma = cudaSimulationParameters.voidMetaMutationsSigma.value;
