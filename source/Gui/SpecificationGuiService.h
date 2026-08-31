@@ -6,7 +6,7 @@
 #include <EngineInterface/ParametersFilterHash.h>
 #include <EngineInterface/SimulationParametersSpecification.h>
 
-#include "ColorMatrixWidget.h"
+#include "ColorMatrixDialog.h"
 #include "Definitions.h"
 
 class SpecificationGuiService
@@ -90,5 +90,5 @@ private:
 
     mutable std::unordered_map<unsigned int, bool> _visibilityById;
 
-    mutable std::unordered_map<unsigned int, ColorMatrixWidget> _colorMatrixWidgetById;
+    mutable std::unordered_map<unsigned int, ColorMatrixDialog<bool>> _colorMatrixDialogById;
 };
