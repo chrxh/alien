@@ -2964,15 +2964,16 @@ void AlienGui::ProcessColorMatrixDialog(BasicInputColorMatrixParameters<bool> co
         // The matrix is placed in a child window so that the buttons stay at the bottom of the dialog
         if (ImGui::BeginChild("##matrix", ImVec2(0, -scale(ColorMatrixDialogButtonAreaHeight)), false)) {
 
-            // The matrix fills the dialog, but its cells stay square and are therefore also limited by the available height
+            // The matrix scales with the dialog, but its cells stay square and are therefore limited by the smaller extent
             auto const& style = ImGui::GetStyle();
             auto available = ImGui::GetContentRegionAvail();
             auto numCells = toFloat(MAX_COLORS + 1);
-            auto cellSize = std::max((available.y - ImGui::GetTextLineHeight() - style.ItemSpacing.y) / numCells - 2 * style.CellPadding.y, 0.0f);
-            auto widthForCellSize = ImGui::GetTextLineHeight() + style.ItemSpacing.x + numCells * (cellSize + 2 * style.CellPadding.x + 1.0f);
-            auto blockWidth = std::min(available.x, widthForCellSize);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (available.x - blockWidth) / 2);
-            ColorMatrixBlock(parameters, value, blockWidth, cellSize);
+            auto rowLabelWidth = ImGui::GetTextLineHeight() + style.ItemSpacing.x;
+            auto cellSizeForWidth = (available.x - rowLabelWidth) / numCells - 2 * style.CellPadding.x - 1.0f;
+            auto cellSizeForHeight = (available.y - ImGui::GetTextLineHeight() - style.ItemSpacing.y) / numCells - 2 * style.CellPadding.y;
+            auto cellSize = std::max(std::min(cellSizeForWidth, cellSizeForHeight), 0.0f);
+            auto blockWidth = rowLabelWidth + numCells * (cellSize + 2 * style.CellPadding.x + 1.0f);
+            ColorMatrixBlock(parameters, value, std::min(available.x, blockWidth), cellSize);
         }
         ImGui::EndChild();
 
