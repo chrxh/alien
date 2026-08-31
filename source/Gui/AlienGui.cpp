@@ -2921,7 +2921,6 @@ void AlienGui::ColorMatrixBlock(BasicInputColorMatrixParameters<T> const& parame
     }
 }
 
-// The matrix editor dialog draws the block of a bool matrix in another translation unit
 template void AlienGui::ColorMatrixBlock<bool>(
     BasicInputColorMatrixParameters<bool> const& parameters,
     bool (&value)[MAX_COLORS][MAX_COLORS],

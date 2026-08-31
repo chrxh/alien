@@ -8,8 +8,6 @@
 #include "Definitions.h"
 #include "ModalWindow.h"
 
-// Modal dialog for editing a bool color matrix. The dialog is shared by all color matrix widgets, therefore its owner
-// is tracked by the widget id. It is processed by its owner, since it is drawn within the id scope of the widget.
 class ColorMatrixDialog
 {
 public:
