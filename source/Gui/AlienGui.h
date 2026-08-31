@@ -201,8 +201,7 @@ public:
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void
-    InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<int>* dialog = nullptr);
+    static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct InputFloatColorMatrixParameters
     {
@@ -218,11 +217,7 @@ public:
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputFloatColorMatrix(
-        InputFloatColorMatrixParameters const& parameters,
-        float (&value)[MAX_COLORS][MAX_COLORS],
-        bool* enabled = nullptr,
-        ColorMatrixDialog<float>* dialog = nullptr);
+    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
     struct InputTextParameters
     {
