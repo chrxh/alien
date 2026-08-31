@@ -189,7 +189,7 @@ public:
         MEMBER(CheckboxColorMatrixParameters, std::string, columnLabel, "[target cell color]");
         MEMBER(CheckboxColorMatrixParameters, bool, disableDiagonal, false);
     };
-    static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
+    static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog& dialog);
 
     struct InputIntColorMatrixParameters
     {
@@ -587,7 +587,11 @@ private:
     static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned);
 
     template <typename T>
-    static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
+    static void BasicInputColorMatrix(
+        BasicInputColorMatrixParameters<T> const& parameters,
+        T (&value)[MAX_COLORS][MAX_COLORS],
+        ColorMatrixDialog* dialog = nullptr,
+        bool* enabled = nullptr);
 
     //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));
     //static void EndTable();

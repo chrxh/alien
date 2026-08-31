@@ -106,6 +106,10 @@ class PreviewSettingsDialog;
 
 class MutationRatesDialog;
 
+class ColorMatrixDialog;
+
+class ColorMatrixWidget;
+
 class FileTransferController;
 
 class _LocationWidget;

@@ -24,24 +24,15 @@ ColorMatrixDialog::ColorMatrixDialog()
     : _modalWindow("", DialogSize)
 {}
 
-void ColorMatrixDialog::open(std::string const& name, unsigned int ownerId)
+void ColorMatrixDialog::open(std::string const& name)
 {
-    _ownerId = ownerId;
     _modalWindow.setTitle(name);
     _modalWindow.open();
 }
 
-void ColorMatrixDialog::process(AlienGui::BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], unsigned int ownerId)
+void ColorMatrixDialog::process(AlienGui::BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
 {
-    if (_ownerId != ownerId) {
-        return;
-    }
-
     _modalWindow.process([&] { processContent(parameters, value); });
-
-    if (!_modalWindow.isOpen()) {
-        _ownerId = 0;
-    }
 }
 
 void ColorMatrixDialog::processContent(AlienGui::BasicInputColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
@@ -63,7 +54,6 @@ void ColorMatrixDialog::processContent(AlienGui::BasicInputColorMatrixParameters
 
     if (AlienGui::Button("Close")) {
         _modalWindow.close();
-        _ownerId = 0;
     }
     ImGui::SetItemDefaultFocus();
 
