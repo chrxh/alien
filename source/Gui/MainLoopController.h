@@ -5,6 +5,9 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
+#include <EngineInterface/Descs.h>
+
+#include <Network/NetworkResourceRawTO.h>
 
 #include <PersisterInterface/Definitions.h>
 #include <PersisterInterface/PersisterRequestId.h>
@@ -32,6 +35,13 @@ private:
     void processScheduleExit();
     void processExiting();
 
+    void scheduleReadingAutosave();
+    void scheduleSearchingStartupSimulation();
+    void scheduleDownloadingStartupSimulation(NetworkResourceRawTO const& resourceTO);
+    void setupSimulation(SimulationDesc const& simulationDesc);
+    void setupEmptySimulation();
+    void finishSimulationLoading(SimulationDesc const& simulationDesc);
+
     void drawLoadingScreen();
     void decreaseAlphaForFadeOutLoadingScreen();
     void increaseAlphaForFadeInUI();
@@ -54,8 +64,11 @@ private:
     ProgramState _programState = ProgramState::FirstTick;
     bool _saveOnExit = true;
 
-    PersisterRequestId _loadSimRequestId;
+    TaskProcessor _autosaveProcessor;
+    TaskProcessor _searchProcessor;
+    TaskProcessor _downloadProcessor;
     PersisterRequestId _saveSimRequestId;
+    std::string _loadedSimulationName;
 
     TextureData _logo;
     std::optional<std::chrono::steady_clock::time_point> _simulationLoadedTimepoint;
