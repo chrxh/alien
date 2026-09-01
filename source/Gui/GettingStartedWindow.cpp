@@ -43,6 +43,10 @@ void GettingStartedWindow::processIntern()
         drawParagraph("A new version of ALIEN is currently under development. Since the program has changed considerably in the meantime, the former getting "
                       "started guide has been removed. An updated documentation will follow.");
 
+        drawHeading1("Examples");
+
+        drawParagraph("Example simulations can be found in the browser window, from where they can be downloaded and opened directly.");
+
         ImGui::Dummy(ImVec2(0.0f, scale(20.0f)));
 
         ImGui::PopTextWrapPos();
