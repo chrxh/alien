@@ -18,14 +18,12 @@ public:
 
     bool isOn() const;
     void setOn(bool value);
-    void activateProgressAnimation(bool value);
 
 private:
     void processProgressAnimation();
     void processMessage();
 
     bool _show = false;
-    bool _progressAnimationActivated = false;
     bool _withLightning = false;
     bool _on = true;
     std::string _message;

@@ -61,14 +61,9 @@ void OverlayController::setOn(bool value)
     _on = value;
 }
 
-void OverlayController::activateProgressAnimation(bool value)
-{
-    _progressAnimationActivated = value;
-}
-
 void OverlayController::processProgressAnimation()
 {
-    if (_progressAnimationActivated || _PersisterFacade::get()->isBusy()) {
+    if (_PersisterFacade::get()->isBusy()) {
         _busyTimepoint = std::chrono::steady_clock::now();
     }
     if (!_busyTimepoint.has_value()) {

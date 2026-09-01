@@ -7,7 +7,7 @@ namespace Const
     std::string const ProgramVersion = "5.0.0-alpha.26";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const AlienServerURL = "api.alien-project.org";
-    std::string const StartupSimulationResourceName = "Startup.sim";
+    std::string const StartupSimulationResourceName = "Startup/Version1";
 
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
