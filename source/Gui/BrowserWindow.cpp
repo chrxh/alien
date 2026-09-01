@@ -169,9 +169,7 @@ void BrowserWindow::refreshIntern(bool withRetry)
                 auto userName = NetworkService::get().getLoggedInUserName().value_or("");
                 for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType) {
-                        // Public user items should also be visible in private workspace
-                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName
-                             && (rawTO->workspaceType == WorkspaceType_Private || rawTO->workspaceType == WorkspaceType_Public))
+                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName)
                             || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
                                 && rawTO->workspaceType == workspaceId.workspaceType)) {
                             workspace.rawTOs.emplace_back(rawTO);
@@ -787,9 +785,10 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processDownloadButton(leaf);
         ImGui::SameLine();
-        if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType == WorkspaceType_Public) {
+        if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip("Visible in the public workspace");
+            AlienGui::Tooltip(
+                leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in alien-project's workspace" : "Visible in the public workspace");
         }
         ImGui::SameLine();
 
@@ -1308,24 +1307,29 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     auto& source = _workspaces.at(_currentWorkspace);
     auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, source.rawTOs);
 
+    std::vector<NetworkResourceRawTO> movedRawTOs;
     for (auto const& rawTO : rawTOs) {
+        auto& publicWorkspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, WorkspaceType_Public});
         switch (rawTO->workspaceType) {
         case WorkspaceType_Private: {
             rawTO->workspaceType = WorkspaceType_Public;
-            auto& publicWorkspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, WorkspaceType_Public});
             publicWorkspace.rawTOs.emplace_back(rawTO);
+            movedRawTOs.emplace_back(rawTO);
         } break;
         case WorkspaceType_Public: {
             rawTO->workspaceType = WorkspaceType_Private;
-            auto& publicWorkspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, WorkspaceType_Public});
             auto findResult = std::ranges::find_if(publicWorkspace.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
             if (findResult != publicWorkspace.rawTOs.end()) {
                 publicWorkspace.rawTOs.erase(findResult);
             }
+            movedRawTOs.emplace_back(rawTO);
         } break;
         default:
             break;
         }
+    }
+    if (movedRawTOs.empty()) {
+        return;
     }
     for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
         createTreeTOs(_workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType}));
@@ -1333,7 +1337,7 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
 
     // Apply changes to server
     MoveNetworkResourceRequestData requestData;
-    for (auto const& rawTO : rawTOs) {
+    for (auto const& rawTO : movedRawTOs) {
         requestData.entries.emplace_back(rawTO->id, rawTO->workspaceType);
     }
     NetworkTransferController::get().onMove(requestData);
