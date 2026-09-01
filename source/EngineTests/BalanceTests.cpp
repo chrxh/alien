@@ -153,7 +153,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(20000);
+    _simulationFacade->calcTimesteps(25000);
 
 
     auto stats = calcLineageStats();
@@ -179,7 +179,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(20000);
+    _simulationFacade->calcTimesteps(25000);
 
     auto stats = calcLineageStats();
     EXPECT_LT(90, stats.numLargeCells);

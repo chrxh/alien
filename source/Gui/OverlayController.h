@@ -18,7 +18,6 @@ public:
 
     bool isOn() const;
     void setOn(bool value);
-    void activateProgressAnimation(bool value);
 
 private:
     void processProgressAnimation();

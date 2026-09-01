@@ -61,8 +61,6 @@ void OverlayController::setOn(bool value)
     _on = value;
 }
 
-void OverlayController::activateProgressAnimation(bool value) {}
-
 void OverlayController::processProgressAnimation()
 {
     if (_PersisterFacade::get()->isBusy()) {
