@@ -105,10 +105,6 @@ NewByOldOrderNumber ParametersEditService::cloneLocation(SimulationParameters& p
             auto targetOrderNumber = parameters.layerOrderNumbers[i + 1];
             copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
-        StringHelper::copy(
-            parameters.layerName.layerValues[startIndex + 1],
-            sizeof(parameters.layerName.layerValues[startIndex + 1]),
-            LocationHelper::generateLayerName(parameters));
     } else {
         ++parameters.numSources;
         for (int i = parameters.numSources - 2; i >= startIndex; --i) {
@@ -121,10 +117,6 @@ NewByOldOrderNumber ParametersEditService::cloneLocation(SimulationParameters& p
             auto targetOrderNumber = parameters.sourceOrderNumbers[i + 1];
             copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
-        StringHelper::copy(
-            parameters.sourceName.sourceValues[startIndex + 1],
-            sizeof(parameters.sourceName.sourceValues[startIndex + 1]),
-            LocationHelper::generateSourceName(parameters));
     }
 
     return result;
