@@ -130,23 +130,18 @@ protected:
     {
         checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedOrderNumber);
 
-        SimulationParameters defaultParameters;
         auto locationType = LocationHelper::getLocationType(insertedOrderNumber, parameters);
         auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
-        auto prevArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
+        auto prevArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber - 1);
 
         if (locationType == LocationType::Layer) {
             EXPECT_EQ(parameters.layerCoreRadius.layerValues[prevArrayIndex], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
-
-            Char64 layerName;
-            StringHelper::copy(layerName, sizeof(Char64), LocationHelper::generateLayerName(origParameters));
-            EXPECT_TRUE(StringHelper::compare(layerName, sizeof(Char64), parameters.layerName.layerValues[insertedArrayIndex]));
+            EXPECT_TRUE(
+                StringHelper::compare(parameters.layerName.layerValues[prevArrayIndex], sizeof(Char64), parameters.layerName.layerValues[insertedArrayIndex]));
         } else if (locationType == LocationType::Source) {
             EXPECT_EQ(parameters.sourceCircularRadius.sourceValues[prevArrayIndex], parameters.sourceCircularRadius.sourceValues[insertedArrayIndex]);
-
-            Char64 sourceName;
-            StringHelper::copy(sourceName, sizeof(Char64), LocationHelper::generateSourceName(origParameters));
-            EXPECT_TRUE(StringHelper::compare(sourceName, sizeof(Char64), parameters.sourceName.sourceValues[insertedArrayIndex]));
+            EXPECT_TRUE(StringHelper::compare(
+                parameters.sourceName.sourceValues[prevArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[insertedArrayIndex]));
         }
     }
 
