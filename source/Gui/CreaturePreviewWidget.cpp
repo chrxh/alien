@@ -36,6 +36,9 @@ namespace
     auto constexpr NeuralActivitySlidersPerColumn = 4;
     auto constexpr MaxCellFunctionTextSize = 16.0f;
 
+    auto constexpr SignalStrengthWhiteness = 0.2f;
+    auto constexpr SignalStrengthEnlargement = 0.5f;
+
     std::string getNeuralActivityEditorSignalLabel(int index)
     {
         return "Signal " + std::to_string(index);
@@ -279,8 +282,14 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
         AlienGui::ConvertRGBtoHSV(color, h, s, v);
 
-        auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.15f : 0.5f;
-        drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
+        auto signalStrength = _zoom > ZoomLevelForConnections ? toFloat(object._highlightIntensity) / 255.0f : 0.0f;
+        auto whiteness = signalStrength * SignalStrengthWhiteness;
+
+        auto cellRadiusFactor = (_zoom > ZoomLevelForConnections ? 0.15f : 0.5f) * (1.0f + signalStrength * SignalStrengthEnlargement);
+        drawList->AddCircleFilled(
+            {cellPos.x, cellPos.y},
+            std::max(1.0f, cellSize * cellRadiusFactor),
+            ImColor::HSV(h, s * 1.2f * (1.0f - whiteness), v * (1.0f - whiteness) + whiteness));
 
         if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == object._id) {
             if (_zoom > ZoomLevelForGeneReferences) {
@@ -323,23 +332,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 drawList, font, fontSize, {cellPos.x - textSize.x / 2 + 1, cellPos.y - textSize.y / 2 + 1}, ImColor::HSV(0, 0, 0, 0.7f), text.c_str());
             AlienGui::AddTextWithSubpixelAccuracy(
                 drawList, font, fontSize, {cellPos.x - textSize.x / 2, cellPos.y - textSize.y / 2}, ImColor::HSV(0, 0, 1.0f, 0.7f), text.c_str());
-        }
-    }
-
-    // Draw signals
-    if (_zoom > ZoomLevelForConnections && _editData->detailSimulation) {
-        for (auto const& object : desc._cells) {
-            auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
-            auto constexpr cellRadiusFactor = 0.11f;
-            float radius = cellSize * cellRadiusFactor;
-
-            auto signalStrength = 0.0f;
-            for (auto const& ch : object._signal._channels) {
-                signalStrength += std::abs(ch);
-            }
-            signalStrength = std::min(1.0f, static_cast<float>(sqrt(sqrt(signalStrength)) / 2));
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, signalStrength));
-            drawList->AddCircle({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 0.2f, signalStrength));
         }
     }
 
