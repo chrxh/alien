@@ -173,7 +173,12 @@ public:
     };
 
     template <typename T>
-    static void ExpandedColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], float width, float maxCellSize = 0);
+    static void ExpandedColorMatrix(
+        BasicInputColorMatrixParameters<T> const& parameters,
+        T (&value)[MAX_COLORS][MAX_COLORS],
+        float width,
+        float maxCellSize = 0,
+        bool readOnly = false);
 
     struct CheckboxColorMatrixParameters
     {
@@ -201,7 +206,7 @@ public:
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
+    static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<int>& dialog);
 
     struct InputFloatColorMatrixParameters
     {
@@ -217,7 +222,11 @@ public:
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
+    static void InputFloatColorMatrix(
+        InputFloatColorMatrixParameters const& parameters,
+        float (&value)[MAX_COLORS][MAX_COLORS],
+        ColorMatrixDialog<float>& dialog,
+        bool* enabled = nullptr);
 
     struct InputTextParameters
     {
@@ -588,7 +597,7 @@ private:
     static void BasicInputColorMatrix(
         BasicInputColorMatrixParameters<T> const& parameters,
         T (&value)[MAX_COLORS][MAX_COLORS],
-        ColorMatrixDialog<T>* dialog = nullptr,
+        ColorMatrixDialog<T>& dialog,
         bool* enabled = nullptr);
 
     //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));

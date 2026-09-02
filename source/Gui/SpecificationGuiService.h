@@ -90,5 +90,7 @@ private:
 
     mutable std::unordered_map<unsigned int, bool> _visibilityById;
 
-    mutable std::unordered_map<unsigned int, ColorMatrixDialog<bool>> _colorMatrixDialogById;
+    mutable std::unordered_map<unsigned int, ColorMatrixDialog<bool>> _boolColorMatrixDialogById;
+    mutable std::unordered_map<unsigned int, ColorMatrixDialog<int>> _intColorMatrixDialogById;
+    mutable std::unordered_map<unsigned int, ColorMatrixDialog<float>> _floatColorMatrixDialogById;
 };
