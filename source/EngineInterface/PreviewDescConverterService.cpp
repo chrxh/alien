@@ -131,7 +131,8 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
                                .inactive(isPreviewInactive(object))
                                .geneIndex(object.getCellRef()._geneIndex)
                                .nodeIndex(object.getCellRef()._nodeIndex)
-                               .cellType(getCellType(object));
+                               .cellType(getCellType(object))
+                               .highlightIntensity(object.getCellRef()._highlightIntensity);
 
         previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._neuralActivity._signals);
         previewCell._memory = object.getCellRef()._neuralActivity._memory;
