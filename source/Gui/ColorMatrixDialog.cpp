@@ -14,6 +14,8 @@ namespace
 {
     auto const DialogSize = RealVector2D(560.0f, 480.0f);
     auto constexpr ButtonAreaHeight = 50.0f;
+    auto constexpr MaxCellSizeForSlider = 40.0f;
+    auto constexpr MaxCellSizeForCheckbox = 28.0f;
 
     float buttonWidth(std::string const& text)
     {
@@ -90,15 +92,8 @@ template <typename T>
 void ColorMatrixDialog<T>::processContent()
 {
     if (ImGui::BeginChild("##matrix", ImVec2(0, -scale(ButtonAreaHeight)), false)) {
-        auto const& style = ImGui::GetStyle();
-        auto available = ImGui::GetContentRegionAvail();
-        auto numCells = toFloat(MAX_COLORS + 1);
-        auto rowLabelWidth = ImGui::GetTextLineHeight() + style.ItemSpacing.x;
-        auto cellSizeForWidth = (available.x - rowLabelWidth) / numCells - 2 * style.CellPadding.x - 1.0f;
-        auto cellSizeForHeight = (available.y - ImGui::GetTextLineHeight() - style.ItemSpacing.y) / numCells - 2 * style.CellPadding.y;
-        auto cellSize = std::max(std::min(cellSizeForWidth, cellSizeForHeight), 0.0f);
-        auto blockWidth = rowLabelWidth + numCells * (cellSize + 2 * style.CellPadding.x + 1.0f);
-        AlienGui::ExpandedColorMatrix(_parameters, _matrix.values, std::min(available.x, blockWidth), cellSize);
+        auto maxCellSize = std::is_same_v<T, bool> ? MaxCellSizeForCheckbox : MaxCellSizeForSlider;
+        AlienGui::ExpandedColorMatrix(_parameters, _matrix.values, ImGui::GetContentRegionAvail().x, scale(maxCellSize));
     }
     ImGui::EndChild();
 

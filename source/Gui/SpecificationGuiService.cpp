@@ -195,7 +195,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
                 .columnLabel("[target customization]")
                 .disableDiagonal(true),
             *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value),
-            _colorMatrixDialogById[ImGui::GetID("colorMatrix")]);
+            _boolColorMatrixDialogById[ImGui::GetID("colorMatrix")]);
 
     } else {
         AlienGui::Checkbox(
@@ -228,7 +228,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
         AlienGui::InputIntColorMatrix(
             AlienGui::InputIntColorMatrixParameters()
                 .name(parameterSpec._name)
-                .max(intSpec._min)
+                .min(intSpec._min)
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
                 .textWidth(TextColumnWidth)
@@ -236,7 +236,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
-            *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value));
+            *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value),
+            _intColorMatrixDialogById[ImGui::GetID("colorMatrix")]);
 
     } else {
         AlienGui::SliderInt(
@@ -302,6 +303,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                         ? std::make_optional(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(disabledValue)))
                         : std::optional<std::vector<std::vector<float>>>()),
             *reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(value),
+            _floatColorMatrixDialogById[ImGui::GetID("colorMatrix")],
             enabledValue);
 
     } else {
