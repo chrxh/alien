@@ -69,7 +69,7 @@ ColorMatrixDialog<T>::ColorMatrixDialog()
 
 template <typename T>
 void ColorMatrixDialog<T>::open(
-    AlienGui::BasicInputColorMatrixParameters<T> const& parameters,
+    AlienGui::ExpandedColorMatrixParameters<T> const& parameters,
     T const (&value)[MAX_COLORS][MAX_COLORS],
     std::function<void(ColorMatrix<T> const&)> const& onAdoptCallback)
 {
@@ -93,7 +93,9 @@ void ColorMatrixDialog<T>::processContent()
 {
     if (ImGui::BeginChild("##matrix", ImVec2(0, -scale(ButtonAreaHeight)), false)) {
         auto maxCellSize = std::is_same_v<T, bool> ? MaxCellSizeForCheckbox : MaxCellSizeForSlider;
-        AlienGui::ExpandedColorMatrix(_parameters, _matrix.values, ImGui::GetContentRegionAvail().x, scale(maxCellSize));
+        AlienGui::ExpandedColorMatrix(
+            AlienGui::ExpandedColorMatrixParameters<T>(_parameters).width(scaleInverse(ImGui::GetContentRegionAvail().x)).maxCellSize(maxCellSize),
+            _matrix.values);
     }
     ImGui::EndChild();
 
