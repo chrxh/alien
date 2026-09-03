@@ -154,31 +154,29 @@ public:
     static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
 
     template <typename T>
-    struct BasicInputColorMatrixParameters
+    struct ExpandedColorMatrixParameters
     {
-        MEMBER(BasicInputColorMatrixParameters, std::string, name, "");
-        MEMBER(BasicInputColorMatrixParameters, T, min, static_cast<T>(0));
-        MEMBER(BasicInputColorMatrixParameters, T, max, static_cast<T>(0));
-        MEMBER(BasicInputColorMatrixParameters, bool, logarithmic, false);
-        MEMBER(BasicInputColorMatrixParameters, std::string, format, "%.2f");
-        MEMBER(BasicInputColorMatrixParameters, float, textWidth, 100);
-        MEMBER(BasicInputColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::string, rowLabel, "[cell color]");
-        MEMBER(BasicInputColorMatrixParameters, std::string, columnLabel, "[target cell color]");
-        MEMBER(BasicInputColorMatrixParameters, bool, disableDiagonal, false);
+        MEMBER(ExpandedColorMatrixParameters, std::string, name, "");
+        MEMBER(ExpandedColorMatrixParameters, T, min, static_cast<T>(0));
+        MEMBER(ExpandedColorMatrixParameters, T, max, static_cast<T>(0));
+        MEMBER(ExpandedColorMatrixParameters, bool, logarithmic, false);
+        MEMBER(ExpandedColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER(ExpandedColorMatrixParameters, float, textWidth, 100);
+        MEMBER(ExpandedColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
+        MEMBER(ExpandedColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
+        MEMBER(ExpandedColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
+        MEMBER(ExpandedColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(ExpandedColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ExpandedColorMatrixParameters, std::string, rowLabel, "[cell color]");
+        MEMBER(ExpandedColorMatrixParameters, std::string, columnLabel, "[target cell color]");
+        MEMBER(ExpandedColorMatrixParameters, bool, disableDiagonal, false);
+        MEMBER(ExpandedColorMatrixParameters, float, width, 0);
+        MEMBER(ExpandedColorMatrixParameters, float, maxCellSize, 0);
+        MEMBER(ExpandedColorMatrixParameters, bool, readOnly, false);
     };
 
     template <typename T>
-    static void ExpandedColorMatrix(
-        BasicInputColorMatrixParameters<T> const& parameters,
-        T (&value)[MAX_COLORS][MAX_COLORS],
-        float width,
-        float maxCellSize = 0,
-        bool readOnly = false);
+    static void ExpandedColorMatrix(ExpandedColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct CheckboxColorMatrixParameters
     {
@@ -595,7 +593,7 @@ private:
 
     template <typename T>
     static void BasicInputColorMatrix(
-        BasicInputColorMatrixParameters<T> const& parameters,
+        ExpandedColorMatrixParameters<T> const& parameters,
         T (&value)[MAX_COLORS][MAX_COLORS],
         ColorMatrixDialog<T>& dialog,
         bool* enabled = nullptr);

@@ -16,7 +16,7 @@ public:
     ColorMatrixDialog();
 
     void open(
-        AlienGui::BasicInputColorMatrixParameters<T> const& parameters,
+        AlienGui::ExpandedColorMatrixParameters<T> const& parameters,
         T const (&value)[MAX_COLORS][MAX_COLORS],
         std::function<void(ColorMatrix<T> const&)> const& onAdoptCallback);
     void process();
@@ -26,7 +26,7 @@ private:
     void onAdopt();
 
     ModalWindow _modalWindow;
-    AlienGui::BasicInputColorMatrixParameters<T> _parameters;
+    AlienGui::ExpandedColorMatrixParameters<T> _parameters;
     ColorMatrix<T> _matrix;
     std::function<void(ColorMatrix<T> const&)> _onAdoptCallback;
 };

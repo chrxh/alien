@@ -460,33 +460,33 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
 
 void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<bool>& dialog)
 {
-    BasicInputColorMatrixParameters<bool> basicParameters;
-    basicParameters._name = parameters._name;
-    basicParameters._textWidth = parameters._textWidth;
-    basicParameters._customizationColors = parameters._customizationColors;
-    basicParameters._defaultValue = parameters._defaultValue;
-    basicParameters._tooltip = parameters._tooltip;
-    basicParameters._highlightedSubString = parameters._highlightedSubString;
-    basicParameters._rowLabel = parameters._rowLabel;
-    basicParameters._columnLabel = parameters._columnLabel;
-    basicParameters._disableDiagonal = parameters._disableDiagonal;
-    BasicInputColorMatrix<bool>(basicParameters, value, dialog);
+    ExpandedColorMatrixParameters<bool> matrixParameters;
+    matrixParameters._name = parameters._name;
+    matrixParameters._textWidth = parameters._textWidth;
+    matrixParameters._customizationColors = parameters._customizationColors;
+    matrixParameters._defaultValue = parameters._defaultValue;
+    matrixParameters._tooltip = parameters._tooltip;
+    matrixParameters._highlightedSubString = parameters._highlightedSubString;
+    matrixParameters._rowLabel = parameters._rowLabel;
+    matrixParameters._columnLabel = parameters._columnLabel;
+    matrixParameters._disableDiagonal = parameters._disableDiagonal;
+    BasicInputColorMatrix<bool>(matrixParameters, value, dialog);
 }
 
 void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS], ColorMatrixDialog<int>& dialog)
 {
-    BasicInputColorMatrixParameters<int> basicParameters;
-    basicParameters._name = parameters._name;
-    basicParameters._min = parameters._min;
-    basicParameters._max = parameters._max;
-    basicParameters._format = "%d";
-    basicParameters._logarithmic = parameters._logarithmic;
-    basicParameters._textWidth = parameters._textWidth;
-    basicParameters._customizationColors = parameters._customizationColors;
-    basicParameters._defaultValue = parameters._defaultValue;
-    basicParameters._tooltip = parameters._tooltip;
-    basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<int>(basicParameters, value, dialog);
+    ExpandedColorMatrixParameters<int> matrixParameters;
+    matrixParameters._name = parameters._name;
+    matrixParameters._min = parameters._min;
+    matrixParameters._max = parameters._max;
+    matrixParameters._format = "%d";
+    matrixParameters._logarithmic = parameters._logarithmic;
+    matrixParameters._textWidth = parameters._textWidth;
+    matrixParameters._customizationColors = parameters._customizationColors;
+    matrixParameters._defaultValue = parameters._defaultValue;
+    matrixParameters._tooltip = parameters._tooltip;
+    matrixParameters._highlightedSubString = parameters._highlightedSubString;
+    BasicInputColorMatrix<int>(matrixParameters, value, dialog);
 }
 
 void AlienGui::InputFloatColorMatrix(
@@ -495,19 +495,19 @@ void AlienGui::InputFloatColorMatrix(
     ColorMatrixDialog<float>& dialog,
     bool* enabled)
 {
-    BasicInputColorMatrixParameters<float> basicParameters;
-    basicParameters._name = parameters._name;
-    basicParameters._min = parameters._min;
-    basicParameters._max = parameters._max;
-    basicParameters._logarithmic = parameters._logarithmic;
-    basicParameters._format = parameters._format;
-    basicParameters._textWidth = parameters._textWidth;
-    basicParameters._customizationColors = parameters._customizationColors;
-    basicParameters._defaultValue = parameters._defaultValue;
-    basicParameters._tooltip = parameters._tooltip;
-    basicParameters._disabledValue = parameters._disabledValue;
-    basicParameters._highlightedSubString = parameters._highlightedSubString;
-    BasicInputColorMatrix<float>(basicParameters, value, dialog, enabled);
+    ExpandedColorMatrixParameters<float> matrixParameters;
+    matrixParameters._name = parameters._name;
+    matrixParameters._min = parameters._min;
+    matrixParameters._max = parameters._max;
+    matrixParameters._logarithmic = parameters._logarithmic;
+    matrixParameters._format = parameters._format;
+    matrixParameters._textWidth = parameters._textWidth;
+    matrixParameters._customizationColors = parameters._customizationColors;
+    matrixParameters._defaultValue = parameters._defaultValue;
+    matrixParameters._tooltip = parameters._tooltip;
+    matrixParameters._disabledValue = parameters._disabledValue;
+    matrixParameters._highlightedSubString = parameters._highlightedSubString;
+    BasicInputColorMatrix<float>(matrixParameters, value, dialog, enabled);
 }
 
 bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -2712,7 +2712,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 
 template <typename T>
 void AlienGui::BasicInputColorMatrix(
-    BasicInputColorMatrixParameters<T> const& parameters,
+    ExpandedColorMatrixParameters<T> const& parameters,
     T (&value)[MAX_COLORS][MAX_COLORS],
     ColorMatrixDialog<T>& dialog,
     bool* enabled)
@@ -2759,7 +2759,7 @@ void AlienGui::BasicInputColorMatrix(
     }
     ImGui::PopStyleVar();
     if (isExpanded) {
-        ExpandedColorMatrix(parameters, value, contentWidth, 0, true);
+        ExpandedColorMatrix(ExpandedColorMatrixParameters<T>(parameters).width(scaleInverse(contentWidth)).readOnly(true), value);
     }
     ImGui::EndGroup();
 
@@ -2817,14 +2817,12 @@ namespace
 }
 
 template <typename T>
-void AlienGui::ExpandedColorMatrix(
-    BasicInputColorMatrixParameters<T> const& parameters,
-    T (&value)[MAX_COLORS][MAX_COLORS],
-    float width,
-    float maxCellSize,
-    bool readOnly)
+void AlienGui::ExpandedColorMatrix(ExpandedColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS])
 {
     auto const& style = ImGui::GetStyle();
+    auto readOnly = parameters._readOnly;
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+    auto maxCellSize = scale(parameters._maxCellSize);
     auto showLabels = !readOnly;
     auto rowLabelWidth = showLabels ? ImGui::GetTextLineHeight() + style.ItemSpacing.x : 0.0f;
     auto tableWidth = std::max(width - rowLabelWidth, scale(MinColorMatrixWidth));
@@ -2934,24 +2932,9 @@ void AlienGui::ExpandedColorMatrix(
     }
 }
 
-template void AlienGui::ExpandedColorMatrix<bool>(
-    BasicInputColorMatrixParameters<bool> const& parameters,
-    bool (&value)[MAX_COLORS][MAX_COLORS],
-    float width,
-    float maxCellSize,
-    bool readOnly);
-template void AlienGui::ExpandedColorMatrix<int>(
-    BasicInputColorMatrixParameters<int> const& parameters,
-    int (&value)[MAX_COLORS][MAX_COLORS],
-    float width,
-    float maxCellSize,
-    bool readOnly);
-template void AlienGui::ExpandedColorMatrix<float>(
-    BasicInputColorMatrixParameters<float> const& parameters,
-    float (&value)[MAX_COLORS][MAX_COLORS],
-    float width,
-    float maxCellSize,
-    bool readOnly);
+template void AlienGui::ExpandedColorMatrix<bool>(ExpandedColorMatrixParameters<bool> const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
+template void AlienGui::ExpandedColorMatrix<int>(ExpandedColorMatrixParameters<int> const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
+template void AlienGui::ExpandedColorMatrix<float>(ExpandedColorMatrixParameters<float> const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
 
 // RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
 //>>>>>>>>>>
