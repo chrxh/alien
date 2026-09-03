@@ -174,7 +174,6 @@ public:
         MEMBER(ExpandedColorMatrixParameters, float, maxCellSize, 0);
         MEMBER(ExpandedColorMatrixParameters, bool, readOnly, false);
     };
-
     template <typename T>
     static void ExpandedColorMatrix(ExpandedColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
 
