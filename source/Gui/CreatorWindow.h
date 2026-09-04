@@ -51,19 +51,38 @@ private:
     bool isShown() override;
 
     void processToolbar();
-    void processBuildButtons();
-    void processPointPreview() const;
+
+    void processCreateObject();
+    void processCreateRectangle();
+    void processCreateHexagon();
+    void processCreateDisc();
+    void processDrawing();
+    void processCreateLine();
+    void processCreateCurve();
+    void processCreatePolygon();
 
     void updateInteractionMode();
 
-    void createEntity();
+    bool beginParameterPanel();
+    void endParameterPanel();
+    void processColorWidget();
+    void processMaterialWidgets();
+    void processObjectDistanceWidget();
+    void processStickyWidget();
+    void processStaticWidget();
+    bool processBuildButton();
+    bool processPointButtons(int minNumPoints);
+
+    void processPointPreview(std::vector<RealVector2D> const& path, bool closed) const;
+    void processControlPolygonPreview() const;
+
+    void createSingleObject();
     void createRectangle();
     void createHexagon();
     void createDisc();
-    void createFromPoints();
+    void createObjectNetwork(std::vector<RealVector2D> const& positions, float connectionDistance);
 
     std::vector<RealVector2D> calcBezierCurvePath() const;
-    std::vector<RealVector2D> calcObjectPositionsFromPoints() const;
 
     ContentDesc convertToEnergyParticles(ContentDesc const& description) const;
 
@@ -71,7 +90,6 @@ private:
     bool isEnergyMaterial() const;
     bool isPointPlacementMode() const;
     InteractionMode getInteractionMode() const;
-    int getRequiredNumPoints() const;
 
     ObjectTypeDesc getObjectTypeDesc() const;
 

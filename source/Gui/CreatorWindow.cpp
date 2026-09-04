@@ -54,6 +54,24 @@ namespace
 
     auto const RightColumnWidth = 160.0f;
     auto constexpr MaxNumObjects = size_t{1000000};
+    auto constexpr PreviewLineThickness = 2.0f;
+    auto constexpr PreviewPointRadius = 3.0f;
+
+    ImVec2 mapToViewPosition(RealVector2D const& worldPos)
+    {
+        auto viewPos = Viewport::get().mapWorldToViewPosition(worldPos);
+        return ImVec2(viewPos.x, viewPos.y);
+    }
+
+    std::vector<ImVec2> mapToViewPositions(std::vector<RealVector2D> const& worldPositions)
+    {
+        std::vector<ImVec2> result;
+        result.reserve(worldPositions.size());
+        for (auto const& worldPos : worldPositions) {
+            result.emplace_back(mapToViewPosition(worldPos));
+        }
+        return result;
+    }
 
     RealVector2D evaluateBezier(std::vector<RealVector2D> const& controlPoints, float t)
     {
@@ -175,98 +193,201 @@ void CreatorWindow::shutdownIntern()
 void CreatorWindow::processIntern()
 {
     processToolbar();
-
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        AlienGui::Group(AlienGui::GroupParameters().text(ModeText.at(_mode)));
-
-        auto color = EditorModel::get().getDefaultColorCode();
-        AlienGui::ComboColor(
-            AlienGui::ComboColorParameters()
-                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                .name("Color")
-                .textWidth(RightColumnWidth)
-                .tooltip(Const::GenomeColorTooltip),
-            color);
-        EditorModel::get().setDefaultColorCode(color);
-        if (_mode == CreationMode_Drawing) {
-            auto pencilWidth = EditorModel::get().getPencilWidth();
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Pencil radius")
-                    .min(1.0f)
-                    .max(8.0f)
-                    .textWidth(RightColumnWidth)
-                    .format("%.1f")
-                    .tooltip(Const::CreatorPencilRadiusTooltip),
-                &pencilWidth);
-            EditorModel::get().setPencilWidth(pencilWidth);
-        }
-        AlienGui::Switcher(
-            AlienGui::SwitcherParameters()
-                .name("Material")
-                .textWidth(RightColumnWidth)
-                .values({"Solid", "Fluid", "Free cells", "Energy particles"})
-                .tooltip(Const::CreatorDrawingTypeTooltip),
-            &_material);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
-        if (_material == CreationMaterial_Fluid) {
-            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
-        }
-        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
-                &_stiffness);
-        }
-
-        if (_mode == CreationMode_CreateRectangle) {
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Horizontal objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
-                _rectHorizontalObjects);
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Vertical objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
-                _rectVerticalObjects);
-        }
-        if (_mode == CreationMode_CreateHexagon) {
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
-        }
-        if (_mode == CreationMode_CreateDisc) {
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
-                _outerRadius);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
-                _innerRadius);
-        }
-        if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc || isPointPlacementMode()) {
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters()
-                    .name("Object distance")
-                    .format("%.2f")
-                    .step(0.1)
-                    .textWidth(RightColumnWidth)
-                    .tooltip(Const::CreatorDistanceTooltip),
-                _objectDistance);
-        }
-        if (_mode != CreationMode_CreateObject) {
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
-        }
-        if (!isEnergyMaterial()) {
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(Const::CellStaticTooltip), _static);
-        }
-    }
-    ImGui::EndChild();
-
     updateInteractionMode();
 
-    if (_mode != CreationMode_Drawing) {
-        AlienGui::Separator();
-        processBuildButtons();
+    switch (_mode) {
+    case CreationMode_CreateObject:
+        processCreateObject();
+        break;
+    case CreationMode_CreateRectangle:
+        processCreateRectangle();
+        break;
+    case CreationMode_CreateHexagon:
+        processCreateHexagon();
+        break;
+    case CreationMode_CreateDisc:
+        processCreateDisc();
+        break;
+    case CreationMode_Drawing:
+        processDrawing();
+        break;
+    case CreationMode_CreateLine:
+        processCreateLine();
+        break;
+    case CreationMode_CreateCurve:
+        processCreateCurve();
+        break;
+    case CreationMode_CreatePolygon:
+        processCreatePolygon();
+        break;
     }
-    if (isPointPlacementMode()) {
-        processPointPreview();
-    }
+
     validateAndCorrect();
+}
+
+void CreatorWindow::processCreateObject()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    if (processBuildButton()) {
+        createSingleObject();
+        EditorModel::get().update();
+    }
+}
+
+void CreatorWindow::processCreateRectangle()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters().name("Horizontal objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
+            _rectHorizontalObjects);
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters().name("Vertical objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
+            _rectVerticalObjects);
+        processObjectDistanceWidget();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    if (processBuildButton()) {
+        createRectangle();
+        EditorModel::get().update();
+    }
+}
+
+void CreatorWindow::processCreateHexagon()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        AlienGui::InputInt(AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
+        processObjectDistanceWidget();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    if (processBuildButton()) {
+        createHexagon();
+        EditorModel::get().update();
+    }
+}
+
+void CreatorWindow::processCreateDisc()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
+            _outerRadius);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
+            _innerRadius);
+        processObjectDistanceWidget();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    if (processBuildButton()) {
+        createDisc();
+        EditorModel::get().update();
+    }
+}
+
+void CreatorWindow::processDrawing()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+
+        auto pencilWidth = EditorModel::get().getPencilWidth();
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters()
+                .name("Pencil radius")
+                .min(1.0f)
+                .max(8.0f)
+                .textWidth(RightColumnWidth)
+                .format("%.1f")
+                .tooltip(Const::CreatorPencilRadiusTooltip),
+            &pencilWidth);
+        EditorModel::get().setPencilWidth(pencilWidth);
+
+        processMaterialWidgets();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+}
+
+void CreatorWindow::processCreateLine()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        processObjectDistanceWidget();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    processPointPreview(_points, false);
+
+    if (processPointButtons(2)) {
+        createObjectNetwork(distributeAlongPath(_points, _objectDistance), _objectDistance * 1.5f);
+        _points.clear();
+        EditorModel::get().update();
+    }
+}
+
+void CreatorWindow::processCreateCurve()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        processObjectDistanceWidget();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    auto path = calcBezierCurvePath();
+    processControlPolygonPreview();
+    processPointPreview(path, false);
+
+    if (processPointButtons(2)) {
+        createObjectNetwork(distributeAlongPath(path, _objectDistance), _objectDistance * 1.5f);
+        _points.clear();
+        EditorModel::get().update();
+    }
+}
+
+void CreatorWindow::processCreatePolygon()
+{
+    if (beginParameterPanel()) {
+        processColorWidget();
+        processMaterialWidgets();
+        processObjectDistanceWidget();
+        processStickyWidget();
+        processStaticWidget();
+    }
+    endParameterPanel();
+
+    processPointPreview(_points, true);
+
+    if (processPointButtons(3)) {
+        createObjectNetwork(distributeHexagonallyInPolygon(_points, _objectDistance), _objectDistance * 1.7f);
+        _points.clear();
+        EditorModel::get().update();
+    }
 }
 
 void CreatorWindow::updateInteractionMode()
@@ -279,42 +400,94 @@ void CreatorWindow::updateInteractionMode()
     }
 }
 
-void CreatorWindow::processBuildButtons()
+bool CreatorWindow::beginParameterPanel()
 {
-    ImGui::BeginDisabled(isPointPlacementMode() && toInt(_points.size()) < getRequiredNumPoints());
-    if (AlienGui::Button("Build")) {
-        switch (_mode) {
-        case CreationMode_CreateObject:
-            createEntity();
-            break;
-        case CreationMode_CreateRectangle:
-            createRectangle();
-            break;
-        case CreationMode_CreateHexagon:
-            createHexagon();
-            break;
-        case CreationMode_CreateDisc:
-            createDisc();
-            break;
-        case CreationMode_CreateLine:
-        case CreationMode_CreateCurve:
-        case CreationMode_CreatePolygon:
-            createFromPoints();
-            _points.clear();
-            break;
-        }
-        EditorModel::get().update();
+    auto result = ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar);
+    if (result) {
+        AlienGui::Group(AlienGui::GroupParameters().text(ModeText.at(_mode)));
+    }
+    return result;
+}
+
+void CreatorWindow::endParameterPanel()
+{
+    ImGui::EndChild();
+}
+
+void CreatorWindow::processColorWidget()
+{
+    auto color = EditorModel::get().getDefaultColorCode();
+    AlienGui::ComboColor(
+        AlienGui::ComboColorParameters()
+            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
+            .name("Color")
+            .textWidth(RightColumnWidth)
+            .tooltip(Const::GenomeColorTooltip),
+        color);
+    EditorModel::get().setDefaultColorCode(color);
+}
+
+void CreatorWindow::processMaterialWidgets()
+{
+    AlienGui::Switcher(
+        AlienGui::SwitcherParameters()
+            .name("Material")
+            .textWidth(RightColumnWidth)
+            .values({"Solid", "Fluid", "Free cells", "Energy particles"})
+            .tooltip(Const::CreatorDrawingTypeTooltip),
+        &_material);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
+    if (_material == CreationMaterial_Fluid) {
+        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
+    }
+    if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
+            &_stiffness);
+    }
+}
+
+void CreatorWindow::processObjectDistanceWidget()
+{
+    AlienGui::InputFloat(
+        AlienGui::InputFloatParameters().name("Object distance").format("%.2f").step(0.1).textWidth(RightColumnWidth).tooltip(Const::CreatorDistanceTooltip),
+        _objectDistance);
+}
+
+void CreatorWindow::processStickyWidget()
+{
+    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
+}
+
+void CreatorWindow::processStaticWidget()
+{
+    if (!isEnergyMaterial()) {
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(Const::CellStaticTooltip), _static);
+    }
+}
+
+bool CreatorWindow::processBuildButton()
+{
+    AlienGui::Separator();
+    return AlienGui::Button("Build");
+}
+
+bool CreatorWindow::processPointButtons(int minNumPoints)
+{
+    AlienGui::Separator();
+
+    ImGui::BeginDisabled(toInt(_points.size()) < minNumPoints);
+    auto result = AlienGui::Button("Build");
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_points.empty());
+    if (AlienGui::Button("Clear")) {
+        _points.clear();
     }
     ImGui::EndDisabled();
 
-    if (isPointPlacementMode()) {
-        ImGui::SameLine();
-        ImGui::BeginDisabled(_points.empty());
-        if (AlienGui::Button("Clear")) {
-            _points.clear();
-        }
-        ImGui::EndDisabled();
-    }
+    return result;
 }
 
 void CreatorWindow::processToolbar()
@@ -334,50 +507,43 @@ void CreatorWindow::processToolbar()
     }
 }
 
-void CreatorWindow::processPointPreview() const
+void CreatorWindow::processPointPreview(std::vector<RealVector2D> const& path, bool closed) const
 {
     if (_points.empty()) {
         return;
     }
 
-    auto toViewPos = [](RealVector2D const& worldPos) {
-        auto viewPos = Viewport::get().mapWorldToViewPosition(worldPos);
-        return ImVec2(viewPos.x, viewPos.y);
-    };
-
-    auto path = _mode == CreationMode_CreateCurve ? calcBezierCurvePath() : _points;
-    std::vector<ImVec2> viewPath;
-    viewPath.reserve(path.size());
-    for (auto const& point : path) {
-        viewPath.emplace_back(toViewPos(point));
-    }
-
     auto drawList = ImGui::GetBackgroundDrawList();
-    auto lineThickness = scale(2.0f);
-    auto closed = _mode == CreationMode_CreatePolygon ? ImDrawFlags_Closed : ImDrawFlags_None;
-    drawList->AddPolyline(viewPath.data(), toInt(viewPath.size()), Const::ConstructionPreviewLineColor, closed, lineThickness);
-
-    if (_mode == CreationMode_CreateCurve) {
-        std::vector<ImVec2> viewControlPolygon;
-        viewControlPolygon.reserve(_points.size());
-        for (auto const& point : _points) {
-            viewControlPolygon.emplace_back(toViewPos(point));
-        }
-        drawList->AddPolyline(
-            viewControlPolygon.data(), toInt(viewControlPolygon.size()), Const::ConstructionPreviewHintLineColor, ImDrawFlags_None, lineThickness);
-    }
+    auto viewPath = mapToViewPositions(path);
+    drawList->AddPolyline(
+        viewPath.data(),
+        toInt(viewPath.size()),
+        Const::ConstructionPreviewLineColor,
+        closed ? ImDrawFlags_Closed : ImDrawFlags_None,
+        scale(PreviewLineThickness));
 
     if (!ImGui::GetIO().WantCaptureMouse) {
         auto mousePos = ImGui::GetMousePos();
-        drawList->AddLine(toViewPos(_points.back()), mousePos, Const::ConstructionPreviewHintLineColor, lineThickness);
-        if (_mode == CreationMode_CreatePolygon && _points.size() > 1) {
-            drawList->AddLine(mousePos, toViewPos(_points.front()), Const::ConstructionPreviewHintLineColor, lineThickness);
+        drawList->AddLine(mapToViewPosition(_points.back()), mousePos, Const::ConstructionPreviewHintLineColor, scale(PreviewLineThickness));
+        if (closed && _points.size() > 1) {
+            drawList->AddLine(mousePos, mapToViewPosition(_points.front()), Const::ConstructionPreviewHintLineColor, scale(PreviewLineThickness));
         }
     }
 
     for (auto const& point : _points) {
-        drawList->AddCircleFilled(toViewPos(point), scale(3.0f), Const::ConstructionPreviewPointColor);
+        drawList->AddCircleFilled(mapToViewPosition(point), scale(PreviewPointRadius), Const::ConstructionPreviewPointColor);
     }
+}
+
+void CreatorWindow::processControlPolygonPreview() const
+{
+    if (_points.size() < 2) {
+        return;
+    }
+
+    auto viewPath = mapToViewPositions(_points);
+    ImGui::GetBackgroundDrawList()->AddPolyline(
+        viewPath.data(), toInt(viewPath.size()), Const::ConstructionPreviewHintLineColor, ImDrawFlags_None, scale(PreviewLineThickness));
 }
 
 bool CreatorWindow::isShown()
@@ -472,7 +638,7 @@ CreatorWindow::CreatorWindow()
     : AlienWindow("Creator", "editors.creator", false, false, {464.0f, 61.0f}, {400.0f, 370.0f})
 {}
 
-void CreatorWindow::createEntity()
+void CreatorWindow::createSingleObject()
 {
     ContentDesc description;
     if (isEnergyMaterial()) {
@@ -574,9 +740,8 @@ void CreatorWindow::createDisc()
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
-void CreatorWindow::createFromPoints()
+void CreatorWindow::createObjectNetwork(std::vector<RealVector2D> const& positions, float connectionDistance)
 {
-    auto positions = calcObjectPositionsFromPoints();
     if (positions.empty()) {
         return;
     }
@@ -598,7 +763,6 @@ void CreatorWindow::createFromPoints()
     if (isEnergyMaterial()) {
         description = convertToEnergyParticles(description);
     } else {
-        auto connectionDistance = _objectDistance * (_mode == CreationMode_CreatePolygon ? 1.7f : 1.5f);
         DescEditService::get().reconnectObjects(description, connectionDistance);
     }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
@@ -622,14 +786,6 @@ std::vector<RealVector2D> CreatorWindow::calcBezierCurvePath() const
         result.emplace_back(evaluateBezier(_points, toFloat(segment) / toFloat(numSegments)));
     }
     return result;
-}
-
-std::vector<RealVector2D> CreatorWindow::calcObjectPositionsFromPoints() const
-{
-    if (_mode == CreationMode_CreatePolygon) {
-        return distributeHexagonallyInPolygon(_points, _objectDistance);
-    }
-    return distributeAlongPath(_mode == CreationMode_CreateCurve ? calcBezierCurvePath() : _points, _objectDistance);
 }
 
 ContentDesc CreatorWindow::convertToEnergyParticles(ContentDesc const& description) const
@@ -674,11 +830,6 @@ InteractionMode CreatorWindow::getInteractionMode() const
         return InteractionMode_PointPlacement;
     }
     return InteractionMode_Selection;
-}
-
-int CreatorWindow::getRequiredNumPoints() const
-{
-    return _mode == CreationMode_CreatePolygon ? 3 : 2;
 }
 
 ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
