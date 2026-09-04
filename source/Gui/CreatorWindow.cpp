@@ -53,6 +53,7 @@ namespace
     };
 
     auto const RightColumnWidth = 160.0f;
+    auto const PointButtonWidth = 60.0f;
     auto constexpr MaxNumObjects = size_t{1000000};
     auto constexpr PreviewLineThickness = 2.0f;
     auto constexpr PreviewPointRadius = 3.0f;
@@ -394,7 +395,7 @@ void CreatorWindow::updateInteractionMode()
 {
     auto& simInteractionController = SimulationInteractionController::get();
     if (simInteractionController.getInteractionMode() == InteractionMode_PositionSelection) {
-        _points.clear();
+        abortPointPlacement();
     } else {
         simInteractionController.setInteractionMode(getInteractionMode());
     }
@@ -476,18 +477,34 @@ bool CreatorWindow::processPointButtons(int minNumPoints)
 {
     AlienGui::Separator();
 
-    ImGui::BeginDisabled(toInt(_points.size()) < minNumPoints);
-    auto result = AlienGui::Button("Build");
-    ImGui::EndDisabled();
+    auto result = false;
+    if (!_pointPlacementActive) {
+        if (AlienGui::Button("Start", PointButtonWidth)) {
+            _pointPlacementActive = true;
+        }
+    } else {
+        ImGui::BeginDisabled(toInt(_points.size()) < minNumPoints);
+        if (AlienGui::Button("Finish", PointButtonWidth)) {
+            _pointPlacementActive = false;
+            result = true;
+        }
+        ImGui::EndDisabled();
+    }
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_points.empty());
-    if (AlienGui::Button("Clear")) {
-        _points.clear();
+    ImGui::BeginDisabled(!_pointPlacementActive);
+    if (AlienGui::Button("Abort", PointButtonWidth)) {
+        abortPointPlacement();
     }
     ImGui::EndDisabled();
 
     return result;
+}
+
+void CreatorWindow::abortPointPlacement()
+{
+    _pointPlacementActive = false;
+    _points.clear();
 }
 
 void CreatorWindow::processToolbar()
@@ -503,7 +520,7 @@ void CreatorWindow::processToolbar()
     }
 
     if (_mode != previousMode) {
-        _points.clear();
+        abortPointPlacement();
     }
 }
 
@@ -544,6 +561,13 @@ void CreatorWindow::processControlPolygonPreview() const
     auto viewPath = mapToViewPositions(_points);
     ImGui::GetBackgroundDrawList()->AddPolyline(
         viewPath.data(), toInt(viewPath.size()), Const::ConstructionPreviewHintLineColor, ImDrawFlags_None, scale(PreviewLineThickness));
+}
+
+void CreatorWindow::processBackground()
+{
+    if (!isShown()) {
+        abortPointPlacement();
+    }
 }
 
 bool CreatorWindow::isShown()
@@ -826,7 +850,7 @@ InteractionMode CreatorWindow::getInteractionMode() const
     if (_mode == CreationMode_Drawing) {
         return InteractionMode_Drawing;
     }
-    if (isPointPlacementMode()) {
+    if (isPointPlacementMode() && _pointPlacementActive) {
         return InteractionMode_PointPlacement;
     }
     return InteractionMode_Selection;
