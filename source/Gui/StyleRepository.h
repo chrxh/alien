@@ -107,6 +107,14 @@ namespace Const
     ImColor const ToolbarButtonTextColor = ImColor::HSV(0.530f, 0.320f, 0.950f);
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.0f);
     ImColor const ToolbarButtonHoveredColor = RaisedColor;
+    ImColor const ToolbarButtonSelectedColor = AccentDeepColor;
+    ImColor const ToolbarButtonSelectedTextColor = AccentColor;
+    ImColor const ToolbarButtonDisabledTextColor = TextFaintColor;
+    ImColor const ToolbarSelectionBarColor = AccentColor;
+    ImColor const ToolbarGroupColor = ImColor::HSV(0.583f, 0.100f, 1.000f, 0.050f);
+    ImColor const ToolbarOverflowColor = TextFaintColor;
+    ImColor const ToolbarOverflowHoveredColor = AccentColor;
+    ImColor const ToolbarMenuHoveredColor = AccentDeepColor;
 
     ImColor const ActionButtonTextColor = ImColor::HSV(0.530f, 0.400f, 0.950f);
     ImColor const ActionButtonHighlightedTextColor = AccentColor;

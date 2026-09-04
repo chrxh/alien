@@ -10,21 +10,18 @@
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SpaceCalculator.h>
 
+#include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
     auto constexpr LeftColumnWidth = 180.0f;
 }
 
-void TemporalControlWindow::initIntern()
-{
-
-}
+void TemporalControlWindow::initIntern() {}
 
 void TemporalControlWindow::onSnapshot()
 {
@@ -37,23 +34,7 @@ TemporalControlWindow::TemporalControlWindow()
 
 void TemporalControlWindow::processIntern()
 {
-    processRunButton();
-    ImGui::SameLine();
-    processPauseButton();
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-    ImGui::SameLine();
-    processStepBackwardButton();
-    ImGui::SameLine();
-    processStepForwardButton();
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-    ImGui::SameLine();
-    processCreateFlashbackButton();
-    ImGui::SameLine();
-    processLoadFlashbackButton();
-
-    AlienGui::Separator();
+    processToolbar();
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         processTpsInfo();
@@ -134,84 +115,61 @@ void TemporalControlWindow::processTpsRestriction()
     ImGui::EndDisabled();
 }
 
-void TemporalControlWindow::processRunButton()
+void TemporalControlWindow::processToolbar()
 {
-    ImGui::BeginDisabled(_SimulationFacade::get()->isSimulationRunning());
-    auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLAY));
-    AlienGui::Tooltip("Run");
-    if (result) {
-        _history.clear();
-        _SimulationFacade::get()->runSimulation();
-        printOverlayMessage("Run");
-    }
-    ImGui::EndDisabled();
-}
+    auto simulationRunning = _SimulationFacade::get()->isSimulationRunning();
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("TemporalControl"),
+        {AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_PLAY).name("Run").disabled(simulationRunning).action([&] {
+             _history.clear();
+             _SimulationFacade::get()->runSimulation();
+             printOverlayMessage("Run");
+         })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_PAUSE).name("Pause").disabled(!simulationRunning).action([&] {
+             _SimulationFacade::get()->pauseSimulation();
+             printOverlayMessage("Pause");
+         })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_CHEVRON_LEFT)
+                                                 .name("Load previous time step")
+                                                 .disabled(_history.empty() || simulationRunning)
+                                                 .action([&] {
+                                                     auto const& snapshot = _history.back();
+                                                     delayedExecution([this, snapshot] { applySnapshot(snapshot); });
+                                                     printOverlayMessage("Loading previous time step ...");
 
-void TemporalControlWindow::processPauseButton()
-{
-    ImGui::BeginDisabled(!_SimulationFacade::get()->isSimulationRunning());
-    auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PAUSE));
-    AlienGui::Tooltip("Pause");
-    if (result) {
-        _SimulationFacade::get()->pauseSimulation();
-        printOverlayMessage("Pause");
-    }
-    ImGui::EndDisabled();
-}
+                                                     _history.pop_back();
+                                                 })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_CHEVRON_RIGHT).name("Process single time step").disabled(simulationRunning).action([&] {
+                 _history.emplace_back(createSnapshot());
+                 _SimulationFacade::get()->calcTimesteps(1);
+             })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_CAMERA)
+                                                 .name("Create flashback")
+                                                 .tooltip("Creating in-memory flashback: It saves the content of the current world to the memory.")
+                                                 .action([&] {
+                                                     delayedExecution([this] { onSnapshot(); });
 
-void TemporalControlWindow::processStepBackwardButton()
-{
-    ImGui::BeginDisabled(_history.empty() || _SimulationFacade::get()->isSimulationRunning());
-    auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_LEFT));
-    AlienGui::Tooltip("Load previous time step");
-    if (result) {
-        auto const& snapshot = _history.back();
-        delayedExecution([this, snapshot] { applySnapshot(snapshot); });
-        printOverlayMessage("Loading previous time step ...");
+                                                     printOverlayMessage("Creating flashback ...", true);
+                                                 })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters()
+                 .icon(ICON_FA_UNDO)
+                 .name("Load flashback")
+                 .tooltip("Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. "
+                          "Non-static parameters (such as the position of moving layers) will be restored as well.")
+                 .disabled(!_snapshot)
+                 .action([&] {
+                     delayedExecution([this] { applySnapshot(*_snapshot); });
+                     _SimulationFacade::get()->removeSelection();
+                     _history.clear();
 
-        _history.pop_back();
-    }
-    ImGui::EndDisabled();
-}
-
-void TemporalControlWindow::processStepForwardButton()
-{
-    ImGui::BeginDisabled(_SimulationFacade::get()->isSimulationRunning());
-    auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_RIGHT));
-    AlienGui::Tooltip("Process single time step");
-    if (result) {
-        _history.emplace_back(createSnapshot());
-        _SimulationFacade::get()->calcTimesteps(1);
-    }
-    ImGui::EndDisabled();
-}
-
-void TemporalControlWindow::processCreateFlashbackButton()
-{
-    auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA));
-    AlienGui::Tooltip("Creating in-memory flashback: It saves the content of the current world to the memory.");
-    if (result) {
-        delayedExecution([this] { onSnapshot(); });
-
-        printOverlayMessage("Creating flashback ...", true);
-    }
-}
-
-void TemporalControlWindow::processLoadFlashbackButton()
-{
-    ImGui::BeginDisabled(!_snapshot);
-    auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO));
-    AlienGui::Tooltip(
-        "Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
-        "(such as the position of moving layers) will be restored as well.");
-    if (result) {
-        delayedExecution([this] { applySnapshot(*_snapshot); });
-        _SimulationFacade::get()->removeSelection();
-        _history.clear();
-
-        printOverlayMessage("Loading flashback ...", true);
-    }
-    ImGui::EndDisabled();
+                     printOverlayMessage("Loading flashback ...", true);
+                 }))});
 }
 
 TemporalControlWindow::Snapshot TemporalControlWindow::createSnapshot()

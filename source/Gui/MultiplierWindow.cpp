@@ -95,10 +95,7 @@ MultiplierWindow::MultiplierWindow()
 
 void MultiplierWindow::processIntern()
 {
-    AlienGui::SelectableToolbarButton(ICON_GRID, _mode, MultiplierMode_Grid, MultiplierMode_Grid);
-
-    ImGui::SameLine();
-    AlienGui::SelectableToolbarButton(ICON_RANDOM, _mode, MultiplierMode_Random, MultiplierMode_Random);
+    processToolbar();
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
@@ -139,6 +136,20 @@ void MultiplierWindow::processIntern()
 bool MultiplierWindow::isShown()
 {
     return _on && EditorController::get().isOn();
+}
+
+void MultiplierWindow::processToolbar()
+{
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("Multiplier").bottomSeparator(false),
+        {AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_GRID).name(ModeText.at(MultiplierMode_Grid)).selected(_mode == MultiplierMode_Grid).action([&] {
+                 _mode = MultiplierMode_Grid;
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_RANDOM).name(ModeText.at(MultiplierMode_Random)).selected(_mode == MultiplierMode_Random).action([&] {
+                 _mode = MultiplierMode_Random;
+             }))});
 }
 
 void MultiplierWindow::processGridPanel()

@@ -28,6 +28,7 @@ private:
     void processIntern() override;
     bool isShown() override;
 
+    void processToolbar();
     void processGridPanel();
     void processRandomPanel();
 
