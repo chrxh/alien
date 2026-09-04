@@ -3,6 +3,8 @@
 #include <ranges>
 #include <variant>
 
+#include <boost/range/adaptors.hpp>
+
 #include <imgui.h>
 
 #include <Base/Math.h>
@@ -43,6 +45,23 @@ namespace
     {
         auto text = value;
         AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true), text);
+    }
+
+    void geneIndexWidget(std::optional<GenomeDesc> const& genome, int& geneIndex)
+    {
+        if (!genome.has_value()) {
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), geneIndex);
+            return;
+        }
+        std::vector<std::string> geneNames;
+        for (auto const& [index, gene] : genome->_genes | boost::adaptors::indexed(0)) {
+            auto text = std::to_string(index) + ": " + gene._name;
+            if (index == 0) {
+                text += " (root)";
+            }
+            geneNames.emplace_back(text);
+        }
+        AlienGui::Combo(AlienGui::ComboParameters().name("Gene index").values(geneNames).textWidth(TextWidth), geneIndex);
     }
 
     template <typename Func>
@@ -335,7 +354,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
             table.next();
             break;
         case ObjectType_Cell: {
-            processCellNode(object);
+            processCellNode(object, extendedObject.genome);
             table.next();
             if (extendedObject.creature.has_value()) {
                 processCreatureNode(extendedObject);
@@ -481,7 +500,7 @@ void _InspectionWindow::processFreeCellNode(ObjectDesc& object)
     AlienGui::EndTreeNode();
 }
 
-void _InspectionWindow::processCellNode(ObjectDesc& object)
+void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<GenomeDesc> const& genome)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
         auto& cell = object.getCellRef();
@@ -524,10 +543,10 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             }
         });
 
-        processCellTypeNode(cell);
+        processCellTypeNode(cell, genome);
 
         if (cell.getCellType() != CellType_Void && cell._constructor.has_value()) {
-            processConstructorNode(cell._constructor.value());
+            processConstructorNode(cell._constructor.value(), genome);
         }
 
         processNeuralActivityNode(cell);
@@ -538,7 +557,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
     AlienGui::EndTreeNode();
 }
 
-void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
+void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std::optional<GenomeDesc> const& genome)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
@@ -560,7 +579,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
         }
         constructor._numBranches = numBranches + 1;
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), constructor._geneIndex);
+        geneIndexWidget(genome, constructor._geneIndex);
     }
     AlienGui::EndTreeNode();
 }
@@ -664,7 +683,7 @@ namespace
     }
 }
 
-void _InspectionWindow::processCellTypeNode(CellDesc& cell)
+void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<GenomeDesc> const& genome)
 {
     auto cellType = cell.getCellType();
     auto cellTypeName = Const::CellTypeStrings.at(cellType) + " properties";
@@ -746,7 +765,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
             }
         } else if (cellType == CellType_Injector) {
             auto& injector = std::get<InjectorDesc>(cell._cellType);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), injector._geneIndex);
+            geneIndexWidget(genome, injector._geneIndex);
         } else if (cellType == CellType_Muscle) {
             auto& muscle = std::get<MuscleDesc>(cell._cellType);
             auto mode = muscle.getMode();
