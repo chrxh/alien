@@ -33,13 +33,13 @@ private:
     void processSolidNode(ObjectDesc& object);
     void processFluidNode(ObjectDesc& object);
     void processFreeCellNode(ObjectDesc& object);
-    void processCellNode(ObjectDesc& object);
+    void processCellNode(ObjectDesc& object, std::optional<GenomeDesc> const& genome);
     void processCreatureNode(ExtendedObjectDesc& extendedObject);
     void processCreatureProperties(ExtendedObjectDesc& extendedObject);
     void processNeuralActivityNode(CellDesc& cell);
     void processNeuralNetNode(ObjectDesc& object);
-    void processCellTypeNode(CellDesc& cell);
-    void processConstructorNode(ConstructorDesc& constructor);
+    void processCellTypeNode(CellDesc& cell, std::optional<GenomeDesc> const& genome);
+    void processConstructorNode(ConstructorDesc& constructor, std::optional<GenomeDesc> const& genome);
 
     float calcWindowWidth() const;
 
