@@ -7,6 +7,7 @@
 
 #include "AlienWindow.h"
 #include "Definitions.h"
+#include "SimulationInteractionController.h"
 
 using CreationMode = int;
 enum CreationMode_
@@ -15,7 +16,10 @@ enum CreationMode_
     CreationMode_CreateRectangle,
     CreationMode_CreateHexagon,
     CreationMode_CreateDisc,
-    CreationMode_Drawing
+    CreationMode_Drawing,
+    CreationMode_CreateLine,
+    CreationMode_CreateCurve,
+    CreationMode_CreatePolygon
 };
 
 using CreationMaterial = int;
@@ -35,23 +39,59 @@ public:
     void onDrawing();
     void finishDrawing();
 
+    void onAddPoint(RealVector2D const& worldPos);
+    void onRemoveLastPoint();
+
 private:
     CreatorWindow();
 
     void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
+    void processBackground() override;
     bool isShown() override;
 
-    void createEntity();
+    void processToolbar();
+
+    void processCreateObject();
+    void processCreateRectangle();
+    void processCreateHexagon();
+    void processCreateDisc();
+    void processDrawing();
+    void processCreateLine();
+    void processCreateCurve();
+    void processCreatePolygon();
+
+    void updateInteractionMode();
+
+    bool beginParameterPanel();
+    void endParameterPanel();
+    void processColorWidget();
+    void processMaterialWidgets();
+    void processObjectDistanceWidget();
+    void processStickyWidget();
+    void processStaticWidget();
+    bool processBuildButton();
+    bool processPointButtons(int minNumPoints);
+    void abortPointPlacement();
+
+    void processPointPreview(std::vector<RealVector2D> const& path, bool closed) const;
+    void processControlPolygonPreview() const;
+
+    void createSingleObject();
     void createRectangle();
     void createHexagon();
     void createDisc();
+    void createObjectNetwork(std::vector<RealVector2D> const& positions, float connectionDistance);
+
+    std::vector<RealVector2D> calcBezierCurvePath() const;
 
     ContentDesc convertToEnergyParticles(ContentDesc const& description) const;
 
     void validateAndCorrect();
     bool isEnergyMaterial() const;
+    bool isPointPlacementMode() const;
+    InteractionMode getInteractionMode() const;
 
     ObjectTypeDesc getObjectTypeDesc() const;
 
@@ -80,6 +120,9 @@ private:
     ContentDesc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
+
+    std::vector<RealVector2D> _points;
+    bool _pointPlacementActive = false;
 
     CreationMode _mode = CreationMode_Drawing;
 };

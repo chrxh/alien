@@ -435,8 +435,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
         correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
 
-        // Use a distinct color for sources (e.g., yellow)
-        float3 color = {0.05f, 0.05f, 0.15f};
+        float3 color = {0.15f, 0.15f, 0.45f};
         auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];
         auto radius = cudaSimulationParameters.sourceCircularRadius.sourceValues[i];
         auto rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[i];
