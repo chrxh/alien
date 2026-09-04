@@ -22,6 +22,7 @@
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "HelpStrings.h"
+#include "ImageToPatternDialog.h"
 #include "SimulationInteractionController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -514,9 +515,14 @@ void CreatorWindow::processToolbar()
     for (auto const& [mode, icon] : ToolbarModeIcons) {
         AlienGui::SelectableToolbarButton(icon, _mode, mode, mode);
         AlienGui::Tooltip(ModeText.at(mode));
-        if (mode != ToolbarModeIcons.back().first) {
-            ImGui::SameLine();
-        }
+        ImGui::SameLine();
+    }
+
+    AlienGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_IMAGE).tooltip("Create a pattern from an image"))) {
+        ImageToPatternDialog::get().show();
     }
 
     if (_mode != previousMode) {
