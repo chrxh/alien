@@ -48,6 +48,7 @@ private:
     void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
+    void processBackground() override;
     bool isShown() override;
 
     void processToolbar();
@@ -72,6 +73,7 @@ private:
     void processStaticWidget();
     bool processBuildButton();
     bool processPointButtons(int minNumPoints);
+    void abortPointPlacement();
 
     void processPointPreview(std::vector<RealVector2D> const& path, bool closed) const;
     void processControlPolygonPreview() const;
@@ -120,6 +122,7 @@ private:
     RealVector2D _lastDrawPos;
 
     std::vector<RealVector2D> _points;
+    bool _pointPlacementActive = false;
 
     CreationMode _mode = CreationMode_Drawing;
 };
