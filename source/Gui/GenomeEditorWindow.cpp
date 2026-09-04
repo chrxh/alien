@@ -109,16 +109,35 @@ bool GenomeEditorWindow::isShown()
     return _on;
 }
 
+namespace
+{
+    float calcUnsavedChangesChipWidth()
+    {
+        return scaleInverse(ImGui::CalcTextSize(UnsavedChangesText).x) + UnsavedChangesChipPadding;
+    }
+
+    void processUnsavedChangesChip()
+    {
+        AlienGui::Chip(AlienGui::ChipParameters()
+                           .text(UnsavedChangesText)
+                           .textColor(Const::UnsavedChangesColor)
+                           .backgroundColor(Const::UnsavedChangesBackgroundColor)
+                           .dotColor(Const::UnsavedChangesColor));
+    }
+}
+
 void GenomeEditorWindow::processToolbar()
 {
     auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
     auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
 
+    auto toolbarParameters = AlienGui::ToolbarParameters().id("GenomeEditor");
+    if (hasGenomeChanged) {
+        toolbarParameters.trailing([] { processUnsavedChangesChip(); }).trailingWidth(calcUnsavedChangesChipWidth());
+    }
+
     AlienGui::Toolbar(
-        AlienGui::ToolbarParameters()
-            .id("GenomeEditor")
-            .trailing([&] { processUnsavedChangesChip(hasGenomeChanged); })
-            .trailingWidth(hasGenomeChanged ? calcUnsavedChangesChipWidth() : 0.0f),
+        toolbarParameters,
         {AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_FOLDER_OPEN).name("Open genome").tooltip("Open genome from file").action([&] { onOpenGenome(); })),
          AlienGui::ToolbarItem::createButton(
@@ -182,23 +201,6 @@ void GenomeEditorWindow::processToolbar()
                                                  .name("Create seed with energy")
                                                  .tooltip("Create a seed with current genome with free energy supply")
                                                  .action([&] { onCreateSeed(true); }))});
-}
-
-float GenomeEditorWindow::calcUnsavedChangesChipWidth() const
-{
-    return scaleInverse(ImGui::CalcTextSize(UnsavedChangesText).x) + UnsavedChangesChipPadding;
-}
-
-void GenomeEditorWindow::processUnsavedChangesChip(bool hasGenomeChanged)
-{
-    if (!hasGenomeChanged) {
-        return;
-    }
-    AlienGui::Chip(AlienGui::ChipParameters()
-                       .text(UnsavedChangesText)
-                       .textColor(Const::UnsavedChangesColor)
-                       .backgroundColor(Const::UnsavedChangesBackgroundColor)
-                       .dotColor(Const::UnsavedChangesColor));
 }
 
 void GenomeEditorWindow::processTabWidget()
