@@ -1885,6 +1885,7 @@ namespace
     auto constexpr ToolbarSelectionBarBottom = 5.0f;
     auto constexpr ToolbarSelectionBarHeight = 2.0f;
     auto constexpr ToolbarOverflowSize = 28.0f;
+    auto constexpr ToolbarOverflowIconSize = 15.0f;
     auto constexpr ToolbarOverflowSpacing = 10.0f;
     auto constexpr ToolbarMenuSpacing = 4.0f;
     auto constexpr ToolbarMenuRowHeight = 34.0f;
@@ -2123,13 +2124,15 @@ void AlienGui::Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarI
         }
         auto opened = ImGui::IsPopupOpen("##toolbarMenu");
 
-        ImGui::PushFont(StyleRepository::get().getIconFont());
-        auto iconSize = ImGui::CalcTextSize(ICON_FA_ELLIPSIS_H);
+        auto iconFont = StyleRepository::get().getIconFont();
+        auto iconFontSize = scale(ToolbarOverflowIconSize);
+        auto iconSize = iconFont->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, ICON_FA_ELLIPSIS_H);
         drawList->AddText(
+            iconFont,
+            iconFontSize,
             {overflowPos + (overflowSize - iconSize.x) / 2, startPos.y + (toolbarHeight - iconSize.y) / 2},
             hovered || opened ? Const::ToolbarOverflowHoveredColor : Const::ToolbarOverflowColor,
             ICON_FA_ELLIPSIS_H);
-        ImGui::PopFont();
         Tooltip("Show remaining actions");
 
         auto menuWidth = 0.0f;
