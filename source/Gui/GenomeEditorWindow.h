@@ -27,6 +27,7 @@ private:
     bool isShown() override;
 
     void processToolbar();
+    float calcUnsavedChangesChipWidth() const;
     void processUnsavedChangesChip(bool hasGenomeChanged);
     void processTabWidget();
 

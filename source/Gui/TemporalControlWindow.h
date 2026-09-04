@@ -29,12 +29,7 @@ private:
     void processRealTimeInfo();
     void processTpsRestriction();
 
-    void processRunButton();
-    void processPauseButton();
-    void processStepBackwardButton();
-    void processStepForwardButton();
-    void processCreateFlashbackButton();
-    void processLoadFlashbackButton();
+    void processToolbar();
 
     struct Snapshot
     {

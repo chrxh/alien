@@ -460,18 +460,38 @@ public:
     };
     static void ListBox(ListBoxParameters const& parameters);
 
-    struct ToolbarButtonParameters
+    struct ToolbarItemParameters
     {
-        MEMBER(ToolbarButtonParameters, std::string, text, std::string());
-        MEMBER(ToolbarButtonParameters, std::optional<std::string>, secondText, std::nullopt);
-        MEMBER(ToolbarButtonParameters, RealVector2D, secondTextOffset, (RealVector2D{25.0f, 25.0f}));
-        MEMBER(ToolbarButtonParameters, float, secondTextScale, 0.5f);
-        MEMBER(ToolbarButtonParameters, bool, disabled, false);
-        MEMBER(ToolbarButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ToolbarItemParameters, std::string, icon, std::string());
+        MEMBER(ToolbarItemParameters, std::optional<std::string>, secondIcon, std::nullopt);
+        MEMBER(ToolbarItemParameters, RealVector2D, secondIconOffset, (RealVector2D{25.0f, 25.0f}));
+        MEMBER(ToolbarItemParameters, float, secondIconScale, 0.5f);
+        MEMBER(ToolbarItemParameters, std::string, name, std::string());
+        MEMBER(ToolbarItemParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ToolbarItemParameters, bool, disabled, false);
+        MEMBER(ToolbarItemParameters, bool, selected, false);
+        MEMBER(ToolbarItemParameters, std::function<void()>, action, std::function<void()>());
     };
-    static bool ToolbarButton(ToolbarButtonParameters const& parameters);
 
-    static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
+    struct ToolbarItem
+    {
+        static ToolbarItem createButton(ToolbarItemParameters const& parameters);
+        static ToolbarItem createSeparator();
+
+        bool _isSeparator = false;
+        ToolbarItemParameters _parameters;
+    };
+
+    struct ToolbarParameters
+    {
+        MEMBER(ToolbarParameters, std::string, id, std::string("Toolbar"));
+        MEMBER(ToolbarParameters, std::function<void()>, trailing, std::function<void()>());
+        MEMBER(ToolbarParameters, float, trailingWidth, 0.0f);
+        MEMBER(ToolbarParameters, bool, bottomSeparator, true);
+    };
+
+    // Draws icon buttons grouped by separators. Items that do not fit are moved to a menu behind an ellipsis at the right border.
+    static void Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarItem> const& items);
 
     struct ChipParameters
     {
@@ -485,7 +505,6 @@ public:
     static void Chip(ChipParameters const& parameters);
 
     static void VerticalSeparator(float height = 23.0f);
-    static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
     static bool MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized);
@@ -505,7 +524,7 @@ public:
         MEMBER(TreeNodeParameters, bool, enableBlinking, false);
         MEMBER(TreeNodeParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
     };
-    static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);   // Returns true if the tree node is open.
+    static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);  // Returns true if the tree node is open.
     static void EndTreeNode();
 
     struct TabItemParameters
