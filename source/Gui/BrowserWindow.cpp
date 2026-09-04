@@ -226,123 +226,74 @@ void BrowserWindow::processToolbar()
     std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
     auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
 
-    // Refresh button
-    ImGui::BeginDisabled(_refreshProcessor->pendingTasks());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SYNC))) {
-        onRefresh();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Refresh");
-
-    // Login button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SIGN_IN_ALT))) {
-        LoginDialog::get().open();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Login or register");
-
-    // Logout button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SIGN_OUT_ALT))) {
-        NetworkService::get().logout();
-        onRefresh();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Logout");
-
-    // Separator
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    // Upload button
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
-        std::string prefix = [&] {
-            if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
-                return std::string();
-            }
-            return NetworkResourceService::get().concatenateFolderName(_selectedTreeTO->folderNames, true);
-        }();
-        UploadSimulationDialog::get().open(_currentWorkspace.resourceType, prefix);
-    }
-    AlienGui::Tooltip(
-        "Upload your current " + resourceTypeString
-        + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only be visible "
-          "in your private workspace.\nIf you have already selected a folder, your "
-        + resourceTypeString + " will be uploaded there.");
-
-    // Edit button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EDIT))) {
-        onEditResource(_selectedTreeTO);
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Change name or description");
-
-    // Replace button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXCHANGE_ALT))) {
-        onReplaceResource(_selectedTreeTO->getLeaf());
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip(
-        "Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
-
-    // Move to other workspace button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SHARE_ALT))) {
-        onMoveResource(_selectedTreeTO);
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
-
-    // Delete button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
-        onDeleteResource(_selectedTreeTO);
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Delete selected " + resourceTypeString);
-
-    // Separator
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    // Expand button
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
-        onExpandFolders();
-    }
-    AlienGui::Tooltip("Expand all folders");
-
-    // Collapse button
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
-        onCollapseFolders();
-    }
-    AlienGui::Tooltip("Collapse all folders");
+    std::vector<AlienGui::ToolbarItem> items{
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_SYNC).name("Refresh").disabled(_refreshProcessor->pendingTasks()).action([&] { onRefresh(); })),
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                .icon(ICON_FA_SIGN_IN_ALT)
+                                                .name("Login or register")
+                                                .disabled(NetworkService::get().getLoggedInUserName().has_value())
+                                                .action([&] { LoginDialog::get().open(); })),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_SIGN_OUT_ALT).name("Logout").disabled(!NetworkService::get().getLoggedInUserName()).action([&] {
+                NetworkService::get().logout();
+                onRefresh();
+            })),
+        AlienGui::ToolbarItem::createSeparator(),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters()
+                .icon(ICON_FA_UPLOAD)
+                .name("Upload " + resourceTypeString)
+                .tooltip(
+                    "Upload your current " + resourceTypeString
+                    + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only "
+                      "be visible in your private workspace.\nIf you have already selected a folder, your "
+                    + resourceTypeString + " will be uploaded there.")
+                .action([&] {
+                    std::string prefix = [&] {
+                        if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
+                            return std::string();
+                        }
+                        return NetworkResourceService::get().concatenateFolderName(_selectedTreeTO->folderNames, true);
+                    }();
+                    UploadSimulationDialog::get().open(_currentWorkspace.resourceType, prefix);
+                })),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_EDIT).name("Change name or description").disabled(!isOwnerForSelectedItem).action([&] {
+                onEditResource(_selectedTreeTO);
+            })),
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                .icon(ICON_FA_EXCHANGE_ALT)
+                                                .name("Replace " + resourceTypeString)
+                                                .tooltip(
+                                                    "Replace the selected " + resourceTypeString
+                                                    + " with the one that is currently open. The name, description and reactions will be preserved.")
+                                                .disabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf())
+                                                .action([&] { onReplaceResource(_selectedTreeTO->getLeaf()); })),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters()
+                .icon(ICON_FA_SHARE_ALT)
+                .name("Change visibility")
+                .tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public")
+                .disabled(!isOwnerForSelectedItem)
+                .action([&] { onMoveResource(_selectedTreeTO); })),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_TRASH).name("Delete selected " + resourceTypeString).disabled(!isOwnerForSelectedItem).action([&] {
+                onDeleteResource(_selectedTreeTO);
+            })),
+        AlienGui::ToolbarItem::createSeparator(),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_EXPAND_ARROWS_ALT).name("Expand all folders").action([&] { onExpandFolders(); })),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_COMPRESS_ARROWS_ALT).name("Collapse all folders").action([&] { onCollapseFolders(); }))};
 
 #ifdef _WIN32
-    // Separator
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    // Discord button
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMMENTS))) {
-        openWeblink(Const::DiscordURL);
-    }
-    AlienGui::Tooltip("Open ALIEN Discord server");
+    items.emplace_back(AlienGui::ToolbarItem::createSeparator());
+    items.emplace_back(AlienGui::ToolbarItem::createButton(
+        AlienGui::ToolbarItemParameters().icon(ICON_FA_COMMENTS).name("Open ALIEN Discord server").action([&] { openWeblink(Const::DiscordURL); })));
 #endif
 
-    AlienGui::Separator();
+    AlienGui::Toolbar(AlienGui::ToolbarParameters().id("Browser"), items);
 }
 
 void BrowserWindow::processWorkspace()

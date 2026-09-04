@@ -33,6 +33,8 @@ private:
     void processIntern() override;
     bool isShown() override;
 
+    void processToolbar();
+
     void onOpenPattern();
     void onSavePattern();
     void onMakeSticky();

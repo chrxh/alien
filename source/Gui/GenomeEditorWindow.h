@@ -27,7 +27,6 @@ private:
     bool isShown() override;
 
     void processToolbar();
-    void processUnsavedChangesChip(bool hasGenomeChanged);
     void processTabWidget();
 
     void onOpenGenome();

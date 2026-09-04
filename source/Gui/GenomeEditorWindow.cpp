@@ -32,6 +32,9 @@
 
 namespace
 {
+    auto constexpr UnsavedChangesText = "Unsaved changes";
+    auto constexpr UnsavedChangesChipPadding = 34.0f;
+
     std::optional<ImColor> getLineageMarkerColor(std::optional<int> const& lineageId)
     {
         if (!lineageId.has_value()) {
@@ -106,123 +109,98 @@ bool GenomeEditorWindow::isShown()
     return _on;
 }
 
-void GenomeEditorWindow::processToolbar()
+namespace
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open genome from file"))) {
-        onOpenGenome();
+    float calcUnsavedChangesChipWidth()
+    {
+        return scaleInverse(ImGui::CalcTextSize(UnsavedChangesText).x) + UnsavedChangesChipPadding;
     }
 
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save genome to file"))) {
-        onSaveGenome();
+    void processUnsavedChangesChip()
+    {
+        AlienGui::Chip(AlienGui::ChipParameters()
+                           .text(UnsavedChangesText)
+                           .textColor(Const::UnsavedChangesColor)
+                           .backgroundColor(Const::UnsavedChangesBackgroundColor)
+                           .dotColor(Const::UnsavedChangesColor));
     }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters()
-                .text(ICON_FA_UPLOAD)
-                .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser."))) {
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
-        onCloneGenome();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome to clipboard"))) {
-        onCopyGenome();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste genome from clipboard").disabled(!_copiedGenome.has_value()))) {
-        onPasteGenome();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_WINDOW_CLOSE).tooltip("Close all tabs except the current one").disabled(_tabs.size() <= 1))) {
-        onCloseOtherTabs();
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point in this tab").disabled(!hasGenomeChanged))) {
-        onSavepointGenome();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert genome to save point").disabled(!hasGenomeChanged))) {
-        _tabs.at(_selectedTabIndex)->revertChanges();
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PALETTE).tooltip("Change the color of all nodes with a certain color"))) {
-        ChangeColorDialog::get().open(_tabs.at(_selectedTabIndex)->getEditData());
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the current genome to the selected creatures in the simulation")
-                                    .disabled(!creaturesSelected))) {
-        onInjectGenome();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING).tooltip("Create a seed with current genome without free energy supply"))) {
-        onCreateSeed(false);
-    }
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_SEEDLING)
-                                    .secondText(ICON_FA_BOLT)
-                                    .secondTextOffset({30.0f, 25.0f})
-                                    .tooltip("Create a seed with current genome with free energy supply"))) {
-        onCreateSeed(true);
-    }
-
-    processUnsavedChangesChip(hasGenomeChanged);
-
-    AlienGui::Separator();
 }
 
-void GenomeEditorWindow::processUnsavedChangesChip(bool hasGenomeChanged)
+void GenomeEditorWindow::processToolbar()
 {
-    if (!hasGenomeChanged) {
-        return;
-    }
-    auto text = "Unsaved changes";
-    auto chipWidth = ImGui::CalcTextSize(text).x + scale(34.0f);
-    auto chipHeight = ImGui::GetTextLineHeight() + scale(4.0f);
-    if (ImGui::GetWindowContentRegionMax().x - ImGui::GetCursorPosX() < chipWidth + scale(16.0f)) {
-        return;
+    auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
+    auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
+
+    auto toolbarParameters = AlienGui::ToolbarParameters().id("GenomeEditor");
+    if (hasGenomeChanged) {
+        toolbarParameters.trailing([] { processUnsavedChangesChip(); }).trailingWidth(calcUnsavedChangesChipWidth());
     }
 
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x - chipWidth);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (scale(40.0f) - chipHeight) / 2);
-    AlienGui::Chip(AlienGui::ChipParameters()
-                       .text(text)
-                       .textColor(Const::UnsavedChangesColor)
-                       .backgroundColor(Const::UnsavedChangesBackgroundColor)
-                       .dotColor(Const::UnsavedChangesColor));
+    AlienGui::Toolbar(
+        toolbarParameters,
+        {AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_FOLDER_OPEN).name("Open genome").tooltip("Open genome from file").action([&] { onOpenGenome(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_SAVE).name("Save genome").tooltip("Save genome to file").action([&] { onSaveGenome(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters()
+                 .icon(ICON_FA_UPLOAD)
+                 .name("Share genome")
+                 .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.")),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_CLONE).name("Clone genome").action([&] { onCloneGenome(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_COPY).name("Copy genome").tooltip("Copy genome to clipboard").action([&] { onCopyGenome(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_PASTE)
+                                                 .name("Paste genome")
+                                                 .tooltip("Paste genome from clipboard")
+                                                 .disabled(!_copiedGenome.has_value())
+                                                 .action([&] { onPasteGenome(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_WINDOW_CLOSE)
+                                                 .name("Close other tabs")
+                                                 .tooltip("Close all tabs except the current one")
+                                                 .disabled(_tabs.size() <= 1)
+                                                 .action([&] { onCloseOtherTabs(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_CAMERA)
+                                                 .name("Create save point")
+                                                 .tooltip("Create save point in this tab")
+                                                 .disabled(!hasGenomeChanged)
+                                                 .action([&] { onSavepointGenome(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_UNDO)
+                                                 .name("Revert to save point")
+                                                 .tooltip("Revert genome to save point")
+                                                 .disabled(!hasGenomeChanged)
+                                                 .action([&] { _tabs.at(_selectedTabIndex)->revertChanges(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_PALETTE)
+                                                 .name("Change colors")
+                                                 .tooltip("Change the color of all nodes with a certain color")
+                                                 .action([&] { ChangeColorDialog::get().open(_tabs.at(_selectedTabIndex)->getEditData()); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_SYRINGE)
+                                                 .name("Inject genome")
+                                                 .tooltip("Inject the current genome to the selected creatures in the simulation")
+                                                 .disabled(!creaturesSelected)
+                                                 .action([&] { onInjectGenome(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_SEEDLING)
+                                                 .name("Create seed")
+                                                 .tooltip("Create a seed with current genome without free energy supply")
+                                                 .action([&] { onCreateSeed(false); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_SEEDLING)
+                                                 .secondIcon(ICON_FA_BOLT)
+                                                 .secondIconOffset({30.0f, 25.0f})
+                                                 .name("Create seed with energy")
+                                                 .tooltip("Create a seed with current genome with free energy supply")
+                                                 .action([&] { onCreateSeed(true); }))});
 }
 
 void GenomeEditorWindow::processTabWidget()
