@@ -20,10 +20,7 @@ private:
     void processIntern() override;
     void processBackground() override;
 
-    void processZoomInButton();
-    void processZoomOutButton();
-    void processCenterButton();
-    void processResizeButton();
+    void processToolbar();
 
     void processCenterOnSelection();
 

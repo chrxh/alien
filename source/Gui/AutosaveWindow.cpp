@@ -112,31 +112,22 @@ void AutosaveWindow::processBackground()
 
 void AutosaveWindow::processToolbar()
 {
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!_savepointTable.has_value());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
-        onCreateSavepoint(false);
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Create save point");
-
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry));
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
-        onDeleteSavepoint(_selectedEntry);
-    }
-    AlienGui::Tooltip("Delete save point");
-    ImGui::EndDisabled();
-
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
-        GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
-    }
-    AlienGui::Tooltip("Delete all save points");
-    ImGui::EndDisabled();
-
-    AlienGui::Separator();
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("Autosave"),
+        {AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLUS).name("Create save point").disabled(!_savepointTable.has_value()).action([&] {
+                 onCreateSavepoint(false);
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_MINUS).name("Delete save point").disabled(!static_cast<bool>(_selectedEntry)).action([&] {
+                 onDeleteSavepoint(_selectedEntry);
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters()
+                 .icon(ICON_FA_BROOM)
+                 .name("Delete all save points")
+                 .disabled(!_savepointTable.has_value() || _savepointTable->isEmpty())
+                 .action([&] { GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); }); }))});
 }
 
 void AutosaveWindow::processHeader() {}

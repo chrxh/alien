@@ -6,6 +6,7 @@
 #include <ranges>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/range/adaptors.hpp>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -1872,87 +1873,291 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     ImGui::Dummy(ImVec2(0, boxHeight));
 }
 
-bool AlienGui::ToolbarButton(ToolbarButtonParameters const& parameters)
+namespace
 {
-    auto id = std::to_string(ImGui::GetID(parameters._text.c_str()));
-    if (parameters._secondText.has_value()) {
-        id += parameters._secondText.value();
-    }
-    ImGui::PushID(id.c_str());
+    auto constexpr ToolbarButtonSize = 40.0f;
+    auto constexpr ToolbarButtonRounding = 9.0f;
+    auto constexpr ToolbarItemSpacing = 2.0f;
+    auto constexpr ToolbarGroupPadding = 3.0f;
+    auto constexpr ToolbarGroupRounding = 12.0f;
+    auto constexpr ToolbarGroupSpacing = 10.0f;
+    auto constexpr ToolbarSelectionBarInset = 11.0f;
+    auto constexpr ToolbarSelectionBarBottom = 5.0f;
+    auto constexpr ToolbarSelectionBarHeight = 2.0f;
+    auto constexpr ToolbarOverflowSize = 28.0f;
+    auto constexpr ToolbarOverflowIconSize = 15.0f;
+    auto constexpr ToolbarOverflowSpacing = 10.0f;
+    auto constexpr ToolbarMenuSpacing = 4.0f;
+    auto constexpr ToolbarMenuRowHeight = 34.0f;
+    auto constexpr ToolbarMenuIconSize = 18.0f;
+    auto constexpr ToolbarMenuIconOffset = 12.0f;
+    auto constexpr ToolbarMenuTextOffset = 44.0f;
+    auto constexpr ToolbarMenuRightPadding = 24.0f;
 
-    ImGui::PushFont(StyleRepository::get().getIconFont());
-    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-
-    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(Const::AccentDeepColor));
-    ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(Const::ToolbarButtonTextColor));
-
-    auto buttonSize = scale(40.0f);
-
-    ImGui::BeginDisabled(parameters._disabled);
-
-    auto pos = ImGui::GetCursorScreenPos();
-    auto result = ImGui::Button(parameters._text.c_str(), {buttonSize, buttonSize});
-
-    if (parameters._secondText.has_value()) {
-        ImGui::GetWindowDrawList()->AddText(
-            ImGui::GetFont(),
-            ImGui::GetFontSize() * parameters._secondTextScale,
-            {pos.x + scale(parameters._secondTextOffset.x), pos.y + scale(parameters._secondTextOffset.y)},
-            ImGui::GetColorU32(ImGuiCol_Text),
-            parameters._secondText->c_str());
-    }
-    ImGui::EndDisabled();
-
-    ImGui::PopStyleColor(4);
-    ImGui::PopStyleVar();
-    ImGui::PopFont();
-
-    if (parameters._tooltip) {
-        AlienGui::Tooltip(*parameters._tooltip);
-    }
-    ImGui::PopID();
-    return result;
-}
-
-bool AlienGui::SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue)
-{
-    auto id = std::to_string(ImGui::GetID(text.c_str()));
-
-    ImGui::PushFont(StyleRepository::get().getIconFont());
-    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-    auto color = Const::ToolbarButtonTextColor;
-    float h, s, v;
-    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-
-    auto buttonColor = Const::ToolbarButtonBackgroundColor;
-    auto buttonColorHovered = ImColor::HSV(h, s, v * 0.3f);
-    auto buttonColorActive = ImColor::HSV(h, s, v * 0.45f);
-    if (value == selectionValue) {
-        buttonColor = buttonColorActive;
-        buttonColorHovered = buttonColorActive;
+    float calcToolbarWidth(std::vector<AlienGui::ToolbarItem> const& items, int numItems)
+    {
+        auto result = 0.0f;
+        auto numButtonsInGroup = 0;
+        auto numGroups = 0;
+        auto closeGroup = [&] {
+            if (numButtonsInGroup == 0) {
+                return;
+            }
+            if (numGroups > 0) {
+                result += scale(ToolbarGroupSpacing);
+            }
+            result += toFloat(numButtonsInGroup) * scale(ToolbarButtonSize) + toFloat(numButtonsInGroup - 1) * scale(ToolbarItemSpacing)
+                + 2 * scale(ToolbarGroupPadding);
+            ++numGroups;
+            numButtonsInGroup = 0;
+        };
+        for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
+            if (index >= numItems) {
+                break;
+            }
+            if (item._isSeparator) {
+                closeGroup();
+            } else {
+                ++numButtonsInGroup;
+            }
+        }
+        closeGroup();
+        return result;
     }
 
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
+    int calcToolbarSplitIndex(std::vector<AlienGui::ToolbarItem> const& items, float availableWidth)
+    {
+        auto numItems = toInt(items.size());
+        if (calcToolbarWidth(items, numItems) <= availableWidth) {
+            return numItems;
+        }
+        auto budget = availableWidth - scale(ToolbarOverflowSize) - scale(ToolbarOverflowSpacing);
+        auto result = 0;
+        for (auto numVisibleItems : std::views::iota(1, numItems + 1)) {
+            if (calcToolbarWidth(items, numVisibleItems) > budget) {
+                break;
+            }
+            result = numVisibleItems;
+        }
+        return result;
+    }
 
-    ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(Const::ToolbarButtonTextColor));
-    auto buttonSize = scale(40.0f);
-    auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
-    if (result) {
-        if (value == selectionValue) {
-            value = deselectionValue;
-        } else {
-            value = selectionValue;
+    std::vector<std::vector<int>> calcToolbarGroups(std::vector<AlienGui::ToolbarItem> const& items, int numItems)
+    {
+        std::vector<std::vector<int>> result;
+        for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
+            if (index >= numItems) {
+                break;
+            }
+            if (item._isSeparator) {
+                if (!result.empty() && !result.back().empty()) {
+                    result.emplace_back();
+                }
+            } else {
+                if (result.empty()) {
+                    result.emplace_back();
+                }
+                result.back().emplace_back(toInt(index));
+            }
+        }
+        if (!result.empty() && result.back().empty()) {
+            result.pop_back();
+        }
+        return result;
+    }
+
+    void processToolbarButton(AlienGui::ToolbarItemParameters const& parameters, ImVec2 const& pos, std::function<void()>& pendingAction)
+    {
+        auto size = scale(ToolbarButtonSize);
+        auto drawList = ImGui::GetWindowDrawList();
+
+        ImGui::SetCursorScreenPos(pos);
+        ImGui::BeginDisabled(parameters._disabled);
+        auto clicked = ImGui::InvisibleButton("##button", {size, size});
+        auto hovered = ImGui::IsItemHovered();
+        ImGui::EndDisabled();
+
+        if (parameters._selected) {
+            drawList->AddRectFilled(pos, {pos.x + size, pos.y + size}, Const::ToolbarButtonSelectedColor, scale(ToolbarButtonRounding));
+        } else if (hovered) {
+            drawList->AddRectFilled(pos, {pos.x + size, pos.y + size}, Const::ToolbarButtonHoveredColor, scale(ToolbarButtonRounding));
+        }
+
+        auto iconColor = parameters._disabled ? Const::ToolbarButtonDisabledTextColor
+            : parameters._selected            ? Const::ToolbarButtonSelectedTextColor
+                                              : Const::ToolbarButtonTextColor;
+        ImGui::PushFont(StyleRepository::get().getIconFont());
+        auto iconSize = ImGui::CalcTextSize(parameters._icon.c_str());
+        drawList->AddText({pos.x + (size - iconSize.x) / 2, pos.y + (size - iconSize.y) / 2}, iconColor, parameters._icon.c_str());
+        if (parameters._secondIcon.has_value()) {
+            drawList->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize() * parameters._secondIconScale,
+                {pos.x + scale(parameters._secondIconOffset.x), pos.y + scale(parameters._secondIconOffset.y)},
+                iconColor,
+                parameters._secondIcon->c_str());
+        }
+        ImGui::PopFont();
+
+        if (parameters._selected) {
+            drawList->AddRectFilled(
+                {pos.x + scale(ToolbarSelectionBarInset), pos.y + size - scale(ToolbarSelectionBarBottom + ToolbarSelectionBarHeight)},
+                {pos.x + size - scale(ToolbarSelectionBarInset), pos.y + size - scale(ToolbarSelectionBarBottom)},
+                Const::ToolbarSelectionBarColor,
+                scale(1.0f));
+        }
+
+        auto tooltip = parameters._tooltip.value_or(parameters._name);
+        if (!tooltip.empty()) {
+            AlienGui::Tooltip(tooltip);
+        }
+        if (clicked) {
+            pendingAction = parameters._action;
         }
     }
 
-    ImGui::PopStyleColor(4);
-    ImGui::PopStyleVar();
-    ImGui::PopFont();
+    void processToolbarMenu(std::vector<AlienGui::ToolbarItem> const& items, int splitIndex, std::function<void()>& pendingAction)
+    {
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::ToolbarMenuHoveredColor));
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::ToolbarMenuHoveredColor));
+        if (ImGui::BeginPopup("##toolbarMenu")) {
+            auto drawList = ImGui::GetWindowDrawList();
+            auto rowHeight = scale(ToolbarMenuRowHeight);
+            auto iconFont = StyleRepository::get().getIconFont();
+            auto iconSize = scale(ToolbarMenuIconSize);
+            for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
+                if (index < splitIndex) {
+                    continue;
+                }
+                if (item._isSeparator) {
+                    ImGui::Separator();
+                    continue;
+                }
+                auto const& parameters = item._parameters;
+                ImGui::PushID(toInt(index));
+                auto rowPos = ImGui::GetCursorScreenPos();
+                auto flags = parameters._disabled ? ImGuiSelectableFlags_Disabled : ImGuiSelectableFlags_None;
+                if (ImGui::Selectable("##row", false, flags, {0, rowHeight})) {
+                    pendingAction = parameters._action;
+                    ImGui::CloseCurrentPopup();
+                }
+                if (parameters._tooltip.has_value()) {
+                    AlienGui::Tooltip(*parameters._tooltip);
+                }
+                auto iconColor = parameters._disabled ? Const::ToolbarButtonDisabledTextColor : Const::ToolbarButtonTextColor;
+                auto textColor = parameters._disabled ? Const::TextFaintColor : Const::TextBaseColor;
+                drawList->AddText(
+                    iconFont, iconSize, {rowPos.x + scale(ToolbarMenuIconOffset), rowPos.y + (rowHeight - iconSize) / 2}, iconColor, parameters._icon.c_str());
+                auto textSize = ImGui::CalcTextSize(parameters._name.c_str());
+                drawList->AddText({rowPos.x + scale(ToolbarMenuTextOffset), rowPos.y + (rowHeight - textSize.y) / 2}, textColor, parameters._name.c_str());
+                ImGui::PopID();
+            }
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleColor(2);
+    }
+}
+
+AlienGui::ToolbarItem AlienGui::ToolbarItem::createButton(ToolbarItemParameters const& parameters)
+{
+    ToolbarItem result;
+    result._parameters = parameters;
     return result;
+}
+
+AlienGui::ToolbarItem AlienGui::ToolbarItem::createSeparator()
+{
+    ToolbarItem result;
+    result._isSeparator = true;
+    return result;
+}
+
+void AlienGui::Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarItem> const& items)
+{
+    ImGui::PushID(parameters._id.c_str());
+
+    auto buttonSize = scale(ToolbarButtonSize);
+    auto groupPadding = scale(ToolbarGroupPadding);
+    auto toolbarHeight = buttonSize + 2 * groupPadding;
+    auto startPos = ImGui::GetCursorScreenPos();
+    auto toolbarWidth = ImGui::GetContentRegionAvail().x;
+    auto trailingWidth = scale(parameters._trailingWidth);
+    auto splitIndex = calcToolbarSplitIndex(items, toolbarWidth - trailingWidth);
+    auto hasOverflow = splitIndex < toInt(items.size());
+
+    std::function<void()> pendingAction;
+    auto drawList = ImGui::GetWindowDrawList();
+
+    auto groupPos = startPos;
+    for (auto const& group : calcToolbarGroups(items, splitIndex)) {
+        auto numButtons = toFloat(group.size());
+        auto groupWidth = numButtons * buttonSize + (numButtons - 1) * scale(ToolbarItemSpacing) + 2 * groupPadding;
+        drawList->AddRectFilled(groupPos, {groupPos.x + groupWidth, groupPos.y + toolbarHeight}, Const::ToolbarGroupColor, scale(ToolbarGroupRounding));
+
+        auto buttonPos = ImVec2{groupPos.x + groupPadding, groupPos.y + groupPadding};
+        for (auto const& index : group) {
+            ImGui::PushID(index);
+            processToolbarButton(items.at(index)._parameters, buttonPos, pendingAction);
+            ImGui::PopID();
+            buttonPos.x += buttonSize + scale(ToolbarItemSpacing);
+        }
+        groupPos.x += groupWidth + scale(ToolbarGroupSpacing);
+    }
+
+    auto rightBorder = startPos.x + toolbarWidth;
+    auto overflowPos = rightBorder - scale(ToolbarOverflowSize);
+
+    if (parameters._trailing) {
+        auto trailingHeight = ImGui::GetTextLineHeight() + 2 * scale(ChipPaddingY);
+        auto trailingPos = (hasOverflow ? overflowPos - scale(ToolbarOverflowSpacing) : rightBorder) - trailingWidth;
+        ImGui::SetCursorScreenPos({trailingPos, startPos.y + (toolbarHeight - trailingHeight) / 2});
+        parameters._trailing();
+    }
+
+    if (hasOverflow) {
+        auto overflowSize = scale(ToolbarOverflowSize);
+        ImGui::SetCursorScreenPos({overflowPos, startPos.y + (toolbarHeight - overflowSize) / 2});
+        ImGui::InvisibleButton("##overflow", {overflowSize, overflowSize});
+        auto hovered = ImGui::IsItemHovered();
+        if (ImGui::IsItemClicked()) {
+            ImGui::OpenPopup("##toolbarMenu");
+        }
+        auto opened = ImGui::IsPopupOpen("##toolbarMenu");
+
+        auto iconFont = StyleRepository::get().getIconFont();
+        auto iconFontSize = scale(ToolbarOverflowIconSize);
+        auto iconSize = iconFont->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, ICON_FA_ELLIPSIS_H);
+        drawList->AddText(
+            iconFont,
+            iconFontSize,
+            {overflowPos + (overflowSize - iconSize.x) / 2, startPos.y + (toolbarHeight - iconSize.y) / 2},
+            hovered || opened ? Const::ToolbarOverflowHoveredColor : Const::ToolbarOverflowColor,
+            ICON_FA_ELLIPSIS_H);
+        Tooltip("Show remaining actions");
+
+        auto menuWidth = 0.0f;
+        for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
+            if (index >= splitIndex && !item._isSeparator) {
+                menuWidth = std::max(menuWidth, ImGui::CalcTextSize(item._parameters._name.c_str()).x);
+            }
+        }
+        menuWidth += scale(ToolbarMenuTextOffset + ToolbarMenuRightPadding);
+        ImGui::SetNextWindowPos({rightBorder - menuWidth, startPos.y + toolbarHeight + scale(ToolbarMenuSpacing)});
+        ImGui::SetNextWindowSize({menuWidth, 0.0f});
+        processToolbarMenu(items, splitIndex, pendingAction);
+    }
+
+    ImGui::SetCursorScreenPos(startPos);
+    ImGui::Dummy({toolbarWidth, toolbarHeight});
+
+    if (parameters._bottomSeparator) {
+        Separator();
+    }
+    ImGui::PopID();
+
+    if (pendingAction) {
+        pendingAction();
+    }
 }
 
 void AlienGui::VerticalSeparator(float height)
@@ -1968,11 +2173,6 @@ void AlienGui::VerticalSeparator(float height)
         color,
         2.0f);
     ImGui::Dummy(ImVec2(padding /** 2*/, 1));
-}
-
-void AlienGui::ToolbarSeparator()
-{
-    VerticalSeparator(40.0f);
 }
 
 void AlienGui::Chip(ChipParameters const& parameters)

@@ -512,18 +512,17 @@ void CreatorWindow::processToolbar()
 {
     auto previousMode = _mode;
 
+    std::vector<AlienGui::ToolbarItem> items;
     for (auto const& [mode, icon] : ToolbarModeIcons) {
-        AlienGui::SelectableToolbarButton(icon, _mode, mode, mode);
-        AlienGui::Tooltip(ModeText.at(mode));
-        ImGui::SameLine();
+        items.emplace_back(AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters().icon(icon).name(ModeText.at(mode)).selected(_mode == mode).action([this, mode = mode] { _mode = mode; })));
     }
-
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_IMAGE).tooltip("Create a pattern from an image"))) {
-        ImageToPatternDialog::get().show();
-    }
+    items.emplace_back(AlienGui::ToolbarItem::createSeparator());
+    items.emplace_back(AlienGui::ToolbarItem::createButton(
+        AlienGui::ToolbarItemParameters().icon(ICON_FA_IMAGE).name("Pattern from image").tooltip("Create a pattern from an image").action([&] {
+            ImageToPatternDialog::get().show();
+        })));
+    AlienGui::Toolbar(AlienGui::ToolbarParameters().id("Creator").bottomSeparator(false), items);
 
     if (_mode != previousMode) {
         abortPointPlacement();

@@ -102,109 +102,90 @@ void SimulationParametersMainWindow::shutdownIntern()
 
 void SimulationParametersMainWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
-        onOpenParameters();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save simulation parameters to file"))) {
-        onSaveParameters();
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters to clipboard"))) {
-        _copiedParameters = _SimulationFacade::get()->getSimulationParameters();
-        printOverlayMessage("Simulation parameters copied");
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters from clipboard").disabled(!_copiedParameters))) {
-        _SimulationFacade::get()->setSimulationParameters(*_copiedParameters);
-        _SimulationFacade::get()->setOriginalSimulationParameters(*_copiedParameters);
-        printOverlayMessage("Simulation parameters pasted");
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_PASTE)
-                                    .secondText(ICON_FA_UNDO)
-                                    .secondTextOffset(RealVector2D{32.0f, 28.0f})
-                                    .secondTextScale(0.3f)
-                                    .tooltip("Replace reference values by values from the clipboard. This is useful to see the diff between the current "
-                                             "parameters and those from the clipboard.")
-                                    .disabled(!_copiedParameters))) {
-        auto parameters = _SimulationFacade::get()->getSimulationParameters();
-        if (_copiedParameters->numLayers == parameters.numLayers && _copiedParameters->numSources == parameters.numSources) {
-            _SimulationFacade::get()->setOriginalSimulationParameters(*_copiedParameters);
-            printOverlayMessage("Reference simulation parameters replaced");
-        } else {
-            GenericMessageDialog::get().information(
-                "Error", "The number of layers and radiation sources of the current simulation parameters must match with those from the clipboard.");
-        }
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter layer"))) {
-        onInsertDefaultLayer();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
-        onInsertDefaultSource();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_PLUS)
-                                    .secondText(ICON_FA_CLONE)
-                                    .disabled(_selectedOrderNumber == 0)
-                                    .tooltip("Clone selected layer/radiation source"))) {
-        onCloneLocation();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedOrderNumber == 0).tooltip("Delete selected layer/radiation source"))) {
-        onDeleteLocation();
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_CHEVRON_UP)
-                                    .disabled(_selectedOrderNumber <= 1)
-                                    .tooltip("Move selected layer/radiation source upward"))) {
-        onDecreaseOrderNumber();
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_CHEVRON_DOWN)
-                                    .tooltip("Move selected layer/radiation source downward")
-                                    .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0))) {
-        onIncreaseOrderNumber();
-    }
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
-                                    .tooltip("Open parameters for selected layer/radiation source in a new window"))) {
-        onOpenInLocationWindow();
-    }
-
-    AlienGui::Separator();
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("SimulationParameters"),
+        {AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_FOLDER_OPEN).name("Open parameters").tooltip("Open simulation parameters from file").action([&] {
+                 onOpenParameters();
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_SAVE).name("Save parameters").tooltip("Save simulation parameters to file").action([&] {
+                 onSaveParameters();
+             })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_COPY).name("Copy parameters").tooltip("Copy simulation parameters to clipboard").action([&] {
+                 _copiedParameters = _SimulationFacade::get()->getSimulationParameters();
+                 printOverlayMessage("Simulation parameters copied");
+             })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_PASTE)
+                                                 .name("Paste parameters")
+                                                 .tooltip("Paste simulation parameters from clipboard")
+                                                 .disabled(!_copiedParameters)
+                                                 .action([&] {
+                                                     _SimulationFacade::get()->setSimulationParameters(*_copiedParameters);
+                                                     _SimulationFacade::get()->setOriginalSimulationParameters(*_copiedParameters);
+                                                     printOverlayMessage("Simulation parameters pasted");
+                                                 })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters()
+                 .icon(ICON_FA_PASTE)
+                 .secondIcon(ICON_FA_UNDO)
+                 .secondIconOffset(RealVector2D{32.0f, 28.0f})
+                 .secondIconScale(0.3f)
+                 .name("Paste reference parameters")
+                 .tooltip("Replace reference values by values from the clipboard. This is useful to see the diff between the current "
+                          "parameters and those from the clipboard.")
+                 .disabled(!_copiedParameters)
+                 .action([&] {
+                     auto parameters = _SimulationFacade::get()->getSimulationParameters();
+                     if (_copiedParameters->numLayers == parameters.numLayers && _copiedParameters->numSources == parameters.numSources) {
+                         _SimulationFacade::get()->setOriginalSimulationParameters(*_copiedParameters);
+                         printOverlayMessage("Reference simulation parameters replaced");
+                     } else {
+                         GenericMessageDialog::get().information(
+                             "Error",
+                             "The number of layers and radiation sources of the current simulation parameters must match with those from the clipboard.");
+                     }
+                 })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLUS).secondIcon(ICON_FA_LAYER_GROUP).name("Add parameter layer").action([&] {
+                 onInsertDefaultLayer();
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLUS).secondIcon(ICON_FA_SUN).name("Add radiation source").action([&] {
+                 onInsertDefaultSource();
+             })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_PLUS)
+                                                 .secondIcon(ICON_FA_CLONE)
+                                                 .name("Clone selected layer/radiation source")
+                                                 .disabled(_selectedOrderNumber == 0)
+                                                 .action([&] { onCloneLocation(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_MINUS)
+                                                 .name("Delete selected layer/radiation source")
+                                                 .disabled(_selectedOrderNumber == 0)
+                                                 .action([&] { onDeleteLocation(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_CHEVRON_UP)
+                                                 .name("Move selected layer/radiation source upward")
+                                                 .disabled(_selectedOrderNumber <= 1)
+                                                 .action([&] { onDecreaseOrderNumber(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_CHEVRON_DOWN)
+                                                 .name("Move selected layer/radiation source downward")
+                                                 .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0)
+                                                 .action([&] { onIncreaseOrderNumber(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
+                                                 .name("Open in new window")
+                                                 .tooltip("Open parameters for selected layer/radiation source in a new window")
+                                                 .action([&] { onOpenInLocationWindow(); }))});
 }
 
 void SimulationParametersMainWindow::processMasterWidget()

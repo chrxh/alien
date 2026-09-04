@@ -50,15 +50,7 @@ void SpatialControlWindow::shutdownIntern()
 
 void SpatialControlWindow::processIntern()
 {
-    processZoomInButton();
-    ImGui::SameLine();
-    processZoomOutButton();
-    ImGui::SameLine();
-    processCenterButton();
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-    ImGui::SameLine();
-    processResizeButton();
+    processToolbar();
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -108,38 +100,24 @@ void SpatialControlWindow::processBackground()
     processCenterOnSelection();
 }
 
-void SpatialControlWindow::processZoomInButton()
+void SpatialControlWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SEARCH_PLUS))) {
-        Viewport::get().setZoomFactor(Viewport::get().getZoomFactor() * 2);
-    }
-    AlienGui::Tooltip("Zoom in");
-}
-
-void SpatialControlWindow::processZoomOutButton()
-{
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SEARCH_MINUS))) {
-        Viewport::get().setZoomFactor(Viewport::get().getZoomFactor() / 2);
-    }
-    AlienGui::Tooltip("Zoom out");
-}
-
-void SpatialControlWindow::processCenterButton()
-{
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CROSSHAIRS))) {
-        Viewport::get().setZoomFactor(1.0f);
-        auto worldSize = toRealVector2D(_SimulationFacade::get()->getWorldSize());
-        Viewport::get().setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
-    }
-    AlienGui::Tooltip("Center");
-}
-
-void SpatialControlWindow::processResizeButton()
-{
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CROP_ALT))) {
-        ResizeWorldDialog::get().open();
-    }
-    AlienGui::Tooltip("Resize");
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("SpatialControl").bottomSeparator(false),
+        {AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_SEARCH_PLUS).name("Zoom in").action([&] {
+             Viewport::get().setZoomFactor(Viewport::get().getZoomFactor() * 2);
+         })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_SEARCH_MINUS).name("Zoom out").action([&] {
+             Viewport::get().setZoomFactor(Viewport::get().getZoomFactor() / 2);
+         })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_CROSSHAIRS).name("Center").action([&] {
+             Viewport::get().setZoomFactor(1.0f);
+             auto worldSize = toRealVector2D(_SimulationFacade::get()->getWorldSize());
+             Viewport::get().setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
+         })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_CROP_ALT).name("Resize").action([&] { ResizeWorldDialog::get().open(); }))});
 }
 
 void SpatialControlWindow::processCenterOnSelection()

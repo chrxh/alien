@@ -49,80 +49,7 @@ void PatternEditorWindow::processIntern()
         _angularVel = 0;
     }
 
-    // Load button
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
-        onOpenPattern();
-    }
-    AlienGui::Tooltip("Open pattern");
-
-    // Save button
-    ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
-        onSavePattern();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Save pattern");
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    // Copy button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
-        onCopy();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Copy pattern");
-
-    // Paste button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!_copiedSelection.has_value());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
-        onPaste();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Paste pattern");
-
-    // Delete button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
-        onDelete();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Delete Pattern");
-
-    ImGui::SameLine();
-    AlienGui::ToolbarSeparator();
-
-    // Inspect objects button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isObjectInspectionPossible());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MICROSCOPE))) {
-        EditorController::get().onInspectSelectedObjects();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect Objects");
-
-    // Inspect genomes button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isGenomeInspectionPossible());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_DNA))) {
-        EditorController::get().onInspectSelectedGenomes();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect genomes");
-
-    // Inspect creatures button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isCreatureInspectionPossible());
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PAW))) {
-        EditorController::get().onInspectSelectedCreatures();
-    }
-    ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect creatures");
+    processToolbar();
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
@@ -265,6 +192,36 @@ void PatternEditorWindow::processIntern()
                          "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells "
                          "and the neighboring cells are recalculated when the positions are changed.\n"
                          "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
+}
+
+void PatternEditorWindow::processToolbar()
+{
+    auto selectionEmpty = EditorModel::get().isSelectionEmpty();
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("PatternEditor").bottomSeparator(false),
+        {AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_FOLDER_OPEN).name("Open pattern").action([&] { onOpenPattern(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_SAVE).name("Save pattern").disabled(selectionEmpty).action([&] { onSavePattern(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_COPY).name("Copy pattern").disabled(selectionEmpty).action([&] { onCopy(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PASTE).name("Paste pattern").disabled(!_copiedSelection.has_value()).action([&] { onPaste(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_TRASH).name("Delete pattern").disabled(selectionEmpty).action([&] { onDelete(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_MICROSCOPE).name("Inspect objects").disabled(!isObjectInspectionPossible()).action([&] {
+                 EditorController::get().onInspectSelectedObjects();
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_DNA).name("Inspect genomes").disabled(!isGenomeInspectionPossible()).action([&] {
+                 EditorController::get().onInspectSelectedGenomes();
+             })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PAW).name("Inspect creatures").disabled(!isCreatureInspectionPossible()).action([&] {
+                 EditorController::get().onInspectSelectedCreatures();
+             }))});
 }
 
 bool PatternEditorWindow::isShown()
