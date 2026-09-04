@@ -60,7 +60,7 @@ namespace
 }
 
 BrowserWindow::BrowserWindow()
-    : AlienWindow("Browser", "windows.browser", true, true)
+    : AlienWindow("Browser", "windows.browser", true, true, {172.0f, 78.0f}, {1252.0f, 825.0f})
 {}
 
 namespace
@@ -86,7 +86,7 @@ void BrowserWindow::initIntern()
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getValue("windows.browser.resource type", _currentWorkspace.resourceType);
     _currentWorkspace.workspaceType = settings.getValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth));
+    _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth)) * WindowController::get().getContentScaleCorrection();
 
     int numEmojis = 0;
     for (int i = 0; i < NumEmojiBlocks; ++i) {
@@ -349,10 +349,7 @@ void BrowserWindow::processWorkspace()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild(
-            "##1",
-            ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomSpace)),
-            false,
-            ImGuiWindowFlags_HorizontalScrollbar)) {
+            "##1", ImVec2(sizeAvailable.x - _userTableWidth, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
             if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
                 if (_currentWorkspace.resourceType != NetworkResourceType_Simulation) {

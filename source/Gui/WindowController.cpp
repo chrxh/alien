@@ -55,7 +55,10 @@ void WindowController::init()
     _sizeInWindowedMode.x = std::max(100, settings.getValue("settings.display.window width", _sizeInWindowedMode.x));
     _sizeInWindowedMode.y = std::max(100, settings.getValue("settings.display.window height", _sizeInWindowedMode.y));
     _fps = settings.getValue("settings.display.fps", _fps);
-    _lastContentScaleFactor = settings.getValue("settings.display.content scale factor", _lastContentScaleFactor);
+    auto lastContentScaleFactor = settings.getValue("settings.display.content scale factor", 0.0f);
+    if (lastContentScaleFactor > 0.0f) {
+        _lastContentScaleFactor = lastContentScaleFactor;
+    }
     _autoContentScaleFactor = settings.getValue("settings.display.auto content scale factor", _autoContentScaleFactor);
     _userDefinedContentScaleFactor = settings.getValue("settings.display.user defined content scale factor", _userDefinedContentScaleFactor);
 
@@ -219,9 +222,9 @@ float WindowController::getContentScaleFactor()
     return _contentScaleFactor;
 }
 
-float WindowController::getLastContentScaleFactor()
+float WindowController::getContentScaleCorrection()
 {
-    return _lastContentScaleFactor;
+    return _lastContentScaleFactor ? _contentScaleFactor / *_lastContentScaleFactor : 1.0f;
 }
 
 float WindowController::getOsContentScaleFactor()

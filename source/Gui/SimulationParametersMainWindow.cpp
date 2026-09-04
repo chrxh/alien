@@ -36,7 +36,7 @@ namespace
 }
 
 SimulationParametersMainWindow::SimulationParametersMainWindow()
-    : AlienWindow("Simulation parameters", "windows.simulation parameters", false, true)
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false, true, {386.0f, 68.0f}, {680.0f, 780.0f})
 {}
 
 void SimulationParametersMainWindow::initIntern()
@@ -45,8 +45,9 @@ void SimulationParametersMainWindow::initIntern()
     _masterWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters.master widget.open", _masterWidgetOpen);
     _detailWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters.detail widget.open", _detailWidgetOpen);
     _expertWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters.expert widget.open", _expertWidgetOpen);
-    _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.master widget.height", scale(MasterHeight));
-    _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.expert widget height", scale(ExpertWidgetHeight));
+    auto correction = WindowController::get().getContentScaleCorrection();
+    _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.master widget.height", scale(MasterHeight)) * correction;
+    _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.expert widget height", scale(ExpertWidgetHeight)) * correction;
 
     auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
     baseWidgets->init();

@@ -103,12 +103,12 @@ _MainWindow::_MainWindow()
 {
     IMGUI_CHECKVERSION();
 
-    LogWindow::get().setup();
-
     StartupCheckService::get().check();
 
     log(Priority::Important, "initialize GLFW and OpenGL");
     initGlfwAndOpenGL();
+
+    LogWindow::get().setup();
 
     log(Priority::Important, "initialize GLAD");
     initGlad();

@@ -2,12 +2,21 @@
 
 #include "AlienGui.h"
 
-AlienWindow::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn, bool maximizable, RealVector2D const& minSize)
+AlienWindow::AlienWindow(
+    std::string const& title,
+    std::string const& settingsNode,
+    bool defaultOn,
+    bool maximizable,
+    RealVector2D const& defaultPos,
+    RealVector2D const& defaultSize,
+    RealVector2D const& minSize)
     : _title(title)
     , _settingsNode(settingsNode)
     , _defaultOn(defaultOn)
     , _isMaximizable(maximizable)
-    , _minSize(minSize)
+    , _defaultPos{scale(defaultPos.x), scale(defaultPos.y)}
+    , _defaultSize{scale(defaultSize.x), scale(defaultSize.y)}
+    , _minSize{scale(minSize.x), scale(minSize.y)}
 {}
 
 void AlienWindow::init()
@@ -15,12 +24,11 @@ void AlienWindow::init()
     _on = GlobalSettings::get().getValue(_settingsNode + ".active", _defaultOn);
     _state = static_cast<WindowState>(GlobalSettings::get().getValue(_settingsNode + ".state", toInt(_state)));
     _isFocused = GlobalSettings::get().getValue(_settingsNode + ".is focused", _isFocused);
-    _savedPos.x = GlobalSettings::get().getValue(_settingsNode + ".saved pos.x", _savedPos.x);
-    _savedPos.y = GlobalSettings::get().getValue(_settingsNode + ".saved pos.y", _savedPos.y);
-    _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _savedSize.x);
-    _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _savedSize.y);
-    _savedWindowMinSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved window min size.x", _savedWindowMinSize.x);
-    _savedWindowMinSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved window min size.y", _savedWindowMinSize.y);
+    _savedPos.x = GlobalSettings::get().getValue(_settingsNode + ".saved pos.x", _defaultPos.x);
+    _savedPos.y = GlobalSettings::get().getValue(_settingsNode + ".saved pos.y", _defaultPos.y);
+    auto correction = WindowController::get().getContentScaleCorrection();
+    _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _defaultSize.x) * correction;
+    _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _defaultSize.y) * correction;
     initIntern();
 }
 
@@ -33,25 +41,22 @@ void AlienWindow::process()
     }
     ImGui::PushID(_title.c_str());
 
-    _savedWindowMinSize = ImGui::GetStyle().WindowMinSize;
+    auto const& windowMinSize = ImGui::GetStyle().WindowMinSize;
+    _savedWindowMinSize = {windowMinSize.x, windowMinSize.y};
 
     auto flags = returnFlagsAndConfigureNextWindow();
 
     if (ImGui::Begin(_title.c_str(), nullptr, flags)) {
         if (_state == WindowState::Normal) {
-            _savedPos = ImGui::GetWindowPos();
-            _savedSize = ImGui::GetWindowSize();
+            auto windowPos = ImGui::GetWindowPos();
+            auto windowSize = ImGui::GetWindowSize();
+            _savedPos = {windowPos.x, windowPos.y};
+            _savedSize = {windowSize.x, windowSize.y};
         }
         _isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
         processTitlebar();
 
-        if (!_sizeInitialized) {
-            auto size = ImGui::GetWindowSize();
-            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-            ImGui::SetWindowSize({size.x * factor, size.y * factor});
-            _sizeInitialized = true;
-        }
         if (_state != WindowState::Collapsed) {
             if (ImGui::BeginChild("child")) {
                 processIntern();
@@ -87,10 +92,8 @@ void AlienWindow::shutdown()
     GlobalSettings::get().setValue(_settingsNode + ".is focused", _isFocused);
     GlobalSettings::get().setValue(_settingsNode + ".saved pos.x", _savedPos.x);
     GlobalSettings::get().setValue(_settingsNode + ".saved pos.y", _savedPos.y);
-    GlobalSettings::get().setValue(_settingsNode + ".saved size.x",_savedSize.x);
-    GlobalSettings::get().setValue(_settingsNode + ".saved size.y",_savedSize.y);
-    GlobalSettings::get().setValue(_settingsNode + ".saved window min size.x", _savedWindowMinSize.x);
-    GlobalSettings::get().setValue(_settingsNode + ".saved window min size.y", _savedWindowMinSize.y);
+    GlobalSettings::get().setValue(_settingsNode + ".saved size.x", _savedSize.x);
+    GlobalSettings::get().setValue(_settingsNode + ".saved size.y", _savedSize.y);
 }
 
 ImGuiWindowFlags AlienWindow::returnFlagsAndConfigureNextWindow()
@@ -110,7 +113,8 @@ ImGuiWindowFlags AlienWindow::returnFlagsAndConfigureNextWindow()
         return ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
     } else {
         ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-        ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos({_savedPos.x, _savedPos.y}, ImGuiCond_Once);
+        ImGui::SetNextWindowSize({_savedSize.x, _savedSize.y}, ImGuiCond_Once);
         ImGui::GetStyle().WindowMinSize.x = _minSize.x;
         ImGui::GetStyle().WindowMinSize.y = _minSize.y;
         return ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
@@ -167,12 +171,12 @@ void AlienWindow::processCollapseButton()
     ImGui::SetCursorScreenPos(iconPos);
     if (ImGui::InvisibleButton("CollapseButton", ImVec2(iconSize, iconSize))) {
         if (_state == WindowState::Collapsed) {
-            ImGui::SetWindowSize(_savedSize);
+            ImGui::SetWindowSize({_savedSize.x, _savedSize.y});
             _state = WindowState::Normal;
         } else {
             if (_state == WindowState::Maximized) {
-                ImGui::SetWindowPos(_savedPos);
-                ImGui::SetWindowSize(_savedSize);
+                ImGui::SetWindowPos({_savedPos.x, _savedPos.y});
+                ImGui::SetWindowSize({_savedSize.x, _savedSize.y});
             }
             _state = WindowState::Collapsed;
         }
@@ -225,8 +229,8 @@ void AlienWindow::processMaximizeButton()
 
     if (AlienGui::MaximizeButton(iconPos, iconSize, _state == WindowState::Maximized)) {
         if (_state == WindowState::Maximized) {
-            ImGui::SetWindowPos(_savedPos);
-            ImGui::SetWindowSize(_savedSize);
+            ImGui::SetWindowPos({_savedPos.x, _savedPos.y});
+            ImGui::SetWindowSize({_savedSize.x, _savedSize.y});
             _state = WindowState::Normal;
         } else {
             _state = WindowState::Maximized;

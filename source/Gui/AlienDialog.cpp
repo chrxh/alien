@@ -1,7 +1,7 @@
 #include "AlienDialog.h"
 
-AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize, bool maximizable)
-    : _modalWindow(title, defaultSize, maximizable)
+AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize, bool maximizable, std::string const& settingsNode)
+    : _modalWindow(title, defaultSize, maximizable, settingsNode)
 {}
 
 void AlienDialog::init()

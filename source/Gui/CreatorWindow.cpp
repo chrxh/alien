@@ -277,7 +277,7 @@ void CreatorWindow::finishDrawing()
 }
 
 CreatorWindow::CreatorWindow()
-    : AlienWindow("Creator", "editors.creator", false)
+    : AlienWindow("Creator", "editors.creator", false, false, {464.0f, 61.0f}, {358.0f, 370.0f})
 {}
 
 void CreatorWindow::createEntity()

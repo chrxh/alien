@@ -19,7 +19,9 @@ public:
         std::string const& settingsNode,
         bool defaultOn,
         bool maximizable = false,
-        RealVector2D const& minSize = {scale(300.0f), scale(100.0f)});
+        RealVector2D const& defaultPos = {60.0f, 60.0f},
+        RealVector2D const& defaultSize = {650.0f, 350.0f},
+        RealVector2D const& minSize = {300.0f, 100.0f});
 
     bool isOn() const;
     void setOn(bool value);
@@ -33,7 +35,6 @@ protected:
 
     virtual bool isShown() { return _on; }
 
-    bool _sizeInitialized = false;
     bool _on = false;
     bool _defaultOn = false;
     std::string _settingsNode;
@@ -53,11 +54,13 @@ private:
         Collapsed
     };
     WindowState _state = WindowState::Normal;
+    RealVector2D _defaultPos;
+    RealVector2D _defaultSize;
     RealVector2D _minSize;
     bool _isFocused = false;
-    ImVec2 _savedPos;
-    ImVec2 _savedSize;
-    ImVec2 _savedWindowMinSize;
+    RealVector2D _savedPos;
+    RealVector2D _savedSize;
+    RealVector2D _savedWindowMinSize;
 
     ImGuiWindowFlags returnFlagsAndConfigureNextWindow();
 

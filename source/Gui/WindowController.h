@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
@@ -38,7 +40,7 @@ public:
     void setFps(int value);
 
     float getContentScaleFactor();
-    float getLastContentScaleFactor();
+    float getContentScaleCorrection();
 
     float getOsContentScaleFactor();
 
@@ -65,7 +67,7 @@ private:
     IntVector2D _startupSize;
     IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
     float _contentScaleFactor = 1.0f;
-    float _lastContentScaleFactor = 1.0f;
+    std::optional<float> _lastContentScaleFactor;
     float _osContentScaleFactor = 1.0f;
     float _userDefinedContentScaleFactor = 0.0f;
     bool _autoContentScaleFactor = true;

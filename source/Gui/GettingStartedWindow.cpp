@@ -12,7 +12,7 @@ void GettingStartedWindow::initIntern()
 
 
 GettingStartedWindow::GettingStartedWindow()
-    : AlienWindow("Getting started", "windows.getting started", true)
+    : AlienWindow("Getting started", "windows.getting started", true, false, {520.0f, 176.0f}, {738.0f, 566.0f})
 {}
 
 void GettingStartedWindow::shutdownIntern()

@@ -39,7 +39,7 @@ void SpatialControlWindow::initIntern()
 }
 
 SpatialControlWindow::SpatialControlWindow()
-    : AlienWindow("Spatial control", "windows.spatial control", true)
+    : AlienWindow("Spatial control", "windows.spatial control", true, false, {1517.0f, 162.0f}, {330.0f, 397.0f})
 {}
 
 void SpatialControlWindow::shutdownIntern()

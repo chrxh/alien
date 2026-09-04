@@ -15,7 +15,7 @@ namespace
 }
 
 SelectionWindow::SelectionWindow()
-    : AlienWindow("Selection", "windows.selection", true, false, {scale(100), scale(100.0f)})
+    : AlienWindow("Selection", "windows.selection", true, false, {73.0f, 586.0f}, {201.0f, 254.0f}, {100.0f, 100.0f})
 {}
 
 void SelectionWindow::processIntern()

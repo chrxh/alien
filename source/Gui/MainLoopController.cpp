@@ -27,7 +27,6 @@
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreatorWindow.h"
-#include "DefaultImguiSettings.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
@@ -74,7 +73,7 @@ namespace
 
 void MainLoopController::setup()
 {
-    GlobalSettings::get().loadImGuiSettings(Const::DefaultImguiSettings);
+    GlobalSettings::get().loadImGuiSettings();
 
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);

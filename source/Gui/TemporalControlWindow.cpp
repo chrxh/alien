@@ -32,7 +32,7 @@ void TemporalControlWindow::onSnapshot()
 }
 
 TemporalControlWindow::TemporalControlWindow()
-    : AlienWindow("Temporal control", "windows.temporal control", true)
+    : AlienWindow("Temporal control", "windows.temporal control", true, false, {1517.0f, 578.0f}, {341.0f, 393.0f})
 {}
 
 void TemporalControlWindow::processIntern()
