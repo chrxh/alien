@@ -472,7 +472,6 @@ public:
         MEMBER(ToolbarItemParameters, bool, selected, false);
         MEMBER(ToolbarItemParameters, std::function<void()>, action, std::function<void()>());
     };
-
     struct ToolbarItem
     {
         static ToolbarItem createButton(ToolbarItemParameters const& parameters);
@@ -481,7 +480,6 @@ public:
         bool _isSeparator = false;
         ToolbarItemParameters _parameters;
     };
-
     struct ToolbarParameters
     {
         MEMBER(ToolbarParameters, std::string, id, std::string("Toolbar"));
@@ -489,8 +487,6 @@ public:
         MEMBER(ToolbarParameters, float, trailingWidth, 0.0f);
         MEMBER(ToolbarParameters, bool, bottomSeparator, true);
     };
-
-    // Draws icon buttons grouped by separators. Items that do not fit are moved to a menu behind an ellipsis at the right border.
     static void Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarItem> const& items);
 
     struct ChipParameters
