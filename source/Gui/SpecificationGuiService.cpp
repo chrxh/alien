@@ -370,8 +370,10 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
         }
     }();
 
-    auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
-    auto setMousePickerEnabledFunc = [&](bool value) { SimulationInteractionController::get().setPositionSelectionMode(value); };
+    auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().getInteractionMode() == InteractionMode_PositionSelection; };
+    auto setMousePickerEnabledFunc = [&](bool value) {
+        SimulationInteractionController::get().setInteractionMode(value ? InteractionMode_PositionSelection : InteractionMode_Selection);
+    };
     auto getMousePickerPositionFunc = [&]() { return SimulationInteractionController::get().getPositionSelectionData(); };
 
     AlienGui::SliderFloat2(

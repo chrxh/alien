@@ -7,6 +7,7 @@
 
 #include "AlienWindow.h"
 #include "Definitions.h"
+#include "SimulationInteractionController.h"
 
 using CreationMode = int;
 enum CreationMode_
@@ -15,7 +16,10 @@ enum CreationMode_
     CreationMode_CreateRectangle,
     CreationMode_CreateHexagon,
     CreationMode_CreateDisc,
-    CreationMode_Drawing
+    CreationMode_Drawing,
+    CreationMode_CreateLine,
+    CreationMode_CreateCurve,
+    CreationMode_CreatePolygon
 };
 
 using CreationMaterial = int;
@@ -35,6 +39,9 @@ public:
     void onDrawing();
     void finishDrawing();
 
+    void onAddPoint(RealVector2D const& worldPos);
+    void onRemoveLastPoint();
+
 private:
     CreatorWindow();
 
@@ -43,15 +50,28 @@ private:
     void processIntern() override;
     bool isShown() override;
 
+    void processToolbar();
+    void processBuildButtons();
+    void processPointPreview() const;
+
+    void updateInteractionMode();
+
     void createEntity();
     void createRectangle();
     void createHexagon();
     void createDisc();
+    void createFromPoints();
+
+    std::vector<RealVector2D> calcBezierCurvePath() const;
+    std::vector<RealVector2D> calcObjectPositionsFromPoints() const;
 
     ContentDesc convertToEnergyParticles(ContentDesc const& description) const;
 
     void validateAndCorrect();
     bool isEnergyMaterial() const;
+    bool isPointPlacementMode() const;
+    InteractionMode getInteractionMode() const;
+    int getRequiredNumPoints() const;
 
     ObjectTypeDesc getObjectTypeDesc() const;
 
@@ -80,6 +100,8 @@ private:
     ContentDesc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
+
+    std::vector<RealVector2D> _points;
 
     CreationMode _mode = CreationMode_Drawing;
 };
