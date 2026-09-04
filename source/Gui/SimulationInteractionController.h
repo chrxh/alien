@@ -9,6 +9,15 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
+using InteractionMode = int;
+enum InteractionMode_
+{
+    InteractionMode_Selection,
+    InteractionMode_Drawing,
+    InteractionMode_PointPlacement,
+    InteractionMode_PositionSelection
+};
+
 class SimulationInteractionController : public MainLoopEntity
 {
     MAKE_SINGLETON(SimulationInteractionController);
@@ -17,17 +26,15 @@ public:
     bool isEditMode() const;
     void setEditMode(bool value);
 
-    bool isDrawMode() const;
-    void setDrawMode(bool value);
+    InteractionMode getInteractionMode() const;
+    void setInteractionMode(InteractionMode value);
 
-    bool isPositionSelectionMode() const;
-    void setPositionSelectionMode(bool value);
     std::optional<RealVector2D> getPositionSelectionData() const;
 
 private:
     void init() override;
     void process() override;
-    void shutdown() override {}
+    void shutdown() override;
 
     void processEditWidget();
     void processEvents();
@@ -60,8 +67,7 @@ private:
     struct Modes
     {
         bool editMode = false;
-        bool drawMode = false;
-        bool positionSelectionMode = false;
+        InteractionMode interactionMode = InteractionMode_Selection;
     };
     Modes _modes;
     Modes _modesAtClick;

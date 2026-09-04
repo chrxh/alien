@@ -1,7 +1,10 @@
 #include "CreatorWindow.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <ranges>
+#include <span>
 
 #include <imgui.h>
 
@@ -32,10 +35,106 @@ namespace
         {CreationMode_CreateRectangle, "Create a rectangular object network"},
         {CreationMode_CreateHexagon, "Create a hexagonal object network"},
         {CreationMode_CreateDisc, "Create a disc-shaped object network"},
+        {CreationMode_CreateLine, "Create an object network along a line"},
+        {CreationMode_CreateCurve, "Create an object network along a Bezier curve"},
+        {CreationMode_CreatePolygon, "Create a polygon-shaped object network"},
         {CreationMode_Drawing, "Draw freehand"},
     };
 
+    auto const ToolbarModeIcons = std::vector<std::pair<CreationMode, std::string>>{
+        {CreationMode_CreateObject, ICON_DOT},
+        {CreationMode_CreateRectangle, ICON_RECTANGLE},
+        {CreationMode_CreateHexagon, ICON_HEXAGON},
+        {CreationMode_CreateDisc, ICON_DISC},
+        {CreationMode_CreateLine, ICON_FA_SLASH},
+        {CreationMode_CreateCurve, ICON_FA_BEZIER_CURVE},
+        {CreationMode_CreatePolygon, ICON_FA_DRAW_POLYGON},
+        {CreationMode_Drawing, ICON_FA_PAINT_BRUSH},
+    };
+
     auto const RightColumnWidth = 160.0f;
+    auto constexpr MaxNumObjects = size_t{1000000};
+
+    RealVector2D evaluateBezier(std::vector<RealVector2D> const& controlPoints, float t)
+    {
+        auto points = controlPoints;
+        for (auto count = points.size(); count > 1; --count) {
+            auto range = std::span(points).first(count);
+            for (auto&& [current, next] : std::views::zip(range, range | std::views::drop(1))) {
+                current = current * (1.0f - t) + next * t;
+            }
+        }
+        return points.front();
+    }
+
+    std::vector<RealVector2D> distributeAlongPath(std::vector<RealVector2D> const& path, float distance)
+    {
+        std::vector<RealVector2D> result;
+        if (path.size() < 2 || distance < NEAR_ZERO) {
+            return result;
+        }
+        result.emplace_back(path.front());
+        auto pendingDistance = distance;
+        for (auto const& [from, to] : std::views::zip(path, path | std::views::drop(1))) {
+            auto segmentLength = Math::length(to - from);
+            if (segmentLength < NEAR_ZERO) {
+                continue;
+            }
+            auto direction = (to - from) / segmentLength;
+            auto offset = pendingDistance;
+            for (; offset < segmentLength + NEAR_ZERO && result.size() < MaxNumObjects; offset += distance) {
+                result.emplace_back(from + direction * offset);
+            }
+            pendingDistance = offset - segmentLength;
+        }
+        return result;
+    }
+
+    bool isInsidePolygon(std::vector<RealVector2D> const& closedPolygon, RealVector2D const& pos)
+    {
+        auto result = false;
+        for (auto const& [from, to] : std::views::zip(closedPolygon, closedPolygon | std::views::drop(1))) {
+            if ((from.y > pos.y) != (to.y > pos.y)) {
+                auto intersectionX = from.x + (pos.y - from.y) / (to.y - from.y) * (to.x - from.x);
+                if (pos.x < intersectionX) {
+                    result = !result;
+                }
+            }
+        }
+        return result;
+    }
+
+    std::vector<RealVector2D> distributeHexagonallyInPolygon(std::vector<RealVector2D> const& polygon, float distance)
+    {
+        std::vector<RealVector2D> result;
+        if (polygon.size() < 3 || distance < NEAR_ZERO) {
+            return result;
+        }
+        auto closedPolygon = polygon;
+        closedPolygon.emplace_back(polygon.front());
+
+        auto minPos = polygon.front();
+        auto maxPos = polygon.front();
+        for (auto const& point : polygon) {
+            minPos.x = std::min(minPos.x, point.x);
+            minPos.y = std::min(minPos.y, point.y);
+            maxPos.x = std::max(maxPos.x, point.x);
+            maxPos.y = std::max(maxPos.y, point.y);
+        }
+
+        auto rowDistance = distance * sqrtf(3.0f) / 2;
+        auto rowIndex = 0;
+        for (auto y = minPos.y; y < maxPos.y + NEAR_ZERO && result.size() < MaxNumObjects; y += rowDistance) {
+            auto rowOffset = rowIndex % 2 == 0 ? 0.0f : distance / 2;
+            for (auto x = minPos.x + rowOffset; x < maxPos.x + NEAR_ZERO && result.size() < MaxNumObjects; x += distance) {
+                if (isInsidePolygon(closedPolygon, {x, y})) {
+                    result.emplace_back(RealVector2D{x, y});
+                }
+            }
+            ++rowIndex;
+        }
+        return result;
+    }
 }
 
 void CreatorWindow::initIntern()
@@ -75,24 +174,7 @@ void CreatorWindow::shutdownIntern()
 
 void CreatorWindow::processIntern()
 {
-    AlienGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateObject, CreationMode_CreateObject);
-    AlienGui::Tooltip(ModeText.at(CreationMode_CreateObject));
-
-    ImGui::SameLine();
-    AlienGui::SelectableToolbarButton(ICON_RECTANGLE, _mode, CreationMode_CreateRectangle, CreationMode_CreateRectangle);
-    AlienGui::Tooltip(ModeText.at(CreationMode_CreateRectangle));
-
-    ImGui::SameLine();
-    AlienGui::SelectableToolbarButton(ICON_HEXAGON, _mode, CreationMode_CreateHexagon, CreationMode_CreateHexagon);
-    AlienGui::Tooltip(ModeText.at(CreationMode_CreateHexagon));
-
-    ImGui::SameLine();
-    AlienGui::SelectableToolbarButton(ICON_DISC, _mode, CreationMode_CreateDisc, CreationMode_CreateDisc);
-    AlienGui::Tooltip(ModeText.at(CreationMode_CreateDisc));
-
-    ImGui::SameLine();
-    AlienGui::SelectableToolbarButton(ICON_FA_PAINT_BRUSH, _mode, CreationMode_Drawing, CreationMode_Drawing);
-    AlienGui::Tooltip(ModeText.at(CreationMode_Drawing));
+    processToolbar();
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         AlienGui::Group(AlienGui::GroupParameters().text(ModeText.at(_mode)));
@@ -156,7 +238,7 @@ void CreatorWindow::processIntern()
                 AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
                 _innerRadius);
         }
-        if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
+        if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc || isPointPlacementMode()) {
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Object distance")
@@ -175,29 +257,127 @@ void CreatorWindow::processIntern()
     }
     ImGui::EndChild();
 
-    auto& simInteractionController = SimulationInteractionController::get();
-    if (_mode == CreationMode_Drawing) {
-        simInteractionController.setDrawMode(true);
-    } else {
+    updateInteractionMode();
+
+    if (_mode != CreationMode_Drawing) {
         AlienGui::Separator();
-        simInteractionController.setDrawMode(false);
-        if (AlienGui::Button("Build")) {
-            if (_mode == CreationMode_CreateObject) {
-                createEntity();
-            }
-            if (_mode == CreationMode_CreateRectangle) {
-                createRectangle();
-            }
-            if (_mode == CreationMode_CreateHexagon) {
-                createHexagon();
-            }
-            if (_mode == CreationMode_CreateDisc) {
-                createDisc();
-            }
-            EditorModel::get().update();
-        }
+        processBuildButtons();
+    }
+    if (isPointPlacementMode()) {
+        processPointPreview();
     }
     validateAndCorrect();
+}
+
+void CreatorWindow::updateInteractionMode()
+{
+    auto& simInteractionController = SimulationInteractionController::get();
+    if (simInteractionController.getInteractionMode() == InteractionMode_PositionSelection) {
+        _points.clear();
+    } else {
+        simInteractionController.setInteractionMode(getInteractionMode());
+    }
+}
+
+void CreatorWindow::processBuildButtons()
+{
+    ImGui::BeginDisabled(isPointPlacementMode() && toInt(_points.size()) < getRequiredNumPoints());
+    if (AlienGui::Button("Build")) {
+        switch (_mode) {
+        case CreationMode_CreateObject:
+            createEntity();
+            break;
+        case CreationMode_CreateRectangle:
+            createRectangle();
+            break;
+        case CreationMode_CreateHexagon:
+            createHexagon();
+            break;
+        case CreationMode_CreateDisc:
+            createDisc();
+            break;
+        case CreationMode_CreateLine:
+        case CreationMode_CreateCurve:
+        case CreationMode_CreatePolygon:
+            createFromPoints();
+            _points.clear();
+            break;
+        }
+        EditorModel::get().update();
+    }
+    ImGui::EndDisabled();
+
+    if (isPointPlacementMode()) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(_points.empty());
+        if (AlienGui::Button("Clear")) {
+            _points.clear();
+        }
+        ImGui::EndDisabled();
+    }
+}
+
+void CreatorWindow::processToolbar()
+{
+    auto previousMode = _mode;
+
+    for (auto const& [mode, icon] : ToolbarModeIcons) {
+        AlienGui::SelectableToolbarButton(icon, _mode, mode, mode);
+        AlienGui::Tooltip(ModeText.at(mode));
+        if (mode != ToolbarModeIcons.back().first) {
+            ImGui::SameLine();
+        }
+    }
+
+    if (_mode != previousMode) {
+        _points.clear();
+    }
+}
+
+void CreatorWindow::processPointPreview() const
+{
+    if (_points.empty()) {
+        return;
+    }
+
+    auto toViewPos = [](RealVector2D const& worldPos) {
+        auto viewPos = Viewport::get().mapWorldToViewPosition(worldPos);
+        return ImVec2(viewPos.x, viewPos.y);
+    };
+
+    auto path = _mode == CreationMode_CreateCurve ? calcBezierCurvePath() : _points;
+    std::vector<ImVec2> viewPath;
+    viewPath.reserve(path.size());
+    for (auto const& point : path) {
+        viewPath.emplace_back(toViewPos(point));
+    }
+
+    auto drawList = ImGui::GetBackgroundDrawList();
+    auto lineThickness = scale(2.0f);
+    auto closed = _mode == CreationMode_CreatePolygon ? ImDrawFlags_Closed : ImDrawFlags_None;
+    drawList->AddPolyline(viewPath.data(), toInt(viewPath.size()), Const::ConstructionPreviewLineColor, closed, lineThickness);
+
+    if (_mode == CreationMode_CreateCurve) {
+        std::vector<ImVec2> viewControlPolygon;
+        viewControlPolygon.reserve(_points.size());
+        for (auto const& point : _points) {
+            viewControlPolygon.emplace_back(toViewPos(point));
+        }
+        drawList->AddPolyline(
+            viewControlPolygon.data(), toInt(viewControlPolygon.size()), Const::ConstructionPreviewHintLineColor, ImDrawFlags_None, lineThickness);
+    }
+
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        auto mousePos = ImGui::GetMousePos();
+        drawList->AddLine(toViewPos(_points.back()), mousePos, Const::ConstructionPreviewHintLineColor, lineThickness);
+        if (_mode == CreationMode_CreatePolygon && _points.size() > 1) {
+            drawList->AddLine(mousePos, toViewPos(_points.front()), Const::ConstructionPreviewHintLineColor, lineThickness);
+        }
+    }
+
+    for (auto const& point : _points) {
+        drawList->AddCircleFilled(toViewPos(point), scale(3.0f), Const::ConstructionPreviewPointColor);
+    }
 }
 
 bool CreatorWindow::isShown()
@@ -276,8 +456,20 @@ void CreatorWindow::finishDrawing()
     _drawingOccupancy.clear();
 }
 
+void CreatorWindow::onAddPoint(RealVector2D const& worldPos)
+{
+    _points.emplace_back(worldPos);
+}
+
+void CreatorWindow::onRemoveLastPoint()
+{
+    if (!_points.empty()) {
+        _points.pop_back();
+    }
+}
+
 CreatorWindow::CreatorWindow()
-    : AlienWindow("Creator", "editors.creator", false, false, {464.0f, 61.0f}, {358.0f, 370.0f})
+    : AlienWindow("Creator", "editors.creator", false, false, {464.0f, 61.0f}, {400.0f, 370.0f})
 {}
 
 void CreatorWindow::createEntity()
@@ -382,6 +574,64 @@ void CreatorWindow::createDisc()
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
+void CreatorWindow::createFromPoints()
+{
+    auto positions = calcObjectPositionsFromPoints();
+    if (positions.empty()) {
+        return;
+    }
+
+    ContentDesc description;
+    auto const color = EditorModel::get().getDefaultColorCode();
+    auto const objectType = isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc();
+    for (auto const& pos : positions) {
+        description._objects.emplace_back(ObjectDesc()
+                                              .id(NumberGenerator::get().createEntityId())
+                                              .stiffness(_stiffness)
+                                              .sticky(_makeSticky)
+                                              .pos(pos)
+                                              .color(color)
+                                              .isStatic(_static)
+                                              .type(objectType));
+    }
+
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    } else {
+        auto connectionDistance = _objectDistance * (_mode == CreationMode_CreatePolygon ? 1.7f : 1.5f);
+        DescEditService::get().reconnectObjects(description, connectionDistance);
+    }
+    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
+}
+
+std::vector<RealVector2D> CreatorWindow::calcBezierCurvePath() const
+{
+    if (_points.size() < 2) {
+        return _points;
+    }
+
+    auto controlPolygonLength = 0.0f;
+    for (auto const& [from, to] : std::views::zip(_points, _points | std::views::drop(1))) {
+        controlPolygonLength += Math::length(to - from);
+    }
+
+    auto numSegments = std::clamp(toInt(controlPolygonLength * 4 / _objectDistance), 16, 10000);
+    std::vector<RealVector2D> result;
+    result.reserve(numSegments + 1);
+    for (auto segment : std::views::iota(0, numSegments + 1)) {
+        result.emplace_back(evaluateBezier(_points, toFloat(segment) / toFloat(numSegments)));
+    }
+    return result;
+}
+
+std::vector<RealVector2D> CreatorWindow::calcObjectPositionsFromPoints() const
+{
+    if (_mode == CreationMode_CreatePolygon) {
+        return distributeHexagonallyInPolygon(_points, _objectDistance);
+    }
+    return distributeAlongPath(_mode == CreationMode_CreateCurve ? calcBezierCurvePath() : _points, _objectDistance);
+}
+
 ContentDesc CreatorWindow::convertToEnergyParticles(ContentDesc const& description) const
 {
     ContentDesc result;
@@ -408,6 +658,27 @@ void CreatorWindow::validateAndCorrect()
 bool CreatorWindow::isEnergyMaterial() const
 {
     return _material == CreationMaterial_EnergyParticle;
+}
+
+bool CreatorWindow::isPointPlacementMode() const
+{
+    return _mode == CreationMode_CreateLine || _mode == CreationMode_CreateCurve || _mode == CreationMode_CreatePolygon;
+}
+
+InteractionMode CreatorWindow::getInteractionMode() const
+{
+    if (_mode == CreationMode_Drawing) {
+        return InteractionMode_Drawing;
+    }
+    if (isPointPlacementMode()) {
+        return InteractionMode_PointPlacement;
+    }
+    return InteractionMode_Selection;
+}
+
+int CreatorWindow::getRequiredNumPoints() const
+{
+    return _mode == CreationMode_CreatePolygon ? 3 : 2;
 }
 
 ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
