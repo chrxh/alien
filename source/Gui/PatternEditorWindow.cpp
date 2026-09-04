@@ -355,7 +355,7 @@ void PatternEditorWindow::onDelete()
 }
 
 PatternEditorWindow::PatternEditorWindow()
-    : AlienWindow("Pattern editor", "editors.pattern editor", true)
+    : AlienWindow("Pattern editor", "editors.pattern editor", true, false, {60.0f, 60.0f}, {378.0f, 486.0f})
 {}
 
 void PatternEditorWindow::shutdownIntern()

@@ -90,7 +90,7 @@ void MultiplierWindow::shutdownIntern()
 }
 
 MultiplierWindow::MultiplierWindow()
-    : AlienWindow("Multiplier", "editors.multiplier", false)
+    : AlienWindow("Multiplier", "editors.multiplier", false, false, {841.0f, 61.0f}, {370.0f, 503.0f})
 {}
 
 void MultiplierWindow::processIntern()

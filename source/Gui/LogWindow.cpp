@@ -17,7 +17,7 @@ void LogWindow::initIntern()
 }
 
 LogWindow::LogWindow()
-    : AlienWindow("Log", "windows.log", false)
+    : AlienWindow("Log", "windows.log", false, false, {934.0f, 636.0f}, {652.0f, 414.0f})
 {}
 
 void LogWindow::shutdownIntern()

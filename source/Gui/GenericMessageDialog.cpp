@@ -10,7 +10,6 @@
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
-#include "WindowController.h"
 
 void GenericMessageDialog::processIntern()
 {
@@ -61,13 +60,6 @@ GenericMessageDialog::GenericMessageDialog()
 
 void GenericMessageDialog::processInformation()
 {
-    if (!_sizeInitialized) {
-        auto size = ImGui::GetWindowSize();
-        auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-        ImGui::SetWindowSize({size.x * factor, size.y * factor});
-        _sizeInitialized = true;
-    }
-
     processMessageText();
     AlienGui::Separator();
 
@@ -78,13 +70,6 @@ void GenericMessageDialog::processInformation()
 
 void GenericMessageDialog::processYesNo()
 {
-    if (!_sizeInitialized) {
-        auto size = ImGui::GetWindowSize();
-        auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-        ImGui::SetWindowSize({size.x * factor, size.y * factor});
-        _sizeInitialized = true;
-    }
-
     processMessageText();
     AlienGui::Separator();
 

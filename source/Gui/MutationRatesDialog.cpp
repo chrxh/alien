@@ -284,7 +284,7 @@ namespace
 }
 
 MutationRatesDialog::MutationRatesDialog()
-    : _modalWindow("Mutation rates", DialogSize, true)
+    : _modalWindow("Mutation rates", DialogSize, true, "dialogs.mutation rates")
 {}
 
 void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix)

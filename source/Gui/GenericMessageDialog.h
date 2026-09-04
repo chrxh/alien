@@ -29,8 +29,6 @@ private:
     void processYesNo();
     void processMessageText();
 
-    bool _sizeInitialized = false;
-
     enum class DialogType
     {
         Information,

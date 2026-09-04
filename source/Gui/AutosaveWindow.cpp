@@ -24,19 +24,21 @@
 namespace
 {
     auto constexpr RightColumnWidth = 200.0f;
+    auto constexpr DefaultSettingsHeight = 130.0f;
     auto constexpr AutosaveSenderId = "Autosave";
     auto constexpr PeakDetectionInterval = 30;  // In seconds
 }
 
 AutosaveWindow::AutosaveWindow()
-    : AlienWindow("Autosave", "windows.autosave", false, true)
+    : AlienWindow("Autosave", "windows.autosave", false, true, {49.0f, 71.0f}, {546.0f, 448.0f})
 {}
 
 void AutosaveWindow::initIntern()
 {
 
     _settingsOpen = GlobalSettings::get().getValue("windows.autosave.settings.open", _settingsOpen);
-    _settingsHeight = GlobalSettings::get().getValue("windows.autosave.settings.height", _settingsHeight);
+    _settingsHeight =
+        GlobalSettings::get().getValue("windows.autosave.settings.height", scale(DefaultSettingsHeight)) * WindowController::get().getContentScaleCorrection();
     _autosaveEnabled = GlobalSettings::get().getValue("windows.autosave.enabled", _autosaveEnabled);
     _origAutosaveInterval = GlobalSettings::get().getValue("windows.autosave.interval", _origAutosaveInterval);
     _autosaveInterval = _origAutosaveInterval;

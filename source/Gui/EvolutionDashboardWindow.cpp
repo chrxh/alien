@@ -315,12 +315,13 @@ namespace
 }
 
 EvolutionDashboardWindow::EvolutionDashboardWindow()
-    : AlienWindow("Evolution dashboard", "windows.evolution dashboard", false, true, {scale(700.0f), scale(500.0f)})
+    : AlienWindow("Evolution dashboard", "windows.evolution dashboard", false, true, {60.0f, 60.0f}, {700.0f, 500.0f}, {700.0f, 500.0f})
 {}
 
 void EvolutionDashboardWindow::initIntern()
 {
-    _timelinesHeight = GlobalSettings::get().getValue("windows.evolution dashboard.timelines height", scale(DefaultTimelinesHeight));
+    _timelinesHeight = GlobalSettings::get().getValue("windows.evolution dashboard.timelines height", scale(DefaultTimelinesHeight))
+        * WindowController::get().getContentScaleCorrection();
     _timelineMode = GlobalSettings::get().getValue("windows.evolution dashboard.timeline mode", _timelineMode);
     _lastSteps = GlobalSettings::get().getValue("windows.evolution dashboard.last steps", _lastSteps);
     _plotHeight = GlobalSettings::get().getValue("windows.evolution dashboard.plot height", _plotHeight);

@@ -3,8 +3,6 @@
 #include <functional>
 #include <string>
 
-#include <imgui.h>
-
 #include "Definitions.h"
 
 // Modal popup window whose content is drawn by a callback. In contrast to AlienDialog it holds no content state and is
@@ -12,7 +10,11 @@
 class ModalWindow
 {
 public:
-    ModalWindow(std::string const& title, RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f), bool maximizable = false);
+    ModalWindow(
+        std::string const& title,
+        RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f),
+        bool maximizable = false,
+        std::string const& settingsNode = std::string());
 
     void open();
 
@@ -27,13 +29,14 @@ public:
 
 private:
     void processMaximizeButton();
+    void loadSettings();
+    void saveSettings();
 
     std::string _title;
     RealVector2D _defaultSize;
     bool _isMaximizable = false;
+    std::string _settingsNode;
 
-    bool _sizeInitialized = false;
-    ImVec2 _appliedDefaultSize;
     enum class State
     {
         Closed,
@@ -48,6 +51,6 @@ private:
         Maximized
     };
     WindowState _windowState = WindowState::Normal;
-    ImVec2 _savedPos;
-    ImVec2 _savedSize;
+    RealVector2D _savedPos;
+    RealVector2D _savedSize;
 };

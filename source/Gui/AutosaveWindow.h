@@ -47,7 +47,7 @@ private:
     void validateAndCorrect();
 
     bool _settingsOpen = false;
-    float _settingsHeight = scale(130.0f);
+    float _settingsHeight = 0;
     std::string _origDirectory;
     std::string _directory;
 

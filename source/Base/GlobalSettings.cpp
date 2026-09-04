@@ -341,10 +341,10 @@ namespace
     std::string const ImGuiSettingsKey = "gui.imgui settings";
 }
 
-void GlobalSettings::loadImGuiSettings(std::string const& defaultSettings)
+void GlobalSettings::loadImGuiSettings()
 {
     ImGui::GetIO().IniFilename = nullptr;  // No imgui.ini file; the state is persisted here instead
-    auto settings = getValue(ImGuiSettingsKey, defaultSettings);
+    auto settings = getValue(ImGuiSettingsKey, std::string());
     if (!settings.empty()) {
         ImGui::LoadIniSettingsFromMemory(settings.c_str(), settings.size());
     }
