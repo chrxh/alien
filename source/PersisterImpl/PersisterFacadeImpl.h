@@ -47,6 +47,9 @@ public:
     PersisterRequestId scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data) override;
     ReplaceNetworkResourceResultData fetchReplaceNetworkResourcesData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleGetSimulationPictures(SenderInfo const& senderInfo, GetSimulationPicturesRequestData const& data) override;
+    GetSimulationPicturesResultData fetchGetSimulationPicturesData(PersisterRequestId const& id) override;
+
     PersisterRequestId scheduleGetUserNamesForReaction(SenderInfo const& senderInfo, GetUserNamesForReactionRequestData const& data) override;
     GetUserNamesForReactionResultData fetchGetUserNamesForReactionData(PersisterRequestId const& id) override;
 

@@ -84,7 +84,7 @@ The C++ client (`source/Base/Resources.h`, `AlienServerURL`) defaults to
 
 ```bash
 pip install -r tests/requirements.txt
-pytest scripts/ServerNew/tests
+pytest source/Server/tests
 ```
 
 The test suite injects its own SQLite-backed `DATABASE_URL` via the

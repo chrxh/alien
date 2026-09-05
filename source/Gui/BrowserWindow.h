@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 
 #include <imgui.h>
 
@@ -19,6 +20,13 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
+
+enum GallerySorting
+{
+    GallerySorting_MostReactions,
+    GallerySorting_Newest,
+    GallerySorting_MostDownloads
+};
 
 class BrowserWindow : public AlienWindow
 {
@@ -56,13 +64,28 @@ private:
     void processBackground() override;
 
     void processToolbar();
-    void processWorkspaceSelectionAndFilter();
+    void processWorkspaceSelection();
+    void processFilter();
     void processWorkspace();
     void processUserList();
     void processStatusBar();
 
     void processSimulationList();
     void processGenomeList();
+
+    void processGallery();
+    void processGallerySorting();
+    void processGalleryPaging();
+    std::string getGalleryPageText() const;
+    float getGalleryPagerWidth() const;
+    void processGalleryTile(NetworkResourceRawTO const& rawTO, float tileWidth);
+    void processGalleryPicture(NetworkResourceRawTO const& rawTO, float width);
+    void processGalleryReactionButton(NetworkResourceRawTO const& rawTO);
+    void processReactionTooltip(NetworkResourceRawTO const& rawTO);
+    NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO) const;
+    std::vector<NetworkResourceRawTO> getSortedGalleryEntries() const;
+    void requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries);
+    bool hasPreviewPictures() const;
 
     bool processResourceNameField(
         NetworkResourceTreeTO const& treeTO,
@@ -99,6 +122,8 @@ private:
     void createTreeTOs(Workspace& workspace);
     void sortUserList();
 
+    void onSelectGalleryEntry(NetworkResourceRawTO const& rawTO);
+
     void onDownloadResource(BrowserLeaf const& leaf);
     void onReplaceResource(BrowserLeaf const& leaf);
     void onEditResource(NetworkResourceTreeTO const& treeTO);
@@ -123,6 +148,14 @@ private:
     TaskProcessor _refreshProcessor;
     TaskProcessor _emojiUserNameProcessor;
     TaskProcessor _reactionProcessor;
+    TaskProcessor _pictureProcessor;
+
+    bool _galleryView = true;
+    int _gallerySorting = GallerySorting_MostReactions;
+    int _galleryPage = 0;
+    int _galleryNumEntries = 0;
+    int _galleryNumPages = 1;
+    std::unordered_map<std::string, std::optional<TextureData>> _pictureBySimId;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;

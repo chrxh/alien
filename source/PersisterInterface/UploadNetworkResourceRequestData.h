@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include <Network/Definitions.h>
@@ -20,6 +21,7 @@ struct UploadNetworkResourceRequestData
     {
         float zoom = 1.0f;
         RealVector2D center;
+        std::optional<std::string> jpg;
     };
     struct CreatureData
     {

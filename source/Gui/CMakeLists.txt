@@ -127,6 +127,9 @@ PUBLIC
     OverlayController.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PictureData.h
+    PictureGuiService.cpp
+    PictureGuiService.h
     PreviewSettingsDialog.cpp
     PreviewSettingsDialog.h
     PreviewWidget.cpp

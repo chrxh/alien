@@ -5,6 +5,7 @@
 #include <PersisterInterface/EditNetworkResourceResultData.h>
 #include <PersisterInterface/GetNetworkResourcesResultData.h>
 #include <PersisterInterface/GetPeakSimulationResultData.h>
+#include <PersisterInterface/GetSimulationPicturesResultData.h>
 #include <PersisterInterface/GetUserNamesForReactionResultData.h>
 #include <PersisterInterface/LoginResultData.h>
 #include <PersisterInterface/MoveNetworkResourceResultData.h>
@@ -59,6 +60,7 @@ using _GetNetworkResourcesRequestResult = _ConcreteRequestResult<GetNetworkResou
 using _DownloadNetworkResourceRequestResult = _ConcreteRequestResult<DownloadNetworkResourceResultData>;
 using _UploadNetworkResourceRequestResult = _ConcreteRequestResult<UploadNetworkResourceResultData>;
 using _ReplaceNetworkResourceRequestResult = _ConcreteRequestResult<ReplaceNetworkResourceResultData>;
+using _GetSimulationPicturesRequestResult = _ConcreteRequestResult<GetSimulationPicturesResultData>;
 using _GetUserNamesForEmojiRequestResult = _ConcreteRequestResult<GetUserNamesForReactionResultData>;
 using _DeleteNetworkResourceRequestResult = _ConcreteRequestResult<DeleteNetworkResourceResultData>;
 using _EditNetworkResourceRequestResult = _ConcreteRequestResult<EditNetworkResourceResultData>;

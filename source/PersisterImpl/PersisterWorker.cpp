@@ -11,6 +11,7 @@
 
 #include <Network/NetworkService.h>
 
+#include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/PersisterRequestResult.h>
@@ -149,6 +150,8 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_UploadNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReplaceNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetSimulationPicturesRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetUserNamesForEmojiRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
@@ -368,15 +371,12 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         resultData.resourceData.emplace<SimulationDesc>(std::move(deserializedSimulation));
     } else {
-        THROW_NOT_IMPLEMENTED();
-        //std::vector<uint8_t> genome;
-        //if (!SerializerService::get().deserializeGenomeFromString(genome, serializedSim)) {
-        //    return std::make_shared<_PersisterRequestError>(
-        //        request->getRequestId(),
-        //        request->getSenderInfo().senderId,
-        //        PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
-        //}
-        //resultData.resourceData = GenomeDescConverterService::get().convertBytesToDescription(genome);
+        GenomeDesc genome;
+        if (!SerializerService::get().deserializeGenomeFromString(genome, serializedSim)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
+        }
+        resultData.resourceData.emplace<GenomeDesc>(std::move(genome));
     }
 
     return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
@@ -392,6 +392,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     DownloadNetworkResourceResultData resultData;
 
     std::string mainData;
+    std::optional<std::string> pictureJpg;
     IntVector2D size;
     int numObjects = 0;
 
@@ -422,20 +423,18 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         size = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
+        pictureJpg = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
     } else {
-        THROW_NOT_IMPLEMENTED();
-        //auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
-        //if (genome._objects.empty()) {
-        //    return std::make_shared<_PersisterRequestError>(
-        //        request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for uploading selected."});
-        //}
-        //auto genomeData = GenomeDescConverterService::get().convertDescriptionToBytes(genome);
-        //numObjects = GenomeDescConverterService::get().getNumNodesRecursively(genomeData, true);
-
-        //if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
-        //    return std::make_shared<_PersisterRequestError>(
-        //        request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
-        //}
+        auto const& genome = std::get<UploadNetworkResourceRequestData::CreatureData>(requestData.data).description;
+        if (genome._genes.empty()) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"There is no valid genome for uploading selected."});
+        }
+        if (!SerializerService::get().serializeGenomeToString(mainData, genome)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
+        }
+        numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
     }
 
     std::string resourceId;
@@ -446,6 +445,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             size,
             numObjects,
             mainData,
+            pictureJpg,
             resourceType,
             requestData.workspaceType)) {
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -504,7 +504,16 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         worldSize = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
     } else {
-        THROW_NOT_IMPLEMENTED();
+        auto const& genome = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data).description;
+        if (genome._genes.empty()) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"There is no valid genome for replacing selected."});
+        }
+        if (!SerializerService::get().serializeGenomeToString(mainData, genome)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for replacing."});
+        }
+        numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
     }
 
     if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData)) {
@@ -522,6 +531,23 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         requestData.downloadCache->insertOrAssign(requestData.resourceId, deserializedSim);
     }
     return std::make_shared<_ReplaceNetworkResourceRequestResult>(request->getRequestId(), ReplaceNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    GetSimulationPicturesRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    GetSimulationPicturesResultData resultData;
+    if (!NetworkService::get().getSimulationPictures(resultData.jpgBySimId, requestData.simIds)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load preview pictures."});
+    }
+
+    return std::make_shared<_GetSimulationPicturesRequestResult>(request->getRequestId(), resultData);
 }
 
 _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request)

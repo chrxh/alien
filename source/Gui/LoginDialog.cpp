@@ -25,7 +25,7 @@ void LoginDialog::initIntern()
 }
 
 LoginDialog::LoginDialog()
-    : AlienDialog("Login")
+    : AlienDialog("Login", {450.0f, 450.0f})
 {}
 
 void LoginDialog::processIntern()

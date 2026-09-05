@@ -1,8 +1,12 @@
 #include "UploadSimulationDialog.h"
 
+#include <GLFW/glfw3.h>
+
 #include <imgui.h>
 
+#include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
 
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
@@ -17,12 +21,18 @@
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "PictureGuiService.h"
+#include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "WindowController.h"
 
 namespace
 {
     auto constexpr FolderWidgetHeight = 50.0f;
+
+    auto constexpr PreviewPictureResolution = IntVector2D{300, 200};
+    auto constexpr PreviewPictureBrightness = 1.3f;
 
     std::map<NetworkResourceType, std::string> const BrowserDataTypeToLowerString = {
         {NetworkResourceType_Simulation, "simulation"},
@@ -61,7 +71,7 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
 }
 
 UploadSimulationDialog::UploadSimulationDialog()
-    : AlienDialog("")
+    : AlienDialog("", {450.0f, 500.0f})
 {}
 
 void UploadSimulationDialog::processIntern()
@@ -106,10 +116,10 @@ void UploadSimulationDialog::processIntern()
 
     AlienGui::ToggleButton(
         AlienGui::ToggleButtonParameters()
-            .name("Make public")
+            .name("Share with the community")
             .tooltip(
-                "If true, the " + resourceTypeString + " will be visible to all users. If false, the " + resourceTypeString
-                + " will only be visible in the private workspace. This property can also be changed later if desired."),
+                "If true, the " + resourceTypeString + " will be visible to all users in the Community workspace. If false, the " + resourceTypeString
+                + " will only be visible in your own workspace. This property can also be changed later if desired."),
         _share);
 
     AlienGui::Separator();
@@ -135,11 +145,31 @@ void UploadSimulationDialog::processIntern()
     }
 }
 
+namespace
+{
+    std::optional<std::string> createPreviewJpg()
+    {
+        try {
+            auto screenWidth = WindowController::get().getWindowData().mode->width;
+            auto scaleFactor = toFloat(screenWidth) / toFloat(PreviewPictureResolution.x);
+            auto renderResolution = IntVector2D{screenWidth, toInt(toFloat(PreviewPictureResolution.y) * scaleFactor)};
+
+            auto picture = SimulationView::get().savePicture(renderResolution);
+            auto preview = PictureGuiService::get().scale(picture, PreviewPictureResolution);
+            return PictureGuiService::get().encodeJpg(PictureGuiService::get().brighten(preview, PreviewPictureBrightness));
+        } catch (AlienException const& exception) {
+            log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
+            return std::nullopt;
+        }
+    }
+}
+
 void UploadSimulationDialog::onUpload()
 {
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
-            return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
+            return UploadNetworkResourceRequestData::SimulationData{
+                .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .jpg = createPreviewJpg()};
         } else {
             return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
         }

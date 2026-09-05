@@ -5,6 +5,35 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
+namespace
+{
+    TextureData createTexture(unsigned char const* pixels, int width, int height)
+    {
+        unsigned int textureId;
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        return {textureId, width, height};
+    }
+}
+
+auto OpenGLHelper::loadTextureFromMemory(std::string const& encodedImage) -> TextureData
+{
+    int width, height, numChannels;
+    auto pixels =
+        stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(encodedImage.data()), static_cast<int>(encodedImage.size()), &width, &height, &numChannels, 4);
+    if (pixels == nullptr) {
+        throw std::runtime_error("Failed to load texture");
+    }
+    auto result = createTexture(pixels, width, height);
+    stbi_image_free(pixels);
+    return result;
+}
+
 auto OpenGLHelper::loadTexture(std::filesystem::path const& filename) -> TextureData
 {
     unsigned int textureId;

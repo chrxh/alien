@@ -26,8 +26,8 @@ public:
     bool serializeGenomeToFile(std::filesystem::path const& filename, GenomeDesc const& genome) const;
     bool deserializeGenomeFromFile(GenomeDesc& genome, std::filesystem::path const& filename) const;
 
-    bool serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input) const;
-    bool deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input) const;
+    bool serializeGenomeToString(std::string& output, GenomeDesc const& genome) const;
+    bool deserializeGenomeFromString(GenomeDesc& genome, std::string const& input) const;
 
     bool serializeSimulationParametersToFile(std::filesystem::path const& filename, SimulationParameters const& parameters) const;
     bool deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::filesystem::path const& filename) const;

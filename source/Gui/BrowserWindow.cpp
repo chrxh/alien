@@ -8,6 +8,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
+#include <boost/range/adaptor/indexed.hpp>
 
 #include <imgui.h>
 
@@ -57,6 +58,15 @@ namespace
     auto constexpr NumEmojiBlocks = 4;
     int const NumEmojisPerBlock[] = {19, 14, 10, 6};
     auto constexpr NumEmojisPerRow = 5;
+
+    auto constexpr GalleryTilesPerPage = 100;
+    auto constexpr GalleryMaxPicturesPerRequest = 32;
+    auto constexpr GalleryMinTileWidth = 190.0f;
+    auto constexpr GalleryTileSpacing = 8.0f;
+    auto constexpr GalleryTileTextHeight = 108.0f;
+    auto constexpr WorkspaceSwitcherWidth = 270.0f;
+    auto constexpr MinFilterWidth = 100.0f;
+    auto constexpr GalleryPictureAspectRatio = 2.0f / 3.0f;
 }
 
 BrowserWindow::BrowserWindow()
@@ -82,8 +92,11 @@ void BrowserWindow::initIntern()
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _reactionProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
+    _pictureProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
 
     auto& settings = GlobalSettings::get();
+    _galleryView = settings.getValue("windows.browser.gallery view", _galleryView);
+    _gallerySorting = settings.getValue("windows.browser.gallery sorting", _gallerySorting);
     _currentWorkspace.resourceType = settings.getValue("windows.browser.resource type", _currentWorkspace.resourceType);
     _currentWorkspace.workspaceType = settings.getValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
     _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth)) * WindowController::get().getContentScaleCorrection();
@@ -124,6 +137,8 @@ void BrowserWindow::initIntern()
 void BrowserWindow::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
+    settings.setValue("windows.browser.gallery view", _galleryView);
+    settings.setValue("windows.browser.gallery sorting", _gallerySorting);
     settings.setValue("windows.browser.resource type", _currentWorkspace.resourceType);
     settings.setValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
     settings.setValue("windows.browser.first start", false);
@@ -246,8 +261,8 @@ void BrowserWindow::processToolbar()
                 .name("Upload " + resourceTypeString)
                 .tooltip(
                     "Upload your current " + resourceTypeString
-                    + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only "
-                      "be visible in your private workspace.\nIf you have already selected a folder, your "
+                    + " to the server and made visible in the browser. You can choose whether you want to share it with the community or whether it should "
+                      "only be visible in your own workspace.\nIf you have already selected a folder, your "
                     + resourceTypeString + " will be uploaded there.")
                 .action([&] {
                     std::string prefix = [&] {
@@ -270,22 +285,39 @@ void BrowserWindow::processToolbar()
                                                     + " with the one that is currently open. The name, description and reactions will be preserved.")
                                                 .disabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf())
                                                 .action([&] { onReplaceResource(_selectedTreeTO->getLeaf()); })),
-        AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters()
-                .icon(ICON_FA_SHARE_ALT)
-                .name("Change visibility")
-                .tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public")
-                .disabled(!isOwnerForSelectedItem)
-                .action([&] { onMoveResource(_selectedTreeTO); })),
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                .icon(ICON_FA_SHARE_ALT)
+                                                .name("Change visibility")
+                                                .tooltip("Change visibility: Community " ICON_FA_LONG_ARROW_ALT_RIGHT
+                                                         " my workspace and my workspace " ICON_FA_LONG_ARROW_ALT_RIGHT " Community")
+                                                .disabled(!isOwnerForSelectedItem)
+                                                .action([&] { onMoveResource(_selectedTreeTO); })),
         AlienGui::ToolbarItem::createButton(
             AlienGui::ToolbarItemParameters().icon(ICON_FA_TRASH).name("Delete selected " + resourceTypeString).disabled(!isOwnerForSelectedItem).action([&] {
                 onDeleteResource(_selectedTreeTO);
             })),
         AlienGui::ToolbarItem::createSeparator(),
         AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters().icon(ICON_FA_EXPAND_ARROWS_ALT).name("Expand all folders").action([&] { onExpandFolders(); })),
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_EXPAND_ARROWS_ALT).name("Expand all folders").disabled(_galleryView).action([&] {
+                onExpandFolders();
+            })),
         AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters().icon(ICON_FA_COMPRESS_ARROWS_ALT).name("Collapse all folders").action([&] { onCollapseFolders(); }))};
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_COMPRESS_ARROWS_ALT).name("Collapse all folders").disabled(_galleryView).action([&] {
+                onCollapseFolders();
+            })),
+        AlienGui::ToolbarItem::createSeparator(),
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                .icon(ICON_FA_TH)
+                                                .name("Gallery view")
+                                                .tooltip("Show the " + resourceTypeString + "s as tiles with preview pictures.")
+                                                .selected(_galleryView)
+                                                .action([&] { _galleryView = true; })),
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                .icon(ICON_FA_LIST)
+                                                .name("Table view")
+                                                .tooltip("Show the " + resourceTypeString + "s as a sortable table with folders.")
+                                                .selected(!_galleryView)
+                                                .action([&] { _galleryView = false; }))};
 
 #ifdef _WIN32
     items.emplace_back(AlienGui::ToolbarItem::createSeparator());
@@ -307,7 +339,11 @@ void BrowserWindow::processWorkspace()
                     _currentWorkspace.resourceType = NetworkResourceType_Simulation;
                     _selectedTreeTO = nullptr;
                 }
-                processSimulationList();
+                if (_galleryView) {
+                    processGallery();
+                } else {
+                    processSimulationList();
+                }
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
@@ -315,50 +351,59 @@ void BrowserWindow::processWorkspace()
                     _currentWorkspace.resourceType = NetworkResourceType_Genome;
                     _selectedTreeTO = nullptr;
                 }
-                processGenomeList();
+                if (_galleryView) {
+                    processGallery();
+                } else {
+                    processGenomeList();
+                }
                 ImGui::EndTabItem();
             }
             ImGui::EndTabBar();
         }
-        processWorkspaceSelectionAndFilter();
+        processFilter();
     }
     ImGui::EndChild();
 }
 
-void BrowserWindow::processWorkspaceSelectionAndFilter()
+void BrowserWindow::processWorkspaceSelection()
+{
+    auto userName = NetworkService::get().getLoggedInUserName();
+    auto privateWorkspaceString = userName.has_value() ? std::string("My workspace") : std::string("My workspace (login required)");
+    auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  // Change the order for display
+    if (AlienGui::Switcher(
+            AlienGui::SwitcherParameters()
+                .width(WorkspaceSwitcherWidth)
+                .textWidth(0.0f)
+                .tooltip(Const::BrowserWorkspaceTooltip)
+                .values({privateWorkspaceString, std::string("Featured"), std::string("Community")}),
+            &workspaceType_reordered)) {
+        _selectedTreeTO = nullptr;
+        _galleryPage = 0;
+    }
+    _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
+}
+
+void BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("##workspaceType");
-        ImGui::TableSetupColumn("##textFilter");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        auto userName = NetworkService::get().getLoggedInUserName();
-        auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
-        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  // Change the order for display
-        if (AlienGui::Switcher(
-                AlienGui::SwitcherParameters()
-                    .textWidth(48.0f)
-                    .tooltip(Const::BrowserWorkspaceTooltip)
-                    .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
-                &workspaceType_reordered)) {
-            _selectedTreeTO = nullptr;
-        }
-        _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
-        ImGui::SameLine();
-        AlienGui::VerticalSeparator();
-
-        ImGui::TableSetColumnIndex(1);
-        if (AlienGui::InputFilter(AlienGui::InputFilterParameters(), _filter)) {
-            for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
-                for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-                    createTreeTOs(_workspaces.at(WorkspaceId{resourceType, workspaceType}));
-                }
+    auto filterParameters = AlienGui::InputFilterParameters();
+    if (_galleryView) {
+        auto availableWidth = ImGui::GetContentRegionAvail().x - getGalleryPagerWidth() - ImGui::GetStyle().ItemSpacing.x;
+        filterParameters.width(std::max(MinFilterWidth, scaleInverse(availableWidth)));
+    }
+    if (AlienGui::InputFilter(filterParameters, _filter)) {
+        _galleryPage = 0;
+        for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
+            for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+                createTreeTOs(_workspaces.at(WorkspaceId{resourceType, workspaceType}));
             }
         }
+    }
 
-        ImGui::EndTable();
+    if (_galleryView) {
+        ImGui::SameLine();
+        processGalleryPaging();
     }
 }
 
@@ -515,6 +560,8 @@ void BrowserWindow::processStatusBar()
 
 void BrowserWindow::processSimulationList()
 {
+    processWorkspaceSelection();
+
     ImGui::PushID("SimulationList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY
@@ -621,8 +668,328 @@ void BrowserWindow::processSimulationList()
     ImGui::PopID();
 }
 
+void BrowserWindow::processGallery()
+{
+    ImGui::PushID("Gallery");
+
+    auto entries = getSortedGalleryEntries();
+    _galleryNumEntries = toInt(entries.size());
+
+    processGallerySorting();
+
+    _galleryNumPages = std::max(1, (_galleryNumEntries + GalleryTilesPerPage - 1) / GalleryTilesPerPage);
+    _galleryPage = std::clamp(_galleryPage, 0, _galleryNumPages - 1);
+
+    auto firstIndex = _galleryPage * GalleryTilesPerPage;
+    auto lastIndex = std::min(_galleryNumEntries, firstIndex + GalleryTilesPerPage);
+    auto pageEntries = std::vector<NetworkResourceRawTO>(entries.begin() + firstIndex, entries.begin() + lastIndex);
+
+    requestMissingPictures(pageEntries);
+
+    if (ImGui::BeginChild("##tiles", {0, ImGui::GetContentRegionAvail().y - scale(WorkspaceBottomSpace)}, false)) {
+        auto horizontalSpacing = scale(GalleryTileSpacing);
+        auto availableWidth = ImGui::GetContentRegionAvail().x;
+        auto numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (scale(GalleryMinTileWidth) + horizontalSpacing)));
+        auto tileWidth = (availableWidth - horizontalSpacing * (numColumns - 1)) / numColumns;
+
+        for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
+            if (index % numColumns != 0) {
+                ImGui::SameLine(0, horizontalSpacing);
+            }
+            ImGui::PushID(toInt(index));
+            processGalleryTile(rawTO, tileWidth);
+            ImGui::PopID();
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::PopID();
+}
+
+void BrowserWindow::processGallerySorting()
+{
+    processWorkspaceSelection();
+
+    ImGui::SameLine();
+    AlienGui::VerticalSeparator();
+    ImGui::SameLine();
+    if (AlienGui::Switcher(
+            AlienGui::SwitcherParameters().name("Sort by").width(230.0f).textWidth(55.0f).values(
+                {std::string("Most reactions"), std::string("Newest"), std::string("Most downloads")}),
+            &_gallerySorting)) {
+        _galleryPage = 0;
+    }
+}
+
+void BrowserWindow::processGalleryPaging()
+{
+    ImGui::BeginDisabled(_galleryPage == 0);
+    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_DOUBLE_LEFT).tooltip("First page"))) {
+        _galleryPage = 0;
+    }
+    ImGui::SameLine();
+    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_LEFT).tooltip("Previous page"))) {
+        --_galleryPage;
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    AlienGui::Text(getGalleryPageText());
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_galleryPage >= _galleryNumPages - 1);
+    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_RIGHT).tooltip("Next page"))) {
+        ++_galleryPage;
+    }
+    ImGui::SameLine();
+    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_DOUBLE_RIGHT).tooltip("Last page"))) {
+        _galleryPage = _galleryNumPages - 1;
+    }
+    ImGui::EndDisabled();
+}
+
+std::string BrowserWindow::getGalleryPageText() const
+{
+    auto firstEntry = _galleryNumEntries > 0 ? _galleryPage * GalleryTilesPerPage + 1 : 0;
+    auto lastEntry = std::min(_galleryNumEntries, (_galleryPage + 1) * GalleryTilesPerPage);
+    return std::to_string(firstEntry) + " - " + std::to_string(lastEntry) + " of " + std::to_string(_galleryNumEntries);
+}
+
+float BrowserWindow::getGalleryPagerWidth() const
+{
+    auto const& style = ImGui::GetStyle();
+    auto getButtonWidth = [&](std::string const& icon) { return ImGui::CalcTextSize(icon.c_str()).x + style.FramePadding.x * 2; };
+    return getButtonWidth(ICON_FA_ANGLE_DOUBLE_LEFT) + getButtonWidth(ICON_FA_ANGLE_LEFT) + getButtonWidth(ICON_FA_ANGLE_RIGHT)
+        + getButtonWidth(ICON_FA_ANGLE_DOUBLE_RIGHT) + ImGui::CalcTextSize(getGalleryPageText().c_str()).x + style.ItemSpacing.x * 4;
+}
+
+namespace
+{
+    std::string shortenText(std::string const& text, float width)
+    {
+        if (ImGui::CalcTextSize(text.c_str()).x <= width) {
+            return text;
+        }
+        auto shortened = text;
+        while (!shortened.empty() && ImGui::CalcTextSize((shortened + "...").c_str()).x > width) {
+            shortened.pop_back();
+            while (!shortened.empty() && (static_cast<unsigned char>(shortened.back()) & 0xc0) == 0x80) {
+                shortened.pop_back();
+            }
+        }
+        return shortened + "...";
+    }
+
+    void processTileText(std::string const& text, float width, bool bold = false)
+    {
+        if (bold) {
+            ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+        }
+        auto shortenedText = shortenText(text, width);
+        AlienGui::Text(shortenedText);
+        if (bold) {
+            ImGui::PopFont();
+        }
+        if (shortenedText != text) {
+            AlienGui::Tooltip(text, false);
+        }
+    }
+}
+
+void BrowserWindow::processGalleryTile(NetworkResourceRawTO const& rawTO, float tileWidth)
+{
+    _lastSessionData.registrate(rawTO);
+
+    auto tileHeight = tileWidth * GalleryPictureAspectRatio + scale(GalleryTileTextHeight);
+
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
+    if (ImGui::BeginChild("##tile", {tileWidth, tileHeight}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+        auto textWidth = ImGui::GetContentRegionAvail().x;
+        processGalleryPicture(rawTO, textWidth);
+
+        auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);
+        processTileText(NetworkResourceService::get().concatenateFolderName(folderNames, true), textWidth);
+        ImGui::PopStyleColor();
+
+        if (_currentWorkspace.workspaceType == WorkspaceType_Private && rawTO->workspaceType != WorkspaceType_Private) {
+            AlienGui::Text(ICON_FA_SHARE_ALT);
+            AlienGui::Tooltip(rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community");
+            ImGui::SameLine();
+        }
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceTextColor);
+        processTileText(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), ImGui::GetContentRegionAvail().x, true);
+        ImGui::PopStyleColor();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+        AlienGui::Text(rawTO->userName);
+        ImGui::SameLine();
+        AlienGui::Text(AlienGui::TextParameters().text(rawTO->timestamp.substr(0, 10)).rightAligned(true));
+        ImGui::PopStyleColor();
+
+        processDownloadButton(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
+        ImGui::SameLine();
+        processGalleryReactionButton(rawTO);
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+        AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_DOWNLOAD " " + std::to_string(rawTO->numDownloads)).rightAligned(true));
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
+
+    auto tileMin = ImGui::GetItemRectMin();
+    auto tileMax = ImGui::GetItemRectMax();
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseHoveringRect(tileMin, tileMax)) {
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            onSelectGalleryEntry(rawTO);
+        }
+        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            onDownloadResource(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
+        }
+    }
+    if (_selectedTreeTO != nullptr && _selectedTreeTO->isLeaf() && _selectedTreeTO->getLeaf().rawTO->id == rawTO->id) {
+        ImGui::GetWindowDrawList()->AddRect(tileMin, tileMax, (ImU32)Const::AccentColor, 0, 0, scale(2.0f));
+    }
+}
+
+void BrowserWindow::processGalleryReactionButton(NetworkResourceRawTO const& rawTO)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
+    auto isAddReaction = processActionButton(ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()));
+    ImGui::PopStyleColor();
+
+    if (ImGui::IsItemHovered()) {
+        processReactionTooltip(rawTO);
+    }
+    if (isAddReaction) {
+        _activateEmojiPopup = true;
+        _emojiPopupTO = createLeafTreeTO(rawTO);
+    }
+}
+
+void BrowserWindow::processReactionTooltip(NetworkResourceRawTO const& rawTO)
+{
+    ImGui::BeginTooltip();
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
+    if (rawTO->numLikesByEmojiType.empty()) {
+        AlienGui::Text("Add a reaction");
+    } else {
+        for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
+            if (emojiType < toInt(_emojis.size())) {
+                auto const& emoji = _emojis.at(emojiType);
+                ImGui::Image((ImTextureID)(intptr_t)emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
+                ImGui::SameLine();
+            }
+            AlienGui::Text(std::to_string(numLikes) + "   " + getUserNamesToEmojiType(rawTO->id, emojiType));
+        }
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndTooltip();
+}
+
+NetworkResourceTreeTO BrowserWindow::createLeafTreeTO(NetworkResourceRawTO const& rawTO) const
+{
+    auto result = std::make_shared<_NetworkResourceTreeTO>();
+    result->type = rawTO->resourceType;
+    result->folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
+    result->node = BrowserLeaf{.leafName = NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), .rawTO = rawTO};
+    return result;
+}
+
+void BrowserWindow::processGalleryPicture(NetworkResourceRawTO const& rawTO, float width)
+{
+    auto height = width * GalleryPictureAspectRatio;
+    auto pos = ImGui::GetCursorScreenPos();
+
+    auto findResult = _pictureBySimId.find(rawTO->id);
+    if (findResult != _pictureBySimId.end() && findResult->second.has_value()) {
+        ImGui::Image((ImTextureID)(intptr_t)findResult->second->textureId, {width, height});
+        return;
+    }
+
+    ImGui::GetWindowDrawList()->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
+    auto text = hasPreviewPictures() && findResult == _pictureBySimId.end() ? std::string("loading...") : std::string("no preview");
+    auto textSize = ImGui::CalcTextSize(text.c_str());
+    ImGui::GetWindowDrawList()->AddText({pos.x + (width - textSize.x) / 2, pos.y + (height - textSize.y) / 2}, (ImU32)Const::TextDecentColor, text.c_str());
+    ImGui::Dummy({width, height});
+}
+
+std::vector<NetworkResourceRawTO> BrowserWindow::getSortedGalleryEntries() const
+{
+    auto const& workspace = _workspaces.at(_currentWorkspace);
+
+    std::vector<NetworkResourceRawTO> result;
+    for (auto const& rawTO : workspace.rawTOs) {
+        if (_filter.empty() || rawTO->matchWithFilter(_filter)) {
+            result.emplace_back(rawTO);
+        }
+    }
+
+    std::ranges::sort(result, [this](NetworkResourceRawTO const& left, NetworkResourceRawTO const& right) {
+        if (_gallerySorting == GallerySorting_Newest) {
+            return left->timestamp > right->timestamp;
+        }
+        if (_gallerySorting == GallerySorting_MostDownloads) {
+            return left->numDownloads > right->numDownloads;
+        }
+        return left->getTotalLikes() > right->getTotalLikes();
+    });
+    return result;
+}
+
+void BrowserWindow::requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries)
+{
+    if (!hasPreviewPictures() || _pictureProcessor->pendingTasks()) {
+        return;
+    }
+
+    std::vector<std::string> simIds;
+    for (auto const& rawTO : pageEntries) {
+        if (!_pictureBySimId.contains(rawTO->id) && toInt(simIds.size()) < GalleryMaxPicturesPerRequest) {
+            simIds.emplace_back(rawTO->id);
+        }
+    }
+    if (simIds.empty()) {
+        return;
+    }
+
+    _pictureProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _PersisterFacade::get()->scheduleGetSimulationPictures(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, GetSimulationPicturesRequestData{.simIds = simIds});
+        },
+        [&, simIds](auto const& requestId) {
+            auto data = _PersisterFacade::get()->fetchGetSimulationPicturesData(requestId);
+            for (auto const& simId : simIds) {
+                auto findResult = data.jpgBySimId.find(simId);
+                std::optional<TextureData> picture;
+                if (findResult != data.jpgBySimId.end() && !findResult->second.empty()) {
+                    try {
+                        picture = OpenGLHelper::loadTextureFromMemory(findResult->second);
+                    } catch (std::exception const&) {
+                        log(Priority::Important, "browser: preview picture of simulation " + simId + " could not be decoded");
+                    }
+                }
+                _pictureBySimId.insert_or_assign(simId, picture);
+            }
+        },
+        [&, simIds](auto const&) {
+            for (auto const& simId : simIds) {
+                _pictureBySimId.insert_or_assign(simId, std::nullopt);
+            }
+        });
+}
+
+bool BrowserWindow::hasPreviewPictures() const
+{
+    return _currentWorkspace.resourceType == NetworkResourceType_Simulation;
+}
+
 void BrowserWindow::processGenomeList()
 {
+    processWorkspaceSelection();
+
     ImGui::PushID("GenomeList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
@@ -735,8 +1102,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         ImGui::SameLine();
         if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip(
-                leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in alien-project's workspace" : "Visible in the public workspace");
+            AlienGui::Tooltip(leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community");
         }
         ImGui::SameLine();
 
@@ -1182,6 +1548,7 @@ void BrowserWindow::processPendingRequestIds()
     _refreshProcessor->process();
     _emojiUserNameProcessor->process();
     _reactionProcessor->process();
+    _pictureProcessor->process();
 }
 
 void BrowserWindow::createTreeTOs(Workspace& workspace)
@@ -1209,6 +1576,11 @@ void BrowserWindow::createTreeTOs(Workspace& workspace)
 void BrowserWindow::sortUserList()
 {
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
+}
+
+void BrowserWindow::onSelectGalleryEntry(NetworkResourceRawTO const& rawTO)
+{
+    _selectedTreeTO = createLeafTreeTO(rawTO);
 }
 
 void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
