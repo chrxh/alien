@@ -1,5 +1,7 @@
 #include "UploadSimulationDialog.h"
 
+#include <GLFW/glfw3.h>
+
 #include <imgui.h>
 
 #include <Base/GlobalSettings.h>
@@ -17,6 +19,7 @@
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "PictureGuiService.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 
@@ -61,7 +64,7 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
 }
 
 UploadSimulationDialog::UploadSimulationDialog()
-    : AlienDialog("")
+    : AlienDialog("", {450.0f, 500.0f})
 {}
 
 void UploadSimulationDialog::processIntern()
@@ -106,10 +109,10 @@ void UploadSimulationDialog::processIntern()
 
     AlienGui::ToggleButton(
         AlienGui::ToggleButtonParameters()
-            .name("Make public")
+            .name("Share with the community")
             .tooltip(
-                "If true, the " + resourceTypeString + " will be visible to all users. If false, the " + resourceTypeString
-                + " will only be visible in the private workspace. This property can also be changed later if desired."),
+                "If true, the " + resourceTypeString + " will be visible to all users in the Community workspace. If false, the " + resourceTypeString
+                + " will only be visible in your own workspace. This property can also be changed later if desired."),
         _share);
 
     AlienGui::Separator();
@@ -139,7 +142,10 @@ void UploadSimulationDialog::onUpload()
 {
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
-            return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
+            return UploadNetworkResourceRequestData::SimulationData{
+                .zoom = Viewport::get().getZoomFactor(),
+                .center = Viewport::get().getCenterInWorldPos(),
+                .jpg = PictureGuiService::get().createSimulationPreviewJpg()};
         } else {
             return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
         }

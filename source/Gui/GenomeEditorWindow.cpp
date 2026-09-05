@@ -29,6 +29,7 @@
 #include "GenomeTabWidget.h"
 #include "GenomeWindowEditData.h"
 #include "OverlayController.h"
+#include "UploadSimulationDialog.h"
 
 namespace
 {
@@ -146,7 +147,8 @@ void GenomeEditorWindow::processToolbar()
              AlienGui::ToolbarItemParameters()
                  .icon(ICON_FA_UPLOAD)
                  .name("Share genome")
-                 .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.")),
+                 .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.")
+                 .action([&] { onShareGenome(); })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_CLONE).name("Clone genome").action([&] { onCloneGenome(); })),
          AlienGui::ToolbarItem::createButton(
@@ -274,6 +276,11 @@ void GenomeEditorWindow::onSaveGenome()
     auto const& selectedTab = _tabs.at(_selectedTabIndex);
     auto genome = selectedTab->getGenomeDesc();
     FileTransferController::get().onSaveGenomeDialog(genome, [selectedTab]() { selectedTab->resetOriginal(); });
+}
+
+void GenomeEditorWindow::onShareGenome()
+{
+    UploadSimulationDialog::get().open(NetworkResourceType_Genome);
 }
 
 void GenomeEditorWindow::onCloneGenome()

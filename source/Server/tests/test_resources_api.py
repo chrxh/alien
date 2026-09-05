@@ -1,12 +1,14 @@
 """End-to-end tests for the resource-management endpoints in main.py.
 
-These cover NetworkService's getNetworkResources, getUserList,
+These cover NetworkService's getNetworkResourceList, getUserList,
 getEmojiTypeByResourceId, getUserNamesForResourceAndEmojiType,
 toggleReactionForResource, uploadResource, replaceResource, downloadResource,
 incDownloadCounter, editResource, moveResource and deleteResource.
 """
 
 from __future__ import annotations
+
+import struct
 
 
 # --- /uploadsimulation -------------------------------------------------------
@@ -47,6 +49,88 @@ def test_upload_simulation_persists_row_and_returns_sim_id(app_client, helpers):
         assert sim.size == len(b"\x00\x01\x02payload")
         assert sim.workspace == 0
         assert sim.type == 0
+        assert bytes(sim.picture) == b""
+
+
+def test_upload_simulation_stores_picture(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    resp = helpers.upload_simulation(app_client, "alice", "pw", picture=picture)
+    assert resp.json()["result"] is True
+
+    sim_id = int(resp.json()["simId"])
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        sim = session.get(main.Simulation, sim_id)
+        assert bytes(sim.picture) == picture
+
+
+def test_upload_simulation_rejects_oversized_picture(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    resp = helpers.upload_simulation(
+        app_client, "alice", "pw", picture=b"x" * (main._MAX_PICTURE_SIZE + 1)
+    )
+    assert resp.status_code == 400
+
+
+def _decode_pictures(content: bytes) -> dict[str, bytes]:
+    """Decode the binary picture response, mirroring the C++ client."""
+    pos = 0
+
+    def read_block() -> bytes:
+        nonlocal pos
+        (size,) = struct.unpack_from("<I", content, pos)
+        pos += 4
+        block = content[pos : pos + size]
+        pos += size
+        return block
+
+    (num_pictures,) = struct.unpack_from("<I", content, pos)
+    pos += 4
+
+    result = {}
+    for _ in range(num_pictures):
+        sim_id = read_block().decode("ascii")
+        result[sim_id] = read_block()
+    assert pos == len(content)
+    return result
+
+
+def test_get_simulation_pictures_returns_jpgs_for_requested_ids(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    withPicture = helpers.upload_simulation(app_client, "alice", "pw", sim_name="a", picture=picture)
+    withoutPicture = helpers.upload_simulation(app_client, "alice", "pw", sim_name="b")
+
+    idWithPicture = withPicture.json()["simId"]
+    idWithoutPicture = withoutPicture.json()["simId"]
+    resp = app_client.post(
+        "/getsimulationpictures", data={"simIds": idWithPicture + "," + idWithoutPicture}
+    )
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "application/octet-stream"
+
+    jpgById = _decode_pictures(resp.content)
+    assert jpgById[idWithPicture] == picture
+    assert jpgById[idWithoutPicture] == b""
+
+
+def test_get_simulation_pictures_ignores_unknown_ids(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw").json()["simId"]
+
+    resp = app_client.post("/getsimulationpictures", data={"simIds": sim_id + ",999999"})
+    assert list(_decode_pictures(resp.content)) == [sim_id]
+
+
+def test_get_simulation_pictures_rejects_too_many_ids(app_client, helpers):
+    main = app_client.app_module
+    simIds = ",".join(str(i) for i in range(main._MAX_PICTURES_PER_REQUEST + 1))
+    resp = app_client.post("/getsimulationpictures", data={"simIds": simIds})
+    assert resp.status_code == 400
 
 
 def test_upload_simulation_wrong_password_fails(app_client, helpers):
@@ -103,6 +187,86 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
         assert sim.particles == 1234
         assert sim.version == "9.9"
         assert sim.size == 3
+
+
+def test_replace_simulation_updates_picture(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw", picture=b"old-jpg").json()["simId"]
+    )
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+            "picture": ("picture.jpg", b"new-jpg", "image/jpeg"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Simulation, sim_id).picture) == b"new-jpg"
+
+
+def test_replace_simulation_keeps_picture_when_none_is_sent(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw", picture=b"old-jpg").json()["simId"]
+    )
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Simulation, sim_id).picture) == b"old-jpg"
+
+
+def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw").json()["simId"]
+    )
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        with session.begin():
+            session.get(main.Simulation, sim_id).workspace = 1
+
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Simulation, sim_id).content) == b"NEW"
 
 
 def test_replace_simulation_rejects_non_owner(app_client, helpers):
