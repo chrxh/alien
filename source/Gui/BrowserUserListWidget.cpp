@@ -27,6 +27,11 @@ _BrowserUserListWidget::_BrowserUserListWidget(BrowserData const& data)
 
 namespace
 {
+    AlienGui::TextStyle getTextStyle(bool bold)
+    {
+        return bold ? AlienGui::TextStyle::Bold : AlienGui::TextStyle::Normal;
+    }
+
     std::string getGpuString(std::string const& gpu)
     {
         if (gpu.substr(0, 6) == "NVIDIA") {
@@ -100,11 +105,11 @@ void _BrowserUserListWidget::process()
                             drawLastDayOnlineSymbol();
                             ImGui::SameLine();
                         }
-                        BrowserGui::ShortenedText(user.userName, isBoldFont);
+                        AlienGui::Text(AlienGui::TextParameters().text(user.userName).style(getTextStyle(isBoldFont)).truncate(true));
 
                         ImGui::TableNextColumn();
                         if (isLoggedIn && LoginController::get().shareGpuInfo()) {
-                            BrowserGui::ShortenedText(getGpuString(user.gpu), isBoldFont);
+                            AlienGui::Text(AlienGui::TextParameters().text(getGpuString(user.gpu)).style(getTextStyle(isBoldFont)).truncate(true));
                         }
 
                         ImGui::TableNextColumn();
@@ -120,26 +125,14 @@ void _BrowserUserListWidget::process()
                             } else {
                                 text = std::to_string(totalSeconds / 60) + "m";
                             }
-                            BrowserGui::ShortenedText(text, isBoldFont);
+                            AlienGui::Text(AlienGui::TextParameters().text(text).style(getTextStyle(isBoldFont)).truncate(true));
                         }
 
                         ImGui::TableNextColumn();
-                        if (isBoldFont) {
-                            ImGui::PushFont(styleRepository.getSmallBoldFont());
-                        }
-                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsReceived)).rightAligned(true));
-                        if (isBoldFont) {
-                            ImGui::PopFont();
-                        }
+                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsReceived)).style(getTextStyle(isBoldFont)).rightAligned(true));
 
                         ImGui::TableNextColumn();
-                        if (isBoldFont) {
-                            ImGui::PushFont(styleRepository.getSmallBoldFont());
-                        }
-                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsGiven)).rightAligned(true));
-                        if (isBoldFont) {
-                            ImGui::PopFont();
-                        }
+                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsGiven)).style(getTextStyle(isBoldFont)).rightAligned(true));
 
                         ImGui::PopID();
                     }

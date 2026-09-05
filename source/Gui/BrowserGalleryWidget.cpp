@@ -143,36 +143,6 @@ void _BrowserGalleryWidget::resetPage()
 
 namespace
 {
-    std::string shortenText(std::string const& text, float width)
-    {
-        if (ImGui::CalcTextSize(text.c_str()).x <= width) {
-            return text;
-        }
-        auto shortened = text;
-        while (!shortened.empty() && ImGui::CalcTextSize((shortened + "...").c_str()).x > width) {
-            shortened.pop_back();
-            while (!shortened.empty() && (static_cast<unsigned char>(shortened.back()) & 0xc0) == 0x80) {
-                shortened.pop_back();
-            }
-        }
-        return shortened + "...";
-    }
-
-    void processTileText(std::string const& text, float width, bool bold = false)
-    {
-        if (bold) {
-            ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
-        }
-        auto shortenedText = shortenText(text, width);
-        AlienGui::Text(shortenedText);
-        if (bold) {
-            ImGui::PopFont();
-        }
-        if (shortenedText != text) {
-            AlienGui::Tooltip(text, false);
-        }
-    }
-
     NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO)
     {
         auto result = std::make_shared<_NetworkResourceTreeTO>();
@@ -196,7 +166,7 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
 
         auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);
-        processTileText(NetworkResourceService::get().concatenateFolderName(folderNames, true), textWidth);
+        AlienGui::Text(AlienGui::TextParameters().text(NetworkResourceService::get().concatenateFolderName(folderNames, true)).truncate(true));
         ImGui::PopStyleColor();
 
         if (_data->currentWorkspace.workspaceType == WorkspaceType_Private && rawTO->workspaceType != WorkspaceType_Private) {
@@ -205,7 +175,10 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
             ImGui::SameLine();
         }
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceTextColor);
-        processTileText(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), ImGui::GetContentRegionAvail().x, true);
+        AlienGui::Text(AlienGui::TextParameters()
+                           .text(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName))
+                           .style(AlienGui::TextStyle::Bold)
+                           .truncate(true));
         ImGui::PopStyleColor();
 
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
