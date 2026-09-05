@@ -92,6 +92,7 @@ source/EngineTests/          CUDA engine integration tests
 source/Gui/                  Dear ImGui GUI
 source/Network/              HTTP / cloud features
 source/PersisterImpl/        File I/O and serialization
+source/Server/               Python (FastAPI) server behind the cloud features
 external/                    Third-party dependencies incl. the pinned vcpkg submodule
 resources/                   Runtime assets
 ```

@@ -445,6 +445,7 @@ bool NetworkService::uploadResource(
     IntVector2D const& worldSize,
     int numObjects,
     std::string const& mainData,
+    std::optional<std::string> const& picture,
     NetworkResourceType resourceType,
     WorkspaceType workspaceType)
 {
@@ -465,6 +466,9 @@ bool NetworkService::uploadResource(
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
     };
+    if (picture.has_value()) {
+        items.push_back({"picture", *picture, "picture.jpg", "image/jpeg"});
+    }
 
     try {
         auto result = executeRequest([&] { return client.Post("/uploadsimulation", items); });

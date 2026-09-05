@@ -94,6 +94,9 @@ class User(Base):
     # GPU model reported by the client on login
     gpu: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
+    # Program version reported by the client on login
+    version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
     __table_args__ = (
         CheckConstraint("char_length(name) > 0", name="ck_users_name_nonempty"),
     )
@@ -168,16 +171,26 @@ app = FastAPI()
 TIME_SPENT_MAX_GAP_SECONDS = 30 * 60
 
 
+# Columns of ``users`` that were introduced after the initial release, mapped
+# to the SQL type used by the ``ALTER TABLE`` fallback in
+# ``_ensure_users_schema``. All of them are nullable so that existing rows stay
+# valid without a backfill.
+USERS_ADDED_COLUMNS = {
+    "last_time_spent_update": "TIMESTAMP WITH TIME ZONE",
+    "version": "VARCHAR(64)",
+}
+
+
 def _ensure_users_schema():
     """Add columns introduced after the initial release.
 
     ``Base.metadata.create_all`` only creates *missing tables*; it does not
     migrate existing tables. For deployments upgrading from an earlier
-    revision we add the ``last_time_spent_update`` column on startup if it
-    is not present yet. Production runs on PostgreSQL (see ``README.md``);
-    the test suite uses SQLite but always starts from a fresh database, so
-    the freshly-created schema already contains the column and this ALTER
-    is never executed there.
+    revision we add the columns listed in ``USERS_ADDED_COLUMNS`` on startup
+    if they are not present yet. Production runs on PostgreSQL (see
+    ``README.md``); the test suite uses SQLite but always starts from a fresh
+    database, so the freshly-created schema already contains the columns and
+    these ALTERs are never executed there.
     """
     from sqlalchemy import inspect, text
 
@@ -185,14 +198,16 @@ def _ensure_users_schema():
     if not inspector.has_table("users"):
         return
     existing_cols = {col["name"] for col in inspector.get_columns("users")}
-    if "last_time_spent_update" not in existing_cols:
-        with engine.begin() as conn:
-            conn.execute(
-                text(
-                    "ALTER TABLE users "
-                    "ADD COLUMN last_time_spent_update TIMESTAMP WITH TIME ZONE"
-                )
-            )
+    missing = {
+        name: sql_type
+        for name, sql_type in USERS_ADDED_COLUMNS.items()
+        if name not in existing_cols
+    }
+    if not missing:
+        return
+    with engine.begin() as conn:
+        for name, sql_type in missing.items():
+            conn.execute(text(f"ALTER TABLE users ADD COLUMN {name} {sql_type}"))
 
 
 @app.on_event("startup")
@@ -477,13 +492,28 @@ def _parse_int(value: object, default: int = 0) -> int:
 # a plain form field (older client builds). We must accept both shapes.
 _MAX_UPLOAD_SIZE = 256 * 1024 * 1024  # 256 MB
 
+# Maximum allowed size of the preview picture. The client sends a JPG encoded
+# thumbnail of a few hundred pixels, so this is far above what is needed.
+_MAX_PICTURE_SIZE = 1024 * 1024  # 1 MB
 
-async def _read_resource_form(request: Request) -> tuple[dict[str, str], bytes]:
+
+async def _read_binary_part(value: object) -> bytes:
+    """Return the raw bytes of a multipart part, whatever shape it has."""
+    if hasattr(value, "read") and hasattr(value, "filename"):
+        return await value.read()
+    if isinstance(value, (bytes, bytearray)):
+        return bytes(value)
+    return str(value).encode("utf-8", "surrogateescape")
+
+
+async def _read_resource_form(request: Request) -> tuple[dict[str, str], bytes, bytes]:
     """Parse a multipart form for the resource upload endpoints.
 
-    Returns a ``(fields, content)`` tuple where ``fields`` contains all
-    non-binary form values as strings and ``content`` is the simulation
-    payload. Raises :class:`HTTPException` on malformed input.
+    Returns a ``(fields, content, picture)`` tuple where ``fields`` contains
+    all non-binary form values as strings, ``content`` is the simulation
+    payload and ``picture`` is the optional JPG preview picture (empty when
+    the client does not send one). Raises :class:`HTTPException` on malformed
+    input.
 
     This intentionally does the parsing itself (rather than relying on
     ``Form``/``File`` parameter declarations) so that:
@@ -505,6 +535,7 @@ async def _read_resource_form(request: Request) -> tuple[dict[str, str], bytes]:
 
     fields: dict[str, str] = {}
     content: bytes | None = None
+    picture: bytes = b""
     for key, value in form.multi_items():
         # ``request.form()`` returns Starlette ``UploadFile`` instances when a
         # multipart part has a ``filename`` parameter, otherwise plain strings.
@@ -512,12 +543,9 @@ async def _read_resource_form(request: Request) -> tuple[dict[str, str], bytes]:
         # FastAPI's classes are not the same type.
         is_upload = hasattr(value, "read") and hasattr(value, "filename")
         if key == "content":
-            if is_upload:
-                content = await value.read()
-            elif isinstance(value, (bytes, bytearray)):
-                content = bytes(value)
-            else:
-                content = str(value).encode("utf-8", "surrogateescape")
+            content = await _read_binary_part(value)
+        elif key == "picture":
+            picture = await _read_binary_part(value)
         else:
             if is_upload:
                 fields[key] = (await value.read()).decode("utf-8", "replace")
@@ -527,7 +555,12 @@ async def _read_resource_form(request: Request) -> tuple[dict[str, str], bytes]:
         raise HTTPException(
             status_code=400, detail='Missing required form field "content".'
         )
-    return fields, content
+    if len(picture) > _MAX_PICTURE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f'Form field "picture" exceeds {_MAX_PICTURE_SIZE} bytes.',
+        )
+    return fields, content, picture
 
 
 def _require_field(fields: dict[str, str], name: str) -> str:
@@ -619,6 +652,7 @@ def login(
     userName: str = Form(...),
     password: str = Form(...),
     gpu: str | None = Form(None),
+    version: str | None = Form(None),
 ):
     # errorCode:
     #   0 -> user exists but is not activated yet
@@ -640,6 +674,7 @@ def login(
                         flags=1,
                         timestamp=func.now(),
                         gpu=(gpu or ""),
+                        version=(version or ""),
                         # Reset the 20-minute tick clock so that time spent
                         # offline (between this login and the previous logout)
                         # is never counted by /refreshlogin.
@@ -1081,7 +1116,7 @@ def _is_owner_of_simulation(session: Session, sim_id: int, user_name: str) -> bo
 
 @app.post("/uploadsimulation")
 async def upload_simulation(request: Request):
-    fields, content_bytes = await _read_resource_form(request)
+    fields, content_bytes, picture_bytes = await _read_resource_form(request)
     userName = _require_field(fields, "userName")
     password = _require_field(fields, "password")
     simName = _require_field(fields, "simName")
@@ -1116,7 +1151,7 @@ async def upload_simulation(request: Request):
                 version=version,
                 description=simDesc,
                 content=content_bytes,
-                picture=b"",
+                picture=picture_bytes,
                 num_downloads=0,
                 workspace=workspace,
                 size=len(content_bytes),
@@ -1136,7 +1171,7 @@ async def upload_simulation(request: Request):
 
 @app.post("/replacesimulation")
 async def replace_simulation(request: Request):
-    fields, content_bytes = await _read_resource_form(request)
+    fields, content_bytes, _ = await _read_resource_form(request)
     userName = _require_field(fields, "userName")
     password = _require_field(fields, "password")
     simId = _require_field(fields, "simId")

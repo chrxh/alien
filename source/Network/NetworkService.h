@@ -58,6 +58,7 @@ public:
         IntVector2D const& worldSize,
         int numObjects,
         std::string const& data,
+        std::optional<std::string> const& picture,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
     bool replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& data);
