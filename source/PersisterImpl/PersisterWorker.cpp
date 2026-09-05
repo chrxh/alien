@@ -150,6 +150,8 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReplaceNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetSimulationPicturesRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetUserNamesForEmojiRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_DeleteNetworkResourceRequest>(request)) {
@@ -525,6 +527,23 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         requestData.downloadCache->insertOrAssign(requestData.resourceId, deserializedSim);
     }
     return std::make_shared<_ReplaceNetworkResourceRequestResult>(request->getRequestId(), ReplaceNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    GetSimulationPicturesRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    GetSimulationPicturesResultData resultData;
+    if (!NetworkService::get().getSimulationPictures(resultData.jpgBySimId, requestData.simIds)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load preview pictures."});
+    }
+
+    return std::make_shared<_GetSimulationPicturesRequestResult>(request->getRequestId(), resultData);
 }
 
 _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request)

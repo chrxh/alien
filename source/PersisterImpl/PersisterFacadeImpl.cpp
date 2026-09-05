@@ -136,6 +136,16 @@ ReplaceNetworkResourceResultData _PersisterFacadeImpl::fetchReplaceNetworkResour
     return fetchData<_ReplaceNetworkResourceRequestResult, ReplaceNetworkResourceResultData>(id);
 }
 
+PersisterRequestId _PersisterFacadeImpl::scheduleGetSimulationPictures(SenderInfo const& senderInfo, GetSimulationPicturesRequestData const& data)
+{
+    return scheduleRequest<_GetSimulationPicturesRequest>(senderInfo, data);
+}
+
+GetSimulationPicturesResultData _PersisterFacadeImpl::fetchGetSimulationPicturesData(PersisterRequestId const& id)
+{
+    return fetchData<_GetSimulationPicturesRequestResult, GetSimulationPicturesResultData>(id);
+}
+
 PersisterRequestId _PersisterFacadeImpl::scheduleGetUserNamesForReaction(SenderInfo const& senderInfo, GetUserNamesForReactionRequestData const& data)
 {
     return scheduleRequest<_GetUserNamesForEmojiRequest>(senderInfo, data);

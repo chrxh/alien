@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import json
@@ -495,6 +496,9 @@ _MAX_UPLOAD_SIZE = 256 * 1024 * 1024  # 256 MB
 # Maximum allowed size of the preview picture. The client sends a JPG encoded
 # thumbnail of a few hundred pixels, so this is far above what is needed.
 _MAX_PICTURE_SIZE = 1024 * 1024  # 1 MB
+
+# Maximum number of simulations the gallery may request pictures for at once.
+_MAX_PICTURES_PER_REQUEST = 64
 
 
 async def _read_binary_part(value: object) -> bytes:
@@ -1249,6 +1253,35 @@ def download_content(id: str, chunkIndex: int = 0):
             )
             content = sim.content or b""
     return Response(content=bytes(content), media_type="application/octet-stream")
+
+
+@app.post("/getsimulationpictures")
+def get_simulation_pictures(simIds: str = Form(...)):
+    """Return the preview pictures for a set of simulations, base64 encoded.
+
+    The gallery view of the client requests the pictures of one page at a
+    time. They are deliberately not part of ``/getversionedsimulationlist``,
+    which must stay small enough to be polled regularly.
+    """
+    sim_ids = [_parse_int(part) for part in simIds.split(",") if part]
+    if len(sim_ids) > _MAX_PICTURES_PER_REQUEST:
+        raise HTTPException(
+            status_code=400,
+            detail=f"At most {_MAX_PICTURES_PER_REQUEST} pictures can be requested at once.",
+        )
+
+    with Session(engine) as session:
+        rows = session.execute(
+            select(Simulation.id, Simulation.picture).where(Simulation.id.in_(sim_ids))
+        ).all()
+
+    return {
+        "result": True,
+        "pictures": [
+            {"id": str(sim_id), "jpg": base64.b64encode(bytes(picture or b"")).decode("ascii")}
+            for sim_id, picture in rows
+        ],
+    }
 
 
 @app.get("/incdownloadcount")
