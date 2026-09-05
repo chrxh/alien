@@ -169,7 +169,7 @@ void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::v
     ImGui::TableNextRow(0, scale(BrowserGui::RowHeight));
     ImGui::TableNextColumn();
 
-    auto selected = _data->selectedTreeTO == treeTO;
+    auto selected = _data->isSelected(treeTO);
     if (ImGui::Selectable(
             "",
             &selected,

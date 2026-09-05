@@ -109,6 +109,22 @@ bool _BrowserData::isOwner(NetworkResourceTreeTO const& treeTO) const
     return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 
+bool _BrowserData::isSelected(NetworkResourceRawTO const& rawTO) const
+{
+    return selectedTreeTO != nullptr && selectedTreeTO->isLeaf() && selectedTreeTO->getLeaf().rawTO->id == rawTO->id;
+}
+
+bool _BrowserData::isSelected(NetworkResourceTreeTO const& treeTO) const
+{
+    if (selectedTreeTO == nullptr || treeTO == nullptr) {
+        return false;
+    }
+    if (treeTO->isLeaf()) {
+        return isSelected(treeTO->getLeaf().rawTO);
+    }
+    return !selectedTreeTO->isLeaf() && selectedTreeTO->type == treeTO->type && selectedTreeTO->folderNames == treeTO->folderNames;
+}
+
 void _BrowserData::sortUserList()
 {
     std::sort(userTOs.begin(), userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
