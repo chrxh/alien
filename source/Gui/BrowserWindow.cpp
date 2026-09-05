@@ -45,6 +45,11 @@ namespace
 
     auto constexpr WorkspaceSwitcherWidth = 270.0f;
     auto constexpr MinFilterWidth = 100.0f;
+
+    auto constexpr EmojiPopupScale = 0.66f;  // Relative to the resolution of the emoji images
+    auto constexpr EmojiPopupWidth = 255.0f;
+    auto constexpr EmojiPopupHeight = 300.0f;
+    auto constexpr EmojiPopupSingleRowHeight = 75.0f;
 }
 
 BrowserWindow::BrowserWindow()
@@ -437,7 +442,7 @@ void BrowserWindow::processEmojiWindow()
         ImGui::Spacing();
         ImGui::Spacing();
         if (_showAllEmojis) {
-            if (ImGui::BeginChild("##reactionchild", ImVec2(scale(335), scale(300)), false)) {
+            if (ImGui::BeginChild("##reactionchild", ImVec2(scale(EmojiPopupWidth), scale(EmojiPopupHeight)), false)) {
                 int offset = 0;
                 for (int i = 0; i < _BrowserData::NumEmojiBlocks; ++i) {
                     for (int j = 0; j < _BrowserData::NumEmojisPerBlock[i]; ++j) {
@@ -452,7 +457,7 @@ void BrowserWindow::processEmojiWindow()
             }
             ImGui::EndChild();
         } else {
-            if (ImGui::BeginChild("##reactionchild", ImVec2(scale(335), scale(90)), false)) {
+            if (ImGui::BeginChild("##reactionchild", ImVec2(scale(EmojiPopupWidth), scale(EmojiPopupSingleRowHeight)), false)) {
                 for (int i = 0; i < _BrowserData::NumEmojisPerRow; ++i) {
                     if (i % _BrowserData::NumEmojisPerRow != 0) {
                         ImGui::SameLine();
@@ -479,8 +484,8 @@ void BrowserWindow::processEmojiButton(int emojiType)
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
     auto cursorPos = ImGui::GetCursorScreenPos();
-    auto emojiWidth = scale(toFloat(emoji.width));
-    auto emojiHeight = scale(toFloat(emoji.height));
+    auto emojiWidth = scale(toFloat(emoji.width) * EmojiPopupScale);
+    auto emojiHeight = scale(toFloat(emoji.height) * EmojiPopupScale);
     auto leaf = _data->emojiPopupTO->getLeaf();
     ImGui::PushID(emojiType);
     if (ImGui::ImageButton("emoji_popup", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
