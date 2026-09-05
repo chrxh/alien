@@ -12,6 +12,16 @@ PUBLIC
     AlienWindow.h
     AutosaveWindow.cpp
     AutosaveWindow.h
+    BrowserData.cpp
+    BrowserData.h
+    BrowserGalleryWidget.cpp
+    BrowserGalleryWidget.h
+    BrowserGui.cpp
+    BrowserGui.h
+    BrowserTableWidget.cpp
+    BrowserTableWidget.h
+    BrowserUserListWidget.cpp
+    BrowserUserListWidget.h
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionChannels.cpp
