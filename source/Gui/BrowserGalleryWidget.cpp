@@ -165,6 +165,25 @@ void _BrowserGalleryWidget::invalidatePicture(std::string const& resourceId)
 
 namespace
 {
+    // Drawn inside the tile: child windows are rendered after their parent and would cover a border drawn around them
+    void processSelectionBorder(ImVec2 const& tileSize)
+    {
+        auto thickness = scale(2.0f);
+        auto tileMin = ImGui::GetWindowPos();
+        auto tileMax = ImVec2{tileMin.x + tileSize.x, tileMin.y + tileSize.y};
+
+        auto drawList = ImGui::GetWindowDrawList();
+        drawList->PushClipRect(tileMin, tileMax, false);
+        drawList->AddRect(
+            {tileMin.x + thickness / 2, tileMin.y + thickness / 2},
+            {tileMax.x - thickness / 2, tileMax.y - thickness / 2},
+            (ImU32)Const::AccentColor,
+            ImGui::GetStyle().ChildRounding,
+            0,
+            thickness);
+        drawList->PopClipRect();
+    }
+
     NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO)
     {
         auto result = std::make_shared<_NetworkResourceTreeTO>();
@@ -223,6 +242,10 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
         ImGui::PopStyleColor();
 
         buttonHovered = ImGui::IsAnyItemHovered();
+
+        if (_data->isSelected(rawTO)) {
+            processSelectionBorder({tileWidth, tileHeight});
+        }
     }
     ImGui::EndChild();
     ImGui::PopStyleColor();
@@ -249,9 +272,6 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
                 processTileTooltip(rawTO);
             }
         }
-    }
-    if (_data->isSelected(rawTO)) {
-        ImGui::GetWindowDrawList()->AddRect(tileMin, tileMax, (ImU32)Const::AccentColor, 0, 0, scale(2.0f));
     }
 }
 
