@@ -144,6 +144,18 @@ using PreviewWidget = std::shared_ptr<_PreviewWidget>;
 class _CreaturePreviewWidget;
 using CreaturePreviewWidget = std::shared_ptr<_CreaturePreviewWidget>;
 
+class _BrowserData;
+using BrowserData = std::shared_ptr<_BrowserData>;
+
+class _BrowserGalleryWidget;
+using BrowserGalleryWidget = std::shared_ptr<_BrowserGalleryWidget>;
+
+class _BrowserTableWidget;
+using BrowserTableWidget = std::shared_ptr<_BrowserTableWidget>;
+
+class _BrowserUserListWidget;
+using BrowserUserListWidget = std::shared_ptr<_BrowserUserListWidget>;
+
 struct UserInfo;
 
 struct GLFWvidmode;
