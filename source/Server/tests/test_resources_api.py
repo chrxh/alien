@@ -685,3 +685,58 @@ def test_get_user_list_excludes_pending_users_and_reports_stars(app_client, help
     assert by_name["alice"]["starsGiven"] == 0
     assert by_name["bob"]["starsReceived"] == 0
     assert by_name["bob"]["starsGiven"] == 1
+
+
+# --- Discord notifications ---------------------------------------------------
+def _capture_discord_requests(main, monkeypatch):
+    """Redirect the webhook call and return the list of captured requests."""
+    monkeypatch.setenv("DISCORD_WEBHOOK_URL", "https://discord.test/webhook")
+
+    class _Response:
+        status = 204
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    requests = []
+
+    def _urlopen(request, timeout=None):
+        requests.append(request)
+        return _Response()
+
+    monkeypatch.setattr(main.urllib.request, "urlopen", _urlopen)
+    return requests
+
+
+def test_discord_notification_attaches_picture(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    assert helpers.upload_simulation(app_client, "alice", "pw", picture=picture).json()["result"] is True
+
+    assert len(requests) == 1
+    request = requests[0]
+    assert request.get_header("Content-type").startswith("multipart/form-data; boundary=")
+    assert b'name="files[0]"; filename="preview.jpg"' in request.data
+    assert picture in request.data
+    assert b"attachment://preview.jpg" in request.data
+
+
+def test_discord_notification_without_picture_stays_json(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    assert helpers.upload_simulation(app_client, "alice", "pw").json()["result"] is True
+
+    assert len(requests) == 1
+    request = requests[0]
+    assert request.get_header("Content-type") == "application/json"
+    assert b"attachment://" not in request.data

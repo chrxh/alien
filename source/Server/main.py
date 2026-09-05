@@ -327,25 +327,56 @@ _DISCORD_USERPIC_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/r
 # _DISCORD_GENOME_ICON = "https://alien-project.org/alien-server/genome.png"
 # _DISCORD_USERPIC_ICON = "https://alien-project.org/alien-server/userpic.png"
 
+_DISCORD_PICTURE_FILENAME = "preview.jpg"
+
 _discord_logger = logging.getLogger("alien-server.discord")
 
 
-def _send_discord_message(payload: dict) -> bool:
+def _build_discord_multipart_body(boundary: str, payload: dict, picture: bytes) -> bytes:
+    """Encode the message and the preview picture as a multipart form.
+
+    Discord hosts the attached file itself, so the picture survives in the
+    channel regardless of what happens to the resource later on.
+    """
+    separator = f"--{boundary}\r\n".encode("utf-8")
+
+    body = bytearray(separator)
+    body += b'Content-Disposition: form-data; name="payload_json"\r\n'
+    body += b"Content-Type: application/json\r\n\r\n"
+    body += json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    body += b"\r\n"
+
+    body += separator
+    body += f'Content-Disposition: form-data; name="files[0]"; filename="{_DISCORD_PICTURE_FILENAME}"\r\n'.encode("utf-8")
+    body += b"Content-Type: image/jpeg\r\n\r\n"
+    body += picture
+    body += b"\r\n"
+
+    body += f"--{boundary}--\r\n".encode("utf-8")
+    return bytes(body)
+
+
+def _send_discord_message(payload: dict, picture: bytes | None = None) -> bool:
     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
     if not webhook_url:
         _discord_logger.warning("DISCORD_WEBHOOK_URL not set; skipping Discord notification")
         return False
 
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-
     headers = {
-        "Content-Type": "application/json",
         "Accept": "*/*",
         # Pick one of these; “curl” UA often works well:
         "User-Agent": "curl/8.0.0",
         # or:
         # "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) alien-server/1.0",
     }
+
+    if picture:
+        boundary = "alien-" + secrets.token_hex(16)
+        body = _build_discord_multipart_body(boundary, payload, picture)
+        headers["Content-Type"] = f"multipart/form-data; boundary={boundary}"
+    else:
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        headers["Content-Type"] = "application/json"
 
     req = urllib.request.Request(webhook_url, data=body, headers=headers, method="POST")
 
@@ -392,33 +423,36 @@ def _discord_notify_resource(
     height: int,
     particles: int,
     sim_type: int,
+    picture: bytes | None = None,
 ) -> None:
     """Send a Discord notification for a new or updated simulation/genome."""
     if sim_type == 0:
         particles_str = (
             f"{particles}" if particles < 1000 else f"{particles // 1000} K"
         )
+        embed = {
+            "author": {
+                "name": title,
+                "icon_url": _DISCORD_GALAXY_ICON,
+            },
+            "title": sim_name,
+            "description": description,
+            "fields": [
+                {"name": "User", "value": user_name, "inline": True},
+                {"name": "Size", "value": f"{width} x {height}", "inline": True},
+                {"name": "Objects", "value": particles_str, "inline": True},
+            ],
+        }
+        if picture:
+            embed["image"] = {"url": f"attachment://{_DISCORD_PICTURE_FILENAME}"}
         _send_discord_message(
             {
                 "username": "alien-project",
                 "avatar_url": _DISCORD_AVATAR_URL,
                 "content": "",
-                "embeds": [
-                    {
-                        "author": {
-                            "name": title,
-                            "icon_url": _DISCORD_GALAXY_ICON,
-                        },
-                        "title": sim_name,
-                        "description": description,
-                        "fields": [
-                            {"name": "User", "value": user_name, "inline": True},
-                            {"name": "Size", "value": f"{width} x {height}", "inline": True},
-                            {"name": "Objects", "value": particles_str, "inline": True},
-                        ],
-                    }
-                ],
-            }
+                "embeds": [embed],
+            },
+            picture,
         )
     else:
         _send_discord_message(
@@ -1168,7 +1202,7 @@ async def upload_simulation(request: Request):
     if workspace != _WORKSPACE_PRIVATE:
         _discord_notify_resource(
             "New simulation added to the database" if sim_type == 0 else "New genome added to the database",
-            simName, userName, simDesc, width, height, particles, sim_type,
+            simName, userName, simDesc, width, height, particles, sim_type, picture_bytes,
         )
     return {"result": True, "simId": str(sim_id)}
 
@@ -1189,6 +1223,7 @@ async def replace_simulation(request: Request):
     notify_workspace: int = _WORKSPACE_PRIVATE
     notify_type: int = 0
     notify_desc: str = ""
+    notify_picture: bytes = b""
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -1216,11 +1251,12 @@ async def replace_simulation(request: Request):
             # Genomes and older clients send no picture: keep the stored one.
             if picture_bytes:
                 sim.picture = picture_bytes
+            notify_picture = bytes(sim.picture or b"")
 
     if notify_workspace != _WORKSPACE_PRIVATE and notify_name is not None:
         _discord_notify_resource(
             "Simulation updated in the database" if notify_type == 0 else "Genome updated in the database",
-            notify_name, userName, notify_desc, width, height, particles, notify_type,
+            notify_name, userName, notify_desc, width, height, particles, notify_type, notify_picture,
         )
     return {"result": True}
 
@@ -1343,6 +1379,7 @@ def move_simulation(
     notify_width: int = 0
     notify_height: int = 0
     notify_particles: int = 0
+    notify_picture: bytes = b""
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -1359,6 +1396,7 @@ def move_simulation(
                 notify_width = int(sim.width)
                 notify_height = int(sim.height)
                 notify_particles = int(sim.particles)
+                notify_picture = bytes(sim.picture or b"")
 
             session.execute(
                 update(Simulation)
@@ -1369,7 +1407,7 @@ def move_simulation(
     if target != _WORKSPACE_PRIVATE and notify_name is not None:
         _discord_notify_resource(
             "New simulation added to the database" if notify_type == 0 else "New genome added to the database",
-            notify_name, userName, notify_desc, notify_width, notify_height, notify_particles, notify_type,
+            notify_name, userName, notify_desc, notify_width, notify_height, notify_particles, notify_type, notify_picture,
         )
     return {"result": True}
 
