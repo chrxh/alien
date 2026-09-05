@@ -65,7 +65,8 @@ namespace
     auto constexpr GalleryTileSpacing = 8.0f;
     auto constexpr GalleryTileTextHeight = 108.0f;
     auto constexpr GalleryMinTileWidth = 120.0f;
-    auto constexpr WorkspaceSwitcherWidth = 290.0f;
+    auto constexpr WorkspaceSwitcherWidth = 270.0f;
+    auto constexpr MinFilterWidth = 100.0f;
     auto constexpr GalleryPictureAspectRatio = 2.0f / 3.0f;
 }
 
@@ -298,27 +299,25 @@ void BrowserWindow::processToolbar()
             })),
         AlienGui::ToolbarItem::createSeparator(),
         AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters().icon(ICON_FA_EXPAND_ARROWS_ALT).name("Expand all folders").disabled(isGalleryActive()).action([&] {
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_EXPAND_ARROWS_ALT).name("Expand all folders").disabled(_galleryView).action([&] {
                 onExpandFolders();
             })),
         AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters().icon(ICON_FA_COMPRESS_ARROWS_ALT).name("Collapse all folders").disabled(isGalleryActive()).action([&] {
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_COMPRESS_ARROWS_ALT).name("Collapse all folders").disabled(_galleryView).action([&] {
                 onCollapseFolders();
             })),
         AlienGui::ToolbarItem::createSeparator(),
         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                 .icon(ICON_FA_TH)
                                                 .name("Gallery view")
-                                                .tooltip("Show the simulations as tiles with preview pictures.")
+                                                .tooltip("Show the " + resourceTypeString + "s as tiles with preview pictures.")
                                                 .selected(_galleryView)
-                                                .disabled(_currentWorkspace.resourceType != NetworkResourceType_Simulation)
                                                 .action([&] { _galleryView = true; })),
         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                 .icon(ICON_FA_LIST)
                                                 .name("Table view")
-                                                .tooltip("Show the simulations as a sortable table with folders.")
+                                                .tooltip("Show the " + resourceTypeString + "s as a sortable table with folders.")
                                                 .selected(!_galleryView)
-                                                .disabled(_currentWorkspace.resourceType != NetworkResourceType_Simulation)
                                                 .action([&] { _galleryView = false; }))};
 
 #ifdef _WIN32
@@ -353,7 +352,11 @@ void BrowserWindow::processWorkspace()
                     _currentWorkspace.resourceType = NetworkResourceType_Genome;
                     _selectedTreeTO = nullptr;
                 }
-                processGenomeList();
+                if (_galleryView) {
+                    processGallery();
+                } else {
+                    processGenomeList();
+                }
                 ImGui::EndTabItem();
             }
             ImGui::EndTabBar();
@@ -384,13 +387,24 @@ void BrowserWindow::processWorkspaceSelection()
 void BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (AlienGui::InputFilter(AlienGui::InputFilterParameters(), _filter)) {
+
+    auto filterParameters = AlienGui::InputFilterParameters();
+    if (_galleryView) {
+        auto availableWidth = ImGui::GetContentRegionAvail().x - getGalleryPagerWidth() - ImGui::GetStyle().ItemSpacing.x;
+        filterParameters.width(std::max(MinFilterWidth, scaleInverse(availableWidth)));
+    }
+    if (AlienGui::InputFilter(filterParameters, _filter)) {
         _galleryPage = 0;
         for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
             for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
                 createTreeTOs(_workspaces.at(WorkspaceId{resourceType, workspaceType}));
             }
         }
+    }
+
+    if (_galleryView) {
+        ImGui::SameLine();
+        processGalleryPaging();
     }
 }
 
@@ -660,15 +674,15 @@ void BrowserWindow::processGallery()
     ImGui::PushID("Gallery");
 
     auto entries = getSortedGalleryEntries();
-    auto numEntries = toInt(entries.size());
-    auto numPages = std::max(1, (numEntries + GalleryTilesPerPage - 1) / GalleryTilesPerPage);
-    _galleryPage = std::clamp(_galleryPage, 0, numPages - 1);
+    _galleryNumEntries = toInt(entries.size());
+    _galleryNumPages = std::max(1, (_galleryNumEntries + GalleryTilesPerPage - 1) / GalleryTilesPerPage);
+    _galleryPage = std::clamp(_galleryPage, 0, _galleryNumPages - 1);
 
     auto firstIndex = _galleryPage * GalleryTilesPerPage;
-    auto lastIndex = std::min(numEntries, firstIndex + GalleryTilesPerPage);
+    auto lastIndex = std::min(_galleryNumEntries, firstIndex + GalleryTilesPerPage);
     auto pageEntries = std::vector<NetworkResourceRawTO>(entries.begin() + firstIndex, entries.begin() + lastIndex);
 
-    processGallerySortingAndPaging(numEntries, numPages);
+    processGallerySorting();
     requestMissingPictures(pageEntries);
 
     auto verticalSpacing = ImGui::GetStyle().ItemSpacing.y;
@@ -677,11 +691,8 @@ void BrowserWindow::processGallery()
     auto widthPerTile = (availableSize.x - scale(GalleryTileSpacing) * (GalleryColumns - 1)) / GalleryColumns;
     auto heightPerTile = (availableHeight - verticalSpacing * (GalleryRows - 1)) / GalleryRows;
     auto tileWidth = std::max(scale(GalleryMinTileWidth), std::min(widthPerTile, (heightPerTile - scale(GalleryTileTextHeight)) / GalleryPictureAspectRatio));
-    auto tileHeight = tileWidth * GalleryPictureAspectRatio + scale(GalleryTileTextHeight);
-    auto numRows = std::max(1, (toInt(pageEntries.size()) + GalleryColumns - 1) / GalleryColumns);
-    auto gridHeight = std::min(availableHeight, tileHeight * numRows + verticalSpacing * (numRows - 1) + scale(2.0f));
 
-    if (ImGui::BeginChild("##tiles", {0, gridHeight}, false)) {
+    if (ImGui::BeginChild("##tiles", {0, availableHeight}, false)) {
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
             if (index % GalleryColumns != 0) {
                 ImGui::SameLine(0, scale(GalleryTileSpacing));
@@ -696,30 +707,23 @@ void BrowserWindow::processGallery()
     ImGui::PopID();
 }
 
-void BrowserWindow::processGallerySortingAndPaging(int numEntries, int numPages)
+void BrowserWindow::processGallerySorting()
 {
     processWorkspaceSelection();
 
     ImGui::SameLine();
+    AlienGui::VerticalSeparator();
+    ImGui::SameLine();
     if (AlienGui::Switcher(
-            AlienGui::SwitcherParameters().name("Sort by").width(320.0f).textWidth(60.0f).values(
+            AlienGui::SwitcherParameters().name("Sort by").width(230.0f).textWidth(55.0f).values(
                 {std::string("Most reactions"), std::string("Newest"), std::string("Most downloads")}),
             &_gallerySorting)) {
         _galleryPage = 0;
     }
+}
 
-    auto firstEntry = numEntries > 0 ? _galleryPage * GalleryTilesPerPage + 1 : 0;
-    auto lastEntry = std::min(numEntries, (_galleryPage + 1) * GalleryTilesPerPage);
-    auto pageText = std::to_string(firstEntry) + " - " + std::to_string(lastEntry) + " of " + std::to_string(numEntries);
-
-    auto const& style = ImGui::GetStyle();
-    auto getButtonWidth = [&](std::string const& icon) { return ImGui::CalcTextSize(icon.c_str()).x + style.FramePadding.x * 2; };
-    auto pagerWidth = getButtonWidth(ICON_FA_ANGLE_DOUBLE_LEFT) + getButtonWidth(ICON_FA_ANGLE_LEFT) + getButtonWidth(ICON_FA_ANGLE_RIGHT)
-        + getButtonWidth(ICON_FA_ANGLE_DOUBLE_RIGHT) + ImGui::CalcTextSize(pageText.c_str()).x + style.ItemSpacing.x * 4;
-
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - pagerWidth);
-
+void BrowserWindow::processGalleryPaging()
+{
     ImGui::BeginDisabled(_galleryPage == 0);
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_DOUBLE_LEFT).tooltip("First page"))) {
         _galleryPage = 0;
@@ -731,18 +735,33 @@ void BrowserWindow::processGallerySortingAndPaging(int numEntries, int numPages)
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    AlienGui::Text(pageText);
+    AlienGui::Text(getGalleryPageText());
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_galleryPage >= numPages - 1);
+    ImGui::BeginDisabled(_galleryPage >= _galleryNumPages - 1);
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_RIGHT).tooltip("Next page"))) {
         ++_galleryPage;
     }
     ImGui::SameLine();
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_ANGLE_DOUBLE_RIGHT).tooltip("Last page"))) {
-        _galleryPage = numPages - 1;
+        _galleryPage = _galleryNumPages - 1;
     }
     ImGui::EndDisabled();
+}
+
+std::string BrowserWindow::getGalleryPageText() const
+{
+    auto firstEntry = _galleryNumEntries > 0 ? _galleryPage * GalleryTilesPerPage + 1 : 0;
+    auto lastEntry = std::min(_galleryNumEntries, (_galleryPage + 1) * GalleryTilesPerPage);
+    return std::to_string(firstEntry) + " - " + std::to_string(lastEntry) + " of " + std::to_string(_galleryNumEntries);
+}
+
+float BrowserWindow::getGalleryPagerWidth() const
+{
+    auto const& style = ImGui::GetStyle();
+    auto getButtonWidth = [&](std::string const& icon) { return ImGui::CalcTextSize(icon.c_str()).x + style.FramePadding.x * 2; };
+    return getButtonWidth(ICON_FA_ANGLE_DOUBLE_LEFT) + getButtonWidth(ICON_FA_ANGLE_LEFT) + getButtonWidth(ICON_FA_ANGLE_RIGHT)
+        + getButtonWidth(ICON_FA_ANGLE_DOUBLE_RIGHT) + ImGui::CalcTextSize(getGalleryPageText().c_str()).x + style.ItemSpacing.x * 4;
 }
 
 void BrowserWindow::processGalleryTile(NetworkResourceRawTO const& rawTO, float tileWidth)
@@ -810,7 +829,7 @@ void BrowserWindow::processGalleryPicture(NetworkResourceRawTO const& rawTO, flo
     }
 
     ImGui::GetWindowDrawList()->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
-    auto text = findResult != _pictureBySimId.end() ? std::string("no preview") : std::string("loading...");
+    auto text = hasPreviewPictures() && findResult == _pictureBySimId.end() ? std::string("loading...") : std::string("no preview");
     auto textSize = ImGui::CalcTextSize(text.c_str());
     ImGui::GetWindowDrawList()->AddText({pos.x + (width - textSize.x) / 2, pos.y + (height - textSize.y) / 2}, (ImU32)Const::TextDecentColor, text.c_str());
     ImGui::Dummy({width, height});
@@ -841,7 +860,7 @@ std::vector<NetworkResourceRawTO> BrowserWindow::getSortedGalleryEntries() const
 
 void BrowserWindow::requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries)
 {
-    if (_pictureProcessor->pendingTasks()) {
+    if (!hasPreviewPictures() || _pictureProcessor->pendingTasks()) {
         return;
     }
 
@@ -882,9 +901,9 @@ void BrowserWindow::requestMissingPictures(std::vector<NetworkResourceRawTO> con
         });
 }
 
-bool BrowserWindow::isGalleryActive() const
+bool BrowserWindow::hasPreviewPictures() const
 {
-    return _galleryView && _currentWorkspace.resourceType == NetworkResourceType_Simulation;
+    return _currentWorkspace.resourceType == NetworkResourceType_Simulation;
 }
 
 void BrowserWindow::processGenomeList()
