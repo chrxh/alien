@@ -1938,7 +1938,7 @@ bool SerializerService::deserializeGenomeFromFile(GenomeDesc& genome, std::files
     }
 }
 
-bool SerializerService::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input) const
+bool SerializerService::serializeGenomeToString(std::string& output, GenomeDesc const& genome) const
 {
     try {
         std::stringstream stdStream;
@@ -1948,9 +1948,9 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
         }
 
         ContentDesc description;
-        //if (!wrapGenome(description, input)) {
-        //    return false;
-        //}
+        if (!wrapGenome(description, genome)) {
+            return false;
+        }
 
         serializeDescription(description, stream);
         stream.flush();
@@ -1961,7 +1961,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
     }
 }
 
-bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input) const
+bool SerializerService::deserializeGenomeFromString(GenomeDesc& genome, std::string const& input) const
 {
     try {
         std::stringstream stdStream(input);
@@ -1973,10 +1973,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
         ContentDesc description;
         deserializeDescription(description, stream);
 
-        //if (!unwrapGenome(output, description)) {
-        //    return false;
-        //}
-        return true;
+        return unwrapGenome(genome, description);
     } catch (...) {
         return false;
     }

@@ -1,12 +1,10 @@
 #include "SimulationView.h"
 
 #include <algorithm>
+#include <ranges>
 #include <vector>
 
 #include <glad/glad.h>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
 
 #include <imgui.h>
 
@@ -195,7 +193,7 @@ namespace
     }
 }
 
-void SimulationView::savePicture(std::filesystem::path const& filename, IntVector2D const& resolution)
+PictureData SimulationView::savePicture(IntVector2D const& resolution)
 {
     GLint maxTextureSize = 0;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
@@ -238,17 +236,20 @@ void SimulationView::savePicture(std::filesystem::path const& filename, IntVecto
     _renderPipeline->resize(resolution);
     _renderPipeline->execute(target);
 
-    std::vector<unsigned char> pixels(static_cast<size_t>(resolution.x) * resolution.y * 3);
+    PictureData result{.resolution = resolution, .pixels = std::vector<uint8_t>(static_cast<size_t>(resolution.x) * resolution.y * PictureData::NumChannels)};
     glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+    glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, result.pixels.data());
 
     // OpenGL provides the rows bottom-up
-    stbi_flip_vertically_on_write(1);
-    if (stbi_write_png(filename.string().c_str(), resolution.x, resolution.y, 3, pixels.data(), resolution.x * 3) == 0) {
-        throw AlienException("The file could not be written.");
+    auto bytesPerRow = static_cast<size_t>(resolution.x) * PictureData::NumChannels;
+    for (auto row : std::views::iota(0, resolution.y / 2)) {
+        auto upperRow = result.pixels.begin() + row * bytesPerRow;
+        auto lowerRow = result.pixels.begin() + (resolution.y - 1 - row) * bytesPerRow;
+        std::swap_ranges(upperRow, upperRow + bytesPerRow, lowerRow);
     }
+    return result;
 }
 
 void SimulationView::setupRenderPipeline()

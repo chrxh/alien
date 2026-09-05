@@ -16,6 +16,8 @@
 #include "GetNetworkResourcesResultData.h"
 #include "GetPeakSimulationRequestData.h"
 #include "GetPeakSimulationResultData.h"
+#include "GetSimulationPicturesRequestData.h"
+#include "GetSimulationPicturesResultData.h"
 #include "GetUserNamesForReactionRequestData.h"
 #include "GetUserNamesForReactionResultData.h"
 #include "LoginRequestData.h"
@@ -81,6 +83,9 @@ public:
 
     virtual PersisterRequestId scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data) = 0;
     virtual ReplaceNetworkResourceResultData fetchReplaceNetworkResourcesData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleGetSimulationPictures(SenderInfo const& senderInfo, GetSimulationPicturesRequestData const& data) = 0;
+    virtual GetSimulationPicturesResultData fetchGetSimulationPicturesData(PersisterRequestId const& id) = 0;
 
     virtual PersisterRequestId scheduleGetUserNamesForReaction(SenderInfo const& senderInfo, GetUserNamesForReactionRequestData const& data) = 0;
     virtual GetUserNamesForReactionResultData fetchGetUserNamesForReactionData(PersisterRequestId const& id) = 0;

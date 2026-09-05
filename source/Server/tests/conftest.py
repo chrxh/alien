@@ -143,6 +143,7 @@ def _upload_simulation(
     content: bytes = b"\x00\x01\x02binary-payload",
     sim_type: int = 0,
     workspace: int = 0,
+    picture: bytes | None = None,
 ):
     files = {
         "userName": (None, user_name),
@@ -157,6 +158,8 @@ def _upload_simulation(
         "type": (None, str(sim_type)),
         "workspace": (None, str(workspace)),
     }
+    if picture is not None:
+        files["picture"] = ("picture.jpg", picture, "image/jpeg")
     return client.post("/uploadsimulation", files=files)
 
 

@@ -308,7 +308,7 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     }
 }
 
-bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry)
+bool NetworkService::getNetworkResourceList(std::vector<NetworkResourceRawTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get resource list");
 
@@ -328,6 +328,90 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result = NetworkResourceParserService::get().decodeRemoteSimulationData(tree);
+        return true;
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
+namespace
+{
+    bool readUint32(std::string const& data, size_t& pos, uint32_t& result)
+    {
+        if (pos + sizeof(uint32_t) > data.size()) {
+            return false;
+        }
+        result = static_cast<uint8_t>(data[pos]) | static_cast<uint32_t>(static_cast<uint8_t>(data[pos + 1])) << 8
+            | static_cast<uint32_t>(static_cast<uint8_t>(data[pos + 2])) << 16 | static_cast<uint32_t>(static_cast<uint8_t>(data[pos + 3])) << 24;
+        pos += sizeof(uint32_t);
+        return true;
+    }
+
+    bool readSizedBlock(std::string const& data, size_t& pos, std::string& result)
+    {
+        uint32_t size = 0;
+        if (!readUint32(data, pos, size) || pos + size > data.size()) {
+            return false;
+        }
+        result = data.substr(pos, size);
+        pos += size;
+        return true;
+    }
+
+    // Binary layout of the picture response: number of records, then for each record the id and the JPG, both prefixed by their length in bytes
+    bool decodePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::string const& data)
+    {
+        size_t pos = 0;
+        uint32_t numPictures = 0;
+        if (!readUint32(data, pos, numPictures)) {
+            return false;
+        }
+        for (uint32_t i = 0; i < numPictures; ++i) {
+            std::string simId;
+            std::string jpg;
+            if (!readSizedBlock(data, pos, simId) || !readSizedBlock(data, pos, jpg)) {
+                return false;
+            }
+            jpgBySimId.emplace(simId, jpg);
+        }
+        return true;
+    }
+
+    std::string joinSimIds(std::vector<std::string> const& simIds)
+    {
+        std::string result;
+        for (auto const& simId : simIds) {
+            if (!result.empty()) {
+                result += ",";
+            }
+            result += simId;
+        }
+        return result;
+    }
+}
+
+bool NetworkService::getResourcePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds)
+{
+    log(Priority::Important, "network: get " + std::to_string(simIds.size()) + " simulation picture(s)");
+
+    auto client = createClient(_serverAddress);
+
+    httplib::Params params;
+    params.emplace("simIds", joinSimIds(simIds));
+
+    try {
+        auto postResult = executeRequest([&] { return client.Post("/getsimulationpictures", params); });
+        if (postResult->status != 200) {
+            log(Priority::Important, "network: server responded with status " + std::to_string(postResult->status) + " for /getsimulationpictures");
+            return false;
+        }
+
+        jpgBySimId.clear();
+        if (!decodePictures(jpgBySimId, postResult->body)) {
+            log(Priority::Important, "network: malformed picture response received");
+            return false;
+        }
         return true;
     } catch (...) {
         logNetworkError();
@@ -445,6 +529,7 @@ bool NetworkService::uploadResource(
     IntVector2D const& worldSize,
     int numObjects,
     std::string const& mainData,
+    std::optional<std::string> const& picture,
     NetworkResourceType resourceType,
     WorkspaceType workspaceType)
 {
@@ -465,6 +550,9 @@ bool NetworkService::uploadResource(
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
     };
+    if (picture.has_value()) {
+        items.push_back({"picture", *picture, "picture.jpg", "image/jpeg"});
+    }
 
     try {
         auto result = executeRequest([&] { return client.Post("/uploadsimulation", items); });
@@ -482,7 +570,12 @@ bool NetworkService::uploadResource(
     return true;
 }
 
-bool NetworkService::replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& mainData)
+bool NetworkService::replaceResource(
+    std::string const& resourceId,
+    IntVector2D const& worldSize,
+    int numObjects,
+    std::string const& mainData,
+    std::optional<std::string> const& picture)
 {
     log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
 
@@ -498,6 +591,9 @@ bool NetworkService::replaceResource(std::string const& resourceId, IntVector2D 
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
     };
+    if (picture.has_value()) {
+        items.push_back({"picture", *picture, "picture.jpg", "image/jpeg"});
+    }
 
     try {
         auto result = executeRequest([&] { return client.Post("/replacesimulation", items); });

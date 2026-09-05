@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <unordered_map>
 
 #include <Base/Cache.h>
 #include <Base/Singleton.h>
@@ -45,7 +46,8 @@ public:
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
-    bool getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry);
+    bool getNetworkResourceList(std::vector<NetworkResourceRawTO>& result, bool withRetry);
+    bool getResourcePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds);
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
@@ -58,9 +60,15 @@ public:
         IntVector2D const& worldSize,
         int numObjects,
         std::string const& data,
+        std::optional<std::string> const& picture,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
-    bool replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& data);
+    bool replaceResource(
+        std::string const& resourceId,
+        IntVector2D const& worldSize,
+        int numObjects,
+        std::string const& data,
+        std::optional<std::string> const& picture);
     bool downloadResource(std::string& mainData, std::string const& simId);
     void incDownloadCounter(std::string const& simId);
     bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);

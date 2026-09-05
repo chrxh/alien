@@ -12,6 +12,8 @@ add_library(PersisterInterface
     GetNetworkResourcesResultData.h
     GetPeakSimulationRequestData.h
     GetPeakSimulationResultData.h
+    GetSimulationPicturesRequestData.h
+    GetSimulationPicturesResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
     LoginRequestData.h
