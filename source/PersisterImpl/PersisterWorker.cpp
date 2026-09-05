@@ -313,7 +313,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     GetNetworkResourcesResultData data;
 
     auto withRetry = true;
-    bool success = NetworkService::get().getNetworkResources(data.resourceTOs, withRetry);
+    bool success = NetworkService::get().getNetworkResourceList(data.resourceTOs, withRetry);
     if (success) {
         success &= NetworkService::get().getUserList(data.userTOs, withRetry);
     }
@@ -542,7 +542,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     auto const& requestData = request->getData();
 
     GetSimulationPicturesResultData resultData;
-    if (!NetworkService::get().getSimulationPictures(resultData.jpgBySimId, requestData.simIds)) {
+    if (!NetworkService::get().getResourcePictures(resultData.jpgBySimId, requestData.simIds)) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load preview pictures."});
     }

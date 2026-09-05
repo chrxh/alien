@@ -1,4 +1,3 @@
-import base64
 import hashlib
 import hmac
 import json
@@ -6,6 +5,7 @@ import logging
 import os
 import secrets
 import smtplib
+import struct
 import urllib.request
 import urllib.error
 
@@ -1251,7 +1251,11 @@ def download_content(id: str, chunkIndex: int = 0):
 
 @app.post("/getsimulationpictures")
 def get_simulation_pictures(simIds: str = Form(...)):
-    """Return the preview pictures for a set of simulations, base64 encoded.
+    """Return the preview pictures for a set of simulations as one binary blob.
+
+    Layout, little endian: the number of records, then for each record the id
+    and the JPG, both prefixed by their length in bytes. Base64 inside a JSON
+    envelope would inflate the payload by a third without any benefit.
 
     The gallery view of the client requests the pictures of one page at a
     time. They are deliberately not part of ``/getversionedsimulationlist``,
@@ -1269,13 +1273,14 @@ def get_simulation_pictures(simIds: str = Form(...)):
             select(Simulation.id, Simulation.picture).where(Simulation.id.in_(sim_ids))
         ).all()
 
-    return {
-        "result": True,
-        "pictures": [
-            {"id": str(sim_id), "jpg": base64.b64encode(bytes(picture or b"")).decode("ascii")}
-            for sim_id, picture in rows
-        ],
-    }
+    payload = bytearray(struct.pack("<I", len(rows)))
+    for sim_id, picture in rows:
+        id_bytes = str(sim_id).encode("ascii")
+        jpg_bytes = bytes(picture or b"")
+        payload += struct.pack("<I", len(id_bytes)) + id_bytes
+        payload += struct.pack("<I", len(jpg_bytes)) + jpg_bytes
+
+    return Response(content=bytes(payload), media_type="application/octet-stream")
 
 
 @app.get("/incdownloadcount")
