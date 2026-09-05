@@ -1,8 +1,14 @@
 #include "UploadSimulationDialog.h"
 
+#include <filesystem>
+
+#include <GLFW/glfw3.h>
+
 #include <imgui.h>
 
+#include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
 
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
@@ -17,12 +23,19 @@
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "PictureGuiService.h"
+#include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "WindowController.h"
 
 namespace
 {
     auto constexpr FolderWidgetHeight = 50.0f;
+
+    auto constexpr PreviewPictureResolution = IntVector2D{300, 200};
+    auto constexpr PreviewPictureBrightness = 1.3f;
+    auto const PreviewPictureFilename = std::filesystem::path("D:/temp.jpg");
 
     std::map<NetworkResourceType, std::string> const BrowserDataTypeToLowerString = {
         {NetworkResourceType_Simulation, "simulation"},
@@ -135,8 +148,31 @@ void UploadSimulationDialog::processIntern()
     }
 }
 
+namespace
+{
+    // The picture is rendered in screen resolution and downscaled afterwards to obtain a smooth result
+    void savePreviewPicture()
+    {
+        try {
+            auto screenWidth = WindowController::get().getWindowData().mode->width;
+            auto scaleFactor = toFloat(screenWidth) / toFloat(PreviewPictureResolution.x);
+            auto renderResolution = IntVector2D{screenWidth, toInt(toFloat(PreviewPictureResolution.y) * scaleFactor)};
+
+            auto picture = SimulationView::get().savePicture(renderResolution);
+            auto preview = PictureGuiService::get().scale(picture, PreviewPictureResolution);
+            PictureGuiService::get().saveJpg(PictureGuiService::get().brighten(preview, PreviewPictureBrightness), PreviewPictureFilename);
+        } catch (AlienException const& exception) {
+            log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
+        }
+    }
+}
+
 void UploadSimulationDialog::onUpload()
 {
+    if (_resourceType == NetworkResourceType_Simulation) {
+        savePreviewPicture();
+    }
+
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
