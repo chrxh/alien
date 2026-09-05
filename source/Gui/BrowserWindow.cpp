@@ -59,7 +59,8 @@ namespace
     int const NumEmojisPerBlock[] = {19, 14, 10, 6};
     auto constexpr NumEmojisPerRow = 5;
 
-    auto constexpr GalleryTilesPerPage = 15;
+    auto constexpr GalleryTilesPerPage = 100;
+    auto constexpr GalleryMaxPicturesPerRequest = 32;
     auto constexpr GalleryMinTileWidth = 190.0f;
     auto constexpr GalleryTileSpacing = 8.0f;
     auto constexpr GalleryTileTextHeight = 108.0f;
@@ -945,7 +946,7 @@ void BrowserWindow::requestMissingPictures(std::vector<NetworkResourceRawTO> con
 
     std::vector<std::string> simIds;
     for (auto const& rawTO : pageEntries) {
-        if (!_pictureBySimId.contains(rawTO->id)) {
+        if (!_pictureBySimId.contains(rawTO->id) && toInt(simIds.size()) < GalleryMaxPicturesPerRequest) {
             simIds.emplace_back(rawTO->id);
         }
     }
