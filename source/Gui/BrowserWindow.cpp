@@ -119,6 +119,11 @@ void BrowserWindow::onRefresh()
     refreshIntern(true);
 }
 
+void BrowserWindow::onPreviewPictureChanged(std::string const& resourceId)
+{
+    _galleryWidget->invalidatePicture(resourceId);
+}
+
 WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
 {
     return _data->currentWorkspace.workspaceType;

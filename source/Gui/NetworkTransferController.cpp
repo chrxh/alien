@@ -112,8 +112,9 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
             return _PersisterFacade::get()->scheduleReplaceNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
-        [&](auto const& requestId) {
+        [&, resourceId = requestData.resourceId](auto const& requestId) {
             _PersisterFacade::get()->fetchReplaceNetworkResourcesData(requestId);
+            BrowserWindow::get().onPreviewPictureChanged(resourceId);
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
