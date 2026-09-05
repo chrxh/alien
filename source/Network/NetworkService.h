@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <unordered_map>
 
 #include <Base/Cache.h>
 #include <Base/Singleton.h>
@@ -46,6 +47,7 @@ public:
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
     bool getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry);
+    bool getSimulationPictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds);
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);

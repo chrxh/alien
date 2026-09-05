@@ -74,6 +74,43 @@ def test_upload_simulation_rejects_oversized_picture(app_client, helpers):
     assert resp.status_code == 400
 
 
+def test_get_simulation_pictures_returns_base64_for_requested_ids(app_client, helpers):
+    import base64
+
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    withPicture = helpers.upload_simulation(app_client, "alice", "pw", sim_name="a", picture=picture)
+    withoutPicture = helpers.upload_simulation(app_client, "alice", "pw", sim_name="b")
+
+    idWithPicture = withPicture.json()["simId"]
+    idWithoutPicture = withoutPicture.json()["simId"]
+    resp = app_client.post(
+        "/getsimulationpictures", data={"simIds": idWithPicture + "," + idWithoutPicture}
+    )
+    assert resp.status_code == 200
+
+    body = resp.json()
+    assert body["result"] is True
+    jpgById = {entry["id"]: entry["jpg"] for entry in body["pictures"]}
+    assert base64.b64decode(jpgById[idWithPicture]) == picture
+    assert jpgById[idWithoutPicture] == ""
+
+
+def test_get_simulation_pictures_ignores_unknown_ids(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw").json()["simId"]
+
+    resp = app_client.post("/getsimulationpictures", data={"simIds": sim_id + ",999999"})
+    assert [entry["id"] for entry in resp.json()["pictures"]] == [sim_id]
+
+
+def test_get_simulation_pictures_rejects_too_many_ids(app_client, helpers):
+    main = app_client.app_module
+    simIds = ",".join(str(i) for i in range(main._MAX_PICTURES_PER_REQUEST + 1))
+    resp = app_client.post("/getsimulationpictures", data={"simIds": simIds})
+    assert resp.status_code == 400
+
+
 def test_upload_simulation_wrong_password_fails(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
     resp = helpers.upload_simulation(app_client, "alice", "wrong")

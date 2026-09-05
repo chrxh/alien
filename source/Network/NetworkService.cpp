@@ -335,6 +335,75 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
     }
 }
 
+namespace
+{
+    std::string decodeBase64(std::string const& encoded)
+    {
+        static auto constexpr Alphabet = std::string_view("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+        std::string result;
+        result.reserve(encoded.size() / 4 * 3);
+        uint32_t buffer = 0;
+        auto numBits = 0;
+        for (auto const& character : encoded) {
+            auto position = Alphabet.find(character);
+            if (position == std::string_view::npos) {
+                continue;
+            }
+            buffer = (buffer << 6) + static_cast<uint32_t>(position);
+            numBits += 6;
+            if (numBits >= 8) {
+                numBits -= 8;
+                result.push_back(static_cast<char>((buffer >> numBits) & 0xff));
+            }
+        }
+        return result;
+    }
+
+    std::string joinSimIds(std::vector<std::string> const& simIds)
+    {
+        std::string result;
+        for (auto const& simId : simIds) {
+            if (!result.empty()) {
+                result += ",";
+            }
+            result += simId;
+        }
+        return result;
+    }
+}
+
+bool NetworkService::getSimulationPictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds)
+{
+    log(Priority::Important, "network: get " + std::to_string(simIds.size()) + " simulation picture(s)");
+
+    auto client = createClient(_serverAddress);
+
+    httplib::Params params;
+    params.emplace("simIds", joinSimIds(simIds));
+
+    try {
+        auto postResult = executeRequest([&] { return client.Post("/getsimulationpictures", params); });
+        if (postResult->status != 200) {
+            log(Priority::Important, "network: server responded with status " + std::to_string(postResult->status) + " for /getsimulationpictures");
+            return false;
+        }
+
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+
+        jpgBySimId.clear();
+        for (auto const& [key, subTree] : tree.get_child("pictures")) {
+            jpgBySimId.emplace(subTree.get<std::string>("id"), decodeBase64(subTree.get<std::string>("jpg")));
+        }
+        return true;
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
 bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get user list");
