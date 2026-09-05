@@ -2,6 +2,16 @@
 
 #include "NetworkResourceRawTO.h"
 
+namespace
+{
+    // The server sends fractional seconds and a time zone offset, for instance 2026-08-03 20:40:15.897599+00:00
+    std::string truncateToSeconds(std::string const& timestamp)
+    {
+        auto constexpr NumCharsUpToSeconds = 19;
+        return timestamp.substr(0, NumCharsUpToSeconds);
+    }
+}
+
 std::vector<NetworkResourceRawTO> NetworkResourceParserService::decodeRemoteSimulationData(boost::property_tree::ptree const& tree)
 {
     std::vector<NetworkResourceRawTO> result;
@@ -15,7 +25,7 @@ std::vector<NetworkResourceRawTO> NetworkResourceParserService::decodeRemoteSimu
         entry->height = subTree.get<int>("height");
         entry->particles = subTree.get<int>("particles");
         entry->version = subTree.get<std::string>("version");
-        entry->timestamp = subTree.get<std::string>("timestamp");
+        entry->timestamp = truncateToSeconds(subTree.get<std::string>("timestamp"));
         entry->contentSize = std::stoll(subTree.get<std::string>("contentSize"));
 
         bool isArray = false;
