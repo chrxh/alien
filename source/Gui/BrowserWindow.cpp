@@ -31,6 +31,7 @@
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "PictureGuiService.h"
 #include "StyleRepository.h"
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"
@@ -536,7 +537,9 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
         auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::CreatureData> {
             if (_data->currentWorkspace.resourceType == NetworkResourceType_Simulation) {
                 return ReplaceNetworkResourceRequestData::SimulationData{
-                    .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
+                    .zoom = Viewport::get().getZoomFactor(),
+                    .center = Viewport::get().getCenterInWorldPos(),
+                    .jpg = PictureGuiService::get().createSimulationPreviewJpg()};
             } else {
                 return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
             }

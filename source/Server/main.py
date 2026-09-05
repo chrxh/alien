@@ -1175,7 +1175,7 @@ async def upload_simulation(request: Request):
 
 @app.post("/replacesimulation")
 async def replace_simulation(request: Request):
-    fields, content_bytes, _ = await _read_resource_form(request)
+    fields, content_bytes, picture_bytes = await _read_resource_form(request)
     userName = _require_field(fields, "userName")
     password = _require_field(fields, "password")
     simId = _require_field(fields, "simId")
@@ -1212,6 +1212,10 @@ async def replace_simulation(request: Request):
             sim.width = width
             sim.height = height
             sim.size = len(content_bytes)
+
+            # Genomes and older clients send no picture: keep the stored one.
+            if picture_bytes:
+                sim.picture = picture_bytes
 
     if notify_workspace != _WORKSPACE_PRIVATE and notify_name is not None:
         _discord_notify_resource(

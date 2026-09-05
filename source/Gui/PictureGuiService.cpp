@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <GLFW/glfw3.h>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
@@ -9,10 +11,33 @@
 #include <stb_image_resize2.h>
 
 #include <Base/AlienExceptions.h>
+#include <Base/LoggingService.h>
+
+#include "SimulationView.h"
+#include "WindowController.h"
 
 namespace
 {
     auto constexpr JpgQuality = 70;
+
+    auto constexpr PreviewPictureResolution = IntVector2D{300, 200};
+    auto constexpr PreviewPictureBrightness = 1.3f;
+}
+
+std::optional<std::string> PictureGuiService::createSimulationPreviewJpg()
+{
+    try {
+        auto screenWidth = WindowController::get().getWindowData().mode->width;
+        auto scaleFactor = toFloat(screenWidth) / toFloat(PreviewPictureResolution.x);
+        auto renderResolution = IntVector2D{screenWidth, toInt(toFloat(PreviewPictureResolution.y) * scaleFactor)};
+
+        auto picture = SimulationView::get().savePicture(renderResolution);
+        auto preview = scale(picture, PreviewPictureResolution);
+        return encodeJpg(brighten(preview, PreviewPictureBrightness));
+    } catch (AlienException const& exception) {
+        log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
+        return std::nullopt;
+    }
 }
 
 PictureData PictureGuiService::scale(PictureData const& picture, IntVector2D const& resolution)

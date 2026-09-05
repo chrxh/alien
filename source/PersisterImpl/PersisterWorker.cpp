@@ -477,6 +477,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     std::string mainData;
     IntVector2D worldSize;
     int numObjects = 0;
+    std::optional<std::string> pictureJpg;
 
     SimulationDesc deserializedSim;
     if (resourceType == NetworkResourceType_Simulation) {
@@ -503,6 +504,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         worldSize = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
+        pictureJpg = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
     } else {
         auto const& genome = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data).description;
         if (genome._genes.empty()) {
@@ -516,7 +518,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
     }
 
-    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData)) {
+    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, pictureJpg)) {
 
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         return std::make_shared<_PersisterRequestError>(

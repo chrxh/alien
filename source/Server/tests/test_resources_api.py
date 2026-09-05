@@ -189,6 +189,57 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
         assert sim.size == 3
 
 
+def test_replace_simulation_updates_picture(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw", picture=b"old-jpg").json()["simId"]
+    )
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+            "picture": ("picture.jpg", b"new-jpg", "image/jpeg"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Simulation, sim_id).picture) == b"new-jpg"
+
+
+def test_replace_simulation_keeps_picture_when_none_is_sent(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw", picture=b"old-jpg").json()["simId"]
+    )
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Simulation, sim_id).picture) == b"old-jpg"
+
+
 def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
     sim_id = int(

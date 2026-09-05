@@ -570,7 +570,12 @@ bool NetworkService::uploadResource(
     return true;
 }
 
-bool NetworkService::replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& mainData)
+bool NetworkService::replaceResource(
+    std::string const& resourceId,
+    IntVector2D const& worldSize,
+    int numObjects,
+    std::string const& mainData,
+    std::optional<std::string> const& picture)
 {
     log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
 
@@ -586,6 +591,9 @@ bool NetworkService::replaceResource(std::string const& resourceId, IntVector2D 
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
     };
+    if (picture.has_value()) {
+        items.push_back({"picture", *picture, "picture.jpg", "image/jpeg"});
+    }
 
     try {
         auto result = executeRequest([&] { return client.Post("/replacesimulation", items); });

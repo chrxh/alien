@@ -4,9 +4,7 @@
 
 #include <imgui.h>
 
-#include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
-#include <Base/LoggingService.h>
 
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
@@ -22,17 +20,12 @@
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
 #include "PictureGuiService.h"
-#include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "WindowController.h"
 
 namespace
 {
     auto constexpr FolderWidgetHeight = 50.0f;
-
-    auto constexpr PreviewPictureResolution = IntVector2D{300, 200};
-    auto constexpr PreviewPictureBrightness = 1.3f;
 
     std::map<NetworkResourceType, std::string> const BrowserDataTypeToLowerString = {
         {NetworkResourceType_Simulation, "simulation"},
@@ -145,31 +138,14 @@ void UploadSimulationDialog::processIntern()
     }
 }
 
-namespace
-{
-    std::optional<std::string> createPreviewJpg()
-    {
-        try {
-            auto screenWidth = WindowController::get().getWindowData().mode->width;
-            auto scaleFactor = toFloat(screenWidth) / toFloat(PreviewPictureResolution.x);
-            auto renderResolution = IntVector2D{screenWidth, toInt(toFloat(PreviewPictureResolution.y) * scaleFactor)};
-
-            auto picture = SimulationView::get().savePicture(renderResolution);
-            auto preview = PictureGuiService::get().scale(picture, PreviewPictureResolution);
-            return PictureGuiService::get().encodeJpg(PictureGuiService::get().brighten(preview, PreviewPictureBrightness));
-        } catch (AlienException const& exception) {
-            log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
-            return std::nullopt;
-        }
-    }
-}
-
 void UploadSimulationDialog::onUpload()
 {
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{
-                .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .jpg = createPreviewJpg()};
+                .zoom = Viewport::get().getZoomFactor(),
+                .center = Viewport::get().getCenterInWorldPos(),
+                .jpg = PictureGuiService::get().createSimulationPreviewJpg()};
         } else {
             return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
         }
