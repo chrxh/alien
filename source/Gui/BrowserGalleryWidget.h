@@ -33,6 +33,7 @@ public:
 
     float getPagerWidth() const;
     void resetPage();
+    void invalidatePicture(std::string const& resourceId);
 
 private:
     _BrowserGalleryWidget(BrowserData const& data);

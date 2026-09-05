@@ -5,6 +5,8 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
+#include <glad/glad.h>
+
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -29,7 +31,7 @@ namespace
     auto constexpr MaxPicturesPerRequest = 32;
     auto constexpr MinTileWidth = 190.0f;
     auto constexpr TileSpacing = 8.0f;
-    auto constexpr TileTextHeight = 108.0f;
+    auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
     auto constexpr PictureAspectRatio = 2.0f / 3.0f;
 }
 
@@ -141,6 +143,18 @@ void _BrowserGalleryWidget::resetPage()
     _page = 0;
 }
 
+void _BrowserGalleryWidget::invalidatePicture(std::string const& resourceId)
+{
+    auto findResult = _pictureBySimId.find(resourceId);
+    if (findResult == _pictureBySimId.end()) {
+        return;
+    }
+    if (findResult->second.has_value()) {
+        glDeleteTextures(1, &findResult->second->textureId);
+    }
+    _pictureBySimId.erase(findResult);
+}
+
 namespace
 {
     NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO)
@@ -157,7 +171,10 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
 {
     _data->lastSessionData.registrate(rawTO);
 
-    auto tileHeight = tileWidth * PictureAspectRatio + scale(TileTextHeight);
+    auto const& style = ImGui::GetStyle();
+    auto pictureHeight = (tileWidth - style.WindowPadding.x * 2) * PictureAspectRatio;
+    auto tileHeight = pictureHeight + NumTileTextLines * ImGui::GetTextLineHeight() + ImGui::GetFrameHeight()  // Button row
+        + (NumTileTextLines + 1) * style.ItemSpacing.y + style.WindowPadding.y * 2;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
     if (ImGui::BeginChild("##tile", {tileWidth, tileHeight}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {

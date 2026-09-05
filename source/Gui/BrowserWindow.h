@@ -18,6 +18,7 @@ class BrowserWindow : public AlienWindow
 
 public:
     void onRefresh();
+    void onPreviewPictureChanged(std::string const& resourceId);
     WorkspaceType getCurrentWorkspaceType() const;
 
     DownloadCache& getSimulationCache();
