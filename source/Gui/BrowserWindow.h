@@ -80,6 +80,9 @@ private:
     float getGalleryPagerWidth() const;
     void processGalleryTile(NetworkResourceRawTO const& rawTO, float tileWidth);
     void processGalleryPicture(NetworkResourceRawTO const& rawTO, float width);
+    void processGalleryReactionButton(NetworkResourceRawTO const& rawTO);
+    void processReactionTooltip(NetworkResourceRawTO const& rawTO);
+    NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO) const;
     std::vector<NetworkResourceRawTO> getSortedGalleryEntries() const;
     void requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries);
     bool hasPreviewPictures() const;
