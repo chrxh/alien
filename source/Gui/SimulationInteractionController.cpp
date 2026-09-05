@@ -1,18 +1,19 @@
 #include "SimulationInteractionController.h"
 
 #include <cmath>
+#include <ranges>
 
 #include <imgui.h>
 
+#include <Fonts/IconsFontAwesome5.h>
+
 #include <Base/GlobalSettings.h>
-#include <Base/Resources.h>
 
 #include <EngineInterface/SimulationFacade.h>
 
 #include "CreatorWindow.h"
 #include "EditorController.h"
 #include "EditorModel.h"
-#include "OpenGLHelper.h"
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -20,14 +21,25 @@
 namespace
 {
     auto constexpr CursorRadius = 13.0f;
+    auto constexpr EditToggleLeftMargin = 20.0f;
+    auto constexpr EditToggleBottomMargin = 30.0f;
+    auto constexpr EditToggleSize = 44.0f;
+    auto constexpr EditToggleIconSize = 18.0f;
+    // Corrects the side bearings of the glyph and its weight in the lower left corner
+    auto constexpr EditToggleIconOffsetX = 2.0f;
+    auto constexpr EditToggleIconOffsetY = 0.0f;
+    auto constexpr EditToggleBorderThickness = 1.5f;
+    auto constexpr EditToggleGlowSteps = 4;
+    auto constexpr EditToggleGlowWidth = 2.0f;
+    auto constexpr EditToggleLabelSpacing = 10.0f;
+    auto constexpr EditToggleLabelPaddingX = 10.0f;
+    auto constexpr EditToggleLabelPaddingY = 5.0f;
+    auto constexpr EditToggleLabelRounding = 5.0f;
+    auto constexpr EditToggleShortcutSpacing = 10.0f;
 }
 
 void SimulationInteractionController::init()
 {
-
-    _editorOn = OpenGLHelper::loadTexture(Const::EditorOnFilename);
-    _editorOff = OpenGLHelper::loadTexture(Const::EditorOffFilename);
-
     setEditMode(GlobalSettings::get().getValue("controllers.simulation interaction.edit mode", _modes.editMode));
 }
 
@@ -80,28 +92,84 @@ std::optional<RealVector2D> SimulationInteractionController::getPositionSelectio
     return Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
 }
 
+namespace
+{
+    void drawEditToggleLabel(ImDrawList* drawList, ImVec2 const& leftCenterPos)
+    {
+        auto text = "Edit mode";
+        auto shortcut = "ALT+E";
+        auto textSize = ImGui::CalcTextSize(text);
+        auto shortcutSize = ImGui::CalcTextSize(shortcut);
+        auto width = textSize.x + scale(EditToggleShortcutSpacing) + shortcutSize.x + 2 * scale(EditToggleLabelPaddingX);
+        auto height = textSize.y + 2 * scale(EditToggleLabelPaddingY);
+
+        auto topLeft = ImVec2{leftCenterPos.x, leftCenterPos.y - height / 2};
+        auto bottomRight = ImVec2{topLeft.x + width, topLeft.y + height};
+        drawList->AddRectFilled(topLeft, bottomRight, Const::FloatingCardBackgroundColor, scale(EditToggleLabelRounding));
+        drawList->AddRect(topLeft, bottomRight, Const::FloatingCardBorderColor, scale(EditToggleLabelRounding));
+
+        auto textPos = ImVec2{topLeft.x + scale(EditToggleLabelPaddingX), topLeft.y + scale(EditToggleLabelPaddingY)};
+        drawList->AddText(textPos, Const::EditToggleLabelColor, text);
+        drawList->AddText({textPos.x + textSize.x + scale(EditToggleShortcutSpacing), textPos.y}, Const::EditToggleShortcutColor, shortcut);
+    }
+}
+
 void SimulationInteractionController::processEditWidget()
 {
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - scale(120.0f)));
-    ImGui::SetNextWindowSize(ImVec2(scale(160.0f), scale(100.0f)));
-
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
-    ImGui::Begin("TOOLBAR", NULL, windowFlags);
-
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor());
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor());
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
-
-    auto actionTexture = _modes.editMode ? _editorOn.textureId : _editorOff.textureId;
-    if (ImGui::ImageButton("editor_toggle", (ImTextureID)(intptr_t)actionTexture, ImVec2(scale(80.0f), scale(80.0f)), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
-        _modes.editMode = !_modes.editMode;
-        EditorController::get().setOn(!EditorController::get().isOn());
+    if (!SimulationView::get().isRenderSimulation()) {
+        return;
     }
 
-    ImGui::PopStyleColor(3);
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    auto anchorPos = ImVec2(viewport->Pos.x + scale(EditToggleLeftMargin), viewport->Pos.y + viewport->Size.y - scale(EditToggleBottomMargin));
+    ImGui::SetNextWindowPos(anchorPos, ImGuiCond_Always, ImVec2(0.0f, 1.0f));
+
+    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("edit toggle", NULL, windowFlags);
+
+    auto size = scale(EditToggleSize);
+    auto pos = ImGui::GetCursorScreenPos();
+    if (ImGui::InvisibleButton("editToggle", {size, size})) {
+        setEditMode(!_modes.editMode);
+    }
+    auto hovered = ImGui::IsItemHovered();
+
+    // The glow and the label reach beyond the auto-sized window
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->PushClipRectFullScreen();
+
+    auto radius = size / 2;
+    auto center = ImVec2{pos.x + radius, pos.y + radius};
+    if (_modes.editMode) {
+        for (auto step : std::views::iota(1, EditToggleGlowSteps + 1)) {
+            auto glowColor = Const::EditToggleGlowColor;
+            glowColor.Value.w *= 1.0f - toFloat(step - 1) / toFloat(EditToggleGlowSteps);
+            drawList->AddCircle(center, radius + toFloat(step) * scale(EditToggleGlowWidth), glowColor, 0, scale(EditToggleGlowWidth));
+        }
+    }
+    drawList->AddCircleFilled(center, radius, _modes.editMode ? Const::EditToggleSelectedColor : Const::EditToggleColor);
+    drawList->AddCircle(
+        center, radius, _modes.editMode ? Const::EditToggleSelectedBorderColor : Const::EditToggleBorderColor, 0, scale(EditToggleBorderThickness));
+
+    auto iconColor = _modes.editMode ? Const::EditToggleSelectedIconColor : hovered ? Const::EditToggleHoveredIconColor : Const::EditToggleIconColor;
+    auto iconFont = StyleRepository::get().getIconFont();
+    auto iconFontSize = scale(EditToggleIconSize);
+    auto iconSize = iconFont->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, ICON_FA_EDIT);
+
+    // ImGui truncates the text position, therefore it is rounded here to avoid a bias towards the upper left
+    auto iconPos =
+        ImVec2{std::round(center.x - iconSize.x / 2 + scale(EditToggleIconOffsetX)), std::round(center.y - iconSize.y / 2 + scale(EditToggleIconOffsetY))};
+    drawList->AddText(iconFont, iconFontSize, iconPos, iconColor, ICON_FA_EDIT);
+
+    if (hovered) {
+        drawEditToggleLabel(drawList, {pos.x + size + scale(EditToggleLabelSpacing), center.y});
+    }
+
+    drawList->PopClipRect();
     ImGui::End();
+    ImGui::PopStyleVar();
 }
 
 void SimulationInteractionController::processEvents()

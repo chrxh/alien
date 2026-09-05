@@ -21,8 +21,5 @@ namespace Const
     std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
-    std::filesystem::path const EditorOnFilename = ImagesPath / "editor on.png";
-    std::filesystem::path const EditorOffFilename = ImagesPath / "editor off.png";
-
     std::filesystem::path const LogoFilename = ImagesPath / "logo.png";
 }

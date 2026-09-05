@@ -48,8 +48,8 @@ namespace Const
     ImColor const HeaderHoveredColor = RaisedColor;
 
     ImColor const MenuButtonColor = ImColor::HSV(0.583f, 0.333f, 0.212f);
-    ImColor const MenuButtonHoveredColor = AccentColor;
-    ImColor const MenuButtonActiveColor = AccentLineColor;
+    ImColor const MenuButtonHoveredColor = AccentLineColor;
+    ImColor const MenuButtonActiveColor = AccentDeepColor;
 
     ImColor const ImportantButtonColor = ImColor::HSV(0.980f, 0.607f, 0.478f);
     ImColor const ImportantButtonHoveredColor = ImColor::HSV(0.980f, 0.620f, 0.639f);
@@ -115,6 +115,18 @@ namespace Const
     ImColor const ToolbarOverflowColor = TextFaintColor;
     ImColor const ToolbarOverflowHoveredColor = AccentColor;
     ImColor const ToolbarMenuHoveredColor = AccentDeepColor;
+
+    // Floats above the simulation, therefore a semi-transparent background
+    ImColor const EditToggleColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.850f);
+    ImColor const EditToggleSelectedColor = ImColor::HSV(0.490f, 0.556f, 0.247f, 0.900f);
+    ImColor const EditToggleBorderColor = LineColor;
+    ImColor const EditToggleSelectedBorderColor = AccentColor;
+    ImColor const EditToggleGlowColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.180f);
+    ImColor const EditToggleIconColor = TextDimColor;
+    ImColor const EditToggleHoveredIconColor = TextBaseColor;
+    ImColor const EditToggleSelectedIconColor = AccentColor;
+    ImColor const EditToggleLabelColor = TextBaseColor;
+    ImColor const EditToggleShortcutColor = TextFaintColor;
 
     ImColor const ActionButtonTextColor = ImColor::HSV(0.530f, 0.400f, 0.950f);
     ImColor const ActionButtonHighlightedTextColor = AccentColor;
