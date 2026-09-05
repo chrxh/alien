@@ -218,12 +218,12 @@ void _BrowserTableWidget::processResourceNameField(NetworkResourceTreeTO const& 
             ImGui::SameLine();
         }
 
-        BrowserGui::ShortenedText(leaf.leafName, true);
+        AlienGui::Text(AlienGui::TextParameters().text(leaf.leafName).style(AlienGui::TextStyle::Bold).truncate(true));
     } else {
         auto& folder = treeTO->getFolder();
 
         processFolderTreeSymbols(treeTO, collapsedFolderNames);
-        BrowserGui::ShortenedText(treeTO->folderNames.back());
+        AlienGui::Text(AlienGui::TextParameters().text(treeTO->folderNames.back()).truncate(true));
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         std::string resourceTypeString = [&] {
@@ -311,7 +311,7 @@ void _BrowserTableWidget::processDescriptionField(NetworkResourceTreeTO const& t
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        BrowserGui::ShortenedText(leaf.rawTO->description);
+        AlienGui::Text(AlienGui::TextParameters().text(leaf.rawTO->description).truncate(true));
     }
 }
 
@@ -413,7 +413,7 @@ void _BrowserTableWidget::processUserNameField(NetworkResourceTreeTO const& tree
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        BrowserGui::ShortenedText(leaf.rawTO->userName);
+        AlienGui::Text(AlienGui::TextParameters().text(leaf.rawTO->userName).truncate(true));
     }
 }
 
