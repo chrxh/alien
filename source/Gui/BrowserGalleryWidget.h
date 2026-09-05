@@ -39,6 +39,7 @@ private:
     _BrowserGalleryWidget(BrowserData const& data);
 
     void processTile(NetworkResourceRawTO const& rawTO, float tileWidth);
+    void processTileTooltip(NetworkResourceRawTO const& rawTO);
     void processPicture(NetworkResourceRawTO const& rawTO, float width);
     void processReactionButton(NetworkResourceRawTO const& rawTO);
     void processReactionTooltip(NetworkResourceRawTO const& rawTO);
@@ -52,6 +53,9 @@ private:
 
     BrowserData _data;
     TaskProcessor _pictureProcessor;
+
+    std::string _hoveredTileId;
+    float _hoveredTileTime = 0;
 
     int _sorting = GallerySorting_MostReactions;
     int _page = 0;
