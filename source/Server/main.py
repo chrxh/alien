@@ -1195,16 +1195,10 @@ async def replace_simulation(request: Request):
             if user is None:
                 return {"result": False}
 
+            # Ownership is the only requirement: an owner may also replace an
+            # entry that lives in the curated workspace.
             sim = session.get(Simulation, sim_id)
             if sim is None or sim.user_id != user.id:
-                return {"result": False}
-
-            # An entry in the curated workspace can only be replaced by the
-            # dedicated alien-project user.
-            if (
-                sim.workspace == _WORKSPACE_ALIEN_PROJECT
-                and userName != _ALIEN_PROJECT_USER_NAME
-            ):
                 return {"result": False}
 
             notify_name = sim.name
