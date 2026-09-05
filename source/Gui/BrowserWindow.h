@@ -74,12 +74,15 @@ private:
     void processGenomeList();
 
     void processGallery();
-    void processGallerySortingAndPaging(int numEntries, int numPages);
+    void processGallerySorting();
+    void processGalleryPaging();
+    std::string getGalleryPageText() const;
+    float getGalleryPagerWidth() const;
     void processGalleryTile(NetworkResourceRawTO const& rawTO, float tileWidth);
     void processGalleryPicture(NetworkResourceRawTO const& rawTO, float width);
     std::vector<NetworkResourceRawTO> getSortedGalleryEntries() const;
     void requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries);
-    bool isGalleryActive() const;
+    bool hasPreviewPictures() const;
 
     bool processResourceNameField(
         NetworkResourceTreeTO const& treeTO,
@@ -144,9 +147,11 @@ private:
     TaskProcessor _reactionProcessor;
     TaskProcessor _pictureProcessor;
 
-    bool _galleryView = false;
+    bool _galleryView = true;
     int _gallerySorting = GallerySorting_MostReactions;
     int _galleryPage = 0;
+    int _galleryNumEntries = 0;
+    int _galleryNumPages = 1;
     std::unordered_map<std::string, std::optional<TextureData>> _pictureBySimId;
 
     bool _activateEmojiPopup = false;
