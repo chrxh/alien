@@ -46,6 +46,7 @@ namespace Const
     ImColor const HeaderColor = AccentDeepColor;
     ImColor const HeaderActiveColor = ImColor::HSV(0.489f, 0.548f, 0.329f);
     ImColor const HeaderHoveredColor = RaisedColor;
+    ImColor const HeaderSelectedHoveredColor = ImColor::HSV(0.489f, 0.552f, 0.302f);
 
     ImColor const MenuButtonColor = ImColor::HSV(0.583f, 0.333f, 0.212f);
     ImColor const MenuButtonHoveredColor = AccentLineColor;
