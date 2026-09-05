@@ -47,6 +47,31 @@ def test_upload_simulation_persists_row_and_returns_sim_id(app_client, helpers):
         assert sim.size == len(b"\x00\x01\x02payload")
         assert sim.workspace == 0
         assert sim.type == 0
+        assert bytes(sim.picture) == b""
+
+
+def test_upload_simulation_stores_picture(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    resp = helpers.upload_simulation(app_client, "alice", "pw", picture=picture)
+    assert resp.json()["result"] is True
+
+    sim_id = int(resp.json()["simId"])
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        sim = session.get(main.Simulation, sim_id)
+        assert bytes(sim.picture) == picture
+
+
+def test_upload_simulation_rejects_oversized_picture(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    resp = helpers.upload_simulation(
+        app_client, "alice", "pw", picture=b"x" * (main._MAX_PICTURE_SIZE + 1)
+    )
+    assert resp.status_code == 400
 
 
 def test_upload_simulation_wrong_password_fails(app_client, helpers):

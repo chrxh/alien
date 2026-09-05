@@ -47,6 +47,18 @@ PictureData PictureGuiService::brighten(PictureData const& picture, float factor
     return result;
 }
 
+std::string PictureGuiService::encodeJpg(PictureData const& picture)
+{
+    std::string result;
+    auto appendData = [](void* context, void* data, int size) { static_cast<std::string*>(context)->append(static_cast<char const*>(data), size); };
+    auto writeResult =
+        stbi_write_jpg_to_func(appendData, &result, picture.resolution.x, picture.resolution.y, PictureData::NumChannels, picture.pixels.data(), JpgQuality);
+    if (writeResult == 0) {
+        throw AlienException("The picture could not be encoded.");
+    }
+    return result;
+}
+
 void PictureGuiService::savePng(PictureData const& picture, std::filesystem::path const& filename)
 {
     auto result = stbi_write_png(
@@ -56,15 +68,6 @@ void PictureGuiService::savePng(PictureData const& picture, std::filesystem::pat
         PictureData::NumChannels,
         picture.pixels.data(),
         picture.resolution.x * PictureData::NumChannels);
-    if (result == 0) {
-        throw AlienException("The file could not be written.");
-    }
-}
-
-void PictureGuiService::saveJpg(PictureData const& picture, std::filesystem::path const& filename)
-{
-    auto result =
-        stbi_write_jpg(filename.string().c_str(), picture.resolution.x, picture.resolution.y, PictureData::NumChannels, picture.pixels.data(), JpgQuality);
     if (result == 0) {
         throw AlienException("The file could not be written.");
     }

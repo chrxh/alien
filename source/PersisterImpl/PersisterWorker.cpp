@@ -392,6 +392,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     DownloadNetworkResourceResultData resultData;
 
     std::string mainData;
+    std::optional<std::string> pictureJpg;
     IntVector2D size;
     int numObjects = 0;
 
@@ -422,6 +423,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         size = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
+        pictureJpg = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
     } else {
         THROW_NOT_IMPLEMENTED();
         //auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
@@ -446,6 +448,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             size,
             numObjects,
             mainData,
+            pictureJpg,
             resourceType,
             requestData.workspaceType)) {
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
