@@ -167,6 +167,35 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
         assert sim.size == 3
 
 
+def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw").json()["simId"]
+    )
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        with session.begin():
+            session.get(main.Simulation, sim_id).workspace = 1
+
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Simulation, sim_id).content) == b"NEW"
+
+
 def test_replace_simulation_rejects_non_owner(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
     helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")
