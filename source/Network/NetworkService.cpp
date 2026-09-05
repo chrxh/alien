@@ -308,7 +308,7 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     }
 }
 
-bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry)
+bool NetworkService::getNetworkResourceList(std::vector<NetworkResourceRawTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get resource list");
 
@@ -337,27 +337,45 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
 
 namespace
 {
-    std::string decodeBase64(std::string const& encoded)
+    bool readUint32(std::string const& data, size_t& pos, uint32_t& result)
     {
-        static auto constexpr Alphabet = std::string_view("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
-
-        std::string result;
-        result.reserve(encoded.size() / 4 * 3);
-        uint32_t buffer = 0;
-        auto numBits = 0;
-        for (auto const& character : encoded) {
-            auto position = Alphabet.find(character);
-            if (position == std::string_view::npos) {
-                continue;
-            }
-            buffer = (buffer << 6) + static_cast<uint32_t>(position);
-            numBits += 6;
-            if (numBits >= 8) {
-                numBits -= 8;
-                result.push_back(static_cast<char>((buffer >> numBits) & 0xff));
-            }
+        if (pos + sizeof(uint32_t) > data.size()) {
+            return false;
         }
-        return result;
+        result = static_cast<uint8_t>(data[pos]) | static_cast<uint32_t>(static_cast<uint8_t>(data[pos + 1])) << 8
+            | static_cast<uint32_t>(static_cast<uint8_t>(data[pos + 2])) << 16 | static_cast<uint32_t>(static_cast<uint8_t>(data[pos + 3])) << 24;
+        pos += sizeof(uint32_t);
+        return true;
+    }
+
+    bool readSizedBlock(std::string const& data, size_t& pos, std::string& result)
+    {
+        uint32_t size = 0;
+        if (!readUint32(data, pos, size) || pos + size > data.size()) {
+            return false;
+        }
+        result = data.substr(pos, size);
+        pos += size;
+        return true;
+    }
+
+    // Binary layout of the picture response: number of records, then for each record the id and the JPG, both prefixed by their length in bytes
+    bool decodePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::string const& data)
+    {
+        size_t pos = 0;
+        uint32_t numPictures = 0;
+        if (!readUint32(data, pos, numPictures)) {
+            return false;
+        }
+        for (uint32_t i = 0; i < numPictures; ++i) {
+            std::string simId;
+            std::string jpg;
+            if (!readSizedBlock(data, pos, simId) || !readSizedBlock(data, pos, jpg)) {
+                return false;
+            }
+            jpgBySimId.emplace(simId, jpg);
+        }
+        return true;
     }
 
     std::string joinSimIds(std::vector<std::string> const& simIds)
@@ -373,7 +391,7 @@ namespace
     }
 }
 
-bool NetworkService::getSimulationPictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds)
+bool NetworkService::getResourcePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds)
 {
     log(Priority::Important, "network: get " + std::to_string(simIds.size()) + " simulation picture(s)");
 
@@ -389,13 +407,10 @@ bool NetworkService::getSimulationPictures(std::unordered_map<std::string, std::
             return false;
         }
 
-        std::stringstream stream(postResult->body);
-        boost::property_tree::ptree tree;
-        boost::property_tree::read_json(stream, tree);
-
         jpgBySimId.clear();
-        for (auto const& [key, subTree] : tree.get_child("pictures")) {
-            jpgBySimId.emplace(subTree.get<std::string>("id"), decodeBase64(subTree.get<std::string>("jpg")));
+        if (!decodePictures(jpgBySimId, postResult->body)) {
+            log(Priority::Important, "network: malformed picture response received");
+            return false;
         }
         return true;
     } catch (...) {
