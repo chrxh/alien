@@ -158,6 +158,17 @@ namespace
     {
         ImGui::PopStyleColor();
     }
+
+    std::optional<ImU32> getRowBackgroundColor(bool selected, bool hovered)
+    {
+        if (selected) {
+            return static_cast<ImU32>(hovered ? Const::HeaderSelectedHoveredColor : Const::HeaderColor);
+        }
+        if (hovered) {
+            return static_cast<ImU32>(Const::HeaderHoveredColor);
+        }
+        return std::nullopt;
+    }
 }
 
 void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::vector<Column> const& columns)
@@ -170,12 +181,21 @@ void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::v
     ImGui::TableNextColumn();
 
     auto selected = _data->isSelected(treeTO);
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0, 0, 0, 0));
     if (ImGui::Selectable(
             "",
             &selected,
             ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
             ImVec2(0, scale(BrowserGui::RowHeight) - ImGui::GetStyle().FramePadding.y))) {
         _data->selectedTreeTO = selected ? treeTO : nullptr;
+    }
+    ImGui::PopStyleColor(3);
+
+    // The selectable's own hover state alternates each frame in overlap mode, so the row background is drawn separately
+    if (auto rowBackgroundColor = getRowBackgroundColor(selected, ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlappedByItem))) {
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, *rowBackgroundColor);
     }
     ImGui::SameLine();
 
