@@ -61,9 +61,6 @@ private:
 
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
-    TextureData _editorOn;
-    TextureData _editorOff;
-
     struct Modes
     {
         bool editMode = false;
