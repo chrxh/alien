@@ -547,7 +547,7 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
             .resourceId = leaf.rawTO->id, .workspaceType = leaf.rawTO->workspaceType, .downloadCache = getSimulationCache(), .data = data});
     };
-    GenericMessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
+    GenericMessageDialog::get().yesNo("Replace", "Do you really want to replace the content of the selected item?", func);
 }
 
 void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
