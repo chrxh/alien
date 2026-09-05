@@ -71,7 +71,7 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
 }
 
 UploadSimulationDialog::UploadSimulationDialog()
-    : AlienDialog("")
+    : AlienDialog("", {450.0f, 500.0f})
 {}
 
 void UploadSimulationDialog::processIntern()
@@ -116,10 +116,10 @@ void UploadSimulationDialog::processIntern()
 
     AlienGui::ToggleButton(
         AlienGui::ToggleButtonParameters()
-            .name("Make public")
+            .name("Share with the community")
             .tooltip(
-                "If true, the " + resourceTypeString + " will be visible to all users. If false, the " + resourceTypeString
-                + " will only be visible in the private workspace. This property can also be changed later if desired."),
+                "If true, the " + resourceTypeString + " will be visible to all users in the Community workspace. If false, the " + resourceTypeString
+                + " will only be visible in your own workspace. This property can also be changed later if desired."),
         _share);
 
     AlienGui::Separator();

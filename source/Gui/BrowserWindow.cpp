@@ -59,12 +59,10 @@ namespace
     int const NumEmojisPerBlock[] = {19, 14, 10, 6};
     auto constexpr NumEmojisPerRow = 5;
 
-    auto constexpr GalleryColumns = 5;
-    auto constexpr GalleryRows = 3;
-    auto constexpr GalleryTilesPerPage = GalleryColumns * GalleryRows;
+    auto constexpr GalleryTilesPerPage = 15;
+    auto constexpr GalleryMinTileWidth = 190.0f;
     auto constexpr GalleryTileSpacing = 8.0f;
     auto constexpr GalleryTileTextHeight = 108.0f;
-    auto constexpr GalleryMinTileWidth = 120.0f;
     auto constexpr WorkspaceSwitcherWidth = 270.0f;
     auto constexpr MinFilterWidth = 100.0f;
     auto constexpr GalleryPictureAspectRatio = 2.0f / 3.0f;
@@ -262,8 +260,8 @@ void BrowserWindow::processToolbar()
                 .name("Upload " + resourceTypeString)
                 .tooltip(
                     "Upload your current " + resourceTypeString
-                    + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only "
-                      "be visible in your private workspace.\nIf you have already selected a folder, your "
+                    + " to the server and made visible in the browser. You can choose whether you want to share it with the community or whether it should "
+                      "only be visible in your own workspace.\nIf you have already selected a folder, your "
                     + resourceTypeString + " will be uploaded there.")
                 .action([&] {
                     std::string prefix = [&] {
@@ -286,13 +284,13 @@ void BrowserWindow::processToolbar()
                                                     + " with the one that is currently open. The name, description and reactions will be preserved.")
                                                 .disabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf())
                                                 .action([&] { onReplaceResource(_selectedTreeTO->getLeaf()); })),
-        AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters()
-                .icon(ICON_FA_SHARE_ALT)
-                .name("Change visibility")
-                .tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public")
-                .disabled(!isOwnerForSelectedItem)
-                .action([&] { onMoveResource(_selectedTreeTO); })),
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                .icon(ICON_FA_SHARE_ALT)
+                                                .name("Change visibility")
+                                                .tooltip("Change visibility: Community " ICON_FA_LONG_ARROW_ALT_RIGHT
+                                                         " my workspace and my workspace " ICON_FA_LONG_ARROW_ALT_RIGHT " Community")
+                                                .disabled(!isOwnerForSelectedItem)
+                                                .action([&] { onMoveResource(_selectedTreeTO); })),
         AlienGui::ToolbarItem::createButton(
             AlienGui::ToolbarItemParameters().icon(ICON_FA_TRASH).name("Delete selected " + resourceTypeString).disabled(!isOwnerForSelectedItem).action([&] {
                 onDeleteResource(_selectedTreeTO);
@@ -369,14 +367,14 @@ void BrowserWindow::processWorkspace()
 void BrowserWindow::processWorkspaceSelection()
 {
     auto userName = NetworkService::get().getLoggedInUserName();
-    auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
+    auto privateWorkspaceString = userName.has_value() ? std::string("My workspace") : std::string("My workspace (login required)");
     auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  // Change the order for display
     if (AlienGui::Switcher(
             AlienGui::SwitcherParameters()
                 .width(WorkspaceSwitcherWidth)
                 .textWidth(0.0f)
                 .tooltip(Const::BrowserWorkspaceTooltip)
-                .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
+                .values({privateWorkspaceString, std::string("Featured"), std::string("Community")}),
             &workspaceType_reordered)) {
         _selectedTreeTO = nullptr;
         _galleryPage = 0;
@@ -675,6 +673,9 @@ void BrowserWindow::processGallery()
 
     auto entries = getSortedGalleryEntries();
     _galleryNumEntries = toInt(entries.size());
+
+    processGallerySorting();
+
     _galleryNumPages = std::max(1, (_galleryNumEntries + GalleryTilesPerPage - 1) / GalleryTilesPerPage);
     _galleryPage = std::clamp(_galleryPage, 0, _galleryNumPages - 1);
 
@@ -682,20 +683,17 @@ void BrowserWindow::processGallery()
     auto lastIndex = std::min(_galleryNumEntries, firstIndex + GalleryTilesPerPage);
     auto pageEntries = std::vector<NetworkResourceRawTO>(entries.begin() + firstIndex, entries.begin() + lastIndex);
 
-    processGallerySorting();
     requestMissingPictures(pageEntries);
 
-    auto verticalSpacing = ImGui::GetStyle().ItemSpacing.y;
-    auto availableSize = ImGui::GetContentRegionAvail();
-    auto availableHeight = availableSize.y - scale(WorkspaceBottomSpace);
-    auto widthPerTile = (availableSize.x - scale(GalleryTileSpacing) * (GalleryColumns - 1)) / GalleryColumns;
-    auto heightPerTile = (availableHeight - verticalSpacing * (GalleryRows - 1)) / GalleryRows;
-    auto tileWidth = std::max(scale(GalleryMinTileWidth), std::min(widthPerTile, (heightPerTile - scale(GalleryTileTextHeight)) / GalleryPictureAspectRatio));
+    if (ImGui::BeginChild("##tiles", {0, ImGui::GetContentRegionAvail().y - scale(WorkspaceBottomSpace)}, false)) {
+        auto horizontalSpacing = scale(GalleryTileSpacing);
+        auto availableWidth = ImGui::GetContentRegionAvail().x;
+        auto numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (scale(GalleryMinTileWidth) + horizontalSpacing)));
+        auto tileWidth = (availableWidth - horizontalSpacing * (numColumns - 1)) / numColumns;
 
-    if (ImGui::BeginChild("##tiles", {0, availableHeight}, false)) {
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
-            if (index % GalleryColumns != 0) {
-                ImGui::SameLine(0, scale(GalleryTileSpacing));
+            if (index % numColumns != 0) {
+                ImGui::SameLine(0, horizontalSpacing);
             }
             ImGui::PushID(toInt(index));
             processGalleryTile(rawTO, tileWidth);
@@ -764,6 +762,39 @@ float BrowserWindow::getGalleryPagerWidth() const
         + getButtonWidth(ICON_FA_ANGLE_DOUBLE_RIGHT) + ImGui::CalcTextSize(getGalleryPageText().c_str()).x + style.ItemSpacing.x * 4;
 }
 
+namespace
+{
+    std::string shortenText(std::string const& text, float width)
+    {
+        if (ImGui::CalcTextSize(text.c_str()).x <= width) {
+            return text;
+        }
+        auto shortened = text;
+        while (!shortened.empty() && ImGui::CalcTextSize((shortened + "...").c_str()).x > width) {
+            shortened.pop_back();
+            while (!shortened.empty() && (static_cast<unsigned char>(shortened.back()) & 0xc0) == 0x80) {
+                shortened.pop_back();
+            }
+        }
+        return shortened + "...";
+    }
+
+    void processTileText(std::string const& text, float width, bool bold = false)
+    {
+        if (bold) {
+            ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+        }
+        auto shortenedText = shortenText(text, width);
+        AlienGui::Text(shortenedText);
+        if (bold) {
+            ImGui::PopFont();
+        }
+        if (shortenedText != text) {
+            AlienGui::Tooltip(text, false);
+        }
+    }
+}
+
 void BrowserWindow::processGalleryTile(NetworkResourceRawTO const& rawTO, float tileWidth)
 {
     _lastSessionData.registrate(rawTO);
@@ -772,15 +803,21 @@ void BrowserWindow::processGalleryTile(NetworkResourceRawTO const& rawTO, float 
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
     if (ImGui::BeginChild("##tile", {tileWidth, tileHeight}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-        processGalleryPicture(rawTO, ImGui::GetContentRegionAvail().x);
-
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceTextColor);
-        processShortenedText(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), true);
-        ImGui::PopStyleColor();
+        auto textWidth = ImGui::GetContentRegionAvail().x;
+        processGalleryPicture(rawTO, textWidth);
 
         auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);
-        processShortenedText(NetworkResourceService::get().concatenateFolderName(folderNames, true));
+        processTileText(NetworkResourceService::get().concatenateFolderName(folderNames, true), textWidth);
+        ImGui::PopStyleColor();
+
+        if (_currentWorkspace.workspaceType == WorkspaceType_Private && rawTO->workspaceType != WorkspaceType_Private) {
+            AlienGui::Text(ICON_FA_SHARE_ALT);
+            AlienGui::Tooltip(rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community");
+            ImGui::SameLine();
+        }
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceTextColor);
+        processTileText(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), ImGui::GetContentRegionAvail().x, true);
         ImGui::PopStyleColor();
 
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
@@ -791,9 +828,7 @@ void BrowserWindow::processGalleryTile(NetworkResourceRawTO const& rawTO, float 
 
         processDownloadButton(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
-        AlienGui::Text(ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()));
-        ImGui::PopStyleColor();
+        processGalleryReactionButton(rawTO);
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_DOWNLOAD " " + std::to_string(rawTO->numDownloads)).rightAligned(true));
@@ -815,6 +850,50 @@ void BrowserWindow::processGalleryTile(NetworkResourceRawTO const& rawTO, float 
     if (_selectedTreeTO != nullptr && _selectedTreeTO->isLeaf() && _selectedTreeTO->getLeaf().rawTO->id == rawTO->id) {
         ImGui::GetWindowDrawList()->AddRect(tileMin, tileMax, (ImU32)Const::AccentColor, 0, 0, scale(2.0f));
     }
+}
+
+void BrowserWindow::processGalleryReactionButton(NetworkResourceRawTO const& rawTO)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
+    auto isAddReaction = processActionButton(ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()));
+    ImGui::PopStyleColor();
+
+    if (ImGui::IsItemHovered()) {
+        processReactionTooltip(rawTO);
+    }
+    if (isAddReaction) {
+        _activateEmojiPopup = true;
+        _emojiPopupTO = createLeafTreeTO(rawTO);
+    }
+}
+
+void BrowserWindow::processReactionTooltip(NetworkResourceRawTO const& rawTO)
+{
+    ImGui::BeginTooltip();
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
+    if (rawTO->numLikesByEmojiType.empty()) {
+        AlienGui::Text("Add a reaction");
+    } else {
+        for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
+            if (emojiType < toInt(_emojis.size())) {
+                auto const& emoji = _emojis.at(emojiType);
+                ImGui::Image((ImTextureID)(intptr_t)emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
+                ImGui::SameLine();
+            }
+            AlienGui::Text(std::to_string(numLikes) + "   " + getUserNamesToEmojiType(rawTO->id, emojiType));
+        }
+    }
+    ImGui::PopStyleColor();
+    ImGui::EndTooltip();
+}
+
+NetworkResourceTreeTO BrowserWindow::createLeafTreeTO(NetworkResourceRawTO const& rawTO) const
+{
+    auto result = std::make_shared<_NetworkResourceTreeTO>();
+    result->type = rawTO->resourceType;
+    result->folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
+    result->node = BrowserLeaf{.leafName = NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), .rawTO = rawTO};
+    return result;
 }
 
 void BrowserWindow::processGalleryPicture(NetworkResourceRawTO const& rawTO, float width)
@@ -1022,8 +1101,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         ImGui::SameLine();
         if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip(
-                leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in alien-project's workspace" : "Visible in the public workspace");
+            AlienGui::Tooltip(leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community");
         }
         ImGui::SameLine();
 
@@ -1501,11 +1579,7 @@ void BrowserWindow::sortUserList()
 
 void BrowserWindow::onSelectGalleryEntry(NetworkResourceRawTO const& rawTO)
 {
-    auto selectedTO = std::make_shared<_NetworkResourceTreeTO>();
-    selectedTO->type = rawTO->resourceType;
-    selectedTO->folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
-    selectedTO->node = BrowserLeaf{.leafName = NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), .rawTO = rawTO};
-    _selectedTreeTO = selectedTO;
+    _selectedTreeTO = createLeafTreeTO(rawTO);
 }
 
 void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
