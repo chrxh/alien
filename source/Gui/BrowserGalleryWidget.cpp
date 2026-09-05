@@ -208,8 +208,7 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
             _data->onDownloadResource(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
         }
     }
-    auto const& selectedTreeTO = _data->selectedTreeTO;
-    if (selectedTreeTO != nullptr && selectedTreeTO->isLeaf() && selectedTreeTO->getLeaf().rawTO->id == rawTO->id) {
+    if (_data->isSelected(rawTO)) {
         ImGui::GetWindowDrawList()->AddRect(tileMin, tileMax, (ImU32)Const::AccentColor, 0, 0, scale(2.0f));
     }
 }

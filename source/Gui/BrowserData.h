@@ -65,6 +65,11 @@ public:
     void createTreeTOsForCurrentResourceType();
     std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
     bool isOwner(NetworkResourceTreeTO const& treeTO) const;
+
+    // The gallery and the table build their own tree objects, so the selection is compared by resource and not by object identity
+    bool isSelected(NetworkResourceRawTO const& rawTO) const;
+    bool isSelected(NetworkResourceTreeTO const& treeTO) const;
+
     void sortUserList();
 
     std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
