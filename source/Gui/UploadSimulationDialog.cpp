@@ -1,10 +1,15 @@
 #include "UploadSimulationDialog.h"
 
+#include <algorithm>
+
+#include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
 
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
@@ -19,6 +24,7 @@
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "OpenGLHelper.h"
 #include "PictureGuiService.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -57,6 +63,7 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
         _folder = folder;
         _resourceName = _resourceNameByFolder[_folder];
         _resourceDescription = _resourceDescriptionByFolder[_folder];
+        createPreview();
         AlienDialog::open();
     } else {
         LoginDialog::get().open();
@@ -64,8 +71,44 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
 }
 
 UploadSimulationDialog::UploadSimulationDialog()
-    : AlienDialog("", {450.0f, 500.0f})
+    : AlienDialog("", {450.0f, 700.0f})
 {}
+
+void UploadSimulationDialog::createPreview()
+{
+    if (_previewTexture.has_value()) {
+        glDeleteTextures(1, &_previewTexture->textureId);
+        _previewTexture.reset();
+    }
+    _previewJpg.reset();
+
+    if (_resourceType != NetworkResourceType_Simulation) {
+        return;
+    }
+    _previewJpg = PictureGuiService::get().createSimulationPreviewJpg();
+    if (!_previewJpg.has_value()) {
+        return;
+    }
+    try {
+        _previewTexture = OpenGLHelper::loadTextureFromMemory(*_previewJpg);
+    } catch (std::exception const&) {
+        log(Priority::Important, "upload dialog: preview picture could not be decoded");
+    }
+}
+
+void UploadSimulationDialog::processPreview()
+{
+    if (!_previewTexture.has_value()) {
+        return;
+    }
+
+    // Reserving the scrollbar width independently of its visibility avoids a feedback loop between the picture height and the scrollbar
+    auto const& style = ImGui::GetStyle();
+    auto availableWidth = ImGui::GetWindowWidth() - style.WindowPadding.x * 2 - style.ScrollbarSize;
+    auto width = std::min(availableWidth, scale(toFloat(_previewTexture->width)));
+    auto height = width * toFloat(_previewTexture->height) / toFloat(_previewTexture->width);
+    ImGui::Image((ImTextureID)(intptr_t)_previewTexture->textureId, {width, height});
+}
 
 void UploadSimulationDialog::processIntern()
 {
@@ -91,6 +134,8 @@ void UploadSimulationDialog::processIntern()
         }
         ImGui::EndChild();
     }
+
+    processPreview();
 
     AlienGui::Separator();
 
@@ -143,9 +188,7 @@ void UploadSimulationDialog::onUpload()
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{
-                .zoom = Viewport::get().getZoomFactor(),
-                .center = Viewport::get().getCenterInWorldPos(),
-                .jpg = PictureGuiService::get().createSimulationPreviewJpg()};
+                .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .jpg = _previewJpg};
         } else {
             return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
         }
