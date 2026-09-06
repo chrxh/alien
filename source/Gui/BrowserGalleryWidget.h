@@ -58,6 +58,7 @@ private:
     float _hoveredTileTime = 0;
 
     int _sorting = GallerySorting_MostReactions;
+    int _cardSizePercent = 100;
     int _page = 0;
     int _numEntries = 0;
     int _numPages = 1;

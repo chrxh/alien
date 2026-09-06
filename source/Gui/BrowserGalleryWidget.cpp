@@ -31,7 +31,9 @@ namespace
 {
     auto constexpr TilesPerPage = 100;
     auto constexpr MaxPicturesPerRequest = 32;
-    auto constexpr MinTileWidth = 190.0f;
+    auto constexpr BaseTileWidth = 190.0f;
+    auto constexpr MinCardSizePercent = 60;
+    auto constexpr MaxCardSizePercent = 200;
     auto constexpr TileSpacing = 8.0f;
     auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
     auto constexpr PictureAspectRatio = 2.0f / 3.0f;
@@ -51,11 +53,13 @@ _BrowserGalleryWidget::_BrowserGalleryWidget(BrowserData const& data)
 {
     _pictureProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _sorting = GlobalSettings::get().getValue("windows.browser.gallery sorting", _sorting);
+    _cardSizePercent = GlobalSettings::get().getValue("windows.browser.gallery card size", _cardSizePercent);
 }
 
 void _BrowserGalleryWidget::shutdown()
 {
     GlobalSettings::get().setValue("windows.browser.gallery sorting", _sorting);
+    GlobalSettings::get().setValue("windows.browser.gallery card size", _cardSizePercent);
 }
 
 void _BrowserGalleryWidget::processSorting()
@@ -66,6 +70,21 @@ void _BrowserGalleryWidget::processSorting()
             &_sorting)) {
         _page = 0;
     }
+
+    ImGui::SameLine();
+    AlienGui::VerticalSeparator();
+    ImGui::SameLine();
+
+    AlienGui::SliderInt(
+        AlienGui::SliderIntParameters()
+            .name("Card size")
+            .width(230.0f)
+            .textWidth(75.0f)
+            .min(MinCardSizePercent)
+            .max(MaxCardSizePercent)
+            .format("%d %%")
+            .tooltip("Scale the preview cards. Larger cards mean fewer cards per row."),
+        &_cardSizePercent);
 }
 
 void _BrowserGalleryWidget::process()
@@ -89,8 +108,8 @@ void _BrowserGalleryWidget::process()
             "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserGui::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto horizontalSpacing = scale(TileSpacing);
         auto availableWidth = ImGui::GetContentRegionAvail().x;
-        auto numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (scale(MinTileWidth) + horizontalSpacing)));
-        auto tileWidth = std::floor((availableWidth - horizontalSpacing * (numColumns - 1)) / numColumns);
+        auto tileWidth = std::floor(std::min(availableWidth, scale(BaseTileWidth) * toFloat(_cardSizePercent) / 100.0f));
+        auto numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (tileWidth + horizontalSpacing)));
 
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
             if (index % numColumns != 0) {
@@ -255,9 +274,6 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseHoveringRect(tileMin, tileMax)) {
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             onSelectEntry(rawTO);
-        }
-        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            _data->onDownloadResource(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
         }
 
         // The buttons of the tile have tooltips of their own
