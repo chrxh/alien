@@ -1,5 +1,8 @@
 #pragma once
 
+#include <optional>
+#include <string>
+
 #include <Base/Singleton.h>
 
 #include <Network/Definitions.h>
@@ -23,6 +26,8 @@ private:
     void shutdownIntern() override;
     void processIntern() override;
 
+    void createPreview();
+    void processPreview();
     void onUpload();
 
     std::string _folder;
@@ -35,4 +40,6 @@ private:
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
     bool _share = false;
 
+    std::optional<std::string> _previewJpg;
+    std::optional<TextureData> _previewTexture;
 };
