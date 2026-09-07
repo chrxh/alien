@@ -9,5 +9,6 @@ struct _GenomeWindowEditData
 {
     std::optional<int> currentPreviewId;  // TabId of the current preview
     GenotypeToPhenotypeCache genotypeToPhenotypeCache;
-    bool showNodeIndex = true;  // true = show node index, false = show cell function
+    bool defaultShowNodeIndex = true;  // true = show node index, false = show cell function
+    bool defaultDetailSimulation = false;
 };
