@@ -37,7 +37,7 @@ def test_upload_simulation_persists_row_and_returns_sim_id(app_client, helpers):
     sim_id = int(body["simId"])
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        sim = session.get(main.Simulation, sim_id)
+        sim = session.get(main.Resource, sim_id)
         assert sim is not None
         assert sim.name == "alice-sim"
         assert sim.width == 32
@@ -62,7 +62,7 @@ def test_upload_simulation_stores_picture(app_client, helpers):
     sim_id = int(resp.json()["simId"])
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        sim = session.get(main.Simulation, sim_id)
+        sim = session.get(main.Resource, sim_id)
         assert bytes(sim.picture) == picture
 
 
@@ -180,7 +180,7 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        sim = session.get(main.Simulation, sim_id)
+        sim = session.get(main.Resource, sim_id)
         assert bytes(sim.content) == b"NEW"
         assert sim.width == 100
         assert sim.height == 50
@@ -212,7 +212,7 @@ def test_replace_simulation_updates_picture(app_client, helpers):
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        assert bytes(session.get(main.Simulation, sim_id).picture) == b"new-jpg"
+        assert bytes(session.get(main.Resource, sim_id).picture) == b"new-jpg"
 
 
 def test_replace_simulation_keeps_picture_when_none_is_sent(app_client, helpers):
@@ -237,7 +237,7 @@ def test_replace_simulation_keeps_picture_when_none_is_sent(app_client, helpers)
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        assert bytes(session.get(main.Simulation, sim_id).picture) == b"old-jpg"
+        assert bytes(session.get(main.Resource, sim_id).picture) == b"old-jpg"
 
 
 def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpers):
@@ -248,7 +248,7 @@ def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpe
     main = app_client.app_module
     with main.Session(main.engine) as session:
         with session.begin():
-            session.get(main.Simulation, sim_id).workspace = 1
+            session.get(main.Resource, sim_id).workspace = 1
 
     resp = app_client.post(
         "/replacesimulation",
@@ -266,7 +266,7 @@ def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpe
     assert resp.json() == {"result": True}
 
     with main.Session(main.engine) as session:
-        assert bytes(session.get(main.Simulation, sim_id).content) == b"NEW"
+        assert bytes(session.get(main.Resource, sim_id).content) == b"NEW"
 
 
 def test_replace_simulation_rejects_non_owner(app_client, helpers):
@@ -319,7 +319,7 @@ def test_download_endpoints_return_content_and_increment_counter(
     # Each call to /downloadcontent with chunkIndex==0 increments num_downloads.
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        sim = session.get(main.Simulation, sim_id)
+        sim = session.get(main.Resource, sim_id)
         assert sim.num_downloads == 1
 
 
@@ -336,7 +336,7 @@ def test_inc_download_count_increments(app_client, helpers):
             "/incdownloadcount", params={"id": str(sim_id)}
         ).json() == {"result": True}
         with main.Session(main.engine) as session:
-            assert session.get(main.Simulation, sim_id).num_downloads == expected
+            assert session.get(main.Resource, sim_id).num_downloads == expected
 
 
 # --- /editsimulation ---------------------------------------------------------
@@ -361,7 +361,7 @@ def test_edit_simulation_updates_name_and_description(app_client, helpers):
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        sim = session.get(main.Simulation, sim_id)
+        sim = session.get(main.Resource, sim_id)
         assert sim.name == "renamed"
         assert sim.description == "renamed-desc"
 
@@ -387,7 +387,7 @@ def test_edit_simulation_accepts_empty_description(app_client, helpers):
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
-        sim = session.get(main.Simulation, sim_id)
+        sim = session.get(main.Resource, sim_id)
         assert sim.name == "renamed"
         assert sim.description == ""
 
@@ -429,7 +429,7 @@ def test_move_simulation_to_private_and_back(app_client, helpers):
     )
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
-        assert session.get(main.Simulation, sim_id).workspace == 2
+        assert session.get(main.Resource, sim_id).workspace == 2
 
     resp = app_client.post(
         "/movesimulation",
@@ -440,7 +440,7 @@ def test_move_simulation_to_private_and_back(app_client, helpers):
     )
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
-        assert session.get(main.Simulation, sim_id).workspace == 0
+        assert session.get(main.Resource, sim_id).workspace == 0
 
 
 def test_move_simulation_rejects_alien_project_workspace(app_client, helpers):
@@ -496,7 +496,7 @@ def test_delete_simulation_removes_row_and_dependent_likes(app_client, helpers):
     main = app_client.app_module
     from sqlalchemy import select
     with main.Session(main.engine) as session:
-        assert session.get(main.Simulation, sim_id) is None
+        assert session.get(main.Resource, sim_id) is None
         assert session.execute(
             select(main.UserLike).where(main.UserLike.simulation_id == sim_id)
         ).first() is None
