@@ -1,6 +1,7 @@
 #include "SimulationView.h"
 
 #include <algorithm>
+#include <cmath>
 #include <ranges>
 #include <vector>
 
@@ -313,6 +314,22 @@ void SimulationView::setupRenderPipeline()
         return result;
     };
 
+    auto organicFadeIn = [] { return std::clamp((Viewport::get().getScreenZoomFactor() - 4.0f) / 12.0f, 0.0f, 1.0f); };
+
+    auto organicSurfaceUniformFunc = [organicFadeIn](SimulationParameters const&) { return UniformValueMap{{"effectStrength", organicFadeIn()}}; };
+
+    auto cellAppearanceUniformFunc = [organicFadeIn](SimulationParameters const&) {
+        auto fadeIn = organicFadeIn();
+        auto dimmed = 0.54f * std::min(1.0f, Viewport::get().getScreenZoomFactor() * 0.5f);
+        return UniformValueMap{
+            {"brightness", std::lerp(dimmed, 1.0f, fadeIn)},
+            {"sizeScale", std::lerp(0.87f, 1.0f, fadeIn)},
+        };
+    };
+    auto objectMergeUniformFunc = [organicFadeIn](SimulationParameters const&) {
+        return UniformValueMap{{"colorFactor2", std::lerp(2.0f, 1.3f, organicFadeIn())}};
+    };
+
     // Define render pipeline
     _renderPipeline = std::make_shared<_RenderPipeline>(RenderBlocks{
 
@@ -369,6 +386,8 @@ void SimulationView::setupRenderPipeline()
             RenderSequence().steps({
                 _LineRenderStep::create(StepParameters().shader(ShaderSources::Line)),
                 _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
+                _NonFluidObjectRenderStep::create(
+                    StepParameters().shader(ShaderSources::NonFluidObject).uniformFunc(cellAppearanceUniformFunc).previousTargetSelection(0)),
                 _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
                 _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
@@ -377,24 +396,32 @@ void SimulationView::setupRenderPipeline()
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
+                _PostProcessingRenderStep::create(StepParameters()
+                                                      .shader(ShaderSources::OrganicSurface)
+                                                      .uniformFunc(organicSurfaceUniformFunc)
+                                                      .addUniform("warpStrength", 0.0f)
+                                                      .addUniform("warpFrequency", 3.5f)
+                                                      .addUniform("smoothingStrength", 0.3f)
+                                                      .addUniform("depthStrength", 0.5f)
+                                                      .addUniform("roundingStrength", 0.35f)
+                                                      .addUniform("reliefStrength", 4.0f)
+                                                      .addUniform("shadingStrength", 0.8f)
+                                                      .addUniform("membraneStrength", 0.15f)
+                                                      .addUniform("scatterStrength", 0.08f)
+                                                      .addUniform("specularStrength", 0.08f)
+                                                      .addUniform("cavityStrength", 0.5f)
+                                                      .addUniform("grainStrength", 0.0f)
+                                                      .addUniform("grainFrequency", 25.0f)),
                 //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Fresnel)),
                 //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
-            }),
-            RenderSequence().steps({
-                _NonFluidObjectRenderStep::create(StepParameters().shader(ShaderSources::NonFluidObject)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
             }),
         },
 
         // Render block: Merge fluid, connections and objects sequence
         RenderBlock{
             RenderSequence().steps({
-                _PostProcessingRenderStep::create(StepParameters()
-                                                      .shader(ShaderSources::MergeAdditive)
-                                                      .addUniform("colorFactor1", 1.0f)
-                                                      .addUniform("colorFactor2", 2.0f)
-                                                      .addUniform("colorFactor3", 1.5f)),
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(objectMergeUniformFunc)),
             }),
         },
 

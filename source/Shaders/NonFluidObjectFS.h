@@ -10,28 +10,34 @@ out vec4 FragColor;
 
 in vec3 vColor;
 
-#define PI 3.1415926538
+uniform float brightness;
 
 void main()
 {
-    // Calculate distance from center of point
-    vec2 coord = gl_PointCoord - vec2(0.5, 0.5);
-    float dist = length(coord);
-    
-    // Discard pixels outside the circle
-     if (dist > 0.5) {
-         discard;
-     }
-    
-    // Foreground objects - smooth circles with angle-based factor
-    float angle = atan(coord.y, coord.x) * 180.0 / PI;
-    angle += 45.0;
-    if (angle > 180.0) {
-        angle -= 360.0;
+    // Coordinates on the sprite in [-1, 1]
+    vec2 coord = (gl_PointCoord - vec2(0.5, 0.5)) * 2.0;
+    float radiusSquared = dot(coord, coord);
+    if (radiusSquared > 1.0) {
+        discard;
     }
-    float factor = min(1.0, 60.0 / (abs(angle) + 1.0));
-    float alpha = max(0.0, (1.0 - smoothstep(0.3, 0.5, dist)) * smoothstep(0.0, 0.1, dist) * factor);
-    FragColor = vec4(vColor * alpha, 1.0);
+
+    // Shade the sprite as a translucent vesicle rather than a solid sphere: a wide diffuse term
+    // for the volume and a rim that lights up where the body is thin. A narrow highlight would
+    // make the cell look like polished plastic.
+    // The y axis of the sprite points downwards, hence the sign of the normal.
+    vec3 normal = vec3(coord.x, -coord.y, sqrt(1.0 - radiusSquared));
+    vec3 lightDirection = normalize(vec3(-0.55, 0.55, 0.45));
+    vec3 halfVector = normalize(lightDirection + vec3(0.0, 0.0, 1.0));
+
+    float diffuse = 0.55 + 0.45 * (0.5 + 0.5 * dot(normal, lightDirection));
+    float translucentRim = 0.3 * radiusSquared * radiusSquared;
+    float sheen = 0.12 * pow(max(dot(normal, halfVector), 0.0), 8.0);
+    float silhouette = 1.0 - smoothstep(0.7, 1.0, radiusSquared);
+
+    // The metaballs step derives the silhouette of a cell from its brightness, so dimming here also shrinks
+    // the cell. The caller therefore keeps the brightness at 1 while the cells are meant to fuse with the
+    // bodies and dims them only where that does not matter.
+    FragColor = vec4(vColor * (diffuse + translucentRim + sheen) * silhouette * brightness, 1.0);
 }
 )";
 }

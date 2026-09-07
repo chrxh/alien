@@ -44,9 +44,10 @@ void main()
     for (int i = 0; i < 3; i++)
     {
         gl_Position = gl_in[i].gl_Position;
-        // Apply lighting to each vertex color individually
-        //fragColor = mix(vertexColor[i], vec3(1.0, 1.0, 0.0), lightIntensity * 0.5);
-        fragColor = vertexColor[i] * (0.8 + lightIntensity * 0.5);
+        // Keep the per triangle lighting subtle, the rounded shape of a body comes from the organic
+        // surface filter. A strong term would show the triangulation as hard facets. The constant is
+        // chosen so that the mean over both triangle windings stays at the one of the former term.
+        fragColor = vertexColor[i] * (0.9 + lightIntensity * 0.16);
         EmitVertex();
     }
     EndPrimitive();

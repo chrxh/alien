@@ -43,6 +43,8 @@ add_library(Shaders INTERFACE
     ModuloCopyVS.h
     NonFluidObjectFS.h
     NonFluidObjectVS.h
+    OrganicSurfaceFS.h
+    OrganicSurfaceVS.h
     SelectedConnectionFS.h
     SelectedConnectionGS.h
     SelectedConnectionVS.h

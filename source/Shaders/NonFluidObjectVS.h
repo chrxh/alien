@@ -19,6 +19,7 @@ uniform float zoom;
 uniform float radius;
 uniform vec2 viewportSize;
 uniform float renderScale;
+uniform float sizeScale;
 
 const int ObjectType_Fluid = 1;
 const float DetailZoom = 5.0;
@@ -53,7 +54,7 @@ void main()
 
     float visibleHighlightIntensity = screenZoom < DetailZoom ? 0.0 : highlightIntensity;
     vColor = mix(aColor, vec3(1.0), visibleHighlightIntensity * 0.2);
-    gl_PointSize = radius * (0.4 + visibleHighlightIntensity * 0.2) * sizeFactor;
+    gl_PointSize = radius * (0.4 + visibleHighlightIntensity * 0.2) * sizeFactor * sizeScale;
 }
 )";
 }
