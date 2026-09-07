@@ -15,6 +15,7 @@
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "GenomeTabWidget.h"
+#include "GenomeWindowEditData.h"
 #include "NodeEditorWidget.h"
 #include "PreviewWidget.h"
 #include "StyleRepository.h"
@@ -148,6 +149,8 @@ _GenomeTabWidget::_GenomeTabWidget(
 
     _editData = std::make_shared<_GenomeTabEditData>(++_sequence, genome);
     _editData->id = ++_sequence;
+    _editData->showNodeIndex = genomeEditData->defaultShowNodeIndex;
+    _editData->detailSimulation = genomeEditData->defaultDetailSimulation;
 
     auto normalizedGenome = normalizeForEditor(genome);
 

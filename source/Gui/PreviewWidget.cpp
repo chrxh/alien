@@ -75,7 +75,7 @@ void _PreviewWidget::createSubGenomesForPreview()
     if (_creatureWidgets.size() != subGenomesForPreview.size()) {
         _creatureWidgets.clear();
         for (auto const& [geneIndices, subGenome] : boost::combine(geneIndicesForSubGenomes, subGenomesForPreview)) {
-            _creatureWidgets.emplace_back(_CreaturePreviewWidget::create(_genomeEditData, _editData, geneIndices, subGenome));
+            _creatureWidgets.emplace_back(_CreaturePreviewWidget::create(_editData, geneIndices, subGenome));
         }
     } else {
 
@@ -182,12 +182,13 @@ void _PreviewWidget::processActionBar()
     if (AlienGui::SelectableButton(
             AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20).tooltip("Activates a more detail simulation including signals and muscles"),
             _editData->detailSimulation)) {
+        _genomeEditData->defaultDetailSimulation = _editData->detailSimulation;
         onRestart();
     }
 
     ImGui::SameLine();
     if (AlienGui::Button(ICON_FA_COG, 25.0f)) {
-        PreviewSettingsDialog::get().setEditData(_genomeEditData);
+        PreviewSettingsDialog::get().setEditData(_genomeEditData, _editData);
         PreviewSettingsDialog::get().open();
     }
     AlienGui::Tooltip("Preview settings");

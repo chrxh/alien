@@ -10,7 +10,7 @@ class PreviewSettingsDialog : public AlienDialog
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(PreviewSettingsDialog);
 
 public:
-    void setEditData(GenomeWindowEditData const& editData);
+    void setEditData(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
 private:
     PreviewSettingsDialog();
@@ -18,6 +18,7 @@ private:
     void processIntern() override;
     void openIntern() override;
 
-    GenomeWindowEditData _editData;
+    GenomeWindowEditData _genomeEditData;
+    GenomeTabEditData _editData;
     bool _showNodeIndex = true;
 };

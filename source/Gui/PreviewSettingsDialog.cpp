@@ -3,14 +3,16 @@
 #include <imgui.h>
 
 #include "AlienGui.h"
+#include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
 
 PreviewSettingsDialog::PreviewSettingsDialog()
     : AlienDialog("Preview settings")
 {}
 
-void PreviewSettingsDialog::setEditData(GenomeWindowEditData const& editData)
+void PreviewSettingsDialog::setEditData(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
+    _genomeEditData = genomeEditData;
     _editData = editData;
 }
 
@@ -30,6 +32,7 @@ void PreviewSettingsDialog::processIntern()
     if (AlienGui::Button("Adopt")) {
         close();
         _editData->showNodeIndex = _showNodeIndex;
+        _genomeEditData->defaultShowNodeIndex = _showNodeIndex;
     }
     ImGui::SetItemDefaultFocus();
 

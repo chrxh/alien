@@ -72,9 +72,9 @@ namespace
 
 
 CreaturePreviewWidget
-_CreaturePreviewWidget::create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex)
+_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex)
 {
-    return CreaturePreviewWidget(new _CreaturePreviewWidget(genomeEditData, editData, geneIndices, genomeWithStartIndex));
+    return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
 void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float height)
@@ -138,12 +138,10 @@ void _CreaturePreviewWidget::resetVisualFrontAngle()
 }
 
 _CreaturePreviewWidget::_CreaturePreviewWidget(
-    GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
     SubGenomeDesc const& genomeWithStartIndex)
-    : _genomeEditData(genomeEditData)
-    , _editData(editData)
+    : _editData(editData)
     , _geneIndices(geneIndices)
     , _subGenome(genomeWithStartIndex)
 {
@@ -320,7 +318,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         for (auto const& object : desc._cells) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             std::string text;
-            if (_genomeEditData->showNodeIndex) {
+            if (_editData->showNodeIndex) {
                 text = std::to_string(object._nodeIndex);
             } else {
                 text = Const::CellTypeStrings.at(object._cellType);

@@ -88,7 +88,8 @@ void GenomeEditorWindow::initIntern()
     ChangeColorDialog::get().setup();
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
-    _genomeEditData->showNodeIndex = GlobalSettings::get().getValue(_settingsNode + ".show node index", true);
+    _genomeEditData->defaultShowNodeIndex = GlobalSettings::get().getValue(_settingsNode + ".show node index", true);
+    _genomeEditData->defaultDetailSimulation = GlobalSettings::get().getValue(_settingsNode + ".detail simulation", false);
 
     // Initialize the first tab with default genome
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
@@ -96,7 +97,8 @@ void GenomeEditorWindow::initIntern()
 
 void GenomeEditorWindow::shutdownIntern()
 {
-    GlobalSettings::get().setValue(_settingsNode + ".show node index", _genomeEditData->showNodeIndex);
+    GlobalSettings::get().setValue(_settingsNode + ".show node index", _genomeEditData->defaultShowNodeIndex);
+    GlobalSettings::get().setValue(_settingsNode + ".detail simulation", _genomeEditData->defaultDetailSimulation);
 }
 
 void GenomeEditorWindow::processIntern()
