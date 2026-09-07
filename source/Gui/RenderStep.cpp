@@ -1,5 +1,7 @@
 #include "RenderStep.h"
 
+#include <ranges>
+
 #include <Base/Math.h>
 
 #include <EngineInterface/CellTypeConstants.h>
@@ -15,6 +17,8 @@
 namespace
 {
     auto constexpr ZoomFactorForCellDetails = 25.0f;  // Cell type strings and arrows
+    auto constexpr CellTypeLabelShadowOffset = 1.0f;
+    auto constexpr CellTypeLabelShadowAlpha = 0.8f;
 }
 
 TextureTarget _TextureTarget::create()
@@ -433,6 +437,24 @@ _CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& par
     createCellTypeTextureAtlas();
 }
 
+namespace
+{
+    void blendPixel(std::vector<uint8_t>& pixels, int index, float brightness, float alpha)
+    {
+        auto backgroundAlpha = toFloat(pixels.at(index + 3)) / 255.0f;
+        auto resultAlpha = alpha + backgroundAlpha * (1.0f - alpha);
+        if (resultAlpha == 0) {
+            return;
+        }
+        for (auto channel : std::views::iota(0, 3)) {
+            auto backgroundColor = toFloat(pixels.at(index + channel)) / 255.0f;
+            auto resultColor = (brightness * alpha + backgroundColor * backgroundAlpha * (1.0f - alpha)) / resultAlpha;
+            pixels.at(index + channel) = static_cast<uint8_t>(resultColor * 255.0f);
+        }
+        pixels.at(index + 3) = static_cast<uint8_t>(resultAlpha * 255.0f);
+    }
+}
+
 void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
 {
     // Create a texture atlas containing all cell type strings and object type strings
@@ -454,14 +476,6 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     allLabels.push_back(Const::ObjectTypeStrings[ObjectType_Fluid]);
     allLabels.push_back(Const::ObjectTypeStrings[ObjectType_FreeCell]);
 
-    // Calculate dimensions for each label
-    std::vector<ImVec2> textSizes;
-
-    for (auto const& labelStr : allLabels) {
-        auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, labelStr.c_str());
-        textSizes.push_back(textSize);
-    }
-
     int textureWidth = 512;   // Fixed width
     int textureHeight = 512;  // Fixed height, should be enough for all labels
 
@@ -477,71 +491,34 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     int rowHeight = 20;
     float scale = fontSize / font->FontSize;
 
-    for (size_t i = 0; i < allLabels.size(); ++i) {
-        auto const& labelStr = allLabels[i];
-        float posY = toFloat(i * rowHeight) + 2.0f;
-        float posX = 5.0f;
-
-        // Render background to glyph area
-        for (int py = toInt(posY); py < toInt(posY) + rowHeight - 2; ++py) {
-            for (int px = 3; px < toInt(textSizes.at(i).x) + 7; ++px) {
-                int idx = (py * textureWidth + px) * 4;
-                pixels[idx + 0] = 255;  // R
-                pixels[idx + 1] = 255;  // G
-                pixels[idx + 2] = 255;  // B
-                pixels[idx + 3] = 20;   // A
-            }
-        }
-        for (int py = toInt(posY) + 1; py < toInt(posY) + rowHeight - 4; ++py) {
-            for (int px = 4; px < toInt(textSizes.at(i).x) + 6; ++px) {
-                int idx = (py * textureWidth + px) * 4;
-                pixels[idx + 0] = 0;   // R
-                pixels[idx + 1] = 0;   // G
-                pixels[idx + 2] = 0;   // B
-                pixels[idx + 3] = 20;  // A
-            }
-        }
-
-        // Render each character
-        for (size_t charIdx = 0; charIdx < labelStr.length(); ++charIdx) {
-            char character = labelStr[charIdx];
-            auto glyph = font->FindGlyph((ImWchar)character);
+    auto renderLabel = [&](std::string const& label, float startPosX, float posY, float brightness, float alphaFactor) {
+        auto posX = startPosX;
+        for (auto const& character : label) {
+            auto glyph = font->FindGlyph(static_cast<ImWchar>(character));
             CHECK(glyph);
 
             // Calculate glyph position and size
-            float x0 = posX + glyph->X0 * scale;
-            float y0 = posY + glyph->Y0 * scale;
-            float x1 = posX + glyph->X1 * scale;
-            float y1 = posY + glyph->Y1 * scale;
-
-            // Get texture coordinates in font atlas
-            float u0 = glyph->U0;
-            float v0 = glyph->V0;
-            float u1 = glyph->U1;
-            float v1 = glyph->V1;
+            auto x0 = posX + glyph->X0 * scale;
+            auto y0 = posY + glyph->Y0 * scale;
+            auto x1 = posX + glyph->X1 * scale;
+            auto y1 = posY + glyph->Y1 * scale;
 
             // Render glyph to our texture buffer
-            for (int py = toInt(y0); py <= toInt(y1); ++py) {
-                for (int px = toInt(x0); px <= toInt(x1); ++px) {
+            for (auto py = toInt(y0); py <= toInt(y1); ++py) {
+                for (auto px = toInt(x0); px <= toInt(x1); ++px) {
                     // Calculate texture coordinate in font atlas
-                    float tu = u0 + (u1 - u0) * ((px - x0) / (x1 - x0));
-                    float tv = v0 + (v1 - v0) * ((py - y0) / (y1 - y0));
+                    auto tu = glyph->U0 + (glyph->U1 - glyph->U0) * ((px - x0) / (x1 - x0));
+                    auto tv = glyph->V0 + (glyph->V1 - glyph->V0) * ((py - y0) / (y1 - y0));
 
-                    int atlasx = toInt(tu * atlasWidth);
-                    int atlasy = toInt(tv * atlasHeight);
+                    auto atlasX = toInt(tu * atlasWidth);
+                    auto atlasY = toInt(tv * atlasHeight);
+                    if (atlasX < 0 || atlasX >= atlasWidth || atlasY < 0 || atlasY >= atlasHeight) {
+                        continue;
+                    }
 
-                    int idx = (py * textureWidth + px) * 4;
-
-                    if (atlasx >= 0 && atlasx < atlasWidth && atlasy >= 0 && atlasy < atlasHeight) {
-                        auto alpha = atlasData[atlasy * atlasWidth + atlasx];
-
-                        if (alpha > 0) {
-                            // Write to our texture buffer (white text with alpha from font)
-                            pixels[idx + 0] = 255;                           // R
-                            pixels[idx + 1] = 255;                           // G
-                            pixels[idx + 2] = 255;                           // B
-                            pixels[idx + 3] = toInt(toFloat(alpha) * 0.5f);  // A
-                        }
+                    auto alpha = toFloat(atlasData[atlasY * atlasWidth + atlasX]) / 255.0f;
+                    if (alpha > 0) {
+                        blendPixel(pixels, (py * textureWidth + px) * 4, brightness, alpha * alphaFactor);
                     }
                 }
             }
@@ -549,6 +526,17 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
             // Advance position for next character
             posX += glyph->AdvanceX * scale;
         }
+    };
+
+    auto rowIndex = 0;
+    for (auto const& label : allLabels) {
+        auto posX = 5.0f;
+        auto posY = toFloat(rowIndex * rowHeight) + 2.0f;
+
+        // A dark copy behind the white text keeps the labels readable on bright backgrounds
+        renderLabel(label, posX + CellTypeLabelShadowOffset, posY + CellTypeLabelShadowOffset, 0.0f, CellTypeLabelShadowAlpha);
+        renderLabel(label, posX, posY, 1.0f, 1.0f);
+        ++rowIndex;
     }
 
     // Create OpenGL texture
