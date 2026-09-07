@@ -716,7 +716,6 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
     // Enable button
     if (enabled) {
         ImGui::Checkbox("##checkbox", enabled);
-        ImGui::BeginDisabled(!(*enabled));
         ImGui::SameLine();
     }
 
@@ -735,6 +734,10 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
             }
         }
         ImGui::SameLine();
+    }
+
+    if (enabled) {
+        ImGui::BeginDisabled(!(*enabled));
     }
 
     static auto constexpr buttonWidth = 22.0f;
@@ -2748,7 +2751,6 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 value[row] = parameters._disabledValue[row];
             }
         }
-        ImGui::BeginDisabled(!(*enabled));
         ImGui::SameLine();
     }
 
@@ -2765,6 +2767,10 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
             }
         }
         ImGui::SameLine();
+    }
+
+    if (enabled) {
+        ImGui::BeginDisabled(!(*enabled));
     }
 
     bool result = false;
@@ -2957,7 +2963,6 @@ void AlienGui::BasicInputColorMatrix(
             }
         }
         ImGui::SameLine();
-        ImGui::BeginDisabled(!(*enabled));
     }
 
     auto toggleButtonId = ImGui::GetID("expanded");
@@ -2973,6 +2978,10 @@ void AlienGui::BasicInputColorMatrix(
     auto textWidth = scale(parameters._textWidth);
 
     ImGui::SameLine();
+
+    if (enabled) {
+        ImGui::BeginDisabled(!(*enabled));
+    }
 
     auto contentWidth = ImGui::GetContentRegionAvail().x - textWidth;
     ImGui::BeginGroup();
