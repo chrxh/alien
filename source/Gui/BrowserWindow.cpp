@@ -309,7 +309,10 @@ void BrowserWindow::processWorkspace()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild(
-            "##1", ImVec2(sizeAvailable.x - _userTableWidth, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            "##1",
+            ImVec2(sizeAvailable.x - _userTableWidth, sizeAvailable.y - scale(BrowserBottomSpace)),
+            false,
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
             if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
                 if (_data->currentWorkspace.resourceType != NetworkResourceType_Simulation) {
