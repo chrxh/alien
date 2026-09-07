@@ -44,6 +44,8 @@
 #include "ModuloCopyVS.h"
 #include "NonFluidObjectFS.h"
 #include "NonFluidObjectVS.h"
+#include "OrganicSurfaceFS.h"
+#include "OrganicSurfaceVS.h"
 #include "SelectedConnectionFS.h"
 #include "SelectedConnectionGS.h"
 #include "SelectedConnectionVS.h"
