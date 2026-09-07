@@ -67,6 +67,28 @@ Further information and artwork:
 * [Reddit](https://www.reddit.com/r/AlienProject)
 * [Discord](https://discord.gg/7bjyZdXXQ2)
 
+# 📖 Citing ALIEN
+If you use ALIEN in a scientific publication, please cite:
+
+> Heinemann, C.: *Artificial Life Environment*. Informatik-Spektrum **31**, 55–61 (2008). https://doi.org/10.1007/s00287-007-0205-1
+
+```bibtex
+@article{Heinemann2008,
+  author  = {Heinemann, Christian},
+  title   = {Artificial Life Environment},
+  journal = {Informatik-Spektrum},
+  volume  = {31},
+  number  = {1},
+  pages   = {55--61},
+  year    = {2008},
+  doi     = {10.1007/s00287-007-0205-1}
+}
+```
+
+Note that this paper describes the beginnings of what has become ALIEN. The current simulator differs substantially from the system presented there.
+
+If you adopt ideas or concepts from ALIEN without using the software itself, that is fine but please just mention ALIEN and link to this repository: https://github.com/chrxh/alien
+
 # 🖥️ Minimal system requirements
 An Nvidia graphics card with compute capability 7.5 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
