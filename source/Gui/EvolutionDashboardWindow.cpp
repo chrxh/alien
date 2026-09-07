@@ -74,9 +74,9 @@ namespace
         {"Creatures", "Creatures", 0, 0, 82.0f},
         {"Avg cells", "Avg cells", 1, 1, 82.0f},
         {"Avg nodes", "Avg nodes", 1, 1, 82.0f},
-        {"Internal energy", "Internal energy", 0, 0, 105.0f},
-        {"Avg mut. rate", "Avg mutation rate", 4, 4, 105.0f},
         {"Avg generation", "Avg generation", 0, 0, 105.0f},
+        {"Avg mut. rate", "Avg mutation rate", 4, 4, 105.0f},
+        {"Internal energy", "Internal energy", 0, 0, 105.0f},
         {"Created /1K", "Created /1K", 2, 2, 105.0f},
         {"Mutations /1K", "Mutations /1K", 4, 4, 105.0f},
         {"Avg attacks /1K", "Avg attacks /1K", 2, 2, 105.0f},
@@ -208,11 +208,11 @@ namespace
         case 2:
             return entry.numGenomes > 0 ? entry.sumGenomeNodes / entry.numGenomes : 0.0;
         case 3:
-            return entry.sumCreatureEnergy;
+            return entry.numCreatures > 0 ? entry.sumCreatureGenerations / entry.numCreatures : 0.0;
         case 4:
             return entry.numGenomes > 0 ? entry.sumMutationRates / entry.numGenomes : 0.0;
         case 5:
-            return entry.numCreatures > 0 ? entry.sumCreatureGenerations / entry.numCreatures : 0.0;
+            return entry.sumCreatureEnergy;
         case 6:
             return lastEntry ? calcRate(entry.numCreatedCreatures, lastEntry->numCreatedCreatures, rateDelta) : std::numeric_limits<double>::quiet_NaN();
         case 7:
