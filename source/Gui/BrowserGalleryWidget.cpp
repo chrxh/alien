@@ -38,6 +38,10 @@ namespace
     auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
     auto constexpr PictureAspectRatio = 2.0f / 3.0f;
 
+    auto constexpr SortingSwitcherWidth = 230.0f;
+    auto constexpr CardSizeSliderWidth = 230.0f;
+    auto constexpr MinCardSizeSliderWidth = 130.0f;
+
     auto constexpr TooltipDelay = 0.5f;  // In seconds
     auto constexpr TooltipLabelWidth = 110.0f;
     auto constexpr TooltipWrapChars = 35.0f;
@@ -65,8 +69,11 @@ void _BrowserGalleryWidget::shutdown()
 void _BrowserGalleryWidget::processSorting()
 {
     if (AlienGui::Switcher(
-            AlienGui::SwitcherParameters().name("Sort by").width(230.0f).textWidth(55.0f).values(
-                {std::string("Most reactions"), std::string("Newest"), std::string("Most downloads")}),
+            AlienGui::SwitcherParameters()
+                .name("Sort by")
+                .width(SortingSwitcherWidth)
+                .textWidth(55.0f)
+                .values({std::string("Most reactions"), std::string("Newest"), std::string("Most downloads")}),
             &_sorting)) {
         _page = 0;
     }
@@ -75,10 +82,11 @@ void _BrowserGalleryWidget::processSorting()
     AlienGui::VerticalSeparator();
     ImGui::SameLine();
 
+    auto cardSizeSliderWidth = std::clamp(scaleInverse(ImGui::GetContentRegionAvail().x), MinCardSizeSliderWidth, CardSizeSliderWidth);
     AlienGui::SliderInt(
         AlienGui::SliderIntParameters()
             .name("Card size")
-            .width(230.0f)
+            .width(cardSizeSliderWidth)
             .textWidth(75.0f)
             .min(MinCardSizePercent)
             .max(MaxCardSizePercent)
