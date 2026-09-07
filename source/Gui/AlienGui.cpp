@@ -38,6 +38,8 @@ namespace
     auto constexpr MinColorMatrixWidth = 50.0f;
     auto constexpr ColorMatrixGrabSize = 4.0f;
     auto constexpr ReadOnlyCellPadding = 1.0f;
+    auto constexpr MaxFilterWidth = 400.0f;
+    auto constexpr FilterClearButtonWidth = 28.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -593,8 +595,9 @@ bool AlienGui::InputText(InputTextParameters const& parameters, std::string& tex
 
 bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string& filter)
 {
+    auto width = std::min(parameters._width != 0.0f ? parameters._width : scaleInverse(ImGui::GetContentRegionAvail().x), MaxFilterWidth);
     auto result = AlienGui::InputText(
-        AlienGui::InputTextParameters().hint("Filter (case insensitive)").bold(!filter.empty()).textWidth(0).width(parameters._width - 28.0f), filter);
+        AlienGui::InputTextParameters().hint("Filter (case insensitive)").bold(!filter.empty()).textWidth(0).width(width - FilterClearButtonWidth), filter);
     if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         filter.clear();
         result = true;

@@ -387,6 +387,7 @@ void BrowserWindow::processFilter()
 
     if (_galleryView) {
         ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - _galleryWidget->getPagerWidth());
         _galleryWidget->processPaging();
     }
 }
