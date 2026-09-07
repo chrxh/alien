@@ -411,9 +411,9 @@ def test_delete_user_removes_row(app_client, helpers):
         assert main._get_user_by_name(session, "alice") is None
 
 
-def test_delete_user_cascades_to_userlikes_and_simulations(app_client, helpers):
-    """deleteUser must also remove the user's simulations and all userlikes
-    that reference either the user or any of those simulations (foreign-key
+def test_delete_user_cascades_to_userlikes_and_resources(app_client, helpers):
+    """deleteUser must also remove the user's resources and all userlikes
+    that reference either the user or any of those resources (foreign-key
     dependencies on the ``users`` table)."""
     main = app_client.app_module
     from sqlalchemy import select as _select
@@ -441,7 +441,7 @@ def test_delete_user_cascades_to_userlikes_and_simulations(app_client, helpers):
 
     with main.Session(main.engine) as session:
         assert session.execute(_select(main.UserLike)).all()  # sanity: 2 likes exist
-        assert session.execute(_select(main.Simulation)).all()  # 2 sims exist
+        assert session.execute(_select(main.Resource)).all()  # 2 sims exist
 
     # Delete Alice.
     assert app_client.post(
@@ -452,9 +452,9 @@ def test_delete_user_cascades_to_userlikes_and_simulations(app_client, helpers):
         # Alice's user row gone.
         assert main._get_user_by_name(session, "alice") is None
         # Alice's simulation gone.
-        assert session.get(main.Simulation, alice_sim_id) is None
+        assert session.get(main.Resource, alice_sim_id) is None
         # Bob's simulation still there.
-        assert session.get(main.Simulation, bob_sim_id) is not None
+        assert session.get(main.Resource, bob_sim_id) is not None
 
         # All remaining userlike rows must belong to Bob (the only surviving
         # user) AND must reference Bob's surviving simulation. The two original

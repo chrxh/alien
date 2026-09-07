@@ -103,8 +103,8 @@ class User(Base):
     )
 
 
-class Simulation(Base):
-    __tablename__ = "simulations"
+class Resource(Base):
+    __tablename__ = "resources"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
@@ -150,7 +150,7 @@ class UserLike(Base):
         Integer, ForeignKey("users.id"), nullable=False
     )
     simulation_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("simulations.id"), nullable=False
+        Integer, ForeignKey("resources.id"), nullable=False
     )
 
     type: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -813,12 +813,12 @@ def delete_user(
 
             # Delete dependent rows first (foreign keys to "users"):
             #   - userlikes:    references the user directly via user_id
-            #   - userlikes:    references the user's simulations via simulation_id
-            #   - simulations:  references the user via user_id
+            #   - userlikes:    references the user's resources via simulation_id
+            #   - resources:    references the user via user_id
             user_id = user.id
             user_sim_ids = list(
                 session.execute(
-                    select(Simulation.id).where(Simulation.user_id == user_id)
+                    select(Resource.id).where(Resource.user_id == user_id)
                 ).scalars()
             )
             session.execute(delete(UserLike).where(UserLike.user_id == user_id))
@@ -826,7 +826,7 @@ def delete_user(
                 session.execute(
                     delete(UserLike).where(UserLike.simulation_id.in_(user_sim_ids))
                 )
-            session.execute(delete(Simulation).where(Simulation.user_id == user_id))
+            session.execute(delete(Resource).where(Resource.user_id == user_id))
             session.execute(delete(User).where(User.id == user_id))
     return {"result": True}
 
@@ -921,20 +921,20 @@ def get_versioned_simulation_list(
 
         sims = session.execute(
             select(
-                Simulation.id,
-                Simulation.name,
-                Simulation.description,
+                Resource.id,
+                Resource.name,
+                Resource.description,
                 User.name,
-                Simulation.width,
-                Simulation.height,
-                Simulation.particles,
-                Simulation.version,
-                Simulation.timestamp,
-                Simulation.num_downloads,
-                Simulation.size,
-                Simulation.workspace,
-                Simulation.type,
-            ).join(User, User.id == Simulation.user_id, isouter=True)
+                Resource.width,
+                Resource.height,
+                Resource.particles,
+                Resource.version,
+                Resource.timestamp,
+                Resource.num_downloads,
+                Resource.size,
+                Resource.workspace,
+                Resource.type,
+            ).join(User, User.id == Resource.user_id, isouter=True)
         ).all()
 
         result = []
@@ -989,12 +989,12 @@ def get_versioned_simulation_list(
 @app.post("/getuserlist")
 def get_user_list():
     with Session(engine) as session:
-        # Stars received: total userlikes on simulations owned by each user.
+        # Stars received: total userlikes on resources owned by each user.
         stars_received_rows = session.execute(
             select(User.id, func.count())
             .select_from(User)
-            .join(Simulation, Simulation.user_id == User.id)
-            .join(UserLike, UserLike.simulation_id == Simulation.id)
+            .join(Resource, Resource.user_id == User.id)
+            .join(UserLike, UserLike.simulation_id == Resource.id)
             .group_by(User.id)
         ).all()
         stars_received_by_user = {uid: int(n) for uid, n in stars_received_rows}
@@ -1145,9 +1145,9 @@ def toggle_like_simulation(
 def _is_owner_of_simulation(session: Session, sim_id: int, user_name: str) -> bool:
     row = session.execute(
         select(User.name)
-        .select_from(Simulation)
-        .join(User, User.id == Simulation.user_id)
-        .where(Simulation.id == sim_id)
+        .select_from(Resource)
+        .join(User, User.id == Resource.user_id)
+        .where(Resource.id == sim_id)
     ).first()
     return row is not None and row[0] == user_name
 
@@ -1180,7 +1180,7 @@ async def upload_simulation(request: Request):
             ):
                 return {"result": False}
 
-            sim = Simulation(
+            sim = Resource(
                 user_id=user.id,
                 name=simName,
                 width=width,
@@ -1232,7 +1232,7 @@ async def replace_simulation(request: Request):
 
             # Ownership is the only requirement: an owner may also replace an
             # entry that lives in the curated workspace.
-            sim = session.get(Simulation, sim_id)
+            sim = session.get(Resource, sim_id)
             if sim is None or sim.user_id != user.id:
                 return {"result": False}
 
@@ -1276,14 +1276,14 @@ def download_content(id: str, chunkIndex: int = 0):
 
     with Session(engine) as session:
         with session.begin():
-            sim = session.get(Simulation, sim_id)
+            sim = session.get(Resource, sim_id)
             if sim is None:
                 return Response(content=b"", media_type="application/octet-stream")
             # Increment the download counter without touching the timestamp.
             session.execute(
-                update(Simulation)
-                .where(Simulation.id == sim_id)
-                .values(num_downloads=Simulation.num_downloads + 1, timestamp=Simulation.timestamp)
+                update(Resource)
+                .where(Resource.id == sim_id)
+                .values(num_downloads=Resource.num_downloads + 1, timestamp=Resource.timestamp)
             )
             content = sim.content or b""
     return Response(content=bytes(content), media_type="application/octet-stream")
@@ -1310,7 +1310,7 @@ def get_simulation_pictures(simIds: str = Form(...)):
 
     with Session(engine) as session:
         rows = session.execute(
-            select(Simulation.id, Simulation.picture).where(Simulation.id.in_(sim_ids))
+            select(Resource.id, Resource.picture).where(Resource.id.in_(sim_ids))
         ).all()
 
     payload = bytearray(struct.pack("<I", len(rows)))
@@ -1329,9 +1329,9 @@ def inc_download_count(id: str):
     with Session(engine) as session:
         with session.begin():
             session.execute(
-                update(Simulation)
-                .where(Simulation.id == sim_id)
-                .values(num_downloads=Simulation.num_downloads + 1, timestamp=Simulation.timestamp)
+                update(Resource)
+                .where(Resource.id == sim_id)
+                .values(num_downloads=Resource.num_downloads + 1, timestamp=Resource.timestamp)
             )
     return {"result": True}
 
@@ -1353,9 +1353,9 @@ def edit_simulation(
             if not _is_owner_of_simulation(session, sim_id, userName):
                 return {"result": False}
             session.execute(
-                update(Simulation)
-                .where(Simulation.id == sim_id)
-                .values(name=newName, description=newDescription, timestamp=Simulation.timestamp)
+                update(Resource)
+                .where(Resource.id == sim_id)
+                .values(name=newName, description=newDescription, timestamp=Resource.timestamp)
             )
     return {"result": True}
 
@@ -1388,7 +1388,7 @@ def move_simulation(
             if not _is_owner_of_simulation(session, sim_id, userName):
                 return {"result": False}
 
-            sim = session.get(Simulation, sim_id)
+            sim = session.get(Resource, sim_id)
             if sim is not None and target == _WORKSPACE_PUBLIC:
                 notify_name = sim.name
                 notify_type = 0 if sim.type is None else int(sim.type)
@@ -1399,9 +1399,9 @@ def move_simulation(
                 notify_picture = bytes(sim.picture or b"")
 
             session.execute(
-                update(Simulation)
-                .where(Simulation.id == sim_id)
-                .values(workspace=target, timestamp=Simulation.timestamp)
+                update(Resource)
+                .where(Resource.id == sim_id)
+                .values(workspace=target, timestamp=Resource.timestamp)
             )
 
     if target != _WORKSPACE_PRIVATE and notify_name is not None:
@@ -1428,13 +1428,13 @@ def delete_simulation(
             # success (idempotent delete).
             row = session.execute(
                 select(User.name)
-                .select_from(Simulation)
-                .join(User, User.id == Simulation.user_id)
-                .where(Simulation.id == sim_id)
+                .select_from(Resource)
+                .join(User, User.id == Resource.user_id)
+                .where(Resource.id == sim_id)
             ).first()
             if row is not None and row[0] != userName:
                 return {"result": False}
 
             session.execute(delete(UserLike).where(UserLike.simulation_id == sim_id))
-            session.execute(delete(Simulation).where(Simulation.id == sim_id))
+            session.execute(delete(Resource).where(Resource.id == sim_id))
     return {"result": True}
