@@ -190,55 +190,8 @@ boost::property_tree::ptree SettingsParserService::encodeSimulationParameters(Si
     return tree;
 }
 
-// BEGIN: Temporary compatibility code for reading the legacy simulation parameters format. Remove after all simulations have been migrated.
-namespace
-{
-    // The legacy inflow parameter was a fraction of this reference energy instead of an absolute energy.
-    auto constexpr LegacyInflowReferenceEnergy = 50.0f;
-
-    void migrateLegacyExternalEnergyGroup(boost::property_tree::ptree& tree, std::string const& nodeBase)
-    {
-        auto legacyGroup = tree.get_child_optional(nodeBase + ".External energy control");
-        if (!legacyGroup || tree.get_child_optional(nodeBase + ".Guided energy supply")) {
-            return;
-        }
-        auto& group = tree.put_child(nodeBase + ".Guided energy supply", *legacyGroup);
-
-        boost::property_tree::ptree inflowForConstructor;
-        for (int color = 0; color < MAX_COLORS; ++color) {
-            auto colorNode = "Color " + std::to_string(color);
-            if (auto inflowFactor = group.get_optional<float>("Inflow.Base." + colorNode)) {
-                inflowForConstructor.put(colorNode, *inflowFactor * LegacyInflowReferenceEnergy);
-            }
-        }
-        group.put_child("Inflow for constructors.Base", inflowForConstructor);
-
-        // The legacy expert toggle switched off the whole external energy handling.
-        if (auto enabled = group.get_optional<bool>("Enabled"); enabled && !*enabled) {
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                auto colorNode = "Color " + std::to_string(color);
-                group.put("Inflow for constructors.Base." + colorNode, 0.0f);
-                group.put("Inflow for sources.Base." + colorNode, 0.0f);
-                group.put("Backflow.Base." + colorNode, 0.0f);
-            }
-        }
-    }
-
-    void migrateLegacySimulationParameters(boost::property_tree::ptree& tree, std::string const& nodeBase)
-    {
-        migrateLegacyExternalEnergyGroup(tree, nodeBase);
-
-        if (auto transformationAllowed = tree.get_optional<std::string>(nodeBase + ".Radiation.Energy to cell transformation.Base.Value")) {
-            tree.put(nodeBase + ".Cell life cycle.Energy to cell free transformation.Base.Value", *transformationAllowed);
-        }
-    }
-}
-// END: Temporary compatibility code
-
 SimulationParameters SettingsParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
-    migrateLegacySimulationParameters(tree, SimulationParametersNode);
-
     SimulationParameters result;
     encodeDecodeSimulationParameters(tree, result, SimulationParametersNode, ParserTask::Decode);
     return result;
