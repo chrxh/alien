@@ -735,14 +735,14 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
                 }),
             ParameterGroupSpec()
-                .name("Cell color transition rules")
+                .name("Object color transition rules")
                 .expertToggle(&SimulationParameters::colorTransitionRulesToggle)
                 .parameters({
                     ParameterSpec()
                         .name("Target color and duration")
                         .reference(ColorTransitionRulesSpec().member(&SimulationParameters::colorTransitionRules))
                         .description("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
-                                     "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
+                                     "color can be defined for each customization color. In addition, durations must be specified that define how many time steps the "
                                      "corresponding color are kept."),
                 }),
         });
