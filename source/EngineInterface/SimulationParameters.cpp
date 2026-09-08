@@ -138,7 +138,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "a new cell.\n\nIf the external energy pool cannot satisfy all requesting constructor cells, the available energy is distributed "
                             "proportionally."),
                     ParameterSpec()
-                        .name("Inflow threshold")
+                        .name("Inflow threshold factor")
                         .reference(
                             FloatSpec().member(&SimulationParameters::externalEnergyInflowThresholdFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
                         .description(
