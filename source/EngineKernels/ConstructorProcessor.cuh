@@ -732,7 +732,7 @@ __inline__ __device__ bool ConstructorProcessor::hasEnergyForConstructionOrReque
 
 __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(Object const* hostObject)
 {
-    if (!cudaSimulationParameters.externalEnergyControlToggle.value || cudaSimulationParameters.externalEnergyInflowFactor.value[hostObject->color] <= 0) {
+    if (cudaSimulationParameters.externalEnergyInflowForConstructor.value[hostObject->color] <= 0) {
         return false;
     }
     if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value && hostObject->typeData.cell.constructor.currentOffspring > 0) {

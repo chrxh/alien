@@ -39,6 +39,15 @@ struct SimulationParameters
     SourceParameter<bool> sourceShowRadiationCenter = {true};
     LayerParameter<bool> layerShowForceField = {{true}};
 
+    // External energy control
+    BaseParameter<float> externalEnergy = {0.0f};
+    BaseParameter<ColorVector<float>> externalEnergyInflowForConstructor = {ColorVector<float>::uniform(50.0f)};
+    BaseParameter<ColorVector<float>> externalEnergyInflowThresholdFactor = {ColorVector<float>::uniform(0.0f)};
+    BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
+    BaseParameter<ColorVector<float>> externalEnergyInflowForSources = {ColorVector<float>::uniform(100.0f)};
+    BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {ColorVector<float>::uniform(0.0f)};
+    BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
+
     // Location
     LayerParameter<RealVector2D> layerPosition;
     LayerParameter<RealVector2D> layerVelocity;
@@ -91,7 +100,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> radiationType2_strength = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {ColorVector<float>::uniform(500.0f)};
     BaseParameter<ColorVector<float>> particleSplitEnergy = {ColorVector<float>::uniform(50.0f)};
-    BaseParameter<bool> particleTransformationAllowed = {false};
     EnableableSourceParameter<float> sourceRadiationAngle = {{{.value = 0.0f, .enabled = false}}};
     static float constexpr radiationProbability = 0.03f;
     static float constexpr radiationVelocityMultiplier = 1.0f;
@@ -103,6 +111,7 @@ struct SimulationParameters
     BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = ColorVector<float>::uniform(50.0f)};
     BaseParameter<ColorVector<float>> normalCellEnergy = {ColorVector<float>::uniform(100.0f)};
     BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = ColorVector<float>::uniform(0.001f)};
+    BaseParameter<bool> particleTransformationAllowed = {false};
 
     // Cell constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {ColorVector<float>::uniform(3.5f)};
@@ -174,30 +183,9 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> detonatorRadius = {ColorVector<float>::uniform(10.0f)};
     BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {ColorVector<float>::uniform(0.2f)};
 
-    // Expert settings: Advanced absorption control
-    ExpertToggle advancedAbsorptionControlToggle = {false};
-    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowNumCellsPenalty = {.baseValue = ColorVector<float>::uniform(0.0f)};
-    BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {ColorVector<float>::uniform(0.0f)};
-    BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {ColorVector<float>::uniform(0.0f)};
-    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = ColorVector<float>::uniform(0.0f)};
-
     // Expert settings: Cell color transition rules
     ExpertToggle colorTransitionRulesToggle = {false};
     BaseLayerParameter<ColorVector<ColorTransitionRule>> colorTransitionRules;
-
-    // Expert settings: Customize deletion mutations setting
-    ExpertToggle customizeDeletionMutationsToggle = {false};
-    BaseParameter<int> cellCopyMutationDeletionMinSize = {0};
-
-    // Expert settings: External energy settings
-    ExpertToggle externalEnergyControlToggle = {false};
-    BaseParameter<float> externalEnergy = {0.0f};
-    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {ColorVector<float>::uniform(1.0f)};
-    BaseParameter<ColorVector<float>> externalEnergyInflowThresholdFactor = {ColorVector<float>::uniform(0.0f)};
-    BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
-    BaseParameter<ColorVector<float>> externalEnergyInflowForSources = {ColorVector<float>::uniform(0.0f)};
-    BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {ColorVector<float>::uniform(0.0f)};
-    BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
 
     bool operator==(SimulationParameters const&) const = default;
 

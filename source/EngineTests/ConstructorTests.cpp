@@ -3414,7 +3414,6 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
         largeData.add(std::move(clone));
     }
 
-    _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 1e7f;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(largeData);
@@ -3423,7 +3422,6 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
 
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffspring)
 {
-    _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = Infinity<float>::value;
     _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -3452,7 +3450,6 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
 
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspring)
 {
-    _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = Infinity<float>::value;
     _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -3481,9 +3478,8 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
 
 TEST_F(ConstructorTests, externalEnergyInflow_distributedProportionally)
 {
-    _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 50.0f;
-    _parameters.externalEnergyInflowFactor.value = ColorVector<float>::uniform(1.0f);
+    _parameters.externalEnergyInflowForConstructor.value = ColorVector<float>::uniform(50.0f);
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
@@ -3511,9 +3507,8 @@ TEST_F(ConstructorTests, externalEnergyInflow_distributedProportionally)
 
 TEST_F(ConstructorTests, finishedConstructorDoesNotRequestExternalEnergy)
 {
-    _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 50.0f;
-    _parameters.externalEnergyInflowFactor.value = ColorVector<float>::uniform(1.0f);
+    _parameters.externalEnergyInflowForConstructor.value = ColorVector<float>::uniform(50.0f);
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
