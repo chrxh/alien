@@ -20,7 +20,7 @@ namespace
 {
     auto constexpr JpgQuality = 70;
 
-    auto constexpr PreviewPictureResolution = IntVector2D{400, 250};
+    auto constexpr PreviewPictureResolution = IntVector2D{600, 350};
     auto constexpr PreviewPictureBrightness = 1.3f;
 }
 
