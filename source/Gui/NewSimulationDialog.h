@@ -27,4 +27,5 @@ private:
     Char64 _projectName = "<unnamed simulation>";
     int _width = 0;
     int _height = 0;
+    float _externalEnergy = 0.0f;
 };

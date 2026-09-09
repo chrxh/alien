@@ -132,22 +132,6 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                     if (particle->tryLock()) {
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
-                        if (cudaSimulationParameters.advancedAbsorptionControlToggle.value) {
-                            energyToTransfer *= max(
-                                0.0f, 1.0f - Math::length(object->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[object->color]);
-
-                            auto radiationAbsorptionLowVelocityPenalty = ParameterCalculator::calcParameter(
-                                cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, object->pos, object->color);
-                            energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(object->vel), 10.0f);
-                            energyToTransfer *= powf(
-                                toFloat(object->numConnections + 1) / 7.0f,
-                                cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[object->color]);
-
-                            //auto radiationAbsorptionLowNumCellsPenalty = ParameterCalculator::calcParameter(
-                            //    cudaSimulationParameters.radiationAbsorptionLowNumCellsPenalty, data, object->pos, object->color);
-                            //energyToTransfer *= 1.0f - radiationAbsorptionLowNumCellsPenalty / powf(1.0f + object->numObjects, 0.1f);
-                        }
-
                         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
@@ -282,7 +266,7 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
     data.objectMap.correctPosition(pos);
 
     auto externalEnergyBackflowFactor = 0.0f;
-    if (cudaSimulationParameters.externalEnergyControlToggle.value && cudaSimulationParameters.externalEnergyBackflowFactor.value[color] > 0) {
+    if (cudaSimulationParameters.externalEnergyBackflowFactor.value[color] > 0) {
         auto energyToAdd = toDouble(energy * cudaSimulationParameters.externalEnergyBackflowFactor.value[color]);
         auto origExternalEnergy = atomicAdd(data.externalEnergy, energyToAdd);
         if (origExternalEnergy + energyToAdd > cudaSimulationParameters.externalEnergyBackflowLimit.value) {
@@ -303,9 +287,6 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
 
 __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(SimulationData& data)
 {
-    if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
-        return;
-    }
     auto totalInflow = 0.0f;
     for (int color = 0; color < MAX_COLORS; ++color) {
         totalInflow += cudaSimulationParameters.externalEnergyInflowForSources.value[color];

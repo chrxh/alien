@@ -102,7 +102,6 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
         CreatureDesc().id(1).mutationState(MutationState_NotMutated),
         genome);
 
-    _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 1000.0f;
     _parameters.newLineageThreshold.value = 100.0f;  // Keep accumulatedMutationsInLineage from resetting
     _simulationFacade->setSimulationParameters(_parameters);

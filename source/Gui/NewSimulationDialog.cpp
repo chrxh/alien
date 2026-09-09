@@ -38,6 +38,7 @@ void NewSimulationDialog::processIntern()
     AlienGui::InputText(AlienGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").textWidth(ContentTextInputWidth).format("%.0f").step(1000.0f), _externalEnergy);
     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Adopt parameters").textWidth(ContentTextInputWidth), _adoptSimulationParameters);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
@@ -57,6 +58,7 @@ void NewSimulationDialog::processIntern()
 
     _width = std::max(1, _width);
     _height = std::max(1, _height);
+    _externalEnergy = std::max(0.0f, _externalEnergy);
 }
 
 void NewSimulationDialog::openIntern()
@@ -64,6 +66,7 @@ void NewSimulationDialog::openIntern()
     auto worldSize = _SimulationFacade::get()->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
+    _externalEnergy = _SimulationFacade::get()->getSimulationParameters().externalEnergy.value;
 }
 
 void NewSimulationDialog::onNewSimulation()
@@ -75,6 +78,7 @@ void NewSimulationDialog::onNewSimulation()
     for (int i = 0; i < ProjectNameSize; ++i) {
         parameters.projectName.value[i] = _projectName[i];
     }
+    parameters.externalEnergy.value = _externalEnergy;
     _SimulationFacade::get()->closeSimulation();
 
     _SimulationFacade::get()->newSimulation(0, {_width, _height}, parameters);

@@ -148,7 +148,7 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
 {
     auto totalEnergyNeeded = 0.0;
     for (int color = 0; color < MAX_COLORS; ++color) {
-        totalEnergyNeeded += data.numConstructorsNeedingEnergyByColor[color] * 50.0 * cudaSimulationParameters.externalEnergyInflowFactor.value[color];
+        totalEnergyNeeded += data.numConstructorsNeedingEnergyByColor[color] * cudaSimulationParameters.externalEnergyInflowForConstructor.value[color];
     }
     auto externalEnergy = *data.externalEnergy;
     auto factor = 0.0;
@@ -156,7 +156,7 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
         factor = externalEnergy == Infinity<float>::value ? 1.0 : min(1.0, externalEnergy / totalEnergyNeeded);
     }
     for (int color = 0; color < MAX_COLORS; ++color) {
-        data.externalEnergyInflowPerConstructorByColor[color] = 50.0f * toFloat(cudaSimulationParameters.externalEnergyInflowFactor.value[color] * factor);
+        data.externalEnergyInflowPerConstructorByColor[color] = toFloat(cudaSimulationParameters.externalEnergyInflowForConstructor.value[color] * factor);
     }
     if (factor > 0.0 && externalEnergy != Infinity<float>::value) {
         *data.externalEnergy = max(0.0, externalEnergy - totalEnergyNeeded);
