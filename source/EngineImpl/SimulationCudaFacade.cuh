@@ -77,7 +77,6 @@ public:
 
     void setKernelLaunchSettings(KernelLaunchSettings const& launchSettings);
 
-    KernelLaunchSettings deriveKernelLaunchSettings() const;
     SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(
         SimulationParameters const& parameters,

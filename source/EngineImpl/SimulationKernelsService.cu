@@ -43,7 +43,7 @@ void SimulationKernelsService::shutdown()
 namespace
 {
     // The fluid kernels work on one object per warp, so a block covers as many objects as it holds warps and the grid
-    // shrinks accordingly; see KernelLaunchSettings::calcWarpsPerBlock.
+    // shrinks accordingly; see KernelLaunchSettingsService::calcFluidWarpsPerBlock.
     LaunchConfig calcFluidLaunchConfig(KernelLaunchSettings const& settings)
     {
         auto const warpsPerBlock = settings.fluidWarpsPerBlock;

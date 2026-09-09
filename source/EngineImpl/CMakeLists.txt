@@ -13,6 +13,8 @@ add_library(EngineImpl
     GarbageCollectorKernelsService.cuh
     GeometryKernelsService.cu
     GeometryKernelsService.cuh
+    KernelLaunchSettingsService.cu
+    KernelLaunchSettingsService.cuh
     SelectionKernelsService.cu
     SelectionKernelsService.cuh
     SimulationCudaFacade.cu
