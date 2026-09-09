@@ -2676,6 +2676,63 @@ void AlienGui::DisabledField()
 
 namespace
 {
+    void pushTransparentHighlightColors()
+    {
+        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0, 0, 0, 0));
+    }
+
+    void popTransparentHighlightColors()
+    {
+        ImGui::PopStyleColor(3);
+    }
+
+    // ImGui would highlight a selected and hovered row with the plain hover color, so the row background is drawn separately
+    void processTableRowBackground(bool selected)
+    {
+        auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlappedByItem);
+        if (selected) {
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, hovered ? Const::HeaderSelectedHoveredColor : Const::HeaderColor);
+        } else if (hovered) {
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::HeaderHoveredColor);
+        }
+    }
+
+    bool processTableRowSelectable(std::string const& id, bool* selected, ImGuiSelectableFlags flags, RealVector2D const& size)
+    {
+        pushTransparentHighlightColors();
+        auto result =
+            ImGui::Selectable(id.c_str(), selected, flags | ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap, {size.x, size.y});
+        popTransparentHighlightColors();
+
+        processTableRowBackground(*selected);
+        return result;
+    }
+}
+
+bool AlienGui::TableRowSelectable(std::string const& id, bool selected, ImGuiSelectableFlags flags, RealVector2D const& size)
+{
+    return processTableRowSelectable(id, &selected, flags, size);
+}
+
+bool AlienGui::TableRowSelectable(std::string const& id, bool* selected, ImGuiSelectableFlags flags, RealVector2D const& size)
+{
+    return processTableRowSelectable(id, selected, flags, size);
+}
+
+bool AlienGui::TableRowTreeNode(std::string const& id, std::string const& text, ImGuiTreeNodeFlags flags)
+{
+    pushTransparentHighlightColors();
+    auto result = ImGui::TreeNodeEx(id.c_str(), flags | ImGuiTreeNodeFlags_SpanAllColumns, "%s", text.c_str());
+    popTransparentHighlightColors();
+
+    processTableRowBackground((flags & ImGuiTreeNodeFlags_Selected) != 0);
+    return result;
+}
+
+namespace
+{
     template <typename T>
     std::string applyFormatToValue(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
     {

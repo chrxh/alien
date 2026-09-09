@@ -832,7 +832,7 @@ void EvolutionDashboardWindow::processLineageTable()
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImColor(0.13f, 0.16f, 0.23f, 1.0f));
         ImGui::TableSetColumnIndex(LineageColumn);
         auto allSelected = _selectedLineageIds.empty();
-        if (ImGui::Selectable("##rowAll", allSelected, ImGuiSelectableFlags_SpanAllColumns)) {
+        if (AlienGui::TableRowSelectable("##rowAll", allSelected)) {
             _selectedLineageIds.clear();
         }
         ImGui::SameLine(0, 0);
@@ -893,7 +893,7 @@ void EvolutionDashboardWindow::processLineageTable()
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             ImGui::SameLine();
             auto selected = _selectedLineageIds.contains(lineage.id);
-            if (ImGui::Selectable("##row", selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)) {
+            if (AlienGui::TableRowSelectable("##row", selected)) {
                 if (ImGui::GetIO().KeyCtrl) {
                     if (selected) {
                         _selectedLineageIds.erase(lineage.id);
