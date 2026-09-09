@@ -72,6 +72,8 @@ class MultiplierWindow;
 
 class FpsController;
 
+class ConsoleModeController;
+
 class BrowserWindow;
 
 class LoginDialog;
