@@ -27,14 +27,12 @@
 #include "BrowserUserListWidget.h"
 #include "EditSimulationDialog.h"
 #include "GenericMessageDialog.h"
-#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
-#include "PictureGuiService.h"
+#include "ReplaceSimulationDialog.h"
 #include "StyleRepository.h"
 #include "UploadSimulationDialog.h"
-#include "Viewport.h"
 
 namespace
 {
@@ -547,21 +545,7 @@ void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
 
 void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 {
-    auto func = [&] {
-        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::CreatureData> {
-            if (_data->currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-                return ReplaceNetworkResourceRequestData::SimulationData{
-                    .zoom = Viewport::get().getZoomFactor(),
-                    .center = Viewport::get().getCenterInWorldPos(),
-                    .jpg = PictureGuiService::get().createSimulationPreviewJpg()};
-            } else {
-                return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
-            }
-        }();
-        NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
-            .resourceId = leaf.rawTO->id, .workspaceType = leaf.rawTO->workspaceType, .downloadCache = getSimulationCache(), .data = data});
-    };
-    GenericMessageDialog::get().yesNo("Replace", "Do you really want to replace the content of the selected item?", func);
+    ReplaceSimulationDialog::get().open(_data->currentWorkspace.resourceType, leaf);
 }
 
 void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)

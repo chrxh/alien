@@ -66,6 +66,7 @@
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
 #include "PreviewSettingsDialog.h"
+#include "ReplaceSimulationDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SavePictureDialog.h"
 #include "SelectionWindow.h"
@@ -140,6 +141,7 @@ _MainWindow::_MainWindow()
     NewPasswordDialog::get().setup();
     LoginDialog::get().setup();
     UploadSimulationDialog::get().setup();
+    ReplaceSimulationDialog::get().setup();
     ImageToPatternDialog::get().setup();
     AutosaveWindow::get().setup();
     OverlayController::get().setup();

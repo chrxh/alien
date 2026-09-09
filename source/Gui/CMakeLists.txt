@@ -148,10 +148,14 @@ PUBLIC
     RenderPipeline.h
     RenderStep.cpp
     RenderStep.h
+    ReplaceSimulationDialog.cpp
+    ReplaceSimulationDialog.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
     ResizeWorldDialog.h
+    ResourcePreviewWidget.cpp
+    ResourcePreviewWidget.h
     SavePictureDialog.cpp
     SavePictureDialog.h
     SelectionWindow.cpp

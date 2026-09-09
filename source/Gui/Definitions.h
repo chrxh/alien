@@ -78,6 +78,8 @@ class LoginDialog;
 
 class UploadSimulationDialog;
 
+class ReplaceSimulationDialog;
+
 class EditSimulationDialog;
 
 class CreateUserDialog;
