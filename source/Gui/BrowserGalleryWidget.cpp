@@ -43,7 +43,7 @@ namespace
     auto constexpr MinCardSizeSliderWidth = 130.0f;
 
     auto constexpr TooltipDelay = 0.5f;  // In seconds
-    auto constexpr TooltipLabelWidth = 110.0f;
+    auto constexpr TooltipValueWidth = 170.0f;
     auto constexpr TooltipWrapChars = 35.0f;
 }
 
@@ -306,14 +306,14 @@ namespace
 {
     void processTooltipLabel(std::string const& label)
     {
+        ImGui::SameLine(scale(TooltipValueWidth));
         AlienGui::Text(AlienGui::TextParameters().text(label).style(AlienGui::TextStyle::Decent));
-        ImGui::SameLine(scale(TooltipLabelWidth));
     }
 
     void processTooltipRow(std::string const& label, std::string const& value)
     {
-        processTooltipLabel(label);
         AlienGui::Text(value);
+        processTooltipLabel(label);
     }
 }
 
@@ -347,9 +347,8 @@ void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO
 
     auto isSimulation = rawTO->resourceType == NetworkResourceType_Simulation;
     processTooltipRow("User", rawTO->userName);
-    processTooltipRow("Date", rawTO->timestamp);
+    processTooltipRow("Timestamp", rawTO->timestamp);
 
-    processTooltipLabel("Reactions");
     if (rawTO->numLikesByEmojiType.empty()) {
         AlienGui::Text("-");
     } else {
@@ -362,8 +361,8 @@ void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO
             AlienGui::Text(std::to_string(numLikes));
             ImGui::SameLine();
         }
-        ImGui::NewLine();
     }
+    processTooltipLabel("Reactions");
 
     processTooltipRow("Downloads", std::to_string(rawTO->numDownloads));
     if (isSimulation) {
