@@ -1,14 +1,20 @@
 #pragma once
 
+#include <bit>
 #include <vector>
 
+#include <cooperative_groups.h>
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
+
+#include <Base/Macros.h>
 
 #include <EngineInterface/Ids.h>
 
 #include <device_launch_parameters.h>
 #include "Array.cuh"
+
+namespace cg = cooperative_groups;
 
 class CudaNumberGenerator
 {
@@ -16,7 +22,8 @@ public:
     // Methods for host
     __host__ void init(int size)
     {
-        _size = size;
+        CHECK(std::has_single_bit(static_cast<uint32_t>(size)));
+        _indexMask = static_cast<uint32_t>(size) - 1;
 
         CudaMemoryManager::getInstance().acquireMemory(1, _currentRandomNumberIndex);
         CudaMemoryManager::getInstance().acquireMemory(size, _array);
@@ -72,6 +79,18 @@ public:
         return static_cast<float>(number) / RAND_MAX;
     }
 
+    // Same result as random(), but one atomic serves the whole warp.
+    __device__ __inline__ float randomForAllThreads()
+    {
+        auto const warp = cg::coalesced_threads();
+        uint32_t firstIndex = 0;
+        if (warp.thread_rank() == 0) {
+            firstIndex = atomicAdd(_currentRandomNumberIndex, warp.size());
+        }
+        firstIndex = warp.shfl(firstIndex, 0);
+        return static_cast<float>(_array[(firstIndex + warp.thread_rank()) & _indexMask]) / RAND_MAX;
+    }
+
     __device__ __inline__ bool randomBool() { return random(1) == 0; }
 
     __device__ __inline__ uint8_t randomByte() { return static_cast<uint8_t>(random(255)); }
@@ -93,15 +112,11 @@ public:
     }
 
 private:
-    __device__ __inline__ int getRandomNumber()
-    {
-        int index = atomicInc(_currentRandomNumberIndex, _size - 1);
-        return _array[index];
-    }
+    __device__ __inline__ int getRandomNumber() { return _array[atomicAdd(_currentRandomNumberIndex, 1u) & _indexMask]; }
 
     uint32_t* _currentRandomNumberIndex = nullptr;
     int* _array = nullptr;
-    int _size = 0;
+    uint32_t _indexMask = 0;
 
     Ids* _ids = nullptr;
 };

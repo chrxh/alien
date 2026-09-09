@@ -45,6 +45,7 @@
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
 #include "GeometryKernelsService.cuh"
+#include "KernelLaunchSettingsService.cuh"
 #include "SelectionKernelsService.cuh"
 #include "SimulationKernelsService.cuh"
 #include "SimulationParametersUpdateService.cuh"
@@ -68,7 +69,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
-    setKernelLaunchSettings(deriveKernelLaunchSettings());
+    setKernelLaunchSettings(KernelLaunchSettingsService::get().deriveFromDevice(_gpuInfo.deviceNumber));
 
     log(Priority::Important, "initialize simulation");
 
@@ -416,29 +417,6 @@ void _SimulationCudaFacade::setDetached(bool value)
 void _SimulationCudaFacade::setKernelLaunchSettings(KernelLaunchSettings const& launchSettings)
 {
     _settings.kernelLaunchSettings = launchSettings;
-}
-
-KernelLaunchSettings _SimulationCudaFacade::deriveKernelLaunchSettings() const
-{
-    KernelLaunchSettings result;
-
-    cudaDeviceProp prop;
-    if (cudaGetDeviceProperties(&prop, _gpuInfo.deviceNumber) != cudaSuccess) {
-        return result;
-    }
-    result.numBlocks = KernelLaunchSettings::calcNumBlocks(prop.multiProcessorCount);
-
-    // How many blocks of the fluid kernel the hardware keeps resident decides whether its warps have to come from
-    // inside a block. Asking the driver covers architectures that do not exist yet.
-    int blocksPerMultiProcessor = 0;
-    if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiProcessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
-        result.fluidWarpsPerBlock = KernelLaunchSettings::calcWarpsPerBlock(blocksPerMultiProcessor);
-    }
-
-    log(Priority::Important,
-        "kernel launch: " + std::to_string(result.numBlocks) + " blocks, " + std::to_string(result.fluidWarpsPerBlock) + " warps per fluid block ("
-            + std::to_string(prop.multiProcessorCount) + " multiprocessors, " + std::to_string(blocksPerMultiProcessor) + " resident blocks each)");
-    return result;
 }
 
 SimulationParameters _SimulationCudaFacade::getSimulationParameters() const
@@ -950,14 +928,16 @@ void _SimulationCudaFacade::reportProfilingContext()
 #if !defined(USE_HIP)
     // The occupancy query would need a HIP counterpart; the kernels only misbehave on NVIDIA hardware anyway.
     // Blackwell keeps a single block resident per SM for the fluid kernels even though the budgets below allow far
-    // more, which is what made them collapse there. Reporting both makes that visible in a profile from any machine.
+    // more, which is what made them collapse there. The table shows what each block size buys on the machine at
+    // hand and therefore why KernelLaunchSettingsService picked the entry reported as "fluid warps per block".
     if (hasDeviceProperties) {
-        int blocksPerMultiprocessor = 0;
-        if (cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocksPerMultiprocessor, cudaNextTimestep_physics_calcFluidForces, WARP_SIZE, 0) == cudaSuccess) {
-            profiler.setReportEntry(
-                "fluid occupancy [blocks/SM]",
-                std::to_string(blocksPerMultiprocessor) + " -> " + std::to_string(blocksPerMultiprocessor * prop.multiProcessorCount) + " total");
+        std::string residentWarpsByWarpsPerBlock;
+        auto warpsPerBlock = 0;
+        for (auto const& residentWarps : KernelLaunchSettingsService::get().calcFluidResidentWarps()) {
+            ++warpsPerBlock;
+            residentWarpsByWarpsPerBlock += std::to_string(warpsPerBlock) + ":" + std::to_string(residentWarps) + " ";
         }
+        profiler.setReportEntry("fluid resident warps/SM", residentWarpsByWarpsPerBlock);
 
         cudaFuncAttributes attributes;
         if (cudaFuncGetAttributes(&attributes, cudaNextTimestep_physics_calcFluidForces) == cudaSuccess) {

@@ -21,8 +21,8 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergyInflowPerConstructorByColor, 0, sizeof(float) * MAX_COLORS));
 
     processMemory.init();
-    primaryNumberGen.init(40312357);   // Some array size for random numbers (~ 160 MB)
-    secondaryNumberGen.init(1536941);  // Some array size for random numbers (~ 6 MB)
+    primaryNumberGen.init(1 << 25);    // Array size for random numbers (~ 134 MB)
+    secondaryNumberGen.init(1 << 20);  // Array size for random numbers (~ 4 MB)
 
     structuralOperations.init();
     for (int i = 0; i < CellType_Count; ++i) {
