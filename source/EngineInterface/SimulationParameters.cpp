@@ -120,6 +120,64 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      "higher the value in the height map, the darker the background."),
                 }),
             ParameterGroupSpec()
+                .name("Guided energy supply")
+                .parameters({
+                    ParameterSpec()
+                        .name("External energy amount")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::externalEnergy).min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
+                        .description("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
+                                     "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can "
+                                     "result in a "
+                                     "massive production of cells and slow down or even crash the simulation."),
+                    ParameterSpec()
+                        .name("Inflow for constructors")
+                        .reference(FloatSpec().member(&SimulationParameters::externalEnergyInflowForConstructor).min(0.0f).max(50.0f).format("%.1f"))
+                        .description(
+                            "The maximum amount of energy that is transferred from the external energy pool to a constructor cell each time it tries to build "
+                            "a new cell.\n\nIf the external energy pool cannot satisfy all requesting constructor cells, the available energy is distributed "
+                            "proportionally."),
+                    ParameterSpec()
+                        .name("Inflow threshold factor")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::externalEnergyInflowThresholdFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
+                        .description(
+                            "Here one can specify the fraction of energy that constructor cells must provide by themselves before constructing with external "
+                            "energy inflow.\n\nFor example, a value of 0.6 means that a constructor cell needs energy amounting to at least 60% of the "
+                            "energy required to build the new cell by itself. Otherwise, no external energy inflow is requested."),
+                    ParameterSpec()
+                        .name("Inflow only for first offspring")
+                        .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))
+                        .description("If activated, external energy can only be transferred to constructor cells that have not yet produced any offspring. "
+                                     "This option can be used to limit the external energy supply."),
+                    ParameterSpec()
+                        .name("Inflow for sources")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::externalEnergyInflowForSources).min(0.0f).max(10000.0f).format("%.1f").logarithmic(true))
+                        .description("The absolute amount of energy that is transferred from the external energy pool to the radiation sources in each time "
+                                     "step. Each color entry defines the energy that is emitted in the corresponding color.\n\nEach radiation source receives "
+                                     "these amounts multiplied by its relative strength and emits them as energy particles. If the external energy pool does "
+                                     "not contain enough energy, only the remaining energy is distributed."),
+                    ParameterSpec()
+                        .name("Backflow")
+                        .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
+                        .description("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
+                                     "or dies a fraction of its energy will be taken. The remaining "
+                                     "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
+                    ParameterSpec()
+                        .name("Backflow limit")
+                        .reference(
+                            FloatSpec()
+                                .member(&SimulationParameters::externalEnergyBackflowLimit)
+                                .min(0.0f)
+                                .max(1e8f)
+                                .format("%.0f")
+                                .logarithmic(true)
+                                .infinity(true))
+                        .description("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
+                                     "below this value."),
+                }),
+            ParameterGroupSpec()
                 .name("Location")
                 .parameters({
                     ParameterSpec()
@@ -406,11 +464,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "The minimum energy of an energy particle after which it can split into two particles, whereby it receives a small momentum. The "
                             "splitting does not occur immediately, but only after a certain time."),
                     ParameterSpec()
-                        .name("Energy to cell transformation")
-                        .reference(BoolSpec().member(&SimulationParameters::particleTransformationAllowed))
-                        .description(
-                            "If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
-                    ParameterSpec()
                         .name("Radiation angle")
                         .reference(FloatSpec().member(&SimulationParameters::sourceRadiationAngle).min(-180.0f).max(180.0f).format("%.1f")),
                 }),
@@ -454,6 +507,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                             "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
                             " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
+                    ParameterSpec()
+                        .name("Energy to cell free transformation")
+                        .reference(BoolSpec().member(&SimulationParameters::particleTransformationAllowed))
+                        .description(
+                            "If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
                 }),
             ParameterGroupSpec()
                 .name("Cell construction")
@@ -677,115 +735,15 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
                 }),
             ParameterGroupSpec()
-                .name("Advanced energy absorption control")
-                .expertToggle(&SimulationParameters::advancedAbsorptionControlToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Low genome complexity penalty")
-                        .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowNumCellsPenalty).min(0.0f).max(1.0f).format("%.2f"))
-                        .description(
-                            "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
-                    ParameterSpec()
-                        .name("Low connection penalty")
-                        .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowConnectionPenalty).min(0.0f).max(5.0f).format("%.1f"))
-                        .description(
-                            "When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
-                    ParameterSpec()
-                        .name("High velocity penalty")
-                        .reference(
-                            FloatSpec()
-                                .member(&SimulationParameters::radiationAbsorptionHighVelocityPenalty)
-                                .min(0.0f)
-                                .max(30.0f)
-                                .logarithmic(true)
-                                .format("%.2f"))
-                        .description("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
-                    ParameterSpec()
-                        .name("Low velocity penalty")
-                        .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowVelocityPenalty).min(0.0f).max(1.0f).format("%.2f"))
-                        .description("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-                }),
-            ParameterGroupSpec()
-                .name("Cell color transition rules")
+                .name("Object color transition rules")
                 .expertToggle(&SimulationParameters::colorTransitionRulesToggle)
                 .parameters({
                     ParameterSpec()
                         .name("Target color and duration")
                         .reference(ColorTransitionRulesSpec().member(&SimulationParameters::colorTransitionRules))
                         .description("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
-                                     "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
+                                     "color can be defined for each customization color. In addition, durations must be specified that define how many time steps the "
                                      "corresponding color are kept."),
-                }),
-            ParameterGroupSpec()
-                .name("Customize deletion mutations")
-                .expertToggle(&SimulationParameters::customizeDeletionMutationsToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Minimum size")
-                        .reference(IntSpec().member(&SimulationParameters::cellCopyMutationDeletionMinSize).min(0).max(1000).logarithmic(true))
-                        .description(
-                            "The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The "
-                            "default is 0."),
-                }),
-            ParameterGroupSpec()
-                .name("External energy control")
-                .expertToggle(&SimulationParameters::externalEnergyControlToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("External energy amount")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::externalEnergy).min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
-                        .description("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
-                                     "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can "
-                                     "result in a "
-                                     "massive production of cells and slow down or even crash the simulation."),
-                    ParameterSpec()
-                        .name("Inflow")
-                        .reference(FloatSpec().member(&SimulationParameters::externalEnergyInflowFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
-                        .description(
-                            "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
-                            "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external "
-                            "energy "
-                            "source."),
-                    ParameterSpec()
-                        .name("Inflow threshold")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::externalEnergyInflowThresholdFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
-                        .description(
-                            "Here one can specify the fraction of energy that constructor cells must provide by themselves before constructing with external "
-                            "energy inflow.\n\nFor example, a value of 0.6 means that a constructor cell needs energy amounting to at least 60% of the "
-                            "energy required to build the new cell by itself. Otherwise, no external energy inflow is requested."),
-                    ParameterSpec()
-                        .name("Inflow only for first offspring")
-                        .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))
-                        .description("If activated, external energy can only be transferred to constructor cells that have not yet produced any offspring. "
-                                     "This option can be used to foster the evolution of additional body parts."),
-                    ParameterSpec()
-                        .name("Inflow for sources")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::externalEnergyInflowForSources).min(0.0f).max(10000.0f).format("%.1f").logarithmic(true))
-                        .description("The absolute amount of energy that is transferred from the external energy pool to the radiation sources in each time "
-                                     "step. Each color entry defines the energy that is emitted in the corresponding color.\n\nEach radiation source receives "
-                                     "these amounts multiplied by its relative strength and emits them as energy particles. If the external energy pool does "
-                                     "not contain enough energy, only the remaining energy is distributed."),
-                    ParameterSpec()
-                        .name("Backflow")
-                        .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
-                        .description("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
-                                     "or dies a fraction of its energy will be taken. The remaining "
-                                     "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
-                    ParameterSpec()
-                        .name("Backflow limit")
-                        .reference(
-                            FloatSpec()
-                                .member(&SimulationParameters::externalEnergyBackflowLimit)
-                                .min(0.0f)
-                                .max(1e8f)
-                                .format("%.0f")
-                                .logarithmic(true)
-                                .infinity(true))
-                        .description("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
-                                     "below this value."),
                 }),
         });
     }
