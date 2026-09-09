@@ -283,6 +283,9 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             onSelectEntry(rawTO);
         }
+        if (!buttonHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            _data->onDownloadResource(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
+        }
 
         // The buttons of the tile have tooltips of their own
         if (!buttonHovered) {
@@ -327,8 +330,9 @@ void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO
 
     auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
     if (!folderNames.empty()) {
-        AlienGui::Text(
-            AlienGui::TextParameters().text(NetworkResourceService::get().concatenateFolderName(folderNames, true)).style(AlienGui::TextStyle::Decent));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);
+        AlienGui::Text(NetworkResourceService::get().concatenateFolderName(folderNames, true));
+        ImGui::PopStyleColor();
     }
     AlienGui::Text(AlienGui::TextParameters().text(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName)).style(AlienGui::TextStyle::Bold));
 
