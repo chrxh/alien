@@ -26,6 +26,7 @@
 #include "AlienGui.h"
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
+#include "ConsoleModeController.h"
 #include "CreatorWindow.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
@@ -87,6 +88,11 @@ void MainLoopController::process()
 {
     glfwPollEvents();
     _SimulationFacade::get()->checkAndThrowException();
+
+    if (ConsoleModeController::get().isActive()) {
+        ConsoleModeController::get().process();
+        return;
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -431,7 +437,7 @@ void MainLoopController::processMenubar()
 
     AlienGui::BeginMenu(" " ICON_FA_GLOBE "  Network ", _networkMenuOpened);
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Browser").keyAlt(true).key(ImGuiKey_W).closeMenuWhenItemClicked(false).selected(BrowserWindow::get().isOn()),
+        AlienGui::MenuItemParameters().name("Browser").keyAlt(true).key(ImGuiKey_B).closeMenuWhenItemClicked(false).selected(BrowserWindow::get().isOn()),
         [&] { BrowserWindow::get().setOn(!BrowserWindow::get().isOn()); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Login").keyAlt(true).key(ImGuiKey_L).disabled(NetworkService::get().isLoggedIn()), [&] {
@@ -501,7 +507,7 @@ void MainLoopController::processMenubar()
         AlienGui::MenuItemParameters()
             .name("Genome editor")
             .keyAlt(true)
-            .key(ImGuiKey_B)
+            .key(ImGuiKey_W)
             .selected(GenomeEditorWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
@@ -629,11 +635,15 @@ void MainLoopController::processMenubar()
             .selected(SimulationView::get().isRenderSimulation())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationView::get().setRenderSimulation(!SimulationView::get().isRenderSimulation()); });
+    AlienGui::MenuSeparator();
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters().name("Console mode").keyAlt(true).key(ImGuiKey_C).disabled(_programState != ProgramState::OperatingMode),
+        [&] { ConsoleModeController::get().activate(); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_C), [&] { ImageToPatternDialog::get().show(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);

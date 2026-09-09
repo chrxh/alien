@@ -30,6 +30,8 @@ PUBLIC
     ChangeColorDialog.h
     ColorMatrixDialog.cpp
     ColorMatrixDialog.h
+    ConsoleModeController.cpp
+    ConsoleModeController.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
