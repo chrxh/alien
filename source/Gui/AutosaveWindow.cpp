@@ -186,11 +186,11 @@ void AutosaveWindow::processTable()
 
                 ImGui::SameLine();
                 auto selected = _selectedEntry == entry;
-                if (ImGui::Selectable(
+                if (AlienGui::TableRowSelectable(
                         "",
                         &selected,
-                        ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
-                        ImVec2(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
+                        ImGuiSelectableFlags_None,
+                        RealVector2D(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
                     _selectedEntry = selected ? entry : nullptr;
                 }
 

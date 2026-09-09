@@ -215,11 +215,9 @@ void SimulationParametersMainWindow::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
-        auto title = _filter.empty() ? "Parameters" : "Parameters (filtered)";
-        if (_detailWidgetOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters()
-                                                            .name((std::string(title) + "###parameters").c_str())
-                                                            .rank(AlienGui::TreeNodeRank::High)
-                                                            .defaultOpen(_detailWidgetOpen))) {
+        auto title = _locations.at(_selectedOrderNumber).name + (_filter.empty() ? " parameters" : " parameters (filtered)");
+        if (_detailWidgetOpen = AlienGui::BeginTreeNode(
+                AlienGui::TreeNodeParameters().name((title + "###parameters").c_str()).rank(AlienGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             //AlienGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
@@ -341,11 +339,8 @@ void SimulationParametersMainWindow::processLocationTable()
                 // Column: Name
                 ImGui::TableNextColumn();
                 auto selected = _selectedOrderNumber == row;
-                if (ImGui::Selectable(
-                        "",
-                        &selected,
-                        ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
-                        ImVec2(0, scale(MasterRowHeight) - ImGui::GetStyle().FramePadding.y))) {
+                if (AlienGui::TableRowSelectable(
+                        "", selected, ImGuiSelectableFlags_None, RealVector2D(0, scale(MasterRowHeight) - ImGui::GetStyle().FramePadding.y))) {
                     _selectedOrderNumber = row;
                 }
                 ImGui::SameLine();

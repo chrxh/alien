@@ -579,6 +579,15 @@ public:
 
     static void DisabledField();
 
+    static bool
+    TableRowSelectable(std::string const& id, bool selected, ImGuiSelectableFlags flags = ImGuiSelectableFlags_None, RealVector2D const& size = RealVector2D());
+    static bool TableRowSelectable(
+        std::string const& id,
+        bool* selected,
+        ImGuiSelectableFlags flags = ImGuiSelectableFlags_None,
+        RealVector2D const& size = RealVector2D());
+    static bool TableRowTreeNode(std::string const& id, std::string const& text, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None);
+
     class DynamicTableLayout
     {
     public:

@@ -84,7 +84,8 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
             &_editData->genome._frontAngle);
 
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Resistance to injection").textWidth(rightColumnWidth), _editData->genome._resistanceToInjection);
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters().name("Resistance to injection").textWidth(rightColumnWidth), _editData->genome._resistanceToInjection);
 
         AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
 
@@ -148,7 +149,7 @@ void _GenomeEditorWidget::processGeneNode(
     ImGui::TableNextRow();
 
     auto isSelectedGene = _editData->selectedGeneIndex == geneIndex;
-    auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen;
+    auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
     if (isSelectedGene && _editData->selectionLevel == GenomeSelectionLevel::Gene) {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
@@ -161,7 +162,7 @@ void _GenomeEditorWidget::processGeneNode(
     if (isUnreachable) {
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextConflictColor.Value);
     }
-    auto isOpen = ImGui::TreeNodeEx("##gene", flags, "Gene %d", geneIndex);
+    auto isOpen = AlienGui::TableRowTreeNode("##gene", "Gene " + std::to_string(geneIndex), flags);
     if (isUnreachable) {
         ImGui::PopStyleColor();
     }
@@ -217,7 +218,7 @@ void _GenomeEditorWidget::processNodeLeaf(
     ImGui::PushID(nodeIndex);
     ImGui::TableNextRow();
 
-    auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAllColumns;
+    auto flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     if (_editData->selectionLevel == GenomeSelectionLevel::Node && _editData->selectedGeneIndex == geneIndex
         && _editData->getSelectedNodeIndex() == nodeIndex) {
         flags |= ImGuiTreeNodeFlags_Selected;
@@ -225,7 +226,7 @@ void _GenomeEditorWidget::processNodeLeaf(
 
     // Column 0: identity
     ImGui::TableNextColumn();
-    ImGui::TreeNodeEx("##node", flags, "Node %d", nodeIndex);
+    AlienGui::TableRowTreeNode("##node", "Node " + std::to_string(nodeIndex), flags);
     if (ImGui::IsItemClicked()) {
         _editData->selectNode(geneIndex, nodeIndex);
         _selectionChangedFromTree = true;
