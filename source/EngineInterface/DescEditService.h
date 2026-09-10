@@ -53,7 +53,7 @@ public:
     };
     ContentDesc createCircle(CreateCircleParameters const& parameters) const;
 
-    void duplicate(ContentDesc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
+    void scaleContent(ContentDesc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {

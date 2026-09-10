@@ -46,7 +46,7 @@ TEST_F(DescriptionEditTests, correctConnections)
 
     auto data = _simulationFacade->getSimulationData();
 
-    DescEditService::get().duplicate(data, {100, 100}, {100, 100});
+    DescEditService::get().scaleContent(data, {100, 100}, {100, 100});
 
     EXPECT_TRUE(areAngelsCorrect(data));
 }

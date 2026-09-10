@@ -164,7 +164,7 @@ namespace
 
 }
 
-void DescEditService::duplicate(ContentDesc& description, IntVector2D const& origSize, IntVector2D const& size) const
+void DescEditService::scaleContent(ContentDesc& description, IntVector2D const& origSize, IntVector2D const& size) const
 {
     correctConnectionsForNonCreatures(description, origSize);
 
