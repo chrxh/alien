@@ -1,11 +1,9 @@
 #pragma once
 
-#include <deque>
-
-#include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SavepointTable.h>
 
 #include "AlienWindow.h"
+#include "AutosaveController.h"
 #include "Definitions.h"
 
 class AutosaveWindow : public AlienWindow
@@ -18,7 +16,6 @@ private:
     void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
-    void processBackground() override;
 
     void processToolbar();
     void processHeader();
@@ -26,64 +23,15 @@ private:
     void processSettings();
     void processStatusBar();
 
-    void onCreateSavepoint(bool usePeakSimulation);
-    void onDeleteSavepoint(SavepointEntry const& entry);
     void onLoadSavepoint(SavepointEntry const& entry);
-
-    void processStateUpdates();
-
-    void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
-    void processDeleteNonPersistentSavepoint();
-
-    void scheduleCleanup();
-    void processCleanup();
-
-    void processAutomaticSavepoints();
-
-    void updateSavepoint(int row);
-
-    void updateSavepointTableFromFile();
-    std::string getSavepointFilename() const;
-    void validateAndCorrect();
 
     bool _settingsOpen = false;
     float _settingsHeight = 0;
+
     std::string _origDirectory;
-    std::string _directory;
-
-    bool _autosaveEnabled = false;
     int _origAutosaveInterval = 40;
-    int _autosaveInterval = _origAutosaveInterval;
-
-    using SaveMode = int;
-    enum SaveMode_
-    {
-        SaveMode_Circular,
-        SaveMode_Unlimited
-    };
-    SaveMode _origSaveMode = SaveMode_Circular;
-    SaveMode _saveMode = _origSaveMode;
+    AutosaveController::SaveMode _origSaveMode = AutosaveController::SaveMode_Circular;
     int _origNumberOfFiles = 20;
-    int _numberOfFiles = _origNumberOfFiles;
 
-    std::optional<SavepointTable> _savepointTable;
     SavepointEntry _selectedEntry;
-    std::vector<SavepointEntry> _savepointsInProgressToDelete;
-
-    bool _scheduleCleanup = false;
-
-    std::chrono::steady_clock::time_point _lastAutosaveTimepoint;
-
-    using CatchPeaks = int;
-    enum CatchPeaks_
-    {
-        CatchPeaks_None,
-        CatchPeaks_Variance
-    };
-    CatchPeaks _origCatchPeaks = CatchPeaks_None;
-    CatchPeaks _catchPeaks = _origCatchPeaks;
-    std::chrono::steady_clock::time_point _lastPeakTimepoint;
-    TaskProcessor _peakProcessor;
-    SharedDeserializedSimulation _peakDeserializedSimulation;
-    std::optional<int> _lastSessionId;
 };

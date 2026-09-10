@@ -32,6 +32,7 @@
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
+#include "AutosaveController.h"
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
@@ -143,6 +144,7 @@ _MainWindow::_MainWindow()
     UploadSimulationDialog::get().setup();
     ReplaceSimulationDialog::get().setup();
     ImageToPatternDialog::get().setup();
+    AutosaveController::get().setup();
     AutosaveWindow::get().setup();
     OverlayController::get().setup();
     FileTransferController::get().setup();
