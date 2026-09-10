@@ -354,7 +354,7 @@ void BrowserWindow::processResourceView()
 void BrowserWindow::processWorkspaceSelection()
 {
     auto userName = NetworkService::get().getLoggedInUserName();
-    auto privateWorkspaceString = userName.has_value() ? std::string("My workspace") : std::string("My workspace (login required)");
+    auto privateWorkspaceString = userName.has_value() ? std::string("Private workspace") : std::string("Private workspace (login required)");
     auto workspaceType_reordered = 2 - _data->currentWorkspace.workspaceType;  // Change the order for display
     if (AlienGui::Switcher(
             AlienGui::SwitcherParameters()
