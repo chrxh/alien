@@ -1,6 +1,7 @@
 #include "BrowserGalleryWidget.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <ranges>
 
@@ -37,6 +38,9 @@ namespace
     auto constexpr TileSpacing = 8.0f;
     auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
     auto constexpr PictureAspectRatio = 2.0f / 3.0f;
+
+    auto constexpr PlaceholderBarHeight = 5.0f;
+    auto const PlaceholderBarWidthFactors = std::array{0.55f, 0.80f, 0.65f};
 
     auto constexpr SortingSwitcherWidth = 230.0f;
     auto constexpr CardSizeSliderWidth = 230.0f;
@@ -114,17 +118,38 @@ void _BrowserGalleryWidget::process()
     // The tile height follows the tile width, so an appearing scrollbar must not change the available width
     if (ImGui::BeginChild(
             "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserGui::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
-        auto horizontalSpacing = scale(TileSpacing);
-        auto availableWidth = ImGui::GetContentRegionAvail().x;
-        auto tileWidth = std::floor(std::min(availableWidth, scale(BaseTileWidth) * toFloat(_cardSizePercent) / 100.0f));
-        auto numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (tileWidth + horizontalSpacing)));
+        auto layout = calcTileLayout();
 
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
-            if (index % numColumns != 0) {
-                ImGui::SameLine(0, horizontalSpacing);
+            if (index % layout.numColumns != 0) {
+                ImGui::SameLine(0, layout.horizontalSpacing);
             }
             ImGui::PushID(toInt(index));
-            processTile(rawTO, tileWidth);
+            processTile(rawTO, layout.tileWidth);
+            ImGui::PopID();
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::PopID();
+}
+
+void _BrowserGalleryWidget::processPlaceholderTiles()
+{
+    ImGui::PushID("GalleryPlaceholder");
+
+    if (ImGui::BeginChild(
+            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserGui::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+        auto layout = calcTileLayout();
+        auto tileHeight = calcTileHeight(layout.tileWidth);
+        auto numRows = std::max(1, toInt(std::ceil(ImGui::GetContentRegionAvail().y / (tileHeight + ImGui::GetStyle().ItemSpacing.y))));
+
+        for (auto const& index : std::views::iota(0, layout.numColumns * numRows)) {
+            if (index % layout.numColumns != 0) {
+                ImGui::SameLine(0, layout.horizontalSpacing);
+            }
+            ImGui::PushID(index);
+            processPlaceholderTile(layout.tileWidth);
             ImGui::PopID();
         }
     }
@@ -221,15 +246,31 @@ namespace
     }
 }
 
+_BrowserGalleryWidget::TileLayout _BrowserGalleryWidget::calcTileLayout() const
+{
+    auto horizontalSpacing = scale(TileSpacing);
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto tileWidth = std::floor(std::min(availableWidth, scale(BaseTileWidth) * toFloat(_cardSizePercent) / 100.0f));
+    return {
+        .tileWidth = tileWidth,
+        .horizontalSpacing = horizontalSpacing,
+        .numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (tileWidth + horizontalSpacing)))};
+}
+
+float _BrowserGalleryWidget::calcTileHeight(float tileWidth) const
+{
+    auto const& style = ImGui::GetStyle();
+    auto pictureHeight = (tileWidth - style.WindowPadding.x * 2) * PictureAspectRatio;
+    return std::floor(
+        pictureHeight + NumTileTextLines * ImGui::GetTextLineHeight() + ImGui::GetFrameHeight()  // Button row
+        + (NumTileTextLines + 1) * style.ItemSpacing.y + style.WindowPadding.y * 2);
+}
+
 void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float tileWidth)
 {
     _data->lastSessionData.registrate(rawTO);
 
-    auto const& style = ImGui::GetStyle();
-    auto pictureHeight = (tileWidth - style.WindowPadding.x * 2) * PictureAspectRatio;
-    auto tileHeight = std::floor(
-        pictureHeight + NumTileTextLines * ImGui::GetTextLineHeight() + ImGui::GetFrameHeight()  // Button row
-        + (NumTileTextLines + 1) * style.ItemSpacing.y + style.WindowPadding.y * 2);
+    auto tileHeight = calcTileHeight(tileWidth);
 
     auto buttonHovered = false;
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
@@ -315,6 +356,34 @@ namespace
         AlienGui::Text(value);
         processTooltipLabel(label);
     }
+}
+
+void _BrowserGalleryWidget::processPlaceholderTile(float tileWidth)
+{
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
+    if (ImGui::BeginChild(
+            "##placeholderTile", {tileWidth, calcTileHeight(tileWidth)}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+        auto contentWidth = ImGui::GetContentRegionAvail().x;
+        auto drawList = ImGui::GetWindowDrawList();
+
+        auto picturePos = ImGui::GetCursorScreenPos();
+        auto pictureHeight = contentWidth * PictureAspectRatio;
+        drawList->AddRectFilled(picturePos, {picturePos.x + contentWidth, picturePos.y + pictureHeight}, Const::BrowserPlaceholderTilePictureColor);
+        ImGui::Dummy({contentWidth, pictureHeight});
+
+        auto barHeight = scale(PlaceholderBarHeight);
+        for (auto const& widthFactor : PlaceholderBarWidthFactors) {
+            auto barPos = ImGui::GetCursorScreenPos();
+            auto barOffsetY = (ImGui::GetTextLineHeight() - barHeight) / 2;
+            drawList->AddRectFilled(
+                {barPos.x, barPos.y + barOffsetY},
+                {barPos.x + contentWidth * widthFactor, barPos.y + barOffsetY + barHeight},
+                Const::BrowserPlaceholderTileBarColor);
+            ImGui::Dummy({contentWidth, ImGui::GetTextLineHeight()});
+        }
+    }
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
 }
 
 void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO)

@@ -38,6 +38,7 @@ private:
     void processToolbar();
     void processWorkspace();
     void processResourceView();
+    bool isLoginRequired() const;
     void processWorkspaceSelection();
     void processFilter();
     void processUserList();
@@ -63,6 +64,7 @@ private:
     BrowserGalleryWidget _galleryWidget;
     BrowserTableWidget _tableWidget;
     BrowserUserListWidget _userListWidget;
+    BrowserLoginHintWidget _loginHintWidget;
 
     bool _galleryView = true;
     bool _showAllEmojis = false;

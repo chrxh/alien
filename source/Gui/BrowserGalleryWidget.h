@@ -27,6 +27,7 @@ public:
 
     void processSorting();
     void process();
+    void processPlaceholderTiles();
     void processPaging();
 
     void processPendingRequests();
@@ -38,7 +39,17 @@ public:
 private:
     _BrowserGalleryWidget(BrowserData const& data);
 
+    struct TileLayout
+    {
+        float tileWidth = 0;
+        float horizontalSpacing = 0;
+        int numColumns = 1;
+    };
+    TileLayout calcTileLayout() const;
+    float calcTileHeight(float tileWidth) const;
+
     void processTile(NetworkResourceRawTO const& rawTO, float tileWidth);
+    void processPlaceholderTile(float tileWidth);
     void processTileTooltip(NetworkResourceRawTO const& rawTO);
     void processPicture(NetworkResourceRawTO const& rawTO, float width);
     void processReactionButton(NetworkResourceRawTO const& rawTO);
