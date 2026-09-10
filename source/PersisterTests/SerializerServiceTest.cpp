@@ -170,7 +170,7 @@ TEST_F(SerializerServiceTests, simulationFiles)
     SimulationDesc before;
     before._mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
     before._timestep = 1234;
-    before._realTime = std::chrono::milliseconds(5678);
+    before._realTime = std::chrono::milliseconds(9876543210);
     before._zoom = 3.5f;
     before._center = {111.0f, 222.0f};
     before._worldSize = {700, 300};
