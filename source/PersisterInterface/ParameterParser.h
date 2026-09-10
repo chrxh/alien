@@ -102,7 +102,7 @@ namespace detail
             std::string parameterAsString;
             auto defaultAsString = std::to_string(defaultValue.count());
             auto result = encodeDecodeImpl(tree, parameterAsString, defaultAsString, node, task);
-            parameter = std::chrono::milliseconds(std::stoi(parameterAsString));
+            parameter = std::chrono::milliseconds(std::stoll(parameterAsString));
             return result;
         }
     }
