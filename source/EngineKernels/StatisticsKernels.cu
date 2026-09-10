@@ -1,4 +1,9 @@
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+
 #include "StatisticsKernels.cuh"
+
+namespace cg = cooperative_groups;
 
 namespace
 {
@@ -75,6 +80,27 @@ __global__ void cudaResetStatistics(SimulationData data, SimulationStatistics st
     }
 }
 
+namespace
+{
+    __inline__ __device__ void addObjectToStatistics(SimulationStatistics& statistics, ObjectType type, float energy)
+    {
+        auto warp = cg::coalesced_threads();
+        auto numSolidObjects = __popc(warp.ballot(type == ObjectType_Solid));
+        auto numFluidObjects = __popc(warp.ballot(type == ObjectType_Fluid));
+        auto numFreeCellObjects = __popc(warp.ballot(type == ObjectType_FreeCell));
+        auto numCellObjects = __popc(warp.ballot(type == ObjectType_Cell));
+        auto energySum = cg::reduce(warp, energy, cg::plus<float>());
+
+        if (warp.thread_rank() == 0) {
+            statistics.addNumSolidObjects(numSolidObjects);
+            statistics.addNumFluidObjects(numFluidObjects);
+            statistics.addNumFreeCellObjects(numFreeCellObjects);
+            statistics.addNumCellObjects(numCellObjects);
+            statistics.addInternalEnergy(energySum);
+        }
+    }
+}
+
 __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, SimulationStatistics statistics)
 {
     {
@@ -82,8 +108,12 @@ __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, Simu
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             if (auto& particle = particles.at(index)) {
-                statistics.incNumEnergyParticles();
-                statistics.addInternalEnergy(particle->energy);
+                auto warp = cg::coalesced_threads();
+                auto energySum = cg::reduce(warp, particle->energy, cg::plus<float>());
+                if (warp.thread_rank() == 0) {
+                    statistics.addNumEnergyParticles(warp.size());
+                    statistics.addInternalEnergy(energySum);
+                }
             }
         }
     }
@@ -92,16 +122,7 @@ __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, Simu
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type == ObjectType_Solid) {
-            statistics.incNumSolidObjects();
-        } else if (object->type == ObjectType_Fluid) {
-            statistics.incNumFluidObjects();
-        } else if (object->type == ObjectType_FreeCell) {
-            statistics.incNumFreeCellObjects();
-        } else if (object->type == ObjectType_Cell) {
-            statistics.incNumCellObjects();
-        }
-        statistics.addInternalEnergy(object->getEnergy());
+        addObjectToStatistics(statistics, object->type, object->getEnergy());
 
         if (object->type != ObjectType_Cell) {
             continue;

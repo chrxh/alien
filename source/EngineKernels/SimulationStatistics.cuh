@@ -22,13 +22,15 @@ public:
     __host__ StatisticsEntry getStatisticsEntry() const;
     __host__ bool isLineageAccumulatorGCNeeded() const;
 
-    // Object statistics (recalculated in every statistics timestep)
+    // Object statistics (recalculated in every statistics timestep). Every object of the simulation contributes, so
+    // the counters take a whole warp's contribution at once: a single address per counter would otherwise serialize
+    // the grid on one atomic.
     __inline__ __device__ void resetObjectStatistics();
-    __inline__ __device__ void incNumSolidObjects();
-    __inline__ __device__ void incNumFluidObjects();
-    __inline__ __device__ void incNumFreeCellObjects();
-    __inline__ __device__ void incNumCellObjects();
-    __inline__ __device__ void incNumEnergyParticles();
+    __inline__ __device__ void addNumSolidObjects(uint32_t value);
+    __inline__ __device__ void addNumFluidObjects(uint32_t value);
+    __inline__ __device__ void addNumFreeCellObjects(uint32_t value);
+    __inline__ __device__ void addNumCellObjects(uint32_t value);
+    __inline__ __device__ void addNumEnergyParticles(uint32_t value);
     __inline__ __device__ void addInternalEnergy(float value);
 
     // Lineage statistics (recalculated in every statistics timestep)
@@ -118,29 +120,39 @@ __inline__ __device__ void SimulationStatistics::resetObjectStatistics()
     *_objectStatisticsEntry = ObjectStatisticsEntry{};
 }
 
-__inline__ __device__ void SimulationStatistics::incNumSolidObjects()
+__inline__ __device__ void SimulationStatistics::addNumSolidObjects(uint32_t value)
 {
-    atomicAdd(&_objectStatisticsEntry->numSolidObjects, 1u);
+    if (value > 0) {
+        atomicAdd(&_objectStatisticsEntry->numSolidObjects, value);
+    }
 }
 
-__inline__ __device__ void SimulationStatistics::incNumFluidObjects()
+__inline__ __device__ void SimulationStatistics::addNumFluidObjects(uint32_t value)
 {
-    atomicAdd(&_objectStatisticsEntry->numFluidObjects, 1u);
+    if (value > 0) {
+        atomicAdd(&_objectStatisticsEntry->numFluidObjects, value);
+    }
 }
 
-__inline__ __device__ void SimulationStatistics::incNumFreeCellObjects()
+__inline__ __device__ void SimulationStatistics::addNumFreeCellObjects(uint32_t value)
 {
-    atomicAdd(&_objectStatisticsEntry->numFreeCellObjects, 1u);
+    if (value > 0) {
+        atomicAdd(&_objectStatisticsEntry->numFreeCellObjects, value);
+    }
 }
 
-__inline__ __device__ void SimulationStatistics::incNumCellObjects()
+__inline__ __device__ void SimulationStatistics::addNumCellObjects(uint32_t value)
 {
-    atomicAdd(&_objectStatisticsEntry->numCellObjects, 1u);
+    if (value > 0) {
+        atomicAdd(&_objectStatisticsEntry->numCellObjects, value);
+    }
 }
 
-__inline__ __device__ void SimulationStatistics::incNumEnergyParticles()
+__inline__ __device__ void SimulationStatistics::addNumEnergyParticles(uint32_t value)
 {
-    atomicAdd(&_objectStatisticsEntry->numEnergyParticles, 1u);
+    if (value > 0) {
+        atomicAdd(&_objectStatisticsEntry->numEnergyParticles, value);
+    }
 }
 
 __inline__ __device__ void SimulationStatistics::addInternalEnergy(float value)
