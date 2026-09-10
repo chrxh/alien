@@ -20,6 +20,8 @@ PUBLIC
     BrowserGalleryWidget.h
     BrowserGui.cpp
     BrowserGui.h
+    BrowserLoginHintWidget.cpp
+    BrowserLoginHintWidget.h
     BrowserTableWidget.cpp
     BrowserTableWidget.h
     BrowserUserListWidget.cpp

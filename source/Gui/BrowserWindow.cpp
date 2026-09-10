@@ -23,6 +23,7 @@
 #include "AlienGui.h"
 #include "BrowserGalleryWidget.h"
 #include "BrowserGui.h"
+#include "BrowserLoginHintWidget.h"
 #include "BrowserTableWidget.h"
 #include "BrowserUserListWidget.h"
 #include "EditSimulationDialog.h"
@@ -73,6 +74,7 @@ void BrowserWindow::initIntern()
     _galleryWidget = _BrowserGalleryWidget::create(_data);
     _tableWidget = _BrowserTableWidget::create(_data);
     _userListWidget = _BrowserUserListWidget::create(_data);
+    _loginHintWidget = _BrowserLoginHintWidget::create();
 
     auto& settings = GlobalSettings::get();
     _galleryView = settings.getValue("windows.browser.gallery view", _galleryView);
@@ -344,11 +346,29 @@ void BrowserWindow::processResourceView()
         AlienGui::VerticalSeparator();
         ImGui::SameLine();
         _galleryWidget->processSorting();
+    }
 
+    if (isLoginRequired()) {
+        auto viewPos = ImGui::GetCursorScreenPos();
+        auto viewSize = ImGui::GetContentRegionAvail();
+        viewSize.y -= scale(BrowserGui::WorkspaceBottomSpace);
+
+        if (_galleryView) {
+            _galleryWidget->processPlaceholderTiles();
+        } else {
+            _tableWidget->process();
+        }
+        _loginHintWidget->process({viewPos.x, viewPos.y}, {viewSize.x, viewSize.y});
+    } else if (_galleryView) {
         _galleryWidget->process();
     } else {
         _tableWidget->process();
     }
+}
+
+bool BrowserWindow::isLoginRequired() const
+{
+    return _data->currentWorkspace.workspaceType == WorkspaceType_Private && !NetworkService::get().getLoggedInUserName();
 }
 
 void BrowserWindow::processWorkspaceSelection()

@@ -162,6 +162,9 @@ using BrowserTableWidget = std::shared_ptr<_BrowserTableWidget>;
 class _BrowserUserListWidget;
 using BrowserUserListWidget = std::shared_ptr<_BrowserUserListWidget>;
 
+class _BrowserLoginHintWidget;
+using BrowserLoginHintWidget = std::shared_ptr<_BrowserLoginHintWidget>;
+
 struct UserInfo;
 
 struct GLFWvidmode;

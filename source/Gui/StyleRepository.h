@@ -177,6 +177,12 @@ namespace Const
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
     ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
     ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
+
+    ImColor const BrowserLoginHintCardColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.940f);
+    ImColor const BrowserLoginHintCardBorderColor = LineColor;
+    ImColor const BrowserLoginHintIconColor = AccentColor;
+    ImColor const BrowserPlaceholderTilePictureColor = ImColor::HSV(0.583f, 0.300f, 0.090f);
+    ImColor const BrowserPlaceholderTileBarColor = LineSoftColor;
 }
 
 class StyleRepository
