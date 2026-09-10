@@ -1,6 +1,7 @@
 #include "DescEditService.h"
 
 #include <cmath>
+#include <ranges>
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
@@ -117,82 +118,169 @@ ContentDesc DescEditService::createCircle(CreateCircleParameters const& paramete
 
 namespace
 {
-    void topologyCorrection(SpaceCalculator const& spaceCalc, ContentDesc& description, uint64_t creatureId)
+    IntVector2D calcNumTiles(IntVector2D const& origWorldSize, IntVector2D const& worldSize)
     {
-        ObjectDesc* refCell = nullptr;
-        for (auto& object : description._objects) {
+        return {(worldSize.x + origWorldSize.x - 1) / origWorldSize.x, (worldSize.y + origWorldSize.y - 1) / origWorldSize.y};
+    }
+
+    bool isCoveredByTile(RealVector2D const& posInOrigWorld, IntVector2D const& tileOffset, IntVector2D const& worldSize)
+    {
+        return toFloat(tileOffset.x) + posInOrigWorld.x < toFloat(worldSize.x) && toFloat(tileOffset.y) + posInOrigWorld.y < toFloat(worldSize.y);
+    }
+
+    void dropConnectionsToRemovedObjects(ObjectDesc& object, std::unordered_set<uint64_t> const& removedObjectIds)
+    {
+        std::vector<ConnectionDesc> remainingConnections;
+        auto angleToTransfer = 0.0f;
+        for (auto const& connection : object._connections) {
+            if (removedObjectIds.contains(connection._objectId)) {
+                angleToTransfer += connection._angleFromPrevious;
+            } else {
+                remainingConnections.emplace_back(connection);
+                remainingConnections.back()._angleFromPrevious += angleToTransfer;
+                angleToTransfer = 0.0f;
+            }
+        }
+        if (!remainingConnections.empty()) {
+            remainingConnections.front()._angleFromPrevious += angleToTransfer;
+        }
+        object._connections = remainingConnections;
+    }
+
+    void dropReferencesToRemovedObjects(ContentDesc& content, std::unordered_set<uint64_t> const& removedObjectIds)
+    {
+        for (auto& object : content._objects) {
+            dropConnectionsToRemovedObjects(object, removedObjectIds);
+
             if (object.getObjectType() != ObjectType_Cell) {
                 continue;
             }
-            if (object.getCellRef()._creatureId == creatureId) {
-                if (!refCell) {
-                    refCell = &object;
-                }
-                auto topologyCorrection = spaceCalc.getCorrectionIncrement(refCell->_pos, object._pos);
-                object._pos = object._pos + topologyCorrection;
+            auto& constructor = object.getCellRef()._constructor;
+            if (constructor.has_value() && constructor->_lastConstructedCellId.has_value()
+                && removedObjectIds.contains(constructor->_lastConstructedCellId.value())) {
+                constructor->_lastConstructedCellId.reset();
             }
         }
     }
 
-    void correctConnectionsForNonCreatures(ContentDesc& description, IntVector2D const& worldSize)
+    std::unordered_map<uint64_t, int> calcNumCellsByCreatureId(ContentDesc const& content)
     {
-        auto threshold = std::min(worldSize.x, worldSize.y) / 3;
-        auto cache = description.createCache();
-
-        for (auto& object : description._objects) {
+        std::unordered_map<uint64_t, int> result;
+        for (auto const& object : content._objects) {
             if (object.getObjectType() == ObjectType_Cell) {
-                continue;
+                ++result[object.getCellRef()._creatureId];
             }
-            std::vector<ConnectionDesc> newConnections;
-            float angleToAdd = 0;
-            for (auto connection : object._connections) {
-                auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
-                if (Math::length(object._pos - connectedObject._pos) > threshold) {
-                    angleToAdd += connection._angleFromPrevious;
-                } else {
-                    connection._angleFromPrevious += angleToAdd;
-                    angleToAdd = 0;
-                    newConnections.emplace_back(connection);
-                }
+        }
+        return result;
+    }
+
+    void dropUnusedGenomes(ContentDesc& content, std::unordered_set<uint64_t> const& genomeIdsToCheck)
+    {
+        std::unordered_set<uint64_t> usedGenomeIds;
+        for (auto const& creature : content._creatures) {
+            usedGenomeIds.insert(creature._genomeId);
+        }
+        std::erase_if(content._genomes, [&](auto const& genome) { return genomeIdsToCheck.contains(genome._id) && !usedGenomeIds.contains(genome._id); });
+    }
+
+    void syncCreaturesWithRemainingCells(ContentDesc& content)
+    {
+        auto numCellsByCreatureId = calcNumCellsByCreatureId(content);
+
+        std::unordered_set<uint64_t> removedCreatureIds;
+        std::unordered_set<uint64_t> genomeIdsOfRemovedCreatures;
+        for (auto const& creature : content._creatures) {
+            if (!numCellsByCreatureId.contains(creature._id)) {
+                removedCreatureIds.insert(creature._id);
+                genomeIdsOfRemovedCreatures.insert(creature._genomeId);
             }
-            if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
-                newConnections.front()._angleFromPrevious += angleToAdd;
+        }
+        std::erase_if(content._creatures, [&](auto const& creature) { return removedCreatureIds.contains(creature._id); });
+
+        for (auto& creature : content._creatures) {
+            creature._numCells = numCellsByCreatureId.at(creature._id);
+            if (creature._ancestorId.has_value() && removedCreatureIds.contains(creature._ancestorId.value())) {
+                creature._ancestorId.reset();
             }
-            object._connections = newConnections;
+        }
+        dropUnusedGenomes(content, genomeIdsOfRemovedCreatures);
+    }
+
+    ContentDesc cutOutTile(ContentDesc const& flattenedContent, IntVector2D const& origWorldSize, IntVector2D const& tileOffset, IntVector2D const& worldSize)
+    {
+        SpaceCalculator origSpace(origWorldSize);
+        auto isCovered = [&](RealVector2D const& pos) { return isCoveredByTile(origSpace.getCorrectedPosition(pos), tileOffset, worldSize); };
+
+        auto result = flattenedContent;
+
+        std::unordered_set<uint64_t> removedObjectIds;
+        for (auto const& object : result._objects) {
+            if (!isCovered(object._pos)) {
+                removedObjectIds.insert(object._id);
+            }
+        }
+        std::erase_if(result._objects, [&](auto const& object) { return removedObjectIds.contains(object._id); });
+        std::erase_if(result._energies, [&](auto const& energy) { return !isCovered(energy._pos); });
+
+        dropReferencesToRemovedObjects(result, removedObjectIds);
+        syncCreaturesWithRemainingCells(result);
+        return result;
+    }
+
+    void reserveExistingIds(ContentDesc const& content)
+    {
+        auto& numberGenerator = NumberGenerator::get();
+        for (auto const& object : content._objects) {
+            numberGenerator.adaptMaxEntityId(object._id);
+        }
+        for (auto const& energy : content._energies) {
+            numberGenerator.adaptMaxEntityId(energy._id);
+        }
+        for (auto const& creature : content._creatures) {
+            numberGenerator.adaptMaxEntityId(creature._id);
+        }
+        for (auto const& genome : content._genomes) {
+            numberGenerator.adaptMaxEntityId(genome._id);
         }
     }
 
+    void mapPositionsIntoWorld(ContentDesc& content, IntVector2D const& worldSize)
+    {
+        SpaceCalculator space(worldSize);
+        for (auto& object : content._objects) {
+            object._pos = space.getCorrectedPosition(object._pos);
+        }
+        for (auto& energy : content._energies) {
+            energy._pos = space.getCorrectedPosition(energy._pos);
+        }
+    }
 }
 
-void DescEditService::scaleContent(ContentDesc& description, IntVector2D const& origSize, IntVector2D const& size) const
+void DescEditService::scaleContent(ContentDesc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const
 {
-    correctConnectionsForNonCreatures(description, origSize);
-
-    SpaceCalculator spaceCalc(origSize);
-
-    ContentDesc result;
-    for (int incX = 0; incX < size.x; incX += origSize.x) {
-        for (int incY = 0; incY < size.y; incY += origSize.y) {
-            auto clone = ContentDesc(description);
-            clone.assignNewEntityIds();
-            for (auto const& creature : clone._creatures) {
-                topologyCorrection(spaceCalc, clone, creature._id);
-                result._creatures.emplace_back(creature);
-            }
-            for (auto& object : clone._objects) {
-                object._pos = RealVector2D{object._pos.x + incX, object._pos.y + incY};
-                result._objects.emplace_back(object);
-            }
-            for (auto energyParticle : clone._energies) {
-                auto origPos = energyParticle._pos;
-                energyParticle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
-                result._energies.emplace_back(energyParticle);
-            }
-            result._genomes.insert(result._genomes.end(), clone._genomes.begin(), clone._genomes.end());
-        }
+    if (origWorldSize.x <= 0 || origWorldSize.y <= 0 || worldSize.x <= 0 || worldSize.y <= 0 || origWorldSize == worldSize) {
+        return;
     }
 
-    description = ContentDesc(result);
+    reserveExistingIds(description);
+    flattenTopology(description, origWorldSize);
+
+    auto numTiles = calcNumTiles(origWorldSize, worldSize);
+
+    ContentDesc result;
+    for (auto tileX : std::views::iota(0, numTiles.x)) {
+        for (auto tileY : std::views::iota(0, numTiles.y)) {
+            IntVector2D tileOffset{tileX * origWorldSize.x, tileY * origWorldSize.y};
+            auto tile = cutOutTile(description, origWorldSize, tileOffset, worldSize);
+            shift(tile, toRealVector2D(tileOffset));
+
+            auto isDuplicate = tileOffset != IntVector2D{0, 0};
+            result.add(std::move(tile), isDuplicate);
+        }
+    }
+    mapPositionsIntoWorld(result, worldSize);
+
+    description = result;
 }
 
 namespace
@@ -347,7 +435,6 @@ void DescEditService::flattenTopology(ContentDesc& description, IntVector2D cons
     SpaceCalculator space(worldSize);
     auto cache = description.createCache();
 
-    std::unordered_set<uint64_t> finishedCellIds;
     std::unordered_set<uint64_t> workingCellIds;
     std::unordered_set<uint64_t> freeCellIds;
 
@@ -378,7 +465,6 @@ void DescEditService::flattenTopology(ContentDesc& description, IntVector2D cons
                 }
             }
         }
-        finishedCellIds.insert(workingCellIds.begin(), workingCellIds.end());
         workingCellIds = newWorkingCellIds;
     }
 }
