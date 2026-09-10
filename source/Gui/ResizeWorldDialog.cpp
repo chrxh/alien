@@ -91,7 +91,7 @@ void ResizeWorldDialog::onResizing()
     _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
 
     if (_scaleContent) {
-        DescEditService::get().duplicate(content, origWorldSize, {_width, _height});
+        DescEditService::get().scaleContent(content, origWorldSize, {_width, _height});
     }
     _SimulationFacade::get()->setSimulationData(content);
     _SimulationFacade::get()->setStatisticsHistory(statistics);
