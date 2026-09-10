@@ -9,24 +9,17 @@
 #include <Base/StringHelper.h>
 
 #include <PersisterInterface/SavepointTableService.h>
-#include <PersisterInterface/SerializerService.h>
-#include <PersisterInterface/TaskProcessor.h>
 
-#include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/PersisterFacade.h>
 #include "AlienGui.h"
+#include "AutosaveController.h"
 #include "FileTransferController.h"
 #include "GenericMessageDialog.h"
-#include "OverlayController.h"
 #include "StyleRepository.h"
-#include "Viewport.h"
 
 namespace
 {
     auto constexpr RightColumnWidth = 200.0f;
     auto constexpr DefaultSettingsHeight = 130.0f;
-    auto constexpr AutosaveSenderId = "Autosave";
-    auto constexpr PeakDetectionInterval = 30;  // In seconds
 }
 
 AutosaveWindow::AutosaveWindow()
@@ -35,44 +28,20 @@ AutosaveWindow::AutosaveWindow()
 
 void AutosaveWindow::initIntern()
 {
-
     _settingsOpen = GlobalSettings::get().getValue("windows.autosave.settings.open", _settingsOpen);
     _settingsHeight =
         GlobalSettings::get().getValue("windows.autosave.settings.height", scale(DefaultSettingsHeight)) * WindowController::get().getContentScaleCorrection();
-    _autosaveEnabled = GlobalSettings::get().getValue("windows.autosave.enabled", _autosaveEnabled);
+
     _origAutosaveInterval = GlobalSettings::get().getValue("windows.autosave.interval", _origAutosaveInterval);
-    _autosaveInterval = _origAutosaveInterval;
-
     _origSaveMode = GlobalSettings::get().getValue("windows.autosave.mode", _origSaveMode);
-    _saveMode = _origSaveMode;
-
     _origNumberOfFiles = GlobalSettings::get().getValue("windows.autosave.number of files", _origNumberOfFiles);
-    _numberOfFiles = _origNumberOfFiles;
-
     _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::AutosavePath).string());
-    _directory = _origDirectory;
-
-    //_origCatchPeaks = GlobalSettings::get().getValue("windows.autosave.catch peaks", _origCatchPeaks);
-    //_catchPeaks = _origCatchPeaks;
-
-    _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-    _lastPeakTimepoint = std::chrono::steady_clock::now();
-
-    _peakProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
-    _peakDeserializedSimulation = std::make_shared<_SharedDeserializedSimulation>();
-    updateSavepointTableFromFile();
 }
 
 void AutosaveWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("windows.autosave.settings.open", _settingsOpen);
     GlobalSettings::get().setValue("windows.autosave.settings.height", _settingsHeight);
-    GlobalSettings::get().setValue("windows.autosave.enabled", _autosaveEnabled);
-    GlobalSettings::get().setValue("windows.autosave.interval", _autosaveInterval);
-    GlobalSettings::get().setValue("windows.autosave.mode", _saveMode);
-    GlobalSettings::get().setValue("windows.autosave.number of files", _numberOfFiles);
-    GlobalSettings::get().setValue("windows.autosave.directory", _directory);
-    GlobalSettings::get().setValue("windows.autosave.catch peaks", _catchPeaks);
 }
 
 void AutosaveWindow::processIntern()
@@ -94,47 +63,44 @@ void AutosaveWindow::processIntern()
         ImGui::EndChild();
 
         processStatusBar();
-
-        validateAndCorrect();
     } catch (std::runtime_error const& error) {
         GenericMessageDialog::get().information("Error", error.what());
     }
 }
 
-void AutosaveWindow::processBackground()
-{
-    processStateUpdates();
-    processDeleteNonPersistentSavepoint();
-    processCleanup();
-    processAutomaticSavepoints();
-    _peakProcessor->process();
-}
-
 void AutosaveWindow::processToolbar()
 {
+    auto const& savepointTable = AutosaveController::get().getSavepointTable();
+
     AlienGui::Toolbar(
         AlienGui::ToolbarParameters().id("Autosave"),
         {AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLUS).name("Create save point").disabled(!_savepointTable.has_value()).action([&] {
-                 onCreateSavepoint(false);
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLUS).name("Create save point").disabled(!savepointTable.has_value()).action([&] {
+                 AutosaveController::get().onCreateSavepoint(false);
              })),
          AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_MINUS).name("Delete save point").disabled(!static_cast<bool>(_selectedEntry)).action([&] {
-                 onDeleteSavepoint(_selectedEntry);
+                 AutosaveController::get().onDeleteSavepoint(_selectedEntry);
+                 _selectedEntry.reset();
              })),
-         AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters()
-                 .icon(ICON_FA_BROOM)
-                 .name("Delete all save points")
-                 .disabled(!_savepointTable.has_value() || _savepointTable->isEmpty())
-                 .action([&] { GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); }); }))});
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_BROOM)
+                                                 .name("Delete all save points")
+                                                 .disabled(!savepointTable.has_value() || savepointTable->isEmpty())
+                                                 .action([&] {
+                                                     GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() {
+                                                         AutosaveController::get().scheduleCleanup();
+                                                         _selectedEntry.reset();
+                                                     });
+                                                 }))});
 }
 
 void AutosaveWindow::processHeader() {}
 
 void AutosaveWindow::processTable()
 {
-    if (!_savepointTable.has_value()) {
+    auto const& savepointTable = AutosaveController::get().getSavepointTable();
+    if (!savepointTable.has_value()) {
         AlienGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
         return;
     }
@@ -151,10 +117,10 @@ void AutosaveWindow::processTable()
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
         ImGuiListClipper clipper;
-        clipper.Begin(_savepointTable->getSize());
+        clipper.Begin(savepointTable->getSize());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto const& entry = _savepointTable->at(row);
+                auto const& entry = savepointTable->at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(23.0f));
@@ -233,13 +199,14 @@ void AutosaveWindow::processSettings()
     _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
+            auto autosaveEnabled = AutosaveController::get().isAutosaveEnabled();
+            auto autosaveInterval = AutosaveController::get().getAutosaveInterval();
             if (AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
-                    _autosaveInterval,
-                    &_autosaveEnabled)) {
-                if (_autosaveEnabled) {
-                    _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-                }
+                    autosaveInterval,
+                    &autosaveEnabled)) {
+                AutosaveController::get().setAutosaveInterval(autosaveInterval);
+                AutosaveController::get().setAutosaveEnabled(autosaveEnabled);
             }
             //if (AlienGui::Switcher(
             //        AlienGui::SwitcherParameters()
@@ -257,6 +224,7 @@ void AutosaveWindow::processSettings()
             //    _peakDeserializedSimulation->setDeserializedSimulation(SimulationDesc());
             //}
 
+            auto directory = AutosaveController::get().getDirectory();
             if (AlienGui::InputText(
                     AlienGui::InputTextParameters()
                         .name("Directory")
@@ -265,19 +233,28 @@ void AutosaveWindow::processSettings()
                         .folderButton(true)
                         .tooltip("The directory where the savepoints are stored can be chosen here. This allows the savepoints to be created in a separate "
                                  "directory for a simulation run. The savepoints are named using the current time step."),
-                    _directory)) {
-                updateSavepointTableFromFile();
+                    directory)) {
+                AutosaveController::get().setDirectory(directory);
+                _selectedEntry.reset();
             }
-            AlienGui::Switcher(
-                AlienGui::SwitcherParameters()
-                    .name("Mode")
-                    .values({"Limited save files", "Unlimited save files"})
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(_origSaveMode),
-                &_saveMode);
-            if (_saveMode == SaveMode_Circular) {
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
+
+            auto saveMode = AutosaveController::get().getSaveMode();
+            if (AlienGui::Switcher(
+                    AlienGui::SwitcherParameters()
+                        .name("Mode")
+                        .values({"Limited save files", "Unlimited save files"})
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(_origSaveMode),
+                    &saveMode)) {
+                AutosaveController::get().setSaveMode(saveMode);
+            }
+
+            if (saveMode == AutosaveController::SaveMode_Circular) {
+                auto numberOfFiles = AutosaveController::get().getNumberOfFiles();
+                if (AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), numberOfFiles)) {
+                    AutosaveController::get().setNumberOfFiles(numberOfFiles);
+                }
             }
         }
         ImGui::EndChild();
@@ -287,219 +264,25 @@ void AutosaveWindow::processSettings()
 
 void AutosaveWindow::processStatusBar()
 {
+    auto const& savepointTable = AutosaveController::get().getSavepointTable();
+
     std::vector<std::string> statusItems;
-    if (!_savepointTable.has_value()) {
+    if (!savepointTable.has_value()) {
         statusItems.emplace_back("No valid directory");
-    } else if (!_autosaveEnabled) {
+    } else if (!AutosaveController::get().isAutosaveEnabled()) {
         statusItems.emplace_back("No autosave scheduled");
     } else {
-        auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint);
-        statusItems.emplace_back("Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave));
+        statusItems.emplace_back("Next autosave in " + StringHelper::format(AutosaveController::get().getDurationUntilNextAutosave()));
     }
-    if (_savepointTable.has_value()) {
-        statusItems.emplace_back(std::to_string(_savepointTable->getSize()) + " save points");
+    if (savepointTable.has_value()) {
+        statusItems.emplace_back(std::to_string(savepointTable->getSize()) + " save points");
     }
 
     AlienGui::StatusBar(statusItems);
 }
 
-void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
-{
-    printOverlayMessage("Creating save point ...");
-
-    if (_saveMode == SaveMode_Circular) {
-        auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), _numberOfFiles - 1);
-        scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
-    }
-
-    PersisterRequestId requestId;
-    if (usePeakSimulation && !_peakDeserializedSimulation->isEmpty()) {
-        auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
-        auto saveData = SaveDeserializedSimulationRequestData{
-            .filename = _directory,
-            .sharedDeserializedSimulation = _peakDeserializedSimulation,
-            .generateNameFromTimestep = true,
-            .resetDeserializedSimulation = true};
-        requestId = _PersisterFacade::get()->scheduleSaveDeserializedSimulation(senderInfo, saveData);
-    } else {
-        auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
-        auto saveData = SaveSimulationRequestData{
-            .filename = _directory, .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .generateNameFromTimestep = true};
-        requestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
-    }
-
-    auto entry = std::make_shared<_SavepointEntry>(
-        _SavepointEntry{.filename = "", .state = SavepointState_InQueue, .timestamp = "", .name = "", .timestep = 0, .requestId = requestId.value});
-    SavepointTableService::get().insertEntryAtFront(_savepointTable.value(), entry);
-}
-
-void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
-{
-    printOverlayMessage("Deleting save point ...");
-
-    SavepointTableService::get().deleteEntry(_savepointTable.value(), entry);
-
-    if (entry->state != SavepointState_Persisted) {
-        scheduleDeleteNonPersistentSavepoint({entry});
-    }
-    _selectedEntry.reset();
-}
-
 void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
-    auto path = SavepointTableService::get().calcAbsolutePath(_savepointTable.value(), entry);
+    auto path = SavepointTableService::get().calcAbsolutePath(AutosaveController::get().getSavepointTable().value(), entry);
     FileTransferController::get().onOpenSimulation(path);
-}
-
-void AutosaveWindow::processStateUpdates()
-{
-    if (_savepointTable.has_value()) {
-        for (int row = 0, size = _savepointTable->getSize(); row < size; ++row) {
-            updateSavepoint(row);
-        }
-    }
-}
-
-void AutosaveWindow::processCleanup()
-{
-    if (_scheduleCleanup) {
-        printOverlayMessage("Cleaning up save points ...");
-
-        auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), 0);
-        scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
-        _scheduleCleanup = false;
-    }
-}
-
-void AutosaveWindow::processAutomaticSavepoints()
-{
-    if (!_autosaveEnabled) {
-        return;
-    }
-
-    if (!_lastSessionId.has_value() || _lastSessionId.value() != _SimulationFacade::get()->getSessionId()) {
-        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-        _lastSessionId = _SimulationFacade::get()->getSessionId();
-        _peakDeserializedSimulation->reset();
-    }
-
-    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
-    if (minSinceLastAutosave >= _autosaveInterval && _savepointTable.has_value()) {
-        onCreateSavepoint(_catchPeaks != CatchPeaks_None);
-        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-        _lastPeakTimepoint = std::chrono::steady_clock::now();
-    }
-
-    if (_catchPeaks != CatchPeaks_None) {
-        auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
-        if (minSinceLastCatchPeak >= PeakDetectionInterval) {
-            _peakProcessor->executeTask(
-                [&](auto const& senderId) {
-                    return _PersisterFacade::get()->scheduleGetPeakSimulation(
-                        SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true},
-                        GetPeakSimulationRequestData{
-                            .peakDeserializedSimulation = _peakDeserializedSimulation,
-                            .zoom = Viewport::get().getZoomFactor(),
-                            .center = Viewport::get().getCenterInWorldPos()});
-                },
-                [&](auto const& requestId) {},
-                [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
-            _lastPeakTimepoint = std::chrono::steady_clock::now();
-        }
-    }
-}
-
-void AutosaveWindow::scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries)
-{
-    for (auto const& entry : entries) {
-        if (!entry->requestId.empty() && (entry->state == SavepointState_InQueue || entry->state == SavepointState_InProgress)) {
-            _savepointsInProgressToDelete.emplace_back(entry);
-        }
-    }
-}
-
-void AutosaveWindow::processDeleteNonPersistentSavepoint()
-{
-    std::vector<SavepointEntry> newRequestsToDelete;
-    for (auto const& entry : _savepointsInProgressToDelete) {
-        if (auto requestState = _PersisterFacade::get()->getRequestState(PersisterRequestId{entry->requestId})) {
-            if (requestState.value() == PersisterRequestState::Finished) {
-                auto requestResult = _PersisterFacade::get()->fetchPersisterRequestResult(PersisterRequestId{entry->requestId});
-                if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
-                    SerializerService::get().deleteSimulation(saveResult->getData().filename);
-                }
-            } else if (requestState.value() == PersisterRequestState::Error) {
-                // Do nothing
-            } else {
-                newRequestsToDelete.emplace_back(entry);
-            }
-        }
-    }
-    _savepointsInProgressToDelete = newRequestsToDelete;
-}
-
-void AutosaveWindow::scheduleCleanup()
-{
-    _scheduleCleanup = true;
-}
-
-void AutosaveWindow::updateSavepoint(int row)
-{
-    auto state = _savepointTable->at(row)->state;
-    if (state != SavepointState_Persisted) {
-        auto newEntry = _savepointTable->at(row);
-        auto requestState = _PersisterFacade::get()->getRequestState(PersisterRequestId{newEntry->requestId});
-        if (requestState.has_value()) {
-            if (requestState.value() == PersisterRequestState::InProgress) {
-                newEntry->state = SavepointState_InProgress;
-            }
-            if (requestState.value() == PersisterRequestState::Finished) {
-                newEntry->state = SavepointState_Persisted;
-                auto requestResult = _PersisterFacade::get()->fetchPersisterRequestResult(PersisterRequestId{newEntry->requestId});
-
-                if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
-                    auto const& data = saveResult->getData();
-                    newEntry->timestep = data.timestep;
-                    newEntry->timestamp = StringHelper::format(data.timestamp);
-                    newEntry->name = data.projectName;
-                    newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
-                } else if (auto saveResult = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequestResult>(requestResult)) {
-                    auto const& data = saveResult->getData();
-                    newEntry->timestep = data.timestep;
-                    newEntry->timestamp = StringHelper::format(data.timestamp);
-                    newEntry->name = data.projectName;
-                    newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
-                    //newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.statisticsRawData.timeline.timestep.numCellsVariance)), 2);
-                    newEntry->peakType = "genome complexity variance";
-                }
-            }
-            if (requestState.value() == PersisterRequestState::Error) {
-                newEntry->state = SavepointState_Error;
-            }
-            if (state != newEntry->state) {
-                SavepointTableService::get().updateEntry(_savepointTable.value(), row, newEntry);
-            }
-        }
-    }
-}
-
-void AutosaveWindow::updateSavepointTableFromFile()
-{
-    if (auto savepoint = SavepointTableService::get().loadFromFile(getSavepointFilename()); std::holds_alternative<SavepointTable>(savepoint)) {
-        _savepointTable = std::get<SavepointTable>(savepoint);
-    } else {
-        _savepointTable.reset();
-    }
-    _selectedEntry.reset();
-}
-
-std::string AutosaveWindow::getSavepointFilename() const
-{
-    return (std::filesystem::path(_directory) / Const::SavepointTableFilename).string();
-}
-
-void AutosaveWindow::validateAndCorrect()
-{
-    _numberOfFiles = std::max(1, _numberOfFiles);
-    _autosaveInterval = std::max(1, _autosaveInterval);
 }

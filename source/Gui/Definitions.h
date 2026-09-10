@@ -102,6 +102,8 @@ class RadiationSourcesWindow;
 
 class ChangeColorDialog;
 
+class AutosaveController;
+
 class AutosaveWindow;
 
 class GenomeEditorWindow;

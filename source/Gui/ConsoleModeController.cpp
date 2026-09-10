@@ -18,6 +18,7 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
+#include "AutosaveController.h"
 #include "WindowController.h"
 
 namespace
@@ -25,6 +26,7 @@ namespace
     auto constexpr PollInterval = std::chrono::milliseconds(100);
     auto constexpr PrintInterval = std::chrono::milliseconds(200);
     auto constexpr EscapeKeyCode = 27;
+    auto constexpr StatusLineWidth = 80;
 
 #ifdef _WIN32
     void bringConsoleToFront()
@@ -124,6 +126,8 @@ void ConsoleModeController::process()
     if (!_active) {
         return;
     }
+    AutosaveController::get().process();
+    printPersistedSavepoint();
     printStatusLine();
 
     if (isEscapePressed()) {
@@ -148,6 +152,16 @@ void ConsoleModeController::deactivate()
     glfwFocusWindow(window);
 
     _active = false;
+}
+
+void ConsoleModeController::printPersistedSavepoint()
+{
+    auto savepoint = AutosaveController::get().getPersistedSavepoint();
+    if (!savepoint.has_value()) {
+        return;
+    }
+    std::cout << "\r" << std::string(StatusLineWidth, ' ') << "\rSave point created: " << savepoint.value()->filename.string() << std::endl;
+    _lastPrintTimepoint.reset();
 }
 
 void ConsoleModeController::printStatusLine()

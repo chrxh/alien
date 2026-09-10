@@ -10,6 +10,8 @@ PUBLIC
     AlienGui.h
     AlienWindow.cpp
     AlienWindow.h
+    AutosaveController.cpp
+    AutosaveController.h
     AutosaveWindow.cpp
     AutosaveWindow.h
     BrowserData.cpp

@@ -15,10 +15,11 @@ public:
     void activate();
     bool isActive() const;
 
-    void process(); // Must not be called within an ImGui frame.
+    void process();  // Must not be called within an ImGui frame.
 
 private:
     void deactivate();
+    void printPersistedSavepoint();
     void printStatusLine();
 
     struct StateBeforeActivation
