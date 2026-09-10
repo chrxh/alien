@@ -505,7 +505,7 @@ namespace Const
         "exploit different features.\n\n" ICON_FA_CHEVRON_RIGHT
         " Community: All logged-in users can share their simulations and genomes here. The files stored in this workspace are visible to all "
         "users.\n\n" ICON_FA_CHEVRON_RIGHT
-        " My workspace: Each user account has its own private space. The simulations and genomes are only visible to the logged-in user.";
+        " Private workspace: Each user account has its own private space. The simulations and genomes are only visible to the logged-in user.";
 
     std::string const ParameterRadiationAbsorptionLowNumCellsPenaltyTooltip =
         "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle.";
