@@ -77,9 +77,12 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
 
 ContentDesc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
-    EngineWorkerGuard access(this);
+    TOs dataTO;
+    {
+        EngineWorkerGuard access(this);
 
-    auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
+        dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
+    }
     ExitScopeGuard guard([&dataTO]() { _TOProvider::destroyUnmanagedDataTO(dataTO); });
 
     return DescConverterService::get().convertTOtoDescription(dataTO);
