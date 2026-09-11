@@ -238,6 +238,7 @@ public:
         MEMBER(InputTextParameters, bool, readOnly, false);
         MEMBER(InputTextParameters, bool, password, false);
         MEMBER(InputTextParameters, bool, folderButton, false);
+        MEMBER(InputTextParameters, std::optional<std::function<std::string()>>, generateValueFunc, std::nullopt);
         MEMBER(InputTextParameters, std::optional<std::string>, defaultValue, std::nullopt);
         MEMBER(InputTextParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);

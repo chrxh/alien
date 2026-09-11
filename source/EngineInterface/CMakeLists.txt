@@ -30,6 +30,8 @@ add_library(EngineInterface
     InspectedEntityIds.h
     LocationHelper.cpp
     LocationHelper.h
+    NameGeneratorService.cpp
+    NameGeneratorService.h
     NeuralNetWeight.h
     NumberGenerator.cpp
     NumberGenerator.h
