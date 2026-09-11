@@ -17,7 +17,6 @@ public:
 
     void process();
 
-    // Previews of all sub-genomes as they are shown in the last processed frame
     std::vector<PreviewDesc> getPreviewDescs() const;
 
 private:

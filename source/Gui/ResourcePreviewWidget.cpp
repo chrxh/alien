@@ -85,7 +85,7 @@ void ResourcePreviewWidget::processGenomePreview()
     if (ImGui::BeginChild("##genomePreview", ImVec2(width, height), 0, ImGuiWindowFlags_NoScrollbar)) {
         RealVector2D viewStartPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
         RealVector2D viewSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-        _renderer.drawCollage(ImGui::GetWindowDrawList(), _genomePreviews, viewStartPos, viewSize);
+        _previewView->drawCollage(ImGui::GetWindowDrawList(), _genomePreviews, viewStartPos, viewSize);
     }
     ImGui::EndChild();
     ImGui::PopStyleColor();

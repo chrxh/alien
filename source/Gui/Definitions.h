@@ -150,6 +150,9 @@ using PreviewWidget = std::shared_ptr<_PreviewWidget>;
 class _CreaturePreviewWidget;
 using CreaturePreviewWidget = std::shared_ptr<_CreaturePreviewWidget>;
 
+class _PreviewDescView;
+using PreviewDescView = std::shared_ptr<_PreviewDescView>;
+
 class _BrowserData;
 using BrowserData = std::shared_ptr<_BrowserData>;
 

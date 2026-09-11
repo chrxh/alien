@@ -20,7 +20,7 @@
 #include <Base/ExitScopeGuard.h>
 #include <Base/LoggingService.h>
 
-#include "PreviewDescRenderer.h"
+#include "PreviewDescView.h"
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
@@ -129,8 +129,8 @@ std::optional<std::string> PictureGuiService::createGenomePreviewJpg(std::vector
         drawList.PushTextureID(ImGui::GetIO().Fonts->TexID);
         drawList.PushClipRect({0, 0}, {viewSize.x, viewSize.y}, false);
 
-        PreviewDescRenderer renderer;
-        renderer.drawCollage(&drawList, previews, {0, 0}, viewSize);
+        auto previewView = _PreviewDescView::create();
+        previewView->drawCollage(&drawList, previews, {0, 0}, viewSize);
 
         drawList.PopClipRect();
         drawList.PopTextureID();

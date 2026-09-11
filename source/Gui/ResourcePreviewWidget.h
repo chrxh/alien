@@ -9,7 +9,7 @@
 #include <Network/Definitions.h>
 
 #include "Definitions.h"
-#include "PreviewDescRenderer.h"
+#include "PreviewDescView.h"
 
 class ResourcePreviewWidget
 {
@@ -29,5 +29,5 @@ private:
     std::optional<TextureData> _texture;
 
     std::vector<PreviewDesc> _genomePreviews;
-    PreviewDescRenderer _renderer;
+    PreviewDescView _previewView = _PreviewDescView::create();
 };
