@@ -1,0 +1,23 @@
+#include "Resources.h"
+
+namespace Const
+{
+    std::string const ProgramVersion = "5.0.0-alpha.29";
+    std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
+    std::string const AlienServerURL = "api.alien-project.org";
+    std::string const StartupSimulationResourceName = "Startup/Version1";
+
+    std::filesystem::path const ResourcePath = "resources";
+    std::filesystem::path const AutosavePath = ResourcePath / "autosave";
+    std::filesystem::path const ImagesPath = ResourcePath / "images";
+
+    std::filesystem::path const LogFilename = "log.txt";
+    std::filesystem::path const ProfileFilename = "profile.txt";
+    std::filesystem::path const TraceFilename = "trace.txt";
+    std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
+    std::filesystem::path const AutosaveFile = AutosavePath / AutosaveFileWithoutPath;
+    std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
+    std::filesystem::path const SavepointTableFilename = "savepoints.json";
+
+    std::filesystem::path const LogoFilename = ImagesPath / "logo.png";
+}

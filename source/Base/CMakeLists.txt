@@ -25,6 +25,7 @@ add_library(Base
     MathTypes.h
     Physics.cpp
     Physics.h
+    Resources.cpp
     Resources.h
     Singleton.h
     StringHelper.cpp

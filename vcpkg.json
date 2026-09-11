@@ -1,6 +1,5 @@
 {
   "name": "alien",
-  "version": "5.0.0",
   "dependencies": [
     {
       "name": "glew",
