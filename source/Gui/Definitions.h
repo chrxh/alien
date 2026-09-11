@@ -15,7 +15,7 @@ using SimulationScrollbars = std::shared_ptr<_SimulationScrollbars>;
 
 class Viewport;
 
-class StyleRepository;
+class StyleService;
 
 class TemporalControlWindow;
 

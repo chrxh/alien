@@ -22,7 +22,7 @@
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "MutationRatesWidget.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

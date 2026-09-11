@@ -9,7 +9,7 @@
 #include <Base/LoggingService.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void GenericMessageDialog::processIntern()
 {

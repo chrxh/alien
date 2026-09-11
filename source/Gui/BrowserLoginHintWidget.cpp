@@ -10,7 +10,7 @@
 
 #include "AlienGui.h"
 #include "LoginDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -72,7 +72,7 @@ void _BrowserLoginHintWidget::processCard()
     drawList->AddRectFilled(cardScreenPos, cardScreenEndPos, Const::BrowserLoginHintCardColor, scale(CardRounding));
     drawList->AddRect(cardScreenPos, cardScreenEndPos, Const::BrowserLoginHintCardBorderColor, scale(CardRounding));
 
-    auto iconFont = StyleRepository::get().getIconFont();
+    auto iconFont = StyleService::get().getIconFont();
     auto iconFontSize = scale(IconFontSize);
     auto iconWidth = iconFont->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, Icon.c_str()).x;
     ImVec4 clipRect(cardScreenPos.x, cardScreenPos.y, cardScreenEndPos.x, cardScreenEndPos.y);
@@ -87,7 +87,7 @@ void _BrowserLoginHintWidget::processCard()
         0.0f,
         false);
 
-    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
+    ImGui::PushFont(StyleService::get().getMediumBoldFont());
     auto headlineWidth = ImGui::CalcTextSize(Headline.c_str()).x;
     ImGui::SetCursorPos({cardPos.x + (cardWidth - headlineWidth) / 2, cardPos.y + scale(HeadlineOffsetY)});
     ImGui::TextUnformatted(Headline.c_str());

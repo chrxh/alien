@@ -9,7 +9,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -274,7 +274,7 @@ void _PreviewDescView::drawCellLabels(ImDrawList* drawList, PreviewDesc const& d
     }
 
     auto const cellSize = scale(viewport.getZoom());
-    auto font = StyleRepository::get().getSmallBoldFont();
+    auto font = StyleService::get().getSmallBoldFont();
     for (auto const& cell : desc._cells) {
         auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
         auto text = parameters._cellLabel == CellLabel::NodeIndex ? std::to_string(cell._nodeIndex) : Const::CellTypeStrings.at(cell._cellType);
@@ -340,7 +340,7 @@ void _PreviewDescView::drawGeneReferences(ImDrawList* drawList, PreviewDesc cons
     }
 
     auto const cellSize = scale(viewport.getZoom());
-    auto font = StyleRepository::get().getSmallBoldFont();
+    auto font = StyleService::get().getSmallBoldFont();
     for (auto const& cell : desc._cells) {
         if (!cell._constructorGeneIndex.has_value()) {
             continue;

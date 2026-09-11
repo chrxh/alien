@@ -15,7 +15,7 @@
 #include <EngineInterface/SimulationParametersTypes.h>
 
 #include "Definitions.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 struct TreeNodeStackElement
 {
@@ -34,6 +34,8 @@ struct TreeNodeInfo
 class AlienGui
 {
 public:
+    static auto constexpr GroupTextIndent = 8.0f;
+
     static void HelpMarker(std::string const& text);
 
     struct SliderFloatParameters

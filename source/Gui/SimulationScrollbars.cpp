@@ -5,7 +5,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

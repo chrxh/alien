@@ -5,7 +5,7 @@
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

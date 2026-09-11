@@ -9,7 +9,7 @@
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "MainLoopController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "WindowController.h"
 
 #include <GLFW/glfw3.h>

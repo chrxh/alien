@@ -8,7 +8,7 @@
 
 #include "AlienGui.h"
 #include "GuiLogger.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void LogWindow::initIntern()
 {
@@ -27,9 +27,9 @@ void LogWindow::shutdownIntern()
 
 void LogWindow::processIntern()
 {
-    auto& styleRepository = StyleRepository::get();
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
+    auto& styleService = StyleService::get();
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleService.scale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
 
         for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important) | boost::adaptors::reversed) {

@@ -6,7 +6,7 @@
 #include "BrowserWindow.h"
 #include "GenomeEditorWindow.h"
 #include "NetworkTransferController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 namespace

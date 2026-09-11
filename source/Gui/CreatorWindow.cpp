@@ -24,7 +24,7 @@
 #include "HelpStrings.h"
 #include "ImageToPatternDialog.h"
 #include "SimulationInteractionController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 #include "Fonts/AlienIconFont.h"
