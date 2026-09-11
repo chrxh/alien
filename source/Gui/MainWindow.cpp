@@ -77,7 +77,7 @@
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
 #include "StartupCheckService.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
 #include "UploadSimulationDialog.h"
@@ -116,7 +116,7 @@ _MainWindow::_MainWindow()
     initGlad();
 
     log(Priority::Important, "initialize services");
-    StyleRepository::get().setup();
+    StyleService::get().setup();
     NetworkService::get().setup();
 
     log(Priority::Important, "initialize facades");

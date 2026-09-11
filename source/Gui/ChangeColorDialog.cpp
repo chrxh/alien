@@ -8,7 +8,7 @@
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void ChangeColorDialog::open(GenomeTabEditData const& editData)
 {

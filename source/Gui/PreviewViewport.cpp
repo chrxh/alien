@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 float PreviewViewport::getZoom() const
 {

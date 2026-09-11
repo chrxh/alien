@@ -22,7 +22,7 @@
 #include "RenderStep.h"
 #include "Shader.h"
 #include "SimulationScrollbars.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 void SimulationView::setup()
@@ -71,7 +71,7 @@ void SimulationView::draw()
         auto textWidth = scale(300.0f);
         auto textHeight = scale(80.0f);
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto& styleRep = StyleRepository::get();
+        auto& styleRep = StyleService::get();
         auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         auto maxLength = std::max(right, bottom);

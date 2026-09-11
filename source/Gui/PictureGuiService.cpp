@@ -22,7 +22,7 @@
 
 #include "PreviewDescView.h"
 #include "SimulationView.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "WindowController.h"
 
 namespace

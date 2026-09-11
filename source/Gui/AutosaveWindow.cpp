@@ -14,7 +14,7 @@
 #include "AutosaveController.h"
 #include "FileTransferController.h"
 #include "GenericMessageDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

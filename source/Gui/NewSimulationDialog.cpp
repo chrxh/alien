@@ -7,7 +7,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 #include <EngineInterface/SimulationFacade.h>

@@ -16,7 +16,7 @@
 #include "HelpStrings.h"
 #include "LoginController.h"
 #include "ResetPasswordDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include <EngineInterface/SimulationFacade.h>
 
 void LoginDialog::initIntern()

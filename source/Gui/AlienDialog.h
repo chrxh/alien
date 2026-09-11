@@ -7,7 +7,7 @@
 #include "MainLoopEntity.h"
 #include "MainLoopEntityController.h"
 #include "ModalWindow.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "WindowController.h"
 
 class AlienDialog : public MainLoopEntity

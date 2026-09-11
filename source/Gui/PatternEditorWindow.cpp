@@ -18,7 +18,7 @@
 #include "EditorModel.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 #include <EngineInterface/SimulationFacade.h>
@@ -80,7 +80,7 @@ void PatternEditorWindow::processIntern()
             AlienGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(RightColumnWidth)
-                .inputWidth(StyleRepository::get().scale(50.0f))
+                .inputWidth(StyleService::get().scale(50.0f))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),

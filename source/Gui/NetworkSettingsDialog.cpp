@@ -6,7 +6,7 @@
 
 #include "AlienGui.h"
 #include "BrowserWindow.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

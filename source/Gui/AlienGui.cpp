@@ -25,7 +25,7 @@
 #include "HelpStrings.h"
 #include "LayerColorPalette.h"
 #include "OverlayController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -203,8 +203,8 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
 
 void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
-    auto inputWidth = StyleRepository::get().scale(parameters._inputWidth);
+    auto textWidth = StyleService::get().scale(parameters._textWidth);
+    auto inputWidth = StyleService::get().scale(parameters._inputWidth);
     ImGui::PushID(parameters._id.c_str());
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth - inputWidth - ImGui::GetStyle().FramePadding.x * 2);
     ImGui::SliderFloat(("##slider" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
@@ -357,7 +357,7 @@ bool AlienGui::InputOptionalFloat(InputFloatParameters const& parameters, std::o
 
     ImGui::PushID(parameters._id.c_str());
     ImGui::PushID(parameters._name.c_str());
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+    auto textWidth = StyleService::get().scale(parameters._textWidth);
 
     ImGui::Checkbox("##optEnabled", &enabled);
     ImGui::SameLine();
@@ -381,7 +381,7 @@ bool AlienGui::InputOptionalFloat(InputFloatParameters const& parameters, std::o
 bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
     ImGui::PushID(parameters._id.c_str());
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+    auto textWidth = StyleService::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -409,7 +409,7 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
 
 void AlienGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)
 {
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+    auto textWidth = StyleService::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -519,10 +519,10 @@ bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, in
     auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x : 0;
     ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - folderButtonWidth);
     if (parameters._monospaceFont) {
-        ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
+        ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
     }
     if (parameters._bold) {
-        ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+        ImGui::PushFont(StyleService::get().getSmallBoldFont());
     }
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
@@ -619,8 +619,8 @@ void AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters
     static char buffer[1024 * 16];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
-    auto height = parameters._height == 0 ? ImGui::GetContentRegionAvail().y : StyleRepository::get().scale(parameters._height);
+    auto textWidth = StyleService::get().scale(parameters._textWidth);
+    auto height = parameters._height == 0 ? ImGui::GetContentRegionAvail().y : StyleService::get().scale(parameters._height);
 
     ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
@@ -650,7 +650,7 @@ namespace
 
 bool AlienGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 {
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+    auto textWidth = StyleService::get().scale(parameters._textWidth);
 
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
@@ -1302,11 +1302,11 @@ void AlienGui::Text(TextParameters const& parameters)
 
     switch (parameters._style) {
     case TextStyle::Bold:
-        ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+        ImGui::PushFont(StyleService::get().getSmallBoldFont());
         fontPushed = true;
         break;
     case TextStyle::Monospace:
-        ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
+        ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         fontPushed = true;
         colorPushed = true;
@@ -1603,7 +1603,7 @@ void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRG
         ("##" + parameters._name).c_str(),
         imGuiColor,
         ImGuiColorEditFlags_NoBorder,
-        {ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(parameters._textWidth), 0});
+        {ImGui::GetContentRegionAvail().x - StyleService::get().scale(parameters._textWidth), 0});
     if (openColorPicker) {
         ImGui::OpenPopup("colorpicker");
         imGuiBackupColor = imGuiColor;
@@ -1812,7 +1812,7 @@ bool AlienGui::Group(GroupParameters const& parameters)
     drawList->AddRectFilled(upperLeft, lowerRight, color, style.FrameRounding);
 
     // Accent bar marking the primary section of a panel
-    auto textIndent = scale(8.0f);
+    auto textIndent = scale(GroupTextIndent);
     if (parameters._highlighted) {
         auto barWidth = scale(3.0f);
         drawList->AddRectFilled(
@@ -2019,7 +2019,7 @@ namespace
         auto iconColor = parameters._disabled ? Const::ToolbarButtonDisabledTextColor
             : parameters._selected            ? Const::ToolbarButtonSelectedTextColor
                                               : Const::ToolbarButtonTextColor;
-        ImGui::PushFont(StyleRepository::get().getIconFont());
+        ImGui::PushFont(StyleService::get().getIconFont());
         auto iconSize = ImGui::CalcTextSize(parameters._icon.c_str());
         drawList->AddText({pos.x + (size - iconSize.x) / 2, pos.y + (size - iconSize.y) / 2}, iconColor, parameters._icon.c_str());
         if (parameters._secondIcon.has_value()) {
@@ -2056,7 +2056,7 @@ namespace
         if (ImGui::BeginPopup("##toolbarMenu")) {
             auto drawList = ImGui::GetWindowDrawList();
             auto rowHeight = scale(ToolbarMenuRowHeight);
-            auto iconFont = StyleRepository::get().getIconFont();
+            auto iconFont = StyleService::get().getIconFont();
             auto iconSize = scale(ToolbarMenuIconSize);
             for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
                 if (index < splitIndex) {
@@ -2157,7 +2157,7 @@ void AlienGui::Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarI
         }
         auto opened = ImGui::IsPopupOpen("##toolbarMenu");
 
-        auto iconFont = StyleRepository::get().getIconFont();
+        auto iconFont = StyleService::get().getIconFont();
         auto iconFontSize = scale(ToolbarOverflowIconSize);
         auto iconSize = iconFont->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, ICON_FA_ELLIPSIS_H);
         drawList->AddText(
@@ -2289,7 +2289,7 @@ bool AlienGui::MaximizeButton(RealVector2D const& pos, float iconSize, bool maxi
 
     auto icon = maximized ? ICON_FA_COMPRESS_ARROWS_ALT : ICON_FA_EXPAND_ARROWS_ALT;
     drawList->AddText(
-        StyleRepository::get().getIconFont(),
+        StyleService::get().getIconFont(),
         iconSize * 0.7f,
         ImVec2(iconCenter.x - iconSize * 0.31f, iconCenter.y - iconSize * 0.22f),
         ImGui::GetColorU32(ImGuiCol_Text),
@@ -2366,7 +2366,7 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters, bool* expandB
     //    treeNodeClosedFlags |= ImGuiTreeNodeFlags_Bullet;
     //    treeNodeOpenFlags |= ImGuiTreeNodeFlags_Bullet;
     //}
-    ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+    ImGui::PushFont(StyleService::get().getSmallBoldFont());
 
     auto refPos = ImGui::GetCursorScreenPos();
     refPos.x += scale(28.0f);
@@ -2466,7 +2466,7 @@ void AlienGui::EndTabItem()
 
 bool AlienGui::Button(ButtonParameters const& parameters)
 {
-    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(parameters._textWidth);
+    auto width = ImGui::GetContentRegionAvail().x - StyleService::get().scale(parameters._textWidth);
     auto result = ImGui::Button(parameters._buttonText.c_str(), {width, 0});
     ImGui::SameLine();
 
@@ -2520,7 +2520,7 @@ void AlienGui::Spinner(SpinnerParameters const& parameters)
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
     AlienGui::RotateStart(drawList);
-    auto font = StyleRepository::get().getIconFont();
+    auto font = StyleService::get().getIconFont();
     auto text = ICON_FA_SPINNER;
     ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
     font->RenderText(

@@ -54,7 +54,7 @@
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
 #include "UploadSimulationDialog.h"
@@ -358,7 +358,7 @@ void MainLoopController::drawLoadingScreen()
     glClearColor(0, 0, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    auto& styleRep = StyleRepository::get();
+    auto& styleRep = StyleService::get();
     auto center = ImGui::GetMainViewport()->GetCenter();
     auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));

@@ -5,7 +5,7 @@
 #include <Base/Resources.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 AboutDialog::AboutDialog()
     : AlienDialog("About")

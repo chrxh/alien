@@ -13,7 +13,7 @@
 #include "HelpStrings.h"
 #include "NetworkTransferController.h"
 #include "OverlayController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {

@@ -11,7 +11,7 @@
 #include "RenderPipeline.h"
 #include "Shader.h"
 #include "SimulationView.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 namespace
@@ -463,7 +463,7 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     // Row 13: "Solid" (for ObjectType_Solid)
     // Row 14: "Fluid" (for ObjectType_Fluid)
     // Row 15: "Free Cell" (for ObjectType_FreeCell)
-    auto font = StyleRepository::get().getDefaultFont();
+    auto font = StyleService::get().getDefaultFont();
     float fontSize = 16.0f;  // Base font size for rendering
 
     // Build combined list of labels: cell types + object types (Solid, Fluid, Free Cell)

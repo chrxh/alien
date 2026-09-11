@@ -14,7 +14,7 @@
 #include <EngineInterface/NumberGenerator.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -147,7 +147,7 @@ namespace
     // Used for the markers accompanying the sliders, which stay small regardless of the label font
     ImFont* smallLabelFont()
     {
-        return StyleRepository::get().getTinyFont();
+        return StyleService::get().getTinyFont();
     }
 
     // The labels are drawn with a font that is rasterized at the used size, otherwise thin strokes are lost when the glyphs are scaled
@@ -446,7 +446,7 @@ void _NeuralNetEditorWidget::processEditor(
     EditorMode mode)
 {
     // The dialog offers more room than the embedded editor and therefore labels the graph with the larger default font
-    _labelFont = mode == EditorMode::Dialog ? StyleRepository::get().getDefaultFont() : StyleRepository::get().getTinyFont();
+    _labelFont = mode == EditorMode::Dialog ? StyleService::get().getDefaultFont() : StyleService::get().getTinyFont();
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
