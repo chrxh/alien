@@ -2,23 +2,32 @@
 
 #include <optional>
 #include <string>
+#include <vector>
+
+#include <EngineInterface/PreviewDesc.h>
 
 #include <Network/Definitions.h>
 
 #include "Definitions.h"
+#include "PreviewDescRenderer.h"
 
 class ResourcePreviewWidget
 {
 public:
-    void create(NetworkResourceType resourceType);
+    void createForSimulation();
+    void createForGenome(std::vector<PreviewDesc> const& previews);
     void process();
 
-    std::optional<std::string> const& getJpg() const;
+    std::string const& getJpg() const;
 
 private:
-    void createSimulationPreview();
+    void processSimulationPreview();
+    void processGenomePreview();
     void clear();
 
-    std::optional<std::string> _jpg;
+    std::string _jpg;
     std::optional<TextureData> _texture;
+
+    std::vector<PreviewDesc> _genomePreviews;
+    PreviewDescRenderer _renderer;
 };

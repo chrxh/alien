@@ -26,7 +26,11 @@ void ReplaceSimulationDialog::open(NetworkResourceType resourceType, BrowserLeaf
     changeTitle("Replace " + getResourceTypeString(resourceType));
     _resourceType = resourceType;
     _leaf = leaf;
-    _preview.create(_resourceType);
+    if (_resourceType == NetworkResourceType_Simulation) {
+        _preview.createForSimulation();
+    } else {
+        _preview.createForGenome(GenomeEditorWindow::get().getCurrentPreviewDescs());
+    }
     AlienDialog::open();
 }
 
@@ -62,7 +66,7 @@ void ReplaceSimulationDialog::onReplace()
             return ReplaceNetworkResourceRequestData::SimulationData{
                 .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .jpg = _preview.getJpg()};
         } else {
-            return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
+            return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome(), .jpg = _preview.getJpg()};
         }
     }();
     NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{

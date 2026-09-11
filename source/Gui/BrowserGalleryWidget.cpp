@@ -460,7 +460,7 @@ void _BrowserGalleryWidget::processPicture(NetworkResourceRawTO const& rawTO, fl
     }
 
     ImGui::GetWindowDrawList()->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
-    auto text = hasPreviewPictures() && findResult == _pictureBySimId.end() ? std::string("loading...") : std::string("no preview");
+    auto text = findResult == _pictureBySimId.end() ? std::string("loading...") : std::string("no preview");
     auto textSize = ImGui::CalcTextSize(text.c_str());
     ImGui::GetWindowDrawList()->AddText({pos.x + (width - textSize.x) / 2, pos.y + (height - textSize.y) / 2}, (ImU32)Const::TextDecentColor, text.c_str());
     ImGui::Dummy({width, height});
@@ -533,7 +533,7 @@ std::vector<NetworkResourceRawTO> _BrowserGalleryWidget::getSortedEntries() cons
 
 void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries)
 {
-    if (!hasPreviewPictures() || _pictureProcessor->pendingTasks()) {
+    if (_pictureProcessor->pendingTasks()) {
         return;
     }
 
@@ -572,11 +572,6 @@ void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRa
                 _pictureBySimId.insert_or_assign(simId, std::nullopt);
             }
         });
-}
-
-bool _BrowserGalleryWidget::hasPreviewPictures() const
-{
-    return _data->currentWorkspace.resourceType == NetworkResourceType_Simulation;
 }
 
 void _BrowserGalleryWidget::onSelectEntry(NetworkResourceRawTO const& rawTO)

@@ -58,7 +58,6 @@ private:
     std::string getPageText() const;
     std::vector<NetworkResourceRawTO> getSortedEntries() const;
     void requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries);
-    bool hasPreviewPictures() const;
 
     void onSelectEntry(NetworkResourceRawTO const& rawTO);
 

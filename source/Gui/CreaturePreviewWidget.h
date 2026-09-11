@@ -4,6 +4,7 @@
 #include <EngineInterface/PreviewDesc.h>
 
 #include "Definitions.h"
+#include "PreviewDescRenderer.h"
 
 class _CreaturePreviewWidget
 {
@@ -22,18 +23,24 @@ public:
     SubGenomeDesc const& getGenomeWithStartIndex() const;
     void setGenomeWithStartIndex(SubGenomeDesc const& value);
 
+    // Preview of the last processed frame
+    PreviewDesc const& getPreviewDesc() const;
+
     void resetVisualFrontAngle();
 
 private:
     _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
     void processMouseNavigation();
-    void processCellGraphAndSelection(ConversionResult const& conversionResult);
-    void processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype, ConversionResult const& conversionResult);
+    void processCellGraphAndSelection();
+    void processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype);
     void processActionButtons();
     void processScrollbars();
-    void processTitle(ConversionResult const& conversionResult);
+    void processTitle();
 
+    void updateSelection(RealVector2D const& viewSize, RealVector2D const& viewStartPos);
+
+    PreviewViewport createViewport(RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     void moveCenter(RealVector2D const& startWorldPosition, RealVector2D const& endViewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos);
@@ -41,10 +48,12 @@ private:
     void updatePhenotype(ContentDesc& phenotype, CellPreviewDesc const& editedCell) const;
 
     SimulationScrollbars _scrollbars;
+    PreviewDescRenderer _renderer;
 
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
     SubGenomeDesc _subGenome;
+    PreviewDesc _previewDesc;
     uint64_t _creatureId = 0;
     std::optional<float> _visualFrontAngle;
     std::optional<uint64_t> _selectedCellIdFromPreview;
@@ -52,7 +61,6 @@ private:
     RealVector2D _worldCenter;
     float _zoom = 20.0f;
     bool _initialScrollPositionSet = false;
-    std::optional<float> _lastFrontAngleRadius;
     std::optional<int> _selectedNodeFromPreview;
 
     std::optional<RealVector2D> _worldPosForPanning;

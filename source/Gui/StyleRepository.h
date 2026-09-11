@@ -150,6 +150,8 @@ namespace Const
     ImColor const CursorShadowColor = ImColor::HSV(0, 0, 0, 1.0f);
     ImColor const CursorColor = ImColor::HSV(0, 0.0f, 1.0f, 1.0f);
 
+    ImColor const GenomePreviewBackgroundColor = ImColor::HSV(0.667f, 1.0f, 0.106f);
+    ImColor const GenomePreviewSeparatorColor = ImColor::HSV(0, 0, 0.25f);
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);
     ImColor const GenomePreviewInactiveColor = ImColor::HSV(0, 0, 0.15f);
     ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 0.7f);

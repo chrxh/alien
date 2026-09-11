@@ -17,8 +17,7 @@
 #include <PersisterInterface/PersisterRequestResult.h>
 #include <PersisterInterface/SerializerService.h>
 
-_PersisterWorker::_PersisterWorker()
-{}
+_PersisterWorker::_PersisterWorker() {}
 
 void _PersisterWorker::runThreadLoop()
 {
@@ -392,7 +391,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     DownloadNetworkResourceResultData resultData;
 
     std::string mainData;
-    std::optional<std::string> pictureJpg;
+    std::string pictureJpg;
     IntVector2D size;
     int numObjects = 0;
 
@@ -425,7 +424,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
         pictureJpg = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
     } else {
-        auto const& genome = std::get<UploadNetworkResourceRequestData::CreatureData>(requestData.data).description;
+        auto const& creatureData = std::get<UploadNetworkResourceRequestData::CreatureData>(requestData.data);
+        auto const& genome = creatureData.description;
         if (genome._genes.empty()) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"There is no valid genome for uploading selected."});
@@ -435,6 +435,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
         }
         numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
+        pictureJpg = creatureData.jpg;
     }
 
     std::string resourceId;
@@ -477,7 +478,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     std::string mainData;
     IntVector2D worldSize;
     int numObjects = 0;
-    std::optional<std::string> pictureJpg;
+    std::string pictureJpg;
 
     SimulationDesc deserializedSim;
     if (resourceType == NetworkResourceType_Simulation) {
@@ -506,7 +507,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
         pictureJpg = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
     } else {
-        auto const& genome = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data).description;
+        auto const& creatureData = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data);
+        auto const& genome = creatureData.description;
         if (genome._genes.empty()) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"There is no valid genome for replacing selected."});
@@ -516,6 +518,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for replacing."});
         }
         numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
+        pictureJpg = creatureData.jpg;
     }
 
     if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, pictureJpg)) {

@@ -79,6 +79,11 @@ GenomeDesc GenomeEditorWindow::getCurrentGenome() const
     return _tabs.at(_selectedTabIndex)->getGenomeDesc();
 }
 
+std::vector<PreviewDesc> GenomeEditorWindow::getCurrentPreviewDescs() const
+{
+    return _tabs.at(_selectedTabIndex)->getPreviewDescs();
+}
+
 GenomeEditorWindow::GenomeEditorWindow()
     : AlienWindow("Genome editor", "windows.genome editor", false, true, {345.0f, 192.0f}, {1100.0f, 732.0f}, {500.0f, 300.0f})
 {}

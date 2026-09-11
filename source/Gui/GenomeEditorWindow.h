@@ -5,6 +5,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GenomeDesc.h>
+#include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienWindow.h"
@@ -17,6 +18,9 @@ class GenomeEditorWindow : public AlienWindow
 public:
     void openTab(GenomeDesc const& genome, bool forceNewTab = false, bool openEditorIfClosed = true, std::optional<int> lineageId = std::nullopt);
     GenomeDesc getCurrentGenome() const;
+
+    // Previews of the sub-genomes of the currently selected genome, e.g. for upload dialogs
+    std::vector<PreviewDesc> getCurrentPreviewDescs() const;
 
 private:
     GenomeEditorWindow();

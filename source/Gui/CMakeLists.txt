@@ -146,6 +146,8 @@ PUBLIC
     PictureData.h
     PictureGuiService.cpp
     PictureGuiService.h
+    PreviewDescRenderer.cpp
+    PreviewDescRenderer.h
     PreviewSettingsDialog.cpp
     PreviewSettingsDialog.h
     PreviewWidget.cpp

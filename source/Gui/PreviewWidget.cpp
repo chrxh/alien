@@ -61,6 +61,15 @@ void _PreviewWidget::process()
     _sessionIdFromPreviousFrame = sessionId;
 }
 
+std::vector<PreviewDesc> _PreviewWidget::getPreviewDescs() const
+{
+    std::vector<PreviewDesc> result;
+    for (auto const& creatureWidget : _creatureWidgets) {
+        result.emplace_back(creatureWidget->getPreviewDesc());
+    }
+    return result;
+}
+
 _PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
     : _genomeEditData(genomeEditData)
     , _editData(editData)

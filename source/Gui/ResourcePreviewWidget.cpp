@@ -12,27 +12,83 @@
 #include "PictureGuiService.h"
 #include "StyleRepository.h"
 
-void ResourcePreviewWidget::create(NetworkResourceType resourceType)
+void ResourcePreviewWidget::createForSimulation()
 {
     clear();
 
-    // Genomes have no preview picture yet
-    if (resourceType == NetworkResourceType_Simulation) {
-        createSimulationPreview();
-    }
-}
-
-void ResourcePreviewWidget::createSimulationPreview()
-{
-    _jpg = PictureGuiService::get().createSimulationPreviewJpg();
-    if (!_jpg.has_value()) {
+    _jpg = PictureGuiService::get().createSimulationPreviewJpg().value_or(std::string());
+    if (_jpg.empty()) {
         return;
     }
     try {
-        _texture = OpenGLHelper::loadTextureFromMemory(*_jpg);
+        _texture = OpenGLHelper::loadTextureFromMemory(_jpg);
     } catch (std::exception const&) {
         log(Priority::Important, "preview picture could not be decoded");
     }
+}
+
+void ResourcePreviewWidget::createForGenome(std::vector<PreviewDesc> const& previews)
+{
+    clear();
+
+    for (auto const& preview : previews) {
+        if (!preview._cells.empty()) {
+            _genomePreviews.emplace_back(preview);
+        }
+    }
+
+    // The uploaded picture shows the same collage as the widget
+    _jpg = PictureGuiService::get().createGenomePreviewJpg(_genomePreviews).value_or(std::string());
+}
+
+void ResourcePreviewWidget::process()
+{
+    if (_texture.has_value()) {
+        processSimulationPreview();
+    }
+    if (!_genomePreviews.empty()) {
+        processGenomePreview();
+    }
+}
+
+std::string const& ResourcePreviewWidget::getJpg() const
+{
+    return _jpg;
+}
+
+namespace
+{
+    // Reserving the scrollbar width independently of its visibility avoids a feedback loop between the picture height and the scrollbar
+    float calcAvailableWidth()
+    {
+        auto const& style = ImGui::GetStyle();
+        return ImGui::GetWindowWidth() - style.WindowPadding.x * 2 - style.ScrollbarSize;
+    }
+}
+
+void ResourcePreviewWidget::processSimulationPreview()
+{
+    auto width = std::min(calcAvailableWidth(), scale(toFloat(_texture->width)));
+    auto height = width * toFloat(_texture->height) / toFloat(_texture->width);
+    ImGui::Image((ImTextureID)(intptr_t)_texture->textureId, {width, height});
+}
+
+void ResourcePreviewWidget::processGenomePreview()
+{
+    auto const& resolution = PictureGuiService::PreviewPictureResolution;
+
+    // The aspect ratio of the uploaded picture makes the widget show the same tile layout
+    auto width = calcAvailableWidth();
+    auto height = width * toFloat(resolution.y) / toFloat(resolution.x);
+
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, Const::GenomePreviewBackgroundColor.Value);
+    if (ImGui::BeginChild("##genomePreview", ImVec2(width, height), 0, ImGuiWindowFlags_NoScrollbar)) {
+        RealVector2D viewStartPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+        RealVector2D viewSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
+        _renderer.drawCollage(ImGui::GetWindowDrawList(), _genomePreviews, viewStartPos, viewSize);
+    }
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
 }
 
 void ResourcePreviewWidget::clear()
@@ -41,24 +97,6 @@ void ResourcePreviewWidget::clear()
         glDeleteTextures(1, &_texture->textureId);
         _texture.reset();
     }
-    _jpg.reset();
-}
-
-void ResourcePreviewWidget::process()
-{
-    if (!_texture.has_value()) {
-        return;
-    }
-
-    // Reserving the scrollbar width independently of its visibility avoids a feedback loop between the picture height and the scrollbar
-    auto const& style = ImGui::GetStyle();
-    auto availableWidth = ImGui::GetWindowWidth() - style.WindowPadding.x * 2 - style.ScrollbarSize;
-    auto width = std::min(availableWidth, scale(toFloat(_texture->width)));
-    auto height = width * toFloat(_texture->height) / toFloat(_texture->width);
-    ImGui::Image((ImTextureID)(intptr_t)_texture->textureId, {width, height});
-}
-
-std::optional<std::string> const& ResourcePreviewWidget::getJpg() const
-{
-    return _jpg;
+    _jpg.clear();
+    _genomePreviews.clear();
 }
