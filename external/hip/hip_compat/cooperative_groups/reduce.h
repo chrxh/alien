@@ -83,6 +83,26 @@ __device__ __forceinline__ T reduce(thread_block_tile<Size, ParentT> const& tile
     return value;
 }
 
+// A coalesced_group contains only resident lanes, so there are no undefined partner registers to
+// guard against here. Its size is however arbitrary (any subset of a wave), which rules out an XOR
+// butterfly: ranks are group-relative and rank ^ offset can leave the group. The doubling shfl_down
+// tree below is exact for every size; the guard drops a lane from the sum once its partner rank is
+// past the end, which is also where coalesced_group::shfl_down would return the caller's own value.
+// Only rank 0 ends up with the full reduction, which is all the call sites consume.
+template <typename T, typename Op>
+__device__ __forceinline__ T reduce(coalesced_group const& group, T value, Op op)
+{
+    unsigned int const groupSize = group.size();
+    unsigned int const rank = group.thread_rank();
+    for (unsigned int offset = 1; offset < groupSize; offset <<= 1) {
+        T const partner = group.shfl_down(value, offset);
+        if (rank + offset < groupSize) {
+            value = op(value, partner);
+        }
+    }
+    return value;
+}
+
 }  // namespace cooperative_groups
 
 #endif  // __has_include amd_hip_cooperative_groups_reduce.h
