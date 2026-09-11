@@ -15,6 +15,7 @@
 
 #include <EngineInterface/GenomeDescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
+#include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -78,7 +79,11 @@ void _GenomeEditorWidget::processHeaderData()
 
         auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
+        AlienGui::InputText(
+            AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth).generateValueFunc([] {
+                return NameGeneratorService::get().createGenomeName();
+            }),
+            _editData->genome._name);
 
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),

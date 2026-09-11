@@ -3,7 +3,9 @@
 #include <imgui.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/StringHelper.h>
 
+#include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -35,7 +37,13 @@ NewSimulationDialog::NewSimulationDialog()
 
 void NewSimulationDialog::processIntern()
 {
-    AlienGui::InputText(AlienGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
+    AlienGui::InputText(
+        AlienGui::InputTextParameters()
+            .name("Project name")
+            .textWidth(ContentTextInputWidth)
+            .generateValueFunc([] { return NameGeneratorService::get().createSimulationName(); }),
+        _projectName,
+        ProjectNameSize);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").textWidth(ContentTextInputWidth).format("%.0f").step(1000.0f), _externalEnergy);
@@ -63,6 +71,8 @@ void NewSimulationDialog::processIntern()
 
 void NewSimulationDialog::openIntern()
 {
+    StringHelper::copy(_projectName, ProjectNameSize, NameGeneratorService::get().createSimulationName());
+
     auto worldSize = _SimulationFacade::get()->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
@@ -75,9 +85,7 @@ void NewSimulationDialog::onNewSimulation()
     if (_adoptSimulationParameters) {
         parameters = _SimulationFacade::get()->getSimulationParameters();
     }
-    for (int i = 0; i < ProjectNameSize; ++i) {
-        parameters.projectName.value[i] = _projectName[i];
-    }
+    StringHelper::copy(parameters.projectName.value, ProjectNameSize, _projectName);
     parameters.externalEnergy.value = _externalEnergy;
     _SimulationFacade::get()->closeSimulation();
 

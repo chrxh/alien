@@ -516,8 +516,9 @@ void AlienGui::InputFloatColorMatrix(
 bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-    auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x : 0;
-    ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - folderButtonWidth);
+    auto embeddedButtonWidth = scale(30.0f) + ImGui::GetStyle().FramePadding.x;
+    auto embeddedButtonsWidth = (parameters._folderButton ? embeddedButtonWidth : 0) + (parameters._generateValueFunc ? embeddedButtonWidth : 0);
+    ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - embeddedButtonsWidth);
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
     }
@@ -562,6 +563,15 @@ bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, in
             selectedFolder.clear();
             result = true;
         }
+    }
+    if (parameters._generateValueFunc) {
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
+        if (ImGui::Button(ICON_FA_DICE, {scale(30.0f), 0})) {
+            StringHelper::copy(buffer, bufferSize, (*parameters._generateValueFunc)());
+            result = true;
+        }
+        AlienGui::Tooltip("Generate a random name");
     }
     if (parameters._defaultValue) {
         ImGui::SameLine();

@@ -12,6 +12,7 @@
 
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
+#include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/ObjectColoring.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -369,8 +370,13 @@ void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome, std::optiona
 
 GenomeDesc GenomeEditorWindow::getDefaultGenome()
 {
+    std::unordered_set<std::string> usedNames;
+    for (auto const& tab : _tabs) {
+        usedNames.insert(tab->getGenomeDesc()._name);
+    }
+
     return GenomeDesc()
-        .name("Draft " + std::to_string(++_sequenceNumberForCreatedGenomes))
+        .name(NameGeneratorService::get().createGenomeName(usedNames))
         .frontAngle(-180.0f)
         .genes({
             GeneDesc().name("Gene 0").nodes({NodeDesc()}).shape(ConstructorShape_Segment),

@@ -50,7 +50,6 @@ private:
     GenomeWindowEditData _genomeEditData;
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
-    int _sequenceNumberForCreatedGenomes = 0;
     std::optional<GenomeDesc> _copiedGenome;
 
     // Actions
