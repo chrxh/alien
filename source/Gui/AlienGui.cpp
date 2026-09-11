@@ -1804,7 +1804,10 @@ bool AlienGui::Group(GroupParameters const& parameters)
 
     ImGui::Spacing();
 
+    auto scrollOffset = ImGui::GetScrollX();    // The header remains in place if the window is scrolled horizontally
+
     auto cursorPos = ImGui::GetCursorScreenPos();
+    cursorPos.x += scrollOffset;
     auto groupWidth = ImGui::GetContentRegionAvail().x;
     auto color = parameters._highlighted ? Const::GroupHighColor : Const::GroupDefaultColor;
     auto upperLeft = ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y);
@@ -1820,7 +1823,9 @@ bool AlienGui::Group(GroupParameters const& parameters)
         textIndent += barWidth;
     }
 
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textIndent);
+    auto contentMaxPosX = ImGui::GetCurrentWindow()->DC.CursorMaxPos.x;
+
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scrollOffset + textIndent);
     ImGui::PushStyleColor(ImGuiCol_Text, parameters._highlighted ? Const::GroupHighTextColor.Value : Const::GroupTextColor.Value);
     ImGui::TextUnformatted(parameters._text.c_str());
     ImGui::PopStyleColor();
@@ -1833,6 +1838,11 @@ bool AlienGui::Group(GroupParameters const& parameters)
         ImGui::PushID(parameters._text.c_str());
         result = drawExpandButton(cursorPos, ImVec2(cursorPos.x + groupWidth, cursorPos.y + ImGui::GetTextLineHeight()), style.FramePadding.x);
         ImGui::PopID();
+    }
+
+    // The shifted header must not enlarge the scrollable area
+    if (scrollOffset > 0) {
+        ImGui::GetCurrentWindow()->DC.CursorMaxPos.x = contentMaxPosX;
     }
 
     ImGui::Spacing();
