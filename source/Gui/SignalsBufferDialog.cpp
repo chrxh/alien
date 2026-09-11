@@ -8,7 +8,7 @@
 #include <EngineInterface/EngineConstants.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

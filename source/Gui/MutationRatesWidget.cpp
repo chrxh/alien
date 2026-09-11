@@ -11,7 +11,7 @@
 #include <EngineInterface/GenomeDesc.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

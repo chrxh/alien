@@ -12,7 +12,7 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include "AlienGui.h"
 #include "MainLoopEntityController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "UiController.h"
 #include "Viewport.h"
 
@@ -173,7 +173,7 @@ void OverlayController::processProgressAnimation()
                 point2, dotRadius * (0.75f + depth2 * 0.5f), ImColor::HSV(0.79f, 0.45f, 0.6f * 0.75f + depth2 * 0.2f, (0.5f + depth2 * 0.4f) * alpha));
         }
         drawList->AddText(
-            StyleRepository::get().getReefMediumFont(),
+            StyleService::get().getReefMediumFont(),
             scale(16.0f),
             {center.x - scale(28.0f), center.y - scale(0.0f)},
             ImColor::HSV(0, 0, 1, 0.7f * alpha),
@@ -203,7 +203,7 @@ void OverlayController::processMessage()
     }
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
 
-    auto& styleRep = StyleRepository::get();
+    auto& styleRep = StyleService::get();
     auto center = ImGui::GetMainViewport()->Size;
     center.x /= 2;
     auto textColorFront = ImColor::HSV(0.5f, 0.0f, 1.0f, textAlpha);

@@ -12,7 +12,7 @@
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 
 namespace

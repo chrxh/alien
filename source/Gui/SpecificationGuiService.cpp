@@ -13,7 +13,7 @@
 
 #include "AlienGui.h"
 #include "SimulationInteractionController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

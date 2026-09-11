@@ -19,7 +19,7 @@
 #include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
 #include "PreviewSettingsDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "WindowController.h"
 
 namespace
@@ -194,6 +194,12 @@ void _PreviewWidget::processActionBar()
         _genomeEditData->defaultDetailSimulation = _editData->detailSimulation;
         onRestart();
     }
+
+    ImGui::SameLine();
+    AlienGui::SelectableButton(
+        AlienGui::SelectableButtonParameters().name(ICON_FA_WAVE_SQUARE).tooltip("Shows the neural activity editor in the preview"),
+        _editData->showNeuralActivityEditor);
+    _genomeEditData->defaultShowNeuralActivityEditor = _editData->showNeuralActivityEditor;
 
     ImGui::SameLine();
     if (AlienGui::Button(ICON_FA_COG, 25.0f)) {

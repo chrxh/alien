@@ -7,7 +7,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 #include "MainLoopEntityController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 #include "WindowController.h"
 

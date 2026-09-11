@@ -12,9 +12,9 @@
 
 #include "AlienGui.h"
 #include "BrowserData.h"
-#include "BrowserGui.h"
+#include "BrowserHelper.h"
 #include "LoginController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 BrowserUserListWidget _BrowserUserListWidget::create(BrowserData const& data)
 {
@@ -62,7 +62,7 @@ namespace
 void _BrowserUserListWidget::process()
 {
     ImGui::PushID("User list");
-    auto& styleRepository = StyleRepository::get();
+    auto& styleService = StyleService::get();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
@@ -75,13 +75,13 @@ void _BrowserUserListWidget::process()
                 ImGui::TableSetupColumn(
                     isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
                     ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-                    styleRepository.scale(200.0f));
-                ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
+                    styleService.scale(200.0f));
+                ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(80.0f));
                 ImGui::TableSetupColumn(
                     "Reactions received",
                     ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
                     scale(120.0f));
-                ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
+                ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(100.0f));
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableHeadersRow();
                 ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -93,7 +93,7 @@ void _BrowserUserListWidget::process()
                         auto const& user = _data->userTOs.at(row);
 
                         ImGui::PushID(row);
-                        ImGui::TableNextRow(0, scale(BrowserGui::RowHeight));
+                        ImGui::TableNextRow(0, scale(BrowserHelper::RowHeight));
 
                         ImGui::TableNextColumn();
                         auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == user.userName;

@@ -10,7 +10,7 @@
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "GenericMessageDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void ActivateUserDialog::initIntern()
 {

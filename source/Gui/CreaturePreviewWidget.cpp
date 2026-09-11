@@ -21,13 +21,15 @@
 #include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
 #include "SimulationScrollbars.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
     auto constexpr NeuralActivityTextMargin = 15.0f;
     auto constexpr NeuralActivitySliderWidth = 55.0f;
     auto constexpr NeuralActivitySlidersPerColumn = 4;
+    auto constexpr NeuralActivityEditorRightMargin = 30.0f;
+    auto constexpr TitleMargin = 7.0f;
 
     std::string getNeuralActivityEditorSignalLabel(int index)
     {
@@ -237,16 +239,44 @@ void _CreaturePreviewWidget::updateSelection()
     }
 }
 
+namespace
+{
+    float calcCardHeaderTextOffsetY()
+    {
+        auto const& style = ImGui::GetStyle();
+        return style.FramePadding.y + style.ItemSpacing.y;
+    }
+
+    bool processHideButton()
+    {
+        auto const& style = ImGui::GetStyle();
+        auto buttonWidth = ImGui::CalcTextSize(ICON_FA_TIMES).x + style.FramePadding.x * 2;
+        auto contentStartPos = ImGui::GetCursorStartPos();
+
+        auto cursorPos = ImGui::GetCursorPos();
+        ImGui::SetCursorPos({ImGui::GetWindowWidth() - contentStartPos.x - buttonWidth, contentStartPos.y + style.ItemSpacing.y - style.FramePadding.y});
+        auto result = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_TIMES).tooltip("Hide the neural activity editor"));
+        ImGui::SetCursorPos(cursorPos);
+
+        return result;
+    }
+}
+
 void _CreaturePreviewWidget::processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype)
 {
-    auto editorWidth = calcNeuralActivityColumnWidth() * toFloat(calcNumNeuralActivityEditorColumns()) + 30.0f;
-    auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(editorWidth) : scale(250);
-    auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
     auto contentAvailable = ImGui::GetContentRegionAvail();
     if (contentAvailable.x < scale(480.0f) || contentAvailable.y < scale(250.0f)) {
         return;
     }
-    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - width - scale(30.0f), ImGui::GetScrollY() + scale(13.0f)});
+    if (!_editData->showNeuralActivityEditor) {
+        return;
+    }
+
+    auto editorWidth = calcNeuralActivityColumnWidth() * toFloat(calcNumNeuralActivityEditorColumns()) + 30.0f;
+    auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(editorWidth) : scale(250);
+    auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
+    ImGui::SetCursorPos(
+        {ImGui::GetScrollX() + ImGui::GetWindowWidth() - width - scale(NeuralActivityEditorRightMargin), ImGui::GetScrollY() + scale(TitleMargin)});
 
     // The frame style derives the background of the editor from the frame color, therefore it is overridden only for the child window itself
     ImGui::PushStyleColor(ImGuiCol_FrameBg, static_cast<ImVec4>(Const::FloatingCardBackgroundColor));
@@ -255,6 +285,9 @@ void _CreaturePreviewWidget::processNeuralActivityEditor(bool& phenotypeChanged,
     if (signalEditorVisible) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Neural activity editor"));
+        if (processHideButton()) {
+            _editData->showNeuralActivityEditor = false;
+        }
 
         if (_editData->detailSimulation && _selectedCellIdFromPreview.has_value()) {
             std::optional<CellPreviewDesc> selectedCell;
@@ -316,6 +349,7 @@ void _CreaturePreviewWidget::processNeuralActivityEditor(bool& phenotypeChanged,
                 updatePhenotype(phenotype, selectedCell.value());
             }
         } else {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(AlienGui::GroupTextIndent));
             if (!_editData->detailSimulation) {
                 AlienGui::Text("Detailed simulation mode disabled");
             } else if (!_selectedCellIdFromPreview.has_value()) {
@@ -365,7 +399,7 @@ void _CreaturePreviewWidget::processScrollbars()
 
 void _CreaturePreviewWidget::processTitle()
 {
-    ImGui::SetCursorPos({scale(7.0f), scale(7.0f)});
+    ImGui::SetCursorPos({scale(TitleMargin), scale(TitleMargin) + calcCardHeaderTextOffsetY()});
     std::vector<std::string> geneIndexStrings;
     auto geneIndices = getGeneIndices();
     for (auto const& geneIndex : geneIndices) {

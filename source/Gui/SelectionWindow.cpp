@@ -7,7 +7,7 @@
 #include "AlienGui.h"
 #include "EditorController.h"
 #include "EditorModel.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -27,7 +27,7 @@ void SelectionWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Cells");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         ImGui::TextUnformatted(StringHelper::format(selection.numObjects).c_str());
         ImGui::PopFont();
         table.next();
@@ -35,7 +35,7 @@ void SelectionWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Connected cells");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());
         ImGui::PopFont();
         table.next();
@@ -43,7 +43,7 @@ void SelectionWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Creatures");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         ImGui::TextUnformatted(StringHelper::format(selection.numCreatures).c_str());
         ImGui::PopFont();
         table.next();
@@ -51,7 +51,7 @@ void SelectionWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Energy particles");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         ImGui::TextUnformatted(StringHelper::format(selection.numEnergyParticles).c_str());
         ImGui::PopFont();
         table.next();

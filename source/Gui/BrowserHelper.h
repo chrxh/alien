@@ -6,8 +6,7 @@
 
 #include "Definitions.h"
 
-// Small GUI elements shared by the browser widgets
-class BrowserGui
+class BrowserHelper
 {
 public:
     static auto constexpr RowHeight = 25.0f;

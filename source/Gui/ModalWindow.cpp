@@ -3,7 +3,7 @@
 #include <Base/GlobalSettings.h>
 
 #include "AlienGui.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "WindowController.h"
 
 ModalWindow::ModalWindow(std::string const& title, RealVector2D const& defaultSize, bool maximizable, std::string const& settingsNode)

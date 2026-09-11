@@ -15,7 +15,7 @@
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "SimulationView.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 namespace
@@ -154,7 +154,7 @@ void SimulationInteractionController::processEditWidget()
         center, radius, _modes.editMode ? Const::EditToggleSelectedBorderColor : Const::EditToggleBorderColor, 0, scale(EditToggleBorderThickness));
 
     auto iconColor = _modes.editMode ? Const::EditToggleSelectedIconColor : hovered ? Const::EditToggleHoveredIconColor : Const::EditToggleIconColor;
-    auto iconFont = StyleRepository::get().getIconFont();
+    auto iconFont = StyleService::get().getIconFont();
     auto iconFontSize = scale(EditToggleIconSize);
     auto iconSize = iconFont->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, ICON_FA_EDIT);
 

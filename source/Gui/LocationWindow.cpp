@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void LocationWindow::init(LocationWidget const& widgets, RealVector2D const& initialPos)
 {

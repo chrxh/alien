@@ -14,7 +14,7 @@
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
 #include "OverlayController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -58,7 +58,7 @@ void TemporalControlWindow::processTpsInfo()
     ImGui::Text("Time steps per second");
     ImGui::PopStyleColor();
 
-    ImGui::PushFont(StyleRepository::get().getLargeFont());
+    ImGui::PushFont(StyleService::get().getLargeFont());
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getTps(), 1).c_str());
     ImGui::PopFont();
 }
@@ -69,7 +69,7 @@ void TemporalControlWindow::processTotalTimestepsInfo()
     ImGui::Text("Total time steps");
     ImGui::PopStyleColor();
 
-    ImGui::PushFont(StyleRepository::get().getLargeFont());
+    ImGui::PushFont(StyleService::get().getLargeFont());
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getCurrentTimestep()).c_str());
     ImGui::PopFont();
 }
@@ -80,7 +80,7 @@ void TemporalControlWindow::processRealTimeInfo()
     ImGui::Text("Real-time");
     ImGui::PopStyleColor();
 
-    ImGui::PushFont(StyleRepository::get().getLargeFont());
+    ImGui::PushFont(StyleService::get().getLargeFont());
     ImGui::TextUnformatted(StringHelper::format(_SimulationFacade::get()->getRealTime()).c_str());
     ImGui::PopFont();
 }
