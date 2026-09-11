@@ -95,6 +95,11 @@ GenomeDesc const& _GenomeTabWidget::getGenomeDesc() const
     return _editData->genome;
 }
 
+std::vector<PreviewDesc> _GenomeTabWidget::getPreviewDescs() const
+{
+    return _simulatedPreviewWidget->getPreviewDescs();
+}
+
 void _GenomeTabWidget::setGenomeDesc(GenomeDesc const& genome)
 {
     _editData->genome = genome;

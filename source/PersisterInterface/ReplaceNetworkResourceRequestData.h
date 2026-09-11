@@ -19,11 +19,12 @@ struct ReplaceNetworkResourceRequestData
     {
         float zoom = 1.0f;
         RealVector2D center;
-        std::optional<std::string> jpg;
+        std::string jpg;
     };
     struct CreatureData
     {
         GenomeDesc description;
+        std::string jpg;
     };
     std::variant<SimulationData, CreatureData> data;
 };

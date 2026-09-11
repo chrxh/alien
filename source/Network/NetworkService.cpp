@@ -529,7 +529,7 @@ bool NetworkService::uploadResource(
     IntVector2D const& worldSize,
     int numObjects,
     std::string const& mainData,
-    std::optional<std::string> const& picture,
+    std::string const& picture,
     NetworkResourceType resourceType,
     WorkspaceType workspaceType)
 {
@@ -550,8 +550,8 @@ bool NetworkService::uploadResource(
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
     };
-    if (picture.has_value()) {
-        items.push_back({"picture", *picture, "picture.jpg", "image/jpeg"});
+    if (!picture.empty()) {
+        items.push_back({"picture", picture, "picture.jpg", "image/jpeg"});
     }
 
     try {
@@ -575,7 +575,7 @@ bool NetworkService::replaceResource(
     IntVector2D const& worldSize,
     int numObjects,
     std::string const& mainData,
-    std::optional<std::string> const& picture)
+    std::string const& picture)
 {
     log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
 
@@ -591,8 +591,8 @@ bool NetworkService::replaceResource(
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
     };
-    if (picture.has_value()) {
-        items.push_back({"picture", *picture, "picture.jpg", "image/jpeg"});
+    if (!picture.empty()) {
+        items.push_back({"picture", picture, "picture.jpg", "image/jpeg"});
     }
 
     try {

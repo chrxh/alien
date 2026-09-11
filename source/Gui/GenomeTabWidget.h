@@ -1,6 +1,7 @@
 #pragma once
 
 #include <EngineInterface/GenomeDesc.h>
+#include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
@@ -30,6 +31,7 @@ public:
     GenomeTabEditData const& getEditData() const;
     GenomeTabLayoutData const& getLayoutData() const;
     GenomeDesc const& getGenomeDesc() const;
+    std::vector<PreviewDesc> getPreviewDescs() const;
 
     void setGenomeDesc(GenomeDesc const& genome);
 

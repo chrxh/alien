@@ -54,7 +54,11 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
         _folder = folder;
         _resourceName = _resourceNameByFolder[_folder];
         _resourceDescription = _resourceDescriptionByFolder[_folder];
-        _preview.create(_resourceType);
+        if (_resourceType == NetworkResourceType_Simulation) {
+            _preview.createForSimulation();
+        } else {
+            _preview.createForGenome(GenomeEditorWindow::get().getCurrentPreviewDescs());
+        }
         AlienDialog::open();
     } else {
         LoginDialog::get().open();
@@ -145,7 +149,7 @@ void UploadSimulationDialog::onUpload()
             return UploadNetworkResourceRequestData::SimulationData{
                 .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .jpg = _preview.getJpg()};
         } else {
-            return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
+            return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome(), .jpg = _preview.getJpg()};
         }
     }();
     auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;

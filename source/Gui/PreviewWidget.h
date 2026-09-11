@@ -6,6 +6,7 @@
 #include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/GenomeDescEditService.h>
+#include <EngineInterface/PreviewDesc.h>
 
 #include "Definitions.h"
 
@@ -15,6 +16,9 @@ public:
     static PreviewWidget create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void process();
+
+    // Previews of all sub-genomes as they are shown in the last processed frame
+    std::vector<PreviewDesc> getPreviewDescs() const;
 
 private:
     _PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
