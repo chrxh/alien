@@ -1,25 +1,26 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 
 namespace Const
 {
-    std::string const ProgramVersion = "5.0.0-alpha.29";
-    std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
-    std::string const AlienServerURL = "api.alien-project.org";
-    std::string const StartupSimulationResourceName = "Startup/Version1";
+    extern std::string const ProgramVersion;
+    extern std::string const DiscordURL;
+    extern std::string const AlienServerURL;
+    extern std::string const StartupSimulationResourceName;
 
-    std::filesystem::path const ResourcePath = "resources";
-    std::filesystem::path const AutosavePath = ResourcePath / "autosave";
-    std::filesystem::path const ImagesPath = ResourcePath / "images";
+    extern std::filesystem::path const ResourcePath;
+    extern std::filesystem::path const AutosavePath;
+    extern std::filesystem::path const ImagesPath;
 
-    std::filesystem::path const LogFilename = "log.txt";
-    std::filesystem::path const ProfileFilename = "profile.txt";
-    std::filesystem::path const TraceFilename = "trace.txt";
-    std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
-    std::filesystem::path const AutosaveFile = AutosavePath / AutosaveFileWithoutPath;
-    std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
-    std::filesystem::path const SavepointTableFilename = "savepoints.json";
+    extern std::filesystem::path const LogFilename;
+    extern std::filesystem::path const ProfileFilename;
+    extern std::filesystem::path const TraceFilename;
+    extern std::filesystem::path const AutosaveFileWithoutPath;
+    extern std::filesystem::path const AutosaveFile;
+    extern std::filesystem::path const SettingsFilename;
+    extern std::filesystem::path const SavepointTableFilename;
 
-    std::filesystem::path const LogoFilename = ImagesPath / "logo.png";
+    extern std::filesystem::path const LogoFilename;
 }
