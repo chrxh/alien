@@ -18,7 +18,7 @@
 #include "GenomeWindowEditData.h"
 #include "NodeEditorWidget.h"
 #include "PreviewWidget.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 GenomeTabWidget _GenomeTabWidget::create(
     GenomeWindowEditData const& genomeEditData,
@@ -156,6 +156,7 @@ _GenomeTabWidget::_GenomeTabWidget(
     _editData->id = ++_sequence;
     _editData->showNodeIndex = genomeEditData->defaultShowNodeIndex;
     _editData->detailSimulation = genomeEditData->defaultDetailSimulation;
+    _editData->showNeuralActivityEditor = genomeEditData->defaultShowNeuralActivityEditor;
 
     auto normalizedGenome = normalizeForEditor(genome);
 

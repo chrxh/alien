@@ -22,7 +22,7 @@
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
 #include "SelectionWindow.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 #include <GLFW/glfw3.h>

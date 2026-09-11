@@ -95,6 +95,7 @@ void GenomeEditorWindow::initIntern()
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
     _genomeEditData->defaultShowNodeIndex = GlobalSettings::get().getValue(_settingsNode + ".show node index", true);
     _genomeEditData->defaultDetailSimulation = GlobalSettings::get().getValue(_settingsNode + ".detail simulation", false);
+    _genomeEditData->defaultShowNeuralActivityEditor = GlobalSettings::get().getValue(_settingsNode + ".show neural activity editor", true);
 
     // Initialize the first tab with default genome
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
@@ -104,6 +105,7 @@ void GenomeEditorWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue(_settingsNode + ".show node index", _genomeEditData->defaultShowNodeIndex);
     GlobalSettings::get().setValue(_settingsNode + ".detail simulation", _genomeEditData->defaultDetailSimulation);
+    GlobalSettings::get().setValue(_settingsNode + ".show neural activity editor", _genomeEditData->defaultShowNeuralActivityEditor);
 }
 
 void GenomeEditorWindow::processIntern()

@@ -13,8 +13,8 @@
 
 #include "AlienGui.h"
 #include "BrowserData.h"
-#include "BrowserGui.h"
-#include "StyleRepository.h"
+#include "BrowserHelper.h"
+#include "StyleService.h"
 
 BrowserTableWidget _BrowserTableWidget::create(BrowserData const& data)
 {
@@ -45,7 +45,7 @@ void _BrowserTableWidget::process()
     auto columns = getColumns(workspace);
 
     ImGui::PushID(resourceType == NetworkResourceType_Simulation ? "SimulationList" : "GenomeList");
-    if (ImGui::BeginTable("Browser", toInt(columns.size()), getTableFlags(resourceType), ImVec2(-1, -scale(BrowserGui::WorkspaceBottomSpace)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", toInt(columns.size()), getTableFlags(resourceType), ImVec2(-1, -scale(BrowserHelper::WorkspaceBottomSpace)), 0.0f)) {
         for (auto const& column : columns) {
             ImGui::TableSetupColumn(column.name.c_str(), column.flags, scale(column.width), column.sortId);
         }
@@ -166,12 +166,12 @@ void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::v
         _data->lastSessionData.registrate(treeTO->getLeaf().rawTO);
     }
 
-    ImGui::TableNextRow(0, scale(BrowserGui::RowHeight));
+    ImGui::TableNextRow(0, scale(BrowserHelper::RowHeight));
     ImGui::TableNextColumn();
 
     auto selected = _data->isSelected(treeTO);
     if (AlienGui::TableRowSelectable(
-            "", &selected, ImGuiSelectableFlags_AllowDoubleClick, RealVector2D(0, scale(BrowserGui::RowHeight) - ImGui::GetStyle().FramePadding.y))) {
+            "", &selected, ImGuiSelectableFlags_AllowDoubleClick, RealVector2D(0, scale(BrowserHelper::RowHeight) - ImGui::GetStyle().FramePadding.y))) {
         if (treeTO->isLeaf() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
             _data->selectedTreeTO = treeTO;
             _data->onDownloadResource(treeTO->getLeaf());
@@ -198,7 +198,7 @@ void _BrowserTableWidget::processResourceNameField(NetworkResourceTreeTO const& 
         auto& leaf = treeTO->getLeaf();
 
         processFolderTreeSymbols(treeTO, collapsedFolderNames);
-        BrowserGui::DownloadButton(_data, leaf);
+        BrowserHelper::DownloadButton(_data, leaf);
         ImGui::SameLine();
         if (_data->currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
@@ -207,7 +207,7 @@ void _BrowserTableWidget::processResourceNameField(NetworkResourceTreeTO const& 
         ImGui::SameLine();
 
         if (!_data->isOwner(treeTO) && _data->lastSessionData.isNew(leaf.rawTO)) {
-            auto font = StyleRepository::get().getSmallBoldFont();
+            auto font = StyleService::get().getSmallBoldFont();
             auto origSize = font->Scale;
             font->Scale *= 0.65f;
             ImGui::PushFont(font);
@@ -264,37 +264,37 @@ void _BrowserTableWidget::processFolderTreeSymbols(NetworkResourceTreeTO const& 
         case FolderTreeSymbols::Continue: {
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserGui::RowHeight) + style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserHelper::RowHeight) + style.FramePadding.y),
                 Const::BrowserResourceLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
         case FolderTreeSymbols::Branch: {
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserGui::RowHeight) + style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserHelper::RowHeight) + style.FramePadding.y),
                 Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
                 Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
                 Const::BrowserResourceLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
         case FolderTreeSymbols::End: {
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
                 Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
                 Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(BrowserGui::RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(BrowserHelper::RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
                 Const::BrowserResourceLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;

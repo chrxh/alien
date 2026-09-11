@@ -11,4 +11,5 @@ struct _GenomeWindowEditData
     GenotypeToPhenotypeCache genotypeToPhenotypeCache;
     bool defaultShowNodeIndex = true;  // true = show node index, false = show cell function
     bool defaultDetailSimulation = false;
+    bool defaultShowNeuralActivityEditor = true;
 };

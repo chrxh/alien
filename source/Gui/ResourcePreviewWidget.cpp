@@ -10,7 +10,7 @@
 
 #include "OpenGLHelper.h"
 #include "PictureGuiService.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 void ResourcePreviewWidget::createForSimulation()
 {

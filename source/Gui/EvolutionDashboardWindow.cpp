@@ -26,7 +26,7 @@
 #include "GenomeEditorWindow.h"
 #include "LiveStatisticsService.h"
 #include "OverlayController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -628,7 +628,7 @@ void EvolutionDashboardWindow::processHeader()
     auto const& style = ImGui::GetStyle();
     auto cardWidth = (ImGui::GetContentRegionAvail().x - 3 * style.ItemSpacing.x) / 6;
     auto cardHeight =
-        style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
+        style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleService::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
 
     // The header shows the current global state; object counts and the total energy cover all objects and thus come
     // from the raw engine snapshot, while the creature counts are accumulated over the lineages of that same snapshot
@@ -704,7 +704,7 @@ void EvolutionDashboardWindow::processCard(
         AlienGui::Text(label);
         ImGui::PopStyleColor();
 
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         AlienGui::Text(value);
         ImGui::PopFont();
 
@@ -1015,7 +1015,7 @@ void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayDa
             ImGui::TableSetColumnIndex(1);
             AlienGui::Text(Metrics[i].plotName);
             for (auto const* lineage : plottedLineages) {
-                ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
+                ImGui::PushFont(StyleService::get().getMediumBoldFont());
                 ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)getPlotColor(lineage->id, i));
                 auto const& series = lineage->series.at(i);
                 AlienGui::Text(!series.empty() ? formatMetricValue(series.back(), Metrics[i].plotDecimals) : "-");

@@ -22,7 +22,7 @@
 
 #include "AlienGui.h"
 #include "BrowserGalleryWidget.h"
-#include "BrowserGui.h"
+#include "BrowserHelper.h"
 #include "BrowserLoginHintWidget.h"
 #include "BrowserTableWidget.h"
 #include "BrowserUserListWidget.h"
@@ -32,7 +32,7 @@
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
 #include "ReplaceSimulationDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "UploadSimulationDialog.h"
 
 namespace
@@ -351,7 +351,7 @@ void BrowserWindow::processResourceView()
     if (isLoginRequired()) {
         auto viewPos = ImGui::GetCursorScreenPos();
         auto viewSize = ImGui::GetContentRegionAvail();
-        viewSize.y -= scale(BrowserGui::WorkspaceBottomSpace);
+        viewSize.y -= scale(BrowserHelper::WorkspaceBottomSpace);
 
         if (_galleryView) {
             _galleryWidget->processPlaceholderTiles();

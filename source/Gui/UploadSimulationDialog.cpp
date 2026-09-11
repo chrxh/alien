@@ -17,7 +17,7 @@
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 namespace
@@ -107,7 +107,7 @@ void UploadSimulationDialog::processIntern()
         AlienGui::InputTextMultilineParameters()
             .hint("Desc (optional)")
             .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - StyleRepository::get().scale(70.0f)),
+            .height(ImGui::GetContentRegionAvail().y - StyleService::get().scale(70.0f)),
         _resourceDescription);
     ImGui::PopID();
 

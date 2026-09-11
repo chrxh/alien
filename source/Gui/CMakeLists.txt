@@ -18,8 +18,8 @@ PUBLIC
     BrowserData.h
     BrowserGalleryWidget.cpp
     BrowserGalleryWidget.h
-    BrowserGui.cpp
-    BrowserGui.h
+    BrowserHelper.cpp
+    BrowserHelper.h
     BrowserLoginHintWidget.cpp
     BrowserLoginHintWidget.h
     BrowserTableWidget.cpp
@@ -194,8 +194,8 @@ PUBLIC
     SpecificationGuiService.h
     StartupCheckService.cpp
     StartupCheckService.h
-    StyleRepository.cpp
-    StyleRepository.h
+    StyleService.cpp
+    StyleService.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
     UiController.cpp

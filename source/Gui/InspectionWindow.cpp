@@ -20,7 +20,7 @@
 #include "GenomeEditorWindow.h"
 #include "NeuralNetEditorWidget.h"
 #include "SignalsBufferDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 
 using namespace std::string_literals;
@@ -924,10 +924,10 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
 float _InspectionWindow::calcWindowWidth() const
 {
     if (_creatureMode) {
-        return StyleRepository::get().scale(CreatureWindowWidth);
+        return StyleService::get().scale(CreatureWindowWidth);
     }
     if (isExtendedObject()) {
-        return StyleRepository::get().scale(CellWindowWidth);
+        return StyleService::get().scale(CellWindowWidth);
     }
-    return StyleRepository::get().scale(ParticleWindowWidth);
+    return StyleService::get().scale(ParticleWindowWidth);
 }

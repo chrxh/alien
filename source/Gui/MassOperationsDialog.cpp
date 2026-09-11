@@ -14,7 +14,7 @@
 #include "AlienGui.h"
 #include "MutationRatesDialog.h"
 #include "MutationRatesWidget.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {

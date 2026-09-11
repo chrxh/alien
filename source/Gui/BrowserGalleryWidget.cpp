@@ -24,10 +24,10 @@
 
 #include "AlienGui.h"
 #include "BrowserData.h"
-#include "BrowserGui.h"
+#include "BrowserHelper.h"
 #include "OpenGLHelper.h"
 #include "PictureGuiService.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 
 namespace
 {
@@ -118,7 +118,7 @@ void _BrowserGalleryWidget::process()
 
     // The tile height follows the tile width, so an appearing scrollbar must not change the available width
     if (ImGui::BeginChild(
-            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserGui::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserHelper::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto layout = calcTileLayout();
 
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
@@ -140,7 +140,7 @@ void _BrowserGalleryWidget::processPlaceholderTiles()
     ImGui::PushID("GalleryPlaceholder");
 
     if (ImGui::BeginChild(
-            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserGui::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserHelper::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto layout = calcTileLayout();
         auto tileHeight = calcTileHeight(layout.tileWidth);
         auto numRows = std::max(1, toInt(std::ceil(ImGui::GetContentRegionAvail().y / (tileHeight + ImGui::GetStyle().ItemSpacing.y))));
@@ -302,7 +302,7 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
         AlienGui::Text(AlienGui::TextParameters().text(rawTO->timestamp.substr(0, 10)).rightAligned(true));
         ImGui::PopStyleColor();
 
-        BrowserGui::DownloadButton(_data, BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
+        BrowserHelper::DownloadButton(_data, BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
         ImGui::SameLine();
         processReactionButton(rawTO);
         ImGui::SameLine();
@@ -484,7 +484,7 @@ void _BrowserGalleryWidget::processPicture(NetworkResourceRawTO const& rawTO, fl
 void _BrowserGalleryWidget::processReactionButton(NetworkResourceRawTO const& rawTO)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
-    auto isAddReaction = BrowserGui::ActionButton(ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()));
+    auto isAddReaction = BrowserHelper::ActionButton(ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()));
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemHovered()) {

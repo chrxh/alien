@@ -11,7 +11,7 @@
 
 #include "AlienGui.h"
 #include "ResizeWorldDialog.h"
-#include "StyleRepository.h"
+#include "StyleService.h"
 #include "Viewport.h"
 #include <EngineInterface/SimulationFacade.h>
 
@@ -63,7 +63,7 @@ void SpatialControlWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("World size");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         auto worldSize = _SimulationFacade::get()->getWorldSize();
         drawCoordinatePair(StringHelper::format(worldSize.x), StringHelper::format(worldSize.y));
         ImGui::PopFont();
@@ -71,14 +71,14 @@ void SpatialControlWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Zoom factor");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         ImGui::TextUnformatted(StringHelper::format(Viewport::get().getZoomFactor(), 2).c_str());
         ImGui::PopFont();
 
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::Text("Center position");
         ImGui::PopStyleColor();
-        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushFont(StyleService::get().getLargeFont());
         auto centerPos = Viewport::get().getCenterInWorldPos();
         drawCoordinatePair(StringHelper::format(centerPos.x, 1), StringHelper::format(centerPos.y, 1));
         ImGui::PopFont();
