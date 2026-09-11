@@ -34,6 +34,7 @@ private:
     void processMouseNavigation();
     void updateSelection();
     void processPreviewRendering();
+    bool processHideButton();
     void processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype);
     void processActionButtons();
     void processScrollbars();
