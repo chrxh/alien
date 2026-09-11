@@ -23,7 +23,7 @@ public:
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
 
-    static float calcZoomToFitContent(float contentRadius, RealVector2D const& viewSize);
+    static float calcZoomToFitContent(RealVector2D const& contentSize, RealVector2D const& viewSize);
 
 private:
     RealVector2D _worldCenter;

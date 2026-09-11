@@ -16,7 +16,7 @@ class PictureGuiService
     MAKE_SINGLETON(PictureGuiService);
 
 public:
-    static auto constexpr PreviewPictureResolution = IntVector2D{600, 350};
+    static auto constexpr PreviewPictureResolution = IntVector2D{600, 400};
 
     // Preview picture of the currently rendered simulation, ready for upload
     std::optional<std::string> createSimulationPreviewJpg();

@@ -42,7 +42,7 @@ namespace
     auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomSpace = 41.0f;
 
-    auto constexpr WorkspaceSwitcherWidth = 270.0f;
+    auto constexpr WorkspaceSwitcherWidth = 200.0f;
     auto constexpr MinFilterWidth = 100.0f;
 
     auto constexpr EmojiPopupScale = 0.66f;  // Relative to the resolution of the emoji images
