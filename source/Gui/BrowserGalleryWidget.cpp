@@ -26,6 +26,7 @@
 #include "BrowserData.h"
 #include "BrowserGui.h"
 #include "OpenGLHelper.h"
+#include "PictureGuiService.h"
 #include "StyleRepository.h"
 
 namespace
@@ -37,7 +38,7 @@ namespace
     auto constexpr MaxCardSizePercent = 200;
     auto constexpr TileSpacing = 8.0f;
     auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
-    auto constexpr PictureAspectRatio = 2.0f / 3.0f;
+    auto const PictureAspectRatio = toFloat(PictureGuiService::PreviewPictureResolution.y) / toFloat(PictureGuiService::PreviewPictureResolution.x);
 
     auto constexpr PlaceholderBarHeight = 5.0f;
     auto const PlaceholderBarWidthFactors = std::array{0.55f, 0.80f, 0.65f};
@@ -455,7 +456,21 @@ void _BrowserGalleryWidget::processPicture(NetworkResourceRawTO const& rawTO, fl
 
     auto findResult = _pictureBySimId.find(rawTO->id);
     if (findResult != _pictureBySimId.end() && findResult->second.has_value()) {
-        ImGui::Image((ImTextureID)(intptr_t)findResult->second->textureId, {width, height});
+        auto const& picture = *findResult->second;
+
+        // Pictures from earlier versions can have a different aspect ratio and are fitted into the tile
+        auto pictureWidth = width;
+        auto pictureHeight = width * toFloat(picture.height) / toFloat(picture.width);
+        if (pictureHeight > height) {
+            pictureWidth = height * toFloat(picture.width) / toFloat(picture.height);
+            pictureHeight = height;
+        }
+        auto picturePos = ImVec2{pos.x + (width - pictureWidth) / 2, pos.y + (height - pictureHeight) / 2};
+
+        auto drawList = ImGui::GetWindowDrawList();
+        drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
+        drawList->AddImage((ImTextureID)(intptr_t)picture.textureId, picturePos, {picturePos.x + pictureWidth, picturePos.y + pictureHeight});
+        ImGui::Dummy({width, height});
         return;
     }
 

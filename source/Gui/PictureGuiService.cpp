@@ -27,10 +27,11 @@
 
 namespace
 {
-    auto constexpr JpgQuality = 70;
+    auto constexpr JpgQuality = 92;
 
     auto constexpr PreviewPictureResolution = PictureGuiService::PreviewPictureResolution;
     auto constexpr PreviewPictureBrightness = 1.3f;
+    auto constexpr PreviewPictureSupersampling = 2;
 }
 
 std::optional<std::string> PictureGuiService::createSimulationPreviewJpg()
@@ -51,9 +52,10 @@ std::optional<std::string> PictureGuiService::createSimulationPreviewJpg()
 
 namespace
 {
-    // Renders a draw list into an offscreen framebuffer and reads the result back as a picture
-    PictureData renderOffscreen(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor)
+    PictureData renderOffscreen(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor, int supersampling)
     {
+        IntVector2D renderResolution{resolution.x * supersampling, resolution.y * supersampling};
+
         GLint origFbo = 0;
         GLint origTexture = 0;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
@@ -76,7 +78,7 @@ namespace
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, resolution.x, resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, renderResolution.x, renderResolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         glGenFramebuffers(1, &fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -89,7 +91,7 @@ namespace
         drawData.Valid = true;
         drawData.DisplayPos = {0, 0};
         drawData.DisplaySize = {toFloat(resolution.x), toFloat(resolution.y)};
-        drawData.FramebufferScale = {1.0f, 1.0f};
+        drawData.FramebufferScale = {toFloat(supersampling), toFloat(supersampling)};
         drawData.AddDrawList(drawList);
 
         // A scissor rect left over from the surrounding frame would clip the clear
@@ -99,16 +101,17 @@ namespace
         ImGui_ImplOpenGL3_RenderDrawData(&drawData);
 
         PictureData result{
-            .resolution = resolution, .pixels = std::vector<uint8_t>(static_cast<size_t>(resolution.x) * resolution.y * PictureData::NumChannels)};
+            .resolution = renderResolution,
+            .pixels = std::vector<uint8_t>(static_cast<size_t>(renderResolution.x) * renderResolution.y * PictureData::NumChannels)};
         glReadBuffer(GL_COLOR_ATTACHMENT0);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, result.pixels.data());
+        glReadPixels(0, 0, renderResolution.x, renderResolution.y, GL_RGB, GL_UNSIGNED_BYTE, result.pixels.data());
 
         // OpenGL provides the rows bottom-up
-        auto bytesPerRow = static_cast<size_t>(resolution.x) * PictureData::NumChannels;
-        for (auto row : std::views::iota(0, resolution.y / 2)) {
+        auto bytesPerRow = static_cast<size_t>(renderResolution.x) * PictureData::NumChannels;
+        for (auto row : std::views::iota(0, renderResolution.y / 2)) {
             auto upperRow = result.pixels.begin() + row * bytesPerRow;
-            auto lowerRow = result.pixels.begin() + (resolution.y - 1 - row) * bytesPerRow;
+            auto lowerRow = result.pixels.begin() + (renderResolution.y - 1 - row) * bytesPerRow;
             std::swap_ranges(upperRow, upperRow + bytesPerRow, lowerRow);
         }
         return result;
@@ -135,7 +138,8 @@ std::optional<std::string> PictureGuiService::createGenomePreviewJpg(std::vector
         drawList.PopClipRect();
         drawList.PopTextureID();
 
-        return encodeJpg(renderOffscreen(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor));
+        auto picture = renderOffscreen(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor, PreviewPictureSupersampling);
+        return encodeJpg(brighten(scale(picture, PreviewPictureResolution), PreviewPictureBrightness));
     } catch (AlienException const& exception) {
         log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
         return std::nullopt;

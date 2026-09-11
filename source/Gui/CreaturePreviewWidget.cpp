@@ -187,13 +187,13 @@ void _CreaturePreviewWidget::processMouseNavigation()
 
 void _CreaturePreviewWidget::processPreviewRendering()
 {
-    auto parameters = _PreviewDescView::RenderParameters{
-        .showFrontMarker = true,
-        .showGeneReferences = true,
-        .cellLabel = _editData->showNodeIndex ? _PreviewDescView::CellLabel::NodeIndex : _PreviewDescView::CellLabel::CellType,
-        .selectedGeneIndex = _editData->selectedGeneIndex,
-        .selectedNodeIndex = _editData->getSelectedNodeIndex(),
-        .selectedCellId = _selectedCellIdFromPreview};
+    auto parameters = _PreviewDescView::RenderParameters()
+                          .showFrontMarker(true)
+                          .showGeneReferences(true)
+                          .cellLabel(_editData->showNodeIndex ? _PreviewDescView::CellLabel::NodeIndex : _PreviewDescView::CellLabel::CellType)
+                          .selectedGeneIndex(_editData->selectedGeneIndex)
+                          .selectedNodeIndex(_editData->getSelectedNodeIndex())
+                          .selectedCellId(_selectedCellIdFromPreview);
     _previewView->draw(ImGui::GetWindowDrawList(), _previewDesc, _viewport, parameters);
 }
 

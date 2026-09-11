@@ -60,8 +60,7 @@ RealVector2D PreviewViewport::mapViewToWorldPosition(RealVector2D const& viewPos
         (viewPos.y - _viewStartPos.y - _viewSize.y / 2) / scaleFactor + _worldCenter.y};
 }
 
-float PreviewViewport::calcZoomToFitContent(float contentRadius, RealVector2D const& viewSize)
+float PreviewViewport::calcZoomToFitContent(RealVector2D const& contentSize, RealVector2D const& viewSize)
 {
-    auto viewExtent = std::min(viewSize.x, viewSize.y);
-    return scaleInverse(viewExtent / (2.0f * contentRadius));
+    return scaleInverse(std::min(viewSize.x / contentSize.x, viewSize.y / contentSize.y));
 }

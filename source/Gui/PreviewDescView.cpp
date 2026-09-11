@@ -22,6 +22,10 @@ namespace
     auto constexpr SignalStrengthEnlargement = 0.5f;
 
     auto constexpr CollageTileMargin = 5.0f;
+    auto constexpr CollageContentMargin = 1.0f;
+    auto constexpr CollageMinContentExtent = 6.0f;
+    auto constexpr CollageRelativeStrokeThickness = 1.0f / 300.0f;
+    auto constexpr CollageCellRadiusScale = 1.8f;
 }
 
 PreviewDescView _PreviewDescView::create()
@@ -31,27 +35,37 @@ PreviewDescView _PreviewDescView::create()
 
 void _PreviewDescView::draw(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters)
 {
-    if (parameters.showFrontMarker) {
+    if (parameters._showFrontMarker) {
         drawFrontMarker(drawList, desc, viewport);
     }
     drawSelection(drawList, desc, viewport, parameters);
     drawCells(drawList, desc, viewport, parameters);
     drawCellLabels(drawList, desc, viewport, parameters);
-    drawConnections(drawList, desc, viewport);
-    if (parameters.showGeneReferences) {
+    drawConnections(drawList, desc, viewport, parameters);
+    if (parameters._showGeneReferences) {
         drawGeneReferences(drawList, desc, viewport);
     }
 }
 
 namespace
 {
-    float calcContentRadius(PreviewDesc const& desc)
+    RealRect calcContentBoundingBox(PreviewDesc const& desc)
     {
-        auto maxDistance = 0.0f;
+        auto topLeft = RealVector2D{0, 0};
+        auto bottomRight = RealVector2D{0, 0};
         for (auto const& cell : desc._cells) {
-            maxDistance = std::max(maxDistance, Math::length(cell._pos));
+            topLeft.x = std::min(topLeft.x, cell._pos.x);
+            topLeft.y = std::min(topLeft.y, cell._pos.y);
+            bottomRight.x = std::max(bottomRight.x, cell._pos.x);
+            bottomRight.y = std::max(bottomRight.y, cell._pos.y);
         }
-        return std::max(maxDistance + 1.0f, 3.0f);
+        topLeft -= RealVector2D{CollageContentMargin, CollageContentMargin};
+        bottomRight += RealVector2D{CollageContentMargin, CollageContentMargin};
+
+        auto enlargement = RealVector2D{
+            std::max(0.0f, CollageMinContentExtent - (bottomRight.x - topLeft.x)) / 2,
+            std::max(0.0f, CollageMinContentExtent - (bottomRight.y - topLeft.y)) / 2};
+        return {topLeft - enlargement, bottomRight + enlargement};
     }
 
     struct PreviewTile
@@ -118,21 +132,42 @@ void _PreviewDescView::drawCollage(
     for (auto const& preview : previews) {
         sortedPreviews.emplace_back(&preview);
     }
-    std::ranges::sort(sortedPreviews, std::greater{}, [](auto const* preview) { return calcContentRadius(*preview); });
 
     auto tiles = calcTiles(toInt(sortedPreviews.size()), viewStartPos, viewSize);
     drawTileSeparators(drawList, tiles, viewStartPos, viewSize);
 
     auto margin = scale(CollageTileMargin);
     auto contentSize = tiles.front().size - RealVector2D{margin * 2, margin * 2};
-    auto zoom = PreviewViewport::calcZoomToFitContent(calcContentRadius(*sortedPreviews.front()), contentSize);
+    auto calcZoomForPreview = [&contentSize](PreviewDesc const* preview) {
+        auto boundingBox = calcContentBoundingBox(*preview);
+        return PreviewViewport::calcZoomToFitContent(boundingBox.bottomRight - boundingBox.topLeft, contentSize);
+    };
+
+    // All creatures are drawn at the same zoom, so the largest one determines it and comes first
+    std::ranges::sort(sortedPreviews, std::less{}, calcZoomForPreview);
+
+    auto parameters = RenderParameters().strokeThickness(scaleInverse(viewSize.y * CollageRelativeStrokeThickness)).cellRadiusScale(CollageCellRadiusScale);
 
     PreviewViewport viewport;
-    viewport.setZoom(zoom);
+    viewport.setZoom(calcZoomForPreview(sortedPreviews.front()));
     for (auto const& [preview, tile] : std::views::zip(sortedPreviews, tiles)) {
+        auto boundingBox = calcContentBoundingBox(*preview);
+        viewport.setWorldCenter((boundingBox.topLeft + boundingBox.bottomRight) / 2.0f);
         viewport.setViewStartPos(tile.startPos);
         viewport.setViewSize(tile.size);
-        draw(drawList, *preview, viewport, RenderParameters());
+        draw(drawList, *preview, viewport, parameters);
+    }
+}
+
+namespace
+{
+    float calcContentRadius(PreviewDesc const& desc)
+    {
+        auto maxDistance = 0.0f;
+        for (auto const& cell : desc._cells) {
+            maxDistance = std::max(maxDistance, Math::length(cell._pos));
+        }
+        return std::max(maxDistance + 1.0f, 3.0f);
     }
 }
 
@@ -168,8 +203,8 @@ void _PreviewDescView::drawFrontMarker(ImDrawList* drawList, PreviewDesc const& 
 void _PreviewDescView::drawSelection(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters) const
 {
     auto const cellSize = scale(viewport.getZoom());
-    auto const& selectedGene = parameters.selectedGeneIndex;
-    auto const& selectedNode = parameters.selectedNodeIndex;
+    auto const& selectedGene = parameters._selectedGeneIndex;
+    auto const& selectedNode = parameters._selectedNodeIndex;
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
     // Draw selected gene
@@ -217,13 +252,14 @@ void _PreviewDescView::drawCells(ImDrawList* drawList, PreviewDesc const& desc, 
         auto signalStrength = viewport.getZoom() > ZoomLevelForConnections ? toFloat(cell._highlightIntensity) / 255.0f : 0.0f;
         auto whiteness = signalStrength * SignalStrengthWhiteness;
 
-        auto cellRadiusFactor = (viewport.getZoom() > ZoomLevelForConnections ? 0.15f : 0.5f) * (1.0f + signalStrength * SignalStrengthEnlargement);
+        auto cellRadiusFactor =
+            (viewport.getZoom() > ZoomLevelForConnections ? 0.15f : 0.5f) * (1.0f + signalStrength * SignalStrengthEnlargement) * parameters._cellRadiusScale;
         drawList->AddCircleFilled(
             {cellPos.x, cellPos.y},
-            std::max(1.0f, cellSize * cellRadiusFactor),
+            std::max(scale(parameters._cellRadiusScale), cellSize * cellRadiusFactor),
             ImColor::HSV(h, s * 1.2f * (1.0f - whiteness), v * (1.0f - whiteness) + whiteness));
 
-        if (parameters.selectedCellId.has_value() && parameters.selectedCellId.value() == cell._id) {
+        if (parameters._selectedCellId.has_value() && parameters._selectedCellId.value() == cell._id) {
             if (viewport.getZoom() > ZoomLevelForGeneReferences) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.15f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f);
             }
@@ -233,7 +269,7 @@ void _PreviewDescView::drawCells(ImDrawList* drawList, PreviewDesc const& desc, 
 
 void _PreviewDescView::drawCellLabels(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters) const
 {
-    if (parameters.cellLabel == CellLabel::None || viewport.getZoom() <= ZoomLevelForCellLabels) {
+    if (parameters._cellLabel == CellLabel::None || viewport.getZoom() <= ZoomLevelForCellLabels) {
         return;
     }
 
@@ -241,7 +277,7 @@ void _PreviewDescView::drawCellLabels(ImDrawList* drawList, PreviewDesc const& d
     auto font = StyleRepository::get().getSmallBoldFont();
     for (auto const& cell : desc._cells) {
         auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
-        auto text = parameters.cellLabel == CellLabel::NodeIndex ? std::to_string(cell._nodeIndex) : Const::CellTypeStrings.at(cell._cellType);
+        auto text = parameters._cellLabel == CellLabel::NodeIndex ? std::to_string(cell._nodeIndex) : Const::CellTypeStrings.at(cell._cellType);
         auto fontSize = std::min(cellSize * 0.18f, MaxCellLabelTextSize);
         auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text.c_str());
         AlienGui::AddTextWithSubpixelAccuracy(
@@ -251,14 +287,16 @@ void _PreviewDescView::drawCellLabels(ImDrawList* drawList, PreviewDesc const& d
     }
 }
 
-void _PreviewDescView::drawConnections(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport) const
+void _PreviewDescView::drawConnections(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters) const
 {
     if (viewport.getZoom() <= ZoomLevelForConnections) {
         return;
     }
 
-    auto const lineThickness = scale(1.0f);
+    auto const lineThickness = scale(parameters._strokeThickness);
     auto const cellSize = scale(viewport.getZoom());
+
+    auto const cellGap = cellSize * 0.15f * parameters._cellRadiusScale;
     for (auto const& connection : desc._connections) {
         auto cellPos1 = viewport.mapWorldToViewPosition(connection._cell1);
         auto cellPos2 = viewport.mapWorldToViewPosition(connection._cell2);
@@ -267,8 +305,8 @@ void _PreviewDescView::drawConnections(ImDrawList* drawList, PreviewDesc const& 
         auto direction = cellPos1 - cellPos2;
 
         Math::normalize(direction);
-        auto connectionStartPos = cellPos1 - direction * cellSize * 0.15f;
-        auto connectionEndPos = cellPos2 + direction * cellSize * 0.15f;
+        auto connectionStartPos = cellPos1 - direction * cellGap;
+        auto connectionEndPos = cellPos2 + direction * cellGap;
         drawList->AddLine({connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, connectionColor, lineThickness);
 
         if (connection._connectionWeightToObject1 != 0.0f) {
