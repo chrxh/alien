@@ -81,8 +81,10 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenot
     ImGui::PushStyleColor(ImGuiCol_ChildBg, Const::GenomePreviewBackgroundColor.Value);
 
     if (ImGui::BeginChild("CellGraphWidget", ImVec2(0, height), 0, ImGuiWindowFlags_NoScrollbar)) {
+        updateViewport();
         processMouseNavigation();
-        processCellGraphAndSelection();
+        updateSelection();
+        processPreviewRendering();
         processTitle();
         processNeuralActivityEditor(phenotypeChanged, phenotype);
         processActionButtons();
@@ -142,6 +144,13 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     , _subGenome(genomeWithStartIndex)
 {
     _scrollbars = std::make_shared<_SimulationScrollbars>(false);
+    _previewView = _PreviewDescView::create();
+}
+
+void _CreaturePreviewWidget::updateViewport()
+{
+    _viewport.setViewStartPos({ImGui::GetWindowPos().x, ImGui::GetWindowPos().y});
+    _viewport.setViewSize({ImGui::GetWindowWidth(), ImGui::GetWindowHeight()});
 }
 
 void _CreaturePreviewWidget::processMouseNavigation()
@@ -152,25 +161,23 @@ void _CreaturePreviewWidget::processMouseNavigation()
     }
 
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
-        RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
         RealVector2D mousePos = {ImGui::GetMousePos().x, ImGui::GetMousePos().y};
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
-            _worldPosForPanning = mapViewToWorldPosition(mousePos, windowSize, windowPos);
+            _worldPosForPanning = _viewport.mapViewToWorldPosition(mousePos);
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Middle) && _worldPosForPanning.has_value()) {
-            moveCenter(_worldPosForPanning.value(), mousePos, windowSize, windowPos);
+            moveCenter(_worldPosForPanning.value(), mousePos);
         }
         if (ImGui::GetIO().MouseWheel > 0) {
-            auto worldPos = mapViewToWorldPosition(mousePos, windowSize, windowPos);
-            _zoom *= sqrt(1.5f);
-            moveCenter(worldPos, mousePos, windowSize, windowPos);
+            auto worldPos = _viewport.mapViewToWorldPosition(mousePos);
+            _viewport.setZoom(_viewport.getZoom() * sqrt(1.5f));
+            moveCenter(worldPos, mousePos);
         }
         if (ImGui::GetIO().MouseWheel < 0) {
-            auto worldPos = mapViewToWorldPosition(mousePos, windowSize, windowPos);
-            _zoom /= sqrt(1.5f);
-            moveCenter(worldPos, mousePos, windowSize, windowPos);
+            auto worldPos = _viewport.mapViewToWorldPosition(mousePos);
+            _viewport.setZoom(_viewport.getZoom() / sqrt(1.5f));
+            moveCenter(worldPos, mousePos);
         }
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
@@ -178,26 +185,21 @@ void _CreaturePreviewWidget::processMouseNavigation()
     }
 }
 
-void _CreaturePreviewWidget::processCellGraphAndSelection()
+void _CreaturePreviewWidget::processPreviewRendering()
 {
-    RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
-    RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-
-    updateSelection(windowSize, windowPos);
-
-    auto parameters = PreviewRenderParameters()
-                          .showFrontMarker(true)
-                          .showGeneReferences(true)
-                          .cellLabel(_editData->showNodeIndex ? PreviewCellLabel::NodeIndex : PreviewCellLabel::CellType)
-                          .selectedGeneIndex(_editData->selectedGeneIndex)
-                          .selectedNodeIndex(_editData->getSelectedNodeIndex())
-                          .selectedCellId(_selectedCellIdFromPreview);
-    _renderer.draw(ImGui::GetWindowDrawList(), _previewDesc, createViewport(windowSize, windowPos), parameters);
+    auto parameters = _PreviewDescView::RenderParameters{
+        .showFrontMarker = true,
+        .showGeneReferences = true,
+        .cellLabel = _editData->showNodeIndex ? _PreviewDescView::CellLabel::NodeIndex : _PreviewDescView::CellLabel::CellType,
+        .selectedGeneIndex = _editData->selectedGeneIndex,
+        .selectedNodeIndex = _editData->getSelectedNodeIndex(),
+        .selectedCellId = _selectedCellIdFromPreview};
+    _previewView->draw(ImGui::GetWindowDrawList(), _previewDesc, _viewport, parameters);
 }
 
-void _CreaturePreviewWidget::updateSelection(RealVector2D const& viewSize, RealVector2D const& viewStartPos)
+void _CreaturePreviewWidget::updateSelection()
 {
-    auto const cellSize = scale(_zoom);
+    auto const cellSize = scale(_viewport.getZoom());
     auto mousePos = ImGui::GetMousePos();
     auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 
@@ -218,7 +220,7 @@ void _CreaturePreviewWidget::updateSelection(RealVector2D const& viewSize, RealV
         return;
     }
     for (auto const& cell : _previewDesc._cells) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, viewSize, viewStartPos);
+        auto cellPos = _viewport.mapWorldToViewPosition(cell._pos);
         if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
             && mousePos.y <= cellPos.y + cellSize / 2) {
             if (_editData->hasValidNodeIndex(cell._geneIndex, cell._nodeIndex)) {
@@ -331,13 +333,13 @@ void _CreaturePreviewWidget::processActionButtons()
         ImGui::SetCursorPos({0, 0});
         ImGui::PushID(1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
-            _zoom *= 1.5f;
+            _viewport.setZoom(_viewport.getZoom() * 1.5f);
         }
         ImGui::PopID();
         ImGui::SameLine();
         ImGui::PushID(2);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
-            _zoom /= 1.5f;
+            _viewport.setZoom(_viewport.getZoom() / 1.5f);
         }
         ImGui::PopID();
     }
@@ -346,16 +348,19 @@ void _CreaturePreviewWidget::processActionButtons()
 
 void _CreaturePreviewWidget::processScrollbars()
 {
-    RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-    RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+    auto viewStartPos = _viewport.getViewStartPos();
+    auto viewSize = _viewport.getViewSize();
 
     RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
     RealRect visibleWorldRect{
-        mapViewToWorldPosition(windowPos, windowSize, windowPos),
-        mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
+        _viewport.mapViewToWorldPosition(viewStartPos),
+        _viewport.mapViewToWorldPosition(viewStartPos + viewSize),
     };
-    RealRect viewRect{windowPos, windowPos + windowSize};
-    _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
+    RealRect viewRect{viewStartPos, viewStartPos + viewSize};
+
+    auto worldCenter = _viewport.getWorldCenter();
+    _scrollbars->process(worldCenter, worldRect, visibleWorldRect, viewRect);
+    _viewport.setWorldCenter(worldCenter);
 }
 
 void _CreaturePreviewWidget::processTitle()
@@ -373,30 +378,11 @@ void _CreaturePreviewWidget::processTitle()
     AlienGui::Text(title.c_str());
 }
 
-PreviewViewport _CreaturePreviewWidget::createViewport(RealVector2D const& viewSize, RealVector2D const& viewStartPos) const
+void _CreaturePreviewWidget::moveCenter(RealVector2D const& startWorldPosition, RealVector2D const& endViewPos)
 {
-    return PreviewViewport().worldCenter(_worldCenter).zoom(_zoom).viewStartPos(viewStartPos).viewSize(viewSize);
-}
-
-RealVector2D _CreaturePreviewWidget::mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const
-{
-    return PreviewDescRenderer::mapWorldToViewPosition(worldPos, createViewport(viewSize, viewStartPos));
-}
-
-RealVector2D _CreaturePreviewWidget::mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const
-{
-    return PreviewDescRenderer::mapViewToWorldPosition(viewPos, createViewport(viewSize, viewStartPos));
-}
-
-void _CreaturePreviewWidget::moveCenter(
-    RealVector2D const& startWorldPosition,
-    RealVector2D const& endViewPos,
-    RealVector2D const& viewSize,
-    RealVector2D const& viewStartPos)
-{
-    auto deltaViewPos = endViewPos - viewStartPos - viewSize / 2.0f;
-    auto deltaWorldPos = deltaViewPos / _zoom;
-    _worldCenter = startWorldPosition - deltaWorldPos;
+    auto deltaViewPos = endViewPos - _viewport.getViewStartPos() - _viewport.getViewSize() / 2.0f;
+    auto deltaWorldPos = deltaViewPos / _viewport.getZoom();
+    _viewport.setWorldCenter(startWorldPosition - deltaWorldPos);
 }
 
 void _CreaturePreviewWidget::updatePhenotype(ContentDesc& phenotype, CellPreviewDesc const& editedCell) const

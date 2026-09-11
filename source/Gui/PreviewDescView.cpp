@@ -1,4 +1,4 @@
-#include "PreviewDescRenderer.h"
+#include "PreviewDescView.h"
 
 #include <algorithm>
 #include <ranges>
@@ -24,22 +24,36 @@ namespace
     auto constexpr CollageTileMargin = 5.0f;
 }
 
-void PreviewDescRenderer::draw(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, PreviewRenderParameters const& parameters)
+PreviewDescView _PreviewDescView::create()
 {
-    if (parameters._showFrontMarker) {
+    return PreviewDescView(new _PreviewDescView());
+}
+
+void _PreviewDescView::draw(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters)
+{
+    if (parameters.showFrontMarker) {
         drawFrontMarker(drawList, desc, viewport);
     }
     drawSelection(drawList, desc, viewport, parameters);
     drawCells(drawList, desc, viewport, parameters);
     drawCellLabels(drawList, desc, viewport, parameters);
     drawConnections(drawList, desc, viewport);
-    if (parameters._showGeneReferences) {
+    if (parameters.showGeneReferences) {
         drawGeneReferences(drawList, desc, viewport);
     }
 }
 
 namespace
 {
+    float calcContentRadius(PreviewDesc const& desc)
+    {
+        auto maxDistance = 0.0f;
+        for (auto const& cell : desc._cells) {
+            maxDistance = std::max(maxDistance, Math::length(cell._pos));
+        }
+        return std::max(maxDistance + 1.0f, 3.0f);
+    }
+
     struct PreviewTile
     {
         RealVector2D startPos;
@@ -90,7 +104,7 @@ namespace
     }
 }
 
-void PreviewDescRenderer::drawCollage(
+void _PreviewDescView::drawCollage(
     ImDrawList* drawList,
     std::vector<PreviewDesc> const& previews,
     RealVector2D const& viewStartPos,
@@ -111,46 +125,18 @@ void PreviewDescRenderer::drawCollage(
 
     auto margin = scale(CollageTileMargin);
     auto contentSize = tiles.front().size - RealVector2D{margin * 2, margin * 2};
-    auto zoom = calcZoomToFitContent(calcContentRadius(*sortedPreviews.front()), contentSize);
+    auto zoom = PreviewViewport::calcZoomToFitContent(calcContentRadius(*sortedPreviews.front()), contentSize);
 
+    PreviewViewport viewport;
+    viewport.setZoom(zoom);
     for (auto const& [preview, tile] : std::views::zip(sortedPreviews, tiles)) {
-        auto viewport = PreviewViewport().zoom(zoom).viewStartPos(tile.startPos).viewSize(tile.size);
-        draw(drawList, *preview, viewport, PreviewRenderParameters());
+        viewport.setViewStartPos(tile.startPos);
+        viewport.setViewSize(tile.size);
+        draw(drawList, *preview, viewport, RenderParameters());
     }
 }
 
-RealVector2D PreviewDescRenderer::mapWorldToViewPosition(RealVector2D const& worldPos, PreviewViewport const& viewport)
-{
-    auto scaleFactor = scale(viewport._zoom);
-    return {
-        (worldPos.x - viewport._worldCenter.x) * scaleFactor + viewport._viewSize.x / 2 + viewport._viewStartPos.x,
-        (worldPos.y - viewport._worldCenter.y) * scaleFactor + viewport._viewSize.y / 2 + viewport._viewStartPos.y};
-}
-
-RealVector2D PreviewDescRenderer::mapViewToWorldPosition(RealVector2D const& viewPos, PreviewViewport const& viewport)
-{
-    auto scaleFactor = scale(viewport._zoom);
-    return {
-        (viewPos.x - viewport._viewStartPos.x - viewport._viewSize.x / 2) / scaleFactor + viewport._worldCenter.x,
-        (viewPos.y - viewport._viewStartPos.y - viewport._viewSize.y / 2) / scaleFactor + viewport._worldCenter.y};
-}
-
-float PreviewDescRenderer::calcContentRadius(PreviewDesc const& desc)
-{
-    auto maxDistance = 0.0f;
-    for (auto const& cell : desc._cells) {
-        maxDistance = std::max(maxDistance, Math::length(cell._pos));
-    }
-    return std::max(maxDistance + 1.0f, 3.0f);
-}
-
-float PreviewDescRenderer::calcZoomToFitContent(float contentRadius, RealVector2D const& viewSize)
-{
-    auto viewExtent = std::min(viewSize.x, viewSize.y);
-    return scaleInverse(viewExtent / (2.0f * contentRadius));
-}
-
-void PreviewDescRenderer::drawFrontMarker(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport)
+void _PreviewDescView::drawFrontMarker(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport)
 {
     // The radius follows the extent of the creature, but small changes are ignored to keep the marker calm
     auto radius = calcContentRadius(desc) * 1.25f;
@@ -160,9 +146,9 @@ void PreviewDescRenderer::drawFrontMarker(ImDrawList* drawList, PreviewDesc cons
     }
     _lastFrontAngleRadius = radius;
 
-    radius *= scale(viewport._zoom);
+    radius *= scale(viewport.getZoom());
 
-    auto center = mapWorldToViewPosition({0, 0}, viewport);
+    auto center = viewport.mapWorldToViewPosition({0, 0});
     drawList->AddCircle({center.x, center.y}, radius, ImColor::HSV(0, 0, 0.2f), 64);
 
     auto textSize = scale(12.0f);
@@ -179,21 +165,17 @@ void PreviewDescRenderer::drawFrontMarker(ImDrawList* drawList, PreviewDesc cons
     AlienGui::RotateEnd(visualFrontAngle, drawList);
 }
 
-void PreviewDescRenderer::drawSelection(
-    ImDrawList* drawList,
-    PreviewDesc const& desc,
-    PreviewViewport const& viewport,
-    PreviewRenderParameters const& parameters) const
+void _PreviewDescView::drawSelection(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters) const
 {
-    auto const cellSize = scale(viewport._zoom);
-    auto const& selectedGene = parameters._selectedGeneIndex;
-    auto const& selectedNode = parameters._selectedNodeIndex;
+    auto const cellSize = scale(viewport.getZoom());
+    auto const& selectedGene = parameters.selectedGeneIndex;
+    auto const& selectedNode = parameters.selectedNodeIndex;
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
     // Draw selected gene
     auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.1f);
     for (auto const& cell : desc._cells) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, viewport);
+        auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
         if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
         }
@@ -201,7 +183,7 @@ void PreviewDescRenderer::drawSelection(
 
     // Draw selected nodes
     for (auto const& cell : desc._cells) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, viewport);
+        auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
         if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
             ImU32 color;
             if (cell._inactive) {
@@ -218,14 +200,13 @@ void PreviewDescRenderer::drawSelection(
     }
 }
 
-void PreviewDescRenderer::drawCells(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, PreviewRenderParameters const& parameters)
-    const
+void _PreviewDescView::drawCells(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters) const
 {
-    auto const cellSize = scale(viewport._zoom);
+    auto const cellSize = scale(viewport.getZoom());
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
     for (auto const& cell : desc._cells) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, viewport);
+        auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
         float h, s, v;
         uint32_t color = customizationColors.values[cell._color].toRgbColor();
         if (cell._inactive) {
@@ -233,38 +214,34 @@ void PreviewDescRenderer::drawCells(ImDrawList* drawList, PreviewDesc const& des
         }
         AlienGui::ConvertRGBtoHSV(color, h, s, v);
 
-        auto signalStrength = viewport._zoom > ZoomLevelForConnections ? toFloat(cell._highlightIntensity) / 255.0f : 0.0f;
+        auto signalStrength = viewport.getZoom() > ZoomLevelForConnections ? toFloat(cell._highlightIntensity) / 255.0f : 0.0f;
         auto whiteness = signalStrength * SignalStrengthWhiteness;
 
-        auto cellRadiusFactor = (viewport._zoom > ZoomLevelForConnections ? 0.15f : 0.5f) * (1.0f + signalStrength * SignalStrengthEnlargement);
+        auto cellRadiusFactor = (viewport.getZoom() > ZoomLevelForConnections ? 0.15f : 0.5f) * (1.0f + signalStrength * SignalStrengthEnlargement);
         drawList->AddCircleFilled(
             {cellPos.x, cellPos.y},
             std::max(1.0f, cellSize * cellRadiusFactor),
             ImColor::HSV(h, s * 1.2f * (1.0f - whiteness), v * (1.0f - whiteness) + whiteness));
 
-        if (parameters._selectedCellId.has_value() && parameters._selectedCellId.value() == cell._id) {
-            if (viewport._zoom > ZoomLevelForGeneReferences) {
+        if (parameters.selectedCellId.has_value() && parameters.selectedCellId.value() == cell._id) {
+            if (viewport.getZoom() > ZoomLevelForGeneReferences) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.15f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f);
             }
         }
     }
 }
 
-void PreviewDescRenderer::drawCellLabels(
-    ImDrawList* drawList,
-    PreviewDesc const& desc,
-    PreviewViewport const& viewport,
-    PreviewRenderParameters const& parameters) const
+void _PreviewDescView::drawCellLabels(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport, RenderParameters const& parameters) const
 {
-    if (parameters._cellLabel == PreviewCellLabel::None || viewport._zoom <= ZoomLevelForCellLabels) {
+    if (parameters.cellLabel == CellLabel::None || viewport.getZoom() <= ZoomLevelForCellLabels) {
         return;
     }
 
-    auto const cellSize = scale(viewport._zoom);
+    auto const cellSize = scale(viewport.getZoom());
     auto font = StyleRepository::get().getSmallBoldFont();
     for (auto const& cell : desc._cells) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, viewport);
-        auto text = parameters._cellLabel == PreviewCellLabel::NodeIndex ? std::to_string(cell._nodeIndex) : Const::CellTypeStrings.at(cell._cellType);
+        auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
+        auto text = parameters.cellLabel == CellLabel::NodeIndex ? std::to_string(cell._nodeIndex) : Const::CellTypeStrings.at(cell._cellType);
         auto fontSize = std::min(cellSize * 0.18f, MaxCellLabelTextSize);
         auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text.c_str());
         AlienGui::AddTextWithSubpixelAccuracy(
@@ -274,17 +251,17 @@ void PreviewDescRenderer::drawCellLabels(
     }
 }
 
-void PreviewDescRenderer::drawConnections(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport) const
+void _PreviewDescView::drawConnections(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport) const
 {
-    if (viewport._zoom <= ZoomLevelForConnections) {
+    if (viewport.getZoom() <= ZoomLevelForConnections) {
         return;
     }
 
     auto const lineThickness = scale(1.0f);
-    auto const cellSize = scale(viewport._zoom);
+    auto const cellSize = scale(viewport.getZoom());
     for (auto const& connection : desc._connections) {
-        auto cellPos1 = mapWorldToViewPosition(connection._cell1, viewport);
-        auto cellPos2 = mapWorldToViewPosition(connection._cell2, viewport);
+        auto cellPos1 = viewport.mapWorldToViewPosition(connection._cell1);
+        auto cellPos2 = viewport.mapWorldToViewPosition(connection._cell2);
         auto connectionColor = connection._inactive ? Const::GenomePreviewInactiveColor : Const::GenomePreviewConnectionColor;
 
         auto direction = cellPos1 - cellPos2;
@@ -318,19 +295,19 @@ void PreviewDescRenderer::drawConnections(ImDrawList* drawList, PreviewDesc cons
     }
 }
 
-void PreviewDescRenderer::drawGeneReferences(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport) const
+void _PreviewDescView::drawGeneReferences(ImDrawList* drawList, PreviewDesc const& desc, PreviewViewport const& viewport) const
 {
-    if (viewport._zoom <= ZoomLevelForGeneReferences) {
+    if (viewport.getZoom() <= ZoomLevelForGeneReferences) {
         return;
     }
 
-    auto const cellSize = scale(viewport._zoom);
+    auto const cellSize = scale(viewport.getZoom());
     auto font = StyleRepository::get().getSmallBoldFont();
     for (auto const& cell : desc._cells) {
         if (!cell._constructorGeneIndex.has_value()) {
             continue;
         }
-        auto cellPos = mapWorldToViewPosition(cell._pos, viewport);
+        auto cellPos = viewport.mapWorldToViewPosition(cell._pos);
         auto text = std::to_string(cell._constructorGeneIndex.value());
         auto textLength = toFloat(text.size());
         auto truncatedSize = std::min(scale(30.0f), cellSize);
