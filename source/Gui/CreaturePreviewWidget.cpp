@@ -247,19 +247,20 @@ namespace
         return style.FramePadding.y + style.ItemSpacing.y;
     }
 
-    bool processHideButton()
-    {
-        auto const& style = ImGui::GetStyle();
-        auto buttonWidth = ImGui::CalcTextSize(ICON_FA_TIMES).x + style.FramePadding.x * 2;
-        auto contentStartPos = ImGui::GetCursorStartPos();
+}
 
-        auto cursorPos = ImGui::GetCursorPos();
-        ImGui::SetCursorPos({ImGui::GetWindowWidth() - contentStartPos.x - buttonWidth, contentStartPos.y + style.ItemSpacing.y - style.FramePadding.y});
-        auto result = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_TIMES).tooltip("Hide the neural activity editor"));
-        ImGui::SetCursorPos(cursorPos);
+bool _CreaturePreviewWidget::processHideButton()
+{
+    auto const& style = ImGui::GetStyle();
+    auto buttonWidth = ImGui::CalcTextSize(ICON_FA_TIMES).x + style.FramePadding.x * 2;
+    auto contentStartPos = ImGui::GetCursorStartPos();
 
-        return result;
-    }
+    auto cursorPos = ImGui::GetCursorPos();
+    ImGui::SetCursorPos({ImGui::GetWindowWidth() - contentStartPos.x - buttonWidth, contentStartPos.y + style.ItemSpacing.y - style.FramePadding.y});
+    auto result = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_TIMES).tooltip("Hide the neural activity editor"));
+    ImGui::SetCursorPos(cursorPos);
+
+    return result;
 }
 
 void _CreaturePreviewWidget::processNeuralActivityEditor(bool& phenotypeChanged, ContentDesc& phenotype)
