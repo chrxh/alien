@@ -250,14 +250,12 @@ void ConsoleModeController::printStatusLine()
 
     auto statistics = simulationFacade->getStatisticsEntry();
     _status.numCells = statistics.objectStatistics.numCellObjects;
-    _status.numEnergyParticles = statistics.objectStatistics.numEnergyParticles;
     _status.numCreatures = 0;
     for (auto const& lineage : statistics.lineageEntries) {
         _status.numCreatures += lineage.numCreatures;
     }
     _status.numLineages = toUInt32(statistics.lineageEntries.size());
-    _status.updateHistory();
 
-    auto lines = ConsoleSimulationPanel::fitsIntoConsole() ? ConsoleSimulationPanel::create("console mode", _status) : std::vector<std::string>();
+    auto lines = ConsoleSimulationPanel::fitsIntoConsole() ? ConsoleSimulationPanel::create(_status) : std::vector<std::string>();
     _liveOutput.update(lines, ConsoleSimulationPanel::createPlainLine(_status));
 }

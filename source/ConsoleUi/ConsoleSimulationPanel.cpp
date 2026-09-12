@@ -1,44 +1,56 @@
 #include "ConsoleSimulationPanel.h"
 
+#include <algorithm>
+#include <ranges>
+
 #include <Base/Definitions.h>
 #include <Base/StringHelper.h>
 #include "ConsoleWidgets.h"
 
 namespace
 {
-    auto constexpr PanelWidth = 64;
-    auto constexpr MaxPanelLines = 14;          // Of the progress variant, which is the taller one
-    auto constexpr PlotWidth = PanelWidth - 4;  // Without the frame borders and the surrounding spaces
-    size_t constexpr MaxHistorySize = PlotWidth;
-    auto constexpr LabelWidth = 18;
-    auto constexpr ValueWidth = 13;
-    auto constexpr SecondLabelWidth = 12;
-    auto constexpr SecondValueWidth = 11;
+    auto constexpr TimeCardWidth = 34;
+    auto constexpr ProgressTimeCardWidth = 42;  // Wider, because the time step row also shows the total number
+    auto constexpr WorldCardWidth = 33;
+    auto constexpr CardGap = 2;
+    auto constexpr PanelWidth = ProgressTimeCardWidth + CardGap + WorldCardWidth;
+    auto constexpr MaxPanelLines = 7;  // Of the progress variant, which is the taller one
+    auto constexpr TimeLabelWidth = 10;
+    auto constexpr TimeValueWidth = 12;
+    auto constexpr WorldLabelWidth = 17;
+    auto constexpr WorldValueWidth = 12;
     auto constexpr SuffixGap = 2;
+}
 
-    std::string createRow(std::string const& label, std::string const& value, std::string const& suffix = std::string())
+bool ConsoleSimulationPanel::fitsIntoConsole()
+{
+    return Console::isRichOutput() && Console::getWidth() > PanelWidth && Console::getHeight() > MaxPanelLines;
+}
+
+namespace
+{
+    int getTimeCardWidth(ConsoleSimulationStatus const& status)
     {
-        auto content = ConsoleWidgets::createField(label, value, LabelWidth, ValueWidth);
+        return status.totalTimesteps.has_value() ? ProgressTimeCardWidth : TimeCardWidth;
+    }
+
+    std::string createTimeRow(int width, std::string const& label, std::string const& value, std::string const& suffix = std::string())
+    {
+        auto content = ConsoleWidgets::createField(label, value, TimeLabelWidth, TimeValueWidth);
         if (!suffix.empty()) {
             content += std::string(SuffixGap, ' ') + suffix;
         }
-        return ConsoleWidgets::createFrameRow(content, PanelWidth);
-    }
-
-    std::string createDoubleRow(std::string const& label, std::string const& value, std::string const& secondLabel, std::string const& secondValue)
-    {
-        auto content = ConsoleWidgets::createField(label, value, LabelWidth, ValueWidth) + "   "
-            + ConsoleWidgets::createField(secondLabel, secondValue, SecondLabelWidth, SecondValueWidth);
-        return ConsoleWidgets::createFrameRow(content, PanelWidth);
+        return ConsoleWidgets::createFrameRow(content, width);
     }
 
     std::string createProgressRow(ConsoleSimulationStatus const& status)
     {
         auto fraction = *status.totalTimesteps != 0 ? toFloat(status.timestep) / toFloat(*status.totalTimesteps) : 0.0f;
         auto percentage = StringHelper::format(fraction * 100.0f, 1) + " %";
-        auto barWidth = PanelWidth - 6 - Console::getVisibleLength(percentage);
+        auto barWidth = ProgressTimeCardWidth - 6 - Console::getVisibleLength(percentage);
         return ConsoleWidgets::createFrameRow(
-            ConsoleWidgets::createProgressBar(fraction, barWidth) + "  " + ConsoleWidgets::createText(percentage, ConsolePalette::Value), PanelWidth);
+            ConsoleWidgets::createProgressBar(fraction, barWidth) + "  " + ConsoleWidgets::createText(percentage, ConsolePalette::Value),
+            ProgressTimeCardWidth);
     }
 
     std::chrono::milliseconds calcRemainingTime(ConsoleSimulationStatus const& status)
@@ -48,61 +60,66 @@ namespace
         }
         return std::chrono::milliseconds(static_cast<int64_t>(toFloat(*status.totalTimesteps - status.timestep) / status.tps * 1000.0f));
     }
-}
 
-namespace
-{
-    void addToHistory(std::vector<float>& history, float value)
+    std::vector<std::string> createTimeCard(ConsoleSimulationStatus const& status)
     {
-        history.push_back(value);
-        if (history.size() > MaxHistorySize) {
-            history.erase(history.begin());
+        auto width = getTimeCardWidth(status);
+
+        std::vector<std::string> result;
+        result.push_back(ConsoleWidgets::createFrameTop("time", width));
+        if (status.totalTimesteps.has_value()) {
+            result.push_back(createProgressRow(status));
+            result.push_back(createTimeRow(
+                width,
+                "time step",
+                StringHelper::format(status.timestep),
+                ConsoleWidgets::createText("/ " + StringHelper::format(*status.totalTimesteps), ConsolePalette::Label)));
+            result.push_back(createTimeRow(width, "tps", StringHelper::format(status.tps, 1)));
+            result.push_back(createTimeRow(width, "elapsed", StringHelper::format(status.duration)));
+            result.push_back(createTimeRow(width, "remaining", StringHelper::format(calcRemainingTime(status))));
+        } else {
+            result.push_back(createTimeRow(
+                width,
+                "time step",
+                StringHelper::format(status.timestep),
+                status.paused ? ConsoleWidgets::createText("paused", ConsolePalette::Warning) : std::string()));
+            result.push_back(createTimeRow(width, "tps", StringHelper::format(status.tps, 1)));
+            result.push_back(createTimeRow(width, "real time", StringHelper::format(status.duration)));
         }
+        result.push_back(ConsoleWidgets::createFrameBottom(width));
+        return result;
+    }
+
+    std::vector<std::string> createWorldCard(ConsoleSimulationStatus const& status)
+    {
+        auto createRow = [](std::string const& label, std::string const& value) {
+            return ConsoleWidgets::createFrameRow(ConsoleWidgets::createField(label, value, WorldLabelWidth, WorldValueWidth), WorldCardWidth);
+        };
+        return {
+            ConsoleWidgets::createFrameTop("world", WorldCardWidth),
+            createRow("cells", StringHelper::format(status.numCells)),
+            createRow("creatures", StringHelper::format(status.numCreatures)),
+            createRow("lineages", StringHelper::format(status.numLineages)),
+            ConsoleWidgets::createFrameBottom(WorldCardWidth)};
+    }
+
+    std::vector<std::string> joinSideBySide(std::vector<std::string> leftCard, int leftCardWidth, std::vector<std::string> rightCard)
+    {
+        auto numLines = std::max(leftCard.size(), rightCard.size());
+        leftCard.resize(numLines, std::string(leftCardWidth, ' '));
+        rightCard.resize(numLines);
+
+        std::vector<std::string> result;
+        for (auto const& [leftLine, rightLine] : std::views::zip(leftCard, rightCard)) {
+            result.push_back(rightLine.empty() ? leftLine : leftLine + std::string(CardGap, ' ') + rightLine);
+        }
+        return result;
     }
 }
 
-void ConsoleSimulationStatus::updateHistory()
+std::vector<std::string> ConsoleSimulationPanel::create(ConsoleSimulationStatus const& status)
 {
-    addToHistory(tpsHistory, tps);
-}
-
-bool ConsoleSimulationPanel::fitsIntoConsole()
-{
-    return Console::isRichOutput() && Console::getWidth() > PanelWidth && Console::getHeight() > MaxPanelLines;
-}
-
-std::vector<std::string> ConsoleSimulationPanel::create(std::string const& title, ConsoleSimulationStatus const& status)
-{
-    std::vector<std::string> result;
-    result.push_back(ConsoleWidgets::createFrameTop(title, PanelWidth));
-
-    if (status.totalTimesteps.has_value()) {
-        result.push_back(createProgressRow(status));
-        result.push_back(createRow(
-            "time step",
-            StringHelper::format(status.timestep),
-            ConsoleWidgets::createText("/ " + StringHelper::format(*status.totalTimesteps), ConsolePalette::Label)));
-        result.push_back(createRow("tps", StringHelper::format(status.tps, 1)));
-        result.push_back(createDoubleRow("elapsed", StringHelper::format(status.duration), "remaining", StringHelper::format(calcRemainingTime(status))));
-    } else {
-        result.push_back(createRow(
-            "time step", StringHelper::format(status.timestep), status.paused ? ConsoleWidgets::createText("paused", ConsolePalette::Warning) : std::string()));
-        result.push_back(createRow("tps", StringHelper::format(status.tps, 1)));
-        result.push_back(createRow("real time", StringHelper::format(status.duration)));
-    }
-
-    result.push_back(ConsoleWidgets::createFrameSeparator("world", PanelWidth));
-    result.push_back(createRow("cells", StringHelper::format(status.numCells)));
-    result.push_back(createRow("energy particles", StringHelper::format(status.numEnergyParticles)));
-    result.push_back(createRow("creatures", StringHelper::format(status.numCreatures)));
-    result.push_back(createRow("lineages", StringHelper::format(status.numLineages)));
-
-    result.push_back(ConsoleWidgets::createFrameSeparator("tps", PanelWidth));
-    for (auto const& plotLine : ConsoleWidgets::createPlot(status.tpsHistory, PlotWidth)) {
-        result.push_back(ConsoleWidgets::createFrameRow(plotLine, PanelWidth));
-    }
-    result.push_back(ConsoleWidgets::createFrameBottom(PanelWidth));
-    return result;
+    return joinSideBySide(createTimeCard(status), getTimeCardWidth(status), createWorldCard(status));
 }
 
 std::string ConsoleSimulationPanel::createPlainLine(ConsoleSimulationStatus const& status)

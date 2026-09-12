@@ -128,15 +128,13 @@ namespace
 
             auto statistics = simulationFacade->getStatisticsEntry();
             status.numCells = statistics.objectStatistics.numCellObjects;
-            status.numEnergyParticles = statistics.objectStatistics.numEnergyParticles;
             status.numCreatures = 0;
             for (auto const& lineage : statistics.lineageEntries) {
                 status.numCreatures += lineage.numCreatures;
             }
             status.numLineages = toUInt32(statistics.lineageEntries.size());
-            status.updateHistory();
 
-            liveOutput.update(ConsoleSimulationPanel::create("simulation", status), std::string());
+            liveOutput.update(ConsoleSimulationPanel::create(status), std::string());
         }
         liveOutput.close();
     }

@@ -15,13 +15,8 @@ struct ConsoleSimulationStatus
     bool paused = false;
 
     uint32_t numCells = 0;
-    uint32_t numEnergyParticles = 0;
     uint32_t numCreatures = 0;
     uint32_t numLineages = 0;
-
-    std::vector<float> tpsHistory;
-
-    void updateHistory();
 };
 
 class ConsoleSimulationPanel
@@ -29,6 +24,6 @@ class ConsoleSimulationPanel
 public:
     static bool fitsIntoConsole();
 
-    static std::vector<std::string> create(std::string const& title, ConsoleSimulationStatus const& status);
+    static std::vector<std::string> create(ConsoleSimulationStatus const& status);
     static std::string createPlainLine(ConsoleSimulationStatus const& status);
 };
