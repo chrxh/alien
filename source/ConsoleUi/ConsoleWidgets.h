@@ -31,9 +31,6 @@ public:
 
     static std::string createProgressBar(float fraction, int width);
 
-    // Two lines resolving into 16 steps, with the newest value at the right edge
-    static std::vector<std::string> createPlot(std::vector<float> const& values, int width);
-
     static std::string createField(std::string const& label, std::string const& value, int labelWidth, int valueWidth);
     static std::string createText(std::string const& text, ConsoleColor const& color);
 };

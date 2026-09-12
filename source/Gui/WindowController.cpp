@@ -16,6 +16,7 @@ namespace
 {
     auto const WindowedMode = std::string("window");
     auto const DesktopMode = std::string("desktop");
+    auto constexpr MinWindowSize = 100;
 
     GLFWvidmode convert(std::string const& mode)
     {
@@ -52,8 +53,11 @@ void WindowController::init()
 {
     auto& settings = GlobalSettings::get();
     _mode = settings.getValue("settings.display.mode", DesktopMode);
-    _sizeInWindowedMode.x = std::max(100, settings.getValue("settings.display.window width", _sizeInWindowedMode.x));
-    _sizeInWindowedMode.y = std::max(100, settings.getValue("settings.display.window height", _sizeInWindowedMode.y));
+    auto storedSize = IntVector2D{
+        settings.getValue("settings.display.window width", _sizeInWindowedMode.x), settings.getValue("settings.display.window height", _sizeInWindowedMode.y)};
+    if (storedSize.x >= MinWindowSize && storedSize.y >= MinWindowSize) {
+        _sizeInWindowedMode = storedSize;
+    }
     _fps = settings.getValue("settings.display.fps", _fps);
     auto lastContentScaleFactor = settings.getValue("settings.display.content scale factor", 0.0f);
     if (lastContentScaleFactor > 0.0f) {
@@ -188,7 +192,15 @@ void WindowController::setMode(std::string const& mode)
 
 void WindowController::updateWindowSize()
 {
-    glfwGetWindowSize(_windowData.window, &_sizeInWindowedMode.x, &_sizeInWindowedMode.y);
+    // A minimized window reports a zero size, which must not overwrite the remembered size
+    if (glfwGetWindowAttrib(_windowData.window, GLFW_ICONIFIED) != 0) {
+        return;
+    }
+    IntVector2D size;
+    glfwGetWindowSize(_windowData.window, &size.x, &size.y);
+    if (size.x > 0 && size.y > 0) {
+        _sizeInWindowedMode = size;
+    }
 }
 
 std::string WindowController::createLogString(GLFWvidmode const& videoMode)

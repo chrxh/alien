@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <ranges>
 #include <string_view>
 
 namespace
@@ -19,9 +18,6 @@ namespace
 
     auto constexpr ShadeLight = "\xe2\x96\x91";
     auto constexpr ShadeFull = "\xe2\x96\x88";
-
-    std::array<char const*, 8> const SparkBlocks =
-        {"\xe2\x96\x81", "\xe2\x96\x82", "\xe2\x96\x83", "\xe2\x96\x84", "\xe2\x96\x85", "\xe2\x96\x86", "\xe2\x96\x87", "\xe2\x96\x88"};
 
     auto constexpr FrameContentOffset = 2;  // Border plus the space in front of the row content
     auto constexpr BannerWidth = 37;
@@ -149,46 +145,6 @@ std::string ConsoleWidgets::createProgressBar(float fraction, int width)
         ++column;
     }
     return result + Console::foreground(ConsolePalette::Frame) + repeat(ShadeLight, std::max(0, width - filledWidth)) + Console::reset();
-}
-
-namespace
-{
-    auto constexpr NumBlockLevels = 8;
-
-    char const* getBlock(int level)
-    {
-        return level > 0 ? SparkBlocks.at(level - 1) : " ";
-    }
-}
-
-std::vector<std::string> ConsoleWidgets::createPlot(std::vector<float> const& values, int width)
-{
-    if (!Console::isRichOutput()) {
-        return {};
-    }
-    auto constexpr MaxLevel = 2 * NumBlockLevels;
-    auto minimum = 0.0f;
-    auto maximum = 0.0f;
-    if (!values.empty()) {
-        auto const extrema = std::ranges::minmax(values);
-        minimum = extrema.min;
-        maximum = extrema.max;
-    }
-    auto range = maximum - minimum;
-
-    auto numSkippedValues = values.size() > static_cast<size_t>(width) ? values.size() - static_cast<size_t>(width) : 0;
-    auto const visibleValues = values | std::views::drop(numSkippedValues);
-
-    auto padding = std::string(std::max(0, width - static_cast<int>(values.size() - numSkippedValues)), ' ');
-    auto upperLine = padding;
-    auto lowerLine = padding;
-    for (auto const& value : visibleValues) {
-        auto level = range > 0.0f ? std::clamp(static_cast<int>((value - minimum) / range * (MaxLevel - 1)) + 1, 1, MaxLevel) : 1;
-        auto color = Console::foreground(Console::blend(ConsolePalette::Frame, ConsolePalette::Accent, static_cast<float>(level) / MaxLevel));
-        upperLine += color + getBlock(std::max(0, level - NumBlockLevels));
-        lowerLine += color + getBlock(std::min(level, NumBlockLevels));
-    }
-    return {upperLine + Console::reset(), lowerLine + Console::reset()};
 }
 
 std::string ConsoleWidgets::createField(std::string const& label, std::string const& value, int labelWidth, int valueWidth)
