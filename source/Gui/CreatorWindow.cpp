@@ -19,9 +19,9 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "CellAttributeHelp.h"
 #include "EditorController.h"
 #include "EditorModel.h"
+#include "EntityAttributeHelp.h"
 #include "HelpStrings.h"
 #include "ImageToPatternDialog.h"
 #include "SimulationInteractionController.h"
@@ -425,7 +425,7 @@ void CreatorWindow::processColorWidget()
             .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
             .name("Color")
             .textWidth(RightColumnWidth)
-            .tooltip(CellAttributeHelp::get(CellAttribute::Color)),
+            .tooltip(EntityAttributeHelp::get(EntityAttribute::Color)),
         color);
     EditorModel::get().setDefaultColorCode(color);
 }
@@ -448,7 +448,7 @@ void CreatorWindow::processMaterialWidgets()
                 .max(1.0f)
                 .format("%.2f")
                 .textWidth(RightColumnWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::FluidGlow)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::FluidGlow)),
             &_glow);
     }
     if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
@@ -458,7 +458,7 @@ void CreatorWindow::processMaterialWidgets()
                 .max(1.0f)
                 .min(0.0f)
                 .textWidth(RightColumnWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::Stiffness)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::Stiffness)),
             &_stiffness);
     }
 }
@@ -473,14 +473,14 @@ void CreatorWindow::processObjectDistanceWidget()
 void CreatorWindow::processStickyWidget()
 {
     AlienGui::Checkbox(
-        AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(CellAttributeHelp::get(CellAttribute::Sticky)), _makeSticky);
+        AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Sticky)), _makeSticky);
 }
 
 void CreatorWindow::processStaticWidget()
 {
     if (!isEnergyMaterial()) {
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(CellAttributeHelp::get(CellAttribute::Static)), _static);
+            AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Static)), _static);
     }
 }
 

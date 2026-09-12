@@ -16,8 +16,8 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "CellAttributeHelp.h"
 #include "EditorModel.h"
+#include "EntityAttributeHelp.h"
 #include "GenomeEditorWindow.h"
 #include "NeuralNetEditorWidget.h"
 #include "SignalsBufferDialog.h"
@@ -36,22 +36,22 @@ namespace
     auto constexpr TableColumnWidth = 380.0f;
     auto constexpr TextWidth = 160.0f;
 
-    void inspectorId(std::string const& name, uint64_t id, CellAttribute attribute, float textWidth = TextWidth)
+    void inspectorId(std::string const& name, uint64_t id, EntityAttribute attribute, float textWidth = TextWidth)
     {
         auto text = std::to_string(id);
-        AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true).tooltip(CellAttributeHelp::get(attribute)), text);
+        AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true).tooltip(EntityAttributeHelp::get(attribute)), text);
     }
 
-    void inspectorText(std::string const& name, std::string const& value, CellAttribute attribute, float textWidth = TextWidth)
+    void inspectorText(std::string const& name, std::string const& value, EntityAttribute attribute, float textWidth = TextWidth)
     {
         auto text = value;
-        AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true).tooltip(CellAttributeHelp::get(attribute)), text);
+        AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true).tooltip(EntityAttributeHelp::get(attribute)), text);
     }
 
-    void geneIndexWidget(std::optional<GenomeDesc> const& genome, int& geneIndex, CellAttribute attribute)
+    void geneIndexWidget(std::optional<GenomeDesc> const& genome, int& geneIndex, EntityAttribute attribute)
     {
         if (!genome.has_value()) {
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth).tooltip(CellAttributeHelp::get(attribute)), geneIndex);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(attribute)), geneIndex);
             return;
         }
         std::vector<std::string> geneNames;
@@ -63,7 +63,7 @@ namespace
             geneNames.emplace_back(text);
         }
         AlienGui::Combo(
-            AlienGui::ComboParameters().name("Gene index").values(geneNames).textWidth(TextWidth).tooltip(CellAttributeHelp::get(attribute)), geneIndex);
+            AlienGui::ComboParameters().name("Gene index").values(geneNames).textWidth(TextWidth).tooltip(EntityAttributeHelp::get(attribute)), geneIndex);
     }
 
     template <typename Func>
@@ -399,13 +399,13 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
     if (table.begin()) {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High))) {
             processPropertiesSubNode("Energy particle", [&] {
-                inspectorId("Particle id", particle._id, CellAttribute::ParticleId);
+                inspectorId("Particle id", particle._id, EntityAttribute::ParticleId);
                 AlienGui::InputFloat2(
                     AlienGui::InputFloat2Parameters()
                         .name("Position")
                         .format("%.3f")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::Position)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::Position)),
                     particle._pos.x,
                     particle._pos.y);
                 AlienGui::InputFloat2(
@@ -413,19 +413,19 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
                         .name("Velocity")
                         .format("%.3f")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::Velocity)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::Velocity)),
                     particle._vel.x,
                     particle._vel.y);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth).tooltip(
-                        CellAttributeHelp::get(CellAttribute::ParticleEnergy)),
+                        EntityAttributeHelp::get(EntityAttribute::ParticleEnergy)),
                     particle._energy);
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters()
                         .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                         .name("Color")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::Color)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::Color)),
                     particle._color);
             });
         }
@@ -442,13 +442,21 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Object").rank(AlienGui::TreeNodeRank::High))) {
         processPropertiesSubNode("Object", [&] {
-            inspectorId("Object id", object._id, CellAttribute::ObjectId);
+            inspectorId("Object id", object._id, EntityAttribute::ObjectId);
             AlienGui::InputFloat2(
-                AlienGui::InputFloat2Parameters().name("Position").format("%.2f").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::Position)),
+                AlienGui::InputFloat2Parameters()
+                    .name("Position")
+                    .format("%.2f")
+                    .textWidth(TextWidth)
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::Position)),
                 object._pos.x,
                 object._pos.y);
             AlienGui::InputFloat2(
-                AlienGui::InputFloat2Parameters().name("Velocity").format("%.2f").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::Velocity)),
+                AlienGui::InputFloat2Parameters()
+                    .name("Velocity")
+                    .format("%.2f")
+                    .textWidth(TextWidth)
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::Velocity)),
                 object._vel.x,
                 object._vel.y);
             AlienGui::InputFloat(
@@ -457,23 +465,24 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                     .format("%.2f")
                     .step(0.05f)
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::Stiffness)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::Stiffness)),
                 object._stiffness);
             AlienGui::ComboColor(
                 AlienGui::ComboColorParameters()
                     .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                     .name("Color")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::Color)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::Color)),
                 object._color);
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Static").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::Static)), object._isStatic);
+                AlienGui::CheckboxParameters().name("Static").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Static)),
+                object._isStatic);
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Sticky").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::Sticky)), object._sticky);
+                AlienGui::CheckboxParameters().name("Sticky").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Sticky)), object._sticky);
 
             auto objectType = object.getObjectType();
             AlienGui::ComboParameters typeParams;
-            typeParams.name("Object type").textWidth(TextWidth).values(Const::ObjectTypeStrings).tooltip(CellAttributeHelp::get(CellAttribute::ObjectType));
+            typeParams.name("Object type").textWidth(TextWidth).values(Const::ObjectTypeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::ObjectType));
             if (AlienGui::Combo(typeParams, objectType)) {
                 object._type = createObjectTypeDesc(objectType);
             }
@@ -486,14 +495,14 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                     auto const connectionNumber = i + 1;
                     if (AlienGui::BeginTreeNode(
                             AlienGui::TreeNodeParameters().name("Connection #" + std::to_string(connectionNumber)).rank(AlienGui::TreeNodeRank::Low))) {
-                        inspectorId("Connected id", conn._objectId, CellAttribute::ConnectedId);
+                        inspectorId("Connected id", conn._objectId, EntityAttribute::ConnectedId);
                         AlienGui::InputFloat(
                             AlienGui::InputFloatParameters()
                                 .name("Distance")
                                 .format("%.2f")
                                 .textWidth(TextWidth)
                                 .readOnly(true)
-                                .tooltip(CellAttributeHelp::get(CellAttribute::ConnectionDistance)),
+                                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConnectionDistance)),
                             conn._distance);
                         AlienGui::InputFloat(
                             AlienGui::InputFloatParameters()
@@ -501,7 +510,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                                 .format("%.2f")
                                 .textWidth(TextWidth)
                                 .readOnly(true)
-                                .tooltip(CellAttributeHelp::get(CellAttribute::ConnectionRefAngle)),
+                                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConnectionRefAngle)),
                             conn._angleFromPrevious);
                     }
                     AlienGui::EndTreeNode();
@@ -519,7 +528,8 @@ void _InspectionWindow::processSolidNode(ObjectDesc& object)
         processPropertiesSubNode("Solid", [&] {
             auto& solid = object.getSolidRef();
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::SolidEnergy)),
+                AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth).tooltip(
+                    EntityAttributeHelp::get(EntityAttribute::SolidEnergy)),
                 solid._energy);
         });
     }
@@ -532,11 +542,12 @@ void _InspectionWindow::processFluidNode(ObjectDesc& object)
         processPropertiesSubNode("Fluid", [&] {
             auto& fluid = object.getFluidRef();
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::FluidEnergy)),
+                AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth).tooltip(
+                    EntityAttributeHelp::get(EntityAttribute::FluidEnergy)),
                 fluid._energy);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Glow").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth).tooltip(
-                    CellAttributeHelp::get(CellAttribute::FluidGlow)),
+                    EntityAttributeHelp::get(EntityAttribute::FluidGlow)),
                 &fluid._glow);
         });
     }
@@ -550,10 +561,10 @@ void _InspectionWindow::processFreeCellNode(ObjectDesc& object)
             auto& freeCell = object.getFreeCellRef();
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth).tooltip(
-                    CellAttributeHelp::get(CellAttribute::FreeCellEnergy)),
+                    EntityAttributeHelp::get(EntityAttribute::FreeCellEnergy)),
                 freeCell._energy);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Age").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::FreeCellAge)), freeCell._age);
+                AlienGui::InputIntParameters().name("Age").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::FreeCellAge)), freeCell._age);
         });
     }
     AlienGui::EndTreeNode();
@@ -569,59 +580,62 @@ void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<Genome
                     .name("Usable energy")
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::CellUsableEnergy)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellUsableEnergy)),
                 cell._usableEnergy);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Raw energy")
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::CellRawEnergy)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellRawEnergy)),
                 cell._rawEnergy);
             AlienGui::InputOptionalFloat(
                 AlienGui::InputFloatParameters()
                     .name("Front angle")
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::CellFrontAngle)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellFrontAngle)),
                 cell._frontAngle);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Age").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CellAge)), cell._age);
+                AlienGui::InputIntParameters().name("Age").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellAge)), cell._age);
             static std::vector<std::string> const cellStateStrings = {"Ready", "Under construction", "Being activated", "Dying", "Instant dying"};
             AlienGui::ComboParameters stateParams;
-            stateParams.name("Cell state").textWidth(TextWidth).values(cellStateStrings).tooltip(CellAttributeHelp::get(CellAttribute::CellState));
+            stateParams.name("Cell state").textWidth(TextWidth).values(cellStateStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::CellState));
             AlienGui::Combo(stateParams, cell._cellState);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Node index").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CellNodeIndex)),
+                AlienGui::InputIntParameters().name("Node index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellNodeIndex)),
                 cell._nodeIndex);
             AlienGui::InputInt(
                 AlienGui::InputIntParameters()
                     .name("Parent node index")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::CellParentNodeIndex)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellParentNodeIndex)),
                 cell._parentNodeIndex);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CellGeneIndex)),
+                AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellGeneIndex)),
                 cell._geneIndex);
             AlienGui::InputInt(
                 AlienGui::InputIntParameters()
                     .name("Concatenation index")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::CellConcatenationIndex)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellConcatenationIndex)),
                 cell._concatenationIndex);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Branch index").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CellBranchIndex)),
+                AlienGui::InputIntParameters().name("Branch index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellBranchIndex)),
                 cell._branchIndex);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Activation time").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CellActivationTime)),
+                AlienGui::InputIntParameters()
+                    .name("Activation time")
+                    .textWidth(TextWidth)
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellActivationTime)),
                 cell._activationTime);
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Head cell").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CellHeadCell)),
+                AlienGui::CheckboxParameters().name("Head cell").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellHeadCell)),
                 cell._headCell);
 
             auto cellType = cell.getCellType();
             AlienGui::ComboParameters cellTypeParams;
-            cellTypeParams.name("Cell type").textWidth(TextWidth).values(Const::CellTypeStrings).tooltip(CellAttributeHelp::get(CellAttribute::CellType));
+            cellTypeParams.name("Cell type").textWidth(TextWidth).values(Const::CellTypeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::CellType));
             if (AlienGui::Combo(cellTypeParams, cellType)) {
                 cell._cellType = createCellTypeDesc(cellType);
                 if (cellType == CellType_Void) {
@@ -636,7 +650,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<Genome
                     AlienGui::CheckboxParameters()
                         .name("Has constructor")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::CellHasConstructor)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::CellHasConstructor)),
                     hasConstructor);
                 if (hasConstructor && !cell._constructor.has_value()) {
                     cell._constructor = ConstructorDesc();
@@ -667,20 +681,20 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
             AlienGui::InputIntParameters()
                 .name("Auto trigger interval")
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorAutoTriggerInterval)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorAutoTriggerInterval)),
             constructor._autoTriggerInterval);
         AlienGui::InputInt(
             AlienGui::InputIntParameters()
                 .name("Activation time")
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorActivationTime)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorActivationTime)),
             constructor._constructionActivationTime);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters()
                 .name("Construction angle")
                 .format("%.2f")
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorConstructionAngle)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorConstructionAngle)),
             constructor._constructionAngle);
         int providedEnergy = constructor._provideEnergy;
         if (AlienGui::Combo(
@@ -688,7 +702,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
                     .name("Provide energy")
                     .textWidth(TextWidth)
                     .values(Const::ProvideEnergyStrings)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorProvideEnergy)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorProvideEnergy)),
                 providedEnergy)) {
             constructor._provideEnergy = static_cast<ProvideEnergy>(providedEnergy);
         }
@@ -697,10 +711,10 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
                 .name("Reserved energy")
                 .format("%.2f")
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorReservedEnergy)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorReservedEnergy)),
             constructor._reservedEnergy);
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::ConstructorSeparation)),
+            AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorSeparation)),
             constructor._separation);
         auto numBranches = constructor._numBranches - 1;
         if (constructor._separation) {
@@ -711,7 +725,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
                 .name("Number of branches")
                 .values({"1", "2", "3", "4", "5", "6"})
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorNumBranches)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorNumBranches)),
             &numBranches);
         if (constructor._separation) {
             ImGui::EndDisabled();
@@ -722,9 +736,9 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
                 .name("Concatenations")
                 .infinity(true)
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::ConstructorNumConcatenations)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorNumConcatenations)),
             constructor._numConcatenations);
-        geneIndexWidget(genome, constructor._geneIndex, CellAttribute::ConstructorGeneIndex);
+        geneIndexWidget(genome, constructor._geneIndex, EntityAttribute::ConstructorGeneIndex);
     }
     AlienGui::EndTreeNode();
 }
@@ -733,23 +747,23 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
 void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedObject)
 {
     auto& creature = extendedObject.creature.value();
-    inspectorId("Creature id", creature._id, CellAttribute::CreatureId);
-    inspectorText("Generation", std::to_string(creature._generation), CellAttribute::CreatureGeneration);
-    inspectorText("Num cells", std::to_string(creature._numCells), CellAttribute::CreatureNumCells);
+    inspectorId("Creature id", creature._id, EntityAttribute::CreatureId);
+    inspectorText("Generation", std::to_string(creature._generation), EntityAttribute::CreatureGeneration);
+    inspectorText("Num cells", std::to_string(creature._numCells), EntityAttribute::CreatureNumCells);
     AlienGui::InputInt(
-        AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CreatureLineageId)),
+        AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CreatureLineageId)),
         creature._lineageId);
-    inspectorText("Mutations (in lineage)", std::to_string(creature._accumulatedMutationsInLineage), CellAttribute::CreatureMutationsInLineage);
-    inspectorText("Mutations (total)", std::to_string(creature._accumulatedMutations), CellAttribute::CreatureMutationsTotal);
+    inspectorText("Mutations (in lineage)", std::to_string(creature._accumulatedMutationsInLineage), EntityAttribute::CreatureMutationsInLineage);
+    inspectorText("Mutations (total)", std::to_string(creature._accumulatedMutations), EntityAttribute::CreatureMutationsTotal);
     auto& genome = extendedObject.genome.value();
-    inspectorText("Genome name", genome._name, CellAttribute::CreatureGenomeName);
-    inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No", CellAttribute::CreatureResistanceToInjection);
-    inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No", CellAttribute::CreatureApplyMetaMutations);
+    inspectorText("Genome name", genome._name, EntityAttribute::CreatureGenomeName);
+    inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No", EntityAttribute::CreatureResistanceToInjection);
+    inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No", EntityAttribute::CreatureApplyMetaMutations);
     if (AlienGui::Button(AlienGui::ButtonParameters()
                              .buttonText("Edit")
                              .name("Edit genome")
                              .textWidth(TextWidth)
-                             .tooltip(CellAttributeHelp::get(CellAttribute::CreatureEditGenome)))) {
+                             .tooltip(EntityAttributeHelp::get(EntityAttribute::CreatureEditGenome)))) {
         GenomeEditorWindow::get().openTab(genome, false, true, creature._lineageId);
     }
 }
@@ -777,7 +791,7 @@ void _InspectionWindow::processNeuralActivityNode(CellDesc& cell)
                     .max(2.0f)
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::NeuralSignal)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::NeuralSignal)),
                 &signals.at(index));
         }
 
@@ -793,7 +807,7 @@ void _InspectionWindow::processNeuralActivityNode(CellDesc& cell)
                     .max(2.0f)
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::NeuralMemory)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::NeuralMemory)),
                 &memory.at(index));
         }
     }
@@ -840,7 +854,7 @@ namespace
             AlienGui::MultiCheckboxesParameters()
                 .name("Channel mask bit 0-3")
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::MemoryChannelMask)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryChannelMask)),
             bits[0],
             bits[1],
             bits[2],
@@ -849,7 +863,7 @@ namespace
             AlienGui::MultiCheckboxesParameters()
                 .name("Channel mask bit 4-7")
                 .textWidth(TextWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::MemoryChannelMask)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryChannelMask)),
             bits[4],
             bits[5],
             bits[6],
@@ -877,29 +891,29 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .name("Storage limit")
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::DepotStorageLimit)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::DepotStorageLimit)),
                 depot._storageLimit);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Stored usable energy")
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::DepotStoredEnergy)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::DepotStoredEnergy)),
                 depot._storedUsableEnergy);
         } else if (cellType == CellType_Sensor) {
             auto& sensor = std::get<SensorDesc>(cell._cellType);
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Auto trigger").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::SensorAutoTrigger)),
+                AlienGui::CheckboxParameters().name("Auto trigger").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::SensorAutoTrigger)),
                 sensor._autoTrigger);
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
                     .name("Tag for attackers")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::SensorTagForAttackers)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorTagForAttackers)),
                 sensor._tagForAttackers);
             auto mode = sensor.getMode();
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::SensorModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::SensorMode));
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::SensorModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::SensorMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 sensor._mode = createSensorModeDesc(mode);
             }
@@ -911,7 +925,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .step(0.05f)
                         .format("%.2f")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::SensorEnergyMinDensity)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorEnergyMinDensity)),
                     m._minDensity);
             } else if (mode == SensorMode_DetectFreeCell) {
                 auto& m = std::get<DetectFreeCellDesc>(sensor._mode);
@@ -921,35 +935,41 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .step(0.05f)
                         .format("%.2f")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::SensorFreeCellMinDensity)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorFreeCellMinDensity)),
                     m._minDensity);
                 AlienGui::ColorCheckboxes(
                     AlienGui::ColorCheckboxesParameters()
                         .customizationColors(customizationColors)
                         .name("Restrict to colors")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::SensorRestrictToColors)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorRestrictToColors)),
                     m._restrictToColors);
             } else if (mode == SensorMode_DetectCreature) {
                 auto& m = std::get<DetectCreatureDesc>(sensor._mode);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Min num cells").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::SensorMinNumCells)),
+                    AlienGui::InputIntParameters()
+                        .name("Min num cells")
+                        .textWidth(TextWidth)
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorMinNumCells)),
                     m._minNumCells);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Max num cells").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::SensorMaxNumCells)),
+                    AlienGui::InputIntParameters()
+                        .name("Max num cells")
+                        .textWidth(TextWidth)
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorMaxNumCells)),
                     m._maxNumCells);
                 AlienGui::ColorCheckboxes(
                     AlienGui::ColorCheckboxesParameters()
                         .customizationColors(customizationColors)
                         .name("Restrict to colors")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::SensorRestrictToColors)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorRestrictToColors)),
                     m._restrictToColors);
                 AlienGui::ComboParameters lineageParams;
                 lineageParams.name("Restrict to lineage")
                     .textWidth(TextWidth)
                     .values({"No", "Same lineage", "Other lineage"})
-                    .tooltip(CellAttributeHelp::get(CellAttribute::SensorRestrictToLineage));
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorRestrictToLineage));
                 AlienGui::Combo(lineageParams, m._restrictToLineage);
             }
             AlienGui::SliderInt(
@@ -958,7 +978,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .min(Const::SensorRange_Min)
                     .max(Const::SensorRange_Max)
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::SensorMinRange)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorMinRange)),
                 &sensor._minRange);
             AlienGui::SliderInt(
                 AlienGui::SliderIntParameters()
@@ -966,12 +986,12 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .min(Const::SensorRange_Min)
                     .max(Const::SensorRange_Max)
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::SensorMaxRange)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorMaxRange)),
                 &sensor._maxRange);
         } else if (cellType == CellType_Generator) {
             auto& generator = std::get<GeneratorDesc>(cell._cellType);
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::GeneratorAdditive)),
+                AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorAdditive)),
                 generator._additive);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
@@ -979,7 +999,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .step(0.05f)
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneratorMinValue)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorMinValue)),
                 generator._minValue);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
@@ -987,33 +1007,33 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .step(0.05f)
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneratorMaxValue)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorMaxValue)),
                 generator._maxValue);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Time offset").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::GeneratorTimeOffset)),
+                AlienGui::InputIntParameters().name("Time offset").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorTimeOffset)),
                 generator._timeOffset);
             auto mode = generator.getMode();
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::GeneratorModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::GeneratorMode));
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::GeneratorModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 generator._mode = createGeneratorModeDesc(mode);
             }
             if (mode == GeneratorMode_SquareSignal) {
                 auto& m = std::get<SquareSignalDesc>(generator._mode);
                 AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Period").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::GeneratorPeriod)),
+                    AlienGui::InputIntParameters().name("Period").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorPeriod)),
                     m._period);
             } else if (mode == GeneratorMode_SawtoothSignal) {
                 auto& m = std::get<SawtoothSignalDesc>(generator._mode);
                 AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Period").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::GeneratorPeriod)),
+                    AlienGui::InputIntParameters().name("Period").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorPeriod)),
                     m._period);
             }
         } else if (cellType == CellType_Attacker) {
             auto& attacker = std::get<AttackerDesc>(cell._cellType);
             auto mode = attacker.getMode();
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::AttackerModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::AttackerMode));
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::AttackerModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::AttackerMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 attacker._mode = createAttackerModeDesc(mode);
             }
@@ -1024,17 +1044,17 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .customizationColors(customizationColors)
                         .name("Restrict to colors")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::AttackerRestrictToColors)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::AttackerRestrictToColors)),
                     m._restrictToColors);
             }
         } else if (cellType == CellType_Injector) {
             auto& injector = std::get<InjectorDesc>(cell._cellType);
-            geneIndexWidget(genome, injector._geneIndex, CellAttribute::InjectorGeneIndex);
+            geneIndexWidget(genome, injector._geneIndex, EntityAttribute::InjectorGeneIndex);
         } else if (cellType == CellType_Muscle) {
             auto& muscle = std::get<MuscleDesc>(cell._cellType);
             auto mode = muscle.getMode();
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::MuscleModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::MuscleMode));
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::MuscleModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::MuscleMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 muscle._mode = createMuscleModeDesc(mode);
             }
@@ -1044,21 +1064,21 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                                                .max(1.0f)
                                                .format("%.2f")
                                                .textWidth(TextWidth)
-                                               .tooltip(CellAttributeHelp::get(CellAttribute::MuscleMaxAngleDeviation));
+                                               .tooltip(EntityAttributeHelp::get(EntityAttribute::MuscleMaxAngleDeviation));
             auto maxDistanceDeviationParams = AlienGui::SliderFloatParameters()
                                                   .name("Max distance deviation")
                                                   .min(0.0f)
                                                   .max(1.0f)
                                                   .format("%.2f")
                                                   .textWidth(TextWidth)
-                                                  .tooltip(CellAttributeHelp::get(CellAttribute::MuscleMaxDistanceDeviation));
+                                                  .tooltip(EntityAttributeHelp::get(EntityAttribute::MuscleMaxDistanceDeviation));
             auto forwardBackwardRatioParams = AlienGui::SliderFloatParameters()
                                                   .name("Forward backward ratio")
                                                   .min(0.0f)
                                                   .max(1.0f)
                                                   .format("%.2f")
                                                   .textWidth(TextWidth)
-                                                  .tooltip(CellAttributeHelp::get(CellAttribute::MuscleForwardBackwardRatio));
+                                                  .tooltip(EntityAttributeHelp::get(EntityAttribute::MuscleForwardBackwardRatio));
             if (mode == MuscleMode_AutoBending) {
                 auto& m = std::get<AutoBendingDesc>(muscle._mode);
                 AlienGui::SliderFloat(maxAngleDeviationParams, &m._maxAngleDeviation);
@@ -1076,7 +1096,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .step(0.05f)
                         .format("%.2f")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::MuscleAttractionRepulsionRatio)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::MuscleAttractionRepulsionRatio)),
                     m._attractionRepulsionRatio);
             } else if (mode == MuscleMode_AutoCrawling) {
                 auto& m = std::get<AutoCrawlingDesc>(muscle._mode);
@@ -1091,7 +1111,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             auto& defender = std::get<DefenderDesc>(cell._cellType);
             int defMode = defender._mode;
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::DefenderModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::DefenderMode));
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::DefenderModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::DefenderMode));
             if (AlienGui::Combo(modeParams, defMode)) {
                 defender._mode = static_cast<DefenderMode>(defMode);
             }
@@ -1099,7 +1119,10 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             auto& reconnector = std::get<ReconnectorDesc>(cell._cellType);
             auto mode = reconnector.getMode();
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::ReconnectorModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::ReconnectorMode));
+            modeParams.name("Mode")
+                .textWidth(TextWidth)
+                .values(Const::ReconnectorModeStrings)
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::ReconnectorMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 reconnector._mode = createReconnectorModeDesc(mode);
             }
@@ -1110,7 +1133,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .customizationColors(customizationColors)
                         .name("Restrict to colors")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::ReconnectorRestrictToColors)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::ReconnectorRestrictToColors)),
                     m._restrictToColors);
             } else if (mode == ReconnectorMode_Creature) {
                 auto& m = std::get<ReconnectCreatureDesc>(reconnector._mode);
@@ -1118,26 +1141,26 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     AlienGui::InputIntParameters()
                         .name("Min num cells")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::ReconnectorMinNumCells)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::ReconnectorMinNumCells)),
                     m._minNumCells);
                 AlienGui::InputOptionalInt(
                     AlienGui::InputIntParameters()
                         .name("Max num cells")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::ReconnectorMaxNumCells)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::ReconnectorMaxNumCells)),
                     m._maxNumCells);
                 AlienGui::ColorCheckboxes(
                     AlienGui::ColorCheckboxesParameters()
                         .customizationColors(customizationColors)
                         .name("Restrict to colors")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::ReconnectorRestrictToColors)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::ReconnectorRestrictToColors)),
                     m._restrictToColors);
                 AlienGui::ComboParameters lineageParams;
                 lineageParams.name("Restrict to lineage")
                     .textWidth(TextWidth)
                     .values({"No", "Same lineage", "Other lineage"})
-                    .tooltip(CellAttributeHelp::get(CellAttribute::ReconnectorRestrictToLineage));
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::ReconnectorRestrictToLineage));
                 AlienGui::Combo(lineageParams, m._restrictToLineage);
             }
         } else if (cellType == CellType_Detonator) {
@@ -1145,12 +1168,12 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             static std::vector<std::string> const detonatorStateStrings = {"Ready", "Activated", "Exploded"};
             int state = detonator._state;
             AlienGui::ComboParameters stateParams;
-            stateParams.name("State").textWidth(TextWidth).values(detonatorStateStrings).tooltip(CellAttributeHelp::get(CellAttribute::DetonatorState));
+            stateParams.name("State").textWidth(TextWidth).values(detonatorStateStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::DetonatorState));
             if (AlienGui::Combo(stateParams, state)) {
                 detonator._state = static_cast<DetonatorState>(state);
             }
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Countdown").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::DetonatorCountdown)),
+                AlienGui::InputIntParameters().name("Countdown").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::DetonatorCountdown)),
                 detonator._countdown);
         } else if (cellType == CellType_Digestor) {
             auto& digestor = std::get<DigestorDesc>(cell._cellType);
@@ -1160,7 +1183,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .max(1.0f)
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::DigestorEnergyConductivity)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::DigestorEnergyConductivity)),
                 &digestor._rawEnergyConductivity);
             auto conversion = digestor.getRawEnergyConversionRate();
             AlienGui::SliderFloat(
@@ -1169,14 +1192,14 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     .max(1.0f)
                     .format("%.2f")
                     .textWidth(TextWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::DigestorEnergyConversion)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::DigestorEnergyConversion)),
                 &conversion);
             digestor.setRawEnergyConversionRate(conversion);
         } else if (cellType == CellType_Memory) {
             auto& memory = std::get<MemoryDesc>(cell._cellType);
             auto mode = memory.getMode();
             AlienGui::ComboParameters modeParams;
-            modeParams.name("Mode").textWidth(TextWidth).values(Const::MemoryModeStrings).tooltip(CellAttributeHelp::get(CellAttribute::MemoryMode));
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::MemoryModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 memory._mode = createMemoryModeDesc(mode);
                 if (mode == MemoryMode_SignalRecorder || mode == MemoryMode_SignalStorage) {
@@ -1186,16 +1209,17 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             if (mode == MemoryMode_SignalDelay) {
                 auto& m = std::get<SignalDelayDesc>(memory._mode);
                 AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Delay").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::MemoryDelay)), m._delay);
+                    AlienGui::InputIntParameters().name("Delay").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryDelay)),
+                    m._delay);
             } else if (mode == MemoryMode_SignalRecorder) {
                 auto& m = std::get<SignalRecorderDesc>(memory._mode);
                 AlienGui::Checkbox(
-                    AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::MemoryReadOnly)),
+                    AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryReadOnly)),
                     m._readOnly);
             } else if (mode == MemoryMode_SignalStorage) {
                 auto& m = std::get<SignalStorageDesc>(memory._mode);
                 AlienGui::Checkbox(
-                    AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::MemoryReadOnly)),
+                    AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryReadOnly)),
                     m._readOnly);
             } else if (mode == MemoryMode_SignalIntegrator) {
                 auto& m = std::get<SignalIntegratorDesc>(memory._mode);
@@ -1205,7 +1229,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .max(1.0f)
                         .format("%.2f")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::MemoryNewSignalWeight)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryNewSignalWeight)),
                     &m._newSignalWeight);
             }
             processMemoryChannelBits(memory._channelBitMask);
@@ -1213,7 +1237,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                                      .buttonText("Edit")
                                      .name("Signal buffer")
                                      .textWidth(TextWidth)
-                                     .tooltip(CellAttributeHelp::get(CellAttribute::MemorySignalBuffer)))) {
+                                     .tooltip(EntityAttributeHelp::get(EntityAttribute::MemorySignalBuffer)))) {
                 SignalsBufferDialog::get().open(
                     memory._signalEntries, [this](std::vector<SignalEntryDesc> const& entries) { _pendingSignalEntries = entries; });
             }
@@ -1224,7 +1248,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             modeParams.name("Mode")
                 .textWidth(TextWidth)
                 .values(Const::CommunicatorModeStrings)
-                .tooltip(CellAttributeHelp::get(CellAttribute::CommunicatorMode));
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::CommunicatorMode));
             if (AlienGui::Combo(modeParams, mode)) {
                 communicator._mode = createCommunicatorModeDesc(mode);
             }
@@ -1232,10 +1256,10 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                 auto& m = std::get<SenderDesc>(communicator._mode);
                 AlienGui::SliderInt(
                     AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(TextWidth).tooltip(
-                        CellAttributeHelp::get(CellAttribute::CommunicatorRange)),
+                        EntityAttributeHelp::get(EntityAttribute::CommunicatorRange)),
                     &m._range);
                 AlienGui::Checkbox(
-                    AlienGui::CheckboxParameters().name("One-way").textWidth(TextWidth).tooltip(CellAttributeHelp::get(CellAttribute::CommunicatorOneway)),
+                    AlienGui::CheckboxParameters().name("One-way").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CommunicatorOneway)),
                     m._oneway);
             } else if (mode == CommunicatorMode_Receiver) {
                 auto& m = std::get<ReceiverDesc>(communicator._mode);
@@ -1244,13 +1268,13 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                         .customizationColors(customizationColors)
                         .name("Restrict to colors")
                         .textWidth(TextWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::CommunicatorRestrictToColors)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::CommunicatorRestrictToColors)),
                     m._restrictToColors);
                 AlienGui::ComboParameters lineageParams;
                 lineageParams.name("Restrict to lineage")
                     .textWidth(TextWidth)
                     .values({"No", "Same lineage", "Other lineage"})
-                    .tooltip(CellAttributeHelp::get(CellAttribute::CommunicatorRestrictToLineage));
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CommunicatorRestrictToLineage));
                 AlienGui::Combo(lineageParams, m._restrictToLineage);
             }
         }

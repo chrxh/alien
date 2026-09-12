@@ -7,7 +7,7 @@
 #include <Base/GlobalSettings.h>
 
 #include "AlienGui.h"
-#include "CellAttributeHelp.h"
+#include "EntityAttributeHelp.h"
 #include "OverlayController.h"
 #include "StyleService.h"
 
@@ -31,7 +31,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationConnectionProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationConnectionProbability)),
                 &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -42,7 +42,7 @@ namespace
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationConnectionValueChangeSigma)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationConnectionValueChangeSigma)),
                 &mutation._valueChangeSigma);
         }
         AlienGui::EndTreeNode();
@@ -60,7 +60,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationNeuronProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationNeuronProbability)),
                 &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -71,7 +71,7 @@ namespace
                     .logarithmic(true)
                     .format("%.2f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationNeuronWeightChangeSigma)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationNeuronWeightChangeSigma)),
                 &mutation._weightChangeSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -82,7 +82,7 @@ namespace
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationNeuronBiasChangeSigma)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationNeuronBiasChangeSigma)),
                 &mutation._biasChangeSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -93,7 +93,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationNeuronActfnChangeProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationNeuronActfnChangeProbability)),
                 &mutation._actfnChangeProbability);
         }
         AlienGui::EndTreeNode();
@@ -111,7 +111,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationCellTypePropertiesProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCellTypePropertiesProbability)),
                 &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -122,7 +122,7 @@ namespace
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationCellTypePropertiesValueChangeSigma)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCellTypePropertiesValueChangeSigma)),
                 &mutation._valueChangeSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -133,7 +133,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationCellTypePropertiesEnumChangeProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCellTypePropertiesEnumChangeProbability)),
                 &mutation._enumChangeProbability);
         }
         AlienGui::EndTreeNode();
@@ -151,7 +151,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationGeometryProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationGeometryProbability)),
                 &mutation._geneProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -162,7 +162,7 @@ namespace
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationGeometryValueChangeSigma)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationGeometryValueChangeSigma)),
                 &mutation._valueChangeSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -173,7 +173,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationGeometryEnumChangeProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationGeometryEnumChangeProbability)),
                 &mutation._enumChangeProbability);
         }
         AlienGui::EndTreeNode();
@@ -191,7 +191,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationCellTypeModeProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCellTypeModeProbability)),
                 &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
@@ -209,7 +209,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationCellTypeProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCellTypeProbability)),
                 &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
@@ -227,7 +227,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationCustomizationProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCustomizationProbability)),
                 &mutation._genomeProbability);
         }
         AlienGui::EndTreeNode();
@@ -245,15 +245,19 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationVoidProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationVoidProbability)),
                 &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
     }
 
     template <typename MutationDesc>
-    void
-    processGeneProbabilityMutationRate(std::string const& name, std::string const& id, MutationDesc& mutation, float rightColumnWidth, CellAttribute attribute)
+    void processGeneProbabilityMutationRate(
+        std::string const& name,
+        std::string const& id,
+        MutationDesc& mutation,
+        float rightColumnWidth,
+        EntityAttribute attribute)
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
@@ -265,15 +269,19 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(attribute)),
+                    .tooltip(EntityAttributeHelp::get(attribute)),
                 &mutation._geneProbability);
         }
         AlienGui::EndTreeNode();
     }
 
     template <typename MutationDesc>
-    void
-    processNodeProbabilityMutationRate(std::string const& name, std::string const& id, MutationDesc& mutation, float rightColumnWidth, CellAttribute attribute)
+    void processNodeProbabilityMutationRate(
+        std::string const& name,
+        std::string const& id,
+        MutationDesc& mutation,
+        float rightColumnWidth,
+        EntityAttribute attribute)
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
@@ -285,7 +293,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(attribute)),
+                    .tooltip(EntityAttributeHelp::get(attribute)),
                 &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
@@ -303,7 +311,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationConstructorProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationConstructorProbability)),
                 &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -314,7 +322,7 @@ namespace
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationConstructorValueChangeSigma)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationConstructorValueChangeSigma)),
                 &mutation._valueChangeSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -325,7 +333,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationConstructorEnumChangeProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationConstructorEnumChangeProbability)),
                 &mutation._enumChangeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
@@ -336,7 +344,7 @@ namespace
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::MutationConstructorToggleProbability)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationConstructorToggleProbability)),
                 &mutation._constructorToggleProbability);
         }
         AlienGui::EndTreeNode();
@@ -601,7 +609,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Extend gene mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
-                        "Mutation rate", "EXGM", _mutation._extendGeneMutation, RightColumnWidth, CellAttribute::MutationExtendGeneProbability);
+                        "Mutation rate", "EXGM", _mutation._extendGeneMutation, RightColumnWidth, EntityAttribute::MutationExtendGeneProbability);
                     table.next();
                 });
             }
@@ -611,7 +619,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Add node mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processNodeProbabilityMutationRate(
-                        "Mutation rate", "ADNM", _mutation._addNodeMutation, RightColumnWidth, CellAttribute::MutationAddNodeProbability);
+                        "Mutation rate", "ADNM", _mutation._addNodeMutation, RightColumnWidth, EntityAttribute::MutationAddNodeProbability);
                     table.next();
                 });
             }
@@ -621,7 +629,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Trim gene mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
-                        "Mutation rate", "TRGM", _mutation._trimGeneMutation, RightColumnWidth, CellAttribute::MutationTrimGeneProbability);
+                        "Mutation rate", "TRGM", _mutation._trimGeneMutation, RightColumnWidth, EntityAttribute::MutationTrimGeneProbability);
                     table.next();
                 });
             }
@@ -631,7 +639,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete node mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processNodeProbabilityMutationRate(
-                        "Mutation rate", "DLNM", _mutation._deleteNodeMutation, RightColumnWidth, CellAttribute::MutationDeleteNodeProbability);
+                        "Mutation rate", "DLNM", _mutation._deleteNodeMutation, RightColumnWidth, EntityAttribute::MutationDeleteNodeProbability);
                     table.next();
                 });
             }
@@ -641,7 +649,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Duplicate gene mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
-                        "Mutation rate", "DPGM", _mutation._duplicateGeneMutation, RightColumnWidth, CellAttribute::MutationDuplicateGeneProbability);
+                        "Mutation rate", "DPGM", _mutation._duplicateGeneMutation, RightColumnWidth, EntityAttribute::MutationDuplicateGeneProbability);
                     table.next();
                 });
             }
@@ -651,7 +659,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete gene mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
-                        "Mutation rate", "DLGM", _mutation._deleteGeneMutation, RightColumnWidth, CellAttribute::MutationDeleteGeneProbability);
+                        "Mutation rate", "DLGM", _mutation._deleteGeneMutation, RightColumnWidth, EntityAttribute::MutationDeleteGeneProbability);
                     table.next();
                 });
             }
@@ -661,7 +669,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Copy node section mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
-                        "Mutation rate", "CNSM", _mutation._copyNodeSectionMutation, RightColumnWidth, CellAttribute::MutationCopyNodeSectionProbability);
+                        "Mutation rate", "CNSM", _mutation._copyNodeSectionMutation, RightColumnWidth, EntityAttribute::MutationCopyNodeSectionProbability);
                     table.next();
                 });
             }
@@ -671,7 +679,7 @@ void MutationRatesDialog::processContent()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Move node section mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
-                        "Mutation rate", "MNSM", _mutation._moveNodeSectionMutation, RightColumnWidth, CellAttribute::MutationMoveNodeSectionProbability);
+                        "Mutation rate", "MNSM", _mutation._moveNodeSectionMutation, RightColumnWidth, EntityAttribute::MutationMoveNodeSectionProbability);
                     table.next();
                 });
             }

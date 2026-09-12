@@ -19,7 +19,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "CellAttributeHelp.h"
+#include "EntityAttributeHelp.h"
 #include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
@@ -84,7 +84,7 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::InputTextParameters()
                 .name("Genome name")
                 .textWidth(rightColumnWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeName))
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeName))
                 .generateValueFunc([] { return NameGeneratorService::get().createGenomeName(); }),
             _editData->genome._name);
 
@@ -95,21 +95,21 @@ void _GenomeEditorWidget::processHeaderData()
                 .min(-180.0f)
                 .max(180.0f)
                 .textWidth(rightColumnWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeFrontAngle)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeFrontAngle)),
             &_editData->genome._frontAngle);
 
         AlienGui::Checkbox(
             AlienGui::CheckboxParameters()
                 .name("Resistance to injection")
                 .textWidth(rightColumnWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeResistanceToInjection)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeResistanceToInjection)),
             _editData->genome._resistanceToInjection);
 
         AlienGui::Checkbox(
             AlienGui::CheckboxParameters()
                 .name("Apply meta-mutations")
                 .textWidth(rightColumnWidth)
-                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeApplyMetaMutations)),
+                .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeApplyMetaMutations)),
             _editData->genome._applyMetaMutations);
 
         AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
