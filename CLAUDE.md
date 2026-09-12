@@ -29,6 +29,10 @@ and bodies, code comments, identifiers. Keep commit messages short and imperativ
 - `external/vcpkg` is a pinned submodule — never modify or commit it. If it shows as
   modified, restore with `git restore external/vcpkg`. Never `git add external/vcpkg`.
 - Do not cancel long-running builds or tests; they can take several minutes.
+- `build-ninja` / `build-ninja-hip` belong to the IDE. Never configure into them,
+  build into them or delete them — Visual Studio may be open on this folder and
+  only recovers by deleting `.vs` and restarting. Agents build into `build-agent`
+  (see below); a clean rebuild means deleting `build-agent`.
 
 ## Build (Windows)
 
@@ -39,17 +43,31 @@ build-windows-ninja.bat          # Release (default)
 build-windows-ninja.bat Debug    # Debug
 ```
 
-It sets up MSVC via vcvars64 and uses the "Ninja Multi-Config" CMake preset
-(`cmake --preset ninja` + `cmake --build --preset ninja-release`), compiling the CUDA
-translation units in parallel. Executables land under **`build-ninja\Release\`**
-(e.g. `alien.exe`, `cli.exe`, `EngineTests.exe`) — not the older `build\Release\`.
+It sets up MSVC via vcvars64 and uses the "Ninja Multi-Config" CMake preset,
+compiling the CUDA translation units in parallel.
+
+There are two separate build trees, and which one the script uses is decided
+automatically:
+
+| Caller | Preset | Output |
+| --- | --- | --- |
+| Visual Studio, or the script run by hand | `ninja` | `build-ninja\Release\` |
+| Claude Code and other agents (`CLAUDECODE` is set) | `ninja-agent` | `build-agent\Release\` |
+
+Visual Studio configures the `ninja` preset into `build-ninja` and caches its model
+of that tree under `.vs`. An outside build regenerates the tree, invalidates that
+cache and breaks the next build in the IDE until `.vs` is deleted — hence the second
+tree. Pass `agent` or `ide` to the script to select one explicitly.
+
+Executables (`alien.exe`, `cli.exe`, `EngineTests.exe`) land under the `Release\`
+subdirectory of the respective tree — not the older `build\Release\`.
 
 A struct / constant-memory / kernel `.cuh` change needs a clean rebuild, otherwise
 stale kernels linger and weak tests can pass against old code.
 
 ## Tests
 
-Executables under `build-ninja\Release\`:
+Executables under `build-agent\Release\` (`build-ninja\Release\` for a manual build):
 
 ```
 EngineInterfaceTests.exe   (<1s)

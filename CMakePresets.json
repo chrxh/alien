@@ -15,6 +15,13 @@
       "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake"
     },
     {
+      "name": "ninja-agent",
+      "displayName": "Ninja Multi-Config (automated builds)",
+      "description": "Same as the 'ninja' preset, but with its own binary directory. An IDE that opens this folder configures the 'ninja' preset into build-ninja and caches its model of that tree (Visual Studio does so under .vs); a command line or agent build into the same directory invalidates that cache and the next build inside the IDE fails until the cache is deleted. Automated builds therefore use this preset -- build-windows-ninja.bat selects it when CLAUDECODE is set or when 'agent' is passed.",
+      "inherits": "ninja",
+      "binaryDir": "${sourceDir}/build-agent"
+    },
+    {
       "name": "ninja-hip",
       "displayName": "Ninja Multi-Config (HIP / AMD)",
       "description": "Same as the 'ninja' preset, but builds the GPU engine for AMD GPUs with ROCm/HIP instead of CUDA. Uses a separate binary directory so a CUDA build in build-ninja stays intact. Requires a ROCm/HIP installation; without an explicit -DCMAKE_HIP_ARCHITECTURES the target architecture is auto-detected from the GPUs of the host.",
@@ -23,6 +30,13 @@
       "cacheVariables": {
         "USE_HIP": "ON"
       }
+    },
+    {
+      "name": "ninja-hip-agent",
+      "displayName": "Ninja Multi-Config (HIP / AMD, automated builds)",
+      "description": "The 'ninja-hip' preset with its own binary directory, for the same reason as 'ninja-agent': it keeps automated builds out of the tree an IDE has configured.",
+      "inherits": "ninja-hip",
+      "binaryDir": "${sourceDir}/build-agent-hip"
     }
   ],
   "buildPresets": [
@@ -39,6 +53,18 @@
       "configuration": "Debug"
     },
     {
+      "name": "ninja-agent-release",
+      "displayName": "Ninja (automated) - Release",
+      "configurePreset": "ninja-agent",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja-agent-debug",
+      "displayName": "Ninja (automated) - Debug",
+      "configurePreset": "ninja-agent",
+      "configuration": "Debug"
+    },
+    {
       "name": "ninja-hip-release",
       "displayName": "Ninja (HIP / AMD) - Release",
       "configurePreset": "ninja-hip",
@@ -48,6 +74,18 @@
       "name": "ninja-hip-debug",
       "displayName": "Ninja (HIP / AMD) - Debug",
       "configurePreset": "ninja-hip",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ninja-hip-agent-release",
+      "displayName": "Ninja (HIP / AMD, automated) - Release",
+      "configurePreset": "ninja-hip-agent",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja-hip-agent-debug",
+      "displayName": "Ninja (HIP / AMD, automated) - Debug",
+      "configurePreset": "ninja-hip-agent",
       "configuration": "Debug"
     }
   ]
