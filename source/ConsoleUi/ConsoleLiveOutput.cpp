@@ -49,7 +49,8 @@ void ConsoleLiveOutput::update(std::vector<std::string> const& lines, std::strin
 
 void ConsoleLiveOutput::printMessage(std::string const& message)
 {
-    std::cout << createEraseSequence() << message << std::endl;
+    // The trailing blank line separates the message from the panel that is redrawn below
+    std::cout << createEraseSequence() << message << std::endl << std::endl;
 }
 
 void ConsoleLiveOutput::close()
