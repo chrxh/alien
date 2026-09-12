@@ -19,6 +19,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
+#include "CellAttributeHelp.h"
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "HelpStrings.h"
@@ -424,7 +425,7 @@ void CreatorWindow::processColorWidget()
             .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
             .name("Color")
             .textWidth(RightColumnWidth)
-            .tooltip(Const::GenomeColorTooltip),
+            .tooltip(CellAttributeHelp::get(CellAttribute::Color)),
         color);
     EditorModel::get().setDefaultColorCode(color);
 }
@@ -440,11 +441,24 @@ void CreatorWindow::processMaterialWidgets()
         &_material);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
     if (_material == CreationMaterial_Fluid) {
-        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters()
+                .name("Glow")
+                .min(0)
+                .max(1.0f)
+                .format("%.2f")
+                .textWidth(RightColumnWidth)
+                .tooltip(CellAttributeHelp::get(CellAttribute::FluidGlow)),
+            &_glow);
     }
     if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
+            AlienGui::SliderFloatParameters()
+                .name("Stiffness")
+                .max(1.0f)
+                .min(0.0f)
+                .textWidth(RightColumnWidth)
+                .tooltip(CellAttributeHelp::get(CellAttribute::Stiffness)),
             &_stiffness);
     }
 }
@@ -458,13 +472,15 @@ void CreatorWindow::processObjectDistanceWidget()
 
 void CreatorWindow::processStickyWidget()
 {
-    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
+    AlienGui::Checkbox(
+        AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(CellAttributeHelp::get(CellAttribute::Sticky)), _makeSticky);
 }
 
 void CreatorWindow::processStaticWidget()
 {
     if (!isEnergyMaterial()) {
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(Const::CellStaticTooltip), _static);
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(CellAttributeHelp::get(CellAttribute::Static)), _static);
     }
 }
 

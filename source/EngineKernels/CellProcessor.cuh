@@ -52,7 +52,7 @@ __inline__ __device__ void CellProcessor::collectCellTypeOperations(SimulationDa
 
 __inline__ __device__ bool CellProcessor::isCellReady(SimulationData& data, Object* object)
 {
-    return object->typeData.cell.cellState != CellState_Constructing && object->typeData.cell.cellState != CellState_Activating
+    return object->typeData.cell.cellState != CellState_UnderConstruction && object->typeData.cell.cellState != CellState_BeingActivated
         && object->typeData.cell.activationTime == 0;
 }
 
@@ -108,9 +108,9 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             continue;
         }
 
-        bool isNeighborActivating = false;
+        bool isNeighborBeingActivated = false;
         if (object->numConnections > 0) {
-            isNeighborActivating = object->connections[0].object->typeData.cell.cellState == CellState_Activating;
+            isNeighborBeingActivated = object->connections[0].object->typeData.cell.cellState == CellState_BeingActivated;
         }
 
         auto origCellState = object->typeData.cell.cellState;
@@ -119,11 +119,11 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
         if (object->isStatic()) {
             cellState = CellState_Ready;
         } else {
-            if (origCellState == CellState_Activating) {
+            if (origCellState == CellState_BeingActivated) {
                 cellState = CellState_Ready;
-            } else if (origCellState == CellState_Constructing) {
-                if (isNeighborActivating) {
-                    cellState = CellState_Activating;
+            } else if (origCellState == CellState_UnderConstruction) {
+                if (isNeighborBeingActivated) {
+                    cellState = CellState_BeingActivated;
                 }
             }
             if (object->type != ObjectType_Cell) {
@@ -275,7 +275,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         if (object->numConnections == 0) {
             continue;
         }
-        //if (object->typeData.cell.cellState == CellState_Constructing || object->typeData.cell.cellState == CellState_Activating) {
+        //if (object->typeData.cell.cellState == CellState_UnderConstruction || object->typeData.cell.cellState == CellState_BeingActivated) {
         //    continue;
         //}
         auto i = timestepMod % object->numConnections;

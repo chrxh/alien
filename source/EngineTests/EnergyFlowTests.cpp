@@ -220,7 +220,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
          ObjectDesc()
              .id(2)
              .pos({100.0f + 1.0f, 100.0f})
-             .type(CellDesc().headCell(true).cellState(CellState_Constructing).constructor(ConstructorDesc().separation(false)).usableEnergy(normalCellEnergy))},
+             .type(CellDesc().headCell(true).cellState(CellState_UnderConstruction).constructor(ConstructorDesc().separation(false)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);

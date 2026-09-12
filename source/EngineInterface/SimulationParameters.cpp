@@ -51,9 +51,18 @@ ParametersSpec const& SimulationParameters::getSpec()
 
         spec = ParametersSpec().groups({
             ParameterGroupSpec().name("General").parameters({
-                ParameterSpec().name("Project name").reference(Char64Spec().member(&SimulationParameters::projectName)),
-                ParameterSpec().name("Layer name").reference(Char64Spec().member(&SimulationParameters::layerName)),
-                ParameterSpec().name("Source name").reference(Char64Spec().member(&SimulationParameters::sourceName)),
+                ParameterSpec()
+                    .name("Project name")
+                    .reference(Char64Spec().member(&SimulationParameters::projectName))
+                    .description("Name of the project. It is stored together with the simulation."),
+                ParameterSpec()
+                    .name("Layer name")
+                    .reference(Char64Spec().member(&SimulationParameters::layerName))
+                    .description("Name of this layer. A layer can locally override the base parameters and exert force fields."),
+                ParameterSpec()
+                    .name("Source name")
+                    .reference(Char64Spec().member(&SimulationParameters::sourceName))
+                    .description("Name of this radiation source."),
                 ParameterSpec()
                     .name("Opacity")
                     .reference(FloatSpec().member(&SimulationParameters::layerOpacity).min(0.0f).max(1.0f))
@@ -75,7 +84,10 @@ ParametersSpec const& SimulationParameters::getSpec()
             ParameterGroupSpec()
                 .name("Visualization")
                 .parameters({
-                    ParameterSpec().name("Background color").reference(ColorSpec().member(&SimulationParameters::backgroundColor)),
+                    ParameterSpec()
+                        .name("Background color")
+                        .reference(ColorSpec().member(&SimulationParameters::backgroundColor))
+                        .description("Color of the empty background of the world."),
                     ParameterSpec()
                         .name("Customization colors")
                         .reference(ColorSpec().member(&SimulationParameters::customizationColors))
@@ -187,14 +199,16 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .min(RealVector2D{0.0f, 0.0f})
                                        .max(WorldSize())
                                        .format("%.2f")
-                                       .mousePicker(true)),
+                                       .mousePicker(true))
+                        .description("Center of the layer in world coordinates."),
                     ParameterSpec()
                         .name("Velocity (x,y)")
                         .reference(Float2Spec()
                                        .member(&SimulationParameters::layerVelocity)
                                        .min(RealVector2D{-4.0f, -4.0f})
                                        .max(RealVector2D{4.0f, 4.0f})
-                                       .format("%.3f")),
+                                       .format("%.3f"))
+                        .description("Velocity by which the layer moves through the world per time step."),
                     ParameterSpec()
                         .name("Position (x,y)")
                         .reference(Float2Spec()
@@ -202,54 +216,72 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .min(RealVector2D{0.0f, 0.0f})
                                        .max(WorldSize())
                                        .format("%.2f")
-                                       .mousePicker(true)),
+                                       .mousePicker(true))
+                        .description("Center of the radiation source in world coordinates."),
                     ParameterSpec()
                         .name("Velocity (x,y)")
                         .reference(Float2Spec()
                                        .member(&SimulationParameters::sourceVelocity)
                                        .min(RealVector2D{-4.0f, -4.0f})
                                        .max(RealVector2D{4.0f, 4.0f})
-                                       .format("%.3f")),
+                                       .format("%.3f"))
+                        .description("Velocity by which the radiation source moves through the world per time step."),
                 }),
             ParameterGroupSpec().name("Shape").parameters({
-                ParameterSpec().name("Shape").reference(
-                    AlternativeSpec()
-                        .member(&SimulationParameters::layerShape)
-                        .alternatives(
-                            {{"Circular",
-                              {ParameterSpec()
-                                   .name("Core radius")
-                                   .reference(FloatSpec().member(&SimulationParameters::layerCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))}},
-                             {"Rectangular",
-                              {ParameterSpec()
-                                   .name("Core size (width,height)")
-                                   .reference(Float2Spec()
-                                                  .member(&SimulationParameters::layerCoreRect)
-                                                  .min(RealVector2D{0.0f, 0.0f})
-                                                  .max(WorldSize())
-                                                  .format("%.2f"))}}})),
+                ParameterSpec()
+                    .name("Shape")
+                    .reference(
+                        AlternativeSpec()
+                            .member(&SimulationParameters::layerShape)
+                            .alternatives(
+                                {{"Circular",
+                                  {ParameterSpec()
+                                       .name("Core radius")
+                                       .reference(FloatSpec().member(&SimulationParameters::layerCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))
+                                       .description("Radius of the core area in which the layer takes full effect.")}},
+                                 {"Rectangular",
+                                  {ParameterSpec()
+                                       .name("Core size (width,height)")
+                                       .reference(Float2Spec()
+                                                      .member(&SimulationParameters::layerCoreRect)
+                                                      .min(RealVector2D{0.0f, 0.0f})
+                                                      .max(WorldSize())
+                                                      .format("%.2f"))
+                                       .description("Width and height of the core area in which the layer takes full effect.")}}}))
+                    .description("Geometric shape of the layer.\n" ICON_FA_CHEVRON_RIGHT
+                                 " Circular: the core is a disc around the center.\n" ICON_FA_CHEVRON_RIGHT
+                                 " Rectangular: the core is a rectangle around the center."),
                 ParameterSpec()
                     .name("Fade-out radius")
-                    .reference(FloatSpec().member(&SimulationParameters::layerFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
-                ParameterSpec().name("Shape").reference(
-                    AlternativeSpec()
-                        .member(&SimulationParameters::sourceShapeType)
-                        .alternatives(
-                            {{"Circular",
-                              {
-                                  ParameterSpec().name("Radius").reference(
-                                      FloatSpec().member(&SimulationParameters::sourceCircularRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
-                              }},
-                             {"Rectangular",
-                              {
-                                  ParameterSpec()
-                                      .name("Size (width, height)")
-                                      .reference(Float2Spec()
-                                                     .member(&SimulationParameters::sourceRectangularRect)
-                                                     .min(RealVector2D{0.0f, 0.0f})
-                                                     .max(WorldSize())
-                                                     .format("%.2f")),
-                              }}})),
+                    .reference(FloatSpec().member(&SimulationParameters::layerFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))
+                    .description("Width of the border area around the core in which the effect of the layer fades out to zero."),
+                ParameterSpec()
+                    .name("Shape")
+                    .reference(
+                        AlternativeSpec()
+                            .member(&SimulationParameters::sourceShapeType)
+                            .alternatives(
+                                {{"Circular",
+                                  {
+                                      ParameterSpec()
+                                          .name("Radius")
+                                          .reference(
+                                              FloatSpec().member(&SimulationParameters::sourceCircularRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))
+                                          .description("Radius of the area in which the energy particles are created."),
+                                  }},
+                                 {"Rectangular",
+                                  {
+                                      ParameterSpec()
+                                          .name("Size (width, height)")
+                                          .reference(Float2Spec()
+                                                         .member(&SimulationParameters::sourceRectangularRect)
+                                                         .min(RealVector2D{0.0f, 0.0f})
+                                                         .max(WorldSize())
+                                                         .format("%.2f"))
+                                          .description("Width and height of the area in which the energy particles are created."),
+                                  }}}))
+                    .description("Geometric shape of the area in which the energy particles of this source are created.\n" ICON_FA_CHEVRON_RIGHT
+                                 " Circular: a disc around the center.\n" ICON_FA_CHEVRON_RIGHT " Rectangular: a rectangle around the center."),
             }),
             ParameterGroupSpec()
                 .name("Force field")
@@ -267,7 +299,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                                               .name("Orientation")
                                               .reference(AlternativeSpec()
                                                              .member(&SimulationParameters::layerRadialForceFieldOrientation)
-                                                             .alternatives({{"Clockwise", {}}, {"Counter clockwise", {}}})),
+                                                             .alternatives({{"Clockwise", {}}, {"Counter clockwise", {}}}))
+                                              .description("Direction of rotation of the radial force field.\n" ICON_FA_CHEVRON_RIGHT
+                                                           " Clockwise\n" ICON_FA_CHEVRON_RIGHT " Counter clockwise"),
                                           ParameterSpec()
                                               .name("Strength")
                                               .reference(
@@ -276,7 +310,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .format("%.6f")
-                                                      .logarithmic(true)),
+                                                      .logarithmic(true))
+                                              .description("Strength of the rotational force around the center of the layer."),
                                           ParameterSpec()
                                               .name("Drift angle")
                                               .reference(
@@ -284,7 +319,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .member(&SimulationParameters::layerRadialForceFieldDriftAngle)
                                                       .min(-180.00f)
                                                       .max(180.0f)
-                                                      .format("%.1f")),
+                                                      .format("%.1f"))
+                                              .description("Rotates the force away from the tangential direction. At 0 the objects only circle around the "
+                                                           "center, other values additionally pull them inwards or outwards."),
                                       }},
                                      {"Central",
                                       {
@@ -296,12 +333,17 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
-                                                      .format("%.6f")),
+                                                      .format("%.6f"))
+                                              .description(
+                                                  "Strength of the force towards the center of the layer. It decreases with the square of the distance."),
                                       }},
                                      {"Linear",
                                       {
-                                          ParameterSpec().name("Angle").reference(
-                                              FloatSpec().member(&SimulationParameters::layerLinearForceFieldAngle).min(-180.0f).max(180.0f).format("%.1f")),
+                                          ParameterSpec()
+                                              .name("Angle")
+                                              .reference(
+                                                  FloatSpec().member(&SimulationParameters::layerLinearForceFieldAngle).min(-180.0f).max(180.0f).format("%.1f"))
+                                              .description("Direction in which the force acts."),
                                           ParameterSpec()
                                               .name("Strength")
                                               .reference(
@@ -310,7 +352,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
-                                                      .format("%.6f")),
+                                                      .format("%.6f"))
+                                              .description("Strength of the force. It is the same everywhere in the layer."),
                                       }},
                                      {"Perlin noise",
                                       {
@@ -322,7 +365,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
-                                                      .format("%.6f")),
+                                                      .format("%.6f"))
+                                              .description("Strength of the force that is derived from the noise field."),
                                           ParameterSpec()
                                               .name("Spatial structure size")
                                               .reference(
@@ -331,7 +375,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.1f)
                                                       .max(1000.0f)
                                                       .logarithmic(true)
-                                                      .format("%.0f")),
+                                                      .format("%.0f"))
+                                              .description("Size of the spatial structures of the noise field. Larger values produce larger vortices."),
                                           ParameterSpec()
                                               .name("Temporal structure size")
                                               .reference(
@@ -340,8 +385,16 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(1.0f)
                                                       .max(1000000.0f)
                                                       .logarithmic(true)
-                                                      .format("%.0f")),
-                                      }}})),
+                                                      .format("%.0f"))
+                                              .description("Number of time steps after which the noise field is completely renewed. Larger values let it "
+                                                           "change more slowly."),
+                                      }}}))
+                        .description("Force field that the layer exerts on all objects inside it.\n" ICON_FA_CHEVRON_RIGHT
+                                     " None: no force field.\n" ICON_FA_CHEVRON_RIGHT
+                                     " Radial: the objects circle around the center of the layer.\n" ICON_FA_CHEVRON_RIGHT
+                                     " Central: the objects are drawn towards the center of the layer.\n" ICON_FA_CHEVRON_RIGHT
+                                     " Linear: a constant force acts in one direction.\n" ICON_FA_CHEVRON_RIGHT
+                                     " Perlin noise: a noise field generates a turbulent flow that changes over time."),
                 }),
             ParameterGroupSpec()
                 .name("Physics: Motion")
@@ -373,12 +426,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Inner friction")
                         .reference(FloatSpec().member(&SimulationParameters::innerFriction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
+                        .description("Fraction of the relative velocity along a bond by which two connected objects are slowed down per time step.")
                         .visible(false),
                     ParameterSpec()
-                        .name("Rigidity")
+                        .name("Rigidity of solids")
                         .reference(FloatSpec().member(&SimulationParameters::rigidity).min(0.0f).max(1.0f).format("%.2f"))
                         .description(
-                            "Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
+                            "A higher value will cause connected objects in solids to move more uniformly as a rigid body."),
                 }),
             ParameterGroupSpec()
                 .name("Physics: Thresholds")
@@ -465,7 +519,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "splitting does not occur immediately, but only after a certain time."),
                     ParameterSpec()
                         .name("Radiation angle")
-                        .reference(FloatSpec().member(&SimulationParameters::sourceRadiationAngle).min(-180.0f).max(180.0f).format("%.1f")),
+                        .reference(FloatSpec().member(&SimulationParameters::sourceRadiationAngle).min(-180.0f).max(180.0f).format("%.1f"))
+                        .description(
+                            "If activated, all energy particles of this source fly in this direction. Otherwise they fly away from the center of the source."),
                 }),
             ParameterGroupSpec()
                 .name("Cell life cycle")
@@ -533,7 +589,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .max(10000.0f)
                                 .infinity(true)
                                 .logarithmic(true)
-                                .format("%.5f")),
+                                .format("%.5f"))
+                        .description("As soon as the accumulated mutations of a creature exceed this value, the creature is given a new lineage id and the "
+                                     "counter is reset."),
                     ParameterSpec()
                         .name("Customization transition matrix")
                         .reference(BoolSpec().member(&SimulationParameters::customizationTransitionMatrix))
@@ -544,71 +602,97 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Neuron mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::neuronsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::neuronsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the neuron mutations stored in a genome. It only acts on "
+                                     "genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Connection mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::connectionsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::connectionsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the connection mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Cell type property mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the cell type property mutations stored in a genome. It "
+                                     "only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Geometry mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::geometryMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::geometryMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the geometry mutations stored in a genome. It only acts "
+                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Cell type mode mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the cell type mode mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Cell type mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the cell type mutations stored in a genome. It only acts "
+                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Customization mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::customizationMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::customizationMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the customization mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Void mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the void mutations stored in a genome. It only acts on "
+                                     "genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Extend gene mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::extendGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::extendGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the extend gene mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Add node mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::addNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::addNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the add node mutations stored in a genome. It only acts "
+                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Trim gene mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::trimGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::trimGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the trim gene mutations stored in a genome. It only acts "
+                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Delete node mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the delete node mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Duplicate gene mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::duplicateGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::duplicateGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the duplicate gene mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Delete gene mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::deleteGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(FloatSpec().member(&SimulationParameters::deleteGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the delete gene mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Copy node section mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::copyNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::copyNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the copy node section mutations stored in a genome. It "
+                                     "only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Move node section mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::moveNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::moveNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the move node section mutations stored in a genome. It "
+                                     "only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Constructor mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the constructor mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")
@@ -634,7 +718,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "influenced by other factors adjustable within the attacker's simulation parameters."),
                     ParameterSpec()
                         .name("Same lineage protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerRelatedLineageProtection).min(0.0f).max(1.0f)),
+                        .reference(FloatSpec().member(&SimulationParameters::attackerRelatedLineageProtection).min(0.0f).max(1.0f))
+                        .description("Fraction by which the stolen energy is reduced when the attacked creature belongs to the same lineage."),
                     ParameterSpec()
                         .name("Size protection")
                         .reference(FloatSpec().member(&SimulationParameters::attackerSizeProtection).min(0.0f).max(1.0f).format("%.2f"))
@@ -651,10 +736,14 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Max raw energy conductivity")
-                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(6.0f).format("%.3f")),
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(6.0f).format("%.3f"))
+                        .description("Upper limit for the raw energy that a digestor cell can pass on to a connected digestor cell. It scales the digestor "
+                                     "property 'Energy conductivity'."),
                     ParameterSpec()
                         .name("Max raw energy conversion")
-                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f")),
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f"))
+                        .description("Upper limit for the raw energy that a digestor cell can convert into usable energy per cycle. It scales the digestor "
+                                     "property 'Energy conversion'."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Defender")
@@ -676,7 +765,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Energy cost")
-                        .reference(FloatSpec().member(&SimulationParameters::injectorEnergyCost).min(0.0f).max(1000.0f).logarithmic(true)),
+                        .reference(FloatSpec().member(&SimulationParameters::injectorEnergyCost).min(0.0f).max(1000.0f).logarithmic(true))
+                        .description("Amount of energy an injector cell loses per successful injection in the form of emitted energy particles. Every defender "
+                                     "cell next to the target increases the cost."),
                     ParameterSpec()
                         .name("Injection radius")
                         .reference(FloatSpec().member(&SimulationParameters::injectorRadius).min(0.1f).max(4.0f))
@@ -741,9 +832,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Target color and duration")
                         .reference(ColorTransitionRulesSpec().member(&SimulationParameters::colorTransitionRules))
-                        .description("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
-                                     "color can be defined for each customization color. In addition, durations must be specified that define how many time steps the "
-                                     "corresponding color are kept."),
+                        .description(
+                            "Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
+                            "color can be defined for each customization color. In addition, durations must be specified that define how many time steps the "
+                            "corresponding color are kept."),
                 }),
         });
     }

@@ -763,7 +763,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.usableEnergy = usableEnergy;
     cell.rawEnergy = 0.0f;
     cell.age = 0;
-    cell.cellState = CellState_Constructing;
+    cell.cellState = CellState_UnderConstruction;
     cell.creature = creature;
     cell.nodeIndex = nodeIndex;
     cell.parentNodeIndex = parentNodeIndex;

@@ -19,6 +19,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
+#include "CellAttributeHelp.h"
 #include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
@@ -80,19 +81,36 @@ void _GenomeEditorWidget::processHeaderData()
         auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
         AlienGui::InputText(
-            AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth).generateValueFunc([] {
-                return NameGeneratorService::get().createGenomeName();
-            }),
+            AlienGui::InputTextParameters()
+                .name("Genome name")
+                .textWidth(rightColumnWidth)
+                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeName))
+                .generateValueFunc([] { return NameGeneratorService::get().createGenomeName(); }),
             _editData->genome._name);
 
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters()
+                .name("Front angle")
+                .format("%.1f")
+                .min(-180.0f)
+                .max(180.0f)
+                .textWidth(rightColumnWidth)
+                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeFrontAngle)),
             &_editData->genome._frontAngle);
 
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Resistance to injection").textWidth(rightColumnWidth), _editData->genome._resistanceToInjection);
+            AlienGui::CheckboxParameters()
+                .name("Resistance to injection")
+                .textWidth(rightColumnWidth)
+                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeResistanceToInjection)),
+            _editData->genome._resistanceToInjection);
 
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters()
+                .name("Apply meta-mutations")
+                .textWidth(rightColumnWidth)
+                .tooltip(CellAttributeHelp::get(CellAttribute::GenomeApplyMetaMutations)),
+            _editData->genome._applyMetaMutations);
 
         AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 

@@ -28,7 +28,7 @@ public:
 TEST_F(VoidTests, doNothing_underConstruction)
 {
     auto data = ContentDesc().addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_Constructing)),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_UnderConstruction)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -41,7 +41,7 @@ TEST_F(VoidTests, doNothing_underConstruction)
 TEST_F(VoidTests, doNothing_activating)
 {
     auto data = ContentDesc().addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_Activating).activationTime(10)),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(VoidDesc()).cellState(CellState_BeingActivated).activationTime(10)),
     });
 
     _simulationFacade->setSimulationData(data);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include <EngineInterface/GenomeDesc.h>
@@ -23,9 +24,14 @@ public:
 
 private:
     void processContent();
+    void processButtons();
     void onAdopt();
+
+    static float calcClipboardButtonsWidth();
 
     ModalWindow _modalWindow;
     MutationRatesDesc _mutation;
     std::function<void(MutationRatesDesc const&)> _onAdoptCallback;
+
+    static std::optional<MutationRatesDesc> _clipboard;
 };

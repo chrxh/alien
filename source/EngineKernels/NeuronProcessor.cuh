@@ -57,7 +57,7 @@ __device__ __inline__ void NeuronProcessor::calcSignal(SimulationData& data, Sim
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
 
-        if (object->type == ObjectType_Cell && object->typeData.cell.cellState != CellState_Constructing) {
+        if (object->type == ObjectType_Cell && object->typeData.cell.cellState != CellState_UnderConstruction) {
             processCell(object, firstCell);
             firstCell = false;
         }
@@ -75,7 +75,7 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
             continue;
         }
         auto& cell = object->typeData.cell;
-        if (object->typeData.cell.cellState == CellState_Constructing) {
+        if (object->typeData.cell.cellState == CellState_UnderConstruction) {
             cell.highlightIntensity = 0;
             continue;
         }
@@ -160,7 +160,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
                 continue;
             }
             auto& connectedCell = connectedObject->typeData.cell;
-            if (connectedCell.cellState == CellState_Constructing) {
+            if (connectedCell.cellState == CellState_UnderConstruction) {
                 continue;
             }
             accumulatedInput += connectedCell.neuralActivity.signals[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
