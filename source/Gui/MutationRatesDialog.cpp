@@ -16,6 +16,7 @@ namespace
     auto constexpr MinSectionWidth = 620.0f;
     auto constexpr MinTreeNodeWidth = 300.0f;
     auto constexpr RightColumnWidth = 195.0f;
+    auto constexpr MaxTreeNodeColumns = 2;
 
     auto const DialogSize = RealVector2D(800.0f, 400.0f);
 
@@ -351,9 +352,9 @@ namespace
     }
 
     template <typename Func>
-    void processConcreteMutationRates(int numRates, Func&& processMutationRates)
+    void processConcreteMutationRates(Func&& processMutationRates)
     {
-        AlienGui::DynamicTableLayout table(MinTreeNodeWidth, numRates);
+        AlienGui::DynamicTableLayout table(MinTreeNodeWidth, MaxTreeNodeColumns);
         if (table.begin()) {
             processMutationRates(table);
             table.end();
@@ -527,7 +528,7 @@ void MutationRatesDialog::processContent()
         AlienGui::DynamicTableLayout sectionTable(MinSectionWidth);
         if (sectionTable.begin()) {
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connection weight mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(2, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processConnectionMutationRate("Mutation rate 1", "CMR1", _mutation._connectionMutations[0], RightColumnWidth);
                     table.next();
                     processConnectionMutationRate("Mutation rate 2", "CMR2", _mutation._connectionMutations[1], RightColumnWidth);
@@ -538,7 +539,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neuron mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(2, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processNeuronMutationRate("Mutation rate 1", "NMR1", _mutation._neuronMutations[0], RightColumnWidth);
                     table.next();
                     processNeuronMutationRate("Mutation rate 2", "NMR2", _mutation._neuronMutations[1], RightColumnWidth);
@@ -549,7 +550,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type property mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(2, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processCellTypePropertiesMutationRate("Mutation rate 1", "CTPM1", _mutation._cellTypePropertiesMutations[0], RightColumnWidth);
                     table.next();
                     processCellTypePropertiesMutationRate("Mutation rate 2", "CTPM2", _mutation._cellTypePropertiesMutations[1], RightColumnWidth);
@@ -560,7 +561,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Geometry mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(2, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeometryMutationRate("Mutation rate 1", "GEOM1", _mutation._geometryMutations[0], RightColumnWidth);
                     table.next();
                     processGeometryMutationRate("Mutation rate 2", "GEOM2", _mutation._geometryMutations[1], RightColumnWidth);
@@ -571,7 +572,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type mode mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processCellTypeModeMutationRate("Mutation rate", "CTMM", _mutation._cellTypeModeMutation, RightColumnWidth);
                     table.next();
                 });
@@ -580,7 +581,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processCellTypeMutationRate("Mutation rate", "CTM", _mutation._cellTypeMutation, RightColumnWidth);
                     table.next();
                 });
@@ -589,7 +590,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Customization mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processCustomizationMutationRate("Mutation rate", "CUM", _mutation._customizationMutation, RightColumnWidth);
                     table.next();
                 });
@@ -598,7 +599,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Void mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processVoidMutationRate("Mutation rate", "VM", _mutation._voidMutation, RightColumnWidth);
                     table.next();
                 });
@@ -607,7 +608,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Extend gene mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "EXGM", _mutation._extendGeneMutation, RightColumnWidth, EntityAttribute::MutationExtendGeneProbability);
                     table.next();
@@ -617,7 +618,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Add node mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processNodeProbabilityMutationRate(
                         "Mutation rate", "ADNM", _mutation._addNodeMutation, RightColumnWidth, EntityAttribute::MutationAddNodeProbability);
                     table.next();
@@ -627,7 +628,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Trim gene mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "TRGM", _mutation._trimGeneMutation, RightColumnWidth, EntityAttribute::MutationTrimGeneProbability);
                     table.next();
@@ -637,7 +638,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete node mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processNodeProbabilityMutationRate(
                         "Mutation rate", "DLNM", _mutation._deleteNodeMutation, RightColumnWidth, EntityAttribute::MutationDeleteNodeProbability);
                     table.next();
@@ -647,7 +648,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Duplicate gene mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "DPGM", _mutation._duplicateGeneMutation, RightColumnWidth, EntityAttribute::MutationDuplicateGeneProbability);
                     table.next();
@@ -657,7 +658,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete gene mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "DLGM", _mutation._deleteGeneMutation, RightColumnWidth, EntityAttribute::MutationDeleteGeneProbability);
                     table.next();
@@ -667,7 +668,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Copy node section mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "CNSM", _mutation._copyNodeSectionMutation, RightColumnWidth, EntityAttribute::MutationCopyNodeSectionProbability);
                     table.next();
@@ -677,7 +678,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Move node section mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "MNSM", _mutation._moveNodeSectionMutation, RightColumnWidth, EntityAttribute::MutationMoveNodeSectionProbability);
                     table.next();
@@ -687,7 +688,7 @@ void MutationRatesDialog::processContent()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(2, [&](AlienGui::DynamicTableLayout& table) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processConstructorMutationRate("Mutation rate 1", "COM1", _mutation._constructorMutations[0], RightColumnWidth);
                     table.next();
                     processConstructorMutationRate("Mutation rate 2", "COM2", _mutation._constructorMutations[1], RightColumnWidth);
