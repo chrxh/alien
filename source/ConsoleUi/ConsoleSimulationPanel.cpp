@@ -9,16 +9,20 @@
 
 namespace
 {
-    auto constexpr TimeCardWidth = 34;
+    constexpr int getContentWidth(int cardWidth)
+    {
+        return cardWidth - 2 * ConsoleWidgets::FrameContentOffset;
+    }
+
+    auto constexpr TimeCardWidth = 33;
     auto constexpr ProgressTimeCardWidth = 42;  // Wider, because the time step row also shows the total number
     auto constexpr WorldCardWidth = 33;
     auto constexpr CardGap = 2;
     auto constexpr PanelWidth = ProgressTimeCardWidth + CardGap + WorldCardWidth;
     auto constexpr MaxPanelLines = 7;  // Of the progress variant, which is the taller one
     auto constexpr TimeLabelWidth = 10;
-    auto constexpr TimeValueWidth = 12;
     auto constexpr WorldLabelWidth = 17;
-    auto constexpr WorldValueWidth = 12;
+    auto constexpr WorldValueWidth = getContentWidth(WorldCardWidth) - WorldLabelWidth;
     auto constexpr SuffixGap = 2;
 }
 
@@ -36,7 +40,8 @@ namespace
 
     std::string createTimeRow(int width, std::string const& label, std::string const& value, std::string const& suffix = std::string())
     {
-        auto content = ConsoleWidgets::createField(label, value, TimeLabelWidth, TimeValueWidth);
+        auto suffixWidth = suffix.empty() ? 0 : SuffixGap + Console::getVisibleLength(suffix);
+        auto content = ConsoleWidgets::createField(label, value, TimeLabelWidth, getContentWidth(width) - TimeLabelWidth - suffixWidth);
         if (!suffix.empty()) {
             content += std::string(SuffixGap, ' ') + suffix;
         }

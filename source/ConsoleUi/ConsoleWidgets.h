@@ -33,4 +33,6 @@ public:
 
     static std::string createField(std::string const& label, std::string const& value, int labelWidth, int valueWidth);
     static std::string createText(std::string const& text, ConsoleColor const& color);
+
+    static auto constexpr FrameContentOffset = 2;  // Border plus the space in front of the row content
 };

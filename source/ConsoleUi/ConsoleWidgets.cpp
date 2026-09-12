@@ -19,7 +19,6 @@ namespace
     auto constexpr ShadeLight = "\xe2\x96\x91";
     auto constexpr ShadeFull = "\xe2\x96\x88";
 
-    auto constexpr FrameContentOffset = 2;  // Border plus the space in front of the row content
     auto constexpr BannerWidth = 37;
     auto constexpr BannerIndent = 2;
 
@@ -88,7 +87,7 @@ namespace
     {
         auto frameColor = Console::foreground(ConsolePalette::Frame);
         auto result = frameColor + leftCorner + FrameHorizontal;
-        auto column = FrameContentOffset;
+        auto column = ConsoleWidgets::FrameContentOffset;
         if (!title.empty()) {
             result += " " + ConsoleWidgets::createText(title, ConsolePalette::Accent) + frameColor + " ";
             column += Console::getVisibleLength(title) + 2;
