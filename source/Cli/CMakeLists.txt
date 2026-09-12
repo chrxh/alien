@@ -3,6 +3,7 @@ PUBLIC
     Main.cpp)
 
 target_link_libraries(cli Base)
+target_link_libraries(cli ConsoleUi)
 target_link_libraries(cli EngineKernels)
 target_link_libraries(cli EngineImpl)
 target_link_libraries(cli EngineInterface)

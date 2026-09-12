@@ -18,9 +18,9 @@
 #include <Network/NetworkService.h>
 
 #include <PersisterInterface/PersisterFacade.h>
-#include <PersisterInterface/TaskProcessor.h>
 
 #include "AlienGui.h"
+#include "BrowserController.h"
 #include "BrowserGalleryWidget.h"
 #include "BrowserHelper.h"
 #include "BrowserLoginHintWidget.h"
@@ -37,8 +37,6 @@
 
 namespace
 {
-    auto constexpr RefreshInterval = 20;  // In minutes
-
     auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomSpace = 41.0f;
 
@@ -68,9 +66,7 @@ namespace
 
 void BrowserWindow::initIntern()
 {
-    _refreshProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
-
-    _data = _BrowserData::create();
+    _data = BrowserController::get().getData();
     _galleryWidget = _BrowserGalleryWidget::create(_data);
     _tableWidget = _BrowserTableWidget::create(_data);
     _userListWidget = _BrowserUserListWidget::create(_data);
@@ -83,7 +79,7 @@ void BrowserWindow::initIntern()
     _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth)) * WindowController::get().getContentScaleCorrection();
 
     auto firstStart = settings.getValue("windows.browser.first start", true);
-    refreshIntern(firstStart);
+    BrowserController::get().refresh(firstStart);
 
     for (auto& [workspaceId, workspace] : _data->workspaces) {
         auto initialCollapsedSimulationFolders =
@@ -121,7 +117,7 @@ void BrowserWindow::shutdownIntern()
 
 void BrowserWindow::onRefresh()
 {
-    refreshIntern(true);
+    BrowserController::get().refresh(true);
 }
 
 void BrowserWindow::onPreviewPictureChanged(std::string const& resourceId)
@@ -137,37 +133,6 @@ WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
 DownloadCache& BrowserWindow::getSimulationCache()
 {
     return _data->downloadCache;
-}
-
-void BrowserWindow::refreshIntern(bool withRetry)
-{
-    _refreshProcessor->executeTask(
-        [&](auto const& senderId) {
-            return _PersisterFacade::get()->scheduleGetNetworkResources(
-                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = withRetry}, GetNetworkResourcesRequestData());
-        },
-        [&](auto const& requestId) {
-            auto data = _PersisterFacade::get()->fetchGetNetworkResourcesData(requestId);
-            _data->userTOs = data.userTOs;
-            _data->ownEmojiTypeBySimId = data.emojiTypeByResourceId;
-
-            for (auto& [workspaceId, workspace] : _data->workspaces) {
-                workspace.rawTOs.clear();
-                auto userName = NetworkService::get().getLoggedInUserName().value_or("");
-                for (auto const& rawTO : data.resourceTOs) {
-                    if (rawTO->resourceType == workspaceId.resourceType) {
-                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName)
-                            || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
-                                && rawTO->workspaceType == workspaceId.workspaceType)) {
-                            workspace.rawTOs.emplace_back(rawTO);
-                        }
-                    }
-                }
-                _data->createTreeTOs(workspace);
-            }
-            _data->sortUserList();
-        },
-        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
 void BrowserWindow::processIntern()
@@ -196,16 +161,7 @@ void BrowserWindow::processIntern()
 
 void BrowserWindow::processBackground()
 {
-    auto now = std::chrono::steady_clock::now();
-    if (!_lastRefreshTime) {
-        _lastRefreshTime = now;
-    }
-    if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
-        _lastRefreshTime = now;
-        refreshIntern(false);
-    }
-
-    processPendingRequestIds();
+    _galleryWidget->processPendingRequests();
 }
 
 void BrowserWindow::processActivated()
@@ -220,7 +176,9 @@ void BrowserWindow::processToolbar()
 
     std::vector<AlienGui::ToolbarItem> items{
         AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters().icon(ICON_FA_SYNC).name("Refresh").disabled(_refreshProcessor->pendingTasks()).action([&] { onRefresh(); })),
+            AlienGui::ToolbarItemParameters().icon(ICON_FA_SYNC).name("Refresh").disabled(BrowserController::get().isRefreshing()).action([&] {
+                onRefresh();
+            })),
         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                 .icon(ICON_FA_SIGN_IN_ALT)
                                                 .name("Login or register")
@@ -531,7 +489,7 @@ void BrowserWindow::processEmojiButton(int emojiType)
 
 void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 {
-    if (_refreshProcessor->pendingTasks()) {
+    if (BrowserController::get().isRefreshing()) {
         auto size = ImGui::GetItemRectSize();
         auto afterTablePos = ImGui::GetCursorScreenPos();
 
@@ -544,13 +502,6 @@ void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
         ImGui::EndChild();
         ImGui::SetCursorScreenPos(afterTablePos);
     }
-}
-
-void BrowserWindow::processPendingRequestIds()
-{
-    _refreshProcessor->process();
-    _data->processPendingRequests();
-    _galleryWidget->processPendingRequests();
 }
 
 void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)

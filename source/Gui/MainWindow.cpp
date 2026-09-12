@@ -34,6 +34,7 @@
 #include "AlienGui.h"
 #include "AutosaveController.h"
 #include "AutosaveWindow.h"
+#include "BrowserController.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "CreatorWindow.h"
@@ -137,6 +138,7 @@ _MainWindow::_MainWindow()
     MassOperationsDialog::get().setup();
     GettingStartedWindow::get().setup();
     NewSimulationDialog::get().setup();
+    BrowserController::get().setup();
     BrowserWindow::get().setup();
     ActivateUserDialog::get().setup();
     NewPasswordDialog::get().setup();

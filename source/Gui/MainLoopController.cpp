@@ -143,6 +143,11 @@ bool MainLoopController::shouldClose() const
     return _programState == ProgramState::Finished;
 }
 
+bool MainLoopController::isSaveOnExit() const
+{
+    return _saveOnExit;
+}
+
 void MainLoopController::processFirstTick()
 {
     drawLoadingScreen();

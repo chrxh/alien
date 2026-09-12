@@ -1,12 +1,16 @@
 #include "ConsoleModeController.h"
 
+#include <atomic>
 #include <iostream>
+#include <optional>
 #include <thread>
+#include <vector>
 
 #ifdef _WIN32
 #include <conio.h>
 #include <windows.h>
 #else
+#include <csignal>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -14,11 +18,16 @@
 
 #include <GLFW/glfw3.h>
 
-#include <Base/StringHelper.h>
+#include <Base/Console.h>
+#include <Base/Resources.h>
+
+#include <ConsoleUi/ConsoleWidgets.h>
 
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AutosaveController.h"
+#include "BrowserController.h"
+#include "MainLoopController.h"
 #include "WindowController.h"
 
 namespace
@@ -26,7 +35,8 @@ namespace
     auto constexpr PollInterval = std::chrono::milliseconds(100);
     auto constexpr PrintInterval = std::chrono::milliseconds(200);
     auto constexpr EscapeKeyCode = 27;
-    auto constexpr StatusLineWidth = 80;
+
+    std::atomic<bool> quitRequested = false;
 
 #ifdef _WIN32
     void bringConsoleToFront()
@@ -37,17 +47,31 @@ namespace
         }
     }
 
-    void beginConsoleInput() {}
-
-    void endConsoleInput() {}
-
-    bool isEscapePressed()
+    BOOL WINAPI handleConsoleCtrlEvent(DWORD eventType)
     {
-        auto result = false;
+        // Closing the console window leaves too little time for saving, so it is left to the default handler
+        if (eventType != CTRL_C_EVENT && eventType != CTRL_BREAK_EVENT) {
+            return FALSE;
+        }
+        quitRequested.store(true);
+        return TRUE;
+    }
+
+    void beginConsoleInput()
+    {
+        SetConsoleCtrlHandler(handleConsoleCtrlEvent, TRUE);
+    }
+
+    void endConsoleInput()
+    {
+        SetConsoleCtrlHandler(handleConsoleCtrlEvent, FALSE);
+    }
+
+    std::vector<int> readPressedKeys()
+    {
+        std::vector<int> result;
         while (_kbhit() != 0) {
-            if (_getch() == EscapeKeyCode) {
-                result = true;
-            }
+            result.emplace_back(_getch());
         }
         return result;
     }
@@ -56,6 +80,11 @@ namespace
     int fileStatusFlagsBeforeActivation = 0;
 
     void bringConsoleToFront() {}
+
+    void handleInterrupt(int)
+    {
+        quitRequested.store(true);
+    }
 
     void beginConsoleInput()
     {
@@ -66,26 +95,35 @@ namespace
 
         fileStatusFlagsBeforeActivation = fcntl(STDIN_FILENO, F_GETFL, 0);
         fcntl(STDIN_FILENO, F_SETFL, fileStatusFlagsBeforeActivation | O_NONBLOCK);
+
+        std::signal(SIGINT, handleInterrupt);
     }
 
     void endConsoleInput()
     {
+        std::signal(SIGINT, SIG_DFL);
+
         tcsetattr(STDIN_FILENO, TCSANOW, &terminalAttributesBeforeActivation);
         fcntl(STDIN_FILENO, F_SETFL, fileStatusFlagsBeforeActivation);
     }
 
-    bool isEscapePressed()
+    std::vector<int> readPressedKeys()
     {
-        auto result = false;
+        std::vector<int> result;
         char input = 0;
         while (read(STDIN_FILENO, &input, 1) == 1) {
-            if (input == EscapeKeyCode) {
-                result = true;
-            }
+            result.emplace_back(input);
         }
         return result;
     }
 #endif
+
+    // Cursor and function keys deliver several bytes, so only a single byte counts as a pressed character
+    std::optional<int> readPressedCharacter()
+    {
+        auto keys = readPressedKeys();
+        return keys.size() == 1 ? std::optional<int>(keys.front()) : std::nullopt;
+    }
 }
 
 void ConsoleModeController::activate()
@@ -95,6 +133,7 @@ void ConsoleModeController::activate()
     }
     _active = true;
     _lastPrintTimepoint.reset();
+    quitRequested.store(false);
 
     auto simulationFacade = _SimulationFacade::get();
     _stateBeforeActivation = StateBeforeActivation{
@@ -110,9 +149,15 @@ void ConsoleModeController::activate()
     glfwIconifyWindow(window);
     glfwHideWindow(window);
 
+    Console::init(false);
+    std::cout << Console::clearScreen() << std::endl;
+    for (auto const& line : ConsoleWidgets::createBanner("artificial life environment  \xc2\xb7  v" + Const::ProgramVersion + "  \xc2\xb7  console mode")) {
+        std::cout << line << std::endl;
+    }
     std::cout << std::endl
-              << "Console mode: user interface and rendering are switched off." << std::endl
-              << "Press ESC to return to the user interface." << std::endl
+              << "  " << ConsoleWidgets::createText("User interface and rendering are switched off.", ConsolePalette::Label) << std::endl
+              << "  " << ConsoleWidgets::createText("Press ESC to return to the user interface.", ConsolePalette::Label) << std::endl
+              << "  " << ConsoleWidgets::createText("Press Q to quit, which saves on exit like the user interface does.", ConsolePalette::Label) << std::endl
               << std::endl;
 }
 
@@ -127,31 +172,54 @@ void ConsoleModeController::process()
         return;
     }
     AutosaveController::get().process();
+    BrowserController::get().process();
     printPersistedSavepoint();
     printStatusLine();
 
-    if (isEscapePressed()) {
+    auto pressedCharacter = readPressedCharacter();
+    if (quitRequested.load() || pressedCharacter == 'q' || pressedCharacter == 'Q') {
+        quit();
+        return;
+    }
+    if (pressedCharacter == EscapeKeyCode) {
         deactivate();
         return;
     }
     std::this_thread::sleep_for(PollInterval);
 }
 
-void ConsoleModeController::deactivate()
+void ConsoleModeController::quit()
+{
+    leaveConsoleMode();
+    auto message = MainLoopController::get().isSaveOnExit() ? "Saving on exit ..." : "Quitting without saving ...";
+    std::cout << std::endl << "  " << ConsoleWidgets::createText(message, ConsolePalette::Label) << std::endl;
+
+    // The main loop runs its regular exit sequence again, but leaves the window hidden
+    MainLoopController::get().scheduleClosing();
+}
+
+void ConsoleModeController::leaveConsoleMode()
 {
     endConsoleInput();
-    std::cout << std::endl << "Returning to the user interface ..." << std::endl;
+    _liveOutput.close();
+    _status = ConsoleSimulationStatus();
 
     auto simulationFacade = _SimulationFacade::get();
     simulationFacade->setSyncSimulationWithRendering(_stateBeforeActivation.syncSimulationWithRendering);
     simulationFacade->setTpsRestriction(_stateBeforeActivation.tpsRestriction);
 
+    _active = false;
+}
+
+void ConsoleModeController::deactivate()
+{
+    leaveConsoleMode();
+    std::cout << std::endl << "  " << ConsoleWidgets::createText("Returning to the user interface ...", ConsolePalette::Label) << std::endl;
+
     auto window = WindowController::get().getWindowData().window;
     glfwShowWindow(window);
     glfwRestoreWindow(window);
     glfwFocusWindow(window);
-
-    _active = false;
 }
 
 void ConsoleModeController::printPersistedSavepoint()
@@ -160,7 +228,9 @@ void ConsoleModeController::printPersistedSavepoint()
     if (!savepoint.has_value()) {
         return;
     }
-    std::cout << "\r" << std::string(StatusLineWidth, ' ') << "\rSave point created: " << savepoint.value()->filename.string() << std::endl;
+    _liveOutput.printMessage(
+        "  " + ConsoleWidgets::createText("Save point created: ", ConsolePalette::Success)
+        + ConsoleWidgets::createText(savepoint.value()->filename.string(), ConsolePalette::Value));
     _lastPrintTimepoint.reset();
 }
 
@@ -173,10 +243,21 @@ void ConsoleModeController::printStatusLine()
     _lastPrintTimepoint = now;
 
     auto simulationFacade = _SimulationFacade::get();
-    auto statusLine =
-        "Time step: " + StringHelper::format(simulationFacade->getCurrentTimestep()) + "   TPS: " + StringHelper::format(simulationFacade->getTps(), 1);
-    if (!simulationFacade->isSimulationRunning()) {
-        statusLine += "   (paused)";
+    _status.timestep = simulationFacade->getCurrentTimestep();
+    _status.tps = simulationFacade->getTps();
+    _status.duration = simulationFacade->getRealTime();
+    _status.paused = !simulationFacade->isSimulationRunning();
+
+    auto statistics = simulationFacade->getStatisticsEntry();
+    _status.numCells = statistics.objectStatistics.numCellObjects;
+    _status.numEnergyParticles = statistics.objectStatistics.numEnergyParticles;
+    _status.numCreatures = 0;
+    for (auto const& lineage : statistics.lineageEntries) {
+        _status.numCreatures += lineage.numCreatures;
     }
-    std::cout << "\r" << statusLine << "          " << std::flush;
+    _status.numLineages = toUInt32(statistics.lineageEntries.size());
+    _status.updateHistory();
+
+    auto lines = ConsoleSimulationPanel::fitsIntoConsole() ? ConsoleSimulationPanel::create("console mode", _status) : std::vector<std::string>();
+    _liveOutput.update(lines, ConsoleSimulationPanel::createPlainLine(_status));
 }
