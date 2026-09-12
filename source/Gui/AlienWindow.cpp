@@ -244,32 +244,9 @@ void AlienWindow::processCloseButton()
     auto windowPos = ImGui::GetWindowPos();
     auto windowSize = ImGui::GetWindowSize();
     auto iconSize = ImGui::GetFontSize();
-    auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
-    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+    auto iconPos = RealVector2D{windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f};
 
-    // Process interaction field
-    ImGui::SetCursorScreenPos(iconPos);
-    if (ImGui::InvisibleButton("CloseButton", ImVec2(iconSize, iconSize))) {
+    if (AlienGui::CloseButton(iconPos, iconSize)) {
         _on = false;
-    }
-
-    // Draw background circle
-    auto pressed = ImGui::IsItemActive();
-    bool hovered = ImGui::IsItemHovered();
-    auto drawList = ImGui::GetWindowDrawList();
-    auto center = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
-    if (hovered || pressed) {
-        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-        auto radius = iconSize * 0.6f;
-        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
-    }
-
-    // Draw cross
-    {
-        auto iconColor = ImGui::GetColorU32(ImGuiCol_Text);
-        auto radius = iconSize * 0.3f;
-        auto thickness = scale(1.0f);
-        drawList->AddLine(ImVec2(center.x - radius, center.y - radius), ImVec2(center.x + radius, center.y + radius), iconColor, thickness);
-        drawList->AddLine(ImVec2(center.x + radius, center.y - radius), ImVec2(center.x - radius, center.y + radius), iconColor, thickness);
     }
 }

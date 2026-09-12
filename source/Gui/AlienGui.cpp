@@ -2161,10 +2161,18 @@ void AlienGui::Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarI
     auto overflowPos = rightBorder - scale(ToolbarOverflowSize);
 
     if (parameters._trailing) {
-        auto trailingHeight = ImGui::GetTextLineHeight() + 2 * scale(ChipPaddingY);
+        auto trailingHeight = parameters._trailingAsButton ? buttonSize : ImGui::GetTextLineHeight() + 2 * scale(ChipPaddingY);
         auto trailingPos = (hasOverflow ? overflowPos - scale(ToolbarOverflowSpacing) : rightBorder) - trailingWidth;
         ImGui::SetCursorScreenPos({trailingPos, startPos.y + (toolbarHeight - trailingHeight) / 2});
+
+        if (parameters._trailingAsButton) {
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(ImGui::GetStyle().FramePadding.x, (buttonSize - ImGui::GetTextLineHeight()) / 2));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, scale(ToolbarButtonRounding));
+        }
         parameters._trailing();
+        if (parameters._trailingAsButton) {
+            ImGui::PopStyleVar(2);
+        }
     }
 
     if (hasOverflow) {
@@ -2291,6 +2299,20 @@ bool AlienGui::CollapseButton(bool collapsed)
     return result;
 }
 
+namespace
+{
+    void drawTitlebarButtonBackground(ImVec2 const& iconCenter, float iconSize)
+    {
+        auto pressed = ImGui::IsItemActive();
+        auto hovered = ImGui::IsItemHovered();
+        if (!hovered && !pressed) {
+            return;
+        }
+        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        ImGui::GetWindowDrawList()->AddCircleFilled(iconCenter, iconSize * 0.6f, bgColor, 12);
+    }
+}
+
 bool AlienGui::MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized)
 {
     auto iconCenter = ImVec2(pos.x + iconSize * 0.5f, pos.y + iconSize * 0.5f);
@@ -2298,22 +2320,34 @@ bool AlienGui::MaximizeButton(RealVector2D const& pos, float iconSize, bool maxi
     ImGui::SetCursorScreenPos({pos.x, pos.y});
     auto clicked = ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize));
 
-    auto pressed = ImGui::IsItemActive();
-    auto hovered = ImGui::IsItemHovered();
-    auto drawList = ImGui::GetWindowDrawList();
-    if (hovered || pressed) {
-        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-        auto radius = iconSize * 0.6f;
-        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
-    }
+    drawTitlebarButtonBackground(iconCenter, iconSize);
 
     auto icon = maximized ? ICON_FA_COMPRESS_ARROWS_ALT : ICON_FA_EXPAND_ARROWS_ALT;
-    drawList->AddText(
+    ImGui::GetWindowDrawList()->AddText(
         StyleService::get().getIconFont(),
         iconSize * 0.7f,
         ImVec2(iconCenter.x - iconSize * 0.31f, iconCenter.y - iconSize * 0.22f),
         ImGui::GetColorU32(ImGuiCol_Text),
         icon);
+
+    return clicked;
+}
+
+bool AlienGui::CloseButton(RealVector2D const& pos, float iconSize)
+{
+    auto iconCenter = ImVec2(pos.x + iconSize * 0.5f, pos.y + iconSize * 0.5f);
+
+    ImGui::SetCursorScreenPos({pos.x, pos.y});
+    auto clicked = ImGui::InvisibleButton("CloseButton", ImVec2(iconSize, iconSize));
+
+    drawTitlebarButtonBackground(iconCenter, iconSize);
+
+    auto iconColor = ImGui::GetColorU32(ImGuiCol_Text);
+    auto radius = iconSize * 0.3f;
+    auto thickness = scale(1.0f);
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->AddLine(ImVec2(iconCenter.x - radius, iconCenter.y - radius), ImVec2(iconCenter.x + radius, iconCenter.y + radius), iconColor, thickness);
+    drawList->AddLine(ImVec2(iconCenter.x + radius, iconCenter.y - radius), ImVec2(iconCenter.x - radius, iconCenter.y + radius), iconColor, thickness);
 
     return clicked;
 }
@@ -2516,7 +2550,8 @@ bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto result = ImGui::Button(parameters._buttonText.c_str(), size);
     if (parameters._frame) {
-        ImGui::GetWindowDrawList()->AddRect(cursorPos, {cursorPos.x + size.x, cursorPos.y + size.y}, ImColor::HSV(0.54f, 0.43f, 0.5f));
+        ImGui::GetWindowDrawList()->AddRect(
+            cursorPos, {cursorPos.x + size.x, cursorPos.y + size.y}, ImColor::HSV(0.54f, 0.43f, 0.5f), ImGui::GetStyle().FrameRounding);
     }
     ImGui::PopStyleColor(4);
 

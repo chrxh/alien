@@ -60,14 +60,17 @@ void ModalWindow::process(std::function<void()> const& contentFunc)
     }
 
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, flags)) {
-        if (_isMaximizable) {
-            processMaximizeButton();
-        }
+        auto contentPos = ImGui::GetCursorScreenPos();
+        auto closeClicked = processTitlebarButtons();
+        ImGui::SetCursorScreenPos(contentPos);
 
         ImGui::PushID(_title.c_str());
         contentFunc();
         ImGui::PopID();
 
+        if (closeClicked && _state == State::Open) {
+            close();
+        }
         ImGui::EndPopup();
     } else if (_state == State::Open) {
         // The popup can also be closed from outside, for instance by pressing escape
@@ -77,21 +80,34 @@ void ModalWindow::process(std::function<void()> const& contentFunc)
     style.WindowMinSize = origWindowMinSize;
 }
 
-void ModalWindow::processMaximizeButton()
+bool ModalWindow::processTitlebarButtons()
 {
     auto titlebarHeight = ImGui::GetFrameHeight();
     auto windowPos = ImGui::GetWindowPos();
     auto windowSize = ImGui::GetWindowSize();
     auto iconSize = ImGui::GetFontSize();
-    auto iconPos = RealVector2D{windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f};
+    auto iconPosY = windowPos.y + (titlebarHeight - iconSize) * 0.5f;
 
     // BeginPopupModal() clips widgets to the area below its native titlebar, so widen the clip rect
-    // to make the button visible and clickable inside that titlebar strip.
+    // to make the buttons visible and clickable inside that titlebar strip.
     ImGui::PushClipRect(windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + titlebarHeight), false);
-    auto clicked = AlienGui::MaximizeButton(iconPos, iconSize, _windowState == WindowState::Maximized);
+
+    if (_isMaximizable) {
+        processMaximizeButton(RealVector2D{windowPos.x + windowSize.x - scale(24.0f) * 2, iconPosY}, iconSize);
+    }
+    auto closeClicked = AlienGui::CloseButton(RealVector2D{windowPos.x + windowSize.x - scale(24.0f), iconPosY}, iconSize);
+
     ImGui::PopClipRect();
 
-    if (clicked) {
+    return closeClicked;
+}
+
+void ModalWindow::processMaximizeButton(RealVector2D const& iconPos, float iconSize)
+{
+    auto windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize();
+
+    if (AlienGui::MaximizeButton(iconPos, iconSize, _windowState == WindowState::Maximized)) {
         if (_windowState == WindowState::Maximized) {
             ImGui::SetWindowPos({_savedPos.x, _savedPos.y});
             ImGui::SetWindowSize({_savedSize.x, _savedSize.y});
