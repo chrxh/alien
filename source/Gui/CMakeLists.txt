@@ -14,6 +14,8 @@ PUBLIC
     AutosaveController.h
     AutosaveWindow.cpp
     AutosaveWindow.h
+    BrowserController.cpp
+    BrowserController.h
     BrowserData.cpp
     BrowserData.h
     BrowserGalleryWidget.cpp
@@ -210,6 +212,7 @@ PUBLIC
     WindowController.h)
 
 target_link_libraries(alien Base)
+target_link_libraries(alien ConsoleUi)
 target_link_libraries(alien EngineKernels)
 target_link_libraries(alien EngineImpl)
 target_link_libraries(alien EngineInterface)

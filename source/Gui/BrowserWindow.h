@@ -1,8 +1,5 @@
 #pragma once
 
-#include <chrono>
-#include <optional>
-
 #include <Network/NetworkResourceTreeTO.h>
 
 #include <PersisterInterface/Definitions.h>
@@ -29,8 +26,6 @@ private:
     void initIntern() override;
     void shutdownIntern() override;
 
-    void refreshIntern(bool withRetry);
-
     void processIntern() override;
     void processBackground() override;
     void processActivated() override;
@@ -48,7 +43,6 @@ private:
     void processEmojiButton(int emojiType);
 
     void processRefreshingScreen(RealVector2D const& startPos);
-    void processPendingRequestIds();
 
     void onEditResource(NetworkResourceTreeTO const& treeTO);
     void onReplaceResource(BrowserLeaf const& leaf);
@@ -58,8 +52,6 @@ private:
     void onCollapseFolders();
     void openWeblink(std::string const& link);
 
-    TaskProcessor _refreshProcessor;
-
     BrowserData _data;
     BrowserGalleryWidget _galleryWidget;
     BrowserTableWidget _tableWidget;
@@ -68,6 +60,5 @@ private:
 
     bool _galleryView = true;
     bool _showAllEmojis = false;
-    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
     float _userTableWidth = 0;
 };

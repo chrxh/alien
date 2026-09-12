@@ -3,6 +3,8 @@ add_library(Base
     AlienExceptions.cpp
     AlienExceptions.h
     Cache.h
+    Console.cpp
+    Console.h
     Definitions.cpp
     Definitions.h
     ExitScopeGuard.h

@@ -5,6 +5,9 @@
 
 #include <Base/Singleton.h>
 
+#include <ConsoleUi/ConsoleLiveOutput.h>
+#include <ConsoleUi/ConsoleSimulationPanel.h>
+
 #include "Definitions.h"
 
 class ConsoleModeController
@@ -18,6 +21,8 @@ public:
     void process();  // Must not be called within an ImGui frame.
 
 private:
+    void quit();
+    void leaveConsoleMode();
     void deactivate();
     void printPersistedSavepoint();
     void printStatusLine();
@@ -31,4 +36,6 @@ private:
     bool _active = false;
     StateBeforeActivation _stateBeforeActivation;
     std::optional<std::chrono::steady_clock::time_point> _lastPrintTimepoint;
+    ConsoleLiveOutput _liveOutput;
+    ConsoleSimulationStatus _status;
 };
