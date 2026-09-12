@@ -70,11 +70,15 @@ namespace Const
         "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
     std::string const LoginShareGpuInfoTooltip2 = "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
-    std::string const BrowserWorkspaceTooltip =
-        "There are three different workspaces where you can find and possibly upload simulations and genomes:\n\n" ICON_FA_CHEVRON_RIGHT " Featured: This "
-        "workspace is curated by the alien-project and contains the simulations that come along with the released versions. They cover a wide range and "
-        "exploit different features.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Community: All logged-in users can share their simulations and genomes here. The files stored in this workspace are visible to all "
-        "users.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Private workspace: Each user account has its own private space. The simulations and genomes are only visible to the logged-in user.";
+    std::string const BrowserFeaturedWorkspaceTooltip =
+        "This workspace is curated by the alien-project and contains the simulations that come along with the released versions. They cover a wide range and "
+        "exploit different features.";
+
+    std::string const BrowserCommunityWorkspaceTooltip =
+        "All logged-in users can share their simulations and genomes here. The files stored in this workspace are visible to all users.";
+
+    std::string const BrowserPrivateWorkspaceTooltip =
+        "Each user account has its own private space. The simulations and genomes are only visible to the logged-in user.";
+
+    std::string const BrowserLoginChipTooltip = "Log in or create a new account to upload your own simulations and genomes and to react to those of others.";
 }

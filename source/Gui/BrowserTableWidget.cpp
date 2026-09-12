@@ -79,11 +79,10 @@ std::vector<_BrowserTableWidget::Column> _BrowserTableWidget::getColumns(Workspa
     auto isSimulation = _data->currentWorkspace.resourceType == NetworkResourceType_Simulation;
 
     std::vector<Column> result;
-    result.emplace_back(Column{
-        .name = isSimulation ? "Simulation" : "Genome",
-        .width = 210.0f,
-        .sortId = NetworkResourceColumnId_SimulationName,
-        .processField = [&, this](auto const& treeTO) { processResourceNameField(treeTO, workspace.collapsedFolderNames); }});
+    result.emplace_back(
+        Column{.name = "Name", .width = 210.0f, .sortId = NetworkResourceColumnId_SimulationName, .processField = [&, this](auto const& treeTO) {
+                   processResourceNameField(treeTO, workspace.collapsedFolderNames);
+               }});
     result.emplace_back(Column{.name = "Description", .width = 200.0f, .sortId = NetworkResourceColumnId_Desc, .processField = [this](auto const& treeTO) {
                                    processDescriptionField(treeTO);
                                }});

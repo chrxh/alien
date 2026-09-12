@@ -23,6 +23,7 @@
 #include "BrowserController.h"
 #include "BrowserGalleryWidget.h"
 #include "BrowserHelper.h"
+#include "BrowserLoginBannerWidget.h"
 #include "BrowserLoginHintWidget.h"
 #include "BrowserTableWidget.h"
 #include "BrowserUserListWidget.h"
@@ -40,7 +41,7 @@ namespace
     auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomSpace = 41.0f;
 
-    auto constexpr WorkspaceSwitcherWidth = 200.0f;
+    auto constexpr FilterWidth = 230.0f;
     auto constexpr MinFilterWidth = 100.0f;
 
     auto constexpr EmojiPopupScale = 0.66f;  // Relative to the resolution of the emoji images
@@ -71,6 +72,7 @@ void BrowserWindow::initIntern()
     _tableWidget = _BrowserTableWidget::create(_data);
     _userListWidget = _BrowserUserListWidget::create(_data);
     _loginHintWidget = _BrowserLoginHintWidget::create();
+    _loginBannerWidget = _BrowserLoginBannerWidget::create();
 
     auto& settings = GlobalSettings::get();
     _galleryView = settings.getValue("windows.browser.gallery view", _galleryView);
@@ -138,6 +140,7 @@ DownloadCache& BrowserWindow::getSimulationCache()
 void BrowserWindow::processIntern()
 {
     processToolbar();
+    _loginBannerWidget->process();
 
     auto startPos = ImGui::GetCursorScreenPos();
 
@@ -169,6 +172,15 @@ void BrowserWindow::processActivated()
     onRefresh();
 }
 
+namespace
+{
+    std::string getAccountChipText()
+    {
+        auto userName = NetworkService::get().getLoggedInUserName();
+        return userName.has_value() ? ICON_FA_USER "  " + *userName + "  " ICON_FA_CARET_DOWN : std::string(ICON_FA_SIGN_IN_ALT "  Log in or register");
+    }
+}
+
 void BrowserWindow::processToolbar()
 {
     std::string resourceTypeString = _data->currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -177,16 +189,6 @@ void BrowserWindow::processToolbar()
     std::vector<AlienGui::ToolbarItem> items{
         AlienGui::ToolbarItem::createButton(
             AlienGui::ToolbarItemParameters().icon(ICON_FA_SYNC).name("Refresh").disabled(BrowserController::get().isRefreshing()).action([&] {
-                onRefresh();
-            })),
-        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
-                                                .icon(ICON_FA_SIGN_IN_ALT)
-                                                .name("Login or register")
-                                                .disabled(NetworkService::get().getLoggedInUserName().has_value())
-                                                .action([&] { LoginDialog::get().open(); })),
-        AlienGui::ToolbarItem::createButton(
-            AlienGui::ToolbarItemParameters().icon(ICON_FA_SIGN_OUT_ALT).name("Logout").disabled(!NetworkService::get().getLoggedInUserName()).action([&] {
-                NetworkService::get().logout();
                 onRefresh();
             })),
         AlienGui::ToolbarItem::createSeparator(),
@@ -260,7 +262,13 @@ void BrowserWindow::processToolbar()
         AlienGui::ToolbarItemParameters().icon(ICON_FA_COMMENTS).name("Open ALIEN Discord server").action([&] { openWeblink(Const::DiscordURL); })));
 #endif
 
-    AlienGui::Toolbar(AlienGui::ToolbarParameters().id("Browser"), items);
+    auto toolbarParameters = AlienGui::ToolbarParameters().id("Browser");
+
+    if (!_loginBannerWidget->isVisible()) {
+        toolbarParameters.trailing([this] { processAccountChip(); }).trailingWidth(calcAccountChipWidth()).trailingAsButton(true);
+    }
+
+    AlienGui::Toolbar(toolbarParameters, items);
 }
 
 void BrowserWindow::processWorkspace()
@@ -290,7 +298,6 @@ void BrowserWindow::processWorkspace()
             }
             ImGui::EndTabBar();
         }
-        processFilter();
     }
     ImGui::EndChild();
 }
@@ -322,6 +329,8 @@ void BrowserWindow::processResourceView()
     } else {
         _tableWidget->process();
     }
+
+    processFooter();
 }
 
 bool BrowserWindow::isLoginRequired() const
@@ -331,32 +340,66 @@ bool BrowserWindow::isLoginRequired() const
 
 void BrowserWindow::processWorkspaceSelection()
 {
-    auto userName = NetworkService::get().getLoggedInUserName();
-    auto privateWorkspaceString = userName.has_value() ? std::string("Private workspace") : std::string("Private workspace (login required)");
-    auto workspaceType_reordered = 2 - _data->currentWorkspace.workspaceType;  // Change the order for display
-    if (AlienGui::Switcher(
-            AlienGui::SwitcherParameters()
-                .width(WorkspaceSwitcherWidth)
-                .textWidth(0.0f)
-                .tooltip(Const::BrowserWorkspaceTooltip)
-                .values({privateWorkspaceString, std::string("Featured"), std::string("Community")}),
-            &workspaceType_reordered)) {
+    processWorkspaceButton(WorkspaceType_AlienProject, ICON_FA_STAR, "Featured", Const::BrowserFeaturedWorkspaceTooltip);
+    ImGui::SameLine();
+    processWorkspaceButton(WorkspaceType_Public, ICON_FA_GLOBE, "Community", Const::BrowserCommunityWorkspaceTooltip);
+    ImGui::SameLine();
+    processWorkspaceButton(WorkspaceType_Private, ICON_FA_LOCK, "Private", Const::BrowserPrivateWorkspaceTooltip);
+}
+
+void BrowserWindow::processWorkspaceButton(WorkspaceType workspaceType, std::string const& icon, std::string const& name, std::string const& tooltip)
+{
+    auto isSelected = _data->currentWorkspace.workspaceType == workspaceType;
+
+    auto label = icon + "  " + name;
+    if (workspaceType != WorkspaceType_Private || NetworkService::get().getLoggedInUserName()) {
+        label += "  (" + std::to_string(_data->workspaces.at(WorkspaceId{_data->currentWorkspace.resourceType, workspaceType}).rawTOs.size()) + ")";
+    }
+    label += "##workspace" + std::to_string(workspaceType);
+
+    auto selected = isSelected;
+    if (AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(label).tooltip(tooltip), selected) && !isSelected) {
+        _data->currentWorkspace.workspaceType = workspaceType;
         _data->selectedTreeTO = nullptr;
         _galleryWidget->resetPage();
     }
-    _data->currentWorkspace.workspaceType = 2 - workspaceType_reordered;
 }
 
-void BrowserWindow::processFilter()
+float BrowserWindow::calcAccountChipWidth() const
 {
-    ImGui::Spacing();
+    return scaleInverse(ImGui::CalcTextSize(getAccountChipText().c_str()).x + ImGui::GetStyle().FramePadding.x * 2);
+}
 
-    auto filterParameters = AlienGui::InputFilterParameters();
-    if (_galleryView) {
-        auto availableWidth = ImGui::GetContentRegionAvail().x - _galleryWidget->getPagerWidth() - ImGui::GetStyle().ItemSpacing.x;
-        filterParameters.width(std::max(MinFilterWidth, scaleInverse(availableWidth)));
+void BrowserWindow::processAccountChip()
+{
+    auto userName = NetworkService::get().getLoggedInUserName();
+
+    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
+                                   .buttonText(getAccountChipText())
+                                   .highlighted(!userName.has_value())
+                                   .frame(!userName.has_value())
+                                   .transparentBackground(false)
+                                   .tooltip(userName.has_value() ? std::string("Show the account menu") : Const::BrowserLoginChipTooltip))) {
+        if (userName.has_value()) {
+            ImGui::OpenPopup("##account");
+        } else {
+            LoginDialog::get().open();
+        }
     }
-    if (AlienGui::InputFilter(filterParameters, _data->filter)) {
+
+    if (ImGui::BeginPopup("##account")) {
+        if (ImGui::Selectable(ICON_FA_SIGN_OUT_ALT "  Log out")) {
+            NetworkService::get().logout();
+            onRefresh();
+        }
+        ImGui::EndPopup();
+    }
+}
+
+void BrowserWindow::processFooter()
+{
+    auto filterWidth = std::clamp(scaleInverse(ImGui::GetContentRegionAvail().x), MinFilterWidth, FilterWidth);
+    if (AlienGui::InputFilter(AlienGui::InputFilterParameters().width(filterWidth), _data->filter)) {
         _galleryWidget->resetPage();
         _data->createTreeTOsForAllWorkspaces();
     }
