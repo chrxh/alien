@@ -191,6 +191,9 @@ namespace Const
     ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
     ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
 
+    ImColor const BrowserLoginBannerColor = ImColor::HSV(0.490f, 0.556f, 0.247f, 0.500f);
+    ImColor const BrowserLoginBannerBarColor = AccentColor;
+
     ImColor const BrowserLoginHintCardColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.940f);
     ImColor const BrowserLoginHintCardBorderColor = LineColor;
     ImColor const BrowserLoginHintIconColor = AccentColor;
@@ -319,8 +322,8 @@ void StyleService::setupColors(ImGuiStyle& style) const
     style.Colors[ImGuiCol_ResizeGripActive] = Const::AccentColor.Value;
 
     style.Colors[ImGuiCol_Tab] = Const::PanelColor.Value;
-    style.Colors[ImGuiCol_TabHovered] = Const::RaisedColor.Value;
-    style.Colors[ImGuiCol_TabSelected] = Const::RaisedColor.Value;
+    style.Colors[ImGuiCol_TabHovered] = Const::HeaderActiveColor.Value;
+    style.Colors[ImGuiCol_TabSelected] = Const::AccentDeepColor.Value;
     style.Colors[ImGuiCol_TabSelectedOverline] = Const::AccentColor.Value;
     style.Colors[ImGuiCol_TabDimmed] = Const::BackgroundColor.Value;
     style.Colors[ImGuiCol_TabDimmedSelected] = Const::PanelColor.Value;

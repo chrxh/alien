@@ -177,6 +177,9 @@ namespace Const
     extern ImColor const BrowserResourceNewTextColor;
     extern ImColor const BrowserResourceSymbolColor;
 
+    extern ImColor const BrowserLoginBannerColor;
+    extern ImColor const BrowserLoginBannerBarColor;
+
     extern ImColor const BrowserLoginHintCardColor;
     extern ImColor const BrowserLoginHintCardBorderColor;
     extern ImColor const BrowserLoginHintIconColor;

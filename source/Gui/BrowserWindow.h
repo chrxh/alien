@@ -35,7 +35,10 @@ private:
     void processResourceView();
     bool isLoginRequired() const;
     void processWorkspaceSelection();
-    void processFilter();
+    void processWorkspaceButton(WorkspaceType workspaceType, std::string const& icon, std::string const& name, std::string const& tooltip);
+    float calcAccountChipWidth() const;
+    void processAccountChip();
+    void processFooter();
     void processUserList();
     void processStatusBar();
 
@@ -57,6 +60,7 @@ private:
     BrowserTableWidget _tableWidget;
     BrowserUserListWidget _userListWidget;
     BrowserLoginHintWidget _loginHintWidget;
+    BrowserLoginBannerWidget _loginBannerWidget;
 
     bool _galleryView = true;
     bool _showAllEmojis = false;

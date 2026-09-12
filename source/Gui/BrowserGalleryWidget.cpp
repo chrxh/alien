@@ -95,8 +95,7 @@ void _BrowserGalleryWidget::processSorting()
             .textWidth(75.0f)
             .min(MinCardSizePercent)
             .max(MaxCardSizePercent)
-            .format("%d %%")
-            .tooltip("Scale the preview cards. Larger cards mean fewer cards per row."),
+            .format("%d %%"),
         &_cardSizePercent);
 }
 

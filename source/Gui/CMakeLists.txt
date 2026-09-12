@@ -22,6 +22,8 @@ PUBLIC
     BrowserGalleryWidget.h
     BrowserHelper.cpp
     BrowserHelper.h
+    BrowserLoginBannerWidget.cpp
+    BrowserLoginBannerWidget.h
     BrowserLoginHintWidget.cpp
     BrowserLoginHintWidget.h
     BrowserTableWidget.cpp
