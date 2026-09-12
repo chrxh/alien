@@ -85,7 +85,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
-TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
+TEST_F(ConstructorMutationTests, mutatesCreatureWhileUnderConstructionOffspring)
 {
     // Regression test:
     // constructor.offspring is set on the first energy-less trigger and, with separation off, never reset.

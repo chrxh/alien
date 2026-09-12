@@ -594,7 +594,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
         if (otherObject->type != ObjectType_Cell) {
             return;
         }
-        if (otherObject == hostObject || (otherObject->typeData.cell.cellState != CellState_Constructing && otherObject->typeData.cell.activationTime == 0)
+        if (otherObject == hostObject || (otherObject->typeData.cell.cellState != CellState_UnderConstruction && otherObject->typeData.cell.activationTime == 0)
             || otherObject->typeData.cell.creature != constructionData.creature
             || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
             return;
@@ -744,7 +744,7 @@ __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(O
 __inline__ __device__ void ConstructorProcessor::activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData)
 {
     if (constructionData.isLastNode) {
-        newObject->typeData.cell.cellState = CellState_Activating;
+        newObject->typeData.cell.cellState = CellState_BeingActivated;
     }
 }
 

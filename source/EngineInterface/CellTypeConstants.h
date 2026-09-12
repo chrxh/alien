@@ -81,8 +81,8 @@ using CellState = int;
 enum CellState_
 {
     CellState_Ready,
-    CellState_Constructing,
-    CellState_Activating,
+    CellState_UnderConstruction,
+    CellState_BeingActivated,
     CellState_Dying,
     CellState_InstantDying,
     CellState_Count,

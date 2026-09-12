@@ -26,13 +26,20 @@ public:
         float speed = 0;
     };
 
+    enum class HeightMode
+    {
+        FillAvailable,  // The parent reserves a region for the editor
+        Natural         // The parent scrolls, therefore the editor claims the height it needs
+    };
+
     void process(
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
         std::vector<float>& connectionWeights,
         std::vector<CellFunctionModule> const& cellFunctionModules = {},
-        std::optional<LiveData> const& liveData = std::nullopt);
+        std::optional<LiveData> const& liveData = std::nullopt,
+        HeightMode heightMode = HeightMode::FillAvailable);
 
     // Shows the editor additionally in a modal dialog which edits a copy until it is adopted there
     void openDialog();
@@ -86,7 +93,8 @@ private:
         std::vector<CellFunctionModule> const& cellFunctionModules,
         std::optional<LiveData> const& liveData,
         SelectionData& selectionData,
-        EditorMode mode);
+        EditorMode mode,
+        HeightMode heightMode);
     void processDialog(
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
@@ -145,6 +153,8 @@ private:
     static ImColor calcWeightColor(float value, float alpha);
     // Stretches the rows until the graph fills the given height, but never below its natural spacing
     static float calcGraphRowSpacing(float availableHeight);
+    // Height at which the editor is still usable. In a scrolling parent such as the inspection window hardly any height is left over.
+    float calcMinEditorHeight(std::vector<CellFunctionModule> const& cellFunctionModules);
     static float calcNetToolButtonsWidth();
     static float calcInspectorCardHeight();
 

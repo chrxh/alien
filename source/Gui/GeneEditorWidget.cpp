@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "AlienGui.h"
+#include "CellAttributeHelp.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "StyleService.h"
@@ -76,11 +77,17 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
 
             // Gene name
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
+            AlienGui::InputText(
+                AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth).tooltip(CellAttributeHelp::get(CellAttribute::GeneName)),
+                gene._name);
 
             // Shape
             if (AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth),
+                    AlienGui::ComboParameters()
+                        .name("Shape generator")
+                        .values(Const::ConstructorShapeStrings)
+                        .textWidth(rightColumnWidth)
+                        .tooltip(CellAttributeHelp::get(CellAttribute::GeneShape)),
                     gene._shape)) {
                 {
                     ShapeGenerator shapeGenerator;
@@ -92,17 +99,30 @@ void _GeneEditorWidget::processHeaderData()
 
             // Connection distance
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
+                AlienGui::InputFloatParameters()
+                    .name("Connection distance")
+                    .format("%.2f")
+                    .step(0.05f)
+                    .textWidth(rightColumnWidth)
+                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneConnectionDistance)),
+                gene._connectionDistance);
 
             // Stiffness
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters()
+                    .name("Stiffness")
+                    .format("%.2f")
+                    .step(0.05f)
+                    .textWidth(rightColumnWidth)
+                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneStiffness)),
+                gene._stiffness);
 
             // Homogeneous cell type
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
                     .name("Homogeneous cell type")
                     .textWidth(rightColumnWidth)
-                    .tooltip("If enabled, every constructed cell of this gene uses the cell type and its properties of the first node."),
+                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneHomogeneousCellType)),
                 gene._homogeneousCellType);
 
             table.next();

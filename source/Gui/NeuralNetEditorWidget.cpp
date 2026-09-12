@@ -380,11 +380,12 @@ void _NeuralNetEditorWidget::process(
     std::vector<ActivationFunction>& activationFunctions,
     std::vector<float>& connectionWeights,
     std::vector<CellFunctionModule> const& cellFunctionModules,
-    std::optional<LiveData> const& liveData)
+    std::optional<LiveData> const& liveData,
+    HeightMode heightMode)
 {
     auto& selectionData = getValueRef(_dataById);
 
-    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData, EditorMode::Embedded);
+    processEditor(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData, EditorMode::Embedded, heightMode);
     processDialog(weights, biases, activationFunctions, connectionWeights, cellFunctionModules, liveData, selectionData);
 }
 
@@ -423,7 +424,8 @@ void _NeuralNetEditorWidget::processDialog(
             cellFunctionModules,
             liveData,
             selectionData,
-            EditorMode::Dialog);
+            EditorMode::Dialog,
+            HeightMode::FillAvailable);
     });
 
     if (_adopted) {
@@ -443,12 +445,16 @@ void _NeuralNetEditorWidget::processEditor(
     std::vector<CellFunctionModule> const& cellFunctionModules,
     std::optional<LiveData> const& liveData,
     SelectionData& selectionData,
-    EditorMode mode)
+    EditorMode mode,
+    HeightMode heightMode)
 {
     // The dialog offers more room than the embedded editor and therefore labels the graph with the larger default font
     _labelFont = mode == EditorMode::Dialog ? StyleService::get().getDefaultFont() : StyleService::get().getTinyFont();
 
-    if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, 0)) {
+    auto claimsNaturalHeight = mode == EditorMode::Embedded && heightMode == HeightMode::Natural;
+    auto editorHeight = claimsNaturalHeight ? calcMinEditorHeight(cellFunctionModules) : 0.0f;
+
+    if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, editorHeight), 0, 0)) {
         auto narrowLayout = isNarrowLayout(ImGui::GetContentRegionAvail().x, cellFunctionModules);
 
         // Use a child window for the content, reserving space for the action buttons
@@ -1132,6 +1138,27 @@ float _NeuralNetEditorWidget::calcGraphRowSpacing(float availableHeight)
     auto fixedHeight = 2 * GraphVerticalMargin + 2 * GraphGroupSpacing;
     auto rowSpacing = (scaleInverse(availableHeight) - fixedHeight) / toFloat(NEURAL_NET_INPUTS);
     return std::clamp(rowSpacing, GraphRowSpacing, GraphRowSpacing * GraphRowStretchMax);
+}
+
+float _NeuralNetEditorWidget::calcMinEditorHeight(std::vector<CellFunctionModule> const& cellFunctionModules)
+{
+    auto& style = ImGui::GetStyle();
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+
+    // Connection weight sliders, which share their line with the label and may wrap into several rows
+    auto indexWidth = calcNodeLabelSize(smallLabelFont(), std::to_string(MAX_OBJECT_CONNECTIONS)).x + scale(ConnectionWeightIndexMargin);
+    auto sliderAreaWidth = availableWidth - 2 * scale(GraphHorizontalMargin) - ImGui::CalcTextSize("Connection weights").x - style.ItemSpacing.x;
+    auto numRows = MAX_OBJECT_CONNECTIONS / calcConnectionWeightSlidersPerRow(sliderAreaWidth, indexWidth);
+    auto slidersHeight = toFloat(numRows) * ImGui::GetFrameHeight() + toFloat(numRows - 1) * style.ItemSpacing.y;
+
+    // Graph with its natural row spacing, below it the inspector card if it does not fit next to the graph
+    auto graphHeight = scale(inputNodeOffsetY(NEURAL_NET_INPUTS - 1, GraphRowSpacing) + GraphRowSpacing / 2 + GraphVerticalMargin);
+    if (isNarrowLayout(availableWidth, cellFunctionModules)) {
+        graphHeight += 2 * style.ItemSpacing.y + scale(CardTopMargin) + calcInspectorCardHeight();
+    }
+
+    auto separatorsHeight = 2 * (ImGui::GetFrameHeight() / 2 + style.ItemSpacing.y);
+    return slidersHeight + graphHeight + separatorsHeight + scale(ButtonAreaHeight);
 }
 
 float _NeuralNetEditorWidget::calcNetToolButtonsWidth()

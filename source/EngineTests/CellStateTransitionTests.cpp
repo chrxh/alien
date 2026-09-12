@@ -74,8 +74,8 @@ TEST_F(CellStateTransitionTests, underConstruction_activating)
 {
     ContentDesc data;
     data.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing)),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_Activating)),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction)),
+        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_BeingActivated)),
     });
     data.addConnection(1, 2);
 
@@ -83,7 +83,7 @@ TEST_F(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_EQ(CellState_Activating, actualData.getObjectRef(1).getCellRef()._cellState);
+    EXPECT_EQ(CellState_BeingActivated, actualData.getObjectRef(1).getCellRef()._cellState);
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
@@ -127,9 +127,9 @@ TEST_F(CellStateTransitionTests, fixedCellDoesNotDieFromLastUpdate)
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
 }
 
-TEST_F(CellStateTransitionTests, isolatedConstructingNonHeadCellDies)
+TEST_F(CellStateTransitionTests, isolatedUnderConstructionNonHeadCellDies)
 {
-    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing).headCell(false))});
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).headCell(false))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2 * CELL_UPDATE_INTERVAL + 1);
@@ -156,7 +156,7 @@ class CellStateTransitionTests_AllStates
 INSTANTIATE_TEST_SUITE_P(
     CellStateTransitionTests_AllStates,
     CellStateTransitionTests_AllStates,
-    ::testing::Values(CellState_Ready, CellState_Constructing, CellState_Activating, CellState_Dying));
+    ::testing::Values(CellState_Ready, CellState_UnderConstruction, CellState_BeingActivated, CellState_Dying));
 
 TEST_P(CellStateTransitionTests_AllStates, solid_cell)
 {
@@ -175,7 +175,7 @@ TEST_P(CellStateTransitionTests_AllStates, solid_cell)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    if (cellState == CellState_Activating) {
+    if (cellState == CellState_BeingActivated) {
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
         EXPECT_EQ(cellState, actualData.getObjectRef(2).getCellRef()._cellState);
@@ -199,7 +199,7 @@ TEST_P(CellStateTransitionTests_AllStates, freeCell_cell)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    if (cellState == CellState_Activating) {
+    if (cellState == CellState_BeingActivated) {
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
         EXPECT_EQ(cellState, actualData.getObjectRef(2).getCellRef()._cellState);

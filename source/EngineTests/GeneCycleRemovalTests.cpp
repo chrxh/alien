@@ -82,7 +82,7 @@ TEST_F(GeneCycleRemovalTests, breaksSeveralIndependentCycles)
 
 TEST_F(GeneCycleRemovalTests, keepsCycleThroughRootGene)
 {
-    // Constructing the root gene starts a new creature, so a cycle running through it is intended.
+    // UnderConstruction the root gene starts a new creature, so a cycle running through it is intended.
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
         GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),

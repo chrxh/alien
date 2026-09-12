@@ -28,6 +28,8 @@ PUBLIC
     BrowserUserListWidget.h
     BrowserWindow.cpp
     BrowserWindow.h
+    CellAttributeHelp.cpp
+    CellAttributeHelp.h
     CellFunctionChannels.cpp
     CellFunctionChannels.h
     ChangeColorDialog.cpp
