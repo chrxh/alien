@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "AlienGui.h"
-#include "CellAttributeHelp.h"
+#include "EntityAttributeHelp.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "StyleService.h"
@@ -78,7 +78,7 @@ void _GeneEditorWidget::processHeaderData()
 
             // Gene name
             AlienGui::InputText(
-                AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth).tooltip(CellAttributeHelp::get(CellAttribute::GeneName)),
+                AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneName)),
                 gene._name);
 
             // Shape
@@ -87,7 +87,7 @@ void _GeneEditorWidget::processHeaderData()
                         .name("Shape generator")
                         .values(Const::ConstructorShapeStrings)
                         .textWidth(rightColumnWidth)
-                        .tooltip(CellAttributeHelp::get(CellAttribute::GeneShape)),
+                        .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneShape)),
                     gene._shape)) {
                 {
                     ShapeGenerator shapeGenerator;
@@ -104,7 +104,7 @@ void _GeneEditorWidget::processHeaderData()
                     .format("%.2f")
                     .step(0.05f)
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneConnectionDistance)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneConnectionDistance)),
                 gene._connectionDistance);
 
             // Stiffness
@@ -114,7 +114,7 @@ void _GeneEditorWidget::processHeaderData()
                     .format("%.2f")
                     .step(0.05f)
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneStiffness)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneStiffness)),
                 gene._stiffness);
 
             // Homogeneous cell type
@@ -122,7 +122,7 @@ void _GeneEditorWidget::processHeaderData()
                 AlienGui::CheckboxParameters()
                     .name("Homogeneous cell type")
                     .textWidth(rightColumnWidth)
-                    .tooltip(CellAttributeHelp::get(CellAttribute::GeneHomogeneousCellType)),
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneHomogeneousCellType)),
                 gene._homogeneousCellType);
 
             table.next();

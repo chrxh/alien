@@ -3,7 +3,7 @@
 #include <string>
 
 // Identifies an attribute of an object, a cell, a genome, a gene or a genome node that is shown in one of the editors or in the inspection window
-enum class CellAttribute
+enum class EntityAttribute
 {
     // Object
     ObjectId,
@@ -197,8 +197,8 @@ enum class CellAttribute
     Count
 };
 
-class CellAttributeHelp
+class EntityAttributeHelp
 {
 public:
-    static std::string get(CellAttribute attribute);
+    static std::string get(EntityAttribute attribute);
 };

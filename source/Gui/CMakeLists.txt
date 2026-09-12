@@ -30,8 +30,6 @@ PUBLIC
     BrowserUserListWidget.h
     BrowserWindow.cpp
     BrowserWindow.h
-    CellAttributeHelp.cpp
-    CellAttributeHelp.h
     CellFunctionChannels.cpp
     CellFunctionChannels.h
     ChangeColorDialog.cpp
@@ -59,6 +57,8 @@ PUBLIC
     EditorModel.h
     EditSimulationDialog.cpp
     EditSimulationDialog.h
+    EntityAttributeHelp.cpp
+    EntityAttributeHelp.h
     EvolutionDashboardWindow.cpp
     EvolutionDashboardWindow.h
     ExitDialog.cpp
