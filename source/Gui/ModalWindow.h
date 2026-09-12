@@ -18,17 +18,17 @@ public:
 
     void open();
 
-    // Needs to be called while the window is being processed, since the underlying popup is closed immediately
     void close();
 
     bool isOpen() const;
     void setTitle(std::string const& title);
 
-    // Draws the modal window and calls contentFunc inside of it
     void process(std::function<void()> const& contentFunc);
 
 private:
-    void processMaximizeButton();
+    bool processTitlebarButtons();
+
+    void processMaximizeButton(RealVector2D const& iconPos, float iconSize);
     void loadSettings();
     void saveSettings();
 

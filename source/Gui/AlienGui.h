@@ -489,6 +489,7 @@ public:
         MEMBER(ToolbarParameters, std::string, id, std::string("Toolbar"));
         MEMBER(ToolbarParameters, std::function<void()>, trailing, std::function<void()>());
         MEMBER(ToolbarParameters, float, trailingWidth, 0.0f);
+        MEMBER(ToolbarParameters, bool, trailingAsButton, false);
         MEMBER(ToolbarParameters, bool, bottomSeparator, true);
     };
     static void Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarItem> const& items);
@@ -508,6 +509,7 @@ public:
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
     static bool MaximizeButton(RealVector2D const& pos, float iconSize, bool maximized);
+    static bool CloseButton(RealVector2D const& pos, float iconSize);
 
     enum class TreeNodeRank
     {
