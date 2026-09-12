@@ -25,6 +25,19 @@ rem build tree, so a CUDA build in build-ninja is left untouched:
 rem
 rem     build-windows-ninja.bat HIP        (Release for AMD, into build-ninja-hip)
 rem
+rem There are two separate build trees. An IDE that opens this folder configures
+rem the "ninja" preset into build-ninja and caches its model of that tree (Visual
+rem Studio does so under .vs). A build from the outside regenerates that tree and
+rem invalidates the cache, after which the IDE fails to build until .vs is deleted
+rem and it is restarted. Automated builds therefore go to build-agent instead:
+rem
+rem     build-windows-ninja.bat ide        (into build-ninja, the IDE tree)
+rem     build-windows-ninja.bat agent      (into build-agent)
+rem
+rem Without an argument the IDE tree is used, except when CLAUDECODE is set -- a
+rem Claude Code agent builds into build-agent automatically. ALIEN_BUILD_TREE=ide
+rem or agent overrides the default; an explicit argument wins over both.
+rem
 setlocal enabledelayedexpansion
 
 rem Change to the repository root (this script may sit in the root or in scripts\).
@@ -62,25 +75,46 @@ set "VSCMAKE=%VSINSTALL%\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 if exist "%VSCMAKE%\cmake.exe" set "PATH=%VSCMAKE%;%PATH%"
 
 rem Parse arguments in any order: "Debug"/"Release" selects the config, "HIP"
-rem selects the AMD GPU backend, a numeric argument caps the parallel build jobs
-rem (default: all cores).
+rem selects the AMD GPU backend, "ide"/"agent" selects the build tree, a numeric
+rem argument caps the parallel build jobs (default: all cores).
 set "CONFIG=Release"
 set "USE_HIP="
 set "JOBS="
+set "TREE_ARG="
 :parseargs
 if "%~1"=="" goto :doneargs
 if /i "%~1"=="Debug" set "CONFIG=Debug"
 if /i "%~1"=="Release" set "CONFIG=Release"
 if /i "%~1"=="HIP" set "USE_HIP=1"
+if /i "%~1"=="ide" set "TREE_ARG=ide"
+if /i "%~1"=="agent" set "TREE_ARG=agent"
 echo %~1| findstr /r "^[1-9][0-9]*$" >nul && set "JOBS=%~1"
 shift
 goto :parseargs
 :doneargs
 
+rem Select the build tree: an explicit argument beats ALIEN_BUILD_TREE, which
+rem beats the automatic choice (agent under Claude Code, otherwise the IDE tree).
+set "TREE=ide"
+if "%CLAUDECODE%"=="1" set "TREE=agent"
+if /i "%ALIEN_BUILD_TREE%"=="ide" set "TREE=ide"
+if /i "%ALIEN_BUILD_TREE%"=="agent" set "TREE=agent"
+if defined TREE_ARG set "TREE=%TREE_ARG%"
+
 if defined USE_HIP goto :hipbuild
 
-if /i "%CONFIG%"=="Debug" (set "BUILD_PRESET=ninja-debug") else (set "BUILD_PRESET=ninja-release")
-cmake --preset ninja || exit /b 1
+if /i "%TREE%"=="agent" (
+    set "CONFIGURE_PRESET=ninja-agent"
+    set "PRESET_PREFIX=ninja-agent"
+    set "OUTDIR=build-agent"
+) else (
+    set "CONFIGURE_PRESET=ninja"
+    set "PRESET_PREFIX=ninja"
+    set "OUTDIR=build-ninja"
+)
+if /i "%CONFIG%"=="Debug" (set "BUILD_PRESET=!PRESET_PREFIX!-debug") else (set "BUILD_PRESET=!PRESET_PREFIX!-release")
+echo [build] Building into !OUTDIR! ^(%TREE% tree^).
+cmake --preset !CONFIGURE_PRESET! || exit /b 1
 if defined JOBS (
     echo [build] Limiting build to %JOBS% parallel jobs.
     cmake --build --preset %BUILD_PRESET% -j %JOBS% || exit /b 1
@@ -88,7 +122,7 @@ if defined JOBS (
     cmake --build --preset %BUILD_PRESET% || exit /b 1
 )
 
-echo [build] Done. Executables are under build-ninja\Release (or build-ninja\Debug).
+echo [build] Done. Executables are under !OUTDIR!\Release ^(or !OUTDIR!\Debug^).
 exit /b 0
 
 rem AMD GPUs: ALIEN_HIP_ARCH lists the target architectures. They all go into one
@@ -98,7 +132,16 @@ rem Set ALIEN_HIP_ARCH in the environment to build for a different set; configur
 rem the ninja-hip preset directly to auto-detect the GPUs of the host instead.
 :hipbuild
 if not defined ALIEN_HIP_ARCH set "ALIEN_HIP_ARCH=gfx10-3-generic;gfx11-generic;gfx12-generic"
-if /i "%CONFIG%"=="Debug" (set "BUILD_PRESET=ninja-hip-debug") else (set "BUILD_PRESET=ninja-hip-release")
+if /i "%TREE%"=="agent" (
+    set "CONFIGURE_PRESET=ninja-hip-agent"
+    set "PRESET_PREFIX=ninja-hip-agent"
+    set "OUTDIR=build-agent-hip"
+) else (
+    set "CONFIGURE_PRESET=ninja-hip"
+    set "PRESET_PREFIX=ninja-hip"
+    set "OUTDIR=build-ninja-hip"
+)
+if /i "%CONFIG%"=="Debug" (set "BUILD_PRESET=!PRESET_PREFIX!-debug") else (set "BUILD_PRESET=!PRESET_PREFIX!-release")
 
 rem find_package(hip) does not see the HIP SDK through the vcpkg toolchain unless
 rem its install root is on CMAKE_PREFIX_PATH. HIP_PATH points into "Program Files"
@@ -138,8 +181,8 @@ if %CMAKE_MAJOR% LSS 4 (
     exit /b 1
 )
 
-echo [build] AMD/ROCm build for architectures: %ALIEN_HIP_ARCH% ^(CMake %CMAKE_VER%^)
-"%CMAKE_EXE%" --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES="%ALIEN_HIP_ARCH%" "-DCMAKE_PREFIX_PATH=%HIP_ROOT%" "-DCMAKE_C_COMPILER=%HIP_CLANG_CL%" "-DCMAKE_CXX_COMPILER=%HIP_CLANG_CL%" "-DCMAKE_HIP_COMPILER=%HIP_CLANG_CL%" || exit /b 1
+echo [build] AMD/ROCm build for architectures: %ALIEN_HIP_ARCH% ^(CMake %CMAKE_VER%, into !OUTDIR!^)
+"%CMAKE_EXE%" --preset !CONFIGURE_PRESET! -DCMAKE_HIP_ARCHITECTURES="%ALIEN_HIP_ARCH%" "-DCMAKE_PREFIX_PATH=%HIP_ROOT%" "-DCMAKE_C_COMPILER=%HIP_CLANG_CL%" "-DCMAKE_CXX_COMPILER=%HIP_CLANG_CL%" "-DCMAKE_HIP_COMPILER=%HIP_CLANG_CL%" || exit /b 1
 if defined JOBS (
     echo [build] Limiting build to %JOBS% parallel jobs.
     "%CMAKE_EXE%" --build --preset %BUILD_PRESET% -j %JOBS% || exit /b 1
@@ -147,4 +190,4 @@ if defined JOBS (
     "%CMAKE_EXE%" --build --preset %BUILD_PRESET% || exit /b 1
 )
 
-echo [build] Done. Executables are under build-ninja-hip\%CONFIG%.
+echo [build] Done. Executables are under !OUTDIR!\%CONFIG%.
