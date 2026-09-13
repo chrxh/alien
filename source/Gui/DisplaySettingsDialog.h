@@ -26,13 +26,13 @@ private:
 
     int _origSelectionIndex = 0;
     int _selectionIndex = 0;
-    int _origFps = 33;
+    int _origFps = 0;
     bool _origAutoContentScaleFactor = true;
     float _origContentScaleFactor = 1.0f;
 
     bool _pendingIsFullscreen = false;
     int _pendingSelectionIndex = 0;
-    int _pendingFps = 33;
+    int _pendingFps = 0;
     bool _pendingAutoContentScaleFactor = true;
     float _pendingContentScaleFactor = 1.0f;
 

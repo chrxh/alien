@@ -71,7 +71,7 @@ private:
     float _osContentScaleFactor = 1.0f;
     float _userDefinedContentScaleFactor = 0.0f;
     bool _autoContentScaleFactor = true;
-    int _fps = 33;
+    int _fps = 40;
 
     std::string _mode;
     std::string _lastProjectName;
