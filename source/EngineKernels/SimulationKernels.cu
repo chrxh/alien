@@ -31,6 +31,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
+    data.mutatedGenomes.setMemory(data.processMemory.getTypedSubArray<Genome*>(maxCellTypeOperations), maxCellTypeOperations);
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
     for (int i = 0; i < MAX_COLORS; ++i) {
         data.numConstructorsNeedingEnergyByColor[i] = 0;
@@ -134,9 +135,14 @@ __global__ void cudaNextTimestep_cellType_generator(SimulationData data, Simulat
     GeneratorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool isPreview)
+__global__ void cudaNextTimestep_constructor_mutate(SimulationData data, SimulationStatistics statistics, bool isPreview)
 {
-    ConstructorProcessor::process(data, statistics, isPreview);
+    ConstructorProcessor::checkReadyAndMutate(data, statistics, isPreview);
+}
+
+__global__ void cudaNextTimestep_constructor_construct(SimulationData data, SimulationStatistics statistics, bool isPreview)
+{
+    ConstructorProcessor::construct(data, statistics, isPreview);
 }
 
 __global__ void cudaNextTimestep_constructor_countConstructorsNeedingEnergy(SimulationData data)
@@ -166,6 +172,38 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
 __global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationData data)
 {
     ConstructorProcessor::provideExternalEnergy(data);
+}
+
+__global__ void cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode(SimulationData data)
+{
+    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, data.mutatedGenomes.at(i));
+    }
+}
+
+__global__ void cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot(SimulationData data)
+{
+    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        GeneGraphProcessor::removeCyclesNotThroughRoot(data, data.mutatedGenomes.at(i));
+    }
+}
+
+__global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(SimulationData data)
+{
+    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        GeneGraphProcessor::removeUnreachableGenesFromRoot(data, data.mutatedGenomes.at(i));
+    }
+}
+
+__global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationData data)
+{
+    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        GeneGraphProcessor::limitGenesWithSeparation(data, data.mutatedGenomes.at(i));
+    }
 }
 
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
