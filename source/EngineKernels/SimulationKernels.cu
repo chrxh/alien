@@ -169,8 +169,6 @@ __global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationDat
     ConstructorProcessor::provideExternalEnergy(data);
 }
 
-// DIAGNOSTIC: each gene graph pass gets its own kernel so that a kernel which does not return identifies the pass that
-// hangs. One block works on one genome at a time, exactly as inside the constructor kernel before.
 __global__ void cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode(SimulationData data)
 {
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());

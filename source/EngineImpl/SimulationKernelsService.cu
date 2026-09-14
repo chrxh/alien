@@ -42,16 +42,12 @@ void SimulationKernelsService::shutdown()
 
 namespace
 {
-    // The fluid kernels work on one object per warp, so a block covers as many objects as it holds warps and the grid
-    // shrinks accordingly; see KernelLaunchSettingsService::calcFluidWarpsPerBlock.
     LaunchConfig calcFluidLaunchConfig(KernelLaunchSettings const& settings)
     {
         auto const warpsPerBlock = settings.fluidWarpsPerBlock;
         return LaunchConfig{std::max(1, settings.numBlocks / warpsPerBlock), warpsPerBlock * WARP_SIZE};
     }
 
-    // DIAGNOSTIC: the gene graph passes were extracted from cudaNextTimestep_constructor into their own kernels so that the
-    // kernel trace shows which pass does not return.
     void launchGeneGraphKernels(cudaStream_t stream, int numBlocks, SimulationData const& data)
     {
         launchKernel(KERNEL(cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, stream, data);
