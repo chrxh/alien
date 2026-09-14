@@ -1,5 +1,7 @@
 #include "BrowserController.h"
 
+#include <optional>
+
 #include <Network/NetworkService.h>
 
 #include <PersisterInterface/PersisterFacade.h>
@@ -41,6 +43,23 @@ void BrowserController::process()
     _data->processPendingRequests();
 }
 
+namespace
+{
+    bool isVisibleInWorkspace(NetworkResourceRawTO const& rawTO, WorkspaceType workspaceType, std::optional<std::string> const& userName)
+    {
+        switch (workspaceType) {
+        case WorkspaceType_Private:
+            return userName.has_value() && rawTO->userName == userName.value();
+        case WorkspaceType_Public:
+            return rawTO->workspaceType == WorkspaceType_Public || rawTO->workspaceType == WorkspaceType_AlienProject;
+        case WorkspaceType_AlienProject:
+            return rawTO->workspaceType == WorkspaceType_AlienProject;
+        default:
+            return false;
+        }
+    }
+}
+
 void BrowserController::refresh(bool withRetry)
 {
     _refreshProcessor->executeTask(
@@ -53,16 +72,12 @@ void BrowserController::refresh(bool withRetry)
             _data->userTOs = data.userTOs;
             _data->ownEmojiTypeBySimId = data.emojiTypeByResourceId;
 
+            auto userName = NetworkService::get().getLoggedInUserName();
             for (auto& [workspaceId, workspace] : _data->workspaces) {
                 workspace.rawTOs.clear();
-                auto userName = NetworkService::get().getLoggedInUserName().value_or("");
                 for (auto const& rawTO : data.resourceTOs) {
-                    if (rawTO->resourceType == workspaceId.resourceType) {
-                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName)
-                            || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
-                                && rawTO->workspaceType == workspaceId.workspaceType)) {
-                            workspace.rawTOs.emplace_back(rawTO);
-                        }
+                    if (rawTO->resourceType == workspaceId.resourceType && isVisibleInWorkspace(rawTO, workspaceId.workspaceType, userName)) {
+                        workspace.rawTOs.emplace_back(rawTO);
                     }
                 }
                 _data->createTreeTOs(workspace);
