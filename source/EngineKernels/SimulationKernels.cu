@@ -179,7 +179,6 @@ __global__ void cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode(Simu
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, data.mutatedGenomes.at(i));
-        __syncthreads();
     }
 }
 
@@ -188,7 +187,6 @@ __global__ void cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot(Simulation
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::removeCyclesNotThroughRoot(data, data.mutatedGenomes.at(i));
-        __syncthreads();
     }
 }
 
@@ -197,7 +195,6 @@ __global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(Simula
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::removeUnreachableGenesFromRoot(data, data.mutatedGenomes.at(i));
-        __syncthreads();
     }
 }
 
@@ -206,7 +203,6 @@ __global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationDa
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::limitGenesWithSeparation(data, data.mutatedGenomes.at(i));
-        __syncthreads();
     }
 }
 
