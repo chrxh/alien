@@ -10,7 +10,8 @@
 class ConstructorProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
+    __inline__ __device__ static void checkReadyAndMutate(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
+    __inline__ __device__ static void construct(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
     __inline__ __device__ static void countConstructorsNeedingEnergy(SimulationData& data);
     __inline__ __device__ static void provideExternalEnergy(SimulationData& data);
 
@@ -40,7 +41,8 @@ private:
         float neededReservedEnergy;
         float neededDepotEnergy;
     };
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
+    __inline__ __device__ static void mutateCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
+    __inline__ __device__ static void constructCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static void mutateGenome(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
@@ -80,9 +82,9 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
+__inline__ __device__ void ConstructorProcessor::checkReadyAndMutate(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
-    // One thread block per constructor cell so that the whole block is available for genome mutation (see processCell).
+    // One thread block per constructor cell so that the whole block is available for genome mutation (see mutateCell).
     // The mutation requires NEURAL_NET_INPUTS threads, so the kernel is always launched with that block size.
     DEVICE_CHECK(blockDim.x == NEURAL_NET_INPUTS);
 
@@ -97,11 +99,32 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         }
         if (threadIdx.x == 0) {
             object->typeData.cell.constructor.energyNeeded = false;
+            object->typeData.cell.constructor.readyToConstruct = false;
         }
         if (!CellProcessor::isCellReady(data, object)) {
             continue;
         }
-        processCell(data, statistics, object, isPreview);
+        mutateCell(data, statistics, object, isPreview);
+    }
+}
+
+__inline__ __device__ void ConstructorProcessor::construct(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
+{
+    if (threadIdx.x != 0) {
+        return;
+    }
+
+    auto const partition = calcBlockPartition(data.entities.objects.getNumOrigEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        auto object = data.entities.objects.at(i);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
+        auto const& cell = object->typeData.cell;
+        if (!cell.constructorAvailable || !cell.constructor.readyToConstruct) {
+            continue;
+        }
+        constructCell(data, statistics, object, isPreview);
     }
 }
 
@@ -159,12 +182,10 @@ __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(Simulatio
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
+__inline__ __device__ void ConstructorProcessor::mutateCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
     auto& constructor = object->typeData.cell.constructor;
 
-    // The block can still be split from the previous constructor cell: the construction itself runs on thread 0 while the other threads already
-    // continue the loop. They must arrive here before readyToConstruct is overwritten, otherwise they read the value of the previous cell.
     __syncthreads();
 
     __shared__ bool readyToConstruct;
@@ -177,6 +198,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (readyToConstruct) {
             readyToConstruct = checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
         }
+        constructor.readyToConstruct = readyToConstruct;
     }
     __syncthreads();
     if (!readyToConstruct) {
@@ -185,11 +207,12 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
     // Important: mutate the host genome before it is cloned for the offspring.
     mutateGenome(data, statistics, object);
+}
 
-    // The actual construction runs on a single thread.
-    if (threadIdx.x != 0) {
-        return;
-    }
+__inline__ __device__ void ConstructorProcessor::constructCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
+{
+    auto& constructor = object->typeData.cell.constructor;
+
     constructor.offspring = findOrCreateNewCreature(data, statistics, object);
 
     // Check again after cloning the creature, because the offspring genome may diverge from the host genome.

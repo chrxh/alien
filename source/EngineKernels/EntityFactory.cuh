@@ -609,6 +609,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
             cell->constructor.offspring = nullptr;
             cell->constructor.energyNeeded = false;
+            cell->constructor.readyToConstruct = false;
         }
     }
 }
@@ -1001,6 +1002,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.currentOffspring = 0;
         constructor.offspring = nullptr;
         constructor.energyNeeded = false;
+        constructor.readyToConstruct = false;
     }
 
     return object;

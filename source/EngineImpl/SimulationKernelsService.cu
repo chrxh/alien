@@ -118,8 +118,9 @@ void SimulationKernelsService::launchTimestepKernels(
         launchKernel(KERNEL(cudaNextTimestep_cellType_prepare_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_cellType_generator), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
         // The constructor mutates the host genome before cloning; the mutation needs NEURAL_NET_INPUTS threads per block.
-        launchKernel(KERNEL(cudaNextTimestep_constructor), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, false);
+        launchKernel(KERNEL(cudaNextTimestep_constructor_mutate), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, false);
         launchGeneGraphKernels(_stream, numBlocks, data);
+        launchKernel(KERNEL(cudaNextTimestep_constructor_construct), LaunchConfig{numBlocks, 1}, _stream, data, statistics, false);
         launchKernel(KERNEL(cudaNextTimestep_constructor_countConstructorsNeedingEnergy), LaunchConfig{numBlocks, 8}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_constructor_prepareExternalEnergyInflow), LaunchConfig{1, 1}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_constructor_provideExternalEnergy), LaunchConfig{numBlocks, 8}, _stream, data);
@@ -266,8 +267,9 @@ void SimulationKernelsService::launchPreviewKernels(
             // Cell type-specific functions
             launchKernel(KERNEL(cudaNextTimestep_cellType_prepare_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
 
-            launchKernel(KERNEL(cudaNextTimestep_constructor), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, true);
+            launchKernel(KERNEL(cudaNextTimestep_constructor_mutate), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, true);
             launchGeneGraphKernels(_stream, numBlocks, data);
+            launchKernel(KERNEL(cudaNextTimestep_constructor_construct), LaunchConfig{numBlocks, 1}, _stream, data, statistics, true);
         }
 
         if (considerInnerFriction) {
@@ -312,8 +314,9 @@ void SimulationKernelsService::launchPreviewKernels(
             launchKernel(KERNEL(cudaNextTimestep_cellType_prepare_substep1), LaunchConfig{numBlocks, 8}, _stream, data);
             launchKernel(KERNEL(cudaNextTimestep_cellType_generator), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
 
-            launchKernel(KERNEL(cudaNextTimestep_constructor), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, true);
+            launchKernel(KERNEL(cudaNextTimestep_constructor_mutate), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, _stream, data, statistics, true);
             launchGeneGraphKernels(_stream, numBlocks, data);
+            launchKernel(KERNEL(cudaNextTimestep_constructor_construct), LaunchConfig{numBlocks, 1}, _stream, data, statistics, true);
             launchKernel(KERNEL(cudaNextTimestep_cellType_muscle), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
             launchKernel(KERNEL(cudaNextTimestep_cellType_void), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
         }

@@ -135,9 +135,14 @@ __global__ void cudaNextTimestep_cellType_generator(SimulationData data, Simulat
     GeneratorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool isPreview)
+__global__ void cudaNextTimestep_constructor_mutate(SimulationData data, SimulationStatistics statistics, bool isPreview)
 {
-    ConstructorProcessor::process(data, statistics, isPreview);
+    ConstructorProcessor::checkReadyAndMutate(data, statistics, isPreview);
+}
+
+__global__ void cudaNextTimestep_constructor_construct(SimulationData data, SimulationStatistics statistics, bool isPreview)
+{
+    ConstructorProcessor::construct(data, statistics, isPreview);
 }
 
 __global__ void cudaNextTimestep_constructor_countConstructorsNeedingEnergy(SimulationData data)
@@ -174,6 +179,7 @@ __global__ void cudaNextTimestep_geneGraph_voidNodesUnreachableFromLastNode(Simu
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::voidNodesUnreachableFromLastNode(data, data.mutatedGenomes.at(i));
+        __syncthreads();
     }
 }
 
@@ -182,6 +188,7 @@ __global__ void cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot(Simulation
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::removeCyclesNotThroughRoot(data, data.mutatedGenomes.at(i));
+        __syncthreads();
     }
 }
 
@@ -190,6 +197,7 @@ __global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(Simula
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::removeUnreachableGenesFromRoot(data, data.mutatedGenomes.at(i));
+        __syncthreads();
     }
 }
 
@@ -198,6 +206,7 @@ __global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationDa
     auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         GeneGraphProcessor::limitGenesWithSeparation(data, data.mutatedGenomes.at(i));
+        __syncthreads();
     }
 }
 
