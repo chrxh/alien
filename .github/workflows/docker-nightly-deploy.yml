@@ -1,0 +1,188 @@
+name: docker-nightly-deploy
+
+# Nightly Docker image containing the headless ALIEN console build (cli), pushed
+# to Docker Hub for use on rented GPU instances (vast.ai). Nothing is uploaded to
+# the rental platform itself -- the instance host pulls the image from Docker Hub
+# when it starts.
+#
+# The binary is compiled natively on the runner instead of inside the image
+# build. The runner already has the CUDA toolkit and a warm vcpkg tree, so the
+# compile stays incremental rather than rebuilding every vcpkg dependency from
+# source each night, and the image build reduces to a copy of the result.
+#
+# Prerequisites on the runner and in the repository:
+#   - Docker, usable by the runner account (member of the docker group)
+#   - repository secrets DOCKERHUB_USER and DOCKERHUB_TOKEN; the image is pushed
+#     to <DOCKERHUB_USER>/alien
+
+on:
+  schedule:
+    # Both other nightly workflows start at 03:00 on the same machine.
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  # sm_86 = RTX 3060, sm_89 = RTX 4090, sm_120 = RTX 5090. All three go into one
+  # fat binary, so a single image runs on every instance type that gets rented.
+  CUDA_ARCHS: 86;89;120
+  # Not the build directory of the other Linux workflows: they share one runner
+  # workspace and are configured with different options.
+  BUILD_DIR: build-docker
+  IMAGE: ${{ secrets.DOCKERHUB_USER }}/alien
+
+jobs:
+  docker-nightly-deploy:
+    runs-on: [self-hosted, Linux]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        clean: false
+        fetch-depth: 0
+
+    - name: Check for recent changes
+      id: recent_changes
+      run: |
+        if [ -n "$(git log --since='24 hours ago' --oneline -n 1)" ]; then
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "should_run=false" >> "$GITHUB_OUTPUT"
+          echo "No commits in the last 24 hours. Skipping image build."
+        fi
+
+    # Fail before the (lengthy) CUDA build rather than after it.
+    - name: Check Docker prerequisites
+      if: steps.recent_changes.outputs.should_run == 'true'
+      env:
+        DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: |
+        if ! docker info > /dev/null 2>&1; then
+          echo "Docker is not usable by the runner account. Install Docker and add the runner user to the docker group."
+          exit 1
+        fi
+        if [ -z "$DOCKERHUB_USER" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+          echo "DOCKERHUB_USER and DOCKERHUB_TOKEN have to be set as repository secrets."
+          exit 1
+        fi
+
+    - name: Unshallow vcpkg submodule
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        cd external/vcpkg
+        git fetch --unshallow || true
+        cd ../..
+
+    - name: Install build dependencies
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+          ninja-build \
+          libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
+          libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+
+    - name: Install CUDA (via NVIDIA's repo)
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        sudo apt-get install -y gnupg software-properties-common wget
+        wget -q -O "$RUNNER_TEMP/cuda-keyring.deb" \
+          https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+        sudo dpkg -i "$RUNNER_TEMP/cuda-keyring.deb"
+        sudo apt-get update -qq
+        sudo apt-get install -y cuda-compiler-13-0 cuda-cuobjdump-13-0
+
+    - name: Add CUDA to PATH
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        echo "/usr/local/cuda/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+    - name: Bootstrap vcpkg
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        pushd external/vcpkg
+        ./bootstrap-vcpkg.sh -disableMetrics
+        popd
+
+    - name: Configure CMake
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: >
+        cmake -S . -B "$BUILD_DIR" -G Ninja
+        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake
+        -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+        -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+        -DCMAKE_CUDA_ARCHITECTURES="${{ env.CUDA_ARCHS }}"
+
+    # Only the console target: the GUI executable and the test binaries are not
+    # part of the image, and the tests already run in the Linux CI on every push.
+    - name: Build cli
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: cmake --build "$BUILD_DIR" --target cli -j "$(nproc)"
+
+    - name: Verify CUDA architectures
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        cuobjdump -lelf "$BUILD_DIR/cli" > "$RUNNER_TEMP/elf.txt"
+        IFS=';' read -ra archs <<< "$CUDA_ARCHS"
+        for arch in "${archs[@]}"; do
+          if ! grep -q "sm_${arch}\b" "$RUNNER_TEMP/elf.txt"; then
+            echo "cli contains no device code for sm_${arch}."
+            exit 1
+          fi
+          echo "sm_${arch}: ok"
+        done
+
+    - name: Stage image payload
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        rm -rf docker/payload
+        mkdir -p docker/payload
+        cp "$BUILD_DIR/cli" docker/payload/cli
+        cp -r resources docker/payload/resources
+
+    - name: Determine image tag
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: echo "SHA_TAG=develop-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+    - name: Build image
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: docker build -f Dockerfile -t "$IMAGE:$SHA_TAG" -t "$IMAGE:nightly" docker/payload
+
+    # The runner has no GPU, so the simulation cannot be smoke-tested here. What
+    # can be checked without one is that the dynamic linker resolves everything
+    # inside the image -- the case this build would otherwise get wrong, since
+    # the binary is compiled against the libraries of the runner and not against
+    # those of the base image.
+    - name: Verify runtime dependencies
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        docker run --rm --entrypoint ldd "$IMAGE:$SHA_TAG" /opt/alien/cli > "$RUNNER_TEMP/ldd.txt"
+        if grep "not found" "$RUNNER_TEMP/ldd.txt"; then
+          echo "The image does not satisfy all shared library dependencies of cli."
+          exit 1
+        fi
+
+    - name: Log in to Docker Hub
+      if: steps.recent_changes.outputs.should_run == 'true'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Only the layer holding cli and resources/ is transferred; the base image
+    # layers already exist on Docker Hub and are mounted across repositories.
+    - name: Push image
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        docker push "$IMAGE:$SHA_TAG"
+        docker push "$IMAGE:nightly"
+
+    # Drop the tags of this run so the runner disk does not collect one image per
+    # night. The base image layers stay in the local cache on purpose, otherwise
+    # the next run would pull several gigabytes again.
+    - name: Remove local image tags
+      if: always() && steps.recent_changes.outputs.should_run == 'true'
+      run: docker image rm "$IMAGE:$SHA_TAG" "$IMAGE:nightly" || true

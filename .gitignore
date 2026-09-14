@@ -311,3 +311,6 @@ source/tests/testdata/comparison/computation.dat
 *autosave.sim*
 _codeql_build_dir/
 _codeql_detected_source_root
+
+# Payload staged for the Docker image (see Dockerfile)
+docker/payload/
