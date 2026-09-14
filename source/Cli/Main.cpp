@@ -2,6 +2,7 @@
 #include <chrono>
 #include <filesystem>
 #include <iostream>
+#include <optional>
 #include <csignal>
 #include <cstdio>
 
@@ -23,6 +24,7 @@
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
 
+#include <ConsoleUi/ConsoleInput.h>
 #include <ConsoleUi/ConsoleLiveOutput.h>
 #include <ConsoleUi/ConsoleSimulationPanel.h>
 #include <ConsoleUi/ConsoleWidgets.h>
@@ -31,7 +33,11 @@
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
+#include <Network/NetworkService.h>
+
 #include <PersisterInterface/SerializerService.h>
+
+#include "LoginSession.h"
 
 namespace
 {
@@ -94,7 +100,13 @@ namespace
         return std::clamp(scaled, uint64_t(1), chunkSize * MaxChunkGrowth);
     }
 
-    void calcTimestepsWithLiveOutput(SimulationFacade const& simulationFacade, uint64_t timesteps)
+    bool isStopRequested()
+    {
+        auto pressedCharacter = ConsoleInput::readPressedCharacter();
+        return ConsoleInput::isQuitRequested() || pressedCharacter == 'q' || pressedCharacter == 'Q';
+    }
+
+    uint64_t calcTimestepsWithLiveOutput(SimulationFacade const& simulationFacade, std::optional<uint64_t> timesteps)
     {
         ConsoleLiveOutput liveOutput;
         ConsoleSimulationStatus status;
@@ -105,8 +117,9 @@ namespace
         auto chunkSize = uint64_t(1);
         auto timestepsSinceUpdate = uint64_t(0);
 
-        while (status.timestep < timesteps) {
-            auto chunk = std::min(chunkSize, timesteps - status.timestep);
+        ConsoleInput::begin();
+        while (!timesteps.has_value() || status.timestep < *timesteps) {
+            auto chunk = timesteps.has_value() ? std::min(chunkSize, *timesteps - status.timestep) : chunkSize;
 
             auto chunkStartTimepoint = std::chrono::steady_clock::now();
             simulationFacade->calcTimesteps(chunk);
@@ -116,7 +129,9 @@ namespace
             timestepsSinceUpdate += chunk;
             chunkSize = calcNextChunkSize(chunkSize, now - chunkStartTimepoint);
 
-            if (now - lastUpdateTimepoint < StatusUpdateInterval && status.timestep < timesteps) {
+            auto stopRequested = isStopRequested();
+            auto finished = stopRequested || (timesteps.has_value() && status.timestep >= *timesteps);
+            if (now - lastUpdateTimepoint < StatusUpdateInterval && !finished) {
                 continue;
             }
             auto intervalMicroseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - lastUpdateTimepoint).count();
@@ -134,10 +149,18 @@ namespace
             }
             status.numLineages = toUInt32(statistics.lineageEntries.size());
 
-            liveOutput.update(ConsoleSimulationPanel::create(status), std::string());
+            auto lines = ConsoleSimulationPanel::fitsIntoConsole() ? ConsoleSimulationPanel::create(status) : std::vector<std::string>();
+            liveOutput.update(lines, ConsoleSimulationPanel::createPlainLine(status));
+
+            if (stopRequested) {
+                break;
+            }
         }
+        ConsoleInput::end();
         liveOutput.close();
+        return status.timestep;
     }
+
 }
 
 int main(int argc, char** argv)
@@ -151,12 +174,20 @@ int main(int argc, char** argv)
         // Parse command line arguments
         std::string inputFilename;
         std::string outputFilename;
-        int timesteps = 0;
+        std::optional<uint64_t> timesteps;
+        std::string userName;
+        std::string password;
         bool debugMode = false;
         bool plainOutput = false;
         app.add_option("-i", inputFilename, "Specifies the name of the input file for the simulation to run.");
         app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
-        app.add_option("-t", timesteps, "The number of time steps to be calculated.");
+        app.add_option(
+            "-t",
+            timesteps,
+            "The number of time steps to be calculated. If it is not specified, the simulation runs until it is stopped with Q or Ctrl+C, which writes the "
+            "output file as well.");
+        app.add_option("-u,--user", userName, "The name of the user to log in to the alien server with. Requires a password to be given via -p.");
+        app.add_option("-p,--password", password, "The password of the user given via -u.");
         app.add_flag(
             "-d,--debug",
             debugMode,
@@ -166,14 +197,15 @@ int main(int argc, char** argv)
                 + "' holds the last kernel calls, which locates a kernel that hangs or triggers a driver timeout as the entry that is still marked as "
                   "running.");
         app.add_flag(
-            "-p,--plain",
+            "--plain",
             plainOutput,
             "Disables colors, the banner and the live status panel and prints plain lines instead. This is switched on automatically when the output is "
-            "redirected. The time steps are then calculated in a single run, which makes this the most accurate mode for measuring the TPS.");
+            "redirected. Together with -t the time steps are then calculated in a single run, which makes this the most accurate mode for measuring the TPS.");
         CLI11_PARSE(app, argc, argv);
 
         Console::init(plainOutput);
         std::signal(SIGINT, restoreCursorOnInterrupt);
+        std::cout << std::endl;
         printLines(ConsoleWidgets::createBanner("artificial life environment  \xc2\xb7  v" + Const::ProgramVersion + "  \xc2\xb7  command line"));
         std::cout << std::endl;
 
@@ -183,6 +215,22 @@ int main(int argc, char** argv)
             KernelTracer::get().init(Const::TraceFilename);
             printStep("profile", std::filesystem::absolute(Const::ProfileFilename).string());
             printStep("trace", std::filesystem::absolute(Const::TraceFilename).string());
+        }
+
+        auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
+
+        std::optional<LoginSession> loginSession;
+        if (!userName.empty()) {
+            if (password.empty()) {
+                printError("No password given. A login requires the user name via -u and the password via -p.");
+                return 1;
+            }
+            loginSession.emplace(userName, password, simulationFacade->getGpuName());
+            if (auto const& errorMessage = loginSession->getErrorMessage()) {
+                printError(*errorMessage);
+                return 1;
+            }
+            printStep("user", userName, NetworkService::get().getServerAddress());
         }
 
         // Read input
@@ -200,7 +248,6 @@ int main(int argc, char** argv)
         printStep("input", inputFilename, StringHelper::format(readDuration.count()) + " ms");
 
         // Run simulation
-        auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
         simulationFacade->newSimulation(simData._timestep, simData._worldSize, simData._simulationParameters);
         simulationFacade->setSimulationData(simData._mainData);
         simulationFacade->setStatisticsHistory(simData._statistics);
@@ -209,21 +256,30 @@ int main(int argc, char** argv)
         printStep(
             "world",
             std::to_string(simData._worldSize.x) + " x " + std::to_string(simData._worldSize.y),
-            StringHelper::format(timesteps) + " time steps to calculate");
+            timesteps.has_value() ? StringHelper::format(*timesteps) + " time steps to calculate" : "no limit on the time steps");
+
+        auto singleRun = timesteps.has_value() && !ConsoleSimulationPanel::fitsIntoConsole();
+        if (!singleRun) {
+            std::cout << std::endl
+                      << "  " << ConsoleWidgets::createText("Press Q to stop the simulation and write the output file.", ConsolePalette::Label) << std::endl;
+        }
         std::cout << std::endl;
 
         // Measure the simulation loop only: loading and uploading the data would otherwise distort the TPS
         auto startTimepoint = std::chrono::steady_clock::now();
-        if (ConsoleSimulationPanel::fitsIntoConsole()) {
-            calcTimestepsWithLiveOutput(simulationFacade, timesteps);
+        auto calculatedTimesteps = uint64_t(0);
+        if (singleRun) {
+            simulationFacade->calcTimesteps(*timesteps);
+            calculatedTimesteps = *timesteps;
         } else {
-            simulationFacade->calcTimesteps(timesteps);
+            calculatedTimesteps = calcTimestepsWithLiveOutput(simulationFacade, timesteps);
         }
 
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
-        auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f;
+        auto tps = ms != 0 ? 1000.0f * toFloat(calculatedTimesteps) / toFloat(ms) : 0.0f;
         std::cout << std::endl;
-        printStep("simulated", StringHelper::format(timesteps) + " time steps", StringHelper::format(ms) + " ms  " + StringHelper::format(tps, 1) + " TPS");
+        printStep(
+            "simulated", StringHelper::format(calculatedTimesteps) + " time steps", StringHelper::format(ms) + " ms  " + StringHelper::format(tps, 1) + " TPS");
 
         if (debugMode) {
             std::cout << std::endl << KernelProfiler::get().getReport() << std::endl;

@@ -24,7 +24,7 @@ void LoginController::init()
 
     auto& settings = GlobalSettings::get();
     _remember = settings.getValue("controller.login.remember", _remember);
-    _shareGpuInfo = settings.getValue("controller.login.share gpu info", _shareGpuInfo);
+    _shareGpuInfo = settings.getValue(Const::ShareGpuInfoSettingsKey, _shareGpuInfo);
 
     if (_remember) {
         _userName = settings.getValue("dialogs.login.user name", std::string());
@@ -76,7 +76,7 @@ void LoginController::saveSettings()
 {
     auto& settings = GlobalSettings::get();
     settings.setValue("controller.login.remember", _remember);
-    settings.setValue("controller.login.share gpu info", _shareGpuInfo);
+    settings.setValue(Const::ShareGpuInfoSettingsKey, _shareGpuInfo);
     if (_remember) {
         settings.setValue("dialogs.login.user name", _userName);
         settings.setValue("dialogs.login.password", _password);

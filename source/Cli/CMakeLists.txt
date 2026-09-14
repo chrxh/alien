@@ -1,5 +1,7 @@
 target_sources(cli
 PUBLIC
+    LoginSession.cpp
+    LoginSession.h
     Main.cpp)
 
 target_link_libraries(cli Base)
@@ -7,6 +9,7 @@ target_link_libraries(cli ConsoleUi)
 target_link_libraries(cli EngineKernels)
 target_link_libraries(cli EngineImpl)
 target_link_libraries(cli EngineInterface)
+target_link_libraries(cli Network)
 target_link_libraries(cli PersisterInterface)
 
 target_include_directories(cli

@@ -136,14 +136,8 @@ std::string ConsoleWidgets::createProgressBar(float fraction, int width)
     if (!Console::isRichOutput()) {
         return std::string(filledWidth, '#') + std::string(std::max(0, width - filledWidth), '.');
     }
-    std::string result;
-    auto column = 0;
-    while (column < filledWidth) {
-        result += Console::foreground(getBannerColor(width > 1 ? static_cast<float>(column) / static_cast<float>(width - 1) : 0.0f));
-        result += ShadeFull;
-        ++column;
-    }
-    return result + Console::foreground(ConsolePalette::Frame) + repeat(ShadeLight, std::max(0, width - filledWidth)) + Console::reset();
+    return Console::foreground(ConsolePalette::Accent) + repeat(ShadeFull, filledWidth) + Console::foreground(ConsolePalette::Frame)
+        + repeat(ShadeLight, std::max(0, width - filledWidth)) + Console::reset();
 }
 
 std::string ConsoleWidgets::createField(std::string const& label, std::string const& value, int labelWidth, int valueWidth)

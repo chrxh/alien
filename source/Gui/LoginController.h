@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Base/GlobalSettings.h>
 #include <Base/Singleton.h>
 
 #include <EngineInterface/SimulationFacade.h>
@@ -39,7 +40,7 @@ private:
 
     TaskProcessor _taskProcessor;
 
-    bool _shareGpuInfo = true;
+    bool _shareGpuInfo = Const::ShareGpuInfoDefault;
     bool _remember = true;
     std::string _userName;
     std::string _password;
