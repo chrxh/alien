@@ -1,5 +1,7 @@
 
 add_library(ConsoleUi
+    ConsoleInput.cpp
+    ConsoleInput.h
     ConsoleLiveOutput.cpp
     ConsoleLiveOutput.h
     ConsoleSimulationPanel.cpp

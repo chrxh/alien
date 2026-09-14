@@ -6,6 +6,12 @@
 
 struct GlobalSettingsImpl;
 
+namespace Const
+{
+    auto constexpr ShareGpuInfoSettingsKey = "controller.login.share gpu info";
+    auto constexpr ShareGpuInfoDefault = true;
+}
+
 class GlobalSettings
 {
 public:

@@ -1,19 +1,11 @@
 #include "ConsoleModeController.h"
 
-#include <atomic>
 #include <iostream>
 #include <optional>
 #include <thread>
-#include <vector>
 
 #ifdef _WIN32
-#include <conio.h>
 #include <windows.h>
-#else
-#include <csignal>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -21,6 +13,7 @@
 #include <Base/Console.h>
 #include <Base/Resources.h>
 
+#include <ConsoleUi/ConsoleInput.h>
 #include <ConsoleUi/ConsoleWidgets.h>
 
 #include <EngineInterface/SimulationFacade.h>
@@ -36,8 +29,6 @@ namespace
     auto constexpr PrintInterval = std::chrono::milliseconds(200);
     auto constexpr EscapeKeyCode = 27;
 
-    std::atomic<bool> quitRequested = false;
-
 #ifdef _WIN32
     void bringConsoleToFront()
     {
@@ -46,84 +37,9 @@ namespace
             SetForegroundWindow(consoleWindow);
         }
     }
-
-    BOOL WINAPI handleConsoleCtrlEvent(DWORD eventType)
-    {
-        // Closing the console window leaves too little time for saving, so it is left to the default handler
-        if (eventType != CTRL_C_EVENT && eventType != CTRL_BREAK_EVENT) {
-            return FALSE;
-        }
-        quitRequested.store(true);
-        return TRUE;
-    }
-
-    void beginConsoleInput()
-    {
-        SetConsoleCtrlHandler(handleConsoleCtrlEvent, TRUE);
-    }
-
-    void endConsoleInput()
-    {
-        SetConsoleCtrlHandler(handleConsoleCtrlEvent, FALSE);
-    }
-
-    std::vector<int> readPressedKeys()
-    {
-        std::vector<int> result;
-        while (_kbhit() != 0) {
-            result.emplace_back(_getch());
-        }
-        return result;
-    }
 #else
-    termios terminalAttributesBeforeActivation;
-    int fileStatusFlagsBeforeActivation = 0;
-
     void bringConsoleToFront() {}
-
-    void handleInterrupt(int)
-    {
-        quitRequested.store(true);
-    }
-
-    void beginConsoleInput()
-    {
-        tcgetattr(STDIN_FILENO, &terminalAttributesBeforeActivation);
-        auto attributes = terminalAttributesBeforeActivation;
-        attributes.c_lflag &= ~(ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &attributes);
-
-        fileStatusFlagsBeforeActivation = fcntl(STDIN_FILENO, F_GETFL, 0);
-        fcntl(STDIN_FILENO, F_SETFL, fileStatusFlagsBeforeActivation | O_NONBLOCK);
-
-        std::signal(SIGINT, handleInterrupt);
-    }
-
-    void endConsoleInput()
-    {
-        std::signal(SIGINT, SIG_DFL);
-
-        tcsetattr(STDIN_FILENO, TCSANOW, &terminalAttributesBeforeActivation);
-        fcntl(STDIN_FILENO, F_SETFL, fileStatusFlagsBeforeActivation);
-    }
-
-    std::vector<int> readPressedKeys()
-    {
-        std::vector<int> result;
-        char input = 0;
-        while (read(STDIN_FILENO, &input, 1) == 1) {
-            result.emplace_back(input);
-        }
-        return result;
-    }
 #endif
-
-    // Cursor and function keys deliver several bytes, so only a single byte counts as a pressed character
-    std::optional<int> readPressedCharacter()
-    {
-        auto keys = readPressedKeys();
-        return keys.size() == 1 ? std::optional<int>(keys.front()) : std::nullopt;
-    }
 }
 
 void ConsoleModeController::activate()
@@ -133,7 +49,6 @@ void ConsoleModeController::activate()
     }
     _active = true;
     _lastPrintTimepoint.reset();
-    quitRequested.store(false);
 
     auto simulationFacade = _SimulationFacade::get();
     _stateBeforeActivation = StateBeforeActivation{
@@ -143,7 +58,7 @@ void ConsoleModeController::activate()
     simulationFacade->setTpsRestriction(std::nullopt);
 
     bringConsoleToFront();
-    beginConsoleInput();
+    ConsoleInput::begin();
 
     auto window = WindowController::get().getWindowData().window;
     glfwIconifyWindow(window);
@@ -176,8 +91,8 @@ void ConsoleModeController::process()
     printPersistedSavepoint();
     printStatusLine();
 
-    auto pressedCharacter = readPressedCharacter();
-    if (quitRequested.load() || pressedCharacter == 'q' || pressedCharacter == 'Q') {
+    auto pressedCharacter = ConsoleInput::readPressedCharacter();
+    if (ConsoleInput::isQuitRequested() || pressedCharacter == 'q' || pressedCharacter == 'Q') {
         quit();
         return;
     }
@@ -200,7 +115,7 @@ void ConsoleModeController::quit()
 
 void ConsoleModeController::leaveConsoleMode()
 {
-    endConsoleInput();
+    ConsoleInput::end();
     _liveOutput.close();
     _status = ConsoleSimulationStatus();
 
