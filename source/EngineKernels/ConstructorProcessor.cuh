@@ -245,10 +245,6 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
         MutationProcessor::applyMutations(data, statistics, cell.creature, clonedGenome);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
-
-            // DIAGNOSTIC: the gene graph passes are executed by their own kernels (see cudaNextTimestep_geneGraph_*) so that
-            // a non-returning kernel can be attributed to a single pass. They therefore run at the end of this timestep
-            // instead of directly after the mutation.
             data.mutatedGenomes.tryAddEntry(clonedGenome);
         }
     }
