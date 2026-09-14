@@ -35,6 +35,9 @@ struct SimulationData
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
 
+    // For running gene graph kernels after mutations
+    UnmanagedArray<Genome*> mutatedGenomes;
+
     // Number generators
     CudaNumberGenerator primaryNumberGen;
     CudaNumberGenerator
