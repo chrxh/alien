@@ -9,8 +9,9 @@
 struct ConsoleSimulationStatus
 {
     uint64_t timestep = 0;
-    std::optional<uint64_t> totalTimesteps;  // Set for a run with a known end, which adds a progress bar
-    std::chrono::milliseconds duration = std::chrono::milliseconds(0);
+    uint64_t startTimestep = 0;
+    std::optional<uint64_t> endTimestep;
+    std::chrono::milliseconds realTime = std::chrono::milliseconds(0);
     float tps = 0.0f;
     bool paused = false;
 

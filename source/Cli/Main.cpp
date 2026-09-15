@@ -110,7 +110,12 @@ namespace
     {
         ConsoleLiveOutput liveOutput;
         ConsoleSimulationStatus status;
-        status.totalTimesteps = timesteps;
+        status.startTimestep = simulationFacade->getCurrentTimestep();
+        status.timestep = status.startTimestep;
+        if (timesteps.has_value()) {
+            status.endTimestep = status.startTimestep + *timesteps;
+        }
+        auto startRealTime = simulationFacade->getRealTime();
 
         auto startTimepoint = std::chrono::steady_clock::now();
         auto lastUpdateTimepoint = startTimepoint;
@@ -118,8 +123,8 @@ namespace
         auto timestepsSinceUpdate = uint64_t(0);
 
         ConsoleInput::begin();
-        while (!timesteps.has_value() || status.timestep < *timesteps) {
-            auto chunk = timesteps.has_value() ? std::min(chunkSize, *timesteps - status.timestep) : chunkSize;
+        while (!status.endTimestep.has_value() || status.timestep < *status.endTimestep) {
+            auto chunk = status.endTimestep.has_value() ? std::min(chunkSize, *status.endTimestep - status.timestep) : chunkSize;
 
             auto chunkStartTimepoint = std::chrono::steady_clock::now();
             simulationFacade->calcTimesteps(chunk);
@@ -130,14 +135,14 @@ namespace
             chunkSize = calcNextChunkSize(chunkSize, now - chunkStartTimepoint);
 
             auto stopRequested = isStopRequested();
-            auto finished = stopRequested || (timesteps.has_value() && status.timestep >= *timesteps);
+            auto finished = stopRequested || (status.endTimestep.has_value() && status.timestep >= *status.endTimestep);
             if (now - lastUpdateTimepoint < StatusUpdateInterval && !finished) {
                 continue;
             }
             auto intervalMicroseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - lastUpdateTimepoint).count();
             lastUpdateTimepoint = now;
 
-            status.duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTimepoint);
+            status.realTime = startRealTime + std::chrono::duration_cast<std::chrono::milliseconds>(now - startTimepoint);
             status.tps = intervalMicroseconds > 0 ? toFloat(timestepsSinceUpdate) * 1.0e6f / toFloat(intervalMicroseconds) : 0.0f;
             timestepsSinceUpdate = 0;
 
@@ -158,7 +163,7 @@ namespace
         }
         ConsoleInput::end();
         liveOutput.close();
-        return status.timestep;
+        return status.timestep - status.startTimestep;
     }
 
 }
@@ -275,7 +280,10 @@ int main(int argc, char** argv)
             calculatedTimesteps = calcTimestepsWithLiveOutput(simulationFacade, timesteps);
         }
 
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint);
+        simulationFacade->setRealTime(simData._realTime + elapsed);
+
+        auto ms = elapsed.count();
         auto tps = ms != 0 ? 1000.0f * toFloat(calculatedTimesteps) / toFloat(ms) : 0.0f;
         std::cout << std::endl;
         printStep(
