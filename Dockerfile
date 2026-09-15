@@ -34,6 +34,11 @@ RUN apt-get update \
         libxi6 \
  && rm -rf /var/lib/apt/lists/*
 
+# vast.ai starts Jupyter with --preferred-dir /workspace, but the base image does
+# not carry that directory, which makes the server abort during initialization.
+# It is unrelated to ALIEN and only affects the Jupyter launch mode.
+RUN mkdir -p /workspace
+
 COPY cli /opt/alien/cli
 COPY resources /opt/alien/resources
 
