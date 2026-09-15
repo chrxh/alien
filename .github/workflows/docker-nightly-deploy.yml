@@ -23,9 +23,12 @@ on:
 
 env:
   BUILD_TYPE: Release
-  # sm_86 = RTX 3060, sm_89 = RTX 4090, sm_120 = RTX 5090. All three go into one
-  # fat binary, so a single image runs on every instance type that gets rented.
-  CUDA_ARCHS: 86;89;120
+  # sm_75 = RTX 2080 Ti, sm_86 = RTX 3060, sm_89 = RTX 4090, sm_120 = RTX 5090. They
+  # all go into one fat binary, so a single image runs on every instance type that
+  # gets rented. Every architecture has to be listed: the separable compilation of
+  # the engine ends in a device link, which leaves no PTX behind, so a card that is
+  # missing here has no JIT fallback and fails with CUDA error 500.
+  CUDA_ARCHS: 75;86;89;120
   # Not the build directory of the other Linux workflows: they share one runner
   # workspace and are configured with different options.
   BUILD_DIR: build-docker
