@@ -55,10 +55,6 @@ else()
   set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
   set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -lineinfo --use-local-env -use_fast_math")
-
-  if(CMAKE_BUILD_TYPE STREQUAL "Release")
-      set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --threads 0")
-  endif()
 endif()
 
 project(alien-project LANGUAGES C CXX)
@@ -84,6 +80,13 @@ if(USE_HIP)
   endif()
 else()
   enable_language(CUDA)
+
+  # Parallel per-architecture compilation, but only for compilation: CMAKE_CUDA_FLAGS would also reach the
+  # nvcc -dlink step, where the per-architecture threads race over their shared temporary files and the link
+  # fails with "nvlink fatal : Could not read file '/tmp/tmpxft_..._cmake_device_link.reg.c'".
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--threads=0>)
+  endif()
 endif()
 
 if(USE_HIP)
