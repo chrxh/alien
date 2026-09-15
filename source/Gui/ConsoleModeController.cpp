@@ -160,7 +160,7 @@ void ConsoleModeController::printStatusLine()
     auto simulationFacade = _SimulationFacade::get();
     _status.timestep = simulationFacade->getCurrentTimestep();
     _status.tps = simulationFacade->getTps();
-    _status.duration = simulationFacade->getRealTime();
+    _status.realTime = simulationFacade->getRealTime();
     _status.paused = !simulationFacade->isSimulationRunning();
 
     auto statistics = simulationFacade->getStatisticsEntry();

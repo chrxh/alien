@@ -35,7 +35,7 @@ namespace
 {
     int getTimeCardWidth(ConsoleSimulationStatus const& status)
     {
-        return status.totalTimesteps.has_value() ? ProgressTimeCardWidth : TimeCardWidth;
+        return status.endTimestep.has_value() ? ProgressTimeCardWidth : TimeCardWidth;
     }
 
     std::string createTimeRow(int width, std::string const& label, std::string const& value, std::string const& suffix = std::string())
@@ -50,7 +50,8 @@ namespace
 
     std::string createProgressRow(ConsoleSimulationStatus const& status)
     {
-        auto fraction = *status.totalTimesteps != 0 ? toFloat(status.timestep) / toFloat(*status.totalTimesteps) : 0.0f;
+        auto span = *status.endTimestep - status.startTimestep;
+        auto fraction = span != 0 ? toFloat(status.timestep - status.startTimestep) / toFloat(span) : 0.0f;
         auto percentage = StringHelper::format(fraction * 100.0f, 1) + " %";
         auto barWidth = ProgressTimeCardWidth - 6 - Console::getVisibleLength(percentage);
         return ConsoleWidgets::createFrameRow(
@@ -60,10 +61,10 @@ namespace
 
     std::chrono::milliseconds calcRemainingTime(ConsoleSimulationStatus const& status)
     {
-        if (status.tps <= 0.0f || status.timestep >= *status.totalTimesteps) {
+        if (status.tps <= 0.0f || status.timestep >= *status.endTimestep) {
             return std::chrono::milliseconds(0);
         }
-        return std::chrono::milliseconds(static_cast<int64_t>(toFloat(*status.totalTimesteps - status.timestep) / status.tps * 1000.0f));
+        return std::chrono::milliseconds(static_cast<int64_t>(toFloat(*status.endTimestep - status.timestep) / status.tps * 1000.0f));
     }
 
     std::vector<std::string> createTimeCard(ConsoleSimulationStatus const& status)
@@ -72,15 +73,15 @@ namespace
 
         std::vector<std::string> result;
         result.push_back(ConsoleWidgets::createFrameTop("time", width));
-        if (status.totalTimesteps.has_value()) {
+        if (status.endTimestep.has_value()) {
             result.push_back(createProgressRow(status));
             result.push_back(createTimeRow(
                 width,
                 "time step",
                 StringHelper::format(status.timestep),
-                ConsoleWidgets::createText("/ " + StringHelper::format(*status.totalTimesteps), ConsolePalette::Label)));
+                ConsoleWidgets::createText("/ " + StringHelper::format(*status.endTimestep), ConsolePalette::Label)));
             result.push_back(createTimeRow(width, "tps", StringHelper::format(status.tps, 1)));
-            result.push_back(createTimeRow(width, "elapsed", StringHelper::format(status.duration)));
+            result.push_back(createTimeRow(width, "real time", StringHelper::format(status.realTime)));
             result.push_back(createTimeRow(width, "remaining", StringHelper::format(calcRemainingTime(status))));
         } else {
             result.push_back(createTimeRow(
@@ -89,7 +90,7 @@ namespace
                 StringHelper::format(status.timestep),
                 status.paused ? ConsoleWidgets::createText("paused", ConsolePalette::Warning) : std::string()));
             result.push_back(createTimeRow(width, "tps", StringHelper::format(status.tps, 1)));
-            result.push_back(createTimeRow(width, "real time", StringHelper::format(status.duration)));
+            result.push_back(createTimeRow(width, "real time", StringHelper::format(status.realTime)));
         }
         result.push_back(ConsoleWidgets::createFrameBottom(width));
         return result;
@@ -130,8 +131,8 @@ std::vector<std::string> ConsoleSimulationPanel::create(ConsoleSimulationStatus 
 std::string ConsoleSimulationPanel::createPlainLine(ConsoleSimulationStatus const& status)
 {
     auto result = "Time step: " + StringHelper::format(status.timestep);
-    if (status.totalTimesteps.has_value()) {
-        result += " / " + StringHelper::format(*status.totalTimesteps);
+    if (status.endTimestep.has_value()) {
+        result += " / " + StringHelper::format(*status.endTimestep);
     }
     result += "   TPS: " + StringHelper::format(status.tps, 1) + "   Cells: " + StringHelper::format(status.numCells)
         + "   Creatures: " + StringHelper::format(status.numCreatures) + "   Lineages: " + StringHelper::format(status.numLineages);
