@@ -88,6 +88,56 @@ def test_create_user_rejects_existing_activated_name(app_client, helpers):
     assert resp.json() == {"result": False}
 
 
+def test_create_user_rejects_email_of_activated_account(app_client, helpers):
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    resp = app_client.post(
+        "/createuser",
+        data={"userName": "bob", "password": "pw2", "email": "a@b.c"},
+    )
+    assert resp.json() == {"result": False}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        assert main._get_user_by_name(session, "bob") is None
+
+
+def test_create_user_rejects_email_differing_only_in_case_or_spaces(app_client, helpers):
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    resp = app_client.post(
+        "/createuser",
+        data={"userName": "bob", "password": "pw2", "email": " A@B.C "},
+    )
+    assert resp.json() == {"result": False}
+
+
+def test_create_user_replaces_pending_record_with_same_email(app_client, helpers):
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    # Same address, previous registration still pending: the address is free
+    # again and the stale record is gone.
+    helpers.create_user(app_client, "alicia", "pw2", "a@b.c")
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        assert main._get_user_by_name(session, "alice") is None
+        assert main._get_user_by_name(session, "alicia") is not None
+
+
+def test_create_user_accepts_email_freed_by_deleted_account(app_client, helpers):
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+    app_client.post("/deleteuser", data={"userName": "alice", "password": "pw"})
+
+    resp = app_client.post(
+        "/createuser",
+        data={"userName": "bob", "password": "pw2", "email": "a@b.c"},
+    )
+    assert resp.json() == {"result": True}
+
+
 # --- /activateuser ------------------------------------------------------------
 def test_activate_user_clears_activation_code(app_client, helpers):
     code = helpers.create_user(app_client, "alice", "pw", "a@b.c")
@@ -503,6 +553,24 @@ def test_reset_password_sets_new_activation_code(app_client, helpers):
         user = main._get_user_by_name(session, "alice")
         assert user.activation_code
         assert len(user.activation_code) == 6
+
+
+def test_reset_password_accepts_legacy_email_hash(app_client, helpers):
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session, session.begin():
+        session.execute(
+            main.update(main.User)
+            .where(main.User.name == "alice")
+            .values(email_hash=main._legacy_hash_email("Alice@B.c"))
+        )
+
+    resp = app_client.post(
+        "/resetpw", data={"userName": "alice", "email": "Alice@B.c"}
+    )
+    assert resp.json() == {"result": True}
 
 
 def test_reset_password_wrong_email_fails(app_client, helpers):
