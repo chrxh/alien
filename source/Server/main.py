@@ -228,9 +228,28 @@ def _hash_password(password: str, salt: str) -> str:
 
 
 def _hash_email(email: str) -> str:
-    # Email is stripped of spaces
-    normalized = email.replace(" ", "")
+    # Spaces are stripped and the address is lowercased so that accounts cannot
+    # be multiplied by varying the spelling of one and the same address.
+    normalized = email.replace(" ", "").lower()
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def _legacy_hash_email(email: str) -> str:
+    # Hash format used before addresses were lowercased. Accounts created back
+    # then still carry it, so it is accepted alongside the current format.
+    return hashlib.sha256(email.replace(" ", "").encode("utf-8")).hexdigest()
+
+
+def _email_hashes(email: str) -> list[str]:
+    hashes = [_hash_email(email)]
+    legacy = _legacy_hash_email(email)
+    if legacy not in hashes:
+        hashes.append(legacy)
+    return hashes
+
+
+def _email_matches(user: "User", email: str) -> bool:
+    return any(hmac.compare_digest(user.email_hash, h) for h in _email_hashes(email))
 
 
 def _new_salt() -> str:
@@ -647,6 +666,19 @@ def create_user(
                     return {"result": False}
                 session.execute(delete(User).where(User.name == userName))
 
+            # One account per email address. Records that are still pending
+            # activation do not claim the address and are dropped, so a failed
+            # registration attempt cannot lock the address out permanently.
+            email_hashes = _email_hashes(email)
+            others = (
+                session.execute(select(User).where(User.email_hash.in_(email_hashes)))
+                .scalars()
+                .all()
+            )
+            if any(_is_activated(other) for other in others):
+                return {"result": False}
+            session.execute(delete(User).where(User.email_hash.in_(email_hashes)))
+
             session.add(
                 User(
                     name=userName,
@@ -836,14 +868,13 @@ def reset_password(
     userName: str = Form(...),
     email: str = Form(...),
 ):
-    email_hash = _hash_email(email)
     normalized_email = email.replace(" ", "")
     activation_code = _new_activation_code()
 
     with Session(engine) as session:
         with session.begin():
             user = _get_user_by_name(session, userName)
-            if user is None or not hmac.compare_digest(user.email_hash, email_hash):
+            if user is None or not _email_matches(user, email):
                 return {"result": False}
 
             session.execute(
