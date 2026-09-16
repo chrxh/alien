@@ -103,7 +103,7 @@ If you adopt ideas or concepts from ALIEN without using the software itself, tha
 # 💻 How to run ALIEN
 
 ## 1. Windows: nightly build
-Download and unpack https://alien-project.org/files/alien-develop.zip — built every night from the `develop` branch. It contains two executables:
+Download and unpack https://alien-project.org/files/alien-develop.zip, which is built every night from the `develop` branch. It contains two executables:
 - `alien.exe` for NVIDIA GPUs
 - `alien-amd.exe` for AMD GPUs (RDNA2, RDNA3 and RDNA4)
 
@@ -132,7 +132,7 @@ Open a command prompt in a suitable directory (which should not contain whitespa
 ```
 git clone --recursive https://github.com/chrxh/alien.git
 ```
-The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Submodules are not updated by a plain `git pull`; use `git pull --recurse-submodules` instead.
+The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Submodules are not updated by a plain `git pull`, so use `git pull --recurse-submodules` instead.
 
 **Prerequisites**
 - [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) for NVIDIA GPUs, or [ROCm 7.2+](https://rocm.docs.amd.com/) providing HIP for AMD GPUs
@@ -162,7 +162,7 @@ On Linux:
 cmake --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES=gfx1100 -DCMAKE_PREFIX_PATH=/opt/rocm
 cmake --build --preset ninja-hip-release
 ```
-`CMAKE_HIP_ARCHITECTURES` selects the target architecture (`gfx1100` for RDNA3, `gfx90a` for CDNA2 / MI200); if omitted, it is auto-detected from the GPUs of the host. `CMAKE_PREFIX_PATH` lets `find_package(hip)` locate the ROCm installation when CMake uses the vcpkg toolchain; adjust it if ROCm is installed elsewhere.
+`CMAKE_HIP_ARCHITECTURES` selects the target architecture (`gfx1100` for RDNA3, `gfx90a` for CDNA2 / MI200). If omitted, it is auto-detected from the GPUs of the host. `CMAKE_PREFIX_PATH` lets `find_package(hip)` locate the ROCm installation when CMake uses the vcpkg toolchain. Adjust it if ROCm is installed elsewhere.
 
 **AMD GPUs (SCALE)**
 
