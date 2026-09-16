@@ -96,9 +96,9 @@ If you use ALIEN in a scientific publication, please cite:
 }
 ```
 
-Note that this paper describes the beginnings of what has become ALIEN. The current simulator differs substantially from the system presented there.
+Note that this paper describes the beginnings of what has become ALIEN. The current simulator differs substantially from the system presented there. You are therefore equally welcome to cite this repository instead of the paper or alongside it: https://github.com/chrxh/alien
 
-If you adopt ideas or concepts from ALIEN without using the software itself, that is fine but please just mention ALIEN and link to this repository: https://github.com/chrxh/alien
+If you adopt ideas or concepts from ALIEN without using the software itself, that is fine but please just mention ALIEN and link to this repository.
 
 # 💻 How to run ALIEN
 
