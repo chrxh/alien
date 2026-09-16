@@ -18,7 +18,7 @@
 namespace
 {
     auto constexpr ColumnWidth = 550.0f;
-    auto constexpr TextColumnWidth = 260.0f;
+    auto constexpr TextColumnWidth = 287.0f;  // Has to hold the revert button, the longest parameter name and the help marker
 
     ColorVector<FloatColorRGB> toColorVector(FloatColorRGB const* values)
     {

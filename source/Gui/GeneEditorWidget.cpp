@@ -10,7 +10,7 @@
 
 namespace
 {
-    auto constexpr HeaderMinRightColumnWidth = 160.0f;
+    auto constexpr HeaderMinRightColumnWidth = 190.0f;  // Has to hold the longest label and the help marker
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
     auto constexpr HeaderMinColumnWidth = 300.0f;
 }
