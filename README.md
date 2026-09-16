@@ -110,9 +110,9 @@ Download and unpack https://alien-project.org/files/alien-develop.zip, which is 
 Start it directly from the unpacked folder, otherwise it will not find the resource folder. If the program crashes for an unknown reason, please refer to the [troubleshooting](#-troubleshooting) section below.
 
 ## 2. Running in the cloud (Docker)
-For long runs without local hardware, a nightly image containing the headless command-line interface (see below) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and the resources, is built for sm_75, sm_86, sm_89 and sm_120. There is no GUI in the image.
+For long runs without local hardware, a nightly image containing the headless command-line interface (see below) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and its resource folder. There is no GUI in the image.
 
-On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand:
+On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for a GeForce RTX 20 to 50 series GPU. Upload your simulation file to the instance with `scp`, then connect via SSH and start it by hand:
 ```
 cd /opt/alien
 cli -i example.sim -o output.sim
