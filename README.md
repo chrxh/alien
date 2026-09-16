@@ -213,7 +213,7 @@ If the conditions are met and the error still occurs, please start ALIEN with th
 <h1 align="center"></h1>
 
 #### Genome editor
-![Screenshot3b](https://user-images.githubusercontent.com/73127001/229313813-c9ce70e2-d61f-4745-b64f-ada0b6758901.jpg)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0b5c8328-31c7-46bb-816c-d4c0e0315f50" />
 
 # 🧩 Contributing to the project
 Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
