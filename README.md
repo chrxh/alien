@@ -115,7 +115,7 @@ For long runs without local hardware, a nightly image containing the headless co
 On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand:
 ```
 cd /opt/alien
-cli -i example.sim -o output.sim -t 1000000
+cli -i example.sim -o output.sim
 ```
 
 Locally, with an NVIDIA GPU and the NVIDIA container toolkit installed:
