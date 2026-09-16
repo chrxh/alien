@@ -175,7 +175,7 @@ cmake --build --preset ninja-release
 # ⌨️ Command-line interface
 
 This repository also contains a CLI for ALIEN. It can be used to run simulations without using a GUI. This is useful for performance measurements as well as for automatic execution and evaluation of simulations for different parameters.
-The CLI takes the simulation file, along with its parameters and the number of time steps, as input. It then provides the resulting simulation file and the statistics (as a CSV file) as output.
+The CLI takes the simulation file, along with its parameters and the number of time steps, as input. It then provides the resulting simulation file as output.
 For example,
 ```
 .\cli.exe -i example.sim -o output.sim -t 1000
