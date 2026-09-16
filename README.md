@@ -112,7 +112,7 @@ Start it directly from the unpacked folder, otherwise it will not find the resou
 ## 2. Running in the cloud (Docker)
 For long runs without local hardware, a nightly image containing the headless command-line interface (see below) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and the resources, is built for sm_75, sm_86, sm_89 and sm_120 and needs an NVIDIA driver 580 or newer on the host. There is no GUI in the image.
 
-On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand, best inside `tmux` so that it survives a disconnect:
+On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand:
 ```
 cd /opt/alien
 cli -i example.sim -o output.sim -t 1000000
