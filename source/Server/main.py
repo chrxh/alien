@@ -550,6 +550,13 @@ _MAX_UPLOAD_SIZE = 256 * 1024 * 1024  # 256 MB
 # thumbnail of a few hundred pixels, so this is far above what is needed.
 _MAX_PICTURE_SIZE = 1024 * 1024  # 1 MB
 
+# Storage quota per user: the summed content size of all simulations and
+# genomes one user may keep on the server, private ones included. Uploads and
+# replacements that would push a user beyond it are rejected; the client
+# already names an exceeded storage limit as a possible cause when an upload
+# fails (see ``PersisterWorker::processRequest``).
+_MAX_TOTAL_SIZE_PER_USER = 1024 * 1024 * 1024  # 1 GB
+
 # Maximum number of simulations the gallery may request pictures for at once.
 _MAX_PICTURES_PER_REQUEST = 64
 
@@ -1183,6 +1190,23 @@ def _is_owner_of_simulation(session: Session, sim_id: int, user_name: str) -> bo
     return row is not None and row[0] == user_name
 
 
+def _exceeds_storage_quota(
+    session: Session, user_id: int, new_size: int, replaced_id: int | None = None
+) -> bool:
+    """Whether storing ``new_size`` bytes would exceed the user's quota.
+
+    ``replaced_id`` names a resource whose current size is about to be
+    overwritten and is therefore left out of the already-used total.
+    """
+    stmt = select(func.coalesce(func.sum(Resource.size), 0)).where(
+        Resource.user_id == user_id
+    )
+    if replaced_id is not None:
+        stmt = stmt.where(Resource.id != replaced_id)
+    used = int(session.execute(stmt).scalar_one())
+    return used + new_size > _MAX_TOTAL_SIZE_PER_USER
+
+
 @app.post("/uploadsimulation")
 async def upload_simulation(request: Request):
     fields, content_bytes, picture_bytes = await _read_resource_form(request)
@@ -1209,6 +1233,9 @@ async def upload_simulation(request: Request):
                 workspace == _WORKSPACE_ALIEN_PROJECT
                 and userName != _ALIEN_PROJECT_USER_NAME
             ):
+                return {"result": False}
+
+            if _exceeds_storage_quota(session, user.id, len(content_bytes)):
                 return {"result": False}
 
             sim = Resource(
@@ -1265,6 +1292,11 @@ async def replace_simulation(request: Request):
             # entry that lives in the curated workspace.
             sim = session.get(Resource, sim_id)
             if sim is None or sim.user_id != user.id:
+                return {"result": False}
+
+            if _exceeds_storage_quota(
+                session, user.id, len(content_bytes), replaced_id=sim.id
+            ):
                 return {"result": False}
 
             notify_name = sim.name
