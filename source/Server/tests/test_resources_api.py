@@ -76,6 +76,58 @@ def test_upload_simulation_rejects_oversized_picture(app_client, helpers):
     assert resp.status_code == 400
 
 
+def _set_stored_size(app_client, sim_id: int, size: int):
+    """Pretend the resource occupies ``size`` bytes without uploading them."""
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        with session.begin():
+            session.get(main.Resource, sim_id).size = size
+
+
+def _count_resources(app_client, user_name: str) -> int:
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        return len(
+            session.execute(
+                main.select(main.Resource.id)
+                .join(main.User, main.User.id == main.Resource.user_id)
+                .where(main.User.name == user_name)
+            ).all()
+        )
+
+
+def test_upload_simulation_rejects_exceeded_storage_quota(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    main = app_client.app_module
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _set_stored_size(app_client, sim_id, main._MAX_TOTAL_SIZE_PER_USER)
+
+    resp = helpers.upload_simulation(app_client, "alice", "pw", content=b"x")
+    assert resp.json() == {"result": False}
+    assert _count_resources(app_client, "alice") == 1
+
+
+def test_upload_simulation_accepts_exactly_filled_storage_quota(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    main = app_client.app_module
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _set_stored_size(app_client, sim_id, main._MAX_TOTAL_SIZE_PER_USER - 3)
+
+    resp = helpers.upload_simulation(app_client, "alice", "pw", content=b"abc")
+    assert resp.json()["result"] is True
+
+
+def test_upload_simulation_storage_quota_is_per_user(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")
+    main = app_client.app_module
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _set_stored_size(app_client, sim_id, main._MAX_TOTAL_SIZE_PER_USER)
+
+    resp = helpers.upload_simulation(app_client, "bob", "pw2", content=b"x")
+    assert resp.json()["result"] is True
+
+
 def _decode_pictures(content: bytes) -> dict[str, bytes]:
     """Decode the binary picture response, mirroring the C++ client."""
     pos = 0
@@ -267,6 +319,61 @@ def test_replace_simulation_allows_owner_in_featured_workspace(app_client, helpe
 
     with main.Session(main.engine) as session:
         assert bytes(session.get(main.Resource, sim_id).content) == b"NEW"
+
+
+def test_replace_simulation_ignores_size_of_replaced_resource(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    main = app_client.app_module
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _set_stored_size(app_client, sim_id, main._MAX_TOTAL_SIZE_PER_USER)
+
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    with main.Session(main.engine) as session:
+        assert session.get(main.Resource, sim_id).size == 3
+
+
+def test_replace_simulation_rejects_exceeded_storage_quota(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    main = app_client.app_module
+    filling_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw", sim_name="filling").json()["simId"]
+    )
+    sim_id = int(
+        helpers.upload_simulation(app_client, "alice", "pw", sim_name="other").json()["simId"]
+    )
+    _set_stored_size(app_client, filling_id, main._MAX_TOTAL_SIZE_PER_USER)
+
+    resp = app_client.post(
+        "/replacesimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simId": (None, str(sim_id)),
+            "width": (None, "100"),
+            "height": (None, "50"),
+            "particles": (None, "1234"),
+            "version": (None, "9.9"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+        },
+    )
+    assert resp.json() == {"result": False}
+
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Resource, sim_id).content) != b"NEW"
 
 
 def test_replace_simulation_rejects_non_owner(app_client, helpers):

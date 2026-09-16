@@ -80,6 +80,12 @@ server {
 The C++ client (`source/Base/Resources.h`, `AlienServerURL`) defaults to
 `http://85.214.181.38`; `httplib::Client` selects HTTP:80 from the scheme.
 
+## Storage quota
+
+`_MAX_TOTAL_SIZE_PER_USER` in `main.py` caps the summed content size of a user's
+simulations and genomes at 1 GB. `/uploadsimulation` and `/replacesimulation`
+answer `{"result": false}` beyond it.
+
 ## Tests
 
 ```bash
