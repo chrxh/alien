@@ -21,6 +21,17 @@ An important goal is to make the simulator user-friendly through a modern user i
   Demo video: <a href="https://youtu.be/qwbMGPkoJmg" target="_blank">Emerging Ecosystems | Winner of the ALIFE 2024 Virtual Creatures Competition</a>
 </p>
 
+# 🖥️ Supported platforms
+
+|             | NVIDIA GPU (CUDA)                   | AMD GPU (HIP or SCALE)              |
+| ----------- | ----------------------------------- | ----------------------------------- |
+| **Windows** | nightly build or build from sources | nightly build or build from sources |
+| **Linux**   | build from sources                  | build from sources                  |
+
+NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer.
+
+Without local hardware, ALIEN can also be run headless on a rented cloud GPU via the nightly Docker image, see [Running in the cloud](#3-running-in-the-cloud-docker).
+
 # ⚡ Main features
 ### Physics and graphics engine
 - Particles for simulating soft and rigid body mechanics, fluids, heat dissipation, damage, adhesion etc.
@@ -89,58 +100,77 @@ Note that this paper describes the beginnings of what has become ALIEN. The curr
 
 If you adopt ideas or concepts from ALIEN without using the software itself, that is fine but please just mention ALIEN and link to this repository: https://github.com/chrxh/alien
 
-# 🖥️ Minimal system requirements
-An Nvidia graphics card with compute capability 7.5 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
+# 💻 How to run ALIEN
 
-# 💽 Nightly build
-Nightly build on `develop` branch for Windows including support for AMD GPUs: https://alien-project.org/files/alien-develop.zip
+## 1. Windows: nightly build
+Download and unpack https://alien-project.org/files/alien-develop.zip — built every night from the `develop` branch. It contains two executables:
+- `alien.exe` for NVIDIA GPUs
+- `alien-amd.exe` for AMD GPUs (RDNA2, RDNA3 and RDNA4)
 
-In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
+Start it directly from the unpacked folder, otherwise it will not find the resource folder. If the program crashes for an unknown reason, please refer to the [troubleshooting](#-troubleshooting) section below.
 
-# 🔨 How to build the sources
-The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
+## 2. Building from the sources
+Windows and Linux are built the same way, using the cross-platform CMake build system, the **Ninja** build tool and the vcpkg package manager, which is included as a Git submodule.
 
-### Getting the sources
-To obtain the sources, please open a command prompt in a suitable directory (which should not contain whitespace characters) and enter the following command:
+**Getting the sources**
+
+Open a command prompt in a suitable directory (which should not contain whitespace characters) and enter:
 ```
 git clone --recursive https://github.com/chrxh/alien.git
 ```
-Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
-
-### Build instructions
-ALIEN is built the same way on Windows and Linux. It uses the **Ninja** build tool together with the **CUDA compiler** (`nvcc`), so both need to be installed and reachable from the command line (i.e. on your `PATH`).
+The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Submodules are not updated by a plain `git pull`; use `git pull --recurse-submodules` instead.
 
 **Prerequisites**
-- [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads)
+- [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) for NVIDIA GPUs, or [ROCm 7.2+](https://rocm.docs.amd.com/) providing HIP for AMD GPUs
 - Windows: [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components (the latter ships Ninja). The MSVC environment must be active while building.
 - Linux: GCC, ninja-build and the X11/OpenGL development libraries:
   ```
   sudo apt-get install ninja-build libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
   ```
 
-**Build steps**
+**NVIDIA GPUs (CUDA)**
 
-Windows shortcut: Just run the `build-windows-ninja.bat` from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN.
+On Windows, just run `build-windows-ninja.bat` from the repository root. It sets up the MSVC environment and locates Ninja and CMake from your Visual Studio installation automatically.
 
-Otherwise (Linux or Windows from a *Developer Command Prompt*), invoke the CMake preset directly:
+On Linux, or on Windows from a *Developer Command Prompt*, invoke the CMake preset directly:
 ```
 cmake --preset ninja
 cmake --build --preset ninja-release
 ```
+The executable is written to `build-ninja/Release/` (`alien.exe` on Windows, `alien` on Linux) and has to be started from there, otherwise it will not find the resource folder.
 
-If everything goes well, the ALIEN executable can be found under `build-ninja/Release/` (`alien.exe` on Windows, `alien` on Linux).
-It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
+**AMD GPUs (HIP)**
 
-### Building for AMD GPUs (ROCm/HIP)
-ALIEN can alternatively be built for AMD GPUs with ROCm/HIP in place of CUDA. Prerequisites: a [ROCm](https://rocm.docs.amd.com/) installation (7.2 or newer) providing HIP, and a CMake toolchain. Configure with `-DUSE_HIP=ON` and set the target GPU architecture via `CMAKE_HIP_ARCHITECTURES` (for example `gfx90a` for CDNA2 / MI200, or `gfx1100` for RDNA3):
+The HIP path builds the same sources for AMD GPUs in place of CUDA. On Windows: `build-windows-ninja.bat HIP`, which writes to `build-ninja-hip/Release/` and covers RDNA2, RDNA3 and RDNA4.
+
+On Linux:
 ```
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DCMAKE_PREFIX_PATH=/opt/rocm
-cmake --build . --config Release -j8
+cmake --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES=gfx1100 -DCMAKE_PREFIX_PATH=/opt/rocm
+cmake --build --preset ninja-hip-release
 ```
-The default build targets NVIDIA GPUs via CUDA and is unchanged; `-DUSE_HIP=ON` selects the AMD path. The `-DCMAKE_PREFIX_PATH=/opt/rocm` entry lets `find_package(hip)` locate the ROCm install when CMake uses the vcpkg toolchain; adjust the path if ROCm is installed elsewhere or already on `PATH`.
+`CMAKE_HIP_ARCHITECTURES` selects the target architecture (`gfx1100` for RDNA3, `gfx90a` for CDNA2 / MI200); if omitted, it is auto-detected from the GPUs of the host. `CMAKE_PREFIX_PATH` lets `find_package(hip)` locate the ROCm installation when CMake uses the vcpkg toolchain; adjust it if ROCm is installed elsewhere.
 
-Windows shortcut: `build-windows-ninja.bat HIP`, building into `build-ninja-hip/Release/` covering RDNA2, RDNA3 and RDNA4 architectures.
+**AMD GPUs (SCALE)**
+
+Alternatively, the unchanged CUDA sources can be compiled for AMD GPUs with [SCALE](https://docs.scale-lang.com) (Linux), whose `nvcc` is a drop-in replacement for the NVIDIA one:
+```
+cmake --preset ninja -DCMAKE_CUDA_COMPILER=/opt/scale/bin/nvcc -DCMAKE_CUDA_ARCHITECTURES=gfx1100
+cmake --build --preset ninja-release
+```
+
+## 3. Running in the cloud (Docker)
+For long runs without local hardware, a nightly image containing the headless command-line interface (see below) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and the resources, is built for sm_75, sm_86, sm_89 and sm_120 and needs an NVIDIA driver 580 or newer on the host. There is no GUI in the image.
+
+On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand, best inside `tmux` so that it survives a disconnect:
+```
+cd /opt/alien
+cli -i example.sim -o output.sim -t 1000000
+```
+
+Locally, with an NVIDIA GPU and the NVIDIA container toolkit installed:
+```
+docker run --rm --gpus all -v "$PWD":/data --entrypoint cli chrxh/alien:nightly -i /data/example.sim -o /data/output.sim -t 1000
+```
 
 # ⌨️ Command-line interface
 
