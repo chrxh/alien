@@ -30,7 +30,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer.
 
-Without local hardware, ALIEN can also be run headless on a rented cloud GPU via the nightly Docker image, see [Running in the cloud](#3-running-in-the-cloud-docker).
+Without local hardware, ALIEN can also be run headless on a rented cloud GPU via the nightly Docker image, see [Running in the cloud](#2-running-in-the-cloud-docker).
 
 # ⚡ Main features
 ### Physics and graphics engine
@@ -109,7 +109,21 @@ Download and unpack https://alien-project.org/files/alien-develop.zip — built 
 
 Start it directly from the unpacked folder, otherwise it will not find the resource folder. If the program crashes for an unknown reason, please refer to the [troubleshooting](#-troubleshooting) section below.
 
-## 2. Building from the sources
+## 2. Running in the cloud (Docker)
+For long runs without local hardware, a nightly image containing the headless command-line interface (see below) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and the resources, is built for sm_75, sm_86, sm_89 and sm_120 and needs an NVIDIA driver 580 or newer on the host. There is no GUI in the image.
+
+On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand, best inside `tmux` so that it survives a disconnect:
+```
+cd /opt/alien
+cli -i example.sim -o output.sim -t 1000000
+```
+
+Locally, with an NVIDIA GPU and the NVIDIA container toolkit installed:
+```
+docker run --rm --gpus all -v "$PWD":/data --entrypoint cli chrxh/alien:nightly -i /data/example.sim -o /data/output.sim -t 1000
+```
+
+## 3. Building from the sources
 Windows and Linux are built the same way, using the cross-platform CMake build system, the **Ninja** build tool and the vcpkg package manager, which is included as a Git submodule.
 
 **Getting the sources**
@@ -156,20 +170,6 @@ Alternatively, the unchanged CUDA sources can be compiled for AMD GPUs with [SCA
 ```
 cmake --preset ninja -DCMAKE_CUDA_COMPILER=/opt/scale/bin/nvcc -DCMAKE_CUDA_ARCHITECTURES=gfx1100
 cmake --build --preset ninja-release
-```
-
-## 3. Running in the cloud (Docker)
-For long runs without local hardware, a nightly image containing the headless command-line interface (see below) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and the resources, is built for sm_75, sm_86, sm_89 and sm_120 and needs an NVIDIA driver 580 or newer on the host. There is no GUI in the image.
-
-On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for driver version 580 or newer. The image builds on the vast.ai base image, so SSH, Jupyter and the instance portal work as usual. Connect via SSH and start the simulation by hand, best inside `tmux` so that it survives a disconnect:
-```
-cd /opt/alien
-cli -i example.sim -o output.sim -t 1000000
-```
-
-Locally, with an NVIDIA GPU and the NVIDIA container toolkit installed:
-```
-docker run --rm --gpus all -v "$PWD":/data --entrypoint cli chrxh/alien:nightly -i /data/example.sim -o /data/output.sim -t 1000
 ```
 
 # ⌨️ Command-line interface
