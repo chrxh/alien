@@ -129,7 +129,7 @@ void ConsoleModeController::leaveConsoleMode()
 void ConsoleModeController::deactivate()
 {
     leaveConsoleMode();
-    std::cout << std::endl << "  " << ConsoleWidgets::createText("Returning to the user interface ...", ConsolePalette::Label) << std::endl;
+    std::cout << Console::clearScreen() << std::flush;
 
     auto window = WindowController::get().getWindowData().window;
     glfwShowWindow(window);
