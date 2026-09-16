@@ -36,18 +36,15 @@ ParametersSpec const& SimulationParameters::getSpec()
         };
 
         std::string const coloringTooltip =
-            "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
-            " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
-            " Customization colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
-            " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or "
-            "duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
-            " Mutant and cell function: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
-            " Cell state: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = "
-            "dying\n\n" ICON_FA_CHEVRON_RIGHT
-            " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
-            "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), "
-            "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
-            "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.";
+            "Here, one can set how the objects are to be colored during rendering. The brightness always follows the energy of the "
+            "object.\n\n" ICON_FA_CHEVRON_RIGHT
+            " Energy: No own color is used, so the objects are displayed in grayscale. The more energy an object has, the brighter it "
+            "is.\n\n" ICON_FA_CHEVRON_RIGHT " Customization: Each object is displayed in its customization color.\n\n" ICON_FA_CHEVRON_RIGHT
+            " Lineage + Customization: Like 'Customization', but the hue is shifted slightly depending on the lineage. Creatures of the same lineage "
+            "therefore keep a common basic color and can still be distinguished.\n\n" ICON_FA_CHEVRON_RIGHT
+            " Lineage: Each lineage is assigned its own color.\n\n" ICON_FA_CHEVRON_RIGHT
+            " Creature: Each creature is assigned its own color.\n\nThe last three options evaluate the creature of a cell. All other objects are "
+            "displayed in their customization color.";
 
         spec = ParametersSpec().groups({
             ParameterGroupSpec().name("General").parameters({
@@ -96,7 +93,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Object coloring")
                         .reference(AlternativeSpec()
                                        .member(&SimulationParameters::objectColoring)
-                                       .alternatives({{"Energy", {}}})
                                        .alternatives({
                                            {"Energy", {}},
                                            {"Customization", {}},
@@ -120,7 +116,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Mark reference domain")
                         .reference(BoolSpec().member(&SimulationParameters::markReferenceDomain))
-                        .description("This option draws a suitable grid in the background depending on the zoom level."),
+                        .description("This option draws a frame around the reference domain of the world. It is helpful with borderless rendering, where the "
+                                     "world is repeated periodically in the view port."),
                     ParameterSpec()
                         .name("Show radiation center")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
@@ -334,8 +331,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .max(0.5f)
                                                       .logarithmic(true)
                                                       .format("%.6f"))
-                                              .description(
-                                                  "Strength of the force towards the center of the layer. It decreases with the square of the distance."),
+                                              .description("Strength of the force towards the center of the layer. The force is weak directly at the center, "
+                                                           "reaches its maximum a short distance away and decreases again further out."),
                                       }},
                                      {"Linear",
                                       {
@@ -418,7 +415,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Viscosity")
                         .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
-                        .description("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement."),
+                        .description("This parameter can be used to control the strength of the viscosity. Larger values lead to a smoother movement."),
                     ParameterSpec()
                         .name("Friction")
                         .reference(FloatSpec().member(&SimulationParameters::friction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
@@ -426,7 +423,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Inner friction")
                         .reference(FloatSpec().member(&SimulationParameters::innerFriction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
-                        .description("Fraction of the relative velocity along a bond by which two connected objects are slowed down per time step.")
+                        .description("Fraction of the relative velocity along a connection by which two connected objects are slowed down per time step.")
                         .visible(false),
                     ParameterSpec()
                         .name("Rigidity of solids")
@@ -456,7 +453,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Fusion velocity")
                         .reference(FloatSpec().member(&SimulationParameters::objectFusionVelocity).min(0.0f).max(2.0f))
-                        .description("Maximum force that can be applied to a cell without causing it to disintegrate."),
+                        .description("Minimum relative velocity of two colliding objects at which they form a new connection. At least one of the two objects "
+                                     "must be sticky and both must have a free connection slot."),
                 }),
             ParameterGroupSpec()
                 .name("Radiation")
@@ -529,7 +527,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Maximum age")
                         .reference(IntSpec().member(&SimulationParameters::maxCellAge).min(1).max(1e7).logarithmic(true).infinity(true))
-                        .description("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
+                        .description("Defines the maximum age of a cell. If a cell exceeds this age, it changes to the state 'Dying' and then disintegrates "
+                                     "with the decay rate of dying cells."),
                     ParameterSpec()
                         .name("Maximum free cell age")
                         .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
@@ -550,10 +549,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description(
                             "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
                             "\n\n" ICON_FA_CHEVRON_RIGHT
-                            " Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
-                            "surrounding cells.\n\n" ICON_FA_CHEVRON_RIGHT
-                            " Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
-                            "residual energy of the constructor cell does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " Energy flow: A cell that does not need energy itself passes everything above the normal value on to a connected cell that is "
+                            "still building.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " Depot cells: Only the energy above the normal value can be moved into the storage of the depot.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " Constructor: Creating new cells costs energy. The creation of new cells is executed only when the "
+                            "residual energy of the constructor does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
                             " If the transformation of energy particles to "
                             "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                     ParameterSpec()
@@ -708,8 +708,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
                             "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
                             "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: "
-                            "If "
-                            "a zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells."),
+                            "If a zero is entered in row 2 and column 3, it means that cells with the second customization color cannot attack cells with the "
+                            "third one."),
                     ParameterSpec()
                         .name("Attack strength")
                         .reference(FloatSpec().member(&SimulationParameters::attackerStrength).min(0.0f).max(0.5f).logarithmic(true))
@@ -789,7 +789,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Crawling acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
-                        .description("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
+                        .description("The maximum value by which a muscle cell can modify its velocity while it changes the length of its connection. This "
+                                     "parameter applies only to muscle cells which are in one of the crawling modes."),
                     ParameterSpec()
                         .name("Bending acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
@@ -802,7 +803,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Radius")
                         .reference(FloatSpec().member(&SimulationParameters::sensorRadius).min(10.0f).max(800.0f))
-                        .description("The maximum radius in which a sensor cell can detect mass concentrations."),
+                        .description("Upper limit for the radius in which a sensor cell can scan. The scan range of an individual sensor cell is additionally "
+                                     "restricted by its own maximum range."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Reconnector")
@@ -810,7 +812,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Radius")
                         .reference(FloatSpec().member(&SimulationParameters::reconnectorRadius).min(0.0f).max(3.0f))
-                        .description("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
+                        .description("The maximum radius in which a reconnector cell can establish or destroy connections to other objects."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Detonator")
@@ -828,6 +830,7 @@ ParametersSpec const& SimulationParameters::getSpec()
             ParameterGroupSpec()
                 .name("Object color transition rules")
                 .expertToggle(&SimulationParameters::colorTransitionRulesToggle)
+                .description("If activated, rules can be defined that let the customization color of a cell change over time.")
                 .parameters({
                     ParameterSpec()
                         .name("Target color and duration")
