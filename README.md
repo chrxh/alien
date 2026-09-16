@@ -26,7 +26,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 |             | NVIDIA GPU (CUDA)                   | AMD GPU (HIP or SCALE)              |
 | ----------- | ----------------------------------- | ----------------------------------- |
 | **Windows** | nightly build or build from sources | nightly build or build from sources |
-| **Linux**   | build from sources                  | build from sources                  |
+| **Linux**   | build from sources, Docker image    | build from sources                  |
 
 NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer.
 
