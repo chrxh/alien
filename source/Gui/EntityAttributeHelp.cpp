@@ -151,6 +151,9 @@ namespace
         {EntityAttribute::MutationDeleteGeneProbability,
          "Probability per gene that it is deleted. At least one gene is kept. A reference to a deleted gene switches off the referencing constructor and "
          "points a referencing injector to the first gene."},
+        {EntityAttribute::MutationSwapGeneProbability,
+         "Probability per gene that it is swapped with another randomly chosen gene. The gene indices stay the same, so every reference to one of the two "
+         "genes now addresses the other one. A gene takes part in at most one swap per mutation pass."},
         {EntityAttribute::MutationCopyNodeSectionProbability,
          "Probability per gene that a contiguous section of its nodes is copied into a randomly chosen gene, which can also be the gene itself."},
         {EntityAttribute::MutationMoveNodeSectionProbability,

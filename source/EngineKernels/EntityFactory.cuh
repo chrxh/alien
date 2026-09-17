@@ -123,6 +123,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->mutationRates.addGeneMutation = {genomeTO.mutationRates.addGeneMutation.geneProbability};
     genome->mutationRates.duplicateGeneMutation = {genomeTO.mutationRates.duplicateGeneMutation.geneProbability};
     genome->mutationRates.deleteGeneMutation = {genomeTO.mutationRates.deleteGeneMutation.geneProbability};
+    genome->mutationRates.swapGeneMutation = {genomeTO.mutationRates.swapGeneMutation.geneProbability};
     genome->mutationRates.copyNodeSectionMutation = {genomeTO.mutationRates.copyNodeSectionMutation.geneProbability};
     genome->mutationRates.moveNodeSectionMutation = {genomeTO.mutationRates.moveNodeSectionMutation.geneProbability};
     genome->numGenes = genomeTO.numGenes;

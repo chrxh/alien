@@ -607,6 +607,46 @@ TEST_F(MetaMutationTests, metaMutation_addGeneRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._addGeneMutation._geneProbability, 0.5f);
 }
 
+TEST_F(MetaMutationTests, metaMutation_swapGeneRatesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._swapGeneMutation = SwapGeneMutationDesc().geneProbability(0.5f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.swapGeneMetaMutationsSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._swapGeneMutation._geneProbability, 0.5f));
+    EXPECT_GE(actualGenome._mutationRates._swapGeneMutation._geneProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._swapGeneMutation._geneProbability, 1.0f);
+}
+
+TEST_F(MetaMutationTests, metaMutation_swapGeneRatesZeroSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._swapGeneMutation = SwapGeneMutationDesc().geneProbability(0.5f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.swapGeneMetaMutationsSigma.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._swapGeneMutation._geneProbability, 0.5f);
+}
+
 TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
 {
     auto genome = createTestGenome();
