@@ -68,8 +68,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
     auto hostObject = actualData.getObjectRef(0);
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentOffspring);
+    EXPECT_EQ(0, creature._currentOffspring);
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
@@ -551,8 +550,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(1, hostConstructor._currentOffspring);
+    EXPECT_EQ(1, hostCreature._currentOffspring);
+    EXPECT_EQ(0, newCreature._currentOffspring);
 }
 
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_upperSide)
@@ -721,8 +720,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto connection = actualData.getConnection(hostObject, newObject);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(1, hostConstructor._currentOffspring);
+    EXPECT_EQ(1, hostCreature._currentOffspring);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_1)
@@ -3432,9 +3430,9 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0).separation(true))),
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
         },
-        CreatureDesc().id(0),
+        CreatureDesc().id(0).currentOffspring(0),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
@@ -3460,9 +3458,9 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(1).separation(true))),
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
         },
-        CreatureDesc().id(0),
+        CreatureDesc().id(0).currentOffspring(1),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);

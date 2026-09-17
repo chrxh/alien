@@ -7,7 +7,7 @@ namespace cg = cooperative_groups;
 
 namespace
 {
-    // The divisor is counted along with the sum so that it cannot drift apart from the summed probabilities when a mutation type is added.
+    // The divisor is counted along so that it cannot drift when a mutation type is added.
     __device__ float calcMeanMutationRate(MutationRates const& rates)
     {
         auto sum = 0.0f;
