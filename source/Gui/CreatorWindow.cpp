@@ -473,14 +473,14 @@ void CreatorWindow::processObjectDistanceWidget()
 void CreatorWindow::processStickyWidget()
 {
     AlienGui::Checkbox(
-        AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Sticky)), _makeSticky);
+        AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Sticky)), &_makeSticky);
 }
 
 void CreatorWindow::processStaticWidget()
 {
     if (!isEnergyMaterial()) {
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Static)), _static);
+            AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Static)), &_static);
     }
 }
 

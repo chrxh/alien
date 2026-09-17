@@ -47,7 +47,7 @@ void NewSimulationDialog::processIntern()
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").textWidth(ContentTextInputWidth).format("%.0f").step(1000.0f), _externalEnergy);
-    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Adopt parameters").textWidth(ContentTextInputWidth), _adoptSimulationParameters);
+    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Adopt parameters").textWidth(ContentTextInputWidth), &_adoptSimulationParameters);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();

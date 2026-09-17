@@ -347,7 +347,7 @@ void _NodeEditorWidget::processNodeAttributes()
                             .name("Separation")
                             .textWidth(rightColumnWidth)
                             .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorSeparation)),
-                        constructor._separation);
+                        &constructor._separation);
 
                     // Number of branches
                     AlienGui::BeginIndent();
@@ -410,13 +410,13 @@ void _NodeEditorWidget::processNodeAttributes()
                         .name("Auto trigger")
                         .textWidth(rightColumnWidth)
                         .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorAutoTrigger)),
-                    sensor._autoTrigger);
+                    &sensor._autoTrigger);
                 AlienGui::Checkbox(
                     AlienGui::CheckboxParameters()
                         .name("Tag for attackers")
                         .textWidth(rightColumnWidth)
                         .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorTagForAttackers)),
-                    sensor._tagForAttackers);
+                    &sensor._tagForAttackers);
 
                 // Mode selection
                 auto mode = sensor.getMode();
@@ -528,7 +528,7 @@ void _NodeEditorWidget::processNodeAttributes()
                         .name("Additive")
                         .textWidth(rightColumnWidth)
                         .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorAdditive)),
-                    generator._additive);
+                    &generator._additive);
 
                 // Value range
                 AlienGui::InputFloat(
@@ -928,7 +928,7 @@ void _NodeEditorWidget::processNodeAttributes()
                             .name("Read only")
                             .textWidth(rightColumnWidth)
                             .tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryReadOnly)),
-                        signalRecorder._readOnly);
+                        &signalRecorder._readOnly);
                     if (AlienGui::Button(AlienGui::ButtonParameters()
                                              .buttonText("Edit")
                                              .name("Signal buffer")
@@ -946,7 +946,7 @@ void _NodeEditorWidget::processNodeAttributes()
                             .name("Read only")
                             .textWidth(rightColumnWidth)
                             .tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryReadOnly)),
-                        signalStorage._readOnly);
+                        &signalStorage._readOnly);
                     if (AlienGui::Button(AlienGui::ButtonParameters()
                                              .buttonText("Edit")
                                              .name("Signal buffer")
@@ -1031,7 +1031,7 @@ void _NodeEditorWidget::processNodeAttributes()
                             .name("One-way")
                             .textWidth(rightColumnWidth)
                             .tooltip(EntityAttributeHelp::get(EntityAttribute::CommunicatorOneway)),
-                        sender._oneway);
+                        &sender._oneway);
                     AlienGui::EndIndent();
                 } else if (mode == CommunicatorMode_Receiver) {
                     AlienGui::BeginIndent();

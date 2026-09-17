@@ -1091,81 +1091,60 @@ namespace
 
 }
 
-bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
-{
-    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(26.0f);
-
-    drawHatchedRectangle(width);
-
-    ImGui::Dummy(ImVec2(width - ImGui::GetStyle().FramePadding.x, 0));
-    ImGui::SameLine();
-
-    auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
-
-    ImGui::SameLine();
-    if (parameters._defaultValue) {
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (RevertButton(parameters._name)) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
-    ImGui::SameLine();
-    AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
-    if (parameters._tooltip) {
-        AlienGui::HelpMarker(*parameters._tooltip);
-    }
-
-    return result;
-}
-
-bool AlienGui::CheckboxColorVector(CheckboxColorVectorParameters const& parameters, bool* value)
+bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool* value)
 {
     ImGui::PushID(parameters._name.c_str());
 
+    auto numColors = parameters._colorDependence ? MAX_COLORS : 1;
+
+    // Color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
-    if (Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle")) {
-        if (isExpanded) {
-            _expandedColorControlIds.erase(toggleButtonId);
-        } else {
-            _expandedColorControlIds.insert(toggleButtonId);
+    if (parameters._colorDependence) {
+        if (Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle")) {
+            if (isExpanded) {
+                _expandedColorControlIds.erase(toggleButtonId);
+            } else {
+                _expandedColorControlIds.insert(toggleButtonId);
+            }
+            isExpanded = !isExpanded;
         }
-        isExpanded = !isExpanded;
+        ImGui::SameLine();
     }
-    ImGui::SameLine();
 
-    // A collapsed control shows the value of all colors at once and therefore may be in a mixed state.
-    auto mixed = !isExpanded && !std::all_of(value, value + MAX_COLORS, [&](bool v) { return v == value[0]; });
+    // A collapsed color dependent control shows the value of all colors at once and therefore may be in a mixed state.
+    auto mixed = parameters._colorDependence && !isExpanded && !std::all_of(value, value + numColors, [&](bool v) { return v == value[0]; });
 
     auto result = false;
     auto rowPosX = ImGui::GetCursorPosX();
-    auto numRows = isExpanded ? MAX_COLORS : 1;
+    auto numRows = parameters._colorDependence && isExpanded ? MAX_COLORS : 1;
     for (int row = 0; row < numRows; ++row) {
         if (row > 0) {
             ImGui::SetCursorPosX(rowPosX);
         }
         ImGui::PushID(row);
 
-        if (isExpanded) {
+        // Color field
+        if (parameters._colorDependence && isExpanded) {
             AlienGui::ColorField(parameters._customizationColors[row].toRgbColor(), 0);
             ImGui::SameLine();
         }
+
         auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(26.0f);
         drawHatchedRectangle(width);
         ImGui::Dummy(ImVec2(width - ImGui::GetStyle().FramePadding.x, 0));
         ImGui::SameLine();
 
+        // Checkbox
         if (mixed) {
             ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
         }
         auto rowValue = value[row];
         if (ImGui::Checkbox("##checkbox", &rowValue)) {
-            if (isExpanded) {
-                value[row] = rowValue;
+            if (parameters._colorDependence && !isExpanded) {
+                std::fill(value, value + numColors, mixed ? true : rowValue);
             } else {
-                std::fill(value, value + MAX_COLORS, mixed ? true : rowValue);
+                value[row] = rowValue;
             }
             result = true;
         }
@@ -1174,18 +1153,23 @@ bool AlienGui::CheckboxColorVector(CheckboxColorVectorParameters const& paramete
         }
 
         if (row == 0) {
+
+            // Revert button
             if (parameters._defaultValue) {
                 ImGui::SameLine();
-                auto isDefault = std::equal(value, value + MAX_COLORS, parameters._defaultValue);
-                ImGui::BeginDisabled(isDefault);
+                ImGui::BeginDisabled(std::equal(value, value + numColors, parameters._defaultValue));
                 if (RevertButton(parameters._name)) {
-                    std::copy(parameters._defaultValue, parameters._defaultValue + MAX_COLORS, value);
+                    std::copy(parameters._defaultValue, parameters._defaultValue + numColors, value);
                     result = true;
                 }
                 ImGui::EndDisabled();
             }
+
+            // Label
             ImGui::SameLine();
             AlienGui::Text(TextParameters().text(parameters._name).highlightedSubString(parameters._highlightedSubString));
+
+            // Tooltip
             if (parameters._tooltip) {
                 AlienGui::HelpMarker(*parameters._tooltip);
             }
