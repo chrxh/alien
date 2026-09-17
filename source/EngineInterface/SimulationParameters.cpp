@@ -46,6 +46,11 @@ ParametersSpec const& SimulationParameters::getSpec()
             " Creature: Each creature is assigned its own color.\n\nThe last three options evaluate the creature of a cell. All other objects are "
             "displayed in their customization color.";
 
+        auto metaMutationDescription = [](std::string const& mutationName) {
+            return "Standard deviation of the Gaussian change of the probability of the " + mutationName
+                + " mutations stored in a genome. It only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring.";
+        };
+
         spec = ParametersSpec().groups({
             ParameterGroupSpec().name("General").parameters({
                 ParameterSpec()
@@ -593,117 +598,110 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .format("%.5f"))
                         .description("As soon as the accumulated mutations of a creature exceed this value, the creature is given a new lineage id and the "
                                      "counter is reset."),
+                }),
+            ParameterGroupSpec()
+                .name("Meta-mutations: Properties")
+                .parameters({
+                    ParameterSpec()
+                        .name("Neuron sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::neuronsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("neuron")),
+                    ParameterSpec()
+                        .name("Connection sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::connectionsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("connection")),
+                    ParameterSpec()
+                        .name("Cell type property sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("cell type property")),
+                    ParameterSpec()
+                        .name("Constructor sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("constructor")),
+                    ParameterSpec()
+                        .name("Geometry sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::geometryMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("geometry")),
+                }),
+            ParameterGroupSpec()
+                .name("Meta-mutations: Cell identity")
+                .parameters({
+                    ParameterSpec()
+                        .name("Cell type sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("cell type")),
+                    ParameterSpec()
+                        .name("Cell type mode sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("cell type mode")),
+                    ParameterSpec()
+                        .name("Void sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("void")),
+                    ParameterSpec()
+                        .name("Customization sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::customizationMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("customization")),
                     ParameterSpec()
                         .name("Customization transition matrix")
                         .reference(BoolSpec().member(&SimulationParameters::customizationTransitionMatrix))
                         .description("Determines which customizations a customization mutation may produce. Row = old customization, column = new one."),
                 }),
             ParameterGroupSpec()
-                .name("Meta-mutations")
+                .name("Meta-mutations: Gene structure")
                 .parameters({
                     ParameterSpec()
-                        .name("Neuron mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::neuronsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the neuron mutations stored in a genome. It only acts on "
-                                     "genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Connection mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::connectionsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the connection mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Cell type property mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the cell type property mutations stored in a genome. It "
-                                     "only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Geometry mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::geometryMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the geometry mutations stored in a genome. It only acts "
-                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Cell type mode mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the cell type mode mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Cell type mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the cell type mutations stored in a genome. It only acts "
-                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Customization mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::customizationMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the customization mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Void mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the void mutations stored in a genome. It only acts on "
-                                     "genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Extend gene mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::extendGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the extend gene mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Add node mutation sigma")
+                        .name("Add node sigma")
                         .reference(FloatSpec().member(&SimulationParameters::addNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the add node mutations stored in a genome. It only acts "
-                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                        .description(metaMutationDescription("add node")),
                     ParameterSpec()
-                        .name("Trim gene mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::trimGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the trim gene mutations stored in a genome. It only acts "
-                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Delete node mutation sigma")
+                        .name("Delete node sigma")
                         .reference(FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the delete node mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                        .description(metaMutationDescription("delete node")),
                     ParameterSpec()
-                        .name("Add gene mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::addGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the add gene mutations stored in a genome. It only acts "
-                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                        .name("Extend gene sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::extendGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("extend gene")),
                     ParameterSpec()
-                        .name("Duplicate gene mutation sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::duplicateGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the duplicate gene mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                        .name("Trim gene sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::trimGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("trim gene")),
                     ParameterSpec()
-                        .name("Delete gene mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::deleteGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the delete gene mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Swap gene mutation sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::swapGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the swap gene mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
-                    ParameterSpec()
-                        .name("Copy node section mutation sigma")
+                        .name("Copy node section sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::copyNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the copy node section mutations stored in a genome. It "
-                                     "only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                        .description(metaMutationDescription("copy node section")),
                     ParameterSpec()
-                        .name("Move node section mutation sigma")
+                        .name("Move node section sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::moveNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the move node section mutations stored in a genome. It "
-                                     "only acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                        .description(metaMutationDescription("move node section")),
+                }),
+            ParameterGroupSpec()
+                .name("Meta-mutations: Genome structure")
+                .parameters({
                     ParameterSpec()
-                        .name("Constructor mutation sigma")
+                        .name("Add gene sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::addGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("add gene")),
+                    ParameterSpec()
+                        .name("Duplicate gene sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Standard deviation of the Gaussian change of the probability of the constructor mutations stored in a genome. It only "
-                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                            FloatSpec().member(&SimulationParameters::duplicateGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("duplicate gene")),
+                    ParameterSpec()
+                        .name("Delete gene sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::deleteGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("delete gene")),
+                    ParameterSpec()
+                        .name("Swap gene sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::swapGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("swap gene")),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")
