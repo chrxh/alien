@@ -982,7 +982,6 @@ __inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, 
 
 __inline__ __device__ void MutationProcessor::initNewGene(Gene& gene)
 {
-    // A freshly created gene uses the shared default attribute values (mirrors GeneDesc defaults).
     for (int i = 0; i < sizeof(Char64); ++i) {
         gene.name[i] = 0;
     }
@@ -996,8 +995,6 @@ __inline__ __device__ void MutationProcessor::initNewGene(Gene& gene)
 
 __inline__ __device__ int MutationProcessor::findNodeForNewConstructor(SimulationData& data, Gene const& gene)
 {
-    // Void cells cannot have a constructor, so a node whose effective cell type is void is not eligible. With homogeneous cell
-    // type the effective cell type of every node is taken from the gene's first node (see EntityFactory::createCellFromNode).
     if (gene.numNodes == 0) {
         return -1;
     }
@@ -1222,14 +1219,10 @@ __inline__ __device__ Node* MutationProcessor::findNthGeneReference(Genome* geno
 
 __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
-    // Each gene is independently a candidate with probability geneProbability, so several genes can trigger in one pass. A
-    // triggered gene gets a new gene consisting of a single new node appended as a new last gene, and one randomly chosen node
-    // of the triggering gene is turned into a constructor pointing to that new gene. Appending at the end keeps all existing
-    // gene indices valid.
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.addGeneMutation;
-    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
+    if (rate.geneProbability <= 0) {
         return;
     }
 
@@ -1245,7 +1238,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
     }
     block.sync();
 
-    // Decide per gene (in parallel) which genes trigger and which of their nodes receives the constructor.
     for (int geneIndex = laneId; geneIndex < oldNumGenes; geneIndex += blockDim.x) {
         if (data.primaryNumberGen.random() >= rate.geneProbability) {
             continue;
@@ -1269,11 +1261,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
     block.sync();
 
     if (numAddedGenes > 0) {
-        // Shallow-copy the existing genes (their node arrays are kept).
         for (int geneIndex = laneId; geneIndex < oldNumGenes; geneIndex += blockDim.x) {
             newGenes[geneIndex] = genome->genes[geneIndex];
         }
-        // Append a new single-node gene per slot and point the chosen node to it.
         for (int slot = laneId; slot < numAddedGenes; slot += blockDim.x) {
             auto newIndex = oldNumGenes + slot;
             auto& chosenNode = *chosenNodes[slot];
@@ -1292,7 +1282,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
             chosenNode.constructor.numConcatenations = 1;
             chosenNode.constructor.geneIndex = newIndex;
 
-            // One new node plus the constructor that was switched on.
             atomicAdd_block(&accumulatedMutations, 2.0f);
         }
         block.sync();
