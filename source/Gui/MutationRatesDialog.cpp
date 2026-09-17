@@ -435,6 +435,8 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         settings.getValue(settingsPrefix + "duplicate gene mutation.gene probability", mutationRates._duplicateGeneMutation._geneProbability);
     mutationRates._deleteGeneMutation._geneProbability =
         settings.getValue(settingsPrefix + "delete gene mutation.gene probability", mutationRates._deleteGeneMutation._geneProbability);
+    mutationRates._swapGeneMutation._geneProbability =
+        settings.getValue(settingsPrefix + "swap gene mutation.gene probability", mutationRates._swapGeneMutation._geneProbability);
     mutationRates._copyNodeSectionMutation._geneProbability =
         settings.getValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
     mutationRates._moveNodeSectionMutation._geneProbability =
@@ -503,6 +505,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     settings.setValue(settingsPrefix + "add gene mutation.gene probability", mutationRates._addGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "duplicate gene mutation.gene probability", mutationRates._duplicateGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "delete gene mutation.gene probability", mutationRates._deleteGeneMutation._geneProbability);
+    settings.setValue(settingsPrefix + "swap gene mutation.gene probability", mutationRates._swapGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
     settings.setValue(settingsPrefix + "move node section mutation.gene probability", mutationRates._moveNodeSectionMutation._geneProbability);
 
@@ -674,6 +677,16 @@ void MutationRatesDialog::processContent()
                 processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "DLGM", _mutation._deleteGeneMutation, RightColumnWidth, EntityAttribute::MutationDeleteGeneProbability);
+                    table.next();
+                });
+            }
+            AlienGui::EndTreeNode();
+            sectionTable.next();
+
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Swap gene mutations").rank(AlienGui::TreeNodeRank::High))) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                    processGeneProbabilityMutationRate(
+                        "Mutation rate", "SWGM", _mutation._swapGeneMutation, RightColumnWidth, EntityAttribute::MutationSwapGeneProbability);
                     table.next();
                 });
             }

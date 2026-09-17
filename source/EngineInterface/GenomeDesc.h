@@ -521,6 +521,13 @@ struct DeleteGeneMutationDesc
     MEMBER(DeleteGeneMutationDesc, float, geneProbability, 0.0f);
 };
 
+struct SwapGeneMutationDesc
+{
+    auto operator<=>(SwapGeneMutationDesc const&) const = default;
+
+    MEMBER(SwapGeneMutationDesc, float, geneProbability, 0.0f);
+};
+
 struct CopyNodeSectionMutationDesc
 {
     auto operator<=>(CopyNodeSectionMutationDesc const&) const = default;
@@ -594,6 +601,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, AddGeneMutationDesc, addGeneMutation, AddGeneMutationDesc());
     MEMBER(MutationRatesDesc, DuplicateGeneMutationDesc, duplicateGeneMutation, DuplicateGeneMutationDesc());
     MEMBER(MutationRatesDesc, DeleteGeneMutationDesc, deleteGeneMutation, DeleteGeneMutationDesc());
+    MEMBER(MutationRatesDesc, SwapGeneMutationDesc, swapGeneMutation, SwapGeneMutationDesc());
     MEMBER(
         MutationRatesDesc,
         ConstructorMutationArray,

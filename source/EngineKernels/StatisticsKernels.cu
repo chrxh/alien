@@ -36,6 +36,7 @@ namespace
         addRate(rates.addGeneMutation.geneProbability);
         addRate(rates.duplicateGeneMutation.geneProbability);
         addRate(rates.deleteGeneMutation.geneProbability);
+        addRate(rates.swapGeneMutation.geneProbability);
         return sum / static_cast<float>(numRates);
     }
 
