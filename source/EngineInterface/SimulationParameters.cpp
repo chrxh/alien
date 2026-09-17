@@ -682,6 +682,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("Standard deviation of the Gaussian change of the probability of the delete gene mutations stored in a genome. It only "
                                      "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
+                        .name("Swap gene mutation sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::swapGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the swap gene mutations stored in a genome. It only "
+                                     "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                    ParameterSpec()
                         .name("Copy node section mutation sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::copyNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))

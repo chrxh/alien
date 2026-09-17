@@ -55,6 +55,7 @@ PUBLIC
     SeparationLimitTests.cpp
     SimulationControlTests.cpp
     StatisticsTests.cpp
+    SwapGeneMutationTests.cpp
     Testsuite.cpp
     TrimGeneMutationTests.cpp
     UnreachableNodeVoidingTests.cpp

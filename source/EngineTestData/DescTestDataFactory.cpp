@@ -193,6 +193,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .addGeneMutation(AddGeneMutationDesc().geneProbability(0.49f))
                         .duplicateGeneMutation(DuplicateGeneMutationDesc().geneProbability(0.45f))
                         .deleteGeneMutation(DeleteGeneMutationDesc().geneProbability(0.46f))
+                        .swapGeneMutation(SwapGeneMutationDesc().geneProbability(0.50f))
                         .copyNodeSectionMutation(CopyNodeSectionMutationDesc().geneProbability(0.47f))
                         .moveNodeSectionMutation(MoveNodeSectionMutationDesc().geneProbability(0.48f))
                         .constructorMutations(

@@ -893,6 +893,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._mutationRates._addGeneMutation._geneProbability = genomeTO.mutationRates.addGeneMutation.geneProbability;
     result._mutationRates._duplicateGeneMutation._geneProbability = genomeTO.mutationRates.duplicateGeneMutation.geneProbability;
     result._mutationRates._deleteGeneMutation._geneProbability = genomeTO.mutationRates.deleteGeneMutation.geneProbability;
+    result._mutationRates._swapGeneMutation._geneProbability = genomeTO.mutationRates.swapGeneMutation.geneProbability;
     result._mutationRates._copyNodeSectionMutation._geneProbability = genomeTO.mutationRates.copyNodeSectionMutation.geneProbability;
     result._mutationRates._moveNodeSectionMutation._geneProbability = genomeTO.mutationRates.moveNodeSectionMutation.geneProbability;
     result._genes.reserve(genomeTO.numGenes);
@@ -1007,6 +1008,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.mutationRates.addGeneMutation = {genome._mutationRates._addGeneMutation._geneProbability};
     genomeTO.mutationRates.duplicateGeneMutation = {genome._mutationRates._duplicateGeneMutation._geneProbability};
     genomeTO.mutationRates.deleteGeneMutation = {genome._mutationRates._deleteGeneMutation._geneProbability};
+    genomeTO.mutationRates.swapGeneMutation = {genome._mutationRates._swapGeneMutation._geneProbability};
     genomeTO.mutationRates.copyNodeSectionMutation = {genome._mutationRates._copyNodeSectionMutation._geneProbability};
     genomeTO.mutationRates.moveNodeSectionMutation = {genome._mutationRates._moveNodeSectionMutation._geneProbability};
     genomeTO.numGenes = toInt(genome._genes.size());

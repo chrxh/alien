@@ -67,6 +67,7 @@ namespace
             genomeTO.mutationRates.addGeneMutation = {genome->mutationRates.addGeneMutation.geneProbability};
             genomeTO.mutationRates.duplicateGeneMutation = {genome->mutationRates.duplicateGeneMutation.geneProbability};
             genomeTO.mutationRates.deleteGeneMutation = {genome->mutationRates.deleteGeneMutation.geneProbability};
+            genomeTO.mutationRates.swapGeneMutation = {genome->mutationRates.swapGeneMutation.geneProbability};
             genomeTO.mutationRates.copyNodeSectionMutation = {genome->mutationRates.copyNodeSectionMutation.geneProbability};
             genomeTO.mutationRates.moveNodeSectionMutation = {genome->mutationRates.moveNodeSectionMutation.geneProbability};
             genomeTO.numGenes = genome->numGenes;
