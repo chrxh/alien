@@ -94,7 +94,8 @@ namespace
          "to all other cells."},
         {EntityAttribute::GenomeResistanceToInjection, "If enabled, injector cells cannot overwrite the genome of creatures built from it."},
         {EntityAttribute::GenomeApplyMetaMutations,
-         "If enabled, the mutation rates of this genome are themselves mutated. The step size comes from the simulation parameters under 'Meta-mutations'."},
+         "If enabled, the mutation rates of this genome are themselves mutated. The step sizes come from the 'Meta-mutations' groups in the simulation "
+         "parameters."},
         {EntityAttribute::GenomeMutationRatesEdit, "Opens the editor for all mutation rates. The rows below only list the rates that are currently active."},
 
         // Gene

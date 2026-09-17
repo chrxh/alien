@@ -118,28 +118,34 @@ struct SimulationParameters
 
     // Mutations
     BaseParameter<float> newLineageThreshold = {0.25f};
+
+    // Meta mutations: properties
+    BaseParameter<float> neuronsMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> connectionsMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> cellTypePropertiesMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> constructorMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> geometryMetaMutationsSigma = {0.0002f};
+
+    // Meta mutations: cell identity
+    BaseParameter<float> cellTypeMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> cellTypeModeMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> voidMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> customizationMetaMutationsSigma = {0};
     BaseParameter<ColorMatrix<bool>> customizationTransitionMatrix = {getDefaultCustomizationTransitionMatrix()};
 
-    // Meta mutations
-    BaseParameter<float> neuronsMetaMutationsSigma = {0};
-    BaseParameter<float> connectionsMetaMutationsSigma = {0};
-    BaseParameter<float> cellTypePropertiesMetaMutationsSigma = {0};
-    BaseParameter<float> geometryMetaMutationsSigma = {0};
-    BaseParameter<float> cellTypeModeMetaMutationsSigma = {0};
-    BaseParameter<float> cellTypeMetaMutationsSigma = {0};
-    BaseParameter<float> customizationMetaMutationsSigma = {0};
-    BaseParameter<float> voidMetaMutationsSigma = {0};
-    BaseParameter<float> extendGeneMetaMutationsSigma = {0};
-    BaseParameter<float> addNodeMetaMutationsSigma = {0};
-    BaseParameter<float> trimGeneMetaMutationsSigma = {0};
-    BaseParameter<float> deleteNodeMetaMutationsSigma = {0};
-    BaseParameter<float> addGeneMetaMutationsSigma = {0};
-    BaseParameter<float> duplicateGeneMetaMutationsSigma = {0};
-    BaseParameter<float> deleteGeneMetaMutationsSigma = {0};
-    BaseParameter<float> swapGeneMetaMutationsSigma = {0};
-    BaseParameter<float> copyNodeSectionMetaMutationsSigma = {0};
-    BaseParameter<float> moveNodeSectionMetaMutationsSigma = {0};
-    BaseParameter<float> constructorMetaMutationsSigma = {0};
+    // Meta mutations: gene structure
+    BaseParameter<float> addNodeMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> deleteNodeMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> extendGeneMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> trimGeneMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> copyNodeSectionMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> moveNodeSectionMetaMutationsSigma = {0.0002f};
+
+    // Meta mutations: genome structure
+    BaseParameter<float> addGeneMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> duplicateGeneMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> deleteGeneMetaMutationsSigma = {0.0002f};
+    BaseParameter<float> swapGeneMetaMutationsSigma = {0.0002f};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = ColorVector<float>::uniform(0.0f)};
