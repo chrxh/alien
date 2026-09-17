@@ -60,9 +60,9 @@ void DisplaySettingsDialog::processIntern()
         AlienGui::CheckboxParameters()
             .name("Adopt scaling from OS")
             .textWidth(RightColumnWidth)
-            .defaultValue(_origAutoContentScaleFactor)
+            .defaultValue(&_origAutoContentScaleFactor)
             .tooltip("If enabled, the scaling below is taken from the display settings of the operating system."),
-        _pendingAutoContentScaleFactor);
+        &_pendingAutoContentScaleFactor);
 
     ImGui::BeginDisabled(_pendingAutoContentScaleFactor);
     AlienGui::SliderFloat(
