@@ -3423,7 +3423,7 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffspring)
 {
     _parameters.externalEnergy.value = Infinity<float>::value;
-    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = ColorVector<bool>::uniform(true);
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
@@ -3451,7 +3451,7 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspring)
 {
     _parameters.externalEnergy.value = Infinity<float>::value;
-    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = ColorVector<bool>::uniform(true);
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
@@ -3474,6 +3474,36 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
 
     // Construction should fail because currentOffspring > 0 blocks energy inflow and cell has insufficient energy
     ASSERT_EQ(1, actualData._creatures.size());
+}
+
+TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_dependsOnCustomization)
+{
+    _parameters.externalEnergy.value = Infinity<float>::value;
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = ColorVector<bool>::uniform(true);
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value[1] = false;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[1];
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .color(1)
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(1).separation(true))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc().color(1)})}));
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 3; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // Energy inflow is not restricted for the constructor's color, so the second offspring is still built.
+    ASSERT_EQ(2, actualData._creatures.size());
 }
 
 TEST_F(ConstructorTests, externalEnergyInflow_distributedProportionally)

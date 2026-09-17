@@ -78,6 +78,8 @@ namespace
 
     auto constexpr Id_DeleteNodeMutation_NodeProbability = 0;
 
+    auto constexpr Id_AddGeneMutation_GeneProbability = 0;
+
     auto constexpr Id_DuplicateGeneMutation_GeneProbability = 0;
 
     auto constexpr Id_DeleteGeneMutation_GeneProbability = 0;
@@ -229,6 +231,7 @@ namespace
     auto constexpr Id_MutationRates_GeometryMutation1 = 20;
     auto constexpr Id_MutationRates_GeometryMutation2 = 21;
     auto constexpr Id_MutationRates_CustomizationMutation = 22;
+    auto constexpr Id_MutationRates_AddGeneMutation = 23;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -861,6 +864,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DeleteNodeMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AddGeneMutationDesc& data)
+    {
+        AddGeneMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_AddGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(AddGeneMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DuplicateGeneMutationDesc& data)
     {
         DuplicateGeneMutationDesc defaultObject;
@@ -929,6 +941,7 @@ namespace cereal
         scope.addDesc(Id_MutationRates_AddNodeMutation, data._addNodeMutation);
         scope.addDesc(Id_MutationRates_TrimGeneMutation, data._trimGeneMutation);
         scope.addDesc(Id_MutationRates_DeleteNodeMutation, data._deleteNodeMutation);
+        scope.addDesc(Id_MutationRates_AddGeneMutation, data._addGeneMutation);
         scope.addDesc(Id_MutationRates_DuplicateGeneMutation, data._duplicateGeneMutation);
         scope.addDesc(Id_MutationRates_DeleteGeneMutation, data._deleteGeneMutation);
         scope.addDesc(Id_MutationRates_CopyNodeSectionMutation, data._copyNodeSectionMutation);

@@ -27,9 +27,10 @@ namespace
         sum += rates.deleteNodeMutation.nodeProbability;
         sum += rates.copyNodeSectionMutation.geneProbability;
         sum += rates.moveNodeSectionMutation.geneProbability;
+        sum += rates.addGeneMutation.geneProbability;
         sum += rates.duplicateGeneMutation.geneProbability;
         sum += rates.deleteGeneMutation.geneProbability;
-        return sum / 21.0f;
+        return sum / 22.0f;
     }
 
     // The lineage slot of a creature is determined once per statistics timestep and cached in Creature::creatureIndex,

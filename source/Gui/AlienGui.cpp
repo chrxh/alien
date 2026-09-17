@@ -1120,6 +1120,84 @@ bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     return result;
 }
 
+bool AlienGui::CheckboxColorVector(CheckboxColorVectorParameters const& parameters, bool* value)
+{
+    ImGui::PushID(parameters._name.c_str());
+
+    auto toggleButtonId = ImGui::GetID("expanded");
+    auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
+    if (Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle")) {
+        if (isExpanded) {
+            _expandedColorControlIds.erase(toggleButtonId);
+        } else {
+            _expandedColorControlIds.insert(toggleButtonId);
+        }
+        isExpanded = !isExpanded;
+    }
+    ImGui::SameLine();
+
+    // A collapsed control shows the value of all colors at once and therefore may be in a mixed state.
+    auto mixed = !isExpanded && !std::all_of(value, value + MAX_COLORS, [&](bool v) { return v == value[0]; });
+
+    auto result = false;
+    auto rowPosX = ImGui::GetCursorPosX();
+    auto numRows = isExpanded ? MAX_COLORS : 1;
+    for (int row = 0; row < numRows; ++row) {
+        if (row > 0) {
+            ImGui::SetCursorPosX(rowPosX);
+        }
+        ImGui::PushID(row);
+
+        if (isExpanded) {
+            AlienGui::ColorField(parameters._customizationColors[row].toRgbColor(), 0);
+            ImGui::SameLine();
+        }
+        auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(26.0f);
+        drawHatchedRectangle(width);
+        ImGui::Dummy(ImVec2(width - ImGui::GetStyle().FramePadding.x, 0));
+        ImGui::SameLine();
+
+        if (mixed) {
+            ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
+        }
+        auto rowValue = value[row];
+        if (ImGui::Checkbox("##checkbox", &rowValue)) {
+            if (isExpanded) {
+                value[row] = rowValue;
+            } else {
+                std::fill(value, value + MAX_COLORS, mixed ? true : rowValue);
+            }
+            result = true;
+        }
+        if (mixed) {
+            ImGui::PopItemFlag();
+        }
+
+        if (row == 0) {
+            if (parameters._defaultValue) {
+                ImGui::SameLine();
+                auto isDefault = std::equal(value, value + MAX_COLORS, parameters._defaultValue);
+                ImGui::BeginDisabled(isDefault);
+                if (RevertButton(parameters._name)) {
+                    std::copy(parameters._defaultValue, parameters._defaultValue + MAX_COLORS, value);
+                    result = true;
+                }
+                ImGui::EndDisabled();
+            }
+            ImGui::SameLine();
+            AlienGui::Text(TextParameters().text(parameters._name).highlightedSubString(parameters._highlightedSubString));
+            if (parameters._tooltip) {
+                AlienGui::HelpMarker(*parameters._tooltip);
+            }
+        }
+
+        ImGui::PopID();
+    }
+
+    ImGui::PopID();
+    return result;
+}
+
 bool AlienGui::MultiCheckboxes(MultiCheckboxesParameters const& parameters, bool& value1, bool& value2, bool& value3, bool& value4)
 {
     ImGui::PushID(parameters._name.c_str());

@@ -197,6 +197,17 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
             *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value),
             _boolColorMatrixDialogById[ImGui::GetID("colorMatrix")]);
 
+    } else if (ref.colorDependence == ColorDependence::ColorVector) {
+        AlienGui::CheckboxColorVector(
+            AlienGui::CheckboxColorVectorParameters()
+                .name(parameterSpec._name)
+                .textWidth(TextColumnWidth)
+                .customizationColors(parameters.customizationColors.value)
+                .defaultValue(origRef.value)
+                .highlightedSubString(filter.containedText)
+                .tooltip(parameterSpec._description),
+            ref.value);
+
     } else {
         AlienGui::Checkbox(
             AlienGui::CheckboxParameters()

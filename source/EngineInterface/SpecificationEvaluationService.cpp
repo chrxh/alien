@@ -31,6 +31,11 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
         return ValueRef{.value = &(parameters.**std::get<BoolSourceMember>(member)).sourceValues[index]};
     }
 
+    // Color vector
+    else if (locationType == LocationType::Base && std::holds_alternative<ColorVectorBoolMember>(member)) {
+        return ValueRef{.value = (parameters.**std::get<ColorVectorBoolMember>(member)).value.values, .colorDependence = ColorDependence::ColorVector};
+    }
+
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixBoolMember>(member)) {
         return ValueRef{
@@ -280,8 +285,8 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
     if (locationType == LocationType::Base) {
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
             auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
-            if (std::holds_alternative<BoolMember>(boolSpec._member) || std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)
-                || std::holds_alternative<BoolBaseLayerMember>(boolSpec._member)) {
+            if (std::holds_alternative<BoolMember>(boolSpec._member) || std::holds_alternative<ColorVectorBoolMember>(boolSpec._member)
+                || std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member) || std::holds_alternative<BoolBaseLayerMember>(boolSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {

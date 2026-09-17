@@ -331,6 +331,17 @@ public:
     };
     static bool Checkbox(CheckboxParameters const& parameters, bool& value);
 
+    struct CheckboxColorVectorParameters
+    {
+        MEMBER(CheckboxColorVectorParameters, std::string, name, "");
+        MEMBER(CheckboxColorVectorParameters, float, textWidth, 100);
+        MEMBER(CheckboxColorVectorParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
+        MEMBER(CheckboxColorVectorParameters, bool const*, defaultValue, nullptr);
+        MEMBER(CheckboxColorVectorParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(CheckboxColorVectorParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool CheckboxColorVector(CheckboxColorVectorParameters const& parameters, bool* value);
+
     struct MultiCheckboxesParameters
     {
         MEMBER(MultiCheckboxesParameters, std::string, name, "");

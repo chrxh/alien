@@ -80,6 +80,7 @@ enum class EntityAttribute
     MutationAddNodeProbability,
     MutationTrimGeneProbability,
     MutationDeleteNodeProbability,
+    MutationAddGeneProbability,
     MutationDuplicateGeneProbability,
     MutationDeleteGeneProbability,
     MutationCopyNodeSectionProbability,

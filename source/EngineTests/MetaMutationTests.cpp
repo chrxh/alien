@@ -563,6 +563,50 @@ TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._deleteNodeMutation._nodeProbability, 0.5f);
 }
 
+TEST_F(MetaMutationTests, metaMutation_addGeneRatesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._addGeneMutation = AddGeneMutationDesc().geneProbability(0.5f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.addGeneMetaMutationsSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    // The add-gene mutation creates a gene per triggering gene, so the genome grows quickly; keep the pass count low so the
+    // genome stays small while the meta-mutation still changes the rate.
+    for (int i = 0; i < 3; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._addGeneMutation._geneProbability, 0.5f));
+    EXPECT_GE(actualGenome._mutationRates._addGeneMutation._geneProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._addGeneMutation._geneProbability, 1.0f);
+}
+
+TEST_F(MetaMutationTests, metaMutation_addGeneRatesZeroSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._addGeneMutation = AddGeneMutationDesc().geneProbability(0.5f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.addGeneMetaMutationsSigma.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    // The add-gene mutation creates a gene per triggering gene, so the genome grows quickly; keep the pass count low so the
+    // genome stays small (the rate itself must not change here).
+    for (int i = 0; i < 5; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._addGeneMutation._geneProbability, 0.5f);
+}
+
 TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
 {
     auto genome = createTestGenome();
