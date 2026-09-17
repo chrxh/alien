@@ -1773,7 +1773,20 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                     }
                 };
 
-                // Mutate the attributes of an existing constructor (real/integer via valueChangeSigma, bool via enumChangeProbability).
+                auto mutateEnumField = [&](auto& value, int count) {
+                    using ValueType = std::decay_t<decltype(value)>;
+                    if (count > 1 && data.primaryNumberGen.random() < rate.enumChangeProbability) {
+                        auto currentValue = static_cast<int>(value);
+                        auto newValue = data.primaryNumberGen.random(count - 2);
+                        if (newValue >= currentValue) {
+                            ++newValue;
+                        }
+                        value = static_cast<ValueType>(newValue);
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
+                    }
+                };
+
+                // Mutate the attributes of an existing constructor (real/integer via valueChangeSigma, gene index and bool via enumChangeProbability).
                 if (node.constructorAvailable) {
                     if (constructor.autoTriggerInterval == 0 || constructor.autoTriggerInterval == Const::ConstructorAutoTriggerInterval_Default) {
                         if (data.primaryNumberGen.random() < rate.enumChangeProbability) {
@@ -1786,7 +1799,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                         mutateNumber(
                             constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Min + 100);
                     }
-                    mutateNumber(constructor.geneIndex, 0, max(0, genome->numGenes - 1));
+                    mutateEnumField(constructor.geneIndex, genome->numGenes);
                     mutateNumber(
                         constructor.constructionActivationTime,
                         Const::ConstructorConstructionActivationTime_Min,
