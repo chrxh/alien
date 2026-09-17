@@ -64,6 +64,7 @@ namespace
             genomeTO.mutationRates.addNodeMutation = {genome->mutationRates.addNodeMutation.nodeProbability};
             genomeTO.mutationRates.trimGeneMutation = {genome->mutationRates.trimGeneMutation.geneProbability};
             genomeTO.mutationRates.deleteNodeMutation = {genome->mutationRates.deleteNodeMutation.nodeProbability};
+            genomeTO.mutationRates.addGeneMutation = {genome->mutationRates.addGeneMutation.geneProbability};
             genomeTO.mutationRates.duplicateGeneMutation = {genome->mutationRates.duplicateGeneMutation.geneProbability};
             genomeTO.mutationRates.deleteGeneMutation = {genome->mutationRates.deleteGeneMutation.geneProbability};
             genomeTO.mutationRates.copyNodeSectionMutation = {genome->mutationRates.copyNodeSectionMutation.geneProbability};
@@ -301,6 +302,7 @@ namespace
             creatureTO.lineageId = creature->lineageId;
             creatureTO.accumulatedMutations = creature->accumulatedMutations;
             creatureTO.accumulatedMutationsInLineage = creature->accumulatedMutationsInLineage;
+            creatureTO.currentOffspring = creature->currentOffspring;
             creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
@@ -568,7 +570,6 @@ namespace
                 cellTO.constructor.numConcatenations = cell.constructor.numConcatenations;
                 cellTO.constructor.geneIndex = cell.constructor.geneIndex;
                 cellTO.constructor.lastConstructedCellId = cell.constructor.lastConstructedCellId;
-                cellTO.constructor.currentOffspring = cell.constructor.currentOffspring;
             }
         }
     }

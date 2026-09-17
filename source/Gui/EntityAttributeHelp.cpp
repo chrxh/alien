@@ -142,6 +142,9 @@ namespace
         {EntityAttribute::MutationTrimGeneProbability,
          "Probability per gene that its first or its last node is removed. The last remaining node of a gene is always kept."},
         {EntityAttribute::MutationDeleteNodeProbability, "Probability per node that it is removed. The last remaining node of a gene is always kept."},
+        {EntityAttribute::MutationAddGeneProbability,
+         "Probability per gene that a new gene consisting of a single node is created. A randomly chosen node of the triggering gene becomes a constructor "
+         "that builds the new gene. Nodes whose cell type is void cannot become a constructor."},
         {EntityAttribute::MutationDuplicateGeneProbability,
          "Probability per gene that it is duplicated. Only genes that are referenced at least twice are duplicated; one of these references then points to the "
          "copy."},

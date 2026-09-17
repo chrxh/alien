@@ -78,6 +78,8 @@ namespace
 
     auto constexpr Id_DeleteNodeMutation_NodeProbability = 0;
 
+    auto constexpr Id_AddGeneMutation_GeneProbability = 0;
+
     auto constexpr Id_DuplicateGeneMutation_GeneProbability = 0;
 
     auto constexpr Id_DeleteGeneMutation_GeneProbability = 0;
@@ -229,6 +231,7 @@ namespace
     auto constexpr Id_MutationRates_GeometryMutation1 = 20;
     auto constexpr Id_MutationRates_GeometryMutation2 = 21;
     auto constexpr Id_MutationRates_CustomizationMutation = 22;
+    auto constexpr Id_MutationRates_AddGeneMutation = 23;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -861,6 +864,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DeleteNodeMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AddGeneMutationDesc& data)
+    {
+        AddGeneMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_AddGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(AddGeneMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DuplicateGeneMutationDesc& data)
     {
         DuplicateGeneMutationDesc defaultObject;
@@ -929,6 +941,7 @@ namespace cereal
         scope.addDesc(Id_MutationRates_AddNodeMutation, data._addNodeMutation);
         scope.addDesc(Id_MutationRates_TrimGeneMutation, data._trimGeneMutation);
         scope.addDesc(Id_MutationRates_DeleteNodeMutation, data._deleteNodeMutation);
+        scope.addDesc(Id_MutationRates_AddGeneMutation, data._addGeneMutation);
         scope.addDesc(Id_MutationRates_DuplicateGeneMutation, data._duplicateGeneMutation);
         scope.addDesc(Id_MutationRates_DeleteGeneMutation, data._deleteGeneMutation);
         scope.addDesc(Id_MutationRates_CopyNodeSectionMutation, data._copyNodeSectionMutation);
@@ -975,6 +988,7 @@ namespace
     auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_AccumulatedMutations = 9;
     auto constexpr Id_Creature_AccumulatedMutationsInLineage = 10;
+    auto constexpr Id_Creature_CurrentOffspring = 11;
 
     auto constexpr Id_Solid_Energy = 0;
 
@@ -1031,7 +1045,6 @@ namespace
     auto constexpr Id_Constructor_LastConstructedCellId = 5;
     auto constexpr Id_Constructor_ConstructionAngle = 7;
     auto constexpr Id_Constructor_ProvideEnergy = 8;
-    auto constexpr Id_Constructor_CurrentOffspring = 9;
     auto constexpr Id_Constructor_ReservedEnergy = 10;
     auto constexpr Id_Constructor_Separation = 11;
     auto constexpr Id_Constructor_NumBranches = 12;
@@ -1277,7 +1290,6 @@ namespace cereal
         scope.addMember(Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         scope.addMember(Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         scope.addMember(Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
-        scope.addMember(Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
         scope.addMember(Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         scope.addMember(Id_Constructor_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         scope.addMember(Id_Constructor_Separation, data._separation, defaultObject._separation);
@@ -1789,6 +1801,7 @@ namespace cereal
         scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         scope.addMember(Id_Creature_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
         scope.addMember(Id_Creature_AccumulatedMutationsInLineage, data._accumulatedMutationsInLineage, defaultObject._accumulatedMutationsInLineage);
+        scope.addMember(Id_Creature_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 

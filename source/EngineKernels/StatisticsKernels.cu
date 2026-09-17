@@ -7,29 +7,36 @@ namespace cg = cooperative_groups;
 
 namespace
 {
+    // The divisor is counted along so that it cannot drift when a mutation type is added.
     __device__ float calcMeanMutationRate(MutationRates const& rates)
     {
         auto sum = 0.0f;
+        auto numRates = 0;
+        auto addRate = [&](float probability) {
+            sum += probability;
+            ++numRates;
+        };
         for (int i = 0; i < 2; ++i) {
-            sum += rates.neuronMutations[i].nodeProbability;
-            sum += rates.connectionMutations[i].nodeProbability;
-            sum += rates.cellTypePropertiesMutations[i].nodeProbability;
-            sum += rates.geometryMutations[i].geneProbability;
-            sum += rates.constructorMutations[i].nodeProbability;
+            addRate(rates.neuronMutations[i].nodeProbability);
+            addRate(rates.connectionMutations[i].nodeProbability);
+            addRate(rates.cellTypePropertiesMutations[i].nodeProbability);
+            addRate(rates.geometryMutations[i].geneProbability);
+            addRate(rates.constructorMutations[i].nodeProbability);
         }
-        sum += rates.cellTypeModeMutation.nodeProbability;
-        sum += rates.cellTypeMutation.nodeProbability;
-        sum += rates.customizationMutation.genomeProbability;
-        sum += rates.voidMutation.nodeProbability;
-        sum += rates.extendGeneMutation.geneProbability;
-        sum += rates.addNodeMutation.nodeProbability;
-        sum += rates.trimGeneMutation.geneProbability;
-        sum += rates.deleteNodeMutation.nodeProbability;
-        sum += rates.copyNodeSectionMutation.geneProbability;
-        sum += rates.moveNodeSectionMutation.geneProbability;
-        sum += rates.duplicateGeneMutation.geneProbability;
-        sum += rates.deleteGeneMutation.geneProbability;
-        return sum / 21.0f;
+        addRate(rates.cellTypeModeMutation.nodeProbability);
+        addRate(rates.cellTypeMutation.nodeProbability);
+        addRate(rates.customizationMutation.genomeProbability);
+        addRate(rates.voidMutation.nodeProbability);
+        addRate(rates.extendGeneMutation.geneProbability);
+        addRate(rates.addNodeMutation.nodeProbability);
+        addRate(rates.trimGeneMutation.geneProbability);
+        addRate(rates.deleteNodeMutation.nodeProbability);
+        addRate(rates.copyNodeSectionMutation.geneProbability);
+        addRate(rates.moveNodeSectionMutation.geneProbability);
+        addRate(rates.addGeneMutation.geneProbability);
+        addRate(rates.duplicateGeneMutation.geneProbability);
+        addRate(rates.deleteGeneMutation.geneProbability);
+        return sum / static_cast<float>(numRates);
     }
 
     // The lineage slot of a creature is determined once per statistics timestep and cached in Creature::creatureIndex,

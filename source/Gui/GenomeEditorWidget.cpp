@@ -103,14 +103,14 @@ void _GenomeEditorWidget::processHeaderData()
                 .name("Resistance to injection")
                 .textWidth(rightColumnWidth)
                 .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeResistanceToInjection)),
-            _editData->genome._resistanceToInjection);
+            &_editData->genome._resistanceToInjection);
 
         AlienGui::Checkbox(
             AlienGui::CheckboxParameters()
                 .name("Apply meta-mutations")
                 .textWidth(rightColumnWidth)
                 .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeApplyMetaMutations)),
-            _editData->genome._applyMetaMutations);
+            &_editData->genome._applyMetaMutations);
 
         AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 

@@ -107,9 +107,9 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
                 AlienGui::CheckboxParameters()
                     .name(groupSpec._name)
                     .textWidth(scaleInverse(rightColumnWidth))
-                    .defaultValue(*origExpertToggleValue)
+                    .defaultValue(origExpertToggleValue)
                     .tooltip(groupSpec._description),
-                *expertToggleValue);
+                expertToggleValue);
         }
     }
 }
@@ -202,10 +202,12 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
             AlienGui::CheckboxParameters()
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)
-                .defaultValue(*origRef.value)
+                .colorDependence(ref.colorDependence == ColorDependence::ColorVector)
+                .customizationColors(parameters.customizationColors.value)
+                .defaultValue(origRef.value)
                 .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description),
-            *ref.value);
+            ref.value);
     }
 }
 

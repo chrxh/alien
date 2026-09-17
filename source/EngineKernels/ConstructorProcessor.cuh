@@ -227,7 +227,7 @@ __inline__ __device__ void ConstructorProcessor::constructCell(SimulationData& d
         alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
         if (constructionData.isLastNodeOfLastConcatenation) {
             if (ConstructorHelper::createsNewCreature(constructor)) {
-                ++constructor.currentOffspring;
+                alienAtomicAdd32(&object->typeData.cell.creature->currentOffspring, static_cast<uint32_t>(1));
                 if (constructor.provideEnergy == ProvideEnergy_Free) {
                     constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
                 }
@@ -755,7 +755,8 @@ __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(O
     if (cudaSimulationParameters.externalEnergyInflowForConstructor.value[hostObject->color] <= 0) {
         return false;
     }
-    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value && hostObject->typeData.cell.constructor.currentOffspring > 0) {
+    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value[hostObject->color]
+        && hostObject->typeData.cell.creature->currentOffspring > 0) {
         return false;
     }
     return true;

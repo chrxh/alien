@@ -86,7 +86,6 @@ struct Constructor
 
     // Process data
     uint64_t lastConstructedCellId;  // May be invalid
-    uint16_t currentOffspring;
 
     // Temp data
     Creature* offspring;  // Must be reset if separated construction is finished
@@ -450,6 +449,8 @@ struct Creature
     uint32_t lineageId;
     float accumulatedMutations;             // Never reset, total over the whole ancestry
     float accumulatedMutationsInLineage;    // Reset when a new lineage is formed
+
+    uint32_t currentOffspring;  // Number of creatures already constructed by all constructors of this creature
 
     // Process data
     uint32_t headUpdateId;  // Will be updated regularly to trigger head updates
