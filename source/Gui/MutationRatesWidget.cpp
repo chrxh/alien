@@ -85,6 +85,8 @@ namespace
         addActiveMutationType(
             activeMutations, "Delete node mutations", EntityAttribute::MutationDeleteNodeProbability, {mutationRates._deleteNodeMutation._nodeProbability});
         addActiveMutationType(
+            activeMutations, "Add gene mutations", EntityAttribute::MutationAddGeneProbability, {mutationRates._addGeneMutation._geneProbability});
+        addActiveMutationType(
             activeMutations,
             "Duplicate gene mutations",
             EntityAttribute::MutationDuplicateGeneProbability,

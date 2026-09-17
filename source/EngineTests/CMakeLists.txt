@@ -1,6 +1,7 @@
 target_sources(EngineTests
 PUBLIC
     AccumulatedMutationTests.cpp
+    AddGeneMutationTests.cpp
     AddNodeMutationTests.cpp
     ExtendGeneMutationTests.cpp
     AttackerTests.cpp

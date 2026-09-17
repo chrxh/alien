@@ -755,7 +755,8 @@ __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(O
     if (cudaSimulationParameters.externalEnergyInflowForConstructor.value[hostObject->color] <= 0) {
         return false;
     }
-    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value && hostObject->typeData.cell.constructor.currentOffspring > 0) {
+    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value[hostObject->color]
+        && hostObject->typeData.cell.constructor.currentOffspring > 0) {
         return false;
     }
     return true;

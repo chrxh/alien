@@ -18,6 +18,8 @@ using _BoolMember = BaseParameter<bool> SimulationParameters::*;
 using BoolMember = std::shared_ptr<_BoolMember>;
 using _BoolLayerMember = LayerParameter<bool> SimulationParameters::*;
 using BoolLayerMember = std::shared_ptr<_BoolLayerMember>;
+using _ColorVectorBoolMember = BaseParameter<ColorVector<bool>> SimulationParameters::*;
+using ColorVectorBoolMember = std::shared_ptr<_ColorVectorBoolMember>;
 using _ColorMatrixBoolMember = BaseParameter<ColorMatrix<bool>> SimulationParameters::*;
 using ColorMatrixBoolMember = std::shared_ptr<_ColorMatrixBoolMember>;
 using _BoolBaseLayerMember = BaseLayerParameter<bool> SimulationParameters::*;
@@ -26,7 +28,8 @@ using _BoolSourceMember = SourceParameter<bool> SimulationParameters::*;
 using BoolSourceMember = std::shared_ptr<_BoolSourceMember>;
 using _ExpertToggleMember = ExpertToggle SimulationParameters::*;
 using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
-using BoolMemberVariant = std::variant<std::monostate, BoolMember, BoolBaseLayerMember, ColorMatrixBoolMember, BoolLayerMember, BoolSourceMember>;
+using BoolMemberVariant =
+    std::variant<std::monostate, BoolMember, BoolBaseLayerMember, ColorVectorBoolMember, ColorMatrixBoolMember, BoolLayerMember, BoolSourceMember>;
 
 using _IntMember = BaseParameter<int> SimulationParameters::*;
 using IntMember = std::shared_ptr<_IntMember>;
@@ -111,6 +114,7 @@ using ColorTransitionRulesMemberVariant = std::variant<std::monostate, ColorTran
 struct BoolSpec
 {
     SETTER_SHARED_PTR(BoolSpec, BoolMember, member);
+    SETTER_SHARED_PTR(BoolSpec, ColorVectorBoolMember, member);
     SETTER_SHARED_PTR(BoolSpec, ColorMatrixBoolMember, member);
     SETTER_SHARED_PTR(BoolSpec, BoolBaseLayerMember, member);
     SETTER_SHARED_PTR(BoolSpec, BoolLayerMember, member);

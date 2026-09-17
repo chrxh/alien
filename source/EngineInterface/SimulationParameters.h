@@ -43,7 +43,7 @@ struct SimulationParameters
     BaseParameter<float> externalEnergy = {0.0f};
     BaseParameter<ColorVector<float>> externalEnergyInflowForConstructor = {ColorVector<float>::uniform(50.0f)};
     BaseParameter<ColorVector<float>> externalEnergyInflowThresholdFactor = {ColorVector<float>::uniform(0.0f)};
-    BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
+    BaseParameter<ColorVector<bool>> externalEnergyInflowOnlyForFirstOffspring = {ColorVector<bool>::uniform(false)};
     BaseParameter<ColorVector<float>> externalEnergyInflowForSources = {ColorVector<float>::uniform(100.0f)};
     BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
@@ -133,6 +133,7 @@ struct SimulationParameters
     BaseParameter<float> addNodeMetaMutationsSigma = {0};
     BaseParameter<float> trimGeneMetaMutationsSigma = {0};
     BaseParameter<float> deleteNodeMetaMutationsSigma = {0};
+    BaseParameter<float> addGeneMetaMutationsSigma = {0};
     BaseParameter<float> duplicateGeneMetaMutationsSigma = {0};
     BaseParameter<float> deleteGeneMetaMutationsSigma = {0};
     BaseParameter<float> copyNodeSectionMetaMutationsSigma = {0};
