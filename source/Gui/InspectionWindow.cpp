@@ -476,9 +476,9 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                 object._color);
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters().name("Static").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Static)),
-                object._isStatic);
+                &object._isStatic);
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Sticky").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Sticky)), object._sticky);
+                AlienGui::CheckboxParameters().name("Sticky").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::Sticky)), &object._sticky);
 
             auto objectType = object.getObjectType();
             AlienGui::ComboParameters typeParams;
@@ -631,7 +631,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<Genome
                 cell._activationTime);
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters().name("Head cell").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellHeadCell)),
-                cell._headCell);
+                &cell._headCell);
 
             auto cellType = cell.getCellType();
             AlienGui::ComboParameters cellTypeParams;
@@ -651,7 +651,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<Genome
                         .name("Has constructor")
                         .textWidth(TextWidth)
                         .tooltip(EntityAttributeHelp::get(EntityAttribute::CellHasConstructor)),
-                    hasConstructor);
+                    &hasConstructor);
                 if (hasConstructor && !cell._constructor.has_value()) {
                     cell._constructor = ConstructorDesc();
                 } else if (!hasConstructor && cell._constructor.has_value()) {
@@ -715,7 +715,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
             constructor._reservedEnergy);
         AlienGui::Checkbox(
             AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorSeparation)),
-            constructor._separation);
+            &constructor._separation);
         auto numBranches = constructor._numBranches - 1;
         if (constructor._separation) {
             ImGui::BeginDisabled();
@@ -904,13 +904,13 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             auto& sensor = std::get<SensorDesc>(cell._cellType);
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters().name("Auto trigger").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::SensorAutoTrigger)),
-                sensor._autoTrigger);
+                &sensor._autoTrigger);
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
                     .name("Tag for attackers")
                     .textWidth(TextWidth)
                     .tooltip(EntityAttributeHelp::get(EntityAttribute::SensorTagForAttackers)),
-                sensor._tagForAttackers);
+                &sensor._tagForAttackers);
             auto mode = sensor.getMode();
             AlienGui::ComboParameters modeParams;
             modeParams.name("Mode").textWidth(TextWidth).values(Const::SensorModeStrings).tooltip(EntityAttributeHelp::get(EntityAttribute::SensorMode));
@@ -992,7 +992,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             auto& generator = std::get<GeneratorDesc>(cell._cellType);
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::GeneratorAdditive)),
-                generator._additive);
+                &generator._additive);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Min value")
@@ -1215,12 +1215,12 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                 auto& m = std::get<SignalRecorderDesc>(memory._mode);
                 AlienGui::Checkbox(
                     AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryReadOnly)),
-                    m._readOnly);
+                    &m._readOnly);
             } else if (mode == MemoryMode_SignalStorage) {
                 auto& m = std::get<SignalStorageDesc>(memory._mode);
                 AlienGui::Checkbox(
                     AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::MemoryReadOnly)),
-                    m._readOnly);
+                    &m._readOnly);
             } else if (mode == MemoryMode_SignalIntegrator) {
                 auto& m = std::get<SignalIntegratorDesc>(memory._mode);
                 AlienGui::SliderFloat(
@@ -1260,7 +1260,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
                     &m._range);
                 AlienGui::Checkbox(
                     AlienGui::CheckboxParameters().name("One-way").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CommunicatorOneway)),
-                    m._oneway);
+                    &m._oneway);
             } else if (mode == CommunicatorMode_Receiver) {
                 auto& m = std::get<ReceiverDesc>(communicator._mode);
                 AlienGui::ColorCheckboxes(

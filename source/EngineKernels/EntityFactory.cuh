@@ -120,6 +120,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->mutationRates.addNodeMutation = {genomeTO.mutationRates.addNodeMutation.nodeProbability};
     genome->mutationRates.trimGeneMutation = {genomeTO.mutationRates.trimGeneMutation.geneProbability};
     genome->mutationRates.deleteNodeMutation = {genomeTO.mutationRates.deleteNodeMutation.nodeProbability};
+    genome->mutationRates.addGeneMutation = {genomeTO.mutationRates.addGeneMutation.geneProbability};
     genome->mutationRates.duplicateGeneMutation = {genomeTO.mutationRates.duplicateGeneMutation.geneProbability};
     genome->mutationRates.deleteGeneMutation = {genomeTO.mutationRates.deleteGeneMutation.geneProbability};
     genome->mutationRates.copyNodeSectionMutation = {genomeTO.mutationRates.copyNodeSectionMutation.geneProbability};
@@ -606,7 +607,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.numConcatenations = cellTO.constructor.numConcatenations;
             cell->constructor.geneIndex = cellTO.constructor.geneIndex;
             cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
-            cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
             cell->constructor.offspring = nullptr;
             cell->constructor.energyNeeded = false;
             cell->constructor.readyToConstruct = false;
@@ -623,6 +623,7 @@ __inline__ __device__ void EntityFactory::changeCreatureFromTO(CreatureTO const&
     creature->lineageId = creatureTO.lineageId;
     creature->accumulatedMutations = creatureTO.accumulatedMutations;
     creature->accumulatedMutationsInLineage = creatureTO.accumulatedMutationsInLineage;
+    creature->currentOffspring = creatureTO.currentOffspring;
     creature->headUpdateId = creatureTO.headUpdateId;
 }
 
@@ -699,6 +700,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     newCreature->ancestorId = creature->id;
     newCreature->generation = creature->generation + 1;
     newCreature->mutationState = MutationState_NotMutated;
+    newCreature->currentOffspring = 0;
     return newCreature;
 }
 
@@ -999,7 +1001,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.numConcatenations = nodeConstructor.numConcatenations;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-        constructor.currentOffspring = 0;
         constructor.offspring = nullptr;
         constructor.energyNeeded = false;
         constructor.readyToConstruct = false;

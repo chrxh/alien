@@ -599,7 +599,6 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             constructor._lastConstructedCellId = objectTO.typeData.cell.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
                 ? std::make_optional(objectTO.typeData.cell.constructor.lastConstructedCellId)
                 : std::nullopt;
-            constructor._currentOffspring = objectTO.typeData.cell.constructor.currentOffspring;
             cellDesc._constructor = constructor;
         }
 
@@ -891,6 +890,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._mutationRates._addNodeMutation._nodeProbability = genomeTO.mutationRates.addNodeMutation.nodeProbability;
     result._mutationRates._trimGeneMutation._geneProbability = genomeTO.mutationRates.trimGeneMutation.geneProbability;
     result._mutationRates._deleteNodeMutation._nodeProbability = genomeTO.mutationRates.deleteNodeMutation.nodeProbability;
+    result._mutationRates._addGeneMutation._geneProbability = genomeTO.mutationRates.addGeneMutation.geneProbability;
     result._mutationRates._duplicateGeneMutation._geneProbability = genomeTO.mutationRates.duplicateGeneMutation.geneProbability;
     result._mutationRates._deleteGeneMutation._geneProbability = genomeTO.mutationRates.deleteGeneMutation.geneProbability;
     result._mutationRates._copyNodeSectionMutation._geneProbability = genomeTO.mutationRates.copyNodeSectionMutation.geneProbability;
@@ -934,6 +934,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     NumberGenerator::get().adaptMaxLineageId(creatureTO.lineageId);
     result._accumulatedMutations = creatureTO.accumulatedMutations;
     result._accumulatedMutationsInLineage = creatureTO.accumulatedMutationsInLineage;
+    result._currentOffspring = creatureTO.currentOffspring;
     result._headUpdateId = creatureTO.headUpdateId;
 
     return result;
@@ -1003,6 +1004,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.mutationRates.addNodeMutation = {genome._mutationRates._addNodeMutation._nodeProbability};
     genomeTO.mutationRates.trimGeneMutation = {genome._mutationRates._trimGeneMutation._geneProbability};
     genomeTO.mutationRates.deleteNodeMutation = {genome._mutationRates._deleteNodeMutation._nodeProbability};
+    genomeTO.mutationRates.addGeneMutation = {genome._mutationRates._addGeneMutation._geneProbability};
     genomeTO.mutationRates.duplicateGeneMutation = {genome._mutationRates._duplicateGeneMutation._geneProbability};
     genomeTO.mutationRates.deleteGeneMutation = {genome._mutationRates._deleteGeneMutation._geneProbability};
     genomeTO.mutationRates.copyNodeSectionMutation = {genome._mutationRates._copyNodeSectionMutation._geneProbability};
@@ -1255,6 +1257,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.accumulatedMutations = creatureDesc._accumulatedMutations;
     creatureTO.accumulatedMutationsInLineage = creatureDesc._accumulatedMutationsInLineage;
+    creatureTO.currentOffspring = static_cast<uint32_t>(creatureDesc._currentOffspring);
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 
@@ -1556,7 +1559,6 @@ void DescConverterService::convertObjectToTO(
             constructorTO.numConcatenations = constructorDesc._numConcatenations;
             constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
             constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
-            constructorTO.currentOffspring = static_cast<uint16_t>(constructorDesc._currentOffspring);
         }
 
         auto numChannels = cellDesc._neuralActivity._signals.size();

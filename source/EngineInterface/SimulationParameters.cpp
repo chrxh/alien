@@ -158,7 +158,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Inflow only for first offspring")
                         .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))
                         .description("If activated, external energy can only be transferred to constructor cells that have not yet produced any offspring. "
-                                     "This option can be used to limit the external energy supply."),
+                                     "This option can be used to limit the external energy supply.\n\nThe setting is evaluated for the customization color of "
+                                     "the cell with the constructor."),
                     ParameterSpec()
                         .name("Inflow for sources")
                         .reference(
@@ -664,6 +665,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
                         .description("Standard deviation of the Gaussian change of the probability of the delete node mutations stored in a genome. It only "
                                      "acts on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
+                    ParameterSpec()
+                        .name("Add gene mutation sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::addGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description("Standard deviation of the Gaussian change of the probability of the add gene mutations stored in a genome. It only acts "
+                                     "on genomes for which 'Apply meta-mutations' is enabled, and is applied once per offspring."),
                     ParameterSpec()
                         .name("Duplicate gene mutation sigma")
                         .reference(

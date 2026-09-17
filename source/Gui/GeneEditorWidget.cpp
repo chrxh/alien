@@ -123,7 +123,7 @@ void _GeneEditorWidget::processHeaderData()
                     .name("Homogeneous cell type")
                     .textWidth(rightColumnWidth)
                     .tooltip(EntityAttributeHelp::get(EntityAttribute::GeneHomogeneousCellType)),
-                gene._homogeneousCellType);
+                &gene._homogeneousCellType);
 
             table.next();
             table.end();
