@@ -41,6 +41,7 @@ private:
     __inline__ __device__ static void applyMutations_addGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_duplicateGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_deleteGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_swapGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_copyNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_moveNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static int getNumGeneReferences(Genome* genome, int geneIndex);
@@ -131,11 +132,12 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     // Sync since the following mutations may add or remove whole genes (changing genome->genes and numGenes)
     block.sync();
     bool anyGeneMutation = nodeRates.addGeneMutation.geneProbability > 0 || nodeRates.duplicateGeneMutation.geneProbability > 0
-        || nodeRates.deleteGeneMutation.geneProbability > 0;
+        || nodeRates.deleteGeneMutation.geneProbability > 0 || nodeRates.swapGeneMutation.geneProbability > 0;
     if (anyGeneMutation) {
         applyMutations_addGene(data, genome, accumulatedMutations);
         applyMutations_duplicateGene(data, genome, accumulatedMutations);
         applyMutations_deleteGene(data, genome, accumulatedMutations);
+        applyMutations_swapGene(data, genome, accumulatedMutations);
     }
 
     block.sync();
@@ -1478,6 +1480,81 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
     block.sync();
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_swapGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    // Each gene is independently a swap candidate with probability geneProbability, so several exchanges can happen in one pass.
+    // A candidate is exchanged with another randomly chosen gene: the gene indices stay valid, but every reference to one of the
+    // two indices now addresses the content of the respective other gene. A gene takes part in at most one exchange per pass, so a
+    // candidate whose partner is already exchanged is skipped.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    auto const& rate = genome->mutationRates.swapGeneMutation;
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ int numGenes;
+    __shared__ int numSwaps;
+    __shared__ int* partners;  // Partner chosen by a gene, or -1 if the gene is not a candidate
+    __shared__ bool* exchanged;
+    __shared__ int* swapFirst;
+    __shared__ int* swapSecond;
+
+    if (laneId == 0) {
+        numGenes = genome->numGenes;
+        numSwaps = 0;
+        if (numGenes > 1) {
+            partners = data.entities.heap.getTypedSubArray<int>(numGenes);
+            exchanged = data.entities.heap.getTypedSubArray<bool>(numGenes);
+            swapFirst = data.entities.heap.getTypedSubArray<int>(numGenes / 2);
+            swapSecond = data.entities.heap.getTypedSubArray<int>(numGenes / 2);
+        }
+    }
+    block.sync();
+
+    if (numGenes > 1) {  // Uniform across the block
+        // Phase 1 (parallel per gene): choose the candidates and their partners. Only reads happen here, so the genome is not
+        // modified yet.
+        for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
+            exchanged[geneIndex] = false;
+            if (data.primaryNumberGen.random() >= rate.geneProbability) {
+                partners[geneIndex] = -1;
+                continue;
+            }
+            auto partner = data.primaryNumberGen.random(numGenes - 2);           // [0, numGenes - 2]
+            partners[geneIndex] = partner >= geneIndex ? partner + 1 : partner;  // Skip the candidate itself
+        }
+        block.sync();
+
+        // Phase 2: collect the disjoint exchanges in gene order, so the result does not depend on the thread scheduling.
+        if (laneId == 0) {
+            for (int geneIndex = 0; geneIndex < numGenes; ++geneIndex) {
+                auto partner = partners[geneIndex];
+                if (partner == -1 || exchanged[geneIndex] || exchanged[partner]) {
+                    continue;
+                }
+                exchanged[geneIndex] = true;
+                exchanged[partner] = true;
+                swapFirst[numSwaps] = geneIndex;
+                swapSecond[numSwaps] = partner;
+                ++numSwaps;
+            }
+        }
+        block.sync();
+
+        // Phase 3 (parallel per exchange): every gene belongs to at most one exchange, so the swaps do not overlap.
+        for (int slot = laneId; slot < numSwaps; slot += blockDim.x) {
+            auto& first = genome->genes[swapFirst[slot]];
+            auto& second = genome->genes[swapSecond[slot]];
+            auto temp = first;
+            first = second;
+            second = temp;
+            atomicAdd_block(&accumulatedMutations, toFloat(first.numNodes + second.numNodes));
+        }
+    }
+    block.sync();
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_copyNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     // Each gene is independently a source candidate with probability geneProbability, so several genes can copy a section in one
@@ -1936,6 +2013,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (deleteGeneSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteGeneSigma)); };
             mutateFloat(genome->mutationRates.deleteGeneMutation.geneProbability);
+        }
+
+        float swapGeneSigma = cudaSimulationParameters.swapGeneMetaMutationsSigma.value;
+        if (swapGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * swapGeneSigma)); };
+            mutateFloat(genome->mutationRates.swapGeneMutation.geneProbability);
         }
 
         float copyNodeSectionSigma = cudaSimulationParameters.copyNodeSectionMetaMutationsSigma.value;

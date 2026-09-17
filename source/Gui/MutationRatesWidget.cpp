@@ -94,6 +94,8 @@ namespace
         addActiveMutationType(
             activeMutations, "Delete gene mutations", EntityAttribute::MutationDeleteGeneProbability, {mutationRates._deleteGeneMutation._geneProbability});
         addActiveMutationType(
+            activeMutations, "Swap gene mutations", EntityAttribute::MutationSwapGeneProbability, {mutationRates._swapGeneMutation._geneProbability});
+        addActiveMutationType(
             activeMutations,
             "Copy node section mutations",
             EntityAttribute::MutationCopyNodeSectionProbability,
