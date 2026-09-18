@@ -1,8 +1,17 @@
 target_sources(cli
 PUBLIC
+    CommandLineArguments.h
+    CommandLineParser.cpp
+    CommandLineParser.h
+    ConsoleOutput.cpp
+    ConsoleOutput.h
     LoginSession.cpp
     LoginSession.h
-    Main.cpp)
+    Main.cpp
+    PeriodicUploader.cpp
+    PeriodicUploader.h
+    SimulationRunner.cpp
+    SimulationRunner.h)
 
 target_link_libraries(cli Base)
 target_link_libraries(cli ConsoleUi)
@@ -11,6 +20,7 @@ target_link_libraries(cli EngineImpl)
 target_link_libraries(cli EngineInterface)
 target_link_libraries(cli Network)
 target_link_libraries(cli PersisterInterface)
+target_link_libraries(cli PersisterImpl)
 
 target_include_directories(cli
     PRIVATE
