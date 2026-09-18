@@ -68,7 +68,8 @@ TEST_F(ConstructorTests, alreadyFinished)
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
     auto hostObject = actualData.getObjectRef(0);
-    EXPECT_EQ(0, creature._currentOffspring);
+    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_EQ(0, hostConstructor._currentOffspring);
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._neuralActivity._signals[0]));
 }
@@ -550,8 +551,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
-    EXPECT_EQ(1, hostCreature._currentOffspring);
-    EXPECT_EQ(0, newCreature._currentOffspring);
+    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_EQ(1, hostConstructor._currentOffspring);
 }
 
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_upperSide)
@@ -720,7 +721,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto connection = actualData.getConnection(hostObject, newObject);
     EXPECT_EQ(1.0f, connection._distance);
 
-    EXPECT_EQ(1, hostCreature._currentOffspring);
+    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_EQ(1, hostConstructor._currentOffspring);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_1)
@@ -3430,9 +3432,9 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0).separation(true))),
         },
-        CreatureDesc().id(0).currentOffspring(0),
+        CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
@@ -3458,9 +3460,9 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(1).separation(true))),
         },
-        CreatureDesc().id(0).currentOffspring(1),
+        CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
@@ -3472,6 +3474,36 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
 
     // Construction should fail because currentOffspring > 0 blocks energy inflow and cell has insufficient energy
     ASSERT_EQ(1, actualData._creatures.size());
+}
+
+TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_twoConstructorsOfSameCreature)
+{
+    _parameters.externalEnergy.value = 50.0f;
+    _parameters.externalEnergyInflowForConstructor.value = ColorVector<float>::uniform(50.0f);
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = ColorVector<bool>::uniform(true);
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // Both constructors would start an offspring, but only the one that claimed the inflow first receives energy
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto reservedEnergy1 = getReservedEnergy(actualData.getObjectRef(0).getCellRef());
+    auto reservedEnergy2 = getReservedEnergy(actualData.getObjectRef(1).getCellRef());
+    EXPECT_TRUE(approxCompare(50.0f, reservedEnergy1 + reservedEnergy2));
+    EXPECT_TRUE(approxCompare(0.0f, std::min(reservedEnergy1, reservedEnergy2)));
 }
 
 TEST_F(ConstructorTests, externalEnergyInflow_distributedProportionally)

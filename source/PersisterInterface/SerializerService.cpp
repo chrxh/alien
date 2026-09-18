@@ -1001,7 +1001,6 @@ namespace
     auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_AccumulatedMutations = 9;
     auto constexpr Id_Creature_AccumulatedMutationsInLineage = 10;
-    auto constexpr Id_Creature_CurrentOffspring = 11;
 
     auto constexpr Id_Solid_Energy = 0;
 
@@ -1058,6 +1057,7 @@ namespace
     auto constexpr Id_Constructor_LastConstructedCellId = 5;
     auto constexpr Id_Constructor_ConstructionAngle = 7;
     auto constexpr Id_Constructor_ProvideEnergy = 8;
+    auto constexpr Id_Constructor_CurrentOffspring = 9;
     auto constexpr Id_Constructor_ReservedEnergy = 10;
     auto constexpr Id_Constructor_Separation = 11;
     auto constexpr Id_Constructor_NumBranches = 12;
@@ -1303,6 +1303,7 @@ namespace cereal
         scope.addMember(Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         scope.addMember(Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         scope.addMember(Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
+        scope.addMember(Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
         scope.addMember(Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         scope.addMember(Id_Constructor_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         scope.addMember(Id_Constructor_Separation, data._separation, defaultObject._separation);
@@ -1814,7 +1815,6 @@ namespace cereal
         scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         scope.addMember(Id_Creature_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
         scope.addMember(Id_Creature_AccumulatedMutationsInLineage, data._accumulatedMutationsInLineage, defaultObject._accumulatedMutationsInLineage);
-        scope.addMember(Id_Creature_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 

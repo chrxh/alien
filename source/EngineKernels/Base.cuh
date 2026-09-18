@@ -230,6 +230,14 @@ __device__ __inline__ T alienAtomicExch64(T* address, T const& value)
 }
 
 template <typename T>
+__device__ __inline__ T alienAtomicCAS64(T* address, T const& compare, T const& value)
+{
+    static_assert(sizeof(unsigned long long) == sizeof(T));
+    return static_cast<T>(
+        atomicCAS(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(compare), static_cast<unsigned long long>(value)));
+}
+
+template <typename T>
 __device__ __inline__ T* alienAtomicExch(T** address, T* value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T*));
