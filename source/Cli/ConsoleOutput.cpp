@@ -43,6 +43,11 @@ void ConsoleOutput::installInterruptHandler()
     std::signal(SIGINT, restoreCursorOnInterrupt);
 }
 
+void ConsoleOutput::clearScreen()
+{
+    std::cout << Console::clearScreen() << std::flush;
+}
+
 void ConsoleOutput::printBanner()
 {
     std::cout << std::endl;
