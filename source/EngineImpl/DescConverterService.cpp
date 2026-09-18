@@ -599,6 +599,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             constructor._lastConstructedCellId = objectTO.typeData.cell.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
                 ? std::make_optional(objectTO.typeData.cell.constructor.lastConstructedCellId)
                 : std::nullopt;
+            constructor._currentOffspring = objectTO.typeData.cell.constructor.currentOffspring;
             cellDesc._constructor = constructor;
         }
 
@@ -935,7 +936,6 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     NumberGenerator::get().adaptMaxLineageId(creatureTO.lineageId);
     result._accumulatedMutations = creatureTO.accumulatedMutations;
     result._accumulatedMutationsInLineage = creatureTO.accumulatedMutationsInLineage;
-    result._currentOffspring = creatureTO.currentOffspring;
     result._headUpdateId = creatureTO.headUpdateId;
 
     return result;
@@ -1259,7 +1259,6 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.accumulatedMutations = creatureDesc._accumulatedMutations;
     creatureTO.accumulatedMutationsInLineage = creatureDesc._accumulatedMutationsInLineage;
-    creatureTO.currentOffspring = static_cast<uint32_t>(creatureDesc._currentOffspring);
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 
@@ -1561,6 +1560,7 @@ void DescConverterService::convertObjectToTO(
             constructorTO.numConcatenations = constructorDesc._numConcatenations;
             constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
             constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
+            constructorTO.currentOffspring = static_cast<uint16_t>(constructorDesc._currentOffspring);
         }
 
         auto numChannels = cellDesc._neuralActivity._signals.size();

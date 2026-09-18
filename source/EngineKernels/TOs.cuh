@@ -66,6 +66,7 @@ struct ConstructorTO
 
     // Process data
     uint64_t lastConstructedCellId;  // May be invalid
+    uint16_t currentOffspring;
 };
 
 struct DetectEnergyTO
@@ -496,8 +497,6 @@ struct CreatureTO
     uint32_t lineageId;
     float accumulatedMutations;
     float accumulatedMutationsInLineage;
-
-    uint32_t currentOffspring;
 
     // Process data
     uint32_t headUpdateId;

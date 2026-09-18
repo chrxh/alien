@@ -73,8 +73,8 @@ private:
 
     __inline__ __device__ static bool checkHostEnergyAndRequestExternalEnergyIfNeeded(SimulationData& data, Object* hostObject);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
-    __inline__ __device__ static bool hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy, uint32_t currentConcatenation);
-    __inline__ __device__ static bool isExternalEnergyInflowAllowed(Object const* hostObject, uint32_t currentConcatenation);
+    __inline__ __device__ static bool hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy);
+    __inline__ __device__ static bool isExternalEnergyInflowAllowed(Object* hostObject);
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
 };
@@ -227,7 +227,7 @@ __inline__ __device__ void ConstructorProcessor::constructCell(SimulationData& d
         alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
         if (constructionData.isLastNodeOfLastConcatenation) {
             if (ConstructorHelper::createsNewCreature(constructor)) {
-                alienAtomicAdd32(&object->typeData.cell.creature->currentOffspring, static_cast<uint32_t>(1));
+                ++constructor.currentOffspring;
                 if (constructor.provideEnergy == ProvideEnergy_Free) {
                     constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
                 }
@@ -687,9 +687,9 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
     auto const& genome = hostCell.creature->genome;
 
     auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
-    uint32_t currentConcatenation = 0;
     if (constructor.geneIndex < genome->numGenes) {
         uint16_t currentNodeIndex;
+        uint32_t currentConcatenation;
         uint8_t currentBranch;
         ConstructorHelper::getConstructorIndices(currentNodeIndex, currentConcatenation, currentBranch, hostObject, *genome);
         auto gene = ConstructorHelper::getCurrentGene(constructor, *genome);
@@ -701,7 +701,7 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         }
     }
 
-    return hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy, currentConcatenation);
+    return hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy);
 }
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData)
@@ -715,7 +715,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     // Energy actually required for the node being constructed (derived from the offspring genome via constructionData). The early gate only
     // estimates this from the host genome, which may diverge from the offspring genome during ongoing construction, so re-check here.
     auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
-    if (!hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy, constructionData.currentConcatenation)) {
+    if (!hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy)) {
         return false;
     }
 
@@ -730,8 +730,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     return true;
 }
 
-__inline__ __device__ bool
-ConstructorProcessor::hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy, uint32_t currentConcatenation)
+__inline__ __device__ bool ConstructorProcessor::hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy)
 {
     auto& hostCell = hostObject->typeData.cell;
     auto& constructor = hostCell.constructor;
@@ -740,7 +739,7 @@ ConstructorProcessor::hasEnergyForConstructionOrRequestExternalEnergy(Object* ho
     if (availableEnergyForConstruction < requiredEnergy) {
 
         // ... if not = > requesting external energy if possible
-        if (isExternalEnergyInflowAllowed(hostObject, currentConcatenation)) {
+        if (isExternalEnergyInflowAllowed(hostObject)) {
             auto thresholdEnergy = requiredEnergy * cudaSimulationParameters.externalEnergyInflowThresholdFactor.value[hostObject->color];
             if (availableEnergyForConstruction >= thresholdEnergy) {
                 constructor.energyNeeded = true;
@@ -751,14 +750,23 @@ ConstructorProcessor::hasEnergyForConstructionOrRequestExternalEnergy(Object* ho
     return true;
 }
 
-__inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(Object const* hostObject, uint32_t currentConcatenation)
+__inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(Object* hostObject)
 {
+    auto& hostCell = hostObject->typeData.cell;
+    auto& constructor = hostCell.constructor;
     if (cudaSimulationParameters.externalEnergyInflowForConstructor.value[hostObject->color] <= 0) {
         return false;
     }
-    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value[hostObject->color]
-        && (hostObject->typeData.cell.creature->currentOffspring > 0 || currentConcatenation > 0)) {
-        return false;
+    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value[hostObject->color] && ConstructorHelper::createsNewCreature(constructor)) {
+        if (constructor.currentOffspring > 0) {
+            return false;
+        }
+
+        // A creature may build several offspring at the same time, so the inflow is claimed by whichever constructor requests it first.
+        auto claimingCellId = alienAtomicCAS64(&hostCell.creature->externalEnergyInflowCellId, static_cast<uint64_t>(VALUE_NOT_SET_UINT64), hostObject->id);
+        if (claimingCellId != VALUE_NOT_SET_UINT64 && claimingCellId != hostObject->id) {
+            return false;
+        }
     }
     return true;
 }

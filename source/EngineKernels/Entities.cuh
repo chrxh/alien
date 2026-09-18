@@ -86,6 +86,7 @@ struct Constructor
 
     // Process data
     uint64_t lastConstructedCellId;  // May be invalid
+    uint16_t currentOffspring;       // Number of creatures already constructed by this constructor
 
     // Temp data
     Creature* offspring;  // Must be reset if separated construction is finished
@@ -450,10 +451,9 @@ struct Creature
     float accumulatedMutations;             // Never reset, total over the whole ancestry
     float accumulatedMutationsInLineage;    // Reset when a new lineage is formed
 
-    uint32_t currentOffspring;  // Number of creatures already constructed by all constructors of this creature
-
     // Process data
-    uint32_t headUpdateId;  // Will be updated regularly to trigger head updates
+    uint32_t headUpdateId;                // Will be updated regularly to trigger head updates
+    uint64_t externalEnergyInflowCellId;  // Constructor cell that claimed the external energy inflow, may be VALUE_NOT_SET_UINT64
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid

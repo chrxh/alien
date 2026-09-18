@@ -303,7 +303,6 @@ namespace
             creatureTO.lineageId = creature->lineageId;
             creatureTO.accumulatedMutations = creature->accumulatedMutations;
             creatureTO.accumulatedMutationsInLineage = creature->accumulatedMutationsInLineage;
-            creatureTO.currentOffspring = creature->currentOffspring;
             creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
@@ -571,6 +570,7 @@ namespace
                 cellTO.constructor.numConcatenations = cell.constructor.numConcatenations;
                 cellTO.constructor.geneIndex = cell.constructor.geneIndex;
                 cellTO.constructor.lastConstructedCellId = cell.constructor.lastConstructedCellId;
+                cellTO.constructor.currentOffspring = cell.constructor.currentOffspring;
             }
         }
     }

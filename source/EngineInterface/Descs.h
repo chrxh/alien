@@ -77,6 +77,7 @@ struct ConstructorDesc
 
     // Process data
     MEMBER(ConstructorDesc, std::optional<uint64_t>, lastConstructedCellId, std::nullopt);
+    MEMBER(ConstructorDesc, int, currentOffspring, 0);
 
     static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
@@ -591,7 +592,6 @@ struct CreatureDesc
     MEMBER(CreatureDesc, int, lineageId, 0);
     MEMBER(CreatureDesc, float, accumulatedMutations, 0.0f);
     MEMBER(CreatureDesc, float, accumulatedMutationsInLineage, 0.0f);
-    MEMBER(CreatureDesc, int, currentOffspring, 0);
 
     // Process data
     MEMBER(CreatureDesc, int, headUpdateId, 0);
