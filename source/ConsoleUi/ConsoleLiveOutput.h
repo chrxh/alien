@@ -13,12 +13,14 @@ public:
     void update(std::vector<std::string> const& lines, std::string const& plainLine);
 
     void printMessage(std::string const& message);
+    void appendToLastMessage(std::string const& text);
     void close();
 
 private:
     std::string createEraseSequence();
 
     std::vector<std::string> _printedLines;
+    std::string _lastMessage;
     int _plainLineLength = 0;
     bool _cursorHidden = false;
 };
