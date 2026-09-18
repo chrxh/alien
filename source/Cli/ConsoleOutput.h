@@ -6,6 +6,7 @@ class ConsoleOutput
 {
 public:
     static void installInterruptHandler();
+    static void clearScreen();
 
     static void printBanner();
     static void printStep(std::string const& label, std::string const& value, std::string const& detail = std::string());

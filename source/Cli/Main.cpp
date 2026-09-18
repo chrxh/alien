@@ -204,6 +204,7 @@ int main(int argc, char** argv)
 
         Console::init(arguments.plainOutput);
         ConsoleOutput::installInterruptHandler();
+        ConsoleOutput::clearScreen();
         ConsoleOutput::printBanner();
         if (arguments.debugMode) {
             initDebugMode();
