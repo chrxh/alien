@@ -5,6 +5,11 @@
 
 #include <Base/Console.h>
 
+namespace
+{
+    auto constexpr LinesBetweenMessageAndPanel = 2;
+}
+
 ConsoleLiveOutput::~ConsoleLiveOutput()
 {
     close();
@@ -49,8 +54,28 @@ void ConsoleLiveOutput::update(std::vector<std::string> const& lines, std::strin
 
 void ConsoleLiveOutput::printMessage(std::string const& message)
 {
+    _lastMessage = message;
+
     // The trailing blank line separates the message from the panel that is redrawn below
     std::cout << createEraseSequence() << message << std::endl << std::endl;
+}
+
+void ConsoleLiveOutput::appendToLastMessage(std::string const& text)
+{
+    if (_lastMessage.empty()) {
+        return;
+    }
+    _lastMessage += text;
+
+    if (!Console::isRichOutput()) {
+        std::cout << createEraseSequence() << _lastMessage << std::endl << std::endl;
+        return;
+    }
+
+    auto panelLines = _printedLines;
+    std::cout << createEraseSequence() << Console::moveUp(LinesBetweenMessageAndPanel) << _lastMessage << Console::eraseToEndOfLine()
+              << Console::moveToNextLine() << Console::moveToNextLine() << std::flush;
+    update(panelLines, std::string());
 }
 
 void ConsoleLiveOutput::close()
@@ -64,6 +89,7 @@ void ConsoleLiveOutput::close()
         _cursorHidden = false;
     }
     _printedLines.clear();
+    _lastMessage.clear();
 }
 
 std::string ConsoleLiveOutput::createEraseSequence()
