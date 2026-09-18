@@ -589,12 +589,6 @@ struct Object
 
     ObjectTypeData typeData;
 
-    __device__ __inline__ float& getRefDistance(Object* connectedObject)
-    {
-        auto index = getConnectionIndex(connectedObject);
-        return connections[index].distance;
-    }
-
     __device__ __inline__ int getConnectionIndex(Object* connectedObject)
     {
         for (int i = 0; i < numConnections; i++) {

@@ -28,6 +28,8 @@ private:
 
     __inline__ __device__ static void radiate(SimulationData& data, Object* object, float activation);
 
+    __inline__ __device__ static bool tryChangeConnectionDistance(Object* object, float distanceDelta);
+
     __inline__ __device__ static void getChain(Object** chain, int& chainLength, Object* startCell);
     __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Object* object);
     __inline__ __device__ static void applyAcceleration(SimulationStatistics& statistics, Object* object, float2 const& acceleration);
@@ -399,9 +401,11 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
         return;
     }
 
+    auto connectionDistance = alienAtomicRead(&object->connections[0].distance);
+
     // Initialization
     if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
-        crawling.initialDistance = object->connections[0].distance;
+        crawling.initialDistance = connectionDistance;
         crawling.forward = true;
         crawling.lastActualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
     }
@@ -415,25 +419,25 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     auto maxDistance = max(crawling.initialDistance * (1.0f + maxDistanceDeviation), MinDistance);
     auto minDistance = min(max(crawling.initialDistance * (1.0f - maxDistanceDeviation), MinDistance), crawling.initialDistance);
 
-    if (object->connections[0].distance > maxDistance - NEAR_ZERO) {
+    if (connectionDistance > maxDistance - NEAR_ZERO) {
         crawling.forward = activation >= 0;
     }
-    if (object->connections[0].distance < minDistance + NEAR_ZERO) {
+    if (connectionDistance < minDistance + NEAR_ZERO) {
         crawling.forward = activation < 0;
     }
 
     // Calc and apply distance delta
     auto distanceDelta = crawling.forward ? -1.05f + crawling.forwardBackwardRatio : 0.05f + crawling.forwardBackwardRatio;
     distanceDelta *= 0.025f * activation * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
-    if (object->connections[0].distance + distanceDelta > maxDistance) {
-        distanceDelta = maxDistance - object->connections[0].distance;
+    if (connectionDistance + distanceDelta > maxDistance) {
+        distanceDelta = maxDistance - connectionDistance;
     }
-    if (object->connections[0].distance + distanceDelta < minDistance) {
-        distanceDelta = minDistance - object->connections[0].distance;
+    if (connectionDistance + distanceDelta < minDistance) {
+        distanceDelta = minDistance - connectionDistance;
     }
-    object->connections[0].distance += distanceDelta;
-    auto& connectedObject = object->connections[0].object;
-    connectedObject->getRefDistance(object) += distanceDelta;
+    if (!tryChangeConnectionDistance(object, distanceDelta)) {
+        return;
+    }
 
     // Apply impulse
     auto power = min(1.0f, abs(distanceDelta));
@@ -472,9 +476,11 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
         return;
     }
 
+    auto connectionDistance = alienAtomicRead(&object->connections[0].distance);
+
     // Initialization
     if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
-        crawling.initialDistance = object->connections[0].distance;
+        crawling.initialDistance = connectionDistance;
         crawling.lastActualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         crawling.lastDistanceDelta = 0;
     }
@@ -491,15 +497,15 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     // Calc and apply distance delta
     auto distanceDelta = activation > 0 ? 1.05f - crawling.forwardBackwardRatio : 0.05f + crawling.forwardBackwardRatio;
     distanceDelta *= 0.025f * activation * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
-    if (object->connections[0].distance + distanceDelta > maxDistance) {
-        distanceDelta = maxDistance - object->connections[0].distance;
+    if (connectionDistance + distanceDelta > maxDistance) {
+        distanceDelta = maxDistance - connectionDistance;
     }
-    if (object->connections[0].distance + distanceDelta < minDistance) {
-        distanceDelta = minDistance - object->connections[0].distance;
+    if (connectionDistance + distanceDelta < minDistance) {
+        distanceDelta = minDistance - connectionDistance;
     }
-    object->connections[0].distance += distanceDelta;
-    auto& connectedObject = object->connections[0].object;
-    connectedObject->getRefDistance(object) += distanceDelta;
+    if (!tryChangeConnectionDistance(object, distanceDelta)) {
+        return;
+    }
 
     crawling.lastDistanceDelta = distanceDelta;
 
@@ -579,6 +585,19 @@ __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object
     if (cellTypeMuscleEnergyCost > 0) {
         EnergyProcessor::radiate(data, object, cellTypeMuscleEnergyCost);
     }
+}
+
+__inline__ __device__ bool MuscleProcessor::tryChangeConnectionDistance(Object* object, float distanceDelta)
+{
+    auto connectedObject = object->connections[0].object;
+    for (int i = 0; i < connectedObject->numConnections; ++i) {
+        if (connectedObject->connections[i].object == object) {
+            atomicAdd(&object->connections[0].distance, distanceDelta);
+            atomicAdd(&connectedObject->connections[i].distance, distanceDelta);
+            return true;
+        }
+    }
+    return false;
 }
 
 __inline__ __device__ void MuscleProcessor::getChain(Object** chain, int& chainLength, Object* startCell)
