@@ -6,6 +6,16 @@
 #include <iostream>
 #include <sstream>
 
+namespace
+{
+    std::string formatTime(std::tm const& time, char const* format)
+    {
+        std::stringstream stream;
+        stream << std::put_time(&time, format);
+        return stream.str();
+    }
+}
+
 void LoggingService::log(Priority priority, std::string const& message)
 {
     std::lock_guard<std::mutex> lock(_mutex);
@@ -13,13 +23,20 @@ void LoggingService::log(Priority priority, std::string const& message)
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
 
-    std::stringstream stream;
-    stream << std::put_time(&tm, "%Y-%m-%d %H-%M-%S") << ": " << message;
+    auto timestamp = formatTime(tm, "%Y-%m-%d %H-%M-%S");
+    auto offset = formatTime(tm, "%z");
+    if (_timezoneOffset != offset) {
+        _timezoneOffset = offset;
+        addMessage(Priority::Important, timestamp + ": log timezone is " + offset);
+    }
+    addMessage(priority, timestamp + ": " + message);
+}
 
-    auto enrichedMessage = stream.str();
-    _messages.emplace_back(enrichedMessage);
+void LoggingService::addMessage(Priority priority, std::string const& message)
+{
+    _messages.emplace_back(message);
     for (auto const& callback : _callbacks) {
-        callback->newLogMessage(priority, enrichedMessage);
+        callback->newLogMessage(priority, message);
     }
 }
 
