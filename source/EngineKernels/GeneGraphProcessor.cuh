@@ -5,6 +5,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/ShapeGenerator.h>
 
+#include "ConstructorHelper.cuh"
 #include "SimulationData.cuh"
 
 namespace cg_geneGraph = cooperative_groups;
@@ -15,7 +16,6 @@ class GeneGraphProcessor
 {
 public:
     static int constexpr MaxGenesWithSeparation = 2;
-    static uint32_t constexpr MaxTransitiveNumCells = 1000000;  // A gene graph may reference the same gene several times
 
     __inline__ __device__ static void voidNodesUnreachableFromLastNode(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
@@ -463,9 +463,9 @@ __inline__ __device__ void GeneGraphProcessor::removeMarkedGenes(Genome* genome,
 
 __inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(SimulationData& data, Genome* genome)
 {
-    // Number of cells that are reachable from a gene, seen from the root gene: the cells of the gene itself plus the cells
-    // reachable through the constructors of its nodes. Branches and concatenations are not counted, so one pass through a gene
-    // is measured.
+    // Number of cells that are reachable from a gene, seen from the root gene: the cells of the gene itself plus, for each of
+    // its constructors, what that constructor has to be equipped with. Branches and concatenations are not counted, so one pass
+    // through a gene is measured.
     //
     // A depth-first search from the root gene determines this bottom-up: a gene is summed up once every gene reachable from it is
     // finished. A cycle makes the search navigate back instead of descending again, so the gene that closes the cycle
@@ -490,8 +490,10 @@ __inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(Simulati
         if (!node.constructorAvailable) {
             return -1;
         }
+
+        // A constructor referencing the root gene starts the genome anew and is not financed, so nothing is reached through it
         auto const& constructor = node.constructor;
-        if (constructor.geneIndex >= numGenes) {
+        if (constructor.geneIndex == 0 || constructor.geneIndex >= numGenes) {
             return -1;
         }
         return static_cast<int>(constructor.geneIndex);
@@ -500,14 +502,19 @@ __inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(Simulati
     auto sumUpGene = [&](Gene& gene) {
         uint64_t numCells = 0;
         for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+            auto const& node = gene.nodes[nodeIndex];
             ++numCells;
 
-            auto reachedGeneIndex = getReachedGeneIndex(gene.nodes[nodeIndex]);
-            if (reachedGeneIndex >= 0 && state[reachedGeneIndex] == 2) {
-                numCells += genome->genes[reachedGeneIndex].transitiveNumCells;
+            auto reachedGeneIndex = getReachedGeneIndex(node);
+            if (reachedGeneIndex < 0) {
+                continue;
             }
+
+            // A gene that is still on the search stack closes a cycle. Its transitive count is then still the zero from the
+            // initialization above, so only the cells that are needed regardless of the cycle are counted.
+            numCells += ConstructorHelper::calcNumCellsToFinance(node.constructor, genome->genes[reachedGeneIndex]);
         }
-        gene.transitiveNumCells = static_cast<uint32_t>(min(numCells, static_cast<uint64_t>(MaxTransitiveNumCells)));
+        gene.transitiveNumCells = static_cast<uint32_t>(min(numCells, ConstructorHelper::MaxNumCellsToFinance));
     };
 
     state[0] = 1;

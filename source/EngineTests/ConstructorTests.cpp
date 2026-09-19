@@ -3133,7 +3133,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_constructorNode)
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numBranches(2).numConcatenations(3)),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(false)),
             NodeDesc(),
         }),
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
@@ -3174,22 +3174,214 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_constructorNode)
     EXPECT_TRUE(approxCompare(reservedEnergy, getReservedEnergy(actualConstructedCell.getCellRef())));
 }
 
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_branchesAndConcatenationsMultiplyTheReserve)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    // The built constructor builds gene 1 on two branches with three concatenations each, so it needs its two cells six times
+    auto reservedEnergy = normalCellEnergy * 12;
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(
+                ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(false).numBranches(2).numConcatenations(3)),
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_TransitiveCells)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1)
+                                           .separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(reservedEnergy, getReservedEnergy(actualConstructedCell.getCellRef())));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_infiniteConcatenationsCountAsOne)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    // An unbounded number of concatenations cannot be financed, so it is counted as a single one
+    auto reservedEnergy = normalCellEnergy * 2;
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc()
+                                       .provideEnergy(ProvideEnergyGenome_TransitiveCells)
+                                       .geneIndex(1)
+                                       .separation(false)
+                                       .numConcatenations(std::numeric_limits<int>::max())),
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_TransitiveCells)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1)
+                                           .separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(reservedEnergy, getReservedEnergy(actualConstructedCell.getCellRef())));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
 TEST_F(ConstructorTests, provideEnergyForTransitiveCells_nestedConstructors)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    // Gene 1 has two cells and one of them builds gene 2 with two further cells, all of them within the creature.
-    // The nested constructor provides energy for its cells only, but the body parts are financed through it anyway.
+    // Gene 1 has two cells and one of them builds gene 2 with two further cells. The nested constructor passes its reserve on,
+    // so the cells of gene 2 have to be financed through it.
     auto reservedEnergy = normalCellEnergy * 4;
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(false)),
             NodeDesc(),
         }),
         GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).provideEnergy(ProvideEnergy_CellOnly)),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(2).separation(false)),
+        }),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_TransitiveCells)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1)
+                                           .separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(reservedEnergy, getReservedEnergy(actualConstructedCell.getCellRef())));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_nestedCellOnlyConstructorStopsOneLevelLater)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    // As above, but the nested constructor provides energy for its cells only. It is still equipped with the two cells of
+    // gene 2 that it builds itself, it just passes nothing on beyond them: 2 cells of gene 1 plus 2 cells of gene 2.
+    auto reservedEnergy = normalCellEnergy * 4;
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(false)),
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_CellOnly).geneIndex(2).separation(false)),
+        }),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_TransitiveCells)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1)
+                                           .separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(reservedEnergy, getReservedEnergy(actualConstructedCell.getCellRef())));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_cellOnlyConstructorFinancedForOwnCells)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    // The built constructor provides energy for its cells only, so it is equipped with the two cells of gene 1 it builds
+    // itself and with nothing beyond them
+    auto reservedEnergy = normalCellEnergy * 2;
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_CellOnly).geneIndex(1).separation(false)),
+            NodeDesc(),
         }),
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
@@ -3234,7 +3426,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_depotCellCountsAsPlainC
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(false)),
             NodeDesc(),
         }),
         GeneDesc().nodes({
@@ -3280,9 +3472,9 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_cyclicGeneReferences)
     // Gene 1 and gene 2 reference each other. The host is a growth constructor, so its genome is neither cloned nor passed
     // through the cycle removal and the cycle is still present while the counts are determined.
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),
-        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(2))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1))}),
     });
 
     auto data = ContentDesc().addCreature(
@@ -3318,7 +3510,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_rootGeneNotFinanced)
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(0)),
             NodeDesc(),
         }),
     });
@@ -3363,7 +3555,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_separatingConstructorFi
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(true)),
             NodeDesc(),
         }),
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
