@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Entities.cuh"
 #include "ConstantMemory.cuh"
+#include "Entities.cuh"
 
 class ConstructorHelper
 {

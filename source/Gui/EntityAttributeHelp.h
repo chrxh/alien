@@ -109,7 +109,6 @@ enum class EntityAttribute
 
     // Depot
     DepotStorageLimit,
-    DepotInitialStoredEnergy,
     DepotStoredEnergy,
 
     // Sensor

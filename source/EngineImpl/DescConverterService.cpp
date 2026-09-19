@@ -637,7 +637,6 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
     case CellType_Depot: {
         DepotGenomeDesc depotDesc;
         depotDesc._storageLimit = nodeTO->cellTypeData.depot.storageLimit;
-        depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
     } break;
     case CellType_Sensor: {
@@ -842,7 +841,6 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         constructorDesc._constructionActivationTime = nodeTO->constructor.constructionActivationTime;
         constructorDesc._constructionAngle = nodeTO->constructor.constructionAngle;
         constructorDesc._provideEnergy = nodeTO->constructor.provideEnergy;
-        constructorDesc._reservedEnergy = nodeTO->constructor.reservedEnergy;
         constructorDesc._separation = nodeTO->constructor.separation;
         constructorDesc._numBranches = nodeTO->constructor.numBranches;
         constructorDesc._numConcatenations = nodeTO->constructor.numConcatenations;
@@ -1043,7 +1041,6 @@ void DescConverterService::convertGenomeToTO(
                 auto const& depotDesc = std::get<DepotGenomeDesc>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
                 depotTO.storageLimit = depotDesc._storageLimit;
-                depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
             case CellType_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
@@ -1229,7 +1226,6 @@ void DescConverterService::convertGenomeToTO(
                 nodeTO.constructor.constructionActivationTime = constructorDesc._constructionActivationTime;
                 nodeTO.constructor.constructionAngle = constructorDesc._constructionAngle;
                 nodeTO.constructor.provideEnergy = constructorDesc._provideEnergy;
-                nodeTO.constructor.reservedEnergy = constructorDesc._reservedEnergy;
                 nodeTO.constructor.separation = constructorDesc._separation;
                 nodeTO.constructor.numBranches = static_cast<uint8_t>(constructorDesc._numBranches);
                 nodeTO.constructor.numConcatenations = constructorDesc._numConcatenations;

@@ -15,11 +15,15 @@ class GeneGraphProcessor
 {
 public:
     static int constexpr MaxGenesWithSeparation = 2;
+    static uint32_t constexpr MaxTransitiveNumCells = 1000000;  // A gene graph may reference the same gene several times
 
     __inline__ __device__ static void voidNodesUnreachableFromLastNode(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeCyclesNotThroughRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void limitGenesWithSeparation(SimulationData& data, Genome* genome);
+
+    // Runs on a single thread, so it can also be called while a genome is being created
+    __inline__ __device__ static void updateTransitiveNumCells(SimulationData& data, Genome* genome);
 
 private:
     __inline__ __device__ static bool voidUnreachableNodes(SimulationData& data, Gene& gene);
@@ -455,4 +459,80 @@ __inline__ __device__ void GeneGraphProcessor::removeMarkedGenes(Genome* genome,
         genome->numGenes = newNumGenes;
     }
     block.sync();
+}
+
+__inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(SimulationData& data, Genome* genome)
+{
+    // Number of cells that are reachable from a gene, seen from the root gene: the cells of the gene itself plus the cells
+    // reachable through the constructors of its nodes. Branches and concatenations are not counted, so one pass through a gene
+    // is measured.
+    //
+    // A depth-first search from the root gene determines this bottom-up: a gene is summed up once every gene reachable from it is
+    // finished. A cycle makes the search navigate back instead of descending again, so the gene that closes the cycle
+    // contributes nothing. This covers references to the root gene as well, which stays on the stack for the whole search.
+    // Genes that the root gene cannot reach at all keep a count of zero.
+    auto const numGenes = genome->numGenes;
+    if (numGenes == 0) {
+        return;
+    }
+
+    auto state = data.entities.heap.getTypedSubArray<int>(numGenes);  // 0 = not visited, 1 = on the DFS stack, 2 = finished
+    // A gene is pushed at most once because only genes in state 0 are pushed and they are marked immediately, so the DFS stack
+    // never holds more than numGenes entries.
+    auto stackGenes = data.entities.heap.getTypedSubArray<int>(numGenes);
+    auto stackNodeIndices = data.entities.heap.getTypedSubArray<int>(numGenes);  // Next node of that stack level to be examined
+    for (int geneIndex = 0; geneIndex < numGenes; ++geneIndex) {
+        state[geneIndex] = 0;
+        genome->genes[geneIndex].transitiveNumCells = 0;
+    }
+
+    auto getReachedGeneIndex = [&](Node const& node) {
+        if (!node.constructorAvailable) {
+            return -1;
+        }
+        auto const& constructor = node.constructor;
+        if (constructor.geneIndex >= numGenes) {
+            return -1;
+        }
+        return static_cast<int>(constructor.geneIndex);
+    };
+
+    auto sumUpGene = [&](Gene& gene) {
+        uint64_t numCells = 0;
+        for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+            ++numCells;
+
+            auto reachedGeneIndex = getReachedGeneIndex(gene.nodes[nodeIndex]);
+            if (reachedGeneIndex >= 0 && state[reachedGeneIndex] == 2) {
+                numCells += genome->genes[reachedGeneIndex].transitiveNumCells;
+            }
+        }
+        gene.transitiveNumCells = static_cast<uint32_t>(min(numCells, static_cast<uint64_t>(MaxTransitiveNumCells)));
+    };
+
+    state[0] = 1;
+    stackGenes[0] = 0;
+    stackNodeIndices[0] = 0;
+    int stackSize = 1;
+
+    while (stackSize > 0) {
+        auto currentGeneIndex = stackGenes[stackSize - 1];
+        auto& gene = genome->genes[currentGeneIndex];
+        auto nodeIndex = stackNodeIndices[stackSize - 1];
+        if (nodeIndex >= gene.numNodes) {
+            sumUpGene(gene);
+            state[currentGeneIndex] = 2;
+            --stackSize;
+            continue;
+        }
+        stackNodeIndices[stackSize - 1] = nodeIndex + 1;
+
+        auto reachedGeneIndex = getReachedGeneIndex(gene.nodes[nodeIndex]);
+        if (reachedGeneIndex >= 0 && state[reachedGeneIndex] == 0) {
+            state[reachedGeneIndex] = 1;
+            stackGenes[stackSize] = reachedGeneIndex;
+            stackNodeIndices[stackSize] = 0;
+            ++stackSize;
+        }
+    }
 }

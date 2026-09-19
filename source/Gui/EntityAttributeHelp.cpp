@@ -182,10 +182,13 @@ namespace
          "Angle of the first constructed cell relative to the connection of the constructor cell. It is only evaluated for the first cell of the first "
          "concatenation in the first branch."},
         {EntityAttribute::ConstructorProvideEnergy,
-         "Determines where the energy for the construction comes from."
-         "\n" ICON_FA_CHEVRON_RIGHT " Reduce cell energy: every constructed cell takes its energy from the constructor cell."
-         "\n" ICON_FA_CHEVRON_RIGHT " Free: cells are built without energy cost. After the first completed offspring the setting falls back to 'Reduce cell "
-         "energy'."},
+         "Determines how much energy the constructor cell raises for a construction."
+         "\n" ICON_FA_CHEVRON_RIGHT " Cell only: only the energy of the constructed cell itself."
+         "\n" ICON_FA_CHEVRON_RIGHT " Transitive cells: additionally the energy reserve of a constructed constructor cell, unless that constructor references "
+         "the first gene. The reserve covers every cell reachable from the gene that constructor references, so they can be built without further energy."
+         "\n" ICON_FA_CHEVRON_RIGHT
+         " Free: cells are built without energy cost. The setting falls back to 'Cell only' after the first completed offspring and cannot be used in a "
+         "genome."},
         {EntityAttribute::ConstructorReservedEnergy,
          "Energy reserve of the constructor cell. It is used up for the construction before the usable energy of the cell. External energy inflow is credited "
          "here."},
@@ -196,8 +199,6 @@ namespace
 
         // Depot
         {EntityAttribute::DepotStorageLimit, "Maximum usable energy that the depot can store."},
-        {EntityAttribute::DepotInitialStoredEnergy,
-         "Energy that the depot already contains when it is constructed. The constructor has to provide this energy in addition."},
         {EntityAttribute::DepotStoredEnergy, "Usable energy that is currently stored in the depot."},
 
         // Sensor

@@ -40,7 +40,6 @@ struct std::hash<DepotGenomeDesc>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._storageLimit);
-        hash_combine(seed, desc._initialStoredUsableEnergy);
         return seed;
     }
 };
@@ -58,7 +57,7 @@ struct std::hash<ConstructorGenomeDesc>
         }
         hash_combine(seed, desc._geneIndex);
         hash_combine(seed, desc._constructionActivationTime);
-        hash_combine(seed, desc._reservedEnergy);
+        hash_combine(seed, desc._provideEnergy);
         hash_combine(seed, desc._separation);
         hash_combine(seed, desc._numBranches);
         hash_combine(seed, desc._numConcatenations);

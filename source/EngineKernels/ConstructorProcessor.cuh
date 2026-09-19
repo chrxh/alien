@@ -39,7 +39,6 @@ private:
         ShapeGeneratorResult shapeResult;
         float neededUsableEnergy;
         float neededReservedEnergy;
-        float neededDepotEnergy;
     };
     __inline__ __device__ static void mutateCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static void constructCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
@@ -71,6 +70,7 @@ private:
         float2 newObjectPos,
         ConstructionData const& constructionData);
 
+    __inline__ __device__ static float calcReservedEnergyToProvide(Constructor const& hostConstructor, Genome const& genome, Node const& node, int color);
     __inline__ __device__ static bool checkHostEnergyAndRequestExternalEnergyIfNeeded(SimulationData& data, Object* hostObject);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static bool hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy);
@@ -229,7 +229,7 @@ __inline__ __device__ void ConstructorProcessor::constructCell(SimulationData& d
             if (ConstructorHelper::createsNewCreature(constructor)) {
                 ++constructor.currentOffspring;
                 if (constructor.provideEnergy == ProvideEnergy_Free) {
-                    constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
+                    constructor.provideEnergy = ProvideEnergy_CellOnly;
                 }
                 constructor.offspring = nullptr;
 
@@ -325,9 +325,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(constructor);
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
-    auto cellTypeNode = result.gene->homogeneousCellType ? &result.gene->nodes[0] : result.node;
-    result.neededDepotEnergy = cellTypeNode->cellType == CellType_Depot ? cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
+    result.neededReservedEnergy = calcReservedEnergyToProvide(constructor, *genome, *result.node, object->color);
 
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -656,7 +654,8 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         constructionData.currentBranch,
         posOfNewObject,
         hostObject->vel,
-        constructionData.neededUsableEnergy);
+        constructionData.neededUsableEnergy,
+        constructionData.neededReservedEnergy);
     result->typeData.cell.headUpdateId = constructionData.creature->headUpdateId;
 
     constructor.lastConstructedCellId = result->id;
@@ -673,6 +672,22 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     }
 
     return result;
+}
+
+__inline__ __device__ float
+ConstructorProcessor::calcReservedEnergyToProvide(Constructor const& hostConstructor, Genome const& genome, Node const& node, int color)
+{
+    // A host providing energy for transitive cells equips a constructor it builds with the energy for all cells that are
+    // reachable from the gene that constructor references, so that they need no further energy of their own. A constructor
+    // referencing the root gene starts the genome anew and is not financed.
+    if (hostConstructor.provideEnergy != ProvideEnergy_TransitiveCells || !node.constructorAvailable) {
+        return 0.0f;
+    }
+    auto const& nodeConstructor = node.constructor;
+    if (nodeConstructor.geneIndex == 0 || nodeConstructor.geneIndex >= genome.numGenes) {
+        return 0.0f;
+    }
+    return static_cast<float>(genome.genes[nodeConstructor.geneIndex].transitiveNumCells) * cudaSimulationParameters.normalCellEnergy.value[color];
 }
 
 __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExternalEnergyIfNeeded(SimulationData& data, Object* hostObject)
@@ -695,9 +710,7 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         auto gene = ConstructorHelper::getCurrentGene(constructor, *genome);
         if (currentNodeIndex < gene->numNodes) {
             auto node = &gene->nodes[currentNodeIndex];
-            requiredEnergy += node->constructorAvailable ? node->constructor.reservedEnergy : 0.0f;
-            auto cellTypeNode = gene->homogeneousCellType ? &gene->nodes[0] : node;
-            requiredEnergy += cellTypeNode->cellType == CellType_Depot ? cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
+            requiredEnergy += calcReservedEnergyToProvide(constructor, *genome, *node, hostObject->color);
         }
     }
 
@@ -714,7 +727,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     // Energy actually required for the node being constructed (derived from the offspring genome via constructionData). The early gate only
     // estimates this from the host genome, which may diverge from the offspring genome during ongoing construction, so re-check here.
-    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
+    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy;
     if (!hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy)) {
         return false;
     }

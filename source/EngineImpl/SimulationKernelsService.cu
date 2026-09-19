@@ -54,6 +54,9 @@ namespace
         launchKernel(KERNEL(cudaNextTimestep_geneGraph_removeCyclesNotThroughRoot), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, stream, data);
         launchKernel(KERNEL(cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, stream, data);
         launchKernel(KERNEL(cudaNextTimestep_geneGraph_limitGenesWithSeparation), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, stream, data);
+
+        // Must run after the passes above since they change which constructors stay within the creature
+        launchKernel(KERNEL(cudaNextTimestep_geneGraph_updateTransitiveNumCells), LaunchConfig{numBlocks, NEURAL_NET_INPUTS}, stream, data);
     }
 }
 
