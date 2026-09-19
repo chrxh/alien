@@ -110,7 +110,7 @@ namespace
     auto constexpr Id_NeuralNetGenome_ConnectionWeights = 3;
 
     auto constexpr Id_DepotGenome_storageLimit = 0;
-    auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 1;
+    // Id 1 was the removed initial stored usable energy of a genome depot
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -119,7 +119,7 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
-    auto constexpr Id_ConstructorGenome_ReservedEnergy = 5;
+    // Id 5 was the removed reserved energy of a genome constructor
     auto constexpr Id_ConstructorGenome_Separation = 6;
     auto constexpr Id_ConstructorGenome_NumBranches = 7;
     auto constexpr Id_ConstructorGenome_NumConcatenations = 8;
@@ -324,7 +324,6 @@ namespace cereal
         DepotGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_DepotGenome_storageLimit, data._storageLimit, defaultObject._storageLimit);
-        scope.addMember(Id_DepotGenome_InitialStoredUsableEnergy, data._initialStoredUsableEnergy, defaultObject._initialStoredUsableEnergy);
     }
     REGISTER_SERIALIZED_TYPE(DepotGenomeDesc, Id_CellTypeGenome_Depot)
     SPLIT_SERIALIZATION(DepotGenomeDesc)
@@ -339,7 +338,6 @@ namespace cereal
         scope.addMember(Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         scope.addMember(Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         scope.addMember(Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
-        scope.addMember(Id_ConstructorGenome_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         scope.addMember(Id_ConstructorGenome_Separation, data._separation, defaultObject._separation);
         scope.addMember(Id_ConstructorGenome_NumBranches, data._numBranches, defaultObject._numBranches);
         scope.addMember(Id_ConstructorGenome_NumConcatenations, data._numConcatenations, defaultObject._numConcatenations);

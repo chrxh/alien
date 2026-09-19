@@ -51,7 +51,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
         mutations.emplace_back(constructor.value());
     }
 
-    // Every mutable constructor attribute must change at least once (provideEnergy is intentionally not mutated).
+    // Every mutable constructor attribute must change at least once.
     auto changedAtLeastOnce = [&](auto attribute) {
         return std::ranges::any_of(mutations, [&](auto const& mutated) { return attribute(mutated) != attribute(original); });
     };
@@ -60,7 +60,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._geneIndex; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._constructionActivationTime; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._constructionAngle; }));
-    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._reservedEnergy; }));
+    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._provideEnergy; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._separation; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._numBranches; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._numConcatenations; }));

@@ -43,7 +43,6 @@ struct DepotGenomeDesc
     auto operator<=>(DepotGenomeDesc const&) const = default;
 
     MEMBER(DepotGenomeDesc, float, storageLimit, Const::DepotStorageLimit_Default);
-    MEMBER(DepotGenomeDesc, float, initialStoredUsableEnergy, Const::DepotInitialStoredUsableEnergy_Default);
 };
 
 struct ConstructorGenomeDesc
@@ -54,8 +53,7 @@ struct ConstructorGenomeDesc
     MEMBER(ConstructorGenomeDesc, int, geneIndex, 0);
     MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, Const::ConstructorConstructionActivationTime_Default);
     MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
-    MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_ReduceCellEnergy);
-    MEMBER(ConstructorGenomeDesc, float, reservedEnergy, 0.0f);
+    MEMBER(ConstructorGenomeDesc, ProvideEnergyGenome, provideEnergy, ProvideEnergyGenome_CellOnly);
     MEMBER(ConstructorGenomeDesc, bool, separation, false);
     MEMBER(ConstructorGenomeDesc, int, numBranches, 1);        // For separation = false
     MEMBER(ConstructorGenomeDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations

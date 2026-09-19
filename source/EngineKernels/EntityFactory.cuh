@@ -4,6 +4,7 @@
 #include <EngineInterface/EngineConstants.h>
 
 #include "ConstantMemory.cuh"
+#include "GeneGraphProcessor.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
 #include "TOs.cuh"
@@ -37,7 +38,8 @@ public:
         int branchIndex,
         float2 pos,
         float2 vel,
-        float usableEnergy);
+        float usableEnergy,
+        float reservedEnergy);
 
     __inline__ __device__ Genome* createEmptyGenome();
     __inline__ __device__ Creature* createEmptyCreature();
@@ -172,7 +174,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 break;
             case CellType_Depot:
                 node.cellTypeData.depot.storageLimit = nodeTO.cellTypeData.depot.storageLimit;
-                node.cellTypeData.depot.initialStoredUsableEnergy = nodeTO.cellTypeData.depot.initialStoredUsableEnergy;
                 break;
             case CellType_Sensor:
                 node.cellTypeData.sensor.autoTrigger = nodeTO.cellTypeData.sensor.autoTrigger;
@@ -318,13 +319,16 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.constructor.constructionActivationTime = nodeTO.constructor.constructionActivationTime;
                 node.constructor.constructionAngle = nodeTO.constructor.constructionAngle;
                 node.constructor.provideEnergy = nodeTO.constructor.provideEnergy;
-                node.constructor.reservedEnergy = nodeTO.constructor.reservedEnergy;
                 node.constructor.separation = nodeTO.constructor.separation;
                 node.constructor.numBranches = nodeTO.constructor.numBranches;
                 node.constructor.numConcatenations = nodeTO.constructor.numConcatenations;
             }
         }
     }
+
+    // Genomes that are never mutated do not pass the gene graph kernels, so their body parts cost is derived here
+    GeneGraphProcessor::updateTransitiveNumCells(*_data, genome);
+
     return genome;
 }
 
@@ -740,7 +744,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int branchIndex,
     float2 pos,
     float2 vel,
-    float usableEnergy)
+    float usableEnergy,
+    float reservedEnergy)
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
@@ -810,7 +815,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     case CellType_Depot: {
         cell.cellType = CellType_Depot;
         cell.cellTypeData.depot.storageLimit = cellTypeNode->cellTypeData.depot.storageLimit;
-        cell.cellTypeData.depot.storedUsableEnergy = cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy;
+        cell.cellTypeData.depot.storedUsableEnergy = 0.0f;
     } break;
     case CellType_Sensor: {
         cell.cellType = CellType_Sensor;
@@ -996,8 +1001,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
-        constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
-        constructor.reservedEnergy = nodeConstructor.reservedEnergy;
+        constructor.provideEnergy = static_cast<ProvideEnergy>(nodeConstructor.provideEnergy);
+        constructor.reservedEnergy = reservedEnergy;
         constructor.separation = nodeConstructor.separation;
         constructor.numBranches = nodeConstructor.numBranches;
         constructor.numConcatenations = nodeConstructor.numConcatenations;

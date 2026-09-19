@@ -160,8 +160,7 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
                          .geneIndex(1)
                          .constructionActivationTime(95)
                          .constructionAngle(25.0f)
-                         .provideEnergy(ProvideEnergy_Free)
-                         .reservedEnergy(7.0f)
+                         .provideEnergy(ProvideEnergyGenome_TransitiveCells)
                          .separation(true)
                          .numBranches(3)
                          .numConcatenations(5))
@@ -863,7 +862,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
     case CellType_Base:
         return BaseGenomeDesc();
     case CellType_Depot:
-        return DepotGenomeDesc().storageLimit(350.0f).initialStoredUsableEnergy(100.0f);
+        return DepotGenomeDesc().storageLimit(350.0f);
     case CellType_Sensor: {
         SensorModeGenomeDesc sensorModeDesc;
         switch (sensorMode) {
