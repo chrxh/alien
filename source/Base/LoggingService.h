@@ -31,8 +31,11 @@ public:
     void unregisterCallBack(LoggingCallBack* callback);
 
 private:
+    void addMessage(Priority priority, std::string const& message);
+
     std::vector<LoggingCallBack*> _callbacks;
     std::vector<std::string> _messages;
+    std::string _timezoneOffset;
     mutable std::mutex _mutex;
 };
 
