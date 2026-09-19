@@ -44,6 +44,9 @@ ALIEN_MUTATION_FIELD_COUNT(MemoryGenomeDesc, 3);
 ALIEN_MUTATION_FIELD_COUNT(CommunicatorGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(VoidGenomeDesc, 0);
 
+// --- Optional constructor of a node (the constructor block in applyMutations_cellTypeProperties()) ---
+ALIEN_MUTATION_FIELD_COUNT(ConstructorGenomeDesc, 8);
+
 // --- Sensor modes (switch (node.cellTypeData.sensor.mode)) ---
 ALIEN_MUTATION_FIELD_COUNT(DetectEnergyGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(DetectSolidGenomeDesc, 0);
