@@ -125,6 +125,8 @@ PUBLIC
     MassOperationsDialog.h
     McpController.cpp
     McpController.h
+    McpWindow.cpp
+    McpWindow.h
     ModalWindow.cpp
     ModalWindow.h
     MultiplierWindow.cpp
