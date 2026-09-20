@@ -173,8 +173,8 @@ enum ProvideEnergyGenome_
 };
 
 // The shared values must match so that a constructed cell can take the value of its genome node directly
-static_assert(ProvideEnergy_CellOnly == ProvideEnergyGenome_CellOnly);
-static_assert(ProvideEnergy_TransitiveCells == ProvideEnergyGenome_TransitiveCells);
+static_assert(static_cast<int>(ProvideEnergy_CellOnly) == static_cast<int>(ProvideEnergyGenome_CellOnly));
+static_assert(static_cast<int>(ProvideEnergy_TransitiveCells) == static_cast<int>(ProvideEnergyGenome_TransitiveCells));
 
 namespace Const
 {
