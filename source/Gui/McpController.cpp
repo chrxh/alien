@@ -1,5 +1,6 @@
 #include "McpController.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <limits>
@@ -25,9 +26,12 @@
 namespace
 {
     auto constexpr DefaultPort = 8765;
+    auto constexpr MinPort = 1;
+    auto constexpr MaxPort = 65535;
     auto constexpr ServerName = "alien";
     auto constexpr TaskPollInterval = std::chrono::milliseconds(50);
     auto constexpr ServerStoppedMessage = "The MCP server has been stopped.";
+    auto constexpr MaxCommandLogEntries = size_t{1000};
 }
 
 bool McpController::isServerRunning() const
@@ -44,9 +48,42 @@ void McpController::setServerRunning(bool value)
     }
 }
 
+int McpController::getPort() const
+{
+    return _port;
+}
+
+void McpController::setPort(int value)
+{
+    _port = std::clamp(value, MinPort, MaxPort);
+}
+
+std::string McpController::getServerUrl() const
+{
+    return std::format("http://127.0.0.1:{}/mcp", _port);
+}
+
+std::vector<std::string> const& McpController::getToolNames() const
+{
+    return _toolNames;
+}
+
+std::deque<McpCommandLogEntry> const& McpController::getCommandLog() const
+{
+    return _commandLog;
+}
+
+void McpController::clearCommandLog()
+{
+    _commandLog.clear();
+}
+
 void McpController::init()
 {
-    _port = GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort);
+    for (auto const& tool : createTools()) {
+        _toolNames.emplace_back(tool.name);
+    }
+    setPort(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort));
     if (GlobalSettings::get().getValue("settings.mcp server.enabled", false)) {
         startServer();
     }
@@ -87,9 +124,8 @@ void McpController::startServer()
     }
     _server = std::move(server);
 
-    auto url = std::format("http://127.0.0.1:{}/mcp", _port);
-    log(Priority::Important, "mcp: server started at " + url);
-    printOverlayMessage("MCP server running at " + url);
+    log(Priority::Important, "mcp: server started at " + getServerUrl());
+    printOverlayMessage("MCP server running at " + getServerUrl());
 }
 
 void McpController::stopServer()
@@ -112,35 +148,51 @@ void McpController::stopServer()
 
 std::vector<McpTool> McpController::createTools()
 {
+    auto const noArguments = boost::json::object{{"type", "object"}, {"properties", boost::json::object{}}};
     return {
-        McpTool{
-            .name = "create_simulation",
-            .description = "Replaces the current simulation in ALIEN with a new, empty and paused simulation. The simulation parameters of the current "
-                           "simulation are kept. Omitted world dimensions default to the current ones.",
-            .inputSchema =
-                {
-                    {"type", "object"},
-                    {"properties",
-                     boost::json::object{
-                         {"width", boost::json::object{{"type", "integer"}, {"minimum", 1}, {"description", "World width"}}},
-                         {"height", boost::json::object{{"type", "integer"}, {"minimum", 1}, {"description", "World height"}}},
-                         {"project_name", boost::json::object{{"type", "string"}, {"description", "Project name, generated if omitted"}}},
-                     }},
-                },
-            .handler = [this](boost::json::object const& arguments) { return executeOnMainThread([this, arguments] { return createSimulation(arguments); }); },
-        },
-        McpTool{
-            .name = "run_simulation",
-            .description = "Starts the simulation in ALIEN.",
-            .inputSchema = {{"type", "object"}, {"properties", boost::json::object{}}},
-            .handler = [this](boost::json::object const&) { return executeOnMainThread([this] { return runSimulation(); }); },
-        },
-        McpTool{
-            .name = "pause_simulation",
-            .description = "Pauses the simulation in ALIEN.",
-            .inputSchema = {{"type", "object"}, {"properties", boost::json::object{}}},
-            .handler = [this](boost::json::object const&) { return executeOnMainThread([this] { return pauseSimulation(); }); },
-        },
+        createTool(
+            "create_simulation",
+            "Replaces the current simulation in ALIEN with a new, empty and paused simulation. The simulation parameters of the current simulation are kept. "
+            "Omitted world dimensions default to the current ones.",
+            {
+                {"type", "object"},
+                {"properties",
+                 boost::json::object{
+                     {"width", boost::json::object{{"type", "integer"}, {"minimum", 1}, {"description", "World width"}}},
+                     {"height", boost::json::object{{"type", "integer"}, {"minimum", 1}, {"description", "World height"}}},
+                     {"project_name", boost::json::object{{"type", "string"}, {"description", "Project name, generated if omitted"}}},
+                 }},
+            },
+            [this](boost::json::object const& arguments) { return createSimulation(arguments); }),
+        createTool("run_simulation", "Starts the simulation in ALIEN.", noArguments, [this](boost::json::object const&) { return runSimulation(); }),
+        createTool("pause_simulation", "Pauses the simulation in ALIEN.", noArguments, [this](boost::json::object const&) { return pauseSimulation(); }),
+    };
+}
+
+McpTool McpController::createTool(
+    std::string const& name,
+    std::string const& description,
+    boost::json::object const& inputSchema,
+    std::function<McpToolResult(boost::json::object const&)> const& function)
+{
+    return McpTool{
+        .name = name,
+        .description = description,
+        .inputSchema = inputSchema,
+        .handler =
+            [this, name, function](boost::json::object const& arguments) {
+                return executeOnMainThread([this, name, function, arguments] {
+                    auto result = [&] {
+                        try {
+                            return function(arguments);
+                        } catch (std::exception const& exception) {
+                            return McpToolResult{.text = exception.what(), .isError = true};
+                        }
+                    }();
+                    addCommandLogEntry(name, arguments, result);
+                    return result;
+                });
+            },
     };
 }
 
@@ -161,6 +213,18 @@ McpToolResult McpController::executeOnMainThread(std::function<McpToolResult()> 
         }
     }
     return result.get();
+}
+
+void McpController::addCommandLogEntry(std::string const& toolName, boost::json::object const& arguments, McpToolResult const& result)
+{
+    auto command = arguments.empty() ? toolName : toolName + " " + boost::json::serialize(arguments);
+    log(Priority::Important, std::format("mcp: {} -> {}{}", command, result.isError ? "error: " : "", result.text));
+
+    _commandLog.emplace_back(
+        McpCommandLogEntry{.time = std::chrono::system_clock::now(), .command = command, .result = result.text, .isError = result.isError});
+    if (_commandLog.size() > MaxCommandLogEntries) {
+        _commandLog.pop_front();
+    }
 }
 
 namespace

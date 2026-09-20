@@ -42,7 +42,7 @@
 #include "LogWindow.h"
 #include "LoginDialog.h"
 #include "MassOperationsDialog.h"
-#include "McpController.h"
+#include "McpWindow.h"
 #include "MultiplierWindow.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
@@ -508,6 +508,9 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_6).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters().name("MCP server").keyAlt(true).key(ImGuiKey_7).selected(McpWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { McpWindow::get().setOn(!McpWindow::get().isOn()); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuOpened);
@@ -652,10 +655,6 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
-    AlienGui::MenuSeparator();
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("MCP server").selected(McpController::get().isServerRunning()).closeMenuWhenItemClicked(false), [&] {
-        McpController::get().setServerRunning(!McpController::get().isServerRunning());
-    });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
