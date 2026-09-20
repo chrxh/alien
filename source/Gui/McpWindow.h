@@ -17,8 +17,7 @@ private:
     void processIntern() override;
 
     void processToolbar();
-    void processStatusLine();
-    void processStatusBadge(bool running);
+    void processStatusBadge();
     void processConnectionCard();
     void processCommandLog();
 };

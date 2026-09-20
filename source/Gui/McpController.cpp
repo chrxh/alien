@@ -48,16 +48,6 @@ void McpController::setServerRunning(bool value)
     }
 }
 
-int McpController::getPort() const
-{
-    return _port;
-}
-
-void McpController::setPort(int value)
-{
-    _port = std::clamp(value, MinPort, MaxPort);
-}
-
 std::string McpController::getServerUrl() const
 {
     return std::format("http://127.0.0.1:{}/mcp", _port);
@@ -83,7 +73,7 @@ void McpController::init()
     for (auto const& tool : createTools()) {
         _toolNames.emplace_back(tool.name);
     }
-    setPort(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort));
+    _port = std::clamp(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort), MinPort, MaxPort);
     if (GlobalSettings::get().getValue("settings.mcp server.enabled", false)) {
         startServer();
     }

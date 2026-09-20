@@ -16,7 +16,6 @@
 
 namespace
 {
-    auto constexpr PortFieldWidth = 70.0f;
     auto constexpr BadgePadding = 10.0f;
     auto constexpr BadgeDotRadius = 4.0f;
     auto constexpr BadgeDotSpacing = 8.0f;
@@ -38,7 +37,7 @@ void McpWindow::processIntern()
     processToolbar();
 
     if (ImGui::BeginChild("##content", {0, 0})) {
-        processStatusLine();
+        processStatusBadge();
         processConnectionCard();
         processCommandLog();
     }
@@ -62,38 +61,9 @@ void McpWindow::processToolbar()
              }))});
 }
 
-void McpWindow::processStatusLine()
+void McpWindow::processStatusBadge()
 {
-    auto& controller = McpController::get();
-    auto running = controller.isServerRunning();
-    auto rightEdge = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x;
-
-    processStatusBadge(running);
-
-    auto const& style = ImGui::GetStyle();
-    auto portLabel = "Port";
-    auto portWidth = scale(PortFieldWidth);
-    ImGui::SameLine(rightEdge - portWidth - ImGui::CalcTextSize(portLabel).x - style.ItemSpacing.x);
-    ImGui::AlignTextToFramePadding();
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDimColor.Value);
-    ImGui::TextUnformatted(portLabel);
-    ImGui::PopStyleColor();
-
-    ImGui::SameLine();
-    ImGui::BeginDisabled(running);
-    auto port = controller.getPort();
-    ImGui::SetNextItemWidth(portWidth);
-    if (ImGui::InputInt("##port", &port, 0, 0)) {
-        controller.setPort(port);
-    }
-    ImGui::EndDisabled();
-    if (running) {
-        AlienGui::Tooltip("Stop the server to change the port.");
-    }
-}
-
-void McpWindow::processStatusBadge(bool running)
-{
+    auto running = McpController::get().isServerRunning();
     auto text = running ? "Running" : "Stopped";
     auto textSize = ImGui::CalcTextSize(text);
     auto paddingX = scale(BadgePadding);

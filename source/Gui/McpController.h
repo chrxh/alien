@@ -33,8 +33,6 @@ public:
     bool isServerRunning() const;
     void setServerRunning(bool value);
 
-    int getPort() const;
-    void setPort(int value);
     std::string getServerUrl() const;
     std::vector<std::string> const& getToolNames() const;
 
