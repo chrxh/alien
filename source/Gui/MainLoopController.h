@@ -26,6 +26,7 @@ public:
     void scheduleClosing();
     bool shouldClose() const;
     bool isSaveOnExit() const;
+    bool isOperatingMode() const;
 
 private:
     void processFirstTick();

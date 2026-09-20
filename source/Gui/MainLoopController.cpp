@@ -42,6 +42,7 @@
 #include "LogWindow.h"
 #include "LoginDialog.h"
 #include "MassOperationsDialog.h"
+#include "McpController.h"
 #include "MultiplierWindow.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
@@ -146,6 +147,11 @@ bool MainLoopController::shouldClose() const
 bool MainLoopController::isSaveOnExit() const
 {
     return _saveOnExit;
+}
+
+bool MainLoopController::isOperatingMode() const
+{
+    return _programState == ProgramState::OperatingMode;
 }
 
 void MainLoopController::processFirstTick()
@@ -646,6 +652,10 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
+    AlienGui::MenuSeparator();
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("MCP server").selected(McpController::get().isServerRunning()).closeMenuWhenItemClicked(false), [&] {
+        McpController::get().setServerRunning(!McpController::get().isServerRunning());
+    });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
