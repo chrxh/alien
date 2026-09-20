@@ -234,6 +234,25 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
 }
 
 /**
+ * Test: Injection counts an offspring on the injected constructor
+ * The injected cell moves into a fresh creature, whose energy inflow quota for a first offspring must not be usable
+ */
+TEST_F(InjectorTests, injectionCountsOffspringOfInjectedConstructor)
+{
+    auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
+    data.add(createTargetCreatureWithConstructor({100.0f, 103.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
+
+    EXPECT_EQ(2, actualConstructor._geneIndex);  // Injection took place
+    EXPECT_EQ(1, actualConstructor._currentOffspring);
+}
+
+/**
  * Test: No injection on creatures resistant to injection
  * Cells of a creature whose genome has resistanceToInjection enabled should not be injected
  */
