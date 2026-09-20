@@ -123,6 +123,8 @@ PUBLIC
     MainWindow.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
+    McpController.cpp
+    McpController.h
     ModalWindow.cpp
     ModalWindow.h
     MultiplierWindow.cpp
@@ -139,6 +141,8 @@ PUBLIC
     NeuralNetEditorWidget.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
+    NewSimulationService.cpp
+    NewSimulationService.h
     NewPasswordDialog.cpp
     NewPasswordDialog.h
     NodeEditorWidget.cpp

@@ -1,5 +1,6 @@
 target_sources(NetworkTests
 PUBLIC
+    McpServerTests.cpp
     NetworkResourceServiceTests.cpp
     Testsuite.cpp)
 

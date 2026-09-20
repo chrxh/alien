@@ -311,6 +311,7 @@ find_package(GTest REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
+find_package(boost_json CONFIG REQUIRED)
 
 if(USE_HIP)
     # The subdir CMakeLists link the bare "cudart" target. On the HIP build the

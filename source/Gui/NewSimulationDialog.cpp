@@ -9,9 +9,8 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
+#include "NewSimulationService.h"
 #include "StyleService.h"
-#include "TemporalControlWindow.h"
-#include "Viewport.h"
 #include <EngineInterface/SimulationFacade.h>
 
 namespace
@@ -81,16 +80,9 @@ void NewSimulationDialog::openIntern()
 
 void NewSimulationDialog::onNewSimulation()
 {
-    SimulationParameters parameters;
-    if (_adoptSimulationParameters) {
-        parameters = _SimulationFacade::get()->getSimulationParameters();
-    }
-    StringHelper::copy(parameters.projectName.value, ProjectNameSize, _projectName);
-    parameters.externalEnergy.value = _externalEnergy;
-    _SimulationFacade::get()->closeSimulation();
-
-    _SimulationFacade::get()->newSimulation(0, {_width, _height}, parameters);
-    Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
-    Viewport::get().setZoomFactor(4.0f);
-    TemporalControlWindow::get().onSnapshot();
+    NewSimulationService::get().createSimulation(NewSimulationService::Parameters()
+                                                     .projectName(_projectName)
+                                                     .worldSize({_width, _height})
+                                                     .externalEnergy(_externalEnergy)
+                                                     .adoptSimulationParameters(_adoptSimulationParameters));
 }
