@@ -17,9 +17,8 @@ private:
     void processIntern() override;
 
     void processToolbar();
-    void processServerSettings();
-    void processConnectionInfo();
+    void processStatusLine();
+    void processStatusBadge(bool running);
+    void processConnectionCard();
     void processCommandLog();
-
-    void processCopyableText(std::string const& id, std::string text, int numLines = 1);
 };

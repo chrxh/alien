@@ -96,6 +96,9 @@ namespace Const
     extern ImColor const ConstructionPreviewPointColor;
     extern ImColor const ConstructionPreviewBrushColor;
 
+    extern ImColor const McpSuccessColor;
+    extern ImColor const McpRunningBadgeColor;
+
     extern ImColor const CellTypeOverlayColor;
     extern ImColor const CellTypeOverlayShadowColor;
     extern ImColor const ExecutionNumberOverlayColor;
