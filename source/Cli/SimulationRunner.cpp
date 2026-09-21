@@ -74,6 +74,7 @@ uint64_t SimulationRunner::calcTimestepsWithLiveOutput(
         lastUpdateTimepoint = now;
 
         status.realTime = startRealTime + std::chrono::duration_cast<std::chrono::milliseconds>(now - startTimepoint);
+        simulationFacade->setRealTime(status.realTime);
         status.tps = intervalMicroseconds > 0 ? toFloat(timestepsSinceUpdate) * 1.0e6f / toFloat(intervalMicroseconds) : 0.0f;
         timestepsSinceUpdate = 0;
 
