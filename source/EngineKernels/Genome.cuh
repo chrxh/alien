@@ -333,9 +333,6 @@ struct Gene
     int numNodes;
     Node* nodes;
 
-    // Number of cells that are transitively reachable from this gene when the gene graph is searched from the root gene
-    // (see GeneGraphProcessor::updateTransitiveNumCells). Kept as a count so that it stays independent of the
-    // color-dependent cell energy parameter.
     uint32_t transitiveNumCells;
 };
 

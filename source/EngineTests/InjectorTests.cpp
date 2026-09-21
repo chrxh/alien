@@ -233,10 +233,6 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     EXPECT_FALSE(actualConstructor._lastConstructedCellId.has_value());
 }
 
-/**
- * Test: Injection counts an offspring on the injected constructor
- * The injected cell moves into a fresh creature, whose energy inflow quota for a first offspring must not be usable
- */
 TEST_F(InjectorTests, injectionCountsOffspringOfInjectedConstructor)
 {
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
@@ -248,7 +244,7 @@ TEST_F(InjectorTests, injectionCountsOffspringOfInjectedConstructor)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
-    EXPECT_EQ(2, actualConstructor._geneIndex);  // Injection took place
+    EXPECT_EQ(2, actualConstructor._geneIndex);
     EXPECT_EQ(1, actualConstructor._currentOffspring);
 }
 

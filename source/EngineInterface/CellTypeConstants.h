@@ -153,8 +153,6 @@ enum ConstructorShape_
     ConstructorShape_Count,
 };
 
-// Energy provision of a constructor cell. Free is a temporary state of an existing cell and cannot be encoded in a genome,
-// therefore the genome has its own enum with the remaining values (see ProvideEnergyGenome).
 using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {
@@ -172,7 +170,6 @@ enum ProvideEnergyGenome_
     ProvideEnergyGenome_Count = 2,
 };
 
-// The shared values must match so that a constructed cell can take the value of its genome node directly
 static_assert(static_cast<int>(ProvideEnergy_CellOnly) == static_cast<int>(ProvideEnergyGenome_CellOnly));
 static_assert(static_cast<int>(ProvideEnergy_TransitiveCells) == static_cast<int>(ProvideEnergyGenome_TransitiveCells));
 
@@ -247,7 +244,7 @@ namespace Const
     auto constexpr DepotStorageLimit_Min = 0.0f;
     auto constexpr DepotStorageLimit_Max = 1000.0f;
     auto constexpr DepotStorageLimit_Default = 200.0f;
-    auto constexpr DepotStoredUsableEnergy_Default = 0.0f;  // A constructed depot cell always starts empty
+    auto constexpr DepotStoredUsableEnergy_Default = 0.0f;
 }
 
 //********************

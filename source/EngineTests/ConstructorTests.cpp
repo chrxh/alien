@@ -2941,21 +2941,21 @@ enum class Separation
 };
 class ConstructorTests_FreeEnergy_Separation
     : public ConstructorTests
-    , public testing::WithParamInterface<std::pair<bool, Separation>>
+    , public testing::WithParamInterface<std::pair<ProvideEnergy, Separation>>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_FreeEnergy,
     ConstructorTests_FreeEnergy_Separation,
     ::testing::Values(
-        std::make_pair(false, Separation::No),
-        std::make_pair(true, Separation::No),
-        std::make_pair(false, Separation::Yes),
-        std::make_pair(true, Separation::Yes)));
+        std::make_pair(ProvideEnergy_CellOnly, Separation::No),
+        std::make_pair(ProvideEnergy_Free, Separation::No),
+        std::make_pair(ProvideEnergy_CellOnly, Separation::Yes),
+        std::make_pair(ProvideEnergy_Free, Separation::Yes)));
 
 TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_sufficientEnergy)
 {
-    auto [freeEnergy, separation] = GetParam();
+    auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
@@ -2967,7 +2967,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_sufficientEnergy)
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    auto constructorEnergy = freeEnergy ? normalCellEnergy : normalCellEnergy * 2 + 1.0f;
+    auto constructorEnergy = provideEnergy == ProvideEnergy_Free ? normalCellEnergy : normalCellEnergy * 2 + 1.0f;
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc()
@@ -2976,7 +2976,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_sufficientEnergy)
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
                           .constructor(ConstructorDesc()
-                                           .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_CellOnly)
+                                           .provideEnergy(provideEnergy)
                                            .geneIndex(0)
                                            .autoTriggerInterval(1)
                                            .lastConstructedCellId(1)
@@ -3000,7 +3000,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_sufficientEnergy)
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
     EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
 
-    if (freeEnergy) {
+    if (provideEnergy == ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
         EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
         EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualConstructedCell.getCellRef())));
@@ -3016,9 +3016,9 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_sufficientEnergy)
 
 TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_insufficientEnergy)
 {
-    auto [freeEnergy, separation] = GetParam();
+    auto [provideEnergy, separation] = GetParam();
 
-    if (freeEnergy) {
+    if (provideEnergy == ProvideEnergy_Free) {
         GTEST_SKIP() << "Skipping test because free energy always has enough energy.";
     }
     auto genome = GenomeDesc().genes({
@@ -3040,7 +3040,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_insufficientEnergy)
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
                           .constructor(ConstructorDesc()
-                                           .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_CellOnly)
+                                           .provideEnergy(provideEnergy)
                                            .geneIndex(0)
                                            .autoTriggerInterval(1)
                                            .lastConstructedCellId(1)
@@ -3064,7 +3064,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_insufficientEnergy)
 
 TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_infiniteConcatenations)
 {
-    auto [freeEnergy, separation] = GetParam();
+    auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
@@ -3080,7 +3080,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_infiniteConcatenations
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    auto constructorEnergy = freeEnergy ? normalCellEnergy : normalCellEnergy * 2 + 1.0f;
+    auto constructorEnergy = provideEnergy == ProvideEnergy_Free ? normalCellEnergy : normalCellEnergy * 2 + 1.0f;
 
     auto data = ContentDesc().addCreature(
         {
@@ -3090,7 +3090,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_infiniteConcatenations
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
                           .constructor(ConstructorDesc()
-                                           .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_CellOnly)
+                                           .provideEnergy(provideEnergy)
                                            .geneIndex(0)
                                            .autoTriggerInterval(1)
                                            .lastConstructedCellId(1)
@@ -3119,7 +3119,7 @@ TEST_P(ConstructorTests_FreeEnergy_Separation, freeEnergy_infiniteConcatenations
     EXPECT_TRUE(approxCompare(0, getReservedEnergy(actualData.getObjectRef(0).getCellRef())));
 
     EXPECT_TRUE(approxCompare(0, getReservedEnergy(actualConstructedCell.getCellRef())));
-    if (freeEnergy) {
+    if (provideEnergy == ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     }
 }
@@ -3128,7 +3128,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_constructorNode)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    // Gene 1 has two nodes and the constructor building it stays within the creature, so its cells have to be financed
+    // Gene 1 has two nodes and the constructor building it stays within the creature, so its cells have to be supplied
     auto reservedEnergy = normalCellEnergy * 2;
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
@@ -3224,7 +3224,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_infiniteConcatenationsC
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    // An unbounded number of concatenations cannot be financed, so it is counted as a single one
+    // An unbounded number of concatenations cannot be supplied, so it is counted as a single one
     auto reservedEnergy = normalCellEnergy * 2;
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
@@ -3274,7 +3274,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_nestedConstructors)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Gene 1 has two cells and one of them builds gene 2 with two further cells. The nested constructor passes its reserve on,
-    // so the cells of gene 2 have to be financed through it.
+    // so the cells of gene 2 have to be supplied through it.
     auto reservedEnergy = normalCellEnergy * 4;
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
@@ -3370,7 +3370,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_nestedCellOnlyConstruct
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(ConstructorTests, provideEnergyForTransitiveCells_cellOnlyConstructorFinancedForOwnCells)
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_cellOnlyConstructorSuppliedForOwnCells)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
@@ -3495,18 +3495,18 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_cyclicGeneReferences)
     ASSERT_EQ(1, actualData._creatures.size());
     ASSERT_EQ(2, actualData.getObjectsForCreature(actualData.getCreatureRef(0)._id).size());
 
-    // The cycle contributes nothing instead of an unbounded amount: the built constructor is financed for the single cell of
+    // The cycle contributes nothing instead of an unbounded amount: the built constructor is supplied for the single cell of
     // gene 2, not for the cells gene 2 would build through gene 1 again
     auto actualConstructedCell = actualData.getOtherObjectRef({0});
     EXPECT_TRUE(approxCompare(normalCellEnergy, getReservedEnergy(actualConstructedCell.getCellRef())));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(ConstructorTests, provideEnergyForTransitiveCells_rootGeneNotFinanced)
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_rootGeneNotSupplied)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    // The constructor of the built cell references the root gene, which starts the genome anew and is not financed
+    // The constructor of the built cell references the root gene, which starts the genome anew and is not supplied
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
@@ -3546,7 +3546,7 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_rootGeneNotFinanced)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(ConstructorTests, provideEnergyForTransitiveCells_separatingConstructorFinanced)
+TEST_F(ConstructorTests, provideEnergyForTransitiveCells_separatingConstructorSupplied)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
@@ -3679,14 +3679,14 @@ TEST_F(ConstructorTests, constructWithReservedEnergy)
 
 class ConstructorTests_FreeEnergy
     : public ConstructorTests
-    , public testing::WithParamInterface<bool>
+    , public testing::WithParamInterface<ProvideEnergy>
 {};
 
-INSTANTIATE_TEST_SUITE_P(ConstructorTests_FreeEnergy, ConstructorTests_FreeEnergy, ::testing::Values(false, true));
+INSTANTIATE_TEST_SUITE_P(ConstructorTests_FreeEnergy, ConstructorTests_FreeEnergy, ::testing::Values(ProvideEnergy_CellOnly, ProvideEnergy_Free));
 
 TEST_P(ConstructorTests_FreeEnergy, freeEnergy_constructedDepotStartsEmpty)
 {
-    auto freeEnergy = GetParam();
+    auto provideEnergy = GetParam();
 
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
@@ -3699,7 +3699,7 @@ TEST_P(ConstructorTests_FreeEnergy, freeEnergy_constructedDepotStartsEmpty)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // A depot costs no more than any other cell
-    auto constructorEnergy = freeEnergy ? normalCellEnergy : normalCellEnergy * 2 + 1.0f;
+    auto constructorEnergy = provideEnergy == ProvideEnergy_Free ? normalCellEnergy : normalCellEnergy * 2 + 1.0f;
 
     auto data = ContentDesc().addCreature(
         {
@@ -3709,7 +3709,7 @@ TEST_P(ConstructorTests_FreeEnergy, freeEnergy_constructedDepotStartsEmpty)
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
                           .constructor(ConstructorDesc()
-                                           .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_CellOnly)
+                                           .provideEnergy(provideEnergy)
                                            .geneIndex(0)
                                            .autoTriggerInterval(1)
                                            .lastConstructedCellId(1)
@@ -3738,7 +3738,7 @@ TEST_P(ConstructorTests_FreeEnergy, freeEnergy_constructedDepotStartsEmpty)
     EXPECT_EQ(CellType_Depot, actualConstructedCell.getCellRef().getCellType());
     auto const& depot = std::get<DepotDesc>(actualConstructedCell.getCellRef()._cellType);
     EXPECT_TRUE(approxCompare(0.0f, depot._storedUsableEnergy));
-    if (!freeEnergy) {
+    if (provideEnergy != ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     }
 }

@@ -6,11 +6,11 @@
 class ConstructorHelper
 {
 public:
-    static uint64_t constexpr MaxNumCellsToFinance = 1000000;  // A gene graph may reference the same gene several times
+    static uint64_t constexpr MaxNumCellsToSupply = 1000000;
 
     __inline__ __device__ static bool isFinished(Object* constructorCell, Genome const& genome);
     __inline__ __device__ static bool createsNewCreature(Constructor const& constructor);
-    __inline__ __device__ static uint64_t calcNumCellsToFinance(ConstructorGenome const& constructor, Gene const& reachedGene);
+    __inline__ __device__ static uint64_t calcNumCellsToSupply(ConstructorGenome const& constructor, Gene const& reachedGene);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
     template <typename ConstructorType>
     __inline__ __device__ static bool hasInfiniteConcatenations(ConstructorType const& constructor);
@@ -56,16 +56,13 @@ __inline__ __device__ bool ConstructorHelper::createsNewCreature(Constructor con
     return constructor.separation || constructor.geneIndex == 0;
 }
 
-__inline__ __device__ uint64_t ConstructorHelper::calcNumCellsToFinance(ConstructorGenome const& constructor, Gene const& reachedGene)
+__inline__ __device__ uint64_t ConstructorHelper::calcNumCellsToSupply(ConstructorGenome const& constructor, Gene const& reachedGene)
 {
-    // Number of cells a constructor has to be equipped with: the cells of the gene it references, and if it passes its reserve
-    // on in turn everything reachable from there. Every branch and every concatenation builds that once more, whereby infinite
-    // concatenations count as a single one.
     uint64_t numCells =
         constructor.provideEnergy == ProvideEnergyGenome_TransitiveCells ? reachedGene.transitiveNumCells : static_cast<uint32_t>(reachedGene.numNodes);
-    uint64_t numBranches = constructor.separation ? 1 : constructor.numBranches;  // Branches are only built without separation
+    uint64_t numBranches = constructor.separation ? 1 : constructor.numBranches;
     uint64_t numConcatenations = hasInfiniteConcatenations(constructor) ? 1 : max(1, constructor.numConcatenations);
-    return min(numCells * numBranches * numConcatenations, MaxNumCellsToFinance);
+    return min(numCells * numBranches * numConcatenations, MaxNumCellsToSupply);
 }
 
 __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)

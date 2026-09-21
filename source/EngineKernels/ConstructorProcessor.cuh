@@ -677,9 +677,6 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
 __inline__ __device__ float
 ConstructorProcessor::calcReservedEnergyToProvide(Constructor const& hostConstructor, Genome const& genome, Node const& node, int color)
 {
-    // A host providing energy for transitive cells equips a constructor it builds with the energy that constructor needs
-    // (see ConstructorHelper::calcNumCellsToFinance). A constructor referencing the root gene starts the genome anew and is
-    // not financed.
     if (hostConstructor.provideEnergy != ProvideEnergy_TransitiveCells || !node.constructorAvailable) {
         return 0.0f;
     }
@@ -687,7 +684,7 @@ ConstructorProcessor::calcReservedEnergyToProvide(Constructor const& hostConstru
     if (nodeConstructor.geneIndex == 0 || nodeConstructor.geneIndex >= genome.numGenes) {
         return 0.0f;
     }
-    auto numCells = ConstructorHelper::calcNumCellsToFinance(nodeConstructor, genome.genes[nodeConstructor.geneIndex]);
+    auto numCells = ConstructorHelper::calcNumCellsToSupply(nodeConstructor, genome.genes[nodeConstructor.geneIndex]);
     return static_cast<float>(numCells) * cudaSimulationParameters.normalCellEnergy.value[color];
 }
 
