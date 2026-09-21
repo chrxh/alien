@@ -104,6 +104,9 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileUnderConstructionOffspring)
 
     _parameters.externalEnergy.value = 1000.0f;
     _parameters.newLineageThreshold.value = 100.0f;  // Keep accumulatedMutationsInLineage from resetting
+
+    // The host keeps all its energy in the constructor reserve, so it counts as dying for the whole test
+    _parameters.cellDeathProbability.baseValue = ColorVector<float>::uniform(0.0f);
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
