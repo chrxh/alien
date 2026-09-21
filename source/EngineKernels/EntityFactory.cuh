@@ -326,7 +326,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
         }
     }
 
-    // Genomes that are never mutated do not pass the gene graph kernels, so their body parts cost is derived here
     GeneGraphProcessor::updateTransitiveNumCells(*_data, genome);
 
     return genome;

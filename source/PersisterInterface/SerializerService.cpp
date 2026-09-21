@@ -110,7 +110,6 @@ namespace
     auto constexpr Id_NeuralNetGenome_ConnectionWeights = 3;
 
     auto constexpr Id_DepotGenome_storageLimit = 0;
-    // Id 1 was the removed initial stored usable energy of a genome depot
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -119,7 +118,6 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
-    // Id 5 was the removed reserved energy of a genome constructor
     auto constexpr Id_ConstructorGenome_Separation = 6;
     auto constexpr Id_ConstructorGenome_NumBranches = 7;
     auto constexpr Id_ConstructorGenome_NumConcatenations = 8;

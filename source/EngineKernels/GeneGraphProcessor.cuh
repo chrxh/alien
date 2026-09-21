@@ -22,7 +22,6 @@ public:
     __inline__ __device__ static void removeCyclesNotThroughRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void limitGenesWithSeparation(SimulationData& data, Genome* genome);
 
-    // Runs on a single thread, so it can also be called while a genome is being created
     __inline__ __device__ static void updateTransitiveNumCells(SimulationData& data, Genome* genome);
 
 private:
@@ -463,24 +462,15 @@ __inline__ __device__ void GeneGraphProcessor::removeMarkedGenes(Genome* genome,
 
 __inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(SimulationData& data, Genome* genome)
 {
-    // Number of cells that are reachable from a gene, seen from the root gene: the cells of the gene itself plus, for each of
-    // its constructors, what that constructor has to be equipped with. Branches and concatenations are not counted, so one pass
-    // through a gene is measured.
-    //
-    // A depth-first search from the root gene determines this bottom-up: a gene is summed up once every gene reachable from it is
-    // finished. A cycle makes the search navigate back instead of descending again, so the gene that closes the cycle
-    // contributes nothing. This covers references to the root gene as well, which stays on the stack for the whole search.
-    // Genes that the root gene cannot reach at all keep a count of zero.
+    // Depth-first search from the root gene. A gene that is still on the stack closes a cycle and keeps its count of zero.
     auto const numGenes = genome->numGenes;
     if (numGenes == 0) {
         return;
     }
 
-    auto state = data.entities.heap.getTypedSubArray<int>(numGenes);  // 0 = not visited, 1 = on the DFS stack, 2 = finished
-    // A gene is pushed at most once because only genes in state 0 are pushed and they are marked immediately, so the DFS stack
-    // never holds more than numGenes entries.
+    auto state = data.entities.heap.getTypedSubArray<int>(numGenes);
     auto stackGenes = data.entities.heap.getTypedSubArray<int>(numGenes);
-    auto stackNodeIndices = data.entities.heap.getTypedSubArray<int>(numGenes);  // Next node of that stack level to be examined
+    auto stackNodeIndices = data.entities.heap.getTypedSubArray<int>(numGenes);
     for (int geneIndex = 0; geneIndex < numGenes; ++geneIndex) {
         state[geneIndex] = 0;
         genome->genes[geneIndex].transitiveNumCells = 0;
@@ -491,7 +481,6 @@ __inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(Simulati
             return -1;
         }
 
-        // A constructor referencing the root gene starts the genome anew and is not financed, so nothing is reached through it
         auto const& constructor = node.constructor;
         if (constructor.geneIndex == 0 || constructor.geneIndex >= numGenes) {
             return -1;
@@ -510,11 +499,9 @@ __inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(Simulati
                 continue;
             }
 
-            // A gene that is still on the search stack closes a cycle. Its transitive count is then still the zero from the
-            // initialization above, so only the cells that are needed regardless of the cycle are counted.
-            numCells += ConstructorHelper::calcNumCellsToFinance(node.constructor, genome->genes[reachedGeneIndex]);
+            numCells += ConstructorHelper::calcNumCellsToSupply(node.constructor, genome->genes[reachedGeneIndex]);
         }
-        gene.transitiveNumCells = static_cast<uint32_t>(min(numCells, ConstructorHelper::MaxNumCellsToFinance));
+        gene.transitiveNumCells = static_cast<uint32_t>(min(numCells, ConstructorHelper::MaxNumCellsToSupply));
     };
 
     state[0] = 1;
