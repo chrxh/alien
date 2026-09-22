@@ -81,7 +81,6 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
-                                       .constructionActivationTime(95)
                                        .constructionAngle(25.0f)
                                        .provideEnergy(ProvideEnergy_Free)
                                        .reservedEnergy(5.5f)
@@ -158,7 +157,6 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
         .constructor(ConstructorGenomeDesc()
                          .autoTriggerInterval(55)
                          .geneIndex(1)
-                         .constructionActivationTime(95)
                          .constructionAngle(25.0f)
                          .provideEnergy(ProvideEnergyGenome_TransitiveCells)
                          .separation(true)
@@ -662,9 +660,6 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             return false;
         }
         if (constructor._geneIndex != nodeConstructor._geneIndex) {
-            return false;
-        }
-        if (constructor._constructionActivationTime != nodeConstructor._constructionActivationTime) {
             return false;
         }
         if (constructor._constructionAngle != nodeConstructor._constructionAngle) {

@@ -58,7 +58,6 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
 
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._autoTriggerInterval; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._geneIndex; }));
-    EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._constructionActivationTime; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._constructionAngle; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._provideEnergy; }));
     EXPECT_TRUE(changedAtLeastOnce([](auto const& c) { return c._separation; }));

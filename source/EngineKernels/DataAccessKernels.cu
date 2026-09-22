@@ -261,7 +261,6 @@ namespace
                     if (node.constructorAvailable) {
                         nodeTO.constructor.autoTriggerInterval = node.constructor.autoTriggerInterval;
                         nodeTO.constructor.geneIndex = node.constructor.geneIndex;
-                        nodeTO.constructor.constructionActivationTime = node.constructor.constructionActivationTime;
                         nodeTO.constructor.constructionAngle = node.constructor.constructionAngle;
                         nodeTO.constructor.provideEnergy = node.constructor.provideEnergy;
                         nodeTO.constructor.separation = node.constructor.separation;
@@ -559,7 +558,6 @@ namespace
             cellTO.constructorAvailable = cell.constructorAvailable;
             if (cell.constructorAvailable) {
                 cellTO.constructor.autoTriggerInterval = cell.constructor.autoTriggerInterval;
-                cellTO.constructor.constructionActivationTime = cell.constructor.constructionActivationTime;
                 cellTO.constructor.constructionAngle = cell.constructor.constructionAngle;
                 cellTO.constructor.provideEnergy = cell.constructor.provideEnergy;
                 cellTO.constructor.reservedEnergy = cell.constructor.reservedEnergy;

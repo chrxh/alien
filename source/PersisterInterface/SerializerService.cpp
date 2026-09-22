@@ -115,7 +115,6 @@ namespace
 
     auto constexpr Id_ConstructorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_ConstructorGenome_GeneIndex = 1;
-    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
     auto constexpr Id_ConstructorGenome_Separation = 6;
@@ -333,7 +332,6 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         scope.addMember(Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        scope.addMember(Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         scope.addMember(Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         scope.addMember(Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         scope.addMember(Id_ConstructorGenome_Separation, data._separation, defaultObject._separation);
@@ -1048,7 +1046,6 @@ namespace
     auto constexpr Id_NeuralNet_ConnectionWeights = 3;
 
     auto constexpr Id_Constructor_AutoTriggerInterval = 0;
-    auto constexpr Id_Constructor_ConstructionActivationTime = 1;
     auto constexpr Id_Constructor_GeneIndex = 2;
     auto constexpr Id_Constructor_LastConstructedCellId = 5;
     auto constexpr Id_Constructor_ConstructionAngle = 7;
@@ -1295,7 +1292,6 @@ namespace cereal
         ConstructorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        scope.addMember(Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         scope.addMember(Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         scope.addMember(Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         scope.addMember(Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);

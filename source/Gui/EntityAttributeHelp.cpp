@@ -176,8 +176,6 @@ namespace
         {EntityAttribute::ConstructorAutoTriggerInterval,
          "If set, the constructor triggers itself every n time steps, with a phase that differs per creature. Without a value it has to be triggered via "
          "channel #0."},
-        {EntityAttribute::ConstructorActivationTime,
-         "Number of time steps for which a newly constructed cell is to remain inactive. Currently without effect: the engine does not evaluate this value."},
         {EntityAttribute::ConstructorConstructionAngle,
          "Angle of the first constructed cell relative to the connection of the constructor cell. It is only evaluated for the first cell of the first "
          "concatenation in the first branch."},

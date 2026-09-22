@@ -315,14 +315,6 @@ void _NodeEditorWidget::processNodeAttributes()
                             .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorAutoTriggerInterval)),
                         constructor._autoTriggerInterval);
 
-                    // Construction activation time
-                    AlienGui::InputInt(
-                        AlienGui::InputIntParameters()
-                            .name("Offspring trigger time")
-                            .textWidth(rightColumnWidth)
-                            .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorActivationTime)),
-                        constructor._constructionActivationTime);
-
                     // Construction angle
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters()

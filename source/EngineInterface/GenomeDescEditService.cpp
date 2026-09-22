@@ -474,7 +474,6 @@ namespace
                 if (node._constructor.has_value()) {
                     auto& constructor = node._constructor.value();
                     constructor._autoTriggerInterval = 50;
-                    constructor._constructionActivationTime = 10;
                     constructor._provideEnergy = ProvideEnergy_CellOnly;
                 }
             }

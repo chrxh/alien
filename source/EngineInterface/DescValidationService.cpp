@@ -297,13 +297,6 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                     value = std::max(value, 1);
                 }
                 constructor._geneIndex = std::max(constructor._geneIndex, 0);
-                if (constructor._autoTriggerInterval.has_value()) {
-                    constructor._autoTriggerInterval = std::max(*constructor._autoTriggerInterval, Const::ConstructorConstructionActivationTime_Min);
-                }
-                constructor._constructionActivationTime = std::clamp(
-                    constructor._constructionActivationTime,
-                    Const::ConstructorConstructionActivationTime_Min,
-                    Const::ConstructorConstructionActivationTime_Max);
                 constructor._provideEnergy = std::clamp(
                     constructor._provideEnergy, static_cast<ProvideEnergyGenome>(0), static_cast<ProvideEnergyGenome>(ProvideEnergyGenome_Count - 1));
                 constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
@@ -511,8 +504,6 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
                 value = std::max(value, Const::ConstructorAutoTriggerInterval_Min);
             }
             constructor._geneIndex = std::max(constructor._geneIndex, 0);
-            constructor._constructionActivationTime = std::clamp(
-                constructor._constructionActivationTime, Const::ConstructorConstructionActivationTime_Min, Const::ConstructorConstructionActivationTime_Max);
             constructor._provideEnergy =
                 std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
             constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
