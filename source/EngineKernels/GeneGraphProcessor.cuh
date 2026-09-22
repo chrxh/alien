@@ -5,6 +5,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/ShapeGenerator.h>
 
+#include "ConstructorHelper.cuh"
 #include "SimulationData.cuh"
 
 namespace cg_geneGraph = cooperative_groups;
@@ -20,6 +21,8 @@ public:
     __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeCyclesNotThroughRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void limitGenesWithSeparation(SimulationData& data, Genome* genome);
+
+    __inline__ __device__ static void updateTransitiveNumCells(SimulationData& data, Genome* genome);
 
 private:
     __inline__ __device__ static bool voidUnreachableNodes(SimulationData& data, Gene& gene);
@@ -455,4 +458,75 @@ __inline__ __device__ void GeneGraphProcessor::removeMarkedGenes(Genome* genome,
         genome->numGenes = newNumGenes;
     }
     block.sync();
+}
+
+__inline__ __device__ void GeneGraphProcessor::updateTransitiveNumCells(SimulationData& data, Genome* genome)
+{
+    // Depth-first search from the root gene. A gene that is still on the stack closes a cycle and keeps its count of zero.
+    auto const numGenes = genome->numGenes;
+    if (numGenes == 0) {
+        return;
+    }
+
+    auto state = data.entities.heap.getTypedSubArray<int>(numGenes);
+    auto stackGenes = data.entities.heap.getTypedSubArray<int>(numGenes);
+    auto stackNodeIndices = data.entities.heap.getTypedSubArray<int>(numGenes);
+    for (int geneIndex = 0; geneIndex < numGenes; ++geneIndex) {
+        state[geneIndex] = 0;
+        genome->genes[geneIndex].transitiveNumCells = 0;
+    }
+
+    auto getReachedGeneIndex = [&](Node const& node) {
+        if (!node.constructorAvailable) {
+            return -1;
+        }
+
+        auto const& constructor = node.constructor;
+        if (constructor.geneIndex == 0 || constructor.geneIndex >= numGenes) {
+            return -1;
+        }
+        return static_cast<int>(constructor.geneIndex);
+    };
+
+    auto sumUpGene = [&](Gene& gene) {
+        uint64_t numCells = 0;
+        for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+            auto const& node = gene.nodes[nodeIndex];
+            ++numCells;
+
+            auto reachedGeneIndex = getReachedGeneIndex(node);
+            if (reachedGeneIndex < 0) {
+                continue;
+            }
+
+            numCells += ConstructorHelper::calcNumCellsToSupply(node.constructor, genome->genes[reachedGeneIndex]);
+        }
+        gene.transitiveNumCells = static_cast<uint32_t>(min(numCells, ConstructorHelper::MaxNumCellsToSupply));
+    };
+
+    state[0] = 1;
+    stackGenes[0] = 0;
+    stackNodeIndices[0] = 0;
+    int stackSize = 1;
+
+    while (stackSize > 0) {
+        auto currentGeneIndex = stackGenes[stackSize - 1];
+        auto& gene = genome->genes[currentGeneIndex];
+        auto nodeIndex = stackNodeIndices[stackSize - 1];
+        if (nodeIndex >= gene.numNodes) {
+            sumUpGene(gene);
+            state[currentGeneIndex] = 2;
+            --stackSize;
+            continue;
+        }
+        stackNodeIndices[stackSize - 1] = nodeIndex + 1;
+
+        auto reachedGeneIndex = getReachedGeneIndex(gene.nodes[nodeIndex]);
+        if (reachedGeneIndex >= 0 && state[reachedGeneIndex] == 0) {
+            state[reachedGeneIndex] = 1;
+            stackGenes[stackSize] = reachedGeneIndex;
+            stackNodeIndices[stackSize] = 0;
+            ++stackSize;
+        }
+    }
 }

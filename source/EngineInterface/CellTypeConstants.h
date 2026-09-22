@@ -156,15 +156,28 @@ enum ConstructorShape_
 using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {
-    ProvideEnergy_ReduceCellEnergy = 0,
-    ProvideEnergy_Free = 1,
-    ProvideEnergy_Count = 2,
+    ProvideEnergy_CellOnly = 0,
+    ProvideEnergy_TransitiveCells = 1,
+    ProvideEnergy_Free = 2,
+    ProvideEnergy_Count = 3,
 };
+
+using ProvideEnergyGenome = uint8_t;
+enum ProvideEnergyGenome_
+{
+    ProvideEnergyGenome_CellOnly = 0,
+    ProvideEnergyGenome_TransitiveCells = 1,
+    ProvideEnergyGenome_Count = 2,
+};
+
+static_assert(static_cast<int>(ProvideEnergy_CellOnly) == static_cast<int>(ProvideEnergyGenome_CellOnly));
+static_assert(static_cast<int>(ProvideEnergy_TransitiveCells) == static_cast<int>(ProvideEnergyGenome_TransitiveCells));
 
 namespace Const
 {
     std::vector<std::string> const ConstructorShapeStrings = {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
-    std::vector<std::string> const ProvideEnergyStrings = {"Reduce cell energy", "Free"};
+    std::vector<std::string> const ProvideEnergyStrings = {"Cell only", "Transitive cells", "Free"};
+    std::vector<std::string> const ProvideEnergyGenomeStrings = {"Cell only", "Transitive cells"};
 }
 
 //******************
@@ -231,8 +244,7 @@ namespace Const
     auto constexpr DepotStorageLimit_Min = 0.0f;
     auto constexpr DepotStorageLimit_Max = 1000.0f;
     auto constexpr DepotStorageLimit_Default = 200.0f;
-    auto constexpr DepotInitialStoredUsableEnergy_Min = 0.0f;
-    auto constexpr DepotInitialStoredUsableEnergy_Default = 0.0f;
+    auto constexpr DepotStoredUsableEnergy_Default = 0.0f;
 }
 
 //********************

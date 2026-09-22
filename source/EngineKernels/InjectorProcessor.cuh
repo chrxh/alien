@@ -75,6 +75,8 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             injectedCell->typeData.cell.creature = cloneCreature;
             injectedCell->typeData.cell.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
             injectedCell->typeData.cell.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+            injectedCell->typeData.cell.constructor.currentOffspring = 1;
+
             object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {

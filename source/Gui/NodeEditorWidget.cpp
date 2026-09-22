@@ -332,14 +332,17 @@ void _NodeEditorWidget::processNodeAttributes()
                             .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorConstructionAngle)),
                         constructor._constructionAngle);
 
-                    // Reserved energy
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters()
-                            .name("Reserved energy")
-                            .textWidth(rightColumnWidth)
-                            .format("%.1f")
-                            .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorReservedEnergy)),
-                        constructor._reservedEnergy);
+                    // Provide energy
+                    int provideEnergy = constructor._provideEnergy;
+                    if (AlienGui::Combo(
+                            AlienGui::ComboParameters()
+                                .name("Provide energy")
+                                .textWidth(rightColumnWidth)
+                                .values(Const::ProvideEnergyGenomeStrings)
+                                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorProvideEnergy)),
+                            provideEnergy)) {
+                        constructor._provideEnergy = static_cast<ProvideEnergyGenome>(provideEnergy);
+                    }
 
                     // Separation
                     AlienGui::Checkbox(
@@ -392,13 +395,6 @@ void _NodeEditorWidget::processNodeAttributes()
                         .textWidth(rightColumnWidth)
                         .tooltip(EntityAttributeHelp::get(EntityAttribute::DepotStorageLimit)),
                     depot._storageLimit);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters()
-                        .name("Initial stored energy")
-                        .textWidth(rightColumnWidth)
-                        .format("%.1f")
-                        .tooltip(EntityAttributeHelp::get(EntityAttribute::DepotInitialStoredEnergy)),
-                    depot._initialStoredUsableEnergy);
             } else if (nodeType == CellType_Sensor) {
 
                 ImGui::PushID("Sensor");

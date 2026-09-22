@@ -475,7 +475,7 @@ namespace
                     auto& constructor = node._constructor.value();
                     constructor._autoTriggerInterval = 50;
                     constructor._constructionActivationTime = 10;
-                    constructor._reservedEnergy = 0;
+                    constructor._provideEnergy = ProvideEnergy_CellOnly;
                 }
             }
         }

@@ -26,7 +26,6 @@ struct VoidGenomeTO
 struct DepotGenomeTO
 {
     float storageLimit;
-    float initialStoredUsableEnergy;
 };
 
 struct DetectEnergyGenomeTO
@@ -75,8 +74,7 @@ struct ConstructorGenomeTO
     uint16_t geneIndex;
     uint16_t constructionActivationTime;
     float constructionAngle;
-    ProvideEnergy provideEnergy;
-    float reservedEnergy;
+    ProvideEnergyGenome provideEnergy;
     bool separation;
     uint8_t numBranches;  // For separation = false
     int numConcatenations;

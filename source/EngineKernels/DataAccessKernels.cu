@@ -111,7 +111,6 @@ namespace
                         break;
                     case CellType_Depot:
                         nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
-                        nodeTO.cellTypeData.depot.initialStoredUsableEnergy = node.cellTypeData.depot.initialStoredUsableEnergy;
                         break;
                     case CellType_Sensor:
                         nodeTO.cellTypeData.sensor.autoTrigger = node.cellTypeData.sensor.autoTrigger;
@@ -265,7 +264,6 @@ namespace
                         nodeTO.constructor.constructionActivationTime = node.constructor.constructionActivationTime;
                         nodeTO.constructor.constructionAngle = node.constructor.constructionAngle;
                         nodeTO.constructor.provideEnergy = node.constructor.provideEnergy;
-                        nodeTO.constructor.reservedEnergy = node.constructor.reservedEnergy;
                         nodeTO.constructor.separation = node.constructor.separation;
                         nodeTO.constructor.numBranches = node.constructor.numBranches;
                         nodeTO.constructor.numConcatenations = node.constructor.numConcatenations;

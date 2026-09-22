@@ -30,7 +30,7 @@
 
 // --- Cell types (switch (node.cellType)) ---
 ALIEN_MUTATION_FIELD_COUNT(BaseGenomeDesc, 0);
-ALIEN_MUTATION_FIELD_COUNT(DepotGenomeDesc, 2);
+ALIEN_MUTATION_FIELD_COUNT(DepotGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(SensorGenomeDesc, 5);
 ALIEN_MUTATION_FIELD_COUNT(GeneratorGenomeDesc, 5);
 ALIEN_MUTATION_FIELD_COUNT(AttackerGenomeDesc, 1);
@@ -43,6 +43,8 @@ ALIEN_MUTATION_FIELD_COUNT(DigestorGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(MemoryGenomeDesc, 3);
 ALIEN_MUTATION_FIELD_COUNT(CommunicatorGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(VoidGenomeDesc, 0);
+
+ALIEN_MUTATION_FIELD_COUNT(ConstructorGenomeDesc, 8);
 
 // --- Sensor modes (switch (node.cellTypeData.sensor.mode)) ---
 ALIEN_MUTATION_FIELD_COUNT(DetectEnergyGenomeDesc, 1);

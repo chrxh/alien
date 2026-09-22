@@ -101,10 +101,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             if (nodeType == CellType_Depot) {
                 auto& depot = std::get<DepotGenomeDesc>(node._cellType);
-                depot._storageLimit =
-                    std::clamp(depot._storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
-                depot._initialStoredUsableEnergy =
-                    std::clamp(depot._initialStoredUsableEnergy, Const::DepotInitialStoredUsableEnergy_Min, depot._storageLimit);
+                depot._storageLimit = std::clamp(depot._storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
 
             } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
@@ -307,9 +304,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                     constructor._constructionActivationTime,
                     Const::ConstructorConstructionActivationTime_Min,
                     Const::ConstructorConstructionActivationTime_Max);
-                constructor._provideEnergy =
-                    std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
-                constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
+                constructor._provideEnergy = std::clamp(
+                    constructor._provideEnergy, static_cast<ProvideEnergyGenome>(0), static_cast<ProvideEnergyGenome>(ProvideEnergyGenome_Count - 1));
                 constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
                 constructor._numConcatenations = std::max(constructor._numConcatenations, 1);
                 constructor._constructionAngle =
