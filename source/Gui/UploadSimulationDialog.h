@@ -18,7 +18,7 @@ class UploadSimulationDialog : public AlienDialog
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(UploadSimulationDialog);
 
 public:
-    void open(NetworkResourceType resourceType, std::string const& folder = "");
+    void open(NetworkResourceType resourceType, std::string const& folder = "", std::string const& resourceName = "");
 
 private:
     UploadSimulationDialog();
