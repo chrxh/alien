@@ -206,6 +206,17 @@ __global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationDa
     }
 }
 
+__global__ void cudaNextTimestep_geneGraph_updateTransitiveNumCells(SimulationData data)
+{
+    if (threadIdx.x != 0) {
+        return;
+    }
+    auto const partition = calcBlockPartition(data.mutatedGenomes.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        GeneGraphProcessor::updateTransitiveNumCells(data, data.mutatedGenomes.at(i));
+    }
+}
+
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
 {
     InjectorProcessor::process(data, statistics);

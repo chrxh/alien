@@ -303,8 +303,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     break;
                 case CellType_Depot:
                     mutateNumber(node.cellTypeData.depot.storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
-                    mutateNumber(
-                        node.cellTypeData.depot.initialStoredUsableEnergy, Const::DepotInitialStoredUsableEnergy_Min, node.cellTypeData.depot.storageLimit);
                     break;
                 case CellType_Sensor:
                     mutateBoolField(node.cellTypeData.sensor.autoTrigger);
@@ -672,7 +670,7 @@ __inline__ __device__ void MutationProcessor::resetCellTypeToDefault(Node& node)
         cellTypeData.base = {};
         break;
     case CellType_Depot:
-        cellTypeData.depot = {Const::DepotStorageLimit_Default, Const::DepotInitialStoredUsableEnergy_Default};
+        cellTypeData.depot = {Const::DepotStorageLimit_Default};
         break;
     case CellType_Sensor: {
         auto& sensor = cellTypeData.sensor;
@@ -993,6 +991,7 @@ __inline__ __device__ void MutationProcessor::initNewGene(Gene& gene)
     gene.homogeneousCellType = false;
     gene.numNodes = 0;
     gene.nodes = nullptr;
+    gene.transitiveNumCells = 0;
 }
 
 __inline__ __device__ int MutationProcessor::findNodeForNewConstructor(SimulationData& data, Gene const& gene)
@@ -1882,7 +1881,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                         Const::ConstructorConstructionActivationTime_Min,
                         Const::ConstructorConstructionActivationTime_Max);
                     mutateNumber(constructor.constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
-                    mutateNumber(constructor.reservedEnergy, 0.0f, 300.0f);
+                    mutateEnumField(constructor.provideEnergy, ProvideEnergyGenome_Count);
                     mutateNumber(constructor.numBranches, 1, 6);
                     if (!ConstructorHelper::hasInfiniteConcatenations(constructor)) {
                         mutateNumber(constructor.numConcatenations, 1, 100);

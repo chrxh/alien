@@ -42,7 +42,7 @@ private:
     void onPasteGenome();
     void onSavepointGenome();
     void onInjectGenome();
-    void onCreateSeed(bool provideEnergy);
+    void onCreateSeed(bool freeEnergy);
     void onScheduleAddTab(GenomeDesc const& genome, std::optional<int> lineageId);
 
     GenomeDesc getDefaultGenome();

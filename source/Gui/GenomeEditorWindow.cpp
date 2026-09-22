@@ -332,7 +332,7 @@ void GenomeEditorWindow::onInjectGenome()
     selectedTab->resetOriginal();
 }
 
-void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
+void GenomeEditorWindow::onCreateSeed(bool freeEnergy)
 {
     auto pos = Viewport::get().getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
@@ -349,7 +349,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .color(EditorModel::get().getDefaultColorCode())
              .type(CellDesc().headCell(true).constructor(ConstructorDesc()
                                                              .autoTriggerInterval(50)
-                                                             .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_ReduceCellEnergy)
+                                                             .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_TransitiveCells)
                                                              .geneIndex(0)
                                                              .separation(true)))},
         CreatureDesc(),

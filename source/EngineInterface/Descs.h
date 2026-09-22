@@ -51,7 +51,7 @@ struct DepotDesc
     auto operator<=>(DepotDesc const&) const = default;
 
     MEMBER(DepotDesc, float, storageLimit, Const::DepotStorageLimit_Default);
-    MEMBER(DepotDesc, float, storedUsableEnergy, Const::DepotInitialStoredUsableEnergy_Default);
+    MEMBER(DepotDesc, float, storedUsableEnergy, Const::DepotStoredUsableEnergy_Default);
 };
 
 struct ConstructorDesc
@@ -66,7 +66,7 @@ struct ConstructorDesc
         Const::ConstructorAutoTriggerInterval_Default);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(ConstructorDesc, int, constructionActivationTime, 100);
     MEMBER(ConstructorDesc, float, constructionAngle, 0.0f);
-    MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_ReduceCellEnergy);
+    MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
     MEMBER(ConstructorDesc, float, reservedEnergy, 0.0f);
     MEMBER(ConstructorDesc, bool, separation, false);
     MEMBER(ConstructorDesc, int, numBranches, 1);        // For separation = false

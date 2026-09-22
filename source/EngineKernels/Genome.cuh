@@ -26,7 +26,6 @@ struct VoidGenome
 struct DepotGenome
 {
     float storageLimit;
-    float initialStoredUsableEnergy;
 };
 
 struct DetectEnergyGenome
@@ -75,8 +74,7 @@ struct ConstructorGenome
     uint16_t geneIndex;
     uint16_t constructionActivationTime;
     float constructionAngle;
-    ProvideEnergy provideEnergy;
-    float reservedEnergy;
+    ProvideEnergyGenome provideEnergy;
     bool separation;
     uint8_t numBranches;  // For separation = false
     int numConcatenations;
@@ -334,6 +332,9 @@ struct Gene
 
     int numNodes;
     Node* nodes;
+
+    // Temporary data
+    uint32_t transitiveNumCells;
 };
 
 struct NeuronMutation
