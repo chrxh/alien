@@ -46,13 +46,13 @@ void UploadSimulationDialog::shutdownIntern()
 }
 
 
-void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
+void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder, std::string const& resourceName)
 {
     if (NetworkService::get().getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
         _resourceType = resourceType;
         _folder = folder;
-        _resourceName = _resourceNameByFolder[_folder];
+        _resourceName = resourceName.empty() ? _resourceNameByFolder[_folder] : resourceName;
         _resourceDescription = _resourceDescriptionByFolder[_folder];
         if (_resourceType == NetworkResourceType_Simulation) {
             _preview.createForSimulation();

@@ -200,15 +200,20 @@ void BrowserWindow::processToolbar()
                     "Upload your current " + resourceTypeString
                     + " to the server and made visible in the browser. You can choose whether you want to share it with the community or whether it should "
                       "only be visible in your own workspace.\nIf you have already selected a folder, your "
-                    + resourceTypeString + " will be uploaded there.")
+                    + resourceTypeString + " will be uploaded there. If you have selected a " + resourceTypeString + ", its folder and name will be suggested.")
                 .action([&] {
-                    std::string prefix = [&] {
-                        if (_data->selectedTreeTO == nullptr || _data->selectedTreeTO->isLeaf()) {
-                            return std::string();
+                    auto [folder, resourceName] = [&]() -> std::pair<std::string, std::string> {
+                        if (_data->selectedTreeTO == nullptr) {
+                            return {};
                         }
-                        return NetworkResourceService::get().concatenateFolderName(_data->selectedTreeTO->folderNames, true);
+                        auto const& folderNames = _data->selectedTreeTO->folderNames;
+                        auto folder = folderNames.empty() ? std::string() : NetworkResourceService::get().concatenateFolderName(folderNames, true);
+                        if (!_data->selectedTreeTO->isLeaf()) {
+                            return {folder, std::string()};
+                        }
+                        return {folder, _data->selectedTreeTO->getLeaf().leafName};
                     }();
-                    UploadSimulationDialog::get().open(_data->currentWorkspace.resourceType, prefix);
+                    UploadSimulationDialog::get().open(_data->currentWorkspace.resourceType, folder, resourceName);
                 })),
         AlienGui::ToolbarItem::createButton(
             AlienGui::ToolbarItemParameters().icon(ICON_FA_EDIT).name("Change name or description").disabled(!isOwnerForSelectedItem).action([&] {
