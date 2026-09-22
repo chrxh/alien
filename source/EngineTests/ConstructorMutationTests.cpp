@@ -85,12 +85,10 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
-TEST_F(ConstructorMutationTests, mutatesCreatureWhileUnderConstructionOffspring)
+TEST_F(ConstructorMutationTests, dyingConstructorMutatesHostAndOffspring)
 {
-    // Regression test:
-    // constructor.offspring is set on the first energy-less trigger and, with separation off, never reset.
-    // External energy inflow then lifts the energy until the offspring is actually constructed and the creature
-    // is mutated - which the previous code skipped while constructor.offspring != nullptr.
+    // A constructor without own energy waits for the external energy inflow before it can build its offspring. The creature
+    // has to be mutated during that wait, and the offspring has to carry mutations as well.
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
 
@@ -102,10 +100,11 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileUnderConstructionOffspring)
         CreatureDesc().id(1).mutationState(MutationState_NotMutated),
         genome);
 
-    _parameters.externalEnergy.value = 1000.0f;
-    _parameters.newLineageThreshold.value = 100.0f;  // Keep accumulatedMutationsInLineage from resetting
+    _parameters.externalEnergy.value = 1000.0f;      // The inflow into the constructor reserve is the only energy the host gets
+    _parameters.newLineageThreshold.value = 100.0f;  // Keep the creature in its lineage while it accumulates mutations
 
-    // The host keeps all its energy in the constructor reserve, so it counts as dying for the whole test
+    // Energy in the constructor reserve does not count as usable energy, so both cells stay dying for the whole test and
+    // would otherwise be removed at random
     _parameters.cellDeathProbability.baseValue = ColorVector<float>::uniform(0.0f);
     _simulationFacade->setSimulationParameters(_parameters);
 
@@ -116,7 +115,7 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileUnderConstructionOffspring)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(2, actualData.getNumObjects());  // Offspring cell was constructed
+    ASSERT_EQ(2, actualData.getNumObjects());  // Host and offspring cell
     auto hostCreatureId = actualData.getObjectRef(1).getCellRef()._creatureId;
     EXPECT_GT(actualData.getCreatureRef(hostCreatureId)._accumulatedMutations, 0.0f);
 
