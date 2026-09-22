@@ -68,6 +68,7 @@ private:
         uint64_t& objectIndex,
         Object* hostObject,
         float2 newObjectPos,
+        uint16_t constructionId,
         ConstructionData const& constructionData);
 
     __inline__ __device__ static float calcReservedEnergyToProvide(Constructor const& hostConstructor, Genome const& genome, Node const& node, int color);
@@ -426,8 +427,10 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
         }
     }
 
+    auto constructionId = static_cast<uint16_t>(alienAtomicAdd32(&constructionData.creature->nextConstructionId, static_cast<uint32_t>(1)));
+
     uint64_t cellPointerIndex;
-    Object* newObject = constructCellIntern(data, statistics, cellPointerIndex, hostObject, newObjectPos, constructionData);
+    Object* newObject = constructCellIntern(data, statistics, cellPointerIndex, hostObject, newObjectPos, constructionId, constructionData);
 
     if (!newObject->tryLock()) {
         return nullptr;
@@ -493,7 +496,8 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     }
 
     uint64_t cellPointerIndex;
-    Object* newObject = constructCellIntern(data, statistics, cellPointerIndex, hostObject, newObjectPos, constructionData);
+    Object* newObject =
+        constructCellIntern(data, statistics, cellPointerIndex, hostObject, newObjectPos, lastObject->typeData.cell.constructionId, constructionData);
 
     if (!newObject->tryLock()) {
         return nullptr;
@@ -605,6 +609,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
         result[i] = nullptr;
     }
 
+    auto constructionId = constructionData.lastConstructionObject->typeData.cell.constructionId;
     data.objectMap.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached(), [&](auto const& otherObject) {
         if (numResultCells == constructionData.shapeResult.numAdditionalConnections) {
             return;
@@ -613,14 +618,12 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
             return;
         }
         if (otherObject == hostObject || (otherObject->typeData.cell.cellState != CellState_UnderConstruction && otherObject->typeData.cell.activationTime == 0)
-            || otherObject->typeData.cell.creature != constructionData.creature
-            || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
+            || otherObject->typeData.cell.creature != constructionData.creature || otherObject->typeData.cell.constructionId != constructionId) {
             return;
         }
         for (int i = 0; i < constructionData.shapeResult.numAdditionalConnections; ++i) {
             if (result[i] == nullptr && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[i]
-                && otherObject->typeData.cell.concatenationIndex == constructionData.currentConcatenation
-                && otherObject->typeData.cell.branchIndex == constructionData.currentBranch) {
+                && otherObject->typeData.cell.concatenationIndex == constructionData.currentConcatenation) {
                 result[i] = otherObject;
                 ++numResultCells;
                 return;
@@ -635,6 +638,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     uint64_t& objectIndex,
     Object* hostObject,
     float2 posOfNewObject,
+    uint16_t constructionId,
     ConstructionData const& constructionData)
 {
     auto& constructor = hostObject->typeData.cell.constructor;
@@ -649,9 +653,9 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         constructor.geneIndex,
         constructionData.currentNodeIndex,
         constructionData.gene->homogeneousCellType,
-        hostObject->typeData.cell.nodeIndex,
         constructionData.currentConcatenation,
         constructionData.currentBranch,
+        constructionId,
         posOfNewObject,
         hostObject->vel,
         constructionData.neededUsableEnergy,

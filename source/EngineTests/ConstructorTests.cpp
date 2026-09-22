@@ -2880,19 +2880,19 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
             ObjectDesc()
                 .id(3)
                 .pos({10.1f, 10.0f - getOffspringDistance() - 1.0f})
-                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(1).parentNodeIndex(0)),
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(1).constructionId(1)),
             ObjectDesc()
                 .id(4)
                 .pos({10.0f, 10.0f - getOffspringDistance()})
-                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1).geneIndex(1).parentNodeIndex(0)),
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1).geneIndex(1).constructionId(1)),
             ObjectDesc()
                 .id(5)
                 .pos({11.1f, 10.0f - getOffspringDistance() - 1.0f})
-                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(2).parentNodeIndex(1)),
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(2).constructionId(2)),
             ObjectDesc()
                 .id(6)
                 .pos({11.0f, 10.0f - getOffspringDistance()})
-                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1).geneIndex(2).parentNodeIndex(1)),
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1).geneIndex(2).constructionId(2)),
         },
         CreatureDesc().id(0),
         genome);
@@ -2917,7 +2917,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     auto constructedCells = actualData.getOtherObjects({1, 2, 3, 4, 5, 6});
     ObjectDesc object1, object2;
     for (auto const& object : constructedCells) {
-        if (object.getCellRef()._parentNodeIndex == 0) {
+        if (object.getCellRef()._geneIndex == 1) {
             object1 = object;
         } else {
             object2 = object;
@@ -2932,6 +2932,146 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     EXPECT_TRUE(actualData.hasConnection(object2._id, 2));
     EXPECT_TRUE(actualData.hasConnection(object2._id, 5));
     EXPECT_TRUE(actualData.hasConnection(object2._id, 6));
+}
+
+TEST_F(ConstructorTests, avoidConnectionsBetweenConstructionsOfSameGene)
+{
+    // Both hosts share node index and gene, only the construction id separates the two constructions
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({}),
+        GeneDesc().shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+    });
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(getConstructorEnergy())
+                          .nodeIndex(0)
+                          .constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(4).separation(false))),
+            ObjectDesc()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(getConstructorEnergy())
+                          .nodeIndex(0)
+                          .constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(6).separation(false))),
+
+            ObjectDesc()
+                .id(3)
+                .pos({10.1f, 10.0f - getOffspringDistance() - 1.0f})
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(1).constructionId(1)),
+            ObjectDesc()
+                .id(4)
+                .pos({10.0f, 10.0f - getOffspringDistance()})
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1).geneIndex(1).constructionId(1)),
+            ObjectDesc()
+                .id(5)
+                .pos({11.1f, 10.0f - getOffspringDistance() - 1.0f})
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(1).constructionId(2)),
+            ObjectDesc()
+                .id(6)
+                .pos({11.0f, 10.0f - getOffspringDistance()})
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1).geneIndex(1).constructionId(2)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(1, 2);
+
+    data.addConnection(4, 1);
+    data.addConnection(3, 4);
+
+    data.addConnection(6, 2);
+    data.addConnection(5, 6);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(8, actualData.getObjectsForCreature(creature._id).size());
+
+    auto constructedCells = actualData.getOtherObjects({1, 2, 3, 4, 5, 6});
+    ObjectDesc object1, object2;
+    for (auto const& object : constructedCells) {
+        if (object.getCellRef()._constructionId == 1) {
+            object1 = object;
+        } else {
+            object2 = object;
+        }
+    }
+    EXPECT_EQ(2, object2.getCellRef()._constructionId);
+
+    EXPECT_EQ(3, object1._connections.size());
+    EXPECT_TRUE(actualData.hasConnection(object1._id, 1));
+    EXPECT_TRUE(actualData.hasConnection(object1._id, 3));
+    EXPECT_TRUE(actualData.hasConnection(object1._id, 4));
+
+    EXPECT_EQ(3, object2._connections.size());
+    EXPECT_TRUE(actualData.hasConnection(object2._id, 2));
+    EXPECT_TRUE(actualData.hasConnection(object2._id, 5));
+    EXPECT_TRUE(actualData.hasConnection(object2._id, 6));
+}
+
+TEST_F(ConstructorTests, constructionId_newBranch)
+{
+    auto data = ContentDesc().addCreature(
+        {ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).separation(false)))},
+        CreatureDesc().id(0).nextConstructionId(5),
+        GenomeDesc().genes({
+            GeneDesc(),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+        }));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    EXPECT_EQ(6, actualData.getCreatureRef(0)._nextConstructionId);
+
+    auto newObjects = actualData.getOtherObjects({1});
+    ASSERT_EQ(1, newObjects.size());
+    EXPECT_EQ(5, newObjects.front().getCellRef()._constructionId);
+}
+
+TEST_F(ConstructorTests, constructionId_continuedBranch)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(2).separation(false))),
+            ObjectDesc()
+                .id(2)
+                .pos({100.0f, 100.0f - getOffspringDistance()})
+                .type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0).geneIndex(1).constructionId(7)),
+        },
+        CreatureDesc().id(0).nextConstructionId(5),
+        GenomeDesc().genes({
+            GeneDesc(),
+            GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+        }));
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    EXPECT_EQ(5, actualData.getCreatureRef(0)._nextConstructionId);
+
+    auto newObjects = actualData.getOtherObjects({1, 2});
+    ASSERT_EQ(1, newObjects.size());
+    EXPECT_EQ(7, newObjects.front().getCellRef()._constructionId);
 }
 
 enum class Separation

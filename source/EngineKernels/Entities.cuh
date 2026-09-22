@@ -452,6 +452,7 @@ struct Creature
 
     // Process data
     uint32_t headUpdateId;                // Will be updated regularly to trigger head updates
+    uint32_t nextConstructionId;
     uint64_t externalEnergyInflowCellId;  // Constructor cell that claimed the external energy inflow, may be VALUE_NOT_SET_UINT64
 
     // Temporary data
@@ -507,8 +508,8 @@ struct Cell
     uint32_t concatenationIndex;
 
     uint16_t nodeIndex;
-    uint16_t parentNodeIndex;
     uint16_t geneIndex;
+    uint16_t constructionId;  // Unique within the creature for each constructed branch
     uint8_t branchIndex;
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
     bool headCell;

@@ -422,8 +422,8 @@ struct CellTO
     // Creature/Genome data
     uint64_t creatureIndex;
     uint16_t nodeIndex;
-    uint16_t parentNodeIndex;
     uint16_t geneIndex;
+    uint16_t constructionId;
     uint32_t concatenationIndex;
     uint8_t branchIndex;
 
@@ -499,6 +499,7 @@ struct CreatureTO
 
     // Process data
     uint32_t headUpdateId;
+    uint32_t nextConstructionId;
 
     // Temporary data
     uint64_t creatureIndexOnGpu;

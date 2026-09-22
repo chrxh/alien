@@ -501,8 +501,8 @@ struct CellDesc
     // Creature/genome data
     MEMBER(CellDesc, uint64_t, creatureId, 0);
     MEMBER(CellDesc, int, nodeIndex, 0);
-    MEMBER(CellDesc, int, parentNodeIndex, 0);
     MEMBER(CellDesc, int, geneIndex, 0);
+    MEMBER(CellDesc, int, constructionId, 0);
     MEMBER(CellDesc, int, concatenationIndex, 0);
     MEMBER(CellDesc, int, branchIndex, 0);
 
@@ -594,6 +594,7 @@ struct CreatureDesc
 
     // Process data
     MEMBER(CreatureDesc, int, headUpdateId, 0);
+    MEMBER(CreatureDesc, uint32_t, nextConstructionId, 0);
 };
 
 struct _ContentDescCache

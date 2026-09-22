@@ -606,12 +606,6 @@ void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<Genome
                 AlienGui::InputIntParameters().name("Node index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellNodeIndex)),
                 cell._nodeIndex);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters()
-                    .name("Parent node index")
-                    .textWidth(TextWidth)
-                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellParentNodeIndex)),
-                cell._parentNodeIndex);
-            AlienGui::InputInt(
                 AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellGeneIndex)),
                 cell._geneIndex);
             AlienGui::InputInt(
@@ -623,6 +617,12 @@ void _InspectionWindow::processCellNode(ObjectDesc& object, std::optional<Genome
             AlienGui::InputInt(
                 AlienGui::InputIntParameters().name("Branch index").textWidth(TextWidth).tooltip(EntityAttributeHelp::get(EntityAttribute::CellBranchIndex)),
                 cell._branchIndex);
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters()
+                    .name("Construction id")
+                    .textWidth(TextWidth)
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::CellConstructionId)),
+                cell._constructionId);
             AlienGui::InputInt(
                 AlienGui::InputIntParameters()
                     .name("Activation time")

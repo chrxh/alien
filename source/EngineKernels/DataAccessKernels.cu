@@ -301,6 +301,7 @@ namespace
             creatureTO.accumulatedMutations = creature->accumulatedMutations;
             creatureTO.accumulatedMutationsInLineage = creature->accumulatedMutationsInLineage;
             creatureTO.headUpdateId = creature->headUpdateId;
+            creatureTO.nextConstructionId = creature->nextConstructionId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
             alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, creatureTOIndex);
@@ -367,8 +368,8 @@ namespace
             cellTO.concatenationIndex = cell.concatenationIndex;
             cellTO.branchIndex = cell.branchIndex;
             cellTO.nodeIndex = cell.nodeIndex;
-            cellTO.parentNodeIndex = cell.parentNodeIndex;
             cellTO.geneIndex = cell.geneIndex;
+            cellTO.constructionId = cell.constructionId;
             cellTO.headUpdateId = cell.headUpdateId;
             cellTO.headCell = cell.headCell;
             cellTO.event = cell.event;

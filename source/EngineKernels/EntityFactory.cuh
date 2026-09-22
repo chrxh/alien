@@ -33,9 +33,9 @@ public:
         int geneIndex,
         int nodeIndex,
         bool homogeneousCellType,
-        int parentNodeIndex,
         int concatenationIndex,
         int branchIndex,
+        int constructionId,
         float2 pos,
         float2 vel,
         float usableEnergy,
@@ -410,8 +410,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->concatenationIndex = cellTO.concatenationIndex;
         cell->branchIndex = cellTO.branchIndex;
         cell->nodeIndex = cellTO.nodeIndex;
-        cell->parentNodeIndex = cellTO.parentNodeIndex;
         cell->geneIndex = cellTO.geneIndex;
+        cell->constructionId = cellTO.constructionId;
         cell->headUpdateId = cellTO.headUpdateId;
         cell->headCell = cellTO.headCell;
         cell->event = cellTO.event;
@@ -627,6 +627,7 @@ __inline__ __device__ void EntityFactory::changeCreatureFromTO(CreatureTO const&
     creature->accumulatedMutations = creatureTO.accumulatedMutations;
     creature->accumulatedMutationsInLineage = creatureTO.accumulatedMutationsInLineage;
     creature->headUpdateId = creatureTO.headUpdateId;
+    creature->nextConstructionId = creatureTO.nextConstructionId;
     creature->externalEnergyInflowCellId = VALUE_NOT_SET_UINT64;
 }
 
@@ -736,9 +737,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int geneIndex,
     int nodeIndex,
     bool homogeneousCellType,
-    int parentNodeIndex,
     int concatenationIndex,
     int branchIndex,
+    int constructionId,
     float2 pos,
     float2 vel,
     float usableEnergy,
@@ -773,10 +774,10 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.cellState = CellState_UnderConstruction;
     cell.creature = creature;
     cell.nodeIndex = nodeIndex;
-    cell.parentNodeIndex = parentNodeIndex;
     cell.geneIndex = geneIndex;
     cell.concatenationIndex = concatenationIndex;
     cell.branchIndex = branchIndex;
+    cell.constructionId = constructionId;
     cell.headUpdateId = 0;
     cell.headCell = false;
     for (int i = 0; i < STANDARD_NEURONS_PER_CELL; ++i) {
