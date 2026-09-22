@@ -30,11 +30,11 @@ std::optional<float> _InspectionWindow::_savedScrollY;
 
 namespace
 {
-    auto constexpr CellWindowWidth = 420.0f;
-    auto constexpr CreatureWindowWidth = 300.0f;
-    auto constexpr ParticleWindowWidth = 320.0f;
-    auto constexpr TableColumnWidth = 380.0f;
-    auto constexpr TextWidth = 160.0f;
+    auto constexpr CellWindowWidth = 450.0f;
+    auto constexpr CreatureWindowWidth = 330.0f;
+    auto constexpr ParticleWindowWidth = 350.0f;
+    auto constexpr TableColumnWidth = 410.0f;
+    auto constexpr TextWidth = 190.0f;
 
     void inspectorId(std::string const& name, uint64_t id, EntityAttribute attribute, float textWidth = TextWidth)
     {
