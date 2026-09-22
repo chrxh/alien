@@ -787,6 +787,9 @@ def logout(
 def refresh_login(
     userName: str = Form(...),
     password: str = Form(...),
+    # Optional so that clients predating this parameter keep working: when it
+    # is absent the stored GPU is left untouched.
+    gpu: str | None = Form(None),
 ):
     from datetime import datetime, timedelta, timezone
 
@@ -828,6 +831,8 @@ def refresh_login(
                 "timestamp": func.now(),
                 "last_time_spent_update": func.now(),
             }
+            if gpu is not None:
+                values["gpu"] = gpu
             if elapsed_seconds > 0:
                 values["time_spent"] = func.coalesce(
                     User.time_spent + elapsed_seconds, elapsed_seconds

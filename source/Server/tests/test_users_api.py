@@ -372,6 +372,41 @@ def test_refresh_login_with_wrong_password_fails(app_client, helpers):
     assert resp.json() == {"result": False}
 
 
+def test_refresh_login_updates_gpu(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    app_client.post(
+        "/login", data={"userName": "alice", "password": "pw", "gpu": "GPU A"}
+    )
+
+    resp = app_client.post(
+        "/refreshlogin",
+        data={"userName": "alice", "password": "pw", "gpu": "GPU B"},
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.gpu == "GPU B"
+
+
+def test_refresh_login_without_gpu_keeps_stored_gpu(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    app_client.post(
+        "/login", data={"userName": "alice", "password": "pw", "gpu": "GPU A"}
+    )
+
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.gpu == "GPU A"
+
+
 def test_login_resets_clock_so_offline_time_is_not_counted(app_client, helpers):
     """Re-login must not count offline (or post-crash) time toward ``time_spent``.
 
