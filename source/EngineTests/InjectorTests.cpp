@@ -235,6 +235,7 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
 
 TEST_F(InjectorTests, injectionCountsOffspringOfInjectedConstructor)
 {
+    // Otherwise creatures can circumvent externalEnergyInflowOnlyForFirstOffspring
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
     data.add(createTargetCreatureWithConstructor({100.0f, 103.0f}), false);
 
