@@ -214,7 +214,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     auto origDistance = adaptedDistance;
                     if ((objectNumConnections < 3 || other.numConnections < 3) && objectType == ObjectType_Cell && other.type == ObjectType_Cell
                         && object->typeData.cell.isSameCreature(&other.self->typeData.cell)
-                        && object->typeData.cell.parentNodeIndex != other.self->typeData.cell.parentNodeIndex) {
+                        && object->typeData.cell.constructionId != other.self->typeData.cell.constructionId) {
                         adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
                     }
                     if (adaptedDistance > cutoff || objectDetached + other.detached() == 1) {

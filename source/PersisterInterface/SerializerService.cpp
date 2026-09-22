@@ -995,6 +995,7 @@ namespace
     auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_AccumulatedMutations = 9;
     auto constexpr Id_Creature_AccumulatedMutationsInLineage = 10;
+    auto constexpr Id_Creature_NextConstructionId = 11;
 
     auto constexpr Id_Solid_Energy = 0;
 
@@ -1011,7 +1012,6 @@ namespace
     auto constexpr Id_Cell_CellState = 3;
     auto constexpr Id_Cell_ActivationTime = 4;
     auto constexpr Id_Cell_NodeIndex = 6;
-    auto constexpr Id_Cell_ParentNodeIndex = 7;
     auto constexpr Id_Cell_GeneIndex = 8;
     auto constexpr Id_Cell_AngleToFront = 10;
     auto constexpr Id_Cell_HeadUpdateId = 11;
@@ -1024,6 +1024,7 @@ namespace
     auto constexpr Id_Cell_LastUpdate = 18;
     auto constexpr Id_Cell_ConcatenationIndex = 19;
     auto constexpr Id_Cell_BranchIndex = 20;
+    auto constexpr Id_Cell_ConstructionId = 26;
 
     auto constexpr Id_Object_Id = 0;
     auto constexpr Id_Object_Pos = 2;
@@ -1755,10 +1756,10 @@ namespace cereal
         scope.addMember(Id_Cell_CellState, data._cellState, defaultObject._cellState);
         scope.addMember(Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         scope.addMember(Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
-        scope.addMember(Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         scope.addMember(Id_Cell_ConcatenationIndex, data._concatenationIndex, defaultObject._concatenationIndex);
         scope.addMember(Id_Cell_BranchIndex, data._branchIndex, defaultObject._branchIndex);
         scope.addMember(Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        scope.addMember(Id_Cell_ConstructionId, data._constructionId, defaultObject._constructionId);
         scope.addMember(Id_Cell_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
         scope.addMember(Id_Cell_HeadCell, data._headCell, defaultObject._headCell);
         scope.addMember(Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
@@ -1802,6 +1803,7 @@ namespace cereal
         scope.addMember(Id_Creature_Generation, data._generation, defaultObject._generation);
         scope.addMember(Id_Creature_NumCells, data._numCells, defaultObject._numCells);
         scope.addMember(Id_Creature_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
+        scope.addMember(Id_Creature_NextConstructionId, data._nextConstructionId, defaultObject._nextConstructionId);
         scope.addMember(Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         scope.addMember(Id_Creature_MutationState, data._mutationState, defaultObject._mutationState);
         scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);

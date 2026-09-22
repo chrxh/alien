@@ -61,10 +61,11 @@ namespace
          "\n" ICON_FA_CHEVRON_RIGHT " Dying: The cell decays with the probability given by the simulation parameter 'Cell death probability'."
          "\n" ICON_FA_CHEVRON_RIGHT " Instant dying: The cell is removed in the next time step."},
         {EntityAttribute::CellNodeIndex, "Index of the genome node from which this cell was built."},
-        {EntityAttribute::CellParentNodeIndex, "Node index of the cell that built this cell."},
         {EntityAttribute::CellGeneIndex, "Index of the gene from which this cell was built."},
         {EntityAttribute::CellConcatenationIndex, "Index of the concatenation in which this cell was built."},
         {EntityAttribute::CellBranchIndex, "Index of the branch in which this cell was built."},
+        {EntityAttribute::CellConstructionId,
+         "Identifies the branch construction in which this cell was built. Cells of the same creature with the same value belong to the same construction."},
         {EntityAttribute::CellActivationTime,
          "Remaining time steps until the cell starts executing its function. As long as the value is greater than 0, the cell is inactive."},
         {EntityAttribute::CellHeadCell,

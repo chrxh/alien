@@ -360,7 +360,7 @@ TEST_F(CreatureTests, constructMusclesVoidsSmallCreature)
     ASSERT_EQ(9, actualData._objects.size());
 
     auto cellIt = std::ranges::find_if(
-        actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 1 && object.getCellRef()._parentNodeIndex == 2; });
+        actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 1 && object.getCellRef()._geneIndex == 1; });
     ASSERT_NE(cellIt, actualData._objects.end());
     auto cell1 = *cellIt;
     EXPECT_TRUE(approxCompare(180.0f, cell1._connections.at(0)._angleFromPrevious));
@@ -420,7 +420,7 @@ TEST_F(CreatureTests, constructMusclesVoidsLargeCreature)
     ASSERT_EQ(19, actualData._objects.size());
 
     auto cellIt = std::ranges::find_if(
-        actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 12 && object.getCellRef()._parentNodeIndex == 0; });
+        actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 12 && object.getCellRef()._geneIndex == 0; });
     ASSERT_NE(cellIt, actualData._objects.end());
     auto cell1 = *cellIt;
     EXPECT_TRUE(approxCompare(120.0f, cell1._connections.at(0)._angleFromPrevious));
@@ -477,10 +477,10 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         auto cells = actualData.getObjectsForCreature(creature._id);
 
         auto backCellIt = std::ranges::find_if(
-            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._parentNodeIndex== 0; });
+            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._geneIndex == 0; });
 
         auto frontCellIt = std::ranges::find_if(
-            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 5 && object.getCellRef()._parentNodeIndex == 0; });
+            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 5 && object.getCellRef()._geneIndex == 0; });
 
         movementDirection = Math::getNormalized(frontCellIt->_pos - backCellIt->_pos);
         if (direction == Direction::Backward) {
@@ -501,7 +501,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         auto cells = actualData.getObjectsForCreature(creature._id);
 
         auto backCellIt = std::ranges::find_if(
-            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._parentNodeIndex == 0; });
+            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._geneIndex == 0; });
 
         auto movedRefPoint = lastPos + movementDirection * 5.0f;
         EXPECT_LT(0.0, Math::dot(backCellIt->_pos - movedRefPoint, movementDirection));

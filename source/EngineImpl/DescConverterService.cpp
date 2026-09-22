@@ -334,8 +334,8 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         cellDesc._age = objectTO.typeData.cell.age;
         cellDesc._frontAngle = objectTO.typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.typeData.cell.frontAngle) : std::nullopt;
         cellDesc._nodeIndex = objectTO.typeData.cell.nodeIndex;
-        cellDesc._parentNodeIndex = objectTO.typeData.cell.parentNodeIndex;
         cellDesc._geneIndex = objectTO.typeData.cell.geneIndex;
+        cellDesc._constructionId = objectTO.typeData.cell.constructionId;
         cellDesc._headUpdateId = objectTO.typeData.cell.headUpdateId;
         cellDesc._headCell = objectTO.typeData.cell.headCell;
         cellDesc._event = objectTO.typeData.cell.event;
@@ -933,6 +933,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     result._accumulatedMutations = creatureTO.accumulatedMutations;
     result._accumulatedMutationsInLineage = creatureTO.accumulatedMutationsInLineage;
     result._headUpdateId = creatureTO.headUpdateId;
+    result._nextConstructionId = creatureTO.nextConstructionId;
 
     return result;
 }
@@ -1247,6 +1248,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.headUpdateId = creatureDesc._headUpdateId;
+    creatureTO.nextConstructionId = creatureDesc._nextConstructionId;
     creatureTO.numCells = creatureDesc._numCells;
     creatureTO.mutationState = creatureDesc._mutationState;
     creatureTO.lineageId = creatureDesc._lineageId;
@@ -1315,8 +1317,8 @@ void DescConverterService::convertObjectToTO(
         objectTO.typeData.cell.cellState = cellDesc._cellState;
         objectTO.typeData.cell.cellType = cellDesc.getCellType();
         objectTO.typeData.cell.nodeIndex = cellDesc._nodeIndex;
-        objectTO.typeData.cell.parentNodeIndex = cellDesc._parentNodeIndex;
         objectTO.typeData.cell.geneIndex = cellDesc._geneIndex;
+        objectTO.typeData.cell.constructionId = cellDesc._constructionId;
         objectTO.typeData.cell.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
         objectTO.typeData.cell.headUpdateId = cellDesc._headUpdateId;
         objectTO.typeData.cell.headCell = cellDesc._headCell;
