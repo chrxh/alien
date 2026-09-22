@@ -7,9 +7,11 @@
 
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include "MainLoopEntityController.h"
 
+#include <stb_image.h>
 #include <GLFW/glfw3.h>
 
 namespace
@@ -46,6 +48,36 @@ namespace
         modeParts.emplace_back(std::to_string(vidmode.refreshRate));
 
         return boost::join(modeParts, " ");
+    }
+}
+
+namespace
+{
+    void setWindowIcon(GLFWwindow* window)
+    {
+        // Wayland has no window icon protocol and GLFW reports an error there, which the error callback turns into an exception.
+        if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
+            return;
+        }
+
+        std::vector<GLFWimage> icons;
+        for (auto const& filename : Const::WindowIconFilenames) {
+            int width, height, numChannels;
+            auto pixels = stbi_load(filename.string().c_str(), &width, &height, &numChannels, 4);
+            if (pixels == nullptr) {
+                log(Priority::Important, "could not load window icon " + filename.string());
+                continue;
+            }
+            icons.push_back(GLFWimage{width, height, pixels});
+        }
+        if (icons.empty()) {
+            return;
+        }
+
+        glfwSetWindowIcon(window, static_cast<int>(icons.size()), icons.data());
+        for (auto const& icon : icons) {
+            stbi_image_free(icon.pixels);
+        }
     }
 }
 
@@ -87,6 +119,7 @@ void WindowController::init()
     if (_windowData.window == nullptr) {
         throw std::runtime_error("Failed to create window.");
     }
+    setWindowIcon(_windowData.window);
     glfwMakeContextCurrent(_windowData.window);
 
     if (!isWindowedMode() && !isDesktopMode()) {

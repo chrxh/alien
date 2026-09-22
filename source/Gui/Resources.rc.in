@@ -1,0 +1,2 @@
+// GLFW uses the icon resource named GLFW_ICON for its window class, the shell uses it for the executable.
+GLFW_ICON ICON "@ALIEN_ICON_FILE@"
