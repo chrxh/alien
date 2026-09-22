@@ -263,3 +263,11 @@ target_precompile_headers(alien PRIVATE
 if (MSVC)
     target_compile_options(alien PRIVATE "/MP")
 endif()
+
+# Embed the application icon. The path is baked into the generated resource script because
+# the resource compiler resolves relative paths against the build directory, not the source one.
+if (WIN32)
+    set(ALIEN_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/images/alien.ico")
+    configure_file(Resources.rc.in ${CMAKE_CURRENT_BINARY_DIR}/Resources.rc @ONLY)
+    target_sources(alien PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/Resources.rc)
+endif()

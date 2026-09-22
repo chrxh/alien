@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace Const
 {
@@ -23,4 +24,5 @@ namespace Const
     extern std::filesystem::path const SavepointTableFilename;
 
     extern std::filesystem::path const LogoFilename;
+    extern std::vector<std::filesystem::path> const WindowIconFilenames;
 }

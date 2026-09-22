@@ -20,4 +20,6 @@ namespace Const
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const LogoFilename = ImagesPath / "logo.png";
+    std::vector<std::filesystem::path> const WindowIconFilenames =
+        {ImagesPath / "alien16.png", ImagesPath / "alien32.png", ImagesPath / "alien48.png", ImagesPath / "alien256.png"};
 }
