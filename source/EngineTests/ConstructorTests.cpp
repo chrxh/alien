@@ -3020,7 +3020,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
         auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
 
-        // Free energy is only inherited by an offspring constructor that stays within the creature
+        // Free energy is only inherited by an offspring constructor that stays within the creature or provides energy transitively
         EXPECT_EQ(separation == Separation::No, newConstructor._provideEnergy == ProvideEnergy_Free);
     } else {
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -3368,6 +3368,93 @@ TEST_F(ConstructorTests, provideEnergyForTransitiveCells_rootGeneNotSupplied)
     EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
     EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualConstructedCell.getCellRef())));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ConstructorTests, provideFreeEnergy_separatingTransitiveConstructorInheritsFreeEnergy)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(true)),
+        }),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(normalCellEnergy)
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_Free)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1)
+                                           .separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
+    EXPECT_EQ(ProvideEnergy_Free, newConstructor._provideEnergy);
+    EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualConstructedCell.getCellRef())));
+}
+
+TEST_F(ConstructorTests, provideFreeEnergy_rootGeneConstructorDoesNotInheritFreeEnergy)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(1).separation(true)),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().provideEnergy(ProvideEnergyGenome_TransitiveCells).geneIndex(0).separation(true)),
+        }),
+    });
+
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(normalCellEnergy)
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_Free)
+                                           .geneIndex(1)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1)
+                                           .separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
+    EXPECT_EQ(ProvideEnergy_TransitiveCells, newConstructor._provideEnergy);
+    EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualConstructedCell.getCellRef())));
 }
 
 TEST_F(ConstructorTests, constructWithReservedEnergy)

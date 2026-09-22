@@ -660,12 +660,13 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
 
     constructor.lastConstructedCellId = result->id;
 
-    // Inherit free energy provision from parent in case that offspring constructs a non-separating gene
+    // Inherit free energy provision from parent in case that offspring constructs a non-separating gene or provides energy transitively.
+    // Constructors of the root gene are excluded, otherwise free energy would propagate endlessly through replication.
     if (constructor.provideEnergy == ProvideEnergy_Free && result->typeData.cell.constructorAvailable) {
         auto const& offspringConstructor = result->typeData.cell.constructor;
         auto const& offspringGenome = constructionData.creature->genome;
-        if (offspringConstructor.geneIndex < offspringGenome->numGenes) {
-            if (!offspringConstructor.separation) {
+        if (offspringConstructor.geneIndex != 0 && offspringConstructor.geneIndex < offspringGenome->numGenes) {
+            if (!offspringConstructor.separation || offspringConstructor.provideEnergy == ProvideEnergy_TransitiveCells) {
                 result->typeData.cell.constructor.provideEnergy = ProvideEnergy_Free;
             }
         }
