@@ -44,7 +44,7 @@ ALIEN_MUTATION_FIELD_COUNT(MemoryGenomeDesc, 3);
 ALIEN_MUTATION_FIELD_COUNT(CommunicatorGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(VoidGenomeDesc, 0);
 
-ALIEN_MUTATION_FIELD_COUNT(ConstructorGenomeDesc, 8);
+ALIEN_MUTATION_FIELD_COUNT(ConstructorGenomeDesc, 7);
 
 // --- Sensor modes (switch (node.cellTypeData.sensor.mode)) ---
 ALIEN_MUTATION_FIELD_COUNT(DetectEnergyGenomeDesc, 1);

@@ -53,7 +53,6 @@ struct ConstructorTO
 {
     // Properties
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
     float reservedEnergy;

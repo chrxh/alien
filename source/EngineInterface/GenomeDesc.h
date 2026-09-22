@@ -51,7 +51,6 @@ struct ConstructorGenomeDesc
 
     MEMBER(ConstructorGenomeDesc, std::optional<int>, autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Default);  // std::nullopt = manual triggering
     MEMBER(ConstructorGenomeDesc, int, geneIndex, 0);
-    MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, Const::ConstructorConstructionActivationTime_Default);
     MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorGenomeDesc, ProvideEnergyGenome, provideEnergy, ProvideEnergyGenome_CellOnly);
     MEMBER(ConstructorGenomeDesc, bool, separation, false);

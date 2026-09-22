@@ -683,12 +683,6 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor, std
                 .textWidth(TextWidth)
                 .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorAutoTriggerInterval)),
             constructor._autoTriggerInterval);
-        AlienGui::InputInt(
-            AlienGui::InputIntParameters()
-                .name("Activation time")
-                .textWidth(TextWidth)
-                .tooltip(EntityAttributeHelp::get(EntityAttribute::ConstructorActivationTime)),
-            constructor._constructionActivationTime);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters()
                 .name("Construction angle")

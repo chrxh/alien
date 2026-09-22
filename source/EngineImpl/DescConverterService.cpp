@@ -588,7 +588,6 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             constructor._autoTriggerInterval = objectTO.typeData.cell.constructor.autoTriggerInterval > 0
                 ? std::make_optional(objectTO.typeData.cell.constructor.autoTriggerInterval)
                 : std::nullopt;
-            constructor._constructionActivationTime = objectTO.typeData.cell.constructor.constructionActivationTime;
             constructor._constructionAngle = objectTO.typeData.cell.constructor.constructionAngle;
             constructor._provideEnergy = objectTO.typeData.cell.constructor.provideEnergy;
             constructor._reservedEnergy = objectTO.typeData.cell.constructor.reservedEnergy;
@@ -838,7 +837,6 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         constructorDesc._autoTriggerInterval =
             nodeTO->constructor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->constructor.autoTriggerInterval) : std::nullopt;
         constructorDesc._geneIndex = nodeTO->constructor.geneIndex;
-        constructorDesc._constructionActivationTime = nodeTO->constructor.constructionActivationTime;
         constructorDesc._constructionAngle = nodeTO->constructor.constructionAngle;
         constructorDesc._provideEnergy = nodeTO->constructor.provideEnergy;
         constructorDesc._separation = nodeTO->constructor.separation;
@@ -1223,7 +1221,6 @@ void DescConverterService::convertGenomeToTO(
                 auto const& constructorDesc = nodeDesc._constructor.value();
                 nodeTO.constructor.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
                 nodeTO.constructor.geneIndex = constructorDesc._geneIndex;
-                nodeTO.constructor.constructionActivationTime = constructorDesc._constructionActivationTime;
                 nodeTO.constructor.constructionAngle = constructorDesc._constructionAngle;
                 nodeTO.constructor.provideEnergy = constructorDesc._provideEnergy;
                 nodeTO.constructor.separation = constructorDesc._separation;
@@ -1547,7 +1544,6 @@ void DescConverterService::convertObjectToTO(
             auto const& constructorDesc = cellDesc._constructor.value();
             ConstructorTO& constructorTO = objectTO.typeData.cell.constructor;
             constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
-            constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
             constructorTO.constructionAngle = constructorDesc._constructionAngle;
             constructorTO.provideEnergy = constructorDesc._provideEnergy;
             constructorTO.reservedEnergy = constructorDesc._reservedEnergy;

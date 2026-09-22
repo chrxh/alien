@@ -64,7 +64,6 @@ struct ConstructorDesc
         std::optional<int>,
         autoTriggerInterval,
         Const::ConstructorAutoTriggerInterval_Default);  // std::nullopt = manual triggering, value must be >= 3
-    MEMBER(ConstructorDesc, int, constructionActivationTime, 100);
     MEMBER(ConstructorDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
     MEMBER(ConstructorDesc, float, reservedEnergy, 0.0f);

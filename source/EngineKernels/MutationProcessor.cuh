@@ -1278,7 +1278,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
             chosenNode.constructorAvailable = true;
             chosenNode.constructor = {};
             chosenNode.constructor.autoTriggerInterval = Const::ConstructorAutoTriggerInterval_Default;
-            chosenNode.constructor.constructionActivationTime = Const::ConstructorConstructionActivationTime_Default;
             chosenNode.constructor.numBranches = 1;
             chosenNode.constructor.numConcatenations = 1;
             chosenNode.constructor.geneIndex = newIndex;
@@ -1876,10 +1875,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                             constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Min + 100);
                     }
                     mutateEnumField(constructor.geneIndex, genome->numGenes);
-                    mutateNumber(
-                        constructor.constructionActivationTime,
-                        Const::ConstructorConstructionActivationTime_Min,
-                        Const::ConstructorConstructionActivationTime_Max);
                     mutateNumber(constructor.constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
                     mutateEnumField(constructor.provideEnergy, ProvideEnergyGenome_Count);
                     mutateNumber(constructor.numBranches, 1, 6);
@@ -1898,7 +1893,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                     if (node.constructorAvailable) {
                         constructor = {};
                         constructor.autoTriggerInterval = Const::ConstructorAutoTriggerInterval_Default;
-                        constructor.constructionActivationTime = Const::ConstructorConstructionActivationTime_Default;
                         constructor.numBranches = 1;
                         constructor.numConcatenations = 1;
                     }

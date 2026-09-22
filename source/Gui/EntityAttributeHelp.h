@@ -98,7 +98,6 @@ enum class EntityAttribute
 
     // Constructor
     ConstructorAutoTriggerInterval,
-    ConstructorActivationTime,
     ConstructorConstructionAngle,
     ConstructorProvideEnergy,
     ConstructorReservedEnergy,
