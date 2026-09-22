@@ -333,6 +333,7 @@ struct Gene
     int numNodes;
     Node* nodes;
 
+    // Temporary data
     uint32_t transitiveNumCells;
 };
 
