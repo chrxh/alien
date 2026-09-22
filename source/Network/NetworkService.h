@@ -74,6 +74,7 @@ private:
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
+    UserInfo _userInfo;
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     struct ResourceData

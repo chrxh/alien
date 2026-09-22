@@ -186,6 +186,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
         if (boolResult) {
             _loggedInUserName = userName;
             _password = password;
+            _userInfo = userInfo;
         }
 
         errorCode = LoginErrorCode_UnknownUser;
@@ -224,6 +225,7 @@ bool NetworkService::logout()
 
     _loggedInUserName = std::nullopt;
     _password = std::nullopt;
+    _userInfo = UserInfo();
     return result;
 }
 
@@ -237,6 +239,9 @@ void NetworkService::refreshLogin()
         httplib::Params params;
         params.emplace("userName", *_loggedInUserName);
         params.emplace("password", *_password);
+        if (_userInfo.gpu) {
+            params.emplace("gpu", *_userInfo.gpu);
+        }
 
         try {
             executeRequest([&] { return client.Post("/refreshlogin", params); });
