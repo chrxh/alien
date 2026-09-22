@@ -42,6 +42,7 @@ private:
         ObjectConnection* connectionNext;
     };
     __inline__ __device__ static BendingInfo getBendingInfo(Object* object);
+    __inline__ __device__ static bool hasValidBendingConnections(Object* object);
 
     __inline__ __device__ static bool isLeftSide(Object* object);
 
@@ -137,7 +138,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     auto& muscle = object->typeData.cell.cellTypeData.muscle;
     auto& bending = muscle.modeData.autoBending;
 
-    if (object->numConnections != 1 && object->numConnections != 2) {
+    if (!hasValidBendingConnections(object)) {
         return;
     }
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
@@ -250,7 +251,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     auto& muscle = object->typeData.cell.cellTypeData.muscle;
     auto& bending = muscle.modeData.manualBending;
 
-    if (object->numConnections != 1 && object->numConnections != 2) {
+    if (!hasValidBendingConnections(object)) {
         return;
     }
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
@@ -342,7 +343,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     auto& muscle = object->typeData.cell.cellTypeData.muscle;
     auto& bending = muscle.modeData.angleBending;
 
-    if (object->numConnections != 1 && object->numConnections != 2) {
+    if (!hasValidBendingConnections(object)) {
         return;
     }
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
@@ -679,6 +680,26 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
         }
     }
     return result;
+}
+
+__inline__ __device__ bool MuscleProcessor::hasValidBendingConnections(Object* object)
+{
+    if (object->numConnections == 1) {
+        return true;
+    }
+    if (object->numConnections != 2) {
+        return false;
+    }
+
+    // Reject triangular connections: the two connected cells must not be connected to each other
+    auto connectedObject = object->connections[0].object;
+    auto otherConnectedObject = object->connections[1].object;
+    for (int i = 0; i < connectedObject->numConnections; ++i) {
+        if (connectedObject->connections[i].object == otherConnectedObject) {
+            return false;
+        }
+    }
+    return true;
 }
 
 __inline__ __device__ bool MuscleProcessor::isLeftSide(Object* object)
