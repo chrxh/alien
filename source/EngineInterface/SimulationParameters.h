@@ -70,7 +70,7 @@ struct SimulationParameters
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
     LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
     LayerParameter<float> layerPerlinNoiseForceFieldStrength = {{0.001f}};
-    LayerParameter<float> layerPerlinNoiseForceFieldSpatialSize = {{20.0f}};
+    LayerParameter<float> layerPerlinNoiseForceFieldSpatialSize = {{100.0f}};
     LayerParameter<float> layerPerlinNoiseForceFieldTemporalSize = {{10000.0f}};
 
     // Physics: Motion

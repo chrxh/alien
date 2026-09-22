@@ -448,12 +448,10 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Login").keyAlt(true).key(ImGuiKey_L).disabled(NetworkService::get().isLoggedIn()), [&] {
         LoginDialog::get().open();
     });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Logout").keyAlt(true).key(ImGuiKey_T).closeMenuWhenItemClicked(false).disabled(!NetworkService::get().isLoggedIn()),
-        [&] {
-            NetworkService::get().logout();
-            BrowserWindow::get().onRefresh();
-        });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Logout").closeMenuWhenItemClicked(false).disabled(!NetworkService::get().isLoggedIn()), [&] {
+        NetworkService::get().logout();
+        BrowserWindow::get().onRefresh();
+    });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Upload simulation").keyAlt(true).key(ImGuiKey_D).disabled(!NetworkService::get().isLoggedIn()),
         [&] { UploadSimulationDialog::get().open(NetworkResourceType_Simulation); });
@@ -461,9 +459,8 @@ void MainLoopController::processMenubar()
         UploadSimulationDialog::get().open(NetworkResourceType_Genome);
     });
     AlienGui::MenuSeparator();
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Delete user").keyAlt(true).key(ImGuiKey_J).disabled(!NetworkService::get().isLoggedIn()), [&] {
-        DeleteUserDialog::get().open();
-    });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters().name("Delete user").disabled(!NetworkService::get().isLoggedIn()), [&] { DeleteUserDialog::get().open(); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuOpened);
@@ -538,7 +535,7 @@ void MainLoopController::processMenubar()
         AlienGui::MenuItemParameters()
             .name("Creator")
             .keyAlt(true)
-            .key(ImGuiKey_G)
+            .key(ImGuiKey_T)
             .selected(CreatorWindow::get().isOn())
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
@@ -654,8 +651,8 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Save on exit").selected(_saveOnExit).closeMenuWhenItemClicked(false), [&] { _saveOnExit = !_saveOnExit; });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Display settings").keyAlt(true).key(ImGuiKey_V), [&] { DisplaySettingsDialog::get().open(); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Network settings").keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Display settings"), [&] { DisplaySettingsDialog::get().open(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Network settings"), [&] { NetworkSettingsDialog::get().open(); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Debug mode").selected(GlobalSettings::get().isDebugMode()).closeMenuWhenItemClicked(false), [&] {
         _SimulationFacade::get()->setDebugMode(!GlobalSettings::get().isDebugMode());
