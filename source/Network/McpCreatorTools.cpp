@@ -14,11 +14,8 @@
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <Network/McpArguments.h>
-#include <Network/McpSchema.h>
-
-#include "EditorModel.h"
-#include "Viewport.h"
+#include "McpArguments.h"
+#include "McpSchema.h"
 
 namespace
 {
@@ -80,8 +77,10 @@ namespace
     }
 }
 
-std::vector<McpTool> McpCreatorTools::getTools()
+std::vector<McpTool> McpCreatorTools::getTools(McpHost const& host)
 {
+    _host = host;
+
     return {
         McpTool{
             .name = "create_object",
@@ -167,7 +166,7 @@ std::vector<McpTool> McpCreatorTools::getTools()
 McpToolResult McpCreatorTools::createObject(boost::json::object const& arguments) const
 {
     auto properties = getObjectProperties(arguments);
-    auto pos = Viewport::get().getCenterInWorldPos();
+    auto pos = _host->getVisibleAreaCenter();
     auto x = McpArguments::getOptionalFloat(arguments, "x");
     auto y = McpArguments::getOptionalFloat(arguments, "y");
     if (x.has_value() != y.has_value()) {
@@ -273,11 +272,14 @@ McpToolResult McpCreatorTools::createPatternFromImage(boost::json::object const&
         throw std::invalid_argument(std::format("The file '{}' does not exist.", filePath));
     }
     auto center = getCenter(arguments);
-    auto content = CreatorService::get().createPatternFromImage(path, center);
-    if (!content) {
-        throw std::invalid_argument(std::format("The file '{}' could not be read as an RGB image.", filePath));
+    auto image = _host->loadImage(path);
+    if (!image) {
+        throw std::invalid_argument(std::format("The file '{}' could not be read as an image.", filePath));
     }
-    return addToSimulation(std::move(*content), CreatorService::ObjectProperties(), "a pattern from the image centered at " + formatPos(center));
+    return addToSimulation(
+        CreatorService::get().createPatternFromImage(*image, center),
+        CreatorService::ObjectProperties(),
+        "a pattern from the image centered at " + formatPos(center));
 }
 
 CreatorService::ObjectProperties McpCreatorTools::getObjectProperties(boost::json::object const& arguments) const
@@ -304,7 +306,7 @@ RealVector2D McpCreatorTools::getCenter(boost::json::object const& arguments) co
     if (x.has_value() != y.has_value()) {
         throw std::invalid_argument("Specify both 'center_x' and 'center_y' or neither.");
     }
-    auto result = x ? RealVector2D{*x, *y} : Viewport::get().getCenterInWorldPos();
+    auto result = x ? RealVector2D{*x, *y} : _host->getVisibleAreaCenter();
     checkInsideWorld(result);
     return result;
 }
@@ -345,7 +347,7 @@ McpToolResult McpCreatorTools::addToSimulation(ContentDesc&& content, CreatorSer
     checkNumObjects(toFloat(numEntities));
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
-    EditorModel::get().update();
+    _host->onSelectionChanged();
 
     auto entityName = [&] {
         switch (properties._material) {

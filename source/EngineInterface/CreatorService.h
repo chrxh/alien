@@ -1,14 +1,20 @@
 #pragma once
 
-#include <filesystem>
-#include <optional>
+#include <cstdint>
 #include <vector>
 
 #include <Base/Definitions.h>
 #include <Base/Macros.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Descs.h>
+#include "Descs.h"
+
+struct RgbImage
+{
+    int width = 0;
+    int height = 0;
+    std::vector<uint8_t> pixels;  // 3 bytes per pixel, row by row
+};
 
 using CreationMaterial = int;
 enum CreationMaterial_
@@ -44,7 +50,7 @@ public:
     ContentDesc createPolygon(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float objectDistance) const;
     ContentDesc createPencilDot(ObjectProperties const& properties, RealVector2D const& pos, float pencilRadius) const;
     ContentDesc createFreehandStroke(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float pencilRadius) const;
-    std::optional<ContentDesc> createPatternFromImage(std::filesystem::path const& path, RealVector2D const& center) const;
+    ContentDesc createPatternFromImage(RgbImage const& image, RealVector2D const& center) const;
 
     std::vector<RealVector2D> calcBezierCurvePath(std::vector<RealVector2D> const& controlPoints, float objectDistance) const;
 

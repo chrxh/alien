@@ -5,11 +5,12 @@
 #include <Base/Definitions.h>
 #include <Base/GlobalSettings.h>
 
+#include <EngineInterface/CreatorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "CreatorService.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "ImageFileService.h"
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
@@ -37,12 +38,12 @@ void ImageToPatternDialog::show()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        auto content = CreatorService::get().createPatternFromImage(firstFilename, Viewport::get().getCenterInWorldPos());
-        if (!content) {
+        auto image = ImageFileService::get().loadRgbImage(firstFilename);
+        if (!image) {
             GenericMessageDialog::get().information("Error", "The image could not be read.");
             return;
         }
-        _SimulationFacade::get()->addAndSelectSimulationData(std::move(*content));
+        _SimulationFacade::get()->addAndSelectSimulationData(CreatorService::get().createPatternFromImage(*image, Viewport::get().getCenterInWorldPos()));
         // TODO: update pattern editor
     });
 }

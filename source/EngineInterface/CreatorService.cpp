@@ -7,17 +7,14 @@
 #include <span>
 
 #include <boost/range/adaptor/indexed.hpp>
-#include <stb_image.h>
-#include <imgui.h>
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/NumberGenerator.h>
-#include <EngineInterface/SimulationFacade.h>
-
-#include "AlienGui.h"
+#include "Colors.h"
+#include "DescEditService.h"
+#include "NumberGenerator.h"
+#include "ObjectColoring.h"
+#include "SimulationFacade.h"
 
 namespace
 {
@@ -270,22 +267,22 @@ ContentDesc CreatorService::createFreehandStroke(ObjectProperties const& propert
 
 namespace
 {
-    int getMatchedColor(ImColor const& color, ColorVector<FloatColorRGB> const& customizationColors)
+    int getMatchedColor(FloatColorRGB const& color, ColorVector<FloatColorRGB> const& customizationColors)
     {
         using Color = std::array<float, 3>;
-        auto toHsv = [](uint32_t color) {
+        auto toHsv = [](FloatColorRGB const& color) {
             float h, s, v;
-            AlienGui::ConvertRGBtoHSV(color, h, s, v);
+            ObjectColoring::rgbToHsv(color.r, color.g, color.b, h, s, v);
             return Color{h, s, v};
         };
         std::vector<Color> objectColors;
         for (auto const& customizationColor : customizationColors.values) {
-            objectColors.emplace_back(toHsv(customizationColor.toRgbColor()));
+            objectColors.emplace_back(toHsv(customizationColor));
         }
 
         std::optional<int> bestMatchIndex;
         std::optional<float> bestMatchDistance;
-        auto colorHsv = toHsv((ImU32)color);
+        auto colorHsv = toHsv(color);
         for (auto const& [index, objectColor] : objectColors | boost::adaptors::indexed(0)) {
             auto distance = colorHsv[0] - objectColor[0];
             if (distance > 0.5f) {
@@ -304,38 +301,28 @@ namespace
     }
 }
 
-std::optional<ContentDesc> CreatorService::createPatternFromImage(std::filesystem::path const& path, RealVector2D const& center) const
+ContentDesc CreatorService::createPatternFromImage(RgbImage const& image, RealVector2D const& center) const
 {
-    int width, height, numChannels;
-    auto image = stbi_load(path.string().c_str(), &width, &height, &numChannels, 0);
-    if (!image) {
-        return std::nullopt;
-    }
-    if (numChannels < 3) {
-        stbi_image_free(image);
-        return std::nullopt;
-    }
-
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     ContentDesc result;
-    for (auto x : std::views::iota(0, width)) {
-        for (auto y : std::views::iota(0, height)) {
-            auto address = (x + y * width) * numChannels;
-            int r = image[address + 2];
-            int g = image[address + 1];
-            int b = image[address];
+    for (auto x : std::views::iota(0, image.width)) {
+        for (auto y : std::views::iota(0, image.height)) {
+            auto address = (x + y * image.width) * 3;
+            int r = image.pixels.at(address);
+            int g = image.pixels.at(address + 1);
+            int b = image.pixels.at(address + 2);
             auto xOffset = y % 2 == 0 ? 0.0f : 0.5f;
             if (r > 20 || g > 20 || b > 20) {
+                auto color = FloatColorRGB{toFloat(r) / 255.0f, toFloat(g) / 255.0f, toFloat(b) / 255.0f};
                 result._objects.emplace_back(ObjectDesc()
                                                  .id(NumberGenerator::get().createEntityId())
                                                  .pos({toFloat(x) + xOffset, toFloat(y)})
-                                                 .color(getMatchedColor(ImColor(r, g, b, 255), customizationColors))
+                                                 .color(getMatchedColor(color, customizationColors))
                                                  .isStatic(false)
                                                  .type(SolidDesc()));
             }
         }
     }
-    stbi_image_free(image);
 
     DescEditService::get().reconnectObjects(result, ImageConnectionDistance);
     DescEditService::get().setCenter(result, center);

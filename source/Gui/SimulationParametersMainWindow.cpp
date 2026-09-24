@@ -14,7 +14,6 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
-#include "LocationEditService.h"
 #include "OverlayController.h"
 #include "SimulationParametersLayerWidget.h"
 #include "SimulationParametersSourceWidget.h"
@@ -458,7 +457,7 @@ void SimulationParametersMainWindow::onSaveParameters()
 
 void SimulationParametersMainWindow::onInsertDefaultLayer()
 {
-    if (auto orderNumber = LocationEditService::get().insertDefaultLayer(_selectedOrderNumber)) {
+    if (auto orderNumber = ParametersEditService::get().insertDefaultLayer(_selectedOrderNumber)) {
         _selectedOrderNumber = orderNumber.value();
     } else {
         showMaxLocationsReachedMessage(LocationType::Layer);
@@ -467,7 +466,7 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
 
 void SimulationParametersMainWindow::onInsertDefaultSource()
 {
-    if (auto orderNumber = LocationEditService::get().insertDefaultSource(_selectedOrderNumber)) {
+    if (auto orderNumber = ParametersEditService::get().insertDefaultSource(_selectedOrderNumber)) {
         _selectedOrderNumber = orderNumber.value();
     } else {
         showMaxLocationsReachedMessage(LocationType::Source);
@@ -476,7 +475,7 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
 
 void SimulationParametersMainWindow::onCloneLocation()
 {
-    if (auto orderNumber = LocationEditService::get().cloneLocation(_selectedOrderNumber)) {
+    if (auto orderNumber = ParametersEditService::get().cloneLocation(_selectedOrderNumber)) {
         _selectedOrderNumber = orderNumber.value();
     } else {
         showMaxLocationsReachedMessage(_locations.at(_selectedOrderNumber).type);
@@ -485,7 +484,7 @@ void SimulationParametersMainWindow::onCloneLocation()
 
 void SimulationParametersMainWindow::onDeleteLocation()
 {
-    LocationEditService::get().deleteLocation(_selectedOrderNumber);
+    ParametersEditService::get().deleteLocation(_selectedOrderNumber);
 
     if (_locations.size() - 1 == _selectedOrderNumber) {
         --_selectedOrderNumber;
@@ -494,13 +493,13 @@ void SimulationParametersMainWindow::onDeleteLocation()
 
 void SimulationParametersMainWindow::onDecreaseOrderNumber()
 {
-    LocationEditService::get().moveLocationUpwards(_selectedOrderNumber);
+    ParametersEditService::get().moveLocationUpwards(_selectedOrderNumber);
     --_selectedOrderNumber;
 }
 
 void SimulationParametersMainWindow::onIncreaseOrderNumber()
 {
-    LocationEditService::get().moveLocationDownwards(_selectedOrderNumber);
+    ParametersEditService::get().moveLocationDownwards(_selectedOrderNumber);
     ++_selectedOrderNumber;
 }
 

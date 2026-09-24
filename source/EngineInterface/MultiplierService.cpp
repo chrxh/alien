@@ -1,8 +1,6 @@
 #include "MultiplierService.h"
 
-#include <EngineInterface/SimulationFacade.h>
-
-#include "EditorModel.h"
+#include "SimulationFacade.h"
 
 namespace
 {
@@ -10,7 +8,6 @@ namespace
     {
         _SimulationFacade::get()->removeSelectedObjects(true);
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
-        EditorModel::get().update();
     }
 }
 

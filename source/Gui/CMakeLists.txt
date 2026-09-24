@@ -42,8 +42,6 @@ PUBLIC
     ConsoleModeController.h
     CreateUserDialog.cpp
     CreateUserDialog.h
-    CreatorService.cpp
-    CreatorService.h
     CreatorWindow.cpp
     CreatorWindow.h
     CreaturePreviewWidget.cpp
@@ -91,6 +89,8 @@ PUBLIC
     GuiLogger.cpp
     GuiLogger.h
     HelpStrings.h
+    ImageFileService.cpp
+    ImageFileService.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
     InspectionWindow.cpp
@@ -105,8 +105,6 @@ PUBLIC
     LiveStatisticsService.h
     LocationController.cpp
     LocationController.h
-    LocationEditService.cpp
-    LocationEditService.h
     LocationWidget.h
     LocationWindow.cpp
     LocationWindow.h
@@ -129,24 +127,12 @@ PUBLIC
     MassOperationsDialog.h
     McpController.cpp
     McpController.h
-    McpCreatorTools.cpp
-    McpCreatorTools.h
-    McpMultiplierTools.cpp
-    McpMultiplierTools.h
-    McpParameterTools.cpp
-    McpParameterTools.h
-    McpSelectionTools.cpp
-    McpSelectionTools.h
     McpSettingsDialog.cpp
     McpSettingsDialog.h
-    McpSimulationTools.cpp
-    McpSimulationTools.h
     McpWindow.cpp
     McpWindow.h
     ModalWindow.cpp
     ModalWindow.h
-    MultiplierService.cpp
-    MultiplierService.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     MutationRatesDialog.cpp
