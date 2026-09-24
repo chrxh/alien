@@ -37,8 +37,12 @@ void McpService::setServerRunning(bool value)
 {
     if (value) {
         startServer();
-    } else {
+        if (isServerRunning()) {
+            _host->showMessage("MCP server running at " + getServerUrl());
+        }
+    } else if (isServerRunning()) {
         stopServer();
+        _host->showMessage("MCP server stopped");
     }
 }
 
@@ -122,7 +126,6 @@ void McpService::startServer()
     _server = std::move(server);
 
     log(Priority::Important, "mcp: server started at " + getServerUrl());
-    _host->showMessage("MCP server running at " + getServerUrl());
 }
 
 void McpService::stopServer()
@@ -140,7 +143,6 @@ void McpService::stopServer()
     _stopping = false;
 
     log(Priority::Important, "mcp: server stopped");
-    _host->showMessage("MCP server stopped");
 }
 
 std::vector<McpTool> McpService::createTools()
