@@ -42,6 +42,8 @@ PUBLIC
     ConsoleModeController.h
     CreateUserDialog.cpp
     CreateUserDialog.h
+    CreatorService.cpp
+    CreatorService.h
     CreatorWindow.cpp
     CreatorWindow.h
     CreaturePreviewWidget.cpp
@@ -125,10 +127,22 @@ PUBLIC
     MassOperationsDialog.h
     McpController.cpp
     McpController.h
+    McpCreatorTools.cpp
+    McpCreatorTools.h
+    McpMultiplierTools.cpp
+    McpMultiplierTools.h
+    McpSelectionTools.cpp
+    McpSelectionTools.h
+    McpSettingsDialog.cpp
+    McpSettingsDialog.h
+    McpSimulationTools.cpp
+    McpSimulationTools.h
     McpWindow.cpp
     McpWindow.h
     ModalWindow.cpp
     ModalWindow.h
+    MultiplierService.cpp
+    MultiplierService.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     MutationRatesDialog.cpp

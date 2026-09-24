@@ -253,7 +253,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                                 // Calc forces: for simplicity pressure = density
                                 auto const& cellPressure = objectDensity;         // Optimization: using the density from last time step
                                 auto const& otherObjectPressure = other.density;  // Optimization: using the density from last time step
-                                auto factor = cellPressure / (objectDensity * objectDensity) + otherObjectPressure / (other.density * other.density);
+                                auto factor =
+                                    cellPressure / max(NEAR_ZERO, objectDensity * objectDensity) + otherObjectPressure / (other.density * other.density);
 
                                 if (adaptedDistance > NEAR_ZERO) {
                                     float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);

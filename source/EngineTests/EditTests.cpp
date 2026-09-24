@@ -1,6 +1,9 @@
 #include <algorithm>
+#include <cmath>
 
 #include <gtest/gtest.h>
+
+#include <Base/Math.h>
 
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/Descs.h>
@@ -263,4 +266,24 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
     auto result = _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     EXPECT_EQ(2, result);
+}
+
+TEST_F(EditTests, setBarrier_releaseAfterTimesteps)
+{
+    auto const center = RealVector2D{50.0f, 50.0f};
+    auto data = DescEditService::get().createRect(DescEditService::CreateRectParameters().width(10).height(10).center(center).isStatic(true));
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(10);
+
+    _simulationFacade->setSelection({40, 40}, {60, 60});
+    _simulationFacade->setBarrier(false, true);
+    _simulationFacade->calcTimesteps(10);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(100, actualData._objects.size());
+    for (auto const& object : actualData._objects) {
+        EXPECT_FALSE(object._isStatic);
+        ASSERT_TRUE(std::isfinite(object._pos.x) && std::isfinite(object._pos.y));
+        EXPECT_LT(Math::length(object._pos - center), 10.0f);
+    }
 }

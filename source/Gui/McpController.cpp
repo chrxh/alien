@@ -2,11 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cstdint>
-#include <limits>
-#include <optional>
 #include <stdexcept>
-#include <string_view>
 #include <format>
 
 #include <boost/json.hpp>
@@ -15,12 +11,12 @@
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
-#include <EngineInterface/NameGeneratorService.h>
-#include <EngineInterface/SimulationFacade.h>
-
 #include "GenericMessageDialog.h"
 #include "MainLoopController.h"
-#include "NewSimulationService.h"
+#include "McpCreatorTools.h"
+#include "McpMultiplierTools.h"
+#include "McpSelectionTools.h"
+#include "McpSimulationTools.h"
 #include "OverlayController.h"
 
 namespace
@@ -48,6 +44,21 @@ void McpController::setServerRunning(bool value)
     }
 }
 
+int McpController::getPort() const
+{
+    return _port;
+}
+
+int McpController::getDefaultPort() const
+{
+    return DefaultPort;
+}
+
+void McpController::setPort(int value)
+{
+    _port = std::clamp(value, MinPort, MaxPort);
+}
+
 std::string McpController::getServerUrl() const
 {
     return std::format("http://127.0.0.1:{}/mcp", _port);
@@ -73,7 +84,7 @@ void McpController::init()
     for (auto const& tool : createTools()) {
         _toolNames.emplace_back(tool.name);
     }
-    _port = std::clamp(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort), MinPort, MaxPort);
+    setPort(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort));
     if (GlobalSettings::get().getValue("settings.mcp server.enabled", false)) {
         startServer();
     }
@@ -138,52 +149,33 @@ void McpController::stopServer()
 
 std::vector<McpTool> McpController::createTools()
 {
-    auto const noArguments = boost::json::object{{"type", "object"}, {"properties", boost::json::object{}}};
-    return {
-        createTool(
-            "create_simulation",
-            "Replaces the current simulation in ALIEN with a new, empty and paused simulation. The simulation parameters of the current simulation are kept. "
-            "Omitted world dimensions default to the current ones.",
-            {
-                {"type", "object"},
-                {"properties",
-                 boost::json::object{
-                     {"width", boost::json::object{{"type", "integer"}, {"minimum", 1}, {"description", "World width"}}},
-                     {"height", boost::json::object{{"type", "integer"}, {"minimum", 1}, {"description", "World height"}}},
-                     {"project_name", boost::json::object{{"type", "string"}, {"description", "Project name, generated if omitted"}}},
-                 }},
-            },
-            [this](boost::json::object const& arguments) { return createSimulation(arguments); }),
-        createTool("run_simulation", "Starts the simulation in ALIEN.", noArguments, [this](boost::json::object const&) { return runSimulation(); }),
-        createTool("pause_simulation", "Pauses the simulation in ALIEN.", noArguments, [this](boost::json::object const&) { return pauseSimulation(); }),
-    };
+    std::vector<McpTool> result;
+    for (auto const& tools :
+         {McpSimulationTools::get().getTools(), McpCreatorTools::get().getTools(), McpSelectionTools::get().getTools(), McpMultiplierTools::get().getTools()}) {
+        for (auto const& tool : tools) {
+            result.emplace_back(wrapTool(tool));
+        }
+    }
+    return result;
 }
 
-McpTool McpController::createTool(
-    std::string const& name,
-    std::string const& description,
-    boost::json::object const& inputSchema,
-    std::function<McpToolResult(boost::json::object const&)> const& function)
+McpTool McpController::wrapTool(McpTool const& tool)
 {
-    return McpTool{
-        .name = name,
-        .description = description,
-        .inputSchema = inputSchema,
-        .handler =
-            [this, name, function](boost::json::object const& arguments) {
-                return executeOnMainThread([this, name, function, arguments] {
-                    auto result = [&] {
-                        try {
-                            return function(arguments);
-                        } catch (std::exception const& exception) {
-                            return McpToolResult{.text = exception.what(), .isError = true};
-                        }
-                    }();
-                    addCommandLogEntry(name, arguments, result);
-                    return result;
-                });
-            },
+    auto result = tool;
+    result.handler = [this, name = tool.name, handler = tool.handler](boost::json::object const& arguments) {
+        return executeOnMainThread([this, name, handler, arguments] {
+            auto toolResult = [&] {
+                try {
+                    return handler(arguments);
+                } catch (std::exception const& exception) {
+                    return McpToolResult{.text = exception.what(), .isError = true};
+                }
+            }();
+            addCommandLogEntry(name, arguments, toolResult);
+            return toolResult;
+        });
     };
+    return result;
 }
 
 McpToolResult McpController::executeOnMainThread(std::function<McpToolResult()> const& function)
@@ -215,72 +207,4 @@ void McpController::addCommandLogEntry(std::string const& toolName, boost::json:
     if (_commandLog.size() > MaxCommandLogEntries) {
         _commandLog.pop_front();
     }
-}
-
-namespace
-{
-    std::optional<int> getWorldDimension(boost::json::object const& arguments, std::string_view key)
-    {
-        auto value = arguments.if_contains(key);
-        if (!value) {
-            return std::nullopt;
-        }
-        try {
-            auto result = value->to_number<int64_t>();
-            if (result >= 1 && result <= std::numeric_limits<int>::max()) {
-                return static_cast<int>(result);
-            }
-        } catch (...) {
-        }
-        throw std::invalid_argument(std::format("'{}' must be a positive integer.", key));
-    }
-}
-
-McpToolResult McpController::createSimulation(boost::json::object const& arguments)
-{
-    auto worldSize = _SimulationFacade::get()->getWorldSize();
-    worldSize.x = getWorldDimension(arguments, "width").value_or(worldSize.x);
-    worldSize.y = getWorldDimension(arguments, "height").value_or(worldSize.y);
-
-    auto projectName = NameGeneratorService::get().createSimulationName();
-    if (auto value = arguments.if_contains("project_name")) {
-        if (!value->is_string()) {
-            throw std::invalid_argument("'project_name' must be a string.");
-        }
-        projectName = value->as_string();
-    }
-
-    NewSimulationService::get().createSimulation(NewSimulationService::Parameters()
-                                                     .projectName(projectName)
-                                                     .worldSize(worldSize)
-                                                     .externalEnergy(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
-    printOverlayMessage("New simulation");
-
-    return {
-        .text = std::format(
-            "Created the empty simulation '{}' with a world size of {} x {}. The simulation is {}.",
-            projectName,
-            worldSize.x,
-            worldSize.y,
-            _SimulationFacade::get()->isSimulationRunning() ? "running" : "paused")};
-}
-
-McpToolResult McpController::runSimulation()
-{
-    if (_SimulationFacade::get()->isSimulationRunning()) {
-        return {.text = "The simulation is already running."};
-    }
-    _SimulationFacade::get()->runSimulation();
-    printOverlayMessage("Run");
-    return {.text = "The simulation is running."};
-}
-
-McpToolResult McpController::pauseSimulation()
-{
-    if (!_SimulationFacade::get()->isSimulationRunning()) {
-        return {.text = "The simulation is already paused."};
-    }
-    _SimulationFacade::get()->pauseSimulation();
-    printOverlayMessage("Pause");
-    return {.text = "The simulation is paused."};
 }

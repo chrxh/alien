@@ -160,7 +160,7 @@ void EditKernelsService::removeStickiness(KernelLaunchSettings const& launchSett
 
 void EditKernelsService::setBarrier(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value, bool includeClusters)
 {
-    launchKernelOnDefaultStream(KERNEL(cudaSetBarrier), LaunchConfig{launchSettings.numBlocks, 8}, data, value, includeClusters);
+    launchKernelOnDefaultStream(KERNEL(cudaSetStatic), LaunchConfig{launchSettings.numBlocks, 8}, data, value, includeClusters);
 }
 
 void EditKernelsService::reconnect(KernelLaunchSettings const& launchSettings, SimulationData const& data)

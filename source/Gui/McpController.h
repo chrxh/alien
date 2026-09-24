@@ -33,6 +33,9 @@ public:
     bool isServerRunning() const;
     void setServerRunning(bool value);
 
+    int getPort() const;
+    int getDefaultPort() const;
+    void setPort(int value);
     std::string getServerUrl() const;
     std::vector<std::string> const& getToolNames() const;
 
@@ -48,17 +51,9 @@ private:
     void stopServer();
 
     std::vector<McpTool> createTools();
-    McpTool createTool(
-        std::string const& name,
-        std::string const& description,
-        boost::json::object const& inputSchema,
-        std::function<McpToolResult(boost::json::object const&)> const& function);
+    McpTool wrapTool(McpTool const& tool);
     McpToolResult executeOnMainThread(std::function<McpToolResult()> const& function);
     void addCommandLogEntry(std::string const& toolName, boost::json::object const& arguments, McpToolResult const& result);
-
-    McpToolResult createSimulation(boost::json::object const& arguments);
-    McpToolResult runSimulation();
-    McpToolResult pauseSimulation();
 
     int _port = 0;
     std::unique_ptr<McpServer> _server;

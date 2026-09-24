@@ -61,6 +61,7 @@
 #include "MainLoopEntityController.h"
 #include "MassOperationsDialog.h"
 #include "McpController.h"
+#include "McpSettingsDialog.h"
 #include "McpWindow.h"
 #include "MultiplierWindow.h"
 #include "NetworkSettingsDialog.h"
@@ -169,6 +170,7 @@ _MainWindow::_MainWindow()
     DelayedExecutionController::get().setup();
     UiController::get().setup();
     McpController::get().setup();
+    McpSettingsDialog::get().setup();
     McpWindow::get().setup();
 
     log(Priority::Important, "initialize file dialogs");
