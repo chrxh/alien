@@ -6,7 +6,7 @@
 
 #include <EngineInterface/SimulationParametersTypes.h>
 
-#include <Network/McpServer.h>
+#include "McpServer.h"
 
 class McpParameterTools
 {

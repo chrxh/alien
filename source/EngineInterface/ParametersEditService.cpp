@@ -5,6 +5,8 @@
 #include <Base/Definitions.h>
 #include <Base/StringHelper.h>
 
+#include "ObjectColoring.h"
+#include "SimulationFacade.h"
 #include "SpecificationEvaluationService.h"
 
 void ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const
@@ -231,6 +233,133 @@ void ParametersEditService::moveLocationDownwards(SimulationParameters& paramete
     }
 }
 
+namespace
+{
+    auto constexpr NumLayerBackgroundColors = 32;
+
+    FloatColorRGB calcBackgroundColorForNewLayer(int numLayers)
+    {
+        auto hue = toFloat((2 + numLayers) * 8 % NumLayerBackgroundColors) / toFloat(NumLayerBackgroundColors - 1);
+        auto rgb = ObjectColoring::hsvToRgb(hue, 0.8f, 0.2f);
+        return {toFloat((rgb >> 16) & 0xff) / 255.0f, toFloat((rgb >> 8) & 0xff) / 255.0f, toFloat(rgb & 0xff) / 255.0f};
+    }
+
+    void applyParameters(SimulationParameters const& parameters, SimulationParameters const& origParameters)
+    {
+        _SimulationFacade::get()->setSimulationParameters(parameters);
+        _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
+    }
+}
+
+std::optional<int> ParametersEditService::insertDefaultLayer(int orderNumber)
+{
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+
+    if (parameters.numLayers == MAX_LAYERS) {
+        return std::nullopt;
+    }
+
+    insertDefaultLayer(parameters, orderNumber);
+    insertDefaultLayer(origParameters, orderNumber);
+
+    auto newOrderNumber = orderNumber + 1;
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
+    auto position = calcPositionForNewLocation(worldSize);
+    auto backgroundColor = calcBackgroundColorForNewLayer(parameters.numLayers);
+    initNewLayer(parameters, newOrderNumber, worldSize, position, backgroundColor);
+    initNewLayer(origParameters, newOrderNumber, worldSize, position, backgroundColor);
+
+    applyParameters(parameters, origParameters);
+
+    ++_insertedLocationCounter;
+    return newOrderNumber;
+}
+
+std::optional<int> ParametersEditService::insertDefaultSource(int orderNumber)
+{
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+
+    if (parameters.numSources == MAX_SOURCES) {
+        return std::nullopt;
+    }
+    auto newStrengths = calcRadiationStrengthsForAddingSource(getRadiationStrengths(parameters));
+
+    insertDefaultSource(parameters, orderNumber);
+    insertDefaultSource(origParameters, orderNumber);
+
+    applyRadiationStrengths(parameters, newStrengths);
+    applyRadiationStrengths(origParameters, newStrengths);
+
+    auto newOrderNumber = orderNumber + 1;
+    auto index = LocationHelper::findLocationArrayIndex(parameters, newOrderNumber);
+    parameters.sourcePosition.sourceValues[index] = calcPositionForNewLocation(_SimulationFacade::get()->getWorldSize());
+    origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
+
+    applyParameters(parameters, origParameters);
+
+    ++_insertedLocationCounter;
+    return newOrderNumber;
+}
+
+std::optional<int> ParametersEditService::cloneLocation(int orderNumber)
+{
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    if ((locationType == LocationType::Layer && parameters.numLayers == MAX_LAYERS)
+        || (locationType == LocationType::Source && parameters.numSources == MAX_SOURCES)) {
+        return std::nullopt;
+    }
+    auto newStrengths = calcRadiationStrengthsForAddingSource(getRadiationStrengths(parameters));
+
+    cloneLocation(parameters, orderNumber);
+    cloneLocation(origParameters, orderNumber);
+
+    if (locationType == LocationType::Source) {
+        applyRadiationStrengths(parameters, newStrengths);
+        applyRadiationStrengths(origParameters, newStrengths);
+    }
+
+    applyParameters(parameters, origParameters);
+    return orderNumber + 1;
+}
+
+void ParametersEditService::deleteLocation(int orderNumber)
+{
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+
+    deleteLocation(parameters, orderNumber);
+    deleteLocation(origParameters, orderNumber);
+
+    applyParameters(parameters, origParameters);
+}
+
+void ParametersEditService::moveLocationUpwards(int orderNumber)
+{
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+
+    moveLocationUpwards(parameters, orderNumber);
+    moveLocationUpwards(origParameters, orderNumber);
+
+    applyParameters(parameters, origParameters);
+}
+
+void ParametersEditService::moveLocationDownwards(int orderNumber)
+{
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+
+    moveLocationDownwards(parameters, orderNumber);
+    moveLocationDownwards(origParameters, orderNumber);
+
+    applyParameters(parameters, origParameters);
+}
+
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
 {
     RadiationStrengths result;
@@ -454,4 +583,11 @@ void ParametersEditService::copyLocationIntern(
             copySourceToTarget(std::get<ColorTransitionRulesSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         }
     }
+}
+
+RealVector2D ParametersEditService::calcPositionForNewLocation(IntVector2D const& worldSize) const
+{
+    return {
+        toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
+        toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
 }

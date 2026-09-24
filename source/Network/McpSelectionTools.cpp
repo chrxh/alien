@@ -12,10 +12,8 @@
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <Network/McpArguments.h>
-#include <Network/McpSchema.h>
-
-#include "EditorModel.h"
+#include "McpArguments.h"
+#include "McpSchema.h"
 
 namespace
 {
@@ -33,8 +31,10 @@ namespace
     }
 }
 
-std::vector<McpTool> McpSelectionTools::getTools()
+std::vector<McpTool> McpSelectionTools::getTools(McpHost const& host)
 {
+    _host = host;
+
     return {
         McpTool{
             .name = "select_area",
@@ -117,14 +117,14 @@ McpToolResult McpSelectionTools::selectArea(boost::json::object const& arguments
     auto x2 = McpArguments::getFloat(arguments, "x2");
     auto y2 = McpArguments::getFloat(arguments, "y2");
     _SimulationFacade::get()->setSelection({std::min(x1, x2), std::min(y1, y2)}, {std::max(x1, x2), std::max(y1, y2)});
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = describeSelection(_SimulationFacade::get()->getSelectionShallowData())};
 }
 
 McpToolResult McpSelectionTools::clearSelection() const
 {
     _SimulationFacade::get()->removeSelection();
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = "The selection is empty."};
 }
 
@@ -147,7 +147,7 @@ McpToolResult McpSelectionTools::deleteSelection(boost::json::object const& argu
     auto includeClusters = getIncludeClusters(arguments);
     auto selection = getNonEmptySelection();
     _SimulationFacade::get()->removeSelectedObjects(includeClusters);
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {
         .text = std::format(
             "Deleted {} objects and {} energy particles.",
@@ -161,7 +161,7 @@ McpToolResult McpSelectionTools::fixSelection(boost::json::object const& argumen
     auto includeClusters = getIncludeClusters(arguments);
     getNonEmptySelection();
     _SimulationFacade::get()->setBarrier(fixed, includeClusters);
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = fixed ? "The selected objects are fixed." : "The selected objects are released."};
 }
 
@@ -171,7 +171,7 @@ McpToolResult McpSelectionTools::colorSelection(boost::json::object const& argum
     auto includeClusters = getIncludeClusters(arguments);
     getNonEmptySelection();
     _SimulationFacade::get()->colorSelectedObjects(static_cast<unsigned char>(color), includeClusters);
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = std::format("The selected objects have color {}.", color)};
 }
 
@@ -185,7 +185,7 @@ McpToolResult McpSelectionTools::setSelectionSticky(boost::json::object const& a
     } else {
         _SimulationFacade::get()->removeStickiness(includeClusters);
     }
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = sticky ? "The selected objects are sticky." : "The selected objects are unsticky."};
 }
 
@@ -204,7 +204,7 @@ McpToolResult McpSelectionTools::moveSelection(boost::json::object const& argume
     updateData.velX = includeClusters ? selection.clusterCenterVelX : selection.centerVelX;
     updateData.velY = includeClusters ? selection.clusterCenterVelY : selection.centerVelY;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = std::format("Moved the selection by ({}, {}).", StringHelper::format(dx, 1), StringHelper::format(dy, 1))};
 }
 
@@ -218,7 +218,7 @@ McpToolResult McpSelectionTools::rotateSelection(boost::json::object const& argu
     updateData.considerClusters = includeClusters;
     updateData.angleDelta = angle;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = std::format("Rotated the selection by {} degrees.", StringHelper::format(angle, 1))};
 }
 
@@ -227,7 +227,7 @@ McpToolResult McpSelectionTools::relaxSelection(boost::json::object const& argum
     auto includeClusters = getIncludeClusters(arguments);
     getNonEmptySelection();
     _SimulationFacade::get()->relaxSelectedObjects(includeClusters);
-    EditorModel::get().update();
+    _host->onSelectionChanged();
     return {.text = "Released the stresses of the selected objects."};
 }
 

@@ -5,18 +5,18 @@
 
 #include <Base/Singleton.h>
 
+#include <EngineInterface/CreatorService.h>
 #include <EngineInterface/Descs.h>
 
-#include <Network/McpServer.h>
-
-#include "CreatorService.h"
+#include "McpHost.h"
+#include "McpServer.h"
 
 class McpCreatorTools
 {
     MAKE_SINGLETON(McpCreatorTools);
 
 public:
-    std::vector<McpTool> getTools();
+    std::vector<McpTool> getTools(McpHost const& host);
 
 private:
     McpToolResult createObject(boost::json::object const& arguments) const;
@@ -36,4 +36,6 @@ private:
     void checkNumObjects(float estimatedNumObjects) const;
 
     McpToolResult addToSimulation(ContentDesc&& content, CreatorService::ObjectProperties const& properties, std::string const& shape) const;
+
+    McpHost _host;
 };

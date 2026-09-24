@@ -9,8 +9,9 @@
 
 #include <Base/StringHelper.h>
 
+#include <Network/McpService.h>
+
 #include "AlienGui.h"
-#include "McpController.h"
 #include "McpSettingsDialog.h"
 #include "OverlayController.h"
 #include "StyleService.h"
@@ -47,18 +48,18 @@ void McpWindow::processIntern()
 
 void McpWindow::processToolbar()
 {
-    auto& controller = McpController::get();
-    auto running = controller.isServerRunning();
+    auto& service = McpService::get();
+    auto running = service.isServerRunning();
     AlienGui::Toolbar(
         AlienGui::ToolbarParameters().id("McpServer"),
         {AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLAY).name("Start server").disabled(running).action([&] { controller.setServerRunning(true); })),
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_PLAY).name("Start server").disabled(running).action([&] { service.setServerRunning(true); })),
          AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_FA_STOP).name("Stop server").disabled(!running).action([&] { controller.setServerRunning(false); })),
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_STOP).name("Stop server").disabled(!running).action([&] { service.setServerRunning(false); })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_FA_BROOM).name("Clear command log").disabled(controller.getCommandLog().empty()).action([&] {
-                 controller.clearCommandLog();
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_BROOM).name("Clear command log").disabled(service.getCommandLog().empty()).action([&] {
+                 service.clearCommandLog();
              })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
@@ -67,7 +68,7 @@ void McpWindow::processToolbar()
 
 void McpWindow::processStatusBadge()
 {
-    auto running = McpController::get().isServerRunning();
+    auto running = McpService::get().isServerRunning();
     auto text = running ? "Running" : "Stopped";
     auto textSize = ImGui::CalcTextSize(text);
     auto paddingX = scale(BadgePadding);
@@ -87,7 +88,7 @@ void McpWindow::processStatusBadge()
 
 void McpWindow::processConnectionCard()
 {
-    auto& controller = McpController::get();
+    auto& service = McpService::get();
     auto const& style = ImGui::GetStyle();
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, Const::PanelColor.Value);
@@ -105,7 +106,7 @@ void McpWindow::processConnectionCard()
         AlienGui::Tooltip(
             [&] {
                 std::string toolNames;
-                for (auto const& toolName : controller.getToolNames()) {
+                for (auto const& toolName : service.getToolNames()) {
                     toolNames += (toolNames.empty() ? "" : ", ") + toolName;
                 }
                 return std::format(
@@ -119,7 +120,7 @@ void McpWindow::processConnectionCard()
         ImGui::TextUnformatted("Add a server of type HTTP with this URL in your MCP client.");
         ImGui::PopStyleColor();
 
-        auto url = controller.getServerUrl();
+        auto url = service.getServerUrl();
         auto copyButtonWidth = ImGui::CalcTextSize(CopyButtonText).x + style.FramePadding.x * 2;
         ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - copyButtonWidth - style.ItemSpacing.x);
@@ -139,7 +140,7 @@ void McpWindow::processConnectionCard()
 
 void McpWindow::processCommandLog()
 {
-    auto const& commandLog = McpController::get().getCommandLog();
+    auto const& commandLog = McpService::get().getCommandLog();
 
     ImGui::Spacing();
     AlienGui::Group(AlienGui::GroupParameters().text(std::format("Command log ({})", commandLog.size())));

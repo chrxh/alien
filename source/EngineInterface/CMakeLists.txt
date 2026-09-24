@@ -4,6 +4,8 @@ add_library(EngineInterface
     ArraySizesForTOs.h
     CellTypeConstants.h
     Colors.h
+    CreatorService.cpp
+    CreatorService.h
     KernelLaunchSettings.h
     DataPointCollection.cpp
     DataPointCollection.h
@@ -30,6 +32,8 @@ add_library(EngineInterface
     InspectedEntityIds.h
     LocationHelper.cpp
     LocationHelper.h
+    MultiplierService.cpp
+    MultiplierService.h
     NameGeneratorService.cpp
     NameGeneratorService.h
     NeuralNetWeight.h

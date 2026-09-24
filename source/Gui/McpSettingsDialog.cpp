@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
+#include <Network/McpService.h>
+
 #include "AlienGui.h"
-#include "McpController.h"
 #include "StyleService.h"
 
 namespace
@@ -17,15 +18,15 @@ McpSettingsDialog::McpSettingsDialog()
 
 void McpSettingsDialog::processIntern()
 {
-    auto& controller = McpController::get();
-    auto running = controller.isServerRunning();
+    auto& service = McpService::get();
+    auto running = service.isServerRunning();
 
     ImGui::BeginDisabled(running);
     AlienGui::InputInt(
         AlienGui::InputIntParameters()
             .name("Port")
             .textWidth(RightColumnWidth)
-            .defaultValue(controller.getDefaultPort())
+            .defaultValue(service.getDefaultPort())
             .tooltip(running ? "Stop the server to change the port." : "Local port on which the MCP server accepts connections."),
         _port);
     ImGui::EndDisabled();
@@ -36,7 +37,7 @@ void McpSettingsDialog::processIntern()
     ImGui::BeginDisabled(running);
     if (AlienGui::Button("Adopt")) {
         close();
-        controller.setPort(_port);
+        service.setPort(_port);
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
@@ -49,5 +50,5 @@ void McpSettingsDialog::processIntern()
 
 void McpSettingsDialog::openIntern()
 {
-    _port = McpController::get().getPort();
+    _port = McpService::get().getPort();
 }

@@ -7,11 +7,12 @@
 
 #include <Base/GlobalSettings.h>
 
+#include <EngineInterface/MultiplierService.h>
+
 #include "AlienGui.h"
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
-#include "MultiplierService.h"
 #include "StyleService.h"
 
 
@@ -227,6 +228,7 @@ void MultiplierWindow::onBuild()
 {
     auto result =
         _mode == MultiplierMode_Grid ? MultiplierService::get().multiplyInGrid(_gridParameters) : MultiplierService::get().multiplyRandomly(_randomParameters);
+    EditorModel::get().update();
     if (!result.overlappingCheckSuccessful) {
         GenericMessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
     }
@@ -237,5 +239,6 @@ void MultiplierWindow::onBuild()
 void MultiplierWindow::onUndo()
 {
     MultiplierService::get().undo(_origSelection);
+    EditorModel::get().update();
     _selectionDataAfterMultiplication = std::nullopt;
 }

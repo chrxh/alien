@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -33,6 +34,15 @@ public:
     void moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
     void moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;
 
+    // Edit the current simulation parameters together with the reference parameters. A new location is placed behind the given one.
+    // Its order number is returned, or nullopt if the maximum number of locations has been reached.
+    std::optional<int> insertDefaultLayer(int orderNumber);
+    std::optional<int> insertDefaultSource(int orderNumber);
+    std::optional<int> cloneLocation(int orderNumber);
+    void deleteLocation(int orderNumber);
+    void moveLocationUpwards(int orderNumber);
+    void moveLocationDownwards(int orderNumber);
+
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
 
@@ -49,4 +59,8 @@ private:
         SimulationParameters& sourceParameters,
         int sourceOrderNumber,
         std::vector<ParameterSpec> const& parameterSpecs) const;
+
+    RealVector2D calcPositionForNewLocation(IntVector2D const& worldSize) const;
+
+    int _insertedLocationCounter = 0;
 };

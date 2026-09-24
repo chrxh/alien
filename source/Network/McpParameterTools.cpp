@@ -25,12 +25,10 @@
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SpecificationEvaluationService.h>
 
-#include <Network/McpArguments.h>
-#include <Network/McpSchema.h>
-
 #include <PersisterInterface/SerializerService.h>
 
-#include "LocationEditService.h"
+#include "McpArguments.h"
+#include "McpSchema.h"
 
 namespace
 {
@@ -789,9 +787,8 @@ McpToolResult McpParameterTools::addLocation(boost::json::object const& argument
     auto numLocations = getNumLocations(parameters);
     auto afterLocation = McpArguments::getOptionalInt(arguments, "after_location", 0, numLocations - 1).value_or(numLocations - 1);
 
-    auto& locationEditService = LocationEditService::get();
-    auto orderNumber =
-        locationType == LocationType::Layer ? locationEditService.insertDefaultLayer(afterLocation) : locationEditService.insertDefaultSource(afterLocation);
+    auto& editService = ParametersEditService::get();
+    auto orderNumber = locationType == LocationType::Layer ? editService.insertDefaultLayer(afterLocation) : editService.insertDefaultSource(afterLocation);
     if (!orderNumber.has_value()) {
         throw std::invalid_argument(
             locationType == LocationType::Layer ? "The maximum number of layers has been reached."
@@ -806,7 +803,7 @@ McpToolResult McpParameterTools::cloneLocation(boost::json::object const& argume
     auto location = getLocation(arguments, parameters);
     auto sourceDescription = describeLocation(location);
 
-    auto orderNumber = LocationEditService::get().cloneLocation(location);
+    auto orderNumber = ParametersEditService::get().cloneLocation(location);
     if (!orderNumber.has_value()) {
         throw std::invalid_argument("The maximum number of layers or radiation sources has been reached.");
     }
@@ -819,7 +816,7 @@ McpToolResult McpParameterTools::deleteLocation(boost::json::object const& argum
     auto location = getLocation(arguments, parameters);
     auto description = describeLocation(location);
 
-    LocationEditService::get().deleteLocation(location);
+    ParametersEditService::get().deleteLocation(location);
     return {.text = std::format("Deleted {}. The locations behind it have been renumbered.", description)};
 }
 
@@ -834,13 +831,13 @@ McpToolResult McpParameterTools::moveLocation(boost::json::object const& argumen
         if (location == 1) {
             throw std::invalid_argument("The location is already the first one.");
         }
-        LocationEditService::get().moveLocationUpwards(location);
+        ParametersEditService::get().moveLocationUpwards(location);
         return {.text = std::format("Moved {} to location {}.", description, location - 1)};
     } else if (direction == "down") {
         if (location == getNumLocations(parameters) - 1) {
             throw std::invalid_argument("The location is already the last one.");
         }
-        LocationEditService::get().moveLocationDownwards(location);
+        ParametersEditService::get().moveLocationDownwards(location);
         return {.text = std::format("Moved {} to location {}.", description, location + 1)};
     }
     throw std::invalid_argument("'direction' must be 'up' or 'down'.");

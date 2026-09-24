@@ -9,15 +9,13 @@
 #include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <Network/McpArguments.h>
-#include <Network/McpSchema.h>
+#include "McpArguments.h"
+#include "McpSchema.h"
 
-#include "NewSimulationService.h"
-#include "OverlayController.h"
-#include "Viewport.h"
-
-std::vector<McpTool> McpSimulationTools::getTools()
+std::vector<McpTool> McpSimulationTools::getTools(McpHost const& host)
 {
+    _host = host;
+
     return {
         McpTool{
             .name = "get_simulation_info",
@@ -55,9 +53,8 @@ std::vector<McpTool> McpSimulationTools::getTools()
 McpToolResult McpSimulationTools::getSimulationInfo() const
 {
     auto worldSize = _SimulationFacade::get()->getWorldSize();
-    auto viewCenter = Viewport::get().getCenterInWorldPos();
-    auto viewSize = Viewport::get().getViewSize();
-    auto zoom = Viewport::get().getZoomFactor();
+    auto visibleAreaCenter = _host->getVisibleAreaCenter();
+    auto visibleAreaSize = _host->getVisibleAreaSize();
     auto selection = _SimulationFacade::get()->getSelectionShallowData();
 
     boost::json::array colors;
@@ -72,10 +69,10 @@ McpToolResult McpSimulationTools::getSimulationInfo() const
         {"time_step", _SimulationFacade::get()->getCurrentTimestep()},
         {"visible_area",
          boost::json::object{
-             {"center_x", viewCenter.x},
-             {"center_y", viewCenter.y},
-             {"width", toFloat(viewSize.x) / zoom},
-             {"height", toFloat(viewSize.y) / zoom},
+             {"center_x", visibleAreaCenter.x},
+             {"center_y", visibleAreaCenter.y},
+             {"width", visibleAreaSize.x},
+             {"height", visibleAreaSize.y},
          }},
         {"selection", boost::json::object{{"objects", selection.numObjects}, {"energy_particles", selection.numEnergyParticles}}},
         {"colors_by_index", std::move(colors)},
@@ -93,11 +90,8 @@ McpToolResult McpSimulationTools::createSimulation(boost::json::object const& ar
         projectName = NameGeneratorService::get().createSimulationName();
     }
 
-    NewSimulationService::get().createSimulation(NewSimulationService::Parameters()
-                                                     .projectName(*projectName)
-                                                     .worldSize(worldSize)
-                                                     .externalEnergy(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
-    printOverlayMessage("New simulation");
+    _host->createSimulation(*projectName, worldSize);
+    _host->showMessage("New simulation");
 
     return {
         .text = std::format(
@@ -114,7 +108,7 @@ McpToolResult McpSimulationTools::runSimulation() const
         return {.text = "The simulation is already running."};
     }
     _SimulationFacade::get()->runSimulation();
-    printOverlayMessage("Run");
+    _host->showMessage("Run");
     return {.text = "The simulation is running."};
 }
 
@@ -124,6 +118,6 @@ McpToolResult McpSimulationTools::pauseSimulation() const
         return {.text = "The simulation is already paused."};
     }
     _SimulationFacade::get()->pauseSimulation();
-    printOverlayMessage("Pause");
+    _host->showMessage("Pause");
     return {.text = "The simulation is paused."};
 }

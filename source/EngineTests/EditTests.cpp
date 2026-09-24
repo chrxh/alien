@@ -268,7 +268,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
     EXPECT_EQ(2, result);
 }
 
-TEST_F(EditTests, setBarrier_releaseAfterTimesteps)
+TEST_F(EditTests, setStatic_releaseAfterTimesteps)
 {
     auto const center = RealVector2D{50.0f, 50.0f};
     auto data = DescEditService::get().createRect(DescEditService::CreateRectParameters().width(10).height(10).center(center).isStatic(true));
