@@ -87,6 +87,22 @@ NewByOldOrderNumber ParametersEditService::insertDefaultSource(SimulationParamet
     return result;
 }
 
+void ParametersEditService::initNewLayer(
+    SimulationParameters& parameters,
+    int orderNumber,
+    IntVector2D const& worldSize,
+    RealVector2D const& position,
+    FloatColorRGB const& backgroundColor) const
+{
+    auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+    auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
+    parameters.backgroundColor.layerValues[index] = {.value = backgroundColor, .enabled = true};
+    parameters.layerPosition.layerValues[index] = position;
+    parameters.layerCoreRadius.layerValues[index] = minRadius / 3;
+    parameters.layerCoreRect.layerValues[index] = {minRadius / 3, minRadius / 3};
+    parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
+}
+
 NewByOldOrderNumber ParametersEditService::cloneLocation(SimulationParameters& parameters, int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);

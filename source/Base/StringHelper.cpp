@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iomanip>
 #include <sstream>
+#include <format>
 
 std::string StringHelper::format(uint64_t n, char separator)
 {
@@ -118,6 +119,12 @@ std::string StringHelper::formatInHex(uint64_t value)
     std::stringstream ss;
     ss << "0x" << std::hex << std::uppercase << value;
     return ss.str();
+}
+
+std::string StringHelper::formatHexColor(FloatColorRGB const& color)
+{
+    auto toByte = [](float value) { return std::clamp(static_cast<int>(std::lround(value * 255.0f)), 0, 255); };
+    return std::format("#{:02x}{:02x}{:02x}", toByte(color.r), toByte(color.g), toByte(color.b));
 }
 
 std::string StringHelper::formatInThousands(double value)

@@ -36,6 +36,8 @@ add_library(EngineInterface
     NumberGenerator.cpp
     NumberGenerator.h
     StatisticsEntry.h
+    ParametersAccessService.cpp
+    ParametersAccessService.h
     ParametersEditService.cpp
     ParametersEditService.h
     ParametersFilter.h

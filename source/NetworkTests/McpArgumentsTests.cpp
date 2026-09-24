@@ -65,3 +65,22 @@ TEST_F(McpArgumentsTests, points_invalidPair)
 {
     EXPECT_THROW(McpArguments::getPoints(parse(R"({"p": [[1, 2, 3], [4, 5]]})"), "p", 1), std::invalid_argument);
 }
+
+TEST_F(McpArgumentsTests, objects)
+{
+    auto objects = McpArguments::getObjects(parse(R"({"o": [{"a": 1}, {"b": 2}]})"), "o", 1);
+
+    ASSERT_EQ(2, objects.size());
+    EXPECT_EQ(1, McpArguments::getInt(objects.at(0), "a"));
+    EXPECT_EQ(2, McpArguments::getInt(objects.at(1), "b"));
+}
+
+TEST_F(McpArgumentsTests, objects_invalidEntry)
+{
+    EXPECT_THROW(McpArguments::getObjects(parse(R"({"o": [{"a": 1}, 2]})"), "o", 1), std::invalid_argument);
+}
+
+TEST_F(McpArgumentsTests, objects_tooFew)
+{
+    EXPECT_THROW(McpArguments::getObjects(parse(R"({"o": []})"), "o", 1), std::invalid_argument);
+}

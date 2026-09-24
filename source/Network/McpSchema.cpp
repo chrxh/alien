@@ -67,3 +67,17 @@ boost::json::object McpSchema::points(std::string const& description, size_t min
         {"items", boost::json::object{{"type", "array"}, {"items", boost::json::object{{"type", "number"}}}, {"minItems", 2}, {"maxItems", 2}}},
     };
 }
+
+boost::json::object McpSchema::array(std::string const& description, boost::json::object items, size_t minItems)
+{
+    boost::json::object result{{"type", "array"}, {"description", description}, {"items", std::move(items)}};
+    if (minItems > 0) {
+        result["minItems"] = minItems;
+    }
+    return result;
+}
+
+boost::json::object McpSchema::any(std::string const& description)
+{
+    return {{"description", description}};
+}

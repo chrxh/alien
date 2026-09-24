@@ -15,6 +15,7 @@
 #include "MainLoopController.h"
 #include "McpCreatorTools.h"
 #include "McpMultiplierTools.h"
+#include "McpParameterTools.h"
 #include "McpSelectionTools.h"
 #include "McpSimulationTools.h"
 #include "OverlayController.h"
@@ -151,7 +152,11 @@ std::vector<McpTool> McpController::createTools()
 {
     std::vector<McpTool> result;
     for (auto const& tools :
-         {McpSimulationTools::get().getTools(), McpCreatorTools::get().getTools(), McpSelectionTools::get().getTools(), McpMultiplierTools::get().getTools()}) {
+         {McpSimulationTools::get().getTools(),
+          McpCreatorTools::get().getTools(),
+          McpSelectionTools::get().getTools(),
+          McpMultiplierTools::get().getTools(),
+          McpParameterTools::get().getTools()}) {
         for (auto const& tool : tools) {
             result.emplace_back(wrapTool(tool));
         }

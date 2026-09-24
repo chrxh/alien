@@ -5,6 +5,7 @@ PUBLIC
     ExtinctLineageAccumulatorTests.cpp
     GenomeDescEditServiceTests.cpp
     GenomeDescInfoServiceTests.cpp
+    ParametersAccessServiceTests.cpp
     ParametersEditServiceTests.cpp
     PreviewDescConverterServiceTests.cpp
     SpecificationFilterServiceTests.cpp

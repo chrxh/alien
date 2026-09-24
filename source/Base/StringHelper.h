@@ -4,6 +4,7 @@
 #include <string>
 
 #include <Base/Definitions.h>
+#include <Base/MathTypes.h>
 
 class StringHelper
 {
@@ -16,7 +17,8 @@ public:
     static std::string format(std::chrono::system_clock::time_point const& timePoint);
     static std::string formatTimeOfDay(std::chrono::system_clock::time_point const& timePoint);
     static std::string formatInHex(uint64_t value);
-    static std::string formatInThousands(double value);  // e.g. 12000 -> "12K", 1000000 -> "1,000K"
+    static std::string formatHexColor(FloatColorRGB const& color);  // e.g. "#1a2b3c"
+    static std::string formatInThousands(double value);             // e.g. 12000 -> "12K", 1000000 -> "1,000K"
 
     static void copy(char* target, int maxSize, std::string const& source);
     static bool compare(char const* target, int maxSize, char const* source);
