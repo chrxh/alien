@@ -33,26 +33,6 @@ void LocationController::addLocationWindow(int orderNumber, RealVector2D const& 
     _locationWindows.emplace_back(std::move(window));
 }
 
-void LocationController::deleteLocationWindow(int orderNumber)
-{
-    std::vector<LocationWindow> newlocationWindows;
-    newlocationWindows.reserve(_locationWindows.size());
-
-    for (auto& locationWindow : _locationWindows) {
-        if (locationWindow.getOrderNumber() != orderNumber) {
-            newlocationWindows.emplace_back(std::move(locationWindow));
-        }
-    }
-    _locationWindows.swap(newlocationWindows);
-}
-
-void LocationController::remapLocationIndices(std::map<int, int> const& newByOldOrderNumber)
-{
-    for (auto& locationWindow : _locationWindows) {
-        locationWindow.setOrderNumber(newByOldOrderNumber.at(locationWindow.getOrderNumber()));
-    }
-}
-
 void LocationController::init() {}
 
 void LocationController::process()

@@ -29,6 +29,7 @@ protected:
                 ++result.numSources;
             }
         }
+        LocationHelper::assignLocationIds(result);
         return result;
     }
 
@@ -53,6 +54,16 @@ protected:
         if (!locationIndices.empty()) {
             EXPECT_EQ(parameters.numLayers + parameters.numSources, *std::max_element(locationIndices.begin(), locationIndices.end()));
         }
+
+        std::set<int> locationIds;
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            locationIds.insert(parameters.layerIds[i]);
+        }
+        for (int i = 0; i < parameters.numSources; ++i) {
+            locationIds.insert(parameters.sourceIds[i]);
+        }
+        EXPECT_EQ(parameters.numLayers + parameters.numSources, locationIds.size());
+        EXPECT_FALSE(locationIds.contains(0));
 
         for (int i = 0; i < parameters.numLayers; ++i) {
             auto orderNumber = parameters.layerOrderNumbers[i];
@@ -80,6 +91,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -91,6 +103,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
         }
     }
@@ -158,6 +171,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -166,6 +180,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
         }
     }
@@ -194,6 +209,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -212,6 +228,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
         }
     }
@@ -240,6 +257,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -258,6 +276,7 @@ protected:
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
         }
     }
@@ -475,6 +494,38 @@ TEST_F(ParametersEditServiceTests, initNewLayer)
     EXPECT_EQ(50.0f, parameters.layerCoreRadius.layerValues[0]);
     EXPECT_EQ(RealVector2D(50.0f, 50.0f), parameters.layerCoreRect.layerValues[0]);
     EXPECT_EQ(30.0f, parameters.layerFadeoutRadius.layerValues[0]);
+}
+
+TEST_F(ParametersEditServiceTests, locationIds)
+{
+    auto parameters = createTestData({LocationType::Source, LocationType::Layer, LocationType::Source});
+
+    EXPECT_EQ(0, LocationHelper::getLocationId(parameters, 0));
+    EXPECT_EQ(1, LocationHelper::getLocationId(parameters, 2));
+    EXPECT_EQ(2, LocationHelper::getLocationId(parameters, 1));
+    EXPECT_EQ(3, LocationHelper::getLocationId(parameters, 3));
+    EXPECT_EQ(std::optional(0), LocationHelper::findOrderNumber(parameters, 0));
+    EXPECT_EQ(std::optional(2), LocationHelper::findOrderNumber(parameters, 1));
+    EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, 4).has_value());
+    EXPECT_EQ(4, LocationHelper::generateLocationId(parameters));
+}
+
+TEST_F(ParametersEditServiceTests, locationIds_followLocation)
+{
+    auto& editService = ParametersEditService::get();
+    auto parameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source});
+    auto locationId = LocationHelper::getLocationId(parameters, 2);
+
+    editService.moveLocationUpwards(parameters, 2);
+    EXPECT_EQ(std::optional(1), LocationHelper::findOrderNumber(parameters, locationId));
+
+    editService.insertDefaultSource(parameters, 0);
+    EXPECT_EQ(std::optional(2), LocationHelper::findOrderNumber(parameters, locationId));
+
+    auto insertedLocationId = LocationHelper::getLocationId(parameters, 1);
+    editService.deleteLocation(parameters, 1);
+    EXPECT_EQ(std::optional(1), LocationHelper::findOrderNumber(parameters, locationId));
+    EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, insertedLocationId).has_value());
 }
 
 TEST_F(ParametersEditServiceTests, insertDefaultSource_empty)

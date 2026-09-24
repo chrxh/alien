@@ -4,8 +4,6 @@
 #include <EngineInterface/ParametersEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "LocationController.h"
-
 namespace
 {
     void applyParameters(SimulationParameters const& parameters, SimulationParameters const& origParameters)
@@ -25,7 +23,7 @@ std::optional<int> LocationEditService::insertDefaultLayer(int orderNumber)
         return std::nullopt;
     }
 
-    auto newByOldOrderNumber = editService.insertDefaultLayer(parameters, orderNumber);
+    editService.insertDefaultLayer(parameters, orderNumber);
     editService.insertDefaultLayer(origParameters, orderNumber);
 
     auto newOrderNumber = orderNumber + 1;
@@ -37,7 +35,6 @@ std::optional<int> LocationEditService::insertDefaultLayer(int orderNumber)
 
     applyParameters(parameters, origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
     ++_insertedLocationCounter;
     return newOrderNumber;
 }
@@ -54,7 +51,7 @@ std::optional<int> LocationEditService::insertDefaultSource(int orderNumber)
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
-    auto newByOldOrderNumber = editService.insertDefaultSource(parameters, orderNumber);
+    editService.insertDefaultSource(parameters, orderNumber);
     editService.insertDefaultSource(origParameters, orderNumber);
 
     editService.applyRadiationStrengths(parameters, newStrengths);
@@ -67,7 +64,6 @@ std::optional<int> LocationEditService::insertDefaultSource(int orderNumber)
 
     applyParameters(parameters, origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
     ++_insertedLocationCounter;
     return newOrderNumber;
 }
@@ -87,7 +83,7 @@ std::optional<int> LocationEditService::cloneLocation(int orderNumber)
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
-    auto newByOldOrderNumber = editService.cloneLocation(parameters, orderNumber);
+    editService.cloneLocation(parameters, orderNumber);
     editService.cloneLocation(origParameters, orderNumber);
 
     if (locationType == LocationType::Source) {
@@ -96,8 +92,6 @@ std::optional<int> LocationEditService::cloneLocation(int orderNumber)
     }
 
     applyParameters(parameters, origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
     return orderNumber + 1;
 }
 
@@ -107,14 +101,10 @@ void LocationEditService::deleteLocation(int orderNumber)
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
 
-    LocationController::get().deleteLocationWindow(orderNumber);
-
-    auto newByOldOrderNumber = editService.deleteLocation(parameters, orderNumber);
+    editService.deleteLocation(parameters, orderNumber);
     editService.deleteLocation(origParameters, orderNumber);
 
     applyParameters(parameters, origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void LocationEditService::moveLocationUpwards(int orderNumber)
@@ -123,12 +113,10 @@ void LocationEditService::moveLocationUpwards(int orderNumber)
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
 
-    auto newByOldOrderNumber = editService.moveLocationUpwards(parameters, orderNumber);
+    editService.moveLocationUpwards(parameters, orderNumber);
     editService.moveLocationUpwards(origParameters, orderNumber);
 
     applyParameters(parameters, origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void LocationEditService::moveLocationDownwards(int orderNumber)
@@ -137,12 +125,10 @@ void LocationEditService::moveLocationDownwards(int orderNumber)
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
 
-    auto newByOldOrderNumber = editService.moveLocationDownwards(parameters, orderNumber);
+    editService.moveLocationDownwards(parameters, orderNumber);
     editService.moveLocationDownwards(origParameters, orderNumber);
 
     applyParameters(parameters, origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 RealVector2D LocationEditService::calcPositionForNewLocation() const

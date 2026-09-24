@@ -15,8 +15,6 @@ class LocationController : public MainLoopEntity
 
 public:
     void addLocationWindow(int orderNumber, RealVector2D const& initialPos);
-    void deleteLocationWindow(int orderNumber);
-    void remapLocationIndices(std::map<int, int> const& newByOldOrderNumber);
 
 private:
     void init() override;

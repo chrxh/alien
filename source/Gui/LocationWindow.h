@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EngineInterface/SimulationParametersTypes.h>
+
 #include "LocationWidget.h"
 
 class LocationWindow
@@ -10,11 +12,10 @@ public:
 
     bool isOn() const;
 
-    int getOrderNumber() const;
-    void setOrderNumber(int orderNumber);
-
 private:
     LocationWidget _widget;
+    int _locationId = 0;
+    LocationType _locationType = LocationType::Base;
     int _id = 0;
     RealVector2D _initialPos;
     bool _on = false;

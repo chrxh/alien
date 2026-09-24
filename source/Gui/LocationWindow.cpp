@@ -2,11 +2,18 @@
 
 #include <imgui.h>
 
+#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "StyleService.h"
 
 void LocationWindow::init(LocationWidget const& widgets, RealVector2D const& initialPos)
 {
     _widget = widgets;
+
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    _locationId = LocationHelper::getLocationId(parameters, _widget->getOrderNumber());
+    _locationType = LocationHelper::getLocationType(_widget->getOrderNumber(), parameters);
 
     static int id = 0;
     _id = ++id;
@@ -16,6 +23,14 @@ void LocationWindow::init(LocationWidget const& widgets, RealVector2D const& ini
 
 void LocationWindow::process()
 {
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto orderNumber = LocationHelper::findOrderNumber(parameters, _locationId);
+    if (!orderNumber.has_value() || LocationHelper::getLocationType(orderNumber.value(), parameters) != _locationType) {
+        _on = false;
+        return;
+    }
+    _widget->setOrderNumber(orderNumber.value());
+
     ImGui::PushID(_id);
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
@@ -33,14 +48,4 @@ void LocationWindow::process()
 bool LocationWindow::isOn() const
 {
     return _on;
-}
-
-int LocationWindow::getOrderNumber() const
-{
-    return _widget->getOrderNumber();
-}
-
-void LocationWindow::setOrderNumber(int orderNumber)
-{
-    _widget->setOrderNumber(orderNumber);
 }
