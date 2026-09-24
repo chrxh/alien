@@ -119,3 +119,23 @@ std::vector<RealVector2D> McpArguments::getPoints(boost::json::object const& arg
     }
     return result;
 }
+
+std::vector<boost::json::object> McpArguments::getObjects(boost::json::object const& arguments, std::string_view key, size_t minNumObjects)
+{
+    auto const& value = getRequiredValue(arguments, key);
+    auto invalidObjects = std::invalid_argument(std::format("'{}' must be an array of objects.", key));
+    if (!value.is_array()) {
+        throw invalidObjects;
+    }
+    std::vector<boost::json::object> result;
+    for (auto const& element : value.as_array()) {
+        if (!element.is_object()) {
+            throw invalidObjects;
+        }
+        result.emplace_back(element.as_object());
+    }
+    if (result.size() < minNumObjects) {
+        throw std::invalid_argument(std::format("'{}' needs at least {} entries.", key, minNumObjects));
+    }
+    return result;
+}

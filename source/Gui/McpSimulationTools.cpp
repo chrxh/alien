@@ -1,9 +1,10 @@
 #include "McpSimulationTools.h"
 
-#include <algorithm>
 #include <format>
 
 #include <boost/json.hpp>
+
+#include <Base/StringHelper.h>
 
 #include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -61,8 +62,7 @@ McpToolResult McpSimulationTools::getSimulationInfo() const
 
     boost::json::array colors;
     for (auto const& color : _SimulationFacade::get()->getSimulationParameters().customizationColors.value.values) {
-        auto toByte = [](float value) { return std::clamp(toInt(value * 255.0f), 0, 255); };
-        colors.emplace_back(std::format("#{:02x}{:02x}{:02x}", toByte(color.r), toByte(color.g), toByte(color.b)));
+        colors.emplace_back(StringHelper::formatHexColor(color));
     }
 
     auto result = boost::json::object{

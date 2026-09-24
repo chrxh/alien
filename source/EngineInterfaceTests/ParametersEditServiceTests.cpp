@@ -462,6 +462,21 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_end)
         6);
 }
 
+TEST_F(ParametersEditServiceTests, initNewLayer)
+{
+    auto parameters = createTestData({LocationType::Source, LocationType::Layer});
+    auto backgroundColor = FloatColorRGB{0.1f, 0.2f, 0.3f};
+
+    ParametersEditService::get().initNewLayer(parameters, 2, {600, 300}, {100.0f, 50.0f}, backgroundColor);
+
+    EXPECT_TRUE(parameters.backgroundColor.layerValues[0].enabled);
+    EXPECT_EQ(backgroundColor, parameters.backgroundColor.layerValues[0].value);
+    EXPECT_EQ(RealVector2D(100.0f, 50.0f), parameters.layerPosition.layerValues[0]);
+    EXPECT_EQ(50.0f, parameters.layerCoreRadius.layerValues[0]);
+    EXPECT_EQ(RealVector2D(50.0f, 50.0f), parameters.layerCoreRect.layerValues[0]);
+    EXPECT_EQ(30.0f, parameters.layerFadeoutRadius.layerValues[0]);
+}
+
 TEST_F(ParametersEditServiceTests, insertDefaultSource_empty)
 {
     auto origParameters = createTestData({});

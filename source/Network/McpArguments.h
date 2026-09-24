@@ -41,4 +41,6 @@ public:
 
     // Expects an array of [x, y] pairs
     static std::vector<RealVector2D> getPoints(boost::json::object const& arguments, std::string_view key, size_t minNumPoints);
+
+    static std::vector<boost::json::object> getObjects(boost::json::object const& arguments, std::string_view key, size_t minNumObjects);
 };

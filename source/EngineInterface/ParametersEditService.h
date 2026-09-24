@@ -24,7 +24,13 @@ class ParametersEditService
 public:
     NewByOldOrderNumber insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;   // Create location at orderNumber + 1
     NewByOldOrderNumber insertDefaultSource(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
-    NewByOldOrderNumber cloneLocation(SimulationParameters& parameters, int orderNumber) const;        // Create location at orderNumber + 1
+    void initNewLayer(
+        SimulationParameters& parameters,
+        int orderNumber,
+        IntVector2D const& worldSize,
+        RealVector2D const& position,
+        FloatColorRGB const& backgroundColor) const;                                             // Core area and fade-out relative to the world size
+    NewByOldOrderNumber cloneLocation(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
     NewByOldOrderNumber deleteLocation(SimulationParameters& parameters, int orderNumber) const;
     NewByOldOrderNumber moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
     NewByOldOrderNumber moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;

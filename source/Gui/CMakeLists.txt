@@ -105,6 +105,8 @@ PUBLIC
     LiveStatisticsService.h
     LocationController.cpp
     LocationController.h
+    LocationEditService.cpp
+    LocationEditService.h
     LocationWidget.h
     LocationWindow.cpp
     LocationWindow.h
@@ -131,6 +133,8 @@ PUBLIC
     McpCreatorTools.h
     McpMultiplierTools.cpp
     McpMultiplierTools.h
+    McpParameterTools.cpp
+    McpParameterTools.h
     McpSelectionTools.cpp
     McpSelectionTools.h
     McpSettingsDialog.cpp
