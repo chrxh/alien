@@ -11,6 +11,7 @@
 
 #include "AlienGui.h"
 #include "McpController.h"
+#include "McpSettingsDialog.h"
 #include "OverlayController.h"
 #include "StyleService.h"
 
@@ -58,7 +59,10 @@ void McpWindow::processToolbar()
          AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_BROOM).name("Clear command log").disabled(controller.getCommandLog().empty()).action([&] {
                  controller.clearCommandLog();
-             }))});
+             })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_COG).name("Settings").action([&] { McpSettingsDialog::get().open(); }))});
 }
 
 void McpWindow::processStatusBadge()

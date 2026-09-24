@@ -1,6 +1,10 @@
 
 add_library(Network
     Definitions.h
+    McpArguments.cpp
+    McpArguments.h
+    McpSchema.cpp
+    McpSchema.h
     McpServer.cpp
     McpServer.h
     NetworkService.cpp

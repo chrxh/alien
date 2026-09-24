@@ -6,6 +6,7 @@
 #include <EngineInterface/Descs.h>
 
 #include "AlienWindow.h"
+#include "CreatorService.h"
 #include "Definitions.h"
 #include "SimulationInteractionController.h"
 
@@ -20,15 +21,6 @@ enum CreationMode_
     CreationMode_CreateLine,
     CreationMode_CreateCurve,
     CreationMode_CreatePolygon
-};
-
-using CreationMaterial = int;
-enum CreationMaterial_
-{
-    CreationMaterial_Solid,
-    CreationMaterial_Fluid,
-    CreationMaterial_FreeCell,
-    CreationMaterial_EnergyParticle
 };
 
 class CreatorWindow : public AlienWindow
@@ -78,22 +70,14 @@ private:
     void processPointPreview(std::vector<RealVector2D> const& path, bool closed) const;
     void processControlPolygonPreview() const;
 
-    void createSingleObject();
-    void createRectangle();
-    void createHexagon();
-    void createDisc();
-    void createObjectNetwork(std::vector<RealVector2D> const& positions, float connectionDistance);
-
-    std::vector<RealVector2D> calcBezierCurvePath() const;
-
-    ContentDesc convertToEnergyParticles(ContentDesc const& description) const;
+    void addToSimulation(ContentDesc&& content) const;
 
     void validateAndCorrect();
     bool isEnergyMaterial() const;
     bool isPointPlacementMode() const;
     InteractionMode getInteractionMode() const;
 
-    ObjectTypeDesc getObjectTypeDesc() const;
+    CreatorService::ObjectProperties getObjectProperties() const;
 
     RealVector2D getRandomPos() const;
 

@@ -369,12 +369,15 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
     }
 }
 
-__global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClusters)
+__global__ void cudaSetStatic(SimulationData data, bool value, bool includeClusters)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
+            if (object->isStatic() && !value) {
+                object->density = 1.0f;
+            }
             object->setStatic(value);
         }
     }
