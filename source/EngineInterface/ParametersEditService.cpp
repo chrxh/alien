@@ -7,9 +7,9 @@
 
 #include "SpecificationEvaluationService.h"
 
-NewByOldOrderNumber ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const
 {
-    auto result = LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
+    LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
 
     auto startIndex = 0;
     auto insertAtEnd = false;
@@ -43,13 +43,12 @@ NewByOldOrderNumber ParametersEditService::insertDefaultLayer(SimulationParamete
 
     auto newLayerIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber + 1);
     StringHelper::copy(parameters.layerName.layerValues[newLayerIndex], sizeof(Char64), LocationHelper::generateLayerName(parameters));
-
-    return result;
+    parameters.layerIds[newLayerIndex] = LocationHelper::generateLocationId(parameters);
 }
 
-NewByOldOrderNumber ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int orderNumber) const
 {
-    auto result = LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
+    LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
 
     auto startIndex = 0;
     auto insertAtEnd = false;
@@ -83,8 +82,7 @@ NewByOldOrderNumber ParametersEditService::insertDefaultSource(SimulationParamet
 
     auto newSourceIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber + 1);
     StringHelper::copy(parameters.sourceName.sourceValues[newSourceIndex], sizeof(Char64), LocationHelper::generateSourceName(parameters));
-
-    return result;
+    parameters.sourceIds[newSourceIndex] = LocationHelper::generateLocationId(parameters);
 }
 
 void ParametersEditService::initNewLayer(
@@ -103,11 +101,11 @@ void ParametersEditService::initNewLayer(
     parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
 }
 
-NewByOldOrderNumber ParametersEditService::cloneLocation(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::cloneLocation(SimulationParameters& parameters, int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
-    auto result = LocationHelper::adaptLocationIndices(parameters, orderNumber, 1);
+    LocationHelper::adaptLocationIndices(parameters, orderNumber, 1);
 
     if (locationType == LocationType::Layer) {
         ++parameters.numLayers;
@@ -134,11 +132,10 @@ NewByOldOrderNumber ParametersEditService::cloneLocation(SimulationParameters& p
             copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
     }
-
-    return result;
+    LocationHelper::setLocationId(parameters, orderNumber + 1, LocationHelper::generateLocationId(parameters));
 }
 
-NewByOldOrderNumber ParametersEditService::deleteLocation(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::deleteLocation(SimulationParameters& parameters, int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
@@ -165,10 +162,10 @@ NewByOldOrderNumber ParametersEditService::deleteLocation(SimulationParameters& 
         --parameters.numSources;
     }
 
-    return LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, -1);
+    LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, -1);
 }
 
-NewByOldOrderNumber ParametersEditService::moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const
 {
     auto sourceLocationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto targetLocationType = LocationHelper::getLocationType(orderNumber - 1, parameters);
@@ -199,21 +196,9 @@ NewByOldOrderNumber ParametersEditService::moveLocationUpwards(SimulationParamet
     } else {
         LocationHelper::decreaseOrderNumber(parameters, orderNumber);
     }
-
-    std::map<int, int> result;
-    for (int i = 0; i < parameters.numLayers + parameters.numSources + 1; ++i) {
-        if (i == orderNumber) {
-            result.emplace(i, i - 1);
-        } else if (i == orderNumber - 1) {
-            result.emplace(i, i + 1);
-        } else {
-            result.emplace(i, i);
-        }
-    }
-    return result;
 }
 
-NewByOldOrderNumber ParametersEditService::moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const
 {
     auto sourceLocationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto targetLocationType = LocationHelper::getLocationType(orderNumber + 1, parameters);
@@ -244,18 +229,6 @@ NewByOldOrderNumber ParametersEditService::moveLocationDownwards(SimulationParam
     } else {
         LocationHelper::increaseOrderNumber(parameters, orderNumber);
     }
-
-    std::map<int, int> result;
-    for (int i = 0; i < parameters.numLayers + parameters.numSources + 1; ++i) {
-        if (i == orderNumber) {
-            result.emplace(i, i + 1);
-        } else if (i == orderNumber + 1) {
-            result.emplace(i, i - 1);
-        } else {
-            result.emplace(i, i);
-        }
-    }
-    return result;
 }
 
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
@@ -412,6 +385,11 @@ void ParametersEditService::copyLocation(
     auto const& parametersSpecs = SimulationParameters::getSpec();
     for (auto const& groupSpec : parametersSpecs._groups) {
         copyLocationIntern(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, groupSpec._parameters);
+    }
+
+    auto targetLocationType = LocationHelper::getLocationType(targetOrderNumber, targetParameters);
+    if (targetLocationType != LocationType::Base && targetLocationType == LocationHelper::getLocationType(sourceOrderNumber, sourceParameters)) {
+        LocationHelper::setLocationId(targetParameters, targetOrderNumber, LocationHelper::getLocationId(sourceParameters, sourceOrderNumber));
     }
 }
 

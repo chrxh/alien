@@ -67,15 +67,17 @@ void SimulationParametersMainWindow::initIntern()
 void SimulationParametersMainWindow::processIntern()
 {
     if (!_sessionId.has_value() || _sessionId.value() != _SimulationFacade::get()->getSessionId()) {
-        _selectedOrderNumber = 0;
+        _selectedLocationId = 0;
     }
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    _selectedOrderNumber =
+        LocationHelper::findOrderNumber(parameters, _selectedLocationId).value_or(std::min(_selectedOrderNumber, parameters.numLayers + parameters.numSources));
 
     processToolbar();
 
     if (ImGui::BeginChild("##content", {0, -scale(50.0f)})) {
 
         updateLocations();
-        _selectedOrderNumber = std::min(_selectedOrderNumber, toInt(_locations.size()) - 1);
 
         auto origMasterHeight = _masterWidgetHeight;
         auto origExpertWidgetHeight = _expertWidgetHeight;
@@ -91,6 +93,7 @@ void SimulationParametersMainWindow::processIntern()
     processStatusBar();
 
     _sessionId = _SimulationFacade::get()->getSessionId();
+    _selectedLocationId = LocationHelper::getLocationId(_SimulationFacade::get()->getSimulationParameters(), _selectedOrderNumber);
 }
 
 void SimulationParametersMainWindow::shutdownIntern()

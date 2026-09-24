@@ -210,6 +210,26 @@ TEST_F(SerializerServiceTests, simulationParametersFile)
     EXPECT_EQ(before.timestepSize.value, after.timestepSize.value);
 }
 
+TEST_F(SerializerServiceTests, simulationParametersFile_assignsLocationIds)
+{
+    auto filename = _testDirectory / "parameters.settings.json";
+
+    SimulationParameters before;
+    before.numLayers = 1;
+    before.layerOrderNumbers[0] = 2;
+    before.layerIds[0] = 7;
+    before.numSources = 1;
+    before.sourceOrderNumbers[0] = 1;
+    before.sourceIds[0] = 3;
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(filename, before));
+
+    SimulationParameters after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationParametersFromFile(after, filename));
+
+    EXPECT_EQ(1, after.layerIds[0]);
+    EXPECT_EQ(2, after.sourceIds[0]);
+}
+
 TEST_F(SerializerServiceTests, statisticsHistory)
 {
     SimulationDesc before;

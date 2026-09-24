@@ -20,6 +20,9 @@ struct SimulationParameters
     int layerOrderNumbers[MAX_LAYERS] = {};
     int sourceOrderNumbers[MAX_SOURCES] = {};
 
+    int layerIds[MAX_LAYERS] = {};
+    int sourceIds[MAX_SOURCES] = {};
+
     // General
     BaseParameter<Char64> projectName = {"<unnamed simulation>"};
     LayerParameter<Char64> layerName = {{"<unnamed>"}};

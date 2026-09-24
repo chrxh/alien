@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -17,9 +17,17 @@ public:
     static void decreaseOrderNumber(SimulationParameters& parameters, int orderNumber);
     static void increaseOrderNumber(SimulationParameters& parameters, int orderNumber);
 
-    // Returns new by old location index
-    static std::map<int, int> adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset);
+    static void adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset);
 
     static std::string generateLayerName(SimulationParameters const& parameters);
     static std::string generateSourceName(SimulationParameters const& parameters);
+
+    // The base location has id 0
+    static int getLocationId(SimulationParameters const& parameters, int orderNumber);
+    static void setLocationId(SimulationParameters& parameters, int orderNumber, int locationId);
+    static std::optional<int> findOrderNumber(SimulationParameters const& parameters, int locationId);
+    static int generateLocationId(SimulationParameters const& parameters);
+
+    // Layers get 1..n, radiation sources the following ids
+    static void assignLocationIds(SimulationParameters& parameters);
 };

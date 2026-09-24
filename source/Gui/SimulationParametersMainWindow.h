@@ -78,6 +78,7 @@ private:
 
     std::vector<Location> _locations;
     int _selectedOrderNumber = 0;
+    int _selectedLocationId = 0;
 
     int _locationWindowCounter = 0;
 

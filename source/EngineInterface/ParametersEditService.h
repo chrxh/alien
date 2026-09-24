@@ -15,25 +15,23 @@ struct RadiationStrengths
     std::set<int> pinned;
 };
 
-using NewByOldOrderNumber = std::map<int, int>;
-
 class ParametersEditService
 {
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    NewByOldOrderNumber insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;   // Create location at orderNumber + 1
-    NewByOldOrderNumber insertDefaultSource(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+    void insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;   // Create location at orderNumber + 1
+    void insertDefaultSource(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
     void initNewLayer(
         SimulationParameters& parameters,
         int orderNumber,
         IntVector2D const& worldSize,
         RealVector2D const& position,
-        FloatColorRGB const& backgroundColor) const;                                             // Core area and fade-out relative to the world size
-    NewByOldOrderNumber cloneLocation(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
-    NewByOldOrderNumber deleteLocation(SimulationParameters& parameters, int orderNumber) const;
-    NewByOldOrderNumber moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
-    NewByOldOrderNumber moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;
+        FloatColorRGB const& backgroundColor) const;                              // Core area and fade-out relative to the world size
+    void cloneLocation(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+    void deleteLocation(SimulationParameters& parameters, int orderNumber) const;
+    void moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
+    void moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);

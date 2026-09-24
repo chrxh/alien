@@ -6,6 +6,7 @@
 
 #include <Base/Resources.h>
 
+#include <EngineInterface/LocationHelper.h>
 #include <EngineInterface/SimulationParametersSpecification.h>
 #include <EngineInterface/SpecificationEvaluationService.h>
 
@@ -194,6 +195,7 @@ SimulationParameters SettingsParserService::decodeSimulationParameters(boost::pr
 {
     SimulationParameters result;
     encodeDecodeSimulationParameters(tree, result, SimulationParametersNode, ParserTask::Decode);
+    LocationHelper::assignLocationIds(result);
     return result;
 }
 
