@@ -10,7 +10,7 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescInfoService.h>
+#include <EngineInterface/GenomeDescAccessService.h>
 #include <EngineInterface/MassOperationsService.h>
 #include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/NumberGenerator.h>

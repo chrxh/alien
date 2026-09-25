@@ -19,17 +19,19 @@ add_library(EngineInterface
     ExtinctLineageAccumulator.h
     GenomeDesc.cpp
     GenomeDesc.h
+    GenomeDescAccessService.cpp
+    GenomeDescAccessService.h
     GenomeDescEditService.cpp
     GenomeDescEditService.h
     GenomeDescHash.h
-    GenomeDescInfoService.cpp
-    GenomeDescInfoService.h
     DescValidationService.cpp
     DescValidationService.h
     GeometryBuffers.cpp
     GeometryBuffers.h
     Ids.h
     InspectedEntityIds.h
+    LocationAccessService.cpp
+    LocationAccessService.h
     LocationEditService.cpp
     LocationEditService.h
     MassOperationsService.cpp
@@ -44,8 +46,6 @@ add_library(EngineInterface
     StatisticsEntry.h
     ParametersAccessService.cpp
     ParametersAccessService.h
-    ParametersEditService.cpp
-    ParametersEditService.h
     ParametersFilter.h
     ParametersValidationService.cpp
     ParametersValidationService.h
@@ -54,6 +54,8 @@ add_library(EngineInterface
     PreviewDesc.h
     PreviewDescConverterService.cpp
     PreviewDescConverterService.h
+    RadiationStrengthService.cpp
+    RadiationStrengthService.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h

@@ -26,7 +26,7 @@ namespace
     {
         auto& evaluationService = SpecificationEvaluationService::get();
 
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         auto defaultOrderNumber = [&] {
             if (locationType == LocationType::Base) {
                 return 0;

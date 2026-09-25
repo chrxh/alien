@@ -1,10 +1,10 @@
-#include "GenomeDescInfoService.h"
+#include "GenomeDescAccessService.h"
 
 #include <algorithm>
 #include <iterator>
 #include <map>
 
-int GenomeDescInfoService::getNumberOfNodes(GenomeDesc const& genome) const
+int GenomeDescAccessService::getNumberOfNodes(GenomeDesc const& genome) const
 {
     int result = 0;
     for (auto const& gene : genome._genes) {
@@ -48,7 +48,7 @@ namespace
     }
 }
 
-int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex) const
+int GenomeDescAccessService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex) const
 {
     if (genome._genes.empty()) {
         return 0;
@@ -57,7 +57,7 @@ int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, i
     return countNodes(genome, startGeneIndex, lastGenes);
 }
 
-std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) const
+std::vector<int> GenomeDescAccessService::getReferences(GeneDesc const& gene) const
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
@@ -69,7 +69,7 @@ std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) cons
     return result;
 }
 
-std::vector<int> GenomeDescInfoService::getReferencedBy(GenomeDesc const& genome, int geneIndex) const
+std::vector<int> GenomeDescAccessService::getReferencedBy(GenomeDesc const& genome, int geneIndex) const
 {
     std::vector<int> result;
     for (int i = 0; i < genome._genes.size(); ++i) {
@@ -86,13 +86,13 @@ std::vector<int> GenomeDescInfoService::getReferencedBy(GenomeDesc const& genome
     return result;
 }
 
-bool GenomeDescInfoService::isConnectedToRoot(GenomeDesc const& genome, int startGeneIndex) const
+bool GenomeDescAccessService::isConnectedToRoot(GenomeDesc const& genome, int startGeneIndex) const
 {
     auto hull = getReferencedGenesInRootGeneHull(genome);
     return hull.contains(startGeneIndex);
 }
 
-std::set<int> GenomeDescInfoService::getReferencedGenesInRootGeneHull(GenomeDesc const& genome) const
+std::set<int> GenomeDescAccessService::getReferencedGenesInRootGeneHull(GenomeDesc const& genome) const
 {
     if (genome._genes.empty()) {
         return {};
@@ -122,7 +122,7 @@ std::set<int> GenomeDescInfoService::getReferencedGenesInRootGeneHull(GenomeDesc
     return alreadyInspectedGeneIndices;
 }
 
-auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome) const -> std::vector<GeneIndicesForSubGenome>
+auto GenomeDescAccessService::getGeneIndicesForSubGenomes(GenomeDesc const& genome) const -> std::vector<GeneIndicesForSubGenome>
 {
     if (genome._genes.empty()) {
         return {};
@@ -150,7 +150,7 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
     return dropContainedSubGenomes(genome, result);
 }
 
-auto GenomeDescInfoService::dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const
+auto GenomeDescAccessService::dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const
     -> std::vector<GeneIndicesForSubGenome>
 {
     std::set<int> separatinglyReferencedGenes;
@@ -191,7 +191,7 @@ auto GenomeDescInfoService::dropContainedSubGenomes(GenomeDesc const& genome, st
     return result;
 }
 
-auto GenomeDescInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDesc const& genome, int startGeneIndex) const -> ReferencedGenes
+auto GenomeDescAccessService::getReferencedGenesInNonSeparatingGeneHull(GenomeDesc const& genome, int startGeneIndex) const -> ReferencedGenes
 {
     ReferencedGenes result;
     std::set<int> alreadyInspectedGeneIndices;

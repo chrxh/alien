@@ -8,9 +8,9 @@
 #include "GenomeDesc.h"
 #include "SimulationParameters.h"
 
-class GenomeDescInfoService
+class GenomeDescAccessService
 {
-    MAKE_SINGLETON(GenomeDescInfoService);
+    MAKE_SINGLETON(GenomeDescAccessService);
 
 public:
     int getNumberOfNodes(GenomeDesc const& genome) const;

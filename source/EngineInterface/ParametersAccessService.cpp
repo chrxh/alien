@@ -12,7 +12,7 @@
 #include <Base/Definitions.h>
 #include <Base/StringHelper.h>
 
-#include "LocationEditService.h"
+#include "LocationAccessService.h"
 
 std::vector<ParameterGroupSpec const*> ParametersAccessService::getGroups(LocationType locationType) const
 {
@@ -53,7 +53,7 @@ namespace
         int orderNumber,
         std::vector<ParameterEntry>& result)
     {
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         for (auto const& parameterSpec : parameterSpecs) {
             if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
                 continue;
@@ -360,7 +360,7 @@ namespace
     void copyParameters(std::vector<ParameterSpec> const& parameterSpecs, SimulationParameters& source, SimulationParameters& target, int orderNumber)
     {
         auto& evaluationService = SpecificationEvaluationService::get();
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, target);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, target);
         for (auto const& parameterSpec : parameterSpecs) {
             if (!evaluationService.isVisible(parameterSpec, locationType)) {
                 continue;

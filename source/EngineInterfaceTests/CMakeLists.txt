@@ -3,10 +3,10 @@ PUBLIC
     DescEditServiceTests.cpp
     DescValidationServiceTests.cpp
     ExtinctLineageAccumulatorTests.cpp
+    GenomeDescAccessServiceTests.cpp
     GenomeDescEditServiceTests.cpp
-    GenomeDescInfoServiceTests.cpp
+    LocationEditServiceTests.cpp
     ParametersAccessServiceTests.cpp
-    ParametersEditServiceTests.cpp
     PreviewDescConverterServiceTests.cpp
     SpecificationFilterServiceTests.cpp
     Testsuite.cpp)

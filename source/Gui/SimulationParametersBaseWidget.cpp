@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include <EngineInterface/Descs.h>
-#include <EngineInterface/ParametersEditService.h>
 #include <EngineInterface/ParametersValidationService.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>

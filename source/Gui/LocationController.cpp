@@ -1,6 +1,6 @@
 #include "LocationController.h"
 
-#include <EngineInterface/LocationEditService.h>
+#include <EngineInterface/LocationAccessService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "SimulationParametersBaseWidget.h"
@@ -17,7 +17,7 @@ void LocationController::addLocationWindow(int orderNumber, RealVector2D const& 
         widget = baseWidgets;
     } else {
         auto parameters = _SimulationFacade::get()->getSimulationParameters();
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         if (locationType == LocationType::Layer) {
             auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
             layerWidgets->init(orderNumber);

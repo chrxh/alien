@@ -10,8 +10,8 @@
 
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/Descs.h>
+#include <EngineInterface/GenomeDescAccessService.h>
 #include <EngineInterface/GenomeDescEditService.h>
-#include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -77,7 +77,7 @@ _PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, Genom
 
 void _PreviewWidget::createSubGenomesForPreview()
 {
-    auto geneIndicesForSubGenomes = GenomeDescInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
+    auto geneIndicesForSubGenomes = GenomeDescAccessService::get().getGeneIndicesForSubGenomes(_editData->genome);
     auto subGenomesForPreview =
         GenomeDescEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _editData->detailSimulation);
 

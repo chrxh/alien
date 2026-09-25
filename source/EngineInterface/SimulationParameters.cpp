@@ -2,8 +2,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "LocationEditService.h"
-#include "ParametersEditService.h"
+#include "LocationAccessService.h"
+#include "RadiationStrengthService.h"
 #include "SimulationParametersSpecification.h"
 
 ParametersSpec const& SimulationParameters::getSpec()
@@ -16,23 +16,23 @@ ParametersSpec const& SimulationParameters::getSpec()
         }
 
         auto radiationStrengthGetter = [](SimulationParameters const& parameters, int orderNumber) {
-            auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
+            auto strength = RadiationStrengthService::get().getRadiationStrengths(parameters);
             if (orderNumber == 0) {
                 return strength.values.at(0);
             } else {
-                auto sourceIndex = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
+                auto sourceIndex = LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber);
                 return parameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
             }
         };
 
         auto radiationStrengthSetter = [](float value, SimulationParameters& parameters, int orderNumber) {
-            auto& editService = ParametersEditService::get();
-            auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
+            auto const& strengthService = RadiationStrengthService::get();
+            auto strength = strengthService.getRadiationStrengths(parameters);
             auto editedStrength = strength;
-            int strengthIndex = orderNumber == 0 ? 0 : LocationEditService::get().findLocationArrayIndex(parameters, orderNumber) + 1;
+            int strengthIndex = orderNumber == 0 ? 0 : LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber) + 1;
             editedStrength.values.at(strengthIndex) = value;
-            editService.adaptRadiationStrengths(editedStrength, strength, strengthIndex);
-            editService.applyRadiationStrengths(parameters, editedStrength);
+            strengthService.adaptRadiationStrengths(editedStrength, strength, strengthIndex);
+            strengthService.applyRadiationStrengths(parameters, editedStrength);
         };
 
         std::string const coloringTooltip =

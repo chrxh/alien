@@ -7,8 +7,8 @@
 
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/GenomeDesc.h>
+#include <EngineInterface/GenomeDescAccessService.h>
 #include <EngineInterface/GenomeDescEditService.h>
-#include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineTestData/DescTestDataFactory.h>
 
 class GenomeDescEditServiceTests : public ::testing::Test
@@ -578,7 +578,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLim
     EXPECT_EQ(PREVIEW_MAX_CELLS - 1, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
     EXPECT_EQ(1, subGenome._genes.at(1)._nodes.size());
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
 }
 
@@ -610,7 +610,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     EXPECT_EQ((PREVIEW_MAX_CELLS - 1) / 5, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
     EXPECT_EQ(5, subGenome._genes.at(1)._nodes.size());
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -642,7 +642,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     EXPECT_EQ((PREVIEW_MAX_CELLS - 1) / 5, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
     EXPECT_EQ(5, subGenome._genes.at(1)._nodes.size());
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -670,7 +670,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     ASSERT_EQ(1, subGenome._genes.size());
     EXPECT_EQ(PREVIEW_MAX_CELLS, subGenome._genes.at(0)._nodes.size());
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
 }
 
@@ -793,7 +793,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
     EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes
     EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);  // Gene 2 should also have nodes (this is the key test)
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -831,7 +831,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_chainedIn
     EXPECT_GT(numConcatenations0, 1);
     EXPECT_EQ(numConcatenations0, numConcatenations1);
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
     EXPECT_GT(resultingCells, PREVIEW_MAX_CELLS * 3 / 4);
 }
@@ -868,7 +868,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
     EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);
     EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -906,7 +906,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
     EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);
     EXPECT_GT(subGenome._genes.at(3)._nodes.size(), 0);
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -952,7 +952,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
         EXPECT_GT(subGenome._genes.at(i)._nodes.size(), 0) << "Gene " << i << " should have nodes";
     }
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -1011,7 +1011,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     // Budget should be roughly proportional (with some tolerance for rounding)
     EXPECT_NEAR(cells1, cells2, 10);  // Genes 1 and 2 should have similar allocations
 
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
@@ -1506,7 +1506,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_branchesW
         GeneDesc().nodes(gene2Nodes),
     });
 
-    auto geneIndicesForSubGenomes = GenomeDescInfoService::get().getGeneIndicesForSubGenomes(genome);
+    auto geneIndicesForSubGenomes = GenomeDescAccessService::get().getGeneIndicesForSubGenomes(genome);
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, geneIndicesForSubGenomes, false);
 
     ASSERT_EQ(1, subGenomes.size());
@@ -1516,7 +1516,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_branchesW
     ASSERT_EQ(3, subGenome._genes.size());
     EXPECT_EQ(20, subGenome._genes.at(1)._nodes.size());
     EXPECT_LT(subGenome._genes.at(2)._nodes.size(), 100);
-    EXPECT_LE(GenomeDescInfoService::get().getNumberOfResultingCells(subGenome), PREVIEW_MAX_CELLS);
+    EXPECT_LE(GenomeDescAccessService::get().getNumberOfResultingCells(subGenome), PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_withOffspring)
