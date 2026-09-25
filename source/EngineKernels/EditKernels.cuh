@@ -1,8 +1,9 @@
 #pragma once
 
-#include <EngineInterface/Colors.h>
+#include <Data/Colors.h>
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/ShallowUpdateSelectionData.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"

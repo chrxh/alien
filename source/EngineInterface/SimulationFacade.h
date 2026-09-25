@@ -1,15 +1,16 @@
 #pragma once
 
+#include <Data/PreviewDesc.h>
+#include <Data/StatisticsHistory.h>
+
 #include "ArraySizesForGpuEntities.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
 #include "StatisticsEntry.h"
-#include "PreviewDesc.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationParametersUpdateConfig.h"
-#include "StatisticsHistory.h"
 
 class _SimulationFacade
 {

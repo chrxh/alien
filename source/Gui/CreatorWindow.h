@@ -2,9 +2,9 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/CreatorService.h>
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"

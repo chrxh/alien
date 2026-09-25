@@ -1,19 +1,11 @@
 target_sources(EngineInterfaceTests
 PUBLIC
-    DescEditServiceTests.cpp
-    DescValidationServiceTests.cpp
     ExtinctLineageAccumulatorTests.cpp
-    GenomeDescAccessServiceTests.cpp
-    GenomeDescEditServiceTests.cpp
-    LocationEditServiceTests.cpp
-    ParametersAccessServiceTests.cpp
-    PreviewDescConverterServiceTests.cpp
-    SpecificationFilterServiceTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(EngineInterfaceTests Base)
+target_link_libraries(EngineInterfaceTests Data)
 target_link_libraries(EngineInterfaceTests EngineInterface)
-target_link_libraries(EngineInterfaceTests EngineTestData)
 
 target_link_libraries(EngineInterfaceTests Boost::boost)
 target_link_libraries(EngineInterfaceTests GTest::GTest GTest::Main)

@@ -6,8 +6,9 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/DescEditService.h>
+#include <Data/Colors.h>
+#include <Data/DescEditService.h>
+
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationFacade.h>
 

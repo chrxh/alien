@@ -7,7 +7,8 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/MultiplierService.h>
+#include <Data/MultiplierService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

@@ -11,7 +11,8 @@
 
 #include <Network/NetworkService.h>
 
-#include <EngineInterface/GenomeDescAccessService.h>
+#include <Data/GenomeDescAccessService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/PersisterRequestResult.h>

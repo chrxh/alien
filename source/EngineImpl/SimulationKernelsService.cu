@@ -5,7 +5,7 @@
 
 #include <Base/KernelTracer.h>
 
-#include <EngineInterface/SpaceCalculator.h>
+#include <Data/SpaceCalculator.h>
 
 #include <EngineKernels/ForceFieldKernels.cuh>
 #include <EngineKernels/KernelLauncher.cuh>

@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/CreatorService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"

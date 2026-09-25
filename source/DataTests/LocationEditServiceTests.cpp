@@ -5,10 +5,10 @@
 #include <Base/Definitions.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/LocationAccessService.h>
-#include <EngineInterface/LocationEditService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+#include <Data/LocationAccessService.h>
+#include <Data/LocationEditService.h>
 
 class LocationEditServiceTests : public ::testing::Test
 {

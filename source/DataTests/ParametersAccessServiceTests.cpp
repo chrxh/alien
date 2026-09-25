@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/ParametersAccessService.h>
+#include <Data/ParametersAccessService.h>
 
 class ParametersAccessServiceTests : public ::testing::Test
 {

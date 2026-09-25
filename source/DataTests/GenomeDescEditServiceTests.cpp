@@ -5,10 +5,11 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/GenomeDescAccessService.h>
-#include <EngineInterface/GenomeDescEditService.h>
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDesc.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
+
 #include <EngineTestData/DescTestDataFactory.h>
 
 class GenomeDescEditServiceTests : public ::testing::Test

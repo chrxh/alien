@@ -9,10 +9,11 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/DataPointCollection.h>
-#include <EngineInterface/EngineConstants.h>
+#include <Data/DataPointCollection.h>
+#include <Data/EngineConstants.h>
+#include <Data/StatisticsHistory.h>
+
 #include <EngineInterface/StatisticsEntry.h>
-#include <EngineInterface/StatisticsHistory.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"

@@ -5,8 +5,9 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/CreatorService.h>
-#include <EngineInterface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SimulationFacade.h>
 

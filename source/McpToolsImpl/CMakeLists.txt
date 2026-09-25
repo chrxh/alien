@@ -13,6 +13,7 @@ add_library(McpToolsImpl
     McpToolsFacadeImpl.h)
 
 target_link_libraries(McpToolsImpl Base)
+target_link_libraries(McpToolsImpl Data)
 target_link_libraries(McpToolsImpl EngineInterface)
 target_link_libraries(McpToolsImpl McpToolsInterface)
 target_link_libraries(McpToolsImpl Network)

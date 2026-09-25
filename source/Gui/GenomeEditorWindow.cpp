@@ -10,11 +10,13 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescAccessService.h>
-#include <EngineInterface/MassOperationsService.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/GenomeDescAccessService.h>
+#include <Data/MassOperationsService.h>
+#include <Data/ObjectColoring.h>
+
 #include <EngineInterface/NameGeneratorService.h>
-#include <EngineInterface/NumberGenerator.h>
-#include <EngineInterface/ObjectColoring.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>

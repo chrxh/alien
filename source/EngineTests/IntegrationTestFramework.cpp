@@ -2,14 +2,15 @@
 
 #include <boost/range/combine.hpp>
 
+#include <Base/NumberGenerator.h>
+
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include <EngineTestData/DescTestDataFactory.h>
 
 #include <EngineImpl/SimulationFacadeImpl.h>
-
-#include "EngineInterface/NumberGenerator.h"
 
 IntegrationTestFramework::TestSuiteContext IntegrationTestFramework::_globalContext;
 

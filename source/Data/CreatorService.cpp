@@ -10,8 +10,9 @@
 
 #include <Base/Math.h>
 
+#include <Base/NumberGenerator.h>
+
 #include "DescEditService.h"
-#include "NumberGenerator.h"
 #include "ObjectColoring.h"
 
 namespace

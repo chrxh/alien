@@ -6,8 +6,8 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/DescValidationService.h>
-#include <EngineInterface/GenomeDescAccessService.h>
+#include <Data/DescValidationService.h>
+#include <Data/GenomeDescAccessService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"

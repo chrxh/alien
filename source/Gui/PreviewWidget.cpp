@@ -8,10 +8,11 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDescAccessService.h>
-#include <EngineInterface/GenomeDescEditService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

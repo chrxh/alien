@@ -69,6 +69,7 @@ jobs:
     - name: Run Tests
       run: |
         cd build
+        ./DataTests
         ./EngineInterfaceTests
         ./NetworkTests
         ./PersisterTests
@@ -86,6 +87,7 @@ jobs:
           echo "changed=true" >> $GITHUB_OUTPUT
         else
           CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            source/Data \
             source/EngineInterface \
             source/EngineImpl \
             source/EngineKernels \

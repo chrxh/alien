@@ -8,7 +8,8 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
+
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationFacade.h>
 

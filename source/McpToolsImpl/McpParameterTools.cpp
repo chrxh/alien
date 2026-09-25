@@ -19,13 +19,14 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/LocationAccessService.h>
-#include <EngineInterface/LocationEditService.h>
-#include <EngineInterface/ParametersAccessService.h>
-#include <EngineInterface/ParametersValidationService.h>
-#include <EngineInterface/RadiationStrengthService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/LocationEditService.h>
+#include <Data/ParametersAccessService.h>
+#include <Data/ParametersValidationService.h>
+#include <Data/RadiationStrengthService.h>
+#include <Data/SpecificationEvaluationService.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SpecificationEvaluationService.h>
 
 #include <PersisterInterface/SerializerService.h>
 

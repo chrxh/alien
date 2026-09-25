@@ -14,8 +14,9 @@
 #include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
 
+#include <Data/SpaceCalculator.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SpaceCalculator.h>
 
 #include "AlienGui.h"
 #include "RenderPipeline.h"

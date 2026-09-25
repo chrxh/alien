@@ -9,7 +9,7 @@
 
 #include <Base/Macros.h>
 
-#include <EngineInterface/Ids.h>
+#include <Base/Ids.h>
 
 #include <device_launch_parameters.h>
 #include "Array.cuh"

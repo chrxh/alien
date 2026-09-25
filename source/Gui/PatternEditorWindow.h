@@ -2,8 +2,9 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/Descs.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Descs.h>
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "AlienWindow.h"

@@ -1,8 +1,10 @@
 #include "SimulationFacadeImpl.h"
 
-#include <EngineInterface/Descs.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/Descs.h>
+
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/NumberGenerator.h>
 
 void _SimulationFacadeImpl::set(SimulationFacade const& instance)
 {

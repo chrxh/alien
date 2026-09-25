@@ -8,7 +8,8 @@
 #include <imgui.h>
 
 #include <Base/StringHelper.h>
-#include <EngineInterface/GenomeDesc.h>
+
+#include <Data/GenomeDesc.h>
 
 #include "AlienGui.h"
 #include "EntityAttributeHelp.h"

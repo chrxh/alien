@@ -2,7 +2,8 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/DescEditService.h>
+#include <Data/DescEditService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

@@ -6,9 +6,9 @@
 
 #include <Base/Resources.h>
 
-#include <EngineInterface/LocationEditService.h>
-#include <EngineInterface/SimulationParametersSpecification.h>
-#include <EngineInterface/SpecificationEvaluationService.h>
+#include <Data/LocationEditService.h>
+#include <Data/SimulationParametersSpecification.h>
+#include <Data/SpecificationEvaluationService.h>
 
 #include "ParameterParser.h"
 

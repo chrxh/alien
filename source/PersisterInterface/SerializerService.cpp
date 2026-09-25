@@ -25,10 +25,10 @@
 #include <Base/Resources.h>
 #include <Base/VersionParserService.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/ParametersValidationService.h>
-#include <EngineInterface/SimulationParameters.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
+#include <Data/ParametersValidationService.h>
+#include <Data/SimulationParameters.h>
 
 #include "SerializationScope.h"
 #include "SettingsParserService.h"

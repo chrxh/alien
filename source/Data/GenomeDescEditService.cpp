@@ -7,7 +7,7 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
 #include "DescEditService.h"
 #include "GenomeDescAccessService.h"

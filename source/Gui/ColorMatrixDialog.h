@@ -2,8 +2,8 @@
 
 #include <functional>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/EngineConstants.h>
+#include <Data/Colors.h>
+#include <Data/EngineConstants.h>
 
 #include "AlienGui.h"
 #include "Definitions.h"

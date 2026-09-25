@@ -3,7 +3,7 @@
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
 
-#include <EngineInterface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"

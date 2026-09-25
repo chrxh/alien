@@ -5,8 +5,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/CreatorService.h>
-#include <EngineInterface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
 
 #include <Network/McpServer.h>
 #include <McpToolsInterface/McpToolContext.h>

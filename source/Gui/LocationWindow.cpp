@@ -2,7 +2,8 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/LocationAccessService.h>
+#include <Data/LocationAccessService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "StyleService.h"

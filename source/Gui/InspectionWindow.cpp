@@ -9,10 +9,11 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/DescValidationService.h>
-#include <EngineInterface/EngineConstants.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/DescEditService.h>
+#include <Data/DescValidationService.h>
+#include <Data/EngineConstants.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

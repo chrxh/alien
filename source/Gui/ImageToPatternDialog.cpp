@@ -6,7 +6,8 @@
 #include <Base/GlobalSettings.h>
 #include <Base/ImageFileService.h>
 
-#include <EngineInterface/CreatorService.h>
+#include <Data/CreatorService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "GenericFileDialog.h"

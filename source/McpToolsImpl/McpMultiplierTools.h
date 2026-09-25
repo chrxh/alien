@@ -5,8 +5,9 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/MultiplierService.h>
+#include <Data/Descs.h>
+#include <Data/MultiplierService.h>
+
 #include <EngineInterface/SelectionShallowData.h>
 
 #include <Network/McpServer.h>

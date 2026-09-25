@@ -119,41 +119,57 @@ IncludeCategories:
   - Regex: '^<Shaders/.*>$'
     Priority: 203
 
+  # Data module includes
+  - Regex: '^<Data/.*>$'
+    Priority: 204
+
+  # Data tests includes
+  - Regex: '^<DataTests/.*>$'
+    Priority: 205
+
   # Engine interface includes
   - Regex: '^<EngineInterface/.*>$'
-    Priority: 204
+    Priority: 206
 
   # Engine test data includes
   - Regex: '^<EngineTestData/.*>$'
-    Priority: 205
+    Priority: 207
 
   # Engine interface tests includes
   - Regex: '^<EngineInterfaceTests/.*>$'
-    Priority: 206
+    Priority: 208
 
   # Engine implementation includes
   - Regex: '^<EngineImpl/.*>$'
-    Priority: 207
+    Priority: 209
 
   # Engine GPU kernels includes
   - Regex: '^<EngineKernels/.*>$'
-    Priority: 208
+    Priority: 210
 
   # Engine tests includes
   - Regex: '^<EngineTests/.*>$'
-    Priority: 209
+    Priority: 211
 
   # Persister interface includes
   - Regex: '^<PersisterInterface/.*>$'
-    Priority: 210
+    Priority: 212
 
   # Persister implementation includes
   - Regex: '^<PersisterImpl/.*>$'
-    Priority: 211
+    Priority: 213
+
+  # MCP tools interface includes
+  - Regex: '^<McpToolsInterface/.*>$'
+    Priority: 214
+
+  # MCP tools implementation includes
+  - Regex: '^<McpToolsImpl/.*>$'
+    Priority: 215
 
   # GUI module includes
   - Regex: '^<Gui/.*>$'
-    Priority: 212
+    Priority: 216
 
   # All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.c?(uh|h)"$'

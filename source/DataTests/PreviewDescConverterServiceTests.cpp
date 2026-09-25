@@ -5,10 +5,10 @@
 #include <Base/Definitions.h>
 #include <Base/Math.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/PreviewDescConverterService.h>
-#include <EngineInterface/SpaceCalculator.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+#include <Data/PreviewDescConverterService.h>
+#include <Data/SpaceCalculator.h>
 
 #include <EngineTestData/TestHelper.h>
 

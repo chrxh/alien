@@ -13,11 +13,13 @@
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
 
-#include <EngineInterface/Ids.h>
+#include <Base/Ids.h>
+
+#include <Data/SimulationParameters.h>
+#include <Data/SpaceCalculator.h>
+
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/KernelLaunchSettings.h>
-#include <EngineInterface/SimulationParameters.h>
-#include <EngineInterface/SpaceCalculator.h>
 
 #include <iomanip>
 #include <sstream>

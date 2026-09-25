@@ -5,7 +5,7 @@
 
 #include <Network/Definitions.h>
 
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #include "DownloadCache.h"
 

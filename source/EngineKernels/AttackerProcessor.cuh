@@ -1,7 +1,7 @@
 #pragma once
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/SimulationParameters.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/SimulationParameters.h>
 
 #include "NeuronProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"

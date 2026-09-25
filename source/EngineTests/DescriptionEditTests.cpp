@@ -6,9 +6,10 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/CreatorService.h>
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
