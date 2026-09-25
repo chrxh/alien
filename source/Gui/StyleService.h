@@ -81,6 +81,7 @@ namespace Const
     extern ImColor const TableHeaderColor;
 
     extern ImColor const MonospaceColor;
+    extern ImColor const SoftHighlightTextColor;
     extern ImColor const StatusBarTextColor;
 
     extern ImColor const HeadlineColor;

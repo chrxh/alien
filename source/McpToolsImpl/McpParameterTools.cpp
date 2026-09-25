@@ -553,7 +553,6 @@ namespace
         }
     }
 
-    // Accepts a single value for all entries or an array with one value per entry
     void applyJsonToRange(boost::json::value const& json, ParameterEntry const& entry, std::span<ParameterScalar> scalars)
     {
         if (json.is_array()) {
@@ -612,7 +611,10 @@ namespace
 
     std::vector<size_t> getAddressedIndices(ParameterValue const& value, std::optional<int> color, std::optional<int> targetColor)
     {
-        auto indexRange = [](size_t begin, size_t end) { return std::views::iota(begin, end) | std::ranges::to<std::vector>(); };
+        auto indexRange = [](size_t begin, size_t end) {
+            auto indices = std::views::iota(begin, end);
+            return std::vector<size_t>(indices.begin(), indices.end());
+        };
         if (value.colorDependence == ColorDependence::None) {
             return {0};
         }
@@ -673,7 +675,6 @@ namespace
             .changedIndices = std::move(changedIndices)};
     }
 
-    // Values set again by a later change belong to that change only
     void addAppliedChange(std::vector<AppliedChange>& appliedChanges, AppliedChange&& newChange)
     {
         for (auto& appliedChange : appliedChanges) {

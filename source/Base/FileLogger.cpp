@@ -21,9 +21,9 @@ _FileLogger::~_FileLogger()
     LoggingService::get().unregisterCallBack(this);
 }
 
-void _FileLogger::newLogMessage(Priority priority, std::string const& message)
+void _FileLogger::newLogMessage(LogMessage const& message)
 {
     if (_outfile.is_open()) {
-        _outfile << message << std::endl;
+        _outfile << LoggingService::format(message) << std::endl;
     }
 }

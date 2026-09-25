@@ -5,7 +5,6 @@
 
 #include "Descs.h"
 
-// Multiplies the selection including its connected cell networks and selects the result. The caller has to update views of the selection.
 class MultiplierService
 {
     MAKE_SINGLETON(MultiplierService);

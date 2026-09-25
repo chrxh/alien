@@ -11,7 +11,6 @@
 
 #include <Base/Definitions.h>
 
-// Reads tool arguments of MCP requests. Invalid arguments throw std::invalid_argument with a message for the MCP client.
 class McpArguments
 {
 public:
@@ -40,10 +39,8 @@ public:
     static std::optional<std::string> getOptionalString(boost::json::object const& arguments, std::string_view key);
     static std::string getString(boost::json::object const& arguments, std::string_view key);
 
-    // Interprets the string as UTF-8, as JSON requires
     static std::filesystem::path getFilePath(boost::json::object const& arguments, std::string_view key);
 
-    // Expects an array of [x, y] pairs
     static std::vector<RealVector2D> getPoints(boost::json::object const& arguments, std::string_view key, size_t minNumPoints);
 
     static std::vector<boost::json::object> getObjects(boost::json::object const& arguments, std::string_view key, size_t minNumObjects);

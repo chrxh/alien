@@ -20,23 +20,21 @@ void LoggingService::log(Priority priority, std::string const& message)
 {
     std::lock_guard<std::mutex> lock(_mutex);
 
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-
-    auto timestamp = formatTime(tm, "%Y-%m-%d %H-%M-%S");
-    auto offset = formatTime(tm, "%z");
+    auto now = std::chrono::system_clock::now();
+    auto t = std::chrono::system_clock::to_time_t(now);
+    auto offset = formatTime(*std::localtime(&t), "%z");
     if (_timezoneOffset != offset) {
         _timezoneOffset = offset;
-        addMessage(Priority::Important, timestamp + ": log timezone is " + offset);
+        addMessage(LogMessage{.time = now, .priority = Priority::Important, .text = "log timezone is " + offset});
     }
-    addMessage(priority, timestamp + ": " + message);
+    addMessage(LogMessage{.time = now, .priority = priority, .text = message});
 }
 
-void LoggingService::addMessage(Priority priority, std::string const& message)
+void LoggingService::addMessage(LogMessage const& message)
 {
     _messages.emplace_back(message);
     for (auto const& callback : _callbacks) {
-        callback->newLogMessage(priority, message);
+        callback->newLogMessage(message);
     }
 }
 
@@ -46,9 +44,15 @@ std::string LoggingService::getLogString() const
 
     std::stringstream stream;
     for (auto const& message : _messages) {
-        stream << message << std::endl;
+        stream << format(message) << std::endl;
     }
     return stream.str();
+}
+
+std::string LoggingService::format(LogMessage const& message)
+{
+    auto t = std::chrono::system_clock::to_time_t(message.time);
+    return formatTime(*std::localtime(&t), "%Y-%m-%d %H-%M-%S") + ": " + message.text;
 }
 
 void LoggingService::registerCallBack(LoggingCallBack* callback)

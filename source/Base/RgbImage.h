@@ -7,5 +7,5 @@ struct RgbImage
 {
     int width = 0;
     int height = 0;
-    std::vector<uint8_t> pixels;  // 3 bytes per pixel, row by row
+    std::vector<uint8_t> pixels;
 };

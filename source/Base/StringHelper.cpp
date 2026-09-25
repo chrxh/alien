@@ -104,16 +104,6 @@ std::string StringHelper::format(std::chrono::system_clock::time_point const& ti
     return ss.str();
 }
 
-std::string StringHelper::formatTimeOfDay(std::chrono::system_clock::time_point const& timePoint)
-{
-    std::time_t time_t = std::chrono::system_clock::to_time_t(timePoint);
-
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&time_t), "%H:%M:%S");
-
-    return ss.str();
-}
-
 std::string StringHelper::formatInHex(uint64_t value)
 {
     std::stringstream ss;

@@ -93,6 +93,7 @@ namespace Const
     ImColor const TableHeaderColor = PanelColor;
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
+    ImColor const SoftHighlightTextColor = ImColor::HSV(0.3f, 0.25f, 0.88f);
     ImColor const StatusBarTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
 
     ImColor const HeadlineColor = AccentColor;
@@ -108,7 +109,7 @@ namespace Const
     ImColor const ConstructionPreviewPointColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const ConstructionPreviewBrushColor = ImColor::HSV(0.54f, 0.3f, 1.0f, 0.6f);
 
-    ImColor const McpSuccessColor = ImColor::HSV(0.43f, 0.55f, 0.78f);
+    ImColor const McpSuccessColor = ImColor::HSV(0.43f, 0.40f, 0.68f);
     ImColor const McpRunningBadgeColor = ImColor::HSV(0.43f, 0.45f, 0.20f);
 
     ImColor const CellTypeOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);

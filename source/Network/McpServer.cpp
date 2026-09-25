@@ -132,7 +132,6 @@ McpServer::~McpServer()
 
 namespace
 {
-    // The httplib default sets SO_REUSEPORT on Linux, which would let a second process listen on the same port
     void setSocketOptions(socket_t socket)
     {
 #ifdef _WIN32
@@ -151,7 +150,6 @@ bool McpServer::start(int port)
     auto server = std::make_unique<httplib::Server>();
     server->set_socket_options(setSocketOptions);
 
-    // Closing each connection after its response lets stop() return without waiting for idle keep-alive connections
     server->set_keep_alive_max_count(1);
     server->set_keep_alive_timeout(KeepAliveTimeoutSec);
 
@@ -186,7 +184,6 @@ bool McpServer::start(int port)
     _server = std::move(server);
     _thread = std::thread([server = _server.get()] { server->listen_after_bind(); });
 
-    // stop() has no effect until the listen loop runs
     for (auto waitTime = std::chrono::milliseconds(0); !_server->is_running() && waitTime < MaxStartupTime; waitTime += StartupPollInterval) {
         std::this_thread::sleep_for(StartupPollInterval);
     }

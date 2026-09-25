@@ -22,12 +22,10 @@ public:
     static std::string generateLayerName(SimulationParameters const& parameters);
     static std::string generateSourceName(SimulationParameters const& parameters);
 
-    // The base location has id 0
     static int getLocationId(SimulationParameters const& parameters, int orderNumber);
     static void setLocationId(SimulationParameters& parameters, int orderNumber, int locationId);
     static std::optional<int> findOrderNumber(SimulationParameters const& parameters, int locationId);
     static int getMaxLocationId(SimulationParameters const& parameters);
 
-    // Layers get 1..n, radiation sources the following ids
     static void assignLocationIds(SimulationParameters& parameters);
 };

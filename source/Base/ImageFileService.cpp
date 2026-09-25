@@ -1,6 +1,5 @@
 #include "ImageFileService.h"
 
-// Private copy of the implementation, ImFileDialog compiles its own
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_WINDOWS_UTF8

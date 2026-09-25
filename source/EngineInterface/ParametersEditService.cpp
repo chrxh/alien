@@ -151,7 +151,6 @@ void ParametersEditService::cloneLocation(SimulationParameters& parameters, int 
 
 void ParametersEditService::deleteLocation(SimulationParameters& parameters, int orderNumber) const
 {
-    // Ids assigned on loading are unknown to the counter so far
     _lastLocationId = std::max(_lastLocationId, LocationHelper::getMaxLocationId(parameters));
 
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);

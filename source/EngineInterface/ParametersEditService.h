@@ -30,14 +30,12 @@ public:
         int orderNumber,
         IntVector2D const& worldSize,
         RealVector2D const& position,
-        FloatColorRGB const& backgroundColor) const;                                              // Core area and fade-out relative to the world size
+        FloatColorRGB const& backgroundColor) const;
     void cloneLocation(SimulationParameters& parameters, int orderNumber, int locationId) const;  // Create location at orderNumber + 1
     void deleteLocation(SimulationParameters& parameters, int orderNumber) const;
     void moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
     void moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;
 
-    // Edit the current simulation parameters together with the reference parameters. A new location is placed behind the given one.
-    // Its order number is returned, or nullopt if the maximum number of locations has been reached.
     std::optional<int> insertDefaultLayer(int orderNumber);
     std::optional<int> insertDefaultSource(int orderNumber);
     std::optional<int> cloneLocation(int orderNumber);
