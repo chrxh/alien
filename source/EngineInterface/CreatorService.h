@@ -7,6 +7,7 @@
 #include <Base/RgbImage.h>
 #include <Base/Singleton.h>
 
+#include "Colors.h"
 #include "Descs.h"
 
 using CreationMaterial = int;
@@ -42,8 +43,9 @@ public:
     ContentDesc createCurve(ObjectProperties const& properties, std::vector<RealVector2D> const& controlPoints, float objectDistance) const;
     ContentDesc createPolygon(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float objectDistance) const;
     ContentDesc createPencilDot(ObjectProperties const& properties, RealVector2D const& pos, float pencilRadius) const;
-    ContentDesc createFreehandStroke(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float pencilRadius) const;
-    ContentDesc createPatternFromImage(RgbImage const& image, RealVector2D const& center) const;
+    ContentDesc
+    createFreehandStroke(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float pencilRadius, IntVector2D const& worldSize) const;
+    ContentDesc createPatternFromImage(RgbImage const& image, RealVector2D const& center, ColorVector<FloatColorRGB> const& customizationColors) const;
 
     std::vector<RealVector2D> calcBezierCurvePath(std::vector<RealVector2D> const& controlPoints, float objectDistance) const;
 

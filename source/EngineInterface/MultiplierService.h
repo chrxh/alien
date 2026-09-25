@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Base/Definitions.h>
 #include <Base/Macros.h>
 #include <Base/Singleton.h>
 
@@ -25,6 +26,7 @@ public:
         MEMBER(GridParameters, float, verticalVelYinc, 0);
         MEMBER(GridParameters, float, verticalAngularVelInc, 0);
     };
+    ContentDesc multiplyInGrid(ContentDesc const& content, GridParameters const& parameters) const;
 
     struct RandomParameters
     {
@@ -38,15 +40,12 @@ public:
         MEMBER(RandomParameters, float, minAngularVel, 0);
         MEMBER(RandomParameters, float, maxAngularVel, 0);
         MEMBER(RandomParameters, bool, overlappingCheck, false);
+        MEMBER(RandomParameters, IntVector2D, maxDelta, IntVector2D());
     };
-
-    struct Result
+    struct RandomMultiplicationResult
     {
-        ContentDesc origSelection;
+        ContentDesc content;
         bool overlappingCheckSuccessful = true;
     };
-    Result multiplyInGrid(GridParameters const& parameters) const;
-    Result multiplyRandomly(RandomParameters const& parameters) const;
-
-    void undo(ContentDesc const& origSelection) const;
+    RandomMultiplicationResult multiplyRandomly(ContentDesc const& content, RandomParameters const& parameters) const;
 };

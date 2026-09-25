@@ -228,7 +228,10 @@ McpToolResult McpCreatorTools::drawFreehand(boost::json::object const& arguments
     auto pencilRadius = McpArguments::getOptionalFloat(arguments, "pencil_radius", MinPencilRadius, MaxPencilRadius).value_or(MinPencilRadius);
     auto pencilDiameter = 2 * pencilRadius + 1;
     checkNumObjects((calcLength(points) + 1) * pencilDiameter * pencilDiameter);
-    return addToSimulation(CreatorService::get().createFreehandStroke(properties, points, pencilRadius), properties, "a freehand stroke");
+    return addToSimulation(
+        CreatorService::get().createFreehandStroke(properties, points, pencilRadius, _SimulationFacade::get()->getWorldSize()),
+        properties,
+        "a freehand stroke");
 }
 
 McpToolResult McpCreatorTools::createLine(boost::json::object const& arguments) const
@@ -279,7 +282,7 @@ McpToolResult McpCreatorTools::createPatternFromImage(boost::json::object const&
     }
     checkNumObjects(toFloat(image->width) * toFloat(image->height));
     return addToSimulation(
-        CreatorService::get().createPatternFromImage(*image, center),
+        CreatorService::get().createPatternFromImage(*image, center, _SimulationFacade::get()->getSimulationParameters().customizationColors.value),
         CreatorService::ObjectProperties(),
         "a pattern from the image centered at " + formatPos(center));
 }

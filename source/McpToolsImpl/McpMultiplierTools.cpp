@@ -76,6 +76,15 @@ std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
     };
 }
 
+namespace
+{
+    void replaceSelection(ContentDesc&& content)
+    {
+        _SimulationFacade::get()->removeSelectedObjects(true);
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
+    }
+}
+
 McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& arguments)
 {
     auto defaults = MultiplierService::GridParameters();
@@ -94,7 +103,9 @@ McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& argu
                           .verticalAngularVelInc(McpArguments::getOptionalFloat(arguments, "vertical_angular_velocity_increment").value_or(0));
     checkSelectionForMultiplication(toFloat(parameters._horizontalNumber) * toFloat(parameters._verticalNumber));
 
-    storeForUndo(MultiplierService::get().multiplyInGrid(parameters));
+    auto origSelection = _SimulationFacade::get()->getSelectedSimulationData(true);
+    replaceSelection(MultiplierService::get().multiplyInGrid(origSelection, parameters));
+    storeForUndo(std::move(origSelection));
     _context->onSelectionChanged();
     return {.text = std::format("Arranged the selection in a {} x {} grid. {}", parameters._horizontalNumber, parameters._verticalNumber, describeSelection())};
 }
@@ -122,20 +133,22 @@ McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& ar
                           .maxVelY(McpArguments::getOptionalFloat(arguments, "max_velocity_y").value_or(0))
                           .minAngularVel(McpArguments::getOptionalFloat(arguments, "min_angular_velocity").value_or(0))
                           .maxAngularVel(McpArguments::getOptionalFloat(arguments, "max_angular_velocity").value_or(0))
-                          .overlappingCheck(McpArguments::getOptionalBool(arguments, "overlapping_check").value_or(false));
+                          .overlappingCheck(McpArguments::getOptionalBool(arguments, "overlapping_check").value_or(false))
+                          .maxDelta(_SimulationFacade::get()->getWorldSize());
     checkMinMax(parameters._minAngle, parameters._maxAngle, "min_angle", "max_angle");
     checkMinMax(parameters._minVelX, parameters._maxVelX, "min_velocity_x", "max_velocity_x");
     checkMinMax(parameters._minVelY, parameters._maxVelY, "min_velocity_y", "max_velocity_y");
     checkMinMax(parameters._minAngularVel, parameters._maxAngularVel, "min_angular_velocity", "max_angular_velocity");
     checkSelectionForMultiplication(toFloat(parameters._number) + 1.0f);
 
-    auto result = MultiplierService::get().multiplyRandomly(parameters);
-    auto overlappingCheckSuccessful = result.overlappingCheckSuccessful;
-    storeForUndo(std::move(result));
+    auto origSelection = _SimulationFacade::get()->getSelectedSimulationData(true);
+    auto multiplication = MultiplierService::get().multiplyRandomly(origSelection, parameters);
+    replaceSelection(std::move(multiplication.content));
+    storeForUndo(std::move(origSelection));
     _context->onSelectionChanged();
 
     auto text = std::format("Added {} copies at random positions. {}", parameters._number, describeSelection());
-    if (!overlappingCheckSuccessful) {
+    if (!multiplication.overlappingCheckSuccessful) {
         text += " Not all copies could be placed without overlapping the original selection or each other.";
     }
     return {.text = text};
@@ -149,7 +162,7 @@ McpToolResult McpMultiplierTools::undoMultiplication()
     if (!_selectionAfterMultiplication->compareSizes(_SimulationFacade::get()->getSelectionShallowData())) {
         throw std::invalid_argument("The selection has changed since the last multiplication, so it can no longer be undone.");
     }
-    MultiplierService::get().undo(*_origSelection);
+    replaceSelection(std::move(*_origSelection));
     _context->onSelectionChanged();
     _origSelection.reset();
     _selectionAfterMultiplication.reset();
@@ -172,9 +185,9 @@ void McpMultiplierTools::checkSelectionForMultiplication(float numCopies) const
     }
 }
 
-void McpMultiplierTools::storeForUndo(MultiplierService::Result&& result)
+void McpMultiplierTools::storeForUndo(ContentDesc&& origSelection)
 {
-    _origSelection = std::move(result.origSelection);
+    _origSelection = std::move(origSelection);
     _selectionAfterMultiplication = _SimulationFacade::get()->getSelectionShallowData();
 }
 

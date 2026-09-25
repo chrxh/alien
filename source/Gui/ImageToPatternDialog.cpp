@@ -43,7 +43,9 @@ void ImageToPatternDialog::show()
             GenericMessageDialog::get().information("Error", "The image could not be read.");
             return;
         }
-        _SimulationFacade::get()->addAndSelectSimulationData(CreatorService::get().createPatternFromImage(*image, Viewport::get().getCenterInWorldPos()));
+        auto customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
+        _SimulationFacade::get()->addAndSelectSimulationData(
+            CreatorService::get().createPatternFromImage(*image, Viewport::get().getCenterInWorldPos(), customizationColors));
         // TODO: update pattern editor
     });
 }

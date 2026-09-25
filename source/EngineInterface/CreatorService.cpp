@@ -10,11 +10,9 @@
 
 #include <Base/Math.h>
 
-#include "Colors.h"
 #include "DescEditService.h"
 #include "NumberGenerator.h"
 #include "ObjectColoring.h"
-#include "SimulationFacade.h"
 
 namespace
 {
@@ -278,7 +276,11 @@ ContentDesc CreatorService::createPencilDot(ObjectProperties const& properties, 
     return properties._material == CreationMaterial_EnergyParticle ? convertToEnergyParticles(properties, result) : result;
 }
 
-ContentDesc CreatorService::createFreehandStroke(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float pencilRadius) const
+ContentDesc CreatorService::createFreehandStroke(
+    ObjectProperties const& properties,
+    std::vector<RealVector2D> const& points,
+    float pencilRadius,
+    IntVector2D const& worldSize) const
 {
     ContentDesc result;
     if (points.empty()) {
@@ -286,7 +288,6 @@ ContentDesc CreatorService::createFreehandStroke(ObjectProperties const& propert
     }
 
     DescEditService::Occupancy occupancy;
-    auto worldSize = _SimulationFacade::get()->getWorldSize();
     auto addDot = [&](RealVector2D const& pos) {
         DescEditService::get().addIfSpaceAvailable(result, occupancy, createPencilDot(properties, pos, pencilRadius), OverlapDistance, worldSize);
     };
@@ -342,9 +343,9 @@ namespace
     }
 }
 
-ContentDesc CreatorService::createPatternFromImage(RgbImage const& image, RealVector2D const& center) const
+ContentDesc CreatorService::createPatternFromImage(RgbImage const& image, RealVector2D const& center, ColorVector<FloatColorRGB> const& customizationColors)
+    const
 {
-    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     ContentDesc result;
     for (auto x : std::views::iota(0, image.width)) {
         for (auto y : std::views::iota(0, image.height)) {
