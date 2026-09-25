@@ -28,6 +28,8 @@ add_library(Base
     Math.h
     MathTypes.cpp
     MathTypes.h
+    NameGeneratorService.cpp
+    NameGeneratorService.h
     NumberGenerator.cpp
     NumberGenerator.h
     Physics.cpp
