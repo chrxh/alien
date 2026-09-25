@@ -27,8 +27,8 @@
 
 #include <PersisterInterface/SerializerService.h>
 
-#include "McpArguments.h"
-#include "McpSchema.h"
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

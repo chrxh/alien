@@ -9,8 +9,8 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
-#include "McpArguments.h"
-#include "McpSchema.h"
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 namespace
 {
@@ -24,9 +24,9 @@ namespace
     }
 }
 
-std::vector<McpTool> McpMultiplierTools::getTools(McpHost const& host)
+std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
 {
-    _host = host;
+    _context = &context;
 
     auto const defaultGrid = DescEditService::GridMultiplyParameters();
     auto const defaultRandom = DescEditService::RandomMultiplyParameters();
@@ -100,7 +100,7 @@ McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& argu
     checkSelectionForMultiplication(parameters._horizontalNumber * parameters._verticalNumber);
 
     storeForUndo(MultiplierService::get().multiplyInGrid(parameters));
-    _host->onSelectionChanged();
+    _context->onSelectionChanged();
     return {.text = std::format("Arranged the selection in a {} x {} grid. {}", parameters._horizontalNumber, parameters._verticalNumber, describeSelection())};
 }
 
@@ -127,7 +127,7 @@ McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& ar
     auto result = MultiplierService::get().multiplyRandomly(parameters);
     auto overlappingCheckSuccessful = result.overlappingCheckSuccessful;
     storeForUndo(std::move(result));
-    _host->onSelectionChanged();
+    _context->onSelectionChanged();
 
     auto text = std::format("Added {} copies at random positions. {}", parameters._number, describeSelection());
     if (!overlappingCheckSuccessful) {
@@ -145,7 +145,7 @@ McpToolResult McpMultiplierTools::undoMultiplication()
         throw std::invalid_argument("The selection has changed since the last multiplication, so it can no longer be undone.");
     }
     MultiplierService::get().undo(*_origSelection);
-    _host->onSelectionChanged();
+    _context->onSelectionChanged();
     _origSelection.reset();
     _selectionAfterMultiplication.reset();
     return {.text = "Reverted the last multiplication. " + describeSelection()};

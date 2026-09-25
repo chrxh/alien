@@ -8,15 +8,16 @@
 #include <EngineInterface/CreatorService.h>
 #include <EngineInterface/Descs.h>
 
-#include "McpHost.h"
-#include "McpServer.h"
+#include <Network/McpServer.h>
+
+#include "McpToolContext.h"
 
 class McpCreatorTools
 {
     MAKE_SINGLETON(McpCreatorTools);
 
 public:
-    std::vector<McpTool> getTools(McpHost const& host);
+    std::vector<McpTool> getTools(McpToolContext& context);
 
 private:
     McpToolResult createObject(boost::json::object const& arguments) const;
@@ -37,5 +38,5 @@ private:
 
     McpToolResult addToSimulation(ContentDesc&& content, CreatorService::ObjectProperties const& properties, std::string const& shape) const;
 
-    McpHost _host;
+    McpToolContext* _context = nullptr;
 };

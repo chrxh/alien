@@ -9,15 +9,16 @@
 #include <EngineInterface/MultiplierService.h>
 #include <EngineInterface/SelectionShallowData.h>
 
-#include "McpHost.h"
-#include "McpServer.h"
+#include <Network/McpServer.h>
+
+#include "McpToolContext.h"
 
 class McpMultiplierTools
 {
     MAKE_SINGLETON(McpMultiplierTools);
 
 public:
-    std::vector<McpTool> getTools(McpHost const& host);
+    std::vector<McpTool> getTools(McpToolContext& context);
 
 private:
     McpToolResult multiplyInGrid(boost::json::object const& arguments);
@@ -28,7 +29,7 @@ private:
     void storeForUndo(MultiplierService::Result&& result);
     std::string describeSelection() const;
 
-    McpHost _host;
+    McpToolContext* _context = nullptr;
     std::optional<ContentDesc> _origSelection;
     std::optional<SelectionShallowData> _selectionAfterMultiplication;
 };

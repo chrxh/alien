@@ -14,8 +14,8 @@
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "McpArguments.h"
-#include "McpSchema.h"
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 namespace
 {
@@ -77,9 +77,9 @@ namespace
     }
 }
 
-std::vector<McpTool> McpCreatorTools::getTools(McpHost const& host)
+std::vector<McpTool> McpCreatorTools::getTools(McpToolContext& context)
 {
-    _host = host;
+    _context = &context;
 
     return {
         McpTool{
@@ -166,7 +166,7 @@ std::vector<McpTool> McpCreatorTools::getTools(McpHost const& host)
 McpToolResult McpCreatorTools::createObject(boost::json::object const& arguments) const
 {
     auto properties = getObjectProperties(arguments);
-    auto pos = _host->getVisibleAreaCenter();
+    auto pos = _context->getVisibleAreaCenter();
     auto x = McpArguments::getOptionalFloat(arguments, "x");
     auto y = McpArguments::getOptionalFloat(arguments, "y");
     if (x.has_value() != y.has_value()) {
@@ -272,7 +272,7 @@ McpToolResult McpCreatorTools::createPatternFromImage(boost::json::object const&
         throw std::invalid_argument(std::format("The file '{}' does not exist.", filePath));
     }
     auto center = getCenter(arguments);
-    auto image = _host->loadImage(path);
+    auto image = _context->loadImage(path);
     if (!image) {
         throw std::invalid_argument(std::format("The file '{}' could not be read as an image.", filePath));
     }
@@ -306,7 +306,7 @@ RealVector2D McpCreatorTools::getCenter(boost::json::object const& arguments) co
     if (x.has_value() != y.has_value()) {
         throw std::invalid_argument("Specify both 'center_x' and 'center_y' or neither.");
     }
-    auto result = x ? RealVector2D{*x, *y} : _host->getVisibleAreaCenter();
+    auto result = x ? RealVector2D{*x, *y} : _context->getVisibleAreaCenter();
     checkInsideWorld(result);
     return result;
 }
@@ -347,7 +347,7 @@ McpToolResult McpCreatorTools::addToSimulation(ContentDesc&& content, CreatorSer
     checkNumObjects(toFloat(numEntities));
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
-    _host->onSelectionChanged();
+    _context->onSelectionChanged();
 
     auto entityName = [&] {
         switch (properties._material) {
