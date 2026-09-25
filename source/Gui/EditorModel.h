@@ -9,6 +9,29 @@
 #include "Definitions.h"
 #include "InspectionWindow.h"
 
+using EditTool = int;
+enum EditTool_
+{
+    EditTool_Select,
+    EditTool_Scissors,
+    EditTool_Object,
+    EditTool_Rectangle,
+    EditTool_Hexagon,
+    EditTool_Disc,
+    EditTool_Line,
+    EditTool_Curve,
+    EditTool_Polygon,
+    EditTool_Freehand
+};
+
+struct SelectionBounds
+{
+    RealVector2D center;
+    RealVector2D velocity;
+    RealVector2D topLeft;
+    RealVector2D bottomRight;
+};
+
 class EditorModel
 {
     MAKE_SINGLETON(EditorModel);
@@ -35,10 +58,23 @@ public:
     void setDefaultColorCode(int value);
     int getDefaultColorCode() const;
 
-    void setForceNoRollout(bool value);
+    EditTool getTool() const;
+    void setTool(EditTool value);
+    bool isCreationTool() const;
 
-    void setRolloutToClusters(bool value);
-    bool isRolloutToClusters() const;
+    // Holding SHIFT inverts the scope temporarily
+    bool isApplyToNetworks() const;
+    bool isApplyToNetworksPersistent() const;
+    void setApplyToNetworks(bool value);
+    void setScopeInvertedTemporarily(bool value);
+
+    bool isGlueOnContact() const;
+    void setGlueOnContact(bool value);
+
+    bool isCutOnlyInSelection() const;
+    void setCutOnlyInSelection(bool value);
+
+    SelectionBounds getSelectionBounds(bool includeClusters) const;
 
 private:
     SelectionShallowData _selectionShallowData;
@@ -47,6 +83,10 @@ private:
 
     float _pencilWidth = 3.0f;
     int _defaultColorCode = 0;
-    bool _rolloutToClusters = true;
-    bool _forceNoRollout = false;
+
+    EditTool _tool = EditTool_Select;
+    bool _applyToNetworks = true;
+    bool _scopeInvertedTemporarily = false;
+    bool _glueOnContact = false;
+    bool _cutOnlyInSelection = false;
 };

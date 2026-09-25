@@ -153,6 +153,16 @@ void _SimulationFacadeImpl::reconnectSelectedObjects()
     _worker.reconnectSelectedObjects();
 }
 
+void _SimulationFacadeImpl::glueSelectedObjects(bool includeClusters)
+{
+    _worker.glueSelectedObjects(includeClusters);
+}
+
+void _SimulationFacadeImpl::cutConnections(RealVector2D const& start, RealVector2D const& end, bool onlySelected, bool includeClusters)
+{
+    _worker.cutConnections(start, end, onlySelected, includeClusters);
+}
+
 void _SimulationFacadeImpl::setDetached(bool value)
 {
     _worker.setDetached(value);

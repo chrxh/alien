@@ -171,20 +171,23 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
     }
 }
 
-__global__ void cudaScheduleConnectSelection(SimulationData data, bool considerWithinSelection, int* result)
+__global__ void cudaScheduleConnectSelection(SimulationData data, bool includeClusters, bool onlyWithinSelection, int* result)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (1 != object->selected) {
+        if (!isSelected(object, includeClusters)) {
             continue;
         }
         data.objectMap.executeForEach(object->pos, 1.3f, object->detached(), [&](auto const& otherObject) {
             if (!otherObject || otherObject == object) {
                 return;
             }
-            if (1 == otherObject->selected && !considerWithinSelection) {
+            if (isSelected(otherObject, includeClusters) != onlyWithinSelection) {
+                return;
+            }
+            if (onlyWithinSelection && otherObject < object) {
                 return;
             }
 
@@ -398,6 +401,58 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
                     ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
                     atomicExch(result, 1);
                 }
+            }
+        }
+    }
+}
+
+namespace
+{
+    __inline__ __device__ float cross(float2 const& a, float2 const& b)
+    {
+        return a.x * b.y - a.y * b.x;
+    }
+
+    __inline__ __device__ bool areSegmentsIntersecting(float2 const& p1, float2 const& p2, float2 const& q1, float2 const& q2)
+    {
+        auto r = p2 - p1;
+        auto s = q2 - q1;
+        auto denominator = cross(r, s);
+        if (abs(denominator) < NEAR_ZERO) {
+            return false;
+        }
+        auto t = cross(q1 - p1, s) / denominator;
+        auto u = cross(q1 - p1, r) / denominator;
+        return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+    }
+}
+
+__global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart, float2 cutEnd, bool onlySelected, bool includeClusters, int* result)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (onlySelected && !isSelected(object, includeClusters)) {
+            continue;
+        }
+        auto const cutStartNearObject = cutStart + data.objectMap.getCorrectionIncrement(object->pos, cutStart);
+        auto const cutEndNearObject = cutStartNearObject + (cutEnd - cutStart);
+
+        for (int i = 0; i < object->numConnections; ++i) {
+            auto const& connectedObject = object->connections[i].object;
+            if (connectedObject < object) {
+                continue;
+            }
+            if (onlySelected && !isSelected(connectedObject, includeClusters)) {
+                continue;
+            }
+            auto connectedPos = connectedObject->pos - object->pos;
+            data.objectMap.correctDirection(connectedPos);
+            connectedPos = connectedPos + object->pos;
+            if (areSegmentsIntersecting(object->pos, connectedPos, cutStartNearObject, cutEndNearObject)) {
+                ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
+                atomicExch(result, 1);
             }
         }
     }

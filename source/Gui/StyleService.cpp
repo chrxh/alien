@@ -181,6 +181,15 @@ namespace Const
     ImColor const FloatingCardBackgroundColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.95f);
     ImColor const FloatingCardBorderColor = LineColor;
 
+    ImColor const SelectionFrameColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.700f);
+    ImColor const SelectionHandleColor = AccentColor;
+    ImColor const SelectionHandleHoveredColor = TextBaseColor;
+    ImColor const SelectionHandleFillColor = PanelColor;
+    ImColor const SelectionVelocityColor = WarningColor;
+    ImColor const SelectionChipTextColor = TextDimColor;
+    ImColor const ScissorsTrailColor = WarningColor;
+    ImColor const MultiplierPreviewColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.450f);
+
     ImColor const NeuronEditorConnectionColor = ImColor::HSV(0.0f, 0.0f, 0.1f);
     ImColor const NeuronEditorGridColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
     ImColor const NeuronEditorZeroLinePlotColor = ImColor::HSV(0.6f, 1.0f, 0.7f);

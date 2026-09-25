@@ -17,6 +17,15 @@ struct SelectionShallowData
     float clusterCenterVelX = 0;
     float clusterCenterVelY = 0;
 
+    float minPosX = 0;
+    float minPosY = 0;
+    float maxPosX = 0;
+    float maxPosY = 0;
+    float clusterMinPosX = 0;
+    float clusterMinPosY = 0;
+    float clusterMaxPosX = 0;
+    float clusterMaxPosY = 0;
+
     bool compareSizes(SelectionShallowData const& other) const
     {
         return numObjects == other.numObjects && numCreatures == other.numCreatures && numClusterCells == other.numClusterCells

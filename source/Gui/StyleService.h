@@ -167,6 +167,15 @@ namespace Const
     extern ImColor const FloatingCardBackgroundColor;
     extern ImColor const FloatingCardBorderColor;
 
+    extern ImColor const SelectionFrameColor;
+    extern ImColor const SelectionHandleColor;
+    extern ImColor const SelectionHandleHoveredColor;
+    extern ImColor const SelectionHandleFillColor;
+    extern ImColor const SelectionVelocityColor;
+    extern ImColor const SelectionChipTextColor;
+    extern ImColor const ScissorsTrailColor;
+    extern ImColor const MultiplierPreviewColor;
+
     extern ImColor const NeuronEditorConnectionColor;
     extern ImColor const NeuronEditorGridColor;
     extern ImColor const NeuronEditorZeroLinePlotColor;

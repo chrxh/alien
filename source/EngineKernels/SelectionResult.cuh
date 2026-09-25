@@ -39,6 +39,15 @@ public:
         _selectionShallowData->clusterCenterPosY = 0;
         _selectionShallowData->clusterCenterVelX = 0;
         _selectionShallowData->clusterCenterVelY = 0;
+
+        _selectionShallowData->minPosX = Infinity<float>::value;
+        _selectionShallowData->minPosY = Infinity<float>::value;
+        _selectionShallowData->maxPosX = -Infinity<float>::value;
+        _selectionShallowData->maxPosY = -Infinity<float>::value;
+        _selectionShallowData->clusterMinPosX = Infinity<float>::value;
+        _selectionShallowData->clusterMinPosY = Infinity<float>::value;
+        _selectionShallowData->clusterMaxPosX = -Infinity<float>::value;
+        _selectionShallowData->clusterMaxPosY = -Infinity<float>::value;
     }
 
     __device__ void collectObject(Object* object, float2 refPos, BaseMap const& map)
@@ -51,6 +60,7 @@ public:
             atomicAdd(&_selectionShallowData->centerPosY, pos.y);
             atomicAdd(&_selectionShallowData->centerVelX, object->vel.x);
             atomicAdd(&_selectionShallowData->centerVelY, object->vel.y);
+            collectBounds(pos);
         }
 
         atomicAdd(&_selectionShallowData->numClusterCells, 1);
@@ -58,6 +68,7 @@ public:
         atomicAdd(&_selectionShallowData->clusterCenterPosY, pos.y);
         atomicAdd(&_selectionShallowData->clusterCenterVelX, object->vel.x);
         atomicAdd(&_selectionShallowData->clusterCenterVelY, object->vel.y);
+        collectClusterBounds(pos);
     }
 
     __device__ void collectCreature() { atomicAdd(&_selectionShallowData->numCreatures, 1); }
@@ -75,6 +86,8 @@ public:
         atomicAdd(&_selectionShallowData->clusterCenterPosY, pos.y);
         atomicAdd(&_selectionShallowData->clusterCenterVelX, particle->vel.x);
         atomicAdd(&_selectionShallowData->clusterCenterVelY, particle->vel.y);
+        collectBounds(pos);
+        collectClusterBounds(pos);
     }
 
     __device__ void finalize(BaseMap const& map, bool mapCorrection)
@@ -87,25 +100,61 @@ public:
             _selectionShallowData->centerVelY /= numEntities;
             if (mapCorrection) {
                 auto correctedPos = map.getCorrectedPosition({_selectionShallowData->centerPosX, _selectionShallowData->centerPosY});
+                auto correction = correctedPos - float2{_selectionShallowData->centerPosX, _selectionShallowData->centerPosY};
                 _selectionShallowData->centerPosX = correctedPos.x;
                 _selectionShallowData->centerPosY = correctedPos.y;
+                _selectionShallowData->minPosX += correction.x;
+                _selectionShallowData->minPosY += correction.y;
+                _selectionShallowData->maxPosX += correction.x;
+                _selectionShallowData->maxPosY += correction.y;
             }
+        } else {
+            _selectionShallowData->minPosX = 0;
+            _selectionShallowData->minPosY = 0;
+            _selectionShallowData->maxPosX = 0;
+            _selectionShallowData->maxPosY = 0;
         }
 
         auto numExtEntities = _selectionShallowData->numClusterCells + _selectionShallowData->numEnergyParticles;
-        if (numEntities > 0) {
+        if (numExtEntities > 0) {
             _selectionShallowData->clusterCenterPosX /= numExtEntities;
             _selectionShallowData->clusterCenterPosY /= numExtEntities;
             _selectionShallowData->clusterCenterVelX /= numExtEntities;
             _selectionShallowData->clusterCenterVelY /= numExtEntities;
             if (mapCorrection) {
                 auto correctedPos = map.getCorrectedPosition({_selectionShallowData->clusterCenterPosX, _selectionShallowData->clusterCenterPosY});
+                auto correction = correctedPos - float2{_selectionShallowData->clusterCenterPosX, _selectionShallowData->clusterCenterPosY};
                 _selectionShallowData->clusterCenterPosX = correctedPos.x;
                 _selectionShallowData->clusterCenterPosY = correctedPos.y;
+                _selectionShallowData->clusterMinPosX += correction.x;
+                _selectionShallowData->clusterMinPosY += correction.y;
+                _selectionShallowData->clusterMaxPosX += correction.x;
+                _selectionShallowData->clusterMaxPosY += correction.y;
             }
+        } else {
+            _selectionShallowData->clusterMinPosX = 0;
+            _selectionShallowData->clusterMinPosY = 0;
+            _selectionShallowData->clusterMaxPosX = 0;
+            _selectionShallowData->clusterMaxPosY = 0;
         }
     }
 
 private:
+    __device__ void collectBounds(float2 const& pos)
+    {
+        alienAtomicMin(&_selectionShallowData->minPosX, pos.x);
+        alienAtomicMin(&_selectionShallowData->minPosY, pos.y);
+        alienAtomicMax(&_selectionShallowData->maxPosX, pos.x);
+        alienAtomicMax(&_selectionShallowData->maxPosY, pos.y);
+    }
+
+    __device__ void collectClusterBounds(float2 const& pos)
+    {
+        alienAtomicMin(&_selectionShallowData->clusterMinPosX, pos.x);
+        alienAtomicMin(&_selectionShallowData->clusterMinPosY, pos.y);
+        alienAtomicMax(&_selectionShallowData->clusterMaxPosX, pos.x);
+        alienAtomicMax(&_selectionShallowData->clusterMaxPosY, pos.y);
+    }
+
     SelectionShallowData* _selectionShallowData;
 };

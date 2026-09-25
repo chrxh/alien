@@ -9,6 +9,7 @@
 #include <Data/Descs.h>
 
 #include <EngineInterface/SelectionShallowData.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -287,4 +288,151 @@ TEST_F(EditTests, setStatic_releaseAfterTimesteps)
         ASSERT_TRUE(std::isfinite(object._pos.x) && std::isfinite(object._pos.y));
         EXPECT_LT(Math::length(object._pos - center), 10.0f);
     }
+}
+
+TEST_F(EditTests, getSelectionShallowData_bounds)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({50, 50}),
+        ObjectDesc().id(2).pos({51, 51}),
+        ObjectDesc().id(3).pos({52, 52}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->setSelection({49, 49}, {51.5f, 51.5f});
+    auto selectionData = _simulationFacade->getSelectionShallowData();
+
+    EXPECT_TRUE(approxCompare(50.0f, selectionData.minPosX));
+    EXPECT_TRUE(approxCompare(50.0f, selectionData.minPosY));
+    EXPECT_TRUE(approxCompare(51.0f, selectionData.maxPosX));
+    EXPECT_TRUE(approxCompare(51.0f, selectionData.maxPosY));
+    EXPECT_TRUE(approxCompare(50.0f, selectionData.clusterMinPosX));
+    EXPECT_TRUE(approxCompare(50.0f, selectionData.clusterMinPosY));
+    EXPECT_TRUE(approxCompare(52.0f, selectionData.clusterMaxPosX));
+    EXPECT_TRUE(approxCompare(52.0f, selectionData.clusterMaxPosY));
+}
+
+namespace
+{
+    ContentDesc createTwoConnectedAndOneFreeObject()
+    {
+        auto result = ContentDesc().addObjects({
+            ObjectDesc().id(1).pos({50, 50}).type(SolidDesc()),
+            ObjectDesc().id(2).pos({51, 50}).type(SolidDesc()),
+            ObjectDesc().id(3).pos({60, 50}).type(SolidDesc()),
+        });
+        result.addConnection(1, 2);
+        return result;
+    }
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_selectedObjects_connectionsOnlyTear)
+{
+    _simulationFacade->setSimulationData(createTwoConnectedAndOneFreeObject());
+    _simulationFacade->setSelection({50.5f, 49}, {51.5f, 51});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = false;
+    updateData.posDeltaX = 8.0f;
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(59.0f, actualData.getObjectRef(2)._pos.x));
+    EXPECT_FALSE(actualData.hasConnection(1, 2));
+    EXPECT_FALSE(actualData.hasConnection(2, 3));
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_selectedObjects_glueOnContact)
+{
+    _simulationFacade->setSimulationData(createTwoConnectedAndOneFreeObject());
+    _simulationFacade->setSelection({50.5f, 49}, {51.5f, 51});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = false;
+    updateData.glueOnContact = true;
+    updateData.posDeltaX = 8.0f;
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_FALSE(actualData.hasConnection(1, 2));
+    EXPECT_TRUE(actualData.hasConnection(2, 3));
+    EXPECT_TRUE(actualData.hasConnection(3, 2));
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_entireNetworks_connectionsRemain)
+{
+    _simulationFacade->setSimulationData(createTwoConnectedAndOneFreeObject());
+    _simulationFacade->setSelection({50.5f, 49}, {51.5f, 51});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = true;
+    updateData.posDeltaX = 3.0f;
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(53.0f, actualData.getObjectRef(1)._pos.x));
+    EXPECT_TRUE(approxCompare(54.0f, actualData.getObjectRef(2)._pos.x));
+    EXPECT_TRUE(actualData.hasConnection(1, 2));
+    EXPECT_FALSE(actualData.hasConnection(2, 3));
+}
+
+TEST_F(EditTests, glueSelectedObjects_onlyWithinSelection)
+{
+    auto data = ContentDesc().addObjects({
+        ObjectDesc().id(1).pos({50, 50}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({51, 50}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({52, 50}).type(SolidDesc()),
+    });
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->setSelection({49, 49}, {51.5f, 51});
+
+    _simulationFacade->glueSelectedObjects(false);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(actualData.hasConnection(1, 2));
+    EXPECT_TRUE(actualData.hasConnection(2, 1));
+    EXPECT_FALSE(actualData.hasConnection(2, 3));
+}
+
+namespace
+{
+    ContentDesc createChainOfThreeObjects()
+    {
+        auto result = ContentDesc().addObjects({
+            ObjectDesc().id(1).pos({50, 50}).type(SolidDesc()),
+            ObjectDesc().id(2).pos({51, 50}).type(SolidDesc()),
+            ObjectDesc().id(3).pos({52, 50}).type(SolidDesc()),
+        });
+        result.addConnection(1, 2);
+        result.addConnection(2, 3);
+        return result;
+    }
+}
+
+TEST_F(EditTests, cutConnections_crossedConnection)
+{
+    _simulationFacade->setSimulationData(createChainOfThreeObjects());
+
+    _simulationFacade->cutConnections({50.5f, 49}, {50.5f, 51}, false, false);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_FALSE(actualData.hasConnection(1, 2));
+    EXPECT_FALSE(actualData.hasConnection(2, 1));
+    EXPECT_TRUE(actualData.hasConnection(2, 3));
+}
+
+TEST_F(EditTests, cutConnections_onlyInSelection)
+{
+    _simulationFacade->setSimulationData(createChainOfThreeObjects());
+    _simulationFacade->setSelection({50.5f, 49}, {52.5f, 51});
+
+    _simulationFacade->cutConnections({50.5f, 49}, {50.5f, 51}, true, false);
+    _simulationFacade->cutConnections({51.5f, 49}, {51.5f, 51}, true, false);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(actualData.hasConnection(1, 2));
+    EXPECT_FALSE(actualData.hasConnection(2, 3));
+    EXPECT_FALSE(actualData.hasConnection(3, 2));
 }

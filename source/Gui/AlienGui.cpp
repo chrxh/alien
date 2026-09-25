@@ -2008,6 +2008,7 @@ namespace
     auto constexpr ToolbarMenuIconOffset = 12.0f;
     auto constexpr ToolbarMenuTextOffset = 44.0f;
     auto constexpr ToolbarMenuRightPadding = 24.0f;
+    auto constexpr FloatingCardRounding = 12.0f;
 
     float calcToolbarWidth(std::vector<AlienGui::ToolbarItem> const& items, int numItems)
     {
@@ -2281,6 +2282,31 @@ void AlienGui::Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarI
     if (pendingAction) {
         pendingAction();
     }
+}
+
+float AlienGui::CalcToolbarWidth(std::vector<ToolbarItem> const& items)
+{
+    return calcToolbarWidth(items, toInt(items.size()));
+}
+
+float AlienGui::CalcToolbarHeight()
+{
+    return scale(ToolbarButtonSize) + 2 * scale(ToolbarGroupPadding);
+}
+
+void AlienGui::PushFloatingCardStyle(float padding)
+{
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(Const::FloatingCardBackgroundColor));
+    ImGui::PushStyleColor(ImGuiCol_Border, static_cast<ImVec4>(Const::FloatingCardBorderColor));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(scale(padding), scale(padding)));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, scale(FloatingCardRounding));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+}
+
+void AlienGui::PopFloatingCardStyle()
+{
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor(2);
 }
 
 void AlienGui::VerticalSeparator(float height)

@@ -84,19 +84,76 @@ int EditorModel::getDefaultColorCode() const
     return _defaultColorCode;
 }
 
-void EditorModel::setForceNoRollout(bool value)
+EditTool EditorModel::getTool() const
 {
-    _forceNoRollout = value;
+    return _tool;
 }
 
-void EditorModel::setRolloutToClusters(bool value)
+void EditorModel::setTool(EditTool value)
 {
-    if (!_forceNoRollout) {
-        _rolloutToClusters = value;
+    _tool = value;
+}
+
+bool EditorModel::isCreationTool() const
+{
+    return _tool != EditTool_Select && _tool != EditTool_Scissors;
+}
+
+bool EditorModel::isApplyToNetworks() const
+{
+    return _applyToNetworks != _scopeInvertedTemporarily;
+}
+
+bool EditorModel::isApplyToNetworksPersistent() const
+{
+    return _applyToNetworks;
+}
+
+void EditorModel::setApplyToNetworks(bool value)
+{
+    _applyToNetworks = value;
+}
+
+void EditorModel::setScopeInvertedTemporarily(bool value)
+{
+    _scopeInvertedTemporarily = value;
+}
+
+bool EditorModel::isGlueOnContact() const
+{
+    return _glueOnContact;
+}
+
+void EditorModel::setGlueOnContact(bool value)
+{
+    _glueOnContact = value;
+}
+
+bool EditorModel::isCutOnlyInSelection() const
+{
+    return _cutOnlyInSelection;
+}
+
+void EditorModel::setCutOnlyInSelection(bool value)
+{
+    _cutOnlyInSelection = value;
+}
+
+SelectionBounds EditorModel::getSelectionBounds(bool includeClusters) const
+{
+    auto const& data = _selectionShallowData;
+    if (includeClusters) {
+        return SelectionBounds{
+            .center = {data.clusterCenterPosX, data.clusterCenterPosY},
+            .velocity = {data.clusterCenterVelX, data.clusterCenterVelY},
+            .topLeft = {data.clusterMinPosX, data.clusterMinPosY},
+            .bottomRight = {data.clusterMaxPosX, data.clusterMaxPosY},
+        };
     }
-}
-
-bool EditorModel::isRolloutToClusters() const
-{
-    return _rolloutToClusters && !_forceNoRollout;
+    return SelectionBounds{
+        .center = {data.centerPosX, data.centerPosY},
+        .velocity = {data.centerVelX, data.centerVelY},
+        .topLeft = {data.minPosX, data.minPosY},
+        .bottomRight = {data.maxPosX, data.maxPosY},
+    };
 }

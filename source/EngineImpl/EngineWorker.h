@@ -101,6 +101,8 @@ public:
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData);
     void colorSelectedObjects(unsigned char color, bool includeClusters);
     void reconnectSelectedObjects();
+    void glueSelectedObjects(bool includeClusters);
+    void cutConnections(RealVector2D const& start, RealVector2D const& end, bool onlySelected, bool includeClusters);
     void setDetached(bool value);
 
     void runThreadLoop();

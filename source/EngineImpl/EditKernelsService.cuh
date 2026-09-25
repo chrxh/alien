@@ -24,6 +24,14 @@ public:
     void removeStickiness(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
     void setStatic(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value, bool includeClusters);
     void reconnect(KernelLaunchSettings const& launchSettings, SimulationData const& data);
+    void glueSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
+    void cutConnections(
+        KernelLaunchSettings const& launchSettings,
+        SimulationData const& data,
+        float2 const& cutStart,
+        float2 const& cutEnd,
+        bool onlySelected,
+        bool includeClusters);
     void changeSimulationData(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& changeTO);
     int injectGenomeToSelectedCreatures(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& to);  // to only contains 1 genome
     void colorSelectedCells(KernelLaunchSettings const& launchSettings, SimulationData const& data, unsigned char color, bool includeClusters);
@@ -37,6 +45,9 @@ public:
 
 private:
     EditKernelsService() = default;
+
+    void disconnectOverstretchedConnections(KernelLaunchSettings const& launchSettings, SimulationData const& data);
+    void connectSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters, bool onlyWithinSelection);
 
     // Gpu memory
     int* _cudaRolloutResult = nullptr;
