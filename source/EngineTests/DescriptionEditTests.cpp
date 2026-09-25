@@ -42,7 +42,7 @@ protected:
 
 TEST_F(DescriptionEditTests, correctConnections)
 {
-    auto origData = CreatorService::get().createRectangle(CreatorService::RectangleParameters().width(10).height(10).center({50.0f, 99.0f}));
+    auto origData = CreatorService::get().createRectangle(CreatorService::ObjectProperties(), {50.0f, 99.0f}, {10, 10}, 1.0f);
     _simulationFacade->setSimulationData(origData);
 
     auto data = _simulationFacade->getSimulationData();

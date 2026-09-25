@@ -130,7 +130,10 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = CreatorService::get().createHexagon(CreatorService::HexagonParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
+    auto hexagon = CreatorService::get().createHexagon(CreatorService::ObjectProperties(), {100.0f, 100.0f}, 10, 1.0f);
+    for (auto& object : hexagon._objects) {
+        object.type(CellDesc());
+    }
 
 
     auto data = ContentDesc().addCreature(
