@@ -49,16 +49,16 @@ ContentDesc CreatorService::createRectangle(ObjectProperties const& properties, 
     if (numObjects.x <= 0 || numObjects.y <= 0) {
         return {};
     }
-    auto result = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                        .objectType(getObjectTypeDesc(properties))
-                                                        .width(numObjects.x)
-                                                        .height(numObjects.y)
-                                                        .cellDistance(objectDistance)
-                                                        .stiffness(properties._stiffness)
-                                                        .sticky(properties._sticky)
-                                                        .color(properties._color)
-                                                        .center(center)
-                                                        .isStatic(properties._isStatic));
+    auto result = createRectangle(RectangleParameters()
+                                      .objectType(getObjectTypeDesc(properties))
+                                      .width(numObjects.x)
+                                      .height(numObjects.y)
+                                      .cellDistance(objectDistance)
+                                      .stiffness(properties._stiffness)
+                                      .sticky(properties._sticky)
+                                      .color(properties._color)
+                                      .center(center)
+                                      .isStatic(properties._isStatic));
     if (properties._material == CreationMaterial_EnergyParticle) {
         result = convertToEnergyParticles(properties, result);
     }
@@ -70,15 +70,15 @@ ContentDesc CreatorService::createHexagon(ObjectProperties const& properties, Re
     if (layers <= 0) {
         return {};
     }
-    auto result = DescEditService::get().createHex(DescEditService::CreateHexParameters()
-                                                       .objectType(getObjectTypeDesc(properties))
-                                                       .layers(layers)
-                                                       .cellDistance(objectDistance)
-                                                       .stiffness(properties._stiffness)
-                                                       .sticky(properties._sticky)
-                                                       .color(properties._color)
-                                                       .center(center)
-                                                       .isStatic(properties._isStatic));
+    auto result = createHexagon(HexagonParameters()
+                                    .objectType(getObjectTypeDesc(properties))
+                                    .layers(layers)
+                                    .cellDistance(objectDistance)
+                                    .stiffness(properties._stiffness)
+                                    .sticky(properties._sticky)
+                                    .color(properties._color)
+                                    .center(center)
+                                    .isStatic(properties._isStatic));
     if (properties._material == CreationMaterial_EnergyParticle) {
         result = convertToEnergyParticles(properties, result);
     } else {
@@ -217,6 +217,35 @@ ContentDesc CreatorService::createPolygon(ObjectProperties const& properties, st
     return createObjectNetwork(properties, distributeHexagonallyInPolygon(points, objectDistance), objectDistance * SurfaceConnectionFactor);
 }
 
+namespace
+{
+    std::vector<RealVector2D> distributeInCircle(RealVector2D const& center, float radius)
+    {
+        if (radius <= 1 + NEAR_ZERO) {
+            return {center};
+        }
+
+        std::vector<RealVector2D> result;
+        auto centerRow = toInt(center.y);
+        auto radiusRow = toInt(radius);
+
+        auto startYRow = centerRow - radiusRow;
+        auto radiusRounded = toFloat(radiusRow);
+        for (float dx = -radiusRounded; dx <= radiusRounded + NEAR_ZERO; dx += 1.0f) {
+            int row = 0;
+            for (float dy = -radiusRounded; dy <= radiusRounded + NEAR_ZERO; dy += 1.0f, ++row) {
+                float evenRowIncrement = (startYRow + row) % 2 == 0 ? 0.5f : 0.0f;
+                auto dxMod = dx + evenRowIncrement;
+                if (dxMod * dxMod + dy * dy > radiusRounded * radiusRounded + NEAR_ZERO) {
+                    continue;
+                }
+                result.emplace_back(RealVector2D{center.x + dxMod, center.y + dy});
+            }
+        }
+        return result;
+    }
+}
+
 ContentDesc CreatorService::createPencilDot(ObjectProperties const& properties, RealVector2D const& pos, float pencilRadius) const
 {
     auto alignedPos = pos;
@@ -224,16 +253,17 @@ ContentDesc CreatorService::createPencilDot(ObjectProperties const& properties, 
         alignedPos.x = toFloat(toInt(pos.x));
         alignedPos.y = toFloat(toInt(pos.y));
     }
-    auto result = DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
-                                                          .center(alignedPos)
-                                                          .radius(pencilRadius)
-                                                          .type(getObjectTypeDesc(properties))
-                                                          .stiffness(properties._stiffness)
-                                                          .sticky(properties._sticky)
-                                                          .cellDistance(1.0f)
-                                                          .color(properties._color)
-                                                          .isStatic(properties._isStatic)
-                                                          .connectObjects(false));
+    ContentDesc result;
+    auto const objectType = getObjectTypeDesc(properties);
+    for (auto const& objectPos : distributeInCircle(alignedPos, pencilRadius)) {
+        result._objects.emplace_back(ObjectDesc()
+                                         .pos(objectPos)
+                                         .stiffness(properties._stiffness)
+                                         .color(properties._color)
+                                         .isStatic(properties._isStatic)
+                                         .sticky(properties._sticky)
+                                         .type(objectType));
+    }
     return properties._material == CreationMaterial_EnergyParticle ? convertToEnergyParticles(properties, result) : result;
 }
 
@@ -326,6 +356,63 @@ ContentDesc CreatorService::createPatternFromImage(RgbImage const& image, RealVe
 
     DescEditService::get().reconnectObjects(result, ImageConnectionDistance);
     DescEditService::get().setCenter(result, center);
+    return result;
+}
+
+ContentDesc CreatorService::createRectangle(RectangleParameters const& parameters) const
+{
+    ContentDesc result;
+    for (int i = 0; i < parameters._width; ++i) {
+        for (int j = 0; j < parameters._height; ++j) {
+            result._objects.emplace_back(ObjectDesc()
+                                             .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
+                                             .stiffness(parameters._stiffness)
+                                             .color(parameters._color)
+                                             .isStatic(parameters._isStatic)
+                                             .sticky(parameters._sticky)
+                                             .type(parameters._objectType));
+        }
+    }
+    if (parameters._connectObjects) {
+        DescEditService::get().reconnectObjects(result, parameters._cellDistance * 1.1f);
+    }
+    DescEditService::get().setCenter(result, parameters._center);
+    return result;
+}
+
+ContentDesc CreatorService::createHexagon(HexagonParameters const& parameters) const
+{
+    ContentDesc result;
+    auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
+    for (int j = 0; j < parameters._layers; ++j) {
+        for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
+
+            // Create cell: upper layer
+            result._objects.emplace_back(ObjectDesc()
+                                             .stiffness(parameters._stiffness)
+                                             .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
+                                             .color(parameters._color)
+                                             .isStatic(parameters._isStatic)
+                                             .sticky(parameters._sticky)
+                                             .type(parameters._objectType));
+
+            // Create cell: under layer (except for 0-layer)
+            if (j > 0) {
+                result._objects.emplace_back(ObjectDesc()
+                                                 .stiffness(parameters._stiffness)
+                                                 .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
+                                                 .color(parameters._color)
+                                                 .isStatic(parameters._isStatic)
+                                                 .type(parameters._objectType));
+            }
+        }
+    }
+
+    if (parameters._connectObjects) {
+        DescEditService::get().reconnectObjects(result, parameters._cellDistance * 1.5f);
+    }
+    DescEditService::get().setCenter(result, parameters._center);
+
     return result;
 }
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/DescEditService.h>
+#include <EngineInterface/CreatorService.h>
 #include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -23,8 +23,8 @@ TEST_F(ObjectConnectionTests, decay)
     _parameters.cellDeathProbability.baseValue[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
-    auto origData = DescEditService::get().createRect(
-        DescEditService::CreateRectParameters().width(1).height(1).objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
+    auto origData = CreatorService::get().createRectangle(
+        CreatorService::RectangleParameters().width(1).height(1).objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

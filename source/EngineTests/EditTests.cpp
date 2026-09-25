@@ -5,7 +5,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescEditService.h>
+#include <EngineInterface/CreatorService.h>
 #include <EngineInterface/Descs.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -271,7 +271,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
 TEST_F(EditTests, setStatic_releaseAfterTimesteps)
 {
     auto const center = RealVector2D{50.0f, 50.0f};
-    auto data = DescEditService::get().createRect(DescEditService::CreateRectParameters().width(10).height(10).center(center).isStatic(true));
+    auto data = CreatorService::get().createRectangle(CreatorService::RectangleParameters().width(10).height(10).center(center).isStatic(true));
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
 

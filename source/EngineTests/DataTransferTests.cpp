@@ -3,6 +3,7 @@
 
 #include <gtest/gtest.h>
 
+#include <EngineInterface/CreatorService.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/Descs.h>
 #include <EngineInterface/NumberGenerator.h>
@@ -129,7 +130,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = DescEditService::get().createHex(DescEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
+    auto hexagon = CreatorService::get().createHexagon(CreatorService::HexagonParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
 
 
     auto data = ContentDesc().addCreature(

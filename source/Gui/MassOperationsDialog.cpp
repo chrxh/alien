@@ -6,9 +6,9 @@
 #include <Base/GlobalSettings.h>
 
 #include <EngineInterface/Colors.h>
-#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDescInfoService.h>
+#include <EngineInterface/MassOperationsService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -275,28 +275,28 @@ void MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        DescEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
+        MassOperationsService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        DescEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
+        MassOperationsService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        DescEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
+        MassOperationsService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        DescEditService::get().randomizeAges(content, _minAge, _maxAge);
+        MassOperationsService::get().randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        DescEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
+        MassOperationsService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
     if (_randomizeLineageId) {
-        DescEditService::get().randomizeLineageIds(content);
+        MassOperationsService::get().randomizeLineageIds(content);
     }
     if (_randomizeGlow) {
-        DescEditService::get().randomizeGlow(content, _minGlow, _maxGlow);
+        MassOperationsService::get().randomizeGlow(content, _minGlow, _maxGlow);
     }
     if (_randomizeMutationRates) {
-        DescEditService::get().setMutationRates(content, _mutationRates);
+        MassOperationsService::get().setMutationRates(content, _mutationRates);
     }
 
     if (_restrictToSelectedCreatures) {

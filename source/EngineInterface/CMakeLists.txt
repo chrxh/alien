@@ -32,6 +32,8 @@ add_library(EngineInterface
     InspectedEntityIds.h
     LocationHelper.cpp
     LocationHelper.h
+    MassOperationsService.cpp
+    MassOperationsService.h
     MultiplierService.cpp
     MultiplierService.h
     NameGeneratorService.cpp

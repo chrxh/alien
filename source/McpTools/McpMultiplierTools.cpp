@@ -28,8 +28,8 @@ std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
 {
     _context = &context;
 
-    auto const defaultGrid = DescEditService::GridMultiplyParameters();
-    auto const defaultRandom = DescEditService::RandomMultiplyParameters();
+    auto const defaultGrid = MultiplierService::GridParameters();
+    auto const defaultRandom = MultiplierService::RandomParameters();
 
     boost::json::object gridProperties;
     for (auto const& direction : {std::string("horizontal"), std::string("vertical")}) {
@@ -83,8 +83,8 @@ std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
 
 McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& arguments)
 {
-    auto defaults = DescEditService::GridMultiplyParameters();
-    auto parameters = DescEditService::GridMultiplyParameters()
+    auto defaults = MultiplierService::GridParameters();
+    auto parameters = MultiplierService::GridParameters()
                           .horizontalNumber(McpArguments::getInt(arguments, "horizontal_copies", 1))
                           .horizontalDistance(McpArguments::getOptionalFloat(arguments, "horizontal_distance", 0).value_or(defaults._horizontalDistance))
                           .horizontalAngleInc(McpArguments::getOptionalFloat(arguments, "horizontal_angle_increment").value_or(0))
@@ -106,8 +106,8 @@ McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& argu
 
 McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& arguments)
 {
-    auto defaults = DescEditService::RandomMultiplyParameters();
-    auto parameters = DescEditService::RandomMultiplyParameters()
+    auto defaults = MultiplierService::RandomParameters();
+    auto parameters = MultiplierService::RandomParameters()
                           .number(McpArguments::getInt(arguments, "copies", 1))
                           .minAngle(McpArguments::getOptionalFloat(arguments, "min_angle").value_or(defaults._minAngle))
                           .maxAngle(McpArguments::getOptionalFloat(arguments, "max_angle").value_or(defaults._maxAngle))

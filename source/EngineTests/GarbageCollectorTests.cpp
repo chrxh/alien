@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/DescEditService.h>
+#include <EngineInterface/CreatorService.h>
 #include <EngineInterface/Descs.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/NumberGenerator.h>
@@ -41,7 +41,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
 
     auto& numberGen = NumberGenerator::get();
 
-    auto data = DescEditService::get().createHex(DescEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
+    auto data = CreatorService::get().createHexagon(CreatorService::HexagonParameters().layers(10).center({100.0f, 100.0}));
     for (int i = 0; i < 100; ++i) {
         data._energies.emplace_back(EnergyDesc()
                                         .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
