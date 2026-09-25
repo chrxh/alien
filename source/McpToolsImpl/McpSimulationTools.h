@@ -5,8 +5,7 @@
 #include <Base/Singleton.h>
 
 #include <Network/McpServer.h>
-
-#include "McpToolContext.h"
+#include <McpToolsInterface/McpToolContext.h>
 
 class McpSimulationTools
 {

@@ -13,7 +13,7 @@
 #include <Base/Singleton.h>
 
 #include <Network/McpServer.h>
-#include <McpTools/McpToolContext.h>
+#include <McpToolsInterface/McpToolContext.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
@@ -54,7 +54,6 @@ private:
     RealVector2D getVisibleAreaSize() const override;
     void createSimulation(std::string const& projectName, IntVector2D const& worldSize) override;
     void onSelectionChanged() override;
-    std::optional<RgbImage> loadImage(std::filesystem::path const& path) const override;
     void showMessage(std::string const& message) override;
 
     void startServer();

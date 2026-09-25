@@ -1,5 +1,8 @@
 #include "ImageFileService.h"
 
+// Private copy of the implementation, ImFileDialog compiles its own
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 std::optional<RgbImage> ImageFileService::loadRgbImage(std::filesystem::path const& path) const

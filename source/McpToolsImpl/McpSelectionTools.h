@@ -8,8 +8,7 @@
 #include <EngineInterface/SelectionShallowData.h>
 
 #include <Network/McpServer.h>
-
-#include "McpToolContext.h"
+#include <McpToolsInterface/McpToolContext.h>
 
 class McpSelectionTools
 {
