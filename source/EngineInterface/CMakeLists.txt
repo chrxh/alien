@@ -30,8 +30,8 @@ add_library(EngineInterface
     GeometryBuffers.h
     Ids.h
     InspectedEntityIds.h
-    LocationHelper.cpp
-    LocationHelper.h
+    LocationEditService.cpp
+    LocationEditService.h
     MassOperationsService.cpp
     MassOperationsService.h
     MultiplierService.cpp

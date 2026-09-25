@@ -6,7 +6,7 @@
 
 #include <Base/Resources.h>
 
-#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/LocationEditService.h>
 #include <EngineInterface/SimulationParametersSpecification.h>
 #include <EngineInterface/SpecificationEvaluationService.h>
 
@@ -26,7 +26,7 @@ namespace
     {
         auto& evaluationService = SpecificationEvaluationService::get();
 
-        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
         auto defaultOrderNumber = [&] {
             if (locationType == LocationType::Base) {
                 return 0;
@@ -195,7 +195,7 @@ SimulationParameters SettingsParserService::decodeSimulationParameters(boost::pr
 {
     SimulationParameters result;
     encodeDecodeSimulationParameters(tree, result, SimulationParametersNode, ParserTask::Decode);
-    LocationHelper::assignLocationIds(result);
+    LocationEditService::get().assignLocationIds(result);
     return result;
 }
 

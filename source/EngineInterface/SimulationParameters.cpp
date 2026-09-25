@@ -2,7 +2,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "LocationHelper.h"
+#include "LocationEditService.h"
 #include "ParametersEditService.h"
 #include "SimulationParametersSpecification.h"
 
@@ -20,7 +20,7 @@ ParametersSpec const& SimulationParameters::getSpec()
             if (orderNumber == 0) {
                 return strength.values.at(0);
             } else {
-                auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+                auto sourceIndex = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
                 return parameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
             }
         };
@@ -29,7 +29,7 @@ ParametersSpec const& SimulationParameters::getSpec()
             auto& editService = ParametersEditService::get();
             auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
             auto editedStrength = strength;
-            int strengthIndex = orderNumber == 0 ? 0 : LocationHelper::findLocationArrayIndex(parameters, orderNumber) + 1;
+            int strengthIndex = orderNumber == 0 ? 0 : LocationEditService::get().findLocationArrayIndex(parameters, orderNumber) + 1;
             editedStrength.values.at(strengthIndex) = value;
             editService.adaptRadiationStrengths(editedStrength, strength, strengthIndex);
             editService.applyRadiationStrengths(parameters, editedStrength);

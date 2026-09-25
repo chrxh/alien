@@ -7,7 +7,7 @@
 
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/Descs.h>
-#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/LocationEditService.h>
 #include <EngineInterface/ParametersEditService.h>
 
 class ParametersEditServiceTests : public ::testing::Test
@@ -29,7 +29,7 @@ protected:
                 ++result.numSources;
             }
         }
-        LocationHelper::assignLocationIds(result);
+        LocationEditService::get().assignLocationIds(result);
         return result;
     }
 
@@ -88,7 +88,7 @@ protected:
                 continue;
             }
             auto origOrderNumber = orderNumber < insertedOrderNumber ? orderNumber : orderNumber - 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
@@ -100,7 +100,7 @@ protected:
                 continue;
             }
             auto origOrderNumber = orderNumber < insertedOrderNumber ? orderNumber : orderNumber - 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
@@ -117,20 +117,20 @@ protected:
         checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedOrderNumber);
 
         SimulationParameters defaultParameters;
-        auto locationType = LocationHelper::getLocationType(insertedOrderNumber, parameters);
-        auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
+        auto locationType = LocationEditService::get().getLocationType(insertedOrderNumber, parameters);
+        auto insertedArrayIndex = LocationEditService::get().findLocationArrayIndex(parameters, insertedOrderNumber);
 
         if (locationType == LocationType::Layer) {
             EXPECT_EQ(defaultParameters.layerCoreRadius.layerValues[0], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
 
             Char64 layerName;
-            StringHelper::copy(layerName, sizeof(Char64), LocationHelper::generateLayerName(origParameters));
+            StringHelper::copy(layerName, sizeof(Char64), LocationEditService::get().generateLayerName(origParameters));
             EXPECT_TRUE(StringHelper::compare(layerName, sizeof(Char64), parameters.layerName.layerValues[insertedArrayIndex]));
         } else if (locationType == LocationType::Source) {
             EXPECT_EQ(defaultParameters.sourceCircularRadius.sourceValues[0], parameters.sourceCircularRadius.sourceValues[insertedArrayIndex]);
 
             Char64 sourceName;
-            StringHelper::copy(sourceName, sizeof(Char64), LocationHelper::generateSourceName(origParameters));
+            StringHelper::copy(sourceName, sizeof(Char64), LocationEditService::get().generateSourceName(origParameters));
             EXPECT_TRUE(StringHelper::compare(sourceName, sizeof(Char64), parameters.sourceName.sourceValues[insertedArrayIndex]));
         }
     }
@@ -143,9 +143,9 @@ protected:
     {
         checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedOrderNumber);
 
-        auto locationType = LocationHelper::getLocationType(insertedOrderNumber, parameters);
-        auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
-        auto prevArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber - 1);
+        auto locationType = LocationEditService::get().getLocationType(insertedOrderNumber, parameters);
+        auto insertedArrayIndex = LocationEditService::get().findLocationArrayIndex(parameters, insertedOrderNumber);
+        auto prevArrayIndex = LocationEditService::get().findLocationArrayIndex(parameters, insertedOrderNumber - 1);
 
         if (locationType == LocationType::Layer) {
             EXPECT_EQ(parameters.layerCoreRadius.layerValues[prevArrayIndex], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
@@ -168,7 +168,7 @@ protected:
         for (int i = 0; i < parameters.numLayers; ++i) {
             auto orderNumber = parameters.layerOrderNumbers[i];
             auto origOrderNumber = orderNumber < deletedOrderNumber ? orderNumber : orderNumber + 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
@@ -177,7 +177,7 @@ protected:
         for (int i = 0; i < parameters.numSources; ++i) {
             auto orderNumber = parameters.sourceOrderNumbers[i];
             auto origOrderNumber = orderNumber < deletedOrderNumber ? orderNumber : orderNumber + 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
@@ -206,7 +206,7 @@ protected:
                 }
             }();
 
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
@@ -225,7 +225,7 @@ protected:
                     CHECK(false);
                 }
             }();
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
@@ -254,7 +254,7 @@ protected:
                 }
             }();
 
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_EQ(origParameters.layerIds[origArrayIndex], parameters.layerIds[i]);
@@ -273,7 +273,7 @@ protected:
                     CHECK(false);
                 }
             }();
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
+            auto origArrayIndex = LocationEditService::get().findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_EQ(origParameters.sourceIds[origArrayIndex], parameters.sourceIds[i]);
@@ -500,14 +500,14 @@ TEST_F(ParametersEditServiceTests, locationIds)
 {
     auto parameters = createTestData({LocationType::Source, LocationType::Layer, LocationType::Source});
 
-    EXPECT_EQ(0, LocationHelper::getLocationId(parameters, 0));
-    EXPECT_EQ(1, LocationHelper::getLocationId(parameters, 2));
-    EXPECT_EQ(2, LocationHelper::getLocationId(parameters, 1));
-    EXPECT_EQ(3, LocationHelper::getLocationId(parameters, 3));
-    EXPECT_EQ(std::optional(0), LocationHelper::findOrderNumber(parameters, 0));
-    EXPECT_EQ(std::optional(2), LocationHelper::findOrderNumber(parameters, 1));
-    EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, 4).has_value());
-    EXPECT_EQ(3, LocationHelper::getMaxLocationId(parameters));
+    EXPECT_EQ(0, LocationEditService::get().getLocationId(parameters, 0));
+    EXPECT_EQ(1, LocationEditService::get().getLocationId(parameters, 2));
+    EXPECT_EQ(2, LocationEditService::get().getLocationId(parameters, 1));
+    EXPECT_EQ(3, LocationEditService::get().getLocationId(parameters, 3));
+    EXPECT_EQ(std::optional(0), LocationEditService::get().findOrderNumber(parameters, 0));
+    EXPECT_EQ(std::optional(2), LocationEditService::get().findOrderNumber(parameters, 1));
+    EXPECT_FALSE(LocationEditService::get().findOrderNumber(parameters, 4).has_value());
+    EXPECT_EQ(3, LocationEditService::get().getMaxLocationId(parameters));
     EXPECT_LT(3, ParametersEditService::generateLocationId(parameters));
 }
 
@@ -515,31 +515,31 @@ TEST_F(ParametersEditServiceTests, locationIds_followLocation)
 {
     auto& editService = ParametersEditService::get();
     auto parameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source});
-    auto locationId = LocationHelper::getLocationId(parameters, 2);
+    auto locationId = LocationEditService::get().getLocationId(parameters, 2);
 
     editService.moveLocationUpwards(parameters, 2);
-    EXPECT_EQ(std::optional(1), LocationHelper::findOrderNumber(parameters, locationId));
+    EXPECT_EQ(std::optional(1), LocationEditService::get().findOrderNumber(parameters, locationId));
 
     editService.insertDefaultSource(parameters, 0, ParametersEditService::generateLocationId(parameters));
-    EXPECT_EQ(std::optional(2), LocationHelper::findOrderNumber(parameters, locationId));
+    EXPECT_EQ(std::optional(2), LocationEditService::get().findOrderNumber(parameters, locationId));
 
-    auto insertedLocationId = LocationHelper::getLocationId(parameters, 1);
+    auto insertedLocationId = LocationEditService::get().getLocationId(parameters, 1);
     editService.deleteLocation(parameters, 1);
-    EXPECT_EQ(std::optional(1), LocationHelper::findOrderNumber(parameters, locationId));
-    EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, insertedLocationId).has_value());
+    EXPECT_EQ(std::optional(1), LocationEditService::get().findOrderNumber(parameters, locationId));
+    EXPECT_FALSE(LocationEditService::get().findOrderNumber(parameters, insertedLocationId).has_value());
 }
 
 TEST_F(ParametersEditServiceTests, locationIds_notReusedAfterDeletion)
 {
     auto& editService = ParametersEditService::get();
     auto parameters = createTestData({LocationType::Layer, LocationType::Layer});
-    auto deletedLocationId = LocationHelper::getLocationId(parameters, 2);
+    auto deletedLocationId = LocationEditService::get().getLocationId(parameters, 2);
 
     editService.deleteLocation(parameters, 2);
     editService.insertDefaultLayer(parameters, 1, ParametersEditService::generateLocationId(parameters));
 
-    EXPECT_NE(deletedLocationId, LocationHelper::getLocationId(parameters, 2));
-    EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, deletedLocationId).has_value());
+    EXPECT_NE(deletedLocationId, LocationEditService::get().getLocationId(parameters, 2));
+    EXPECT_FALSE(LocationEditService::get().findOrderNumber(parameters, deletedLocationId).has_value());
 }
 
 TEST_F(ParametersEditServiceTests, insertDefaultSource_empty)
