@@ -9,10 +9,12 @@
 #include <Base/KernelTracer.h>
 #include <Base/Resources.h>
 
-#include <EngineInterface/DescEditService.h>
+#include <Base/Ids.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/DescEditService.h>
+
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/Ids.h>
-#include <EngineInterface/NumberGenerator.h>
 
 #include <EngineKernels/TOProvider.cuh>
 #include <EngineKernels/TOs.cuh>
@@ -183,11 +185,11 @@ void EngineWorker::removeStickiness(bool includeClusters)
     _simulationCudaFacade->removeStickiness(includeClusters);
 }
 
-void EngineWorker::setBarrier(bool value, bool includeClusters)
+void EngineWorker::setStatic(bool value, bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->setBarrier(value, includeClusters);
+    _simulationCudaFacade->setStatic(value, includeClusters);
 }
 
 void EngineWorker::changeCell(ExtendedObjectDesc const& changedCell)

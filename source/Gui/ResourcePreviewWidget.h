@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <EngineInterface/PreviewDesc.h>
+#include <Data/PreviewDesc.h>
 
 #include <Network/Definitions.h>
 

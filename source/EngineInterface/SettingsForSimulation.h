@@ -1,7 +1,8 @@
 #pragma once
 
+#include <Data/SimulationParameters.h>
+
 #include "KernelLaunchSettings.h"
-#include "SimulationParameters.h"
 
 struct SettingsForSimulation
 {

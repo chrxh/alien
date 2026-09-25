@@ -3,8 +3,8 @@
 #include <Base/Cache.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/ParametersFilterHash.h>
-#include <EngineInterface/SimulationParametersSpecification.h>
+#include <Data/ParametersFilterHash.h>
+#include <Data/SimulationParametersSpecification.h>
 
 #include "ColorMatrixDialog.h"
 #include "Definitions.h"

@@ -7,7 +7,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/PreviewDesc.h>
+#include <Data/PreviewDesc.h>
 
 #include "PictureData.h"
 

@@ -13,8 +13,9 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescEditService.h>
-#include <EngineInterface/GenomeDescInfoService.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
+
 #include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -128,7 +129,7 @@ void _GenomeEditorWidget::processStructureTree()
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
         _selectionChangedFromTree = false;
 
-        auto rootHull = GenomeDescInfoService::get().getReferencedGenesInRootGeneHull(_editData->genome);
+        auto rootHull = GenomeDescAccessService::get().getReferencedGenesInRootGeneHull(_editData->genome);
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
@@ -216,11 +217,11 @@ void _GenomeEditorWidget::processGeneNode(
 
     // Column 2: referenced genes
     ImGui::TableNextColumn();
-    AlienGui::Text(toIndexList(GenomeDescInfoService::get().getReferences(gene)));
+    AlienGui::Text(toIndexList(GenomeDescAccessService::get().getReferences(gene)));
 
     // Column 3: referencing genes
     ImGui::TableNextColumn();
-    AlienGui::Text(toIndexList(GenomeDescInfoService::get().getReferencedBy(_editData->genome, geneIndex)));
+    AlienGui::Text(toIndexList(GenomeDescAccessService::get().getReferencedBy(_editData->genome, geneIndex)));
 
     if (isOpen) {
         for (auto const& [index, node] : gene._nodes | boost::adaptors::indexed(0)) {
@@ -457,7 +458,7 @@ void _GenomeEditorWidget::onMoveNodeDownward()
 
 void _GenomeEditorWidget::onRemoveGene()
 {
-    auto referencedBy = GenomeDescInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
+    auto referencedBy = GenomeDescAccessService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
     if (!referencedBy.empty()) {
         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex); });
         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");

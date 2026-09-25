@@ -4,10 +4,10 @@
 
 #include <cuda_fp16.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/NeuralNetWeight.h>
-#include <EngineInterface/SimulationParametersTypes.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/EngineConstants.h>
+#include <Data/NeuralNetWeight.h>
+#include <Data/SimulationParametersTypes.h>
 
 struct NeuralNetGenome
 {

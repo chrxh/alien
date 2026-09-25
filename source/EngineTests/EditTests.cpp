@@ -5,8 +5,9 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -268,15 +269,15 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
     EXPECT_EQ(2, result);
 }
 
-TEST_F(EditTests, setBarrier_releaseAfterTimesteps)
+TEST_F(EditTests, setStatic_releaseAfterTimesteps)
 {
     auto const center = RealVector2D{50.0f, 50.0f};
-    auto data = DescEditService::get().createRect(DescEditService::CreateRectParameters().width(10).height(10).center(center).isStatic(true));
+    auto data = CreatorService::get().createRectangle(CreatorService::ObjectProperties().isStatic(true), center, {10, 10}, 1.0f);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
 
     _simulationFacade->setSelection({40, 40}, {60, 60});
-    _simulationFacade->setBarrier(false, true);
+    _simulationFacade->setStatic(false, true);
     _simulationFacade->calcTimesteps(10);
 
     auto actualData = _simulationFacade->getSimulationData();

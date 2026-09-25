@@ -16,9 +16,9 @@
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/SimulationParameters.h>
+#include <Data/Colors.h>
+#include <Data/EngineConstants.h>
+#include <Data/SimulationParameters.h>
 
 #include "ColorMatrixDialog.h"
 #include "GenericFileDialog.h"

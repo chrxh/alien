@@ -2,11 +2,11 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "AlienWindow.h"
-#include "LayerColorPalette.h"
 #include "SimulationParametersBaseWidget.h"
 
 class SimulationParametersMainWindow : public AlienWindow
@@ -54,8 +54,7 @@ private:
 
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
-    bool checkNumLayers(SimulationParameters const& parameters);
-    bool checkNumSources(SimulationParameters const& parameters);
+    void showMaxLocationsReachedMessage(LocationType locationType) const;
 
     float getMasterWidgetRefHeight() const;
     float getExpertWidgetRefHeight() const;
@@ -75,16 +74,14 @@ private:
     float _masterWidgetHeight = 0;
     float _expertWidgetHeight = 0;
 
-    LayerColorPalette _layerColorPalette;
-
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _sessionId;
 
     std::vector<Location> _locations;
     int _selectedOrderNumber = 0;
+    int _selectedLocationId = 0;
 
     int _locationWindowCounter = 0;
-    int _insertedLocationCounter = 0;
 
     std::string _fileDialogPath;
 

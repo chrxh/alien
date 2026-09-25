@@ -3,9 +3,12 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/CreatorService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <EngineTestData/DescTestDataFactory.h>
@@ -129,7 +132,10 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = DescEditService::get().createHex(DescEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
+    auto hexagon = CreatorService::get().createHexagon(CreatorService::ObjectProperties(), {100.0f, 100.0f}, 10, 1.0f);
+    for (auto& object : hexagon._objects) {
+        object.type(CellDesc());
+    }
 
 
     auto data = ContentDesc().addCreature(

@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #include "Definitions.h"
 #include "ModalWindow.h"

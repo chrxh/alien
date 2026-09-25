@@ -123,6 +123,12 @@ PUBLIC
     MainWindow.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
+    McpController.cpp
+    McpController.h
+    McpSettingsDialog.cpp
+    McpSettingsDialog.h
+    McpWindow.cpp
+    McpWindow.h
     ModalWindow.cpp
     ModalWindow.h
     MultiplierWindow.cpp
@@ -139,6 +145,8 @@ PUBLIC
     NeuralNetEditorWidget.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
+    NewSimulationService.cpp
+    NewSimulationService.h
     NewPasswordDialog.cpp
     NewPasswordDialog.h
     NodeEditorWidget.cpp
@@ -217,7 +225,10 @@ target_link_libraries(alien Base)
 target_link_libraries(alien ConsoleUi)
 target_link_libraries(alien EngineKernels)
 target_link_libraries(alien EngineImpl)
+target_link_libraries(alien Data)
 target_link_libraries(alien EngineInterface)
+target_link_libraries(alien McpToolsImpl)
+target_link_libraries(alien McpToolsInterface)
 target_link_libraries(alien Network)
 target_link_libraries(alien PersisterInterface)
 target_link_libraries(alien PersisterImpl)

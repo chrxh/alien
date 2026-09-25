@@ -6,8 +6,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

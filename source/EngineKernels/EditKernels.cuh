@@ -1,8 +1,9 @@
 #pragma once
 
-#include <EngineInterface/Colors.h>
+#include <Data/Colors.h>
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/ShallowUpdateSelectionData.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
@@ -31,7 +32,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters);
 __global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters);
-__global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClusters);
+__global__ void cudaSetStatic(SimulationData data, bool value, bool includeClusters);
 __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData data, int* result);
 __global__ void cudaPrepareConnectionChanges(SimulationData data);
 __global__ void cudaProcessDeleteConnectionChanges(SimulationData data);

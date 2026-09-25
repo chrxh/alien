@@ -1,7 +1,8 @@
 #pragma once
 
+#include <Data/SimulationParametersSpecification.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/SimulationParametersSpecification.h>
 
 #include "LocationWidget.h"
 

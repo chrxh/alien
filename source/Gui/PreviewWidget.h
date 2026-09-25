@@ -2,11 +2,12 @@
 
 #include <chrono>
 
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
+#include <Data/GenomeDescEditService.h>
+#include <Data/PreviewDesc.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/GenomeDescEditService.h>
-#include <EngineInterface/PreviewDesc.h>
 
 #include "Definitions.h"
 

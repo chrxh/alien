@@ -7,7 +7,7 @@
 
 #include <Base/Macros.h>
 
-#include <EngineInterface/PreviewDesc.h>
+#include <Data/PreviewDesc.h>
 
 #include "Definitions.h"
 #include "PreviewViewport.h"

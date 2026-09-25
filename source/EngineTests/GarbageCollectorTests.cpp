@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -41,7 +43,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
 
     auto& numberGen = NumberGenerator::get();
 
-    auto data = DescEditService::get().createHex(DescEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
+    auto data = CreatorService::get().createHexagon(CreatorService::ObjectProperties(), {100.0f, 100.0f}, 10, 1.0f);
     for (int i = 0; i < 100; ++i) {
         data._energies.emplace_back(EnergyDesc()
                                         .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})

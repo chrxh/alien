@@ -13,9 +13,9 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/PreviewDescConverterService.h>
-#include <EngineInterface/SpaceCalculator.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/PreviewDescConverterService.h>
+#include <Data/SpaceCalculator.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"

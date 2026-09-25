@@ -81,6 +81,7 @@ namespace Const
     extern ImColor const TableHeaderColor;
 
     extern ImColor const MonospaceColor;
+    extern ImColor const SoftHighlightTextColor;
     extern ImColor const StatusBarTextColor;
 
     extern ImColor const HeadlineColor;
@@ -95,6 +96,9 @@ namespace Const
     extern ImColor const ConstructionPreviewHintLineColor;
     extern ImColor const ConstructionPreviewPointColor;
     extern ImColor const ConstructionPreviewBrushColor;
+
+    extern ImColor const McpSuccessColor;
+    extern ImColor const McpRunningBadgeColor;
 
     extern ImColor const CellTypeOverlayColor;
     extern ImColor const CellTypeOverlayShadowColor;

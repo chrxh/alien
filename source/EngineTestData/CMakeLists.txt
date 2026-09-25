@@ -6,7 +6,7 @@ add_library(EngineTestData
     TestHelper.h)
 
 target_link_libraries(EngineTestData Base)
-target_link_libraries(EngineTestData EngineInterface)
+target_link_libraries(EngineTestData Data)
 
 target_link_libraries(EngineTestData Boost::boost)
 

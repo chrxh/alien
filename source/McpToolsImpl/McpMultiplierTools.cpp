@@ -1,0 +1,201 @@
+#include "McpMultiplierTools.h"
+
+#include <stdexcept>
+#include <format>
+
+#include <boost/json.hpp>
+
+#include <Base/StringHelper.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
+
+namespace
+{
+    auto constexpr MaxObjectsPerCommand = 1000000.0f;
+}
+
+std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
+{
+    _context = &context;
+
+    auto const defaultGrid = MultiplierService::GridParameters();
+    auto const defaultRandom = MultiplierService::RandomParameters();
+
+    boost::json::object gridProperties;
+    for (auto const& direction : {std::string("horizontal"), std::string("vertical")}) {
+        auto axis = direction == "horizontal" ? "x" : "y";
+        gridProperties[direction + "_copies"] = McpSchema::integer(std::format("Number of copies in {} direction, including the original", axis), 1);
+        auto defaultDistance = direction == "horizontal" ? defaultGrid._horizontalDistance : defaultGrid._verticalDistance;
+        gridProperties[direction + "_distance"] =
+            McpSchema::number(std::format("Distance between neighboring copies in {} direction. Default: {}", axis, defaultDistance), 0);
+        gridProperties[direction + "_angle_increment"] = McpSchema::number("Rotation added per copy in degrees. Default: 0");
+        gridProperties[direction + "_velocity_x_increment"] = McpSchema::number("Velocity in x direction added per copy. Default: 0");
+        gridProperties[direction + "_velocity_y_increment"] = McpSchema::number("Velocity in y direction added per copy. Default: 0");
+        gridProperties[direction + "_angular_velocity_increment"] = McpSchema::number("Angular velocity added per copy. Default: 0");
+    }
+
+    return {
+        McpTool{
+            .name = "multiply_selection_grid",
+            .description = "Arranges copies of the selection in a grid, like the grid multiplier in ALIEN. The selection always includes the connected "
+                           "cell networks and is replaced by all copies, which are selected afterwards.",
+            .inputSchema = McpSchema::object(gridProperties, {"horizontal_copies", "vertical_copies"}),
+            .handler = [this](boost::json::object const& arguments) { return multiplyInGrid(arguments); },
+        },
+        McpTool{
+            .name = "multiply_selection_random",
+            .description = "Adds copies of the selection at random positions in the whole world, like the random multiplier in ALIEN. The selection "
+                           "always includes the connected cell networks. The original and the copies are selected afterwards.",
+            .inputSchema = McpSchema::object(
+                {
+                    {"copies", McpSchema::integer("Number of additional copies", 1)},
+                    {"min_angle", McpSchema::number(std::format("Minimum rotation in degrees. Default: {}", defaultRandom._minAngle))},
+                    {"max_angle", McpSchema::number(std::format("Maximum rotation in degrees. Default: {}", defaultRandom._maxAngle))},
+                    {"min_velocity_x", McpSchema::number("Minimum velocity in x direction. Default: 0")},
+                    {"max_velocity_x", McpSchema::number("Maximum velocity in x direction. Default: 0")},
+                    {"min_velocity_y", McpSchema::number("Minimum velocity in y direction. Default: 0")},
+                    {"max_velocity_y", McpSchema::number("Maximum velocity in y direction. Default: 0")},
+                    {"min_angular_velocity", McpSchema::number("Minimum angular velocity. Default: 0")},
+                    {"max_angular_velocity", McpSchema::number("Maximum angular velocity. Default: 0")},
+                    {"overlapping_check",
+                     McpSchema::boolean(
+                         "Avoid copies that overlap the original selection or each other. Other objects in the world are not checked. Default: false")},
+                },
+                {"copies"}),
+            .handler = [this](boost::json::object const& arguments) { return multiplyRandomly(arguments); },
+        },
+        McpTool{
+            .name = "undo_multiplication",
+            .description = "Reverts the last multiplication made via MCP, as long as the selection has not changed since then.",
+            .inputSchema = McpSchema::object(),
+            .handler = [this](boost::json::object const&) { return undoMultiplication(); },
+        },
+    };
+}
+
+namespace
+{
+    void replaceSelection(ContentDesc&& content)
+    {
+        _SimulationFacade::get()->removeSelectedObjects(true);
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
+    }
+}
+
+McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& arguments)
+{
+    auto defaults = MultiplierService::GridParameters();
+    auto parameters = MultiplierService::GridParameters()
+                          .horizontalNumber(McpArguments::getInt(arguments, "horizontal_copies", 1))
+                          .horizontalDistance(McpArguments::getOptionalFloat(arguments, "horizontal_distance", 0).value_or(defaults._horizontalDistance))
+                          .horizontalAngleInc(McpArguments::getOptionalFloat(arguments, "horizontal_angle_increment").value_or(0))
+                          .horizontalVelXinc(McpArguments::getOptionalFloat(arguments, "horizontal_velocity_x_increment").value_or(0))
+                          .horizontalVelYinc(McpArguments::getOptionalFloat(arguments, "horizontal_velocity_y_increment").value_or(0))
+                          .horizontalAngularVelInc(McpArguments::getOptionalFloat(arguments, "horizontal_angular_velocity_increment").value_or(0))
+                          .verticalNumber(McpArguments::getInt(arguments, "vertical_copies", 1))
+                          .verticalDistance(McpArguments::getOptionalFloat(arguments, "vertical_distance", 0).value_or(defaults._verticalDistance))
+                          .verticalAngleInc(McpArguments::getOptionalFloat(arguments, "vertical_angle_increment").value_or(0))
+                          .verticalVelXinc(McpArguments::getOptionalFloat(arguments, "vertical_velocity_x_increment").value_or(0))
+                          .verticalVelYinc(McpArguments::getOptionalFloat(arguments, "vertical_velocity_y_increment").value_or(0))
+                          .verticalAngularVelInc(McpArguments::getOptionalFloat(arguments, "vertical_angular_velocity_increment").value_or(0));
+    checkSelectionForMultiplication(toFloat(parameters._horizontalNumber) * toFloat(parameters._verticalNumber));
+
+    auto origSelection = _SimulationFacade::get()->getSelectedSimulationData(true);
+    replaceSelection(MultiplierService::get().multiplyInGrid(origSelection, parameters));
+    storeForUndo(std::move(origSelection));
+    _context->onSelectionChanged();
+    return {.text = std::format("Arranged the selection in a {} x {} grid. {}", parameters._horizontalNumber, parameters._verticalNumber, describeSelection())};
+}
+
+namespace
+{
+    void checkMinMax(float min, float max, std::string const& minKey, std::string const& maxKey)
+    {
+        if (min > max) {
+            throw std::invalid_argument(std::format("'{}' must not be greater than '{}'.", minKey, maxKey));
+        }
+    }
+}
+
+McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& arguments)
+{
+    auto defaults = MultiplierService::RandomParameters();
+    auto parameters = MultiplierService::RandomParameters()
+                          .number(McpArguments::getInt(arguments, "copies", 1))
+                          .minAngle(McpArguments::getOptionalFloat(arguments, "min_angle").value_or(defaults._minAngle))
+                          .maxAngle(McpArguments::getOptionalFloat(arguments, "max_angle").value_or(defaults._maxAngle))
+                          .minVelX(McpArguments::getOptionalFloat(arguments, "min_velocity_x").value_or(0))
+                          .maxVelX(McpArguments::getOptionalFloat(arguments, "max_velocity_x").value_or(0))
+                          .minVelY(McpArguments::getOptionalFloat(arguments, "min_velocity_y").value_or(0))
+                          .maxVelY(McpArguments::getOptionalFloat(arguments, "max_velocity_y").value_or(0))
+                          .minAngularVel(McpArguments::getOptionalFloat(arguments, "min_angular_velocity").value_or(0))
+                          .maxAngularVel(McpArguments::getOptionalFloat(arguments, "max_angular_velocity").value_or(0))
+                          .overlappingCheck(McpArguments::getOptionalBool(arguments, "overlapping_check").value_or(false))
+                          .maxDelta(_SimulationFacade::get()->getWorldSize());
+    checkMinMax(parameters._minAngle, parameters._maxAngle, "min_angle", "max_angle");
+    checkMinMax(parameters._minVelX, parameters._maxVelX, "min_velocity_x", "max_velocity_x");
+    checkMinMax(parameters._minVelY, parameters._maxVelY, "min_velocity_y", "max_velocity_y");
+    checkMinMax(parameters._minAngularVel, parameters._maxAngularVel, "min_angular_velocity", "max_angular_velocity");
+    checkSelectionForMultiplication(toFloat(parameters._number) + 1.0f);
+
+    auto origSelection = _SimulationFacade::get()->getSelectedSimulationData(true);
+    auto multiplication = MultiplierService::get().multiplyRandomly(origSelection, parameters);
+    replaceSelection(std::move(multiplication.content));
+    storeForUndo(std::move(origSelection));
+    _context->onSelectionChanged();
+
+    auto text = std::format("Added {} copies at random positions. {}", parameters._number, describeSelection());
+    if (!multiplication.overlappingCheckSuccessful) {
+        text += " Not all copies could be placed without overlapping the original selection or each other.";
+    }
+    return {.text = text};
+}
+
+McpToolResult McpMultiplierTools::undoMultiplication()
+{
+    if (!_origSelection) {
+        throw std::invalid_argument("There is no multiplication to undo.");
+    }
+    if (!_selectionAfterMultiplication->compareSizes(_SimulationFacade::get()->getSelectionShallowData())) {
+        throw std::invalid_argument("The selection has changed since the last multiplication, so it can no longer be undone.");
+    }
+    replaceSelection(std::move(*_origSelection));
+    _context->onSelectionChanged();
+    _origSelection.reset();
+    _selectionAfterMultiplication.reset();
+    return {.text = "Reverted the last multiplication. " + describeSelection()};
+}
+
+void McpMultiplierTools::checkSelectionForMultiplication(float numCopies) const
+{
+    auto selection = _SimulationFacade::get()->getSelectionShallowData();
+    auto numEntities = selection.numClusterCells + selection.numEnergyParticles;
+    if (numEntities == 0) {
+        throw std::invalid_argument("Nothing is selected. Select an area with select_area first.");
+    }
+    auto estimatedNumEntities = toFloat(numEntities) * numCopies;
+    if (estimatedNumEntities > MaxObjectsPerCommand) {
+        throw std::invalid_argument(std::format(
+            "This would result in about {} objects, but at most {} are allowed per command.",
+            StringHelper::format(static_cast<uint64_t>(estimatedNumEntities)),
+            StringHelper::format(static_cast<uint64_t>(MaxObjectsPerCommand))));
+    }
+}
+
+void McpMultiplierTools::storeForUndo(ContentDesc&& origSelection)
+{
+    _origSelection = std::move(origSelection);
+    _selectionAfterMultiplication = _SimulationFacade::get()->getSelectionShallowData();
+}
+
+std::string McpMultiplierTools::describeSelection() const
+{
+    auto selection = _SimulationFacade::get()->getSelectionShallowData();
+    return std::format(
+        "The selection now contains {} objects and {} energy particles.",
+        StringHelper::format(static_cast<uint64_t>(selection.numClusterCells)),
+        StringHelper::format(static_cast<uint64_t>(selection.numEnergyParticles)));
+}

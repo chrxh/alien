@@ -1,7 +1,8 @@
 #include "SimulationParametersLayerWidget.h"
 
-#include <EngineInterface/LocationHelper.h>
-#include <EngineInterface/ParametersValidationService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/ParametersValidationService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -20,7 +21,7 @@ void _SimulationParameterLayerWidget::process(ParametersFilter const& filter)
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto layerIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
+    auto layerIndex = LocationAccessService::get().findLocationArrayIndex(parameters, _orderNumber);
     _layerName = std::string(parameters.layerName.layerValues[layerIndex]);
 
     ImGui::PushID("Layer");

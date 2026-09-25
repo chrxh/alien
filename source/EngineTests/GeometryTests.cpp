@@ -5,7 +5,8 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/Descs.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 

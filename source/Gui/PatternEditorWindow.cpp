@@ -6,8 +6,9 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/DescEditService.h>
+#include <Data/Colors.h>
+#include <Data/DescEditService.h>
+
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -165,13 +166,13 @@ void PatternEditorWindow::processIntern()
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_LINK)) {
-            onSetBarrier(true);
+            onSetStatic(true);
         }
         AlienGui::Tooltip("Fix");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_UNLINK)) {
-            onSetBarrier(false);
+            onSetStatic(false);
         }
         AlienGui::Tooltip("Unfix");
         ImGui::EndDisabled();
@@ -330,9 +331,9 @@ void PatternEditorWindow::onRemoveStickiness()
     _SimulationFacade::get()->removeStickiness(EditorModel::get().isRolloutToClusters());
 }
 
-void PatternEditorWindow::onSetBarrier(bool value)
+void PatternEditorWindow::onSetStatic(bool value)
 {
-    _SimulationFacade::get()->setBarrier(value, EditorModel::get().isRolloutToClusters());
+    _SimulationFacade::get()->setStatic(value, EditorModel::get().isRolloutToClusters());
 }
 
 bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)

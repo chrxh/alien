@@ -7,12 +7,12 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/PreviewDesc.h>
-#include <EngineInterface/SimulationParametersTypes.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/Colors.h>
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDesc.h>
+#include <Data/PreviewDesc.h>
+#include <Data/SimulationParametersTypes.h>
 
 #include "Definitions.h"
 #include "StyleService.h"

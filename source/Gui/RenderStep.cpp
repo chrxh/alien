@@ -4,7 +4,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
+
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 

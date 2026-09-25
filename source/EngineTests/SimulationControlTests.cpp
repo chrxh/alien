@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "IntegrationTestFramework.h"
 

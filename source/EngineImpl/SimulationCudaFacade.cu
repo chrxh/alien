@@ -13,11 +13,13 @@
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
 
-#include <EngineInterface/Ids.h>
+#include <Base/Ids.h>
+
+#include <Data/SimulationParameters.h>
+#include <Data/SpaceCalculator.h>
+
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/KernelLaunchSettings.h>
-#include <EngineInterface/SimulationParameters.h>
-#include <EngineInterface/SpaceCalculator.h>
 
 #include <iomanip>
 #include <sstream>
@@ -307,9 +309,9 @@ void _SimulationCudaFacade::removeStickiness(bool includeClusters)
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::setBarrier(bool value, bool includeClusters)
+void _SimulationCudaFacade::setStatic(bool value, bool includeClusters)
 {
-    EditKernelsService::get().setBarrier(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value, includeClusters);
+    EditKernelsService::get().setStatic(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value, includeClusters);
     syncAndCheck();
 }
 

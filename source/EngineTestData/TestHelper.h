@@ -7,8 +7,8 @@
 #include <Base/Definitions.h>
 #include <Base/Math.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 class TestHelper
 {

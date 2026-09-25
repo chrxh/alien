@@ -2,9 +2,10 @@
 
 #include <atomic>
 
+#include <Data/CellTypeConstants.h>
+#include <Data/Colors.h>
+
 #include <EngineInterface/ArraySizesForGpuEntities.h>
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/Colors.h>
 #include <EngineInterface/KernelLaunchSettings.h>
 
 #include "CudaNumberGenerator.cuh"

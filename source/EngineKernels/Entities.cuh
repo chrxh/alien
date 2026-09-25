@@ -2,10 +2,11 @@
 
 #include <cuda_fp16.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/EngineConstants.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/EngineConstants.h>
+#include <Data/NeuralNetWeight.h>
+
 #include <EngineInterface/KernelLaunchSettings.h>
-#include <EngineInterface/NeuralNetWeight.h>
 
 #include "Array.cuh"
 #include "Genome.cuh"

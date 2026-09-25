@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <EngineInterface/SimulationParameters.h>
-#include <EngineInterface/SpaceCalculator.h>
+#include <Data/SimulationParameters.h>
+#include <Data/SpaceCalculator.h>
 
 #include <EngineKernels/Base.cuh>
 #include <EngineKernels/SimulationData.cuh>

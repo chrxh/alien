@@ -6,8 +6,8 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/DescValidationService.h>
-#include <EngineInterface/GenomeDescInfoService.h>
+#include <Data/DescValidationService.h>
+#include <Data/GenomeDescAccessService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"
@@ -229,7 +229,7 @@ void _GenomeTabWidget::processStatusBar()
 
     auto const& genome = _editData->genome;
     auto numGenes = toInt(genome._genes.size());
-    auto numNodes = GenomeDescInfoService::get().getNumberOfNodes(genome);
+    auto numNodes = GenomeDescAccessService::get().getNumberOfNodes(genome);
 
     std::vector<std::string> statusItems;
     statusItems.emplace_back(std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes"));
