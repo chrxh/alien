@@ -13,6 +13,8 @@ add_library(Base
     GlobalSettings.cpp
     GlobalSettings.h
     Hashes.h
+    ImageFileService.cpp
+    ImageFileService.h
     JsonParser.h
     KernelProfiler.cpp
     KernelProfiler.h
@@ -29,6 +31,7 @@ add_library(Base
     Physics.h
     Resources.cpp
     Resources.h
+    RgbImage.h
     Singleton.h
     StringHelper.cpp
     StringHelper.h

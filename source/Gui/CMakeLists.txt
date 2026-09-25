@@ -89,8 +89,6 @@ PUBLIC
     GuiLogger.cpp
     GuiLogger.h
     HelpStrings.h
-    ImageFileService.cpp
-    ImageFileService.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
     InspectionWindow.cpp
@@ -228,7 +226,8 @@ target_link_libraries(alien ConsoleUi)
 target_link_libraries(alien EngineKernels)
 target_link_libraries(alien EngineImpl)
 target_link_libraries(alien EngineInterface)
-target_link_libraries(alien McpTools)
+target_link_libraries(alien McpToolsImpl)
+target_link_libraries(alien McpToolsInterface)
 target_link_libraries(alien Network)
 target_link_libraries(alien PersisterInterface)
 target_link_libraries(alien PersisterImpl)

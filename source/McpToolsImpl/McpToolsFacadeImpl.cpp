@@ -1,4 +1,4 @@
-#include "McpToolsService.h"
+#include "McpToolsFacadeImpl.h"
 
 #include "McpCreatorTools.h"
 #include "McpMultiplierTools.h"
@@ -6,7 +6,12 @@
 #include "McpSelectionTools.h"
 #include "McpSimulationTools.h"
 
-std::vector<McpTool> McpToolsService::getTools(McpToolContext& context)
+void _McpToolsFacadeImpl::set(McpToolsFacade const& instance)
+{
+    _instance = instance;
+}
+
+std::vector<McpTool> _McpToolsFacadeImpl::getTools(McpToolContext& context)
 {
     std::vector<McpTool> result;
     for (auto const& tools :

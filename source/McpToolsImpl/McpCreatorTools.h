@@ -9,8 +9,7 @@
 #include <EngineInterface/Descs.h>
 
 #include <Network/McpServer.h>
-
-#include "McpToolContext.h"
+#include <McpToolsInterface/McpToolContext.h>
 
 class McpCreatorTools
 {

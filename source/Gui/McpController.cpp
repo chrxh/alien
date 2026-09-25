@@ -12,11 +12,10 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
-#include <McpTools/McpToolsService.h>
+#include <McpToolsInterface/McpToolsFacade.h>
 
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
-#include "ImageFileService.h"
 #include "MainLoopController.h"
 #include "NewSimulationService.h"
 #include "OverlayController.h"
@@ -144,11 +143,6 @@ void McpController::onSelectionChanged()
     EditorModel::get().update();
 }
 
-std::optional<RgbImage> McpController::loadImage(std::filesystem::path const& path) const
-{
-    return ImageFileService::get().loadRgbImage(path);
-}
-
 void McpController::showMessage(std::string const& message)
 {
     printOverlayMessage(message);
@@ -190,7 +184,7 @@ void McpController::stopServer()
 std::vector<McpTool> McpController::createTools()
 {
     std::vector<McpTool> result;
-    for (auto const& tool : McpToolsService::get().getTools(*this)) {
+    for (auto const& tool : _McpToolsFacade::get()->getTools(*this)) {
         result.emplace_back(wrapTool(tool));
     }
     return result;

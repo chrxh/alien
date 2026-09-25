@@ -8,6 +8,7 @@
 
 #include <boost/json.hpp>
 
+#include <Base/ImageFileService.h>
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
 
@@ -272,7 +273,7 @@ McpToolResult McpCreatorTools::createPatternFromImage(boost::json::object const&
         throw std::invalid_argument(std::format("The file '{}' does not exist.", filePath));
     }
     auto center = getCenter(arguments);
-    auto image = _context->loadImage(path);
+    auto image = ImageFileService::get().loadRgbImage(path);
     if (!image) {
         throw std::invalid_argument(std::format("The file '{}' could not be read as an image.", filePath));
     }
