@@ -4,8 +4,9 @@
 #include <unordered_set>
 #include <queue>
 
+#include <Base/NumberGenerator.h>
+
 #include "GenomeDesc.h"
-#include "NumberGenerator.h"
 
 namespace
 {

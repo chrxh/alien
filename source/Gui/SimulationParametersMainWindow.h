@@ -2,8 +2,9 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "AlienWindow.h"
 #include "SimulationParametersBaseWidget.h"

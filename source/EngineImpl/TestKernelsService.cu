@@ -1,6 +1,6 @@
 #include "TestKernelsService.cuh"
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <EngineKernels/KernelLauncher.cuh>
 #include <EngineKernels/Macros.cuh>

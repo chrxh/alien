@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/GenomeDescAccessService.h>
+#include <Data/GenomeDesc.h>
+#include <Data/GenomeDescAccessService.h>
 
 class GenomeDescAccessServiceTests : public ::testing::Test
 {

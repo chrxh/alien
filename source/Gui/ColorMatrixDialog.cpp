@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

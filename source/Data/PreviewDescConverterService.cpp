@@ -4,7 +4,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescEditService.h>
+#include "DescEditService.h"
 
 #include "SpaceCalculator.h"
 

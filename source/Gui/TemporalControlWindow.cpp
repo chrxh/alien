@@ -7,8 +7,9 @@
 #include <Base/Definitions.h>
 #include <Base/StringHelper.h>
 
+#include <Data/SpaceCalculator.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SpaceCalculator.h>
 
 #include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/EngineConstants.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/EngineConstants.h>
 
 #include "ConstantMemory.cuh"
 #include "GeneGraphProcessor.cuh"

@@ -11,7 +11,7 @@
 #include <Base/Math.h>
 #include <Base/Physics.h>
 
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
 #include "GenomeDesc.h"
 #include "SpaceCalculator.h"

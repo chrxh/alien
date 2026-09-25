@@ -9,10 +9,12 @@
 #include <Base/KernelTracer.h>
 #include <Base/Resources.h>
 
-#include <EngineInterface/DescEditService.h>
+#include <Base/Ids.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/DescEditService.h>
+
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/Ids.h>
-#include <EngineInterface/NumberGenerator.h>
 
 #include <EngineKernels/TOProvider.cuh>
 #include <EngineKernels/TOs.cuh>

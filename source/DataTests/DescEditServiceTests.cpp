@@ -4,10 +4,11 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
-#include <EngineInterface/SpaceCalculator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+#include <Data/SpaceCalculator.h>
 
 class DescEditServiceTests : public ::testing::Test
 {

@@ -10,17 +10,18 @@
 
 #include <Base/Definitions.h>
 
+#include <Data/PreviewDesc.h>
+#include <Data/SimulationParameters.h>
+#include <Data/StatisticsHistory.h>
+
 #include <EngineInterface/ArraySizesForGpuEntities.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/StatisticsEntry.h>
-#include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
-#include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
-#include <EngineInterface/StatisticsHistory.h>
 
 #include <EngineKernels/Definitions.h>
 

@@ -3,9 +3,10 @@
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
 
+#include <Data/CellTypeConstants.h>
+#include <Data/EngineConstants.h>
+
 #include <EngineInterface/ArraySizesForTOs.h>
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/EngineConstants.h>
 
 #include "GenomeTO.cuh"
 #include <stdint.h>

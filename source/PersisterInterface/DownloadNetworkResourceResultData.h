@@ -4,8 +4,8 @@
 
 #include <Network/Definitions.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 struct DownloadNetworkResourceResultData
 {

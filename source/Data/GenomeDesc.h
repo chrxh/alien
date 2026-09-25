@@ -10,7 +10,7 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/NeuralNetWeight.h>
+#include "NeuralNetWeight.h"
 
 #include "CellTypeConstants.h"
 #include "EngineConstants.h"

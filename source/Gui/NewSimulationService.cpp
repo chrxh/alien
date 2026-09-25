@@ -2,8 +2,9 @@
 
 #include <Base/StringHelper.h>
 
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "TemporalControlWindow.h"
 #include "Viewport.h"

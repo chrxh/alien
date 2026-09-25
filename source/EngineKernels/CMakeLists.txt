@@ -86,6 +86,7 @@ add_library(EngineKernels
     )
 
 target_link_libraries(EngineKernels Base)
+target_link_libraries(EngineKernels Data)
 target_link_libraries(EngineKernels EngineInterface)
 target_link_libraries(EngineKernels OpenGL::GL)
 target_link_libraries(EngineKernels glad::glad)

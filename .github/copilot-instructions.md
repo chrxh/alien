@@ -37,6 +37,7 @@ cmake --build build --config Release -j32
 cd build
 
 # Tests
+./DataTests             # <1 second
 ./EngineInterfaceTests  # <1 second
 ./NetworkTests          # <1 second
 ./PersisterTests        # ~1.4 seconds
@@ -65,18 +66,19 @@ cd build
 ## Validation
 
 ### Build Validation
-- **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `EngineInterfaceTests`, `NetworkTests`, `PersisterTests`
+- **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `DataTests`, `EngineInterfaceTests`, `NetworkTests`, `PersisterTests`
 - **Build time**: ~1 min on 32-core system with `-j32` parallelization
 - **Clean configuration**: ~6 seconds
 - **No build errors or warnings** when following the exact commands above
 
 ### Test Validation  
+- **DataTests**: tests pass in <1 second
 - **EngineInterfaceTests**: tests pass in <1 second
 - **NetworkTests**: tests pass in <1 second
 - **PersisterTests**: tests pass in ~1.4 seconds
 - **EngineTests**: tests pass in >4 min
 - Pure GUI-only changes in `source/Gui/` that do not affect engine, network, persistence, or CLI logic do **not** require running tests
-- For all other changes, run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
+- For all other changes, run `./DataTests && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
 - `./EngineTests` are most important and contain the entire simulation logic written in CUDA
 
 ### Application Validation
@@ -96,7 +98,7 @@ clang-format --style=file:source/_clang-format -i path/to/modified/files.cpp
 cmake --build build --config Release -j32
 
 # 3. Run core tests (required unless the change is pure GUI-only in source/Gui)
-cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests & ./EngineTests
+cd build && ./DataTests && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests & ./EngineTests
 
 # 4. Test CLI functionality
 ./cli --help
@@ -122,6 +124,8 @@ find source -name "*.cpp" -o -name "*.h" | xargs clang-format --style=file:sourc
 - `source/`: Main C++ and CUDA source code
   - `source/Base/`: Common utilities, math, logging
   - `source/Cli/`: Command-line interface
+  - `source/Data/`: Descriptions, genomes, simulation parameters and their services
+  - `source/DataTests/`: Unit tests for Data
   - `source/EngineGpuKernels/`: CUDA kernels for simulation
   - `source/EngineImpl/`: CPU-side engine implementation
   - `source/EngineInterface/`: Abstract simulation APIs
@@ -164,6 +168,7 @@ Python automation tools are available in `scripts/CLI-Tools/`:
 
 ### Architecture Overview
 The engine follows a layered architecture:
+- **Data Layer** (`Data/`): Descriptions, genomes, simulation parameters and the services to read and edit them
 - **Interface Layer** (`EngineInterface/`): Abstract APIs for simulation operations
 - **Implementation Layer** (`EngineImpl/`): CPU-side coordination and data management
 - **GPU Compute Layer** (`EngineGpuKernels/`): CUDA kernels for parallel simulation
@@ -173,7 +178,7 @@ The engine follows a layered architecture:
 - **Test naming**: `*Tests.cpp` files, descriptive test method names
 - **Test types**: Unit tests (preferred), integration tests, performance tests
 - **GPU tests**: Require NVIDIA hardware, will fail in CI without GPU
-- **Always run**: `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests` to verify core functionality
+- **Always run**: `./DataTests && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests` to verify core functionality
 
 ### Performance & Debugging
 - **CUDA debugging**: Use `cuda-gdb` or Nsight Compute for kernel debugging

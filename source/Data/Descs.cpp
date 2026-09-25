@@ -8,7 +8,7 @@
 #include <Base/Math.h>
 #include <Base/Physics.h>
 
-#include "NumberGenerator.h"
+#include <Base/NumberGenerator.h>
 
 NeuralNetDesc::NeuralNetDesc()
 {

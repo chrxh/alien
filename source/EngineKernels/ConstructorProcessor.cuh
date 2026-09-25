@@ -1,6 +1,7 @@
 #pragma once
 
-#include <EngineInterface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
+
 #include <EngineInterface/ShapeGenerator.h>
 
 #include "CellProcessor.cuh"

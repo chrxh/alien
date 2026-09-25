@@ -7,8 +7,9 @@
 
 #include <Shaders/ShaderSources.h>
 
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "Definitions.h"
 

@@ -12,7 +12,8 @@
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <Network/McpArguments.h>

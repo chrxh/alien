@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

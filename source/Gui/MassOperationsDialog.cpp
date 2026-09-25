@@ -5,10 +5,11 @@
 #include <Base/Definitions.h>
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDescAccessService.h>
-#include <EngineInterface/MassOperationsService.h>
+#include <Data/Colors.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/MassOperationsService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

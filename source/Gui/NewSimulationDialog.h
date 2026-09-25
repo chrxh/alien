@@ -2,9 +2,10 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/Descs.h>
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

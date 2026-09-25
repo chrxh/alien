@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #include "CellFunctionChannels.h"
 #include "Definitions.h"

@@ -7,7 +7,7 @@
 #include <Base/JsonParser.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include "Definitions.h"
 

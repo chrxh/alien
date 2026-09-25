@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "NumberGenerator.h"
+#include <Base/NumberGenerator.h>
 
 NeuralNetGenomeDesc::NeuralNetGenomeDesc()
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 #include "ConstructorHelper.cuh"
 #include "MuscleProcessor.cuh"

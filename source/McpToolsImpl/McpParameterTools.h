@@ -4,7 +4,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/SimulationParametersTypes.h>
+#include <Data/SimulationParametersTypes.h>
 
 #include <Network/McpServer.h>
 

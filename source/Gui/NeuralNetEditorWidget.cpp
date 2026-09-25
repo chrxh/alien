@@ -10,8 +10,9 @@
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/CellTypeConstants.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

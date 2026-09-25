@@ -13,8 +13,9 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescAccessService.h>
-#include <EngineInterface/GenomeDescEditService.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
+
 #include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 

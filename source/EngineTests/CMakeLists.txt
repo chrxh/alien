@@ -66,6 +66,7 @@ PUBLIC
 target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineKernels)
 target_link_libraries(EngineTests EngineImpl)
+target_link_libraries(EngineTests Data)
 target_link_libraries(EngineTests EngineInterface)
 target_link_libraries(EngineTests PersisterInterface)
 target_link_libraries(EngineTests EngineTestData)

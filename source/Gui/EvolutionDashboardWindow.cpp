@@ -17,10 +17,11 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/ObjectColoring.h>
+#include <Data/Descs.h>
+#include <Data/ObjectColoring.h>
+#include <Data/SimulationParametersTypes.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SimulationParametersTypes.h>
 
 #include "AlienGui.h"
 #include "GenomeEditorWindow.h"

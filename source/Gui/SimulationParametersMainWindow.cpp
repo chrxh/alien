@@ -6,9 +6,10 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/LocationAccessService.h>
-#include <EngineInterface/LocationEditService.h>
-#include <EngineInterface/RadiationStrengthService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/LocationEditService.h>
+#include <Data/RadiationStrengthService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>

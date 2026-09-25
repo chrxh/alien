@@ -10,7 +10,7 @@
 #include <Base/Macros.h>
 #include <Base/MathTypes.h>
 
-#include <EngineInterface/NeuralNetWeight.h>
+#include "NeuralNetWeight.h"
 
 #include "Definitions.h"
 #include "GenomeDesc.h"

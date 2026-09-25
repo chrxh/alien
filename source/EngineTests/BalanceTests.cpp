@@ -2,10 +2,12 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
+
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/SerializerService.h>
 

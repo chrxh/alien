@@ -4,8 +4,8 @@
 
 #include <optional>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/PreviewDesc.h>
+#include "Descs.h"
+#include "PreviewDesc.h"
 
 struct ConversionResult
 {

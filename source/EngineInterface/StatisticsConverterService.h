@@ -2,7 +2,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/DataPointCollection.h>
+#include <Data/DataPointCollection.h>
+
 #include <EngineInterface/StatisticsEntry.h>
 
 class StatisticsConverterService

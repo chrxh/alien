@@ -1,7 +1,8 @@
 #include "MultiplierService.h"
 
+#include <Base/NumberGenerator.h>
+
 #include "DescEditService.h"
-#include "NumberGenerator.h"
 #include "SpaceCalculator.h"
 
 ContentDesc MultiplierService::multiplyInGrid(ContentDesc const& content, GridParameters const& parameters) const

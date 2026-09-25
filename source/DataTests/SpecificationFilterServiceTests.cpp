@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/ParametersFilter.h>
-#include <EngineInterface/SimulationParametersSpecification.h>
-#include <EngineInterface/SpecificationFilterService.h>
+#include <Data/ParametersFilter.h>
+#include <Data/SimulationParametersSpecification.h>
+#include <Data/SpecificationFilterService.h>
 
 class SpecificationFilterServiceTests : public ::testing::Test
 {

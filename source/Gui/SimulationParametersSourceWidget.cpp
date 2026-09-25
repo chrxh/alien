@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/LocationAccessService.h>
-#include <EngineInterface/ParametersValidationService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/ParametersValidationService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "SimulationInteractionController.h"

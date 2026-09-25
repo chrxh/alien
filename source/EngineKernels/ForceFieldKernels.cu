@@ -1,5 +1,6 @@
+#include <Data/SimulationParameters.h>
+
 #include <EngineInterface/PerlinNoiseSource.h>
-#include <EngineInterface/SimulationParameters.h>
 
 #include "ForceFieldKernels.cuh"
 #include "ParameterCalculator.cuh"
