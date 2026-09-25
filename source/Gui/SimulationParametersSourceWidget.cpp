@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/LocationHelper.h>
-#include <EngineInterface/ParametersValidationService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/ParametersValidationService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "SimulationInteractionController.h"
@@ -21,7 +22,7 @@ void _SimulationParametersSourceWidgets::process(ParametersFilter const& filter)
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
+    auto sourceIndex = LocationAccessService::get().findLocationArrayIndex(parameters, _orderNumber);
 
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 

@@ -1,10 +1,7 @@
 #include "CreatorWindow.h"
 
 #include <algorithm>
-#include <cmath>
 #include <cstdlib>
-#include <ranges>
-#include <span>
 
 #include <imgui.h>
 
@@ -13,9 +10,9 @@
 #include <Base/GlobalSettings.h>
 #include <Base/Math.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -56,7 +53,6 @@ namespace
 
     auto const RightColumnWidth = 160.0f;
     auto const PointButtonWidth = 60.0f;
-    auto constexpr MaxNumObjects = size_t{1000000};
     auto constexpr PreviewLineThickness = 2.0f;
     auto constexpr PreviewPointRadius = 3.0f;
 
@@ -72,87 +68,6 @@ namespace
         result.reserve(worldPositions.size());
         for (auto const& worldPos : worldPositions) {
             result.emplace_back(mapToViewPosition(worldPos));
-        }
-        return result;
-    }
-
-    RealVector2D evaluateBezier(std::vector<RealVector2D> const& controlPoints, float t)
-    {
-        auto points = controlPoints;
-        for (auto count = points.size(); count > 1; --count) {
-            auto range = std::span(points).first(count);
-            for (auto&& [current, next] : std::views::zip(range, range | std::views::drop(1))) {
-                current = current * (1.0f - t) + next * t;
-            }
-        }
-        return points.front();
-    }
-
-    std::vector<RealVector2D> distributeAlongPath(std::vector<RealVector2D> const& path, float distance)
-    {
-        std::vector<RealVector2D> result;
-        if (path.size() < 2 || distance < NEAR_ZERO) {
-            return result;
-        }
-        result.emplace_back(path.front());
-        auto pendingDistance = distance;
-        for (auto const& [from, to] : std::views::zip(path, path | std::views::drop(1))) {
-            auto segmentLength = Math::length(to - from);
-            if (segmentLength < NEAR_ZERO) {
-                continue;
-            }
-            auto direction = (to - from) / segmentLength;
-            auto offset = pendingDistance;
-            for (; offset < segmentLength + NEAR_ZERO && result.size() < MaxNumObjects; offset += distance) {
-                result.emplace_back(from + direction * offset);
-            }
-            pendingDistance = offset - segmentLength;
-        }
-        return result;
-    }
-
-    bool isInsidePolygon(std::vector<RealVector2D> const& closedPolygon, RealVector2D const& pos)
-    {
-        auto result = false;
-        for (auto const& [from, to] : std::views::zip(closedPolygon, closedPolygon | std::views::drop(1))) {
-            if ((from.y > pos.y) != (to.y > pos.y)) {
-                auto intersectionX = from.x + (pos.y - from.y) / (to.y - from.y) * (to.x - from.x);
-                if (pos.x < intersectionX) {
-                    result = !result;
-                }
-            }
-        }
-        return result;
-    }
-
-    std::vector<RealVector2D> distributeHexagonallyInPolygon(std::vector<RealVector2D> const& polygon, float distance)
-    {
-        std::vector<RealVector2D> result;
-        if (polygon.size() < 3 || distance < NEAR_ZERO) {
-            return result;
-        }
-        auto closedPolygon = polygon;
-        closedPolygon.emplace_back(polygon.front());
-
-        auto minPos = polygon.front();
-        auto maxPos = polygon.front();
-        for (auto const& point : polygon) {
-            minPos.x = std::min(minPos.x, point.x);
-            minPos.y = std::min(minPos.y, point.y);
-            maxPos.x = std::max(maxPos.x, point.x);
-            maxPos.y = std::max(maxPos.y, point.y);
-        }
-
-        auto rowDistance = distance * sqrtf(3.0f) / 2;
-        auto rowIndex = 0;
-        for (auto y = minPos.y; y < maxPos.y + NEAR_ZERO && result.size() < MaxNumObjects; y += rowDistance) {
-            auto rowOffset = rowIndex % 2 == 0 ? 0.0f : distance / 2;
-            for (auto x = minPos.x + rowOffset; x < maxPos.x + NEAR_ZERO && result.size() < MaxNumObjects; x += distance) {
-                if (isInsidePolygon(closedPolygon, {x, y})) {
-                    result.emplace_back(RealVector2D{x, y});
-                }
-            }
-            ++rowIndex;
         }
         return result;
     }
@@ -238,7 +153,7 @@ void CreatorWindow::processCreateObject()
     endParameterPanel();
 
     if (processBuildButton()) {
-        createSingleObject();
+        addToSimulation(CreatorService::get().createSingleObject(getObjectProperties(), getRandomPos()));
         EditorModel::get().update();
     }
 }
@@ -261,7 +176,8 @@ void CreatorWindow::processCreateRectangle()
     endParameterPanel();
 
     if (processBuildButton()) {
-        createRectangle();
+        addToSimulation(
+            CreatorService::get().createRectangle(getObjectProperties(), getRandomPos(), {_rectHorizontalObjects, _rectVerticalObjects}, _objectDistance));
         EditorModel::get().update();
     }
 }
@@ -279,7 +195,7 @@ void CreatorWindow::processCreateHexagon()
     endParameterPanel();
 
     if (processBuildButton()) {
-        createHexagon();
+        addToSimulation(CreatorService::get().createHexagon(getObjectProperties(), getRandomPos(), _layers, _objectDistance));
         EditorModel::get().update();
     }
 }
@@ -302,7 +218,7 @@ void CreatorWindow::processCreateDisc()
     endParameterPanel();
 
     if (processBuildButton()) {
-        createDisc();
+        addToSimulation(CreatorService::get().createDisc(getObjectProperties(), getRandomPos(), _outerRadius, _innerRadius, _objectDistance));
         EditorModel::get().update();
     }
 }
@@ -345,7 +261,7 @@ void CreatorWindow::processCreateLine()
     processPointPreview(_points, false);
 
     if (processPointButtons(2)) {
-        createObjectNetwork(distributeAlongPath(_points, _objectDistance), _objectDistance * 1.5f);
+        addToSimulation(CreatorService::get().createLine(getObjectProperties(), _points, _objectDistance));
         _points.clear();
         EditorModel::get().update();
     }
@@ -362,12 +278,11 @@ void CreatorWindow::processCreateCurve()
     }
     endParameterPanel();
 
-    auto path = calcBezierCurvePath();
     processControlPolygonPreview();
-    processPointPreview(path, false);
+    processPointPreview(CreatorService::get().calcBezierCurvePath(_points, _objectDistance), false);
 
     if (processPointButtons(2)) {
-        createObjectNetwork(distributeAlongPath(path, _objectDistance), _objectDistance * 1.5f);
+        addToSimulation(CreatorService::get().createCurve(getObjectProperties(), _points, _objectDistance));
         _points.clear();
         EditorModel::get().update();
     }
@@ -387,7 +302,7 @@ void CreatorWindow::processCreatePolygon()
     processPointPreview(_points, true);
 
     if (processPointButtons(3)) {
-        createObjectNetwork(distributeHexagonallyInPolygon(_points, _objectDistance), _objectDistance * 1.7f);
+        addToSimulation(CreatorService::get().createPolygon(getObjectProperties(), _points, _objectDistance));
         _points.clear();
         EditorModel::get().update();
     }
@@ -601,22 +516,8 @@ void CreatorWindow::onDrawing()
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
 
-    auto createAlignedCircle = [&](auto pos) {
-        if (EditorModel::get().getPencilWidth() > 1 + NEAR_ZERO) {
-            pos.x = toFloat(toInt(pos.x));
-            pos.y = toFloat(toInt(pos.y));
-        }
-        auto desc = DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
-                                                            .center(pos)
-                                                            .radius(EditorModel::get().getPencilWidth())
-                                                            .type(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
-                                                            .stiffness(_stiffness)
-                                                            .sticky(_makeSticky)
-                                                            .cellDistance(1.0f)
-                                                            .color(EditorModel::get().getDefaultColorCode())
-                                                            .isStatic(_static)
-                                                            .connectObjects(false));
-        return isEnergyMaterial() ? convertToEnergyParticles(desc) : desc;
+    auto createAlignedCircle = [&](RealVector2D const& pos) {
+        return CreatorService::get().createPencilDot(getObjectProperties(), pos, EditorModel::get().getPencilWidth());
     };
 
     auto prevEntityCount = isEnergyMaterial() ? _drawingDescription._energies.size() : _drawingDescription._objects.size();
@@ -683,164 +584,11 @@ CreatorWindow::CreatorWindow()
     : AlienWindow("Creator", "editors.creator", false, false, {464.0f, 61.0f}, {400.0f, 370.0f})
 {}
 
-void CreatorWindow::createSingleObject()
+void CreatorWindow::addToSimulation(ContentDesc&& content) const
 {
-    ContentDesc description;
-    if (isEnergyMaterial()) {
-        description._energies.emplace_back(EnergyDesc().pos(getRandomPos()).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
-    } else {
-        description._objects.emplace_back(ObjectDesc()
-                                              .pos(getRandomPos())
-                                              .stiffness(_stiffness)
-                                              .color(EditorModel::get().getDefaultColorCode())
-                                              .isStatic(_static)
-                                              .sticky(_makeSticky)
-                                              .type(getObjectTypeDesc()));
+    if (!content.isEmpty()) {
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
     }
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-void CreatorWindow::createRectangle()
-{
-    if (_rectHorizontalObjects <= 0 || _rectVerticalObjects <= 0) {
-        return;
-    }
-
-    auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                             .objectType(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
-                                                             .width(_rectHorizontalObjects)
-                                                             .height(_rectVerticalObjects)
-                                                             .cellDistance(_objectDistance)
-                                                             .stiffness(_stiffness)
-                                                             .sticky(_makeSticky)
-                                                             .color(EditorModel::get().getDefaultColorCode())
-                                                             .center(getRandomPos())
-                                                             .isStatic(_static));
-    if (isEnergyMaterial()) {
-        description = convertToEnergyParticles(description);
-    }
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-void CreatorWindow::createHexagon()
-{
-    if (_layers <= 0) {
-        return;
-    }
-
-    auto description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
-                                                            .objectType(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
-                                                            .layers(_layers)
-                                                            .cellDistance(_objectDistance)
-                                                            .stiffness(_stiffness)
-                                                            .sticky(_makeSticky)
-                                                            .color(EditorModel::get().getDefaultColorCode())
-                                                            .center(getRandomPos())
-                                                            .isStatic(_static));
-    if (isEnergyMaterial()) {
-        description = convertToEnergyParticles(description);
-    } else {
-        DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
-    }
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-void CreatorWindow::createDisc()
-{
-    if (_innerRadius > _outerRadius || _innerRadius < 0 || _outerRadius < 0) {
-        return;
-    }
-
-    ContentDesc description;
-    auto const color = EditorModel::get().getDefaultColorCode();
-    auto const objectType = isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc();
-    auto constexpr SmallValue = 0.01f;
-    for (float radius = _innerRadius; radius <= _outerRadius + SmallValue; radius += _objectDistance) {
-        float angleInc = [&] {
-            if (radius > SmallValue) {
-                auto result = asinf(_objectDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
-                return 360.0f / floorf(360.0f / result);
-            }
-            return 360.0f;
-        }();
-        for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
-            auto relPos = Math::unitVectorOfAngle(angle) * radius;
-            description._objects.emplace_back(ObjectDesc()
-                                                  .id(NumberGenerator::get().createEntityId())
-                                                  .stiffness(_stiffness)
-                                                  .sticky(_makeSticky)
-                                                  .pos(relPos)
-                                                  .color(color)
-                                                  .isStatic(_static)
-                                                  .type(objectType));
-        }
-    }
-
-    if (isEnergyMaterial()) {
-        description = convertToEnergyParticles(description);
-    } else {
-        DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
-    }
-    DescEditService::get().setCenter(description, getRandomPos());
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-void CreatorWindow::createObjectNetwork(std::vector<RealVector2D> const& positions, float connectionDistance)
-{
-    if (positions.empty()) {
-        return;
-    }
-
-    ContentDesc description;
-    auto const color = EditorModel::get().getDefaultColorCode();
-    auto const objectType = isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc();
-    for (auto const& pos : positions) {
-        description._objects.emplace_back(ObjectDesc()
-                                              .id(NumberGenerator::get().createEntityId())
-                                              .stiffness(_stiffness)
-                                              .sticky(_makeSticky)
-                                              .pos(pos)
-                                              .color(color)
-                                              .isStatic(_static)
-                                              .type(objectType));
-    }
-
-    if (isEnergyMaterial()) {
-        description = convertToEnergyParticles(description);
-    } else {
-        DescEditService::get().reconnectObjects(description, connectionDistance);
-    }
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-std::vector<RealVector2D> CreatorWindow::calcBezierCurvePath() const
-{
-    if (_points.size() < 2) {
-        return _points;
-    }
-
-    auto controlPolygonLength = 0.0f;
-    for (auto const& [from, to] : std::views::zip(_points, _points | std::views::drop(1))) {
-        controlPolygonLength += Math::length(to - from);
-    }
-
-    auto numSegments = std::clamp(toInt(controlPolygonLength * 4 / _objectDistance), 16, 10000);
-    std::vector<RealVector2D> result;
-    result.reserve(numSegments + 1);
-    for (auto segment : std::views::iota(0, numSegments + 1)) {
-        result.emplace_back(evaluateBezier(_points, toFloat(segment) / toFloat(numSegments)));
-    }
-    return result;
-}
-
-ContentDesc CreatorWindow::convertToEnergyParticles(ContentDesc const& description) const
-{
-    ContentDesc result;
-    auto const color = EditorModel::get().getDefaultColorCode();
-    for (auto const& object : description._objects) {
-        result._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(color));
-    }
-    return result;
 }
 
 void CreatorWindow::validateAndCorrect()
@@ -877,18 +625,16 @@ InteractionMode CreatorWindow::getInteractionMode() const
     return InteractionMode_Selection;
 }
 
-ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
+CreatorService::ObjectProperties CreatorWindow::getObjectProperties() const
 {
-    switch (_material) {
-    case CreationMaterial_Solid:
-        return SolidDesc().energy(_energy);
-    case CreationMaterial_Fluid:
-        return FluidDesc().energy(_energy).glow(_glow);
-    case CreationMaterial_FreeCell:
-        return FreeCellDesc().energy(_energy);
-    default:
-        CHECK(false);
-    }
+    return CreatorService::ObjectProperties()
+        .material(_material)
+        .color(EditorModel::get().getDefaultColorCode())
+        .energy(_energy)
+        .stiffness(_stiffness)
+        .glow(_glow)
+        .isStatic(_static)
+        .sticky(_makeSticky);
 }
 
 RealVector2D CreatorWindow::getRandomPos() const

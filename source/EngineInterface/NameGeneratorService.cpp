@@ -7,7 +7,7 @@
 
 #include <Base/Definitions.h>
 
-#include "NumberGenerator.h"
+#include <Base/NumberGenerator.h>
 
 namespace
 {

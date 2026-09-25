@@ -2,9 +2,10 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDesc.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/GenomeDesc.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

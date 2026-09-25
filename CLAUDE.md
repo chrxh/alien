@@ -70,6 +70,7 @@ stale kernels linger and weak tests can pass against old code.
 Executables under `build-agent\Release\` (`build-ninja\Release\` for a manual build):
 
 ```
+DataTests.exe              (<1s)
 EngineInterfaceTests.exe   (<1s)
 NetworkTests.exe           (<1s)
 PersisterTests.exe         (~1.4s)
@@ -102,6 +103,8 @@ builder-chain assignments beyond 160, and that is accepted.
 ```
 source/Base/                 Common utilities, math, logging
 source/Cli/                  Command-line interface
+source/Data/                 Descriptions, genomes, simulation parameters and their services
+source/DataTests/            Data unit tests
 source/EngineGpuKernels/     CUDA kernels
 source/EngineImpl/           CPU-side engine implementation
 source/EngineInterface/      Abstract simulation APIs

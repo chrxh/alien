@@ -11,7 +11,8 @@
 
 #include <Network/NetworkService.h>
 
-#include <EngineInterface/GenomeDescInfoService.h>
+#include <Data/GenomeDescAccessService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/PersisterRequestResult.h>
@@ -434,7 +435,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
         }
-        numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
+        numObjects = GenomeDescAccessService::get().getNumberOfNodes(genome);
         pictureJpg = creatureData.jpg;
     }
 
@@ -517,7 +518,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for replacing."});
         }
-        numObjects = GenomeDescInfoService::get().getNumberOfNodes(genome);
+        numObjects = GenomeDescAccessService::get().getNumberOfNodes(genome);
         pictureJpg = creatureData.jpg;
     }
 

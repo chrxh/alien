@@ -8,8 +8,9 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/DescEditService.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/DescEditService.h>
+
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
 

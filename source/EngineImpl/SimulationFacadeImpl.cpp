@@ -1,8 +1,10 @@
 #include "SimulationFacadeImpl.h"
 
-#include <EngineInterface/Descs.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/Descs.h>
+
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/NumberGenerator.h>
 
 void _SimulationFacadeImpl::set(SimulationFacade const& instance)
 {
@@ -136,9 +138,9 @@ void _SimulationFacadeImpl::removeStickiness(bool includeClusters)
     _worker.removeStickiness(includeClusters);
 }
 
-void _SimulationFacadeImpl::setBarrier(bool value, bool includeClusters)
+void _SimulationFacadeImpl::setStatic(bool value, bool includeClusters)
 {
-    _worker.setBarrier(value, includeClusters);
+    _worker.setStatic(value, includeClusters);
 }
 
 void _SimulationFacadeImpl::colorSelectedObjects(unsigned char color, bool includeClusters)

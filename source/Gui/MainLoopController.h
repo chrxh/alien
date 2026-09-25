@@ -4,8 +4,9 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/Descs.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Descs.h>
 
 #include <Network/NetworkResourceRawTO.h>
 
@@ -26,6 +27,7 @@ public:
     void scheduleClosing();
     bool shouldClose() const;
     bool isSaveOnExit() const;
+    bool isOperatingMode() const;
 
 private:
     void processFirstTick();

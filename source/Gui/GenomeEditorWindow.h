@@ -4,8 +4,9 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/GenomeDesc.h>
-#include <EngineInterface/PreviewDesc.h>
+#include <Data/GenomeDesc.h>
+#include <Data/PreviewDesc.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienWindow.h"

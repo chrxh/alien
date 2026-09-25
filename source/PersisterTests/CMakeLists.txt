@@ -7,6 +7,7 @@ PUBLIC
 target_link_libraries(PersisterTests Base)
 target_link_libraries(PersisterTests EngineKernels)
 target_link_libraries(PersisterTests EngineImpl)
+target_link_libraries(PersisterTests Data)
 target_link_libraries(PersisterTests EngineInterface)
 target_link_libraries(PersisterTests EngineTestData)
 target_link_libraries(PersisterTests PersisterInterface)

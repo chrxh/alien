@@ -7,7 +7,7 @@
 
 #include <Base/LoggingService.h>
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <EngineKernels/Base.cuh>
 #include <EngineKernels/SimulationKernels.cuh>

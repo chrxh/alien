@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -23,8 +25,8 @@ TEST_F(ObjectConnectionTests, decay)
     _parameters.cellDeathProbability.baseValue[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
-    auto origData = DescEditService::get().createRect(
-        DescEditService::CreateRectParameters().width(1).height(1).objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
+    auto origData = CreatorService::get().createRectangle(
+        CreatorService::ObjectProperties().material(CreationMaterial_FreeCell).energy(_parameters.minCellEnergy.baseValue[0] / 2), {0.0f, 0.0f}, {1, 1}, 1.0f);
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

@@ -12,6 +12,8 @@
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
+#include <McpToolsImpl/McpToolsFacadeImpl.h>
+
 #include <PersisterInterface/SerializerService.h>
 
 #include <PersisterImpl/PersisterFacadeImpl.h>
@@ -59,6 +61,7 @@ int main(int argc, char** argv)
 
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());
+        _McpToolsFacadeImpl::set(std::make_shared<_McpToolsFacadeImpl>());
 
         mainWindow = std::make_shared<_MainWindow>();
         mainWindow->mainLoop();

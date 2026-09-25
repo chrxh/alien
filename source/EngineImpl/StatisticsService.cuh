@@ -6,9 +6,10 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/StatisticsHistory.h>
+
 #include <EngineInterface/ExtinctLineageAccumulator.h>
 #include <EngineInterface/StatisticsEntry.h>
-#include <EngineInterface/StatisticsHistory.h>
 
 #include <EngineKernels/Definitions.cuh>
 

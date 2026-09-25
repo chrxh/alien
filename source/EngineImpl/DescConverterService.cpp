@@ -11,8 +11,9 @@
 
 #include <Base/AlienExceptions.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/Descs.h>
 
 #include <EngineKernels/TOProvider.cuh>
 

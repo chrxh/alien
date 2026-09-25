@@ -2,8 +2,9 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/MultiplierService.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "AlienWindow.h"
@@ -39,8 +40,8 @@ private:
 
     MultiplierMode _mode = MultiplierMode_Grid;
 
-    DescEditService::GridMultiplyParameters _gridParameters;
-    DescEditService::RandomMultiplyParameters _randomParameters;
+    MultiplierService::GridParameters _gridParameters;
+    MultiplierService::RandomParameters _randomParameters;
 
     ContentDesc _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;

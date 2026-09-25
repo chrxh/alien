@@ -22,7 +22,7 @@
 
 #include <Base/MathTypes.h>
 
-#include <EngineInterface/NeuralNetWeight.h>
+#include <Data/NeuralNetWeight.h>
 
 #include "SerializedTypeIds.h"
 

@@ -1,9 +1,12 @@
 target_sources(NetworkTests
 PUBLIC
+    McpArgumentsTests.cpp
+    McpServerTests.cpp
     NetworkResourceServiceTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(NetworkTests Base)
+target_link_libraries(NetworkTests Data)
 target_link_libraries(NetworkTests EngineInterface)
 target_link_libraries(NetworkTests Network)
 

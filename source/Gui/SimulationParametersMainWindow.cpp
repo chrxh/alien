@@ -1,11 +1,15 @@
 #include "SimulationParametersMainWindow.h"
 
+#include <functional>
+
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/LocationHelper.h>
-#include <EngineInterface/ParametersEditService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/LocationEditService.h>
+#include <Data/RadiationStrengthService.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
@@ -66,8 +70,12 @@ void SimulationParametersMainWindow::initIntern()
 void SimulationParametersMainWindow::processIntern()
 {
     if (!_sessionId.has_value() || _sessionId.value() != _SimulationFacade::get()->getSessionId()) {
-        _selectedOrderNumber = 0;
+        _selectedLocationId = 0;
     }
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    _selectedOrderNumber = LocationAccessService::get()
+                               .findOrderNumber(parameters, _selectedLocationId)
+                               .value_or(std::min(_selectedOrderNumber, parameters.numLayers + parameters.numSources));
 
     processToolbar();
 
@@ -89,6 +97,7 @@ void SimulationParametersMainWindow::processIntern()
     processStatusBar();
 
     _sessionId = _SimulationFacade::get()->getSessionId();
+    _selectedLocationId = LocationAccessService::get().getLocationId(_SimulationFacade::get()->getSimulationParameters(), _selectedOrderNumber);
 }
 
 void SimulationParametersMainWindow::shutdownIntern()
@@ -451,185 +460,79 @@ void SimulationParametersMainWindow::onSaveParameters()
         });
 }
 
+namespace
+{
+    void editLocations(std::function<void(SimulationParameters& parameters, SimulationParameters& origParameters)> const& edit)
+    {
+        auto parameters = _SimulationFacade::get()->getSimulationParameters();
+        auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+        edit(parameters, origParameters);
+        _SimulationFacade::get()->setSimulationParameters(parameters);
+        _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
+    }
+}
+
 void SimulationParametersMainWindow::onInsertDefaultLayer()
 {
-    auto& editService = ParametersEditService::get();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
-
-    if (!checkNumLayers(parameters)) {
-        return;
+    std::optional<int> orderNumber;
+    editLocations([&](auto& parameters, auto& origParameters) {
+        orderNumber = LocationEditService::get().insertDefaultLayer(parameters, origParameters, _selectedOrderNumber, _SimulationFacade::get()->getWorldSize());
+    });
+    if (orderNumber) {
+        _selectedOrderNumber = orderNumber.value();
+    } else {
+        showMaxLocationsReachedMessage(LocationType::Layer);
     }
-
-    auto newByOldOrderNumber = editService.insertDefaultLayer(parameters, _selectedOrderNumber);
-    editService.insertDefaultLayer(origParameters, _selectedOrderNumber);
-
-    ++_selectedOrderNumber;
-
-    auto worldSize = _SimulationFacade::get()->getWorldSize();
-    auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-
-    SimulationParameters defaultParameters;
-    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
-    parameters.backgroundColor.layerValues[index].enabled = true;
-    parameters.backgroundColor.layerValues[index].value = _layerColorPalette.getColor((2 + parameters.numLayers) * 8);
-    parameters.layerShape.layerValues[index] = defaultParameters.layerShape.layerValues[0];
-    parameters.layerPosition.layerValues[index] = {
-        toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
-        toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
-    parameters.layerCoreRadius.layerValues[index] = minRadius / 3;
-    parameters.layerCoreRect.layerValues[index] = {minRadius / 3, minRadius / 3};
-    parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
-    parameters.layerRadialForceFieldOrientation.layerValues[index] = defaultParameters.layerRadialForceFieldOrientation.layerValues[0];
-    parameters.layerRadialForceFieldStrength.layerValues[index] = defaultParameters.layerRadialForceFieldStrength.layerValues[0];
-    parameters.layerRadialForceFieldDriftAngle.layerValues[index] = defaultParameters.layerRadialForceFieldDriftAngle.layerValues[0];
-    parameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = defaultParameters.layerPerlinNoiseForceFieldStrength.layerValues[0];
-    parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = defaultParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[0];
-    parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = defaultParameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[0];
-
-    origParameters.backgroundColor.layerValues[index] = parameters.backgroundColor.layerValues[index];
-    origParameters.layerShape.layerValues[index] = parameters.layerShape.layerValues[index];
-    origParameters.layerPosition.layerValues[index] = parameters.layerPosition.layerValues[index];
-    origParameters.layerCoreRadius.layerValues[index] = parameters.layerCoreRadius.layerValues[index];
-    origParameters.layerCoreRect.layerValues[index] = parameters.layerCoreRect.layerValues[index];
-    origParameters.layerFadeoutRadius.layerValues[index] = parameters.layerFadeoutRadius.layerValues[index];
-    origParameters.layerForceFieldType.layerValues[index] = parameters.layerForceFieldType.layerValues[index];
-    origParameters.layerRadialForceFieldOrientation.layerValues[index] = parameters.layerRadialForceFieldOrientation.layerValues[index];
-    origParameters.layerRadialForceFieldStrength.layerValues[index] = parameters.layerRadialForceFieldStrength.layerValues[index];
-    origParameters.layerRadialForceFieldDriftAngle.layerValues[index] = parameters.layerRadialForceFieldDriftAngle.layerValues[index];
-    origParameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = parameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
-    origParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index];
-    origParameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index];
-
-    _SimulationFacade::get()->setSimulationParameters(parameters);
-    _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
-    ++_insertedLocationCounter;
 }
 
 void SimulationParametersMainWindow::onInsertDefaultSource()
 {
-    auto& editService = ParametersEditService::get();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
-
-    if (!checkNumSources(parameters)) {
-        return;
+    std::optional<int> orderNumber;
+    editLocations([&](auto& parameters, auto& origParameters) {
+        orderNumber =
+            LocationEditService::get().insertDefaultSource(parameters, origParameters, _selectedOrderNumber, _SimulationFacade::get()->getWorldSize());
+    });
+    if (orderNumber) {
+        _selectedOrderNumber = orderNumber.value();
+    } else {
+        showMaxLocationsReachedMessage(LocationType::Source);
     }
-    auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
-
-    auto newByOldOrderNumber = editService.insertDefaultSource(parameters, _selectedOrderNumber);
-    editService.insertDefaultSource(origParameters, _selectedOrderNumber);
-
-    ++_selectedOrderNumber;
-
-    editService.applyRadiationStrengths(parameters, newStrengths);
-    editService.applyRadiationStrengths(origParameters, newStrengths);
-
-    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
-    auto worldSize = _SimulationFacade::get()->getWorldSize();
-    parameters.sourcePosition.sourceValues[index] = {
-        toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
-        toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
-    origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
-
-    _SimulationFacade::get()->setSimulationParameters(parameters);
-    _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
-    ++_insertedLocationCounter;
 }
 
 void SimulationParametersMainWindow::onCloneLocation()
 {
-    auto& editService = ParametersEditService::get();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
-
-    auto locationType = LocationHelper::getLocationType(_selectedOrderNumber, parameters);
-    if (locationType == LocationType::Layer) {
-        if (!checkNumLayers(parameters)) {
-            return;
-        }
+    std::optional<int> orderNumber;
+    editLocations([&](auto& parameters, auto& origParameters) {
+        orderNumber = LocationEditService::get().cloneLocation(parameters, origParameters, _selectedOrderNumber);
+    });
+    if (orderNumber) {
+        _selectedOrderNumber = orderNumber.value();
     } else {
-        if (!checkNumSources(parameters)) {
-            return;
-        }
+        showMaxLocationsReachedMessage(_locations.at(_selectedOrderNumber).type);
     }
-
-    auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
-
-    auto newByOldOrderNumber = editService.cloneLocation(parameters, _selectedOrderNumber);
-    editService.cloneLocation(origParameters, _selectedOrderNumber);
-
-    if (locationType == LocationType::Source) {
-        editService.applyRadiationStrengths(parameters, newStrengths);
-        editService.applyRadiationStrengths(origParameters, newStrengths);
-    }
-
-    ++_selectedOrderNumber;
-    _SimulationFacade::get()->setSimulationParameters(parameters);
-    _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onDeleteLocation()
 {
-    auto& editService = ParametersEditService::get();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
-
-    LocationController::get().deleteLocationWindow(_selectedOrderNumber);
-
-    auto newByOldOrderNumber = editService.deleteLocation(parameters, _selectedOrderNumber);
-    editService.deleteLocation(origParameters, _selectedOrderNumber);
+    editLocations([&](auto& parameters, auto& origParameters) { LocationEditService::get().deleteLocation(parameters, origParameters, _selectedOrderNumber); });
 
     if (_locations.size() - 1 == _selectedOrderNumber) {
         --_selectedOrderNumber;
     }
-
-    _SimulationFacade::get()->setSimulationParameters(parameters);
-    _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onDecreaseOrderNumber()
 {
-    auto& editService = ParametersEditService::get();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
-
-    auto newByOldOrderNumber = editService.moveLocationUpwards(parameters, _selectedOrderNumber);
-    editService.moveLocationUpwards(origParameters, _selectedOrderNumber);
-
+    editLocations(
+        [&](auto& parameters, auto& origParameters) { LocationEditService::get().moveLocationUpwards(parameters, origParameters, _selectedOrderNumber); });
     --_selectedOrderNumber;
-
-    _SimulationFacade::get()->setSimulationParameters(parameters);
-    _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onIncreaseOrderNumber()
 {
-    auto& editService = ParametersEditService::get();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
-
-    auto newByOldOrderNumber = editService.moveLocationDownwards(parameters, _selectedOrderNumber);
-    editService.moveLocationDownwards(origParameters, _selectedOrderNumber);
-
+    editLocations(
+        [&](auto& parameters, auto& origParameters) { LocationEditService::get().moveLocationDownwards(parameters, origParameters, _selectedOrderNumber); });
     ++_selectedOrderNumber;
-
-    _SimulationFacade::get()->setSimulationParameters(parameters);
-    _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
-
-    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onOpenInLocationWindow()
@@ -643,8 +546,8 @@ void SimulationParametersMainWindow::onOpenInLocationWindow()
 void SimulationParametersMainWindow::onCenterLocation(int orderNumber)
 {
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
-    auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+    auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
+    auto arrayIndex = LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber);
     RealVector2D pos;
     if (locationType == LocationType::Layer) {
         pos = parameters.layerPosition.layerValues[arrayIndex];
@@ -659,7 +562,7 @@ void SimulationParametersMainWindow::updateLocations()
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
 
     _locations = std::vector<Location>(1 + parameters.numLayers + parameters.numSources);
-    auto radiationStrength = ParametersEditService::get().getRadiationStrengths(parameters);
+    auto radiationStrength = RadiationStrengthService::get().getRadiationStrengths(parameters);
     auto pinnedString = radiationStrength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(radiationStrength.values.front() * 100, 1) + "%"};
     for (int i = 0; i < parameters.numLayers; ++i) {
@@ -693,22 +596,13 @@ void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float
     }
 }
 
-bool SimulationParametersMainWindow::checkNumLayers(SimulationParameters const& parameters)
+void SimulationParametersMainWindow::showMaxLocationsReachedMessage(LocationType locationType) const
 {
-    if (parameters.numLayers == MAX_LAYERS) {
+    if (locationType == LocationType::Layer) {
         showMessage("Error", "The maximum number of layers has been reached.");
-        return false;
-    }
-    return true;
-}
-
-bool SimulationParametersMainWindow::checkNumSources(SimulationParameters const& parameters)
-{
-    if (parameters.numSources == MAX_SOURCES) {
+    } else {
         showMessage("Error", "The maximum number of radiation sources has been reached.");
-        return false;
     }
-    return true;
 }
 
 float SimulationParametersMainWindow::getMasterWidgetRefHeight() const

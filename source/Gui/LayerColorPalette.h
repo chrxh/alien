@@ -4,7 +4,7 @@
 
 #include <Base/MathTypes.h>
 
-#include <EngineInterface/SimulationParametersTypes.h>
+#include <Data/SimulationParametersTypes.h>
 
 class LayerColorPalette
 {

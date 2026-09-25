@@ -9,6 +9,10 @@
 #include <windows.h>
 #endif
 
+#include <Base/Ids.h>
+
+#include <Data/StatisticsHistory.h>
+
 #include <EngineInterface/ArraySizesForGpuEntities.h>
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/Definitions.h>
@@ -18,7 +22,6 @@
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
-#include <EngineInterface/StatisticsHistory.h>
 
 #include <EngineKernels/Definitions.cuh>
 #include <EngineKernels/TOs.cuh>
@@ -59,7 +62,7 @@ public:
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
-    void setBarrier(bool value, bool includeClusters);
+    void setStatic(bool value, bool includeClusters);
     void changeInspectedSimulationData(TOs const& changeTO);
     int injectGenomeToSelectedCreatures(TOs const& to);  // to only contains 1 genome
 

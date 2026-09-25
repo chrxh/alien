@@ -4,8 +4,8 @@
 
 #include <Base/JsonParser.h>
 
-#include <EngineInterface/Colors.h>
-#include <EngineInterface/SimulationParameters.h>
+#include <Data/Colors.h>
+#include <Data/SimulationParameters.h>
 
 class ParameterParser
 {

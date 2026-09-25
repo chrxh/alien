@@ -7,7 +7,7 @@
 #include <Base/KernelProfiler.h>
 #include <Base/KernelTracer.h>
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include "Macros.cuh"
 

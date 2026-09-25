@@ -5,11 +5,12 @@
 
 #include <boost/range/adaptors.hpp>
 
+#include <Data/SimulationParameters.h>
+#include <Data/SimulationParametersTypes.h>
+#include <Data/SpecificationEvaluationService.h>
+#include <Data/SpecificationFilterService.h>
+
 #include <EngineInterface/SimulationFacade.h>
-#include <EngineInterface/SimulationParameters.h>
-#include <EngineInterface/SimulationParametersTypes.h>
-#include <EngineInterface/SpecificationEvaluationService.h>
-#include <EngineInterface/SpecificationFilterService.h>
 
 #include "AlienGui.h"
 #include "SimulationInteractionController.h"
@@ -39,7 +40,7 @@ void SpecificationGuiService::createWidgetsForParameters(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();
     auto filteredParametersSpecs = _specCache.find(filter, [&] { return SpecificationFilterService::get().filter(parametersSpecs, filter); });
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
 
     AlienGui::DynamicTableLayout table(ColumnWidth);
     if (table.begin()) {
@@ -139,7 +140,7 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
     int orderNumber,
     ParametersFilter const& filter) const
 {
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
     for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
         if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
             continue;
@@ -456,7 +457,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
         enabledValue);
 
     auto const& parametersForAlternative = alternativeSpec._alternatives.at(*value).second;
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
     auto containsWidgets = std::any_of(parametersForAlternative.begin(), parametersForAlternative.end(), [&](auto const& parameterSpec) {
         return evaluationService.isVisible(parameterSpec, locationType);
     });

@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 // A channel of the outgoing signal that a cell function reads and/or overwrites after the neural net has been evaluated
 struct CellFunctionChannel

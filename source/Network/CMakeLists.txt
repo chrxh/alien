@@ -1,6 +1,12 @@
 
 add_library(Network
     Definitions.h
+    McpArguments.cpp
+    McpArguments.h
+    McpSchema.cpp
+    McpSchema.h
+    McpServer.cpp
+    McpServer.h
     NetworkService.cpp
     NetworkService.h
     NetworkResourceParserService.cpp
@@ -17,6 +23,7 @@ add_library(Network
 
 target_link_libraries(Network Base)
 target_link_libraries(Network Boost::boost)
+target_link_libraries(Network Boost::json)
 target_link_libraries(Network OpenSSL::SSL OpenSSL::Crypto)
     
 target_precompile_headers(Network PRIVATE

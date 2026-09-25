@@ -6,8 +6,10 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -41,7 +43,7 @@ protected:
 
 TEST_F(DescriptionEditTests, correctConnections)
 {
-    auto origData = DescEditService::get().createRect(DescEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
+    auto origData = CreatorService::get().createRectangle(CreatorService::ObjectProperties(), {50.0f, 99.0f}, {10, 10}, 1.0f);
     _simulationFacade->setSimulationData(origData);
 
     auto data = _simulationFacade->getSimulationData();

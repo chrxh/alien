@@ -2,9 +2,11 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescEditService.h>
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
+
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+
 #include <EngineInterface/ShapeGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 

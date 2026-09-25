@@ -42,6 +42,7 @@
 #include "LogWindow.h"
 #include "LoginDialog.h"
 #include "MassOperationsDialog.h"
+#include "McpWindow.h"
 #include "MultiplierWindow.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
@@ -146,6 +147,11 @@ bool MainLoopController::shouldClose() const
 bool MainLoopController::isSaveOnExit() const
 {
     return _saveOnExit;
+}
+
+bool MainLoopController::isOperatingMode() const
+{
+    return _programState == ProgramState::OperatingMode;
 }
 
 void MainLoopController::processFirstTick()
@@ -500,7 +506,10 @@ void MainLoopController::processMenubar()
         AlienGui::MenuItemParameters().name("Autosave").keyAlt(true).key(ImGuiKey_5).selected(AutosaveWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_6).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("MCP server").keyAlt(true).key(ImGuiKey_6).selected(McpWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { McpWindow::get().setOn(!McpWindow::get().isOn()); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_7).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
     AlienGui::EndMenu();
 

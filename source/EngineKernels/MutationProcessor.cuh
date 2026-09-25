@@ -5,10 +5,10 @@
 #include <type_traits>
 #include <cooperative_groups.h>
 
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/NeuralNetWeight.h>
-#include <EngineInterface/SimulationParameters.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/EngineConstants.h>
+#include <Data/NeuralNetWeight.h>
+#include <Data/SimulationParameters.h>
 
 #include "ConstructorHelper.cuh"
 #include "EntityFactory.cuh"

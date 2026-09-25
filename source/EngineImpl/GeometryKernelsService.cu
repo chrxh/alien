@@ -9,7 +9,8 @@
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 
-#include <EngineInterface/EngineConstants.h>
+#include <Data/EngineConstants.h>
+
 #include <EngineInterface/SettingsForSimulation.h>
 
 #include <EngineKernels/CudaGeometryBuffers.cuh>

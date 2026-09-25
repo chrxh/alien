@@ -6,8 +6,8 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Descs.h>
-#include <EngineInterface/StatisticsHistory.h>
+#include <Data/Descs.h>
+#include <Data/StatisticsHistory.h>
 
 #include "Definitions.h"
 

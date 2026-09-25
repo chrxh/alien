@@ -2,8 +2,9 @@
 
 #include <Base/Singleton.h>
 
+#include <Data/Descs.h>
+
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Descs.h>
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "AlienWindow.h"
@@ -39,7 +40,7 @@ private:
     void onSavePattern();
     void onMakeSticky();
     void onRemoveStickiness();
-    void onSetBarrier(bool value);
+    void onSetStatic(bool value);
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 

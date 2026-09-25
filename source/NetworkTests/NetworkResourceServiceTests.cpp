@@ -4,7 +4,7 @@
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkResourceTreeTO.h>
 
-#include <EngineInterface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
 class NetworkResourceServiceTests : public ::testing::Test
 {
