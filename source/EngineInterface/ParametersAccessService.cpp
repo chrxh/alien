@@ -149,17 +149,6 @@ ParameterType ParametersAccessService::getType(ParameterEntry const& entry) cons
 
 namespace
 {
-    int getArraySize(ColorDependence colorDependence)
-    {
-        if (colorDependence == ColorDependence::ColorVector) {
-            return MAX_COLORS;
-        } else if (colorDependence == ColorDependence::ColorMatrix) {
-            return MAX_COLORS * MAX_COLORS;
-        } else {
-            return 1;
-        }
-    }
-
     template <typename T>
     ParameterValue toParameterValue(ValueRef<T> const& ref, std::function<ParameterScalar(T const&)> const& convert)
     {
@@ -172,7 +161,7 @@ namespace
         }
         auto source = ref.enabled && !*ref.enabled && ref.disabledValue ? ref.disabledValue : ref.value;
         if (source) {
-            for (auto const& element : std::span(source, getArraySize(ref.colorDependence))) {
+            for (auto const& element : std::span(source, SpecificationEvaluationService::get().getArraySize(ref.colorDependence))) {
                 result.values.emplace_back(convert(element));
             }
         }
@@ -273,7 +262,7 @@ namespace
         if (!ref.value) {
             throw std::invalid_argument("The parameter '" + entry.path + "' is not available at this location.");
         }
-        checkNumValues(entry, value, getArraySize(ref.colorDependence));
+        checkNumValues(entry, value, SpecificationEvaluationService::get().getArraySize(ref.colorDependence));
         for (auto const& [target, scalar] : std::views::zip(std::span(ref.value, value.values.size()), value.values)) {
             assign(target, scalar);
         }
@@ -358,7 +347,7 @@ namespace
     void copyRef(ValueRef<T> const& sourceRef, ValueRef<T> const& targetRef)
     {
         if (sourceRef.value && targetRef.value) {
-            std::memcpy(targetRef.value, sourceRef.value, sizeof(T) * getArraySize(sourceRef.colorDependence));
+            std::memcpy(targetRef.value, sourceRef.value, sizeof(T) * SpecificationEvaluationService::get().getArraySize(sourceRef.colorDependence));
         }
         if (sourceRef.enabled && targetRef.enabled) {
             *targetRef.enabled = *sourceRef.enabled;

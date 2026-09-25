@@ -24,7 +24,7 @@ private:
     McpToolResult multiplyRandomly(boost::json::object const& arguments);
     McpToolResult undoMultiplication();
 
-    void checkSelectionForMultiplication(int numCopies) const;
+    void checkSelectionForMultiplication(float numCopies) const;
     void storeForUndo(MultiplierService::Result&& result);
     std::string describeSelection() const;
 

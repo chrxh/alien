@@ -65,7 +65,7 @@ public:
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
-    void setBarrier(bool value, bool includeClusters);
+    void setStatic(bool value, bool includeClusters);
     void changeCell(ExtendedObjectDesc const& changedCell);
     void changeParticle(EnergyDesc const& changedParticle);
     int injectGenomeToSelectedCreatures(GenomeDesc const& genome);

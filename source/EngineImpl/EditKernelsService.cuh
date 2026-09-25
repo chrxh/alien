@@ -22,7 +22,7 @@ public:
     void uniformVelocities(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
     void makeSticky(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
     void removeStickiness(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters);
-    void setBarrier(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value, bool includeClusters);
+    void setStatic(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool value, bool includeClusters);
     void reconnect(KernelLaunchSettings const& launchSettings, SimulationData const& data);
     void changeSimulationData(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& changeTO);
     int injectGenomeToSelectedCreatures(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& to);  // to only contains 1 genome

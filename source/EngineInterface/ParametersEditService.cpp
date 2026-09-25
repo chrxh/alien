@@ -1,5 +1,6 @@
 #include "ParametersEditService.h"
 
+#include <algorithm>
 #include <ranges>
 
 #include <Base/Definitions.h>
@@ -9,7 +10,18 @@
 #include "SimulationFacade.h"
 #include "SpecificationEvaluationService.h"
 
-void ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const
+namespace
+{
+    auto constexpr NumLayerBackgroundColors = 32;
+}
+
+int ParametersEditService::generateLocationId(SimulationParameters const& parameters)
+{
+    _lastLocationId = std::max(_lastLocationId, LocationHelper::getMaxLocationId(parameters)) + 1;
+    return _lastLocationId;
+}
+
+void ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber, int locationId) const
 {
     LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
 
@@ -45,10 +57,10 @@ void ParametersEditService::insertDefaultLayer(SimulationParameters& parameters,
 
     auto newLayerIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber + 1);
     StringHelper::copy(parameters.layerName.layerValues[newLayerIndex], sizeof(Char64), LocationHelper::generateLayerName(parameters));
-    parameters.layerIds[newLayerIndex] = LocationHelper::generateLocationId(parameters);
+    parameters.layerIds[newLayerIndex] = locationId;
 }
 
-void ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int orderNumber, int locationId) const
 {
     LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
 
@@ -84,7 +96,7 @@ void ParametersEditService::insertDefaultSource(SimulationParameters& parameters
 
     auto newSourceIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber + 1);
     StringHelper::copy(parameters.sourceName.sourceValues[newSourceIndex], sizeof(Char64), LocationHelper::generateSourceName(parameters));
-    parameters.sourceIds[newSourceIndex] = LocationHelper::generateLocationId(parameters);
+    parameters.sourceIds[newSourceIndex] = locationId;
 }
 
 void ParametersEditService::initNewLayer(
@@ -103,7 +115,7 @@ void ParametersEditService::initNewLayer(
     parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
 }
 
-void ParametersEditService::cloneLocation(SimulationParameters& parameters, int orderNumber) const
+void ParametersEditService::cloneLocation(SimulationParameters& parameters, int orderNumber, int locationId) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
@@ -134,11 +146,14 @@ void ParametersEditService::cloneLocation(SimulationParameters& parameters, int 
             copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
     }
-    LocationHelper::setLocationId(parameters, orderNumber + 1, LocationHelper::generateLocationId(parameters));
+    LocationHelper::setLocationId(parameters, orderNumber + 1, locationId);
 }
 
 void ParametersEditService::deleteLocation(SimulationParameters& parameters, int orderNumber) const
 {
+    // Ids assigned on loading are unknown to the counter so far
+    _lastLocationId = std::max(_lastLocationId, LocationHelper::getMaxLocationId(parameters));
+
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
 
@@ -235,8 +250,6 @@ void ParametersEditService::moveLocationDownwards(SimulationParameters& paramete
 
 namespace
 {
-    auto constexpr NumLayerBackgroundColors = 32;
-
     FloatColorRGB calcBackgroundColorForNewLayer(int numLayers)
     {
         auto hue = toFloat((2 + numLayers) * 8 % NumLayerBackgroundColors) / toFloat(NumLayerBackgroundColors - 1);
@@ -260,8 +273,9 @@ std::optional<int> ParametersEditService::insertDefaultLayer(int orderNumber)
         return std::nullopt;
     }
 
-    insertDefaultLayer(parameters, orderNumber);
-    insertDefaultLayer(origParameters, orderNumber);
+    auto locationId = generateLocationId(parameters);
+    insertDefaultLayer(parameters, orderNumber, locationId);
+    insertDefaultLayer(origParameters, orderNumber, locationId);
 
     auto newOrderNumber = orderNumber + 1;
     auto worldSize = _SimulationFacade::get()->getWorldSize();
@@ -286,8 +300,9 @@ std::optional<int> ParametersEditService::insertDefaultSource(int orderNumber)
     }
     auto newStrengths = calcRadiationStrengthsForAddingSource(getRadiationStrengths(parameters));
 
-    insertDefaultSource(parameters, orderNumber);
-    insertDefaultSource(origParameters, orderNumber);
+    auto locationId = generateLocationId(parameters);
+    insertDefaultSource(parameters, orderNumber, locationId);
+    insertDefaultSource(origParameters, orderNumber, locationId);
 
     applyRadiationStrengths(parameters, newStrengths);
     applyRadiationStrengths(origParameters, newStrengths);
@@ -315,8 +330,9 @@ std::optional<int> ParametersEditService::cloneLocation(int orderNumber)
     }
     auto newStrengths = calcRadiationStrengthsForAddingSource(getRadiationStrengths(parameters));
 
-    cloneLocation(parameters, orderNumber);
-    cloneLocation(origParameters, orderNumber);
+    auto locationId = generateLocationId(parameters);
+    cloneLocation(parameters, orderNumber, locationId);
+    cloneLocation(origParameters, orderNumber, locationId);
 
     if (locationType == LocationType::Source) {
         applyRadiationStrengths(parameters, newStrengths);

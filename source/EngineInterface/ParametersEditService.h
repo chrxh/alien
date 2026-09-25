@@ -21,15 +21,17 @@ class ParametersEditService
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    void insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;   // Create location at orderNumber + 1
-    void insertDefaultSource(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+    static int generateLocationId(SimulationParameters const& parameters);
+
+    void insertDefaultLayer(SimulationParameters& parameters, int orderNumber, int locationId) const;   // Create location at orderNumber + 1
+    void insertDefaultSource(SimulationParameters& parameters, int orderNumber, int locationId) const;  // Create location at orderNumber + 1
     void initNewLayer(
         SimulationParameters& parameters,
         int orderNumber,
         IntVector2D const& worldSize,
         RealVector2D const& position,
-        FloatColorRGB const& backgroundColor) const;                              // Core area and fade-out relative to the world size
-    void cloneLocation(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+        FloatColorRGB const& backgroundColor) const;                                              // Core area and fade-out relative to the world size
+    void cloneLocation(SimulationParameters& parameters, int orderNumber, int locationId) const;  // Create location at orderNumber + 1
     void deleteLocation(SimulationParameters& parameters, int orderNumber) const;
     void moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
     void moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;
@@ -62,5 +64,6 @@ private:
 
     RealVector2D calcPositionForNewLocation(IntVector2D const& worldSize) const;
 
-    int _insertedLocationCounter = 0;
+    static inline int _insertedLocationCounter = 0;
+    static inline int _lastLocationId = 0;
 };

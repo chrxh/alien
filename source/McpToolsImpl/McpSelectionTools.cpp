@@ -160,7 +160,7 @@ McpToolResult McpSelectionTools::fixSelection(boost::json::object const& argumen
     auto fixed = McpArguments::getBool(arguments, "fixed");
     auto includeClusters = getIncludeClusters(arguments);
     getNonEmptySelection();
-    _SimulationFacade::get()->setBarrier(fixed, includeClusters);
+    _SimulationFacade::get()->setStatic(fixed, includeClusters);
     _context->onSelectionChanged();
     return {.text = fixed ? "The selected objects are fixed." : "The selected objects are released."};
 }

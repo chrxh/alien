@@ -397,3 +397,14 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
 
     return false;
 }
+
+int SpecificationEvaluationService::getArraySize(ColorDependence colorDependence) const
+{
+    if (colorDependence == ColorDependence::ColorVector) {
+        return MAX_COLORS;
+    } else if (colorDependence == ColorDependence::ColorMatrix) {
+        return MAX_COLORS * MAX_COLORS;
+    } else {
+        return 1;
+    }
+}

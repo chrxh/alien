@@ -16,20 +16,6 @@ void ParametersValidationService::validateAndCorrect(ValidationConfig const& con
     }
 }
 
-namespace
-{
-    int getArraySize(ColorDependence colorDependence)
-    {
-        if (colorDependence == ColorDependence::ColorVector) {
-            return MAX_COLORS;
-        } else if (colorDependence == ColorDependence::ColorMatrix) {
-            return MAX_COLORS * MAX_COLORS;
-        } else {
-            return 1;
-        }
-    }
-}
-
 void ParametersValidationService::validateAndCorrectIntern(
     ValidationConfig const& config,
     std::vector<ParameterSpec> const& parameterSpecs,
@@ -43,7 +29,7 @@ void ParametersValidationService::validateAndCorrectIntern(
             auto const& valueSpec = std::get<IntSpec>(parameterSpec._reference);
             auto ref = evaluationService.getRef(valueSpec._member, parameters, orderNumber);
             if (ref.value) {
-                auto arraySize = getArraySize(ref.colorDependence);
+                auto arraySize = SpecificationEvaluationService::get().getArraySize(ref.colorDependence);
                 auto max = valueSpec._infinity ? Infinity<int>::value : valueSpec._max;
                 for (int i = 0; i < arraySize; ++i) {
                     ref.value[i] = std::clamp(ref.value[i], valueSpec._min, max);
@@ -65,7 +51,7 @@ void ParametersValidationService::validateAndCorrectIntern(
                         }
                     }
                 }();
-                auto arraySize = getArraySize(ref.colorDependence);
+                auto arraySize = SpecificationEvaluationService::get().getArraySize(ref.colorDependence);
                 for (int i = 0; i < arraySize; ++i) {
                     ref.value[i] = std::clamp(ref.value[i], min, max);
                 }
@@ -89,7 +75,7 @@ void ParametersValidationService::validateAndCorrectIntern(
                     }
                 }();
                 if (!std::holds_alternative<WorldSize>(valueSpec._max)) {
-                    auto arraySize = getArraySize(ref.colorDependence);
+                    auto arraySize = SpecificationEvaluationService::get().getArraySize(ref.colorDependence);
                     for (int i = 0; i < arraySize; ++i) {
                         ref.value[i].x = std::clamp(ref.value[i].x, min.x, max.x);
                         ref.value[i].y = std::clamp(ref.value[i].y, min.y, max.y);
@@ -101,7 +87,7 @@ void ParametersValidationService::validateAndCorrectIntern(
             auto ref = evaluationService.getRef(valueSpec._member, parameters, orderNumber);
             if (ref.value) {
                 auto max = toInt(valueSpec._alternatives.size()) - 1;
-                auto arraySize = getArraySize(ref.colorDependence);
+                auto arraySize = SpecificationEvaluationService::get().getArraySize(ref.colorDependence);
                 for (int i = 0; i < arraySize; ++i) {
                     ref.value[i] = std::clamp(ref.value[i], 0, max);
                 }
@@ -113,7 +99,7 @@ void ParametersValidationService::validateAndCorrectIntern(
             auto const& valueSpec = std::get<ColorSpec>(parameterSpec._reference);
             auto ref = evaluationService.getRef(valueSpec._member, parameters, orderNumber);
             if (ref.value) {
-                auto arraySize = getArraySize(ref.colorDependence);
+                auto arraySize = SpecificationEvaluationService::get().getArraySize(ref.colorDependence);
                 for (int i = 0; i < arraySize; ++i) {
                     ref.value[i].r = std::clamp(ref.value[i].r, 0.0f, 1.0f);
                     ref.value[i].g = std::clamp(ref.value[i].g, 0.0f, 1.0f);
@@ -124,7 +110,7 @@ void ParametersValidationService::validateAndCorrectIntern(
             auto const& valueSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
             auto ref = evaluationService.getRef(valueSpec._member, parameters, orderNumber);
             if (ref.value) {
-                auto arraySize = getArraySize(ref.colorDependence);
+                auto arraySize = SpecificationEvaluationService::get().getArraySize(ref.colorDependence);
                 for (int i = 0; i < arraySize; ++i) {
                     ref.value[i].duration = std::max(ref.value[i].duration, 0);
                     ref.value[i].targetColor = std::clamp(ref.value[i].targetColor, 0, MAX_COLORS - 1);

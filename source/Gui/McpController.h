@@ -33,6 +33,8 @@ class McpController
     MAKE_SINGLETON(McpController);
 
 public:
+    ~McpController() override;
+
     bool isServerRunning() const;
     void setServerRunning(bool value);
 

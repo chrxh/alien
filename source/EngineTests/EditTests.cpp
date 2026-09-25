@@ -276,7 +276,7 @@ TEST_F(EditTests, setStatic_releaseAfterTimesteps)
     _simulationFacade->calcTimesteps(10);
 
     _simulationFacade->setSelection({40, 40}, {60, 60});
-    _simulationFacade->setBarrier(false, true);
+    _simulationFacade->setStatic(false, true);
     _simulationFacade->calcTimesteps(10);
 
     auto actualData = _simulationFacade->getSimulationData();

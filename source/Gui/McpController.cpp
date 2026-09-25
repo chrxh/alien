@@ -32,6 +32,13 @@ namespace
     auto constexpr MaxCommandLogEntries = size_t{1000};
 }
 
+// Only relevant if shutdown() was skipped: releases requests still waiting for the main thread so that the server threads can be joined
+McpController::~McpController()
+{
+    _stopping = true;
+    _server.reset();
+}
+
 bool McpController::isServerRunning() const
 {
     return _server != nullptr;
@@ -231,7 +238,8 @@ McpToolResult McpController::executeOnMainThread(std::function<McpToolResult()> 
 void McpController::addCommandLogEntry(std::string const& toolName, boost::json::object const& arguments, McpToolResult const& result)
 {
     auto command = arguments.empty() ? toolName : toolName + " " + boost::json::serialize(arguments);
-    log(Priority::Important, std::format("mcp: {} -> {}{}", command, result.isError ? "error: " : "", result.text));
+    log(Priority::Important, result.isError ? std::format("mcp: {} -> error: {}", toolName, result.text) : "mcp: " + toolName);
+    log(Priority::Unimportant, std::format("mcp: {} -> {}", command, result.text));
 
     _commandLog.emplace_back(
         McpCommandLogEntry{.time = std::chrono::system_clock::now(), .command = command, .result = result.text, .isError = result.isError});

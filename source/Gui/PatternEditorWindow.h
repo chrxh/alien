@@ -39,7 +39,7 @@ private:
     void onSavePattern();
     void onMakeSticky();
     void onRemoveStickiness();
-    void onSetBarrier(bool value);
+    void onSetStatic(bool value);
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 

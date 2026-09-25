@@ -136,9 +136,9 @@ void _SimulationFacadeImpl::removeStickiness(bool includeClusters)
     _worker.removeStickiness(includeClusters);
 }
 
-void _SimulationFacadeImpl::setBarrier(bool value, bool includeClusters)
+void _SimulationFacadeImpl::setStatic(bool value, bool includeClusters)
 {
-    _worker.setBarrier(value, includeClusters);
+    _worker.setStatic(value, includeClusters);
 }
 
 void _SimulationFacadeImpl::colorSelectedObjects(unsigned char color, bool includeClusters)

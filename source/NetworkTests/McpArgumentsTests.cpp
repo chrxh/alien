@@ -48,6 +48,13 @@ TEST_F(McpArgumentsTests, bool_wrongType)
     EXPECT_THROW(McpArguments::getBool(parse(R"({"b": 1})"), "b"), std::invalid_argument);
 }
 
+TEST_F(McpArgumentsTests, filePath_nonAscii)
+{
+    auto path = McpArguments::getFilePath(parse(R"({"f": "C:/J\u00fcrgen/x.settings.json"})"), "f");
+
+    EXPECT_TRUE(path.u8string() == u8"C:/J\u00fcrgen/x.settings.json");
+}
+
 TEST_F(McpArgumentsTests, points)
 {
     auto points = McpArguments::getPoints(parse(R"({"p": [[1, 2], [3.5, 4]]})"), "p", 2);
