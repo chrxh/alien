@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/LocationEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "StyleService.h"
@@ -12,8 +12,8 @@ void LocationWindow::init(LocationWidget const& widgets, RealVector2D const& ini
     _widget = widgets;
 
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    _locationId = LocationHelper::getLocationId(parameters, _widget->getOrderNumber());
-    _locationType = LocationHelper::getLocationType(_widget->getOrderNumber(), parameters);
+    _locationId = LocationEditService::get().getLocationId(parameters, _widget->getOrderNumber());
+    _locationType = LocationEditService::get().getLocationType(_widget->getOrderNumber(), parameters);
 
     static int id = 0;
     _id = ++id;
@@ -24,8 +24,8 @@ void LocationWindow::init(LocationWidget const& widgets, RealVector2D const& ini
 void LocationWindow::process()
 {
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto orderNumber = LocationHelper::findOrderNumber(parameters, _locationId);
-    if (!orderNumber.has_value() || LocationHelper::getLocationType(orderNumber.value(), parameters) != _locationType) {
+    auto orderNumber = LocationEditService::get().findOrderNumber(parameters, _locationId);
+    if (!orderNumber.has_value() || LocationEditService::get().getLocationType(orderNumber.value(), parameters) != _locationType) {
         _on = false;
         return;
     }

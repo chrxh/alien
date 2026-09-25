@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include "LocationHelper.h"
+#include "LocationEditService.h"
 #include "SimulationParameters.h"
 #include "SimulationParametersSpecification.h"
 #include "SimulationParametersTypes.h"

@@ -18,7 +18,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/LocationEditService.h>
 #include <EngineInterface/ParametersAccessService.h>
 #include <EngineInterface/ParametersEditService.h>
 #include <EngineInterface/ParametersValidationService.h>
@@ -219,11 +219,11 @@ namespace
 
     std::string getLocationName(SimulationParameters const& parameters, int orderNumber)
     {
-        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
         if (locationType == LocationType::Base) {
             return "Base";
         }
-        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+        auto index = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
         return locationType == LocationType::Layer ? parameters.layerName.layerValues[index] : parameters.sourceName.sourceValues[index];
     }
 
@@ -384,7 +384,7 @@ McpToolResult McpParameterTools::listParameterGroups(boost::json::object const& 
     auto& service = ParametersAccessService::get();
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto orderNumber = getOptionalLocation(arguments, parameters);
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
 
     boost::json::array groups;
     for (auto const& groupSpec : service.getGroups(locationType)) {
@@ -413,7 +413,7 @@ McpToolResult McpParameterTools::getParameters(boost::json::object const& argume
     auto orderNumber = getOptionalLocation(arguments, parameters);
     auto includeDescriptions = McpArguments::getOptionalBool(arguments, "include_descriptions").value_or(false);
 
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
     if (!SpecificationEvaluationService::get().isVisible(groupSpec, locationType)) {
         throw std::invalid_argument(
             std::format("The group '{}' is not available for location {} ({}).", groupSpec._name, orderNumber, getLocationTypeName(locationType)));
@@ -440,7 +440,7 @@ namespace
     ParameterEntry findParameter(std::string const& path, SimulationParameters const& parameters, int orderNumber)
     {
         auto& service = ParametersAccessService::get();
-        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
         if (auto result = service.findParameter(path, locationType)) {
             return result.value();
         }
@@ -656,7 +656,7 @@ namespace
         if (jsonValue) {
             applyJson(*jsonValue, entry, color, targetColor, value);
             changedIndices = getAddressedIndices(value, color, targetColor);
-            auto isLayer = LocationHelper::getLocationType(orderNumber, parameters) == LocationType::Layer;
+            auto isLayer = LocationEditService::get().getLocationType(orderNumber, parameters) == LocationType::Layer;
             if (isLayer && value.enabled.has_value() && !enabled.has_value()) {
                 value.enabled = true;
             }
@@ -775,7 +775,7 @@ McpToolResult McpParameterTools::listLocations() const
 
     boost::json::array locations;
     for (int orderNumber = 0; orderNumber < getNumLocations(parameters); ++orderNumber) {
-        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
         boost::json::object location{
             {"location", orderNumber},
             {"type", getLocationTypeName(locationType)},
@@ -785,12 +785,12 @@ McpToolResult McpParameterTools::listLocations() const
             location["relative_strength"] = toJsonNumber(strengths.values.front());
             location["pinned"] = strengths.pinned.contains(0);
         } else if (locationType == LocationType::Layer) {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+            auto index = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
             location["position"] = toJson(parameters.layerPosition.layerValues[index]);
             location["velocity"] = toJson(parameters.layerVelocity.layerValues[index]);
             location["opacity"] = toJsonNumber(parameters.layerOpacity.layerValues[index]);
         } else {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+            auto index = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
             location["position"] = toJson(parameters.sourcePosition.sourceValues[index]);
             location["velocity"] = toJson(parameters.sourceVelocity.sourceValues[index]);
             location["relative_strength"] = toJsonNumber(strengths.values.at(index + 1));
@@ -820,7 +820,7 @@ namespace
     std::string describeLocation(int orderNumber)
     {
         auto parameters = _SimulationFacade::get()->getSimulationParameters();
-        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
         return std::format(
             "{} '{}' (location {})", locationType == LocationType::Layer ? "layer" : "radiation source", getLocationName(parameters, orderNumber), orderNumber);
     }

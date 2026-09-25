@@ -1,8 +1,8 @@
-#include "LocationHelper.h"
+#include "LocationEditService.h"
 
 #include <Base/Definitions.h>
 
-LocationType LocationHelper::getLocationType(int orderNumber, SimulationParameters const& parameters)
+LocationType LocationEditService::getLocationType(int orderNumber, SimulationParameters const& parameters) const
 {
     if (orderNumber == 0) {
         return LocationType::Base;
@@ -21,7 +21,7 @@ LocationType LocationHelper::getLocationType(int orderNumber, SimulationParamete
     CHECK(false);
 }
 
-int& LocationHelper::findOrderNumberRef(SimulationParameters& parameters, int orderNumber)
+int& LocationEditService::findOrderNumberRef(SimulationParameters& parameters, int orderNumber) const
 {
     for (int i = 0; i < parameters.numLayers; ++i) {
         if (parameters.layerOrderNumbers[i] == orderNumber) {
@@ -37,7 +37,7 @@ int& LocationHelper::findOrderNumberRef(SimulationParameters& parameters, int or
     CHECK(false);
 }
 
-int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameters, int orderNumber)
+int LocationEditService::findLocationArrayIndex(SimulationParameters const& parameters, int orderNumber) const
 {
     for (int i = 0; i < parameters.numLayers; ++i) {
         if (parameters.layerOrderNumbers[i] == orderNumber) {
@@ -52,7 +52,7 @@ int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameter
     CHECK(false);
 }
 
-void LocationHelper::decreaseOrderNumber(SimulationParameters& parameters, int orderNumber)
+void LocationEditService::decreaseOrderNumber(SimulationParameters& parameters, int orderNumber) const
 {
     auto& orderNumberRef1 = findOrderNumberRef(parameters, orderNumber);
     auto& orderNumberRef2 = findOrderNumberRef(parameters, orderNumber - 1);
@@ -60,7 +60,7 @@ void LocationHelper::decreaseOrderNumber(SimulationParameters& parameters, int o
     ++orderNumberRef2;
 }
 
-void LocationHelper::increaseOrderNumber(SimulationParameters& parameters, int orderNumber)
+void LocationEditService::increaseOrderNumber(SimulationParameters& parameters, int orderNumber) const
 {
     auto& orderNumberRef1 = findOrderNumberRef(parameters, orderNumber);
     auto& orderNumberRef2 = findOrderNumberRef(parameters, orderNumber + 1);
@@ -68,7 +68,7 @@ void LocationHelper::increaseOrderNumber(SimulationParameters& parameters, int o
     --orderNumberRef2;
 }
 
-void LocationHelper::adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset)
+void LocationEditService::adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset) const
 {
     for (int i = 0; i < parameters.numLayers; ++i) {
         auto& orderNumber = parameters.layerOrderNumbers[i];
@@ -84,7 +84,7 @@ void LocationHelper::adaptLocationIndices(SimulationParameters& parameters, int 
     }
 }
 
-std::string LocationHelper::generateLayerName(SimulationParameters const& parameters)
+std::string LocationEditService::generateLayerName(SimulationParameters const& parameters) const
 {
     int counter = 0;
     bool alreadyUsed;
@@ -104,7 +104,7 @@ std::string LocationHelper::generateLayerName(SimulationParameters const& parame
     return result;
 }
 
-std::string LocationHelper::generateSourceName(SimulationParameters const& parameters)
+std::string LocationEditService::generateSourceName(SimulationParameters const& parameters) const
 {
     int counter = 0;
     bool alreadyUsed;
@@ -124,7 +124,7 @@ std::string LocationHelper::generateSourceName(SimulationParameters const& param
     return result;
 }
 
-int LocationHelper::getLocationId(SimulationParameters const& parameters, int orderNumber)
+int LocationEditService::getLocationId(SimulationParameters const& parameters, int orderNumber) const
 {
     auto locationType = getLocationType(orderNumber, parameters);
     if (locationType == LocationType::Base) {
@@ -134,7 +134,7 @@ int LocationHelper::getLocationId(SimulationParameters const& parameters, int or
     return locationType == LocationType::Layer ? parameters.layerIds[index] : parameters.sourceIds[index];
 }
 
-void LocationHelper::setLocationId(SimulationParameters& parameters, int orderNumber, int locationId)
+void LocationEditService::setLocationId(SimulationParameters& parameters, int orderNumber, int locationId) const
 {
     auto locationType = getLocationType(orderNumber, parameters);
     CHECK(locationType != LocationType::Base);
@@ -147,7 +147,7 @@ void LocationHelper::setLocationId(SimulationParameters& parameters, int orderNu
     }
 }
 
-std::optional<int> LocationHelper::findOrderNumber(SimulationParameters const& parameters, int locationId)
+std::optional<int> LocationEditService::findOrderNumber(SimulationParameters const& parameters, int locationId) const
 {
     if (locationId == 0) {
         return 0;
@@ -165,7 +165,7 @@ std::optional<int> LocationHelper::findOrderNumber(SimulationParameters const& p
     return std::nullopt;
 }
 
-int LocationHelper::getMaxLocationId(SimulationParameters const& parameters)
+int LocationEditService::getMaxLocationId(SimulationParameters const& parameters) const
 {
     auto result = 0;
     for (int i = 0; i < parameters.numLayers; ++i) {
@@ -177,7 +177,7 @@ int LocationHelper::getMaxLocationId(SimulationParameters const& parameters)
     return result;
 }
 
-void LocationHelper::assignLocationIds(SimulationParameters& parameters)
+void LocationEditService::assignLocationIds(SimulationParameters& parameters) const
 {
     for (int i = 0; i < parameters.numLayers; ++i) {
         parameters.layerIds[i] = i + 1;

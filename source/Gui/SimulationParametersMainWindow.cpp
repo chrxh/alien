@@ -4,7 +4,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/LocationEditService.h>
 #include <EngineInterface/ParametersEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -69,8 +69,9 @@ void SimulationParametersMainWindow::processIntern()
         _selectedLocationId = 0;
     }
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    _selectedOrderNumber =
-        LocationHelper::findOrderNumber(parameters, _selectedLocationId).value_or(std::min(_selectedOrderNumber, parameters.numLayers + parameters.numSources));
+    _selectedOrderNumber = LocationEditService::get()
+                               .findOrderNumber(parameters, _selectedLocationId)
+                               .value_or(std::min(_selectedOrderNumber, parameters.numLayers + parameters.numSources));
 
     processToolbar();
 
@@ -92,7 +93,7 @@ void SimulationParametersMainWindow::processIntern()
     processStatusBar();
 
     _sessionId = _SimulationFacade::get()->getSessionId();
-    _selectedLocationId = LocationHelper::getLocationId(_SimulationFacade::get()->getSimulationParameters(), _selectedOrderNumber);
+    _selectedLocationId = LocationEditService::get().getLocationId(_SimulationFacade::get()->getSimulationParameters(), _selectedOrderNumber);
 }
 
 void SimulationParametersMainWindow::shutdownIntern()
@@ -514,8 +515,8 @@ void SimulationParametersMainWindow::onOpenInLocationWindow()
 void SimulationParametersMainWindow::onCenterLocation(int orderNumber)
 {
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
-    auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+    auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+    auto arrayIndex = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
     RealVector2D pos;
     if (locationType == LocationType::Layer) {
         pos = parameters.layerPosition.layerValues[arrayIndex];
