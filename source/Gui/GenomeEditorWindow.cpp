@@ -8,6 +8,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/NameGeneratorService.h>
 #include <Base/StringHelper.h>
 
 #include <Base/NumberGenerator.h>
@@ -16,7 +17,6 @@
 #include <Data/MassOperationsService.h>
 #include <Data/ObjectColoring.h>
 
-#include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
