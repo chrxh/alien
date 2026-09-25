@@ -3,9 +3,9 @@
 #include <imgui.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/NameGeneratorService.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

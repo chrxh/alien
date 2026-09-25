@@ -11,12 +11,12 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/NameGeneratorService.h>
 #include <Base/StringHelper.h>
 
 #include <Data/GenomeDescAccessService.h>
 #include <Data/GenomeDescEditService.h>
 
-#include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

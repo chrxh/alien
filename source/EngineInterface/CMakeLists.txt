@@ -9,8 +9,6 @@ add_library(EngineInterface
     GeometryBuffers.h
     InspectedEntityIds.h
     KernelLaunchSettings.h
-    NameGeneratorService.cpp
-    NameGeneratorService.h
     PerlinNoiseSource.h
     SelectionShallowData.h
     SettingsForSimulation.h
