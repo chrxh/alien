@@ -52,36 +52,6 @@ public:
     ContentDesc createFreehandStroke(ObjectProperties const& properties, std::vector<RealVector2D> const& points, float pencilRadius) const;
     ContentDesc createPatternFromImage(RgbImage const& image, RealVector2D const& center) const;
 
-    // Variants for arbitrary object types
-    struct RectangleParameters
-    {
-        MEMBER(RectangleParameters, int, width, 10);
-        MEMBER(RectangleParameters, int, height, 10);
-        MEMBER(RectangleParameters, ObjectTypeDesc, objectType, SolidDesc());
-        MEMBER(RectangleParameters, float, cellDistance, 1.0f);
-        MEMBER(RectangleParameters, bool, connectObjects, true);
-        MEMBER(RectangleParameters, float, stiffness, 1.0f);
-        MEMBER(RectangleParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER(RectangleParameters, bool, sticky, false);
-        MEMBER(RectangleParameters, int, color, 0);
-        MEMBER(RectangleParameters, bool, isStatic, false);
-    };
-    ContentDesc createRectangle(RectangleParameters const& parameters) const;
-
-    struct HexagonParameters
-    {
-        MEMBER(HexagonParameters, int, layers, 10);
-        MEMBER(HexagonParameters, ObjectTypeDesc, objectType, SolidDesc());
-        MEMBER(HexagonParameters, float, cellDistance, 1.0f);
-        MEMBER(HexagonParameters, bool, connectObjects, true);
-        MEMBER(HexagonParameters, float, stiffness, 1.0f);
-        MEMBER(HexagonParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER(HexagonParameters, bool, sticky, false);
-        MEMBER(HexagonParameters, int, color, 0);
-        MEMBER(HexagonParameters, bool, isStatic, false);
-    };
-    ContentDesc createHexagon(HexagonParameters const& parameters) const;
-
     std::vector<RealVector2D> calcBezierCurvePath(std::vector<RealVector2D> const& controlPoints, float objectDistance) const;
 
 private:

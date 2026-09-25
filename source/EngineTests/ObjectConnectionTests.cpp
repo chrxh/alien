@@ -24,7 +24,7 @@ TEST_F(ObjectConnectionTests, decay)
 
     _simulationFacade->setSimulationParameters(_parameters);
     auto origData = CreatorService::get().createRectangle(
-        CreatorService::RectangleParameters().width(1).height(1).objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
+        CreatorService::ObjectProperties().material(CreationMaterial_FreeCell).energy(_parameters.minCellEnergy.baseValue[0] / 2), {0.0f, 0.0f}, {1, 1}, 1.0f);
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

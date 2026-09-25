@@ -271,7 +271,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
 TEST_F(EditTests, setStatic_releaseAfterTimesteps)
 {
     auto const center = RealVector2D{50.0f, 50.0f};
-    auto data = CreatorService::get().createRectangle(CreatorService::RectangleParameters().width(10).height(10).center(center).isStatic(true));
+    auto data = CreatorService::get().createRectangle(CreatorService::ObjectProperties().isStatic(true), center, {10, 10}, 1.0f);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
 
