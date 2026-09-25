@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/LocationEditService.h>
+#include <EngineInterface/LocationAccessService.h>
 #include <EngineInterface/ParametersValidationService.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -21,7 +21,7 @@ void _SimulationParametersSourceWidgets::process(ParametersFilter const& filter)
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto sourceIndex = LocationEditService::get().findLocationArrayIndex(parameters, _orderNumber);
+    auto sourceIndex = LocationAccessService::get().findLocationArrayIndex(parameters, _orderNumber);
 
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 

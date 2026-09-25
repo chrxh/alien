@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
+#include <functional>
 #include <limits>
 #include <ranges>
 #include <stdexcept>
@@ -18,10 +19,11 @@
 
 #include <Base/StringHelper.h>
 
+#include <EngineInterface/LocationAccessService.h>
 #include <EngineInterface/LocationEditService.h>
 #include <EngineInterface/ParametersAccessService.h>
-#include <EngineInterface/ParametersEditService.h>
 #include <EngineInterface/ParametersValidationService.h>
+#include <EngineInterface/RadiationStrengthService.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SpecificationEvaluationService.h>
 
@@ -219,11 +221,11 @@ namespace
 
     std::string getLocationName(SimulationParameters const& parameters, int orderNumber)
     {
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         if (locationType == LocationType::Base) {
             return "Base";
         }
-        auto index = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
+        auto index = LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber);
         return locationType == LocationType::Layer ? parameters.layerName.layerValues[index] : parameters.sourceName.sourceValues[index];
     }
 
@@ -384,7 +386,7 @@ McpToolResult McpParameterTools::listParameterGroups(boost::json::object const& 
     auto& service = ParametersAccessService::get();
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto orderNumber = getOptionalLocation(arguments, parameters);
-    auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+    auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
 
     boost::json::array groups;
     for (auto const& groupSpec : service.getGroups(locationType)) {
@@ -413,7 +415,7 @@ McpToolResult McpParameterTools::getParameters(boost::json::object const& argume
     auto orderNumber = getOptionalLocation(arguments, parameters);
     auto includeDescriptions = McpArguments::getOptionalBool(arguments, "include_descriptions").value_or(false);
 
-    auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+    auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
     if (!SpecificationEvaluationService::get().isVisible(groupSpec, locationType)) {
         throw std::invalid_argument(
             std::format("The group '{}' is not available for location {} ({}).", groupSpec._name, orderNumber, getLocationTypeName(locationType)));
@@ -440,7 +442,7 @@ namespace
     ParameterEntry findParameter(std::string const& path, SimulationParameters const& parameters, int orderNumber)
     {
         auto& service = ParametersAccessService::get();
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         if (auto result = service.findParameter(path, locationType)) {
             return result.value();
         }
@@ -656,7 +658,7 @@ namespace
         if (jsonValue) {
             applyJson(*jsonValue, entry, color, targetColor, value);
             changedIndices = getAddressedIndices(value, color, targetColor);
-            auto isLayer = LocationEditService::get().getLocationType(orderNumber, parameters) == LocationType::Layer;
+            auto isLayer = LocationAccessService::get().getLocationType(orderNumber, parameters) == LocationType::Layer;
             if (isLayer && value.enabled.has_value() && !enabled.has_value()) {
                 value.enabled = true;
             }
@@ -771,11 +773,11 @@ McpToolResult McpParameterTools::resetParameters(boost::json::object const& argu
 McpToolResult McpParameterTools::listLocations() const
 {
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
-    auto strengths = ParametersEditService::get().getRadiationStrengths(parameters);
+    auto strengths = RadiationStrengthService::get().getRadiationStrengths(parameters);
 
     boost::json::array locations;
     for (int orderNumber = 0; orderNumber < getNumLocations(parameters); ++orderNumber) {
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         boost::json::object location{
             {"location", orderNumber},
             {"type", getLocationTypeName(locationType)},
@@ -785,12 +787,12 @@ McpToolResult McpParameterTools::listLocations() const
             location["relative_strength"] = toJsonNumber(strengths.values.front());
             location["pinned"] = strengths.pinned.contains(0);
         } else if (locationType == LocationType::Layer) {
-            auto index = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
+            auto index = LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber);
             location["position"] = toJson(parameters.layerPosition.layerValues[index]);
             location["velocity"] = toJson(parameters.layerVelocity.layerValues[index]);
             location["opacity"] = toJsonNumber(parameters.layerOpacity.layerValues[index]);
         } else {
-            auto index = LocationEditService::get().findLocationArrayIndex(parameters, orderNumber);
+            auto index = LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber);
             location["position"] = toJson(parameters.sourcePosition.sourceValues[index]);
             location["velocity"] = toJson(parameters.sourceVelocity.sourceValues[index]);
             location["relative_strength"] = toJsonNumber(strengths.values.at(index + 1));
@@ -820,9 +822,18 @@ namespace
     std::string describeLocation(int orderNumber)
     {
         auto parameters = _SimulationFacade::get()->getSimulationParameters();
-        auto locationType = LocationEditService::get().getLocationType(orderNumber, parameters);
+        auto locationType = LocationAccessService::get().getLocationType(orderNumber, parameters);
         return std::format(
             "{} '{}' (location {})", locationType == LocationType::Layer ? "layer" : "radiation source", getLocationName(parameters, orderNumber), orderNumber);
+    }
+
+    void editLocations(std::function<void(SimulationParameters& currentParameters, SimulationParameters& origParameters)> const& edit)
+    {
+        auto currentParameters = _SimulationFacade::get()->getSimulationParameters();
+        auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
+        edit(currentParameters, origParameters);
+        _SimulationFacade::get()->setSimulationParameters(currentParameters);
+        _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);
     }
 }
 
@@ -832,8 +843,13 @@ McpToolResult McpParameterTools::addLocation(boost::json::object const& argument
     auto numLocations = getNumLocations(parameters);
     auto afterLocation = McpArguments::getOptionalInt(arguments, "after_location", 0, numLocations - 1).value_or(numLocations - 1);
 
-    auto& editService = ParametersEditService::get();
-    auto orderNumber = locationType == LocationType::Layer ? editService.insertDefaultLayer(afterLocation) : editService.insertDefaultSource(afterLocation);
+    std::optional<int> orderNumber;
+    editLocations([&](auto& currentParameters, auto& origParameters) {
+        auto const& editService = LocationEditService::get();
+        auto worldSize = _SimulationFacade::get()->getWorldSize();
+        orderNumber = locationType == LocationType::Layer ? editService.insertDefaultLayer(currentParameters, origParameters, afterLocation, worldSize)
+                                                          : editService.insertDefaultSource(currentParameters, origParameters, afterLocation, worldSize);
+    });
     if (!orderNumber.has_value()) {
         throw std::invalid_argument(
             locationType == LocationType::Layer ? "The maximum number of layers has been reached."
@@ -848,7 +864,10 @@ McpToolResult McpParameterTools::cloneLocation(boost::json::object const& argume
     auto location = getLocation(arguments, parameters);
     auto sourceDescription = describeLocation(location);
 
-    auto orderNumber = ParametersEditService::get().cloneLocation(location);
+    std::optional<int> orderNumber;
+    editLocations([&](auto& currentParameters, auto& origParameters) {
+        orderNumber = LocationEditService::get().cloneLocation(currentParameters, origParameters, location);
+    });
     if (!orderNumber.has_value()) {
         throw std::invalid_argument("The maximum number of layers or radiation sources has been reached.");
     }
@@ -861,7 +880,8 @@ McpToolResult McpParameterTools::deleteLocation(boost::json::object const& argum
     auto location = getLocation(arguments, parameters);
     auto description = describeLocation(location);
 
-    ParametersEditService::get().deleteLocation(location);
+    editLocations(
+        [&](auto& currentParameters, auto& origParameters) { LocationEditService::get().deleteLocation(currentParameters, origParameters, location); });
     return {.text = std::format("Deleted {}. The locations behind it have been renumbered.", description)};
 }
 
@@ -876,13 +896,17 @@ McpToolResult McpParameterTools::moveLocation(boost::json::object const& argumen
         if (location == 1) {
             throw std::invalid_argument("The location is already the first one.");
         }
-        ParametersEditService::get().moveLocationUpwards(location);
+        editLocations([&](auto& currentParameters, auto& origParameters) {
+            LocationEditService::get().moveLocationUpwards(currentParameters, origParameters, location);
+        });
         return {.text = std::format("Moved {} to location {}.", description, location - 1)};
     } else if (direction == "down") {
         if (location == getNumLocations(parameters) - 1) {
             throw std::invalid_argument("The location is already the last one.");
         }
-        ParametersEditService::get().moveLocationDownwards(location);
+        editLocations([&](auto& currentParameters, auto& origParameters) {
+            LocationEditService::get().moveLocationDownwards(currentParameters, origParameters, location);
+        });
         return {.text = std::format("Moved {} to location {}.", description, location + 1)};
     }
     throw std::invalid_argument("'direction' must be 'up' or 'down'.");

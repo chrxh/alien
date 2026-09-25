@@ -10,7 +10,7 @@
 #include <EngineInterface/NumberGenerator.h>
 
 #include "DescEditService.h"
-#include "GenomeDescInfoService.h"
+#include "GenomeDescAccessService.h"
 
 namespace
 {
@@ -284,7 +284,7 @@ std::vector<SubGenomeDesc> GenomeDescEditService::createSubGenomesForPreview(
         auto subGenome = subGenomeWithStartGeneIndex.genome;
         auto startGeneIndex = subGenomeWithStartGeneIndex.startIndex;
 
-        auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
+        auto resultingCells = GenomeDescAccessService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
         if (resultingCells != -1) {
             sumNumResultingCells += resultingCells;
         } else {

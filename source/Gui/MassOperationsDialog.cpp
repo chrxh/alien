@@ -7,7 +7,7 @@
 
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/Descs.h>
-#include <EngineInterface/GenomeDescInfoService.h>
+#include <EngineInterface/GenomeDescAccessService.h>
 #include <EngineInterface/MassOperationsService.h>
 #include <EngineInterface/SimulationFacade.h>
 
