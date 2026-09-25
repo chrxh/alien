@@ -358,6 +358,18 @@ void EngineWorker::reconnectSelectedObjects()
     _simulationCudaFacade->reconnectSelectedObjects();
 }
 
+void EngineWorker::glueSelectedObjects(bool includeClusters)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->glueSelectedObjects(includeClusters);
+}
+
+void EngineWorker::cutConnections(RealVector2D const& start, RealVector2D const& end, bool onlySelected, bool includeClusters)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->cutConnections({start.x, start.y}, {end.x, end.y}, onlySelected, includeClusters);
+}
+
 void EngineWorker::setDetached(bool value)
 {
     EngineWorkerGuard access(this);

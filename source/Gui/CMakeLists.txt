@@ -42,8 +42,8 @@ PUBLIC
     ConsoleModeController.h
     CreateUserDialog.cpp
     CreateUserDialog.h
-    CreatorWindow.cpp
-    CreatorWindow.h
+    CreatorTool.cpp
+    CreatorTool.h
     CreaturePreviewWidget.cpp
     CreaturePreviewWidget.h
     Definitions.h
@@ -59,6 +59,8 @@ PUBLIC
     EditorModel.h
     EditSimulationDialog.cpp
     EditSimulationDialog.h
+    EditToolbar.cpp
+    EditToolbar.h
     EntityAttributeHelp.cpp
     EntityAttributeHelp.h
     EvolutionDashboardWindow.cpp
@@ -131,8 +133,8 @@ PUBLIC
     McpWindow.h
     ModalWindow.cpp
     ModalWindow.h
-    MultiplierWindow.cpp
-    MultiplierWindow.h
+    MultiplierTool.cpp
+    MultiplierTool.h
     MutationRatesDialog.cpp
     MutationRatesDialog.h
     MutationRatesWidget.cpp
@@ -155,8 +157,6 @@ PUBLIC
     OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
-    PatternEditorWindow.cpp
-    PatternEditorWindow.h
     PictureData.h
     PictureGuiService.cpp
     PictureGuiService.h
@@ -182,8 +182,8 @@ PUBLIC
     ResourcePreviewWidget.h
     SavePictureDialog.cpp
     SavePictureDialog.h
-    SelectionWindow.cpp
-    SelectionWindow.h
+    SelectionHud.cpp
+    SelectionHud.h
     Shader.cpp
     Shader.h
     SignalsBufferDialog.cpp

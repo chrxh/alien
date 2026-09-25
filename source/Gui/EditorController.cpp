@@ -1,11 +1,14 @@
 #include "EditorController.h"
 
+#include <filesystem>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
 #include <imgui.h>
+#include <ImFileDialog.h>
 
+#include <Base/GlobalSettings.h>
 #include <Base/Math.h>
 
 #include <Data/CellTypeConstants.h>
@@ -14,15 +17,18 @@
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "CreatorWindow.h"
+#include <PersisterInterface/SerializerService.h>
+
+#include "CreatorTool.h"
+#include "EditToolbar.h"
 #include "EditorModel.h"
+#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "MainLoopEntityController.h"
-#include "MultiplierWindow.h"
+#include "MultiplierTool.h"
 #include "OverlayController.h"
-#include "PatternEditorWindow.h"
-#include "SelectionWindow.h"
+#include "SelectionHud.h"
 #include "StyleService.h"
 #include "Viewport.h"
 
@@ -30,12 +36,36 @@
 
 void EditorController::init()
 {
-    SelectionWindow::get().setup();
     EditorModel::get().setup();
     GenomeEditorWindow::get().setup();
-    PatternEditorWindow::get().setup();
-    CreatorWindow::get().setup();
-    MultiplierWindow::get().setup();
+    CreatorTool::get().setup();
+    MultiplierTool::get().setup();
+    SelectionHud::get().setup();
+    EditToolbar::get().setup();
+
+    auto& settings = GlobalSettings::get();
+    auto& model = EditorModel::get();
+    model.setTool(settings.getValue("editors.tool", model.getTool()));
+    model.setApplyToNetworks(settings.getValue("editors.apply to networks", model.isApplyToNetworksPersistent()));
+    model.setGlueOnContact(settings.getValue("editors.glue on contact", model.isGlueOnContact()));
+    model.setCutOnlyInSelection(settings.getValue("editors.scissors.only in selection", model.isCutOnlyInSelection()));
+
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _patternStartingPath = settings.getValue("editors.pattern editor.starting path", path.string());
+}
+
+void EditorController::shutdown()
+{
+    auto& settings = GlobalSettings::get();
+    auto const& model = EditorModel::get();
+    settings.setValue("editors.tool", model.getTool());
+    settings.setValue("editors.apply to networks", model.isApplyToNetworksPersistent());
+    settings.setValue("editors.glue on contact", model.isGlueOnContact());
+    settings.setValue("editors.scissors.only in selection", model.isCutOnlyInSelection());
+    settings.setValue("editors.pattern editor.starting path", _patternStartingPath);
 }
 
 bool EditorController::isOn() const
@@ -56,13 +86,13 @@ void EditorController::process()
 
     processInspectorWindows();
 
-    EditorModel::get().setForceNoRollout(ImGui::GetIO().KeyShift);
+    auto const& io = ImGui::GetIO();
+    EditorModel::get().setScopeInvertedTemporarily(io.KeyShift && !io.WantTextInput);
 
     if (_SimulationFacade::get()->updateSelectionIfNecessary()) {
         EditorModel::get().update();
     }
 }
-
 
 bool EditorController::areInspectionWindowsActive() const
 {
@@ -72,6 +102,21 @@ bool EditorController::areInspectionWindowsActive() const
 void EditorController::onCloseAllInspectorWindows()
 {
     _inspectorWindows.clear();
+}
+
+bool EditorController::isObjectInspectionPossible() const
+{
+    return !EditorModel::get().isSelectionEmpty();
+}
+
+bool EditorController::isGenomeInspectionPossible() const
+{
+    return EditorModel::get().getSelectionShallowData().numCreatures > 0;
+}
+
+bool EditorController::isCreatureInspectionPossible() const
+{
+    return EditorModel::get().getSelectionShallowData().numCreatures > 0;
 }
 
 void EditorController::onInspectSelectedObjects()
@@ -271,35 +316,113 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
 
 bool EditorController::isCopyingPossible() const
 {
-    return PatternEditorWindow::get().isCopyingPossible();
+    return !EditorModel::get().isSelectionEmpty();
 }
 
 void EditorController::onCopy()
 {
-    PatternEditorWindow::get().onCopy();
+    _copiedSelection = _SimulationFacade::get()->getSelectedSimulationData(EditorModel::get().isApplyToNetworks());
     printOverlayMessage("Selection copied");
 }
 
 bool EditorController::isPastingPossible() const
 {
-    return PatternEditorWindow::get().isPastingPossible();
+    return _copiedSelection.has_value();
 }
 
 void EditorController::onPaste()
 {
-    PatternEditorWindow::get().onPaste();
+    auto content = *_copiedSelection;
+    DescEditService::get().setCenter(content, Viewport::get().getCenterInWorldPos());
+    _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
+    EditorModel::get().update();
     printOverlayMessage("Selection pasted");
 }
 
 bool EditorController::isDeletingPossible() const
 {
-    return PatternEditorWindow::get().isDeletingPossible();
+    return !EditorModel::get().isSelectionEmpty() && !EditorModel::get().areEntitiesInspected();
 }
 
 void EditorController::onDelete()
 {
-    PatternEditorWindow::get().onDelete();
+    _SimulationFacade::get()->removeSelectedObjects(EditorModel::get().isApplyToNetworks());
+    EditorModel::get().update();
     printOverlayMessage("Selection deleted");
+}
+
+void EditorController::onOpenPattern()
+{
+    GenericFileDialog::get().showOpenFileDialog("Open pattern", "Pattern file (*.sim){.sim},.*", _patternStartingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _patternStartingPath = firstFilenameCopy.remove_filename().string();
+        ContentDesc content;
+        if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
+            DescEditService::get().setCenter(content, Viewport::get().getCenterInWorldPos());
+            _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
+            EditorModel::get().update();
+        } else {
+            GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
+        }
+    });
+}
+
+bool EditorController::isSavingPatternPossible() const
+{
+    return !EditorModel::get().isSelectionEmpty();
+}
+
+void EditorController::onSavePattern()
+{
+    GenericFileDialog::get().showSaveFileDialog("Save pattern", "Pattern file (*.sim){.sim},.*", _patternStartingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _patternStartingPath = firstFilenameCopy.remove_filename().string();
+
+        auto content = _SimulationFacade::get()->getSelectedSimulationData(EditorModel::get().isApplyToNetworks());
+        if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
+            GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
+        }
+    });
+}
+
+void EditorController::onColorSelectedObjects(int color)
+{
+    _SimulationFacade::get()->colorSelectedObjects(toUInt8(color), EditorModel::get().isApplyToNetworks());
+    EditorModel::get().setDefaultColorCode(color);
+}
+
+void EditorController::onSetSticky(bool value)
+{
+    if (value) {
+        _SimulationFacade::get()->makeSticky(EditorModel::get().isApplyToNetworks());
+    } else {
+        _SimulationFacade::get()->removeStickiness(EditorModel::get().isApplyToNetworks());
+    }
+}
+
+void EditorController::onSetFixed(bool value)
+{
+    _SimulationFacade::get()->setStatic(value, EditorModel::get().isApplyToNetworks());
+}
+
+void EditorController::onUniformVelocities()
+{
+    _SimulationFacade::get()->uniformVelocitiesForSelectedObjects(EditorModel::get().isApplyToNetworks());
+    EditorModel::get().update();
+}
+
+void EditorController::onReleaseStresses()
+{
+    _SimulationFacade::get()->relaxSelectedObjects(EditorModel::get().isApplyToNetworks());
+}
+
+void EditorController::onGlueSelectedObjects()
+{
+    _SimulationFacade::get()->glueSelectedObjects(EditorModel::get().isApplyToNetworks());
+    EditorModel::get().update();
+    printOverlayMessage("Selection glued");
 }
 
 void EditorController::processInspectorWindows()
@@ -365,14 +488,59 @@ void EditorController::onMoveSelectedObjects(RealVector2D const& viewPos, RealVe
 {
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = Viewport::get().getZoomFactor();
-    auto delta = end - start;
+    onMoveSelectedObjectsBy(end - start);
+}
 
+void EditorController::onMoveSelectedObjectsBy(RealVector2D const& delta)
+{
+    auto const& model = EditorModel::get();
     ShallowUpdateSelectionData updateData;
-    updateData.considerClusters = EditorModel::get().isRolloutToClusters();
+    updateData.considerClusters = model.isApplyToNetworks();
+    updateData.glueOnContact = model.isGlueOnContact();
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onRotateSelectedObjects(float angleDelta)
+{
+    auto const& model = EditorModel::get();
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = model.isApplyToNetworks();
+    updateData.glueOnContact = model.isGlueOnContact();
+    updateData.angleDelta = angleDelta;
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onSetVelocityOfSelectedObjects(RealVector2D const& velocity)
+{
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = EditorModel::get().isApplyToNetworks();
+    updateData.velX = velocity.x;
+    updateData.velY = velocity.y;
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onSetAngularVelocityOfSelectedObjects(float angularVelocity)
+{
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = EditorModel::get().isApplyToNetworks();
+    updateData.angularVel = angularVelocity;
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onCutConnections(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+{
+    auto end = Viewport::get().mapViewToWorldPosition(viewPos);
+    if (Math::length(end - prevWorldPos) < NEAR_ZERO) {
+        return;
+    }
+    auto const& model = EditorModel::get();
+    _SimulationFacade::get()->cutConnections(prevWorldPos, end, model.isCutOnlyInSelection(), model.isApplyToNetworks());
     EditorModel::get().update();
 }
 

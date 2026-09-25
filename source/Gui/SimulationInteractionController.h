@@ -1,6 +1,9 @@
 #pragma once
 
 #include <chrono>
+#include <deque>
+
+#include <imgui.h>
 
 #include <Base/Singleton.h>
 
@@ -15,7 +18,9 @@ enum InteractionMode_
     InteractionMode_Selection,
     InteractionMode_Drawing,
     InteractionMode_PointPlacement,
-    InteractionMode_PositionSelection
+    InteractionMode_PositionSelection,
+    InteractionMode_Placement,
+    InteractionMode_Scissors
 };
 
 class SimulationInteractionController : public MainLoopEntity
@@ -30,6 +35,9 @@ public:
     void setInteractionMode(InteractionMode value);
 
     std::optional<RealVector2D> getPositionSelectionData() const;
+
+    // Right center of the edit mode toggle in screen coordinates
+    RealVector2D getEditToggleAnchor() const;
 
 private:
     void init() override;
@@ -56,8 +64,10 @@ private:
     void middleMouseButtonReleased();
 
     void drawCursor();
+    void drawScissorsCursor(ImVec2 const& mousePos, ImDrawList* drawList) const;
 
     void processSelectionRect();
+    void processScissorsTrail();
 
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
@@ -68,6 +78,7 @@ private:
     };
     Modes _modes;
     Modes _modesAtClick;
+    RealVector2D _editToggleAnchor;
 
     // Navigation
     std::optional<RealVector2D> _worldPosForPanning;
@@ -86,4 +97,12 @@ private:
         std::chrono::steady_clock::time_point lastTime;
     };
     std::optional<MouseWheelAction> _mouseWheelAction;
+
+    struct ScissorsTrailPoint
+    {
+        RealVector2D worldPos;
+        std::chrono::steady_clock::time_point time;
+        bool startsSegment = false;
+    };
+    std::deque<ScissorsTrailPoint> _scissorsTrail;
 };

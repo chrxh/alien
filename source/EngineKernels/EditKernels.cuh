@@ -22,7 +22,7 @@ __global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome*
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool includeClusters);
 __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);
-__global__ void cudaScheduleConnectSelection(SimulationData data, bool considerWithinSelection, int* result);
+__global__ void cudaScheduleConnectSelection(SimulationData data, bool includeClusters, bool onlyWithinSelection, int* result);
 __global__ void cudaPrepareMapForReconnection(SimulationData data);
 __global__ void cudaUpdateMapForReconnection(SimulationData data);
 __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center);
@@ -34,6 +34,7 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters);
 __global__ void cudaSetStatic(SimulationData data, bool value, bool includeClusters);
 __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData data, int* result);
+__global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart, float2 cutEnd, bool onlySelected, bool includeClusters, int* result);
 __global__ void cudaPrepareConnectionChanges(SimulationData data);
 __global__ void cudaProcessDeleteConnectionChanges(SimulationData data);
 __global__ void cudaProcessAddConnectionChanges(SimulationData data);
