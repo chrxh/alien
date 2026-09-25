@@ -9,12 +9,12 @@
 #include <EngineInterface/NameGeneratorService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "McpArguments.h"
-#include "McpSchema.h"
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
-std::vector<McpTool> McpSimulationTools::getTools(McpHost const& host)
+std::vector<McpTool> McpSimulationTools::getTools(McpToolContext& context)
 {
-    _host = host;
+    _context = &context;
 
     return {
         McpTool{
@@ -53,8 +53,8 @@ std::vector<McpTool> McpSimulationTools::getTools(McpHost const& host)
 McpToolResult McpSimulationTools::getSimulationInfo() const
 {
     auto worldSize = _SimulationFacade::get()->getWorldSize();
-    auto visibleAreaCenter = _host->getVisibleAreaCenter();
-    auto visibleAreaSize = _host->getVisibleAreaSize();
+    auto visibleAreaCenter = _context->getVisibleAreaCenter();
+    auto visibleAreaSize = _context->getVisibleAreaSize();
     auto selection = _SimulationFacade::get()->getSelectionShallowData();
 
     boost::json::array colors;
@@ -90,8 +90,8 @@ McpToolResult McpSimulationTools::createSimulation(boost::json::object const& ar
         projectName = NameGeneratorService::get().createSimulationName();
     }
 
-    _host->createSimulation(*projectName, worldSize);
-    _host->showMessage("New simulation");
+    _context->createSimulation(*projectName, worldSize);
+    _context->showMessage("New simulation");
 
     return {
         .text = std::format(
@@ -108,7 +108,7 @@ McpToolResult McpSimulationTools::runSimulation() const
         return {.text = "The simulation is already running."};
     }
     _SimulationFacade::get()->runSimulation();
-    _host->showMessage("Run");
+    _context->showMessage("Run");
     return {.text = "The simulation is running."};
 }
 
@@ -118,6 +118,6 @@ McpToolResult McpSimulationTools::pauseSimulation() const
         return {.text = "The simulation is already paused."};
     }
     _SimulationFacade::get()->pauseSimulation();
-    _host->showMessage("Pause");
+    _context->showMessage("Pause");
     return {.text = "The simulation is paused."};
 }

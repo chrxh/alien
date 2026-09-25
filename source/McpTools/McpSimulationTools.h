@@ -4,15 +4,16 @@
 
 #include <Base/Singleton.h>
 
-#include "McpHost.h"
-#include "McpServer.h"
+#include <Network/McpServer.h>
+
+#include "McpToolContext.h"
 
 class McpSimulationTools
 {
     MAKE_SINGLETON(McpSimulationTools);
 
 public:
-    std::vector<McpTool> getTools(McpHost const& host);
+    std::vector<McpTool> getTools(McpToolContext& context);
 
 private:
     McpToolResult getSimulationInfo() const;
@@ -20,5 +21,5 @@ private:
     McpToolResult runSimulation() const;
     McpToolResult pauseSimulation() const;
 
-    McpHost _host;
+    McpToolContext* _context = nullptr;
 };

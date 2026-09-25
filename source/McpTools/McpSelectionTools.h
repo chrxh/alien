@@ -7,15 +7,16 @@
 
 #include <EngineInterface/SelectionShallowData.h>
 
-#include "McpHost.h"
-#include "McpServer.h"
+#include <Network/McpServer.h>
+
+#include "McpToolContext.h"
 
 class McpSelectionTools
 {
     MAKE_SINGLETON(McpSelectionTools);
 
 public:
-    std::vector<McpTool> getTools(McpHost const& host);
+    std::vector<McpTool> getTools(McpToolContext& context);
 
 private:
     McpToolResult selectArea(boost::json::object const& arguments) const;
@@ -32,5 +33,5 @@ private:
     SelectionShallowData getNonEmptySelection() const;
     std::string describeSelection(SelectionShallowData const& selection) const;
 
-    McpHost _host;
+    McpToolContext* _context = nullptr;
 };
