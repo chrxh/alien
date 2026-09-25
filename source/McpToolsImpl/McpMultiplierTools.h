@@ -25,7 +25,7 @@ private:
     McpToolResult undoMultiplication();
 
     void checkSelectionForMultiplication(float numCopies) const;
-    void storeForUndo(MultiplierService::Result&& result);
+    void storeForUndo(ContentDesc&& origSelection);
     std::string describeSelection() const;
 
     McpToolContext* _context = nullptr;

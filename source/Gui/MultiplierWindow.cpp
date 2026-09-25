@@ -8,6 +8,7 @@
 #include <Base/GlobalSettings.h>
 
 #include <EngineInterface/MultiplierService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
 #include "EditorController.h"
@@ -224,21 +225,35 @@ void MultiplierWindow::validateAndCorrect()
     _randomParameters._maxAngularVel = std::max(_randomParameters._minAngularVel, _randomParameters._maxAngularVel);
 }
 
+namespace
+{
+    void replaceSelection(ContentDesc&& content)
+    {
+        _SimulationFacade::get()->removeSelectedObjects(true);
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
+    }
+}
+
 void MultiplierWindow::onBuild()
 {
-    auto result =
-        _mode == MultiplierMode_Grid ? MultiplierService::get().multiplyInGrid(_gridParameters) : MultiplierService::get().multiplyRandomly(_randomParameters);
-    EditorModel::get().update();
-    if (!result.overlappingCheckSuccessful) {
-        GenericMessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
+    _origSelection = _SimulationFacade::get()->getSelectedSimulationData(true);
+    if (_mode == MultiplierMode_Grid) {
+        replaceSelection(MultiplierService::get().multiplyInGrid(_origSelection, _gridParameters));
+    } else {
+        auto parameters = MultiplierService::RandomParameters(_randomParameters).maxDelta(_SimulationFacade::get()->getWorldSize());
+        auto multiplication = MultiplierService::get().multiplyRandomly(_origSelection, parameters);
+        replaceSelection(std::move(multiplication.content));
+        if (!multiplication.overlappingCheckSuccessful) {
+            GenericMessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
+        }
     }
-    _origSelection = std::move(result.origSelection);
+    EditorModel::get().update();
     _selectionDataAfterMultiplication = EditorModel::get().getSelectionShallowData();
 }
 
 void MultiplierWindow::onUndo()
 {
-    MultiplierService::get().undo(_origSelection);
+    replaceSelection(ContentDesc(_origSelection));
     EditorModel::get().update();
     _selectionDataAfterMultiplication = std::nullopt;
 }
