@@ -268,7 +268,7 @@ McpToolResult McpCreatorTools::createPolygon(boost::json::object const& argument
 McpToolResult McpCreatorTools::createPatternFromImage(boost::json::object const& arguments) const
 {
     auto filePath = McpArguments::getString(arguments, "file_path");
-    auto path = std::filesystem::path(std::u8string(filePath.begin(), filePath.end()));
+    auto path = McpArguments::getFilePath(arguments, "file_path");
     if (!std::filesystem::is_regular_file(path)) {
         throw std::invalid_argument(std::format("The file '{}' does not exist.", filePath));
     }
@@ -277,6 +277,7 @@ McpToolResult McpCreatorTools::createPatternFromImage(boost::json::object const&
     if (!image) {
         throw std::invalid_argument(std::format("The file '{}' could not be read as an image.", filePath));
     }
+    checkNumObjects(toFloat(image->width) * toFloat(image->height));
     return addToSimulation(
         CreatorService::get().createPatternFromImage(*image, center),
         CreatorService::ObjectProperties(),

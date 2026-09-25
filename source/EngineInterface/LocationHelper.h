@@ -26,7 +26,7 @@ public:
     static int getLocationId(SimulationParameters const& parameters, int orderNumber);
     static void setLocationId(SimulationParameters& parameters, int orderNumber, int locationId);
     static std::optional<int> findOrderNumber(SimulationParameters const& parameters, int locationId);
-    static int generateLocationId(SimulationParameters const& parameters);
+    static int getMaxLocationId(SimulationParameters const& parameters);
 
     // Layers get 1..n, radiation sources the following ids
     static void assignLocationIds(SimulationParameters& parameters);

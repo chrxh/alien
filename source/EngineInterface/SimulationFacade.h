@@ -51,7 +51,7 @@ public:
     virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
     virtual void makeSticky(bool includeClusters) = 0;
     virtual void removeStickiness(bool includeClusters) = 0;
-    virtual void setBarrier(bool value, bool includeClusters) = 0;
+    virtual void setStatic(bool value, bool includeClusters) = 0;
     virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedObjects() = 0;
     virtual void setDetached(bool value) = 0;

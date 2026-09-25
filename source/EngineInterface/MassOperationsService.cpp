@@ -81,7 +81,7 @@ void MassOperationsService::randomizeCellColors(ContentDesc& description, std::v
 void MassOperationsService::randomizeGenomeColors(ContentDesc& description, std::vector<int> const& colorCodes) const
 {
     for (auto& genome : description._genomes) {
-        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
+        auto newColor = colorCodes.at(NumberGenerator::get().getRandomInt(toInt(colorCodes.size())));
         for (auto& gene : genome._genes) {
             for (auto& node : gene._nodes) {
                 node._color = newColor;

@@ -32,6 +32,8 @@
 
 namespace
 {
+    auto constexpr SettingsFileExtension = ".settings.json";
+
     std::vector<std::string> getExpertGroupNames()
     {
         std::vector<std::string> result;
@@ -183,7 +185,7 @@ std::vector<McpTool> McpParameterTools::getTools()
             .description = "Saves the simulation parameters including layers and radiation sources to a settings file (*.settings.json).",
             .inputSchema = McpSchema::object(
                 {
-                    {"file_path", McpSchema::string("Absolute path of the file")},
+                    {"file_path", McpSchema::string("Absolute path of the file, must end with .settings.json")},
                     {"overwrite", McpSchema::boolean("Overwrite an existing file. Default: false")},
                 },
                 {"file_path"}),
@@ -605,7 +607,25 @@ namespace
         ParameterEntry entry;
         int orderNumber = 0;
         ParameterValue requestedValue;
+        std::vector<size_t> changedIndices;
     };
+
+    std::vector<size_t> getAddressedIndices(ParameterValue const& value, std::optional<int> color, std::optional<int> targetColor)
+    {
+        auto indexRange = [](size_t begin, size_t end) { return std::views::iota(begin, end) | std::ranges::to<std::vector>(); };
+        if (value.colorDependence == ColorDependence::None) {
+            return {0};
+        }
+        if (color.has_value() && targetColor.has_value()) {
+            return {static_cast<size_t>(color.value() * MAX_COLORS + targetColor.value())};
+        }
+        if (color.has_value()) {
+            auto isVector = value.colorDependence == ColorDependence::ColorVector;
+            auto begin = static_cast<size_t>(isVector ? color.value() : color.value() * MAX_COLORS);
+            return indexRange(begin, begin + (isVector ? 1 : MAX_COLORS));
+        }
+        return indexRange(0, value.values.size());
+    }
 
     AppliedChange applyChange(boost::json::object const& change, SimulationParameters& parameters)
     {
@@ -630,9 +650,12 @@ namespace
             throw std::invalid_argument(std::format("'target_color' requires 'color' and a color matrix parameter ('{}').", entry.path));
         }
 
+        std::vector<size_t> changedIndices;
         if (jsonValue) {
             applyJson(*jsonValue, entry, color, targetColor, value);
-            if (value.enabled.has_value() && !enabled.has_value()) {
+            changedIndices = getAddressedIndices(value, color, targetColor);
+            auto isLayer = LocationHelper::getLocationType(orderNumber, parameters) == LocationType::Layer;
+            if (isLayer && value.enabled.has_value() && !enabled.has_value()) {
                 value.enabled = true;
             }
         }
@@ -643,7 +666,28 @@ namespace
             value.pinned = pinned.value();
         }
         service.setValue(entry, parameters, orderNumber, value);
-        return AppliedChange{.entry = entry, .orderNumber = orderNumber, .requestedValue = service.getValue(entry, parameters, orderNumber)};
+        return AppliedChange{
+            .entry = entry,
+            .orderNumber = orderNumber,
+            .requestedValue = service.getValue(entry, parameters, orderNumber),
+            .changedIndices = std::move(changedIndices)};
+    }
+
+    // Values set again by a later change belong to that change only
+    void addAppliedChange(std::vector<AppliedChange>& appliedChanges, AppliedChange&& newChange)
+    {
+        for (auto& appliedChange : appliedChanges) {
+            if (appliedChange.entry.spec == newChange.entry.spec && appliedChange.orderNumber == newChange.orderNumber) {
+                std::erase_if(appliedChange.changedIndices, [&](size_t index) { return std::ranges::contains(newChange.changedIndices, index); });
+            }
+        }
+        appliedChanges.emplace_back(std::move(newChange));
+    }
+
+    bool isAdjusted(AppliedChange const& appliedChange, ParameterValue const& value)
+    {
+        return std::ranges::any_of(
+            appliedChange.changedIndices, [&](size_t index) { return value.values.at(index) != appliedChange.requestedValue.values.at(index); });
     }
 }
 
@@ -656,7 +700,7 @@ McpToolResult McpParameterTools::setParameters(boost::json::object const& argume
 
     std::vector<AppliedChange> appliedChanges;
     for (auto const& change : changes) {
-        appliedChanges.emplace_back(applyChange(change, parameters));
+        addAppliedChange(appliedChanges, applyChange(change, parameters));
     }
     ParametersValidationService::get().validateAndCorrect({_SimulationFacade::get()->getWorldSize()}, parameters);
 
@@ -680,7 +724,7 @@ McpToolResult McpParameterTools::setParameters(boost::json::object const& argume
         if (value.pinned.has_value()) {
             entry["pinned"] = value.pinned.value();
         }
-        if (value.values != appliedChange.requestedValue.values) {
+        if (isAdjusted(appliedChange, value)) {
             entry["adjusted"] = true;
             anyAdjusted = true;
         }
@@ -845,30 +889,31 @@ McpToolResult McpParameterTools::moveLocation(boost::json::object const& argumen
 
 McpToolResult McpParameterTools::loadParameters(boost::json::object const& arguments) const
 {
-    auto path = std::filesystem::path(McpArguments::getString(arguments, "file_path"));
+    auto filePath = McpArguments::getString(arguments, "file_path");
     SimulationParameters parameters;
-    if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, path)) {
-        throw std::invalid_argument(std::format("The file '{}' could not be loaded.", path.string()));
+    if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, McpArguments::getFilePath(arguments, "file_path"))) {
+        throw std::invalid_argument(std::format("The file '{}' could not be loaded.", filePath));
     }
     _SimulationFacade::get()->setSimulationParameters(parameters);
     _SimulationFacade::get()->setOriginalSimulationParameters(parameters);
     return {
         .text = std::format(
-            "Loaded the simulation parameters from '{}' with {} layer(s) and {} radiation source(s).",
-            path.string(),
-            parameters.numLayers,
-            parameters.numSources)};
+            "Loaded the simulation parameters from '{}' with {} layer(s) and {} radiation source(s).", filePath, parameters.numLayers, parameters.numSources)};
 }
 
 McpToolResult McpParameterTools::saveParameters(boost::json::object const& arguments) const
 {
-    auto path = std::filesystem::path(McpArguments::getString(arguments, "file_path"));
+    auto filePath = McpArguments::getString(arguments, "file_path");
+    auto path = McpArguments::getFilePath(arguments, "file_path");
+    if (!filePath.ends_with(SettingsFileExtension)) {
+        throw std::invalid_argument(std::format("The file name must end with '{}'.", SettingsFileExtension));
+    }
     auto overwrite = McpArguments::getOptionalBool(arguments, "overwrite").value_or(false);
     if (std::filesystem::exists(path) && !overwrite) {
-        throw std::invalid_argument(std::format("The file '{}' already exists. Set 'overwrite' to replace it.", path.string()));
+        throw std::invalid_argument(std::format("The file '{}' already exists. Set 'overwrite' to replace it.", filePath));
     }
     if (!SerializerService::get().serializeSimulationParametersToFile(path, _SimulationFacade::get()->getSimulationParameters())) {
-        throw std::invalid_argument(std::format("The file '{}' could not be saved.", path.string()));
+        throw std::invalid_argument(std::format("The file '{}' could not be saved.", filePath));
     }
-    return {.text = std::format("Saved the simulation parameters to '{}'.", path.string())};
+    return {.text = std::format("Saved the simulation parameters to '{}'.", filePath)};
 }

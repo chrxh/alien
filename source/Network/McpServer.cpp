@@ -20,6 +20,7 @@ namespace
     auto constexpr DefaultProtocolVersion = "2025-06-18";
     auto constexpr MaxStartupTime = std::chrono::milliseconds(2000);
     auto constexpr StartupPollInterval = std::chrono::milliseconds(1);
+    auto constexpr KeepAliveTimeoutSec = 1;
 
     auto constexpr ParseError = -32700;
     auto constexpr InvalidRequest = -32600;
@@ -129,11 +130,31 @@ McpServer::~McpServer()
     stop();
 }
 
+namespace
+{
+    // The httplib default sets SO_REUSEPORT on Linux, which would let a second process listen on the same port
+    void setSocketOptions(socket_t socket)
+    {
+#ifdef _WIN32
+        httplib::default_socket_options(socket);
+#else
+        int yes = 1;
+        setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<void*>(&yes), sizeof(yes));
+#endif
+    }
+}
+
 bool McpServer::start(int port)
 {
     stop();
 
     auto server = std::make_unique<httplib::Server>();
+    server->set_socket_options(setSocketOptions);
+
+    // Closing each connection after its response lets stop() return without waiting for idle keep-alive connections
+    server->set_keep_alive_max_count(1);
+    server->set_keep_alive_timeout(KeepAliveTimeoutSec);
+
     server->Post(Endpoint, [this](httplib::Request const& request, httplib::Response& response) {
         if (!isOriginAllowed(request)) {
             response.status = 403;

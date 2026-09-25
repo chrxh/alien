@@ -59,7 +59,7 @@ public:
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
-    void setBarrier(bool value, bool includeClusters);
+    void setStatic(bool value, bool includeClusters);
     void changeInspectedSimulationData(TOs const& changeTO);
     int injectGenomeToSelectedCreatures(TOs const& to);  // to only contains 1 genome
 

@@ -183,11 +183,11 @@ void EngineWorker::removeStickiness(bool includeClusters)
     _simulationCudaFacade->removeStickiness(includeClusters);
 }
 
-void EngineWorker::setBarrier(bool value, bool includeClusters)
+void EngineWorker::setStatic(bool value, bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->setBarrier(value, includeClusters);
+    _simulationCudaFacade->setStatic(value, includeClusters);
 }
 
 void EngineWorker::changeCell(ExtendedObjectDesc const& changedCell)

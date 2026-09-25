@@ -3,14 +3,16 @@
 // Private copy of the implementation, ImFileDialog compiles its own
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
+#define STBI_WINDOWS_UTF8
 #include <stb_image.h>
 
 std::optional<RgbImage> ImageFileService::loadRgbImage(std::filesystem::path const& path) const
 {
     auto constexpr NumChannels = 3;
 
+    auto fileName = path.u8string();
     int width, height, numChannels;
-    auto pixels = stbi_load(path.string().c_str(), &width, &height, &numChannels, NumChannels);
+    auto pixels = stbi_load(reinterpret_cast<char const*>(fileName.c_str()), &width, &height, &numChannels, NumChannels);
     if (!pixels) {
         return std::nullopt;
     }

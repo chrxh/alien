@@ -99,6 +99,12 @@ std::string McpArguments::getString(boost::json::object const& arguments, std::s
     return std::string(value.as_string());
 }
 
+std::filesystem::path McpArguments::getFilePath(boost::json::object const& arguments, std::string_view key)
+{
+    auto value = getString(arguments, key);
+    return std::filesystem::path(std::u8string(value.begin(), value.end()));
+}
+
 std::vector<RealVector2D> McpArguments::getPoints(boost::json::object const& arguments, std::string_view key, size_t minNumPoints)
 {
     auto const& value = getRequiredValue(arguments, key);

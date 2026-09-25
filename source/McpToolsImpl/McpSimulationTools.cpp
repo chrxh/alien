@@ -12,6 +12,11 @@
 #include <Network/McpArguments.h>
 #include <Network/McpSchema.h>
 
+namespace
+{
+    auto constexpr MaxWorldSize = 10000;
+}
+
 std::vector<McpTool> McpSimulationTools::getTools(McpToolContext& context)
 {
     _context = &context;
@@ -29,8 +34,8 @@ std::vector<McpTool> McpSimulationTools::getTools(McpToolContext& context)
             .description = "Replaces the current simulation in ALIEN with a new, empty and paused simulation. The simulation parameters of the current "
                            "simulation are kept. Omitted world dimensions default to the current ones.",
             .inputSchema = McpSchema::object({
-                {"width", McpSchema::integer("World width", 1)},
-                {"height", McpSchema::integer("World height", 1)},
+                {"width", McpSchema::integer("World width", 1, MaxWorldSize)},
+                {"height", McpSchema::integer("World height", 1, MaxWorldSize)},
                 {"project_name", McpSchema::string("Project name, generated if omitted")},
             }),
             .handler = [this](boost::json::object const& arguments) { return createSimulation(arguments); },
@@ -83,8 +88,8 @@ McpToolResult McpSimulationTools::getSimulationInfo() const
 McpToolResult McpSimulationTools::createSimulation(boost::json::object const& arguments) const
 {
     auto worldSize = _SimulationFacade::get()->getWorldSize();
-    worldSize.x = McpArguments::getOptionalInt(arguments, "width", 1).value_or(worldSize.x);
-    worldSize.y = McpArguments::getOptionalInt(arguments, "height", 1).value_or(worldSize.y);
+    worldSize.x = McpArguments::getOptionalInt(arguments, "width", 1, MaxWorldSize).value_or(worldSize.x);
+    worldSize.y = McpArguments::getOptionalInt(arguments, "height", 1, MaxWorldSize).value_or(worldSize.y);
     auto projectName = McpArguments::getOptionalString(arguments, "project_name");
     if (!projectName) {
         projectName = NameGeneratorService::get().createSimulationName();

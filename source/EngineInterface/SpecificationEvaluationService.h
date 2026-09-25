@@ -41,4 +41,6 @@ public:
 
     bool isVisible(ParameterGroupSpec const& groupSpec, LocationType locationType) const;
     bool isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const;
+
+    int getArraySize(ColorDependence colorDependence) const;
 };

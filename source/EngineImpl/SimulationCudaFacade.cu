@@ -307,9 +307,9 @@ void _SimulationCudaFacade::removeStickiness(bool includeClusters)
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::setBarrier(bool value, bool includeClusters)
+void _SimulationCudaFacade::setStatic(bool value, bool includeClusters)
 {
-    EditKernelsService::get().setBarrier(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value, includeClusters);
+    EditKernelsService::get().setStatic(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value, includeClusters);
     syncAndCheck();
 }
 

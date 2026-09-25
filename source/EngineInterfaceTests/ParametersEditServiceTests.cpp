@@ -286,7 +286,7 @@ TEST_F(ParametersEditServiceTests, cloneLayer)
 {
     auto origParameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source});
     auto parameters = origParameters;
-    ParametersEditService::get().cloneLocation(parameters, 1);
+    ParametersEditService::get().cloneLocation(parameters, 1, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterCloning(
         parameters, origParameters, {LocationType::Layer, LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source}, 2);
 }
@@ -295,7 +295,7 @@ TEST_F(ParametersEditServiceTests, cloneSource)
 {
     auto origParameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source});
     auto parameters = origParameters;
-    ParametersEditService::get().cloneLocation(parameters, 3);
+    ParametersEditService::get().cloneLocation(parameters, 3, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterCloning(
         parameters, origParameters, {LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source, LocationType::Source}, 4);
 }
@@ -304,7 +304,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_empty)
 {
     auto origParameters = createTestData({});
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 0);
+    ParametersEditService::get().insertDefaultLayer(parameters, 0, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Layer}, 1);
 }
 
@@ -315,7 +315,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_onlySources)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 1);
+    ParametersEditService::get().insertDefaultLayer(parameters, 1, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -337,7 +337,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_base)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 0);
+    ParametersEditService::get().insertDefaultLayer(parameters, 0, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -362,7 +362,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_firstLayer1)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 1);
+    ParametersEditService::get().insertDefaultLayer(parameters, 1, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -387,7 +387,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_firstLayer2)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 2);
+    ParametersEditService::get().insertDefaultLayer(parameters, 2, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -412,7 +412,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_middle1)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 3);
+    ParametersEditService::get().insertDefaultLayer(parameters, 3, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -439,7 +439,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_middle2)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 4);
+    ParametersEditService::get().insertDefaultLayer(parameters, 4, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -466,7 +466,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultLayer_end)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultLayer(parameters, 5);
+    ParametersEditService::get().insertDefaultLayer(parameters, 5, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -507,7 +507,8 @@ TEST_F(ParametersEditServiceTests, locationIds)
     EXPECT_EQ(std::optional(0), LocationHelper::findOrderNumber(parameters, 0));
     EXPECT_EQ(std::optional(2), LocationHelper::findOrderNumber(parameters, 1));
     EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, 4).has_value());
-    EXPECT_EQ(4, LocationHelper::generateLocationId(parameters));
+    EXPECT_EQ(3, LocationHelper::getMaxLocationId(parameters));
+    EXPECT_LT(3, ParametersEditService::generateLocationId(parameters));
 }
 
 TEST_F(ParametersEditServiceTests, locationIds_followLocation)
@@ -519,7 +520,7 @@ TEST_F(ParametersEditServiceTests, locationIds_followLocation)
     editService.moveLocationUpwards(parameters, 2);
     EXPECT_EQ(std::optional(1), LocationHelper::findOrderNumber(parameters, locationId));
 
-    editService.insertDefaultSource(parameters, 0);
+    editService.insertDefaultSource(parameters, 0, ParametersEditService::generateLocationId(parameters));
     EXPECT_EQ(std::optional(2), LocationHelper::findOrderNumber(parameters, locationId));
 
     auto insertedLocationId = LocationHelper::getLocationId(parameters, 1);
@@ -528,11 +529,24 @@ TEST_F(ParametersEditServiceTests, locationIds_followLocation)
     EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, insertedLocationId).has_value());
 }
 
+TEST_F(ParametersEditServiceTests, locationIds_notReusedAfterDeletion)
+{
+    auto& editService = ParametersEditService::get();
+    auto parameters = createTestData({LocationType::Layer, LocationType::Layer});
+    auto deletedLocationId = LocationHelper::getLocationId(parameters, 2);
+
+    editService.deleteLocation(parameters, 2);
+    editService.insertDefaultLayer(parameters, 1, ParametersEditService::generateLocationId(parameters));
+
+    EXPECT_NE(deletedLocationId, LocationHelper::getLocationId(parameters, 2));
+    EXPECT_FALSE(LocationHelper::findOrderNumber(parameters, deletedLocationId).has_value());
+}
+
 TEST_F(ParametersEditServiceTests, insertDefaultSource_empty)
 {
     auto origParameters = createTestData({});
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 0);
+    ParametersEditService::get().insertDefaultSource(parameters, 0, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Source}, 1);
 }
 
@@ -543,7 +557,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_onlyLayers)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 1);
+    ParametersEditService::get().insertDefaultSource(parameters, 1, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -565,7 +579,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_base)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 0);
+    ParametersEditService::get().insertDefaultSource(parameters, 0, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -590,7 +604,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_firstSource1)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 1);
+    ParametersEditService::get().insertDefaultSource(parameters, 1, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -615,7 +629,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_firstSource2)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 2);
+    ParametersEditService::get().insertDefaultSource(parameters, 2, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -640,7 +654,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_middle1)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 3);
+    ParametersEditService::get().insertDefaultSource(parameters, 3, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -667,7 +681,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_middle2)
         LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 4);
+    ParametersEditService::get().insertDefaultSource(parameters, 4, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
@@ -694,7 +708,7 @@ TEST_F(ParametersEditServiceTests, insertDefaultSource_end)
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultSource(parameters, 5);
+    ParametersEditService::get().insertDefaultSource(parameters, 5, ParametersEditService::generateLocationId(parameters));
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,

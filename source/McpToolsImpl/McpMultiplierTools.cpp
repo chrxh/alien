@@ -15,13 +15,6 @@
 namespace
 {
     auto constexpr MaxObjectsPerCommand = 1000000.0f;
-
-    void checkMinMax(float min, float max, std::string const& minKey, std::string const& maxKey)
-    {
-        if (min > max) {
-            throw std::invalid_argument(std::format("'{}' must not be greater than '{}'.", minKey, maxKey));
-        }
-    }
 }
 
 std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
@@ -67,7 +60,9 @@ std::vector<McpTool> McpMultiplierTools::getTools(McpToolContext& context)
                     {"max_velocity_y", McpSchema::number("Maximum velocity in y direction. Default: 0")},
                     {"min_angular_velocity", McpSchema::number("Minimum angular velocity. Default: 0")},
                     {"max_angular_velocity", McpSchema::number("Maximum angular velocity. Default: 0")},
-                    {"overlapping_check", McpSchema::boolean("Avoid copies that overlap existing objects. Default: false")},
+                    {"overlapping_check",
+                     McpSchema::boolean(
+                         "Avoid copies that overlap the original selection or each other. Other objects in the world are not checked. Default: false")},
                 },
                 {"copies"}),
             .handler = [this](boost::json::object const& arguments) { return multiplyRandomly(arguments); },
@@ -97,11 +92,21 @@ McpToolResult McpMultiplierTools::multiplyInGrid(boost::json::object const& argu
                           .verticalVelXinc(McpArguments::getOptionalFloat(arguments, "vertical_velocity_x_increment").value_or(0))
                           .verticalVelYinc(McpArguments::getOptionalFloat(arguments, "vertical_velocity_y_increment").value_or(0))
                           .verticalAngularVelInc(McpArguments::getOptionalFloat(arguments, "vertical_angular_velocity_increment").value_or(0));
-    checkSelectionForMultiplication(parameters._horizontalNumber * parameters._verticalNumber);
+    checkSelectionForMultiplication(toFloat(parameters._horizontalNumber) * toFloat(parameters._verticalNumber));
 
     storeForUndo(MultiplierService::get().multiplyInGrid(parameters));
     _context->onSelectionChanged();
     return {.text = std::format("Arranged the selection in a {} x {} grid. {}", parameters._horizontalNumber, parameters._verticalNumber, describeSelection())};
+}
+
+namespace
+{
+    void checkMinMax(float min, float max, std::string const& minKey, std::string const& maxKey)
+    {
+        if (min > max) {
+            throw std::invalid_argument(std::format("'{}' must not be greater than '{}'.", minKey, maxKey));
+        }
+    }
 }
 
 McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& arguments)
@@ -122,7 +127,7 @@ McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& ar
     checkMinMax(parameters._minVelX, parameters._maxVelX, "min_velocity_x", "max_velocity_x");
     checkMinMax(parameters._minVelY, parameters._maxVelY, "min_velocity_y", "max_velocity_y");
     checkMinMax(parameters._minAngularVel, parameters._maxAngularVel, "min_angular_velocity", "max_angular_velocity");
-    checkSelectionForMultiplication(parameters._number + 1);
+    checkSelectionForMultiplication(toFloat(parameters._number) + 1.0f);
 
     auto result = MultiplierService::get().multiplyRandomly(parameters);
     auto overlappingCheckSuccessful = result.overlappingCheckSuccessful;
@@ -131,7 +136,7 @@ McpToolResult McpMultiplierTools::multiplyRandomly(boost::json::object const& ar
 
     auto text = std::format("Added {} copies at random positions. {}", parameters._number, describeSelection());
     if (!overlappingCheckSuccessful) {
-        text += " Not all copies could be placed without overlapping existing objects.";
+        text += " Not all copies could be placed without overlapping the original selection or each other.";
     }
     return {.text = text};
 }
@@ -151,14 +156,14 @@ McpToolResult McpMultiplierTools::undoMultiplication()
     return {.text = "Reverted the last multiplication. " + describeSelection()};
 }
 
-void McpMultiplierTools::checkSelectionForMultiplication(int numCopies) const
+void McpMultiplierTools::checkSelectionForMultiplication(float numCopies) const
 {
     auto selection = _SimulationFacade::get()->getSelectionShallowData();
     auto numEntities = selection.numClusterCells + selection.numEnergyParticles;
     if (numEntities == 0) {
         throw std::invalid_argument("Nothing is selected. Select an area with select_area first.");
     }
-    auto estimatedNumEntities = toFloat(numEntities) * toFloat(numCopies);
+    auto estimatedNumEntities = toFloat(numEntities) * numCopies;
     if (estimatedNumEntities > MaxObjectsPerCommand) {
         throw std::invalid_argument(std::format(
             "This would result in about {} objects, but at most {} are allowed per command.",

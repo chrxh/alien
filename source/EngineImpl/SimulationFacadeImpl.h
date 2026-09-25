@@ -44,7 +44,7 @@ public:
     void uniformVelocitiesForSelectedObjects(bool includeClusters) override;
     void makeSticky(bool includeClusters) override;
     void removeStickiness(bool includeClusters) override;
-    void setBarrier(bool value, bool includeClusters) override;
+    void setStatic(bool value, bool includeClusters) override;
     void colorSelectedObjects(unsigned char color, bool includeClusters) override;
     void reconnectSelectedObjects() override;
     void setDetached(bool value) override;

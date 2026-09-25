@@ -165,7 +165,7 @@ std::optional<int> LocationHelper::findOrderNumber(SimulationParameters const& p
     return std::nullopt;
 }
 
-int LocationHelper::generateLocationId(SimulationParameters const& parameters)
+int LocationHelper::getMaxLocationId(SimulationParameters const& parameters)
 {
     auto result = 0;
     for (int i = 0; i < parameters.numLayers; ++i) {
@@ -174,7 +174,7 @@ int LocationHelper::generateLocationId(SimulationParameters const& parameters)
     for (int i = 0; i < parameters.numSources; ++i) {
         result = std::max(result, parameters.sourceIds[i]);
     }
-    return result + 1;
+    return result;
 }
 
 void LocationHelper::assignLocationIds(SimulationParameters& parameters)
