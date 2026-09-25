@@ -196,7 +196,6 @@ McpToolResult McpSelectionTools::moveSelection(boost::json::object const& argume
     auto includeClusters = getIncludeClusters(arguments);
     auto selection = getNonEmptySelection();
 
-    // The update also sets the velocity, so the current one is passed on
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = includeClusters;
     updateData.posDeltaX = dx;

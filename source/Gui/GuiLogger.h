@@ -10,11 +10,11 @@ public:
     _GuiLogger();
     ~_GuiLogger() override;
 
-    std::vector<std::string> const& getMessages(Priority minPriority) const;
+    std::vector<LogMessage> const& getMessages(Priority minPriority) const;
 
 private:
-    void newLogMessage(Priority priority, std::string const& message) override;
+    void newLogMessage(LogMessage const& message) override;
 
-    std::vector<std::string> _allLogMessages;
-    std::vector<std::string> _importantLogMessages;
+    std::vector<LogMessage> _allLogMessages;
+    std::vector<LogMessage> _importantLogMessages;
 };

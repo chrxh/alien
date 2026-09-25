@@ -32,7 +32,6 @@ namespace
     auto constexpr MaxCommandLogEntries = size_t{1000};
 }
 
-// Only relevant if shutdown() was skipped: releases requests still waiting for the main thread so that the server threads can be joined
 McpController::~McpController()
 {
     _stopping = true;
@@ -69,7 +68,15 @@ int McpController::getDefaultPort() const
 
 void McpController::setPort(int value)
 {
-    _port = std::clamp(value, MinPort, MaxPort);
+    auto port = std::clamp(value, MinPort, MaxPort);
+    if (port == _port) {
+        return;
+    }
+    _port = port;
+    if (isServerRunning()) {
+        stopServer();
+        setServerRunning(true);
+    }
 }
 
 std::string McpController::getServerUrl() const

@@ -105,7 +105,6 @@ namespace
                 overlappingCheckSuccessful = false;
             }
 
-            // Add copy to the map for overlapping check
             if (parameters._overlappingCheck) {
                 for (auto const& object : copy._objects) {
                     auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(object._pos));

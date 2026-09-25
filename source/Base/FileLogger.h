@@ -13,7 +13,7 @@ public:
     _FileLogger();
     ~_FileLogger() override;
 
-    void newLogMessage(Priority priority, std::string const& message) override;
+    void newLogMessage(LogMessage const& message) override;
 
 private:
     std::ofstream _outfile;

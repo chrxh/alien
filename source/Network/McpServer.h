@@ -28,20 +28,17 @@ struct McpTool
     std::function<McpToolResult(boost::json::object const& arguments)> handler;
 };
 
-// MCP server with the Streamable HTTP transport, reachable only from the local machine
 class McpServer
 {
 public:
     McpServer(std::string const& serverName, std::string const& serverVersion, std::vector<McpTool> tools);
     ~McpServer();
 
-    // Port 0 selects a free port
     bool start(int port);
     void stop();
     bool isRunning() const;
     int getPort() const;
 
-    // Returns nothing for notifications and responses sent by the client
     std::optional<std::string> handleMessage(std::string const& message) const;
 
 private:

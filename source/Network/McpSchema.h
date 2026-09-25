@@ -7,7 +7,6 @@
 
 #include <boost/json/object.hpp>
 
-// Builds JSON schemas for the input of MCP tools
 class McpSchema
 {
 public:

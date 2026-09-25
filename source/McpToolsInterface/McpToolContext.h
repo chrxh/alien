@@ -4,7 +4,6 @@
 
 #include <Base/Definitions.h>
 
-// Functionality of the application in which the MCP server runs
 class McpToolContext
 {
 public:

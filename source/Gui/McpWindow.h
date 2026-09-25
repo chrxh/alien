@@ -18,6 +18,7 @@ private:
 
     void processToolbar();
     void processStatusBadge();
-    void processConnectionCard();
+    void processConnectionGuide();
+    void processStepNumber(int number);
     void processCommandLog();
 };
