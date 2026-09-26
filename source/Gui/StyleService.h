@@ -15,20 +15,22 @@ namespace Const
     extern float const SliderBarWidth;
     extern float const WindowsRounding;
 
-    extern ImColor const BackgroundColor;
-    extern ImColor const PanelColor;
-    extern ImColor const RaisedColor;
-    extern ImColor const InputColor;
-    extern ImColor const LineColor;
-    extern ImColor const LineSoftColor;
-    extern ImColor const TextBaseColor;
-    extern ImColor const TextDimColor;
-    extern ImColor const TextFaintColor;
-    extern ImColor const AccentColor;
-    extern ImColor const AccentDeepColor;
-    extern ImColor const AccentLineColor;
-    extern ImColor const WarningColor;
-    extern ImColor const DangerColor;
+    // Non-const colors depend on the color theme and are assigned by StyleService
+    extern ImColor BackgroundColor;
+    extern ImColor PanelColor;
+    extern ImColor RaisedColor;
+    extern ImColor InputColor;
+    extern ImColor LineColor;
+    extern ImColor LineSoftColor;
+    extern ImColor TextStrongColor;
+    extern ImColor TextBaseColor;
+    extern ImColor TextDimColor;
+    extern ImColor TextFaintColor;
+    extern ImColor AccentColor;
+    extern ImColor AccentDeepColor;
+    extern ImColor AccentLineColor;
+    extern ImColor WarningColor;
+    extern ImColor DangerColor;
 
     extern ImColor const ProgramVersionTextColor;
 
@@ -37,56 +39,57 @@ namespace Const
     extern int64_t const SimulationSliderColor_Base;
     extern int64_t const SimulationSliderColor_Active;
 
-    extern ImColor const TextTooltipColor;
-    extern ImColor const TextInfoColor;
-    extern ImColor const TextDecentColor;
-    extern ImColor const TextConflictColor;
+    extern ImColor TextTooltipColor;
+    extern ImColor TextInfoColor;
+    extern ImColor TextDecentColor;
+    extern ImColor TextConflictColor;
 
-    extern ImColor const HeaderColor;
-    extern ImColor const HeaderActiveColor;
-    extern ImColor const HeaderHoveredColor;
-    extern ImColor const HeaderSelectedHoveredColor;
+    extern ImColor HeaderColor;
+    extern ImColor HeaderActiveColor;
+    extern ImColor HeaderHoveredColor;
+    extern ImColor HeaderSelectedHoveredColor;
 
-    extern ImColor const MenuButtonColor;
-    extern ImColor const MenuButtonHoveredColor;
-    extern ImColor const MenuButtonActiveColor;
+    extern ImColor MenuButtonColor;
+    extern ImColor MenuButtonHoveredColor;
+    extern ImColor MenuButtonActiveColor;
 
-    extern ImColor const ImportantButtonColor;
-    extern ImColor const ImportantButtonHoveredColor;
-    extern ImColor const ImportantButtonActiveColor;
+    extern ImColor ImportantButtonColor;
+    extern ImColor ImportantButtonHoveredColor;
+    extern ImColor ImportantButtonActiveColor;
 
-    extern ImColor const TreeNodeHighColor;
-    extern ImColor const TreeNodeHighHoveredColor;
-    extern ImColor const TreeNodeHighActiveColor;
-    extern ImColor const TreeNodeDefaultColor;
-    extern ImColor const TreeNodeDefaultHoveredColor;
-    extern ImColor const TreeNodeDefaultActiveColor;
-    extern ImColor const TreeNodeLowColor;
-    extern ImColor const TreeNodeLowHoveredColor;
-    extern ImColor const TreeNodeLowActiveColor;
+    extern ImColor TreeNodeHighColor;
+    extern ImColor TreeNodeHighHoveredColor;
+    extern ImColor TreeNodeHighActiveColor;
+    extern ImColor TreeNodeDefaultColor;
+    extern ImColor TreeNodeDefaultHoveredColor;
+    extern ImColor TreeNodeDefaultActiveColor;
+    extern ImColor TreeNodeLowColor;
+    extern ImColor TreeNodeLowHoveredColor;
+    extern ImColor TreeNodeLowActiveColor;
 
-    extern ImColor const DisabledOverlayColor1;
-    extern ImColor const DisabledOverlayColor2;
+    extern ImColor DisabledOverlayColor1;
+    extern ImColor DisabledOverlayColor2;
 
-    extern ImColor const GroupDefaultColor;
-    extern ImColor const GroupHighColor;
-    extern ImColor const GroupAccentBarColor;
-    extern ImColor const GroupTextColor;
-    extern ImColor const GroupHighTextColor;
+    extern ImColor GroupDefaultColor;
+    extern ImColor GroupHighColor;
+    extern ImColor GroupAccentBarColor;
+    extern ImColor GroupTextColor;
+    extern ImColor GroupHighTextColor;
 
-    extern ImColor const MovableSeparatorColor;
-    extern ImColor const MovableSeparatorHoveredColor;
-    extern ImColor const MovableSeparatorActiveColor;
+    extern ImColor MovableSeparatorColor;
+    extern ImColor MovableSeparatorHoveredColor;
+    extern ImColor MovableSeparatorActiveColor;
 
-    extern ImColor const TableHeaderColor;
+    extern ImColor TableHeaderColor;
+    extern ImColor TableRowAltColor;
 
-    extern ImColor const MonospaceColor;
-    extern ImColor const StatusBarTextColor;
+    extern ImColor MonospaceColor;
+    extern ImColor StatusBarTextColor;
 
-    extern ImColor const HeadlineColor;
+    extern ImColor HeadlineColor;
 
-    extern ImColor const UnsavedChangesColor;
-    extern ImColor const UnsavedChangesBackgroundColor;
+    extern ImColor UnsavedChangesColor;
+    extern ImColor UnsavedChangesBackgroundColor;
 
     extern ImColor const SelectionAreaFillColor;
     extern ImColor const SelectionAreaBorderColor;
@@ -96,8 +99,8 @@ namespace Const
     extern ImColor const ConstructionPreviewPointColor;
     extern ImColor const ConstructionPreviewBrushColor;
 
-    extern ImColor const McpSuccessColor;
-    extern ImColor const McpRunningBadgeColor;
+    extern ImColor McpSuccessColor;
+    extern ImColor McpRunningBadgeColor;
 
     extern ImColor const CellTypeOverlayColor;
     extern ImColor const CellTypeOverlayShadowColor;
@@ -106,42 +109,42 @@ namespace Const
 
     extern ImColor const SelectedObjectOverlayColor;
 
-    extern ImColor const ToolbarButtonTextColor;
+    extern ImColor ToolbarButtonTextColor;
     extern ImColor const ToolbarButtonBackgroundColor;
-    extern ImColor const ToolbarButtonHoveredColor;
-    extern ImColor const ToolbarButtonSelectedColor;
-    extern ImColor const ToolbarButtonSelectedTextColor;
-    extern ImColor const ToolbarButtonDisabledTextColor;
-    extern ImColor const ToolbarSelectionBarColor;
-    extern ImColor const ToolbarGroupColor;
-    extern ImColor const ToolbarOverflowColor;
-    extern ImColor const ToolbarOverflowHoveredColor;
-    extern ImColor const ToolbarMenuHoveredColor;
+    extern ImColor ToolbarButtonHoveredColor;
+    extern ImColor ToolbarButtonSelectedColor;
+    extern ImColor ToolbarButtonSelectedTextColor;
+    extern ImColor ToolbarButtonDisabledTextColor;
+    extern ImColor ToolbarSelectionBarColor;
+    extern ImColor ToolbarGroupColor;
+    extern ImColor ToolbarOverflowColor;
+    extern ImColor ToolbarOverflowHoveredColor;
+    extern ImColor ToolbarMenuHoveredColor;
 
-    extern ImColor const EditToggleColor;
-    extern ImColor const EditToggleSelectedColor;
-    extern ImColor const EditToggleBorderColor;
-    extern ImColor const EditToggleSelectedBorderColor;
-    extern ImColor const EditToggleGlowColor;
-    extern ImColor const EditToggleIconColor;
-    extern ImColor const EditToggleHoveredIconColor;
-    extern ImColor const EditToggleSelectedIconColor;
-    extern ImColor const EditToggleLabelColor;
-    extern ImColor const EditToggleShortcutColor;
+    extern ImColor EditToggleColor;
+    extern ImColor EditToggleSelectedColor;
+    extern ImColor EditToggleBorderColor;
+    extern ImColor EditToggleSelectedBorderColor;
+    extern ImColor EditToggleGlowColor;
+    extern ImColor EditToggleIconColor;
+    extern ImColor EditToggleHoveredIconColor;
+    extern ImColor EditToggleSelectedIconColor;
+    extern ImColor EditToggleLabelColor;
+    extern ImColor EditToggleShortcutColor;
 
-    extern ImColor const ActionButtonTextColor;
-    extern ImColor const ActionButtonHighlightedTextColor;
-    extern ImColor const ActionButtonBackgroundColor;
-    extern ImColor const ActionButtonHoveredColor;
-    extern ImColor const ActionButtonActiveColor;
+    extern ImColor ActionButtonTextColor;
+    extern ImColor ActionButtonHighlightedTextColor;
+    extern ImColor ActionButtonBackgroundColor;
+    extern ImColor ActionButtonHoveredColor;
+    extern ImColor ActionButtonActiveColor;
 
     extern ImColor const ButtonColor;
-    extern ImColor const ToggleOnColor;
-    extern ImColor const ToggleOnHoveredColor;
-    extern ImColor const ToggleOffColor;
-    extern ImColor const ToggleOffHoveredColor;
-    extern ImColor const ToggleKnobColor;
-    extern ImColor const ToggleKnobBorderColor;
+    extern ImColor ToggleOnColor;
+    extern ImColor ToggleOnHoveredColor;
+    extern ImColor ToggleOffColor;
+    extern ImColor ToggleOffHoveredColor;
+    extern ImColor ToggleKnobColor;
+    extern ImColor ToggleKnobBorderColor;
     extern ImColor const DetailButtonColor;
 
     extern ImColor const InspectorLineColor;
@@ -163,39 +166,46 @@ namespace Const
     extern ImColor const GenomePreviewMultipleConstructorColor;
     extern ImColor const GenomePreviewSelfReplicatorColor;
 
-    extern ImColor const FloatingCardBackgroundColor;
-    extern ImColor const FloatingCardBorderColor;
+    extern ImColor FloatingCardBackgroundColor;
+    extern ImColor FloatingCardBorderColor;
 
     extern ImColor const SelectionFrameColor;
-    extern ImColor const SelectionHandleColor;
-    extern ImColor const SelectionHandleHoveredColor;
-    extern ImColor const SelectionHandleFillColor;
-    extern ImColor const SelectionChipTextColor;
-    extern ImColor const ScissorsTrailColor;
+    extern ImColor SelectionHandleColor;
+    extern ImColor SelectionHandleHoveredColor;
+    extern ImColor SelectionHandleFillColor;
+    extern ImColor SelectionChipTextColor;
+    extern ImColor ScissorsTrailColor;
     extern ImColor const MultiplierPreviewColor;
 
     extern ImColor const NeuronEditorConnectionColor;
     extern ImColor const NeuronEditorGridColor;
     extern ImColor const NeuronEditorZeroLinePlotColor;
     extern ImColor const NeuronEditorPlotColor;
+    extern ImColor NeuronEditorNodeFillColor;
+    extern ImColor NeuronEditorLabelColor;
 
-    extern ImColor const BrowserAddReactionButtonTextColor;
-    extern ImColor const BrowserDownloadButtonTextColor;
-    extern ImColor const BrowserDeleteButtonTextColor;
-    extern ImColor const BrowserLeafTextColor;
-    extern ImColor const BrowserResourceTextColor;
+    extern ImColor DashboardCardBackgroundColor;
+    extern ImColor DashboardCardBorderColor;
+    extern ImColor DashboardSummaryRowColor;
+
+    extern ImColor BrowserAddReactionButtonTextColor;
+    extern ImColor BrowserDownloadButtonTextColor;
+    extern ImColor BrowserDeleteButtonTextColor;
+    extern ImColor BrowserLeafTextColor;
+    extern ImColor BrowserResourceTextColor;
     extern ImColor const BrowserResourceLineColor;
-    extern ImColor const BrowserResourceNewTextColor;
-    extern ImColor const BrowserResourceSymbolColor;
+    extern ImColor BrowserResourceNewTextColor;
+    extern ImColor BrowserResourceSymbolColor;
+    extern ImColor BrowserOwnReactionFrameColor;
 
-    extern ImColor const BrowserLoginBannerColor;
-    extern ImColor const BrowserLoginBannerBarColor;
+    extern ImColor BrowserLoginBannerColor;
+    extern ImColor BrowserLoginBannerBarColor;
 
-    extern ImColor const BrowserLoginHintCardColor;
-    extern ImColor const BrowserLoginHintCardBorderColor;
-    extern ImColor const BrowserLoginHintIconColor;
-    extern ImColor const BrowserPlaceholderTilePictureColor;
-    extern ImColor const BrowserPlaceholderTileBarColor;
+    extern ImColor BrowserLoginHintCardColor;
+    extern ImColor BrowserLoginHintCardBorderColor;
+    extern ImColor BrowserLoginHintIconColor;
+    extern ImColor BrowserPlaceholderTilePictureColor;
+    extern ImColor BrowserPlaceholderTileBarColor;
 }
 
 class StyleService
@@ -204,6 +214,12 @@ class StyleService
 
 public:
     void setup();
+
+    // Must be called before ImGui::NewFrame, since a theme change during a frame would be reverted by pending PopStyleColor calls
+    void process();
+
+    bool isLightMode() const;
+    void setLightMode(bool value);
 
     ImFont* getIconFont() const;
 
@@ -228,7 +244,11 @@ public:
 
 private:
     void setupSizes(ImGuiStyle& style) const;
+    void setupPalette() const;
     void setupColors(ImGuiStyle& style) const;
+
+    bool _lightMode = false;
+    bool _paletteOutdated = false;
 
     ImFont* _iconFont = nullptr;
     ImFont* _tinyFont = nullptr;
