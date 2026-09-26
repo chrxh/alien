@@ -1,4 +1,4 @@
-#include "MultiplierTool.h"
+#include "MultiplierWidget.h"
 
 #include <imgui.h>
 
@@ -28,7 +28,7 @@ namespace
     auto constexpr MaxNumPreviewFrames = 2500;
 }
 
-void MultiplierTool::init()
+void MultiplierWidget::init()
 {
     auto& settings = GlobalSettings::get();
     _mode = settings.getValue("editors.multiplier.mode", _mode);
@@ -57,7 +57,7 @@ void MultiplierTool::init()
     _randomParameters._overlappingCheck = settings.getValue("editors.multiplier.random.overlapping check", _randomParameters._overlappingCheck);
 }
 
-void MultiplierTool::shutdown()
+void MultiplierWidget::shutdown()
 {
     auto& settings = GlobalSettings::get();
     settings.setValue("editors.multiplier.mode", _mode);
@@ -85,9 +85,9 @@ void MultiplierTool::shutdown()
     settings.setValue("editors.multiplier.random.overlapping check", _randomParameters._overlappingCheck);
 }
 
-void MultiplierTool::process() {}
+void MultiplierWidget::process() {}
 
-void MultiplierTool::processContent()
+void MultiplierWidget::processContent()
 {
     AlienGui::Toolbar(
         AlienGui::ToolbarParameters().id("Multiplier").bottomSeparator(false),
@@ -127,7 +127,7 @@ void MultiplierTool::processContent()
     validateAndCorrect();
 }
 
-void MultiplierTool::processGridPanel()
+void MultiplierWidget::processGridPanel()
 {
     if (!ImGui::BeginTable("##grid", 3, ImGuiTableFlags_SizingStretchSame)) {
         return;
@@ -176,7 +176,7 @@ void MultiplierTool::processGridPanel()
     ImGui::EndTable();
 }
 
-void MultiplierTool::processRandomPanel()
+void MultiplierWidget::processRandomPanel()
 {
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of copies").textWidth(RightColumnWidth), _randomParameters._number);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min angle").textWidth(RightColumnWidth).format("%.1f"), _randomParameters._minAngle);
@@ -196,7 +196,7 @@ void MultiplierTool::processRandomPanel()
     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Overlapping check").textWidth(RightColumnWidth), &_randomParameters._overlappingCheck);
 }
 
-void MultiplierTool::processGridPreview() const
+void MultiplierWidget::processGridPreview() const
 {
     if (_gridParameters._horizontalNumber * _gridParameters._verticalNumber > MaxNumPreviewFrames) {
         return;
@@ -227,7 +227,7 @@ void MultiplierTool::processGridPreview() const
     }
 }
 
-void MultiplierTool::validateAndCorrect()
+void MultiplierWidget::validateAndCorrect()
 {
     _gridParameters._horizontalNumber = std::max(1, _gridParameters._horizontalNumber);
     _gridParameters._horizontalDistance = std::max(0.0f, _gridParameters._horizontalDistance);
@@ -249,7 +249,7 @@ namespace
     }
 }
 
-void MultiplierTool::onBuild()
+void MultiplierWidget::onBuild()
 {
     _origSelection = _SimulationFacade::get()->getSelectedSimulationData(true);
     if (_mode == MultiplierMode_Grid) {
@@ -266,7 +266,7 @@ void MultiplierTool::onBuild()
     _selectionDataAfterMultiplication = EditorModel::get().getSelectionShallowData();
 }
 
-void MultiplierTool::onUndo()
+void MultiplierWidget::onUndo()
 {
     replaceSelection(ContentDesc(_origSelection));
     EditorModel::get().update();
