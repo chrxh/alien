@@ -16,7 +16,8 @@
 #include "AlienGui.h"
 #include "EditorController.h"
 #include "EditorModel.h"
-#include "MultiplierTool.h"
+#include "InspectionController.h"
+#include "MultiplierWidget.h"
 #include "SimulationInteractionController.h"
 #include "SimulationView.h"
 #include "StyleService.h"
@@ -321,7 +322,7 @@ void SelectionWidget::processMultiplyPopup()
     if (!ImGui::BeginPopup("##hudMultiply")) {
         return;
     }
-    MultiplierTool::get().processContent();
+    MultiplierWidget::get().processContent();
     ImGui::EndPopup();
 }
 
@@ -330,7 +331,7 @@ void SelectionWidget::processInspectPopup()
     if (!ImGui::BeginPopup("##hudInspect")) {
         return;
     }
-    auto& controller = EditorController::get();
+    auto& controller = InspectionController::get();
     if (ImGui::Selectable("Objects (ALT+N)", false, controller.isObjectInspectionPossible() ? 0 : ImGuiSelectableFlags_Disabled)) {
         controller.onInspectSelectedObjects();
     }

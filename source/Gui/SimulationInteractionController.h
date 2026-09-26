@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <deque>
 
 #include <imgui.h>
 
@@ -10,18 +9,14 @@
 #include <EngineInterface/Definitions.h>
 
 #include "Definitions.h"
+#include "EditorModel.h"
 #include "MainLoopEntity.h"
 
 using InteractionMode = int;
 enum InteractionMode_
 {
-    InteractionMode_Selection,
-    InteractionMode_Drawing,
-    InteractionMode_PointPlacement,
-    InteractionMode_PositionSelection,
-    InteractionMode_Placement,
-    InteractionMode_Scissors,
-    InteractionMode_Force
+    InteractionMode_Normal,
+    InteractionMode_PositionSelection
 };
 
 class SimulationInteractionController : public MainLoopEntity
@@ -65,17 +60,14 @@ private:
     void middleMouseButtonReleased();
 
     void drawCursor();
-    void drawScissorsCursor(ImVec2 const& mousePos, ImDrawList* drawList) const;
-
-    void processSelectionRect();
-    void processScissorsTrail();
 
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
     struct Modes
     {
         bool editMode = false;
-        InteractionMode interactionMode = InteractionMode_Selection;
+        InteractionMode interactionMode = InteractionMode_Normal;
+        EditTool tool = EditTool_Select;
     };
     Modes _modes;
     Modes _modesAtClick;
@@ -83,10 +75,7 @@ private:
 
     // Navigation
     std::optional<RealVector2D> _worldPosForPanning;
-    std::optional<RealVector2D> _worldPosOnClick;
     std::optional<IntVector2D> _prevMousePosInt;
-    std::optional<RealVector2D> _selectionPositionOnClick;
-    std::optional<RealRect> _selectionRect;
 
     std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
 
@@ -98,12 +87,4 @@ private:
         std::chrono::steady_clock::time_point lastTime;
     };
     std::optional<MouseWheelAction> _mouseWheelAction;
-
-    struct ScissorsTrailPoint
-    {
-        RealVector2D worldPos;
-        std::chrono::steady_clock::time_point time;
-        bool startsSegment = false;
-    };
-    std::deque<ScissorsTrailPoint> _scissorsTrail;
 };

@@ -38,6 +38,7 @@
 #include "GenomeEditorWindow.h"
 #include "GettingStartedWindow.h"
 #include "ImageToPatternDialog.h"
+#include "InspectionController.h"
 #include "LogWindow.h"
 #include "LoginDialog.h"
 #include "MassOperationsDialog.h"
@@ -533,29 +534,29 @@ void MainLoopController::processMenubar()
             .name("Inspect objects")
             .keyAlt(true)
             .key(ImGuiKey_N)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isObjectInspectionPossible()),
-        [&] { EditorController::get().onInspectSelectedObjects(); });
+            .disabled(!SimulationInteractionController::get().isEditMode() || !InspectionController::get().isObjectInspectionPossible()),
+        [&] { InspectionController::get().onInspectSelectedObjects(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Inspect genomes")
             .keyAlt(true)
             .key(ImGuiKey_F)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isGenomeInspectionPossible()),
-        [&] { EditorController::get().onInspectSelectedGenomes(); });
+            .disabled(!SimulationInteractionController::get().isEditMode() || !InspectionController::get().isGenomeInspectionPossible()),
+        [&] { InspectionController::get().onInspectSelectedGenomes(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Inspect creatures")
             .keyAlt(true)
             .key(ImGuiKey_P)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCreatureInspectionPossible()),
-        [&] { EditorController::get().onInspectSelectedCreatures(); });
-    auto inspectionWindowsActive = EditorController::get().areInspectionWindowsActive();
+            .disabled(!SimulationInteractionController::get().isEditMode() || !InspectionController::get().isCreatureInspectionPossible()),
+        [&] { InspectionController::get().onInspectSelectedCreatures(); });
+    auto inspectionWindowsActive = InspectionController::get().areInspectionWindowsActive();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Close inspections")
             .key(ImGuiKey_Escape)
             .disabled(!SimulationInteractionController::get().isEditMode() || !inspectionWindowsActive),
-        [&] { EditorController::get().onCloseAllInspectorWindows(); });
+        [&] { InspectionController::get().onCloseAllInspectorWindows(); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()

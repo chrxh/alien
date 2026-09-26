@@ -7,40 +7,59 @@
 #include <Data/Descs.h>
 
 #include "Definitions.h"
+#include "EditInteractionController.h"
 #include "EditorModel.h"
 #include "MainLoopEntity.h"
 
-class CreatorTool : public MainLoopEntity
+struct CreatorParameters
 {
-    MAKE_SINGLETON(CreatorTool);
+    CreationMaterial material = CreationMaterial_Solid;
+    float energy = 100.0f;
+    float stiffness = 1.0f;
+    float glow = 0.0f;
+    bool isStatic = false;
+    bool sticky = false;
+    float objectDistance = 1.0f;
+    float pencilWidth = 3.0f;
+
+    int rectHorizontalObjects = 10;
+    int rectVerticalObjects = 10;
+    int layers = 10;
+    float outerRadius = 10.0f;
+    float innerRadius = 5.0f;
+};
+
+class CreatorController
+    : public MainLoopEntity
+    , public EditInteractionController
+{
+    MAKE_SINGLETON(CreatorController);
 
 public:
-    void processOptions();
+    CreatorParameters const& getParameters() const;
+    void setParameters(CreatorParameters const& parameters);
 
-    void onPlace(RealVector2D const& worldPos);
-
-    void onAddPoint(RealVector2D const& worldPos);
-    void onRemoveLastPoint();
     bool isFinishingPointsPossible() const;
     void onFinishPoints();
     bool hasPoints() const;
     void onAbortPoints();
 
-    void onDrawing();
-    void finishDrawing();
+    void onLeftMouseButtonPressed(RealVector2D const& viewPos) override;
+    void onLeftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos) override;
+    void onLeftMouseButtonReleased(RealVector2D const& viewPos, RealVector2D const& prevViewPos) override;
+    void onRightMouseButtonPressed(RealVector2D const& viewPos) override;
+
+    bool isCrosshairCursor() const override;
+    void drawCursor(ImDrawList* drawList, ImVec2 const& mousePos) const override;
 
 private:
     void init() override;
     void process() override;
     void shutdown() override;
 
-    void processShapeWidgets();
-    void processColorWidget();
-    void processMaterialWidgets();
-    void processObjectDistanceWidget();
-    void processStickyWidget();
-    void processStaticWidget();
-    void processPointButtons();
+    void place(RealVector2D const& worldPos);
+    void draw(RealVector2D const& worldPos);
+    void finishDrawing();
 
     void processPlacementPreview();
     void processPointPreview(std::vector<RealVector2D> const& path, bool closed) const;
@@ -55,22 +74,8 @@ private:
 
     CreatorService::ObjectProperties getObjectProperties() const;
 
-    float _energy = 100.0f;
-    float _stiffness = 1.0f;
-    bool _static = false;
-    float _objectDistance = 1.0f;
-    float _glow = 0.0f;
-    bool _makeSticky = false;
+    CreatorParameters _parameters;
 
-    int _rectHorizontalObjects = 10;
-    int _rectVerticalObjects = 10;
-
-    int _layers = 10;
-
-    float _outerRadius = 10.0f;
-    float _innerRadius = 5.0f;
-
-    CreationMaterial _material = CreationMaterial_Solid;
     ContentDesc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
