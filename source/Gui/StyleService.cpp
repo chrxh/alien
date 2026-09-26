@@ -185,7 +185,6 @@ namespace Const
     ImColor const SelectionHandleColor = AccentColor;
     ImColor const SelectionHandleHoveredColor = TextBaseColor;
     ImColor const SelectionHandleFillColor = PanelColor;
-    ImColor const SelectionVelocityColor = WarningColor;
     ImColor const SelectionChipTextColor = TextDimColor;
     ImColor const ScissorsTrailColor = WarningColor;
     ImColor const MultiplierPreviewColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.450f);

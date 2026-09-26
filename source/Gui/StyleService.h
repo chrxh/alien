@@ -171,7 +171,6 @@ namespace Const
     extern ImColor const SelectionHandleColor;
     extern ImColor const SelectionHandleHoveredColor;
     extern ImColor const SelectionHandleFillColor;
-    extern ImColor const SelectionVelocityColor;
     extern ImColor const SelectionChipTextColor;
     extern ImColor const ScissorsTrailColor;
     extern ImColor const MultiplierPreviewColor;

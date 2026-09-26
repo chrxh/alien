@@ -21,7 +21,8 @@ enum EditTool_
     EditTool_Line,
     EditTool_Curve,
     EditTool_Polygon,
-    EditTool_Freehand
+    EditTool_Freehand,
+    EditTool_Force
 };
 
 struct SelectionBounds

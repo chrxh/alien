@@ -96,7 +96,7 @@ void EditorModel::setTool(EditTool value)
 
 bool EditorModel::isCreationTool() const
 {
-    return _tool != EditTool_Select && _tool != EditTool_Scissors;
+    return _tool != EditTool_Select && _tool != EditTool_Scissors && _tool != EditTool_Force;
 }
 
 bool EditorModel::isApplyToNetworks() const

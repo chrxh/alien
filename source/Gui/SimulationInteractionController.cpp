@@ -5,6 +5,7 @@
 
 #include <imgui.h>
 
+#include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
@@ -41,6 +42,9 @@ namespace
     auto constexpr ScissorsTrailThickness = 3.0f;
     auto constexpr ScissorsIconSize = 16.0f;
     auto constexpr ScissorsIconOffset = 8.0f;
+
+    // Matches the radius used in EditorController::onApplyForces (20 world units divided by the zoom factor)
+    auto constexpr ForceCursorRadius = 20.0f;
 }
 
 void SimulationInteractionController::init()
@@ -71,6 +75,8 @@ namespace
             return InteractionMode_PointPlacement;
         case EditTool_Freehand:
             return InteractionMode_Drawing;
+        case EditTool_Force:
+            return InteractionMode_Force;
         default:
             return InteractionMode_Selection;
         }
@@ -315,6 +321,11 @@ void SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mou
             EditorController::get().onCutConnections(toRealVector2D(mousePos), prevWorldPos);
             _scissorsTrail.emplace_back(Viewport::get().mapViewToWorldPosition(toRealVector2D(mousePos)), std::chrono::steady_clock::now(), false);
         }
+    } else if (_modesAtClick.interactionMode == InteractionMode_Force) {
+        if (!ImGui::GetIO().KeyAlt && _SimulationFacade::get()->isSimulationRunning()) {
+            RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
+            EditorController::get().onApplyForces(toRealVector2D(mousePos), prevWorldPos);
+        }
     } else if (_modesAtClick.interactionMode == InteractionMode_Selection) {
         RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
 
@@ -367,7 +378,7 @@ void SimulationInteractionController::rightMouseButtonPressed(IntVector2D const&
         if (!ImGui::GetIO().KeyAlt) {
             if (_modes.interactionMode == InteractionMode_PointPlacement) {
                 CreatorTool::get().onRemoveLastPoint();
-            } else if (_modes.interactionMode == InteractionMode_Selection && !_SimulationFacade::get()->isSimulationRunning()) {
+            } else if (_modes.interactionMode == InteractionMode_Selection) {
                 auto viewPos = toRealVector2D(mousePos);
                 RealRect rect{viewPos, viewPos};
                 _selectionRect = rect;
@@ -385,16 +396,9 @@ void SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mo
     if (!_modesAtClick.editMode) {
         Viewport::get().zoom(mousePos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     } else if (_modesAtClick.interactionMode != InteractionMode_PointPlacement) {
-        if (!ImGui::GetIO().KeyAlt) {
-            auto isSimulationRunning = _SimulationFacade::get()->isSimulationRunning();
-            if (!isSimulationRunning && _modesAtClick.interactionMode == InteractionMode_Selection && _selectionRect.has_value()) {
-                _selectionRect->bottomRight = toRealVector2D(mousePos);
-                EditorController::get().onUpdateSelectionRect(*_selectionRect);
-            }
-            if (isSimulationRunning) {
-                RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
-                EditorController::get().onApplyForces(toRealVector2D(mousePos), prevWorldPos);
-            }
+        if (!ImGui::GetIO().KeyAlt && _modesAtClick.interactionMode == InteractionMode_Selection && _selectionRect.has_value()) {
+            _selectionRect->bottomRight = toRealVector2D(mousePos);
+            EditorController::get().onUpdateSelectionRect(*_selectionRect);
         }
     }
 }
@@ -413,10 +417,8 @@ void SimulationInteractionController::rightMouseButtonReleased()
 
     if (!_modesAtClick.editMode) {
         SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
-    } else if (_modesAtClick.interactionMode != InteractionMode_PointPlacement) {
-        if (!_SimulationFacade::get()->isSimulationRunning()) {
-            _selectionRect.reset();
-        }
+    } else {
+        _selectionRect.reset();
     }
 }
 
@@ -511,6 +513,9 @@ void SimulationInteractionController::drawCursor()
             if (_modes.interactionMode == InteractionMode_Scissors) {
                 drawScissorsCursor(mousePos, drawList);
             }
+            if (_modes.interactionMode == InteractionMode_Force) {
+                drawList->AddCircle(mousePos, ForceCursorRadius, Const::ConstructionPreviewHintLineColor, 0, scale(1.5f));
+            }
         } else {
             auto zoom = Viewport::get().getZoomFactor();
             auto radius = EditorModel::get().getPencilWidth() * zoom;
@@ -546,8 +551,8 @@ void SimulationInteractionController::drawScissorsCursor(ImVec2 const& mousePos,
     auto iconFont = StyleService::get().getIconFont();
     auto iconFontSize = scale(ScissorsIconSize);
     auto iconPos = ImVec2{mousePos.x + scale(ScissorsIconOffset), mousePos.y + scale(ScissorsIconOffset)};
-    drawList->AddText(iconFont, iconFontSize, {iconPos.x + scale(1.0f), iconPos.y + scale(1.0f)}, Const::CursorShadowColor, ICON_FA_CUT);
-    drawList->AddText(iconFont, iconFontSize, iconPos, Const::ScissorsTrailColor, ICON_FA_CUT);
+    drawList->AddText(iconFont, iconFontSize, {iconPos.x + scale(1.0f), iconPos.y + scale(1.0f)}, Const::CursorShadowColor, ICON_SCISSORS);
+    drawList->AddText(iconFont, iconFontSize, iconPos, Const::ScissorsTrailColor, ICON_SCISSORS);
 }
 
 void SimulationInteractionController::processScissorsTrail()

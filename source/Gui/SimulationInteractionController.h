@@ -20,7 +20,8 @@ enum InteractionMode_
     InteractionMode_PointPlacement,
     InteractionMode_PositionSelection,
     InteractionMode_Placement,
-    InteractionMode_Scissors
+    InteractionMode_Scissors,
+    InteractionMode_Force
 };
 
 class SimulationInteractionController : public MainLoopEntity

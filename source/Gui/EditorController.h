@@ -35,14 +35,12 @@ public:
     void onPaste();
     bool isDeletingPossible() const;
     void onDelete();
-
-    void onOpenPattern();
-    bool isSavingPatternPossible() const;
-    void onSavePattern();
+    bool isDeselectingPossible() const;
+    void onDeselect();
 
     void onColorSelectedObjects(int color);
     void onSetSticky(bool value);
-    void onSetFixed(bool value);
+    void onSetStatic(bool value);
     void onUniformVelocities();
     void onReleaseStresses();
     void onGlueSelectedObjects();
@@ -70,5 +68,4 @@ private:
 
     std::vector<InspectionWindow> _inspectorWindows;
     std::optional<ContentDesc> _copiedSelection;
-    std::string _patternStartingPath;
 };

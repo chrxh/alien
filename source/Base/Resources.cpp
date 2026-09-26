@@ -2,7 +2,7 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "5.0.0-alpha.34";
+    std::string const ProgramVersion = "5.0.0-alpha.35";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const AlienServerURL = "api.alien-project.org";
     std::string const StartupSimulationResourceName = "Startup/Version1";

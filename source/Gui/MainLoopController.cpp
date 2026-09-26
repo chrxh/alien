@@ -527,14 +527,6 @@ void MainLoopController::processMenubar()
             .selected(SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode()); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Open pattern").disabled(!SimulationInteractionController::get().isEditMode()), [&] {
-        EditorController::get().onOpenPattern();
-    });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Save pattern")
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isSavingPatternPossible()),
-        [&] { EditorController::get().onSavePattern(); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
@@ -557,13 +549,20 @@ void MainLoopController::processMenubar()
             .key(ImGuiKey_P)
             .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCreatureInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedCreatures(); });
+    auto inspectionWindowsActive = EditorController::get().areInspectionWindowsActive();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Close inspections")
             .key(ImGuiKey_Escape)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive()),
+            .disabled(!SimulationInteractionController::get().isEditMode() || !inspectionWindowsActive),
         [&] { EditorController::get().onCloseAllInspectorWindows(); });
     AlienGui::MenuSeparator();
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
+            .name("Deselect")
+            .key(ImGuiKey_Escape)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isDeselectingPossible() || inspectionWindowsActive),
+        [&] { EditorController::get().onDeselect(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Copy")
