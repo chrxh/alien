@@ -291,7 +291,7 @@ void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& 
                 CreatorTool::get().onDrawing();
             } else if (_modes.interactionMode == InteractionMode_Scissors) {
                 _scissorsTrail.emplace_back(worldPos, std::chrono::steady_clock::now(), true);
-            } else {
+            } else if (_modes.interactionMode == InteractionMode_Selection) {
                 EditorController::get().onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 _worldPosOnClick = Viewport::get().mapViewToWorldPosition(toRealVector2D(mousePos));
                 if (_SimulationFacade::get()->isSimulationRunning()) {

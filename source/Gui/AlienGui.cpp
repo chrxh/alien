@@ -1605,7 +1605,7 @@ void AlienGui::MenuItem(MenuItemParameters const& parameters, std::function<void
     }
     auto const& io = ImGui::GetIO();
     if (parameters._key.has_value() && !parameters._disabled && !io.WantCaptureKeyboard && io.KeyCtrl == parameters._keyCtrl && io.KeyAlt == parameters._keyAlt
-        && ImGui::IsKeyPressed(*parameters._key)) {
+        && ImGui::IsKeyPressed(*parameters._key, *parameters._key != ImGuiKey_Escape)) {
         action();
     }
 }
