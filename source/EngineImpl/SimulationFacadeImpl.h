@@ -87,6 +87,7 @@ public:
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) override;
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) override;
     void removeSelection() override;
+    void updateSelection() override;
     bool updateSelectionIfNecessary() override;
 
     IntVector2D getWorldSize() const override;

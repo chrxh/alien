@@ -36,8 +36,8 @@ namespace
     std::vector<std::vector<ToolDefinition>> const ToolGroups = {
         {
             {EditTool_Select, ICON_SELECTION, "Select and move"},
-            {EditTool_Scissors, ICON_SCISSORS, "Scissors: cut connections"},
             {EditTool_Force, ICON_FORCE, "Apply forces"},
+            {EditTool_Scissors, ICON_SCISSORS, "Scissors: cut connections"},
             {EditTool_Freehand, ICON_FREEHAND, "Draw freehand"},
         },
         {

@@ -169,6 +169,7 @@ void SimulationInteractionController::processEditWidget()
         | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("edit toggle", NULL, windowFlags);
+    ImGui::PopStyleVar();
 
     auto size = scale(EditToggleSize);
     auto pos = ImGui::GetCursorScreenPos();
@@ -215,7 +216,6 @@ void SimulationInteractionController::processEditWidget()
 
     drawList->PopClipRect();
     ImGui::End();
-    ImGui::PopStyleVar();
 }
 
 void SimulationInteractionController::processEvents()

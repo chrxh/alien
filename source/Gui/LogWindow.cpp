@@ -61,7 +61,7 @@ void LogWindow::processIntern()
                 if (firstLine.size() < message.text.size()) {
                     firstLine += " ...";
                 }
-                auto textColor = message.priority == Priority::Important ? Const::SoftHighlightTextColor : Const::TextDimColor;
+                auto textColor = message.priority == Priority::Important ? Const::AccentColor : Const::TextDimColor;
                 ImGui::PushStyleColor(ImGuiCol_Text, textColor.Value);
                 AlienGui::Text(AlienGui::TextParameters().text(firstLine).truncate(true));
                 ImGui::PopStyleColor();

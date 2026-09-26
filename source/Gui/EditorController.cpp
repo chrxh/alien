@@ -1,5 +1,6 @@
 #include "EditorController.h"
 
+#include <chrono>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -32,6 +33,7 @@
 namespace
 {
     auto constexpr MaxInspectedGenomes = 20;
+    auto constexpr SelectionRolloutInterval = std::chrono::milliseconds(500);
 }
 
 void EditorController::init()
@@ -82,8 +84,17 @@ void EditorController::process()
     auto const& io = ImGui::GetIO();
     EditorModel::get().setScopeInvertedTemporarily(io.KeyShift && !io.WantTextInput);
 
-    if (_SimulationFacade::get()->updateSelectionIfNecessary()) {
-        EditorModel::get().update();
+    auto const& simulationFacade = _SimulationFacade::get();
+    auto& model = EditorModel::get();
+    if (simulationFacade->updateSelectionIfNecessary()) {
+        model.update();
+    } else if (simulationFacade->isSimulationRunning() && !model.isSelectionEmpty()) {
+        auto now = std::chrono::steady_clock::now();
+        if (now - _lastSelectionRolloutTime >= SelectionRolloutInterval) {
+            simulationFacade->updateSelection();
+            _lastSelectionRolloutTime = now;
+        }
+        model.update();
     }
 }
 
