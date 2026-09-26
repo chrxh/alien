@@ -406,27 +406,6 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
     }
 }
 
-namespace
-{
-    __inline__ __device__ float cross(float2 const& a, float2 const& b)
-    {
-        return a.x * b.y - a.y * b.x;
-    }
-
-    __inline__ __device__ bool areSegmentsIntersecting(float2 const& p1, float2 const& p2, float2 const& q1, float2 const& q2)
-    {
-        auto r = p2 - p1;
-        auto s = q2 - q1;
-        auto denominator = cross(r, s);
-        if (abs(denominator) < NEAR_ZERO) {
-            return false;
-        }
-        auto t = cross(q1 - p1, s) / denominator;
-        auto u = cross(q1 - p1, r) / denominator;
-        return t >= 0 && t <= 1 && u >= 0 && u <= 1;
-    }
-}
-
 __global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart, float2 cutEnd, bool onlySelected, bool includeClusters, int* result)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -450,7 +429,7 @@ __global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart,
             auto connectedPos = connectedObject->pos - object->pos;
             data.objectMap.correctDirection(connectedPos);
             connectedPos = connectedPos + object->pos;
-            if (areSegmentsIntersecting(object->pos, connectedPos, cutStartNearObject, cutEndNearObject)) {
+            if (Math::crossing(object->pos, connectedPos, cutStartNearObject, cutEndNearObject)) {
                 ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
                 atomicExch(result, 1);
             }

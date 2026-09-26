@@ -90,14 +90,16 @@ std::vector<McpTool> McpSelectionTools::getTools(McpToolContext& context)
         },
         McpTool{
             .name = "move_selection",
-            .description = "Moves the selected objects by an offset. Without include_clusters, connections to unselected objects are cut.",
+            .description = "Moves the selected objects by an offset. Without include_clusters, connections to unselected objects tear when they become "
+                           "overstretched. No new connections are formed.",
             .inputSchema = McpSchema::object(
                 withIncludeClusters({{"dx", McpSchema::number("Offset in x direction")}, {"dy", McpSchema::number("Offset in y direction")}}), {"dx", "dy"}),
             .handler = [this](boost::json::object const& arguments) { return moveSelection(arguments); },
         },
         McpTool{
             .name = "rotate_selection",
-            .description = "Rotates the selected objects around their center. Without include_clusters, connections to unselected objects are cut.",
+            .description = "Rotates the selected objects around their center. Without include_clusters, connections to unselected objects tear when "
+                           "they become overstretched. No new connections are formed.",
             .inputSchema = McpSchema::object(withIncludeClusters({{"angle", McpSchema::number("Rotation angle in degrees", -360, 360)}}), {"angle"}),
             .handler = [this](boost::json::object const& arguments) { return rotateSelection(arguments); },
         },
