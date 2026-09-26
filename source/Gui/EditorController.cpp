@@ -17,14 +17,14 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "CreatorTool.h"
-#include "EditToolbar.h"
 #include "EditorModel.h"
+#include "EditorWidget.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "MainLoopEntityController.h"
 #include "MultiplierTool.h"
 #include "OverlayController.h"
-#include "SelectionHud.h"
+#include "SelectionWidget.h"
 #include "StyleService.h"
 #include "Viewport.h"
 
@@ -42,8 +42,8 @@ void EditorController::init()
     GenomeEditorWindow::get().setup();
     CreatorTool::get().setup();
     MultiplierTool::get().setup();
-    SelectionHud::get().setup();
-    EditToolbar::get().setup();
+    SelectionWidget::get().setup();
+    EditorWidget::get().setup();
 
     auto& settings = GlobalSettings::get();
     auto& model = EditorModel::get();

@@ -7,9 +7,9 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class SelectionHud : public MainLoopEntity
+class SelectionWidget : public MainLoopEntity
 {
-    MAKE_SINGLETON(SelectionHud);
+    MAKE_SINGLETON(SelectionWidget);
 
 private:
     void init() override {}

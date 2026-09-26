@@ -1,4 +1,4 @@
-#include "EditToolbar.h"
+#include "EditorWidget.h"
 
 #include <imgui.h>
 
@@ -52,7 +52,7 @@ namespace
     };
 }
 
-void EditToolbar::process()
+void EditorWidget::process()
 {
     if (!SimulationInteractionController::get().isEditMode() || !SimulationView::get().isRenderSimulation()) {
         return;
@@ -62,7 +62,7 @@ void EditToolbar::process()
     processShortcuts();
 }
 
-void EditToolbar::processDock()
+void EditorWidget::processDock()
 {
     auto& model = EditorModel::get();
     auto simulationRunning = _SimulationFacade::get()->isSimulationRunning();
@@ -156,7 +156,7 @@ namespace
     }
 }
 
-void EditToolbar::processToolOptions()
+void EditorWidget::processToolOptions()
 {
     auto const& model = EditorModel::get();
     auto tool = model.getTool();
@@ -204,7 +204,7 @@ void EditToolbar::processToolOptions()
     AlienGui::PopFloatingCardStyle();
 }
 
-void EditToolbar::processShortcuts()
+void EditorWidget::processShortcuts()
 {
     auto const& io = ImGui::GetIO();
     if (io.WantCaptureKeyboard || io.WantTextInput || io.KeyCtrl || io.KeyAlt || io.KeySuper) {
@@ -223,7 +223,7 @@ void EditToolbar::processShortcuts()
     }
 }
 
-void EditToolbar::selectTool(EditTool tool)
+void EditorWidget::selectTool(EditTool tool)
 {
     EditorModel::get().setTool(tool);
 }

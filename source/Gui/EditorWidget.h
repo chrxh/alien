@@ -6,9 +6,9 @@
 #include "EditorModel.h"
 #include "MainLoopEntity.h"
 
-class EditToolbar : public MainLoopEntity
+class EditorWidget : public MainLoopEntity
 {
-    MAKE_SINGLETON(EditToolbar);
+    MAKE_SINGLETON(EditorWidget);
 
 private:
     void init() override {}

@@ -1,4 +1,4 @@
-#include "SelectionHud.h"
+#include "SelectionWidget.h"
 
 #include <algorithm>
 #include <cmath>
@@ -44,7 +44,7 @@ namespace
     auto constexpr TransformTextWidth = 130.0f;
 }
 
-void SelectionHud::process()
+void SelectionWidget::process()
 {
     auto const& model = EditorModel::get();
     if (!SimulationInteractionController::get().isEditMode() || !SimulationView::get().isRenderSimulation() || model.getTool() != EditTool_Select
@@ -60,7 +60,7 @@ void SelectionHud::process()
     processActionBar(bounds);
 }
 
-SelectionHud::ViewBounds SelectionHud::calcViewBounds() const
+SelectionWidget::ViewBounds SelectionWidget::calcViewBounds() const
 {
     auto const& model = EditorModel::get();
     auto selectionBounds = model.getSelectionBounds(model.isApplyToNetworks());
@@ -75,7 +75,7 @@ SelectionHud::ViewBounds SelectionHud::calcViewBounds() const
     };
 }
 
-void SelectionHud::processFrame(ViewBounds const& bounds) const
+void SelectionWidget::processFrame(ViewBounds const& bounds) const
 {
     auto drawList = ImGui::GetBackgroundDrawList();
     drawList->AddRect(
@@ -140,7 +140,7 @@ namespace
     }
 }
 
-void SelectionHud::processRotationHandle(ViewBounds const& bounds)
+void SelectionWidget::processRotationHandle(ViewBounds const& bounds)
 {
     auto frameTop = RealVector2D{(bounds.topLeft.x + bounds.bottomRight.x) / 2, bounds.topLeft.y};
     auto handlePos = RealVector2D{frameTop.x, frameTop.y - scale(RotationHandleDistance)};
@@ -165,7 +165,7 @@ void SelectionHud::processRotationHandle(ViewBounds const& bounds)
     _lastRotationAngle = angle;
 }
 
-void SelectionHud::processSummary(ViewBounds const& bounds) const
+void SelectionWidget::processSummary(ViewBounds const& bounds) const
 {
     auto const& model = EditorModel::get();
     auto const& selection = model.getSelectionShallowData();
@@ -197,7 +197,7 @@ void SelectionHud::processSummary(ViewBounds const& bounds) const
     drawList->AddText({topLeft.x + scale(SummaryPaddingX), topLeft.y + scale(SummaryPaddingY)}, Const::SelectionChipTextColor, text.c_str());
 }
 
-void SelectionHud::processActionBar(ViewBounds const& bounds)
+void SelectionWidget::processActionBar(ViewBounds const& bounds)
 {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && !ImGui::GetIO().WantCaptureMouse) {
         return;
@@ -267,7 +267,7 @@ void SelectionHud::processActionBar(ViewBounds const& bounds)
     ImGui::End();
 }
 
-void SelectionHud::processColorPopup()
+void SelectionWidget::processColorPopup()
 {
     if (!ImGui::BeginPopup("##hudColor")) {
         return;
@@ -287,7 +287,7 @@ void SelectionHud::processColorPopup()
     ImGui::EndPopup();
 }
 
-void SelectionHud::processStickyPopup()
+void SelectionWidget::processStickyPopup()
 {
     if (!ImGui::BeginPopup("##hudSticky")) {
         return;
@@ -301,7 +301,7 @@ void SelectionHud::processStickyPopup()
     ImGui::EndPopup();
 }
 
-void SelectionHud::processStaticPopup()
+void SelectionWidget::processStaticPopup()
 {
     if (!ImGui::BeginPopup("##hudStatic")) {
         return;
@@ -315,7 +315,7 @@ void SelectionHud::processStaticPopup()
     ImGui::EndPopup();
 }
 
-void SelectionHud::processMultiplyPopup()
+void SelectionWidget::processMultiplyPopup()
 {
     ImGui::SetNextWindowSize({scale(MultiplyPopupWidth), 0.0f});
     if (!ImGui::BeginPopup("##hudMultiply")) {
@@ -325,7 +325,7 @@ void SelectionHud::processMultiplyPopup()
     ImGui::EndPopup();
 }
 
-void SelectionHud::processInspectPopup()
+void SelectionWidget::processInspectPopup()
 {
     if (!ImGui::BeginPopup("##hudInspect")) {
         return;
@@ -343,7 +343,7 @@ void SelectionHud::processInspectPopup()
     ImGui::EndPopup();
 }
 
-void SelectionHud::processMorePopup()
+void SelectionWidget::processMorePopup()
 {
     auto const& model = EditorModel::get();
     auto const& selection = model.getSelectionShallowData();
