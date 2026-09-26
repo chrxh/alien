@@ -55,6 +55,9 @@ private:
     __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node);
     __inline__ __device__ static void initNewNode(SimulationData& data, Node& node, int color);
     __inline__ __device__ static void initNewGene(Gene& gene);
+    __inline__ __device__ static int parseMutationGeneNumber(Char64 const& name);
+    __inline__ __device__ static void setDefaultGeneName(Gene& gene, int number);
+    __inline__ __device__ static void assignDefaultGeneNames(Gene* genes, int oldNumGenes, int numAddedGenes);
     __inline__ __device__ static int findNodeForNewConstructor(SimulationData& data, Gene const& gene);
     __inline__ __device__ static void insertNode(SimulationData& data, Genome* genome, Gene& gene, int position);
     __inline__ __device__ static void removeNode(SimulationData& data, Gene& gene, int position);
@@ -994,6 +997,76 @@ __inline__ __device__ void MutationProcessor::initNewGene(Gene& gene)
     gene.transitiveNumCells = 0;
 }
 
+__inline__ __device__ int MutationProcessor::parseMutationGeneNumber(Char64 const& name)
+{
+    char const* prefix = "Mutation_";
+    int pos = 0;
+    while (prefix[pos] != 0) {
+        if (name[pos] != prefix[pos]) {
+            return -1;
+        }
+        ++pos;
+    }
+    if (name[pos] == 0) {
+        return -1;
+    }
+    int value = 0;
+    while (name[pos] != 0) {
+        char c = name[pos];
+        if (c < '0' || c > '9') {
+            return -1;
+        }
+        value = value * 10 + (c - '0');
+        ++pos;
+    }
+    return value;
+}
+
+__inline__ __device__ void MutationProcessor::setDefaultGeneName(Gene& gene, int number)
+{
+    char const* prefix = "Mutation_";
+    int pos = 0;
+    while (prefix[pos] != 0) {
+        gene.name[pos] = prefix[pos];
+        ++pos;
+    }
+
+    char digits[16];
+    int numDigits = 0;
+    for (int n = number; n > 0; n /= 10) {
+        digits[numDigits++] = static_cast<char>('0' + (n % 10));
+    }
+    if (numDigits == 0) {
+        digits[numDigits++] = '0';
+    }
+    for (int i = numDigits - 1; i >= 0; --i) {
+        gene.name[pos++] = digits[i];
+    }
+    gene.name[pos] = 0;
+}
+
+__inline__ __device__ void MutationProcessor::assignDefaultGeneNames(Gene* genes, int oldNumGenes, int numAddedGenes)
+{
+    // Every gene created here starts unnamed, so it gets the lowest "Mutation_<x>" number not already used in the genome.
+    int nextNumber = 1;
+    for (int slot = 0; slot < numAddedGenes; ++slot) {
+        auto newIndex = oldNumGenes + slot;
+        int candidate = nextNumber;
+        for (bool retry = true; retry;) {
+            retry = false;
+            for (int i = 0; i < newIndex; ++i) {
+                if (parseMutationGeneNumber(genes[i].name) == candidate) {
+                    ++candidate;
+                    retry = true;
+                    break;
+                }
+            }
+        }
+        setDefaultGeneName(genes[newIndex], candidate);
+        nextNumber = candidate + 1;
+    }
+}
+
 __inline__ __device__ int MutationProcessor::findNodeForNewConstructor(SimulationData& data, Gene const& gene)
 {
     if (gene.numNodes == 0) {
@@ -1287,6 +1360,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
         block.sync();
 
         if (laneId == 0) {
+            assignDefaultGeneNames(newGenes, oldNumGenes, numAddedGenes);
             genome->genes = newGenes;
             genome->numGenes = oldNumGenes + numAddedGenes;
         }
