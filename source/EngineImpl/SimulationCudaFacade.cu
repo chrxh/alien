@@ -12,6 +12,7 @@
 #include <Base/KernelProfiler.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
+#include <Base/StringHelper.h>
 
 #include <Base/Ids.h>
 
@@ -54,14 +55,6 @@
 #include "StatisticsKernelsService.cuh"
 #include "StatisticsService.cuh"
 #include "TestKernelsService.cuh"
-
-// Base/StringHelper.h is not included here because it drags in Base/Definitions.h, whose toInt/toFloat templates
-// collide with EngineKernels/Base.cuh in this CUDA translation unit; only the one function used below is declared.
-class StringHelper
-{
-public:
-    static std::string format(uint64_t n, char separator = ',');
-};
 
 namespace
 {
