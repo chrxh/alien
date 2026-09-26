@@ -50,10 +50,8 @@ public:
         _selectionShallowData->clusterMaxPosY = -Infinity<float>::value;
     }
 
-    __device__ void collectObject(Object* object, float2 refPos, BaseMap const& map)
+    __device__ void collectObject(Object* object, float2 pos)
     {
-        auto pos = object->pos + map.getCorrectionIncrement(refPos, object->pos);
-
         if (1 == object->selected) {
             atomicAdd(&_selectionShallowData->numObjects, 1);
             atomicAdd(&_selectionShallowData->centerPosX, pos.x);
@@ -73,10 +71,8 @@ public:
 
     __device__ void collectCreature() { atomicAdd(&_selectionShallowData->numCreatures, 1); }
 
-    __device__ void collectParticle(Energy* particle, float2 refPos, BaseMap const& map)
+    __device__ void collectParticle(Energy* particle, float2 pos)
     {
-        auto pos = particle->pos + map.getCorrectionIncrement(refPos, particle->pos);
-
         atomicAdd(&_selectionShallowData->numEnergyParticles, 1);
         atomicAdd(&_selectionShallowData->centerPosX, pos.x);
         atomicAdd(&_selectionShallowData->centerPosY, pos.y);

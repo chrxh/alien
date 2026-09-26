@@ -1,5 +1,12 @@
 ﻿#include "EditKernels.cuh"
 
+namespace
+{
+    __device__ uint64_t constexpr KeyClaimed = 0xfffffffffffffffeull;
+    __device__ uint64_t constexpr KeyFlattened = 0xffffffffffffffffull;
+    __device__ int constexpr MaxFlatteningWalkLength = 100;
+}
+
 __global__ void cudaColorSelectedObjects(SimulationData data, unsigned char color, bool includeClusters)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -218,7 +225,167 @@ __global__ void cudaUpdateMapForReconnection(SimulationData data)
     ObjectProcessor::updateMap(data);
 }
 
-__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center)
+namespace
+{
+    __inline__ __device__ void accumulateAngles(float2 const& pos, int2 const& worldSize, float4* angleSums)
+    {
+        float sinX, cosX, sinY, cosY;
+        sincosf(pos.x / toFloat(worldSize.x) * 2.0f * Const::PI, &sinX, &cosX);
+        sincosf(pos.y / toFloat(worldSize.y) * 2.0f * Const::PI, &sinY, &cosY);
+        atomicAdd(&angleSums->x, cosX);
+        atomicAdd(&angleSums->y, sinX);
+        atomicAdd(&angleSums->z, cosY);
+        atomicAdd(&angleSums->w, sinY);
+    }
+}
+
+__global__ void cudaAccumulateSelectionAngles(SimulationData data, float4* angleSums)
+{
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (0 != object->selected) {
+            accumulateAngles(object->pos, data.worldSize, angleSums);
+        }
+    }
+
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
+        auto const& particle = data.entities.energies.at(index);
+        if (0 != particle->selected) {
+            accumulateAngles(particle->pos, data.worldSize, angleSums);
+        }
+    }
+}
+
+__global__ void cudaInitSelectionAnchorKeys(SimulationData data, float2 refPos)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (0 != object->selected) {
+            auto distance = data.objectMap.getDistance(object->pos, refPos);
+            object->tempValue1.as_uint64 = (static_cast<uint64_t>(__float_as_uint(distance)) << 32) | static_cast<uint64_t>(index);
+        }
+    }
+}
+
+__global__ void cudaPropagateSelectionAnchorKeys(SimulationData data, int* result)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (0 == object->selected) {
+            continue;
+        }
+        auto current = object;
+        for (int step = 0; step < MaxFlatteningWalkLength && current; ++step) {
+            auto key = alienAtomicAdd64(&current->tempValue1.as_uint64, uint64_t{0});
+            Object* next = nullptr;
+            for (int i = 0; i < current->numConnections; ++i) {
+                auto connectedObject = current->connections[i].object;
+                if (0 != connectedObject->selected && alienAtomicMin64(&connectedObject->tempValue1.as_uint64, key) > key) {
+                    next = connectedObject;
+                    atomicExch(result, 1);
+                }
+            }
+            current = next;
+        }
+    }
+}
+
+__global__ void cudaPlaceSelectionAnchors(SimulationData data, float2 refPos)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (0 != object->selected && static_cast<uint32_t>(object->tempValue1.as_uint64) == static_cast<uint32_t>(index)) {
+            object->tempValue2.as_float2 = object->pos + data.objectMap.getCorrectionIncrement(refPos, object->pos);
+            object->tempValue1.as_uint64 = KeyFlattened;
+        }
+    }
+}
+
+namespace
+{
+    __inline__ __device__ float2 readVolatile(float2 const& value)
+    {
+        auto const components = reinterpret_cast<float const volatile*>(&value);
+        return {components[0], components[1]};
+    }
+}
+
+__global__ void cudaPropagateFlattenedSelectionPositions(SimulationData data, int* result)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (0 == object->selected || alienAtomicAdd64(&object->tempValue1.as_uint64, uint64_t{0}) != KeyFlattened) {
+            continue;
+        }
+        auto current = object;
+        auto currentPos = readVolatile(object->tempValue2.as_float2);
+        for (int step = 0; step < MaxFlatteningWalkLength; ++step) {
+            Object* next = nullptr;
+            for (int i = 0; i < current->numConnections; ++i) {
+                auto connectedObject = current->connections[i].object;
+                if (0 == connectedObject->selected) {
+                    continue;
+                }
+                auto key = alienAtomicAdd64(&connectedObject->tempValue1.as_uint64, uint64_t{0});
+                if (key >= KeyClaimed || alienAtomicCAS64(&connectedObject->tempValue1.as_uint64, key, KeyClaimed) != key) {
+                    continue;
+                }
+                auto delta = connectedObject->pos - current->pos;
+                data.objectMap.correctDirection(delta);
+                connectedObject->tempValue2.as_float2 = currentPos + delta;
+                __threadfence();
+                alienAtomicExch64(&connectedObject->tempValue1.as_uint64, KeyFlattened);
+                next = connectedObject;
+                atomicExch(result, 1);
+            }
+            if (!next) {
+                break;
+            }
+            current = next;
+            currentPos = next->tempValue2.as_float2;
+        }
+    }
+}
+
+namespace
+{
+    __inline__ __device__ float2 getFlattenedPos(Energy* particle, float2 const& refPos, BaseMap const& map)
+    {
+        return particle->pos + map.getCorrectionIncrement(refPos, particle->pos);
+    }
+}
+
+__global__ void cudaCalcFlattenedSelectionCenter(SimulationData data, float2 refPos, float2* center, int* numEntities, bool includeClusters)
+{
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (isSelected(object, includeClusters)) {
+            atomicAdd(&center->x, object->tempValue2.as_float2.x);
+            atomicAdd(&center->y, object->tempValue2.as_float2.y);
+            atomicAdd(numEntities, 1);
+        }
+    }
+
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
+        auto const& particle = data.entities.energies.at(index);
+        if (0 != particle->selected) {
+            auto pos = getFlattenedPos(particle, refPos, data.objectMap);
+            atomicAdd(&center->x, pos.x);
+            atomicAdd(&center->y, pos.y);
+            atomicAdd(numEntities, 1);
+        }
+    }
+}
+
+__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 refPos, float2 center)
 {
     __shared__ Math::Matrix rotationMatrix;
     if (0 == threadIdx.x) {
@@ -230,9 +397,8 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
         auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
-            if ((updateData.considerClusters && object->selected != 0) || (!updateData.considerClusters && object->selected == 1)) {
-                auto relPos = object->pos - center;
-                data.objectMap.correctDirection(relPos);
+            if (isSelected(object, updateData.considerClusters)) {
+                auto relPos = object->tempValue2.as_float2 - center;
 
                 if (updateData.angleDelta != 0) {
                     object->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
@@ -255,8 +421,7 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.entities.energies.at(index);
             if (particle->selected != 0) {
-                auto relPos = particle->pos - center;
-                data.objectMap.correctDirection(relPos);
+                auto relPos = getFlattenedPos(particle, refPos, data.objectMap) - center;
                 particle->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
                 data.objectMap.correctPosition(particle->pos);
             }
@@ -264,26 +429,16 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
     }
 }
 
-__global__ void
-cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
+__global__ void cudaCalcAccumulatedVel(SimulationData data, float2* velocity, int* numEntities, bool includeClusters)
 {
     {
-        float2 refPos = refObjectIndex != -1 ? data.entities.objects.at(refObjectIndex)->pos : float2{0, 0};
-
         auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
             if (isSelected(object, includeClusters)) {
-                if (center) {
-                    auto pos = object->pos + data.objectMap.getCorrectionIncrement(refPos, object->pos);
-                    atomicAdd(&center->x, pos.x);
-                    atomicAdd(&center->y, pos.y);
-                }
-                if (velocity) {
-                    atomicAdd(&velocity->x, object->vel.x);
-                    atomicAdd(&velocity->y, object->vel.y);
-                }
+                atomicAdd(&velocity->x, object->vel.x);
+                atomicAdd(&velocity->y, object->vel.y);
                 atomicAdd(numEntities, 1);
             }
         }
@@ -294,14 +449,8 @@ cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2*
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.entities.energies.at(index);
             if (particle->selected != 0) {
-                if (center) {
-                    atomicAdd(&center->x, particle->pos.x);
-                    atomicAdd(&center->y, particle->pos.y);
-                }
-                if (velocity) {
-                    atomicAdd(&velocity->x, particle->vel.x);
-                    atomicAdd(&velocity->y, particle->vel.y);
-                }
+                atomicAdd(&velocity->x, particle->vel.x);
+                atomicAdd(&velocity->y, particle->vel.y);
                 atomicAdd(numEntities, 1);
             }
         }
@@ -536,18 +685,6 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
     result.reset();
 }
 
-__global__ void cudaCalcObjectWithMinimalPosY(SimulationData data, unsigned long long int* minObjectPosYAndIndex)
-{
-    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-
-    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
-        auto const& object = data.entities.objects.at(index);
-        if (0 != object->selected) {
-            atomicMin(minObjectPosYAndIndex, (static_cast<unsigned long long int>(abs(object->pos.y)) << 32) | static_cast<unsigned long long int>(index));
-        }
-    }
-}
-
 __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -560,16 +697,14 @@ __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
     }
 }
 
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refObjectIndex, SelectionResult result)
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, float2 refPos, SelectionResult result)
 {
-    float2 refPos = refObjectIndex != 0xffffffff ? data.entities.objects.at(refObjectIndex)->pos : float2{0, 0};
-
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            result.collectObject(object, refPos, data.objectMap);
+            result.collectObject(object, object->tempValue2.as_float2);
             if (object->selected == 1 && object->type == ObjectType_Cell) {
                 if (alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
@@ -583,7 +718,7 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refOb
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
-            result.collectParticle(particle, refPos, data.objectMap);
+            result.collectParticle(particle, getFlattenedPos(particle, refPos, data.objectMap));
         }
     }
 }

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <ranges>
 
 #include <gtest/gtest.h>
 
@@ -7,6 +8,7 @@
 
 #include <Data/CreatorService.h>
 #include <Data/Descs.h>
+#include <Data/SpaceCalculator.h>
 
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
@@ -312,6 +314,81 @@ TEST_F(EditTests, getSelectionShallowData_bounds)
     EXPECT_TRUE(approxCompare(50.0f, selectionData.clusterMinPosY));
     EXPECT_TRUE(approxCompare(52.0f, selectionData.clusterMaxPosX));
     EXPECT_TRUE(approxCompare(52.0f, selectionData.clusterMaxPosY));
+}
+
+TEST_F(EditTests, getSelectionShallowData_boundsOfSelectionLargerThanHalfWorld)
+{
+    auto data = ContentDesc().addObjects({
+        ObjectDesc().id(1).pos({50, 20}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({50, 35}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({50, 50}).type(SolidDesc()),
+        ObjectDesc().id(4).pos({50, 65}).type(SolidDesc()),
+        ObjectDesc().id(5).pos({50, 80}).type(SolidDesc()),
+    });
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->setSelection({40, 10}, {60, 90});
+    auto selectionData = _simulationFacade->getSelectionShallowData();
+
+    EXPECT_EQ(5, selectionData.numObjects);
+    EXPECT_TRUE(approxCompare(20.0f, selectionData.minPosY));
+    EXPECT_TRUE(approxCompare(80.0f, selectionData.maxPosY));
+    EXPECT_TRUE(approxCompare(50.0f, selectionData.centerPosY));
+}
+
+namespace
+{
+    auto constexpr WrappingChainLength = 120;
+    auto constexpr WrappingChainSlope = 0.5f;
+
+    ContentDesc createChainWrappingAroundWorld(float worldWidth)
+    {
+        ContentDesc result;
+        for (auto i : std::views::iota(0, WrappingChainLength)) {
+            result.addObjects({ObjectDesc().id(i + 1).pos({toFloat(i), 20.0f + toFloat(i) * WrappingChainSlope}).type(SolidDesc())});
+            if (i > 0) {
+                result.addConnection(i, i + 1);
+            }
+        }
+        for (auto& object : result._objects) {
+            object._pos.x = std::fmod(object._pos.x, worldWidth);
+        }
+        return result;
+    }
+}
+
+TEST_F(EditTests, getSelectionShallowData_boundsOfNetworkWrappingAroundWorld)
+{
+    _simulationFacade->setSimulationData(createChainWrappingAroundWorld(100.0f));
+
+    _simulationFacade->setSelection({0, 10}, {99.9f, 90});
+    auto selectionData = _simulationFacade->getSelectionShallowData();
+
+    EXPECT_EQ(WrappingChainLength, selectionData.numObjects);
+    EXPECT_TRUE(approxCompare(toFloat(WrappingChainLength - 1), selectionData.maxPosX - selectionData.minPosX));
+    EXPECT_TRUE(approxCompare(toFloat(WrappingChainLength - 1) * WrappingChainSlope, selectionData.maxPosY - selectionData.minPosY));
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_rotateNetworkWrappingAroundWorld)
+{
+    _simulationFacade->setSimulationData(createChainWrappingAroundWorld(100.0f));
+    _simulationFacade->setSelection({0, 10}, {99.9f, 90});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = true;
+    updateData.angleDelta = 90.0f;
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    SpaceCalculator space({100, 100});
+    auto expectedDistance = std::sqrt(1.0f + WrappingChainSlope * WrappingChainSlope);
+    for (auto id : std::views::iota(uint64_t{1}, uint64_t{WrappingChainLength})) {
+        EXPECT_TRUE(approxCompare(expectedDistance, space.distance(actualData.getObjectRef(id)._pos, actualData.getObjectRef(id + 1)._pos)));
+    }
+
+    auto selectionData = _simulationFacade->getSelectionShallowData();
+    EXPECT_TRUE(approxCompare(toFloat(WrappingChainLength - 1) * WrappingChainSlope, selectionData.maxPosX - selectionData.minPosX));
+    EXPECT_TRUE(approxCompare(toFloat(WrappingChainLength - 1), selectionData.maxPosY - selectionData.minPosY));
 }
 
 namespace

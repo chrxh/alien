@@ -25,9 +25,14 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
 __global__ void cudaScheduleConnectSelection(SimulationData data, bool includeClusters, bool onlyWithinSelection, int* result);
 __global__ void cudaPrepareMapForReconnection(SimulationData data);
 __global__ void cudaUpdateMapForReconnection(SimulationData data);
-__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center);
-__global__ void
-cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters);
+__global__ void cudaAccumulateSelectionAngles(SimulationData data, float4* angleSums);
+__global__ void cudaInitSelectionAnchorKeys(SimulationData data, float2 refPos);
+__global__ void cudaPropagateSelectionAnchorKeys(SimulationData data, int* result);
+__global__ void cudaPlaceSelectionAnchors(SimulationData data, float2 refPos);
+__global__ void cudaPropagateFlattenedSelectionPositions(SimulationData data, int* result);
+__global__ void cudaCalcFlattenedSelectionCenter(SimulationData data, float2 refPos, float2* center, int* numEntities, bool includeClusters);
+__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 refPos, float2 center);
+__global__ void cudaCalcAccumulatedVel(SimulationData data, float2* velocity, int* numEntities, bool includeClusters);
 __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters);
 __global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
@@ -43,7 +48,6 @@ __global__ void cudaSetDetached(SimulationData data, bool value);
 __global__ void cudaApplyCataclysm(SimulationData data);
 
 __global__ void cudaResetSelectionResult(SelectionResult result);
-__global__ void cudaCalcObjectWithMinimalPosY(SimulationData data, unsigned long long int* minObjectPosYAndIndex);
 __global__ void cudaGetSelectionShallowData_step1(SimulationData data);
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refObjectIndex, SelectionResult result);
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, float2 refPos, SelectionResult result);
 __global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
