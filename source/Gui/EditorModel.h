@@ -53,15 +53,11 @@ public:
     void setInspectedEntities(std::vector<ExtendedObjectOrEnergyDesc> const& inspectedEntities);
     bool areEntitiesInspected() const;
 
-    void setPencilWidth(float value);
-    float getPencilWidth() const;
-
     void setDefaultColorCode(int value);
     int getDefaultColorCode() const;
 
     EditTool getTool() const;
     void setTool(EditTool value);
-    bool isCreationTool() const;
 
     // Holding SHIFT inverts the scope temporarily
     bool isApplyToNetworks() const;
@@ -72,9 +68,6 @@ public:
     bool isGlueOnContact() const;
     void setGlueOnContact(bool value);
 
-    bool isCutOnlyInSelection() const;
-    void setCutOnlyInSelection(bool value);
-
     SelectionBounds getSelectionBounds(bool includeClusters) const;
 
 private:
@@ -82,12 +75,10 @@ private:
 
     std::unordered_map<uint64_t, ExtendedObjectOrEnergyDesc> _inspectedEntityById;
 
-    float _pencilWidth = 3.0f;
     int _defaultColorCode = 0;
 
     EditTool _tool = EditTool_Select;
     bool _applyToNetworks = true;
     bool _scopeInvertedTemporarily = false;
     bool _glueOnContact = false;
-    bool _cutOnlyInSelection = false;
 };

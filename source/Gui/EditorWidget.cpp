@@ -8,10 +8,12 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "CreatorTool.h"
+#include "CreatorController.h"
+#include "CreatorWidget.h"
 #include "EditorController.h"
 #include "ImageToPatternDialog.h"
 #include "McpWindow.h"
+#include "ScissorsController.h"
 #include "SimulationInteractionController.h"
 #include "SimulationView.h"
 #include "StyleService.h"
@@ -173,19 +175,20 @@ void EditorWidget::processToolOptions()
 
         std::string hint;
         if (tool == EditTool_Scissors) {
-            auto cutOnlyInSelection = model.isCutOnlyInSelection();
+            auto& scissorsController = ScissorsController::get();
+            auto cutOnlyInSelection = scissorsController.isCutOnlyInSelection();
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
                     .name("Only in selection")
                     .textWidth(OptionsTextWidth)
                     .tooltip("If enabled, only connections between selected objects are cut."),
                 &cutOnlyInSelection);
-            EditorModel::get().setCutOnlyInSelection(cutOnlyInSelection);
+            scissorsController.setCutOnlyInSelection(cutOnlyInSelection);
             hint = "Hold the left mouse button and drag across connections to cut them.";
         } else if (tool == EditTool_Force) {
             hint = "Hold the left mouse button and drag to push the objects under the cursor.";
         } else {
-            CreatorTool::get().processOptions();
+            CreatorWidget::get().process();
             if (tool == EditTool_Line || tool == EditTool_Curve || tool == EditTool_Polygon) {
                 hint = "Left click: add point, right click: remove last point, ENTER: finish, ESC: abort";
             } else if (tool == EditTool_Freehand) {
@@ -214,12 +217,12 @@ void EditorWidget::processShortcuts()
         return;
     }
 
-    auto& creatorTool = CreatorTool::get();
+    auto& creatorController = CreatorController::get();
     if (ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false)) {
-        creatorTool.onFinishPoints();
+        creatorController.onFinishPoints();
     }
-    if (ImGui::IsKeyPressed(ImGuiKey_Escape, false) && creatorTool.hasPoints()) {
-        creatorTool.onAbortPoints();
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape, false) && creatorController.hasPoints()) {
+        creatorController.onAbortPoints();
     }
 }
 

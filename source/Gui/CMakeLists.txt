@@ -42,8 +42,10 @@ PUBLIC
     ConsoleModeController.h
     CreateUserDialog.cpp
     CreateUserDialog.h
-    CreatorTool.cpp
-    CreatorTool.h
+    CreatorController.cpp
+    CreatorController.h
+    CreatorWidget.cpp
+    CreatorWidget.h
     CreaturePreviewWidget.cpp
     CreaturePreviewWidget.h
     Definitions.h
@@ -53,6 +55,7 @@ PUBLIC
     DeleteUserDialog.h
     DisplaySettingsDialog.cpp
     DisplaySettingsDialog.h
+    EditInteractionController.h
     EditorController.cpp
     EditorController.h
     EditorModel.cpp
@@ -69,6 +72,8 @@ PUBLIC
     ExitDialog.h
     FileTransferController.cpp
     FileTransferController.h
+    ForceController.cpp
+    ForceController.h
     FpsController.cpp
     FpsController.h
     GenericFileDialog.cpp
@@ -93,6 +98,8 @@ PUBLIC
     HelpStrings.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
+    InspectionController.cpp
+    InspectionController.h
     InspectionWindow.cpp
     InspectionWindow.h
     LastSessionBrowserData.cpp
@@ -133,8 +140,8 @@ PUBLIC
     McpWindow.h
     ModalWindow.cpp
     ModalWindow.h
-    MultiplierTool.cpp
-    MultiplierTool.h
+    MultiplierWidget.cpp
+    MultiplierWidget.h
     MutationRatesDialog.cpp
     MutationRatesDialog.h
     MutationRatesWidget.cpp
@@ -182,6 +189,10 @@ PUBLIC
     ResourcePreviewWidget.h
     SavePictureDialog.cpp
     SavePictureDialog.h
+    ScissorsController.cpp
+    ScissorsController.h
+    SelectionController.cpp
+    SelectionController.h
     SelectionWidget.cpp
     SelectionWidget.h
     Shader.cpp

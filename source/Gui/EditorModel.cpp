@@ -64,16 +64,6 @@ bool EditorModel::areEntitiesInspected() const
     return !_inspectedEntityById.empty();
 }
 
-void EditorModel::setPencilWidth(float value)
-{
-    _pencilWidth = value;
-}
-
-float EditorModel::getPencilWidth() const
-{
-    return _pencilWidth;
-}
-
 void EditorModel::setDefaultColorCode(int value)
 {
     _defaultColorCode = value;
@@ -92,11 +82,6 @@ EditTool EditorModel::getTool() const
 void EditorModel::setTool(EditTool value)
 {
     _tool = value;
-}
-
-bool EditorModel::isCreationTool() const
-{
-    return _tool != EditTool_Select && _tool != EditTool_Scissors && _tool != EditTool_Force;
 }
 
 bool EditorModel::isApplyToNetworks() const
@@ -127,16 +112,6 @@ bool EditorModel::isGlueOnContact() const
 void EditorModel::setGlueOnContact(bool value)
 {
     _glueOnContact = value;
-}
-
-bool EditorModel::isCutOnlyInSelection() const
-{
-    return _cutOnlyInSelection;
-}
-
-void EditorModel::setCutOnlyInSelection(bool value)
-{
-    _cutOnlyInSelection = value;
 }
 
 SelectionBounds EditorModel::getSelectionBounds(bool includeClusters) const
