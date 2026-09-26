@@ -14,18 +14,29 @@ namespace httplib
     class Server;
 }
 
+struct McpImage
+{
+    std::string mimeType;
+    std::string data;
+};
+
 struct McpToolResult
 {
     std::string text;
+    std::vector<McpImage> images;
     bool isError = false;
 };
+
+using McpToolCompletion = std::function<void(McpToolResult const& result)>;
 
 struct McpTool
 {
     std::string name;
+    std::string group;
     std::string description;
     boost::json::object inputSchema;
     std::function<McpToolResult(boost::json::object const& arguments)> handler;
+    std::function<void(boost::json::object const& arguments, McpToolCompletion const& completion)> deferredHandler;
 };
 
 class McpServer

@@ -1,13 +1,15 @@
 #include "FileTransferController.h"
 
+#include <Base/GlobalSettings.h>
+
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/TaskProcessor.h>
 
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "NewSimulationService.h"
 #include "OverlayController.h"
-#include "TemporalControlWindow.h"
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
@@ -38,34 +40,9 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
         },
         [&](auto const& requestId) {
             auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
-            _PersisterFacade::get()->shutdown();
-
-            _SimulationFacade::get()->closeSimulation();
-
-            std::optional<std::string> errorMessage;
-            try {
-                _SimulationFacade::get()->newSimulation(
-                    data.simulationDesc._timestep, data.simulationDesc._worldSize, data.simulationDesc._simulationParameters);
-                _SimulationFacade::get()->setSimulationData(data.simulationDesc._mainData);
-                _SimulationFacade::get()->setStatisticsHistory(data.simulationDesc._statistics);
-                _SimulationFacade::get()->setRealTime(data.simulationDesc._realTime);
-            } catch (AlienException const& exception) {
-                errorMessage = exception.what();
-            } catch (...) {
-                errorMessage = "Failed to load simulation.";
-            }
-
-            if (errorMessage) {
+            if (auto errorMessage = NewSimulationService::get().loadSimulation(data.simulationDesc)) {
                 showMessage("Error", *errorMessage);
-                _SimulationFacade::get()->closeSimulation();
-                _SimulationFacade::get()->newSimulation(
-                    data.simulationDesc._timestep, data.simulationDesc._worldSize, data.simulationDesc._simulationParameters);
             }
-            _PersisterFacade::get()->restart();
-
-            Viewport::get().setCenterInWorldPos(data.simulationDesc._center);
-            Viewport::get().setZoomFactor(data.simulationDesc._zoom);
-            TemporalControlWindow::get().onSnapshot();
             printOverlayMessage(data.filename.string());
         },
         [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });

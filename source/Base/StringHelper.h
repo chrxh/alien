@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <string>
+#include <string_view>
 
 #include <Base/Definitions.h>
 #include <Base/MathTypes.h>
@@ -18,6 +19,7 @@ public:
     static std::string formatInHex(uint64_t value);
     static std::string formatHexColor(FloatColorRGB const& color);
     static std::string formatInThousands(double value);  // e.g. 12000 -> "12K", 1000000 -> "1,000K"
+    static std::string encodeBase64(std::string_view data);
 
     static void copy(char* target, int maxSize, std::string const& source);
     static bool compare(char const* target, int maxSize, char const* source);

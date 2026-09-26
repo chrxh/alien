@@ -1,3 +1,5 @@
+#include <thread>
+
 #include <gtest/gtest.h>
 
 #include <boost/json.hpp>
@@ -15,17 +17,36 @@ public:
               "alien",
               "1.0",
               {McpTool{
-                  .name = "echo",
-                  .description = "Returns the text argument",
-                  .inputSchema = {{"type", "object"}},
-                  .handler =
-                      [](boost::json::object const& arguments) {
-                          if (!arguments.contains("text")) {
-                              throw std::runtime_error("Missing text");
-                          }
-                          return McpToolResult{.text = std::string(arguments.at("text").as_string())};
-                      },
-              }})
+                   .name = "echo",
+                   .description = "Returns the text argument",
+                   .inputSchema = {{"type", "object"}},
+                   .handler =
+                       [](boost::json::object const& arguments) {
+                           if (!arguments.contains("text")) {
+                               throw std::runtime_error("Missing text");
+                           }
+                           return McpToolResult{.text = std::string(arguments.at("text").as_string())};
+                       },
+               },
+               McpTool{
+                   .name = "picture",
+                   .description = "Returns a picture",
+                   .inputSchema = {{"type", "object"}},
+                   .handler =
+                       [](boost::json::object const&) { return McpToolResult{.text = "picture", .images = {{.mimeType = "image/png", .data = "abcd"}}}; },
+               },
+               McpTool{
+                   .name = "deferredEcho",
+                   .description = "Returns the text argument later",
+                   .inputSchema = {{"type", "object"}},
+                   .deferredHandler =
+                       [](boost::json::object const& arguments, McpToolCompletion const& completion) {
+                           std::thread([text = std::string(arguments.at("text").as_string()), completion] {
+                               completion(McpToolResult{.text = text});
+                               completion(McpToolResult{.text = "second completion"});
+                           }).detach();
+                       },
+               }})
     {}
 
 protected:
@@ -69,9 +90,31 @@ TEST_F(McpServerTests, listTools)
     auto response = sendRequest("tools/list");
 
     auto const& tools = response.at("result").as_object().at("tools").as_array();
-    ASSERT_EQ(1, tools.size());
+    ASSERT_EQ(3, tools.size());
     EXPECT_EQ("echo", tools.at(0).as_object().at("name").as_string());
     EXPECT_TRUE(tools.at(0).as_object().contains("inputSchema"));
+}
+
+TEST_F(McpServerTests, callTool_image)
+{
+    auto response = sendRequest("tools/call", {{"name", "picture"}});
+
+    auto const& content = response.at("result").as_object().at("content").as_array();
+    ASSERT_EQ(2, content.size());
+    EXPECT_EQ("picture", content.at(0).as_object().at("text").as_string());
+    auto const& image = content.at(1).as_object();
+    EXPECT_EQ("image", image.at("type").as_string());
+    EXPECT_EQ("image/png", image.at("mimeType").as_string());
+    EXPECT_EQ("YWJjZA==", image.at("data").as_string());
+}
+
+TEST_F(McpServerTests, callTool_deferred)
+{
+    auto response = sendRequest("tools/call", {{"name", "deferredEcho"}, {"arguments", boost::json::object{{"text", "later"}}}});
+
+    auto const& result = response.at("result").as_object();
+    EXPECT_FALSE(result.at("isError").as_bool());
+    EXPECT_EQ("later", result.at("content").as_array().at(0).as_object().at("text").as_string());
 }
 
 TEST_F(McpServerTests, callTool)

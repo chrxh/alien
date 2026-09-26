@@ -4,6 +4,8 @@
 #include <ranges>
 #include <format>
 
+#include <boost/algorithm/string/join.hpp>
+
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -95,14 +97,14 @@ void McpWindow::processConnectionGuide()
     ImGui::PopStyleColor();
     AlienGui::Tooltip(
         [&] {
-            std::string toolNames;
-            for (auto const& toolName : controller.getToolNames()) {
-                toolNames += (toolNames.empty() ? "" : ", ") + toolName;
+            std::string toolGroups;
+            for (auto const& toolGroup : controller.getToolGroups()) {
+                toolGroups += std::format("\n\n{}:\n{}", toolGroup.name, boost::algorithm::join(toolGroup.toolNames, ", "));
             }
             return std::format(
                 "Works with any AI agent or MCP client that supports MCP servers of type HTTP (also called Streamable HTTP), regardless of the AI "
-                "provider.\n\nOnly agents on this computer can connect.\n\nAvailable tools: {}",
-                toolNames);
+                "provider.\n\nOnly agents on this computer can connect.\n\nAvailable tools{}",
+                toolGroups);
         },
         false);
 

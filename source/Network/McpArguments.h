@@ -41,6 +41,12 @@ public:
 
     static std::filesystem::path getFilePath(boost::json::object const& arguments, std::string_view key);
 
+    static uint64_t getId(boost::json::object const& arguments, std::string_view key);
+    static std::optional<uint64_t> getOptionalId(boost::json::object const& arguments, std::string_view key);
+    static std::vector<uint64_t> getIds(boost::json::object const& arguments, std::string_view key, size_t minNumIds);
+
+    static boost::json::value const& getValue(boost::json::object const& arguments, std::string_view key);
+
     static std::vector<RealVector2D> getPoints(boost::json::object const& arguments, std::string_view key, size_t minNumPoints);
 
     static std::vector<boost::json::object> getObjects(boost::json::object const& arguments, std::string_view key, size_t minNumObjects);

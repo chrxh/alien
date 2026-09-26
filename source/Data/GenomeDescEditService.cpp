@@ -11,6 +11,7 @@
 
 #include "DescEditService.h"
 #include "GenomeDescAccessService.h"
+#include "MassOperationsService.h"
 
 namespace
 {
@@ -394,6 +395,22 @@ void GenomeDescEditService::removeSeedFromPhenotype(ContentDesc& phenotype) cons
         }
     }
     DescEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& object) { return seedCellIds.contains(object._id); });
+}
+
+ContentDesc GenomeDescEditService::createSeed(GenomeDesc const& genome, RealVector2D const& pos, int color, bool freeEnergy) const
+{
+    ContentDesc result;
+    result.addCreature(
+        {ObjectDesc().pos(pos).stiffness(1.0f).color(color).type(
+            CellDesc().headCell(true).constructor(ConstructorDesc()
+                                                      .autoTriggerInterval(50)
+                                                      .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_TransitiveCells)
+                                                      .geneIndex(0)
+                                                      .separation(true)))},
+        CreatureDesc(),
+        genome);
+    MassOperationsService::get().randomizeLineageIds(result);
+    return result;
 }
 
 ContentDesc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const

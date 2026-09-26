@@ -1,8 +1,10 @@
 #include "McpController.h"
 
 #include <algorithm>
+#include <atomic>
 #include <stdexcept>
 #include <format>
+#include <future>
 
 #include <boost/json.hpp>
 
@@ -14,11 +16,14 @@
 
 #include <McpToolsInterface/McpToolsFacade.h>
 
+#include "BrowserWindow.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "MainLoopController.h"
 #include "NewSimulationService.h"
 #include "OverlayController.h"
+#include "PictureGuiService.h"
+#include "SimulationView.h"
 #include "Viewport.h"
 
 namespace
@@ -84,9 +89,9 @@ std::string McpController::getServerUrl() const
     return std::format("http://127.0.0.1:{}/mcp", _port);
 }
 
-std::vector<std::string> const& McpController::getToolNames() const
+std::vector<McpToolGroup> const& McpController::getToolGroups() const
 {
-    return _toolNames;
+    return _toolGroups;
 }
 
 std::deque<McpCommandLogEntry> const& McpController::getCommandLog() const
@@ -102,7 +107,10 @@ void McpController::clearCommandLog()
 void McpController::init()
 {
     for (auto const& tool : createTools()) {
-        _toolNames.emplace_back(tool.name);
+        if (_toolGroups.empty() || _toolGroups.back().name != tool.group) {
+            _toolGroups.emplace_back(McpToolGroup{.name = tool.group});
+        }
+        _toolGroups.back().toolNames.emplace_back(tool.name);
     }
     setPort(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort));
     if (GlobalSettings::get().getValue("settings.mcp server.enabled", false)) {
@@ -115,13 +123,15 @@ void McpController::process()
     if (!MainLoopController::get().isOperatingMode()) {
         return;
     }
+    _McpToolsFacade::get()->process();
+
     decltype(_pendingTasks) tasks;
     {
         std::lock_guard lock(_pendingTasksMutex);
         tasks.swap(_pendingTasks);
     }
     for (auto const& task : tasks) {
-        (*task)();
+        task();
     }
 }
 
@@ -144,6 +154,17 @@ RealVector2D McpController::getVisibleAreaSize() const
     return {toFloat(viewSize.x) / zoom, toFloat(viewSize.y) / zoom};
 }
 
+float McpController::getZoomFactor() const
+{
+    return Viewport::get().getZoomFactor();
+}
+
+void McpController::setVisibleArea(RealVector2D const& center, float zoomFactor)
+{
+    Viewport::get().setCenterInWorldPos(center);
+    Viewport::get().setZoomFactor(zoomFactor);
+}
+
 void McpController::createSimulation(std::string const& projectName, IntVector2D const& worldSize)
 {
     NewSimulationService::get().createSimulation(NewSimulationService::Parameters()
@@ -152,9 +173,32 @@ void McpController::createSimulation(std::string const& projectName, IntVector2D
                                                      .externalEnergy(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
 }
 
+void McpController::applySimulation(SimulationDesc const& simulation)
+{
+    if (auto errorMessage = NewSimulationService::get().loadSimulation(simulation)) {
+        throw std::runtime_error(*errorMessage);
+    }
+}
+
 void McpController::onSelectionChanged()
 {
     EditorModel::get().update();
+}
+
+void McpController::onNetworkResourcesChanged()
+{
+    BrowserWindow::get().onRefresh();
+}
+
+std::string McpController::createPicture(IntVector2D const& resolution, McpPictureFormat format)
+{
+    auto picture = SimulationView::get().savePicture(resolution);
+    return format == McpPictureFormat::Png ? PictureGuiService::get().encodePng(picture) : PictureGuiService::get().encodeJpg(picture);
+}
+
+std::optional<std::string> McpController::createSimulationPreviewJpg()
+{
+    return PictureGuiService::get().createSimulationPreviewJpg();
 }
 
 void McpController::showMessage(std::string const& message)
@@ -207,32 +251,44 @@ std::vector<McpTool> McpController::createTools()
 McpTool McpController::wrapTool(McpTool const& tool)
 {
     auto result = tool;
-    result.handler = [this, name = tool.name, handler = tool.handler](boost::json::object const& arguments) {
-        return executeOnMainThread([this, name, handler, arguments] {
-            auto toolResult = [&] {
-                try {
-                    return handler(arguments);
-                } catch (std::exception const& exception) {
-                    return McpToolResult{.text = exception.what(), .isError = true};
+    result.deferredHandler = nullptr;
+    result.handler = [this, tool](boost::json::object const& arguments) {
+        return executeOnMainThread([this, tool, arguments](McpToolCompletion const& completion) {
+            auto completeAndLog = [this, name = tool.name, arguments, completion](McpToolResult const& toolResult) {
+                addCommandLogEntry(name, arguments, toolResult);
+                completion(toolResult);
+            };
+            try {
+                if (tool.handler) {
+                    completeAndLog(tool.handler(arguments));
+                } else {
+                    tool.deferredHandler(arguments, completeAndLog);
                 }
-            }();
-            addCommandLogEntry(name, arguments, toolResult);
-            return toolResult;
+            } catch (std::exception const& exception) {
+                completeAndLog(McpToolResult{.text = exception.what(), .isError = true});
+            }
         });
     };
     return result;
 }
 
-McpToolResult McpController::executeOnMainThread(std::function<McpToolResult()> const& function)
+McpToolResult McpController::executeOnMainThread(std::function<void(McpToolCompletion const&)> const& function)
 {
-    auto task = std::make_shared<std::packaged_task<McpToolResult()>>(function);
-    auto result = task->get_future();
+    auto promise = std::make_shared<std::promise<McpToolResult>>();
+    auto completed = std::make_shared<std::atomic_flag>();
+    auto result = promise->get_future();
     {
         std::lock_guard lock(_pendingTasksMutex);
         if (_stopping) {
             return McpToolResult{.text = ServerStoppedMessage, .isError = true};
         }
-        _pendingTasks.emplace_back(task);
+        _pendingTasks.emplace_back([function, promise, completed] {
+            function([promise, completed](McpToolResult const& toolResult) {
+                if (!completed->test_and_set()) {
+                    promise->set_value(toolResult);
+                }
+            });
+        });
     }
     while (result.wait_for(TaskPollInterval) != std::future_status::ready) {
         if (_stopping) {

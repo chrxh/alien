@@ -19,7 +19,9 @@ add_library(EngineInterface
     SimulationParametersUpdateConfig.h
     StatisticsConverterService.cpp
     StatisticsConverterService.h
-    StatisticsEntry.h)
+    StatisticsEntry.h
+    TemporalControlService.cpp
+    TemporalControlService.h)
 
 target_link_libraries(EngineInterface Base)
 target_link_libraries(EngineInterface Data)

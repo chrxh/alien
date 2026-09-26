@@ -43,6 +43,8 @@ public:
     std::vector<ContentDesc> extractPhenotypesFromPreview(ContentDesc&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
     void removeSeedFromPhenotype(ContentDesc& phenotype) const;
 
+    ContentDesc createSeed(GenomeDesc const& genome, RealVector2D const& pos, int color, bool freeEnergy) const;
+
 private:
     ContentDesc createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const;
 

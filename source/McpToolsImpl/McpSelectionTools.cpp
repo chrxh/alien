@@ -14,6 +14,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include <Network/McpArguments.h>
+#include <Network/McpJson.h>
 #include <Network/McpSchema.h>
 
 namespace
@@ -91,9 +92,14 @@ std::vector<McpTool> McpSelectionTools::getTools(McpToolContext& context)
         McpTool{
             .name = "move_selection",
             .description = "Moves the selected objects by an offset. Without include_clusters, connections to unselected objects tear when they become "
-                           "overstretched. No new connections are formed.",
+                           "overstretched. New connections are only formed with glue_on_contact.",
             .inputSchema = McpSchema::object(
-                withIncludeClusters({{"dx", McpSchema::number("Offset in x direction")}, {"dy", McpSchema::number("Offset in y direction")}}), {"dx", "dy"}),
+                withIncludeClusters({
+                    {"dx", McpSchema::number("Offset in x direction")},
+                    {"dy", McpSchema::number("Offset in y direction")},
+                    {"glue_on_contact", McpSchema::boolean("Connect the moved objects with the objects they touch at the new position. Default: false")},
+                }),
+                {"dx", "dy"}),
             .handler = [this](boost::json::object const& arguments) { return moveSelection(arguments); },
         },
         McpTool{
@@ -142,7 +148,7 @@ McpToolResult McpSelectionTools::getSelection() const
         {"center", boost::json::array{selection.centerPosX, selection.centerPosY}},
         {"velocity", boost::json::array{selection.centerVelX, selection.centerVelY}},
     };
-    return {.text = boost::json::serialize(result)};
+    return {.text = McpJson::serialize(result)};
 }
 
 McpToolResult McpSelectionTools::deleteSelection(boost::json::object const& arguments) const
@@ -164,6 +170,9 @@ McpToolResult McpSelectionTools::fixSelection(boost::json::object const& argumen
     auto includeClusters = getIncludeClusters(arguments);
     getNonEmptySelection();
     _SimulationFacade::get()->setStatic(fixed, includeClusters);
+    if (fixed) {
+        _SimulationFacade::get()->uniformVelocitiesForSelectedObjects(includeClusters);
+    }
     _context->onSelectionChanged();
     return {.text = fixed ? "The selected objects are fixed." : "The selected objects are released."};
 }
@@ -201,6 +210,7 @@ McpToolResult McpSelectionTools::moveSelection(boost::json::object const& argume
 
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = includeClusters;
+    updateData.glueOnContact = McpArguments::getOptionalBool(arguments, "glue_on_contact").value_or(false);
     updateData.posDeltaX = dx;
     updateData.posDeltaY = dy;
     updateData.velX = includeClusters ? selection.clusterCenterVelX : selection.centerVelX;

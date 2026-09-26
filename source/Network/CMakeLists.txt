@@ -3,6 +3,8 @@ add_library(Network
     Definitions.h
     McpArguments.cpp
     McpArguments.h
+    McpJson.cpp
+    McpJson.h
     McpSchema.cpp
     McpSchema.h
     McpServer.cpp

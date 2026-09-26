@@ -10,9 +10,8 @@
 #include "EditorController.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
+#include "NewSimulationService.h"
 #include "OverlayController.h"
-#include "TemporalControlWindow.h"
-#include "Viewport.h"
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/PersisterFacade.h>
 
@@ -40,33 +39,9 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
             auto data = _PersisterFacade::get()->fetchDownloadNetworkResourcesData(requestId);
 
             if (data.resourceType == NetworkResourceType_Simulation) {
-                _PersisterFacade::get()->shutdown();
-                _SimulationFacade::get()->closeSimulation();
-                std::optional<std::string> errorMessage;
-                auto const& deserializedSimulation = std::get<SimulationDesc>(data.resourceData);
-                try {
-                    _SimulationFacade::get()->newSimulation(
-                        deserializedSimulation._timestep, deserializedSimulation._worldSize, deserializedSimulation._simulationParameters);
-                    _SimulationFacade::get()->setRealTime(deserializedSimulation._realTime);
-                    _SimulationFacade::get()->setSimulationData(deserializedSimulation._mainData);
-                    _SimulationFacade::get()->setStatisticsHistory(deserializedSimulation._statistics);
-                } catch (CudaMemoryAllocationException const& exception) {
-                    errorMessage = exception.what();
-                } catch (...) {
-                    errorMessage = "Failed to load simulation.";
-                }
-                if (errorMessage) {
+                if (auto errorMessage = NewSimulationService::get().loadSimulation(std::get<SimulationDesc>(data.resourceData))) {
                     showMessage("Error", *errorMessage);
-                    _SimulationFacade::get()->closeSimulation();
-                    _SimulationFacade::get()->newSimulation(
-                        deserializedSimulation._timestep, deserializedSimulation._worldSize, deserializedSimulation._simulationParameters);
                 }
-                _PersisterFacade::get()->restart();
-
-                Viewport::get().setCenterInWorldPos(deserializedSimulation._center);
-                Viewport::get().setZoomFactor(deserializedSimulation._zoom);
-                TemporalControlWindow::get().onSnapshot();
-
                 printOverlayMessage(data.resourceName);
             } else {
                 EditorController::get().setOn(true);

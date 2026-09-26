@@ -38,6 +38,29 @@ TEST_F(McpArgumentsTests, int_fraction)
     EXPECT_THROW(McpArguments::getInt(parse(R"({"n": 2.5})"), "n"), std::invalid_argument);
 }
 
+TEST_F(McpArgumentsTests, id_fromString)
+{
+    EXPECT_EQ(18446744073709551615ull, McpArguments::getId(parse(R"({"id": "18446744073709551615"})"), "id"));
+}
+
+TEST_F(McpArgumentsTests, id_fromInteger)
+{
+    EXPECT_EQ(42, McpArguments::getId(parse(R"({"id": 42})"), "id"));
+}
+
+TEST_F(McpArgumentsTests, id_invalid)
+{
+    EXPECT_THROW(McpArguments::getId(parse(R"({"id": "12a"})"), "id"), std::invalid_argument);
+    EXPECT_THROW(McpArguments::getId(parse(R"({"id": ""})"), "id"), std::invalid_argument);
+    EXPECT_THROW(McpArguments::getId(parse(R"({"id": -1})"), "id"), std::invalid_argument);
+}
+
+TEST_F(McpArgumentsTests, ids)
+{
+    EXPECT_EQ((std::vector<uint64_t>{1, 2}), McpArguments::getIds(parse(R"({"ids": ["1", 2]})"), "ids", 1));
+    EXPECT_THROW(McpArguments::getIds(parse(R"({"ids": []})"), "ids", 1), std::invalid_argument);
+}
+
 TEST_F(McpArgumentsTests, int_wrongType)
 {
     EXPECT_THROW(McpArguments::getInt(parse(R"({"n": "ten"})"), "n"), std::invalid_argument);

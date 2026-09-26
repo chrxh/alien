@@ -14,6 +14,17 @@
 
 #include <Base/MathTypes.h>
 
+struct SerializationKey
+{
+    constexpr SerializationKey(int32_t id, char const* name = nullptr)
+        : id(id)
+        , name(name)
+    {}
+
+    int32_t id;
+    char const* name;
+};
+
 namespace cereal
 {
     // A std::variant is written as a type id followed by the value. The type id is part of the file format:
@@ -23,11 +34,12 @@ namespace cereal
     template <typename T>
     struct SerializedTypeId;
 
-#define REGISTER_SERIALIZED_TYPE(Type, Id) \
+#define REGISTER_SERIALIZED_TYPE(Type, Key) \
     template <> \
     struct SerializedTypeId<Type> \
     { \
-        static constexpr int32_t value = Id; \
+        static constexpr int32_t value = SerializationKey(Key).id; \
+        static constexpr char const* name = SerializationKey(Key).name; \
     };
 
     // Attribute values

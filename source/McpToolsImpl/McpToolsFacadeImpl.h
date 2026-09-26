@@ -8,4 +8,5 @@ public:
     static void set(McpToolsFacade const& instance);
 
     std::vector<McpTool> getTools(McpToolContext& context) override;
+    void process() override;
 };

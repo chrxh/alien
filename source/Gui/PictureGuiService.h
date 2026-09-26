@@ -28,6 +28,7 @@ public:
     PictureData brighten(PictureData const& picture, float factor);
 
     std::string encodeJpg(PictureData const& picture);
+    std::string encodePng(PictureData const& picture);
 
     void savePng(PictureData const& picture, std::filesystem::path const& filename);
 };

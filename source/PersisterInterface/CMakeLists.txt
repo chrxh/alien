@@ -17,6 +17,7 @@ add_library(PersisterInterface
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
     LoginRequestData.h
+    JsonSerializationScope.h
     LoginResultData.h
     MoveNetworkResourceRequestData.h
     MoveNetworkResourceResultData.h
@@ -58,6 +59,7 @@ add_library(PersisterInterface
 target_link_libraries(PersisterInterface Base)
 
 target_link_libraries(PersisterInterface Boost::boost)
+target_link_libraries(PersisterInterface Boost::json)
 
 find_package(zstd CONFIG REQUIRED)
 target_link_libraries(PersisterInterface zstd::libzstd)
