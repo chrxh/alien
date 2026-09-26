@@ -55,6 +55,8 @@ public:
     virtual void setStatic(bool value, bool includeClusters) = 0;
     virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedObjects() = 0;
+    virtual void glueSelectedObjects(bool includeClusters) = 0;
+    virtual void cutConnections(RealVector2D const& start, RealVector2D const& end, bool onlySelected, bool includeClusters) = 0;
     virtual void setDetached(bool value) = 0;
     virtual void changeCell(ExtendedObjectDesc const& changedCell) = 0;
     virtual void changeParticle(EnergyDesc const& changedParticle) = 0;
@@ -65,6 +67,7 @@ public:
     virtual void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) = 0;
     virtual void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) = 0;
     virtual void removeSelection() = 0;
+    virtual void updateSelection() = 0;
     virtual bool updateSelectionIfNecessary() = 0;
     virtual void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) = 0;
 

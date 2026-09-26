@@ -410,6 +410,18 @@ void _SimulationCudaFacade::reconnectSelectedObjects()
     syncAndCheck();
 }
 
+void _SimulationCudaFacade::glueSelectedObjects(bool includeClusters)
+{
+    EditKernelsService::get().glueSelectedObjects(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), includeClusters);
+    syncAndCheck();
+}
+
+void _SimulationCudaFacade::cutConnections(float2 const& start, float2 const& end, bool onlySelected, bool includeClusters)
+{
+    EditKernelsService::get().cutConnections(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), start, end, onlySelected, includeClusters);
+    syncAndCheck();
+}
+
 void _SimulationCudaFacade::setDetached(bool value)
 {
     EditKernelsService::get().setDetached(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), value);

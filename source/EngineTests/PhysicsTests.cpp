@@ -172,6 +172,45 @@ TEST_F(PhysicsTests, noGhostMovements)
     EXPECT_TRUE(approxCompare(center, newCenter, 0.01f));
 }
 
+TEST_F(PhysicsTests, connectionBetweenStaticObjectsTears)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).isStatic(true),
+        ObjectDesc().id(2).pos({13.0f, 10.0f}).vel({0.5f, 0.0f}).isStatic(true),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(actualData.getObjectRef(1)._connections.empty());
+    EXPECT_TRUE(actualData.getObjectRef(2)._connections.empty());
+}
+
+TEST_F(PhysicsTests, onlyOverstretchedConnectionTears)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).isStatic(true),
+        ObjectDesc().id(2).pos({11.0f, 10.0f}).isStatic(true),
+        ObjectDesc().id(3).pos({14.0f, 10.0f}).vel({0.5f, 0.0f}).isStatic(true),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto const& object1 = actualData.getObjectRef(1);
+    auto const& object2 = actualData.getObjectRef(2);
+    ASSERT_EQ(1, object1._connections.size());
+    ASSERT_EQ(1, object2._connections.size());
+    EXPECT_EQ(2, object1._connections.front()._objectId);
+    EXPECT_EQ(1, object2._connections.front()._objectId);
+    EXPECT_TRUE(actualData.getObjectRef(3)._connections.empty());
+}
+
 TEST_F(PhysicsTests, angularForcesBetweenFixedAndNonFixedObject)
 {
     auto data = ContentDesc().addCreature({

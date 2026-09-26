@@ -44,22 +44,9 @@ void EditKernelsService::shallowUpdateSelectedObjects(
     SimulationData const& data,
     ShallowUpdateSelectionData const& updateData)
 {
-    bool reconnectionRequired = !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.angleDelta != 0);
-
-    // Disconnect selection in case of reconnection
-    if (reconnectionRequired) {
-        int counter = 10;
-        do {
-            launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
-
-            setValueToDevice(_cudaUpdateResult, 0);
-            launchKernelOnDefaultStream(KERNEL(cudaScheduleDisconnectSelectionFromRemainings), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
-            launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
-            launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-            launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-            cudaDeviceSynchronize();
-        } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
-    }
+    auto positionsChanged = updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.angleDelta != 0;
+    auto tearingRequired = !updateData.considerClusters && positionsChanged;
+    auto gluingRequired = updateData.glueOnContact && positionsChanged;
 
     if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velX != 0 || updateData.velY != 0) {
         launchKernelOnDefaultStream(KERNEL(cudaIncrementPosAndVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data);
@@ -93,29 +80,83 @@ void EditKernelsService::shallowUpdateSelectedObjects(
             KERNEL(cudaUpdateAngleAndAngularVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data, copyToHost(_cudaCenter));
     }
 
-    // Connect selection in case of reconnection
-    if (reconnectionRequired) {
+    if (tearingRequired) {
         cudaDeviceSynchronize();
-
-        int counter = 10;
-        do {
-            launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
-
-            setValueToDevice(_cudaUpdateResult, 0);
-            launchKernelOnDefaultStream(KERNEL(cudaPrepareMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
-            launchKernelOnDefaultStream(KERNEL(cudaUpdateMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
-            launchKernelOnDefaultStream(KERNEL(cudaScheduleConnectSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, false, _cudaUpdateResult);
-            launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
-            launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-            launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-
-            launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
-            cudaDeviceSynchronize();
-
-        } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
-
+        disconnectOverstretchedConnections(launchSettings, data);
+    }
+    if (gluingRequired) {
+        cudaDeviceSynchronize();
+        connectSelection(launchSettings, data, updateData.considerClusters, false);
+    }
+    if (tearingRequired || gluingRequired) {
         SelectionKernelsService::get().updateSelection(launchSettings, data);
     }
+}
+
+void EditKernelsService::glueSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
+{
+    connectSelection(launchSettings, data, includeClusters, true);
+    SelectionKernelsService::get().updateSelection(launchSettings, data);
+}
+
+void EditKernelsService::cutConnections(
+    KernelLaunchSettings const& launchSettings,
+    SimulationData const& data,
+    float2 const& cutStart,
+    float2 const& cutEnd,
+    bool onlySelected,
+    bool includeClusters)
+{
+    int counter = 10;
+    do {
+        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
+
+        setValueToDevice(_cudaUpdateResult, 0);
+        launchKernelOnDefaultStream(
+            KERNEL(cudaScheduleCutConnections), LaunchConfig{launchSettings.numBlocks, 8}, data, cutStart, cutEnd, onlySelected, includeClusters, _cudaUpdateResult);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
+
+    SelectionKernelsService::get().updateSelection(launchSettings, data);
+}
+
+void EditKernelsService::disconnectOverstretchedConnections(KernelLaunchSettings const& launchSettings, SimulationData const& data)
+{
+    int counter = 10;
+    do {
+        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
+
+        setValueToDevice(_cudaUpdateResult, 0);
+        launchKernelOnDefaultStream(KERNEL(cudaScheduleDisconnectSelectionFromRemainings), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
+}
+
+void EditKernelsService::connectSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters, bool onlyWithinSelection)
+{
+    int counter = 10;
+    do {
+        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
+
+        setValueToDevice(_cudaUpdateResult, 0);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaUpdateMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(
+            KERNEL(cudaScheduleConnectSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, includeClusters, onlyWithinSelection, _cudaUpdateResult);
+        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
+
+        launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        cudaDeviceSynchronize();
+
+    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
 }
 
 void EditKernelsService::removeSelectedObjects(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters)
@@ -165,37 +206,9 @@ void EditKernelsService::setStatic(KernelLaunchSettings const& launchSettings, S
 
 void EditKernelsService::reconnect(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    int counter = 10;
-    do {
-        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
-
-        setValueToDevice(_cudaUpdateResult, 0);
-        launchKernelOnDefaultStream(KERNEL(cudaScheduleDisconnectSelectionFromRemainings), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
-        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
-        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-        cudaDeviceSynchronize();
-    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all affecting connections may be removed at first => repeat
-
+    disconnectOverstretchedConnections(launchSettings, data);
     cudaDeviceSynchronize();
-
-    counter = 10;
-    do {
-        launchKernelOnDefaultStream(KERNEL(cudaNextTimestep_prepare), LaunchConfig{1, 1}, data);
-
-        setValueToDevice(_cudaUpdateResult, 0);
-        launchKernelOnDefaultStream(KERNEL(cudaPrepareMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
-        launchKernelOnDefaultStream(KERNEL(cudaUpdateMapForReconnection), LaunchConfig{launchSettings.numBlocks, 8}, data);
-        launchKernelOnDefaultStream(KERNEL(cudaScheduleConnectSelection), LaunchConfig{launchSettings.numBlocks, 8}, data, false, _cudaUpdateResult);
-        launchKernelOnDefaultStream(KERNEL(cudaPrepareConnectionChanges), LaunchConfig{1, 1}, data);
-        launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-        launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
-
-        launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
-        cudaDeviceSynchronize();
-
-    } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
-
+    connectSelection(launchSettings, data, false, false);
     SelectionKernelsService::get().updateSelection(launchSettings, data);
 }
 

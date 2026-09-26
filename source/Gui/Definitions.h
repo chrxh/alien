@@ -53,10 +53,6 @@ class EditorModel;
 
 class EditorController;
 
-class SelectionWindow;
-
-class PatternEditorWindow;
-
 class WindowController;
 
 class ResizeWorldDialog;
@@ -65,10 +61,6 @@ class SavePictureDialog;
 
 class _InspectionWindow;
 using InspectionWindow = std::shared_ptr<_InspectionWindow>;
-
-class CreatorWindow;
-
-class MultiplierWindow;
 
 class FpsController;
 

@@ -223,6 +223,15 @@ __device__ __forceinline__ float alienAtomicMax(float* addr, float value)
     return old;
 }
 
+__device__ __forceinline__ float alienAtomicMin(float* addr, float value)
+{
+    float old;
+    old = !signbit(value) ? __int_as_float(atomicMin((int*)addr, __float_as_int(value)))
+                          : __uint_as_float(atomicMax((unsigned int*)addr, __float_as_uint(value)));
+
+    return old;
+}
+
 template <typename T>
 __device__ __inline__ T alienAtomicExch64(T* address, T const& value)
 {

@@ -495,6 +495,11 @@ public:
         MEMBER(ToolbarParameters, bool, bottomSeparator, true);
     };
     static void Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarItem> const& items);
+    static float CalcToolbarWidth(std::vector<ToolbarItem> const& items);
+    static float CalcToolbarHeight();
+
+    static void PushFloatingCardStyle(float padding);
+    static void PopFloatingCardStyle();
 
     struct ChipParameters
     {

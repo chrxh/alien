@@ -76,6 +76,8 @@ public:
     void updateSelection();
     void colorSelectedObjects(unsigned char color, bool includeClusters);
     void reconnectSelectedObjects();
+    void glueSelectedObjects(bool includeClusters);
+    void cutConnections(float2 const& start, float2 const& end, bool onlySelected, bool includeClusters);
     void setDetached(bool value);
 
     void setKernelLaunchSettings(KernelLaunchSettings const& launchSettings);

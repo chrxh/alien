@@ -3,6 +3,7 @@
 struct ShallowUpdateSelectionData
 {
     bool considerClusters = true;
+    bool glueOnContact = false;
     float posDeltaX = 0;
     float posDeltaY = 0;
     float velX = 0;

@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <ImFileDialog.h>
 
+#include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
@@ -191,11 +192,10 @@ void GenomeEditorWindow::processToolbar()
                                                  .disabled(!hasGenomeChanged)
                                                  .action([&] { _tabs.at(_selectedTabIndex)->revertChanges(); })),
          AlienGui::ToolbarItem::createSeparator(),
-         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
-                                                 .icon(ICON_FA_PALETTE)
-                                                 .name("Change colors")
-                                                 .tooltip("Change the color of all nodes with a certain color")
-                                                 .action([&] { ChangeColorDialog::get().open(_tabs.at(_selectedTabIndex)->getEditData()); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_COLOR).name("Change colors").tooltip("Change the color of all nodes with a certain color").action([&] {
+                 ChangeColorDialog::get().open(_tabs.at(_selectedTabIndex)->getEditData());
+             })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_SYRINGE)
