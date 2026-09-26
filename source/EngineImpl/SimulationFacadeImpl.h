@@ -47,6 +47,8 @@ public:
     void setStatic(bool value, bool includeClusters) override;
     void colorSelectedObjects(unsigned char color, bool includeClusters) override;
     void reconnectSelectedObjects() override;
+    void glueSelectedObjects(bool includeClusters) override;
+    void cutConnections(RealVector2D const& start, RealVector2D const& end, bool onlySelected, bool includeClusters) override;
     void setDetached(bool value) override;
     void changeCell(ExtendedObjectDesc const& changedCell) override;
     void changeParticle(EnergyDesc const& changedParticle) override;
@@ -85,6 +87,7 @@ public:
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) override;
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) override;
     void removeSelection() override;
+    void updateSelection() override;
     bool updateSelectionIfNecessary() override;
 
     IntVector2D getWorldSize() const override;

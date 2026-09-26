@@ -81,7 +81,6 @@ namespace Const
     extern ImColor const TableHeaderColor;
 
     extern ImColor const MonospaceColor;
-    extern ImColor const SoftHighlightTextColor;
     extern ImColor const StatusBarTextColor;
 
     extern ImColor const HeadlineColor;
@@ -166,6 +165,14 @@ namespace Const
 
     extern ImColor const FloatingCardBackgroundColor;
     extern ImColor const FloatingCardBorderColor;
+
+    extern ImColor const SelectionFrameColor;
+    extern ImColor const SelectionHandleColor;
+    extern ImColor const SelectionHandleHoveredColor;
+    extern ImColor const SelectionHandleFillColor;
+    extern ImColor const SelectionChipTextColor;
+    extern ImColor const ScissorsTrailColor;
+    extern ImColor const MultiplierPreviewColor;
 
     extern ImColor const NeuronEditorConnectionColor;
     extern ImColor const NeuronEditorGridColor;

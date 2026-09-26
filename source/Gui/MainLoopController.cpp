@@ -27,7 +27,6 @@
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "ConsoleModeController.h"
-#include "CreatorWindow.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
@@ -43,14 +42,11 @@
 #include "LoginDialog.h"
 #include "MassOperationsDialog.h"
 #include "McpWindow.h"
-#include "MultiplierWindow.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
 #include "OpenGLHelper.h"
 #include "OverlayController.h"
-#include "PatternEditorWindow.h"
 #include "SavePictureDialog.h"
-#include "SelectionWindow.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
@@ -531,71 +527,42 @@ void MainLoopController::processMenubar()
             .selected(SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Selection")
-            .keyAlt(true)
-            .key(ImGuiKey_S)
-            .selected(SelectionWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
-            .closeMenuWhenItemClicked(false),
-        [&] { SelectionWindow::get().setOn(!SelectionWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Creator")
-            .keyAlt(true)
-            .key(ImGuiKey_T)
-            .selected(CreatorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
-            .closeMenuWhenItemClicked(false),
-        [&] { CreatorWindow::get().setOn(!CreatorWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Pattern editor")
-            .keyAlt(true)
-            .key(ImGuiKey_M)
-            .selected(PatternEditorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
-            .closeMenuWhenItemClicked(false),
-        [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Multiplier")
-            .keyAlt(true)
-            .key(ImGuiKey_A)
-            .selected(MultiplierWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
-            .closeMenuWhenItemClicked(false),
-        [&] { MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn()); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Inspect objects")
             .keyAlt(true)
             .key(ImGuiKey_N)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isObjectInspectionPossible()),
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isObjectInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedObjects(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Inspect genomes")
             .keyAlt(true)
             .key(ImGuiKey_F)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isGenomeInspectionPossible()),
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isGenomeInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedGenomes(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Inspect creatures")
             .keyAlt(true)
             .key(ImGuiKey_P)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isCreatureInspectionPossible()),
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCreatureInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedCreatures(); });
+    auto inspectionWindowsActive = EditorController::get().areInspectionWindowsActive();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Close inspections")
             .key(ImGuiKey_Escape)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive()),
+            .disabled(!SimulationInteractionController::get().isEditMode() || !inspectionWindowsActive),
         [&] { EditorController::get().onCloseAllInspectorWindows(); });
     AlienGui::MenuSeparator();
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
+            .name("Deselect")
+            .key(ImGuiKey_Escape)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isDeselectingPossible() || inspectionWindowsActive),
+        [&] { EditorController::get().onDeselect(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Copy")

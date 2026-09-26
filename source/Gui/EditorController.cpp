@@ -1,11 +1,13 @@
 #include "EditorController.h"
 
+#include <chrono>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
 #include <imgui.h>
 
+#include <Base/GlobalSettings.h>
 #include <Base/Math.h>
 
 #include <Data/CellTypeConstants.h>
@@ -14,28 +16,51 @@
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "CreatorWindow.h"
+#include "CreatorTool.h"
 #include "EditorModel.h"
+#include "EditorWidget.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "MainLoopEntityController.h"
-#include "MultiplierWindow.h"
+#include "MultiplierTool.h"
 #include "OverlayController.h"
-#include "PatternEditorWindow.h"
-#include "SelectionWindow.h"
+#include "SelectionWidget.h"
 #include "StyleService.h"
 #include "Viewport.h"
 
 #include <GLFW/glfw3.h>
 
+namespace
+{
+    auto constexpr MaxInspectedGenomes = 20;
+    auto constexpr SelectionRolloutInterval = std::chrono::milliseconds(500);
+}
+
 void EditorController::init()
 {
-    SelectionWindow::get().setup();
     EditorModel::get().setup();
     GenomeEditorWindow::get().setup();
-    PatternEditorWindow::get().setup();
-    CreatorWindow::get().setup();
-    MultiplierWindow::get().setup();
+    CreatorTool::get().setup();
+    MultiplierTool::get().setup();
+    SelectionWidget::get().setup();
+    EditorWidget::get().setup();
+
+    auto& settings = GlobalSettings::get();
+    auto& model = EditorModel::get();
+    model.setTool(settings.getValue("editors.tool", model.getTool()));
+    model.setApplyToNetworks(settings.getValue("editors.apply to networks", model.isApplyToNetworksPersistent()));
+    model.setGlueOnContact(settings.getValue("editors.glue on contact", model.isGlueOnContact()));
+    model.setCutOnlyInSelection(settings.getValue("editors.scissors.only in selection", model.isCutOnlyInSelection()));
+}
+
+void EditorController::shutdown()
+{
+    auto& settings = GlobalSettings::get();
+    auto const& model = EditorModel::get();
+    settings.setValue("editors.tool", model.getTool());
+    settings.setValue("editors.apply to networks", model.isApplyToNetworksPersistent());
+    settings.setValue("editors.glue on contact", model.isGlueOnContact());
+    settings.setValue("editors.scissors.only in selection", model.isCutOnlyInSelection());
 }
 
 bool EditorController::isOn() const
@@ -56,13 +81,22 @@ void EditorController::process()
 
     processInspectorWindows();
 
-    EditorModel::get().setForceNoRollout(ImGui::GetIO().KeyShift);
+    auto const& io = ImGui::GetIO();
+    EditorModel::get().setScopeInvertedTemporarily(io.KeyShift && !io.WantTextInput);
 
-    if (_SimulationFacade::get()->updateSelectionIfNecessary()) {
-        EditorModel::get().update();
+    auto const& simulationFacade = _SimulationFacade::get();
+    auto& model = EditorModel::get();
+    if (simulationFacade->updateSelectionIfNecessary()) {
+        model.update();
+    } else if (simulationFacade->isSimulationRunning() && !model.isSelectionEmpty()) {
+        auto now = std::chrono::steady_clock::now();
+        if (now - _lastSelectionRolloutTime >= SelectionRolloutInterval) {
+            simulationFacade->updateSelection();
+            _lastSelectionRolloutTime = now;
+        }
+        model.update();
     }
 }
-
 
 bool EditorController::areInspectionWindowsActive() const
 {
@@ -72,6 +106,21 @@ bool EditorController::areInspectionWindowsActive() const
 void EditorController::onCloseAllInspectorWindows()
 {
     _inspectorWindows.clear();
+}
+
+bool EditorController::isObjectInspectionPossible() const
+{
+    return !EditorModel::get().isSelectionEmpty();
+}
+
+bool EditorController::isGenomeInspectionPossible() const
+{
+    return EditorModel::get().getSelectionShallowData().numCreatures > 0;
+}
+
+bool EditorController::isCreatureInspectionPossible() const
+{
+    return EditorModel::get().getSelectionShallowData().numCreatures > 0;
 }
 
 void EditorController::onInspectSelectedObjects()
@@ -123,6 +172,14 @@ void EditorController::onInspectSelectedGenomes()
         } else {
             uniqueGenomes.emplace_back(genomeWithoutId, lineageId);
         }
+    }
+
+    if (uniqueGenomes.size() > MaxInspectedGenomes) {
+        std::string message = "Too many genomes are selected for inspection. A maximum of ";
+        message += std::to_string(MaxInspectedGenomes);
+        message += " genomes are allowed.";
+        showMessage("Inspection not possible", message);
+        return;
     }
 
     for (auto const& uniqueGenome : uniqueGenomes) {
@@ -271,35 +328,88 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
 
 bool EditorController::isCopyingPossible() const
 {
-    return PatternEditorWindow::get().isCopyingPossible();
+    return !EditorModel::get().isSelectionEmpty();
 }
 
 void EditorController::onCopy()
 {
-    PatternEditorWindow::get().onCopy();
+    _copiedSelection = _SimulationFacade::get()->getSelectedSimulationData(EditorModel::get().isApplyToNetworks());
     printOverlayMessage("Selection copied");
 }
 
 bool EditorController::isPastingPossible() const
 {
-    return PatternEditorWindow::get().isPastingPossible();
+    return _copiedSelection.has_value();
 }
 
 void EditorController::onPaste()
 {
-    PatternEditorWindow::get().onPaste();
+    auto content = *_copiedSelection;
+    DescEditService::get().setCenter(content, Viewport::get().getCenterInWorldPos());
+    _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
+    EditorModel::get().update();
     printOverlayMessage("Selection pasted");
 }
 
 bool EditorController::isDeletingPossible() const
 {
-    return PatternEditorWindow::get().isDeletingPossible();
+    return !EditorModel::get().isSelectionEmpty() && !EditorModel::get().areEntitiesInspected();
 }
 
 void EditorController::onDelete()
 {
-    PatternEditorWindow::get().onDelete();
+    _SimulationFacade::get()->removeSelectedObjects(EditorModel::get().isApplyToNetworks());
+    EditorModel::get().update();
     printOverlayMessage("Selection deleted");
+}
+
+bool EditorController::isDeselectingPossible() const
+{
+    return !EditorModel::get().isSelectionEmpty() && !CreatorTool::get().hasPoints();
+}
+
+void EditorController::onDeselect()
+{
+    _SimulationFacade::get()->removeSelection();
+    EditorModel::get().update();
+}
+
+void EditorController::onColorSelectedObjects(int color)
+{
+    _SimulationFacade::get()->colorSelectedObjects(toUInt8(color), EditorModel::get().isApplyToNetworks());
+    EditorModel::get().setDefaultColorCode(color);
+}
+
+void EditorController::onSetSticky(bool value)
+{
+    if (value) {
+        _SimulationFacade::get()->makeSticky(EditorModel::get().isApplyToNetworks());
+    } else {
+        _SimulationFacade::get()->removeStickiness(EditorModel::get().isApplyToNetworks());
+    }
+}
+
+void EditorController::onSetStatic(bool value)
+{
+    _SimulationFacade::get()->setStatic(value, EditorModel::get().isApplyToNetworks());
+}
+
+void EditorController::onUniformVelocities()
+{
+    _SimulationFacade::get()->uniformVelocitiesForSelectedObjects(EditorModel::get().isApplyToNetworks());
+    EditorModel::get().update();
+}
+
+void EditorController::onReleaseStresses()
+{
+    _SimulationFacade::get()->relaxSelectedObjects(EditorModel::get().isApplyToNetworks());
+}
+
+void EditorController::onGlueSelectedObjects()
+{
+    _SimulationFacade::get()->glueSelectedObjects(EditorModel::get().isApplyToNetworks());
+    EditorModel::get().update();
+    printOverlayMessage("Selection glued");
 }
 
 void EditorController::processInspectorWindows()
@@ -365,14 +475,59 @@ void EditorController::onMoveSelectedObjects(RealVector2D const& viewPos, RealVe
 {
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = Viewport::get().getZoomFactor();
-    auto delta = end - start;
+    onMoveSelectedObjectsBy(end - start);
+}
 
+void EditorController::onMoveSelectedObjectsBy(RealVector2D const& delta)
+{
+    auto const& model = EditorModel::get();
     ShallowUpdateSelectionData updateData;
-    updateData.considerClusters = EditorModel::get().isRolloutToClusters();
+    updateData.considerClusters = model.isApplyToNetworks();
+    updateData.glueOnContact = model.isGlueOnContact();
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onRotateSelectedObjects(float angleDelta)
+{
+    auto const& model = EditorModel::get();
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = model.isApplyToNetworks();
+    updateData.glueOnContact = model.isGlueOnContact();
+    updateData.angleDelta = angleDelta;
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onSetVelocityOfSelectedObjects(RealVector2D const& velocity)
+{
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = EditorModel::get().isApplyToNetworks();
+    updateData.velX = velocity.x;
+    updateData.velY = velocity.y;
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onSetAngularVelocityOfSelectedObjects(float angularVelocity)
+{
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = EditorModel::get().isApplyToNetworks();
+    updateData.angularVel = angularVelocity;
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
+    EditorModel::get().update();
+}
+
+void EditorController::onCutConnections(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+{
+    auto end = Viewport::get().mapViewToWorldPosition(viewPos);
+    if (Math::length(end - prevWorldPos) < NEAR_ZERO) {
+        return;
+    }
+    auto const& model = EditorModel::get();
+    _SimulationFacade::get()->cutConnections(prevWorldPos, end, model.isCutOnlyInSelection(), model.isApplyToNetworks());
     EditorModel::get().update();
 }
 

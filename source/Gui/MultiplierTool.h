@@ -4,11 +4,10 @@
 
 #include <Data/MultiplierService.h>
 
-#include <EngineInterface/Definitions.h>
 #include <EngineInterface/SelectionShallowData.h>
 
-#include "AlienWindow.h"
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
 using MultiplierMode = int;
 enum MultiplierMode_
@@ -17,32 +16,29 @@ enum MultiplierMode_
     MultiplierMode_Random
 };
 
-class MultiplierWindow : public AlienWindow
+class MultiplierTool : public MainLoopEntity
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MultiplierWindow);
+    MAKE_SINGLETON(MultiplierTool);
+
+public:
+    void processContent();
 
 private:
-    MultiplierWindow();
+    void init() override;
+    void process() override;
+    void shutdown() override;
 
-    void initIntern() override;
-    void shutdownIntern() override;
-    void processIntern() override;
-    bool isShown() override;
-
-    void processToolbar();
     void processGridPanel();
     void processRandomPanel();
-
+    void processGridPreview() const;
     void validateAndCorrect();
 
     void onBuild();
     void onUndo();
 
     MultiplierMode _mode = MultiplierMode_Grid;
-
     MultiplierService::GridParameters _gridParameters;
     MultiplierService::RandomParameters _randomParameters;
-
     ContentDesc _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;
 };
