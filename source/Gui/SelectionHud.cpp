@@ -31,9 +31,6 @@ namespace
     auto constexpr HandleHitMargin = 4.0f;
     auto constexpr HandleThickness = 1.5f;
     auto constexpr RotationHandleDistance = 30.0f;
-    auto constexpr VelocityArrowScale = 100.0f;
-    auto constexpr VelocityArrowThickness = 2.0f;
-    auto constexpr VelocityArrowHeadSize = 9.0f;
     auto constexpr SummarySpacing = 8.0f;
     auto constexpr SummaryPaddingX = 8.0f;
     auto constexpr SummaryPaddingY = 3.0f;
@@ -53,14 +50,12 @@ void SelectionHud::process()
     if (!SimulationInteractionController::get().isEditMode() || !SimulationView::get().isRenderSimulation() || model.getTool() != EditTool_Select
         || model.isSelectionEmpty()) {
         _lastRotationAngle.reset();
-        _lastVelocityHandlePos.reset();
         return;
     }
 
     auto bounds = calcViewBounds();
     processFrame(bounds);
     processRotationHandle(bounds);
-    processVelocityHandle(bounds);
     processSummary(bounds);
     processActionBar(bounds);
 }
@@ -170,41 +165,6 @@ void SelectionHud::processRotationHandle(ViewBounds const& bounds)
     _lastRotationAngle = angle;
 }
 
-void SelectionHud::processVelocityHandle(ViewBounds const& bounds)
-{
-    auto const& model = EditorModel::get();
-    auto velocity = model.getSelectionBounds(model.isApplyToNetworks()).velocity;
-    auto tipPos = bounds.center + velocity * scale(VelocityArrowScale);
-
-    auto drawList = ImGui::GetBackgroundDrawList();
-    auto arrow = tipPos - bounds.center;
-    auto arrowLength = toFloat(Math::length(arrow));
-    if (arrowLength > scale(HandleRadius)) {
-        auto direction = arrow / arrowLength;
-        auto normal = RealVector2D{-direction.y, direction.x};
-        auto headBase = tipPos - direction * scale(HandleRadius);
-        auto headSize = scale(VelocityArrowHeadSize);
-        drawList->AddLine({bounds.center.x, bounds.center.y}, {headBase.x, headBase.y}, Const::SelectionVelocityColor, scale(VelocityArrowThickness));
-        auto headLeft = headBase - direction * headSize + normal * headSize / 2;
-        auto headRight = headBase - direction * headSize - normal * headSize / 2;
-        drawList->AddTriangleFilled({headBase.x, headBase.y}, {headLeft.x, headLeft.y}, {headRight.x, headRight.y}, Const::SelectionVelocityColor);
-    }
-
-    auto state = processHandle("##selectionVelocityHandle", tipPos, "Drag to set the velocity of the selection");
-    drawHandle(tipPos, state, Const::SelectionVelocityColor);
-
-    if (!state.active) {
-        _lastVelocityHandlePos.reset();
-        return;
-    }
-    auto mousePos = ImGui::GetMousePos();
-    auto handlePos = RealVector2D{mousePos.x, mousePos.y};
-    if (_lastVelocityHandlePos.has_value() && *_lastVelocityHandlePos != handlePos) {
-        EditorController::get().onSetVelocityOfSelectedObjects((handlePos - bounds.center) / scale(VelocityArrowScale));
-    }
-    _lastVelocityHandlePos = handlePos;
-}
-
 void SelectionHud::processSummary(ViewBounds const& bounds) const
 {
     auto const& model = EditorModel::get();
@@ -252,27 +212,27 @@ void SelectionHud::processActionBar(ViewBounds const& bounds)
         return AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(icon).name(name).disabled(disabled).action(action));
     };
     std::vector<AlienGui::ToolbarItem> items = {
-        popupButton(ICON_FA_PALETTE, "Color", "##hudColor"),
-        popupButton(ICON_FA_TINT, "Stickiness", "##hudSticky"),
-        popupButton(ICON_FA_THUMBTACK, "Fixation", "##hudFixed"),
+        popupButton(ICON_COLOR, "Color", "##hudColor"),
+        popupButton(ICON_STICKY, "Stickiness", "##hudSticky"),
+        popupButton(ICON_FIXED, "Static", "##hudStatic"),
         AlienGui::ToolbarItem::createSeparator(),
-        actionButton(ICON_FA_WIND, "Make uniform velocities", [&controller] { controller.onUniformVelocities(); }),
+        actionButton(ICON_UNIFORM_VELOCITY, "Make uniform velocities", [&controller] { controller.onUniformVelocities(); }),
         actionButton(
-            ICON_FA_BALANCE_SCALE, "Release stresses", [&controller] { controller.onReleaseStresses(); }, model.isCellSelectionEmpty()),
+            ICON_RELEASE_STRESSES, "Release stresses", [&controller] { controller.onReleaseStresses(); }, model.isCellSelectionEmpty()),
         actionButton(
-            ICON_FA_MAGNET,
+            ICON_GLUE_SELECTION,
             "Glue selection: connects neighboring objects within the selection",
             [&controller] { controller.onGlueSelectedObjects(); },
             model.isCellSelectionEmpty()),
         AlienGui::ToolbarItem::createSeparator(),
-        popupButton(ICON_GRID, "Multiply", "##hudMultiply"),
+        popupButton(ICON_MULTIPLY, "Multiply", "##hudMultiply"),
         AlienGui::ToolbarItem::createSeparator(),
         actionButton(ICON_FA_COPY, "Copy (CTRL+C)", [&controller] { controller.onCopy(); }),
         actionButton(
             ICON_FA_TRASH, "Delete (DEL)", [&controller] { controller.onDelete(); }, !controller.isDeletingPossible()),
         AlienGui::ToolbarItem::createSeparator(),
-        popupButton(ICON_FA_MICROSCOPE, "Inspect", "##hudInspect"),
-        popupButton(ICON_FA_ELLIPSIS_H, "Transform and more", "##hudMore"),
+        popupButton(ICON_INSPECT, "Inspect", "##hudInspect"),
+        popupButton(ICON_MORE, "Transform: position, velocity and rotation", "##hudMore"),
     };
 
     auto viewport = ImGui::GetMainViewport();
@@ -297,7 +257,7 @@ void SelectionHud::processActionBar(ViewBounds const& bounds)
         AlienGui::Toolbar(AlienGui::ToolbarParameters().id("SelectionActions").bottomSeparator(false), items);
         processColorPopup();
         processStickyPopup();
-        processFixedPopup();
+        processStaticPopup();
         processMultiplyPopup();
         processInspectPopup();
         processMorePopup();
@@ -341,16 +301,16 @@ void SelectionHud::processStickyPopup()
     ImGui::EndPopup();
 }
 
-void SelectionHud::processFixedPopup()
+void SelectionHud::processStaticPopup()
 {
-    if (!ImGui::BeginPopup("##hudFixed")) {
+    if (!ImGui::BeginPopup("##hudStatic")) {
         return;
     }
-    if (ImGui::Selectable("Fix")) {
-        EditorController::get().onSetFixed(true);
+    if (ImGui::Selectable("Make static")) {
+        EditorController::get().onSetStatic(true);
     }
-    if (ImGui::Selectable("Unfix")) {
-        EditorController::get().onSetFixed(false);
+    if (ImGui::Selectable("Make movable")) {
+        EditorController::get().onSetStatic(false);
     }
     ImGui::EndPopup();
 }
@@ -429,13 +389,5 @@ void SelectionHud::processMorePopup()
     if (_angularVelocity != origAngularVelocity) {
         controller.onSetAngularVelocityOfSelectedObjects(_angularVelocity);
     }
-
-    AlienGui::Group(AlienGui::GroupParameters().text("Pattern"));
-    ImGui::BeginDisabled(!controller.isSavingPatternPossible());
-    if (AlienGui::Button(ICON_FA_SAVE "  Save pattern")) {
-        ImGui::CloseCurrentPopup();
-        controller.onSavePattern();
-    }
-    ImGui::EndDisabled();
     ImGui::EndPopup();
 }

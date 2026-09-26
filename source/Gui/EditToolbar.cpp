@@ -5,9 +5,13 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienGui.h"
 #include "CreatorTool.h"
+#include "EditorController.h"
 #include "ImageToPatternDialog.h"
+#include "McpWindow.h"
 #include "SimulationInteractionController.h"
 #include "SimulationView.h"
 #include "StyleService.h"
@@ -28,20 +32,23 @@ namespace
         EditTool tool;
         std::string icon;
         std::string name;
-        std::string shortcut;
-        ImGuiKey key;
     };
-    std::vector<ToolDefinition> const ToolDefinitions = {
-        {EditTool_Select, ICON_FA_MOUSE_POINTER, "Select and move", "V", ImGuiKey_V},
-        {EditTool_Scissors, ICON_FA_CUT, "Scissors", "X", ImGuiKey_X},
-        {EditTool_Object, ICON_DOT, "Single object", "O", ImGuiKey_O},
-        {EditTool_Rectangle, ICON_RECTANGLE, "Rectangular object network", "R", ImGuiKey_R},
-        {EditTool_Hexagon, ICON_HEXAGON, "Hexagonal object network", "H", ImGuiKey_H},
-        {EditTool_Disc, ICON_DISC, "Disc-shaped object network", "D", ImGuiKey_D},
-        {EditTool_Line, ICON_FA_SLASH, "Object network along a line", "L", ImGuiKey_L},
-        {EditTool_Curve, ICON_FA_BEZIER_CURVE, "Object network along a Bezier curve", "C", ImGuiKey_C},
-        {EditTool_Polygon, ICON_FA_DRAW_POLYGON, "Polygon-shaped object network", "P", ImGuiKey_P},
-        {EditTool_Freehand, ICON_FA_PAINT_BRUSH, "Draw freehand", "B", ImGuiKey_B},
+    std::vector<std::vector<ToolDefinition>> const ToolGroups = {
+        {
+            {EditTool_Select, ICON_SELECTION, "Select and move"},
+            {EditTool_Scissors, ICON_SCISSORS, "Scissors: cut connections"},
+            {EditTool_Force, ICON_FORCE, "Apply forces"},
+            {EditTool_Freehand, ICON_FREEHAND, "Draw freehand"},
+        },
+        {
+            {EditTool_Object, ICON_SINGLE_OBJECT, "Single object"},
+            {EditTool_Rectangle, ICON_RECTANGLE_NETWORK, "Rectangular object network"},
+            {EditTool_Hexagon, ICON_HEXAGON_NETWORK, "Hexagonal object network"},
+            {EditTool_Disc, ICON_DISC_NETWORK, "Disc-shaped object network"},
+            {EditTool_Line, ICON_LINE_NETWORK, "Object network along a line"},
+            {EditTool_Curve, ICON_CURVE_NETWORK, "Object network along a Bezier curve"},
+            {EditTool_Polygon, ICON_POLYGON_NETWORK, "Polygon-shaped object network"},
+        },
     };
 }
 
@@ -58,28 +65,46 @@ void EditToolbar::process()
 void EditToolbar::processDock()
 {
     auto& model = EditorModel::get();
+    auto simulationRunning = _SimulationFacade::get()->isSimulationRunning();
+    if (model.getTool() == EditTool_Force && !simulationRunning) {
+        selectTool(EditTool_Select);
+    }
 
     std::vector<AlienGui::ToolbarItem> items;
-    for (auto const& definition : ToolDefinitions) {
-        items.emplace_back(AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
-                                                                   .icon(definition.icon)
-                                                                   .name(definition.name)
-                                                                   .tooltip(definition.name + " (" + definition.shortcut + ")")
-                                                                   .selected(model.getTool() == definition.tool)
-                                                                   .action([this, tool = definition.tool] { selectTool(tool); })));
-        if (definition.tool == EditTool_Scissors) {
-            items.emplace_back(AlienGui::ToolbarItem::createSeparator());
+    for (auto const& group : ToolGroups) {
+        for (auto const& definition : group) {
+            auto parameters = AlienGui::ToolbarItemParameters()
+                                  .icon(definition.icon)
+                                  .name(definition.name)
+                                  .selected(model.getTool() == definition.tool)
+                                  .action([this, tool = definition.tool] { selectTool(tool); });
+            if (definition.tool == EditTool_Force) {
+                parameters.disabled(!simulationRunning).tooltip("Apply forces (available while the simulation is running)");
+            }
+            items.emplace_back(AlienGui::ToolbarItem::createButton(parameters));
         }
+        items.emplace_back(AlienGui::ToolbarItem::createSeparator());
     }
-    items.emplace_back(AlienGui::ToolbarItem::createSeparator());
+    items.emplace_back(AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                               .icon(ICON_AGENT)
+                                                               .name("MCP server")
+                                                               .tooltip("Connect your AI agent to ALIEN")
+                                                               .selected(McpWindow::get().isOn())
+                                                               .action([] { McpWindow::get().setOn(!McpWindow::get().isOn()); })));
     items.emplace_back(AlienGui::ToolbarItem::createButton(
-        AlienGui::ToolbarItemParameters().icon(ICON_FA_IMAGE).name("Pattern from image").tooltip("Create a pattern from an image (I)").action([] {
+        AlienGui::ToolbarItemParameters().icon(ICON_IMAGE_PATTERN).name("Pattern from image").tooltip("Create a pattern from an image").action([] {
             ImageToPatternDialog::get().show();
         })));
+    items.emplace_back(AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                               .icon(ICON_FA_PASTE)
+                                                               .name("Paste")
+                                                               .tooltip("Paste the copied selection (CTRL+V)")
+                                                               .disabled(!EditorController::get().isPastingPossible())
+                                                               .action([] { EditorController::get().onPaste(); })));
     items.emplace_back(AlienGui::ToolbarItem::createSeparator());
     items.emplace_back(AlienGui::ToolbarItem::createButton(
         AlienGui::ToolbarItemParameters()
-            .icon(ICON_FA_DOT_CIRCLE)
+            .icon(ICON_SCOPE_OBJECTS)
             .name("Apply to selected objects")
             .tooltip("Apply to selected objects\n\nEdits only affect the selected objects. When they are moved, their connections to unselected "
                      "objects can only tear.\nHold SHIFT to switch to entire networks temporarily.")
@@ -87,16 +112,15 @@ void EditToolbar::processDock()
             .action([&model] { model.setApplyToNetworks(false); })));
     items.emplace_back(AlienGui::ToolbarItem::createButton(
         AlienGui::ToolbarItemParameters()
-            .icon(ICON_FA_PROJECT_DIAGRAM)
+            .icon(ICON_SCOPE_NETWORKS)
             .name("Apply to entire networks")
             .tooltip("Apply to entire networks\n\nEdits affect the whole object networks of the selected objects.\nHold SHIFT to switch to selected "
                      "objects temporarily.")
             .selected(model.isApplyToNetworks())
             .action([&model] { model.setApplyToNetworks(true); })));
-    items.emplace_back(AlienGui::ToolbarItem::createSeparator());
     items.emplace_back(
         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
-                                                .icon(ICON_FA_MAGNET)
+                                                .icon(ICON_GLUE)
                                                 .name("Glue on contact")
                                                 .tooltip("Glue on contact\n\nIf enabled, moved or rotated objects connect to the objects they touch.")
                                                 .selected(model.isGlueOnContact())
@@ -121,12 +145,14 @@ namespace
 {
     ToolDefinition const& getToolDefinition(EditTool tool)
     {
-        for (auto const& definition : ToolDefinitions) {
-            if (definition.tool == tool) {
-                return definition;
+        for (auto const& group : ToolGroups) {
+            for (auto const& definition : group) {
+                if (definition.tool == tool) {
+                    return definition;
+                }
             }
         }
-        return ToolDefinitions.front();
+        return ToolGroups.front().front();
     }
 }
 
@@ -156,6 +182,8 @@ void EditToolbar::processToolOptions()
                 &cutOnlyInSelection);
             EditorModel::get().setCutOnlyInSelection(cutOnlyInSelection);
             hint = "Hold the left mouse button and drag across connections to cut them.";
+        } else if (tool == EditTool_Force) {
+            hint = "Hold the left mouse button and drag to push the objects under the cursor.";
         } else {
             CreatorTool::get().processOptions();
             if (tool == EditTool_Line || tool == EditTool_Curve || tool == EditTool_Polygon) {
@@ -184,15 +212,6 @@ void EditToolbar::processShortcuts()
     }
     if (ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
         return;
-    }
-
-    for (auto const& definition : ToolDefinitions) {
-        if (ImGui::IsKeyPressed(definition.key, false)) {
-            selectTool(definition.tool);
-        }
-    }
-    if (ImGui::IsKeyPressed(ImGuiKey_I, false)) {
-        ImageToPatternDialog::get().show();
     }
 
     auto& creatorTool = CreatorTool::get();

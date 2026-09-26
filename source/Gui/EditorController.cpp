@@ -1,12 +1,10 @@
 #include "EditorController.h"
 
-#include <filesystem>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
 #include <imgui.h>
-#include <ImFileDialog.h>
 
 #include <Base/GlobalSettings.h>
 #include <Base/Math.h>
@@ -17,12 +15,9 @@
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <PersisterInterface/SerializerService.h>
-
 #include "CreatorTool.h"
 #include "EditToolbar.h"
 #include "EditorModel.h"
-#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "MainLoopEntityController.h"
@@ -33,6 +28,11 @@
 #include "Viewport.h"
 
 #include <GLFW/glfw3.h>
+
+namespace
+{
+    auto constexpr MaxInspectedGenomes = 20;
+}
 
 void EditorController::init()
 {
@@ -49,12 +49,6 @@ void EditorController::init()
     model.setApplyToNetworks(settings.getValue("editors.apply to networks", model.isApplyToNetworksPersistent()));
     model.setGlueOnContact(settings.getValue("editors.glue on contact", model.isGlueOnContact()));
     model.setCutOnlyInSelection(settings.getValue("editors.scissors.only in selection", model.isCutOnlyInSelection()));
-
-    auto path = std::filesystem::current_path();
-    if (path.has_parent_path()) {
-        path = path.parent_path();
-    }
-    _patternStartingPath = settings.getValue("editors.pattern editor.starting path", path.string());
 }
 
 void EditorController::shutdown()
@@ -65,7 +59,6 @@ void EditorController::shutdown()
     settings.setValue("editors.apply to networks", model.isApplyToNetworksPersistent());
     settings.setValue("editors.glue on contact", model.isGlueOnContact());
     settings.setValue("editors.scissors.only in selection", model.isCutOnlyInSelection());
-    settings.setValue("editors.pattern editor.starting path", _patternStartingPath);
 }
 
 bool EditorController::isOn() const
@@ -168,6 +161,14 @@ void EditorController::onInspectSelectedGenomes()
         } else {
             uniqueGenomes.emplace_back(genomeWithoutId, lineageId);
         }
+    }
+
+    if (uniqueGenomes.size() > MaxInspectedGenomes) {
+        std::string message = "Too many genomes are selected for inspection. A maximum of ";
+        message += std::to_string(MaxInspectedGenomes);
+        message += " genomes are allowed.";
+        showMessage("Inspection not possible", message);
+        return;
     }
 
     for (auto const& uniqueGenome : uniqueGenomes) {
@@ -351,40 +352,15 @@ void EditorController::onDelete()
     printOverlayMessage("Selection deleted");
 }
 
-void EditorController::onOpenPattern()
+bool EditorController::isDeselectingPossible() const
 {
-    GenericFileDialog::get().showOpenFileDialog("Open pattern", "Pattern file (*.sim){.sim},.*", _patternStartingPath, [&](std::filesystem::path const& path) {
-        auto firstFilename = ifd::FileDialog::Instance().GetResult();
-        auto firstFilenameCopy = firstFilename;
-        _patternStartingPath = firstFilenameCopy.remove_filename().string();
-        ContentDesc content;
-        if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
-            DescEditService::get().setCenter(content, Viewport::get().getCenterInWorldPos());
-            _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
-            EditorModel::get().update();
-        } else {
-            GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
-        }
-    });
+    return !EditorModel::get().isSelectionEmpty() && !CreatorTool::get().hasPoints();
 }
 
-bool EditorController::isSavingPatternPossible() const
+void EditorController::onDeselect()
 {
-    return !EditorModel::get().isSelectionEmpty();
-}
-
-void EditorController::onSavePattern()
-{
-    GenericFileDialog::get().showSaveFileDialog("Save pattern", "Pattern file (*.sim){.sim},.*", _patternStartingPath, [&](std::filesystem::path const& path) {
-        auto firstFilename = ifd::FileDialog::Instance().GetResult();
-        auto firstFilenameCopy = firstFilename;
-        _patternStartingPath = firstFilenameCopy.remove_filename().string();
-
-        auto content = _SimulationFacade::get()->getSelectedSimulationData(EditorModel::get().isApplyToNetworks());
-        if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
-            GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
-        }
-    });
+    _SimulationFacade::get()->removeSelection();
+    EditorModel::get().update();
 }
 
 void EditorController::onColorSelectedObjects(int color)
@@ -402,7 +378,7 @@ void EditorController::onSetSticky(bool value)
     }
 }
 
-void EditorController::onSetFixed(bool value)
+void EditorController::onSetStatic(bool value)
 {
     _SimulationFacade::get()->setStatic(value, EditorModel::get().isApplyToNetworks());
 }
