@@ -156,6 +156,9 @@ void EditorController::onSetSticky(bool value)
 void EditorController::onSetStatic(bool value)
 {
     _SimulationFacade::get()->setStatic(value, EditorModel::get().isApplyToNetworks());
+    if (value) {
+        onUniformVelocities();
+    }
 }
 
 void EditorController::onUniformVelocities()
