@@ -55,6 +55,14 @@
 #include "StatisticsService.cuh"
 #include "TestKernelsService.cuh"
 
+// Base/StringHelper.h is not included here because it drags in Base/Definitions.h, whose toInt/toFloat templates
+// collide with EngineKernels/Base.cuh in this CUDA translation unit; only the one function used below is declared.
+class StringHelper
+{
+public:
+    static std::string format(uint64_t n, char separator = ',');
+};
+
 namespace
 {
     auto constexpr EvolutionStatisticsUpdateInterval = 10;
@@ -892,9 +900,9 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
 
     CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
 
-    log(Priority::Unimportant, "cell array capacity: " + std::to_string(cellArraySize));
-    log(Priority::Unimportant, "particle array capacity: " + std::to_string(particleArraySize));
-    log(Priority::Unimportant, "heap capacity: " + std::to_string(auxiliaryDataSize));
+    log(Priority::Unimportant, "cell array capacity: " + StringHelper::format(cellArraySize));
+    log(Priority::Unimportant, "particle array capacity: " + StringHelper::format(particleArraySize));
+    log(Priority::Unimportant, "heap capacity: " + StringHelper::format(auxiliaryDataSize));
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
