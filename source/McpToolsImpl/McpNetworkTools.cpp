@@ -135,8 +135,11 @@ McpToolResult McpNetworkTools::createResourceList(boost::json::object const& arg
         if (toInt(resources.size()) >= maxResults) {
             continue;
         }
-        auto description =
-            resource->description.size() > MaxDescriptionLength ? resource->description.substr(0, MaxDescriptionLength) + " ..." : resource->description;
+        auto description = resource->description;
+        if (description.size() > MaxDescriptionLength) {
+            description.resize(MaxDescriptionLength);
+            description.append(" ...");
+        }
         boost::json::object entry{
             {"id", resource->id},
             {"type", getResourceTypeName(resource->resourceType)},
