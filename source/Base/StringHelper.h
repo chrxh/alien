@@ -1,9 +1,9 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <string>
 
-#include <Base/Definitions.h>
 #include <Base/MathTypes.h>
 
 class StringHelper
