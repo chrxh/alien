@@ -57,10 +57,10 @@ PUBLIC
     EditorController.h
     EditorModel.cpp
     EditorModel.h
+    EditorWidget.cpp
+    EditorWidget.h
     EditSimulationDialog.cpp
     EditSimulationDialog.h
-    EditToolbar.cpp
-    EditToolbar.h
     EntityAttributeHelp.cpp
     EntityAttributeHelp.h
     EvolutionDashboardWindow.cpp
@@ -182,8 +182,8 @@ PUBLIC
     ResourcePreviewWidget.h
     SavePictureDialog.cpp
     SavePictureDialog.h
-    SelectionHud.cpp
-    SelectionHud.h
+    SelectionWidget.cpp
+    SelectionWidget.h
     Shader.cpp
     Shader.h
     SignalsBufferDialog.cpp
