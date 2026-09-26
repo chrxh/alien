@@ -20,7 +20,7 @@ void EditKernelsService::init()
     memoryManager.acquireMemory(1, _cudaCenter);
     memoryManager.acquireMemory(1, _cudaVelocity);
     memoryManager.acquireMemory(1, _cudaNumEntities);
-    memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
+    memoryManager.acquireMemory(1, _cudaAngleSums);
     memoryManager.acquireMemory(1, _genomePtr);
 }
 
@@ -35,7 +35,7 @@ void EditKernelsService::shutdown()
     memoryManager.freeMemory(_cudaCenter);
     memoryManager.freeMemory(_cudaVelocity);
     memoryManager.freeMemory(_cudaNumEntities);
-    memoryManager.freeMemory(_cudaMinCellPosYAndIndex);
+    memoryManager.freeMemory(_cudaAngleSums);
     memoryManager.freeMemory(_genomePtr);
 }
 
@@ -52,32 +52,27 @@ void EditKernelsService::shallowUpdateSelectedObjects(
         launchKernelOnDefaultStream(KERNEL(cudaIncrementPosAndVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data);
     }
     if (updateData.angleDelta != 0 || updateData.angularVel != 0) {
+        auto refPos = flattenSelection(launchSettings, data);
+
         setValueToDevice(_cudaCenter, float2{0, 0});
         setValueToDevice(_cudaNumEntities, 0);
-
-        setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffff00000000ull);
-        launchKernelOnDefaultStream(KERNEL(cudaCalcObjectWithMinimalPosY), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaMinCellPosYAndIndex);
-        cudaDeviceSynchronize();
-        auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
-
         launchKernelOnDefaultStream(
-            KERNEL(cudaCalcAccumulatedCenterAndVel),
+            KERNEL(cudaCalcFlattenedSelectionCenter),
             LaunchConfig{launchSettings.numBlocks, 8},
             data,
-            refCellIndex,
+            refPos,
             _cudaCenter,
-            nullptr,
             _cudaNumEntities,
             updateData.considerClusters);
         cudaDeviceSynchronize();
 
+        auto center = copyToHost(_cudaCenter);
         auto numEntities = copyToHost(_cudaNumEntities);
         if (numEntities != 0) {
-            auto center = copyToHost(_cudaCenter);
-            setValueToDevice(_cudaCenter, float2{center.x / numEntities, center.y / numEntities});
+            center = center / numEntities;
         }
         launchKernelOnDefaultStream(
-            KERNEL(cudaUpdateAngleAndAngularVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data, copyToHost(_cudaCenter));
+            KERNEL(cudaUpdateAngleAndAngularVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data, refPos, center);
     }
 
     if (tearingRequired) {
@@ -179,7 +174,7 @@ void EditKernelsService::uniformVelocities(KernelLaunchSettings const& launchSet
     setValueToDevice(_cudaVelocity, float2{0, 0});
     setValueToDevice(_cudaNumEntities, 0);
     launchKernelOnDefaultStream(
-        KERNEL(cudaCalcAccumulatedCenterAndVel), LaunchConfig{launchSettings.numBlocks, 8}, data, -1, nullptr, _cudaVelocity, _cudaNumEntities, includeClusters);
+        KERNEL(cudaCalcAccumulatedVel), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaVelocity, _cudaNumEntities, includeClusters);
     cudaDeviceSynchronize();
 
     auto numEntities = copyToHost(_cudaNumEntities);
@@ -267,11 +262,45 @@ void EditKernelsService::applyCataclysm(KernelLaunchSettings const& launchSettin
 void EditKernelsService::getSelectionShallowData(KernelLaunchSettings const& launchSettings, SimulationData const& data, SelectionResult const& selectionResult)
 {
     launchKernelOnDefaultStream(KERNEL(cudaResetSelectionResult), LaunchConfig{1, 1}, selectionResult);
-    setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
-    launchKernelOnDefaultStream(KERNEL(cudaCalcObjectWithMinimalPosY), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaMinCellPosYAndIndex);
-    cudaDeviceSynchronize();
-    auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
+    auto refPos = flattenSelection(launchSettings, data);
     launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step1), LaunchConfig{launchSettings.numBlocks, 8}, data);
-    launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, refCellIndex, selectionResult);
+    launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, refPos, selectionResult);
     launchKernelOnDefaultStream(KERNEL(cudaFinalizeSelectionResult), LaunchConfig{1, 1}, selectionResult, data.objectMap);
+}
+
+namespace
+{
+    float calcCircularMean(float sumCos, float sumSin, float size)
+    {
+        auto result = std::atan2(sumSin, sumCos) / (2.0f * Const::PI) * size;
+        return result < 0 ? result + size : result;
+    }
+}
+
+float2 EditKernelsService::flattenSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data)
+{
+    setValueToDevice(_cudaAngleSums, float4{0, 0, 0, 0});
+    launchKernelOnDefaultStream(KERNEL(cudaAccumulateSelectionAngles), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaAngleSums);
+    cudaDeviceSynchronize();
+    auto angleSums = copyToHost(_cudaAngleSums);
+    auto refPos = float2{
+        calcCircularMean(angleSums.x, angleSums.y, toFloat(data.worldSize.x)),
+        calcCircularMean(angleSums.z, angleSums.w, toFloat(data.worldSize.y)),
+    };
+
+    launchKernelOnDefaultStream(KERNEL(cudaInitSelectionAnchorKeys), LaunchConfig{launchSettings.numBlocks, 8}, data, refPos);
+    do {
+        setValueToDevice(_cudaUpdateResult, 0);
+        launchKernelOnDefaultStream(KERNEL(cudaPropagateSelectionAnchorKeys), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUpdateResult));
+
+    launchKernelOnDefaultStream(KERNEL(cudaPlaceSelectionAnchors), LaunchConfig{launchSettings.numBlocks, 8}, data, refPos);
+    do {
+        setValueToDevice(_cudaUpdateResult, 0);
+        launchKernelOnDefaultStream(KERNEL(cudaPropagateFlattenedSelectionPositions), LaunchConfig{launchSettings.numBlocks, 8}, data, _cudaUpdateResult);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUpdateResult));
+
+    return refPos;
 }

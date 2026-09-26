@@ -49,6 +49,8 @@ private:
     void disconnectOverstretchedConnections(KernelLaunchSettings const& launchSettings, SimulationData const& data);
     void connectSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data, bool includeClusters, bool onlyWithinSelection);
 
+    float2 flattenSelection(KernelLaunchSettings const& launchSettings, SimulationData const& data);
+
     // Gpu memory
     int* _cudaRolloutResult = nullptr;
     int* _cudaSwitchResult = nullptr;
@@ -58,6 +60,6 @@ private:
     float2* _cudaCenter = nullptr;
     float2* _cudaVelocity = nullptr;
     int* _cudaNumEntities = nullptr;
-    unsigned long long int* _cudaMinCellPosYAndIndex = nullptr;
+    float4* _cudaAngleSums = nullptr;
     Genome** _genomePtr = nullptr;
 };
