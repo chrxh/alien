@@ -18,9 +18,7 @@
 
 namespace
 {
-    auto constexpr BadgePadding = 10.0f;
-    auto constexpr BadgeDotRadius = 4.0f;
-    auto constexpr BadgeDotSpacing = 8.0f;
+    auto constexpr StatusChipPadding = 34.0f;
     auto constexpr StepNumberRadius = 9.0f;
     auto constexpr StepNumberSpacing = 8.0f;
     auto constexpr TimeColumnSample = "0000-00-00 00:00:00";
@@ -37,11 +35,27 @@ void McpWindow::processIntern()
     processToolbar();
 
     if (ImGui::BeginChild("##content", {0, 0})) {
-        processStatusBadge();
         processConnectionGuide();
         processCommandLog();
     }
     ImGui::EndChild();
+}
+
+namespace
+{
+    char const* getStatusText(bool running)
+    {
+        return running ? "Running" : "Stopped";
+    }
+
+    void processStatusChip(bool running)
+    {
+        AlienGui::Chip(AlienGui::ChipParameters()
+                           .text(getStatusText(running))
+                           .textColor(running ? Const::McpSuccessColor : Const::TextDimColor)
+                           .backgroundColor(running ? Const::McpRunningBadgeColor : Const::RaisedColor)
+                           .dotColor(running ? Const::McpSuccessColor : Const::TextFaintColor));
+    }
 }
 
 void McpWindow::processToolbar()
@@ -49,7 +63,10 @@ void McpWindow::processToolbar()
     auto& controller = McpController::get();
     auto running = controller.isServerRunning();
     AlienGui::Toolbar(
-        AlienGui::ToolbarParameters().id("McpServer"),
+        AlienGui::ToolbarParameters()
+            .id("McpServer")
+            .trailing([running] { processStatusChip(running); })
+            .trailingWidth(scaleInverse(ImGui::CalcTextSize(getStatusText(running)).x) + StatusChipPadding),
         {AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_PLAY).name("Start server").disabled(running).action([&] { controller.setServerRunning(true); })),
          AlienGui::ToolbarItem::createButton(
@@ -62,26 +79,6 @@ void McpWindow::processToolbar()
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_COG).name("Settings").action([&] { McpSettingsDialog::get().open(); }))});
-}
-
-void McpWindow::processStatusBadge()
-{
-    auto running = McpController::get().isServerRunning();
-    auto text = running ? "Running" : "Stopped";
-    auto textSize = ImGui::CalcTextSize(text);
-    auto paddingX = scale(BadgePadding);
-    auto paddingY = ImGui::GetStyle().FramePadding.y;
-    auto dotRadius = scale(BadgeDotRadius);
-    auto width = paddingX * 2 + dotRadius * 2 + scale(BadgeDotSpacing) + textSize.x;
-    auto height = textSize.y + paddingY * 2;
-
-    auto pos = ImGui::GetCursorScreenPos();
-    auto drawList = ImGui::GetWindowDrawList();
-    drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, running ? Const::McpRunningBadgeColor : Const::RaisedColor, height / 2);
-    drawList->AddCircleFilled({pos.x + paddingX + dotRadius, pos.y + height / 2}, dotRadius, running ? Const::McpSuccessColor : Const::TextFaintColor);
-    drawList->AddText(
-        {pos.x + paddingX + dotRadius * 2 + scale(BadgeDotSpacing), pos.y + paddingY}, running ? Const::McpSuccessColor : Const::TextDimColor, text);
-    ImGui::Dummy({width, height});
 }
 
 void McpWindow::processConnectionGuide()
@@ -121,7 +118,7 @@ void McpWindow::processConnectionGuide()
     ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
     ImGui::PushStyleColor(ImGuiCol_FrameBg, Const::BackgroundColor.Value);
     ImGui::PushStyleColor(ImGuiCol_Border, Const::LineColor.Value);
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::SoftHighlightTextColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::AccentColor.Value);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     auto urlWidth = ImGui::CalcTextSize(url.c_str()).x + style.FramePadding.x * 2;
     ImGui::SetNextItemWidth(std::min(urlWidth, ImGui::GetContentRegionAvail().x - copyButtonWidth - style.ItemSpacing.x));
@@ -186,7 +183,7 @@ void McpWindow::processCommandLog()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
-                ImGui::PushStyleColor(ImGuiCol_Text, Const::SoftHighlightTextColor.Value);
+                ImGui::PushStyleColor(ImGuiCol_Text, Const::AccentColor.Value);
                 AlienGui::Text(AlienGui::TextParameters().text(entry.command).truncate(true));
                 ImGui::PopStyleColor();
                 ImGui::PopFont();

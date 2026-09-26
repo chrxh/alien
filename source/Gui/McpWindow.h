@@ -17,7 +17,6 @@ private:
     void processIntern() override;
 
     void processToolbar();
-    void processStatusBadge();
     void processConnectionGuide();
     void processStepNumber(int number);
     void processCommandLog();

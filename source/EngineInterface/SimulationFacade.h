@@ -67,6 +67,7 @@ public:
     virtual void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) = 0;
     virtual void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) = 0;
     virtual void removeSelection() = 0;
+    virtual void updateSelection() = 0;
     virtual bool updateSelectionIfNecessary() = 0;
     virtual void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) = 0;
 

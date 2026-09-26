@@ -318,6 +318,11 @@ void _SimulationFacadeImpl::removeSelection()
     _worker.removeSelection();
 }
 
+void _SimulationFacadeImpl::updateSelection()
+{
+    _worker.updateSelection();
+}
+
 bool _SimulationFacadeImpl::updateSelectionIfNecessary()
 {
     auto result = _selectionNeedsUpdate;

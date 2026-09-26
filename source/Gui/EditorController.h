@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
@@ -68,4 +70,5 @@ private:
 
     std::vector<InspectionWindow> _inspectorWindows;
     std::optional<ContentDesc> _copiedSelection;
+    std::chrono::steady_clock::time_point _lastSelectionRolloutTime;
 };

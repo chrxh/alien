@@ -309,7 +309,7 @@ void SelectionHud::processStaticPopup()
     if (ImGui::Selectable("Make static")) {
         EditorController::get().onSetStatic(true);
     }
-    if (ImGui::Selectable("Make movable")) {
+    if (ImGui::Selectable("Make non-static")) {
         EditorController::get().onSetStatic(false);
     }
     ImGui::EndPopup();
