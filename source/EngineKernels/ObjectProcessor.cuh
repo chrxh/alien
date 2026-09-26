@@ -27,7 +27,7 @@ public:
     __inline__ __device__ static void applyForces(SimulationData& data);  // Prerequisite: data from calcCollisions_reconnectCells_correctOverlap
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool calcAngularForces);
-    __inline__ __device__ static void checkConnections(SimulationData& data);
+    __inline__ __device__ static void tearOverstretchedConnections(SimulationData& data);
     __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
@@ -547,30 +547,26 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
     }
 }
 
-__inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& data)
+__inline__ __device__ void ObjectProcessor::tearOverstretchedConnections(SimulationData& data)
 {
     auto& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->isStatic()) {
-            continue;
-        }
 
-        bool scheduleForDestruction = false;
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
-
+            if (connectedObject < object) {
+                continue;
+            }
             auto displacement = connectedObject->pos - object->pos;
             data.objectMap.correctDirection(displacement);
-            auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
-                scheduleForDestruction = true;
+            auto maxDistance = min(
+                cudaSimulationParameters.maxBindingDistance.value[object->color], cudaSimulationParameters.maxBindingDistance.value[connectedObject->color]);
+            if (Math::length(displacement) > maxDistance) {
+                ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
             }
-        }
-        if (scheduleForDestruction) {
-            ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
         }
     }
 }

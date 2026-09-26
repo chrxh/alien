@@ -80,7 +80,7 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
 {
     ObjectProcessor::verletPositionUpdate(data);
-    ObjectProcessor::checkConnections(data);
+    ObjectProcessor::tearOverstretchedConnections(data);
 
     EnergyProcessor::splitting(data);
 }
