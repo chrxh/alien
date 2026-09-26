@@ -77,6 +77,21 @@ boost::json::object McpSchema::array(std::string const& description, boost::json
     return result;
 }
 
+boost::json::object McpSchema::id(std::string const& description)
+{
+    return {{"type", "string"}, {"description", description}, {"pattern", "^[0-9]+$"}};
+}
+
+boost::json::object McpSchema::ids(std::string const& description, size_t minItems)
+{
+    return array(description, boost::json::object{{"type", "string"}, {"pattern", "^[0-9]+$"}}, minItems);
+}
+
+boost::json::object McpSchema::jsonObject(std::string const& description)
+{
+    return {{"type", "object"}, {"description", description}};
+}
+
 boost::json::object McpSchema::any(std::string const& description)
 {
     return {{"description", description}};

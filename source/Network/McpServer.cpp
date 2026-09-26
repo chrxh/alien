@@ -2,11 +2,15 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <stdexcept>
 #include <string_view>
+#include <future>
 
 #include <boost/json.hpp>
+
+#include <Base/StringHelper.h>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <cpp-httplib/httplib.h>
@@ -72,6 +76,25 @@ namespace
         return {{"tools", std::move(toolList)}};
     }
 
+    McpToolResult invokeTool(McpTool const& tool, boost::json::object const& arguments)
+    {
+        if (tool.handler) {
+            return tool.handler(arguments);
+        }
+        if (!tool.deferredHandler) {
+            throw std::runtime_error("The tool has no handler.");
+        }
+        auto promise = std::make_shared<std::promise<McpToolResult>>();
+        auto completed = std::make_shared<std::atomic_flag>();
+        auto result = promise->get_future();
+        tool.deferredHandler(arguments, [promise, completed](McpToolResult const& toolResult) {
+            if (!completed->test_and_set()) {
+                promise->set_value(toolResult);
+            }
+        });
+        return result.get();
+    }
+
     boost::json::object callTool(boost::json::object const& params, std::vector<McpTool> const& tools)
     {
         auto name = params.if_contains("name");
@@ -89,13 +112,18 @@ namespace
 
         auto result = [&] {
             try {
-                return tool->handler(arguments ? arguments->as_object() : boost::json::object());
+                return invokeTool(*tool, arguments ? arguments->as_object() : boost::json::object());
             } catch (std::exception const& exception) {
                 return McpToolResult{.text = exception.what(), .isError = true};
             }
         }();
+
+        boost::json::array content{boost::json::object{{"type", "text"}, {"text", result.text}}};
+        for (auto const& image : result.images) {
+            content.emplace_back(boost::json::object{{"type", "image"}, {"data", StringHelper::encodeBase64(image.data)}, {"mimeType", image.mimeType}});
+        }
         return {
-            {"content", boost::json::array{boost::json::object{{"type", "text"}, {"text", result.text}}}},
+            {"content", std::move(content)},
             {"isError", result.isError},
         };
     }

@@ -17,6 +17,7 @@
 #include <Base/Resources.h>
 
 #include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/TemporalControlService.h>
 
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SerializerService.h>
@@ -263,7 +264,7 @@ void MainLoopController::finishSimulationLoading(SimulationDesc const& simulatio
 {
     Viewport::get().setCenterInWorldPos(simulationDesc._center);
     Viewport::get().setZoomFactor(simulationDesc._zoom);
-    TemporalControlWindow::get().onSnapshot();
+    TemporalControlService::get().createFlashback();
 
     _simulationLoadedTimepoint = std::chrono::steady_clock::now();
     _programState = ProgramState::FadeOutLoadingScreen;

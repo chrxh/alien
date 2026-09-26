@@ -1,16 +1,30 @@
 add_library(McpToolsImpl
     McpCreatorTools.cpp
     McpCreatorTools.h
+    McpEditTools.cpp
+    McpEditTools.h
+    McpGenomeTools.cpp
+    McpGenomeTools.h
+    McpInspectionTools.cpp
+    McpInspectionTools.h
     McpMultiplierTools.cpp
     McpMultiplierTools.h
+    McpNetworkTools.cpp
+    McpNetworkTools.h
     McpParameterTools.cpp
     McpParameterTools.h
+    McpPersisterTask.cpp
+    McpPersisterTask.h
     McpSelectionTools.cpp
     McpSelectionTools.h
     McpSimulationTools.cpp
     McpSimulationTools.h
+    McpTemporalTools.cpp
+    McpTemporalTools.h
     McpToolsFacadeImpl.cpp
-    McpToolsFacadeImpl.h)
+    McpToolsFacadeImpl.h
+    McpViewTools.cpp
+    McpViewTools.h)
 
 target_link_libraries(McpToolsImpl Base)
 target_link_libraries(McpToolsImpl Data)

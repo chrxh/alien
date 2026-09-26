@@ -1,13 +1,6 @@
 #pragma once
 
-#include <chrono>
-
 #include <Base/Singleton.h>
-
-#include <Data/Descs.h>
-#include <Data/SimulationParameters.h>
-
-#include <EngineInterface/Definitions.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -15,9 +8,6 @@
 class TemporalControlWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TemporalControlWindow);
-
-public:
-    void onSnapshot();
 
 private:
     TemporalControlWindow();
@@ -32,24 +22,5 @@ private:
 
     void processToolbar();
 
-    struct Snapshot
-    {
-        uint64_t timestep;
-        std::chrono::milliseconds realTime;
-        SimulationParameters parameters;
-        ContentDesc data;
-    };
-    Snapshot createSnapshot();
-    void applySnapshot(Snapshot const& snapshot);
-
-    void restorePosition(RealVector2D& position, RealVector2D const& velocity, RealVector2D const& origPosition, RealVector2D const& origVelocity);
-
-    std::optional<Snapshot> _snapshot;
-
-    std::vector<Snapshot> _history;
-
-    bool _slowDown = false;
     int _tpsRestriction = 100;
-
-    std::optional<int> _sessionId;
 };

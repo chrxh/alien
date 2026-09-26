@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <ranges>
 #include <sstream>
 #include <format>
 
@@ -115,6 +116,24 @@ std::string StringHelper::formatHexColor(FloatColorRGB const& color)
 {
     auto toByte = [](float value) { return std::clamp(static_cast<int>(std::lround(value * 255.0f)), 0, 255); };
     return std::format("#{:02x}{:02x}{:02x}", toByte(color.r), toByte(color.g), toByte(color.b));
+}
+
+std::string StringHelper::encodeBase64(std::string_view data)
+{
+    static auto constexpr Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    std::string result;
+    result.reserve((data.size() + 2) / 3 * 4);
+    for (auto chunk : data | std::views::chunk(3)) {
+        uint32_t block = 0;
+        for (auto [byteIndex, byte] : std::views::enumerate(chunk)) {
+            block |= static_cast<uint32_t>(static_cast<uint8_t>(byte)) << (16 - 8 * byteIndex);
+        }
+        for (auto charIndex : std::views::iota(0, 4)) {
+            result.push_back(charIndex <= std::ssize(chunk) ? Alphabet[(block >> (18 - 6 * charIndex)) & 0x3f] : '=');
+        }
+    }
+    return result;
 }
 
 std::string StringHelper::formatInThousands(double value)

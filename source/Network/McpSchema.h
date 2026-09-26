@@ -19,5 +19,8 @@ public:
     static boost::json::object enumeration(std::string const& description, std::vector<std::string> const& values);
     static boost::json::object points(std::string const& description, size_t minItems);
     static boost::json::object array(std::string const& description, boost::json::object items, size_t minItems = 0);
+    static boost::json::object id(std::string const& description);
+    static boost::json::object ids(std::string const& description, size_t minItems);
+    static boost::json::object jsonObject(std::string const& description);
     static boost::json::object any(std::string const& description);
 };

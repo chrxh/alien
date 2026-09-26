@@ -5,10 +5,9 @@
 #include <Data/DescEditService.h>
 
 #include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/TemporalControlService.h>
 
 #include "AlienGui.h"
-#include "TemporalControlWindow.h"
-#include <EngineInterface/SimulationFacade.h>
 
 void ResizeWorldDialog::initIntern()
 {
@@ -97,5 +96,5 @@ void ResizeWorldDialog::onResizing()
     _SimulationFacade::get()->setSimulationData(content);
     _SimulationFacade::get()->setStatisticsHistory(statistics);
     _SimulationFacade::get()->setRealTime(realtime);
-    TemporalControlWindow::get().onSnapshot();
+    TemporalControlService::get().createFlashback();
 }

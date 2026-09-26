@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <charconv>
 #include <format>
 
 #include <boost/json.hpp>
@@ -103,6 +104,64 @@ std::filesystem::path McpArguments::getFilePath(boost::json::object const& argum
 {
     auto value = getString(arguments, key);
     return std::filesystem::path(std::u8string(value.begin(), value.end()));
+}
+
+namespace
+{
+    uint64_t toId(boost::json::value const& value, std::string_view key)
+    {
+        auto invalidId = std::invalid_argument(std::format("'{}' must be an id given as a string of decimal digits.", key));
+        if (value.is_string()) {
+            auto const& text = value.as_string();
+            uint64_t result = 0;
+            auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), result);
+            if (text.empty() || error != std::errc() || end != text.data() + text.size()) {
+                throw invalidId;
+            }
+            return result;
+        }
+        if (value.is_uint64()) {
+            return value.as_uint64();
+        }
+        if (value.is_int64() && value.as_int64() >= 0) {
+            return static_cast<uint64_t>(value.as_int64());
+        }
+        throw invalidId;
+    }
+}
+
+uint64_t McpArguments::getId(boost::json::object const& arguments, std::string_view key)
+{
+    return toId(getRequiredValue(arguments, key), key);
+}
+
+std::optional<uint64_t> McpArguments::getOptionalId(boost::json::object const& arguments, std::string_view key)
+{
+    if (!arguments.contains(key)) {
+        return std::nullopt;
+    }
+    return getId(arguments, key);
+}
+
+std::vector<uint64_t> McpArguments::getIds(boost::json::object const& arguments, std::string_view key, size_t minNumIds)
+{
+    auto const& value = getRequiredValue(arguments, key);
+    if (!value.is_array()) {
+        throw std::invalid_argument(std::format("'{}' must be an array of ids.", key));
+    }
+    std::vector<uint64_t> result;
+    for (auto const& element : value.as_array()) {
+        result.emplace_back(toId(element, key));
+    }
+    if (result.size() < minNumIds) {
+        throw std::invalid_argument(std::format("'{}' needs at least {} ids.", key, minNumIds));
+    }
+    return result;
+}
+
+boost::json::value const& McpArguments::getValue(boost::json::object const& arguments, std::string_view key)
+{
+    return getRequiredValue(arguments, key);
 }
 
 std::vector<RealVector2D> McpArguments::getPoints(boost::json::object const& arguments, std::string_view key, size_t minNumPoints)

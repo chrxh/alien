@@ -15,7 +15,7 @@
 #include <Base/NumberGenerator.h>
 
 #include <Data/GenomeDescAccessService.h>
-#include <Data/MassOperationsService.h>
+#include <Data/GenomeDescEditService.h>
 #include <Data/ObjectColoring.h>
 
 #include <EngineInterface/SimulationFacade.h>
@@ -341,22 +341,7 @@ void GenomeEditorWindow::onCreateSeed(bool freeEnergy)
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
     auto tab = _tabs.at(_selectedTabIndex);
-    auto genome = tab->getGenomeDesc();
-
-    ContentDesc seed;
-    seed.addCreature(
-        {ObjectDesc()
-             .pos(pos)
-             .stiffness(1.0f)
-             .color(EditorModel::get().getDefaultColorCode())
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc()
-                                                             .autoTriggerInterval(50)
-                                                             .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_TransitiveCells)
-                                                             .geneIndex(0)
-                                                             .separation(true)))},
-        CreatureDesc(),
-        genome);
-    MassOperationsService::get().randomizeLineageIds(seed);
+    auto seed = GenomeDescEditService::get().createSeed(tab->getGenomeDesc(), pos, EditorModel::get().getDefaultColorCode(), freeEnergy);
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();

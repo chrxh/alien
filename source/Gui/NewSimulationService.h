@@ -1,10 +1,13 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include <Base/Definitions.h>
 #include <Base/Macros.h>
 #include <Base/Singleton.h>
+
+#include <Data/Descs.h>
 
 class NewSimulationService
 {
@@ -19,4 +22,6 @@ public:
         MEMBER(Parameters, bool, adoptSimulationParameters, true);
     };
     void createSimulation(Parameters const& parameters);
+
+    std::optional<std::string> loadSimulation(SimulationDesc const& simulation);
 };

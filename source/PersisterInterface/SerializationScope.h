@@ -221,24 +221,24 @@ namespace cereal
         operator std::unordered_map<int, VariantData>&() & { return _attributeMap; }
 
         template <typename T>
-        void addMember(int key, T& value, T const& defaultValue)
+        void addMember(SerializationKey key, T& value, T const& defaultValue)
         {
             if (_task == SerializationTask::Load) {
-                auto findResult = _attributeMap.find(key);
+                auto findResult = _attributeMap.find(key.id);
                 if (findResult == _attributeMap.end() || !convertVariantData(findResult->second, value)) {
                     value = defaultValue;
                 }
             } else {
-                _attributeMap.emplace(key, value);
+                _attributeMap.emplace(key.id, value);
             }
         }
 
         template <typename T>
-        void addDesc(int key, T& value)
+        void addDesc(SerializationKey key, T& value)
         {
             if (_task == SerializationTask::Save) {
                 // Defer the save operation
-                addDeferredDescOp(key, [this, &value]() {
+                addDeferredDescOp(key.id, [this, &value]() {
                     // Serialize to buffer
                     std::ostringstream ss(std::ios::binary);
                     {
@@ -254,7 +254,7 @@ namespace cereal
                 });
             } else {
                 // Defer the load operation
-                addDeferredDescOp(key, [this, &value]() {
+                addDeferredDescOp(key.id, [this, &value]() {
                     // Read size-prefixed data
                     uint64_t dataSize = 0;
                     _ar(dataSize);
@@ -274,7 +274,7 @@ namespace cereal
         // For vectors whose size is fixed: files saved with a different layout may contain differently
         // sized vectors, so the loaded values are merged into a default-sized vector
         template <typename T>
-        void addFixedSizeMember(int key, std::vector<T>& value, std::vector<T> const& defaultValue)
+        void addFixedSizeMember(SerializationKey key, std::vector<T>& value, std::vector<T> const& defaultValue)
         {
             addMember(key, value, defaultValue);
             if (_task == SerializationTask::Load && value.size() != defaultValue.size()) {
@@ -285,11 +285,11 @@ namespace cereal
         }
 
         // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
-        void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
+        void addMember(SerializationKey key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
         {
             if (_task == SerializationTask::Load) {
                 std::vector<int8_t> rawValues;
-                auto findResult = _attributeMap.find(key);
+                auto findResult = _attributeMap.find(key.id);
                 if (findResult == _attributeMap.end() || !convertVariantData(findResult->second, rawValues)) {
                     value = defaultValue;
                     return;
@@ -304,7 +304,7 @@ namespace cereal
                 for (auto const& weight : value) {
                     rawValues.push_back(weight.rawValue);
                 }
-                _attributeMap.emplace(key, rawValues);
+                _attributeMap.emplace(key.id, rawValues);
             }
         }
 

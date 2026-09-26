@@ -30,6 +30,7 @@
 #include <Data/ParametersValidationService.h>
 #include <Data/SimulationParameters.h>
 
+#include "JsonSerializationScope.h"
 #include "SerializationScope.h"
 #include "SettingsParserService.h"
 
@@ -40,256 +41,256 @@
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Genome_Id = 0;
-    auto constexpr Id_Genome_Name = 1;
-    auto constexpr Id_Genome_FrontAngle = 2;
-    auto constexpr Id_Genome_ResistanceToInjection = 6;
-    auto constexpr Id_Genome_ApplyMetaMutations = 7;
+    auto constexpr Id_Genome_Id = SerializationKey(0, "id");
+    auto constexpr Id_Genome_Name = SerializationKey(1, "name");
+    auto constexpr Id_Genome_FrontAngle = SerializationKey(2, "frontAngle");
+    auto constexpr Id_Genome_ResistanceToInjection = SerializationKey(6, "resistanceToInjection");
+    auto constexpr Id_Genome_ApplyMetaMutations = SerializationKey(7, "applyMetaMutations");
 
-    auto constexpr Id_NeuronMutation_NodeProbability = 0;
-    auto constexpr Id_NeuronMutation_WeightChangeSigma = 1;
-    auto constexpr Id_NeuronMutation_BiasChangeSigma = 2;
-    auto constexpr Id_NeuronMutation_ActfnChangeProbability = 3;
+    auto constexpr Id_NeuronMutation_NodeProbability = SerializationKey(0, "nodeProbability");
+    auto constexpr Id_NeuronMutation_WeightChangeSigma = SerializationKey(1, "weightChangeSigma");
+    auto constexpr Id_NeuronMutation_BiasChangeSigma = SerializationKey(2, "biasChangeSigma");
+    auto constexpr Id_NeuronMutation_ActfnChangeProbability = SerializationKey(3, "actfnChangeProbability");
 
-    auto constexpr Id_ConnectionMutation_NodeProbability = 0;
-    auto constexpr Id_ConnectionMutation_ValueChangeSigma = 1;
+    auto constexpr Id_ConnectionMutation_NodeProbability = SerializationKey(0, "nodeProbability");
+    auto constexpr Id_ConnectionMutation_ValueChangeSigma = SerializationKey(1, "valueChangeSigma");
 
-    auto constexpr Id_CellTypePropertiesMutation_NodeProbability = 0;
-    auto constexpr Id_CellTypePropertiesMutation_ValueChangeSigma = 1;
-    auto constexpr Id_CellTypePropertiesMutation_EnumChangeProbability = 2;
+    auto constexpr Id_CellTypePropertiesMutation_NodeProbability = SerializationKey(0, "nodeProbability");
+    auto constexpr Id_CellTypePropertiesMutation_ValueChangeSigma = SerializationKey(1, "valueChangeSigma");
+    auto constexpr Id_CellTypePropertiesMutation_EnumChangeProbability = SerializationKey(2, "enumChangeProbability");
 
-    auto constexpr Id_GeometryMutation_GeneProbability = 0;
-    auto constexpr Id_GeometryMutation_ValueChangeSigma = 1;
-    auto constexpr Id_GeometryMutation_EnumChangeProbability = 2;
+    auto constexpr Id_GeometryMutation_GeneProbability = SerializationKey(0, "geneProbability");
+    auto constexpr Id_GeometryMutation_ValueChangeSigma = SerializationKey(1, "valueChangeSigma");
+    auto constexpr Id_GeometryMutation_EnumChangeProbability = SerializationKey(2, "enumChangeProbability");
 
-    auto constexpr Id_CellTypeModeMutation_NodeProbability = 0;
+    auto constexpr Id_CellTypeModeMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
-    auto constexpr Id_CellTypeMutation_NodeProbability = 0;
+    auto constexpr Id_CellTypeMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
-    auto constexpr Id_CustomizationMutation_GenomeProbability = 0;
+    auto constexpr Id_CustomizationMutation_GenomeProbability = SerializationKey(0, "genomeProbability");
 
-    auto constexpr Id_VoidMutation_NodeProbability = 0;
+    auto constexpr Id_VoidMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
-    auto constexpr Id_ExtendGeneMutation_GeneProbability = 0;
+    auto constexpr Id_ExtendGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_AddNodeMutation_NodeProbability = 0;
+    auto constexpr Id_AddNodeMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
-    auto constexpr Id_TrimGeneMutation_GeneProbability = 0;
+    auto constexpr Id_TrimGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_DeleteNodeMutation_NodeProbability = 0;
+    auto constexpr Id_DeleteNodeMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
-    auto constexpr Id_AddGeneMutation_GeneProbability = 0;
+    auto constexpr Id_AddGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_DuplicateGeneMutation_GeneProbability = 0;
+    auto constexpr Id_DuplicateGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_DeleteGeneMutation_GeneProbability = 0;
+    auto constexpr Id_DeleteGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_SwapGeneMutation_GeneProbability = 0;
+    auto constexpr Id_SwapGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_CopyNodeSectionMutation_GeneProbability = 0;
+    auto constexpr Id_CopyNodeSectionMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_MoveNodeSectionMutation_GeneProbability = 0;
+    auto constexpr Id_MoveNodeSectionMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_ConstructorMutation_NodeProbability = 0;
-    auto constexpr Id_ConstructorMutation_ValueChangeSigma = 1;
-    auto constexpr Id_ConstructorMutation_EnumChangeProbability = 2;
-    auto constexpr Id_ConstructorMutation_ConstructorToggleProbability = 3;
+    auto constexpr Id_ConstructorMutation_NodeProbability = SerializationKey(0, "nodeProbability");
+    auto constexpr Id_ConstructorMutation_ValueChangeSigma = SerializationKey(1, "valueChangeSigma");
+    auto constexpr Id_ConstructorMutation_EnumChangeProbability = SerializationKey(2, "enumChangeProbability");
+    auto constexpr Id_ConstructorMutation_ConstructorToggleProbability = SerializationKey(3, "constructorToggleProbability");
 
-    auto constexpr Id_Gene_Name = 0;
-    auto constexpr Id_Gene_Shape = 1;
-    auto constexpr Id_Gene_Stiffness = 5;
-    auto constexpr Id_Gene_ConnectionDistance = 6;
-    auto constexpr Id_Gene_HomogeneousCellType = 7;
+    auto constexpr Id_Gene_Name = SerializationKey(0, "name");
+    auto constexpr Id_Gene_Shape = SerializationKey(1, "shape");
+    auto constexpr Id_Gene_Stiffness = SerializationKey(5, "stiffness");
+    auto constexpr Id_Gene_ConnectionDistance = SerializationKey(6, "connectionDistance");
+    auto constexpr Id_Gene_HomogeneousCellType = SerializationKey(7, "homogeneousCellType");
 
-    auto constexpr Id_Node_ReferenceAngle = 0;
-    auto constexpr Id_Node_Color = 1;
+    auto constexpr Id_Node_ReferenceAngle = SerializationKey(0, "referenceAngle");
+    auto constexpr Id_Node_Color = SerializationKey(1, "color");
 
-    auto constexpr Id_NeuralNetGenome_Weights = 0;
-    auto constexpr Id_NeuralNetGenome_Biases = 1;
-    auto constexpr Id_NeuralNetGenome_ActivationFunctions = 2;
-    auto constexpr Id_NeuralNetGenome_ConnectionWeights = 3;
+    auto constexpr Id_NeuralNetGenome_Weights = SerializationKey(0, "weights");
+    auto constexpr Id_NeuralNetGenome_Biases = SerializationKey(1, "biases");
+    auto constexpr Id_NeuralNetGenome_ActivationFunctions = SerializationKey(2, "activationFunctions");
+    auto constexpr Id_NeuralNetGenome_ConnectionWeights = SerializationKey(3, "connectionWeights");
 
-    auto constexpr Id_DepotGenome_storageLimit = 0;
+    auto constexpr Id_DepotGenome_storageLimit = SerializationKey(0, "storageLimit");
 
-    auto constexpr Id_DefenderGenome_Mode = 0;
+    auto constexpr Id_DefenderGenome_Mode = SerializationKey(0, "mode");
 
-    auto constexpr Id_ConstructorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_ConstructorGenome_GeneIndex = 1;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
-    auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
-    auto constexpr Id_ConstructorGenome_Separation = 6;
-    auto constexpr Id_ConstructorGenome_NumBranches = 7;
-    auto constexpr Id_ConstructorGenome_NumConcatenations = 8;
+    auto constexpr Id_ConstructorGenome_AutoTriggerInterval = SerializationKey(0, "autoTriggerInterval");
+    auto constexpr Id_ConstructorGenome_GeneIndex = SerializationKey(1, "geneIndex");
+    auto constexpr Id_ConstructorGenome_ConstructionAngle = SerializationKey(3, "constructionAngle");
+    auto constexpr Id_ConstructorGenome_ProvideEnergy = SerializationKey(4, "provideEnergy");
+    auto constexpr Id_ConstructorGenome_Separation = SerializationKey(6, "separation");
+    auto constexpr Id_ConstructorGenome_NumBranches = SerializationKey(7, "numBranches");
+    auto constexpr Id_ConstructorGenome_NumConcatenations = SerializationKey(8, "numConcatenations");
 
-    auto constexpr Id_SensorGenome_AutoTrigger = 0;
-    auto constexpr Id_SensorGenome_MinRange = 1;
-    auto constexpr Id_SensorGenome_MaxRange = 2;
-    auto constexpr Id_SensorGenome_TagForAttackers = 3;
+    auto constexpr Id_SensorGenome_AutoTrigger = SerializationKey(0, "autoTrigger");
+    auto constexpr Id_SensorGenome_MinRange = SerializationKey(1, "minRange");
+    auto constexpr Id_SensorGenome_MaxRange = SerializationKey(2, "maxRange");
+    auto constexpr Id_SensorGenome_TagForAttackers = SerializationKey(3, "tagForAttackers");
 
-    auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
+    auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = SerializationKey(0, "minDensity");
 
-    auto constexpr Id_SensorModeGenome_DetectFreeCell_MinDensity = 0;
-    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = 1;
+    auto constexpr Id_SensorModeGenome_DetectFreeCell_MinDensity = SerializationKey(0, "minDensity");
+    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = SerializationKey(1, "restrictToColors");
 
-    auto constexpr Id_SensorModeGenome_DetectCreature_MinNumCells = 0;
-    auto constexpr Id_SensorModeGenome_DetectCreature_MaxNumCells = 1;
-    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToColor = 2;
-    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToLineage = 3;
+    auto constexpr Id_SensorModeGenome_DetectCreature_MinNumCells = SerializationKey(0, "minNumCells");
+    auto constexpr Id_SensorModeGenome_DetectCreature_MaxNumCells = SerializationKey(1, "maxNumCells");
+    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToColor = SerializationKey(2, "restrictToColors");
+    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToLineage = SerializationKey(3, "restrictToLineage");
 
-    auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio = 4;
+    auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = SerializationKey(0, "maxAngleDeviation");
+    auto constexpr Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio = SerializationKey(4, "forwardBackwardRatio");
 
-    auto constexpr Id_MuscleModeGenome_ManualBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio = 1;
+    auto constexpr Id_MuscleModeGenome_ManualBending_MaxAngleDeviation = SerializationKey(0, "maxAngleDeviation");
+    auto constexpr Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio = SerializationKey(1, "forwardBackwardRatio");
 
-    auto constexpr Id_MuscleModeGenome_AngleBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio = 1;
+    auto constexpr Id_MuscleModeGenome_AngleBending_MaxAngleDeviation = SerializationKey(0, "maxAngleDeviation");
+    auto constexpr Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio = SerializationKey(1, "attractionRepulsionRatio");
 
-    auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio = 1;
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = SerializationKey(0, "maxDistanceDeviation");
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio = SerializationKey(1, "forwardBackwardRatio");
 
-    auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio = 1;
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = SerializationKey(0, "maxDistanceDeviation");
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio = SerializationKey(1, "forwardBackwardRatio");
 
-    auto constexpr Id_GeneratorGenome_Additive = 0;
-    auto constexpr Id_GeneratorGenome_MinValue = 4;
-    auto constexpr Id_GeneratorGenome_MaxValue = 5;
-    auto constexpr Id_GeneratorGenome_TimeOffset = 2;
+    auto constexpr Id_GeneratorGenome_Additive = SerializationKey(0, "additive");
+    auto constexpr Id_GeneratorGenome_MinValue = SerializationKey(4, "minValue");
+    auto constexpr Id_GeneratorGenome_MaxValue = SerializationKey(5, "maxValue");
+    auto constexpr Id_GeneratorGenome_TimeOffset = SerializationKey(2, "timeOffset");
 
-    auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
-    auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
+    auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = SerializationKey(0, "amplitude");
+    auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = SerializationKey(1, "period");
 
-    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Amplitude = 0;
-    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Period = 1;
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Amplitude = SerializationKey(0, "amplitude");
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Period = SerializationKey(1, "period");
 
-    auto constexpr Id_AttackerModeGenome_FreeCell_RestrictToColor = 0;
+    auto constexpr Id_AttackerModeGenome_FreeCell_RestrictToColor = SerializationKey(0, "restrictToColors");
 
-    auto constexpr Id_AttackerModeGenome_Creature_MinNumCells = 0;
-    auto constexpr Id_AttackerModeGenome_Creature_MaxNumCells = 1;
-    auto constexpr Id_AttackerModeGenome_Creature_RestrictToColor = 2;
-    auto constexpr Id_AttackerModeGenome_Creature_RestrictToLineage = 3;
+    auto constexpr Id_AttackerModeGenome_Creature_MinNumCells = SerializationKey(0, "minNumCells");
+    auto constexpr Id_AttackerModeGenome_Creature_MaxNumCells = SerializationKey(1, "maxNumCells");
+    auto constexpr Id_AttackerModeGenome_Creature_RestrictToColor = SerializationKey(2, "restrictToColor");
+    auto constexpr Id_AttackerModeGenome_Creature_RestrictToLineage = SerializationKey(3, "restrictToLineage");
 
-    auto constexpr Id_InjectorGenome_GeneIndex = 0;
+    auto constexpr Id_InjectorGenome_GeneIndex = SerializationKey(0, "geneIndex");
 
-    auto constexpr Id_ReconnectorModeGenome_FreeCell_RestrictToColor = 0;
+    auto constexpr Id_ReconnectorModeGenome_FreeCell_RestrictToColor = SerializationKey(0, "restrictToColors");
 
-    auto constexpr Id_ReconnectorModeGenome_Creature_MinNumCells = 0;
-    auto constexpr Id_ReconnectorModeGenome_Creature_MaxNumCells = 1;
-    auto constexpr Id_ReconnectorModeGenome_Creature_RestrictToColor = 2;
-    auto constexpr Id_ReconnectorModeGenome_Creature_RestrictToLineage = 3;
+    auto constexpr Id_ReconnectorModeGenome_Creature_MinNumCells = SerializationKey(0, "minNumCells");
+    auto constexpr Id_ReconnectorModeGenome_Creature_MaxNumCells = SerializationKey(1, "maxNumCells");
+    auto constexpr Id_ReconnectorModeGenome_Creature_RestrictToColor = SerializationKey(2, "restrictToColors");
+    auto constexpr Id_ReconnectorModeGenome_Creature_RestrictToLineage = SerializationKey(3, "restrictToLineage");
 
-    auto constexpr Id_DetonatorGenome_Countdown = 0;
+    auto constexpr Id_DetonatorGenome_Countdown = SerializationKey(0, "countdown");
 
-    auto constexpr Id_DigestorGenome_RawEnergyConductivity = 0;
+    auto constexpr Id_DigestorGenome_RawEnergyConductivity = SerializationKey(0, "rawEnergyConductivity");
 
-    auto constexpr Id_SignalEntryGenome_Channels = 0;
+    auto constexpr Id_SignalEntryGenome_Channels = SerializationKey(0, "channels");
 
-    auto constexpr Id_SignalDelayGenome_Delay = 0;
+    auto constexpr Id_SignalDelayGenome_Delay = SerializationKey(0, "delay");
 
-    auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
-    auto constexpr Id_SignalRecorderGenome_NumSavedSignalEntries = 1;
+    auto constexpr Id_SignalRecorderGenome_ReadOnly = SerializationKey(0, "readOnly");
+    auto constexpr Id_SignalRecorderGenome_NumSavedSignalEntries = SerializationKey(1, "numWrittenSignalEntries");
 
-    auto constexpr Id_SignalStorageGenome_ReadOnly = 0;
+    auto constexpr Id_SignalStorageGenome_ReadOnly = SerializationKey(0, "readOnly");
 
-    auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
+    auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = SerializationKey(0, "newSignalWeight");
 
-    auto constexpr Id_MemoryGenome_ChannelBitMask = 0;
+    auto constexpr Id_MemoryGenome_ChannelBitMask = SerializationKey(0, "channelBitMask");
 
-    auto constexpr Id_SenderGenome_Range = 0;
-    auto constexpr Id_SenderGenome_Oneway = 3;
+    auto constexpr Id_SenderGenome_Range = SerializationKey(0, "range");
+    auto constexpr Id_SenderGenome_Oneway = SerializationKey(3, "oneway");
 
-    auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
-    auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
+    auto constexpr Id_ReceiverGenome_RestrictToColor = SerializationKey(1, "restrictToColors");
+    auto constexpr Id_ReceiverGenome_RestrictToLineage = SerializationKey(2, "restrictToLineage");
 
     // Description member keys
-    auto constexpr Id_Node_NeuralNetwork = 2;
-    auto constexpr Id_Node_CellType = 3;
-    auto constexpr Id_Node_Constructor = 4;
+    auto constexpr Id_Node_NeuralNetwork = SerializationKey(2, "neuralNetwork");
+    auto constexpr Id_Node_CellType = SerializationKey(3, "cellType");
+    auto constexpr Id_Node_Constructor = SerializationKey(4, "constructor");
 
-    auto constexpr Id_Gene_Nodes = 8;
+    auto constexpr Id_Gene_Nodes = SerializationKey(8, "nodes");
 
-    auto constexpr Id_MutationRates_NeuronMutation1 = 1;
-    auto constexpr Id_MutationRates_NeuronMutation2 = 2;
-    auto constexpr Id_MutationRates_ConnectionMutation1 = 3;
-    auto constexpr Id_MutationRates_ConnectionMutation2 = 4;
-    auto constexpr Id_MutationRates_CellTypePropertiesMutation1 = 5;
-    auto constexpr Id_MutationRates_CellTypePropertiesMutation2 = 6;
-    auto constexpr Id_MutationRates_CellTypeModeMutation = 7;
-    auto constexpr Id_MutationRates_CellTypeMutation = 8;
-    auto constexpr Id_MutationRates_VoidMutation = 9;
-    auto constexpr Id_MutationRates_ConstructorMutation1 = 10;
-    auto constexpr Id_MutationRates_ConstructorMutation2 = 11;
-    auto constexpr Id_MutationRates_ExtendGeneMutation = 12;
-    auto constexpr Id_MutationRates_AddNodeMutation = 13;
-    auto constexpr Id_MutationRates_TrimGeneMutation = 14;
-    auto constexpr Id_MutationRates_DeleteNodeMutation = 15;
-    auto constexpr Id_MutationRates_DuplicateGeneMutation = 16;
-    auto constexpr Id_MutationRates_DeleteGeneMutation = 17;
-    auto constexpr Id_MutationRates_CopyNodeSectionMutation = 18;
-    auto constexpr Id_MutationRates_MoveNodeSectionMutation = 19;
-    auto constexpr Id_MutationRates_GeometryMutation1 = 20;
-    auto constexpr Id_MutationRates_GeometryMutation2 = 21;
-    auto constexpr Id_MutationRates_CustomizationMutation = 22;
-    auto constexpr Id_MutationRates_AddGeneMutation = 23;
-    auto constexpr Id_MutationRates_SwapGeneMutation = 24;
+    auto constexpr Id_MutationRates_NeuronMutation1 = SerializationKey(1, "neuronMutation1");
+    auto constexpr Id_MutationRates_NeuronMutation2 = SerializationKey(2, "neuronMutation2");
+    auto constexpr Id_MutationRates_ConnectionMutation1 = SerializationKey(3, "connectionMutation1");
+    auto constexpr Id_MutationRates_ConnectionMutation2 = SerializationKey(4, "connectionMutation2");
+    auto constexpr Id_MutationRates_CellTypePropertiesMutation1 = SerializationKey(5, "cellTypePropertiesMutation1");
+    auto constexpr Id_MutationRates_CellTypePropertiesMutation2 = SerializationKey(6, "cellTypePropertiesMutation2");
+    auto constexpr Id_MutationRates_CellTypeModeMutation = SerializationKey(7, "cellTypeModeMutation");
+    auto constexpr Id_MutationRates_CellTypeMutation = SerializationKey(8, "cellTypeMutation");
+    auto constexpr Id_MutationRates_VoidMutation = SerializationKey(9, "voidMutation");
+    auto constexpr Id_MutationRates_ConstructorMutation1 = SerializationKey(10, "constructorMutation1");
+    auto constexpr Id_MutationRates_ConstructorMutation2 = SerializationKey(11, "constructorMutation2");
+    auto constexpr Id_MutationRates_ExtendGeneMutation = SerializationKey(12, "extendGeneMutation");
+    auto constexpr Id_MutationRates_AddNodeMutation = SerializationKey(13, "addNodeMutation");
+    auto constexpr Id_MutationRates_TrimGeneMutation = SerializationKey(14, "trimGeneMutation");
+    auto constexpr Id_MutationRates_DeleteNodeMutation = SerializationKey(15, "deleteNodeMutation");
+    auto constexpr Id_MutationRates_DuplicateGeneMutation = SerializationKey(16, "duplicateGeneMutation");
+    auto constexpr Id_MutationRates_DeleteGeneMutation = SerializationKey(17, "deleteGeneMutation");
+    auto constexpr Id_MutationRates_CopyNodeSectionMutation = SerializationKey(18, "copyNodeSectionMutation");
+    auto constexpr Id_MutationRates_MoveNodeSectionMutation = SerializationKey(19, "moveNodeSectionMutation");
+    auto constexpr Id_MutationRates_GeometryMutation1 = SerializationKey(20, "geometryMutation1");
+    auto constexpr Id_MutationRates_GeometryMutation2 = SerializationKey(21, "geometryMutation2");
+    auto constexpr Id_MutationRates_CustomizationMutation = SerializationKey(22, "customizationMutation");
+    auto constexpr Id_MutationRates_AddGeneMutation = SerializationKey(23, "addGeneMutation");
+    auto constexpr Id_MutationRates_SwapGeneMutation = SerializationKey(24, "swapGeneMutation");
 
-    auto constexpr Id_Genome_Genes = 6;
-    auto constexpr Id_Genome_MutationRates = 7;
+    auto constexpr Id_Genome_Genes = SerializationKey(6, "genes");
+    auto constexpr Id_Genome_MutationRates = SerializationKey(7, "mutationRates");
 
-    auto constexpr Id_SensorGenome_Mode = 4;
-    auto constexpr Id_GeneratorGenome_Mode = 3;
-    auto constexpr Id_AttackerGenome_Mode = 0;
-    auto constexpr Id_MuscleGenome_Mode = 0;
-    auto constexpr Id_ReconnectorGenome_Mode = 0;
-    auto constexpr Id_MemoryGenome_Mode = 1;
-    auto constexpr Id_MemoryGenome_SignalEntries = 2;
-    auto constexpr Id_CommunicatorGenome_Mode = 0;
+    auto constexpr Id_SensorGenome_Mode = SerializationKey(4, "mode");
+    auto constexpr Id_GeneratorGenome_Mode = SerializationKey(3, "mode");
+    auto constexpr Id_AttackerGenome_Mode = SerializationKey(0, "mode");
+    auto constexpr Id_MuscleGenome_Mode = SerializationKey(0, "mode");
+    auto constexpr Id_ReconnectorGenome_Mode = SerializationKey(0, "mode");
+    auto constexpr Id_MemoryGenome_Mode = SerializationKey(1, "mode");
+    auto constexpr Id_MemoryGenome_SignalEntries = SerializationKey(2, "signalEntries");
+    auto constexpr Id_CommunicatorGenome_Mode = SerializationKey(0, "mode");
 
     // Serialized type ids
-    auto constexpr Id_CellTypeGenome_Base = 0;
-    auto constexpr Id_CellTypeGenome_Depot = 1;
-    auto constexpr Id_CellTypeGenome_Sensor = 2;
-    auto constexpr Id_CellTypeGenome_Generator = 3;
-    auto constexpr Id_CellTypeGenome_Attacker = 4;
-    auto constexpr Id_CellTypeGenome_Injector = 5;
-    auto constexpr Id_CellTypeGenome_Muscle = 6;
-    auto constexpr Id_CellTypeGenome_Defender = 7;
-    auto constexpr Id_CellTypeGenome_Reconnector = 8;
-    auto constexpr Id_CellTypeGenome_Detonator = 9;
-    auto constexpr Id_CellTypeGenome_Digestor = 10;
-    auto constexpr Id_CellTypeGenome_Memory = 11;
-    auto constexpr Id_CellTypeGenome_Communicator = 12;
-    auto constexpr Id_CellTypeGenome_Void = 13;
+    auto constexpr Id_CellTypeGenome_Base = SerializationKey(0, "base");
+    auto constexpr Id_CellTypeGenome_Depot = SerializationKey(1, "depot");
+    auto constexpr Id_CellTypeGenome_Sensor = SerializationKey(2, "sensor");
+    auto constexpr Id_CellTypeGenome_Generator = SerializationKey(3, "generator");
+    auto constexpr Id_CellTypeGenome_Attacker = SerializationKey(4, "attacker");
+    auto constexpr Id_CellTypeGenome_Injector = SerializationKey(5, "injector");
+    auto constexpr Id_CellTypeGenome_Muscle = SerializationKey(6, "muscle");
+    auto constexpr Id_CellTypeGenome_Defender = SerializationKey(7, "defender");
+    auto constexpr Id_CellTypeGenome_Reconnector = SerializationKey(8, "reconnector");
+    auto constexpr Id_CellTypeGenome_Detonator = SerializationKey(9, "detonator");
+    auto constexpr Id_CellTypeGenome_Digestor = SerializationKey(10, "digestor");
+    auto constexpr Id_CellTypeGenome_Memory = SerializationKey(11, "memory");
+    auto constexpr Id_CellTypeGenome_Communicator = SerializationKey(12, "communicator");
+    auto constexpr Id_CellTypeGenome_Void = SerializationKey(13, "void");
 
-    auto constexpr Id_SensorModeGenome_DetectEnergy = 0;
-    auto constexpr Id_SensorModeGenome_DetectSolid = 1;
-    auto constexpr Id_SensorModeGenome_DetectFreeCell = 2;
-    auto constexpr Id_SensorModeGenome_DetectCreature = 3;
+    auto constexpr Id_SensorModeGenome_DetectEnergy = SerializationKey(0, "detectEnergy");
+    auto constexpr Id_SensorModeGenome_DetectSolid = SerializationKey(1, "detectSolid");
+    auto constexpr Id_SensorModeGenome_DetectFreeCell = SerializationKey(2, "detectFreeCell");
+    auto constexpr Id_SensorModeGenome_DetectCreature = SerializationKey(3, "detectCreature");
 
-    auto constexpr Id_GeneratorModeGenome_SquareSignal = 0;
-    auto constexpr Id_GeneratorModeGenome_SawtoothSignal = 1;
+    auto constexpr Id_GeneratorModeGenome_SquareSignal = SerializationKey(0, "squareSignal");
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal = SerializationKey(1, "sawtoothSignal");
 
-    auto constexpr Id_AttackerModeGenome_AttackFreeCell = 0;
-    auto constexpr Id_AttackerModeGenome_AttackCreature = 1;
+    auto constexpr Id_AttackerModeGenome_AttackFreeCell = SerializationKey(0, "attackFreeCell");
+    auto constexpr Id_AttackerModeGenome_AttackCreature = SerializationKey(1, "attackCreature");
 
-    auto constexpr Id_MuscleModeGenome_AutoBending = 0;
-    auto constexpr Id_MuscleModeGenome_ManualBending = 1;
-    auto constexpr Id_MuscleModeGenome_AngleBending = 2;
-    auto constexpr Id_MuscleModeGenome_AutoCrawling = 3;
-    auto constexpr Id_MuscleModeGenome_ManualCrawling = 4;
-    auto constexpr Id_MuscleModeGenome_DirectMovement = 5;
+    auto constexpr Id_MuscleModeGenome_AutoBending = SerializationKey(0, "autoBending");
+    auto constexpr Id_MuscleModeGenome_ManualBending = SerializationKey(1, "manualBending");
+    auto constexpr Id_MuscleModeGenome_AngleBending = SerializationKey(2, "angleBending");
+    auto constexpr Id_MuscleModeGenome_AutoCrawling = SerializationKey(3, "autoCrawling");
+    auto constexpr Id_MuscleModeGenome_ManualCrawling = SerializationKey(4, "manualCrawling");
+    auto constexpr Id_MuscleModeGenome_DirectMovement = SerializationKey(5, "directMovement");
 
-    auto constexpr Id_ReconnectorModeGenome_ReconnectSolid = 0;
-    auto constexpr Id_ReconnectorModeGenome_ReconnectFreeCell = 1;
-    auto constexpr Id_ReconnectorModeGenome_ReconnectCreature = 2;
+    auto constexpr Id_ReconnectorModeGenome_ReconnectSolid = SerializationKey(0, "reconnectSolid");
+    auto constexpr Id_ReconnectorModeGenome_ReconnectFreeCell = SerializationKey(1, "reconnectFreeCell");
+    auto constexpr Id_ReconnectorModeGenome_ReconnectCreature = SerializationKey(2, "reconnectCreature");
 
-    auto constexpr Id_MemoryModeGenome_SignalDelay = 0;
-    auto constexpr Id_MemoryModeGenome_SignalRecorder = 1;
-    auto constexpr Id_MemoryModeGenome_SignalStorage = 2;
-    auto constexpr Id_MemoryModeGenome_SignalIntegrator = 3;
+    auto constexpr Id_MemoryModeGenome_SignalDelay = SerializationKey(0, "signalDelay");
+    auto constexpr Id_MemoryModeGenome_SignalRecorder = SerializationKey(1, "signalRecorder");
+    auto constexpr Id_MemoryModeGenome_SignalStorage = SerializationKey(2, "signalStorage");
+    auto constexpr Id_MemoryModeGenome_SignalIntegrator = SerializationKey(3, "signalIntegrator");
 
-    auto constexpr Id_CommunicatorModeGenome_Sender = 0;
-    auto constexpr Id_CommunicatorModeGenome_Receiver = 1;
+    auto constexpr Id_CommunicatorModeGenome_Sender = SerializationKey(0, "sender");
+    auto constexpr Id_CommunicatorModeGenome_Receiver = SerializationKey(1, "receiver");
 }
 
 namespace cereal
@@ -979,258 +980,258 @@ namespace cereal
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Particle_Id = 0;
-    auto constexpr Id_Particle_Pos = 1;
-    auto constexpr Id_Particle_Vel = 2;
-    auto constexpr Id_Particle_Energy = 3;
-    auto constexpr Id_Particle_Color = 4;
+    auto constexpr Id_Particle_Id = SerializationKey(0, "id");
+    auto constexpr Id_Particle_Pos = SerializationKey(1, "pos");
+    auto constexpr Id_Particle_Vel = SerializationKey(2, "vel");
+    auto constexpr Id_Particle_Energy = SerializationKey(3, "energy");
+    auto constexpr Id_Particle_Color = SerializationKey(4, "color");
 
-    auto constexpr Id_Creature_Id = 0;
-    auto constexpr Id_Creature_AncestorId = 1;
-    auto constexpr Id_Creature_Generation = 2;
-    auto constexpr Id_Creature_NumCells = 4;
-    auto constexpr Id_Creature_HeadUpdateId = 5;
-    auto constexpr Id_Creature_GenomeId = 6;
-    auto constexpr Id_Creature_MutationState = 7;
-    auto constexpr Id_Creature_LineageId = 3;
-    auto constexpr Id_Creature_AccumulatedMutations = 9;
-    auto constexpr Id_Creature_AccumulatedMutationsInLineage = 10;
-    auto constexpr Id_Creature_NextConstructionId = 11;
+    auto constexpr Id_Creature_Id = SerializationKey(0, "id");
+    auto constexpr Id_Creature_AncestorId = SerializationKey(1, "ancestorId");
+    auto constexpr Id_Creature_Generation = SerializationKey(2, "generation");
+    auto constexpr Id_Creature_NumCells = SerializationKey(4, "numCells");
+    auto constexpr Id_Creature_HeadUpdateId = SerializationKey(5, "headUpdateId");
+    auto constexpr Id_Creature_GenomeId = SerializationKey(6, "genomeId");
+    auto constexpr Id_Creature_MutationState = SerializationKey(7, "mutationState");
+    auto constexpr Id_Creature_LineageId = SerializationKey(3, "lineageId");
+    auto constexpr Id_Creature_AccumulatedMutations = SerializationKey(9, "accumulatedMutations");
+    auto constexpr Id_Creature_AccumulatedMutationsInLineage = SerializationKey(10, "accumulatedMutationsInLineage");
+    auto constexpr Id_Creature_NextConstructionId = SerializationKey(11, "nextConstructionId");
 
-    auto constexpr Id_Solid_Energy = 0;
+    auto constexpr Id_Solid_Energy = SerializationKey(0, "energy");
 
-    auto constexpr Id_Fluid_Energy = 0;
-    auto constexpr Id_Fluid_Glow = 1;
+    auto constexpr Id_Fluid_Energy = SerializationKey(0, "energy");
+    auto constexpr Id_Fluid_Glow = SerializationKey(1, "glow");
 
-    auto constexpr Id_FreeCell_Energy = 0;
-    auto constexpr Id_FreeCell_Age = 1;
+    auto constexpr Id_FreeCell_Energy = SerializationKey(0, "energy");
+    auto constexpr Id_FreeCell_Age = SerializationKey(1, "age");
 
-    auto constexpr Id_Cell_UsableEnergy = 0;
-    auto constexpr Id_Cell_RawEnergy = 1;
-    auto constexpr Id_Cell_ReservedEnergy = 17;
-    auto constexpr Id_Cell_Age = 2;
-    auto constexpr Id_Cell_CellState = 3;
-    auto constexpr Id_Cell_ActivationTime = 4;
-    auto constexpr Id_Cell_NodeIndex = 6;
-    auto constexpr Id_Cell_GeneIndex = 8;
-    auto constexpr Id_Cell_AngleToFront = 10;
-    auto constexpr Id_Cell_HeadUpdateId = 11;
-    auto constexpr Id_Cell_HeadCell = 12;
-    auto constexpr Id_Cell_CreatureId = 13;
-    auto constexpr Id_Cell_Event = 14;
-    auto constexpr Id_Cell_EventCounter = 15;
-    auto constexpr Id_Cell_EventPos = 16;
-    auto constexpr Id_Cell_HighlightIntensity = 25;
-    auto constexpr Id_Cell_LastUpdate = 18;
-    auto constexpr Id_Cell_ConcatenationIndex = 19;
-    auto constexpr Id_Cell_BranchIndex = 20;
-    auto constexpr Id_Cell_ConstructionId = 26;
+    auto constexpr Id_Cell_UsableEnergy = SerializationKey(0, "usableEnergy");
+    auto constexpr Id_Cell_RawEnergy = SerializationKey(1, "rawEnergy");
+    auto constexpr Id_Cell_ReservedEnergy = SerializationKey(17, "reservedEnergy");
+    auto constexpr Id_Cell_Age = SerializationKey(2, "age");
+    auto constexpr Id_Cell_CellState = SerializationKey(3, "cellState");
+    auto constexpr Id_Cell_ActivationTime = SerializationKey(4, "activationTime");
+    auto constexpr Id_Cell_NodeIndex = SerializationKey(6, "nodeIndex");
+    auto constexpr Id_Cell_GeneIndex = SerializationKey(8, "geneIndex");
+    auto constexpr Id_Cell_AngleToFront = SerializationKey(10, "frontAngle");
+    auto constexpr Id_Cell_HeadUpdateId = SerializationKey(11, "headUpdateId");
+    auto constexpr Id_Cell_HeadCell = SerializationKey(12, "headCell");
+    auto constexpr Id_Cell_CreatureId = SerializationKey(13, "creatureId");
+    auto constexpr Id_Cell_Event = SerializationKey(14, "event");
+    auto constexpr Id_Cell_EventCounter = SerializationKey(15, "eventCounter");
+    auto constexpr Id_Cell_EventPos = SerializationKey(16, "eventPos");
+    auto constexpr Id_Cell_HighlightIntensity = SerializationKey(25, "highlightIntensity");
+    auto constexpr Id_Cell_LastUpdate = SerializationKey(18, "lastUpdate");
+    auto constexpr Id_Cell_ConcatenationIndex = SerializationKey(19, "concatenationIndex");
+    auto constexpr Id_Cell_BranchIndex = SerializationKey(20, "branchIndex");
+    auto constexpr Id_Cell_ConstructionId = SerializationKey(26, "constructionId");
 
-    auto constexpr Id_Object_Id = 0;
-    auto constexpr Id_Object_Pos = 2;
-    auto constexpr Id_Object_Vel = 3;
-    auto constexpr Id_Object_Stiffness = 4;
-    auto constexpr Id_Object_Color = 5;
-    auto constexpr Id_Object_Static = 6;
-    auto constexpr Id_Object_Sticky = 17;
+    auto constexpr Id_Object_Id = SerializationKey(0, "id");
+    auto constexpr Id_Object_Pos = SerializationKey(2, "pos");
+    auto constexpr Id_Object_Vel = SerializationKey(3, "vel");
+    auto constexpr Id_Object_Stiffness = SerializationKey(4, "stiffness");
+    auto constexpr Id_Object_Color = SerializationKey(5, "color");
+    auto constexpr Id_Object_Static = SerializationKey(6, "isStatic");
+    auto constexpr Id_Object_Sticky = SerializationKey(17, "sticky");
 
-    auto constexpr Id_NeuralActivity_Signals = 0;
-    auto constexpr Id_NeuralActivity_Memory = 1;
+    auto constexpr Id_NeuralActivity_Signals = SerializationKey(0, "signals");
+    auto constexpr Id_NeuralActivity_Memory = SerializationKey(1, "memory");
 
-    auto constexpr Id_Connection_ObjectId = 0;
-    auto constexpr Id_Connection_Distance = 1;
-    auto constexpr Id_Connection_AngleFromPrevious = 2;
+    auto constexpr Id_Connection_ObjectId = SerializationKey(0, "objectId");
+    auto constexpr Id_Connection_Distance = SerializationKey(1, "distance");
+    auto constexpr Id_Connection_AngleFromPrevious = SerializationKey(2, "angleFromPrevious");
 
-    auto constexpr Id_NeuralNet_Weights = 0;
-    auto constexpr Id_NeuralNet_Biases = 1;
-    auto constexpr Id_NeuralNet_ActivationFunctions = 2;
-    auto constexpr Id_NeuralNet_ConnectionWeights = 3;
+    auto constexpr Id_NeuralNet_Weights = SerializationKey(0, "weights");
+    auto constexpr Id_NeuralNet_Biases = SerializationKey(1, "biases");
+    auto constexpr Id_NeuralNet_ActivationFunctions = SerializationKey(2, "activationFunctions");
+    auto constexpr Id_NeuralNet_ConnectionWeights = SerializationKey(3, "connectionWeights");
 
-    auto constexpr Id_Constructor_AutoTriggerInterval = 0;
-    auto constexpr Id_Constructor_GeneIndex = 2;
-    auto constexpr Id_Constructor_LastConstructedCellId = 5;
-    auto constexpr Id_Constructor_ConstructionAngle = 7;
-    auto constexpr Id_Constructor_ProvideEnergy = 8;
-    auto constexpr Id_Constructor_CurrentOffspring = 9;
-    auto constexpr Id_Constructor_ReservedEnergy = 10;
-    auto constexpr Id_Constructor_Separation = 11;
-    auto constexpr Id_Constructor_NumBranches = 12;
-    auto constexpr Id_Constructor_NumConcatenations = 13;
+    auto constexpr Id_Constructor_AutoTriggerInterval = SerializationKey(0, "autoTriggerInterval");
+    auto constexpr Id_Constructor_GeneIndex = SerializationKey(2, "geneIndex");
+    auto constexpr Id_Constructor_LastConstructedCellId = SerializationKey(5, "lastConstructedCellId");
+    auto constexpr Id_Constructor_ConstructionAngle = SerializationKey(7, "constructionAngle");
+    auto constexpr Id_Constructor_ProvideEnergy = SerializationKey(8, "provideEnergy");
+    auto constexpr Id_Constructor_CurrentOffspring = SerializationKey(9, "currentOffspring");
+    auto constexpr Id_Constructor_ReservedEnergy = SerializationKey(10, "reservedEnergy");
+    auto constexpr Id_Constructor_Separation = SerializationKey(11, "separation");
+    auto constexpr Id_Constructor_NumBranches = SerializationKey(12, "numBranches");
+    auto constexpr Id_Constructor_NumConcatenations = SerializationKey(13, "numConcatenations");
 
-    auto constexpr Id_Defender_Mode = 0;
+    auto constexpr Id_Defender_Mode = SerializationKey(0, "mode");
 
-    auto constexpr Id_Muscle_LastMovementX = 4;
-    auto constexpr Id_Muscle_LastMovementY = 5;
+    auto constexpr Id_Muscle_LastMovementX = SerializationKey(4, "lastMovementX");
+    auto constexpr Id_Muscle_LastMovementY = SerializationKey(5, "lastMovementY");
 
-    auto constexpr Id_MuscleMode_AutoBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AutoBending_ForwardBackwardRatio = 6;
-    auto constexpr Id_MuscleMode_AutoBending_InitialAngle = 7;
-    auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
+    auto constexpr Id_MuscleMode_AutoBending_MaxAngleDeviation = SerializationKey(0, "maxAngleDeviation");
+    auto constexpr Id_MuscleMode_AutoBending_ForwardBackwardRatio = SerializationKey(6, "forwardBackwardRatio");
+    auto constexpr Id_MuscleMode_AutoBending_InitialAngle = SerializationKey(7, "initialAngle");
+    auto constexpr Id_MuscleMode_AutoBending_Forward = SerializationKey(8, "forward");
 
-    auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_ManualBending_ForwardBackwardRatio = 1;
-    auto constexpr Id_MuscleMode_ManualBending_InitialAngle = 2;
-    auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
+    auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = SerializationKey(0, "maxAngleDeviation");
+    auto constexpr Id_MuscleMode_ManualBending_ForwardBackwardRatio = SerializationKey(1, "forwardBackwardRatio");
+    auto constexpr Id_MuscleMode_ManualBending_InitialAngle = SerializationKey(2, "initialAngle");
+    auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = SerializationKey(5, "lastAngleDelta");
 
-    auto constexpr Id_MuscleMode_AngleBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AngleBending_AttractionRepulsionRatio = 1;
-    auto constexpr Id_MuscleMode_AngleBending_InitialAngle = 2;
+    auto constexpr Id_MuscleMode_AngleBending_MaxAngleDeviation = SerializationKey(0, "maxAngleDeviation");
+    auto constexpr Id_MuscleMode_AngleBending_AttractionRepulsionRatio = SerializationKey(1, "attractionRepulsionRatio");
+    auto constexpr Id_MuscleMode_AngleBending_InitialAngle = SerializationKey(2, "initialAngle");
 
-    auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AutoCrawling_ForwardBackwardRatio = 1;
-    auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
-    auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
-    auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
+    auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = SerializationKey(0, "maxDistanceDeviation");
+    auto constexpr Id_MuscleMode_AutoCrawling_ForwardBackwardRatio = SerializationKey(1, "forwardBackwardRatio");
+    auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = SerializationKey(2, "initialDistance");
+    auto constexpr Id_MuscleMode_AutoCrawling_Forward = SerializationKey(3, "forward");
+    auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = SerializationKey(6, "lastActualDistance");
 
-    auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_ManualCrawling_ForwardBackwardRatio = 1;
-    auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = 2;
-    auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = 3;
-    auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
+    auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = SerializationKey(0, "maxDistanceDeviation");
+    auto constexpr Id_MuscleMode_ManualCrawling_ForwardBackwardRatio = SerializationKey(1, "forwardBackwardRatio");
+    auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = SerializationKey(2, "initialDistance");
+    auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = SerializationKey(3, "lastActualDistance");
+    auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = SerializationKey(4, "lastDistanceDelta");
 
-    auto constexpr Id_Injector_GeneIndex = 0;
+    auto constexpr Id_Injector_GeneIndex = SerializationKey(0, "geneIndex");
 
-    auto constexpr Id_Generator_Additive = 0;
-    auto constexpr Id_Generator_NumPulses = 1;
-    auto constexpr Id_Generator_TimeOffset = 3;
-    auto constexpr Id_Generator_MinValue = 5;
-    auto constexpr Id_Generator_MaxValue = 6;
+    auto constexpr Id_Generator_Additive = SerializationKey(0, "additive");
+    auto constexpr Id_Generator_NumPulses = SerializationKey(1, "numPulses");
+    auto constexpr Id_Generator_TimeOffset = SerializationKey(3, "timeOffset");
+    auto constexpr Id_Generator_MinValue = SerializationKey(5, "minValue");
+    auto constexpr Id_Generator_MaxValue = SerializationKey(6, "maxValue");
 
-    auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
-    auto constexpr Id_GeneratorMode_SawtoothSignal_Period = 1;
+    auto constexpr Id_GeneratorMode_SquareSignal_Period = SerializationKey(1, "period");
+    auto constexpr Id_GeneratorMode_SawtoothSignal_Period = SerializationKey(1, "period");
 
-    auto constexpr Id_AttackerMode_FreeCell_RestrictToColor = 0;
+    auto constexpr Id_AttackerMode_FreeCell_RestrictToColor = SerializationKey(0, "restrictToColors");
 
-    auto constexpr Id_Sensor_MinRange = 0;
-    auto constexpr Id_Sensor_MaxRange = 1;
-    auto constexpr Id_Sensor_AutoTrigger = 2;
-    auto constexpr Id_Sensor_TagForAttackers = 3;
+    auto constexpr Id_Sensor_MinRange = SerializationKey(0, "minRange");
+    auto constexpr Id_Sensor_MaxRange = SerializationKey(1, "maxRange");
+    auto constexpr Id_Sensor_AutoTrigger = SerializationKey(2, "autoTrigger");
+    auto constexpr Id_Sensor_TagForAttackers = SerializationKey(3, "tagForAttackers");
 
-    auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
+    auto constexpr Id_SensorMode_DetectEnergy_MinDensity = SerializationKey(0, "minDensity");
 
-    auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
-    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;
+    auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = SerializationKey(0, "minDensity");
+    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = SerializationKey(1, "restrictToColors");
 
-    auto constexpr Id_SensorMode_SensorLastMatch_CreatureIdPart = 0;
-    auto constexpr Id_SensorMode_SensorLastMatch_Pos = 1;
+    auto constexpr Id_SensorMode_SensorLastMatch_CreatureIdPart = SerializationKey(0, "creatureIdPart");
+    auto constexpr Id_SensorMode_SensorLastMatch_Pos = SerializationKey(1, "pos");
 
-    auto constexpr Id_SensorMode_DetectCreature_MinNumCells = 0;
-    auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = 1;
-    auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = 2;
-    auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = 3;
+    auto constexpr Id_SensorMode_DetectCreature_MinNumCells = SerializationKey(0, "minNumCells");
+    auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = SerializationKey(1, "maxNumCells");
+    auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = SerializationKey(2, "restrictToColors");
+    auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = SerializationKey(3, "restrictToLineage");
 
-    auto constexpr Id_Depot_storageLimit = 1;
-    auto constexpr Id_Depot_StoredUsableEnergy = 2;
+    auto constexpr Id_Depot_storageLimit = SerializationKey(1, "storageLimit");
+    auto constexpr Id_Depot_StoredUsableEnergy = SerializationKey(2, "storedUsableEnergy");
 
-    auto constexpr Id_ReconnectorMode_FreeCell_RestrictToColor = 0;
+    auto constexpr Id_ReconnectorMode_FreeCell_RestrictToColor = SerializationKey(0, "restrictToColors");
 
-    auto constexpr Id_ReconnectorMode_Creature_MinNumCells = 0;
-    auto constexpr Id_ReconnectorMode_Creature_MaxNumCells = 1;
-    auto constexpr Id_ReconnectorMode_Creature_RestrictToColor = 2;
-    auto constexpr Id_ReconnectorMode_Creature_RestrictToLineage = 3;
+    auto constexpr Id_ReconnectorMode_Creature_MinNumCells = SerializationKey(0, "minNumCells");
+    auto constexpr Id_ReconnectorMode_Creature_MaxNumCells = SerializationKey(1, "maxNumCells");
+    auto constexpr Id_ReconnectorMode_Creature_RestrictToColor = SerializationKey(2, "restrictToColors");
+    auto constexpr Id_ReconnectorMode_Creature_RestrictToLineage = SerializationKey(3, "restrictToLineage");
 
-    auto constexpr Id_Detonator_State = 0;
-    auto constexpr Id_Detonator_Countdown = 1;
+    auto constexpr Id_Detonator_State = SerializationKey(0, "state");
+    auto constexpr Id_Detonator_Countdown = SerializationKey(1, "countdown");
 
-    auto constexpr Id_Digestor_RawEnergyConductivity = 0;
+    auto constexpr Id_Digestor_RawEnergyConductivity = SerializationKey(0, "rawEnergyConductivity");
 
-    auto constexpr Id_SignalEntry_Channels = 0;
+    auto constexpr Id_SignalEntry_Channels = SerializationKey(0, "channels");
 
-    auto constexpr Id_SignalDelay_Delay = 0;
-    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
-    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
+    auto constexpr Id_SignalDelay_Delay = SerializationKey(0, "delay");
+    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = SerializationKey(1, "numSignalEntriesInitialized");
+    auto constexpr Id_SignalDelay_RingBufferIndex = SerializationKey(2, "ringBufferIndex");
 
-    auto constexpr Id_SignalRecorder_ReadOnly = 0;
-    auto constexpr Id_SignalRecorder_State = 1;
-    auto constexpr Id_SignalRecorder_NumSavedSignalEntries = 2;
-    auto constexpr Id_SignalRecorder_NumReadSignalEntries = 3;
+    auto constexpr Id_SignalRecorder_ReadOnly = SerializationKey(0, "readOnly");
+    auto constexpr Id_SignalRecorder_State = SerializationKey(1, "state");
+    auto constexpr Id_SignalRecorder_NumSavedSignalEntries = SerializationKey(2, "numWrittenSignalEntries");
+    auto constexpr Id_SignalRecorder_NumReadSignalEntries = SerializationKey(3, "numReadSignalEntries");
 
-    auto constexpr Id_SignalStorage_ReadOnly = 0;
+    auto constexpr Id_SignalStorage_ReadOnly = SerializationKey(0, "readOnly");
 
-    auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
+    auto constexpr Id_SignalIntegrator_NewSignalWeight = SerializationKey(0, "newSignalWeight");
 
-    auto constexpr Id_Memory_ChannelBitMask = 0;
+    auto constexpr Id_Memory_ChannelBitMask = SerializationKey(0, "channelBitMask");
 
-    auto constexpr Id_Sender_Range = 0;
-    auto constexpr Id_Sender_Oneway = 3;
+    auto constexpr Id_Sender_Range = SerializationKey(0, "range");
+    auto constexpr Id_Sender_Oneway = SerializationKey(3, "oneway");
 
-    auto constexpr Id_Receiver_RestrictToColor = 1;
-    auto constexpr Id_Receiver_RestrictToLineage = 2;
+    auto constexpr Id_Receiver_RestrictToColor = SerializationKey(1, "restrictToColors");
+    auto constexpr Id_Receiver_RestrictToLineage = SerializationKey(2, "restrictToLineage");
 
     // Description member keys for objects data
-    auto constexpr Id_Cell_CellType = 21;
-    auto constexpr Id_Cell_Constructor = 22;
-    auto constexpr Id_Cell_NeuralActivity = 23;
-    auto constexpr Id_Cell_NeuralNetwork = 24;
+    auto constexpr Id_Cell_CellType = SerializationKey(21, "cellType");
+    auto constexpr Id_Cell_Constructor = SerializationKey(22, "constructor");
+    auto constexpr Id_Cell_NeuralActivity = SerializationKey(23, "neuralActivity");
+    auto constexpr Id_Cell_NeuralNetwork = SerializationKey(24, "neuralNetwork");
 
-    auto constexpr Id_Object_Connections = 7;
-    auto constexpr Id_Object_Type = 8;
+    auto constexpr Id_Object_Connections = SerializationKey(7, "connections");
+    auto constexpr Id_Object_Type = SerializationKey(8, "type");
 
-    auto constexpr Id_Sensor_Mode = 4;
-    auto constexpr Id_Sensor_LastMatch = 5;
-    auto constexpr Id_Generator_Mode = 4;
-    auto constexpr Id_Attacker_Mode = 0;
-    auto constexpr Id_Muscle_Mode = 3;
-    auto constexpr Id_Reconnector_Mode = 0;
-    auto constexpr Id_Memory_Mode = 1;
-    auto constexpr Id_Memory_SignalEntries = 2;
-    auto constexpr Id_Communicator_Mode = 0;
+    auto constexpr Id_Sensor_Mode = SerializationKey(4, "mode");
+    auto constexpr Id_Sensor_LastMatch = SerializationKey(5, "lastMatch");
+    auto constexpr Id_Generator_Mode = SerializationKey(4, "mode");
+    auto constexpr Id_Attacker_Mode = SerializationKey(0, "mode");
+    auto constexpr Id_Muscle_Mode = SerializationKey(3, "mode");
+    auto constexpr Id_Reconnector_Mode = SerializationKey(0, "mode");
+    auto constexpr Id_Memory_Mode = SerializationKey(1, "mode");
+    auto constexpr Id_Memory_SignalEntries = SerializationKey(2, "signalEntries");
+    auto constexpr Id_Communicator_Mode = SerializationKey(0, "mode");
 
-    auto constexpr Id_Desc_Objects = 0;
-    auto constexpr Id_Desc_Energies = 1;
-    auto constexpr Id_Desc_Creatures = 2;
-    auto constexpr Id_Desc_Genomes = 3;
+    auto constexpr Id_Desc_Objects = SerializationKey(0, "objects");
+    auto constexpr Id_Desc_Energies = SerializationKey(1, "energies");
+    auto constexpr Id_Desc_Creatures = SerializationKey(2, "creatures");
+    auto constexpr Id_Desc_Genomes = SerializationKey(3, "genomes");
 
     // Serialized type ids
-    auto constexpr Id_ObjectType_Solid = 0;
-    auto constexpr Id_ObjectType_Fluid = 1;
-    auto constexpr Id_ObjectType_FreeCell = 2;
-    auto constexpr Id_ObjectType_Cell = 3;
+    auto constexpr Id_ObjectType_Solid = SerializationKey(0, "solid");
+    auto constexpr Id_ObjectType_Fluid = SerializationKey(1, "fluid");
+    auto constexpr Id_ObjectType_FreeCell = SerializationKey(2, "freeCell");
+    auto constexpr Id_ObjectType_Cell = SerializationKey(3, "cell");
 
-    auto constexpr Id_CellType_Base = 0;
-    auto constexpr Id_CellType_Depot = 1;
-    auto constexpr Id_CellType_Sensor = 2;
-    auto constexpr Id_CellType_Generator = 3;
-    auto constexpr Id_CellType_Attacker = 4;
-    auto constexpr Id_CellType_Injector = 5;
-    auto constexpr Id_CellType_Muscle = 6;
-    auto constexpr Id_CellType_Defender = 7;
-    auto constexpr Id_CellType_Reconnector = 8;
-    auto constexpr Id_CellType_Detonator = 9;
-    auto constexpr Id_CellType_Digestor = 10;
-    auto constexpr Id_CellType_Memory = 11;
-    auto constexpr Id_CellType_Communicator = 12;
-    auto constexpr Id_CellType_Void = 13;
+    auto constexpr Id_CellType_Base = SerializationKey(0, "base");
+    auto constexpr Id_CellType_Depot = SerializationKey(1, "depot");
+    auto constexpr Id_CellType_Sensor = SerializationKey(2, "sensor");
+    auto constexpr Id_CellType_Generator = SerializationKey(3, "generator");
+    auto constexpr Id_CellType_Attacker = SerializationKey(4, "attacker");
+    auto constexpr Id_CellType_Injector = SerializationKey(5, "injector");
+    auto constexpr Id_CellType_Muscle = SerializationKey(6, "muscle");
+    auto constexpr Id_CellType_Defender = SerializationKey(7, "defender");
+    auto constexpr Id_CellType_Reconnector = SerializationKey(8, "reconnector");
+    auto constexpr Id_CellType_Detonator = SerializationKey(9, "detonator");
+    auto constexpr Id_CellType_Digestor = SerializationKey(10, "digestor");
+    auto constexpr Id_CellType_Memory = SerializationKey(11, "memory");
+    auto constexpr Id_CellType_Communicator = SerializationKey(12, "communicator");
+    auto constexpr Id_CellType_Void = SerializationKey(13, "void");
 
-    auto constexpr Id_SensorMode_DetectEnergy = 0;
-    auto constexpr Id_SensorMode_DetectSolid = 1;
-    auto constexpr Id_SensorMode_DetectFreeCell = 2;
-    auto constexpr Id_SensorMode_DetectCreature = 3;
+    auto constexpr Id_SensorMode_DetectEnergy = SerializationKey(0, "detectEnergy");
+    auto constexpr Id_SensorMode_DetectSolid = SerializationKey(1, "detectSolid");
+    auto constexpr Id_SensorMode_DetectFreeCell = SerializationKey(2, "detectFreeCell");
+    auto constexpr Id_SensorMode_DetectCreature = SerializationKey(3, "detectCreature");
 
-    auto constexpr Id_GeneratorMode_SquareSignal = 0;
-    auto constexpr Id_GeneratorMode_SawtoothSignal = 1;
+    auto constexpr Id_GeneratorMode_SquareSignal = SerializationKey(0, "squareSignal");
+    auto constexpr Id_GeneratorMode_SawtoothSignal = SerializationKey(1, "sawtoothSignal");
 
-    auto constexpr Id_AttackerMode_AttackFreeCell = 0;
-    auto constexpr Id_AttackerMode_AttackCreature = 1;
+    auto constexpr Id_AttackerMode_AttackFreeCell = SerializationKey(0, "attackFreeCell");
+    auto constexpr Id_AttackerMode_AttackCreature = SerializationKey(1, "attackCreature");
 
-    auto constexpr Id_MuscleMode_AutoBending = 0;
-    auto constexpr Id_MuscleMode_ManualBending = 1;
-    auto constexpr Id_MuscleMode_AngleBending = 2;
-    auto constexpr Id_MuscleMode_AutoCrawling = 3;
-    auto constexpr Id_MuscleMode_ManualCrawling = 4;
-    auto constexpr Id_MuscleMode_DirectMovement = 5;
+    auto constexpr Id_MuscleMode_AutoBending = SerializationKey(0, "autoBending");
+    auto constexpr Id_MuscleMode_ManualBending = SerializationKey(1, "manualBending");
+    auto constexpr Id_MuscleMode_AngleBending = SerializationKey(2, "angleBending");
+    auto constexpr Id_MuscleMode_AutoCrawling = SerializationKey(3, "autoCrawling");
+    auto constexpr Id_MuscleMode_ManualCrawling = SerializationKey(4, "manualCrawling");
+    auto constexpr Id_MuscleMode_DirectMovement = SerializationKey(5, "directMovement");
 
-    auto constexpr Id_ReconnectorMode_ReconnectSolid = 0;
-    auto constexpr Id_ReconnectorMode_ReconnectFreeCell = 1;
-    auto constexpr Id_ReconnectorMode_ReconnectCreature = 2;
+    auto constexpr Id_ReconnectorMode_ReconnectSolid = SerializationKey(0, "reconnectSolid");
+    auto constexpr Id_ReconnectorMode_ReconnectFreeCell = SerializationKey(1, "reconnectFreeCell");
+    auto constexpr Id_ReconnectorMode_ReconnectCreature = SerializationKey(2, "reconnectCreature");
 
-    auto constexpr Id_MemoryMode_SignalDelay = 0;
-    auto constexpr Id_MemoryMode_SignalRecorder = 1;
-    auto constexpr Id_MemoryMode_SignalStorage = 2;
-    auto constexpr Id_MemoryMode_SignalIntegrator = 3;
+    auto constexpr Id_MemoryMode_SignalDelay = SerializationKey(0, "signalDelay");
+    auto constexpr Id_MemoryMode_SignalRecorder = SerializationKey(1, "signalRecorder");
+    auto constexpr Id_MemoryMode_SignalStorage = SerializationKey(2, "signalStorage");
+    auto constexpr Id_MemoryMode_SignalIntegrator = SerializationKey(3, "signalIntegrator");
 
-    auto constexpr Id_CommunicatorMode_Sender = 0;
-    auto constexpr Id_CommunicatorMode_Receiver = 1;
+    auto constexpr Id_CommunicatorMode_Sender = SerializationKey(0, "sender");
+    auto constexpr Id_CommunicatorMode_Receiver = SerializationKey(1, "receiver");
 }
 
 namespace cereal
@@ -2056,6 +2057,76 @@ bool SerializerService::deserializeContentFromFile(ContentDesc& content, std::fi
     } catch (...) {
         return false;
     }
+}
+
+namespace
+{
+    template <typename T>
+    boost::json::value serializeDescToJson(T const& desc, JsonSerializationSettings const& settings)
+    {
+        return cereal::saveDescToJson(desc, settings, "");
+    }
+}
+
+boost::json::value SerializerService::serializeToJson(ObjectDesc const& object, bool omitDefaultValues) const
+{
+    return serializeDescToJson(object, {.omitDefaultValues = omitDefaultValues});
+}
+
+boost::json::value SerializerService::serializeToJson(EnergyDesc const& energy, bool omitDefaultValues) const
+{
+    return serializeDescToJson(energy, {.omitDefaultValues = omitDefaultValues});
+}
+
+boost::json::value SerializerService::serializeToJson(CreatureDesc const& creature, bool omitDefaultValues) const
+{
+    return serializeDescToJson(creature, {.omitDefaultValues = omitDefaultValues});
+}
+
+boost::json::value SerializerService::serializeToJson(GenomeDesc const& genome, bool omitDefaultValues) const
+{
+    return serializeDescToJson(genome, {.omitDefaultValues = omitDefaultValues});
+}
+
+namespace
+{
+    template <typename T>
+    void deserializeDescFromJson(T& desc, boost::json::value const& json, bool patch)
+    {
+        auto result = patch ? desc : T();
+        cereal::loadDescFromJson(json, result, "", patch);
+        desc = std::move(result);
+    }
+}
+
+void SerializerService::deserializeFromJson(ObjectDesc& object, boost::json::value const& json, bool patch) const
+{
+    deserializeDescFromJson(object, json, patch);
+}
+
+void SerializerService::deserializeFromJson(EnergyDesc& energy, boost::json::value const& json, bool patch) const
+{
+    deserializeDescFromJson(energy, json, patch);
+}
+
+void SerializerService::deserializeFromJson(CreatureDesc& creature, boost::json::value const& json, bool patch) const
+{
+    deserializeDescFromJson(creature, json, patch);
+}
+
+void SerializerService::deserializeFromJson(GenomeDesc& genome, boost::json::value const& json, bool patch) const
+{
+    deserializeDescFromJson(genome, json, patch);
+}
+
+boost::json::value SerializerService::getJsonFormatOfObject() const
+{
+    return serializeDescToJson(ObjectDesc(), {.omitDefaultValues = false, .describeFormat = true});
+}
+
+boost::json::value SerializerService::getJsonFormatOfGenome() const
+{
+    return serializeDescToJson(GenomeDesc(), {.omitDefaultValues = false, .describeFormat = true});
 }
 
 void SerializerService::serializeDescription(ContentDesc const& description, std::ostream& stream) const

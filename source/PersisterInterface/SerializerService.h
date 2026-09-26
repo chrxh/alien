@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <string>
 
+#include <boost/json/value.hpp>
+
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
@@ -34,6 +36,19 @@ public:
 
     bool serializeContentToFile(std::filesystem::path const& filename, ContentDesc const& content) const;
     bool deserializeContentFromFile(ContentDesc& content, std::filesystem::path const& filename) const;
+
+    boost::json::value serializeToJson(ObjectDesc const& object, bool omitDefaultValues = true) const;
+    boost::json::value serializeToJson(EnergyDesc const& energy, bool omitDefaultValues = true) const;
+    boost::json::value serializeToJson(CreatureDesc const& creature, bool omitDefaultValues = true) const;
+    boost::json::value serializeToJson(GenomeDesc const& genome, bool omitDefaultValues = true) const;
+
+    void deserializeFromJson(ObjectDesc& object, boost::json::value const& json, bool patch = false) const;
+    void deserializeFromJson(EnergyDesc& energy, boost::json::value const& json, bool patch = false) const;
+    void deserializeFromJson(CreatureDesc& creature, boost::json::value const& json, bool patch = false) const;
+    void deserializeFromJson(GenomeDesc& genome, boost::json::value const& json, bool patch = false) const;
+
+    boost::json::value getJsonFormatOfObject() const;
+    boost::json::value getJsonFormatOfGenome() const;
 
 private:
     void serializeDescription(ContentDesc const& description, std::ostream& stream) const;

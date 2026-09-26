@@ -15,6 +15,7 @@ public:
     static McpToolsFacade get();
 
     virtual std::vector<McpTool> getTools(McpToolContext& context) = 0;
+    virtual void process() = 0;
 
 protected:
     static McpToolsFacade _instance;

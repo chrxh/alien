@@ -31,6 +31,7 @@
 #include <PersisterInterface/SerializerService.h>
 
 #include <Network/McpArguments.h>
+#include <Network/McpJson.h>
 #include <Network/McpSchema.h>
 
 namespace
@@ -405,7 +406,7 @@ McpToolResult McpParameterTools::listParameterGroups(boost::json::object const& 
         {"location_type", getLocationTypeName(locationType)},
         {"groups", std::move(groups)},
     };
-    return {.text = boost::json::serialize(result)};
+    return {.text = McpJson::serialize(result)};
 }
 
 McpToolResult McpParameterTools::getParameters(boost::json::object const& arguments) const
@@ -435,7 +436,7 @@ McpToolResult McpParameterTools::getParameters(boost::json::object const& argume
         result["expert_settings_enabled"] = *SpecificationEvaluationService::get().getExpertToggleRef(groupSpec._expertToggle, parameters);
     }
     result["parameters"] = std::move(entries);
-    return {.text = boost::json::serialize(result)};
+    return {.text = McpJson::serialize(result)};
 }
 
 namespace
@@ -738,7 +739,7 @@ McpToolResult McpParameterTools::setParameters(boost::json::object const& argume
     if (anyAdjusted) {
         result["note"] = "Values marked as adjusted were corrected to the valid range.";
     }
-    return {.text = boost::json::serialize(result)};
+    return {.text = McpJson::serialize(result)};
 }
 
 McpToolResult McpParameterTools::enableExpertSettings(boost::json::object const& arguments) const
@@ -806,7 +807,7 @@ McpToolResult McpParameterTools::listLocations() const
         {"max_layers", MAX_LAYERS},
         {"max_radiation_sources", MAX_SOURCES},
     };
-    return {.text = boost::json::serialize(result)};
+    return {.text = McpJson::serialize(result)};
 }
 
 namespace

@@ -190,6 +190,24 @@ std::string PictureGuiService::encodeJpg(PictureData const& picture)
     return result;
 }
 
+std::string PictureGuiService::encodePng(PictureData const& picture)
+{
+    std::string result;
+    auto appendData = [](void* context, void* data, int size) { static_cast<std::string*>(context)->append(static_cast<char const*>(data), size); };
+    auto writeResult = stbi_write_png_to_func(
+        appendData,
+        &result,
+        picture.resolution.x,
+        picture.resolution.y,
+        PictureData::NumChannels,
+        picture.pixels.data(),
+        picture.resolution.x * PictureData::NumChannels);
+    if (writeResult == 0) {
+        throw AlienException("The picture could not be encoded.");
+    }
+    return result;
+}
+
 void PictureGuiService::savePng(PictureData const& picture, std::filesystem::path const& filename)
 {
     auto result = stbi_write_png(
