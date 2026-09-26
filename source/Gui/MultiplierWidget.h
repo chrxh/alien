@@ -16,9 +16,9 @@ enum MultiplierMode_
     MultiplierMode_Random
 };
 
-class MultiplierTool : public MainLoopEntity
+class MultiplierWidget : public MainLoopEntity
 {
-    MAKE_SINGLETON(MultiplierTool);
+    MAKE_SINGLETON(MultiplierWidget);
 
 public:
     void processContent();
