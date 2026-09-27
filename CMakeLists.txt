@@ -322,6 +322,12 @@ if(USE_HIP)
         add_library(cudart INTERFACE)
         target_link_libraries(cudart INTERFACE hip::host)
     endif()
+
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        # Match the ABI of the MSVC-built Boost.JSON library, see the header.
+        set_property(TARGET Boost::json APPEND PROPERTY
+            INTERFACE_COMPILE_OPTIONS "/FI${CMAKE_CURRENT_SOURCE_DIR}/external/hip/boost_json_msvc_abi.h")
+    endif()
 endif()
 
 add_subdirectory(external/ImFileDialog)
