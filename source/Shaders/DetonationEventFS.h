@@ -7,7 +7,7 @@ namespace Shaders
     std::string_view const DetonationEventFS = R"(
 #version 330 core
 
-// Flash of a detonation, added to the merged scene. It lights up the surroundings with relief lighting,
+// Flash of a detonation, rendered into a separate buffer and later added to the scene. It lights up the scene with relief lighting,
 // soft shadows and light shafts and vanishes within a few frames. Sizes are measured in detonator radii, times in seconds.
 
 in vec2 localPos;

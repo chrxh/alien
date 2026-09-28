@@ -256,7 +256,6 @@ private:
     _DetonationEventRenderStep(StepParameters const& parameters);
 
     void updateDetonations(GeometryBuffers const& geometryBuffers, std::chrono::steady_clock::time_point now);
-    void copyInputToTarget(unsigned int inputTexture) const;
 
     struct Detonation
     {
@@ -269,5 +268,4 @@ private:
 
     unsigned int _vao = 0;
     unsigned int _vbo = 0;
-    unsigned int _sourceFbo = 0;
 };
