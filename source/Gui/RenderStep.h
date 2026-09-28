@@ -1,6 +1,8 @@
 #pragma once
 
+#include <chrono>
 #include <filesystem>
+#include <unordered_map>
 #include <variant>
 
 #include <Base/MathTypes.h>
@@ -245,10 +247,29 @@ class _DetonationEventRenderStep : public _RenderStep
 {
 public:
     static DetonationEventRenderStep create(StepParameters const& parameters);
+    ~_DetonationEventRenderStep();
 
 protected:
     void execute(ExecutionParameters parameters) override;
 
 private:
     _DetonationEventRenderStep(StepParameters const& parameters);
+
+    void updateDetonations(GeometryBuffers const& geometryBuffers, std::chrono::steady_clock::time_point now);
+    void copyInputToTarget(unsigned int inputTexture) const;
+
+    struct Detonation
+    {
+        RealVector2D pos;
+        float radius = 0;
+        float seed = 0;
+        std::chrono::steady_clock::time_point startTime;
+        bool reported = false;
+    };
+    std::unordered_map<uint64_t, Detonation> _detonations;
+    std::chrono::steady_clock::time_point _creationTime;
+
+    unsigned int _vao = 0;
+    unsigned int _vbo = 0;
+    unsigned int _sourceFbo = 0;
 };
