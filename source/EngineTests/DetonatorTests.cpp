@@ -88,6 +88,26 @@ TEST_F(DetonatorTests, explosion)
     EXPECT_TRUE(Math::length(actualOtherObject._vel) > NEAR_ZERO);
 }
 
+TEST_F(DetonatorTests, shockWave)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DetonatorDesc().state(DetonatorState_Activated).countdown(0))),
+        ObjectDesc().id(2).pos({125.0f, 100.0f}),
+        ObjectDesc().id(3).pos({190.0f, 100.0f}),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(10 * TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualObjectInReach = actualData.getObjectRef(2);
+    auto actualObjectOutOfReach = actualData.getObjectRef(3);
+
+    EXPECT_TRUE(actualObjectInReach._vel.x > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(0.0f, actualObjectInReach._vel.y));
+    EXPECT_TRUE(approxCompare(0.0f, Math::length(actualObjectOutOfReach._vel)));
+}
+
 TEST_F(DetonatorTests, chainExplosion)
 {
     auto data = ContentDesc().addCreature({

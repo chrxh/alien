@@ -390,7 +390,6 @@ void SimulationView::setupRenderPipeline()
                 _NonFluidObjectRenderStep::create(
                     StepParameters().shader(ShaderSources::NonFluidObject).uniformFunc(cellAppearanceUniformFunc).previousTargetSelection(0)),
                 _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
-                _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
@@ -423,6 +422,24 @@ void SimulationView::setupRenderPipeline()
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(objectMergeUniformFunc)),
+            }),
+        },
+
+        // Render block: Two outputs: Detonation flashes lighting the scene and the scene
+        RenderBlock{
+            RenderSequence().steps({
+                _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent)),
+            }),
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+            }),
+        },
+
+        // Render block: Add detonation flashes to the scene
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
             }),
         },
 
