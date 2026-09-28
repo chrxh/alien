@@ -390,7 +390,6 @@ void SimulationView::setupRenderPipeline()
                 _NonFluidObjectRenderStep::create(
                     StepParameters().shader(ShaderSources::NonFluidObject).uniformFunc(cellAppearanceUniformFunc).previousTargetSelection(0)),
                 _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
-                _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
@@ -418,11 +417,12 @@ void SimulationView::setupRenderPipeline()
             }),
         },
 
-        // Render block: Merge fluid, connections and objects sequence
+        // Render block: Merge fluid, connections and objects sequence, then light the result by detonations
         RenderBlock{
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(objectMergeUniformFunc)),
+                _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent)),
             }),
         },
 

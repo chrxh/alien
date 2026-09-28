@@ -10,47 +10,43 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 in float vertexRadius[];
-out vec2 quadCoord;  // Coordinates within the quad, from -1 to 1
-out float fragRadius;
+in float vertexProgress[];
+in float vertexSeed[];
+
+// Relative to the detonation in world units, y points upwards on screen like gl_FragCoord
+out vec2 localPos;
+flat out vec2 centerPixelPos;
+flat out float blastRadius;
+flat out float progress;
+flat out float seed;
 
 uniform vec2 viewportSize;
 uniform float zoom;
 
+// Reach of the light in multiples of the detonator radius
+const float LightReach = 5.5;
+
+void emitCorner(vec2 corner, vec4 center, float extent)
+{
+    vec2 ndcExtent = extent * zoom / viewportSize * 2.0;
+    gl_Position = vec4(center.xy + corner * ndcExtent, 0.0, 1.0);
+    localPos = corner * extent;
+    centerPixelPos = (center.xy * 0.5 + 0.5) * viewportSize;
+    blastRadius = vertexRadius[0];
+    progress = vertexProgress[0];
+    seed = vertexSeed[0];
+    EmitVertex();
+}
+
 void main()
 {
-    // Get the center position in NDC
     vec4 center = gl_in[0].gl_Position;
-    float radius = vertexRadius[0];
-    
-    // Pass radius to fragment shader
-    fragRadius = radius;
-    
-    // Calculate size in NDC coordinates
-    // The quad should be large enough to contain the circle
-    float ndcHalfWidth = (radius * zoom) / viewportSize.x * 2.0;
-    float ndcHalfHeight = (radius * zoom) / viewportSize.y * 2.0;
-    
-    // Generate quad (4 vertices as triangle strip)
-    // Bottom-left
-    gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    quadCoord = vec2(-1.0, -1.0);
-    EmitVertex();
-    
-    // Bottom-right
-    gl_Position = vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    quadCoord = vec2(1.0, -1.0);
-    EmitVertex();
-    
-    // Top-left
-    gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    quadCoord = vec2(-1.0, 1.0);
-    EmitVertex();
-    
-    // Top-right
-    gl_Position = vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    quadCoord = vec2(1.0, 1.0);
-    EmitVertex();
-    
+    float extent = vertexRadius[0] * LightReach;
+
+    emitCorner(vec2(-1.0, -1.0), center, extent);
+    emitCorner(vec2(1.0, -1.0), center, extent);
+    emitCorner(vec2(-1.0, 1.0), center, extent);
+    emitCorner(vec2(1.0, 1.0), center, extent);
     EndPrimitive();
 }
 )";

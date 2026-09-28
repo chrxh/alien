@@ -22,7 +22,6 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_vboForSelectedConnections);
     glGenVertexArrays(1, &result->_vaoForAttackEvents);
     glGenBuffers(1, &result->_vboForAttackEvents);
-    glGenVertexArrays(1, &result->_vaoForDetonationEvents);
     glGenBuffers(1, &result->_vboForDetonationEvents);
     return GeometryBuffers(result);
 }

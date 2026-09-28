@@ -40,7 +40,7 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
         }
         if (detonator.countdown == -1) {
             object->typeData.cell.event = CellEvent_Detonation;
-            object->typeData.cell.eventCounter = 10;
+            object->typeData.cell.eventCounter = 30;
             detonator.countdown = 0;
             data.objectMap.executeForEach(
                 object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached(), [&](Object* const& otherObject) {
