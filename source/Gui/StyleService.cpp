@@ -17,7 +17,14 @@
 #include <ImFileDialog.h>
 #include <implot.h>
 
+#include <Base/GlobalSettings.h>
+
 #include "WindowController.h"
+
+namespace
+{
+    auto constexpr LightModeSettingsKey = "settings.light mode";
+}
 
 namespace Const
 {
@@ -26,21 +33,21 @@ namespace Const
     float const SliderBarWidth = 30.0f;
     float const WindowsRounding = 10.0f;
 
-    // Base palette: neutral dark grays with a slight blue bias, one accent reserved for selection and focus
-    ImColor const BackgroundColor = ImColor::HSV(0.583f, 0.316f, 0.075f);
-    ImColor const PanelColor = ImColor::HSV(0.583f, 0.323f, 0.122f);
-    ImColor const RaisedColor = ImColor::HSV(0.583f, 0.333f, 0.165f);
-    ImColor const InputColor = ImColor::HSV(0.583f, 0.350f, 0.157f);
-    ImColor const LineColor = ImColor::HSV(0.574f, 0.310f, 0.227f);
-    ImColor const LineSoftColor = ImColor::HSV(0.578f, 0.326f, 0.180f);
-    ImColor const TextBaseColor = ImColor::HSV(0.564f, 0.055f, 0.925f);
-    ImColor const TextDimColor = ImColor::HSV(0.570f, 0.158f, 0.647f);
-    ImColor const TextFaintColor = ImColor::HSV(0.570f, 0.222f, 0.459f);
-    ImColor const AccentColor = ImColor::HSV(0.484f, 0.587f, 0.816f);
-    ImColor const AccentDeepColor = ImColor::HSV(0.490f, 0.556f, 0.247f);
-    ImColor const AccentLineColor = ImColor::HSV(0.487f, 0.569f, 0.427f);
-    ImColor const WarningColor = ImColor::HSV(0.093f, 0.607f, 0.878f);
-    ImColor const DangerColor = ImColor::HSV(0.979f, 0.603f, 0.878f);
+    ImColor BackgroundColor;
+    ImColor PanelColor;
+    ImColor RaisedColor;
+    ImColor InputColor;
+    ImColor LineColor;
+    ImColor LineSoftColor;
+    ImColor TextStrongColor;
+    ImColor TextBaseColor;
+    ImColor TextDimColor;
+    ImColor TextFaintColor;
+    ImColor AccentColor;
+    ImColor AccentDeepColor;
+    ImColor AccentLineColor;
+    ImColor WarningColor;
+    ImColor DangerColor;
 
     ImColor const ProgramVersionTextColor = ImColor::HSV(0.5f, 0.1f, 1.0f, 1.0f);
 
@@ -49,56 +56,57 @@ namespace Const
     int64_t const SimulationSliderColor_Base = 0xff4c4c4c;
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
 
-    ImColor const TextTooltipColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
-    ImColor const TextInfoColor = ImColor::HSV(0.167f, 0.64f, 0.53f);
-    ImColor const TextDecentColor = TextFaintColor;
-    ImColor const TextConflictColor = WarningColor;
+    ImColor TextTooltipColor;
+    ImColor TextInfoColor;
+    ImColor TextDecentColor;
+    ImColor TextConflictColor;
 
-    ImColor const HeaderColor = AccentDeepColor;
-    ImColor const HeaderActiveColor = ImColor::HSV(0.489f, 0.548f, 0.329f);
-    ImColor const HeaderHoveredColor = RaisedColor;
-    ImColor const HeaderSelectedHoveredColor = ImColor::HSV(0.489f, 0.552f, 0.302f);
+    ImColor HeaderColor;
+    ImColor HeaderActiveColor;
+    ImColor HeaderHoveredColor;
+    ImColor HeaderSelectedHoveredColor;
 
-    ImColor const MenuButtonColor = ImColor::HSV(0.583f, 0.333f, 0.212f);
-    ImColor const MenuButtonHoveredColor = AccentLineColor;
-    ImColor const MenuButtonActiveColor = AccentDeepColor;
+    ImColor MenuButtonColor;
+    ImColor MenuButtonHoveredColor;
+    ImColor MenuButtonActiveColor;
 
-    ImColor const ImportantButtonColor = ImColor::HSV(0.980f, 0.607f, 0.478f);
-    ImColor const ImportantButtonHoveredColor = ImColor::HSV(0.980f, 0.620f, 0.639f);
-    ImColor const ImportantButtonActiveColor = DangerColor;
+    ImColor ImportantButtonColor;
+    ImColor ImportantButtonHoveredColor;
+    ImColor ImportantButtonActiveColor;
 
-    ImColor const TreeNodeHighColor = ImColor::HSV(0.578f, 0.333f, 0.200f);
-    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.579f, 0.323f, 0.255f);
-    ImColor const TreeNodeHighActiveColor = AccentDeepColor;
-    ImColor const TreeNodeDefaultColor = PanelColor;
-    ImColor const TreeNodeDefaultHoveredColor = RaisedColor;
-    ImColor const TreeNodeDefaultActiveColor = AccentDeepColor;
-    ImColor const TreeNodeLowColor = ImColor::HSV(0.556f, 0.333f, 0.106f);
-    ImColor const TreeNodeLowHoveredColor = RaisedColor;
-    ImColor const TreeNodeLowActiveColor = AccentDeepColor;
+    ImColor TreeNodeHighColor;
+    ImColor TreeNodeHighHoveredColor;
+    ImColor TreeNodeHighActiveColor;
+    ImColor TreeNodeDefaultColor;
+    ImColor TreeNodeDefaultHoveredColor;
+    ImColor TreeNodeDefaultActiveColor;
+    ImColor TreeNodeLowColor;
+    ImColor TreeNodeLowHoveredColor;
+    ImColor TreeNodeLowActiveColor;
 
-    ImColor const DisabledOverlayColor1 = ImColor::HSV(0.0f, 0.0f, 0.35f, 0.5f);
-    ImColor const DisabledOverlayColor2 = ImColor::HSV(0.0f, 0.0f, 0.06f, 0.2f);
+    ImColor DisabledOverlayColor1;
+    ImColor DisabledOverlayColor2;
 
-    ImColor const GroupDefaultColor = ImColor::HSV(0.583f, 0.333f, 0.141f);
-    ImColor const GroupHighColor = ImColor::HSV(0.583f, 0.348f, 0.180f);
-    ImColor const GroupAccentBarColor = AccentColor;
-    ImColor const GroupTextColor = TextDimColor;
-    ImColor const GroupHighTextColor = TextBaseColor;
+    ImColor GroupDefaultColor;
+    ImColor GroupHighColor;
+    ImColor GroupAccentBarColor;
+    ImColor GroupTextColor;
+    ImColor GroupHighTextColor;
 
-    ImColor const MovableSeparatorColor = LineSoftColor;
-    ImColor const MovableSeparatorHoveredColor = AccentLineColor;
-    ImColor const MovableSeparatorActiveColor = AccentColor;
+    ImColor MovableSeparatorColor;
+    ImColor MovableSeparatorHoveredColor;
+    ImColor MovableSeparatorActiveColor;
 
-    ImColor const TableHeaderColor = PanelColor;
+    ImColor TableHeaderColor;
+    ImColor TableRowAltColor;
 
-    ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
-    ImColor const StatusBarTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor MonospaceColor;
+    ImColor StatusBarTextColor;
 
-    ImColor const HeadlineColor = AccentColor;
+    ImColor HeadlineColor;
 
-    ImColor const UnsavedChangesColor = WarningColor;
-    ImColor const UnsavedChangesBackgroundColor = ImColor::HSV(0.094f, 0.545f, 0.216f);
+    ImColor UnsavedChangesColor;
+    ImColor UnsavedChangesBackgroundColor;
 
     ImColor const SelectionAreaFillColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 0.6f);
     ImColor const SelectionAreaBorderColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 1.0f);
@@ -108,8 +116,8 @@ namespace Const
     ImColor const ConstructionPreviewPointColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const ConstructionPreviewBrushColor = ImColor::HSV(0.54f, 0.3f, 1.0f, 0.6f);
 
-    ImColor const McpSuccessColor = ImColor::HSV(0.43f, 0.40f, 0.68f);
-    ImColor const McpRunningBadgeColor = ImColor::HSV(0.43f, 0.45f, 0.20f);
+    ImColor McpSuccessColor;
+    ImColor McpRunningBadgeColor;
 
     ImColor const CellTypeOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
     ImColor const CellTypeOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
@@ -118,44 +126,42 @@ namespace Const
 
     ImColor const SelectedObjectOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
 
-    // Icon buttons keep a light blue tint so they stand out against the neutral panels
-    ImColor const ToolbarButtonTextColor = ImColor::HSV(0.530f, 0.320f, 0.950f);
+    ImColor ToolbarButtonTextColor;
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.0f);
-    ImColor const ToolbarButtonHoveredColor = RaisedColor;
-    ImColor const ToolbarButtonSelectedColor = AccentDeepColor;
-    ImColor const ToolbarButtonSelectedTextColor = AccentColor;
-    ImColor const ToolbarButtonDisabledTextColor = TextFaintColor;
-    ImColor const ToolbarSelectionBarColor = AccentColor;
-    ImColor const ToolbarGroupColor = ImColor::HSV(0.583f, 0.100f, 1.000f, 0.050f);
-    ImColor const ToolbarOverflowColor = TextFaintColor;
-    ImColor const ToolbarOverflowHoveredColor = AccentColor;
-    ImColor const ToolbarMenuHoveredColor = AccentDeepColor;
+    ImColor ToolbarButtonHoveredColor;
+    ImColor ToolbarButtonSelectedColor;
+    ImColor ToolbarButtonSelectedTextColor;
+    ImColor ToolbarButtonDisabledTextColor;
+    ImColor ToolbarSelectionBarColor;
+    ImColor ToolbarGroupColor;
+    ImColor ToolbarOverflowColor;
+    ImColor ToolbarOverflowHoveredColor;
+    ImColor ToolbarMenuHoveredColor;
 
-    // Floats above the simulation, therefore a semi-transparent background
-    ImColor const EditToggleColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.850f);
-    ImColor const EditToggleSelectedColor = ImColor::HSV(0.490f, 0.556f, 0.247f, 0.900f);
-    ImColor const EditToggleBorderColor = LineColor;
-    ImColor const EditToggleSelectedBorderColor = AccentColor;
-    ImColor const EditToggleGlowColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.180f);
-    ImColor const EditToggleIconColor = TextDimColor;
-    ImColor const EditToggleHoveredIconColor = TextBaseColor;
-    ImColor const EditToggleSelectedIconColor = AccentColor;
-    ImColor const EditToggleLabelColor = TextBaseColor;
-    ImColor const EditToggleShortcutColor = TextFaintColor;
+    ImColor EditToggleColor;
+    ImColor EditToggleSelectedColor;
+    ImColor EditToggleBorderColor;
+    ImColor EditToggleSelectedBorderColor;
+    ImColor EditToggleGlowColor;
+    ImColor EditToggleIconColor;
+    ImColor EditToggleHoveredIconColor;
+    ImColor EditToggleSelectedIconColor;
+    ImColor EditToggleLabelColor;
+    ImColor EditToggleShortcutColor;
 
-    ImColor const ActionButtonTextColor = ImColor::HSV(0.530f, 0.400f, 0.950f);
-    ImColor const ActionButtonHighlightedTextColor = AccentColor;
-    ImColor const ActionButtonBackgroundColor = RaisedColor;
-    ImColor const ActionButtonHoveredColor = ImColor::HSV(0.583f, 0.321f, 0.220f);
-    ImColor const ActionButtonActiveColor = AccentDeepColor;
+    ImColor ActionButtonTextColor;
+    ImColor ActionButtonHighlightedTextColor;
+    ImColor ActionButtonBackgroundColor;
+    ImColor ActionButtonHoveredColor;
+    ImColor ActionButtonActiveColor;
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
-    ImColor const ToggleOnColor = AccentLineColor;
-    ImColor const ToggleOnHoveredColor = AccentColor;
-    ImColor const ToggleOffColor = LineSoftColor;
-    ImColor const ToggleOffHoveredColor = LineColor;
-    ImColor const ToggleKnobColor = TextBaseColor;
-    ImColor const ToggleKnobBorderColor = BackgroundColor;
+    ImColor ToggleOnColor;
+    ImColor ToggleOnHoveredColor;
+    ImColor ToggleOffColor;
+    ImColor ToggleOffHoveredColor;
+    ImColor ToggleKnobColor;
+    ImColor ToggleKnobBorderColor;
     ImColor const DetailButtonColor = ImColor::HSV(0, 0, 1.0f);
 
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
@@ -177,39 +183,46 @@ namespace Const
     ImColor const GenomePreviewMultipleConstructorColor = ImColor::HSV(0.375f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewSelfReplicatorColor = ImColor::HSV(0.79f, 0.8f, 1.0f, 1.0f);
 
-    ImColor const FloatingCardBackgroundColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.95f);
-    ImColor const FloatingCardBorderColor = LineColor;
+    ImColor FloatingCardBackgroundColor;
+    ImColor FloatingCardBorderColor;
 
     ImColor const SelectionFrameColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.700f);
-    ImColor const SelectionHandleColor = AccentColor;
-    ImColor const SelectionHandleHoveredColor = TextBaseColor;
-    ImColor const SelectionHandleFillColor = PanelColor;
-    ImColor const SelectionChipTextColor = TextDimColor;
-    ImColor const ScissorsTrailColor = WarningColor;
+    ImColor SelectionHandleColor;
+    ImColor SelectionHandleHoveredColor;
+    ImColor SelectionHandleFillColor;
+    ImColor SelectionChipTextColor;
+    ImColor ScissorsTrailColor;
     ImColor const MultiplierPreviewColor = ImColor::HSV(0.484f, 0.587f, 0.816f, 0.450f);
 
     ImColor const NeuronEditorConnectionColor = ImColor::HSV(0.0f, 0.0f, 0.1f);
     ImColor const NeuronEditorGridColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
     ImColor const NeuronEditorZeroLinePlotColor = ImColor::HSV(0.6f, 1.0f, 0.7f);
     ImColor const NeuronEditorPlotColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor NeuronEditorNodeFillColor;
+    ImColor NeuronEditorLabelColor;
 
-    ImColor const BrowserAddReactionButtonTextColor = ImColor::HSV(0.375f, 0.6f, 0.7f, 1.0f);
-    ImColor const BrowserDownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
-    ImColor const BrowserDeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
-    ImColor const BrowserLeafTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
-    ImColor const BrowserResourceTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor DashboardCardBackgroundColor;
+    ImColor DashboardCardBorderColor;
+    ImColor DashboardSummaryRowColor;
+
+    ImColor BrowserAddReactionButtonTextColor;
+    ImColor BrowserDownloadButtonTextColor;
+    ImColor BrowserDeleteButtonTextColor;
+    ImColor BrowserLeafTextColor;
+    ImColor BrowserResourceTextColor;
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
-    ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
-    ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
+    ImColor BrowserResourceNewTextColor;
+    ImColor BrowserResourceSymbolColor;
+    ImColor BrowserOwnReactionFrameColor;
 
-    ImColor const BrowserLoginBannerColor = ImColor::HSV(0.490f, 0.556f, 0.247f, 0.500f);
-    ImColor const BrowserLoginBannerBarColor = AccentColor;
+    ImColor BrowserLoginBannerColor;
+    ImColor BrowserLoginBannerBarColor;
 
-    ImColor const BrowserLoginHintCardColor = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.940f);
-    ImColor const BrowserLoginHintCardBorderColor = LineColor;
-    ImColor const BrowserLoginHintIconColor = AccentColor;
-    ImColor const BrowserPlaceholderTilePictureColor = ImColor::HSV(0.583f, 0.300f, 0.090f);
-    ImColor const BrowserPlaceholderTileBarColor = LineSoftColor;
+    ImColor BrowserLoginHintCardColor;
+    ImColor BrowserLoginHintCardBorderColor;
+    ImColor BrowserLoginHintIconColor;
+    ImColor BrowserPlaceholderTilePictureColor;
+    ImColor BrowserPlaceholderTileBarColor;
 }
 
 void StyleService::setup()
@@ -219,7 +232,10 @@ void StyleService::setup()
     auto& style = ImGui::GetStyle();
     style.ScaleAllSizes(scaleFactor);
 
+    _lightMode = GlobalSettings::get().getValue(LightModeSettingsKey, _lightMode);
+
     setupSizes(style);
+    setupPalette();
     setupColors(style);
 
     ImFontConfig configMerge;
@@ -275,6 +291,30 @@ void StyleService::setup()
     _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * scaleFactor);
 }
 
+void StyleService::process()
+{
+    if (_paletteOutdated) {
+        setupPalette();
+        setupColors(ImGui::GetStyle());
+        _paletteOutdated = false;
+    }
+}
+
+bool StyleService::isLightMode() const
+{
+    return _lightMode;
+}
+
+void StyleService::setLightMode(bool value)
+{
+    if (_lightMode == value) {
+        return;
+    }
+    _lightMode = value;
+    _paletteOutdated = true;
+    GlobalSettings::get().setValue(LightModeSettingsKey, _lightMode);
+}
+
 void StyleService::setupSizes(ImGuiStyle& style) const
 {
     style.FrameRounding = scale(6.0f);
@@ -283,6 +323,156 @@ void StyleService::setupSizes(ImGuiStyle& style) const
     style.GrabRounding = scale(6.0f);
     style.ScrollbarRounding = scale(6.0f);
     style.TabRounding = scale(6.0f);
+}
+
+void StyleService::setupPalette() const
+{
+    using namespace Const;
+
+    auto themed = [this](ImColor const& darkColor, ImColor const& lightColor) { return _lightMode ? lightColor : darkColor; };
+
+    // Base palette: neutral grays with a slight blue bias, one accent reserved for selection and focus
+    BackgroundColor = themed(ImColor::HSV(0.583f, 0.316f, 0.075f), ImColor::HSV(0.583f, 0.040f, 0.945f));
+    PanelColor = themed(ImColor::HSV(0.583f, 0.323f, 0.122f), ImColor::HSV(0.583f, 0.025f, 0.985f));
+    RaisedColor = themed(ImColor::HSV(0.583f, 0.333f, 0.165f), ImColor::HSV(0.583f, 0.070f, 0.880f));
+    InputColor = themed(ImColor::HSV(0.583f, 0.350f, 0.157f), ImColor::HSV(0.583f, 0.015f, 1.000f));
+    LineColor = themed(ImColor::HSV(0.574f, 0.310f, 0.227f), ImColor::HSV(0.574f, 0.120f, 0.740f));
+    LineSoftColor = themed(ImColor::HSV(0.578f, 0.326f, 0.180f), ImColor::HSV(0.578f, 0.080f, 0.840f));
+    TextStrongColor = themed(ImColor::HSV(0.0f, 0.0f, 1.0f), ImColor::HSV(0.583f, 0.300f, 0.080f));
+    TextBaseColor = themed(ImColor::HSV(0.564f, 0.055f, 0.925f), ImColor::HSV(0.583f, 0.300f, 0.140f));
+    TextDimColor = themed(ImColor::HSV(0.570f, 0.158f, 0.647f), ImColor::HSV(0.575f, 0.200f, 0.380f));
+    TextFaintColor = themed(ImColor::HSV(0.570f, 0.222f, 0.459f), ImColor::HSV(0.570f, 0.120f, 0.560f));
+    AccentColor = themed(ImColor::HSV(0.484f, 0.587f, 0.816f), ImColor::HSV(0.487f, 0.850f, 0.500f));
+    AccentDeepColor = themed(ImColor::HSV(0.490f, 0.556f, 0.247f), ImColor::HSV(0.490f, 0.220f, 0.900f));
+    AccentLineColor = themed(ImColor::HSV(0.487f, 0.569f, 0.427f), ImColor::HSV(0.487f, 0.450f, 0.720f));
+    WarningColor = themed(ImColor::HSV(0.093f, 0.607f, 0.878f), ImColor::HSV(0.083f, 0.850f, 0.800f));
+    DangerColor = themed(ImColor::HSV(0.979f, 0.603f, 0.878f), ImColor::HSV(0.979f, 0.750f, 0.780f));
+
+    TextTooltipColor = TextStrongColor;
+    TextInfoColor = themed(ImColor::HSV(0.167f, 0.64f, 0.53f), ImColor::HSV(0.120f, 0.85f, 0.62f));
+    TextDecentColor = TextFaintColor;
+    TextConflictColor = WarningColor;
+
+    HeaderColor = AccentDeepColor;
+    HeaderActiveColor = themed(ImColor::HSV(0.489f, 0.548f, 0.329f), ImColor::HSV(0.489f, 0.350f, 0.820f));
+    HeaderHoveredColor = RaisedColor;
+    HeaderSelectedHoveredColor = themed(ImColor::HSV(0.489f, 0.552f, 0.302f), ImColor::HSV(0.489f, 0.300f, 0.850f));
+
+    MenuButtonColor = themed(ImColor::HSV(0.583f, 0.333f, 0.212f), ImColor::HSV(0.583f, 0.100f, 0.850f));
+    MenuButtonHoveredColor = AccentLineColor;
+    MenuButtonActiveColor = AccentDeepColor;
+
+    ImportantButtonColor = themed(ImColor::HSV(0.980f, 0.607f, 0.478f), ImColor::HSV(0.980f, 0.400f, 0.950f));
+    ImportantButtonHoveredColor = themed(ImColor::HSV(0.980f, 0.620f, 0.639f), ImColor::HSV(0.980f, 0.500f, 0.900f));
+    ImportantButtonActiveColor = DangerColor;
+
+    TreeNodeHighColor = themed(ImColor::HSV(0.578f, 0.333f, 0.200f), ImColor::HSV(0.578f, 0.120f, 0.840f));
+    TreeNodeHighHoveredColor = themed(ImColor::HSV(0.579f, 0.323f, 0.255f), ImColor::HSV(0.579f, 0.150f, 0.800f));
+    TreeNodeHighActiveColor = AccentDeepColor;
+    TreeNodeDefaultColor = PanelColor;
+    TreeNodeDefaultHoveredColor = RaisedColor;
+    TreeNodeDefaultActiveColor = AccentDeepColor;
+    TreeNodeLowColor = themed(ImColor::HSV(0.556f, 0.333f, 0.106f), ImColor::HSV(0.556f, 0.040f, 0.970f));
+    TreeNodeLowHoveredColor = RaisedColor;
+    TreeNodeLowActiveColor = AccentDeepColor;
+
+    DisabledOverlayColor1 = themed(ImColor::HSV(0.0f, 0.0f, 0.35f, 0.5f), ImColor::HSV(0.0f, 0.0f, 0.55f, 0.35f));
+    DisabledOverlayColor2 = themed(ImColor::HSV(0.0f, 0.0f, 0.06f, 0.2f), ImColor::HSV(0.0f, 0.0f, 0.85f, 0.2f));
+
+    GroupDefaultColor = themed(ImColor::HSV(0.583f, 0.333f, 0.141f), ImColor::HSV(0.583f, 0.070f, 0.910f));
+    GroupHighColor = themed(ImColor::HSV(0.583f, 0.348f, 0.180f), ImColor::HSV(0.583f, 0.110f, 0.860f));
+    GroupAccentBarColor = AccentColor;
+    GroupTextColor = TextDimColor;
+    GroupHighTextColor = TextBaseColor;
+
+    MovableSeparatorColor = LineSoftColor;
+    MovableSeparatorHoveredColor = AccentLineColor;
+    MovableSeparatorActiveColor = AccentColor;
+
+    TableHeaderColor = PanelColor;
+    TableRowAltColor = themed(ImColor::HSV(0.583f, 0.323f, 0.122f, 0.4f), ImColor::HSV(0.583f, 0.100f, 0.800f, 0.25f));
+
+    MonospaceColor = themed(ImColor::HSV(0.3f, 1.0f, 1.0f), ImColor::HSV(0.3f, 1.0f, 0.5f));
+    StatusBarTextColor = TextStrongColor;
+
+    HeadlineColor = AccentColor;
+
+    UnsavedChangesColor = WarningColor;
+    UnsavedChangesBackgroundColor = themed(ImColor::HSV(0.094f, 0.545f, 0.216f), ImColor::HSV(0.094f, 0.300f, 0.970f));
+
+    McpSuccessColor = themed(ImColor::HSV(0.43f, 0.40f, 0.68f), ImColor::HSV(0.43f, 0.75f, 0.50f));
+    McpRunningBadgeColor = themed(ImColor::HSV(0.43f, 0.45f, 0.20f), ImColor::HSV(0.43f, 0.25f, 0.88f));
+
+    // Icon buttons keep a blue tint so they stand out against the neutral panels
+    ToolbarButtonTextColor = themed(ImColor::HSV(0.530f, 0.320f, 0.950f), ImColor::HSV(0.560f, 0.650f, 0.500f));
+    ToolbarButtonHoveredColor = RaisedColor;
+    ToolbarButtonSelectedColor = AccentDeepColor;
+    ToolbarButtonSelectedTextColor = AccentColor;
+    ToolbarButtonDisabledTextColor = TextFaintColor;
+    ToolbarSelectionBarColor = AccentColor;
+    ToolbarGroupColor = themed(ImColor::HSV(0.583f, 0.100f, 1.000f, 0.050f), ImColor::HSV(0.583f, 0.300f, 0.200f, 0.060f));
+    ToolbarOverflowColor = TextFaintColor;
+    ToolbarOverflowHoveredColor = AccentColor;
+    ToolbarMenuHoveredColor = AccentDeepColor;
+
+    // Floats above the simulation, therefore a semi-transparent background
+    EditToggleColor = themed(ImColor::HSV(0.583f, 0.323f, 0.122f, 0.850f), ImColor::HSV(0.583f, 0.025f, 0.985f, 0.850f));
+    EditToggleSelectedColor = themed(ImColor::HSV(0.490f, 0.556f, 0.247f, 0.900f), ImColor::HSV(0.490f, 0.220f, 0.900f, 0.900f));
+    EditToggleBorderColor = LineColor;
+    EditToggleSelectedBorderColor = AccentColor;
+    EditToggleGlowColor = themed(ImColor::HSV(0.484f, 0.587f, 0.816f, 0.180f), ImColor::HSV(0.487f, 0.850f, 0.500f, 0.180f));
+    EditToggleIconColor = TextDimColor;
+    EditToggleHoveredIconColor = TextBaseColor;
+    EditToggleSelectedIconColor = AccentColor;
+    EditToggleLabelColor = TextBaseColor;
+    EditToggleShortcutColor = TextFaintColor;
+
+    ActionButtonTextColor = themed(ImColor::HSV(0.530f, 0.400f, 0.950f), ImColor::HSV(0.560f, 0.700f, 0.480f));
+    ActionButtonHighlightedTextColor = AccentColor;
+    ActionButtonBackgroundColor = RaisedColor;
+    ActionButtonHoveredColor = themed(ImColor::HSV(0.583f, 0.321f, 0.220f), ImColor::HSV(0.583f, 0.120f, 0.800f));
+    ActionButtonActiveColor = AccentDeepColor;
+
+    ToggleOnColor = AccentLineColor;
+    ToggleOnHoveredColor = AccentColor;
+    ToggleOffColor = LineSoftColor;
+    ToggleOffHoveredColor = LineColor;
+    ToggleKnobColor = themed(TextBaseColor, ImColor::HSV(0.0f, 0.0f, 1.0f));
+    ToggleKnobBorderColor = BackgroundColor;
+
+    FloatingCardBackgroundColor = themed(ImColor::HSV(0.583f, 0.323f, 0.122f, 0.95f), ImColor::HSV(0.583f, 0.025f, 0.985f, 0.95f));
+    FloatingCardBorderColor = LineColor;
+
+    SelectionHandleColor = AccentColor;
+    SelectionHandleHoveredColor = TextBaseColor;
+    SelectionHandleFillColor = PanelColor;
+    SelectionChipTextColor = TextDimColor;
+    ScissorsTrailColor = WarningColor;
+
+    NeuronEditorNodeFillColor = themed(ImColor::HSV(0.611f, 0.333f, 0.106f), ImColor::HSV(0.583f, 0.040f, 0.945f));
+    NeuronEditorLabelColor = themed(ImColor::HSV(0.611f, 0.124f, 0.761f), ImColor::HSV(0.611f, 0.250f, 0.380f));
+
+    DashboardCardBackgroundColor = themed(ImColor::HSV(0.614f, 0.424f, 0.165f), ImColor::HSV(0.600f, 0.030f, 0.990f));
+    DashboardCardBorderColor = themed(ImColor::HSV(0.617f, 0.389f, 0.270f), ImColor::HSV(0.600f, 0.100f, 0.820f));
+    DashboardSummaryRowColor = themed(ImColor::HSV(0.617f, 0.435f, 0.230f), ImColor::HSV(0.600f, 0.100f, 0.900f));
+
+    BrowserAddReactionButtonTextColor = themed(ImColor::HSV(0.375f, 0.6f, 0.7f), ImColor::HSV(0.375f, 0.8f, 0.5f));
+    BrowserDownloadButtonTextColor = themed(ImColor::HSV(0.55f, 0.6f, 1.0f), ImColor::HSV(0.55f, 0.85f, 0.65f));
+    BrowserDeleteButtonTextColor = themed(ImColor::HSV(0.0f, 0.6f, 0.8f), ImColor::HSV(0.0f, 0.75f, 0.7f));
+    BrowserLeafTextColor = themed(ImColor::HSV(0.58f, 0.2f, 1.0f), ImColor::HSV(0.58f, 0.6f, 0.45f));
+    BrowserResourceTextColor = TextStrongColor;
+    BrowserResourceNewTextColor = themed(ImColor::HSV(0.15f, 0.8f, 1.0f), ImColor::HSV(0.11f, 0.9f, 0.75f));
+    BrowserResourceSymbolColor = TextStrongColor;
+    BrowserOwnReactionFrameColor = themed(ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f), ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f));
+
+    BrowserLoginBannerColor = themed(ImColor::HSV(0.490f, 0.556f, 0.247f, 0.500f), ImColor::HSV(0.490f, 0.300f, 0.900f, 0.600f));
+    BrowserLoginBannerBarColor = AccentColor;
+
+    BrowserLoginHintCardColor = themed(ImColor::HSV(0.583f, 0.323f, 0.122f, 0.940f), ImColor::HSV(0.583f, 0.025f, 0.985f, 0.940f));
+    BrowserLoginHintCardBorderColor = LineColor;
+    BrowserLoginHintIconColor = AccentColor;
+    BrowserPlaceholderTilePictureColor = themed(ImColor::HSV(0.583f, 0.300f, 0.090f), ImColor::HSV(0.583f, 0.060f, 0.880f));
+    BrowserPlaceholderTileBarColor = LineSoftColor;
 }
 
 void StyleService::setupColors(ImGuiStyle& style) const
@@ -344,7 +534,7 @@ void StyleService::setupColors(ImGuiStyle& style) const
     style.Colors[ImGuiCol_TableBorderStrong] = Const::LineColor.Value;
     style.Colors[ImGuiCol_TableBorderLight] = Const::LineSoftColor.Value;
     style.Colors[ImGuiCol_TableRowBg] = transparent.Value;
-    style.Colors[ImGuiCol_TableRowBgAlt] = ImColor::HSV(0.583f, 0.323f, 0.122f, 0.4f).Value;
+    style.Colors[ImGuiCol_TableRowBgAlt] = Const::TableRowAltColor.Value;
 
     style.Colors[ImGuiCol_TextSelectedBg] = Const::AccentDeepColor.Value;
     style.Colors[ImGuiCol_DragDropTarget] = Const::AccentColor.Value;

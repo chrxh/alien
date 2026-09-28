@@ -88,9 +88,7 @@ namespace
     auto const CellFunctionColor = ImColor(255, 140, 66);
     auto const SelectedCellFunctionColor = ImColor(255, 196, 153);
     auto const SelectedNodeColor = ImColor(255, 210, 77);
-    auto const NodeFillColor = ImColor(18, 21, 27);
     auto const ZeroWeightColor = ImColor(90, 97, 110);
-    auto const LabelColor = ImColor(170, 178, 194);
 
     std::vector<std::string> const TelemetryLabels = {"Energy", "Attacked", "Age", "Velocity"};
     std::vector<std::string> const ActivationFunctionShortStrings = {"tanh", "step", "id", "abs", "gauss", "mod"};
@@ -239,7 +237,7 @@ namespace
         ImVec2 max{maxX, nodePos.y + halfHeight};
 
         // Opaque backdrop so that the weight curves running below do not shine through
-        drawList->AddRectFilled(min, max, NodeFillColor, scale(BiasMarkerRounding));
+        drawList->AddRectFilled(min, max, Const::NeuronEditorNodeFillColor, scale(BiasMarkerRounding));
         drawList->AddRectFilled(min, max, calcBiasMarkerColor(bias, isSelected), scale(BiasMarkerRounding));
     }
 
@@ -248,7 +246,7 @@ namespace
     {
         auto centerY = (min.y + max.y) / 2;
         auto halfHeight = (max.y - min.y) / 2;
-        drawList->AddLine({min.x, centerY}, {max.x, centerY}, withAlpha(LabelColor, 0.25f), scale(1.0f));
+        drawList->AddLine({min.x, centerY}, {max.x, centerY}, withAlpha(Const::NeuronEditorLabelColor, 0.25f), scale(1.0f));
 
         auto sampleAt = [&](int index) {
             auto t = toFloat(index) / ActivationIconSamples;
@@ -350,7 +348,8 @@ namespace
         auto pos = ImGui::GetCursorScreenPos();
         auto centerX = pos.x + scale(ToolButtonSeparatorMargin);
         auto padding = scale(ToolButtonSeparatorPadding);
-        drawList->AddLine({centerX, pos.y + padding}, {centerX, pos.y + ImGui::GetFrameHeight() - padding}, withAlpha(LabelColor, 0.25f), scale(1.0f));
+        drawList->AddLine(
+            {centerX, pos.y + padding}, {centerX, pos.y + ImGui::GetFrameHeight() - padding}, withAlpha(Const::NeuronEditorLabelColor, 0.25f), scale(1.0f));
         ImGui::Dummy({2 * scale(ToolButtonSeparatorMargin), ImGui::GetFrameHeight()});
     }
 
@@ -534,7 +533,7 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
             drawList,
             smallLabelFont(),
             {cellPos.x + indexWidth - scale(ConnectionWeightIndexMargin) - indexSize.x, cellPos.y + (frameHeight - indexSize.y) / 2},
-            withAlpha(LabelColor, ConnectionWeightIndexAlpha),
+            withAlpha(Const::NeuronEditorLabelColor, ConnectionWeightIndexAlpha),
             indexLabel);
 
         ImGui::PushID(i);
@@ -788,7 +787,7 @@ void _NeuralNetEditorWidget::drawInputNodes(
         if (isSelected) {
             drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
         }
-        drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
+        drawList->AddCircleFilled(pos, scale(NodeRadius), Const::NeuronEditorNodeFillColor);
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : groupColor(i), 0, scale(1.5f));
 
         auto label = getInputLabel(i);
@@ -797,7 +796,7 @@ void _NeuralNetEditorWidget::drawInputNodes(
             drawList,
             _labelFont,
             {pos.x - scale(NodeRadius + NodeLabelMargin) - textSize.x, pos.y - textSize.y / 2},
-            isSelected ? ImColor(255, 255, 255) : LabelColor,
+            isSelected ? Const::TextStrongColor : Const::NeuronEditorLabelColor,
             label);
 
         // Live values next to memory and telemetry inputs
@@ -829,7 +828,7 @@ void _NeuralNetEditorWidget::drawInputNodes(
                     drawList,
                     _labelFont,
                     {pos.x + scale(NodeRadius + GroupBlockNodeMargin + NodeLabelMargin), pos.y - textSize.y / 2},
-                    withAlpha(LabelColor, 0.6f),
+                    withAlpha(Const::NeuronEditorLabelColor, 0.6f),
                     value);
             }
         }
@@ -860,18 +859,22 @@ void _NeuralNetEditorWidget::drawOutputNodes(
             drawList->AddCircle(pos, scale(NodeRadius + 3.5f), SelectedNodeColor, 0, scale(1.2f));
         }
         addBiasMarker(drawList, pos, biases.at(i), isSelected);
-        drawList->AddCircleFilled(pos, scale(NodeRadius), NodeFillColor);
+        drawList->AddCircleFilled(pos, scale(NodeRadius), Const::NeuronEditorNodeFillColor);
         auto borderColor = i < STANDARD_NEURONS_PER_CELL ? SignalNodeColor : MemoryNodeColor;
         drawList->AddCircle(pos, scale(NodeRadius), hovered ? SelectedNodeColor : borderColor, 0, scale(1.5f));
 
         auto label = getOutputLabel(i);
         auto textSize = calcNodeLabelSize(_labelFont, label);
         auto labelX = pos.x + scale(NodeRadius + NodeLabelMargin);
-        addNodeLabel(drawList, _labelFont, {labelX, pos.y - textSize.y / 2}, isSelected ? ImColor(255, 255, 255) : LabelColor, label);
+        addNodeLabel(drawList, _labelFont, {labelX, pos.y - textSize.y / 2}, isSelected ? Const::TextStrongColor : Const::NeuronEditorLabelColor, label);
 
         auto const& actfnLabel = ActivationFunctionShortStrings.at(activationFunctions.at(i));
         addNodeLabel(
-            drawList, _labelFont, {labelX + textSize.x + scale(ActivationLabelMargin), pos.y - textSize.y / 2}, withAlpha(LabelColor, 0.55f), actfnLabel);
+            drawList,
+            _labelFont,
+            {labelX + textSize.x + scale(ActivationLabelMargin), pos.y - textSize.y / 2},
+            withAlpha(Const::NeuronEditorLabelColor, 0.55f),
+            actfnLabel);
     }
     ImGui::PopID();
 }
@@ -950,7 +953,7 @@ void _NeuralNetEditorWidget::processInspectorCardContent(
     auto headerText = getInputLabel(inputIndex) + "  " ICON_FA_LONG_ARROW_ALT_RIGHT "  " + getOutputLabel(outputIndex);
     auto dotOffset = scale(NodeRadius + 4.0f);
     drawList->AddCircleFilled({contentX + scale(3.0f), posY + lineHeight / 2}, scale(3.5f), groupColor(inputIndex));
-    drawList->AddText({contentX + dotOffset, posY}, ImColor(255, 255, 255), headerText.c_str());
+    drawList->AddText({contentX + dotOffset, posY}, Const::TextStrongColor, headerText.c_str());
     auto headerSize = ImGui::CalcTextSize(headerText.c_str());
     drawList->AddCircleFilled(
         {contentX + dotOffset + headerSize.x + scale(6.0f), posY + lineHeight / 2},
@@ -1023,7 +1026,7 @@ void _NeuralNetEditorWidget::processInspectorCardContent(
             {iconMin.x + iconPadding, iconMin.y + iconPadding},
             {iconMax.x - iconPadding, iconMax.y - iconPadding},
             static_cast<ActivationFunction>(i),
-            isSelected ? SelectedNodeColor : LabelColor);
+            isSelected ? SelectedNodeColor : Const::NeuronEditorLabelColor);
         ImGui::PopID();
     }
 

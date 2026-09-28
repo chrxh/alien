@@ -57,9 +57,6 @@ namespace
     auto constexpr MinLineageTableHeight = 40.0f;
     auto constexpr SeparatorHeight = 5.0f;  // Height of AlienGui::MovableHorizontalSeparator
 
-    ImColor const CardBackgroundColor = ImColor(0.095f, 0.117f, 0.165f, 1.0f);
-    ImColor const CardBorderColor = ImColor(0.165f, 0.196f, 0.270f, 1.0f);
-
     struct MetricDef
     {
         char const* tableHeader;
@@ -698,8 +695,8 @@ void EvolutionDashboardWindow::processCard(
     float height)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
-    ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)CardBorderColor);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::DashboardCardBackgroundColor);
+    ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)Const::DashboardCardBorderColor);
     if (ImGui::BeginChild(("##card" + label).c_str(), {width, height}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text(label);
@@ -760,7 +757,7 @@ void EvolutionDashboardWindow::processFilterBar()
             drawList->AddRect(
                 {pos.x - scale(1.5f), pos.y - scale(1.5f)},
                 {pos.x + chipSize + scale(1.5f), pos.y + chipSize + scale(1.5f)},
-                ImColor(255, 255, 255, 255),
+                Const::TextStrongColor,
                 scale(6.0f),
                 0,
                 scale(1.5f));
@@ -830,7 +827,7 @@ void EvolutionDashboardWindow::processLineageTable()
 
         // Summary row
         ImGui::TableNextRow();
-        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImColor(0.13f, 0.16f, 0.23f, 1.0f));
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::DashboardSummaryRowColor);
         ImGui::TableSetColumnIndex(LineageColumn);
         auto allSelected = _selectedLineageIds.empty();
         if (AlienGui::TableRowSelectable("##rowAll", allSelected)) {
