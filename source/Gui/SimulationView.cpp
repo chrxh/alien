@@ -417,12 +417,29 @@ void SimulationView::setupRenderPipeline()
             }),
         },
 
-        // Render block: Merge fluid, connections and objects sequence, then light the result by detonations
+        // Render block: Merge fluid, connections and objects sequence
         RenderBlock{
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(objectMergeUniformFunc)),
+            }),
+        },
+
+        // Render block: Two outputs: Detonation flashes lighting the scene and the scene
+        RenderBlock{
+            RenderSequence().steps({
                 _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent)),
+            }),
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+            }),
+        },
+
+        // Render block: Add detonation flashes to the scene
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
             }),
         },
 

@@ -624,7 +624,6 @@ DetonationEventRenderStep _DetonationEventRenderStep::create(StepParameters cons
 
 _DetonationEventRenderStep::~_DetonationEventRenderStep()
 {
-    glDeleteFramebuffers(1, &_sourceFbo);
     glDeleteBuffers(1, &_vbo);
     glDeleteVertexArrays(1, &_vao);
 }
@@ -644,9 +643,8 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
     auto now = std::chrono::steady_clock::now();
     updateDetonations(parameters._geometryBuffers, now);
 
+    parameters._clearBackground = true;
     prepareExecution(parameters);
-    auto inputTexture = parameters._textures.at(0);
-    copyInputToTarget(inputTexture);
 
     std::vector<DetonationInstance> instances;
     for (auto const& detonation : _detonations | std::views::values) {
@@ -666,7 +664,7 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
     _shader->setFloat("lifetime", DetonationLifetime);
     _shader->setInt("inputTexture1", 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, inputTexture);
+    glBindTexture(GL_TEXTURE_2D, parameters._textures.at(0));
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, toInt(instances.size() * sizeof(DetonationInstance)), instances.data(), GL_STREAM_DRAW);
@@ -698,26 +696,9 @@ void _DetonationEventRenderStep::updateDetonations(GeometryBuffers const& geomet
     });
 }
 
-void _DetonationEventRenderStep::copyInputToTarget(unsigned int inputTexture) const
-{
-    GLint targetFbo = 0;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &targetFbo);
-
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, _sourceFbo);
-    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, inputTexture, 0);
-
-    auto viewSize = Viewport::get().getViewSize();
-    auto width = toInt(toFloat(viewSize.x) * _textureScale);
-    auto height = toInt(toFloat(viewSize.y) * _textureScale);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, targetFbo);
-}
-
 _DetonationEventRenderStep::_DetonationEventRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {
-    glGenFramebuffers(1, &_sourceFbo);
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
