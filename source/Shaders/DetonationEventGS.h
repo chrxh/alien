@@ -10,21 +10,19 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 in float vertexRadius[];
-in float vertexProgress[];
-in float vertexSeed[];
+in float vertexAge[];
 
 // Relative to the detonation in world units, y points upwards on screen like gl_FragCoord
 out vec2 localPos;
 flat out vec2 centerPixelPos;
 flat out float blastRadius;
-flat out float progress;
-flat out float seed;
+flat out float age;
 
 uniform vec2 viewportSize;
 uniform float zoom;
 
 // Reach of the light in multiples of the detonator radius
-const float LightReach = 5.5;
+const float LightReach = 10.0;
 
 void emitCorner(vec2 corner, vec4 center, float extent)
 {
@@ -33,8 +31,7 @@ void emitCorner(vec2 corner, vec4 center, float extent)
     localPos = corner * extent;
     centerPixelPos = (center.xy * 0.5 + 0.5) * viewportSize;
     blastRadius = vertexRadius[0];
-    progress = vertexProgress[0];
-    seed = vertexSeed[0];
+    age = vertexAge[0];
     EmitVertex();
 }
 

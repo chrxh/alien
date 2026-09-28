@@ -262,12 +262,10 @@ private:
     {
         RealVector2D pos;
         float radius = 0;
-        float seed = 0;
         std::chrono::steady_clock::time_point startTime;
         bool reported = false;
     };
     std::unordered_map<uint64_t, Detonation> _detonations;
-    std::chrono::steady_clock::time_point _creationTime;
 
     unsigned int _vao = 0;
     unsigned int _vbo = 0;

@@ -1,6 +1,5 @@
 #include "RenderStep.h"
 
-#include <cmath>
 #include <cstddef>
 #include <ranges>
 
@@ -22,7 +21,7 @@ namespace
     auto constexpr ZoomFactorForCellDetails = 25.0f;  // Cell type strings and arrows
     auto constexpr CellTypeLabelShadowOffset = 1.0f;
     auto constexpr CellTypeLabelShadowAlpha = 0.8f;
-    auto constexpr DetonationLifetime = 1.8f;  // In seconds
+    auto constexpr DetonationLifetime = 0.1f;  // In seconds
 }
 
 TextureTarget _TextureTarget::create()
@@ -636,8 +635,7 @@ namespace
     {
         float pos[2];
         float radius;
-        float progress;
-        float seed;
+        float age;
     };
 }
 
@@ -652,13 +650,12 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
 
     std::vector<DetonationInstance> instances;
     for (auto const& detonation : _detonations | std::views::values) {
-        auto progress = std::chrono::duration<float>(now - detonation.startTime).count() / DetonationLifetime;
-        if (progress < 1.0f) {
+        auto age = std::chrono::duration<float>(now - detonation.startTime).count();
+        if (age < DetonationLifetime) {
             instances.emplace_back(DetonationInstance{
                 .pos = {detonation.pos.x, detonation.pos.y},
                 .radius = detonation.radius,
-                .progress = progress,
-                .seed = detonation.seed,
+                .age = age,
             });
         }
     }
@@ -666,7 +663,7 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
         return;
     }
 
-    _shader->setFloat("time", std::fmod(std::chrono::duration<float>(now - _creationTime).count(), 1000.0f));
+    _shader->setFloat("lifetime", DetonationLifetime);
     _shader->setInt("inputTexture1", 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, inputTexture);
@@ -674,22 +671,13 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, toInt(instances.size() * sizeof(DetonationInstance)), instances.data(), GL_STREAM_DRAW);
 
-    // Premultiplied alpha: rgb adds light, alpha darkens (smoke) or replaces (refraction) the scene
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, toInt(instances.size()));
 
     glDisable(GL_BLEND);
-}
-
-namespace
-{
-    float calcSeed(uint64_t objectId)
-    {
-        return toFloat((objectId * 2654435761ull) % 10007) / 10007.0f;
-    }
 }
 
 void _DetonationEventRenderStep::updateDetonations(GeometryBuffers const& geometryBuffers, std::chrono::steady_clock::time_point now)
@@ -700,7 +688,7 @@ void _DetonationEventRenderStep::updateDetonations(GeometryBuffers const& geomet
 
     // An event lasts several timesteps and is reported in each of them, but the animation starts only once
     for (auto const& event : geometryBuffers->getDetonationEventData()) {
-        auto newDetonation = Detonation{.pos = {event.pos[0], event.pos[1]}, .radius = event.radius, .seed = calcSeed(event.objectId), .startTime = now};
+        auto newDetonation = Detonation{.pos = {event.pos[0], event.pos[1]}, .radius = event.radius, .startTime = now};
         _detonations.try_emplace(event.objectId, newDetonation).first->second.reported = true;
     }
 
@@ -728,7 +716,6 @@ void _DetonationEventRenderStep::copyInputToTarget(unsigned int inputTexture) co
 
 _DetonationEventRenderStep::_DetonationEventRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-    , _creationTime(std::chrono::steady_clock::now())
 {
     glGenFramebuffers(1, &_sourceFbo);
     glGenVertexArrays(1, &_vao);
@@ -741,10 +728,8 @@ _DetonationEventRenderStep::_DetonationEventRenderStep(StepParameters const& par
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, radius));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, progress));
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, age));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, seed));
-    glEnableVertexAttribArray(3);
 
     glBindVertexArray(0);
 }
