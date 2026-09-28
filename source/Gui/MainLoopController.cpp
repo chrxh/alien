@@ -93,6 +93,8 @@ void MainLoopController::process()
         return;
     }
 
+    StyleService::get().process();
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -629,6 +631,9 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Save on exit").selected(_saveOnExit).closeMenuWhenItemClicked(false), [&] { _saveOnExit = !_saveOnExit; });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Light mode").selected(StyleService::get().isLightMode()).closeMenuWhenItemClicked(false), [&] {
+        StyleService::get().setLightMode(!StyleService::get().isLightMode());
+    });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Display settings"), [&] { DisplaySettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Network settings"), [&] { NetworkSettingsDialog::get().open(); });
     AlienGui::MenuSeparator();

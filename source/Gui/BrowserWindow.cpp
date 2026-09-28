@@ -530,7 +530,7 @@ void BrowserWindow::processEmojiButton(int emojiType)
         drawList->AddRect(
             ImVec2(cursorPos.x, cursorPos.y),
             ImVec2(cursorPos.x + emojiWidth + style.FramePadding.x * 2, cursorPos.y + emojiHeight + style.FramePadding.y * 2),
-            (ImU32)ImColor::HSV(0, 0, 1, 0.5f),
+            (ImU32)Const::BrowserOwnReactionFrameColor,
             1.0f);
     }
 }
