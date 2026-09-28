@@ -1,5 +1,6 @@
 #include "RenderStep.h"
 
+#include <cstddef>
 #include <ranges>
 
 #include <Base/Math.h>
@@ -20,6 +21,7 @@ namespace
     auto constexpr ZoomFactorForCellDetails = 25.0f;  // Cell type strings and arrows
     auto constexpr CellTypeLabelShadowOffset = 1.0f;
     auto constexpr CellTypeLabelShadowAlpha = 0.8f;
+    auto constexpr DetonationLifetime = 0.1f;  // In seconds
 }
 
 TextureTarget _TextureTarget::create()
@@ -620,25 +622,95 @@ DetonationEventRenderStep _DetonationEventRenderStep::create(StepParameters cons
     return DetonationEventRenderStep(new _DetonationEventRenderStep(parameters));
 }
 
+_DetonationEventRenderStep::~_DetonationEventRenderStep()
+{
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vao);
+}
+
+namespace
+{
+    struct DetonationInstance
+    {
+        float pos[2];
+        float radius;
+        float age;
+    };
+}
+
 void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
 {
-    if (!_previousTargetSelection.has_value()) {
-        parameters._clearBackground = true;
-    }
+    auto now = std::chrono::steady_clock::now();
+    updateDetonations(parameters._geometryBuffers, now);
+
+    parameters._clearBackground = true;
     prepareExecution(parameters);
 
-    // Enable blending for glowing circles
+    std::vector<DetonationInstance> instances;
+    for (auto const& detonation : _detonations | std::views::values) {
+        auto age = std::chrono::duration<float>(now - detonation.startTime).count();
+        if (age < DetonationLifetime) {
+            instances.emplace_back(DetonationInstance{
+                .pos = {detonation.pos.x, detonation.pos.y},
+                .radius = detonation.radius,
+                .age = age,
+            });
+        }
+    }
+    if (instances.empty()) {
+        return;
+    }
+
+    _shader->setFloat("lifetime", DetonationLifetime);
+    _shader->setInt("inputTexture1", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, parameters._textures.at(0));
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, toInt(instances.size() * sizeof(DetonationInstance)), instances.data(), GL_STREAM_DRAW);
+
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_ONE, GL_ONE);
 
-    // Draw detonation event circles (geometry shader will convert points to quads)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForDetonationEvents());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().detonationEventVertices));
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, toInt(instances.size()));
 
-    // Disable blending
     glDisable(GL_BLEND);
+}
+
+void _DetonationEventRenderStep::updateDetonations(GeometryBuffers const& geometryBuffers, std::chrono::steady_clock::time_point now)
+{
+    for (auto& detonation : _detonations | std::views::values) {
+        detonation.reported = false;
+    }
+
+    // An event lasts several timesteps and is reported in each of them, but the animation starts only once
+    for (auto const& event : geometryBuffers->getDetonationEventData()) {
+        auto newDetonation = Detonation{.pos = {event.pos[0], event.pos[1]}, .radius = event.radius, .startTime = now};
+        _detonations.try_emplace(event.objectId, newDetonation).first->second.reported = true;
+    }
+
+    std::erase_if(_detonations, [&](auto const& entry) {
+        auto const& detonation = entry.second;
+        return !detonation.reported && now - detonation.startTime > std::chrono::duration<float>(DetonationLifetime);
+    });
 }
 
 _DetonationEventRenderStep::_DetonationEventRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-{}
+{
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
+
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, pos));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, radius));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, age));
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0);
+}

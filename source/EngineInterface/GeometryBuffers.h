@@ -71,8 +71,9 @@ struct AttackEventVertexData
 
 struct DetonationEventVertexData
 {
+    uint64_t objectId;
     float pos[2];  // x, y position
-    float radius;  // Circle radius
+    float radius;  // Detonator radius
 };
 
 class _GeometryBuffers
@@ -87,7 +88,6 @@ public:
     unsigned int getVaoForSelectedObjects() const { return _vaoForSelectedObjects; }
     unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
     unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
-    unsigned int getVaoForDetonationEvents() const { return _vaoForDetonationEvents; }
     unsigned int getVboForObjects() const { return _vboForObjects; }
     unsigned int getVboForFluidParticles() const { return _vboForFluidParticles; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
@@ -134,7 +134,6 @@ private:
     unsigned int _vaoForSelectedObjects = 0;
     unsigned int _vaoForSelectedConnections = 0;
     unsigned int _vaoForAttackEvents = 0;
-    unsigned int _vaoForDetonationEvents = 0;
     unsigned int _vboForObjects = 0;
     unsigned int _vboForFluidParticles = 0;
     unsigned int _vboForLocations = 0;

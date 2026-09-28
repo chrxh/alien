@@ -226,6 +226,43 @@ public:
         }
     }
 
+    template <typename ExecFunc>
+    __device__ __inline__ void executeForEachInRing(float2 const& pos, float innerRadius, float outerRadius, int detached, ExecFunc const& execFunc) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        int outerRadiusInt = ceilf(outerRadius) + 1;
+        auto records = _records.getArray();
+        for (int dy = -outerRadiusInt; dy <= outerRadiusInt; ++dy) {
+            auto nearY = toFloat(max(abs(dy) - 1, 0));
+            auto farY = toFloat(abs(dy) + 1);
+            int outerDx = ceilf(sqrtf(max(outerRadius * outerRadius - nearY * nearY, 0.0f))) + 1;
+            int innerDx = farY < innerRadius ? floorInt(sqrtf(innerRadius * innerRadius - farY * farY)) - 1 : -1;
+            for (int dx = -outerDx; dx <= outerDx; ++dx) {
+                if (abs(dx) <= innerDx) {
+                    dx = innerDx;
+                    continue;
+                }
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                correctPosition(scanPos);
+                int index = _mapHead[scanPos.x + scanPos.y * _size.x];
+                for (int level = 0; level < 10; ++level) {
+                    if (index < 0) {
+                        break;
+                    }
+                    auto const& record = records[index];
+                    auto slotObject = record.self;
+                    auto delta = slotObject->pos - pos;
+                    correctDirection(delta);
+                    auto distance = Math::length(delta);
+                    if (distance > innerRadius && distance <= outerRadius && detached + slotObject->detached() != 1) {
+                        execFunc(slotObject);
+                    }
+                    index = record.nextObjectIndex;
+                }
+            }
+        }
+    }
+
     __device__ __inline__ void cleanup_system()
     {
         auto partition = calcSystemThreadPartition(_mapEntries.getNumEntries());

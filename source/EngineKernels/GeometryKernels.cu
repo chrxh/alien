@@ -665,19 +665,14 @@ __global__ void cudaExtractDetonationEventData(
             continue;
         }
 
-        // Only process cells that have detonation event
         if (object->typeData.cell.eventCounter > 0 && object->typeData.cell.event == CellEvent_Detonation) {
-
-            // Add detonation event point data (1 vertex for the circle center)
             uint64_t vertexIndex = alienAtomicAdd64(numDetonationEventVertices, uint64_t(1));
             if (detonationEventData != nullptr) {
-                // Position of the detonation
-                detonationEventData[vertexIndex].pos[0] = object->pos.x;
-                detonationEventData[vertexIndex].pos[1] = object->pos.y;
-
-                // Radius proportional to eventCounter
-                // Scale the radius based on eventCounter (make it visible)
-                detonationEventData[vertexIndex].radius = toFloat(object->typeData.cell.eventCounter * object->typeData.cell.eventCounter) / 3.0f;
+                auto& vertex = detonationEventData[vertexIndex];
+                vertex.objectId = object->id;
+                vertex.pos[0] = object->pos.x;
+                vertex.pos[1] = object->pos.y;
+                vertex.radius = cudaSimulationParameters.detonatorRadius.value[object->color];
             }
         }
     }
