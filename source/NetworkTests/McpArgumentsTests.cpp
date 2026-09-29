@@ -61,6 +61,14 @@ TEST_F(McpArgumentsTests, ids)
     EXPECT_THROW(McpArguments::getIds(parse(R"({"ids": []})"), "ids", 1), std::invalid_argument);
 }
 
+TEST_F(McpArgumentsTests, ints)
+{
+    EXPECT_EQ((std::vector<int>{3, 1}), McpArguments::getInts(parse(R"({"n": [3, 1]})"), "n", 1, 0, 6));
+    EXPECT_THROW(McpArguments::getInts(parse(R"({"n": []})"), "n", 1), std::invalid_argument);
+    EXPECT_THROW(McpArguments::getInts(parse(R"({"n": [7]})"), "n", 1, 0, 6), std::invalid_argument);
+    EXPECT_THROW(McpArguments::getInts(parse(R"({"n": 3})"), "n", 1), std::invalid_argument);
+}
+
 TEST_F(McpArgumentsTests, int_wrongType)
 {
     EXPECT_THROW(McpArguments::getInt(parse(R"({"n": "ten"})"), "n"), std::invalid_argument);

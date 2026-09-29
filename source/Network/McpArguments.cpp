@@ -53,17 +53,48 @@ std::optional<int> McpArguments::getOptionalInt(boost::json::object const& argum
     return getInt(arguments, key, min, max);
 }
 
+namespace
+{
+    int parseInt(boost::json::value const& value, std::string_view key, int min, int max)
+    {
+        auto result = [&] {
+            try {
+                return value.to_number<int64_t>();
+            } catch (...) {
+                throw std::invalid_argument(std::format("'{}' must be an integer.", key));
+            }
+        }();
+        return static_cast<int>(checkRange<int64_t>(result, key, min, max));
+    }
+}
+
 int McpArguments::getInt(boost::json::object const& arguments, std::string_view key, int min, int max)
 {
+    return parseInt(getRequiredValue(arguments, key), key, min, max);
+}
+
+std::optional<std::vector<int>> McpArguments::getOptionalInts(boost::json::object const& arguments, std::string_view key, size_t minNumInts, int min, int max)
+{
+    if (!arguments.contains(key)) {
+        return std::nullopt;
+    }
+    return getInts(arguments, key, minNumInts, min, max);
+}
+
+std::vector<int> McpArguments::getInts(boost::json::object const& arguments, std::string_view key, size_t minNumInts, int min, int max)
+{
     auto const& value = getRequiredValue(arguments, key);
-    auto result = [&] {
-        try {
-            return value.to_number<int64_t>();
-        } catch (...) {
-            throw std::invalid_argument(std::format("'{}' must be an integer.", key));
-        }
-    }();
-    return static_cast<int>(checkRange<int64_t>(result, key, min, max));
+    if (!value.is_array()) {
+        throw std::invalid_argument(std::format("'{}' must be an array of integers.", key));
+    }
+    std::vector<int> result;
+    for (auto const& element : value.as_array()) {
+        result.emplace_back(parseInt(element, key, min, max));
+    }
+    if (result.size() < minNumInts) {
+        throw std::invalid_argument(std::format("'{}' needs at least {} integers.", key, minNumInts));
+    }
+    return result;
 }
 
 std::optional<bool> McpArguments::getOptionalBool(boost::json::object const& arguments, std::string_view key)

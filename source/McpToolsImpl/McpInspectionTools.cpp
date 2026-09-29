@@ -13,6 +13,7 @@
 #include <Data/DescEditService.h>
 #include <Data/DescValidationService.h>
 
+#include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
@@ -27,7 +28,7 @@ namespace
     auto constexpr MaxSearchRadius = 200.0f;
     auto constexpr DefaultMaxResults = 50;
     auto constexpr MaxResults = 500;
-    auto constexpr MaxInspectedObjects = 100;
+    auto constexpr MaxInspectedObjects = Const::MaxInspectedObjects;
 
     auto constexpr JsonConventions =
         "JSON conventions: ids are strings. Fields with default values are omitted unless 'complete' is set. A field that holds one of several "

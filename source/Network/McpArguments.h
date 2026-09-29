@@ -32,6 +32,18 @@ public:
         int max = std::numeric_limits<int>::max());
     static int
     getInt(boost::json::object const& arguments, std::string_view key, int min = std::numeric_limits<int>::lowest(), int max = std::numeric_limits<int>::max());
+    static std::optional<std::vector<int>> getOptionalInts(
+        boost::json::object const& arguments,
+        std::string_view key,
+        size_t minNumInts,
+        int min = std::numeric_limits<int>::lowest(),
+        int max = std::numeric_limits<int>::max());
+    static std::vector<int> getInts(
+        boost::json::object const& arguments,
+        std::string_view key,
+        size_t minNumInts,
+        int min = std::numeric_limits<int>::lowest(),
+        int max = std::numeric_limits<int>::max());
 
     static std::optional<bool> getOptionalBool(boost::json::object const& arguments, std::string_view key);
     static bool getBool(boost::json::object const& arguments, std::string_view key);
