@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <span>
 
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
@@ -289,18 +290,21 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
     result._vel = RealVector2D{objectTO.vel.x, objectTO.vel.y};
     result._stiffness = objectTO.stiffness;
     std::vector<ConnectionDesc> connections;
-    for (int i = 0; i < objectTO.numConnections; ++i) {
-        auto const& connectionTO = objectTO.connections[i];
-        ConnectionDesc connection;
-        if (connectionTO.objectIndex != VALUE_NOT_SET_UINT64) {
-            connection._objectId = to.objects[connectionTO.objectIndex].id;
-        } else {
-            connections.clear();
-            break;
+    auto angleOfDroppedConnections = 0.0f;
+    for (auto const& connectionTO : std::span(objectTO.connections, objectTO.numConnections)) {
+        if (connectionTO.objectIndex == VALUE_NOT_SET_UINT64) {
+            angleOfDroppedConnections += connectionTO.angleFromPrevious;
+            continue;
         }
+        ConnectionDesc connection;
+        connection._objectId = to.objects[connectionTO.objectIndex].id;
         connection._distance = connectionTO.distance;
-        connection._angleFromPrevious = connectionTO.angleFromPrevious;
+        connection._angleFromPrevious = connectionTO.angleFromPrevious + angleOfDroppedConnections;
         connections.emplace_back(connection);
+        angleOfDroppedConnections = 0.0f;
+    }
+    if (!connections.empty()) {
+        connections.front()._angleFromPrevious += angleOfDroppedConnections;
     }
     result._connections = connections;
     result._isStatic = objectTO.isStatic();
@@ -1590,16 +1594,11 @@ void DescConverterService::setConnections(
 {
     int index = 0;
     auto& objectTO = objectTOs.at(objectIndexByIds.at(cellToAdd._id));
-    float angleOffset = 0;
     for (ConnectionDesc const& connection : cellToAdd._connections) {
         objectTO.connections[index].objectIndex = objectIndexByIds.at(connection._objectId);
         objectTO.connections[index].distance = connection._distance;
-        objectTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;
+        objectTO.connections[index].angleFromPrevious = connection._angleFromPrevious;
         ++index;
-        angleOffset = 0;
-    }
-    if (angleOffset != 0 && index > 0) {
-        objectTO.connections[0].angleFromPrevious += angleOffset;
     }
     objectTO.numConnections = index;
 }
