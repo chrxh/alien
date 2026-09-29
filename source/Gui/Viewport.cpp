@@ -1,6 +1,7 @@
 #include "Viewport.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include <Base/Math.h>
 
@@ -10,6 +11,14 @@
 #include "WindowController.h"
 
 #include <GLFW/glfw3.h>
+
+namespace
+{
+    auto constexpr DampedZoomBelow = 1.0f;
+    auto constexpr DampedZoomAbove = 30.0f;
+    auto constexpr DampingTransitionWidth = 1.4f;
+    auto constexpr MinDampingExponent = 0.5f;
+}
 
 void Viewport::setup()
 {
@@ -62,11 +71,27 @@ void Viewport::setViewSize(IntVector2D const& viewSize)
     _viewSize = viewSize;
 }
 
+namespace
+{
+    float calcDampingExponent(float zoomFactor, float factor)
+    {
+        auto distance = 0.0f;
+        if (factor < 1.0f && zoomFactor < DampedZoomBelow) {
+            distance = std::log(DampedZoomBelow / zoomFactor);
+        } else if (factor > 1.0f && zoomFactor > DampedZoomAbove) {
+            distance = std::log(zoomFactor / DampedZoomAbove);
+        }
+        auto t = std::min(distance / DampingTransitionWidth, 1.0f);
+        auto smooth = t * t * (3.0f - 2.0f * t);
+        return 1.0f - (1.0f - MinDampingExponent) * smooth;
+    }
+}
+
 void Viewport::zoom(IntVector2D const& viewPos, float factor)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
 
-    auto newZoomFactor = _zoomFactor * factor;
+    auto newZoomFactor = _zoomFactor * std::pow(factor, calcDampingExponent(_zoomFactor, factor));
     newZoomFactor = std::clamp(newZoomFactor, 0.02f, 200.0f);
     _zoomFactor = newZoomFactor;
 
