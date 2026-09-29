@@ -24,6 +24,7 @@ public:
 private:
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
     __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
+    __inline__ __device__ static bool rejectEnergyParticle(Object* object);
 
     static auto constexpr MaxFusionEnergy = 5.0f;
     static auto constexpr MinEnergyPerSourceParticle = 10.0f;
@@ -108,7 +109,7 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                 if (object->type == ObjectType_Fluid) {
                     continue;
                 }
-                if (object->isStatic() || object->type == ObjectType_Solid) {
+                if (rejectEnergyParticle(object)) {
                     auto vr = particle->vel - object->vel;
                     auto r = data.objectMap.getCorrectedDirection(particle->pos - object->pos);
                     auto dot_vr_r = Math::dot(vr, r);
@@ -118,6 +119,9 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                     }
                 } else {
                     if (particle->lastAbsorbedObject == object) {
+                        continue;
+                    }
+                    if (object->type == ObjectType_Cell && object->typeData.cell.cellState == CellState_UnderConstruction) {
                         continue;
                     }
                     auto radiationAbsorption =
@@ -156,6 +160,17 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
             }
         }
     }
+}
+
+__inline__ __device__ bool EnergyProcessor::rejectEnergyParticle(Object* object)
+{
+    if (object->type == ObjectType_Solid) {
+        return true;
+    }
+    if (object->isStatic()) {
+        return object->type != ObjectType_Cell || object->typeData.cell.cellType != CellType_Digestor;
+    }
+    return false;
 }
 
 __inline__ __device__ void EnergyProcessor::splitting(SimulationData& data)

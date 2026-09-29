@@ -131,6 +131,29 @@ TEST_F(EnergyParticleTests, particleAbsorptionForCells)
     EXPECT_TRUE(approxCompare(particleEnergy, object.getCellRef()._rawEnergy));
 }
 
+TEST_F(EnergyParticleTests, noParticleAbsorptionForCellsUnderConstruction)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+    auto particleEnergy = 10.0f;
+
+    auto data = ContentDesc()
+                    .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(CellDesc().usableEnergy(cellEnergy).cellState(CellState_UnderConstruction))})
+                    .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    EXPECT_EQ(1, actualData._energies.size());
+    EXPECT_EQ(1, actualData._objects.size());
+
+    auto const& object = actualData._objects.at(0);
+    EXPECT_TRUE(approxCompare(0.0f, object.getCellRef()._rawEnergy));
+}
+
 TEST_F(EnergyParticleTests, particleAbsorptionForFreeCells)
 {
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
@@ -152,6 +175,77 @@ TEST_F(EnergyParticleTests, particleAbsorptionForFreeCells)
 
     auto const& object = actualData._objects.at(0);
     EXPECT_TRUE(approxCompare(cellEnergy + particleEnergy, object.getFreeCellRef()._energy));
+}
+
+TEST_F(EnergyParticleTests, particleAbsorptionForStaticDigestorCells)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+    auto particleEnergy = 10.0f;
+
+    auto data =
+        ContentDesc()
+            .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).isStatic(true).type(CellDesc().usableEnergy(cellEnergy).cellType(DigestorDesc()))})
+            .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    EXPECT_EQ(0, actualData._energies.size());
+    EXPECT_EQ(1, actualData._objects.size());
+
+    auto const& object = actualData._objects.at(0);
+    EXPECT_TRUE(approxCompare(cellEnergy, object.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(particleEnergy, object.getCellRef()._rawEnergy));
+}
+
+TEST_F(EnergyParticleTests, noParticleAbsorptionForStaticNonDigestorCells)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+    auto particleEnergy = 10.0f;
+
+    auto data = ContentDesc()
+                    .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).isStatic(true).type(CellDesc().usableEnergy(cellEnergy))})
+                    .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    EXPECT_EQ(1, actualData._energies.size());
+    EXPECT_EQ(1, actualData._objects.size());
+
+    auto const& object = actualData._objects.at(0);
+    EXPECT_TRUE(approxCompare(0.0f, object.getCellRef()._rawEnergy));
+}
+
+TEST_F(EnergyParticleTests, noParticleAbsorptionForStaticFreeCells)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+    auto particleEnergy = 10.0f;
+
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).isStatic(true).type(FreeCellDesc().energy(cellEnergy))})
+                    .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    EXPECT_EQ(1, actualData._energies.size());
+    EXPECT_EQ(1, actualData._objects.size());
+
+    auto const& object = actualData._objects.at(0);
+    EXPECT_TRUE(approxCompare(cellEnergy, object.getFreeCellRef()._energy));
 }
 
 TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
