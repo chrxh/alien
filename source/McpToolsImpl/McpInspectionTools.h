@@ -22,7 +22,8 @@ private:
     McpToolResult changeObject(boost::json::object const& arguments) const;
     McpToolResult getJsonFormat(boost::json::object const& arguments) const;
 
-    boost::json::object describeBriefly(ExtendedObjectOrEnergyDesc const& entity, RealVector2D const& center) const;
+    boost::json::object describeBriefly(ObjectDesc const& object, float distance) const;
+    boost::json::object describeBriefly(EnergyDesc const& energy, float distance) const;
     ExtendedObjectOrEnergyDesc getInspectedEntity(uint64_t id) const;
 
     McpToolContext* _context = nullptr;
