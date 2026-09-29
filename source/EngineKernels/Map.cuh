@@ -212,7 +212,6 @@ public:
         }
     }
 
-    // All threads of the block must call this with identical arguments, the cells are distributed over the threads
     template <typename ExecFunc>
     __device__ __inline__ void executeForEach_block(float2 const& pos, float radius, int detached, ExecFunc const& execFunc) const
     {
@@ -225,7 +224,6 @@ public:
         }
     }
 
-    // All threads of the block must call this with identical arguments, the rows are distributed over the threads
     template <typename ExecFunc>
     __device__ __inline__ void executeForEachInRing_block(float2 const& pos, float innerRadius, float outerRadius, int detached, ExecFunc const& execFunc) const
     {

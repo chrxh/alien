@@ -8,8 +8,6 @@
 #include <windows.h>
 #endif
 
-#include <GLFW/glfw3.h>
-
 #include <Base/Console.h>
 #include <Base/Resources.h>
 
@@ -60,9 +58,7 @@ void ConsoleModeController::activate()
     bringConsoleToFront();
     ConsoleInput::begin();
 
-    auto window = WindowController::get().getWindowData().window;
-    glfwIconifyWindow(window);
-    glfwHideWindow(window);
+    WindowController::get().hideWindow();
 
     Console::init(false);
     std::cout << Console::clearScreen() << std::endl;
@@ -131,10 +127,7 @@ void ConsoleModeController::deactivate()
     leaveConsoleMode();
     std::cout << Console::clearScreen() << std::flush;
 
-    auto window = WindowController::get().getWindowData().window;
-    glfwShowWindow(window);
-    glfwRestoreWindow(window);
-    glfwFocusWindow(window);
+    WindowController::get().showWindow();
 }
 
 void ConsoleModeController::printPersistedSavepoint()
