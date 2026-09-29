@@ -513,3 +513,45 @@ TEST_F(EditTests, cutConnections_onlyInSelection)
     EXPECT_FALSE(actualData.hasConnection(2, 3));
     EXPECT_FALSE(actualData.hasConnection(3, 2));
 }
+
+TEST_F(EditTests, getSelectedSimulationData_connectionToUnselectedObjectDropped)
+{
+    _simulationFacade->setSimulationData(createChainOfThreeObjects());
+    _simulationFacade->setSelection({50.5f, 49}, {52.5f, 51});
+
+    auto selectedData = _simulationFacade->getSelectedSimulationData(false);
+
+    ASSERT_EQ(2, selectedData._objects.size());
+    EXPECT_TRUE(selectedData.hasConnection(2, 3));
+    EXPECT_TRUE(selectedData.hasConnection(3, 2));
+    auto const& connections = selectedData.getObjectRef(2)._connections;
+    ASSERT_EQ(1, connections.size());
+    EXPECT_TRUE(approxCompare(360.0f, connections.front()._angleFromPrevious));
+}
+
+TEST_F(EditTests, getSelectedSimulationData_angleOfDroppedConnectionPassedOn)
+{
+    auto data = ContentDesc().addObjects({
+        ObjectDesc().id(1).pos({50, 50}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({51, 50}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({52, 50}).type(SolidDesc()),
+        ObjectDesc().id(4).pos({51, 51}).type(SolidDesc()),
+    });
+    data.addConnection(2, 1);
+    data.addConnection(2, 3);
+    data.addConnection(2, 4);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->setSelection({50.5f, 49}, {52.5f, 52});
+
+    auto selectedData = _simulationFacade->getSelectedSimulationData(false);
+
+    auto const& connections = selectedData.getObjectRef(2)._connections;
+    ASSERT_EQ(2, connections.size());
+    std::vector<float> angles;
+    for (auto const& connection : connections) {
+        angles.emplace_back(connection._angleFromPrevious);
+    }
+    std::ranges::sort(angles);
+    EXPECT_TRUE(approxCompare(90.0f, angles.at(0)));
+    EXPECT_TRUE(approxCompare(270.0f, angles.at(1)));
+}
