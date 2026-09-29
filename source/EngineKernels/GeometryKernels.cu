@@ -385,6 +385,10 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
             } break;
             }
         }
+        auto colored = cudaSimulationParameters.backgroundColor.layerValues[i].enabled;
+        if (!colored && fieldType == ForceField_None) {
+            continue;
+        }
 
         // Render at 9 positions for periodic boundaries
         auto worldSizeX = toFloat(worldSize.x);
@@ -421,6 +425,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                 locationData[*numLocations].fieldType = fieldType;
                 locationData[*numLocations].fieldParam1 = fieldParam1;
                 locationData[*numLocations].fieldParam2 = fieldParam2;
+                locationData[*numLocations].colored = colored ? 1 : 0;
             }
             ++(*numLocations);
         }
@@ -470,6 +475,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                 locationData[*numLocations].fieldType = ForceField_None;
                 locationData[*numLocations].fieldParam1 = 0.0f;
                 locationData[*numLocations].fieldParam2 = 0.0f;
+                locationData[*numLocations].colored = 1;
             }
             ++(*numLocations);
         }

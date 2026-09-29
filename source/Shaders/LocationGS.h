@@ -19,6 +19,7 @@ in float vOpacity[];
 flat in int vFieldType[];
 in float vFieldParam1[];
 in float vFieldParam2[];
+flat in int vColored[];
 
 out vec3 gColor;
 out vec2 gWorldPos;
@@ -30,6 +31,7 @@ out float gOpacity;
 flat out int gFieldType;
 out float gFieldParam1;
 out float gFieldParam2;
+flat out int gColored;
 out vec2 gQuadCoord;  // Coordinates within the quad, from -0.5 to 0.5
 
 uniform vec2 viewportSize;
@@ -49,6 +51,7 @@ void main()
     gFieldType = vFieldType[0];
     gFieldParam1 = vFieldParam1[0];
     gFieldParam2 = vFieldParam2[0];
+    gColored = vColored[0];
 
     // Calculate the size of the quad in world coordinates
     float maxDim;

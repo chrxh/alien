@@ -415,10 +415,11 @@ public:
         MEMBER(ColorButtonParameters, std::string, name, "");
         MEMBER(ColorButtonParameters, float, textWidth, 100);
         MEMBER(ColorButtonParameters, std::optional<FloatColorRGB>, defaultValue, std::nullopt);
+        MEMBER(ColorButtonParameters, std::optional<bool>, defaultEnabledValue, std::nullopt);
         MEMBER(ColorButtonParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(ColorButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void ColorButton(ColorButtonParameters const& parameters, FloatColorRGB& color);
+    static void ColorButton(ColorButtonParameters const& parameters, FloatColorRGB& color, bool* enabled = nullptr);
 
     struct ColorVectorButtonsParameters
     {

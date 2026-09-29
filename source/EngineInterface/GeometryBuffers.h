@@ -48,6 +48,7 @@ struct LocationVertexData
     int fieldType;        // Force field whose height map shades the background (ForceField_None = no shading)
     float fieldParam1;    // Orientation sign (radial), angle (linear), spatial size (Perlin noise)
     float fieldParam2;    // Time coordinate (Perlin noise)
+    int colored;          // 0 = the background keeps its color and is only shaded by the force field
 };
 
 struct SelectedObjectVertexData

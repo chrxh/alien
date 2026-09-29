@@ -16,6 +16,7 @@ layout (location = 6) in float aOpacity;
 layout (location = 7) in int aFieldType;
 layout (location = 8) in float aFieldParam1;
 layout (location = 9) in float aFieldParam2;
+layout (location = 10) in int aColored;
 
 out vec3 vColor;
 out vec2 vWorldPos;
@@ -27,6 +28,7 @@ out float vOpacity;
 flat out int vFieldType;
 out float vFieldParam1;
 out float vFieldParam2;
+flat out int vColored;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -46,6 +48,7 @@ void main()
     vFieldType = aFieldType;
     vFieldParam1 = aFieldParam1;
     vFieldParam2 = aFieldParam2;
+    vColored = aColored;
 
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos - rectUpperLeft;
