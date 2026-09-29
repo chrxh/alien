@@ -23,7 +23,7 @@
 
 namespace
 {
-    auto constexpr LightModeSettingsKey = "settings.light mode";
+    auto constexpr DarkModeSettingsKey = "settings.dark mode";
 }
 
 namespace Const
@@ -232,7 +232,7 @@ void StyleService::setup()
     auto& style = ImGui::GetStyle();
     style.ScaleAllSizes(scaleFactor);
 
-    _lightMode = GlobalSettings::get().getValue(LightModeSettingsKey, _lightMode);
+    _darkMode = GlobalSettings::get().getValue(DarkModeSettingsKey, _darkMode);
 
     setupSizes(style);
     setupPalette();
@@ -300,19 +300,19 @@ void StyleService::process()
     }
 }
 
-bool StyleService::isLightMode() const
+bool StyleService::isDarkMode() const
 {
-    return _lightMode;
+    return _darkMode;
 }
 
-void StyleService::setLightMode(bool value)
+void StyleService::setDarkMode(bool value)
 {
-    if (_lightMode == value) {
+    if (_darkMode == value) {
         return;
     }
-    _lightMode = value;
+    _darkMode = value;
     _paletteOutdated = true;
-    GlobalSettings::get().setValue(LightModeSettingsKey, _lightMode);
+    GlobalSettings::get().setValue(DarkModeSettingsKey, _darkMode);
 }
 
 void StyleService::setupSizes(ImGuiStyle& style) const
@@ -329,7 +329,7 @@ void StyleService::setupPalette() const
 {
     using namespace Const;
 
-    auto themed = [this](ImColor const& darkColor, ImColor const& lightColor) { return _lightMode ? lightColor : darkColor; };
+    auto themed = [this](ImColor const& darkColor, ImColor const& lightColor) { return _darkMode ? darkColor : lightColor; };
 
     // Base palette: neutral grays with a slight blue bias, one accent reserved for selection and focus
     BackgroundColor = themed(ImColor::HSV(0.583f, 0.316f, 0.075f), ImColor::HSV(0.583f, 0.040f, 0.945f));
