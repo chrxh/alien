@@ -218,8 +218,8 @@ public:
     // Must be called before ImGui::NewFrame, since a theme change during a frame would be reverted by pending PopStyleColor calls
     void process();
 
-    bool isLightMode() const;
-    void setLightMode(bool value);
+    bool isDarkMode() const;
+    void setDarkMode(bool value);
 
     ImFont* getIconFont() const;
 
@@ -247,7 +247,7 @@ private:
     void setupPalette() const;
     void setupColors(ImGuiStyle& style) const;
 
-    bool _lightMode = false;
+    bool _darkMode = true;
     bool _paletteOutdated = false;
 
     ImFont* _iconFont = nullptr;
