@@ -205,34 +205,34 @@ public:
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         int radiusInt = ceilf(radius);
-        auto records = _records.getArray();
         for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
             for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
-                int2 scanPos{posInt.x + dx, posInt.y + dy};
-                correctPosition(scanPos);
-                int index = _mapHead[scanPos.x + scanPos.y * _size.x];
-                for (int level = 0; level < 10; ++level) {
-                    if (index < 0) {
-                        break;
-                    }
-                    auto const& record = records[index];
-                    auto slotObject = record.self;  // Read fields live: this runs after positions changed since the map was built
-                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached() != 1) {
-                        execFunc(slotObject);
-                    }
-                    index = record.nextObjectIndex;
-                }
+                executeForEachInCell(int2{posInt.x + dx, posInt.y + dy}, pos, radius, detached, execFunc);
             }
         }
     }
 
+    // All threads of the block must call this with identical arguments, the cells are distributed over the threads
     template <typename ExecFunc>
-    __device__ __inline__ void executeForEachInRing(float2 const& pos, float innerRadius, float outerRadius, int detached, ExecFunc const& execFunc) const
+    __device__ __inline__ void executeForEach_block(float2 const& pos, float radius, int detached, ExecFunc const& execFunc) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        int radiusInt = ceilf(radius);
+        int scanLength = 2 * radiusInt + 1;
+        for (int scanIndex = toInt(threadIdx.x); scanIndex < scanLength * scanLength; scanIndex += toInt(blockDim.x)) {
+            int2 scanPos{posInt.x - radiusInt + scanIndex % scanLength, posInt.y - radiusInt + scanIndex / scanLength};
+            executeForEachInCell(scanPos, pos, radius, detached, execFunc);
+        }
+    }
+
+    // All threads of the block must call this with identical arguments, the rows are distributed over the threads
+    template <typename ExecFunc>
+    __device__ __inline__ void executeForEachInRing_block(float2 const& pos, float innerRadius, float outerRadius, int detached, ExecFunc const& execFunc) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         int outerRadiusInt = ceilf(outerRadius) + 1;
         auto records = _records.getArray();
-        for (int dy = -outerRadiusInt; dy <= outerRadiusInt; ++dy) {
+        for (int dy = -outerRadiusInt + toInt(threadIdx.x); dy <= outerRadiusInt; dy += toInt(blockDim.x)) {
             auto nearY = toFloat(max(abs(dy) - 1, 0));
             auto farY = toFloat(abs(dy) + 1);
             int outerDx = ceilf(sqrtf(max(outerRadius * outerRadius - nearY * nearY, 0.0f))) + 1;
@@ -273,6 +273,25 @@ public:
     }
 
 private:
+    template <typename ExecFunc>
+    __device__ __inline__ void executeForEachInCell(int2 scanPos, float2 const& pos, float radius, int detached, ExecFunc const& execFunc) const
+    {
+        correctPosition(scanPos);
+        auto records = _records.getArray();
+        int index = _mapHead[scanPos.x + scanPos.y * _size.x];
+        for (int level = 0; level < 10; ++level) {
+            if (index < 0) {
+                break;
+            }
+            auto const& record = records[index];
+            auto slotObject = record.self;  // Read fields live: this runs after positions changed since the map was built
+            if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached() != 1) {
+                execFunc(slotObject);
+            }
+            index = record.nextObjectIndex;
+        }
+    }
+
     int* _mapHead;
     Array<int> _mapEntries;
     Array<LightObject> _records;
