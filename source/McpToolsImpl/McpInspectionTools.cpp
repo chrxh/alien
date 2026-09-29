@@ -43,14 +43,6 @@ namespace
         return std::string(json.as_object().begin()->key());
     }
 
-    RealVector2D getPos(ExtendedObjectOrEnergyDesc const& entity)
-    {
-        if (std::holds_alternative<ExtendedObjectDesc>(entity)) {
-            return std::get<ExtendedObjectDesc>(entity).object._pos;
-        }
-        return std::get<EnergyDesc>(entity)._pos;
-    }
-
     boost::json::array toJson(RealVector2D const& value)
     {
         return {value.x, value.y};
@@ -126,16 +118,34 @@ McpToolResult McpInspectionTools::findObjects(boost::json::object const& argumen
 
     _SimulationFacade::get()->setSelection({center.x - radius, center.y - radius}, {center.x + radius, center.y + radius});
     _context->onSelectionChanged();
-    auto entities = DescEditService::get().getObjects(_SimulationFacade::get()->getSelectedSimulationData(false));
+    auto content = _SimulationFacade::get()->getSelectedSimulationData(false);
 
-    std::erase_if(entities, [&](auto const& entity) { return Math::length(getPos(entity) - center) > radius; });
-    std::ranges::sort(entities, {}, [&](auto const& entity) { return Math::length(getPos(entity) - center); });
+    struct Hit
+    {
+        float distance = 0;
+        ObjectDesc const* object = nullptr;
+        EnergyDesc const* energy = nullptr;
+    };
+    std::vector<Hit> hits;
+    for (auto const& object : content._objects) {
+        if (auto distance = Math::length(object._pos - center); distance <= radius) {
+            hits.emplace_back(Hit{.distance = distance, .object = &object});
+        }
+    }
+    for (auto const& energy : content._energies) {
+        if (auto distance = Math::length(energy._pos - center); distance <= radius) {
+            hits.emplace_back(Hit{.distance = distance, .energy = &energy});
+        }
+    }
+
+    auto numResults = std::min(toInt(hits.size()), maxResults);
+    std::ranges::partial_sort(hits, hits.begin() + numResults, {}, &Hit::distance);
 
     boost::json::array results;
-    for (auto const& entity : entities | std::views::take(maxResults)) {
-        results.emplace_back(describeBriefly(entity, center));
+    for (auto const& hit : hits | std::views::take(numResults)) {
+        results.emplace_back(hit.object ? describeBriefly(*hit.object, hit.distance) : describeBriefly(*hit.energy, hit.distance));
     }
-    return {.text = McpJson::serialize(boost::json::object{{"found", entities.size()}, {"results", std::move(results)}})};
+    return {.text = McpJson::serialize(boost::json::object{{"found", hits.size()}, {"results", std::move(results)}})};
 }
 
 McpToolResult McpInspectionTools::inspectObjects(boost::json::object const& arguments) const
@@ -257,24 +267,25 @@ McpToolResult McpInspectionTools::getJsonFormat(boost::json::object const& argum
     throw std::invalid_argument("'kind' must be 'object' or 'genome'.");
 }
 
-boost::json::object McpInspectionTools::describeBriefly(ExtendedObjectOrEnergyDesc const& entity, RealVector2D const& center) const
+boost::json::object McpInspectionTools::describeBriefly(EnergyDesc const& energy, float distance) const
 {
-    auto pos = getPos(entity);
-    boost::json::object result{
-        {"id", std::to_string(DescEditService::get().getId(entity))},
-        {"position", toJson(pos)},
-        {"distance", Math::length(pos - center)},
+    return {
+        {"id", std::to_string(energy._id)},
+        {"position", toJson(energy._pos)},
+        {"distance", distance},
+        {"kind", "energyParticle"},
+        {"energy", energy._energy},
+        {"color", energy._color},
     };
-    if (std::holds_alternative<EnergyDesc>(entity)) {
-        auto const& energy = std::get<EnergyDesc>(entity);
-        result["kind"] = "energyParticle";
-        result["energy"] = energy._energy;
-        result["color"] = energy._color;
-        return result;
-    }
+}
 
-    auto const& extendedObject = std::get<ExtendedObjectDesc>(entity);
-    auto const& object = extendedObject.object;
+boost::json::object McpInspectionTools::describeBriefly(ObjectDesc const& object, float distance) const
+{
+    boost::json::object result{
+        {"id", std::to_string(object._id)},
+        {"position", toJson(object._pos)},
+        {"distance", distance},
+    };
     auto objectJson = SerializerService::get().serializeToJson(object);
     auto const& typeJson = objectJson.as_object().at("type");
     auto kind = getFirstKey(typeJson);
@@ -292,8 +303,8 @@ boost::json::object McpInspectionTools::describeBriefly(ExtendedObjectOrEnergyDe
             }
         },
         object._type);
-    if (extendedObject.creature) {
-        result["creature_id"] = std::to_string(extendedObject.creature->_id);
+    if (object.getObjectType() == ObjectType_Cell) {
+        result["creature_id"] = std::to_string(object.getCellRef()._creatureId);
     }
     return result;
 }

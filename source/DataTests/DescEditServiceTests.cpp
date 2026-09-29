@@ -443,6 +443,38 @@ TEST_F(DescEditServiceTests, scaleContent_nonCreatureObjectsAcrossTorusBorder_st
     EXPECT_TRUE(haveConnectionDistancesTorusLength(desc, {200, 200}));
 }
 
+TEST_F(DescEditServiceTests, getObjects_cellsOfCreatures_carryCreatureAndGenome)
+{
+    auto desc = ContentDesc()
+                    .addCreature({ObjectDesc().id(1)}, CreatureDesc().id(10).generation(3), GenomeDesc().id(100).name("A"))
+                    .addCreature({ObjectDesc().id(2), ObjectDesc().id(3)}, CreatureDesc().id(11).generation(5), GenomeDesc().id(101).name("B"));
+    desc.addObjects({ObjectDesc().id(4).type(SolidDesc())});
+    desc._energies.emplace_back(EnergyDesc().id(5));
+
+    auto entities = _service.getObjects(desc);
+
+    ASSERT_EQ(5, entities.size());
+    EXPECT_TRUE(std::holds_alternative<EnergyDesc>(entities.at(0)));
+
+    auto const& cellOfFirstCreature = std::get<ExtendedObjectDesc>(entities.at(1));
+    ASSERT_TRUE(cellOfFirstCreature.creature.has_value());
+    ASSERT_TRUE(cellOfFirstCreature.genome.has_value());
+    EXPECT_EQ(10, cellOfFirstCreature.creature->_id);
+    EXPECT_EQ(3, cellOfFirstCreature.creature->_generation);
+    EXPECT_EQ("A", cellOfFirstCreature.genome->_name);
+
+    auto const& cellOfSecondCreature = std::get<ExtendedObjectDesc>(entities.at(3));
+    ASSERT_TRUE(cellOfSecondCreature.creature.has_value());
+    ASSERT_TRUE(cellOfSecondCreature.genome.has_value());
+    EXPECT_EQ(11, cellOfSecondCreature.creature->_id);
+    EXPECT_EQ(5, cellOfSecondCreature.creature->_generation);
+    EXPECT_EQ("B", cellOfSecondCreature.genome->_name);
+
+    auto const& solid = std::get<ExtendedObjectDesc>(entities.at(4));
+    EXPECT_FALSE(solid.creature.has_value());
+    EXPECT_FALSE(solid.genome.has_value());
+}
+
 TEST_F(DescEditServiceTests, scaleContent_allObjectsInsideNewWorld)
 {
     auto desc = ContentDesc().objects({

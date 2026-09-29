@@ -535,33 +535,35 @@ RealVector2D DescEditService::getPos(ExtendedObjectOrEnergyDesc const& entity) c
 std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(ContentDesc const& description) const
 {
     std::vector<ExtendedObjectOrEnergyDesc> result;
+    result.reserve(description._energies.size() + description._objects.size());
     for (auto const& energyParticle : description._energies) {
         result.emplace_back(energyParticle);
     }
 
-    // Build a map of creatureId to genome
-    std::unordered_map<uint64_t, GenomeDesc> genomeByCreatureId;
+    std::unordered_map<uint64_t, GenomeDesc const*> genomeById;
+    for (auto const& genome : description._genomes) {
+        genomeById.emplace(genome._id, &genome);
+    }
+    std::unordered_map<uint64_t, CreatureDesc const*> creatureById;
+    std::unordered_map<uint64_t, GenomeDesc const*> genomeByCreatureId;
     for (auto const& creature : description._creatures) {
-        auto genomeIt =
-            std::find_if(description._genomes.begin(), description._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
-        if (genomeIt != description._genomes.end()) {
-            genomeByCreatureId.emplace(creature._id, *genomeIt);
+        creatureById.emplace(creature._id, &creature);
+        if (auto genomeIt = genomeById.find(creature._genomeId); genomeIt != genomeById.end()) {
+            genomeByCreatureId.emplace(creature._id, genomeIt->second);
         }
     }
-    auto cache = description.createCache();
 
     for (auto const& object : description._objects) {
         ExtendedObjectDesc extObject;
         extObject.object = object;
         if (object.getObjectType() == ObjectType_Cell) {
             auto const& cell = object.getCellRef();
-            extObject.creature = description.getCreatureRef(cell._creatureId, cache);
-            auto genomeIt = genomeByCreatureId.find(cell._creatureId);
-            if (genomeIt != genomeByCreatureId.end()) {
-                extObject.genome = genomeIt->second;
+            extObject.creature = *creatureById.at(cell._creatureId);
+            if (auto genomeIt = genomeByCreatureId.find(cell._creatureId); genomeIt != genomeByCreatureId.end()) {
+                extObject.genome = *genomeIt->second;
             }
         }
-        result.emplace_back(extObject);
+        result.emplace_back(std::move(extObject));
     }
     return result;
 }

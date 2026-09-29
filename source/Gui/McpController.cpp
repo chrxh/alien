@@ -302,7 +302,6 @@ void McpController::addCommandLogEntry(std::string const& toolName, boost::json:
 {
     auto command = arguments.empty() ? toolName : toolName + " " + boost::json::serialize(arguments);
     log(Priority::Important, result.isError ? std::format("mcp: {} -> error: {}", toolName, result.text) : "mcp: " + toolName);
-    log(Priority::Unimportant, std::format("mcp: {} -> {}", command, result.text));
 
     _commandLog.emplace_back(
         McpCommandLogEntry{.time = std::chrono::system_clock::now(), .command = command, .result = result.text, .isError = result.isError});
