@@ -138,6 +138,10 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         // Force field parameter 2 (1 float)
         glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(10 * sizeof(float) + 2 * sizeof(int)));
         glEnableVertexAttribArray(9);
+
+        // Colored flag (1 int)
+        glVertexAttribIPointer(10, 1, GL_INT, sizeof(LocationVertexData), (void*)(11 * sizeof(float) + 2 * sizeof(int)));
+        glEnableVertexAttribArray(10);
     }
     {
         auto vao = _geometryBuffers->getVaoForSelectedObjects();

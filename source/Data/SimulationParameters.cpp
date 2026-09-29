@@ -89,7 +89,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Background color")
                         .reference(ColorSpec().member(&SimulationParameters::backgroundColor))
-                        .description("Color of the empty background of the world."),
+                        .description("Color of the empty background of the world. A layer is only tinted with its background color if it is "
+                                     "activated. Otherwise, the layer leaves the background unchanged apart from the height map of its force field."),
                     ParameterSpec()
                         .name("Customization colors")
                         .reference(ColorSpec().member(&SimulationParameters::customizationColors))

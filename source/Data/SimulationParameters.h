@@ -31,7 +31,7 @@ struct SimulationParameters
     PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
 
     // Visualization
-    BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
+    BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}, .layerValues = {{.enabled = true}}};
     BaseParameter<ColorVector<FloatColorRGB>> customizationColors = {getDefaultCustomizationColorVector()};
     BaseParameter<ColorVector<CellColoring>> objectColoring = {ColorVector<CellColoring>::uniform(CellColoring_Customization)};
     BaseParameter<CellType> highlightedCellType = {CellType_Base};

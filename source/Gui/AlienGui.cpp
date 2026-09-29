@@ -1654,7 +1654,7 @@ void AlienGui::EndMenuBar()
     }
 }
 
-void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRGB& color)
+void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRGB& color, bool* enabled)
 {
     static FloatColorRGB backupColor;
     static LayerColorPalette layerColorPalette;
@@ -1671,11 +1671,19 @@ void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRG
         imGuiSavedPalette[i].w = 1.0f;
     }
 
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
     bool openColorPicker = ImGui::ColorButton(
         ("##" + parameters._name).c_str(),
         imGuiColor,
         ImGuiColorEditFlags_NoBorder,
         {ImGui::GetContentRegionAvail().x - StyleService::get().scale(parameters._textWidth), 0});
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
     if (openColorPicker) {
         ImGui::OpenPopup("colorpicker");
         imGuiBackupColor = imGuiColor;
@@ -1734,9 +1742,14 @@ void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRG
 
     ImGui::SameLine();
     if (parameters._defaultValue) {
-        ImGui::BeginDisabled(color == *parameters._defaultValue);
+        auto hasDefaultEnabledValue = enabled && parameters._defaultEnabledValue;
+        auto equalEnabledValue = !hasDefaultEnabledValue || *parameters._defaultEnabledValue == *enabled;
+        ImGui::BeginDisabled(color == *parameters._defaultValue && equalEnabledValue);
         if (RevertButton(parameters._name)) {
             color = *parameters._defaultValue;
+            if (hasDefaultEnabledValue) {
+                *enabled = *parameters._defaultEnabledValue;
+            }
         }
         ImGui::EndDisabled();
     }

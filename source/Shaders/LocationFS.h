@@ -20,6 +20,7 @@ in float gOpacity;
 flat in int gFieldType;
 in float gFieldParam1;
 in float gFieldParam2;
+flat in int gColored;
 in vec2 gQuadCoord;
 
 uniform float zoom;
@@ -159,13 +160,18 @@ void main()
     alpha *= gOpacity;
 
     // Darken the color where the height map of the force field is high
-    vec3 color = gColor;
+    float darkening = 0.0;
     if (gFieldType != ForceField_None) {
         float outerRadius = (gShapeType == 0) ? gDimension1 + gFadeoutRadius : length(vec2(gDimension1, gDimension2)) * 0.5 + gFadeoutRadius;
-        color *= 1.0 - MaxDarkening * clamp(fieldHeight(pixelOffset, max(outerRadius, 1.0)), 0.0, 1.0);
+        darkening = MaxDarkening * clamp(fieldHeight(pixelOffset, max(outerRadius, 1.0)), 0.0, 1.0);
     }
 
-    FragColor = vec4(color, alpha);
+    // Without coloring, a translucent black darkens the underlying background by the same factor
+    if (gColored == 0) {
+        FragColor = vec4(0.0, 0.0, 0.0, alpha * darkening);
+    } else {
+        FragColor = vec4(gColor * (1.0 - darkening), alpha);
+    }
 }
 )";
 }
