@@ -20,6 +20,9 @@ uniform vec2 viewportSize;
 uniform bool onBackground;
 uniform float renderScale;
 
+const float CoreHiddenZoom = 2.0;
+const float CoreDetailZoom = 7.0;
+
 void main()
 {
     // Transform world position to normalized device coordinates
@@ -30,10 +33,13 @@ void main()
     gl_Position = vec4(ndc, 0.0, 1.0);
 
     float ballSize;
+    float coreVisibility = 1.0;
     if (onBackground) {
         ballSize = 15.0;
     } else {
-        ballSize = zoom / renderScale < 7.0 ? 0.0 : 0.2;
+        float screenZoom = zoom / renderScale;
+        ballSize = screenZoom < CoreDetailZoom ? 0.0 : 0.2;
+        coreVisibility = clamp((screenZoom - CoreHiddenZoom) / (CoreDetailZoom - CoreHiddenZoom), 0.0, 1.0);
     }
 
     float g = clamp(aGlow, 0.0, 1.0);
@@ -41,7 +47,7 @@ void main()
         vColor = aColor * mix(1.0, 4.0, g);
     } else {
         ballSize = mix(ballSize, 1.0, g);
-        vColor = aColor * mix(1.0, 20.0, g);
+        vColor = aColor * mix(coreVisibility, 20.0, g);
     }
 
     gl_PointSize = radius * ballSize;
