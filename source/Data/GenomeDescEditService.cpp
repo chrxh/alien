@@ -402,11 +402,14 @@ ContentDesc GenomeDescEditService::createSeed(GenomeDesc const& genome, RealVect
     ContentDesc result;
     result.addCreature(
         {ObjectDesc().pos(pos).stiffness(1.0f).color(color).type(
-            CellDesc().headCell(true).constructor(ConstructorDesc()
-                                                      .autoTriggerInterval(50)
-                                                      .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_TransitiveCells)
-                                                      .geneIndex(0)
-                                                      .separation(true)))},
+            CellDesc()
+                .cellType(DigestorDesc().rawEnergyConductivity(Const::DigestorRawEnergyConductivity_Min))
+                .headCell(true)
+                .constructor(ConstructorDesc()
+                                 .autoTriggerInterval(50)
+                                 .provideEnergy(freeEnergy ? ProvideEnergy_Free : ProvideEnergy_TransitiveCells)
+                                 .geneIndex(0)
+                                 .separation(true)))},
         CreatureDesc(),
         genome);
     MassOperationsService::get().randomizeLineageIds(result);

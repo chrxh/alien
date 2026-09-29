@@ -1016,6 +1016,19 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
+TEST_F(GenomeDescEditServiceTests, createSeed_cellIsDigestor)
+{
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
+
+    auto seed = GenomeDescEditService::get().createSeed(genome, RealVector2D{10.0f, 20.0f}, 3, false);
+
+    ASSERT_EQ(1, seed._objects.size());
+    auto const& cell = seed._objects.at(0).getCellRef();
+    ASSERT_EQ(CellType_Digestor, cell.getCellType());
+    EXPECT_FLOAT_EQ(1.0f, std::get<DigestorDesc>(cell._cellType).getRawEnergyConversionRate());
+    EXPECT_TRUE(cell._constructor.has_value());
+}
+
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_emptySubGenomes)
 {
     std::vector<SubGenomeDesc> subGenomes;
