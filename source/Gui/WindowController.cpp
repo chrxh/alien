@@ -205,7 +205,32 @@ void WindowController::setMode(std::string const& mode)
     if (isWindowedMode()) {
         updateWindowSize();
     }
+    applyMode(mode);
+    _mode = mode;
+}
 
+void WindowController::hideWindow()
+{
+    // GLFW ignores hiding a full screen window, so it has to leave full screen first
+    if (!isWindowedMode()) {
+        applyMode(WindowedMode);
+    }
+    glfwIconifyWindow(_windowData.window);
+    glfwHideWindow(_windowData.window);
+}
+
+void WindowController::showWindow()
+{
+    glfwShowWindow(_windowData.window);
+    glfwRestoreWindow(_windowData.window);
+    if (!isWindowedMode()) {
+        applyMode(_mode);
+    }
+    glfwFocusWindow(_windowData.window);
+}
+
+void WindowController::applyMode(std::string const& mode)
+{
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 
     if (mode == WindowedMode) {
@@ -220,7 +245,6 @@ void WindowController::setMode(std::string const& mode)
         log(Priority::Important, "set full screen mode with " + createLogString(userMode));
         glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
     }
-    _mode = mode;
 }
 
 void WindowController::updateWindowSize()

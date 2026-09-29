@@ -34,6 +34,9 @@ public:
     std::string getMode();
     void setMode(std::string const& mode);
 
+    void hideWindow();
+    void showWindow();
+
     void updateWindowTitle(std::string const& projectName);
 
     int getFps();
@@ -59,6 +62,7 @@ private:
     void process() override {}
     void shutdown() override;
 
+    void applyMode(std::string const& mode);
     void updateWindowSize();
     std::string createLogString(GLFWvidmode const& videoMode);
 
