@@ -4,6 +4,7 @@
 #include "McpEditTools.h"
 #include "McpGenomeTools.h"
 #include "McpInspectionTools.h"
+#include "McpMassOperationTools.h"
 #include "McpMultiplierTools.h"
 #include "McpNetworkTools.h"
 #include "McpParameterTools.h"
@@ -36,6 +37,7 @@ std::vector<McpTool> _McpToolsFacadeImpl::getTools(McpToolContext& context)
          McpSelectionTools::get().getTools(context),
          McpEditTools::get().getTools(context),
          McpMultiplierTools::get().getTools(context),
+         McpMassOperationTools::get().getTools(context),
          McpGenomeTools::get().getTools(context)});
     addGroup("Inspection and view", {McpViewTools::get().getTools(context), McpInspectionTools::get().getTools(context)});
     addGroup("Simulation parameters", {McpParameterTools::get().getTools()});
