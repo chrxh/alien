@@ -227,6 +227,9 @@ __inline__ __device__ void ConstructorProcessor::constructCell(SimulationData& d
         object->typeData.cell.neuralActivity.signals[Channels::ConstructorSuccess] = 1;  // Successful
 
         alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
+        if (ConstructorHelper::createsNewCreature(constructor)) {
+            constructionData.creature->creatureState = CreatureState_HostConfirmed;
+        }
         if (constructionData.isLastNodeOfLastConcatenation) {
             if (ConstructorHelper::createsNewCreature(constructor)) {
                 ++constructor.currentOffspring;
@@ -280,7 +283,10 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
 {
     auto& constructor = object->typeData.cell.constructor;
 
-    if (constructor.offspring != nullptr) {
+    auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object);
+
+    if (constructor.offspring != nullptr
+        && (lastConstructionCell || !ConstructorHelper::createsNewCreature(constructor) || constructor.offspring->numCells == 0)) {
         return constructor.offspring;
     }
 
@@ -293,7 +299,6 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     }
 
     // Current branch under construction => use creature reference from there
-    auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object);
     if (lastConstructionCell) {
         return lastConstructionCell->typeData.cell.creature;
     }

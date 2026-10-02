@@ -338,6 +338,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
 
     creature->id = creatureTO.id;
     changeCreatureFromTO(creatureTO, creature);
+    creature->creatureState = CreatureState_HostConfirmed;
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -704,6 +705,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     newCreature->ancestorId = creature->id;
     newCreature->generation = creature->generation + 1;
     newCreature->mutationState = MutationState_NotMutated;
+    newCreature->creatureState = CreatureState_HostConfirmed;
     newCreature->externalEnergyInflowCellId = VALUE_NOT_SET_UINT64;
     return newCreature;
 }
