@@ -285,8 +285,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
 
     auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object);
 
-    if (constructor.offspring != nullptr
-        && (lastConstructionCell || !ConstructorHelper::createsNewCreature(constructor) || constructor.offspring->numCells == 0)) {
+    if (constructor.offspring != nullptr && (lastConstructionCell || constructor.offspring->numCells == 0)) {
         return constructor.offspring;
     }
 

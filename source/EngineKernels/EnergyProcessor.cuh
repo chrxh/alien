@@ -12,10 +12,10 @@ public:
     __inline__ __device__ static void updateMap(SimulationData& data);
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
     __inline__ __device__ static void calcActiveSources(SimulationData& data);
-    __inline__ __device__ static void movement(SimulationData& data);
-    __inline__ __device__ static void collision(SimulationData& data);
-    __inline__ __device__ static void splitting(SimulationData& data);
-    __inline__ __device__ static void transformation(SimulationData& data);
+    __inline__ __device__ static void moveAndBounceOffWalls(SimulationData& data);
+    __inline__ __device__ static void mergeOrAbsorb(SimulationData& data);
+    __inline__ __device__ static void splitHighEnergyParticles(SimulationData& data);
+    __inline__ __device__ static void transformIntoFreeCells(SimulationData& data);
 
     __inline__ __device__ static void radiate(SimulationData& data, Object* cell, float energy);
     __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
@@ -31,13 +31,14 @@ private:
 
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
     __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
-    __inline__ __device__ static bool rejectEnergyParticle(Object* object);
+    __inline__ __device__ static bool isWall(Object* object);
     __inline__ __device__ static float calcWallSearchRadius();
-    __inline__ __device__ static void moveAndBounceOffWalls(SimulationData& data, Energy* particle, float wallSearchRadius);
+    __inline__ __device__ static void moveParticleAndBounceOffWalls(SimulationData& data, Energy* particle, float wallSearchRadius);
     __inline__ __device__ static bool
     findFirstWall(SimulationData& data, float2 const& pos, float2 const& vel, float timeLeft, float elapsedTime, float wallSearchRadius, WallHit& hit);
+    __inline__ __device__ static void mergeParticleInto(Energy*& particle, Energy* target);
+    __inline__ __device__ static void absorbIntoObject(SimulationData& data, Energy*& particle, Object* object);
 
-    static auto constexpr MaxFusionEnergy = 5.0f;
     static auto constexpr MinEnergyPerSourceParticle = 10.0f;
     static auto constexpr MaxNumParticlesPerSource = 1000;
     static auto constexpr MaxWallBouncesPerTimestep = 3;
@@ -85,86 +86,15 @@ __inline__ __device__ void EnergyProcessor::calcActiveSources(SimulationData& da
     }
 }
 
-__inline__ __device__ void EnergyProcessor::movement(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::moveAndBounceOffWalls(SimulationData& data)
 {
     auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
     auto wallSearchRadius = calcWallSearchRadius();
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
-        moveAndBounceOffWalls(data, particle, wallSearchRadius);
+        moveParticleAndBounceOffWalls(data, particle, wallSearchRadius);
         data.energyMap.correctPosition(particle->pos);
-    }
-}
-
-__inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
-{
-    auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
-
-    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        auto& particle = data.entities.energies.at(particleIndex);
-        auto otherParticle = data.energyMap.get(particle->pos);
-        if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
-
-            SystemDoubleLock lock;
-            lock.init(&particle->locked, &otherParticle->locked);
-            if (lock.tryLock()) {
-
-                if (particle->energy > NEAR_ZERO && otherParticle->energy > NEAR_ZERO) {
-                    auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
-                    otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
-                    otherParticle->energy += particle->energy;
-                    otherParticle->lastAbsorbedObject = nullptr;
-                    particle->energy = 0;
-                    particle = nullptr;
-                }
-
-                lock.releaseLock();
-            }
-        } else {
-            if (auto object = data.objectMap.getFirst(particle->pos + particle->vel)) {
-                if (object->type == ObjectType_Fluid || rejectEnergyParticle(object)) {
-                    continue;
-                }
-                if (particle->lastAbsorbedObject == object) {
-                    continue;
-                }
-                if (object->type == ObjectType_Cell && object->typeData.cell.cellState == CellState_UnderConstruction) {
-                    continue;
-                }
-                auto radiationAbsorption = ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, object->pos, object->color);
-
-                if (radiationAbsorption < NEAR_ZERO) {
-                    continue;
-                }
-                if (!object->tryLock()) {
-                    continue;
-                }
-                if (particle->tryLock()) {
-
-                    auto energyToTransfer = particle->energy * radiationAbsorption;
-                    if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
-                        energyToTransfer = particle->energy;
-                    }
-                    if (object->type == ObjectType_Cell) {
-                        object->typeData.cell.rawEnergy += energyToTransfer;
-                    } else {
-                        object->typeData.freeCell.energy += energyToTransfer;
-                    }
-                    particle->energy -= energyToTransfer;
-                    bool killParticle = particle->energy < NEAR_ZERO;
-
-                    particle->releaseLock();
-
-                    if (killParticle) {
-                        particle = nullptr;
-                    } else {
-                        particle->lastAbsorbedObject = object;
-                    }
-                }
-                object->releaseLock();
-            }
-        }
     }
 }
 
@@ -178,7 +108,7 @@ __inline__ __device__ float EnergyProcessor::calcWallSearchRadius()
     return maxBindingDistance / 2 + WallSearchMargin + cudaSimulationParameters.maxVelocity.value * cudaSimulationParameters.timestepSize.value;
 }
 
-__inline__ __device__ void EnergyProcessor::moveAndBounceOffWalls(SimulationData& data, Energy* particle, float wallSearchRadius)
+__inline__ __device__ void EnergyProcessor::moveParticleAndBounceOffWalls(SimulationData& data, Energy* particle, float wallSearchRadius)
 {
     auto pos = particle->pos;
     auto vel = particle->vel;
@@ -222,14 +152,14 @@ __inline__ __device__ bool EnergyProcessor::findFirstWall(
             return;
         }
         auto object = record.self;
-        if (!rejectEnergyParticle(object)) {
+        if (!isWall(object)) {
             return;
         }
 
         auto wallStart = data.objectMap.getCorrectedDirection(object->pos - pos) + object->vel * elapsedTime;
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
-            if (!rejectEnergyParticle(connectedObject)) {
+            if (!isWall(connectedObject)) {
                 continue;
             }
             auto wall = data.objectMap.getCorrectedDirection(connectedObject->pos - object->pos) + (connectedObject->vel - object->vel) * elapsedTime;
@@ -265,7 +195,7 @@ __inline__ __device__ bool EnergyProcessor::findFirstWall(
     return hit.fraction <= 1.0f;
 }
 
-__inline__ __device__ bool EnergyProcessor::rejectEnergyParticle(Object* object)
+__inline__ __device__ bool EnergyProcessor::isWall(Object* object)
 {
     if (object->type == ObjectType_Solid) {
         return true;
@@ -276,7 +206,85 @@ __inline__ __device__ bool EnergyProcessor::rejectEnergyParticle(Object* object)
     return false;
 }
 
-__inline__ __device__ void EnergyProcessor::splitting(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::mergeOrAbsorb(SimulationData& data)
+{
+    auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
+
+    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
+        auto& particle = data.entities.energies.at(particleIndex);
+        auto otherParticle = data.energyMap.get(particle->pos);
+        if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
+            mergeParticleInto(particle, otherParticle);
+        } else if (auto object = data.objectMap.getFirst(particle->pos + particle->vel)) {
+            absorbIntoObject(data, particle, object);
+        }
+    }
+}
+
+__inline__ __device__ void EnergyProcessor::mergeParticleInto(Energy*& particle, Energy* target)
+{
+    SystemDoubleLock lock;
+    lock.init(&particle->locked, &target->locked);
+    if (lock.tryLock()) {
+
+        if (particle->energy > NEAR_ZERO && target->energy > NEAR_ZERO) {
+            auto factor1 = particle->energy / (particle->energy + target->energy);
+            target->vel = particle->vel * factor1 + target->vel * (1.0f - factor1);
+            target->energy += particle->energy;
+            target->lastAbsorbedObject = nullptr;
+            particle->energy = 0;
+            particle = nullptr;
+        }
+
+        lock.releaseLock();
+    }
+}
+
+__inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& data, Energy*& particle, Object* object)
+{
+    if (object->type == ObjectType_Fluid || isWall(object)) {
+        return;
+    }
+    if (particle->lastAbsorbedObject == object) {
+        return;
+    }
+    if (object->type == ObjectType_Cell && object->typeData.cell.cellState == CellState_UnderConstruction) {
+        return;
+    }
+    auto radiationAbsorption = ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, object->pos, object->color);
+
+    if (radiationAbsorption < NEAR_ZERO) {
+        return;
+    }
+    if (!object->tryLock()) {
+        return;
+    }
+    if (particle->tryLock()) {
+
+        auto energyToTransfer = particle->energy * radiationAbsorption;
+        if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
+            energyToTransfer = particle->energy;
+        }
+        if (object->type == ObjectType_Cell) {
+            object->typeData.cell.rawEnergy += energyToTransfer;
+        } else {
+            object->typeData.freeCell.energy += energyToTransfer;
+        }
+        particle->energy -= energyToTransfer;
+        bool killParticle = particle->energy < NEAR_ZERO;
+
+        particle->releaseLock();
+
+        if (killParticle) {
+            particle = nullptr;
+        } else {
+            particle->lastAbsorbedObject = object;
+        }
+    }
+    object->releaseLock();
+}
+
+__inline__ __device__ void EnergyProcessor::splitHighEnergyParticles(SimulationData& data)
 {
     auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
 
@@ -310,7 +318,7 @@ __inline__ __device__ void EnergyProcessor::splitting(SimulationData& data)
     }
 }
 
-__inline__ __device__ void EnergyProcessor::transformation(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::transformIntoFreeCells(SimulationData& data)
 {
     if (!cudaSimulationParameters.particleTransformationAllowed.value) {
         return;
