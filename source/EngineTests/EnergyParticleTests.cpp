@@ -182,10 +182,10 @@ TEST_F(EnergyParticleTests, particleAbsorptionForStaticDigestorCells)
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
     auto particleEnergy = 10.0f;
 
-    auto data =
-        ContentDesc()
-            .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).isStatic(true).type(CellDesc().usableEnergy(cellEnergy).cellType(DigestorDesc()))})
-            .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
+    auto digestor = DigestorDesc().rawEnergyConductivity(Const::DigestorRawEnergyConductivity_Max);
+    auto data = ContentDesc()
+                    .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).isStatic(true).type(CellDesc().usableEnergy(cellEnergy).cellType(digestor))})
+                    .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
 
@@ -246,6 +246,202 @@ TEST_F(EnergyParticleTests, noParticleAbsorptionForStaticFreeCells)
 
     auto const& object = actualData._objects.at(0);
     EXPECT_TRUE(approxCompare(cellEnergy, object.getFreeCellRef()._energy));
+}
+
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenSolids_fromLeft)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({100.0f, 98.5f}).type(SolidDesc()), ObjectDesc().id(2).pos({100.0f, 101.5f}).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(99.49f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(100.0f, particle._pos.y, 0.01f);
+    EXPECT_NEAR(-1.0f, particle._vel.x, 0.001f);
+    EXPECT_NEAR(0.0f, particle._vel.y, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenSolids_fromRight)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({100.0f, 98.5f}).type(SolidDesc()), ObjectDesc().id(2).pos({100.0f, 101.5f}).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({101.5f, 100.0f}).vel({-1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(100.51f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(100.0f, particle._pos.y, 0.01f);
+    EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
+    EXPECT_NEAR(0.0f, particle._vel.y, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenMovingNonStaticSolids)
+{
+    auto data = ContentDesc()
+                    .addObjects(
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).vel({0.4f, 0.0f}).isStatic(false).type(SolidDesc()),
+                         ObjectDesc().id(2).pos({100.0f, 101.5f}).vel({0.4f, 0.0f}).isStatic(false).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(2, actualData._objects.size());
+    for (auto const& object : actualData._objects) {
+        EXPECT_FALSE(object._isStatic);
+        EXPECT_NEAR(101.2f, object._pos.x, 0.01f);
+    }
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(100.89f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(-0.2f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particleIsPushedByConnectionBetweenMovingNonStaticSolids)
+{
+    auto data = ContentDesc()
+                    .addObjects(
+                        {ObjectDesc().id(1).pos({99.8f, 98.5f}).vel({0.4f, 0.0f}).isStatic(false).type(SolidDesc()),
+                         ObjectDesc().id(2).pos({99.8f, 101.5f}).vel({0.4f, 0.0f}).isStatic(false).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({100.5f, 100.0f}).vel({0.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(100.71f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(0.8f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particleBouncesOffDiagonalConnection)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({99.0f, 99.0f}).type(SolidDesc()), ObjectDesc().id(2).pos({101.0f, 101.0f}).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(99.993f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(100.507f, particle._pos.y, 0.01f);
+    EXPECT_NEAR(0.0f, particle._vel.x, 0.001f);
+    EXPECT_NEAR(1.0f, particle._vel.y, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, fastParticleDoesNotTunnelThroughConnection)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({100.0f, 98.5f}).type(SolidDesc()), ObjectDesc().id(2).pos({100.0f, 101.5f}).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({97.5f, 100.0f}).vel({3.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(99.49f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(-3.0f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particlePassesUnconnectedSolid)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({100.5f, 100.5f}).type(SolidDesc())})
+                    .energies({EnergyDesc().pos({99.5f, 100.5f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(102.5f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenStaticCells)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = ContentDesc()
+                    .addCreature(
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).isStatic(true).type(CellDesc().usableEnergy(cellEnergy)),
+                         ObjectDesc().id(2).pos({100.0f, 101.5f}).isStatic(true).type(CellDesc().usableEnergy(cellEnergy))})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(99.49f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(-1.0f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particlePassesConnectionBetweenNonStaticCells)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = ContentDesc()
+                    .addCreature(
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).type(CellDesc().usableEnergy(cellEnergy)),
+                         ObjectDesc().id(2).pos({100.0f, 101.5f}).type(CellDesc().usableEnergy(cellEnergy))})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(101.5f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particlePassesConnectionBetweenStaticAndNonStaticCell)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = ContentDesc()
+                    .addCreature(
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).isStatic(true).type(CellDesc().usableEnergy(cellEnergy)),
+                         ObjectDesc().id(2).pos({100.0f, 101.5f}).type(CellDesc().usableEnergy(cellEnergy))})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(101.5f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
 }
 
 TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)

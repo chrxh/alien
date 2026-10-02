@@ -213,6 +213,36 @@ public:
     }
 
     template <typename ExecFunc>
+    __device__ __inline__ void executeForEachRecord(float2 const& pos, float radius, ExecFunc const& execFunc) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        int radiusInt = ceilf(radius);
+        auto records = _records.getArray();
+        for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+            auto cellY = toFloat(posInt.y + dy);
+            auto deltaY = fmaxf(fmaxf(cellY - pos.y, pos.y - (cellY + 1)), 0.0f);
+            for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+                auto cellX = toFloat(posInt.x + dx);
+                auto deltaX = fmaxf(fmaxf(cellX - pos.x, pos.x - (cellX + 1)), 0.0f);
+                if (deltaX * deltaX + deltaY * deltaY > radius * radius) {
+                    continue;
+                }
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                correctPosition(scanPos);
+                int index = _mapHead[scanPos.x + scanPos.y * _size.x];
+                for (int level = 0; level < 10; ++level) {
+                    if (index < 0) {
+                        break;
+                    }
+                    auto const& record = records[index];
+                    execFunc(record);
+                    index = record.nextObjectIndex;
+                }
+            }
+        }
+    }
+
+    template <typename ExecFunc>
     __device__ __inline__ void executeForEach_block(float2 const& pos, float radius, int detached, ExecFunc const& execFunc) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
