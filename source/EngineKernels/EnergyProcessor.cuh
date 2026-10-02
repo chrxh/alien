@@ -45,7 +45,6 @@ private:
     static auto constexpr WallClearance = 0.01f;
     static auto constexpr WallSearchMargin = 0.5f;
     static auto constexpr MaxWallScanRadius = 8.0f;
-    static auto constexpr MinWallCrossProduct = 1.0e-6f;
 };
 
 /************************************************************************/
@@ -167,7 +166,7 @@ __inline__ __device__ bool EnergyProcessor::findFirstWall(
             // The crossing is tested in the reference frame of the wall
             auto relativeDisplacement = (vel - (object->vel + connectedObject->vel) / 2) * timeLeft;
             auto crossProduct = relativeDisplacement.x * wall.y - relativeDisplacement.y * wall.x;
-            if (abs(crossProduct) < MinWallCrossProduct) {
+            if (crossProduct == 0.0f) {
                 continue;
             }
             auto fraction = (wallStart.x * wall.y - wallStart.y * wall.x) / crossProduct;
