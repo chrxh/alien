@@ -126,7 +126,7 @@ __inline__ __device__ Object* ConstructorHelper::getLastConstructedCell(Object* 
 __inline__ __device__ void ConstructorHelper::confirmOffspring(Object* constructorCell)
 {
     auto lastConstructedCell = getLastConstructedCell(constructorCell);
-    if (!lastConstructedCell || lastConstructedCell->type != ObjectType_Cell) {
+    if (!lastConstructedCell) {
         return;
     }
     auto const& offspring = lastConstructedCell->typeData.cell.creature;

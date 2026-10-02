@@ -73,8 +73,8 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
     ObjectProcessor::checkForces(data);
     ObjectProcessor::applyForces(data);
 
-    EnergyProcessor::movement(data);
-    EnergyProcessor::collision(data);
+    EnergyProcessor::moveAndBounceOffWalls(data);
+    EnergyProcessor::mergeOrAbsorb(data);
 }
 
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
@@ -82,7 +82,7 @@ __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData dat
     ObjectProcessor::verletPositionUpdate(data);
     ObjectProcessor::tearOverstretchedConnections(data);
 
-    EnergyProcessor::splitting(data);
+    EnergyProcessor::splitHighEnergyParticles(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)
@@ -306,7 +306,7 @@ __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)
 {
-    EnergyProcessor::transformation(data);
+    EnergyProcessor::transformIntoFreeCells(data);
 }
 
 __global__ void cudaNextTimestep_incTimestep(SimulationData data)
