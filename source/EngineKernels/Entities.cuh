@@ -454,7 +454,8 @@ struct Creature
     // Process data
     uint32_t headUpdateId;                // Will be updated regularly to trigger head updates
     uint32_t nextConstructionId;
-    uint64_t externalEnergyInflowCellId;  // Constructor cell that claimed the external energy inflow, may be VALUE_NOT_SET_UINT64
+    CreatureState creatureState;
+    uint64_t externalEnergyInflowCellId;  // May be invalid, only used for externalEnergyInflowOnlyForFirstOffspring
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
