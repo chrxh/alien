@@ -15,15 +15,15 @@ public:
         _world.init(worldSize);
         _solids.init(worldSize, OccupancyGrid::Levels::PositionsAndBlocks);
         _barriers.init(worldSize, OccupancyGrid::Levels::Positions);
-        CudaMemoryManager::getInstance().acquireMemory<BarrierBounds>(1, _bounds);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_bounds, 0, sizeof(BarrierBounds)));
+        CudaMemoryManager::getInstance().acquireMemory<float>(1, _maxReach);
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_maxReach, 0, sizeof(float)));
     }
 
     __host__ __inline__ void free()
     {
         _solids.free();
         _barriers.free();
-        CudaMemoryManager::getInstance().freeMemory(_bounds);
+        CudaMemoryManager::getInstance().freeMemory(_maxReach);
     }
 
     __device__ __inline__ void set_block(int numEntities, Object** objects)
@@ -38,7 +38,7 @@ public:
             }
             if (object->type == ObjectType_Solid || object->isStatic()) {
                 _barriers.set(posInt);
-                updateBarrierBounds(object);
+                updateMaxReach(object);
             }
         }
     }
@@ -48,7 +48,7 @@ public:
         _solids.clear_system();
         _barriers.clear_system();
         if (blockIdx.x == 0 && threadIdx.x == 0) {
-            *_bounds = {0, 0};
+            *_maxReach = 0;
         }
     }
 
@@ -69,47 +69,36 @@ public:
         return _barriers.isAnySet({floorInt(pos.x - radius), floorInt(pos.y - radius)}, {floorInt(pos.x + radius), floorInt(pos.y + radius)});
     }
 
-    // A barrier crossed by a particle always has an endpoint within half of its connection length from the crossing point, plus the distance the
-    // barrier moves. The barrier velocity was measured before the current forces accelerated the barriers.
+    // A barrier crossed by a particle always has an endpoint within its reach from the crossing point. The reach was measured before the
+    // barriers were accelerated in the current timestep. Accelerations by force fields are small enough to be covered by the margin.
     __device__ __inline__ float calcBarrierSearchRadius() const
     {
-        auto maxBarrierVelocity = _bounds->maxVelocity + cudaSimulationParameters.maxAcceleration;
-        return _bounds->maxConnectionLength / 2 + BarrierSearchMargin + maxBarrierVelocity * cudaSimulationParameters.timestepSize.value;
-    }
-
-    // Has to be called when a barrier is accelerated after the grid was built
-    __device__ __inline__ void updateBarrierVelocity(Object* barrier)
-    {
-        auto velocity = Math::length(barrier->vel);
-        if (velocity > _bounds->maxVelocity) {
-            alienAtomicMax(&_bounds->maxVelocity, velocity);
-        }
+        return *_maxReach + BarrierSearchMargin + cudaSimulationParameters.maxAcceleration * cudaSimulationParameters.timestepSize.value;
     }
 
 private:
     static auto constexpr BarrierSearchMargin = 0.5f;
 
-    // Upper bounds over all barriers, measured when the grid is built
-    struct BarrierBounds
+    __device__ __inline__ void updateMaxReach(Object* barrier)
     {
-        float maxConnectionLength;
-        float maxVelocity;
-    };
+        auto reach = calcReach(barrier);
+        if (reach > *_maxReach) {
+            alienAtomicMax(_maxReach, reach);
+        }
+    }
 
-    __device__ __inline__ void updateBarrierBounds(Object* barrier)
+    // Half of the longest connection plus the distance the barrier moves in a timestep
+    __device__ __inline__ float calcReach(Object* barrier) const
     {
         auto maxConnectionLength = 0.0f;
         for (int i = 0; i < barrier->numConnections; ++i) {
             maxConnectionLength = max(maxConnectionLength, Math::length(_world.getCorrectedDirection(barrier->connections[i].object->pos - barrier->pos)));
         }
-        if (maxConnectionLength > _bounds->maxConnectionLength) {
-            alienAtomicMax(&_bounds->maxConnectionLength, maxConnectionLength);
-        }
-        updateBarrierVelocity(barrier);
+        return maxConnectionLength / 2 + Math::length(barrier->vel) * cudaSimulationParameters.timestepSize.value;
     }
 
     WorldGeometry _world;
     OccupancyGrid _solids;
     OccupancyGrid _barriers;
-    BarrierBounds* _bounds;
+    float* _maxReach;
 };

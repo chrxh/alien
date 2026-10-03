@@ -100,9 +100,6 @@ __global__ void cudaApplyForceFields(SimulationData data)
                 continue;
             }
             object->vel += calcResultingAcceleration(object->pos, getMassForSPH(object));
-            if (object->type == ObjectType_Solid) {
-                data.barrierGrid.updateBarrierVelocity(object);
-            }
         }
     }
     {
