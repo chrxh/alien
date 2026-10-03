@@ -74,10 +74,10 @@ void CreatorWidget::processMaterialWidgets(CreatorParameters& parameters)
             .name("Material")
             .textWidth(RightColumnWidth)
             .values({"Solid", "Fluid", "Free cells", "Energy particles"})
-            .tooltip(Const::CreatorDrawingTypeTooltip),
+            .tooltip(Const::CreatorMaterialTooltip),
         &parameters.material);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), parameters.energy);
+        AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CreatorEnergyTooltip), parameters.energy);
     if (parameters.material == CreationMaterial_Fluid) {
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters()

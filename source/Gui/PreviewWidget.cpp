@@ -190,7 +190,7 @@ void _PreviewWidget::processActionBar()
     AlienGui::Separator();
     // Alternatives: ICON_FA_GEM, ICON_FA_FIRE, ICON_FA_CUDA
     if (AlienGui::SelectableButton(
-            AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20).tooltip("Activates a more detail simulation including signals and muscles"),
+            AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20).tooltip("Activates a more detailed simulation including signals and muscles"),
             _editData->detailSimulation)) {
         _genomeEditData->defaultDetailSimulation = _editData->detailSimulation;
         onRestart();
