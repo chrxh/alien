@@ -1,16 +1,16 @@
 # Getting started
 
-Welcome to **ALIEN**, the **A**rtificial **LI**fe **EN**vironment. ALIEN simulates a two-dimensional world made of particles. Particles can form rocks, liquids and soft bodies, and they can become living cells. Cells join into creatures that sense their surroundings, move, eat, fight and build offspring from a genome. Everything runs on your graphics card, so worlds with millions of particles evolve in real time.
+**ALIEN** (**A**rtificial **LI**fe **EN**vironment) is an artificial life simulator built on a GPU-accelerated 2D particle engine for soft bodies and fluids. Every object in a simulated world is composed of particles. They can be bonded into solid structures, flow as liquids or act as cells with specialized functions such as sensors, muscles and constructors, each controlled by a small neural network. Networks of such cells form creatures that perceive their environment, move, feed, compete and build offspring according to their genome. With mutations enabled, populations evolve and entire ecosystems emerge. The engine runs entirely on the graphics card and simulates worlds with millions of particles in real time.
 
-![A world grown in ALIEN: plant-like creatures and swarms around glowing nebulae](images/hero.jpg)
+![Worlds within worlds: biotopes full of evolving creatures, connected by glowing currents](images/hero.jpg)
 
-This documentation grows with you. The chapters under **Start here** get you going within minutes. The chapters under **Explore** introduce the big topics step by step. The chapters under **Reference** describe every detail, for example every cell type and every simulation parameter. Use the search field above the table of contents whenever you are looking for something specific.
+This documentation is organized in three parts. **Start here** covers the first steps, the user interface and the control of ALIEN by AI agents. **Explore** introduces the central concepts step by step, from the physics sandbox to creature design, evolution and generative art. **Reference** documents every cell type, the genome format, the neural networks, all simulation parameters and the controls in detail. The search field above the table of contents finds any term across all chapters.
 
 > **Tip:** Press **F1** at any time to open or close this documentation.
 
 ## What you can do with ALIEN
 
-ALIEN has three main uses, and many people enjoy all of them:
+ALIEN serves three main purposes:
 
 - **Evolution simulations.** Seed a world with self-replicating creatures, switch on mutations and watch how populations adapt, compete and form ecosystems. ALIEN is used to study how complexity arises from simple building blocks. See [Evolution experiments](evolution.md).
 - **Sandbox game.** Draw rocks, pour liquids, build machines and creatures, then smash them with the mouse. The physics engine reacts instantly while the simulation is running. See [Sandbox and editing](sandbox.md).
