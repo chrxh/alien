@@ -667,6 +667,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_dif
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_alongsideRay)
 {
+    // A wall running close to the line of sight but parallel to it must not block the ray to the target
     auto data = ContentDesc()
                     .addCreature(
                         {
@@ -679,7 +680,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_alo
                         CreatureDesc().id(0))
                     .addConnection(1, 2);
 
-    // Add a wall that runs alongside the line of sight and shares density map slots with it
+    // Add a wall that runs alongside the line of sight and shares occupancy grid tiles with it
     for (int i = 0; i < 50; ++i) {
         data._objects.emplace_back(ObjectDesc().id(50 + i).pos({97.0f, 95.0f - toFloat(i)}).type(SolidDesc()));
     }
@@ -698,6 +699,7 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_alo
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_touchingSensorFromBehind)
 {
+    // A solid touching the sensor on the side facing away from the target must not block the rays
     auto data = ContentDesc()
                     .addCreature(
                         {
@@ -1204,6 +1206,7 @@ TEST_F(SensorTests, detectSolid_ignoreFluidParticles)
 
 TEST_F(SensorTests, detectSolid_wallDistanceAndAngleAreExact)
 {
+    // The distance to a wall is measured up to the surface of its solids and the angle points straight to the wall
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
@@ -1233,6 +1236,8 @@ TEST_F(SensorTests, detectSolid_wallDistanceAndAngleAreExact)
 
 TEST_F(SensorTests, detectSolid_wallBeyondWorldBoundary)
 {
+    // The sensor sits near the bottom of the world and has to find a wall on the other side of the world boundary.
+    // The world height of 1000 is not a multiple of the block size, so the scan passes the cut-off last block row.
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({500.0f, 995.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
@@ -1260,6 +1265,7 @@ TEST_F(SensorTests, detectSolid_wallBeyondWorldBoundary)
 
 TEST_F(SensorTests, detectSolid_gapInWallIsVisible)
 {
+    // Rays pass through a gap in a wall, so the nearest detected solids are the edges of the gap
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 110.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
@@ -1293,6 +1299,7 @@ TEST_F(SensorTests, detectSolid_gapInWallIsVisible)
 
 TEST_F(SensorTests, detectSolid_solidCloseToSensor)
 {
+    // A wall only 3 units away is detected with exact distance and angle
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
@@ -1320,6 +1327,7 @@ TEST_F(SensorTests, detectSolid_solidCloseToSensor)
 
 TEST_F(SensorTests, detectSolid_solidTouchingSensor)
 {
+    // A solid touching the sensor is detected at distance zero, i.e. with the maximum distance signal
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
@@ -1532,6 +1540,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
 
 TEST_F(SensorTests, detectCreature_nearRangeDistanceHasSubUnitResolution)
 {
+    // A creature close to the sensor is found by the near range scan, its distance is exact and not rounded to whole units
     auto data = ContentDesc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
