@@ -10,6 +10,7 @@ namespace Const
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
     std::filesystem::path const ImagesPath = ResourcePath / "images";
+    std::filesystem::path const DocsPath = ResourcePath / "docs";
 
     std::filesystem::path const LogFilename = "log.txt";
     std::filesystem::path const ProfileFilename = "profile.txt";

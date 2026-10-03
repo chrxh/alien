@@ -256,6 +256,7 @@ The following external libraries are used:
 - [vcpkg](https://vcpkg.io/en/index.html)
 - [WinReg](https://github.com/GiovanniDicanio/WinReg)
 - [CLI11](https://github.com/CLIUtils/CLI11)
+- [MD4C](https://github.com/mity/md4c)
 
 Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)

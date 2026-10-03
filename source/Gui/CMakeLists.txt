@@ -55,6 +55,8 @@ PUBLIC
     DeleteUserDialog.h
     DisplaySettingsDialog.cpp
     DisplaySettingsDialog.h
+    DocumentationWindow.cpp
+    DocumentationWindow.h
     EditInteractionController.h
     EditorController.cpp
     EditorController.h
@@ -91,8 +93,6 @@ PUBLIC
     GenomeTabWidget.cpp
     GenomeTabWidget.h
     GenomeWindowEditData.h
-    GettingStartedWindow.cpp
-    GettingStartedWindow.h
     GuiLogger.cpp
     GuiLogger.h
     HelpStrings.h
@@ -130,6 +130,11 @@ PUBLIC
     MainLoopEntityController.h
     MainWindow.cpp
     MainWindow.h
+    MarkdownDocument.h
+    MarkdownParser.cpp
+    MarkdownParser.h
+    MarkdownRenderer.cpp
+    MarkdownRenderer.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
     McpController.cpp
@@ -256,6 +261,7 @@ target_link_libraries(alien OpenGL::GL OpenGL::GLU)
 target_link_libraries(alien GLEW::GLEW)
 target_link_libraries(alien imgui::imgui)
 target_link_libraries(alien implot::implot)
+target_link_libraries(alien md4c::md4c)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
