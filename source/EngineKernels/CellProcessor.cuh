@@ -136,6 +136,10 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             if (object->typeData.cell.lastUpdate >= 2 * CELL_UPDATE_INTERVAL) {
                 cellState = CellState_Dying;
             }
+            if (origCellState == CellState_UnderConstruction && object->typeData.cell.headCell && *data.timestep % CELL_UPDATE_INTERVAL == 1
+                && object->typeData.cell.creature->creatureState == CreatureState_HostUnconfirmed) {
+                cellState = CellState_Dying;
+            }
         }
         object->tempValue1.as_uint32_float.uint32Part = cellState;
     }
@@ -151,7 +155,11 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        object->typeData.cell.cellState = object->tempValue1.as_uint32_float.uint32Part;
+        auto nextCellState = object->tempValue1.as_uint32_float.uint32Part;
+        if (nextCellState == CellState_BeingActivated) {
+            object->typeData.cell.creature->creatureState = CreatureState_HostConfirmed;
+        }
+        object->typeData.cell.cellState = nextCellState;
         object->tempValue1.as_uint32_float.uint32Part = 0;
     }
 }
@@ -168,6 +176,9 @@ __inline__ __device__ void CellProcessor::headUpdate_calcFutureValue(SimulationD
         }
         if (*data.timestep % CELL_UPDATE_INTERVAL == 0) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            if (object->typeData.cell.constructorAvailable) {
+                ConstructorHelper::confirmOffspring(object);
+            }
         }
 
         auto update = false;
@@ -229,6 +240,9 @@ __inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(Simulation
             if (*data.timestep % CELL_UPDATE_INTERVAL == 1) {
                 object->typeData.cell.headUpdateId = creature->headUpdateId;
                 object->typeData.cell.frontAngle = creature->genome->frontAngle;
+                if (object->typeData.cell.cellState == CellState_UnderConstruction) {
+                    creature->creatureState = CreatureState_HostUnconfirmed;
+                }
             }
         } else {
             auto const& newHeadUpdateId = object->tempValue2.as_uint32_float.uint32Part;

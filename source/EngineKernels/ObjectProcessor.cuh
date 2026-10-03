@@ -17,9 +17,9 @@ class ObjectProcessor
 {
 public:
     __inline__ __device__ static void init(SimulationData& data);
-    __inline__ __device__ static void updateMap(SimulationData& data);
-    __inline__ __device__ static void clearDensityMap(SimulationData& data);
-    __inline__ __device__ static void fillDensityMap(SimulationData& data);
+    __inline__ __device__ static void updateGrids(SimulationData& data);
+    __inline__ __device__ static void clearDensityGrid(SimulationData& data);
+    __inline__ __device__ static void fillDensityGrid(SimulationData& data);
 
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void calcFluidBoundaryForces(SimulationData& data);
@@ -53,32 +53,31 @@ __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
-        data.objectMap.resetRecordLink(index);
+        data.objectGrid.resetRecordLink(index);
         object->tempValue1.as_uint64 = 0;
     }
 }
 
-__inline__ __device__ void ObjectProcessor::updateMap(SimulationData& data)
+__inline__ __device__ void ObjectProcessor::updateGrids(SimulationData& data)
 {
     auto const partition = calcBlockPartition(data.entities.objects.getNumEntries());
     Object** objectPointers = &data.entities.objects.at(partition.startIndex);
-    data.objectMap.set_block(partition.startIndex, partition.numElements(), objectPointers);
+    data.objectGrid.set_block(partition.startIndex, partition.numElements(), objectPointers);
+    data.barrierGrid.set_block(partition.numElements(), objectPointers);
 }
 
-__inline__ __device__ void ObjectProcessor::clearDensityMap(SimulationData& data)
+__inline__ __device__ void ObjectProcessor::clearDensityGrid(SimulationData& data)
 {
-    data.preprocessedSimulationData.densityMap.clear();
+    data.preprocessedSimulationData.densityGrid.clear();
 }
 
-__inline__ __device__ void ObjectProcessor::fillDensityMap(SimulationData& data)
+__inline__ __device__ void ObjectProcessor::fillDensityGrid(SimulationData& data)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto object = data.entities.objects.at(index);
         if (object->type == ObjectType_FreeCell) {
-            data.preprocessedSimulationData.densityMap.addFreeCell(object);
-        } else if (object->type == ObjectType_Solid) {
-            data.preprocessedSimulationData.densityMap.addSolidObject(object);
+            data.preprocessedSimulationData.densityGrid.addFreeCell(object);
         }
     }
 }
@@ -192,14 +191,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         auto cutoff = smoothingLength * 2;
         auto invScanLength = 1.0f / toFloat(scanLength);
 
-        auto records = data.objectMap.getRecords();
+        auto records = data.objectGrid.getRecords();
         for (int scanIndex = toInt(warp.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += warp.size()) {
             int2 scanPos = calcScanPos(scanOrigin, scanIndex, scanLength, invScanLength);
             if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
                 continue;
             }
-            data.objectMap.correctPosition(scanPos);
-            int otherIndex = data.objectMap.getFirstIndex(scanPos);
+            data.world.correctPosition(scanPos);
+            int otherIndex = data.objectGrid.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
                 if (otherIndex < 0) {
                     break;
@@ -209,7 +208,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 if ((isObjectFluid && other.type == ObjectType_Fluid) || (!isObjectFluid && other.type != ObjectType_Fluid)) {
                     auto posDelta = objectPos - other.pos;
 
-                    data.objectMap.correctDirection(posDelta);
+                    data.world.correctDirection(posDelta);
                     auto adaptedDistance = Math::length(posDelta);
                     auto origDistance = adaptedDistance;
                     if ((objectNumConnections < 3 || other.numConnections < 3) && objectType == ObjectType_Cell && other.type == ObjectType_Cell
@@ -298,7 +297,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 float closestFixedObjectDistance;
                 for (int i = 0; i < numFixedObjects; ++i) {
                     auto const& fixedCell = fixedCells[warpIndexInBlock][i];
-                    auto distance = data.objectMap.getDistance(objectPos, fixedCell->pos);
+                    auto distance = data.world.getDistance(objectPos, fixedCell->pos);
                     if (!closestFixedObject || distance < closestFixedObjectDistance) {
                         closestFixedObject = fixedCell;
                         closestFixedObjectDistance = distance;
@@ -316,14 +315,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 if (!connectedToObject) {
                     float2 r{0, 0};
                     if (closestFixedObject->numConnections <= 1) {
-                        r = data.objectMap.getCorrectedDirection(objectPos - closestFixedObject->pos);
+                        r = data.world.getCorrectedDirection(objectPos - closestFixedObject->pos);
                     } else {
-                        auto angleToObject = Math::angleOfVector(data.objectMap.getCorrectedDirection(objectPos - closestFixedObject->pos));
+                        auto angleToObject = Math::angleOfVector(data.world.getCorrectedDirection(objectPos - closestFixedObject->pos));
                         for (int i = 0; i < numConnections; ++i) {
                             auto otherObject1 = closestFixedObject->connections[i].object;
                             auto otherObject2 = closestFixedObject->connections[(i + 1) % numConnections].object;
-                            auto angleToOtherObject1 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject1->pos - closestFixedObject->pos));
-                            auto angleToOtherObject2 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject2->pos - closestFixedObject->pos));
+                            auto angleToOtherObject1 = Math::angleOfVector(data.world.getCorrectedDirection(otherObject1->pos - closestFixedObject->pos));
+                            auto angleToOtherObject2 = Math::angleOfVector(data.world.getCorrectedDirection(otherObject2->pos - closestFixedObject->pos));
                             if (Math::isAngleInBetween(angleToOtherObject1, angleToOtherObject2, angleToObject)) {
                                 r = otherObject2->pos - otherObject1->pos;
                                 Math::rotateQuarterCounterClockwise(r);
@@ -368,7 +367,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
     auto cutoff = smoothingLength * 2;
     auto cutoffSquared = cutoff * cutoff;
     auto pressureStrength = cudaSimulationParameters.pressureStrength.value;
-    auto records = data.objectMap.getRecords();
+    auto records = data.objectGrid.getRecords();
 
     for (int objectIndex = partition.startIndex; objectIndex <= partition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
@@ -391,8 +390,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
             if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
                 continue;
             }
-            data.objectMap.correctPosition(scanPos);
-            int otherIndex = data.objectMap.getFirstIndex(scanPos);
+            data.world.correctPosition(scanPos);
+            int otherIndex = data.objectGrid.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
                 if (otherIndex < 0) {
                     break;
@@ -403,7 +402,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                 if (other.type != ObjectType_Fluid && otherObject != object && objectDetached + otherObject->detached() != 1) {
 
                     auto posDelta = objectPos - otherObject->pos;
-                    data.objectMap.correctDirection(posDelta);
+                    data.world.correctDirection(posDelta);
                     auto adaptedDistance = Math::length(posDelta);
 
                     if (adaptedDistance <= cutoff && adaptedDistance > NEAR_ZERO) {
@@ -491,7 +490,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
         }
         float2 force{0, 0};
         float2 prevDisplacement = object->connections[object->numConnections - 1].object->pos - object->pos;
-        data.objectMap.correctDirection(prevDisplacement);
+        data.world.correctDirection(prevDisplacement);
         auto cellStiffnessSquared = object->stiffness * object->stiffness;
 
         auto numConnections = object->numConnections;
@@ -501,7 +500,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
             auto connectedObjectStiffnessSquared = connectedObject->stiffness * connectedObject->stiffness;
 
             auto displacement = connectedObject->pos - object->pos;
-            data.objectMap.correctDirection(displacement);
+            data.world.correctDirection(displacement);
 
             auto actualDistance = Math::length(displacement);
             auto bondDistance = object->connections[i].distance;
@@ -561,7 +560,7 @@ __inline__ __device__ void ObjectProcessor::tearOverstretchedConnections(Simulat
                 continue;
             }
             auto displacement = connectedObject->pos - object->pos;
-            data.objectMap.correctDirection(displacement);
+            data.world.correctDirection(displacement);
             auto maxDistance = min(
                 cudaSimulationParameters.maxBindingDistance.value[object->color], cudaSimulationParameters.maxBindingDistance.value[connectedObject->color]);
             if (Math::length(displacement) > maxDistance) {
@@ -580,11 +579,11 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
         auto& object = objects.at(index);
         if (object->isStatic()) {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value;
-            data.objectMap.correctPosition(object->pos);
+            data.world.correctPosition(object->pos);
         } else {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value
                 + object->tempValue1.as_float2 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
-            data.objectMap.correctPosition(object->pos);
+            data.world.correctPosition(object->pos);
             object->tempValue2.as_float2 = object->tempValue1.as_float2;  // Save forces from first step for averaging
             object->tempValue1.as_float2 = {0, 0};
         }
@@ -708,7 +707,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
                     + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                 float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
                     - particleVel;  // Minus particleVel because particle will still be moved in current time step
-                data.objectMap.correctPosition(particlePos);
+                data.world.correctPosition(particlePos);
 
                 EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);
 

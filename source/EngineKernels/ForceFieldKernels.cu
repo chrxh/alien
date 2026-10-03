@@ -7,9 +7,9 @@
 
 namespace
 {
-    __device__ float getHeight(BaseMap const& map, float2 const& pos, int const& index)
+    __device__ float getHeight(WorldGeometry const& world, float2 const& pos, int const& index)
     {
-        auto dist = map.getDistance(
+        auto dist = world.getDistance(
             pos, float2{cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y});
         if (Orientation_Clockwise == cudaSimulationParameters.layerRadialForceFieldOrientation.layerValues[index]) {
             return sqrtf(dist) * cudaSimulationParameters.layerRadialForceFieldStrength.layerValues[index];
@@ -20,19 +20,19 @@ namespace
 
     PERLIN_NOISE_SOURCE(__device__ __inline__)
 
-    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, float const& mass, int const& index, uint64_t timestep)
+    __device__ __inline__ float2 calcAcceleration(WorldGeometry const& world, float2 const& pos, float const& mass, int const& index, uint64_t timestep)
     {
         switch (cudaSimulationParameters.layerForceFieldType.layerValues[index].value) {
         case ForceField_Radial: {
-            auto baseValue = getHeight(map, pos, index);
-            auto downValue = getHeight(map, pos + float2{0, 1}, index);
-            auto rightValue = getHeight(map, pos + float2{1, 0}, index);
+            auto baseValue = getHeight(world, pos, index);
+            auto downValue = getHeight(world, pos + float2{0, 1}, index);
+            auto rightValue = getHeight(world, pos + float2{1, 0}, index);
             float2 result{rightValue - baseValue, downValue - baseValue};
             result = Math::rotateClockwise(result, 90.0f + cudaSimulationParameters.layerRadialForceFieldDriftAngle.layerValues[index]);
             return result;
         }
         case ForceField_Central: {
-            auto centerDirection = map.getCorrectedDirection(
+            auto centerDirection = world.getCorrectedDirection(
                 float2{cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y} - pos);
             return centerDirection * cudaSimulationParameters.layerCentralForceFieldStrength.layerValues[index]
                 / (Math::lengthSquared(centerDirection) + 50.0f);
@@ -44,7 +44,7 @@ namespace
         case ForceField_PerlinNoise: {
             auto layerPos = cudaSimulationParameters.layerPosition.layerValues[index];
             float2 relPos{pos.x - layerPos.x, pos.y - layerPos.y};
-            map.correctDirection(relPos);
+            world.correctDirection(relPos);
             auto spatialSize = cudaSimulationParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index];
             auto scale = 1.0f / max(spatialSize, 0.1f);
             auto sx = relPos.x * scale;
@@ -85,7 +85,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
             if (!cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
                 continue;
             }
-            auto acceleration = calcAcceleration(data.objectMap, pos, mass, i, timestep);
+            auto acceleration = calcAcceleration(data.world, pos, mass, i, timestep);
             result = ParameterCalculator::blendLayerValue(result, acceleration, data, pos, i);
         }
         return result;

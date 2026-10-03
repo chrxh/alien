@@ -85,10 +85,10 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
             continue;
         }
         auto cluster = objects.at(object->typeData.solid.clusterIndex);
-        if (object->pos.x < data.worldSize.x / 3) {
+        if (object->pos.x < data.world.getSize().x / 3) {
             atomicOr(&cluster->typeData.solid.clusterBoundaries, 1);
         }
-        if (object->pos.y < data.worldSize.y / 3) {
+        if (object->pos.y < data.world.getSize().y / 3) {
             atomicOr(&cluster->typeData.solid.clusterBoundaries, 2);
         }
     }
@@ -110,11 +110,11 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
 
         // Topology correction
         auto cellPos = object->pos;
-        if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
-            cellPos.x -= data.worldSize.x;
+        if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.world.getSize().x * 2 / 3) {
+            cellPos.x -= data.world.getSize().x;
         }
-        if ((cluster->typeData.solid.clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
-            cellPos.y -= data.worldSize.y;
+        if ((cluster->typeData.solid.clusterBoundaries & 2) == 2 && cellPos.y > data.world.getSize().y * 2 / 3) {
+            cellPos.y -= data.world.getSize().y;
         }
 
         atomicAdd(&cluster->typeData.solid.clusterPos.x, cellPos.x);
@@ -140,11 +140,11 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
 
         // Topology correction
         auto cellPos = object->pos;
-        if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
-            cellPos.x -= data.worldSize.x;
+        if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.world.getSize().x * 2 / 3) {
+            cellPos.x -= data.world.getSize().x;
         }
-        if ((cluster->typeData.solid.clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
-            cellPos.y -= data.worldSize.y;
+        if ((cluster->typeData.solid.clusterBoundaries & 2) == 2 && cellPos.y > data.world.getSize().y * 2 / 3) {
+            cellPos.y -= data.world.getSize().y;
         }
         auto r = cellPos - clusterPos;
 
@@ -170,11 +170,11 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
         auto clusterVel = cluster->typeData.solid.clusterVel / cluster->typeData.solid.numCellsInCluster;
 
         auto cellPos = object->pos;
-        if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
-            cellPos.x -= data.worldSize.x;
+        if ((cluster->typeData.solid.clusterBoundaries & 1) == 1 && cellPos.x > data.world.getSize().x * 2 / 3) {
+            cellPos.x -= data.world.getSize().x;
         }
-        if ((cluster->typeData.solid.clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
-            cellPos.y -= data.worldSize.y;
+        if ((cluster->typeData.solid.clusterBoundaries & 2) == 2 && cellPos.y > data.world.getSize().y * 2 / 3) {
+            cellPos.y -= data.world.getSize().y;
         }
         auto r = cellPos - clusterPos;
 

@@ -87,14 +87,14 @@ __device__ __inline__ void DetonatorProcessor::detonate(SimulationData& data, Ob
 {
     auto radius = cudaSimulationParameters.detonatorRadius.value[object->color];
     auto chainExplosionProbability = cudaSimulationParameters.detonatorChainExplosionProbability.value[object->color];
-    data.objectMap.executeForEach_block(object->pos, radius, object->detached(), [&](Object* const& otherObject) {
+    data.objectGrid.executeForEach_block(object->pos, radius, object->detached(), [&](Object* const& otherObject) {
         if (otherObject == object) {
             return;
         }
         if (otherObject->isStatic()) {
             return;
         }
-        auto delta = data.objectMap.getCorrectedDirection(otherObject->pos - object->pos);
+        auto delta = data.world.getCorrectedDirection(otherObject->pos - object->pos);
         auto lengthSquared = Math::lengthSquared(delta);
         if (lengthSquared > NEAR_ZERO) {
             auto force = delta / lengthSquared * radius * 2;
@@ -120,12 +120,12 @@ __device__ __inline__ void DetonatorProcessor::propagateShockWave(SimulationData
     auto calcFrontRadius = [&](int step) { return radius * (1.0f + (ShockWaveReach - 1.0f) * toFloat(step) / toFloat(ShockWaveDuration)); };
 
     // The front sweeps a new ring in each cell function cycle and accelerates matter up to the flow velocity behind it
-    data.objectMap.executeForEachInRing_block(
+    data.objectGrid.executeForEachInRing_block(
         object->pos, calcFrontRadius(step - 1), calcFrontRadius(step), object->detached(), [&](Object* const& otherObject) {
             if (otherObject->isStatic()) {
                 return;
             }
-            auto delta = data.objectMap.getCorrectedDirection(otherObject->pos - object->pos);
+            auto delta = data.world.getCorrectedDirection(otherObject->pos - object->pos);
             auto distance = Math::length(delta);
             auto direction = delta / distance;
             auto flowVelocity = ShockWaveStrength * sqrtf(radius / distance);

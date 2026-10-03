@@ -49,7 +49,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
     Object* closestCell = nullptr;
     float closestDistance = 0;
-    data.objectMap.executeForEach(
+    data.objectGrid.executeForEach(
         object->pos, cudaSimulationParameters.reconnectorRadius.value[object->color], object->detached(), [&](Object* const& otherObject) {
             // Skip if already connected or too closely connected
             if (ObjectConnectionProcessor::isConnectedConnected(object, otherObject)) {
@@ -117,7 +117,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
 
-            auto distance = data.objectMap.getDistance(object->pos, otherObject->pos);
+            auto distance = data.world.getDistance(object->pos, otherObject->pos);
             if (!closestCell || distance < closestDistance) {
                 closestCell = otherObject;
                 closestDistance = distance;

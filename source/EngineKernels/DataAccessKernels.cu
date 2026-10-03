@@ -606,7 +606,7 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLe
             continue;
         }
         auto pos = object->pos;
-        data.objectMap.correctPosition(pos);
+        data.world.correctPosition(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
             object->typeData.cell.creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
@@ -740,10 +740,10 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = objects.at(index);
 
-            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.x), toFloat(rectLowerRight.x), object->pos.x, toFloat(data.worldSize.x))) {
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.x), toFloat(rectLowerRight.x), object->pos.x, toFloat(data.world.getSize().x))) {
                 continue;
             }
-            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.y), toFloat(rectLowerRight.y), object->pos.y, toFloat(data.worldSize.y))) {
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.y), toFloat(rectLowerRight.y), object->pos.y, toFloat(data.world.getSize().y))) {
                 continue;
             }
 
@@ -764,7 +764,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto& particle = particles.at(index);
 
             auto pos = particle->pos;
-            data.energyMap.correctPosition(pos);
+            data.world.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
@@ -787,7 +787,7 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
         auto& object = objects.at(index);
 
         auto pos = object->pos;
-        data.objectMap.correctPosition(pos);
+        data.world.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
@@ -857,7 +857,7 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
         auto& object = objects.at(index);
 
         auto pos = object->pos;
-        data.objectMap.correctPosition(pos);
+        data.world.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
@@ -929,7 +929,7 @@ __global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rec
         auto& object = objects.at(index);
 
         auto pos = object->pos;
-        data.objectMap.correctPosition(pos);
+        data.world.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             object->tempValue1.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
@@ -960,7 +960,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
         auto const& particle = data.entities.energies.at(particleIndex);
         auto pos = particle->pos;
-        data.energyMap.correctPosition(pos);
+        data.world.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }

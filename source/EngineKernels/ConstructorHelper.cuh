@@ -17,6 +17,7 @@ public:
     __inline__ __device__ static void
     getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Object* getLastConstructedCell(Object* constructorCell);
+    __inline__ __device__ static void confirmOffspring(Object* constructorCell);
 };
 
 /************************************************************************/
@@ -120,4 +121,16 @@ __inline__ __device__ Object* ConstructorHelper::getLastConstructedCell(Object* 
         }
     }
     return nullptr;
+}
+
+__inline__ __device__ void ConstructorHelper::confirmOffspring(Object* constructorCell)
+{
+    auto lastConstructedCell = getLastConstructedCell(constructorCell);
+    if (!lastConstructedCell) {
+        return;
+    }
+    auto const& offspring = lastConstructedCell->typeData.cell.creature;
+    if (offspring != constructorCell->typeData.cell.creature) {
+        offspring->creatureState = CreatureState_HostConfirmed;
+    }
 }
