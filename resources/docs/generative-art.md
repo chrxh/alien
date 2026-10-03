@@ -2,7 +2,7 @@
 
 ALIEN renders every particle with light and color, and evolution and physics constantly produce new forms. This makes it a tool for living, moving artworks. This chapter collects the settings and techniques that matter for beautiful pictures and scenes.
 
-![An artwork from the browser: a reef grown entirely from genomes](images/art.jpg)
+![An artwork from the browser: spiral organisms grown entirely from genomes](images/art.jpg)
 
 ## Get inspired
 
