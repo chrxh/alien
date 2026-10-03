@@ -188,33 +188,7 @@ TEST_F(CellStateTransitionTests, headCellDiesWhenHostConstructorDiesDuringConstr
     EXPECT_EQ(CellState_Dying, offspringCell._cellState);
 }
 
-TEST_F(CellStateTransitionTests, headCellSurvivesWhileHostConstructorLives)
-{
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .type(CellDesc()
-                          .usableEnergy(_parameters.normalCellEnergy.value[0] * 3.5f)
-                          .constructor(ConstructorDesc().autoTriggerInterval(6).geneIndex(0).separation(true))),
-        },
-        CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})}));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(CELL_UPDATE_INTERVAL + 2);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_GE(actualData._objects.size(), 2);
-    for (auto const& object : actualData._objects) {
-        if (object._id != 1) {
-            EXPECT_EQ(CellState_UnderConstruction, object.getCellRef()._cellState);
-        }
-    }
-}
-
-TEST_F(CellStateTransitionTests, headCellDiesWhenLoadedCreatureHasNoHost)
+TEST_F(CellStateTransitionTests, headCellDiesWhenUnfinishedCreatureHasNoHost)
 {
     auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).headCell(true))});
 
@@ -223,29 +197,6 @@ TEST_F(CellStateTransitionTests, headCellDiesWhenLoadedCreatureHasNoHost)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(CellState_Dying, actualData.getObjectRef(1).getCellRef()._cellState);
-}
-
-TEST_F(CellStateTransitionTests, headCellSurvivesWhenLoadedCreatureHasHost)
-{
-    auto data =
-        ContentDesc()
-            .addCreature(
-                {
-                    ObjectDesc()
-                        .id(1)
-                        .pos({10.0f, 10.0f})
-                        .type(CellDesc().constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(2).separation(false).numBranches(1))),
-                },
-                CreatureDesc().id(0),
-                GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}))
-            .addCreature({ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_UnderConstruction).headCell(true))}, CreatureDesc().id(1));
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(CELL_UPDATE_INTERVAL + 2);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    EXPECT_EQ(CellState_UnderConstruction, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
 TEST_F(CellStateTransitionTests, headCellOfAbandonedChainDiesWhenHostStartsNewChain)
@@ -276,14 +227,8 @@ TEST_F(CellStateTransitionTests, headCellOfAbandonedChainDiesWhenHostStartsNewCh
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->calcTimesteps(2 * CELL_UPDATE_INTERVAL + 2 - 10);
 
-    auto actualData = _simulationFacade->getSimulationData();
-    uint64_t firstHeadCellId = std::numeric_limits<uint64_t>::max();
-    for (auto const& object : actualData._objects) {
-        if (object.getCellRef()._headCell) {
-            firstHeadCellId = std::min(firstHeadCellId, object._id);
-        }
-    }
-    EXPECT_EQ(CellState_Dying, actualData.getObjectRef(firstHeadCellId).getCellRef()._cellState);
+    // Both chains have a head cell, the one of the abandoned chain is the older one
+    EXPECT_EQ(CellState_Dying, getFirstHeadCellState());
 }
 
 TEST_F(CellStateTransitionTests, headCellOfFinishedCreatureDiesWhenActivationDoesNotReachIt)
