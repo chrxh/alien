@@ -21,14 +21,16 @@ namespace
         {EntityAttribute::Velocity, "Velocity of the object in world units per time step."},
         {EntityAttribute::Stiffness, "Resistance of the object against deformation of its connections."},
         {EntityAttribute::Color, "Customization color of the object. Many simulation parameters can be defined per color."},
-        {EntityAttribute::Static, "A static object is immovable and immortal. It does not age and is not affected by forces."},
+        {EntityAttribute::Static,
+         "A static object is immortal and not affected by forces. It does not age and keeps its velocity, so it stays in place as long as the velocity "
+         "is zero."},
         {EntityAttribute::Sticky,
          "If enabled, the object can spontaneously form new connections on contact. It is sufficient if one of the two objects is sticky."},
         {EntityAttribute::ObjectType,
          "Type of the object."
          "\n" ICON_FA_CHEVRON_RIGHT " Solid: inorganic rigid particle. It blocks the scan rays of sensor cells."
          "\n" ICON_FA_CHEVRON_RIGHT " Fluid: inorganic freely flowing particle without connections."
-         "\n" ICON_FA_CHEVRON_RIGHT " Free cell: organic substance without a genome. It can serves as food."
+         "\n" ICON_FA_CHEVRON_RIGHT " Free cell: organic substance without a genome. It can serve as food."
          "\n" ICON_FA_CHEVRON_RIGHT " Cell: cell of a creature with genome, neural network and cell type."},
         {EntityAttribute::ConnectedId, "Id of the object that is attached by this connection."},
         {EntityAttribute::ConnectionDistance, "Reference distance of the connection. A deviation of the actual distance generates restoring forces."},
@@ -48,8 +50,9 @@ namespace
 
         // Cell
         {EntityAttribute::CellUsableEnergy,
-         "Energy that keeps the cell alive and can be use for creating new ones. Below the minimum cell energy the cell starts dying."},
-        {EntityAttribute::CellRawEnergy, "Unprocessed energy. Attacker cells gain raw energy while digestor cells convert it into usable energy."},
+         "Energy that keeps the cell alive and can be used for constructing new cells. Below the minimum cell energy the cell starts dying."},
+        {EntityAttribute::CellRawEnergy,
+         "Unprocessed energy. Cells gain raw energy by absorbing energy particles and by attacks. Digestor cells convert it into usable energy."},
         {EntityAttribute::CellFrontAngle,
          "Angle between the first connection and the front direction of the creature. It orients muscle, sensor and communicator cells."},
         {EntityAttribute::CellAge, "Age of the cell in time steps."},
@@ -58,7 +61,7 @@ namespace
          "\n" ICON_FA_CHEVRON_RIGHT " Ready: The cell is in normal operating mode. Neural networks and additional cell functions can be executed."
          "\n" ICON_FA_CHEVRON_RIGHT " Under construction: The cell belongs to an unfinished construction and is inactive."
          "\n" ICON_FA_CHEVRON_RIGHT " Being activated: Transitional state after the construction. The cell becomes ready in the next step."
-         "\n" ICON_FA_CHEVRON_RIGHT " Dying: The cell decays with the probability given by the simulation parameter 'Cell death probability'."
+         "\n" ICON_FA_CHEVRON_RIGHT " Dying: The cell decays with the probability given by the simulation parameter 'Decay rate of dying cells'."
          "\n" ICON_FA_CHEVRON_RIGHT " Instant dying: The cell is removed in the next time step."},
         {EntityAttribute::CellNodeIndex, "Index of the genome node from which this cell was built."},
         {EntityAttribute::CellGeneIndex, "Index of the gene from which this cell was built."},
@@ -73,19 +76,21 @@ namespace
         {EntityAttribute::CellType,
          "Function that the cell performs after its neural network has been executed."
          "\n" ICON_FA_CHEVRON_RIGHT " Base: No special function. Only the neural network is evaluated."
-         "\n" ICON_FA_CHEVRON_RIGHT " Depot: Stores usable energy and releases it again on demand. Both storing and releasing are controlled by neural activities."
+         "\n" ICON_FA_CHEVRON_RIGHT
+         " Depot: Stores usable energy and releases it again on demand. A positive signal in channel #0 stores energy, a negative one releases it."
          "\n" ICON_FA_CHEVRON_RIGHT " Sensor: Scans the environment and reports direction, distance and mass of a match."
          "\n" ICON_FA_CHEVRON_RIGHT " Generator: Generates a periodic signal."
          "\n" ICON_FA_CHEVRON_RIGHT " Attacker: Steals energy from free cells or from cells of other creatures."
          "\n" ICON_FA_CHEVRON_RIGHT " Injector: Injects its own genome into a foreign cell that has a constructor."
-         "\n" ICON_FA_CHEVRON_RIGHT " Muscle: Generates movement by bending connections or changing their length."
-         "\n" ICON_FA_CHEVRON_RIGHT " Defender: Weakens nearby attacker or injector cells from other creatures."
+         "\n" ICON_FA_CHEVRON_RIGHT " Muscle: Generates movement by bending connections, changing their length or accelerating the cell directly."
+         "\n" ICON_FA_CHEVRON_RIGHT " Defender: Protects its creature against attacker or injector cells of other creatures."
          "\n" ICON_FA_CHEVRON_RIGHT " Reconnector: Establishes or removes connections to other objects."
          "\n" ICON_FA_CHEVRON_RIGHT " Detonator: Explodes after a countdown and pushes away surrounding objects."
          "\n" ICON_FA_CHEVRON_RIGHT " Digestor: Converts raw energy into usable energy and conducts it to other digestor cells."
-         "\n" ICON_FA_CHEVRON_RIGHT " Memory: Delays, records or smooths the signal."
+         "\n" ICON_FA_CHEVRON_RIGHT " Memory: Delays, records, stores or smooths the signal."
          "\n" ICON_FA_CHEVRON_RIGHT " Communicator: Transmits the signal to communicator cells of other creatures."
-         "\n" ICON_FA_CHEVRON_RIGHT " Void: Dissolves immediately after the cell network is finished and passes its energy to the neighboring cell. Serves as temporary scaffolding for constructing complex shapes."},
+         "\n" ICON_FA_CHEVRON_RIGHT " Void: Dissolves immediately after the cell network is finished and passes its energy to the neighboring cells. Serves as "
+         "temporary scaffolding for constructing complex shapes."},
         {EntityAttribute::CellHasConstructor, "If enabled, the cell can build other cells specified by a gene."},
 
         // Genome
@@ -117,13 +122,16 @@ namespace
         {EntityAttribute::MutationNeuronProbability, "Probability per node and neuron that the neuron is changed."},
         {EntityAttribute::MutationNeuronWeightChangeSigma,
          "Standard deviation of the Gaussian change of every input weight of the neuron. The result is limited to [-2, 2]."},
-        {EntityAttribute::MutationNeuronBiasChangeSigma, "Standard deviation of the Gaussian change of the bias of the neuron."},
-        {EntityAttribute::MutationNeuronActfnChangeProbability, "Probability that the activation function of the neuron is replaced by a different one."},
+        {EntityAttribute::MutationNeuronBiasChangeSigma,
+         "Standard deviation of the Gaussian change of the bias of the neuron. The result is limited to [-2, 2]."},
+        {EntityAttribute::MutationNeuronActfnChangeProbability,
+         "Probability that the activation function of the neuron is replaced by a randomly chosen one, which can also be the same."},
         {EntityAttribute::MutationCellTypePropertiesProbability, "Probability per node that the properties of its cell type are changed."},
         {EntityAttribute::MutationCellTypePropertiesValueChangeSigma,
          "Standard deviation of the Gaussian change of the numeric properties, relative to the value range of each property."},
         {EntityAttribute::MutationCellTypePropertiesEnumChangeProbability,
-         "Probability that a switch, a mode or a color selection of the cell type is changed."},
+         "Probability that a switch or a selection of the cell type properties is changed, such as a color or lineage restriction. The mode of the "
+         "cell type is changed by a separate mutation."},
         {EntityAttribute::MutationGeometryProbability, "Probability per gene that its geometry is changed."},
         {EntityAttribute::MutationGeometryValueChangeSigma,
          "Standard deviation of the Gaussian change of the stiffness, relative to its value range. The connection distance is not mutated."},
@@ -178,13 +186,14 @@ namespace
          "If set, the constructor triggers itself every n time steps, with a phase that differs per creature. Without a value it has to be triggered via "
          "channel #0."},
         {EntityAttribute::ConstructorConstructionAngle,
-         "Angle of the first constructed cell relative to the connection of the constructor cell. It is only evaluated for the first cell of the first "
-         "concatenation in the first branch."},
+         "Angle by which the first constructed cell deviates from the middle of the largest gap between the connections of the constructor cell. It is "
+         "only evaluated for the first cell of the first concatenation in the first branch."},
         {EntityAttribute::ConstructorProvideEnergy,
          "Determines how much energy the constructor cell raises for a construction."
          "\n" ICON_FA_CHEVRON_RIGHT " Cell only: only the energy of the constructed cell itself."
          "\n" ICON_FA_CHEVRON_RIGHT " Transitive cells: additionally the energy reserve of a constructed constructor cell, unless that constructor references "
-         "the first gene. The reserve covers every cell reachable from the gene that constructor references, so they can be built without further energy."
+         "the first gene. The reserve covers the cells of the gene that constructor references, or every cell reachable from it if that constructor also "
+         "uses 'Transitive cells', so they can be built without further energy."
          "\n" ICON_FA_CHEVRON_RIGHT
          " Free: cells are built without energy cost. The setting falls back to 'Cell only' after the first completed offspring and cannot be used in a "
          "genome."},
@@ -215,7 +224,8 @@ namespace
         {EntityAttribute::SensorFreeCellMinDensity, "Minimum density of free cells that is required for a match. The value lies between 0 and 1."},
         {EntityAttribute::SensorMinRange, "Objects that are closer than this distance are not detected."},
         {EntityAttribute::SensorMaxRange,
-         "Objects that are farther away than this distance are not detected. The simulation parameter 'Sensor radius' limits the range additionally."},
+         "Objects that are farther away than this distance are not detected. The simulation parameter 'Radius' of the sensor cell type limits the range "
+         "additionally."},
         {EntityAttribute::SensorRestrictToColors, "Only objects with one of the selected customization colors are detected."},
         {EntityAttribute::SensorRestrictToLineage,
          "Restricts the detection to the relationship with the own creature."
@@ -234,7 +244,7 @@ namespace
          "Shape of the generated signal."
          "\n" ICON_FA_CHEVRON_RIGHT " Square signal: the maximum value is output in the first half of the period and the minimum value in the second half."
          "\n" ICON_FA_CHEVRON_RIGHT " Sawtooth signal: the output rises linearly from the minimum to the maximum value over the period."},
-        {EntityAttribute::GeneratorPeriod, "Length of one cycle in time steps."},
+        {EntityAttribute::GeneratorPeriod, "Length of one period in time steps."},
 
         // Attacker
         {EntityAttribute::AttackerMode,
@@ -271,8 +281,8 @@ namespace
 
         // Reconnector
         {EntityAttribute::ReconnectorMode,
-         "Selects the objects with which connections are established. A positive value in channel #0 creates a connection, a negative one removes existing "
-         "connections."
+         "Selects the objects with which connections are established. A positive value in channel #0 creates a connection, a negative one removes all "
+         "connections to objects that do not belong to the own creature."
          "\n" ICON_FA_CHEVRON_RIGHT " Solid: connections with solid particles."
          "\n" ICON_FA_CHEVRON_RIGHT " Free cell: connections with free cells."
          "\n" ICON_FA_CHEVRON_RIGHT " Creature: connections with cells of other creatures."},
@@ -297,9 +307,11 @@ namespace
 
         // Digestor
         {EntityAttribute::DigestorEnergyConductivity,
-         "Fraction of the raw energy that the cell passes on to connected digestor cells instead of converting it. Complementary to 'Energy conversion'."},
+         "Determines how much raw energy the cell can take in from connected cells and pass on to connected digestor cells instead of converting it. It "
+         "is scaled by the simulation parameter 'Max raw energy conductivity'. Complementary to 'Energy conversion'."},
         {EntityAttribute::DigestorEnergyConversion,
-         "Fraction of the raw energy that the cell converts into usable energy per cycle. Complementary to 'Energy conductivity'."},
+         "Determines how much raw energy the cell converts into usable energy per time step. It is scaled by the simulation parameter 'Max raw energy "
+         "conversion'. Complementary to 'Energy conductivity'."},
 
         // Memory
         {EntityAttribute::MemoryMode,

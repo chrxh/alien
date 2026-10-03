@@ -1174,7 +1174,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<Genome
             auto& digestor = std::get<DigestorDesc>(cell._cellType);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Raw energy conductivity")
+                    .name("Energy conductivity")
                     .max(1.0f)
                     .format("%.2f")
                     .textWidth(TextWidth)

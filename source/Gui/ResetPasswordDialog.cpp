@@ -26,7 +26,7 @@ void ResetPasswordDialog::processIntern()
     AlienGui::Text("Data privacy policy");
     AlienGui::HelpMarker(
         "The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send the confirmation code. "
-        "2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
+        "2) Its SHA-256 hash value is compared with the one stored for your account on the server.");
     AlienGui::Separator();
     AlienGui::Text("Please enter your email address to receive the\nconfirmation code to reset the password.");
     AlienGui::Separator();

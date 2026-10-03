@@ -109,7 +109,7 @@ void EditorWidget::processDock()
             .icon(ICON_SCOPE_OBJECTS)
             .name("Apply to selected objects")
             .tooltip("Apply to selected objects\n\nEdits only affect the selected objects. When they are moved, their connections to unselected "
-                     "objects can only tear.\nHold SHIFT to switch to entire networks temporarily.")
+                     "objects may tear.\nHold SHIFT to switch to entire networks temporarily.")
             .selected(!model.isApplyToNetworks())
             .action([&model] { model.setApplyToNetworks(false); })));
     items.emplace_back(AlienGui::ToolbarItem::createButton(
