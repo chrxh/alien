@@ -40,6 +40,7 @@
 #include "DelayedExecutionController.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
+#include "DocumentationWindow.h"
 #include "EditSimulationDialog.h"
 #include "EditorController.h"
 #include "EvolutionDashboardWindow.h"
@@ -48,7 +49,6 @@
 #include "FpsController.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
-#include "GettingStartedWindow.h"
 #include "GuiLogger.h"
 #include "ImFileDialog.h"
 #include "ImageToPatternDialog.h"
@@ -135,7 +135,7 @@ _MainWindow::_MainWindow()
     MainLoopController::get().setup();
     ExitDialog::get().setup();
     MassOperationsDialog::get().setup();
-    GettingStartedWindow::get().setup();
+    DocumentationWindow::get().setup();
     NewSimulationDialog::get().setup();
     BrowserController::get().setup();
     BrowserWindow::get().setup();
