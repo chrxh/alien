@@ -194,6 +194,23 @@ std::string StringHelper::toUpper(std::string const& str)
     return result;
 }
 
+std::string StringHelper::truncate(std::string const& str, size_t maxLength, size_t maxLines)
+{
+    auto length = std::min(str.size(), maxLength);
+    auto newline = str.find('\n');
+    for (auto line = size_t{1}; line < maxLines && newline < length; ++line) {
+        newline = str.find('\n', newline + 1);
+    }
+    length = std::min(length, newline);
+    if (length == str.size()) {
+        return str;
+    }
+    while (length > 0 && (static_cast<unsigned char>(str.at(length)) & 0xc0) == 0x80) {  // Skip UTF-8 continuation bytes
+        --length;
+    }
+    return str.substr(0, length) + "...";
+}
+
 StringHelper::Decomposition StringHelper::decomposeCaseInsensitiveMatch(std::string const& str, std::string const& toMatch)
 {
     std::string strLower = str;

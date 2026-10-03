@@ -26,6 +26,7 @@ public:
 
     static bool containsCaseInsensitive(std::string const& str, std::string const& toMatch);
     static std::string toUpper(std::string const& str);
+    static std::string truncate(std::string const& str, size_t maxLength, size_t maxLines);  // Appends "..." if shortened
 
     struct Decomposition
     {
