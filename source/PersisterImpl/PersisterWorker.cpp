@@ -38,7 +38,10 @@ void _PersisterWorker::restart()
 
 void _PersisterWorker::shutdown()
 {
-    _isShutdown = true;
+    {
+        std::unique_lock lock(_requestMutex);
+        _isShutdown = true;
+    }
     _conditionVariable.notify_all();
 }
 

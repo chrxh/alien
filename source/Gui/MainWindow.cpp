@@ -188,19 +188,25 @@ void _MainWindow::shutdown()
     MainLoopEntityController::get().shutdown();
     SimulationView::get().shutdown();
 
+    auto window = WindowController::get().getWindowData().window;
+    glfwHideWindow(window);
+
+    // Closing the simulation releases the CUDA-OpenGL interop resources, which requires the OpenGL context
+    _PersisterFacade::get()->shutdown();
+    _SimulationFacade::get()->closeSimulation();
+
+    NetworkService::get().shutdown();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(WindowController::get().getWindowData().window);
+    glfwDestroyWindow(window);
     glfwTerminate();
 
-    _PersisterFacade::get()->shutdown();
-    _SimulationFacade::get()->closeSimulation();
-
-    NetworkService::get().shutdown();
+    log(Priority::Important, "user interface shut down");
 }
 
 void _MainWindow::initGlfwAndOpenGL()
