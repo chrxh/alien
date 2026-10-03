@@ -67,7 +67,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         int numSensorTargets = 0;
         if (attackerMode == AttackerMode_Creature) {
             auto creatureId = cell->creature->id;
-            data.objectMap.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached(), [&](auto const& nearObject) {
+            data.objectGrid.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached(), [&](auto const& nearObject) {
                 if (nearObject->type != ObjectType_Cell) {
                     return;
                 }
@@ -111,7 +111,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         auto sumEnergyToTransfer = 0.0f;
-        data.objectMap.executeForEach(
+        data.objectGrid.executeForEach(
             object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
                 if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
                     return;

@@ -150,6 +150,13 @@ enum ConstructorShape_
     ConstructorShape_Count,
 };
 
+using CreatureState = int;
+enum CreatureState_
+{
+    CreatureState_HostConfirmed,
+    CreatureState_HostUnconfirmed,
+};
+
 using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {

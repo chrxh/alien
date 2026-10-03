@@ -3,6 +3,7 @@ add_library(EngineKernels
     ActiveRadiationSources.cuh
     Array.cuh
     AttackerProcessor.cuh
+    BarrierGrid.cuh
     Base.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
@@ -24,12 +25,13 @@ add_library(EngineKernels
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
-    DensityMap.cuh
+    DensityGrid.cuh
     DepotProcessor.cuh
     DetonatorProcessor.cuh
     DigestorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
+    EnergyParticleGrid.cuh
     EnergyProcessor.cuh
     Entities.cu
     Entities.cuh
@@ -50,7 +52,6 @@ add_library(EngineKernels
     LineageIdMap.cuh
     List.cuh
     Macros.cuh
-    Map.cuh
     MapSectionCollector.cuh
     Math.cuh
     MemoryProcessor.cuh
@@ -58,7 +59,9 @@ add_library(EngineKernels
     MutationProcessor.cuh
     NeuronProcessor.cuh
     ObjectConnectionProcessor.cuh
+    ObjectGrid.cuh
     ObjectProcessor.cuh
+    OccupancyGrid.cuh
     Operations.cuh
     ParameterCalculator.cuh
     Physics.cuh
@@ -83,6 +86,7 @@ add_library(EngineKernels
     TOProvider.cuh
     Util.cuh
     VoidProcessor.cuh
+    WorldGeometry.cuh
     )
 
 target_link_libraries(EngineKernels Base)

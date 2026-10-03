@@ -217,12 +217,18 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).separation(false)).usableEnergy(normalCellEnergy * 10)),
-         ObjectDesc()
+             .type(CellDesc()
+                       .headCell(true)
+                       .constructor(ConstructorDesc().autoTriggerInterval(0).separation(false).lastConstructedCellId(2))
+                       .usableEnergy(normalCellEnergy * 10))},
+        CreatureDesc().id(0),
+        genome);
+    data.addCreature(
+        {ObjectDesc()
              .id(2)
              .pos({100.0f + 1.0f, 100.0f})
              .type(CellDesc().headCell(true).cellState(CellState_UnderConstruction).constructor(ConstructorDesc().separation(false)).usableEnergy(normalCellEnergy))},
-        CreatureDesc(),
+        CreatureDesc().id(1),
         genome);
     data.addConnection(1, 2);
 

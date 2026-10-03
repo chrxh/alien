@@ -408,12 +408,12 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
         crawling.initialDistance = connectionDistance;
         crawling.forward = true;
-        crawling.lastActualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
+        crawling.lastActualDistance = data.world.getDistance(object->connections[0].object->pos, object->pos);
     }
 
     // Process auto crawling
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
-    auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
+    auto actualDistance = data.world.getDistance(object->connections[0].object->pos, object->pos);
 
     // Change crawling direction
     auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));
@@ -449,8 +449,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
     auto direction = calcAverageDirection(data, object);
 
-    auto front =
-        Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
+    auto front = Math::rotateClockwise(data.world.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
     if (Math::dot(front, direction) > 0) {
         direction *= -1.0f;
     }
@@ -482,12 +481,12 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     // Initialization
     if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
         crawling.initialDistance = connectionDistance;
-        crawling.lastActualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
+        crawling.lastActualDistance = data.world.getDistance(object->connections[0].object->pos, object->pos);
         crawling.lastDistanceDelta = 0;
     }
 
     // Process manual crawling
-    auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
+    auto actualDistance = data.world.getDistance(object->connections[0].object->pos, object->pos);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.neuralActivity.signals[Channels::CellTypeActivation]));
 
     // Calc min and max distance
@@ -519,8 +518,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
     auto direction = calcAverageDirection(data, object);
 
-    auto front =
-        Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
+    auto front = Math::rotateClockwise(data.world.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
     if (Math::dot(front, direction) > 0) {
         direction *= -1.0f;
     }
@@ -642,7 +640,7 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
 
     float2 result{0, 0};
     for (int i = 0; i < chainLength - 1; ++i) {
-        result += Math::getNormalized(data.objectMap.getCorrectedDirection(chain[i]->pos - chain[i + 1]->pos));
+        result += Math::getNormalized(data.world.getCorrectedDirection(chain[i]->pos - chain[i + 1]->pos));
     }
     result /= toFloat(chainLength);
     return result;

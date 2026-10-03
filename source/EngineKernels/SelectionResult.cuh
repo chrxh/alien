@@ -3,6 +3,7 @@
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "Entities.cuh"
+#include "WorldGeometry.cuh"
 
 class SelectionResult
 {
@@ -86,7 +87,7 @@ public:
         collectClusterBounds(pos);
     }
 
-    __device__ void finalize(BaseMap const& map, bool mapCorrection)
+    __device__ void finalize(WorldGeometry const& world, bool mapCorrection)
     {
         auto numEntities = _selectionShallowData->numObjects + _selectionShallowData->numEnergyParticles;
         if (numEntities > 0) {
@@ -95,7 +96,7 @@ public:
             _selectionShallowData->centerVelX /= numEntities;
             _selectionShallowData->centerVelY /= numEntities;
             if (mapCorrection) {
-                auto correctedPos = map.getCorrectedPosition({_selectionShallowData->centerPosX, _selectionShallowData->centerPosY});
+                auto correctedPos = world.getCorrectedPosition({_selectionShallowData->centerPosX, _selectionShallowData->centerPosY});
                 auto correction = correctedPos - float2{_selectionShallowData->centerPosX, _selectionShallowData->centerPosY};
                 _selectionShallowData->centerPosX = correctedPos.x;
                 _selectionShallowData->centerPosY = correctedPos.y;
@@ -118,7 +119,7 @@ public:
             _selectionShallowData->clusterCenterVelX /= numExtEntities;
             _selectionShallowData->clusterCenterVelY /= numExtEntities;
             if (mapCorrection) {
-                auto correctedPos = map.getCorrectedPosition({_selectionShallowData->clusterCenterPosX, _selectionShallowData->clusterCenterPosY});
+                auto correctedPos = world.getCorrectedPosition({_selectionShallowData->clusterCenterPosX, _selectionShallowData->clusterCenterPosY});
                 auto correction = correctedPos - float2{_selectionShallowData->clusterCenterPosX, _selectionShallowData->clusterCenterPosY};
                 _selectionShallowData->clusterCenterPosX = correctedPos.x;
                 _selectionShallowData->clusterCenterPosY = correctedPos.y;

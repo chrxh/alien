@@ -215,7 +215,7 @@ __inline__ __device__ bool
 ObjectConnectionProcessor::tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredRelAngle)
 {
     auto posDelta = object2->pos - object1->pos;
-    data.objectMap.correctDirection(posDelta);
+    data.world.correctDirection(posDelta);
 
     ObjectConnection origConnections[MAX_OBJECT_CONNECTIONS];
     int origNumConnection = object1->numConnections;
@@ -245,7 +245,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAng
     float desiredAbsAngle2)
 {
     auto posDelta = object2->pos - object1->pos;
-    data.objectMap.correctDirection(posDelta);
+    data.world.correctDirection(posDelta);
 
     ObjectConnection origConnections[MAX_OBJECT_CONNECTIONS];
     int origNumConnection = object1->numConnections;
@@ -342,7 +342,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithRelAng
     // *****
     if (1 == object1->numConnections) {
         auto connectedObjectDelta = object1->connections[0].object->pos - object1->pos;
-        data.objectMap.correctDirection(connectedObjectDelta);
+        data.world.correctDirection(connectedObjectDelta);
         auto prevAngle = Math::angleOfVector(connectedObjectDelta);
         auto angleDiff = Math::subtractAngle(newAngle, prevAngle);
         if (0 != desiredRelAngle) {
@@ -374,8 +374,8 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithRelAng
     float nextAngle = 0;
     for (; index < object1->numConnections; ++index) {
         auto prevIndex = (index + object1->numConnections - 1) % object1->numConnections;
-        prevAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object1->connections[prevIndex].object->pos - object1->pos));
-        nextAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object1->connections[index].object->pos - object1->pos));
+        prevAngle = Math::angleOfVector(data.world.getCorrectedDirection(object1->connections[prevIndex].object->pos - object1->pos));
+        nextAngle = Math::angleOfVector(data.world.getCorrectedDirection(object1->connections[index].object->pos - object1->pos));
         if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle) || prevIndex == index) {
             break;
         }
@@ -496,7 +496,7 @@ __inline__ __device__ bool
 ObjectConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached)
 {
     auto result = false;
-    data.objectMap.executeForEach(pos2, radius, detached, [&](auto const& nearObject) {
+    data.objectGrid.executeForEach(pos2, radius, detached, [&](auto const& nearObject) {
         if (!nearObject->tryLock()) {
             return;
         }
@@ -573,7 +573,7 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
         return ReferenceAndActualAngle{0, data.primaryNumberGen.random() * 360};
     }
     auto displacement = object->connections[0].object->pos - object->pos;
-    data.objectMap.correctDirection(displacement);
+    data.world.correctDirection(displacement);
     auto angle = Math::angleOfVector(displacement);
     int index = 0;
     float largestAngleGap = 0;
@@ -619,7 +619,7 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
     auto result = false;
-    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](Object* nearObject) {
+    data.objectGrid.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](Object* nearObject) {
         if (result) {
             return;
         }
@@ -648,7 +648,7 @@ __inline__ __device__ float2 ObjectConnectionProcessor::calcReferenceDirection(S
     if (object->numConnections == 0) {
         return float2{0.0f, -1.0f};
     }
-    return Math::getNormalized(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos));
+    return Math::getNormalized(data.world.getCorrectedDirection(object->connections[0].object->pos - object->pos));
 }
 
 __inline__ __device__ float2 ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(SimulationData& data, Object* object, float const& angleSignal)

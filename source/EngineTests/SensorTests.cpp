@@ -512,11 +512,11 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidF
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add solid cells between sensor and target (to block the ray)
-    for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(SolidDesc()));
+    // Add a wall between sensor and target that is wider than the target (to block the ray)
+    for (int i = 0; i < 30; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 50.0f}).type(SolidDesc()));
     }
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < 29; ++i) {
         data.addConnection(50 + i, 50 + i + 1);
     }
 
@@ -663,6 +663,65 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_dif
     // Sensor detected something (signal has non-zero values)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorFoundResult]));
     EXPECT_TRUE(actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorMass] > 0.0f);
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_alongsideRay)
+{
+    // A wall running close to the line of sight but parallel to it must not block the ray to the target
+    auto data = ContentDesc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(0))
+                    .addConnection(1, 2);
+
+    // Add a wall that runs alongside the line of sight and shares occupancy grid tiles with it
+    for (int i = 0; i < 50; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({97.0f, 95.0f - toFloat(i)}).type(SolidDesc()));
+    }
+    for (int i = 0; i < 49; ++i) {
+        data.addConnection(50 + i, 50 + i + 1);
+    }
+
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorFoundResult]));
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_touchingSensorFromBehind)
+{
+    // A solid touching the sensor on the side facing away from the target must not block the rays
+    auto data = ContentDesc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(0))
+                    .addConnection(1, 2);
+
+    // Add a solid cell touching the sensor on the side that faces away from the target
+    data._objects.emplace_back(ObjectDesc().id(50).pos({100.0f, 100.5f}).type(SolidDesc()));
+
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorFoundResult]));
 }
 
 TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetStationary)
@@ -1145,6 +1204,148 @@ TEST_F(SensorTests, detectSolid_ignoreFluidParticles)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorFoundResult]));
 }
 
+TEST_F(SensorTests, detectSolid_wallDistanceAndAngleAreExact)
+{
+    // The distance to a wall is measured up to the surface of its solids and the angle points straight to the wall
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+    for (int i = 0; i < 81; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(1000 + i).pos({60.0f + toFloat(i), 120.0f}).type(SolidDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+
+    // The wall is 20 units below, the hit is detected at the surface of the solids
+    auto expectedDistance = 1.0f - (20.0f - 0.75f) / 256.0f;
+    EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
+        << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
+
+    // Straight to the wall, i.e. +90 degrees
+    EXPECT_TRUE(approxCompare(0.5f, signals[Channels::SensorAngle], 0.05f)) << "Actual angle " << signals[Channels::SensorAngle];
+}
+
+TEST_F(SensorTests, detectSolid_wallBeyondWorldBoundary)
+{
+    // The sensor sits near the bottom of the world and has to find a wall on the other side of the world boundary.
+    // The world height of 1000 is not a multiple of the block size, so the scan passes the cut-off last block row.
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({500.0f, 995.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
+            ObjectDesc().id(2).pos({501.0f, 995.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+    for (int i = 0; i < 81; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(1000 + i).pos({460.0f + toFloat(i), 10.0f}).type(SolidDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+
+    // The wall is 15 units below, across the world boundary
+    auto expectedDistance = 1.0f - (15.0f - 0.75f) / 256.0f;
+    EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
+        << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
+    EXPECT_TRUE(approxCompare(0.5f, signals[Channels::SensorAngle], 0.05f)) << "Actual angle " << signals[Channels::SensorAngle];
+}
+
+TEST_F(SensorTests, detectSolid_gapInWallIsVisible)
+{
+    // Rays pass through a gap in a wall, so the nearest detected solids are the edges of the gap
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 110.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
+            ObjectDesc().id(2).pos({101.0f, 110.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Wall with a gap of 10 units in front of the sensor
+    for (int i = 0; i < 81; ++i) {
+        auto x = 60.0f + toFloat(i);
+        if (x > 95.0f && x < 105.0f) {
+            continue;
+        }
+        data._objects.emplace_back(ObjectDesc().id(1000 + i).pos({x, 120.0f}).type(SolidDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+
+    // Without the gap the wall would be at a distance of 9.25. The nearest solids are the tips of the wall next to the gap.
+    auto distanceToTip = std::sqrt(5.0f * 5.0f + 10.0f * 10.0f) - 0.75f;
+    auto expectedDistance = 1.0f - distanceToTip / 256.0f;
+    EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
+        << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
+}
+
+TEST_F(SensorTests, detectSolid_solidCloseToSensor)
+{
+    // A wall only 3 units away is detected with exact distance and angle
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+    for (int i = 0; i < 21; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(1000 + i).pos({90.0f + toFloat(i), 97.0f}).type(SolidDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+
+    auto expectedDistance = 1.0f - (3.0f - 0.75f) / 256.0f;
+    EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
+        << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
+    // Straight above, i.e. -90 degrees
+    EXPECT_TRUE(approxCompare(-0.5f, signals[Channels::SensorAngle], 0.05f)) << "Actual angle " << signals[Channels::SensorAngle];
+}
+
+TEST_F(SensorTests, detectSolid_solidTouchingSensor)
+{
+    // A solid touching the sensor is detected at distance zero, i.e. with the maximum distance signal
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+    data._objects.emplace_back(ObjectDesc().id(1000).pos({100.0f, 99.5f}).type(SolidDesc()));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorDistance], 0.005f)) << "Actual distance " << signals[Channels::SensorDistance];
+}
+
 TEST_F(SensorTests, rayNotBlockedByFluidParticles)
 {
     auto data = ContentDesc().addCreature(
@@ -1335,6 +1536,32 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
     auto expectedDistance = 1.0f - 6.0f / 256.0f;
     auto actualDistance = actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorDistance];
     EXPECT_TRUE(approxCompare(expectedDistance, actualDistance, 0.1f)) << "Expected distance " << expectedDistance << " but got " << actualDistance;
+}
+
+TEST_F(SensorTests, detectCreature_nearRangeDistanceHasSubUnitResolution)
+{
+    // A creature close to the sensor is found by the near range scan, its distance is exact and not rounded to whole units
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // The target is 3 units to the right and 5 units above the sensor
+    addDetectionTargets(data, SensorMode_DetectCreature, {103.0f, 95.0f}, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+
+    auto expectedDistance = 1.0f - std::sqrt(34.0f) / 256.0f;
+    EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.0002f))
+        << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
 }
 
 

@@ -17,7 +17,7 @@ __global__ void cudaCleanupCreaturesStep2(Array<Object*> cells, Heap newHeap);
 __global__ void cudaCleanupCellsStep1(Array<Object*> cells, Heap newHeap);
 __global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap);
 __global__ void cudaCleanupDependentCellData(Array<Object*> cells, Heap newHeap);
-__global__ void cudaCleanupMaps(SimulationData data);
+__global__ void cudaCleanupGrids(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);
 __global__ void cudaSwapHeaps(SimulationData data);
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);

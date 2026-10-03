@@ -26,7 +26,7 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (data.objectMap.getDistance(pos, object->pos) < radius) {
+        if (data.world.getDistance(pos, object->pos) < radius) {
             if (object->selected == 0) {
                 object->selected = 1;
             } else if (object->selected == 1) {
@@ -38,7 +38,7 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
     auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
-        if (data.energyMap.getDistance(pos, particle->pos) < radius) {
+        if (data.world.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1 - particle->selected;
         }
     }
@@ -50,7 +50,7 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (1 == object->selected && data.objectMap.getDistance(pointData.pos, object->pos) < pointData.radius) {
+        if (1 == object->selected && data.world.getDistance(pointData.pos, object->pos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -59,7 +59,7 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
 
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
-        if (1 == particle->selected && data.objectMap.getDistance(pointData.pos, particle->pos) < pointData.radius) {
+        if (1 == particle->selected && data.world.getDistance(pointData.pos, particle->pos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -71,7 +71,7 @@ __global__ void cudaSetSelectionAtPoint(float2 pos, float radius, SimulationData
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (data.objectMap.getDistance(pos, object->pos) < radius) {
+        if (data.world.getDistance(pos, object->pos) < radius) {
             object->selected = 1;
         } else {
             object->selected = 0;
@@ -82,7 +82,7 @@ __global__ void cudaSetSelectionAtPoint(float2 pos, float radius, SimulationData
 
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
-        if (data.energyMap.getDistance(pos, particle->pos) < radius) {
+        if (data.world.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1;
         } else {
             particle->selected = 0;
@@ -96,8 +96,8 @@ __global__ void cudaSetSelectionInArea(AreaSelectionData selectionData, Simulati
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
 
-        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), object->pos.x, toFloat(data.worldSize.x))
-            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), object->pos.y, toFloat(data.worldSize.y))) {
+        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), object->pos.x, toFloat(data.world.getSize().x))
+            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), object->pos.y, toFloat(data.world.getSize().y))) {
             object->selected = 1;
         } else {
             object->selected = 0;
@@ -107,8 +107,8 @@ __global__ void cudaSetSelectionInArea(AreaSelectionData selectionData, Simulati
     auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
-        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), particle->pos.x, toFloat(data.worldSize.x))
-            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), particle->pos.y, toFloat(data.worldSize.y))) {
+        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), particle->pos.x, toFloat(data.world.getSize().x))
+            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), particle->pos.y, toFloat(data.world.getSize().y))) {
             particle->selected = 1;
         } else {
             particle->selected = 0;
