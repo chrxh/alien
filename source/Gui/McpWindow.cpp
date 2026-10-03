@@ -8,6 +8,7 @@
 
 #include <imgui.h>
 
+#include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
@@ -75,7 +76,7 @@ void McpWindow::processToolbar()
              AlienGui::ToolbarItemParameters().icon(ICON_FA_STOP).name("Stop server").disabled(!running).action([&] { controller.setServerRunning(false); })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_FA_BROOM).name("Clear command log").disabled(controller.getCommandLog().empty()).action([&] {
+             AlienGui::ToolbarItemParameters().icon(ICON_CLEAR).name("Clear command log").disabled(controller.getCommandLog().empty()).action([&] {
                  controller.clearCommandLog();
              })),
          AlienGui::ToolbarItem::createSeparator(),

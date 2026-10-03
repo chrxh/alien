@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
@@ -84,7 +85,7 @@ void AutosaveWindow::processToolbar()
                  _selectedEntry.reset();
              })),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
-                                                 .icon(ICON_FA_BROOM)
+                                                 .icon(ICON_CLEAR)
                                                  .name("Delete all save points")
                                                  .disabled(!savepointTable.has_value() || savepointTable->isEmpty())
                                                  .action([&] {
