@@ -79,9 +79,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                                    .min(0.0f)
                                    .max(1.0f))
                     .description(
-                        "Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
-                        "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
-                        "energy particle in the current radiation source. Values between 0 and 1 are permitted."),
+                        "Energy that cells release, for example through radiation, energy costs or decay, is emitted as energy particles. A part of them "
+                        "is created directly next to the cell, the rest in the radiation sources. This parameter determines the fraction that is created "
+                        "in this radiation source. It also scales the external energy inflow for this source. The relative strengths of all radiation "
+                        "sources and of the base add up to 1."),
             }),
             ParameterGroupSpec()
                 .name("Visualization")
@@ -94,7 +95,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Customization colors")
                         .reference(ColorSpec().member(&SimulationParameters::customizationColors))
-                        .description("Defines the 10 standard customization colors used for cell rendering and color-based editing throughout the simulation."),
+                        .description("Defines the 10 customization colors. They are used to render the objects and appear in all color selections."),
                     ParameterSpec()
                         .name("Object coloring")
                         .reference(AlternativeSpec()
@@ -127,7 +128,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Show radiation center")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
-                        .description("This option draws a red cross in the center of the radiation source."),
+                        .description("If activated, the area of the radiation source is highlighted in the background."),
                     ParameterSpec()
                         .name("Show force field")
                         .reference(BoolSpec().member(&SimulationParameters::layerShowForceField))
@@ -141,10 +142,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("External energy amount")
                         .reference(
                             FloatSpec().member(&SimulationParameters::externalEnergy).min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
-                        .description("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
-                                     "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can "
-                                     "result in a "
-                                     "massive production of cells and slow down or even crash the simulation."),
+                        .description("This parameter can be used to set the amount of energy of an external energy pool. This energy can then be "
+                                     "transferred to constructor cells and radiation sources (see the inflow settings).\n\nWarning: Too much external energy "
+                                     "can result in a massive production of cells and slow down or even crash the simulation."),
                     ParameterSpec()
                         .name("Inflow for constructors")
                         .reference(FloatSpec().member(&SimulationParameters::externalEnergyInflowForConstructor).min(0.0f).max(50.0f).format("%.1f"))
@@ -164,8 +164,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Inflow only for first offspring")
                         .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))
                         .description("If activated, external energy can only be transferred to constructor cells that have not yet produced any offspring. "
-                                     "This option can be used to limit the external energy supply.\n\nThe setting is evaluated for the customization color of "
-                                     "the cell with the constructor."),
+                                     "This option can be used to limit the external energy supply. Constructors that build parts of their own creature are "
+                                     "not restricted.\n\nThe setting is evaluated for the customization color of the cell with the constructor."),
                     ParameterSpec()
                         .name("Inflow for sources")
                         .reference(
@@ -177,9 +177,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Backflow")
                         .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
-                        .description("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
-                                     "or dies a fraction of its energy will be taken. The remaining "
-                                     "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
+                        .description("The proportion of energy that flows back from the simulation to the external energy pool. Each time an object releases "
+                                     "energy, for example through radiation, energy costs or decay, this fraction is taken. The remaining fraction stays in "
+                                     "the simulation as a new energy particle."),
                     ParameterSpec()
                         .name("Backflow limit")
                         .reference(
@@ -357,7 +357,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .max(0.5f)
                                                       .logarithmic(true)
                                                       .format("%.6f"))
-                                              .description("Strength of the force. It is the same everywhere in the layer."),
+                                              .description("Strength of the force. It is the same everywhere in the core area of the layer."),
                                       }},
                                      {"Perlin noise",
                                       {
@@ -393,7 +393,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                               .description("Number of time steps after which the noise field is completely renewed. Larger values let it "
                                                            "change more slowly."),
                                       }}}))
-                        .description("Force field that the layer exerts on all objects inside it.\n" ICON_FA_CHEVRON_RIGHT
+                        .description("Force field that the layer exerts on all objects and energy particles inside it.\n" ICON_FA_CHEVRON_RIGHT
                                      " None: no force field.\n" ICON_FA_CHEVRON_RIGHT
                                      " Radial: the objects circle around the center of the layer.\n" ICON_FA_CHEVRON_RIGHT
                                      " Central: the objects are drawn towards the center of the layer.\n" ICON_FA_CHEVRON_RIGHT
@@ -418,11 +418,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Pressure")
                         .reference(FloatSpec().member(&SimulationParameters::pressureStrength).min(0.0f).max(0.3f))
-                        .description("This parameter allows to control the strength of the pressure."),
+                        .description("Strength of the pressure that pushes neighboring objects apart."),
                     ParameterSpec()
                         .name("Viscosity")
                         .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
-                        .description("This parameter can be used to control the strength of the viscosity. Larger values lead to a smoother movement."),
+                        .description("Strength of the viscosity. Larger values lead to a smoother movement."),
                     ParameterSpec()
                         .name("Friction")
                         .reference(FloatSpec().member(&SimulationParameters::friction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
@@ -444,19 +444,20 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Maximum velocity")
                         .reference(FloatSpec().member(&SimulationParameters::maxVelocity).min(0.0f).max(6.0f))
-                        .description("Maximum velocity that a cell can reach."),
+                        .description("Maximum velocity that an object can reach."),
                     ParameterSpec()
                         .name("Maximum force")
                         .reference(FloatSpec().member(&SimulationParameters::maxForce).min(0.0f).max(3.0f))
-                        .description("Maximum force that can be applied to a cell without causing it to disintegrate."),
+                        .description("Maximum force that can act on an object without breaking its connections. If the force is exceeded, the object "
+                                     "loses all its connections with a certain probability."),
                     ParameterSpec()
                         .name("Minimum distance")
                         .reference(FloatSpec().member(&SimulationParameters::minObjectDistance).min(0.0f).max(1.0f))
-                        .description("Minimum distance between two cells."),
+                        .description("Minimum distance between two objects. Objects that come closer are pushed apart."),
                     ParameterSpec()
                         .name("Maximum distance")
                         .reference(FloatSpec().member(&SimulationParameters::maxBindingDistance).min(0.0f).max(5.0f))
-                        .description("Maximum distance up to which a connection of two cells is possible."),
+                        .description("Maximum length of a connection between two objects. Longer connections break."),
                     ParameterSpec()
                         .name("Fusion velocity")
                         .reference(FloatSpec().member(&SimulationParameters::objectFusionVelocity).min(0.0f).max(2.0f))
@@ -475,9 +476,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .min(0.0f)
                                 .max(1.0f))
                         .description(
-                            "Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
-                            "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
-                            "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
+                            "Energy that cells release, for example through radiation, energy costs or decay, is emitted as energy particles. A part of "
+                            "them is created directly next to the cell, the rest in the radiation sources. This parameter determines the fraction that is "
+                            "created next to the cell. Together with the relative strengths of all radiation sources it adds up to 1."),
                     ParameterSpec()
                         .name("Disable radiation sources")
                         .reference(BoolSpec().member(&SimulationParameters::disableRadiationSources))
@@ -489,15 +490,17 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Radiation type I: Strength")
                         .reference(FloatSpec().member(&SimulationParameters::radiationType1_strength).min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
-                        .description("Indicates how energetic the emitted particles of aged cells are."),
+                        .description("Fraction of its energy that a cell emits on average per time step in the form of energy particles as soon as its "
+                                     "age exceeds the minimum age of radiation type I."),
                     ParameterSpec()
                         .name("Radiation type I: Minimum age")
                         .reference(IntSpec().member(&SimulationParameters::radiationType1_minimumAge).min(0).max(10000000).logarithmic(true).infinity(true))
-                        .description("The minimum age of a cell can be defined here, from which it emits energy particles."),
+                        .description("Age in time steps from which a cell emits energy particles through radiation type I."),
                     ParameterSpec()
                         .name("Radiation type II: Strength")
                         .reference(FloatSpec().member(&SimulationParameters::radiationType2_strength).min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
-                        .description("Indicates how energetic the emitted particles of high energy cells are."),
+                        .description("Fraction of its energy that a cell emits on average per time step in the form of energy particles as long as its "
+                                     "energy exceeds the threshold of radiation type II."),
                     ParameterSpec()
                         .name("Radiation type II: Threshold")
                         .reference(
@@ -508,7 +511,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .logarithmic(true)
                                 .infinity(true)
                                 .format("%.1f"))
-                        .description("The minimum energy of a cell can be defined here, from which it emits energy particles."),
+                        .description("Energy above which a cell emits energy particles through radiation type II. Usable and raw energy are considered "
+                                     "separately."),
                     ParameterSpec()
                         .name("Minimum split energy")
                         .reference(
@@ -539,11 +543,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Maximum free cell age")
                         .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
-                        .description("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
+                        .description("Maximum age of free cells (cells that arise from energy particles). Older free cells disintegrate into energy "
+                                     "particles."),
                     ParameterSpec()
                         .name("Minimum energy")
                         .reference(FloatSpec().member(&SimulationParameters::minCellEnergy).min(10.0f).max(200.0f).format("%.1f"))
-                        .description("Minimum energy a cell needs to exist."),
+                        .description("Minimum energy a cell needs to exist. If its usable energy falls below this value, the cell changes to the state "
+                                     "'Dying'. Free cells with less energy disintegrate with the decay rate of dying cells."),
                     ParameterSpec()
                         .name("Normal energy")
                         .reference(
@@ -561,20 +567,21 @@ ParametersSpec const& SimulationParameters::getSpec()
                             " Depot cells: Only the energy above the normal value can be moved into the storage of the depot.\n\n" ICON_FA_CHEVRON_RIGHT
                             " Constructor: Creating new cells costs energy. The creation of new cells is executed only when the "
                             "residual energy of the constructor does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
-                            " If the transformation of energy particles to "
-                            "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
+                            " If the transformation of energy particles into free cells is activated, an energy particle transforms into a free cell as "
+                            "soon as its energy reaches the normal value."),
                     ParameterSpec()
                         .name("Decay rate of dying cells")
                         .reference(FloatSpec().member(&SimulationParameters::cellDeathProbability).min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
                         .description(
                             "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                             "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
-                            " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
+                            " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " The cell has lost the connection to the head cell of its creature.\n\nFree cells with too low energy disintegrate with the "
+                            "same probability."),
                     ParameterSpec()
                         .name("Energy to cell free transformation")
                         .reference(BoolSpec().member(&SimulationParameters::particleTransformationAllowed))
-                        .description(
-                            "If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
+                        .description("If activated, an energy particle transforms into a free cell as soon as its energy reaches the normal energy value."),
                 }),
             ParameterGroupSpec()
                 .name("Cell construction")
@@ -582,7 +589,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Connection distance")
                         .reference(FloatSpec().member(&SimulationParameters::constructorConnectingCellDistance).min(0.1f).max(4.0f))
-                        .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
+                        .description("When a constructor starts building a new branch, it checks whether the connection to the first new cell would cross "
+                                     "existing connections of objects within this distance. In this case, the construction is postponed."),
                 }),
             ParameterGroupSpec()
                 .name("Mutations")
@@ -710,22 +718,21 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Energy cost")
                         .reference(FloatSpec().member(&SimulationParameters::attackerEnergyCost).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
+                        .description("Amount of energy that an attacker cell loses per attack attempt in the form of emitted energy particles."),
                     ParameterSpec()
                         .name("Food chain color matrix")
                         .reference(FloatSpec().member(&SimulationParameters::attackerFoodChainColorMatrix).min(0.0f).max(1.0f).format("%.2f"))
                         .description(
-                            "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
-                            "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
-                            "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: "
-                            "If a zero is entered in row 2 and column 3, it means that cells with the second customization color cannot attack cells with the "
-                            "third one."),
+                            "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell corresponds to "
+                            "the row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be "
+                            "digested, i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process."
+                            "\n\nExample: If a zero is entered in row 2 and column 3, it means that cells with the second customization color cannot attack "
+                            "cells with the third one."),
                     ParameterSpec()
                         .name("Attack strength")
                         .reference(FloatSpec().member(&SimulationParameters::attackerStrength).min(0.0f).max(0.5f).logarithmic(true))
-                        .description(
-                            "Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
-                            "influenced by other factors adjustable within the attacker's simulation parameters."),
+                        .description("Fraction of the energy of a target that an attacker cell drains per time step. The amount is further reduced by "
+                                     "defender cells, the food chain color matrix and the protection parameters."),
                     ParameterSpec()
                         .name("Same lineage protection")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRelatedLineageProtection).min(0.0f).max(1.0f))
@@ -734,7 +741,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Size protection")
                         .reference(FloatSpec().member(&SimulationParameters::attackerSizeProtection).min(0.0f).max(1.0f).format("%.2f"))
                         .description(
-                            "If the attacked creature consists of more cells than the attacking creature, the obtained energy is reduced by this factor. "
+                            "If the attacked creature consists of more cells than the attacking creature, the obtained energy is reduced by this fraction. "
                             "This compensates for the systematic advantage smaller creatures would otherwise have."),
                     ParameterSpec()
                         .name("Attack radius")
@@ -747,13 +754,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Max raw energy conductivity")
                         .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(6.0f).format("%.3f"))
-                        .description("Upper limit for the raw energy that a digestor cell can pass on to a connected digestor cell. It scales the digestor "
-                                     "property 'Energy conductivity'."),
+                        .description("Upper limit for the raw energy that a digestor cell can take in from a connected cell or pass on to a connected "
+                                     "digestor cell. It scales the digestor property 'Energy conductivity'."),
                     ParameterSpec()
                         .name("Max raw energy conversion")
                         .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f"))
-                        .description("Upper limit for the raw energy that a digestor cell can convert into usable energy per cycle. It scales the digestor "
-                                     "property 'Energy conversion'."),
+                        .description("Upper limit for the raw energy that a digestor cell can convert into usable energy per time step. It scales the "
+                                     "digestor property 'Energy conversion'."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Defender")
@@ -761,14 +768,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Anti-attacker strength")
                         .reference(FloatSpec().member(&SimulationParameters::defenderAntiAttackerStrength).min(0.0f).max(5.0f))
-                        .description(
-                            "If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
+                        .description("If an attacked cell is a defender cell in anti-attacker mode or is connected to such cells, the stolen energy is "
+                                     "divided by (1 + this value) for each of these defender cells."),
                     ParameterSpec()
                         .name("Anti-injector strength")
                         .reference(FloatSpec().member(&SimulationParameters::defenderAntiInjectorStrength).min(0.0f).max(5.0f))
-                        .description(
-                            "If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
-                            "factor."),
+                        .description("If the target cell of an injector is connected to defender cells in anti-injector mode, the energy cost of the "
+                                     "injection increases by this fraction for each of these defender cells."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Injector")
@@ -777,7 +783,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Energy cost")
                         .reference(FloatSpec().member(&SimulationParameters::injectorEnergyCost).min(0.0f).max(1000.0f).logarithmic(true))
                         .description("Amount of energy an injector cell loses per successful injection in the form of emitted energy particles. Every defender "
-                                     "cell next to the target increases the cost."),
+                                     "cell in anti-injector mode that is connected to the target increases the cost."),
                     ParameterSpec()
                         .name("Injection radius")
                         .reference(FloatSpec().member(&SimulationParameters::injectorRadius).min(0.1f).max(4.0f))
@@ -789,23 +795,23 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Energy cost")
                         .reference(FloatSpec().member(&SimulationParameters::muscleEnergyCost).min(0.0f).max(5.0f).format("%.5f").logarithmic(true))
-                        .description("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
+                        .description("Determines how much energy a muscle cell loses in the form of emitted energy particles when it acts. The amount "
+                                     "scales with the activation."),
                     ParameterSpec()
                         .name("Movement acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0.0f).max(10.0f).logarithmic(true))
-                        .description(
-                            "The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
-                            "which are in movement mode."),
+                        .description("Strength of the acceleration of a muscle cell that moves itself directly. It scales with the activation. This "
+                                     "parameter applies only to muscle cells in 'Direct movement' mode."),
                     ParameterSpec()
                         .name("Crawling acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
-                        .description("The maximum value by which a muscle cell can modify its velocity while it changes the length of its connection. This "
-                                     "parameter applies only to muscle cells which are in one of the crawling modes."),
+                        .description("Strength of the acceleration that a muscle cell generates while it changes the length of its connection. This "
+                                     "parameter applies only to muscle cells in 'Auto crawling' or 'Manual crawling' mode."),
                     ParameterSpec()
                         .name("Bending acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
-                        .description("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
-                                     "only to muscle cells which are in bending mode."),
+                        .description("Strength of the acceleration that a muscle cell generates during a bending action. This parameter applies only to "
+                                     "muscle cells in 'Auto bending' or 'Manual bending' mode."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Sensor")
@@ -822,7 +828,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Radius")
                         .reference(FloatSpec().member(&SimulationParameters::reconnectorRadius).min(0.0f).max(3.0f))
-                        .description("The maximum radius in which a reconnector cell can establish or destroy connections to other objects."),
+                        .description("The maximum distance at which a reconnector cell can establish connections to other objects."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Detonator")
@@ -830,7 +836,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Blast radius")
                         .reference(FloatSpec().member(&SimulationParameters::detonatorRadius).min(0.0f).max(10.0f))
-                        .description("The radius of the detonation."),
+                        .description("Radius within which the explosion of a detonator cell pushes away surrounding objects. The subsequent shock wave "
+                                     "reaches eight times further."),
                     ParameterSpec()
                         .name("Chain explosion probability")
                         .reference(FloatSpec().member(&SimulationParameters::detonatorChainExplosionProbability).min(0.0f).max(1.0f))
@@ -840,7 +847,7 @@ ParametersSpec const& SimulationParameters::getSpec()
             ParameterGroupSpec()
                 .name("Object color transition rules")
                 .expertToggle(&SimulationParameters::colorTransitionRulesToggle)
-                .description("If activated, rules can be defined that let the customization color of a cell change over time.")
+                .description("If activated, rules can be defined that let the customization color of cells and free cells change over time.")
                 .parameters({
                     ParameterSpec()
                         .name("Target color and duration")
@@ -848,7 +855,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description(
                             "Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
                             "color can be defined for each customization color. In addition, durations must be specified that define how many time steps the "
-                            "corresponding color are kept."),
+                            "corresponding color is kept. The age of the cell is reset with each color change."),
                 }),
         });
     }

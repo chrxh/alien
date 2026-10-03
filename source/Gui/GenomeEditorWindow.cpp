@@ -163,7 +163,10 @@ void GenomeEditorWindow::processToolbar()
                  .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.")
                  .action([&] { onShareGenome(); })),
          AlienGui::ToolbarItem::createSeparator(),
-         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_CLONE).name("Clone genome").action([&] { onCloneGenome(); })),
+         AlienGui::ToolbarItem::createButton(
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_CLONE).name("Clone genome").tooltip("Open a copy of the current genome in a new tab").action([&] {
+                 onCloneGenome();
+             })),
          AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_COPY).name("Copy genome").tooltip("Copy genome to clipboard").action([&] { onCopyGenome(); })),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
@@ -200,20 +203,20 @@ void GenomeEditorWindow::processToolbar()
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_SYRINGE)
                                                  .name("Inject genome")
-                                                 .tooltip("Inject the current genome to the selected creatures in the simulation")
+                                                 .tooltip("Inject the current genome into the selected creatures in the simulation")
                                                  .disabled(!creaturesSelected)
                                                  .action([&] { onInjectGenome(); })),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_SEEDLING)
                                                  .name("Create seed")
-                                                 .tooltip("Create a seed with current genome without free energy supply")
+                                                 .tooltip("Create a seed with the current genome. It needs energy to build its first offspring.")
                                                  .action([&] { onCreateSeed(false); })),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_SEEDLING)
                                                  .secondIcon(ICON_FA_BOLT)
                                                  .secondIconOffset({30.0f, 25.0f})
                                                  .name("Create seed with energy")
-                                                 .tooltip("Create a seed with current genome with free energy supply")
+                                                 .tooltip("Create a seed with the current genome. It builds its first offspring without energy cost.")
                                                  .action([&] { onCreateSeed(true); }))});
 }
 

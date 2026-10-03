@@ -198,7 +198,7 @@ void BrowserWindow::processToolbar()
                 .name("Upload " + resourceTypeString)
                 .tooltip(
                     "Upload your current " + resourceTypeString
-                    + " to the server and made visible in the browser. You can choose whether you want to share it with the community or whether it should "
+                    + " to the server and make it visible in the browser. You can choose whether you want to share it with the community or whether it should "
                       "only be visible in your own workspace.\nIf you have already selected a folder, your "
                     + resourceTypeString + " will be uploaded there. If you have selected a " + resourceTypeString + ", its folder and name will be suggested.")
                 .action([&] {
@@ -227,13 +227,13 @@ void BrowserWindow::processToolbar()
                                                     + " with the one that is currently open. The name, description and reactions will be preserved.")
                                                 .disabled(!isOwnerForSelectedItem || !_data->selectedTreeTO->isLeaf())
                                                 .action([&] { onReplaceResource(_data->selectedTreeTO->getLeaf()); })),
-        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
-                                                .icon(ICON_FA_SHARE_ALT)
-                                                .name("Change visibility")
-                                                .tooltip("Change visibility: Community " ICON_FA_LONG_ARROW_ALT_RIGHT
-                                                         " my workspace and my workspace " ICON_FA_LONG_ARROW_ALT_RIGHT " Community")
-                                                .disabled(!isOwnerForSelectedItem)
-                                                .action([&] { onMoveResource(_data->selectedTreeTO); })),
+        AlienGui::ToolbarItem::createButton(
+            AlienGui::ToolbarItemParameters()
+                .icon(ICON_FA_SHARE_ALT)
+                .name("Change visibility")
+                .tooltip("Change visibility: Community " ICON_FA_LONG_ARROW_ALT_RIGHT " Private and Private " ICON_FA_LONG_ARROW_ALT_RIGHT " Community")
+                .disabled(!isOwnerForSelectedItem)
+                .action([&] { onMoveResource(_data->selectedTreeTO); })),
         AlienGui::ToolbarItem::createButton(
             AlienGui::ToolbarItemParameters().icon(ICON_FA_TRASH).name("Delete selected " + resourceTypeString).disabled(!isOwnerForSelectedItem).action([&] {
                 onDeleteResource(_data->selectedTreeTO);
