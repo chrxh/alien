@@ -129,11 +129,11 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         }
 
         float2 scanPos = {senderPos.x + static_cast<float>(dx), senderPos.y + static_cast<float>(dy)};
-        data.objectMap.correctPosition(scanPos);
+        data.world.correctPosition(scanPos);
 
         // Check all cells at this position (including overlapping cells)
-        auto records = data.objectMap.getRecords();
-        int otherIndex = data.objectMap.getFirstIndex(scanPos);
+        auto records = data.objectGrid.getRecords();
+        int otherIndex = data.objectGrid.getFirstIndex(scanPos);
         while (otherIndex >= 0) {
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
@@ -151,7 +151,7 @@ CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObj
     auto const& sender = senderObject->typeData.cell.cellTypeData.communicator.modeData.sender;
     if (sender.oneway) {
         // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
-        auto toReceiver = data.objectMap.getCorrectedDirection(receiverObject->pos - senderObject->pos);
+        auto toReceiver = data.world.getCorrectedDirection(receiverObject->pos - senderObject->pos);
         if (Math::dot(toReceiver, senderFacing) > 0) {
             return false;
         }

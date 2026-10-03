@@ -18,8 +18,8 @@
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
 {
-    data.objectMap.reset();
-    data.energyMap.reset();
+    data.objectGrid.reset();
+    data.energyParticleGrid.reset();
     data.processMemory.reset();
 
     // Heuristics
@@ -32,6 +32,8 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
     data.mutatedGenomes.setMemory(data.processMemory.getTypedSubArray<Genome*>(maxCellTypeOperations), maxCellTypeOperations);
+    auto numEnergyParticles = data.entities.energies.getNumEntries();
+    data.energyParticlesNearBarriers.setMemory(data.processMemory.getTypedSubArray<int>(numEnergyParticles), numEnergyParticles);
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
     for (int i = 0; i < MAX_COLORS; ++i) {
         data.numConstructorsNeedingEnergyByColor[i] = 0;
@@ -47,20 +49,20 @@ __global__ void cudaNextTimestep_physics_init(SimulationData data)
     EnergyProcessor::calcActiveSources(data);
 }
 
-__global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
+__global__ void cudaNextTimestep_physics_fillGrids(SimulationData data)
 {
-    ObjectProcessor::updateMap(data);
+    ObjectProcessor::updateGrids(data);
     ObjectProcessor::radiation(data);  // Do not use EnergyParticleProcessor in this calcKernel
-    ObjectProcessor::clearDensityMap(data);
+    ObjectProcessor::clearDensityGrid(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
     ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
-    ObjectProcessor::fillDensityMap(data);
-    EnergyProcessor::fillDensityMap(data);
+    ObjectProcessor::fillDensityGrid(data);
+    EnergyProcessor::fillDensityGrid(data);
 
-    EnergyProcessor::updateMap(data);
+    EnergyProcessor::updateGrid(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data)
@@ -73,8 +75,12 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
     ObjectProcessor::checkForces(data);
     ObjectProcessor::applyForces(data);
 
-    EnergyProcessor::moveAndBounceOffWalls(data);
-    EnergyProcessor::mergeOrAbsorb(data);
+    EnergyProcessor::moveParticlesFarFromBarriers(data);
+}
+
+__global__ void cudaNextTimestep_physics_moveEnergyParticlesNearBarriers(SimulationData data)
+{
+    EnergyProcessor::moveParticlesNearBarriers(data);
 }
 
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)

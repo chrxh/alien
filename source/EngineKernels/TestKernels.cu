@@ -159,8 +159,8 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
     }
 
     if (object1 != nullptr && object2 != nullptr) {
-        data.objectMap.reset();
-        data.energyMap.reset();
+        data.objectGrid.reset();
+        data.energyParticleGrid.reset();
         data.processMemory.reset();
 
         // Heuristics
@@ -317,7 +317,7 @@ __global__ void cudaTestIsDataValid(SimulationData data, bool* result)
                     }
 
                     auto displacement = connectedObject->pos - object->pos;
-                    data.objectMap.correctDirection(displacement);
+                    data.world.correctDirection(displacement);
                     auto actualDistance = Math::length(displacement);
                     *result &= actualDistance <= 14.0f;
 

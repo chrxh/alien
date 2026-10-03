@@ -51,7 +51,7 @@ private:
     __inline__ __device__ void copyDataToHeap(T sourceSize, uint64_t sourceIndex, uint8_t* heap, T& targetSize, uint8_t*& target);
     __inline__ __device__ void copyDataToHeap(uint64_t size, uint64_t sourceIndex, uint8_t* source, uint8_t*& target);
 
-    BaseMap _map;
+    WorldGeometry _world;
     SimulationData* _data;
 };
 
@@ -62,7 +62,7 @@ private:
 __inline__ __device__ void EntityFactory::init(SimulationData* data)
 {
     _data = data;
-    _map.init(data->worldSize);
+    _world = data->world;
 }
 
 __inline__ __device__ Energy* EntityFactory::createParticleFromTO(EnergyTO const& particleTO)
@@ -73,7 +73,7 @@ __inline__ __device__ Energy* EntityFactory::createParticleFromTO(EnergyTO const
 
     particle->id = particleTO.id;
     particle->pos = particleTO.pos;
-    _map.correctPosition(particle->pos);
+    _world.correctPosition(particle->pos);
     particle->vel = particleTO.vel;
     particle->energy = particleTO.energy;
     particle->locked = 0;
@@ -377,7 +377,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 {
     object->id = objectTO.id;
     object->pos = objectTO.pos;
-    _map.correctPosition(object->pos);
+    _world.correctPosition(object->pos);
     object->vel = objectTO.vel;
     object->stiffness = objectTO.stiffness;
     object->color = objectTO.color;

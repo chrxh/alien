@@ -1,15 +1,15 @@
 #include "ConstantMemory.cuh"
 #include "GarbageCollectorKernels.cuh"
 
-void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
+void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
 {
-    worldSize = worldSize_;
-
     entities.init();
     tempEntities.init();
     preprocessedSimulationData.init(worldSize);
-    objectMap.init(worldSize);
-    energyMap.init(worldSize);
+    world.init(worldSize);
+    objectGrid.init(worldSize);
+    energyParticleGrid.init(worldSize);
+    barrierGrid.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
     CudaMemoryManager::getInstance().acquireMemory<uint32_t>(MAX_COLORS, numConstructorsNeedingEnergyByColor);
@@ -29,6 +29,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
         cellTypeOperations[i].init();
     }
     mutatedGenomes.init();
+    energyParticlesNearBarriers.init();
 }
 
 namespace
@@ -93,8 +94,9 @@ void SimulationData::free()
     entities.free();
     tempEntities.free();
     preprocessedSimulationData.free();
-    objectMap.free();
-    energyMap.free();
+    objectGrid.free();
+    energyParticleGrid.free();
+    barrierGrid.free();
     primaryNumberGen.free();
     secondaryNumberGen.free();
     processMemory.free();
@@ -108,17 +110,19 @@ void SimulationData::free()
         cellTypeOperations[i].free();
     }
     mutatedGenomes.free();
+    energyParticlesNearBarriers.free();
 }
 
 void SimulationData::resizeAuxiliaryData()
 {
     auto estimatedMaxActiveCells = entities.objects.getCapacity_host();
-    objectMap.resize(estimatedMaxActiveCells);
+    objectGrid.resize(estimatedMaxActiveCells);
     auto estimatedMaxActiveParticles = entities.energies.getCapacity_host();
-    energyMap.resize(estimatedMaxActiveParticles);
+    energyParticleGrid.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =
-        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + sizeof(Genome*) + 200) * (estimatedMaxActiveCells + 1000);  // Heuristics
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + sizeof(Genome*) + 200) * (estimatedMaxActiveCells + 1000)  // Heuristics
+        + sizeof(int) * estimatedMaxActiveParticles + GpuMemoryAlignmentBytes;  // For energyParticlesNearBarriers
     processMemory.resize(upperBoundDynamicMemory);
 }
 

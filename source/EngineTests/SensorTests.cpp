@@ -1231,6 +1231,33 @@ TEST_F(SensorTests, detectSolid_wallDistanceAndAngleAreExact)
     EXPECT_TRUE(approxCompare(0.5f, signals[Channels::SensorAngle], 0.05f)) << "Actual angle " << signals[Channels::SensorAngle];
 }
 
+TEST_F(SensorTests, detectSolid_wallBeyondWorldBoundary)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({500.0f, 995.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
+            ObjectDesc().id(2).pos({501.0f, 995.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+    for (int i = 0; i < 81; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(1000 + i).pos({460.0f + toFloat(i), 10.0f}).type(SolidDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
+    EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
+
+    // The wall is 15 units below, across the world boundary
+    auto expectedDistance = 1.0f - (15.0f - 0.75f) / 256.0f;
+    EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
+        << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
+    EXPECT_TRUE(approxCompare(0.5f, signals[Channels::SensorAngle], 0.05f)) << "Actual angle " << signals[Channels::SensorAngle];
+}
+
 TEST_F(SensorTests, detectSolid_gapInWallIsVisible)
 {
     auto data = ContentDesc().addCreature(

@@ -8,18 +8,22 @@
 #include <EngineInterface/ArraySizesForGpuEntities.h>
 #include <EngineInterface/KernelLaunchSettings.h>
 
+#include "BarrierGrid.cuh"
 #include "CudaNumberGenerator.cuh"
-#include "Map.cuh"
+#include "EnergyParticleGrid.cuh"
+#include "ObjectGrid.cuh"
 #include "Operations.cuh"
 #include "PreprocessedSimulationData.cuh"
+#include "WorldGeometry.cuh"
 
 struct SimulationData
 {
-    // Maps
+    // World and grids
     uint64_t* timestep;
-    int2 worldSize;
-    ObjectMap objectMap;
-    EnergyMap energyMap;
+    WorldGeometry world;
+    ObjectGrid objectGrid;
+    EnergyParticleGrid energyParticleGrid;
+    BarrierGrid barrierGrid;
 
     // Entities
     Entities entities;
@@ -35,6 +39,7 @@ struct SimulationData
     Heap processMemory;
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
+    UnmanagedArray<int> energyParticlesNearBarriers;  // Indices into entities.energies
 
     // For running gene graph kernels after mutations
     UnmanagedArray<Genome*> mutatedGenomes;

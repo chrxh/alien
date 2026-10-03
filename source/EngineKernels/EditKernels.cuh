@@ -50,4 +50,4 @@ __global__ void cudaApplyCataclysm(SimulationData data);
 __global__ void cudaResetSelectionResult(SelectionResult result);
 __global__ void cudaGetSelectionShallowData_step1(SimulationData data);
 __global__ void cudaGetSelectionShallowData_step2(SimulationData data, float2 refPos, SelectionResult result);
-__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
+__global__ void cudaFinalizeSelectionResult(SelectionResult result, WorldGeometry world);

@@ -462,7 +462,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     ConstructionData const& constructionData)
 {
     auto const& lastObject = constructionData.lastConstructionObject;
-    auto posDelta = data.objectMap.getCorrectedDirection(lastObject->pos - hostObject->pos) / 2;
+    auto posDelta = data.world.getCorrectedDirection(lastObject->pos - hostObject->pos) / 2;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
     //if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
@@ -615,7 +615,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
     }
 
     auto constructionId = constructionData.lastConstructionObject->typeData.cell.constructionId;
-    data.objectMap.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached(), [&](auto const& otherObject) {
+    data.objectGrid.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached(), [&](auto const& otherObject) {
         if (numResultCells == constructionData.shapeResult.numAdditionalConnections) {
             return;
         }
@@ -648,7 +648,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
 {
     auto& constructor = hostObject->typeData.cell.constructor;
 
-    data.objectMap.correctPosition(posOfNewObject);
+    data.world.correctPosition(posOfNewObject);
 
     EntityFactory factory;
     factory.init(&data);

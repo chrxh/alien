@@ -124,11 +124,7 @@ __host__ __device__ __inline__ float2 toFloat2(int2 const& p)
 
 __host__ __device__ __inline__ int floorInt(float v)
 {
-    int result = static_cast<int>(v);
-    if (result > v) {
-        --result;
-    }
-    return result;
+    return static_cast<int>(floorf(v));
 }
 
 __host__ __device__ __inline__ bool isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
@@ -191,6 +187,13 @@ __device__ __inline__ T alienAtomicOr32(T* address, T value)
 {
     static_assert(sizeof(unsigned int) == sizeof(T));
     return reinterpret_cast<T>(atomicOr(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
+}
+
+template <typename T>
+__device__ __inline__ T alienAtomicOr64(T* address, T const& value)
+{
+    static_assert(sizeof(unsigned long long) == sizeof(T));
+    return static_cast<T>(atomicOr(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value)));
 }
 
 template <typename T>

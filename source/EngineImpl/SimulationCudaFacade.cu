@@ -35,7 +35,7 @@
 #include <EngineKernels/Entities.cuh>
 #include <EngineKernels/GarbageCollectorKernels.cuh>
 #include <EngineKernels/GeometryKernels.cuh>
-#include <EngineKernels/Map.cuh>
+#include <EngineKernels/ObjectGrid.cuh>
 #include <EngineKernels/SelectionResult.cuh>
 #include <EngineKernels/SimulationData.cuh>
 #include <EngineKernels/SimulationKernels.cuh>

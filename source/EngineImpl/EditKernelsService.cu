@@ -148,7 +148,7 @@ void EditKernelsService::connectSelection(KernelLaunchSettings const& launchSett
         launchKernelOnDefaultStream(KERNEL(cudaProcessDeleteConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
         launchKernelOnDefaultStream(KERNEL(cudaProcessAddConnectionChanges), LaunchConfig{launchSettings.numBlocks, 8}, data);
 
-        launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
+        launchKernelOnDefaultStream(KERNEL(cudaCleanupGrids), LaunchConfig{launchSettings.numBlocks, 8}, data);
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  // Due to locking not all necessary connections may be established at first => repeat
@@ -265,7 +265,7 @@ void EditKernelsService::getSelectionShallowData(KernelLaunchSettings const& lau
     auto refPos = flattenSelection(launchSettings, data);
     launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step1), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaGetSelectionShallowData_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, refPos, selectionResult);
-    launchKernelOnDefaultStream(KERNEL(cudaFinalizeSelectionResult), LaunchConfig{1, 1}, selectionResult, data.objectMap);
+    launchKernelOnDefaultStream(KERNEL(cudaFinalizeSelectionResult), LaunchConfig{1, 1}, selectionResult, data.world);
 }
 
 namespace
@@ -284,8 +284,8 @@ float2 EditKernelsService::flattenSelection(KernelLaunchSettings const& launchSe
     cudaDeviceSynchronize();
     auto angleSums = copyToHost(_cudaAngleSums);
     auto refPos = float2{
-        calcCircularMean(angleSums.x, angleSums.y, toFloat(data.worldSize.x)),
-        calcCircularMean(angleSums.z, angleSums.w, toFloat(data.worldSize.y)),
+        calcCircularMean(angleSums.x, angleSums.y, toFloat(data.world.getSize().x)),
+        calcCircularMean(angleSums.z, angleSums.w, toFloat(data.world.getSize().y)),
     };
 
     launchKernelOnDefaultStream(KERNEL(cudaInitSelectionAnchorKeys), LaunchConfig{launchSettings.numBlocks, 8}, data, refPos);

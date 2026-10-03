@@ -98,10 +98,11 @@ __global__ void cudaCleanupDependentCellData(Array<Object*> cells, Heap newHeap)
     }
 }
 
-__global__ void cudaCleanupMaps(SimulationData data)
+__global__ void cudaCleanupGrids(SimulationData data)
 {
-    data.objectMap.cleanup_system();
-    data.energyMap.cleanup_system();
+    data.objectGrid.cleanup_system();
+    data.energyParticleGrid.cleanup_system();
+    data.barrierGrid.cleanup_system();
 }
 
 __global__ void cudaSwapPointerArrays(SimulationData data)
