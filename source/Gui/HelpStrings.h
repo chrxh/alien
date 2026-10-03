@@ -32,25 +32,27 @@ namespace Const
 
     std::string const NotAllowedCharacters = "Your input contains not allowed characters.";
 
-    std::string const CellEnergyTooltip = "The amount of internal energy of the cell. The cell undergoes decay when its energy falls below a critical "
-                                          "threshold (refer to the 'Minimum energy' simulation parameter).";
+    std::string const CreatorEnergyTooltip = "Energy of each created object or energy particle.";
 
-    std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of solid objects.";
+    std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of objects.";
 
-    std::string const CreatorDrawingTypeTooltip =
-        "Specifies whether the drawn solid objects should form a solid body (with connections) or a fluid (without connections).";
+    std::string const CreatorMaterialTooltip = "Material of the objects to be created.\n" ICON_FA_CHEVRON_RIGHT
+                                               " Solid: inorganic rigid particles that are connected to form a solid body.\n" ICON_FA_CHEVRON_RIGHT
+                                               " Fluid: inorganic freely flowing particles without connections.\n" ICON_FA_CHEVRON_RIGHT
+                                               " Free cells: organic substance without a genome. It can serve as food.\n" ICON_FA_CHEVRON_RIGHT
+                                               " Energy particles: energy that can be absorbed by cells.";
 
-    std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
+    std::string const CreatorRectangleWidthTooltip = "The number of objects in the horizontal direction.";
 
-    std::string const CreatorRectangleHeightTooltip = "The height of the rectangle in cells.";
+    std::string const CreatorRectangleHeightTooltip = "The number of objects in the vertical direction.";
 
-    std::string const CreatorHexagonLayersTooltip = "The number of layers in cells starting from the center.";
+    std::string const CreatorHexagonLayersTooltip = "The number of object layers, counted from the center.";
 
-    std::string const CreatorDiscOuterRadiusTooltip = "The outer radius of the disc in cells.";
+    std::string const CreatorDiscOuterRadiusTooltip = "The outer radius of the disc.";
 
-    std::string const CreatorDiscInnerRadiusTooltip = "The inner radius of the disc in cells.";
+    std::string const CreatorDiscInnerRadiusTooltip = "The inner radius of the disc. Objects are only created between the inner and the outer radius.";
 
-    std::string const CreatorDistanceTooltip = "The distance between two connected cells.";
+    std::string const CreatorDistanceTooltip = "The distance between two neighboring objects.";
 
     std::string const LoginHowToCreateNewUseTooltip = "Please enter the desired user name and password and proceed by clicking the 'Create user' button.";
 
