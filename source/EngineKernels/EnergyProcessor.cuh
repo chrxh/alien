@@ -204,7 +204,7 @@ __inline__ __device__ bool EnergyProcessor::findFirstBarrierHit(
         });
 
     hit.fraction = cg::reduce(group, threadHit.fraction, cg::less<float>());
-    auto firstHitThread = __ffs(group.ballot(threadHit.fraction == hit.fraction)) - 1;
+    auto firstHitThread = __ffsll(static_cast<unsigned long long>(group.ballot(threadHit.fraction == hit.fraction))) - 1;
     hit.normal = {group.shfl(threadHit.normal.x, firstHitThread), group.shfl(threadHit.normal.y, firstHitThread)};
     hit.velocity = {group.shfl(threadHit.velocity.x, firstHitThread), group.shfl(threadHit.velocity.y, firstHitThread)};
     return hit.fraction != NoBarrierHit;
