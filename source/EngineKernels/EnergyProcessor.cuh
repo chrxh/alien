@@ -1,19 +1,24 @@
 #pragma once
 
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
 #include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
 
+namespace cg = cooperative_groups;
+
 class EnergyProcessor
 {
 public:
-    __inline__ __device__ static void updateMap(SimulationData& data);
-    __inline__ __device__ static void fillDensityMap(SimulationData& data);
+    __inline__ __device__ static void updateGrid(SimulationData& data);
+    __inline__ __device__ static void fillDensityGrid(SimulationData& data);
     __inline__ __device__ static void calcActiveSources(SimulationData& data);
-    __inline__ __device__ static void moveAndBounceOffWalls(SimulationData& data);
-    __inline__ __device__ static void mergeOrAbsorb(SimulationData& data);
+    __inline__ __device__ static void moveParticlesFarFromBarriers(SimulationData& data);
+    __inline__ __device__ static void moveParticlesNearBarriers(SimulationData& data);
     __inline__ __device__ static void splitHighEnergyParticles(SimulationData& data);
     __inline__ __device__ static void transformIntoFreeCells(SimulationData& data);
 
@@ -22,48 +27,64 @@ public:
     __inline__ __device__ static void provideExternalEnergyForSources(SimulationData& data);
 
 private:
-    struct WallHit
+    static auto constexpr BarrierScanGroupSize = 8;
+    using BarrierScanGroup = cg::thread_block_tile<BarrierScanGroupSize>;
+
+    struct BarrierHit
     {
-        float fraction;
-        float2 normal;
-        float2 velocity;
+        float fraction = NoBarrierHit;  // Fraction of the remaining displacement until the hit
+        float2 normal = {0, 0};
+        float2 velocity = {0, 0};
     };
 
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
     __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
-    __inline__ __device__ static bool isWall(Object* object);
-    __inline__ __device__ static float calcWallSearchRadius();
-    __inline__ __device__ static void moveParticleAndBounceOffWalls(SimulationData& data, Energy* particle, float wallSearchRadius);
-    __inline__ __device__ static bool
-    findFirstWall(SimulationData& data, float2 const& pos, float2 const& vel, float timeLeft, float elapsedTime, float wallSearchRadius, WallHit& hit);
+    __inline__ __device__ static bool isBarrier(Object* object);
+    __inline__ __device__ static float calcScanRadius(float barrierSearchRadius, float2 const& displacement);
+    __inline__ __device__ static void
+    moveParticleAndBounceOffBarriers(SimulationData& data, BarrierScanGroup const& group, Energy* particle, float barrierSearchRadius);
+    __inline__ __device__ static bool findFirstBarrierHit(
+        SimulationData& data,
+        BarrierScanGroup const& group,
+        float2 const& pos,
+        float2 const& vel,
+        float timeLeft,
+        float elapsedTime,
+        float barrierSearchRadius,
+        BarrierHit& hit);
+    __inline__ __device__ static void
+    updateFirstBarrierHit(SimulationData& data, Object* object, float2 const& pos, float2 const& vel, float timeLeft, float elapsedTime, BarrierHit& hit);
+    __inline__ __device__ static void mergeOrAbsorb(SimulationData& data, Energy*& particle);
     __inline__ __device__ static void mergeParticleInto(Energy*& particle, Energy* target);
     __inline__ __device__ static void absorbIntoObject(SimulationData& data, Energy*& particle, Object* object);
 
     static auto constexpr MinEnergyPerSourceParticle = 10.0f;
     static auto constexpr MaxNumParticlesPerSource = 1000;
-    static auto constexpr MaxWallBouncesPerTimestep = 3;
-    static auto constexpr WallClearance = 0.01f;
-    static auto constexpr WallSearchMargin = 0.5f;
-    static auto constexpr MaxWallScanRadius = 8.0f;
+    static auto constexpr MaxBarrierBouncesPerTimestep = 3;
+    static auto constexpr BarrierClearance = 0.01f;
+    static auto constexpr MaxBarrierScanRadius = 8.0f;
+    static auto constexpr NoBarrierHit = 2.0f;
+
+    static_assert(2 * MaxBarrierScanRadius + 1 <= OccupancyGrid::MaxAreaSize);
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void EnergyProcessor::updateMap(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::updateGrid(SimulationData& data)
 {
     auto partition = calcBlockPartition(data.entities.energies.getNumOrigEntries());
 
     Energy** particlePointers = &data.entities.energies.at(partition.startIndex);
-    data.energyMap.set_block(partition.numElements(), particlePointers);
+    data.energyParticleGrid.set_block(partition.numElements(), particlePointers);
 }
 
-__inline__ __device__ void EnergyProcessor::fillDensityMap(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::fillDensityGrid(SimulationData& data)
 {
     auto const partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        data.preprocessedSimulationData.densityMap.addParticle(data.entities.energies.at(index));
+        data.preprocessedSimulationData.densityGrid.addParticle(data.entities.energies.at(index));
     }
 }
 
@@ -85,116 +106,158 @@ __inline__ __device__ void EnergyProcessor::calcActiveSources(SimulationData& da
     }
 }
 
-__inline__ __device__ void EnergyProcessor::moveAndBounceOffWalls(SimulationData& data)
+// Particles near barriers are only collected here and moved by moveParticlesNearBarriers
+__inline__ __device__ void EnergyProcessor::moveParticlesFarFromBarriers(SimulationData& data)
 {
     auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
-    auto wallSearchRadius = calcWallSearchRadius();
+    auto barrierSearchRadius = data.barrierGrid.calcBarrierSearchRadius();
+    auto timestepSize = cudaSimulationParameters.timestepSize.value;
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
-        moveParticleAndBounceOffWalls(data, particle, wallSearchRadius);
-        data.energyMap.correctPosition(particle->pos);
+        auto displacement = particle->vel * timestepSize;
+        if (data.barrierGrid.hasBarrier(particle->pos + displacement / 2, calcScanRadius(barrierSearchRadius, displacement))) {
+            data.energyParticlesNearBarriers.tryAddEntry(particleIndex);
+        } else {
+            particle->pos = particle->pos + displacement;
+            data.world.correctPosition(particle->pos);
+            mergeOrAbsorb(data, particle);
+        }
     }
 }
 
-__inline__ __device__ float EnergyProcessor::calcWallSearchRadius()
+__inline__ __device__ void EnergyProcessor::moveParticlesNearBarriers(SimulationData& data)
 {
-    // A wall crossed by a particle always has an endpoint within half of its maximum length from the crossing point, plus the distance the wall moves
-    auto maxBindingDistance = 0.0f;
-    for (int color = 0; color < MAX_COLORS; ++color) {
-        maxBindingDistance = max(maxBindingDistance, cudaSimulationParameters.maxBindingDistance.value[color]);
+    auto group = cg::tiled_partition<BarrierScanGroupSize>(cg::this_thread_block());
+    auto groupIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x) / BarrierScanGroupSize;
+    auto numGroups = toInt(gridDim.x * blockDim.x) / BarrierScanGroupSize;
+    auto barrierSearchRadius = data.barrierGrid.calcBarrierSearchRadius();
+
+    auto const& particlesNearBarriers = data.energyParticlesNearBarriers;
+    for (int index = groupIndex; index < particlesNearBarriers.getNumEntries(); index += numGroups) {
+        auto& particle = data.entities.energies.at(particlesNearBarriers.at(index));
+        moveParticleAndBounceOffBarriers(data, group, particle, barrierSearchRadius);
+        if (group.thread_rank() == 0) {
+            data.world.correctPosition(particle->pos);
+            mergeOrAbsorb(data, particle);
+        }
     }
-    return maxBindingDistance / 2 + WallSearchMargin + cudaSimulationParameters.maxVelocity.value * cudaSimulationParameters.timestepSize.value;
 }
 
-__inline__ __device__ void EnergyProcessor::moveParticleAndBounceOffWalls(SimulationData& data, Energy* particle, float wallSearchRadius)
+__inline__ __device__ float EnergyProcessor::calcScanRadius(float barrierSearchRadius, float2 const& displacement)
 {
-    auto pos = particle->pos;
-    auto vel = particle->vel;
+    return min(barrierSearchRadius + Math::length(displacement) / 2, MaxBarrierScanRadius);
+}
+
+// All threads of the group compute the same movement, the first thread writes it. They start from the values read by the first thread,
+// since other threads may change the particle meanwhile.
+__inline__ __device__ void
+EnergyProcessor::moveParticleAndBounceOffBarriers(SimulationData& data, BarrierScanGroup const& group, Energy* particle, float barrierSearchRadius)
+{
+    auto readByFirstThread = [&](float2 const& value) { return float2{group.shfl(value.x, 0), group.shfl(value.y, 0)}; };
+    auto pos = readByFirstThread(particle->pos);
+    auto vel = readByFirstThread(particle->vel);
     auto timestepSize = cudaSimulationParameters.timestepSize.value;
     auto timeLeft = timestepSize;
     auto bounced = false;
 
-    for (int i = 0; i < MaxWallBouncesPerTimestep; ++i) {
-        WallHit hit;
-        if (!findFirstWall(data, pos, vel, timeLeft, timestepSize - timeLeft, wallSearchRadius, hit)) {
+    for (int i = 0; i < MaxBarrierBouncesPerTimestep; ++i) {
+        BarrierHit hit;
+        if (!findFirstBarrierHit(data, group, pos, vel, timeLeft, timestepSize - timeLeft, barrierSearchRadius, hit)) {
             pos = pos + vel * timeLeft;
             break;
         }
-        pos = pos + vel * (timeLeft * hit.fraction) + hit.normal * WallClearance;
+        pos = pos + vel * (timeLeft * hit.fraction) + hit.normal * BarrierClearance;
         auto relativeVel = vel - hit.velocity;
         vel = relativeVel - hit.normal * (2 * Math::dot(relativeVel, hit.normal)) + hit.velocity;
         timeLeft *= 1.0f - hit.fraction;
         bounced = true;
     }
 
-    particle->pos = pos;
-    if (bounced) {
-        particle->vel = vel;
+    if (group.thread_rank() == 0) {
+        particle->pos = pos;
+        if (bounced) {
+            particle->vel = vel;
+        }
     }
 }
 
-__inline__ __device__ bool EnergyProcessor::findFirstWall(
+// The positions around the path are distributed among the threads of the group, the earliest hit of all threads is returned to each thread
+__inline__ __device__ bool EnergyProcessor::findFirstBarrierHit(
     SimulationData& data,
+    BarrierScanGroup const& group,
     float2 const& pos,
     float2 const& vel,
     float timeLeft,
     float elapsedTime,
-    float wallSearchRadius,
-    WallHit& hit)
+    float barrierSearchRadius,
+    BarrierHit& hit)
 {
-    hit.fraction = 2.0f;
+    BarrierHit threadHit;
     auto displacement = vel * timeLeft;
-    auto scanRadius = min(wallSearchRadius + Math::length(displacement) / 2, MaxWallScanRadius);
-    data.objectMap.executeForEachRecord(pos + displacement / 2, scanRadius, [&](LightObject const& record) {
-        if (record.numConnections == 0 || (record.type != ObjectType_Solid && !record.isStatic())) {
-            return;
-        }
-        auto object = record.self;
-        if (!isWall(object)) {
-            return;
-        }
+    auto scanRadius = calcScanRadius(barrierSearchRadius, displacement);
+    data.objectGrid.executeForEachBarrierRecord(
+        data.barrierGrid, pos + displacement / 2, scanRadius, toInt(group.thread_rank()), toInt(group.size()), [&](LightObject const& record) {
+            if (record.numConnections > 0 && isBarrier(record.self)) {
+                updateFirstBarrierHit(data, record.self, pos, vel, timeLeft, elapsedTime, threadHit);
+            }
+        });
 
-        auto wallStart = data.objectMap.getCorrectedDirection(object->pos - pos) + object->vel * elapsedTime;
-        for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedObject = object->connections[i].object;
-            if (!isWall(connectedObject)) {
-                continue;
-            }
-            auto wall = data.objectMap.getCorrectedDirection(connectedObject->pos - object->pos) + (connectedObject->vel - object->vel) * elapsedTime;
-
-            // The crossing is tested in the reference frame of the wall
-            auto relativeDisplacement = (vel - (object->vel + connectedObject->vel) / 2) * timeLeft;
-            auto crossProduct = relativeDisplacement.x * wall.y - relativeDisplacement.y * wall.x;
-            if (crossProduct == 0.0f) {
-                continue;
-            }
-            auto fraction = (wallStart.x * wall.y - wallStart.y * wall.x) / crossProduct;
-            if (fraction <= 0.0f || fraction > 1.0f || fraction >= hit.fraction) {
-                continue;
-            }
-            auto wallFraction = (wallStart.x * relativeDisplacement.y - wallStart.y * relativeDisplacement.x) / crossProduct;
-            if (wallFraction < 0.0f || wallFraction > 1.0f) {
-                continue;
-            }
-
-            auto wallVel = object->vel + (connectedObject->vel - object->vel) * wallFraction;
-            auto normal = float2{-wall.y, wall.x} / Math::length(wall);
-            if (crossProduct < 0.0f) {
-                normal = normal * -1.0f;
-            }
-            if (Math::dot(vel - wallVel, normal) >= 0.0f) {
-                continue;
-            }
-            hit.fraction = fraction;
-            hit.normal = normal;
-            hit.velocity = wallVel;
-        }
-    });
-    return hit.fraction <= 1.0f;
+    hit.fraction = cg::reduce(group, threadHit.fraction, cg::less<float>());
+    auto firstHitThread = __ffs(group.ballot(threadHit.fraction == hit.fraction)) - 1;
+    hit.normal = {group.shfl(threadHit.normal.x, firstHitThread), group.shfl(threadHit.normal.y, firstHitThread)};
+    hit.velocity = {group.shfl(threadHit.velocity.x, firstHitThread), group.shfl(threadHit.velocity.y, firstHitThread)};
+    return hit.fraction != NoBarrierHit;
 }
 
-__inline__ __device__ bool EnergyProcessor::isWall(Object* object)
+// Checks the connections from the object to its connected barriers and keeps the crossing if it comes before the given hit
+__inline__ __device__ void EnergyProcessor::updateFirstBarrierHit(
+    SimulationData& data,
+    Object* object,
+    float2 const& pos,
+    float2 const& vel,
+    float timeLeft,
+    float elapsedTime,
+    BarrierHit& hit)
+{
+    auto barrierStart = data.world.getCorrectedDirection(object->pos - pos) + object->vel * elapsedTime;
+    for (int i = 0; i < object->numConnections; ++i) {
+        auto connectedObject = object->connections[i].object;
+        if (!isBarrier(connectedObject)) {
+            continue;
+        }
+        auto barrier = data.world.getCorrectedDirection(connectedObject->pos - object->pos) + (connectedObject->vel - object->vel) * elapsedTime;
+
+        // The crossing is tested in the reference frame of the barrier
+        auto relativeDisplacement = (vel - (object->vel + connectedObject->vel) / 2) * timeLeft;
+        auto crossProduct = relativeDisplacement.x * barrier.y - relativeDisplacement.y * barrier.x;
+        if (crossProduct == 0.0f) {
+            continue;
+        }
+        auto fraction = (barrierStart.x * barrier.y - barrierStart.y * barrier.x) / crossProduct;
+        if (fraction <= 0.0f || fraction > 1.0f || fraction >= hit.fraction) {
+            continue;
+        }
+        auto barrierFraction = (barrierStart.x * relativeDisplacement.y - barrierStart.y * relativeDisplacement.x) / crossProduct;
+        if (barrierFraction < 0.0f || barrierFraction > 1.0f) {
+            continue;
+        }
+
+        auto barrierVel = object->vel + (connectedObject->vel - object->vel) * barrierFraction;
+        auto normal = float2{-barrier.y, barrier.x} / Math::length(barrier);
+        if (crossProduct < 0.0f) {
+            normal = normal * -1.0f;
+        }
+        if (Math::dot(vel - barrierVel, normal) >= 0.0f) {
+            continue;
+        }
+        hit.fraction = fraction;
+        hit.normal = normal;
+        hit.velocity = barrierVel;
+    }
+}
+
+__inline__ __device__ bool EnergyProcessor::isBarrier(Object* object)
 {
     if (object->type == ObjectType_Solid) {
         return true;
@@ -205,18 +268,13 @@ __inline__ __device__ bool EnergyProcessor::isWall(Object* object)
     return false;
 }
 
-__inline__ __device__ void EnergyProcessor::mergeOrAbsorb(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::mergeOrAbsorb(SimulationData& data, Energy*& particle)
 {
-    auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
-
-    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        auto& particle = data.entities.energies.at(particleIndex);
-        auto otherParticle = data.energyMap.get(particle->pos);
-        if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
-            mergeParticleInto(particle, otherParticle);
-        } else if (auto object = data.objectMap.getFirst(particle->pos + particle->vel)) {
-            absorbIntoObject(data, particle, object);
-        }
+    auto otherParticle = data.energyParticleGrid.get(particle->pos);
+    if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
+        mergeParticleInto(particle, otherParticle);
+    } else if (auto object = data.objectGrid.getFirst(particle->pos + particle->vel)) {
+        absorbIntoObject(data, particle, object);
     }
 }
 
@@ -241,7 +299,7 @@ __inline__ __device__ void EnergyProcessor::mergeParticleInto(Energy*& particle,
 
 __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& data, Energy*& particle, Object* object)
 {
-    if (object->type == ObjectType_Fluid || isWall(object)) {
+    if (object->type == ObjectType_Fluid || isBarrier(object)) {
         return;
     }
     if (particle->lastAbsorbedObject == object) {
@@ -301,10 +359,10 @@ __inline__ __device__ void EnergyProcessor::splitHighEnergyParticles(SimulationD
             auto velPerturbation = Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360);
 
             float2 otherPos = particle->pos + velPerturbation / 5;
-            data.energyMap.correctPosition(otherPos);
+            data.world.correctPosition(otherPos);
 
             particle->pos -= velPerturbation / 5;
-            data.energyMap.correctPosition(particle->pos);
+            data.world.correctPosition(particle->pos);
 
             velPerturbation *= cudaSimulationParameters.radiationVelocityPerturbation / (particle->energy + 1.0f);
             float2 otherVel = particle->vel + velPerturbation;
@@ -354,7 +412,7 @@ __inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
     float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
-    data.objectMap.correctPosition(particlePos);
+    data.world.correctPosition(particlePos);
 
     EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
 }
@@ -388,7 +446,7 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
         }
     }
 
-    data.objectMap.correctPosition(pos);
+    data.world.correctPosition(pos);
 
     auto externalEnergyBackflowFactor = 0.0f;
     if (cudaSimulationParameters.externalEnergyBackflowFactor.value[color] > 0) {
@@ -405,7 +463,7 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
     if (particleEnergy > NEAR_ZERO) {
         EntityFactory factory;
         factory.init(&data);
-        data.objectMap.correctPosition(pos);
+        data.world.correctPosition(pos);
         factory.createEnergy(particleEnergy, pos, vel, color);
     }
 }
@@ -445,7 +503,7 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
                 float2 pos{0, 0};
                 float2 vel{0, 0};
                 calcPositionAndVelocityInSource(data, sourceIndex, pos, vel);
-                data.objectMap.correctPosition(pos);
+                data.world.correctPosition(pos);
                 factory.createEnergy(particleEnergy, pos, vel, color);
             }
         }

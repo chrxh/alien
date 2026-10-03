@@ -28,14 +28,14 @@ __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 vis
         auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
-            correctPositionForRendering(object->pos, visibleTopLeft, data.worldSize);
+            correctPositionForRendering(object->pos, visibleTopLeft, data.world.getSize());
         }
     }
     {
         auto const& partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.entities.energies.at(index);
-            correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
+            correctPositionForRendering(particle->pos, visibleTopLeft, data.world.getSize());
         }
     }
 }
@@ -350,13 +350,13 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
 {
     // Extract location data for layers and sources
     // Each location is rendered 5 times (normal + 4 world offsets for periodic boundaries)
-    auto worldSize = data.worldSize;
+    auto worldSize = data.world.getSize();
 
     // Process layers
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         auto const& pos_asRealVector2D = cudaSimulationParameters.layerPosition.layerValues[i];
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
-        correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
+        correctPositionForRendering(pos, visibleTopLeft, data.world.getSize());
         auto color = cudaSimulationParameters.backgroundColor.layerValues[i].value;
         auto shapeType = cudaSimulationParameters.layerShape.layerValues[i];
         auto radius = cudaSimulationParameters.layerCoreRadius.layerValues[i];
@@ -438,7 +438,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         }
         auto const& pos_asRealVector2D = cudaSimulationParameters.sourcePosition.sourceValues[i];
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
-        correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
+        correctPositionForRendering(pos, visibleTopLeft, data.world.getSize());
 
         float3 color = {0.15f, 0.15f, 0.45f};
         auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];

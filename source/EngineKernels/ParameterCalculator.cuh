@@ -13,7 +13,8 @@ public:
     calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color);
     __device__ __inline__ static float
     calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
-    __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
+    __device__ __inline__ static FloatColorRGB
+    calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, WorldGeometry const& world, float2 const& worldPos);
 
     // Blends a single layer value onto an accumulated result, so that callers computing their layer values on
     // the fly do not need to keep them in an array
@@ -42,7 +43,7 @@ __device__ __inline__ float ParameterCalculator::calcParameter(BaseLayerParamete
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         if (parameter.layerValues[i].enabled) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-            auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
+            auto delta = data.world.getCorrectedDirection(layerPos - worldPos);
             auto weight = calcWeight(delta, i);
             result = result * weight + parameter.layerValues[i].value * (1.0f - weight);
         }
@@ -57,7 +58,7 @@ ParameterCalculator::calcParameter(BaseLayerParameter<ColorVector<float>> const&
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         if (parameter.layerValues[i].enabled) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-            auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
+            auto delta = data.world.getCorrectedDirection(layerPos - worldPos);
             auto weight = calcWeight(delta, i);
             result = result * weight + parameter.layerValues[i].value[color] * (1.0f - weight);
         }
@@ -76,7 +77,7 @@ __device__ __inline__ float ParameterCalculator::calcParameter(
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         if (parameter.layerValues[i].enabled) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-            auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
+            auto delta = data.world.getCorrectedDirection(layerPos - worldPos);
             auto weight = calcWeight(delta, i);
             result = result * weight + parameter.layerValues[i].value[color1][color2] * (1.0f - weight);
         }
@@ -88,19 +89,19 @@ __device__ __inline__ float2
 ParameterCalculator::blendLayerValue(float2 const& accumulated, float2 const& layerValue, SimulationData const& data, float2 const& worldPos, int index)
 {
     float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y};
-    auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
+    auto delta = data.world.getCorrectedDirection(layerPos - worldPos);
     auto weight = calcWeight(delta, index);
     return accumulated * weight + layerValue * (1.0f - weight);
 }
 
 __device__ __inline__ FloatColorRGB
-ParameterCalculator::calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos)
+ParameterCalculator::calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, WorldGeometry const& world, float2 const& worldPos)
 {
     auto result = parameter.baseValue;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         if (parameter.layerValues[i].enabled) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-            auto delta = map.getCorrectedDirection(layerPos - worldPos);
+            auto delta = world.getCorrectedDirection(layerPos - worldPos);
             auto weight = calcWeight(delta, i);
             result.r = result.r * weight + parameter.layerValues[i].value.r * (1.0f - weight);
             result.g = result.g * weight + parameter.layerValues[i].value.g * (1.0f - weight);
@@ -114,11 +115,11 @@ template <typename T>
 __device__ __inline__ int
 ParameterCalculator::getFirstMatchingLayerOrBase(SimulationData const& data, float2 const& worldPos, BaseLayerParameter<T> const& parameter)
 {
-    auto const& map = data.objectMap;
+    auto const& world = data.world;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         if (parameter.layerValues[i].enabled) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-            auto delta = map.getCorrectedDirection(layerPos - worldPos);
+            auto delta = world.getCorrectedDirection(layerPos - worldPos);
             if (calcWeight(delta, i) < NEAR_ZERO) {
                 return i;
             }
@@ -130,11 +131,11 @@ ParameterCalculator::getFirstMatchingLayerOrBase(SimulationData const& data, flo
 __device__ __inline__ bool
 ParameterCalculator::isCoveredByLayers(SimulationData const& data, float2 const& worldPos, LayerParameter<bool> const& enabledParameter)
 {
-    auto const& map = data.objectMap;
+    auto const& world = data.world;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         if (enabledParameter.layerValues[i]) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-            auto delta = map.getCorrectedDirection(layerPos - worldPos);
+            auto delta = world.getCorrectedDirection(layerPos - worldPos);
             if (calcWeight(delta, i) < NEAR_ZERO) {
                 return true;
             }

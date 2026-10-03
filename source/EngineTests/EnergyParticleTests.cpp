@@ -286,6 +286,44 @@ TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenSolids_fromRight)
     EXPECT_NEAR(0.0f, particle._vel.y, 0.001f);
 }
 
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionAtWorldBoundary_fromLeft)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({0.0f, 98.5f}).type(SolidDesc()), ObjectDesc().id(2).pos({0.0f, 101.5f}).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({998.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(999.49f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(100.0f, particle._pos.y, 0.01f);
+    EXPECT_NEAR(-1.0f, particle._vel.x, 0.001f);
+    EXPECT_NEAR(0.0f, particle._vel.y, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionAtWorldBoundary_fromRight)
+{
+    auto data = ContentDesc()
+                    .addObjects({ObjectDesc().id(1).pos({0.0f, 98.5f}).type(SolidDesc()), ObjectDesc().id(2).pos({0.0f, 101.5f}).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({1.5f, 100.0f}).vel({-1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(0.51f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(100.0f, particle._pos.y, 0.01f);
+    EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
+    EXPECT_NEAR(0.0f, particle._vel.y, 0.001f);
+}
+
 TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenMovingNonStaticSolids)
 {
     auto data = ContentDesc()

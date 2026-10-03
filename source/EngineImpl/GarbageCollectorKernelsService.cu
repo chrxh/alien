@@ -15,7 +15,7 @@ void GarbageCollectorKernelsService::shutdown()
 
 void GarbageCollectorKernelsService::cleanupAfterTimestep(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    launchKernelOnDefaultStream(KERNEL(cudaCleanupMaps), LaunchConfig{launchSettings.numBlocks, 8}, data);
+    launchKernelOnDefaultStream(KERNEL(cudaCleanupGrids), LaunchConfig{launchSettings.numBlocks, 8}, data);
 
     launchKernelOnDefaultStream(KERNEL(cudaPreparePointerArraysForCleanup), LaunchConfig{1, 1}, data);
     launchKernelOnDefaultStream(
@@ -52,7 +52,7 @@ void GarbageCollectorKernelsService::launchCleanupForPreviewInGraph(cudaStream_t
     ;
     launchKernel(KERNEL(cudaSwapPointerArrays), LaunchConfig{1, 1}, stream, data);
     ;
-    launchKernel(KERNEL(cudaCleanupMaps), LaunchConfig{numBlocks, 8}, stream, data);
+    launchKernel(KERNEL(cudaCleanupGrids), LaunchConfig{numBlocks, 8}, stream, data);
     ;
 }
 

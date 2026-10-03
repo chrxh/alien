@@ -8,20 +8,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    static uint64_t constexpr NoMatch = 0xffffffffffffffff;
-    static int constexpr NumScanRays = 64;
-    static int constexpr RelocationSearchRadius = 32;  // Search grid is (2*radius) x (2*radius) = 64x64
-    static float constexpr ScanStep = 8.0f;
     static int constexpr MaxSameNearCreatureCells = 9 * 9;
-    static float constexpr RayBlockingTestLength = 10.0f;
-
-    static float constexpr SolidScanStep = 1.0f;
-    static float constexpr SolidHitRadius = 0.75f;
-    static int constexpr NumSolidRefinements = 6;
-    static int constexpr NumOcclusionRefinements = 2;  // Occlusion needs a lower precision than the distance of a detected solid
-    static float constexpr SlotTransitionEpsilon = 0.05f;
-
-    static float constexpr DistanceScale = 64.0f;  // Fixed-point resolution of the packed distance, covers distances up to 1023
 
     struct ScanState
     {
@@ -63,13 +50,21 @@ private:
 
     __inline__ __device__ static bool isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance);
     __inline__ __device__ static float calcFreeRayLength(SimulationData& data, float2 const& rayOrigin, float angle, float maxLength);
+    __inline__ __device__ static float2 calcRayRangeInSquare(float2 const& pos, float2 const& direction, int squareSize);
+    __inline__ __device__ static bool isSolidNearSegment(SimulationData& data, float2 const& pos, float2 const& direction, float2 const& range);
     __inline__ __device__ static bool isSolidNearPosition(SimulationData& data, float2 const& pos, float2 const& direction, float distance);
-    __inline__ __device__ static float2 calcRayRangeInSlot(float2 const& scanPos, float2 const& direction);
-    __inline__ __device__ static bool mayContainSolid(SimulationData& data, float2 const& scanPos, float2 const& direction, float2 const& range);
     __inline__ __device__ static float
     findSolidInSegment(SimulationData& data, float2 const& origin, float2 const& direction, float startDistance, float endDistance, int numRefinements);
-    __inline__ __device__ static float
-    findSolidAlongRay(SimulationData& data, float2 const& origin, float angle, float startRadius, float endRadius, float seedDistance, int numRefinements);
+    __inline__ __device__ static float findSolidAlongRay(
+        SimulationData& data,
+        float2 const& origin,
+        float angle,
+        float startRadius,
+        float endRadius,
+        float seedDistance,
+        int numRefinements,
+        uint64_t const* bestMatch = nullptr);
+    __inline__ __device__ static bool isBeyondBestMatch(uint64_t const* bestMatch, float distance);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -80,6 +75,20 @@ private:
     __inline__ __device__ static float convertUint16ToAngle(uint16_t b);
 
     __inline__ __device__ static float calcCreatureDensityFromNumCells(uint32_t numCells);
+
+    static uint64_t constexpr NoMatch = 0xffffffffffffffff;
+    static int constexpr NumScanRays = 64;
+    static int constexpr RelocationSearchRadius = 32;  // Search grid is (2*radius) x (2*radius) = 64x64
+    static float constexpr ScanStep = 8.0f;
+    static float constexpr RayBlockingTestLength = 10.0f;
+
+    static float constexpr SolidScanStep = 1.0f;
+    static float constexpr SolidHitRadius = 0.75f;
+    static int constexpr NumSolidRefinements = 6;
+    static int constexpr NumOcclusionRefinements = 2;  // Occlusion needs a lower precision than the distance of a detected solid
+    static float constexpr SquareTransitionEpsilon = 0.05f;
+
+    static float constexpr DistanceScale = 64.0f;  // Fixed-point resolution of the packed distance, covers distances up to 1023
 };
 
 /************************************************************************/
@@ -128,17 +137,22 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     if (threadIdx.x == 0) {
         state.lookupResult = NoMatch;
         state.seedAngle = data.primaryNumberGen.random(360.0f);
+        state.numNearSameCreatureCells = 0;
+    }
+    __syncthreads();
 
-        data.objectMap.getMatchingObjects(
-            state.nearSameCreatureCells,
-            MaxSameNearCreatureCells,
-            state.numNearSameCreatureCells,
-            object->pos,
-            4.0f,
-            object->detached(),
-            [&](Object* const& otherObject) {
-                return otherObject->type == ObjectType_Cell && object->typeData.cell.isSameCreature(&otherObject->typeData.cell);
-            });
+    data.objectGrid.executeForEach_block(object->pos, 4.0f, object->detached(), [&](Object* const& otherObject) {
+        if (otherObject->type == ObjectType_Cell && object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
+            auto index = atomicAdd(&state.numNearSameCreatureCells, 1);
+            if (index < MaxSameNearCreatureCells) {
+                state.nearSameCreatureCells[index] = otherObject;
+            }
+        }
+    });
+    __syncthreads();
+
+    if (threadIdx.x == 0) {
+        state.numNearSameCreatureCells = min(state.numNearSameCreatureCells, MaxSameNearCreatureCells);
     }
     __syncthreads();
 
@@ -178,8 +192,8 @@ __inline__ __device__ void SensorProcessor::scanSolid(SimulationData& data, Obje
         if (isRayBlockedByCreatureConnections(state, object->pos, angle)) {
             continue;
         }
-        auto solidDistance =
-            findSolidAlongRay(data, object->pos, angle, startRadius, endRadius, data.primaryNumberGen.random(0, SolidScanStep), NumSolidRefinements);
+        auto solidDistance = findSolidAlongRay(
+            data, object->pos, angle, startRadius, endRadius, data.primaryNumberGen.random(0, SolidScanStep), NumSolidRefinements, &state.lookupResult);
         if (solidDistance >= 0) {
             alienAtomicMin64(&state.lookupResult, pack(solidDistance, Math::getNormalizedAngle(angle, -180.0f), 1.0f));
         }
@@ -231,7 +245,7 @@ __inline__ __device__ void SensorProcessor::scanCreatureNearRange(SimulationData
             continue;
         }
         float2 scanPos = object->pos + delta;
-        data.objectMap.correctPosition(scanPos);
+        data.world.correctPosition(scanPos);
 
         // Check all cells at this position (including overlapping cells)
         auto matchInfo = matchCreature(data, object, scanPos, delta, distance);
@@ -248,8 +262,6 @@ template <typename MatchFunc>
 __inline__ __device__ void
 SensorProcessor::scanRays(SimulationData& data, Object* object, ScanState& state, float startRadius, float endRadius, MatchFunc const& getMatchInfo)
 {
-    auto const& densityMap = data.preprocessedSimulationData.densityMap;
-
     // Each thread processes multiple rays if blockDim.x < NumScanRays
     for (int rayIdx = threadIdx.x; rayIdx < NumScanRays; rayIdx += blockDim.x) {
         auto angle = calcRayAngle(rayIdx, state.seedAngle);
@@ -260,9 +272,10 @@ SensorProcessor::scanRays(SimulationData& data, Object* object, ScanState& state
         auto freeLength = endRadius;
         auto direction = Math::unitVectorOfAngle(angle);
 
-        for (float distance = data.primaryNumberGen.random(0, ScanStep); distance <= freeLength; distance += ScanStep) {
+        for (float distance = data.primaryNumberGen.random(0, ScanStep); distance <= freeLength && !isBeyondBestMatch(&state.lookupResult, distance);
+             distance += ScanStep) {
             auto delta = direction * distance;
-            auto scanPos = data.objectMap.getCorrectedPosition(object->pos + delta);
+            auto scanPos = data.world.getCorrectedPosition(object->pos + delta);
 
             if (distance > startRadius) {
                 auto matchInfo = getMatchInfo(scanPos, delta, distance);
@@ -274,9 +287,8 @@ SensorProcessor::scanRays(SimulationData& data, Object* object, ScanState& state
                 }
             }
 
-            // A solid in the density map slot does not necessarily lie on the ray
-            if (densityMap.getSolidDensity(scanPos) > 0) {
-                auto range = calcRayRangeInSlot(scanPos, direction);
+            auto range = calcRayRangeInSquare(scanPos, direction, OccupancyGrid::TileSize);
+            if (isSolidNearSegment(data, scanPos, direction, range)) {
                 auto solidDistance = findSolidInSegment(
                     data,
                     object->pos,
@@ -343,7 +355,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 __inline__ __device__ uint64_t SensorProcessor::getRelocationMatchInfo(SimulationData& data, Object* object, float2 const& scanPos)
 {
     auto const& sensor = object->typeData.cell.cellTypeData.sensor;
-    auto delta = data.objectMap.getCorrectedDirection(scanPos - object->pos);
+    auto delta = data.world.getCorrectedDirection(scanPos - object->pos);
     auto distance = Math::length(delta);
 
     switch (sensor.mode) {
@@ -371,7 +383,7 @@ __inline__ __device__ void SensorProcessor::publishMatch(SimulationData& data, O
     // No relocation for solids
     if (cell.cellTypeData.sensor.mode != SensorMode_DetectSolid) {
         auto matchPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
-        data.objectMap.correctPosition(matchPos);
+        data.world.correctPosition(matchPos);
 
         cell.cellTypeData.sensor.lastMatchAvailable = true;
         cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
@@ -387,7 +399,7 @@ __inline__ __device__ void SensorProcessor::publishNoMatch(Object* object)
 
 __inline__ __device__ uint64_t SensorProcessor::matchEnergy(SimulationData& data, float minDensity, float2 const& scanPos, float2 const& delta, float distance)
 {
-    auto density = data.preprocessedSimulationData.densityMap.getEnergyParticleDensity(scanPos);
+    auto density = data.preprocessedSimulationData.densityGrid.getEnergyParticleDensity(scanPos);
     if (density >= minDensity) {
         return pack(distance, calcAbsAngle(delta), density);
     }
@@ -397,7 +409,7 @@ __inline__ __device__ uint64_t SensorProcessor::matchEnergy(SimulationData& data
 __inline__ __device__ uint64_t
 SensorProcessor::matchFreeCell(SimulationData& data, float minDensity, uint16_t restrictToColors, float2 const& scanPos, float2 const& delta, float distance)
 {
-    auto density = data.preprocessedSimulationData.densityMap.getFreeCellDensity(scanPos, restrictToColors);
+    auto density = data.preprocessedSimulationData.densityGrid.getFreeCellDensity(scanPos, restrictToColors);
     if (density >= minDensity) {
         return pack(distance, calcAbsAngle(delta), density);
     }
@@ -412,8 +424,8 @@ __inline__ __device__ uint64_t SensorProcessor::matchCreature(SimulationData& da
     auto const& restrictToColors = cell.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
     auto const& restrictToLineage = cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
 
-    auto records = data.objectMap.getRecords();
-    int otherIndex = data.objectMap.getFirstIndex(scanPos);
+    auto records = data.objectGrid.getRecords();
+    int otherIndex = data.objectGrid.getFirstIndex(scanPos);
     while (otherIndex >= 0) {
         auto const& otherRecord = records[otherIndex];
         auto otherObject = otherRecord.self;
@@ -457,8 +469,8 @@ __inline__ __device__ uint64_t
 SensorProcessor::matchLastMatchedCreature(SimulationData& data, Object* object, float2 const& scanPos, float2 const& delta, float distance)
 {
     auto const& sensor = object->typeData.cell.cellTypeData.sensor;
-    auto records = data.objectMap.getRecords();
-    int otherIndex = data.objectMap.getFirstIndex(scanPos);
+    auto records = data.objectGrid.getRecords();
+    int otherIndex = data.objectGrid.getFirstIndex(scanPos);
     while (otherIndex >= 0) {
         auto const& otherRecord = records[otherIndex];
         auto otherObject = otherRecord.self;
@@ -485,11 +497,20 @@ __inline__ __device__ float SensorProcessor::calcAbsAngle(float2 const& delta)
 
 __inline__ __device__ bool SensorProcessor::isRayBlockedByCreatureConnections(ScanState const& state, float2 const& rayOrigin, float angle)
 {
-    auto rayEnd = rayOrigin + Math::unitVectorOfAngle(angle) * RayBlockingTestLength;
+    auto direction = Math::unitVectorOfAngle(angle);
+    auto rayEnd = rayOrigin + direction * RayBlockingTestLength;
+    auto calcSideOfRay = [&](float2 const& pos) { return direction.x * (pos.y - rayOrigin.y) - direction.y * (pos.x - rayOrigin.x); };
+
     for (int i = 0; i < state.numNearSameCreatureCells; ++i) {
         auto nearObject = state.nearSameCreatureCells[i];
+        auto sideOfNearObject = calcSideOfRay(nearObject->pos);
         for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
             auto& connectedNearObject = nearObject->connections[j].object;
+
+            // A connection with both ends on the same side of the ray cannot cross it
+            if (sideOfNearObject * calcSideOfRay(connectedNearObject->pos) > 0) {
+                continue;
+            }
             if (Math::crossing(nearObject->pos, connectedNearObject->pos, rayOrigin, rayEnd)) {
                 return true;
             }
@@ -509,72 +530,68 @@ __inline__ __device__ float SensorProcessor::calcFreeRayLength(SimulationData& d
     return solidDistance >= 0 ? min(maxLength, solidDistance) : maxLength;
 }
 
+// Distances relative to pos at which the ray enters and leaves the square containing pos, the squares are aligned to multiples of their size
+__inline__ __device__ float2 SensorProcessor::calcRayRangeInSquare(float2 const& pos, float2 const& direction, int squareSize)
+{
+    auto size = toFloat(squareSize);
+
+    auto enter = -2.0f * size;
+    auto leave = 2.0f * size;
+    auto clip = [&](float position, float directionComponent) {
+        if (fabsf(directionComponent) > NEAR_ZERO) {
+            auto squareStart = floorf(position / size) * size;
+            auto invDirectionComponent = 1.0f / directionComponent;
+            auto t1 = (squareStart - position) * invDirectionComponent;
+            auto t2 = (squareStart + size - position) * invDirectionComponent;
+            enter = max(enter, min(t1, t2));
+            leave = min(leave, max(t1, t2));
+        }
+    };
+    clip(pos.x, direction.x);
+    clip(pos.y, direction.y);
+    return {enter, leave};
+}
+
+// Checks the positions around the part of the ray between the distances range.x and range.y relative to pos, the part must lie in the tile of pos
+__inline__ __device__ bool SensorProcessor::isSolidNearSegment(SimulationData& data, float2 const& pos, float2 const& direction, float2 const& range)
+{
+    if (!data.barrierGrid.hasSolidNearBlockOf(pos)) {
+        return false;
+    }
+    auto start = pos + direction * range.x;
+    auto end = pos + direction * range.y;
+    int2 minPos{floorInt(min(start.x, end.x) - SolidHitRadius), floorInt(min(start.y, end.y) - SolidHitRadius)};
+    int2 maxPos{floorInt(max(start.x, end.x) + SolidHitRadius), floorInt(max(start.y, end.y) + SolidHitRadius)};
+    return data.barrierGrid.hasSolid(minPos, maxPos);
+}
+
 // Solids behind the ray origin are ignored, otherwise a solid touching the sensor would block every ray
 __inline__ __device__ bool SensorProcessor::isSolidNearPosition(SimulationData& data, float2 const& pos, float2 const& direction, float distance)
 {
-    auto records = data.objectMap.getRecords();
+    auto records = data.objectGrid.getRecords();
     int2 const minCell{floorInt(pos.x - SolidHitRadius), floorInt(pos.y - SolidHitRadius)};
     int2 const maxCell{floorInt(pos.x + SolidHitRadius), floorInt(pos.y + SolidHitRadius)};
+    if (!data.barrierGrid.hasSolid(minCell, maxCell)) {
+        return false;
+    }
     for (int cellY = minCell.y; cellY <= maxCell.y; ++cellY) {
         for (int cellX = minCell.x; cellX <= maxCell.x; ++cellX) {
             int2 cell{cellX, cellY};
-            data.objectMap.correctPosition(cell);
-            auto index = data.objectMap.getFirstIndex(cell);
+            data.world.correctPosition(cell);
+            if (!data.barrierGrid.hasSolid(cell)) {
+                continue;
+            }
+            auto index = data.objectGrid.getFirstIndex(cell);
             for (int level = 0; level < 10 && index >= 0; ++level) {
                 auto const& record = records[index];
                 if (record.type == ObjectType_Solid) {
                     auto delta = record.self->pos - pos;
-                    data.objectMap.correctDirection(delta);
+                    data.world.correctDirection(delta);
                     if (delta.x * delta.x + delta.y * delta.y <= SolidHitRadius * SolidHitRadius && Math::dot(delta, direction) + distance >= 0.0f) {
                         return true;
                     }
                 }
                 index = record.nextObjectIndex;
-            }
-        }
-    }
-    return false;
-}
-
-// Distances relative to the scan position at which the ray enters and leaves the density map slot of the scan position
-__inline__ __device__ float2 SensorProcessor::calcRayRangeInSlot(float2 const& scanPos, float2 const& direction)
-{
-    auto slotSize = toFloat(DensityMap::SlotSize);
-
-    auto enter = -2.0f * slotSize;
-    auto leave = 2.0f * slotSize;
-    auto clip = [&](float position, float directionComponent) {
-        if (fabsf(directionComponent) > NEAR_ZERO) {
-            auto slotStart = floorf(position / slotSize) * slotSize;
-            auto invDirectionComponent = 1.0f / directionComponent;
-            auto t1 = (slotStart - position) * invDirectionComponent;
-            auto t2 = (slotStart + slotSize - position) * invDirectionComponent;
-            enter = max(enter, min(t1, t2));
-            leave = min(leave, max(t1, t2));
-        }
-    };
-    clip(scanPos.x, direction.x);
-    clip(scanPos.y, direction.y);
-    return {enter, leave};
-}
-
-// The density map slots that are touched by the part of the ray inside a slot, including the margin for the hit radius
-__inline__ __device__ bool SensorProcessor::mayContainSolid(SimulationData& data, float2 const& scanPos, float2 const& direction, float2 const& range)
-{
-    auto const& densityMap = data.preprocessedSimulationData.densityMap;
-    auto slotSize = toFloat(DensityMap::SlotSize);
-
-    auto start = scanPos + direction * range.x;
-    auto end = scanPos + direction * range.y;
-    auto minSlotX = floorInt((min(start.x, end.x) - SolidHitRadius) / slotSize);
-    auto maxSlotX = floorInt((max(start.x, end.x) + SolidHitRadius) / slotSize);
-    auto minSlotY = floorInt((min(start.y, end.y) - SolidHitRadius) / slotSize);
-    auto maxSlotY = floorInt((max(start.y, end.y) + SolidHitRadius) / slotSize);
-    for (int slotY = minSlotY; slotY <= maxSlotY; ++slotY) {
-        for (int slotX = minSlotX; slotX <= maxSlotX; ++slotX) {
-            auto slotCenter = data.objectMap.getCorrectedPosition({(toFloat(slotX) + 0.5f) * slotSize, (toFloat(slotY) + 0.5f) * slotSize});
-            if (densityMap.getSolidDensity(slotCenter) > 0) {
-                return true;
             }
         }
     }
@@ -590,9 +607,7 @@ __inline__ __device__ float SensorProcessor::findSolidInSegment(
     float endDistance,
     int numRefinements)
 {
-    auto isHit = [&](float distance) {
-        return isSolidNearPosition(data, data.objectMap.getCorrectedPosition(origin + direction * distance), direction, distance);
-    };
+    auto isHit = [&](float distance) { return isSolidNearPosition(data, data.world.getCorrectedPosition(origin + direction * distance), direction, distance); };
 
     for (float distance = startDistance; distance <= endDistance; distance += SolidScanStep) {
         if (!isHit(distance)) {
@@ -617,7 +632,8 @@ __inline__ __device__ float SensorProcessor::findSolidInSegment(
     return -1.0f;
 }
 
-// The ray is followed from density map slot to slot, only slots with solids in reach of the ray are examined in detail
+// The ray crosses blocks without solids in one step and is followed tile by tile through the other blocks.
+// Only tiles with solids in reach of the ray are examined in detail.
 __inline__ __device__ float SensorProcessor::findSolidAlongRay(
     SimulationData& data,
     float2 const& origin,
@@ -625,30 +641,43 @@ __inline__ __device__ float SensorProcessor::findSolidAlongRay(
     float startRadius,
     float endRadius,
     float seedDistance,
-    int numRefinements)
+    int numRefinements,
+    uint64_t const* bestMatch)
 {
     auto direction = Math::unitVectorOfAngle(angle);
 
     auto distance = seedDistance;
     while (distance <= endRadius) {
-        auto scanPos = data.objectMap.getCorrectedPosition(origin + direction * distance);
-        auto range = calcRayRangeInSlot(scanPos, direction);
-        if (mayContainSolid(data, scanPos, direction, range)) {
+        auto scanPos = data.world.getCorrectedPosition(origin + direction * distance);
+        if (!data.barrierGrid.hasSolidNearBlockOf(scanPos)) {
+            distance += max(calcRayRangeInSquare(scanPos, direction, OccupancyGrid::BlockSize).y, 0.0f) + SquareTransitionEpsilon;
+            continue;
+        }
+        auto range = calcRayRangeInSquare(scanPos, direction, OccupancyGrid::TileSize);
+        auto segmentStart = distance + range.x - SolidHitRadius;
+
+        // A found solid lies at most one scan step before the examined segment
+        if (bestMatch != nullptr && isBeyondBestMatch(bestMatch, segmentStart - SolidScanStep)) {
+            return -1.0f;
+        }
+        if (isSolidNearSegment(data, scanPos, direction, range)) {
             auto solidDistance = findSolidInSegment(
-                data,
-                origin,
-                direction,
-                max(seedDistance, distance + range.x - SolidHitRadius),
-                min(endRadius, distance + range.y + SolidHitRadius),
-                numRefinements);
+                data, origin, direction, max(seedDistance, segmentStart), min(endRadius, distance + range.y + SolidHitRadius), numRefinements);
             if (solidDistance >= 0) {
                 // A solid closer than the minimum range blocks the ray
                 return solidDistance >= startRadius ? solidDistance : -1.0f;
             }
         }
-        distance += max(range.y, 0.0f) + SlotTransitionEpsilon;
+        distance += max(range.y, 0.0f) + SquareTransitionEpsilon;
     }
     return -1.0f;
+}
+
+// The best match is the minimum of all rays, so a ray that is already further away than the best match cannot improve it
+__inline__ __device__ bool SensorProcessor::isBeyondBestMatch(uint64_t const* bestMatch, float distance)
+{
+    auto bestDistanceEncoded = *reinterpret_cast<volatile uint64_t const*>(bestMatch) >> 48;
+    return distance * DistanceScale >= toFloat(bestDistanceEncoded + 1);
 }
 
 __inline__ __device__ uint64_t SensorProcessor::pack(float distance, float angle, float density, uint16_t misc)

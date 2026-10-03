@@ -145,7 +145,7 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
                 auto connectedObject = object->connections[i].object;
                 if (isSelected(connectedObject, includeClusters)) {
                     auto delta = connectedObject->pos - object->pos;
-                    data.objectMap.correctDirection(delta);
+                    data.world.correctDirection(delta);
                     object->connections[i].distance = Math::length(delta);
                 }
             }
@@ -156,11 +156,11 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
                     auto connectedObject = object->connections[i].object;
                     if (isSelected(connectedObject, includeClusters) && isSelected(prevConnectedObject, includeClusters)) {
                         auto prevDisplacement = prevConnectedObject->pos - object->pos;
-                        data.objectMap.correctDirection(prevDisplacement);
+                        data.world.correctDirection(prevDisplacement);
                         auto prevAngle = Math::angleOfVector(prevDisplacement);
 
                         auto displacement = connectedObject->pos - object->pos;
-                        data.objectMap.correctDirection(displacement);
+                        data.world.correctDirection(displacement);
                         auto angle = Math::angleOfVector(displacement);
 
                         auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
@@ -187,7 +187,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool includeCl
         if (!isSelected(object, includeClusters)) {
             continue;
         }
-        data.objectMap.executeForEach(object->pos, 1.3f, object->detached(), [&](auto const& otherObject) {
+        data.objectGrid.executeForEach(object->pos, 1.3f, object->detached(), [&](auto const& otherObject) {
             if (!otherObject || otherObject == object) {
                 return;
             }
@@ -199,7 +199,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool includeCl
             }
 
             auto posDelta = object->pos - otherObject->pos;
-            data.objectMap.correctDirection(posDelta);
+            data.world.correctDirection(posDelta);
 
             for (int i = 0; i < object->numConnections; ++i) {
                 auto const& connectedObject = object->connections[i].object;
@@ -222,7 +222,7 @@ __global__ void cudaPrepareMapForReconnection(SimulationData data)
 
 __global__ void cudaUpdateMapForReconnection(SimulationData data)
 {
-    ObjectProcessor::updateMap(data);
+    ObjectProcessor::updateGrids(data);
 }
 
 namespace
@@ -245,7 +245,7 @@ __global__ void cudaAccumulateSelectionAngles(SimulationData data, float4* angle
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            accumulateAngles(object->pos, data.worldSize, angleSums);
+            accumulateAngles(object->pos, data.world.getSize(), angleSums);
         }
     }
 
@@ -253,7 +253,7 @@ __global__ void cudaAccumulateSelectionAngles(SimulationData data, float4* angle
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
-            accumulateAngles(particle->pos, data.worldSize, angleSums);
+            accumulateAngles(particle->pos, data.world.getSize(), angleSums);
         }
     }
 }
@@ -264,7 +264,7 @@ __global__ void cudaInitSelectionAnchorKeys(SimulationData data, float2 refPos)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            auto distance = data.objectMap.getDistance(object->pos, refPos);
+            auto distance = data.world.getDistance(object->pos, refPos);
             object->tempValue1.as_uint64 = (static_cast<uint64_t>(__float_as_uint(distance)) << 32) | static_cast<uint64_t>(index);
         }
     }
@@ -300,7 +300,7 @@ __global__ void cudaPlaceSelectionAnchors(SimulationData data, float2 refPos)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected && static_cast<uint32_t>(object->tempValue1.as_uint64) == static_cast<uint32_t>(index)) {
-            object->tempValue2.as_float2 = object->pos + data.objectMap.getCorrectionIncrement(refPos, object->pos);
+            object->tempValue2.as_float2 = object->pos + data.world.getCorrectionIncrement(refPos, object->pos);
             object->tempValue1.as_uint64 = KeyFlattened;
         }
     }
@@ -337,7 +337,7 @@ __global__ void cudaPropagateFlattenedSelectionPositions(SimulationData data, in
                     continue;
                 }
                 auto delta = connectedObject->pos - current->pos;
-                data.objectMap.correctDirection(delta);
+                data.world.correctDirection(delta);
                 connectedObject->tempValue2.as_float2 = currentPos + delta;
                 __threadfence();
                 alienAtomicExch64(&connectedObject->tempValue1.as_uint64, KeyFlattened);
@@ -355,9 +355,9 @@ __global__ void cudaPropagateFlattenedSelectionPositions(SimulationData data, in
 
 namespace
 {
-    __inline__ __device__ float2 getFlattenedPos(Energy* particle, float2 const& refPos, BaseMap const& map)
+    __inline__ __device__ float2 getFlattenedPos(Energy* particle, float2 const& refPos, WorldGeometry const& world)
     {
-        return particle->pos + map.getCorrectionIncrement(refPos, particle->pos);
+        return particle->pos + world.getCorrectionIncrement(refPos, particle->pos);
     }
 }
 
@@ -377,7 +377,7 @@ __global__ void cudaCalcFlattenedSelectionCenter(SimulationData data, float2 ref
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
-            auto pos = getFlattenedPos(particle, refPos, data.objectMap);
+            auto pos = getFlattenedPos(particle, refPos, data.world);
             atomicAdd(&center->x, pos.x);
             atomicAdd(&center->y, pos.y);
             atomicAdd(numEntities, 1);
@@ -402,7 +402,7 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
 
                 if (updateData.angleDelta != 0) {
                     object->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
-                    data.objectMap.correctPosition(object->pos);
+                    data.world.correctPosition(object->pos);
                 }
 
                 if (updateData.angularVel != 0) {
@@ -421,9 +421,9 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.entities.energies.at(index);
             if (particle->selected != 0) {
-                auto relPos = getFlattenedPos(particle, refPos, data.objectMap) - center;
+                auto relPos = getFlattenedPos(particle, refPos, data.world) - center;
                 particle->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
-                data.objectMap.correctPosition(particle->pos);
+                data.world.correctPosition(particle->pos);
             }
         }
     }
@@ -464,7 +464,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, updateData.considerClusters)) {
             object->pos = object->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
-            data.objectMap.correctPosition(object->pos);
+            data.world.correctPosition(object->pos);
             object->vel = float2{updateData.velX, updateData.velY};
         }
     }
@@ -474,7 +474,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
             particle->pos = particle->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
-            data.energyMap.correctPosition(particle->pos);
+            data.world.correctPosition(particle->pos);
             particle->vel = float2{updateData.velX, updateData.velY};
         }
     }
@@ -546,7 +546,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
                 auto const& connectedObject = object->connections[i].object;
 
                 if (1 != connectedObject->selected
-                    && data.objectMap.getDistance(object->pos, connectedObject->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
+                    && data.world.getDistance(object->pos, connectedObject->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
                     ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
                     atomicExch(result, 1);
                 }
@@ -564,7 +564,7 @@ __global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart,
         if (onlySelected && !isSelected(object, includeClusters)) {
             continue;
         }
-        auto const cutStartNearObject = cutStart + data.objectMap.getCorrectionIncrement(object->pos, cutStart);
+        auto const cutStartNearObject = cutStart + data.world.getCorrectionIncrement(object->pos, cutStart);
         auto const cutEndNearObject = cutStartNearObject + (cutEnd - cutStart);
 
         for (int i = 0; i < object->numConnections; ++i) {
@@ -576,7 +576,7 @@ __global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart,
                 continue;
             }
             auto connectedPos = connectedObject->pos - object->pos;
-            data.objectMap.correctDirection(connectedPos);
+            data.world.correctDirection(connectedPos);
             connectedPos = connectedPos + object->pos;
             if (Math::crossing(object->pos, connectedPos, cutStartNearObject, cutEndNearObject)) {
                 ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
@@ -611,7 +611,7 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
             auto pos = object->pos;
-            pos += data.objectMap.getCorrectionIncrement(applyData.startPos, pos);
+            pos += data.world.getCorrectionIncrement(applyData.startPos, pos);
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
             if (distanceToSegment < applyData.radius && !object->isStatic()) {
                 auto weightedForce = applyData.force;
@@ -718,12 +718,12 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, float2 re
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
-            result.collectParticle(particle, getFlattenedPos(particle, refPos, data.objectMap));
+            result.collectParticle(particle, getFlattenedPos(particle, refPos, data.world));
         }
     }
 }
 
-__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map)
+__global__ void cudaFinalizeSelectionResult(SelectionResult result, WorldGeometry world)
 {
-    result.finalize(map, !cudaSimulationParameters.borderlessRendering.value);
+    result.finalize(world, !cudaSimulationParameters.borderlessRendering.value);
 }
