@@ -607,7 +607,7 @@ bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string&
 {
     auto width = std::min(parameters._width != 0.0f ? parameters._width : scaleInverse(ImGui::GetContentRegionAvail().x), MaxFilterWidth);
     auto result = AlienGui::InputText(
-        AlienGui::InputTextParameters().hint("Filter (case insensitive)").bold(!filter.empty()).textWidth(0).width(width - FilterClearButtonWidth), filter);
+        AlienGui::InputTextParameters().hint(parameters._hint).bold(!filter.empty()).textWidth(0).width(width - FilterClearButtonWidth), filter);
     if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         filter.clear();
         result = true;
@@ -1577,6 +1577,9 @@ void AlienGui::MenuItem(MenuItemParameters const& parameters, std::function<void
                     static std::vector<std::string> const keyMap = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H",
                                                                     "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
                     keyStringParts.emplace_back(keyMap.at(*parameters._key - ImGuiKey_0));
+                }
+                if (*parameters._key >= ImGuiKey_F1 && *parameters._key <= ImGuiKey_F12) {
+                    keyStringParts.emplace_back("F" + std::to_string(*parameters._key - ImGuiKey_F1 + 1));
                 }
                 if (*parameters._key == ImGuiKey_Space) {
                     keyStringParts.emplace_back("Space");

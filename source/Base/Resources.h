@@ -14,6 +14,7 @@ namespace Const
     extern std::filesystem::path const ResourcePath;
     extern std::filesystem::path const AutosavePath;
     extern std::filesystem::path const ImagesPath;
+    extern std::filesystem::path const DocsPath;
 
     extern std::filesystem::path const LogFilename;
     extern std::filesystem::path const ProfileFilename;

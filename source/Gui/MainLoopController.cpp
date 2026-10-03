@@ -30,6 +30,7 @@
 #include "ConsoleModeController.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
+#include "DocumentationWindow.h"
 #include "EditorController.h"
 #include "EvolutionDashboardWindow.h"
 #include "ExitDialog.h"
@@ -37,7 +38,6 @@
 #include "FpsController.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
-#include "GettingStartedWindow.h"
 #include "ImageToPatternDialog.h"
 #include "InspectionController.h"
 #include "LogWindow.h"
@@ -645,8 +645,8 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_LIFE_RING "  Help ", _helpMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("About"), [&] { AboutDialog::get().open(); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Getting started").selected(GettingStartedWindow::get().isOn()).closeMenuWhenItemClicked(false),
-        [&] { GettingStartedWindow::get().setOn(!GettingStartedWindow::get().isOn()); });
+        AlienGui::MenuItemParameters().name("Documentation").key(ImGuiKey_F1).selected(DocumentationWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { DocumentationWindow::get().setOn(!DocumentationWindow::get().isOn()); });
     AlienGui::EndMenu();
     AlienGui::EndMenuBar();
 

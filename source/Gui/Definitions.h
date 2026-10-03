@@ -45,7 +45,7 @@ using GuiLogger = std::shared_ptr<_GuiLogger>;
 
 class UiController;
 
-class GettingStartedWindow;
+class DocumentationWindow;
 
 class DisplaySettingsDialog;
 
