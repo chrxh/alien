@@ -64,6 +64,9 @@
       "name": "cli11"
     },
     {
+      "name": "md4c"
+    },
+    {
       "name": "imgui",
       "features": [
         "glfw-binding",

@@ -249,6 +249,7 @@ public:
     struct InputFilterParameters
     {
         MEMBER(InputFilterParameters, float, width, 0);
+        MEMBER(InputFilterParameters, std::string, hint, "Filter (case insensitive)");
     };
     static bool InputFilter(InputFilterParameters const& parameters, std::string& filter);
 
