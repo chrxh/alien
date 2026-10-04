@@ -36,28 +36,30 @@ and bodies, code comments, identifiers. Keep commit messages short and imperativ
 
 ## Build (Windows)
 
-Build with the repo-root script, not the default Visual Studio generator:
+Build with the repo-root script, not the default Visual Studio generator. Agents
+always pass `agent`:
 
 ```
-build-windows-ninja.bat          # Release (default)
-build-windows-ninja.bat Debug    # Debug
+build-windows-ninja.bat agent          # Release (default)
+build-windows-ninja.bat agent Debug    # Debug
 ```
 
 It sets up MSVC via vcvars64 and uses the "Ninja Multi-Config" CMake preset,
 compiling the CUDA translation units in parallel.
 
-There are two separate build trees, and which one the script uses is decided
-automatically:
+There are two separate build trees:
 
 | Caller | Preset | Output |
 | --- | --- | --- |
 | Visual Studio, or the script run by hand | `ninja` | `build-ninja\Release\` |
-| Claude Code and other agents (`CLAUDECODE` is set) | `ninja-agent` | `build-agent\Release\` |
+| Agents (`agent` argument) | `ninja-agent` | `build-agent\Release\` |
 
 Visual Studio configures the `ninja` preset into `build-ninja` and caches its model
 of that tree under `.vs`. An outside build regenerates the tree, invalidates that
 cache and breaks the next build in the IDE until `.vs` is deleted — hence the second
-tree. Pass `agent` or `ide` to the script to select one explicitly.
+tree. Without an argument the script uses the IDE tree. Only Claude Code (`CLAUDECODE`
+is set) and `ALIEN_BUILD_TREE=agent` switch to the agent tree automatically, so every
+other agent needs the explicit `agent` argument.
 
 Executables (`alien.exe`, `cli.exe`, `EngineTests.exe`) land under the `Release\`
 subdirectory of the respective tree — not the older `build\Release\`.
@@ -70,6 +72,7 @@ stale kernels linger and weak tests can pass against old code.
 Executables under `build-agent\Release\` (`build-ninja\Release\` for a manual build):
 
 ```
+BaseTests.exe              (<1s)
 DataTests.exe              (<1s)
 EngineInterfaceTests.exe   (<1s)
 NetworkTests.exe           (<1s)
@@ -81,6 +84,21 @@ GUI-only changes under `source/Gui/` that do not touch engine, network, persiste
 CLI, or shared code do not strictly need tests, but still build. For a targeted CUDA
 failure: `EngineTests.exe -d --gtest_filter=Suite.Test` (debug mode is much slower —
 use it for single tests only, not the full suite).
+
+## Build and tests on Linux
+
+On Linux, for example in the GitHub Copilot cloud agent environment that
+`.github/workflows/copilot-setup-steps.yml` prepares, the build tree is `build` and
+the executables land directly in it:
+
+```
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+cmake --build build -j32
+cd build && ./BaseTests && ./DataTests && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests
+```
+
+The setup workflow already runs the configure step. The GUI (`./alien`) needs an X11
+display and cannot run in a headless environment.
 
 ## Formatting
 
@@ -101,7 +119,8 @@ builder-chain assignments beyond 160, and that is accepted.
 ## Layout
 
 ```
-source/Base/                 Common utilities, math, logging
+source/Base/                 Common utilities, math, logging, Markdown parsing
+source/BaseTests/            Base unit tests
 source/Cli/                  Command-line interface
 source/Data/                 Descriptions, genomes, simulation parameters and their services
 source/DataTests/            Data unit tests
