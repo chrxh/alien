@@ -4,6 +4,7 @@ add_library(EngineImpl
     DataAccessKernelsService.cuh
     Definitions.h
     DescConverterService.cpp
+    Domain.cuh
     DescConverterService.h
     EditKernelsService.cu
     EditKernelsService.cuh

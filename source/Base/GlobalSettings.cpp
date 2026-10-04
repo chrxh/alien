@@ -210,6 +210,8 @@ struct GlobalSettingsImpl
     boost::property_tree::ptree _tree;
     bool _debugMode = false;
     bool _interop = false;
+    int _numDomains = 1;
+    std::vector<int> _domainDevices;
 };
 
 
@@ -237,6 +239,26 @@ bool GlobalSettings::isInterop() const
 void GlobalSettings::setInterop(bool value) const
 {
     _impl->_interop = value;
+}
+
+int GlobalSettings::getNumDomains() const
+{
+    return _impl->_numDomains;
+}
+
+void GlobalSettings::setNumDomains(int value) const
+{
+    _impl->_numDomains = value < 1 ? 1 : value;
+}
+
+std::vector<int> GlobalSettings::getDomainDevices() const
+{
+    return _impl->_domainDevices;
+}
+
+void GlobalSettings::setDomainDevices(std::vector<int> const& value) const
+{
+    _impl->_domainDevices = value;
 }
 
 bool GlobalSettings::getValue(std::string const& key, bool defaultValue)

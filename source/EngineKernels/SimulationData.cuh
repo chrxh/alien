@@ -10,6 +10,7 @@
 
 #include "BarrierGrid.cuh"
 #include "CudaNumberGenerator.cuh"
+#include "DomainContext.cuh"
 #include "EnergyParticleGrid.cuh"
 #include "ObjectGrid.cuh"
 #include "Operations.cuh"
@@ -18,6 +19,8 @@
 
 struct SimulationData
 {
+    DomainContext domain;
+
     // World and grids
     uint64_t* timestep;
     WorldGeometry world;
