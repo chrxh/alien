@@ -215,7 +215,7 @@ PictureData SimulationView::savePicture(IntVector2D const& resolution)
     _renderPipeline->resize(resolution);
     context.submitAndWait([&](VkCommandBuffer commandBuffer) {
         auto& image = _renderPipeline->execute(commandBuffer, target);
-        VulkanContext::transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);
         VkBufferImageCopy region{
             .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
             .imageExtent = {static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y), 1},

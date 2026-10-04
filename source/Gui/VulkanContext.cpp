@@ -27,6 +27,8 @@ namespace
     auto constexpr ApiVersion = VK_API_VERSION_1_3;
     auto constexpr ValidationLayerName = "VK_LAYER_KHRONOS_validation";
     auto constexpr FrameDescriptorPoolSize = 512;
+    auto constexpr ImageWriteAccesses =
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT;
 
 #if defined(_WIN32)
     auto constexpr ExternalMemoryHandleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
@@ -138,11 +140,11 @@ VulkanImage const& VulkanContext::getDummyImage()
     if (!_dummyImage) {
         auto image = createImage({1, 1}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
         submitAndWait([&image](VkCommandBuffer commandBuffer) {
-            transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            useImage(commandBuffer, image, ImageUsage::TransferDestination);
             VkClearColorValue black{.float32 = {0.0f, 0.0f, 0.0f, 1.0f}};
             VkImageSubresourceRange range{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
             vkCmdClearColorImage(commandBuffer, image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &black, 1, &range);
-            transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            useImage(commandBuffer, image, ImageUsage::ShaderRead);
         });
         _dummyImage = image;
     }
@@ -303,13 +305,13 @@ VulkanImage VulkanContext::createSampledImage(uint8_t const* pixels, IntVector2D
 
     auto result = createImage(size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
     submitAndWait([&](VkCommandBuffer commandBuffer) {
-        transitionImage(commandBuffer, result, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        useImage(commandBuffer, result, ImageUsage::TransferDestination);
         VkBufferImageCopy region{
             .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
             .imageExtent = {static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y), 1},
         };
         vkCmdCopyBufferToImage(commandBuffer, stagingBuffer.buffer, result.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-        transitionImage(commandBuffer, result, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        useImage(commandBuffer, result, ImageUsage::ShaderRead);
     });
     destroyBuffer(stagingBuffer);
     return result;
@@ -325,46 +327,84 @@ void VulkanContext::destroyImage(VulkanImage& image)
     image = VulkanImage();
 }
 
-void VulkanContext::transitionImage(VkCommandBuffer commandBuffer, VulkanImage& image, VkImageLayout newLayout)
+namespace
 {
-    // A full barrier also orders consecutive render passes into the same attachments
-    VkImageMemoryBarrier2 barrier{
+    struct ImageAccess
+    {
+        VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+        VkPipelineStageFlags2 stages = VK_PIPELINE_STAGE_2_NONE;
+        VkAccessFlags2 accesses = VK_ACCESS_2_NONE;
+    };
+
+    ImageAccess getImageAccess(ImageUsage usage)
+    {
+        switch (usage) {
+        case ImageUsage::ColorAttachment:
+            return {
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT};
+        case ImageUsage::DepthAttachment:
+            return {
+                VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+                VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT};
+        case ImageUsage::ShaderRead:
+            return {VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT};
+        case ImageUsage::TransferSource:
+            return {VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT};
+        case ImageUsage::TransferDestination:
+            return {VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT};
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
+}
+
+VulkanImageBarriers& VulkanImageBarriers::add(VulkanImage& image, ImageUsage usage)
+{
+    auto access = getImageAccess(usage);
+    auto pendingWrites = image.lastAccesses & ImageWriteAccesses;
+    if (image.layout == access.layout && pendingWrites == 0 && (access.accesses & ImageWriteAccesses) == 0) {
+        image.lastStages |= access.stages;
+        image.lastAccesses |= access.accesses;
+        return *this;
+    }
+    _barriers.emplace_back(VkImageMemoryBarrier2{
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-        .srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-        .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-        .dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
+        .srcStageMask = image.lastStages,
+        .srcAccessMask = pendingWrites,
+        .dstStageMask = access.stages,
+        .dstAccessMask = access.accesses,
         .oldLayout = image.layout,
-        .newLayout = newLayout,
+        .newLayout = access.layout,
         .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .image = image.image,
         .subresourceRange = {image.aspect, 0, image.mipLevels, 0, 1},
-    };
-    VkDependencyInfo dependencyInfo{
-        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .imageMemoryBarrierCount = 1,
-        .pImageMemoryBarriers = &barrier,
-    };
-    vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
-    image.layout = newLayout;
+    });
+    image.layout = access.layout;
+    image.lastStages = access.stages;
+    image.lastAccesses = access.accesses;
+    return *this;
 }
 
-void VulkanContext::memoryBarrier(VkCommandBuffer commandBuffer)
+void VulkanImageBarriers::record(VkCommandBuffer commandBuffer)
 {
-    VkMemoryBarrier2 barrier{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
-        .srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-        .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-        .dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
-    };
+    if (_barriers.empty()) {
+        return;
+    }
     VkDependencyInfo dependencyInfo{
         .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .memoryBarrierCount = 1,
-        .pMemoryBarriers = &barrier,
+        .imageMemoryBarrierCount = static_cast<uint32_t>(_barriers.size()),
+        .pImageMemoryBarriers = _barriers.data(),
     };
     vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+    _barriers.clear();
+}
+
+void VulkanContext::useImage(VkCommandBuffer commandBuffer, VulkanImage& image, ImageUsage usage)
+{
+    VulkanImageBarriers().add(image, usage).record(commandBuffer);
 }
 
 void VulkanContext::submitAndWait(std::function<void(VkCommandBuffer)> const& recordFunc)

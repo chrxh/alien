@@ -180,7 +180,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     VulkanImage* sceneImage = nullptr;
     if (_sceneRenderFunc) {
         sceneImage = &(*_sceneRenderFunc)(_commandBuffer);
-        VulkanContext::transitionImage(_commandBuffer, *sceneImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        VulkanContext::useImage(_commandBuffer, *sceneImage, ImageUsage::ShaderRead);
     }
 
     auto transitionSwapchainImage = [&](VkImageLayout oldLayout,

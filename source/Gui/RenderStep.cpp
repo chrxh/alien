@@ -117,14 +117,14 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
         }
     }
 
-    // Layout transitions are not allowed during rendering
+    // Barriers are not allowed during rendering
     auto commandBuffer = parameters._renderInfo.commandBuffer;
-    for (auto const& texture : sampledTextures) {
-        VulkanContext::transitionImage(commandBuffer, texture->color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    }
     auto const& target = parameters._target;
-    VulkanContext::transitionImage(commandBuffer, target->color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    VulkanContext::transitionImage(commandBuffer, target->depth, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+    VulkanImageBarriers barriers;
+    for (auto const& texture : sampledTextures) {
+        barriers.add(texture->color, ImageUsage::ShaderRead);
+    }
+    barriers.add(target->color, ImageUsage::ColorAttachment).add(target->depth, ImageUsage::DepthAttachment).record(commandBuffer);
 
     auto loadOp = parameters._clearBackground ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     VkRenderingAttachmentInfo colorAttachment{

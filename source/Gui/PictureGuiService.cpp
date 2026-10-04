@@ -77,7 +77,7 @@ namespace
         drawData.AddDrawList(drawList);
 
         context.submitAndWait([&](VkCommandBuffer commandBuffer) {
-            VulkanContext::transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            VulkanContext::useImage(commandBuffer, image, ImageUsage::ColorAttachment);
             VkRenderingAttachmentInfo colorAttachment{
                 .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
                 .imageView = image.view,
@@ -97,7 +97,7 @@ namespace
             ImGui_ImplVulkan_RenderDrawData(&drawData, commandBuffer);
             vkCmdEndRendering(commandBuffer);
 
-            VulkanContext::transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+            VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);
             VkBufferImageCopy region{
                 .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
                 .imageExtent = {static_cast<uint32_t>(renderResolution.x), static_cast<uint32_t>(renderResolution.y), 1},
