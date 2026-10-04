@@ -207,7 +207,10 @@ VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags u
         .allocationSize = requirements.size,
         .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, properties),
     };
-    checkVkResult(vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory), "vkAllocateMemory");
+    if (auto allocateResult = vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory); allocateResult != VK_SUCCESS) {
+        vkDestroyBuffer(_device, result.buffer, nullptr);
+        checkVkResult(allocateResult, "vkAllocateMemory");
+    }
     result.allocationSize = requirements.size;
     checkVkResult(vkBindBufferMemory(_device, result.buffer, result.memory, 0), "vkBindBufferMemory");
 
@@ -283,7 +286,10 @@ VulkanImage VulkanContext::createImage(IntVector2D const& size, VkFormat format,
         .allocationSize = requirements.size,
         .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
     };
-    checkVkResult(vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory), "vkAllocateMemory");
+    if (auto allocateResult = vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory); allocateResult != VK_SUCCESS) {
+        vkDestroyImage(_device, result.image, nullptr);
+        checkVkResult(allocateResult, "vkAllocateMemory");
+    }
     checkVkResult(vkBindImageMemory(_device, result.image, result.memory, 0), "vkBindImageMemory");
 
     VkImageViewCreateInfo viewInfo{

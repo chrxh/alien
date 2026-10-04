@@ -38,9 +38,14 @@ _TextureTarget::~_TextureTarget()
 
 void _TextureTarget::resize(IntVector2D const& size, VkFormat colorFormat)
 {
+    // A used depth image is recreated right away, so that a lack of memory shows up before any commands are recorded
+    auto withDepth = _depth.image != VK_NULL_HANDLE;
     destroyImages();
     color =
         VulkanContext::get().createImage(size, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+    if (withDepth) {
+        getDepth();
+    }
     initialized = true;
 }
 

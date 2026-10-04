@@ -48,6 +48,8 @@ public:
 private:
     void setupRenderPipeline();
 
+    PictureData renderPicture(IntVector2D const& resolution);
+
     void markReferenceDomain();
 
     // Widgets

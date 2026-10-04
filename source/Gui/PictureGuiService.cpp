@@ -142,7 +142,7 @@ std::optional<std::string> PictureGuiService::createGenomePreviewJpg(std::vector
 
         auto picture = renderOffscreen(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor, PreviewPictureSupersampling);
         return encodeJpg(brighten(scale(picture, PreviewPictureResolution), PreviewPictureBrightness));
-    } catch (AlienException const& exception) {
+    } catch (std::exception const& exception) {
         log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
         return std::nullopt;
     }

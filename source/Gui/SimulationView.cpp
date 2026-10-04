@@ -179,11 +179,24 @@ void SimulationView::setMotionBlur(float value)
 
 PictureData SimulationView::savePicture(IntVector2D const& resolution)
 {
-    auto& context = VulkanContext::get();
-    auto maxTextureSize = toInt(context.getProperties().limits.maxImageDimension2D);
+    auto maxTextureSize = toInt(VulkanContext::get().getProperties().limits.maxImageDimension2D);
     if (resolution.x > maxTextureSize || resolution.y > maxTextureSize) {
         throw AlienException("The resolution must not exceed " + std::to_string(maxTextureSize) + " pixels per dimension on this GPU.");
     }
+
+    try {
+        return renderPicture(resolution);
+    } catch (AlienException const&) {
+        throw;
+    } catch (std::exception const& exception) {
+        throw AlienException(
+            std::string("The picture could not be rendered, possibly because the GPU memory does not suffice for this resolution. ") + exception.what());
+    }
+}
+
+PictureData SimulationView::renderPicture(IntVector2D const& resolution)
+{
+    auto& context = VulkanContext::get();
 
     // The rendering resources are shared with the frame that might still be in flight
     context.waitIdle();
