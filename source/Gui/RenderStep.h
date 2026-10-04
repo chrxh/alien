@@ -26,7 +26,7 @@ struct _TextureTarget
 
     void resize(IntVector2D const& size, VkFormat colorFormat);
 
-    // Created on first use since only a few render steps test depth
+    // Created on first use since only a few render steps test depth, afterwards it follows the size of the color image
     VulkanImage& getDepth();
 
     bool initialized = false;

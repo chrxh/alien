@@ -96,6 +96,8 @@ void _RenderPipeline::applyRequestedSize(bool withScreenTarget)
     CHECK(_requestedTextureSize.has_value());
 
     if (_textureSize != _requestedTextureSize) {
+        // A failed resize, e.g. due to a lack of memory, is repeated at the next execution
+        _textureSize.reset();
         for (auto const& textureTarget : _textureTargets) {
             textureTarget->resize(*_requestedTextureSize, IntermediateFormat);
         }
