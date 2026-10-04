@@ -84,6 +84,7 @@ CudaGraphConfig SimulationKernelsService::buildGraphConfig(
 {
     CudaGraphConfig config;
     config.domainIndex = data.domain.index;
+    config.isDecomposed = data.domain.numDomains > 1;
     config.timestepMod3 = toInt(timestep % 3);
     config.executeCellFunction = forceCellFunctionExecution ? true : timestep % TIMESTEPS_PER_CELL_FUNCTION == 0;
     config.hasLayers = settings.simulationParameters.numLayers > 0;
@@ -150,13 +151,24 @@ void SimulationKernelsService::launchTimestepKernels(
         launchKernel(KERNEL(cudaNextTimestep_cellType_attacker), LaunchConfig{numBlocks, 4}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_depot), LaunchConfig{numBlocks, 4}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_muscle), LaunchConfig{numBlocks, 8}, stream, data, statistics);
-        launchKernel(KERNEL(cudaNextTimestep_cellType_sensor), LaunchConfig{numBlocks, 64}, stream, data, statistics);
+        if (config.isDecomposed) {
+            launchKernel(KERNEL(cudaNextTimestep_cellType_sensor_decomposed), LaunchConfig{numBlocks, 64}, stream, data, statistics);
+            launchKernel(KERNEL(cudaNextTimestep_domain_requestSensorContinuations), LaunchConfig{numBlocks, 64}, stream, data);
+        } else {
+            launchKernel(KERNEL(cudaNextTimestep_cellType_sensor), LaunchConfig{numBlocks, 64}, stream, data, statistics);
+        }
         launchKernel(KERNEL(cudaNextTimestep_cellType_reconnector), LaunchConfig{numBlocks, 8}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_detonator), LaunchConfig{numBlocks, 64}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_digestor), LaunchConfig{numBlocks, 8}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_memory), LaunchConfig{numBlocks, 8}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_communicator), LaunchConfig{numBlocks, 64}, stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_void), LaunchConfig{numBlocks, 8}, stream, data, statistics);
+    }
+
+    // Received in the last sync round and processed here, since they need the filled grids
+    if (config.isDecomposed) {
+        launchKernel(KERNEL(cudaNextTimestep_domain_applyShockWaves), LaunchConfig{numBlocks, 64}, stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_domain_scanSensorRequests), LaunchConfig{numBlocks, 64}, stream, data);
     }
 
     if (considerInnerFriction) {

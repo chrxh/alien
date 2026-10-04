@@ -589,6 +589,7 @@ namespace
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
         particleTO.color = particle->color;
+        particleTO.ghost = particle->ghost;
     }
 
 }

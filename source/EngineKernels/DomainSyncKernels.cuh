@@ -29,10 +29,11 @@ __global__ void cudaDomainPack_genomeRequests(SimulationData data, DomainSyncDat
 __global__ void cudaDomainPack_requestedGenomes(SimulationData data, DomainSyncData syncData);
 __global__ void cudaDomainPack_transferredGenomes(SimulationData data, DomainSyncData syncData);
 __global__ void cudaDomainPack_ops(SimulationData data, DomainSyncData syncData);
+__global__ void cudaDomainPack_sensorScans(SimulationData data, DomainSyncData syncData);
 
 // Handing over the ownership once the messages are complete
 __global__ void cudaDomainCommit_objects(SimulationData data, uint8_t round);
-__global__ void cudaDomainCommit_particles(SimulationData data);
+__global__ void cudaDomainCommit_particles(SimulationData data, uint8_t round);
 __global__ void cudaDomainCommit_resetQueues(SimulationData data, DomainSyncData syncData);
 
 // Unpacking the message of another domain
@@ -41,17 +42,20 @@ __global__ void cudaDomainUnpack_genomes(SimulationData data, DomainSyncData syn
 __global__ void cudaDomainUnpack_genomeRequests(SimulationData data, DomainSyncData syncData, int sender);
 __global__ void cudaDomainUnpack_creatures(SimulationData data, DomainSyncData syncData, int sender);
 __global__ void cudaDomainUnpack_objects(SimulationData data, DomainSyncData syncData, int sender, uint8_t round);
-__global__ void cudaDomainUnpack_particles(SimulationData data, DomainSyncData syncData, int sender);
+__global__ void cudaDomainUnpack_particles(SimulationData data, DomainSyncData syncData, int sender, uint8_t round);
 __global__ void cudaDomainUnpack_resolveObjects(SimulationData data, DomainSyncData syncData, int sender);
 __global__ void cudaDomainUnpack_applyOps(SimulationData data, SimulationStatistics statistics, DomainSyncData syncData, int sender);
-__global__ void cudaDomainUnpack_applyShockWaves(SimulationData data, DomainSyncData syncData, int sender);
+__global__ void cudaDomainUnpack_sensorScanRequests(SimulationData data, DomainSyncData syncData, int sender);
+__global__ void cudaDomainUnpack_sensorScanResponses(SimulationData data, DomainSyncData syncData, int sender);
 
 // Finishing a sync round
 __global__ void cudaDomainSync_markStaleGhosts(SimulationData data, uint8_t round);
 __global__ void cudaDomainSync_removeConnectionsToRemovedGhosts(SimulationData data);
 __global__ void cudaDomainSync_deleteRemovedGhosts(SimulationData data);
+__global__ void cudaDomainSync_publishSensorScans(SimulationData data, DomainSyncData syncData);
+__global__ void cudaDomainSync_resetPendingSensorScans(SimulationData data);
 
 // Initial distribution after every domain received the whole world
 __global__ void cudaDomainDistribute_assignOwners(SimulationData data, uint8_t round);
 __global__ void cudaDomainDistribute_removeObjectsOutsideRoi(SimulationData data);
-__global__ void cudaDomainDistribute_removeForeignParticles(SimulationData data);
+__global__ void cudaDomainDistribute_assignParticleOwners(SimulationData data, uint8_t round);

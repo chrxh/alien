@@ -31,6 +31,14 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
     mutatedGenomes.init();
     energyParticlesNearBarriers.init();
     domainOps.init();
+    receivedShockWaves.init();
+    sensorContinuations.init();
+    sensorScanRequests.init();
+    receivedSensorScanRequests.init();
+    sensorScanResponses.init();
+    for (auto& scans : pendingSensorScans) {
+        scans.init();
+    }
 }
 
 namespace
@@ -113,6 +121,14 @@ void SimulationData::free()
     mutatedGenomes.free();
     energyParticlesNearBarriers.free();
     domainOps.free();
+    receivedShockWaves.free();
+    sensorContinuations.free();
+    sensorScanRequests.free();
+    receivedSensorScanRequests.free();
+    sensorScanResponses.free();
+    for (auto& scans : pendingSensorScans) {
+        scans.free();
+    }
 }
 
 void SimulationData::resizeAuxiliaryData()

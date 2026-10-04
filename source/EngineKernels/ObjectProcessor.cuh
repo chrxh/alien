@@ -562,7 +562,7 @@ __inline__ __device__ void ObjectProcessor::tearOverstretchedConnections(Simulat
             auto connectedObject = object->connections[i].object;
 
             // A connection to a ghost is only seen from this side
-            if (connectedObject < object && !connectedObject->isGhost()) {
+            if (connectedObject < object && (!data.domain.isDecomposed() || !connectedObject->isGhost())) {
                 continue;
             }
             auto displacement = connectedObject->pos - object->pos;

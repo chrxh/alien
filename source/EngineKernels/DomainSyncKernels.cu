@@ -4,6 +4,7 @@
 #include "DetonatorProcessor.cuh"
 #include "DomainOpProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
+#include "SensorProcessor.cuh"
 
 namespace
 {
@@ -396,21 +397,32 @@ __global__ void cudaDomainRoi_dilate(SimulationData data, DomainSyncData syncDat
 __global__ void cudaDomainMaps_clear(DomainSyncData syncData)
 {
     syncData.objectMap.clear_system();
+    syncData.particleMap.clear_system();
     syncData.creatureMap.clear_system();
     syncData.genomeMap.clear_system();
 }
 
 __global__ void cudaDomainMaps_insert(SimulationData data, DomainSyncData syncData)
 {
-    auto& objects = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto object = objects.at(index);
-        syncData.objectMap.insert(object->id, object);
-        if (object->type == ObjectType_Cell) {
-            auto creature = object->typeData.cell.creature;
-            syncData.creatureMap.insert(creature->id, creature);
-            syncData.genomeMap.insert(creature->genome->id, creature->genome);
+    {
+        auto& objects = data.entities.objects;
+        auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto object = objects.at(index);
+            syncData.objectMap.insert(object->id, object);
+            if (object->type == ObjectType_Cell) {
+                auto creature = object->typeData.cell.creature;
+                syncData.creatureMap.insert(creature->id, creature);
+                syncData.genomeMap.insert(creature->genome->id, creature->genome);
+            }
+        }
+    }
+    {
+        auto& particles = data.entities.energies;
+        auto const partition = calcSystemThreadPartition(particles.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto particle = particles.at(index);
+            syncData.particleMap.insert(particle->id, particle);
         }
     }
 }
@@ -515,16 +527,28 @@ __global__ void cudaDomainPack_particles(SimulationData data, DomainSyncData syn
     auto const partition = calcSystemThreadPartition(particles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto particle = particles.at(index);
+        if (particle->ghost) {
+            continue;
+        }
         auto newOwner = decideOwnerByPosition(data, particle->pos.x, false);
-        if (newOwner == domain.index) {
-            continue;
+        for (int receiver = 0; receiver < domain.numDomains; ++receiver) {
+            if (receiver == domain.index) {
+                continue;
+            }
+            auto transfer = receiver == newOwner;
+            if (!transfer && !domain.isInRoi(receiver, particle->pos)) {
+                continue;
+            }
+            auto const& message = syncData.outgoingMessages[receiver];
+            auto recordIndex = message.reserve(&message.counters->numParticles, message.capacities.particles, 1);
+            if (recordIndex < 0) {
+                continue;
+            }
+            auto& record = message.particles[recordIndex];
+            record.particle = *particle;
+            record.particle.ownerDomain = static_cast<uint8_t>(newOwner);
+            record.transfer = transfer;
         }
-        auto const& message = syncData.outgoingMessages[newOwner];
-        auto recordIndex = message.reserve(&message.counters->numParticles, message.capacities.particles, 1);
-        if (recordIndex < 0) {
-            continue;
-        }
-        message.particles[recordIndex].particle = *particle;
     }
 }
 
@@ -604,6 +628,34 @@ __global__ void cudaDomainPack_ops(SimulationData data, DomainSyncData syncData)
     }
 }
 
+__global__ void cudaDomainPack_sensorScans(SimulationData data, DomainSyncData syncData)
+{
+    {
+        auto& requests = data.sensorScanRequests;
+        auto const partition = calcSystemThreadPartition(requests.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto const& request = requests.at(index);
+            auto const& message = syncData.outgoingMessages[request.targetDomain];
+            auto requestIndex = message.reserve(&message.counters->numSensorScanRequests, message.capacities.sensorScanRequests, 1);
+            if (requestIndex >= 0) {
+                message.sensorScanRequests[requestIndex] = request;
+            }
+        }
+    }
+    {
+        auto& responses = data.sensorScanResponses;
+        auto const partition = calcSystemThreadPartition(responses.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto const& response = responses.at(index);
+            auto const& message = syncData.outgoingMessages[response.targetDomain];
+            auto responseIndex = message.reserve(&message.counters->numSensorScanResponses, message.capacities.sensorScanResponses, 1);
+            if (responseIndex >= 0) {
+                message.sensorScanResponses[responseIndex] = response;
+            }
+        }
+    }
+}
+
 /************************************************************************/
 /* Committing                                                           */
 /************************************************************************/
@@ -636,15 +688,21 @@ __global__ void cudaDomainCommit_objects(SimulationData data, uint8_t round)
     }
 }
 
-__global__ void cudaDomainCommit_particles(SimulationData data)
+__global__ void cudaDomainCommit_particles(SimulationData data, uint8_t round)
 {
     auto const& domain = data.domain;
     auto& particles = data.entities.energies;
     auto const partition = calcSystemThreadPartition(particles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& particle = particles.at(index);
-        if (decideOwnerByPosition(data, particle->pos.x, false) != domain.index) {
-            particle = nullptr;
+        if (particle->ghost) {
+            continue;
+        }
+        auto newOwner = decideOwnerByPosition(data, particle->pos.x, false);
+        if (newOwner != domain.index) {
+            particle->ghost = true;
+            particle->ownerDomain = static_cast<uint8_t>(newOwner);
+            particle->syncRound = round;
         }
     }
 }
@@ -657,6 +715,13 @@ __global__ void cudaDomainCommit_resetQueues(SimulationData data, DomainSyncData
             syncData.numGenomesToServe[domain] = 0;
         }
         data.domainOps.reset();
+        data.sensorContinuations.reset();
+        data.sensorScanRequests.reset();
+        data.sensorScanResponses.reset();
+
+        // Processed in the last time step
+        data.receivedShockWaves.reset();
+        data.receivedSensorScanRequests.reset();
     }
 }
 
@@ -807,17 +872,29 @@ __global__ void cudaDomainUnpack_objects(SimulationData data, DomainSyncData syn
     }
 }
 
-__global__ void cudaDomainUnpack_particles(SimulationData data, DomainSyncData syncData, int sender)
+__global__ void cudaDomainUnpack_particles(SimulationData data, DomainSyncData syncData, int sender, uint8_t round)
 {
+    auto const& domain = data.domain;
     auto const& message = syncData.incomingMessages[sender];
     auto const partition = calcSystemThreadPartition(message.counters->numParticles);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto particle = data.entities.heap.getTypedSubArray<Energy>(1);
-        *data.entities.energies.getNewElement() = particle;
-        *particle = message.particles[index].particle;
+        auto const& record = message.particles[index];
+        auto particle = syncData.particleMap.find(record.particle.id);
+        if (particle && !particle->ghost) {
+            continue;
+        }
+        if (!particle) {
+            particle = data.entities.heap.getTypedSubArray<Energy>(1);
+            *data.entities.energies.getNewElement() = particle;
+            syncData.particleMap.insert(record.particle.id, particle);
+        }
+        *particle = record.particle;
         particle->locked = 0;
         particle->selected = 0;
         particle->lastAbsorbedObject = nullptr;
+        particle->ghost = !record.transfer;
+        particle->ownerDomain = record.transfer ? static_cast<uint8_t>(domain.index) : record.particle.ownerDomain;
+        particle->syncRound = round;
     }
 }
 
@@ -872,17 +949,23 @@ __global__ void cudaDomainUnpack_applyOps(SimulationData data, SimulationStatist
     }
 }
 
-// A whole block sweeps the ring of one shock wave front
-__global__ void cudaDomainUnpack_applyShockWaves(SimulationData data, DomainSyncData syncData, int sender)
+__global__ void cudaDomainUnpack_sensorScanRequests(SimulationData data, DomainSyncData syncData, int sender)
 {
     auto const& message = syncData.incomingMessages[sender];
-    auto const partition = calcBlockPartition(message.counters->numOps);
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& op = message.ops[index];
-        if (op.type == DomainOpType::ShockWave) {
-            DetonatorProcessor::applyShockWaveFront_block(data, op.pos, op.values[2], op.values[0], op.values[1], op.kind);
+    auto const partition = calcSystemThreadPartition(message.counters->numSensorScanRequests);
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        if (auto request = data.receivedSensorScanRequests.tryGetNewElement()) {
+            *request = message.sensorScanRequests[index];
         }
-        __syncthreads();
+    }
+}
+
+__global__ void cudaDomainUnpack_sensorScanResponses(SimulationData data, DomainSyncData syncData, int sender)
+{
+    auto const& message = syncData.incomingMessages[sender];
+    auto const partition = calcSystemThreadPartition(message.counters->numSensorScanResponses * SensorScan::NumRays);
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        SensorProcessor::addScanResponse(data, message.sensorScanResponses[index / SensorScan::NumRays], index % SensorScan::NumRays);
     }
 }
 
@@ -890,14 +973,27 @@ __global__ void cudaDomainUnpack_applyShockWaves(SimulationData data, DomainSync
 /* Finishing a sync round                                               */
 /************************************************************************/
 
+// Stale ghost particles are deleted right away since nothing points to them
 __global__ void cudaDomainSync_markStaleGhosts(SimulationData data, uint8_t round)
 {
-    auto& objects = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto object = objects.at(index);
-        if (object->isGhost() && object->syncRound != round) {
-            object->setRemovedGhost(true);
+    {
+        auto& objects = data.entities.objects;
+        auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto object = objects.at(index);
+            if (object->isGhost() && object->syncRound != round) {
+                object->setRemovedGhost(true);
+            }
+        }
+    }
+    {
+        auto& particles = data.entities.energies;
+        auto const partition = calcSystemThreadPartition(particles.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto& particle = particles.at(index);
+            if (particle->ghost && particle->syncRound != round) {
+                particle = nullptr;
+            }
         }
     }
 }
@@ -929,6 +1025,30 @@ __global__ void cudaDomainSync_deleteRemovedGhosts(SimulationData data)
         if (object->isRemovedGhost()) {
             object = nullptr;
         }
+    }
+}
+
+// The scans of the time step before the last one have received all responses by now
+__global__ void cudaDomainSync_publishSensorScans(SimulationData data, DomainSyncData syncData)
+{
+    auto& scans = data.pendingSensorScans[*data.timestep % 2];
+    auto const partition = calcSystemThreadPartition(scans.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& scan = scans.at(index);
+        if (!scan.active) {
+            continue;
+        }
+        auto object = syncData.objectMap.find(scan.sensorId);
+        if (object && !object->isGhost() && object->type == ObjectType_Cell && object->typeData.cell.cellType == CellType_Sensor) {
+            SensorProcessor::publishPendingScan(data, object, scan);
+        }
+    }
+}
+
+__global__ void cudaDomainSync_resetPendingSensorScans(SimulationData data)
+{
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        data.pendingSensorScans[*data.timestep % 2].reset();
     }
 }
 
@@ -974,14 +1094,22 @@ __global__ void cudaDomainDistribute_removeObjectsOutsideRoi(SimulationData data
     }
 }
 
-__global__ void cudaDomainDistribute_removeForeignParticles(SimulationData data)
+__global__ void cudaDomainDistribute_assignParticleOwners(SimulationData data, uint8_t round)
 {
     auto const& domain = data.domain;
     auto& particles = data.entities.energies;
     auto const partition = calcSystemThreadPartition(particles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& particle = particles.at(index);
-        if (decideOwnerByPosition(data, particle->pos.x, true) != domain.index) {
+        auto owner = decideOwnerByPosition(data, particle->pos.x, true);
+        if (owner == domain.index) {
+            continue;
+        }
+        if (domain.isInRoi(domain.index, particle->pos)) {
+            particle->ghost = true;
+            particle->ownerDomain = static_cast<uint8_t>(owner);
+            particle->syncRound = round;
+        } else {
             particle = nullptr;
         }
     }

@@ -5,6 +5,7 @@
 #include "DomainOps.cuh"
 #include "Entities.cuh"
 #include "IdMap.cuh"
+#include "SensorScans.cuh"
 
 // Records of a sync message. Pointers inside the copied entities are meaningless on the receiving side and are replaced by ids.
 struct ObjectRecord
@@ -42,6 +43,7 @@ struct GenomeEntry
 struct ParticleRecord
 {
     Energy particle;
+    bool transfer;  // Otherwise a ghost copy
 };
 
 struct SyncMessageCounters
@@ -54,6 +56,8 @@ struct SyncMessageCounters
     unsigned long long numGenomeRequests;
     unsigned long long numParticles;
     unsigned long long numOps;
+    unsigned long long numSensorScanRequests;
+    unsigned long long numSensorScanResponses;
     int overflow;
 };
 
@@ -67,6 +71,8 @@ struct SyncMessageCapacities
     uint64_t genomeRequests = 0;
     uint64_t particles = 0;
     uint64_t ops = 0;
+    uint64_t sensorScanRequests = 0;
+    uint64_t sensorScanResponses = 0;
     uint64_t bitmapWords = 0;
 
     bool operator==(SyncMessageCapacities const&) const = default;
@@ -89,6 +95,8 @@ struct SyncMessage
     uint64_t* genomeRequests = nullptr;
     ParticleRecord* particles = nullptr;
     DomainOp* ops = nullptr;
+    SensorScanRequest* sensorScanRequests = nullptr;
+    SensorScanResponse* sensorScanResponses = nullptr;
 
     __host__ __inline__ static uint64_t align(uint64_t value) { return (value + 255) / 256 * 256; }
 
@@ -97,7 +105,8 @@ struct SyncMessage
         return align(sizeof(SyncMessageCounters)) + align(capacities.bitmapWords * sizeof(uint32_t)) + align(capacities.objects * sizeof(ObjectRecord))
             + align(capacities.transferPayloads * sizeof(TransferPayload)) + align(capacities.creatures * sizeof(CreatureRecord))
             + align(capacities.genomeEntries * sizeof(GenomeEntry)) + align(capacities.genomeBytes) + align(capacities.genomeRequests * sizeof(uint64_t))
-            + align(capacities.particles * sizeof(ParticleRecord)) + align(capacities.ops * sizeof(DomainOp));
+            + align(capacities.particles * sizeof(ParticleRecord)) + align(capacities.ops * sizeof(DomainOp))
+            + align(capacities.sensorScanRequests * sizeof(SensorScanRequest)) + align(capacities.sensorScanResponses * sizeof(SensorScanResponse));
     }
 
     // Sets the section pointers for a buffer of calcBufferSize(capacities) bytes
@@ -123,6 +132,8 @@ struct SyncMessage
         genomeRequests = reinterpret_cast<uint64_t*>(takeSection(capacities.genomeRequests * sizeof(uint64_t)));
         particles = reinterpret_cast<ParticleRecord*>(takeSection(capacities.particles * sizeof(ParticleRecord)));
         ops = reinterpret_cast<DomainOp*>(takeSection(capacities.ops * sizeof(DomainOp)));
+        sensorScanRequests = reinterpret_cast<SensorScanRequest*>(takeSection(capacities.sensorScanRequests * sizeof(SensorScanRequest)));
+        sensorScanResponses = reinterpret_cast<SensorScanResponse*>(takeSection(capacities.sensorScanResponses * sizeof(SensorScanResponse)));
     }
 
     // Byte ranges [offset, offset + size) of the used parts of all sections, for copying a message
@@ -146,7 +157,9 @@ struct SyncMessage
             rangeOf(genomeBytes, counterValues.numGenomeBytes),
             rangeOf(genomeRequests, counterValues.numGenomeRequests * sizeof(uint64_t)),
             rangeOf(particles, counterValues.numParticles * sizeof(ParticleRecord)),
-            rangeOf(ops, counterValues.numOps * sizeof(DomainOp))};
+            rangeOf(ops, counterValues.numOps * sizeof(DomainOp)),
+            rangeOf(sensorScanRequests, counterValues.numSensorScanRequests * sizeof(SensorScanRequest)),
+            rangeOf(sensorScanResponses, counterValues.numSensorScanResponses * sizeof(SensorScanResponse))};
     }
 
     // Returns the index of the reserved entries or -1 if the section is full. The counter keeps growing in the latter case,
@@ -166,6 +179,7 @@ struct SyncMessage
 struct DomainSyncData
 {
     IdMap<Object> objectMap;
+    IdMap<Energy> particleMap;
     IdMap<Creature> creatureMap;
     IdMap<Genome> genomeMap;
 

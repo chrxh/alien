@@ -116,6 +116,9 @@ __inline__ __device__ void EnergyProcessor::moveParticlesFarFromBarriers(Simulat
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
+        if (particle->ghost) {
+            continue;
+        }
         auto displacement = particle->vel * timestepSize;
         if (data.barrierGrid.hasBarrier(particle->pos + displacement / 2, calcScanRadius(barrierSearchRadius, displacement))) {
             data.energyParticlesNearBarriers.tryAddEntry(particleIndex);
@@ -272,7 +275,7 @@ __inline__ __device__ bool EnergyProcessor::isBarrier(Object* object)
 __inline__ __device__ void EnergyProcessor::mergeOrAbsorb(SimulationData& data, Energy*& particle)
 {
     auto otherParticle = data.energyParticleGrid.get(particle->pos);
-    if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
+    if (otherParticle && otherParticle != particle && !otherParticle->ghost && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
         mergeParticleInto(particle, otherParticle);
     } else if (auto object = data.objectGrid.getFirst(particle->pos + particle->vel)) {
         absorbIntoObject(data, particle, object);
@@ -352,7 +355,7 @@ __inline__ __device__ void EnergyProcessor::splitHighEnergyParticles(SimulationD
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
-        if (particle == nullptr) {
+        if (particle == nullptr || particle->ghost) {
             continue;
         }
         if (data.primaryNumberGen.random() >= 0.01f) {
@@ -389,7 +392,7 @@ __inline__ __device__ void EnergyProcessor::transformIntoFreeCells(SimulationDat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         if (auto& particle = data.entities.energies.at(particleIndex)) {
 
-            if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
+            if (!particle->ghost && particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 EntityFactory factory;
                 factory.init(&data);
                 auto object = factory.createFreeCell(particle->energy, particle->pos, particle->vel);

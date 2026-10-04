@@ -115,7 +115,8 @@ __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, Simu
         auto& particles = data.entities.energies;
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            if (auto& particle = particles.at(index)) {
+            auto& particle = particles.at(index);
+            if (particle && !particle->ghost) {
                 auto warp = cg::coalesced_threads();
                 auto energySum = cg::reduce(warp, particle->energy, cg::plus<float>());
                 if (warp.thread_rank() == 0) {
