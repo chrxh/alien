@@ -29,6 +29,7 @@ add_library(EngineKernels
     DepotProcessor.cuh
     DetonatorProcessor.cuh
     DigestorProcessor.cuh
+    DomainContext.cuh
     EditKernels.cu
     EditKernels.cuh
     EnergyParticleGrid.cuh

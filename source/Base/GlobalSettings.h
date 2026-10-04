@@ -25,6 +25,14 @@ public:
     bool isInterop() const;
     void setInterop(bool value) const;
 
+    // The world of a new simulation is split into this many domains, each simulated on its own device context
+    int getNumDomains() const;
+    void setNumDomains(int value) const;
+
+    // Device index of each domain, assigned round-robin; empty means all suitable devices
+    std::vector<int> getDomainDevices() const;
+    void setDomainDevices(std::vector<int> const& value) const;
+
     bool getValue(std::string const& key, bool defaultValue);
     void setValue(std::string const& key, bool value);
 

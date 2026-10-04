@@ -13,6 +13,7 @@
 // Captures all runtime-varying parameters that affect kernel execution
 struct CudaGraphConfig
 {
+    int domainIndex;           // The captured kernel parameters point to the data of one domain
     int timestepMod3;          // Not every kernel needs to be executed each time
     bool executeCellFunction;  // Cell type functions need to be executed
     bool hasLayers;            // settings.simulationParameters.numLayers > 0
@@ -61,6 +62,11 @@ public:
 private:
     SimulationKernelsService() = default;
 
+    static auto constexpr PreviewStreamKey = -1;
+
+    // Each domain gets its own stream so that domains sharing a device can overlap
+    cudaStream_t getStream(int key);
+
     bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
 
     CudaGraphConfig buildGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, uint64_t timestep, bool forceCellFunctionExecution)
@@ -97,7 +103,7 @@ private:
         SimulationData const& data,
         SimulationStatistics const& statistics);
 
-    cudaStream_t _stream = nullptr;
+    std::map<int, cudaStream_t> _streams;
     std::map<CudaGraphConfig, cudaGraphExec_t> _graphCache;
     std::map<CudaGraphPreviewConfig, cudaGraphExec_t> _previewGraphCache;
 };

@@ -76,19 +76,16 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     log(Priority::Important, "initialize simulation");
 
-    _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaPreviewData = std::make_shared<SimulationData>();
     _cudaGeometryBuffers = std::make_shared<CudaGeometryBuffers>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();
-    _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
     _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
 
     _simulationTimestep = timestep;
-    _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
+    initDomains();
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
-    _cudaSimulationStatistics->init();
     _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
 
@@ -102,7 +99,9 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     SimulationKernelsService::get().init();
 
     // Default array sizes for empty simulation (will be resized later if not sufficient)
-    _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+    for (auto const& domain : _domains) {
+        domain.data->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+    }
     _cudaPreviewData->resizeObjectsAndTempObjects(PreviewCapacityGpu);
 
     auto memory = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
@@ -116,9 +115,11 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
         log(Priority::Unimportant, "skip CUDA shutdown because the CUDA context is invalid");
     } else {
         try {
-            _cudaSimulationData->free();
+            for (auto const& domain : _domains) {
+                domain.data->free();
+                domain.statistics->free();
+            }
             _cudaPreviewData->free();
-            _cudaSimulationStatistics->free();
             _cudaPreviewStatistics->free();
             _cudaSelectionResult->free();
 
@@ -289,7 +290,7 @@ void _SimulationCudaFacade::relaxSelectedObjects(bool includeClusters)
 
 Ids _SimulationCudaFacade::getMaxIds() const
 {
-    return _cudaSimulationData->primaryNumberGen.getIds_host();
+    return getMainDomain().data->primaryNumberGen.getIds_host();
 }
 
 void _SimulationCudaFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)
@@ -454,10 +455,11 @@ ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
 
 void _SimulationCudaFacade::updateStatistics()
 {
-    StatisticsKernelsService::get().updateStatistics(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    auto const& statistics = getMainDomain().statistics;
+    StatisticsKernelsService::get().updateStatistics(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *statistics);
     syncAndCheck();
 
-    auto statisticsEntry = _cudaSimulationStatistics->getStatisticsEntry();
+    auto statisticsEntry = statistics->getStatisticsEntry();
     {
         std::lock_guard lock(_mutexForStatistics);
         _statisticsEntry = statisticsEntry;
@@ -495,7 +497,9 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 {
     {
         std::lock_guard lock(_mutexForSimulationData);
-        copyToDevice(_cudaSimulationData->timestep, &timestep);  // Update GPU timestep
+        for (auto const& domain : _domains) {
+            copyToDevice(domain.data->timestep, &timestep);  // Update GPU timestep
+        }
         _simulationTimestep = timestep;
     }
     StatisticsService::get().resetTime(_statisticsHistory, timestep);
@@ -509,7 +513,7 @@ void _SimulationCudaFacade::clear()
 
 void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpuEntities const& sizeDelta)
 {
-    if (_cudaSimulationData->shouldResize(sizeDelta)) {
+    if (getMainDomain().data->shouldResize(sizeDelta)) {
         resizeArrays(sizeDelta);
     }
 }
@@ -600,7 +604,7 @@ TOs _SimulationCudaFacade::getPreviewData()
 void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics, objectId);
+    TestKernelsService::get().testOnly_mutate(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *getMainDomain().statistics, objectId);
     syncAndCheck();
 
     resizeArraysIfNecessary();
@@ -840,7 +844,7 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
         auto simulationData = getSimulationDataPtrCopy();
         auto timestep = getCurrentTimestep();
         reportProfilingContext();
-        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics, timestep, forceCellFunctionExecution);
+        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *getMainDomain().statistics, timestep, forceCellFunctionExecution);
         {
             std::lock_guard lock(_mutexForSimulationData);
             ++_simulationTimestep;  // SimulationData::timestep is already updated in the kernels
@@ -873,23 +877,24 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
 {
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeTempObjects(sizeDelta);
+    auto const& simulationData = getMainDomain().data;
+    simulationData->resizeTempObjects(sizeDelta);
 
-    if (!_cudaSimulationData->isEmpty()) {
+    if (!simulationData->isEmpty()) {
         GarbageCollectorKernelsService::get().copyArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
         syncAndCheck();
 
-        _cudaSimulationData->resizeObjectsByMatchingTempObjects();
+        simulationData->resizeObjectsByMatchingTempObjects();
 
         GarbageCollectorKernelsService::get().swapArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
         syncAndCheck();
     } else {
-        _cudaSimulationData->resizeObjectsByMatchingTempObjects();
+        simulationData->resizeObjectsByMatchingTempObjects();
     }
 
-    auto cellArraySize = _cudaSimulationData->entities.objects.getCapacity_host();
-    auto particleArraySize = _cudaSimulationData->entities.energies.getCapacity_host();
-    auto auxiliaryDataSize = _cudaSimulationData->entities.heap.getCapacity_host();
+    auto cellArraySize = simulationData->entities.objects.getCapacity_host();
+    auto particleArraySize = simulationData->entities.energies.getCapacity_host();
+    auto auxiliaryDataSize = simulationData->entities.heap.getCapacity_host();
 
     CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
 
@@ -928,7 +933,7 @@ void _SimulationCudaFacade::reportProfilingContext()
     profiler.setReportEntry("world size", std::to_string(_settings.worldSizeX) + " x " + std::to_string(_settings.worldSizeY));
     profiler.setReportEntry("smoothing length", std::to_string(_settings.simulationParameters.smoothingLength.value));
 
-    auto const& entities = _cudaSimulationData->entities;
+    auto const& entities = getMainDomain().data->entities;
     profiler.setReportEntry(
         "objects (used / capacity)", std::to_string(entities.objects.getNumEntries_host()) + " / " + std::to_string(entities.objects.getCapacity_host()));
     profiler.setReportEntry(
@@ -982,7 +987,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
             cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();
 
-        if (_cudaSimulationData) {
+        if (!_domains.empty()) {
             SimulationKernelsService::get().prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy());
         }
     }
@@ -991,5 +996,30 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
 SimulationData _SimulationCudaFacade::getSimulationDataPtrCopy() const
 {
     std::lock_guard lock(_mutexForSimulationData);
-    return *_cudaSimulationData;
+    return *getMainDomain().data;
+}
+
+Domain& _SimulationCudaFacade::getMainDomain()
+{
+    return _domains.front();
+}
+
+Domain const& _SimulationCudaFacade::getMainDomain() const
+{
+    return _domains.front();
+}
+
+void _SimulationCudaFacade::initDomains()
+{
+    _domains.clear();
+
+    Domain domain;
+    domain.index = 0;
+    domain.device = _gpuInfo.deviceNumber;
+    domain.data = std::make_shared<SimulationData>();
+    domain.statistics = std::make_shared<SimulationStatistics>();
+    domain.data->domain = DomainContext{.index = 0, .numDomains = 1};
+    domain.data->init({_settings.worldSizeX, _settings.worldSizeY}, _simulationTimestep);
+    domain.statistics->init();
+    _domains.emplace_back(domain);
 }

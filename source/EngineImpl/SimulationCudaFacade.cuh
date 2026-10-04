@@ -28,6 +28,8 @@
 
 #include <vector_types.h>
 
+#include "Domain.cuh"
+
 #if !defined(USE_HIP)
 struct cudaGraphicsResource;  // On HIP, hipGraphicsResource is declared by the HIP runtime
 #endif
@@ -128,6 +130,7 @@ public:
 
 private:
     void initCuda();
+    void initDomains();
 
     void syncAndCheck();
     void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
@@ -142,6 +145,9 @@ private:
 
     SimulationData getSimulationDataPtrCopy() const;
 
+    Domain& getMainDomain();
+    Domain const& getMainDomain() const;
+
     GpuInfo _gpuInfo;
     cudaGraphicsResource* _cudaResource = nullptr;
 
@@ -154,7 +160,7 @@ private:
 
     mutable std::mutex _mutexForSimulationData;
     uint64_t _simulationTimestep = 0;
-    std::shared_ptr<SimulationData> _cudaSimulationData;  // std::shared_ptr to prevent include in header
+    std::vector<Domain> _domains;
 
     uint64_t _previewTimestep = 0;
     std::shared_ptr<SimulationData> _cudaPreviewData;
@@ -167,6 +173,5 @@ private:
     mutable std::mutex _mutexForStatistics;
     StatisticsHistory _statisticsHistory;
     std::optional<StatisticsEntry> _statisticsEntry;
-    std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
 };
