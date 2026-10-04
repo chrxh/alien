@@ -50,10 +50,15 @@ public:
     void calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
+    // Brings the ghost copies up to date; this also happens before every time step
+    void syncDomains();
+
     Ids getMaxIds() const;
 
     void copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
-    TOs getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
+
+    // One unmanaged TO per domain (i.e. must be deleted by the caller), the ghost copies of other domains are flagged in them
+    std::vector<TOs> getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
     TOs getSelectedSimulationData(bool includeClusters);
     TOs getInspectedSimulationData(std::vector<uint64_t> entityIds);
     TOs getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
@@ -131,19 +136,26 @@ public:
 private:
     void initCuda();
     void initDomains();
+    bool isDecomposed() const;
+    void checkNotDecomposed(std::string const& operation) const;
+    void activateDevice(Domain const& domain) const;
 
     void syncAndCheck();
     void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
     void copyDataTOtoHost(TOs const& to, TOs const& cudaTO);
     void calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution);
+    void resizeArraysIfNecessary(Domain& domain, ArraySizesForGpuEntities const& sizeDelta);
     void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
+    void resizeArrays(Domain& domain, ArraySizesForGpuEntities const& sizeDelta);
     void checkAndProcessSimulationParameterChanges();
+    void copySimulationParametersToDevices(SimulationParameters const& parameters);
 
     // Adds the launch configuration, the entity counts and the occupancy of the fluid kernel to the profiling
     // report; no-op outside debug mode
     void reportProfilingContext();
 
     SimulationData getSimulationDataPtrCopy() const;
+    SimulationData getSimulationDataPtrCopy(Domain const& domain) const;
 
     Domain& getMainDomain();
     Domain const& getMainDomain() const;

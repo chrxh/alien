@@ -3,6 +3,7 @@
 #include <Data/CellTypeConstants.h>
 #include <Data/SimulationParameters.h>
 
+#include "DomainOpEmitter.cuh"
 #include "NeuronProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
@@ -12,11 +13,12 @@ class AttackerProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
+    __inline__ __device__ static float absorbAttackableEnergy(Cell* cell, float energy);
+
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static float calcAttackableEnergy(Cell* cell);
-    __inline__ __device__ static float absorbAttackableEnergy(Cell* cell, float energy);
     __inline__ __device__ static float absorbEnergy(float* energy, float maxEnergy);
 
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
@@ -152,6 +154,12 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     energyToTransfer *=
                         ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
 
+                    // The owner of a ghost drains it and sends the energy back
+                    if (energyToTransfer > NEAR_ZERO && otherObject->isGhost()) {
+                        DomainOpEmitter::drainAttackedEnergy(data, otherObject, object, energyToTransfer);
+                        return;
+                    }
+
                     if (energyToTransfer > NEAR_ZERO) {
                         otherFreeCell->event = CellEvent_Attacked;
                         otherFreeCell->eventCounter = 10;
@@ -215,6 +223,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     // There is a slight systematic disadvantage for smaller creatures. This factor balances that out.
                     if (otherCell->creature->numCells > cell->creature->numCells) {
                         energyToTransfer *= 1.0f - ParameterCalculator::calcParameter(cudaSimulationParameters.attackerSizeProtection, data, object->pos);
+                    }
+
+                    if (energyToTransfer > NEAR_ZERO && otherObject->isGhost()) {
+                        DomainOpEmitter::drainAttackedEnergy(data, otherObject, object, energyToTransfer);
+                        return;
                     }
 
                     if (energyToTransfer > NEAR_ZERO) {

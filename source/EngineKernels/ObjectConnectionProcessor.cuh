@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DomainOpEmitter.cuh"
 #include "EnergyProcessor.cuh"
 
 class ObjectConnectionProcessor
@@ -31,6 +32,9 @@ public:
     __inline__ __device__ static void deleteConnections(Object* object1, Object* object2);
     __inline__ __device__ static void deleteConnectionOneWay(Object* object1, Object* object2);
 
+    // Adds the connection from object1 to object2 only; the angle is determined by the current geometry
+    __inline__ __device__ static bool tryAddConnectionOneWay(SimulationData& data, Object* object1, Object* object2, float desiredDistance);
+
     __inline__ __device__ static bool
     existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
     __inline__ __device__ static bool checkConnectedObjectsForCrossingConnection(Object* object1, float2 otherObjectPos);
@@ -53,7 +57,12 @@ public:
 
 private:
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
+
+    // The own half of the connection is added right away, the owner of the ghost adds the other half in the next sync round
+    __inline__ __device__ static void lockAndTryAddConnectionToGhost(SimulationData& data, Object* ownObject, Object* ghost);
+
     __inline__ __device__ static void markConnectionsForDeletion(Object* object, Object* connectedObject);
+    __inline__ __device__ static void removeConnectionOfGhost(SimulationData& data, Object* object, Object* connectedObject);
 
     // Angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithRelAngle_oneWay(
@@ -134,7 +143,18 @@ __inline__ __device__ void ObjectConnectionProcessor::processAddOperations(Simul
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::AddConnectionPair == operation.type) {
-            lockAndTryAddConnections(data, operation.data.addConnection.object, operation.data.addConnection.otherObject);
+            auto object = operation.data.addConnection.object;
+            auto otherObject = operation.data.addConnection.otherObject;
+            if (object->isGhost() && otherObject->isGhost()) {
+                continue;
+            }
+            if (object->isGhost()) {
+                lockAndTryAddConnectionToGhost(data, otherObject, object);
+            } else if (otherObject->isGhost()) {
+                lockAndTryAddConnectionToGhost(data, object, otherObject);
+            } else {
+                lockAndTryAddConnections(data, object, otherObject);
+            }
         }
     }
 }
@@ -161,6 +181,8 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
             auto const& object2 = delConnectionOperation.object2;
             markConnectionsForDeletion(object1, object2);
             markConnectionsForDeletion(object2, object1);
+            removeConnectionOfGhost(data, object1, object2);
+            removeConnectionOfGhost(data, object2, object1);
         }
         if (StructuralOperation::Type::DelObject == operation.type) {
             auto const& objectIndex = operation.data.delObject.objectIndex;
@@ -169,6 +191,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
                 auto const& connectedObject = object->connections[i].object;
                 alienAtomicOr32(&object->tempValue1.as_uint32_float.uint32Part, 1u << i);
                 markConnectionsForDeletion(connectedObject, object);
+                removeConnectionOfGhost(data, connectedObject, object);
             }
         }
     }
@@ -292,6 +315,47 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndTryAddConnections(S
         }
 
         lock.releaseLock();
+    }
+}
+
+__inline__ __device__ void ObjectConnectionProcessor::lockAndTryAddConnectionToGhost(SimulationData& data, Object* ownObject, Object* ghost)
+{
+    SystemDoubleLock lock;
+    lock.init(&ownObject->locked, &ghost->locked);
+    if (lock.tryLock()) {
+
+        bool alreadyConnected = false;
+        for (int i = 0; i < ownObject->numConnections; ++i) {
+            if (ownObject->connections[i].object == ghost) {
+                alreadyConnected = true;
+                break;
+            }
+        }
+
+        if (!alreadyConnected && ownObject->numConnections < MAX_OBJECT_CONNECTIONS && ghost->numConnections < MAX_OBJECT_CONNECTIONS) {
+            auto distance = data.world.getDistance(ownObject->pos, ghost->pos);
+            if (tryAddConnectionOneWay(data, ownObject, ghost, distance)) {
+                if (!DomainOpEmitter::addConnection(data, ghost, ownObject, distance)) {
+                    deleteConnectionOneWay(ownObject, ghost);
+                }
+            }
+        }
+
+        lock.releaseLock();
+    }
+}
+
+__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(SimulationData& data, Object* object1, Object* object2, float desiredDistance)
+{
+    auto posDelta = object2->pos - object1->pos;
+    data.world.correctDirection(posDelta);
+    return tryAddConnectionWithRelAngle_oneWay(data, object1, object2, posDelta, desiredDistance, 0);
+}
+
+__inline__ __device__ void ObjectConnectionProcessor::removeConnectionOfGhost(SimulationData& data, Object* object, Object* connectedObject)
+{
+    if (object->isGhost() && !connectedObject->isGhost()) {
+        DomainOpEmitter::removeConnection(data, object, connectedObject);
     }
 }
 

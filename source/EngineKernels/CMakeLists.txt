@@ -30,6 +30,12 @@ add_library(EngineKernels
     DetonatorProcessor.cuh
     DigestorProcessor.cuh
     DomainContext.cuh
+    DomainOpEmitter.cuh
+    DomainOpProcessor.cuh
+    DomainOps.cuh
+    DomainSync.cuh
+    DomainSyncKernels.cu
+    DomainSyncKernels.cuh
     EditKernels.cu
     EditKernels.cuh
     EnergyParticleGrid.cuh
@@ -49,6 +55,7 @@ add_library(EngineKernels
     GeometryKernels.cuh
     HashMap.cuh
     HashSet.cuh
+    IdMap.cuh
     InjectorProcessor.cuh
     LineageIdMap.cuh
     List.cuh

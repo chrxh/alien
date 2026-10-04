@@ -125,6 +125,7 @@ public:
     void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation = false) override;
     void testOnly_zeroTransferData() override;
     void testOnly_syncNumberGenerator() override;
+    std::vector<std::string> testOnly_getDomainConsistencyErrors() override;
 
 private:
     bool _selectionNeedsUpdate = false;

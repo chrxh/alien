@@ -3,6 +3,7 @@
 #include <Data/CellTypeConstants.h>
 
 #include "ConstructorHelper.cuh"
+#include "DomainOpEmitter.cuh"
 #include "MuscleProcessor.cuh"
 
 class CellProcessor
@@ -23,6 +24,9 @@ public:
 
     __inline__ __device__ static void decay(SimulationData& data, bool isPreview);
 
+    // Adds energy to a cell; the owner of a ghost receives it in the next sync round. Returns false if that is not possible.
+    __inline__ __device__ static bool tryAddEnergy(SimulationData& data, Object* cellObject, EnergyKind kind, float energy);
+
 private:
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
@@ -40,7 +44,7 @@ __inline__ __device__ void CellProcessor::collectCellTypeOperations(SimulationDa
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
-        if (object->type == ObjectType_Cell && object->typeData.cell.cellType != CellType_Base) {
+        if (object->type == ObjectType_Cell && object->typeData.cell.cellType != CellType_Base && !object->isGhost()) {
             if (object->typeData.cell.cellType == CellType_Detonator) {
                 auto state = object->typeData.cell.cellTypeData.detonator.state;
                 auto isShockWaveRunning = state == DetonatorState_Exploded && object->typeData.cell.eventCounter > 0;
@@ -65,7 +69,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (object->isStatic() || object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {
+        if (object->isStatic() || object->isGhost() || object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {
             continue;
         }
         uint32_t* age = nullptr;
@@ -108,7 +112,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
 
@@ -152,7 +156,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto nextCellState = object->tempValue1.as_uint32_float.uint32Part;
@@ -171,13 +175,13 @@ __inline__ __device__ void CellProcessor::headUpdate_calcFutureValue(SimulationD
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         if (*data.timestep % CELL_UPDATE_INTERVAL == 0) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
             if (object->typeData.cell.constructorAvailable) {
-                ConstructorHelper::confirmOffspring(object);
+                ConstructorHelper::confirmOffspring(data, object);
             }
         }
 
@@ -220,7 +224,7 @@ __inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(Simulation
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
 
@@ -266,7 +270,7 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         if (object->typeData.cell.eventCounter > 0) {
@@ -287,7 +291,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         if (object->numConnections == 0) {
@@ -339,10 +343,8 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             if (flow > 0) {
                 flow = min(2.0f, flow);
                 auto orig = atomicAdd(&object->typeData.cell.usableEnergy, -flow);
-                if (orig < cellMinEnergy) {
+                if (orig < cellMinEnergy || !tryAddEnergy(data, connectedObject, EnergyKind::Usable, flow)) {
                     atomicAdd(&object->typeData.cell.usableEnergy, flow);
-                } else {
-                    atomicAdd(&connectedObject->typeData.cell.usableEnergy, flow);
                 }
             }
         }
@@ -378,14 +380,22 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
                 flow = min(maxFlow, flow);
                 auto orig = atomicAdd(&object->typeData.cell.rawEnergy, -flow);
-                if (orig < 0) {
+                if (orig < 0 || !tryAddEnergy(data, connectedObject, EnergyKind::Raw, flow)) {
                     atomicAdd(&object->typeData.cell.rawEnergy, flow);
-                } else {
-                    atomicAdd(&connectedObject->typeData.cell.rawEnergy, flow);
                 }
             }
         }
     }
+}
+
+__inline__ __device__ bool CellProcessor::tryAddEnergy(SimulationData& data, Object* cellObject, EnergyKind kind, float energy)
+{
+    if (cellObject->isGhost()) {
+        return DomainOpEmitter::creditEnergy(data, cellObject, kind, energy);
+    }
+    auto& cell = cellObject->typeData.cell;
+    atomicAdd(kind == EnergyKind::Raw ? &cell.rawEnergy : &cell.usableEnergy, energy);
+    return true;
 }
 
 __device__ __inline__ float CellProcessor::getInitialAngelSpan(Object* object, int connectionIndex1, int connectionIndex2)
@@ -429,7 +439,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data, bool isPre
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->isStatic()) {
+        if (object->isStatic() || object->isGhost()) {
             continue;
         }
 

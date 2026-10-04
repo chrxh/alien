@@ -135,6 +135,7 @@ public:
     void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation);
     void testOnly_zeroTransferData();
     void testOnly_syncNumberGenerator();
+    std::vector<std::string> testOnly_getDomainConsistencyErrors();
 
 private:
     void processJobs();

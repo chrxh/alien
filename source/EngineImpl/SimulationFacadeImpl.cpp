@@ -479,3 +479,8 @@ void _SimulationFacadeImpl::testOnly_syncNumberGenerator()
 {
     _worker.testOnly_syncNumberGenerator();
 }
+
+std::vector<std::string> _SimulationFacadeImpl::testOnly_getDomainConsistencyErrors()
+{
+    return _worker.testOnly_getDomainConsistencyErrors();
+}

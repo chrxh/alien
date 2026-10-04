@@ -209,6 +209,10 @@ int main(int argc, char** argv)
         if (arguments.debugMode) {
             initDebugMode();
         }
+        if (!arguments.gpus.empty()) {
+            GlobalSettings::get().setNumDomains(static_cast<int>(arguments.gpus.size()));
+            GlobalSettings::get().setDomainDevices(arguments.gpus);
+        }
 
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         ExitScopeGuard closeSimulation([] { _SimulationFacade::get()->closeSimulation(); });

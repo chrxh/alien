@@ -2,7 +2,9 @@
 
 #include <Data/CellTypeConstants.h>
 
+#include "CellProcessor.cuh"
 #include "ConstantMemory.cuh"
+#include "DomainOpEmitter.cuh"
 #include "SimulationData.cuh"
 
 class VoidProcessor
@@ -40,13 +42,16 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
 
     if (cellNeighborCount > 0) {
         auto energyPerNeighbor = totalEnergy / cellNeighborCount;
+        auto undeliveredEnergy = 0.0f;
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
             if (connectedObject->type == ObjectType_Cell && connectedObject->typeData.cell.cellType != CellType_Void) {
-                atomicAdd(&connectedObject->typeData.cell.usableEnergy, energyPerNeighbor);
+                if (!CellProcessor::tryAddEnergy(data, connectedObject, EnergyKind::Usable, energyPerNeighbor)) {
+                    undeliveredEnergy += energyPerNeighbor;
+                }
             }
         }
-        object->typeData.cell.usableEnergy = 0;
+        object->typeData.cell.usableEnergy = undeliveredEnergy;
         object->typeData.cell.rawEnergy = 0;
         if (object->typeData.cell.constructorAvailable) {
             object->typeData.cell.constructor.reservedEnergy = 0;
@@ -63,6 +68,10 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
         }
         auto connectedCell = &connectedObject->typeData.cell;
         if (connectedCell->cellType != CellType_Muscle) {
+            continue;
+        }
+        if (connectedObject->isGhost()) {
+            DomainOpEmitter::resetMuscle(data, connectedObject, false, true);
             continue;
         }
         auto pivotObject = connectedObject->connections[0].object;

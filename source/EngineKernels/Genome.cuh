@@ -479,4 +479,7 @@ struct Genome
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid
+
+    // Replica of a genome owned by another domain whose data has not arrived yet
+    bool isPlaceholder;
 };

@@ -11,6 +11,7 @@
 #include "BarrierGrid.cuh"
 #include "CudaNumberGenerator.cuh"
 #include "DomainContext.cuh"
+#include "DomainOps.cuh"
 #include "EnergyParticleGrid.cuh"
 #include "ObjectGrid.cuh"
 #include "Operations.cuh"
@@ -20,6 +21,7 @@
 struct SimulationData
 {
     DomainContext domain;
+    Array<DomainOp> domainOps;  // Changes to ghosts, sent to their owners in the next sync round
 
     // World and grids
     uint64_t* timestep;

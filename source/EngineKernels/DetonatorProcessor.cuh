@@ -3,6 +3,8 @@
 #include <Data/CellTypeConstants.h>
 
 #include "ConstantMemory.cuh"
+#include "DomainOpEmitter.cuh"
+#include "NeuronProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -10,6 +12,10 @@ class DetonatorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
+
+    // Accelerates the own objects in the ring between the two front radii, executed by a whole block
+    __inline__ __device__ static void
+    applyShockWaveFront_block(SimulationData& data, float2 const& center, float radius, float innerFrontRadius, float outerFrontRadius, int detached);
 
 private:
     static auto constexpr DetonationEventDuration = 30;  // In cell function cycles
@@ -98,12 +104,20 @@ __device__ __inline__ void DetonatorProcessor::detonate(SimulationData& data, Ob
         auto lengthSquared = Math::lengthSquared(delta);
         if (lengthSquared > NEAR_ZERO) {
             auto force = delta / lengthSquared * radius * 2;
-            otherObject->vel += force;
+            if (otherObject->isGhost()) {
+                DomainOpEmitter::addVelocity(data, otherObject, force);
+            } else {
+                otherObject->vel += force;
+            }
         }
         if (otherObject->typeData.cell.cellType == CellType_Detonator && otherObject->typeData.cell.cellTypeData.detonator.state != DetonatorState_Exploded) {
             if (data.primaryNumberGen.random() < chainExplosionProbability) {
-                otherObject->typeData.cell.cellTypeData.detonator.state = DetonatorState_Activated;
-                otherObject->typeData.cell.cellTypeData.detonator.countdown = 1;
+                if (otherObject->isGhost()) {
+                    DomainOpEmitter::activateDetonator(data, otherObject);
+                } else {
+                    otherObject->typeData.cell.cellTypeData.detonator.state = DetonatorState_Activated;
+                    otherObject->typeData.cell.cellTypeData.detonator.countdown = 1;
+                }
             }
         }
     });
@@ -120,18 +134,33 @@ __device__ __inline__ void DetonatorProcessor::propagateShockWave(SimulationData
     auto calcFrontRadius = [&](int step) { return radius * (1.0f + (ShockWaveReach - 1.0f) * toFloat(step) / toFloat(ShockWaveDuration)); };
 
     // The front sweeps a new ring in each cell function cycle and accelerates matter up to the flow velocity behind it
-    data.objectGrid.executeForEachInRing_block(
-        object->pos, calcFrontRadius(step - 1), calcFrontRadius(step), object->detached(), [&](Object* const& otherObject) {
-            if (otherObject->isStatic()) {
-                return;
-            }
-            auto delta = data.world.getCorrectedDirection(otherObject->pos - object->pos);
-            auto distance = Math::length(delta);
-            auto direction = delta / distance;
-            auto flowVelocity = ShockWaveStrength * sqrtf(radius / distance);
-            auto radialVelocity = Math::dot(otherObject->vel, direction);
-            if (radialVelocity < flowVelocity) {
-                otherObject->vel += direction * (flowVelocity - radialVelocity);
-            }
-        });
+    auto innerFrontRadius = calcFrontRadius(step - 1);
+    auto outerFrontRadius = calcFrontRadius(step);
+    applyShockWaveFront_block(data, object->pos, radius, innerFrontRadius, outerFrontRadius, object->detached());
+    if (data.domain.isDecomposed() && threadIdx.x == 0) {
+        DomainOpEmitter::shockWave(data, object->pos, innerFrontRadius, outerFrontRadius, radius, object->detached());
+    }
+}
+
+__device__ __inline__ void DetonatorProcessor::applyShockWaveFront_block(
+    SimulationData& data,
+    float2 const& center,
+    float radius,
+    float innerFrontRadius,
+    float outerFrontRadius,
+    int detached)
+{
+    data.objectGrid.executeForEachInRing_block(center, innerFrontRadius, outerFrontRadius, detached, [&](Object* const& otherObject) {
+        if (otherObject->isStatic() || otherObject->isGhost()) {
+            return;
+        }
+        auto delta = data.world.getCorrectedDirection(otherObject->pos - center);
+        auto distance = Math::length(delta);
+        auto direction = delta / distance;
+        auto flowVelocity = ShockWaveStrength * sqrtf(radius / distance);
+        auto radialVelocity = Math::dot(otherObject->vel, direction);
+        if (radialVelocity < flowVelocity) {
+            otherObject->vel += direction * (flowVelocity - radialVelocity);
+        }
+    });
 }
