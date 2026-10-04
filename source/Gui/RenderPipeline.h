@@ -45,6 +45,7 @@ class _RenderPipeline
 public:
     _RenderPipeline(RenderBlocks&& blocks);
 
+    // The images take the new size at the next execution, so that resizing the window does not create images for every intermediate size
     void resize(IntVector2D const& size);
 
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
@@ -52,6 +53,7 @@ public:
     VulkanImage& execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
 private:
+    void applyRequestedSize(bool withScreenTarget);
     void resizeTarget(TextureTarget const& target);
 
     void forEachStep(
@@ -84,4 +86,5 @@ private:
     TextureTarget _screenTarget;
     std::vector<TextureTarget> _textureTargets;
     std::optional<IntVector2D> _textureSize;
+    std::optional<IntVector2D> _requestedTextureSize;
 };
