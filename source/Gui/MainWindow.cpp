@@ -168,6 +168,7 @@ _MainWindow::_MainWindow()
     initFileDialogs();
 
     log(Priority::Important, "user interface initialized");
+    WindowController::get().showStartupWindow();
 }
 
 void _MainWindow::mainLoop()
