@@ -34,7 +34,13 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     data.mutatedGenomes.setMemory(data.processMemory.getTypedSubArray<Genome*>(maxCellTypeOperations), maxCellTypeOperations);
     auto numEnergyParticles = data.entities.energies.getNumEntries();
     data.energyParticlesNearBarriers.setMemory(data.processMemory.getTypedSubArray<int>(numEnergyParticles), numEnergyParticles);
-    *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
+
+    // The domains share the external energy pool
+    auto externalEnergy = cudaSimulationParameters.externalEnergy.value;
+    if (data.domain.isDecomposed() && externalEnergy != Infinity<float>::value) {
+        externalEnergy *= data.domain.layout->externalEnergyShares[data.domain.index];
+    }
+    *data.externalEnergy = externalEnergy;
     for (int i = 0; i < MAX_COLORS; ++i) {
         data.numConstructorsNeedingEnergyByColor[i] = 0;
         data.externalEnergyInflowPerConstructorByColor[i] = 0.0f;

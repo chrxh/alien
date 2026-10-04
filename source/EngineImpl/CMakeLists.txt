@@ -5,6 +5,8 @@ add_library(EngineImpl
     Definitions.h
     DescConverterService.cpp
     Domain.cuh
+    DomainSyncService.cu
+    DomainSyncService.cuh
     DescConverterService.h
     EditKernelsService.cu
     EditKernelsService.cuh

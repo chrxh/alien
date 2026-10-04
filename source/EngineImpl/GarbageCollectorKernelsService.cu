@@ -105,3 +105,13 @@ void GarbageCollectorKernelsService::swapArrays(KernelLaunchSettings const& laun
     launchKernelOnDefaultStream(KERNEL(cudaSwapPointerArrays), LaunchConfig{1, 1}, data);
     launchKernelOnDefaultStream(KERNEL(cudaSwapHeaps), LaunchConfig{1, 1}, data);
 }
+
+void GarbageCollectorKernelsService::compactPointerArrays(KernelLaunchSettings const& launchSettings, SimulationData const& data)
+{
+    launchKernelOnDefaultStream(KERNEL(cudaPreparePointerArraysForCleanup), LaunchConfig{1, 1}, data);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaCleanupPointerArray<Energy*>), LaunchConfig{launchSettings.numBlocks, 8}, data.entities.energies, data.tempEntities.energies);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaCleanupPointerArray<Object*>), LaunchConfig{launchSettings.numBlocks, 8}, data.entities.objects, data.tempEntities.objects);
+    launchKernelOnDefaultStream(KERNEL(cudaSwapPointerArrays), LaunchConfig{1, 1}, data);
+}

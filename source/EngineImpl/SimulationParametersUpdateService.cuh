@@ -1,3 +1,4 @@
+#include <functional>
 #include <optional>
 
 #include <Base/Singleton.h>
@@ -17,8 +18,6 @@ public:
         SimulationParameters const& changedParameters,
         SimulationParametersUpdateConfig const& updateConfig) const;
 
-    bool updateSimulationParametersAfterTimestep(
-        SettingsForSimulation& settings,
-        SimulationData const& simulationData,
-        uint64_t timestep);  // Returns true if parameters have been changed
+    // Returns true if parameters have been changed
+    bool updateSimulationParametersAfterTimestep(SettingsForSimulation& settings, std::function<double()> const& readExternalEnergy, uint64_t timestep);
 };

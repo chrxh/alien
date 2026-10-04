@@ -23,6 +23,8 @@ public:
     void copyArrays(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
     void swapArrays(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
 
+    // Removes the null entries of the pointer arrays without touching the heap
+    void compactPointerArrays(KernelLaunchSettings const& launchSettings, SimulationData const& simulationData);
 
 private:
     GarbageCollectorKernelsService() = default;

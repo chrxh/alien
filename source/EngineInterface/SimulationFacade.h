@@ -140,6 +140,9 @@ public:
     virtual void testOnly_zeroTransferData() = 0;
     virtual void testOnly_syncNumberGenerator() = 0;
 
+    // Checks the ownership, the ghost copies and the connections across the domains of a simulation split into domains
+    virtual std::vector<std::string> testOnly_getDomainConsistencyErrors() = 0;
+
 protected:
     static SimulationFacade _instance;
 };

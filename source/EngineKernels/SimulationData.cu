@@ -30,6 +30,7 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
     }
     mutatedGenomes.init();
     energyParticlesNearBarriers.init();
+    domainOps.init();
 }
 
 namespace
@@ -111,6 +112,7 @@ void SimulationData::free()
     }
     mutatedGenomes.free();
     energyParticlesNearBarriers.free();
+    domainOps.free();
 }
 
 void SimulationData::resizeAuxiliaryData()

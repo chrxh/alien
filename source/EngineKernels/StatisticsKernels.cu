@@ -130,6 +130,9 @@ __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, Simu
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->isGhost()) {
+            continue;
+        }
         addObjectToStatistics(statistics, object->type, object->getEnergy());
 
         if (object->type != ObjectType_Cell) {
@@ -160,7 +163,7 @@ __global__ void cudaCollectGenomeAndEnergyStatistics(SimulationData data, Simula
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto creature = object->typeData.cell.creature;

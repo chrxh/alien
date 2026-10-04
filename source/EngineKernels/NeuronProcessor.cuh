@@ -57,7 +57,7 @@ __device__ __inline__ void NeuronProcessor::calcSignal(SimulationData& data, Sim
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
 
-        if (object->type == ObjectType_Cell && object->typeData.cell.cellState != CellState_UnderConstruction) {
+        if (object->type == ObjectType_Cell && object->typeData.cell.cellState != CellState_UnderConstruction && !object->isGhost()) {
             processCell(object, firstCell);
             firstCell = false;
         }
@@ -71,7 +71,7 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto& cell = object->typeData.cell;

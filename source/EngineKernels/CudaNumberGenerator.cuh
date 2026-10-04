@@ -54,6 +54,15 @@ public:
         return hostIds;
     }
 
+    // The domains of a decomposed simulation hand out disjoint ids: domain d of n creates the ids d, d + n, d + 2n, ...
+    __host__ void setIdPartition(int numPartitions, int partition)
+    {
+        _idStride = static_cast<uint32_t>(numPartitions);
+        _idOffset = static_cast<uint32_t>(partition);
+        Ids hostIds{.entityId = _idOffset, .lineageId = _idOffset};
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_ids, &hostIds, sizeof(hostIds), cudaMemcpyHostToDevice));
+    }
+
     // Methods for device
     __device__ __inline__ int random(int maxVal)
     {
@@ -102,21 +111,26 @@ public:
         }
     }
 
-    __device__ __inline__ uint64_t createEntityId() { return alienAtomicAdd64(&_ids->entityId, static_cast<uint64_t>(1)); }
-    __device__ __inline__ uint64_t createLineageId() { return alienAtomicAdd32(&_ids->lineageId, static_cast<uint32_t>(1)); }
+    __device__ __inline__ uint64_t createEntityId() { return alienAtomicAdd64(&_ids->entityId, static_cast<uint64_t>(_idStride)); }
+    __device__ __inline__ uint64_t createLineageId() { return alienAtomicAdd32(&_ids->lineageId, _idStride); }
 
     __device__ __inline__ void adaptMaxIds(Ids const& ids)
     {
-        alienAtomicMax64(&_ids->entityId, ids.entityId + 1);
-        alienAtomicMax32(&_ids->lineageId, ids.lineageId + 1);
+        alienAtomicMax64(&_ids->entityId, alignToIdPartition(ids.entityId + 1));
+        alienAtomicMax32(&_ids->lineageId, static_cast<uint32_t>(alignToIdPartition(ids.lineageId + 1)));
     }
 
 private:
     __device__ __inline__ int getRandomNumber() { return _array[atomicAdd(_currentRandomNumberIndex, 1u) & _indexMask]; }
+
+    // Smallest id >= value that belongs to the own id partition
+    __device__ __inline__ uint64_t alignToIdPartition(uint64_t value) const { return value + (_idOffset + _idStride - value % _idStride) % _idStride; }
 
     uint32_t* _currentRandomNumberIndex = nullptr;
     int* _array = nullptr;
     uint32_t _indexMask = 0;
 
     Ids* _ids = nullptr;
+    uint32_t _idStride = 1;
+    uint32_t _idOffset = 0;
 };

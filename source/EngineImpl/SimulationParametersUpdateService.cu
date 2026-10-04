@@ -41,7 +41,7 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
 
 bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     SettingsForSimulation& settings,
-    SimulationData const& simulationData,
+    std::function<double()> const& readExternalEnergy,
     uint64_t timestep)
 {
     auto result = false;
@@ -82,9 +82,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor.value[i] > 0;
     }
     if (externalEnergyPresent) {
-        double temp;
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&temp, simulationData.externalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
-        settings.simulationParameters.externalEnergy.value = toFloat(temp);
+        settings.simulationParameters.externalEnergy.value = toFloat(readExternalEnergy());
         result = true;
     }
 

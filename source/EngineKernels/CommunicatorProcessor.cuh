@@ -2,6 +2,7 @@
 
 #include <Data/CellTypeConstants.h>
 
+#include "DomainOpEmitter.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -9,6 +10,9 @@ class CommunicatorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
+
+    // senderFacing is the absolute direction encoded by the signal angle of the sender
+    __inline__ __device__ static void receiveSignal(SimulationData& data, Object* receiverObject, float const* signals, float2 const& senderFacing);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
@@ -162,10 +166,19 @@ CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObj
         return false;
     }
 
+    if (receiverObject->isGhost()) {
+        return DomainOpEmitter::communicatorSignal(data, receiverObject, senderObject->typeData.cell.neuralActivity.signals, senderFacing);
+    }
+    receiveSignal(data, receiverObject, senderObject->typeData.cell.neuralActivity.signals, senderFacing);
+    return true;
+}
+
+__inline__ __device__ void CommunicatorProcessor::receiveSignal(SimulationData& data, Object* receiverObject, float const* signals, float2 const& senderFacing)
+{
     receiverObject->getLock();
 
     // Copy signal to receiver
-    copyChannels(receiverObject->typeData.cell.neuralActivity.signals, senderObject->typeData.cell.neuralActivity.signals);
+    copyChannels(receiverObject->typeData.cell.neuralActivity.signals, signals);
 
     // The encoded angle is relative to each cell's absolute front direction. senderFacing is the sender's absolute
     // encoded direction; convert it back into the receiver's frame so the absolute direction is preserved.
@@ -173,5 +186,4 @@ CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObj
     receiverObject->typeData.cell.neuralActivity.signals[Channels::CommunicatorAngle] = receiverAngle;
 
     receiverObject->releaseLock();
-    return true;
 }

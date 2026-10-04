@@ -6,6 +6,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
+#include "DomainOpEmitter.cuh"
 #include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
 
@@ -322,7 +323,11 @@ __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& dat
         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
             energyToTransfer = particle->energy;
         }
-        if (object->type == ObjectType_Cell) {
+        if (object->isGhost()) {
+            if (!DomainOpEmitter::creditEnergy(data, object, EnergyKind::Raw, energyToTransfer)) {
+                energyToTransfer = 0;
+            }
+        } else if (object->type == ObjectType_Cell) {
             object->typeData.cell.rawEnergy += energyToTransfer;
         } else {
             object->typeData.freeCell.energy += energyToTransfer;
@@ -485,6 +490,11 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
     auto const partition = calcSystemThreadPartition(numActiveSources);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(index);
+
+        // Each source is fed by exactly one domain
+        if (data.domain.isDecomposed() && data.domain.getStripOwner(cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].x) != data.domain.index) {
+            continue;
+        }
         auto relativeStrength = cudaSimulationParameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
 
         for (int color = 0; color < MAX_COLORS; ++color) {

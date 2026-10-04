@@ -2,6 +2,7 @@
 
 #include <Data/CellTypeConstants.h>
 
+#include "DomainOpEmitter.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -28,11 +29,11 @@ private:
 
     __inline__ __device__ static void radiate(SimulationData& data, Object* object, float activation);
 
-    __inline__ __device__ static bool tryChangeConnectionDistance(Object* object, float distanceDelta);
+    __inline__ __device__ static bool tryChangeConnectionDistance(SimulationData& data, Object* object, float distanceDelta);
 
     __inline__ __device__ static void getChain(Object** chain, int& chainLength, Object* startCell);
     __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Object* object);
-    __inline__ __device__ static void applyAcceleration(SimulationStatistics& statistics, Object* object, float2 const& acceleration);
+    __inline__ __device__ static void applyAcceleration(SimulationData& data, SimulationStatistics& statistics, Object* object, float2 const& acceleration);
 
     struct BendingInfo
     {
@@ -42,6 +43,7 @@ private:
         ObjectConnection* connectionNext;
     };
     __inline__ __device__ static BendingInfo getBendingInfo(Object* object);
+    __inline__ __device__ static void shiftPivotAngle(SimulationData& data, Object* object, BendingInfo const& bendingInfo, float angleDelta);
     __inline__ __device__ static bool hasValidBendingConnections(Object* object);
 
     __inline__ __device__ static bool isLeftSide(Object* object);
@@ -222,8 +224,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (angleFromPrevious + angleDelta < minAngle) {
         angleDelta = minAngle - angleFromPrevious;
     }
-    atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
-    atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
+    shiftPivotAngle(data, object, bendingInfo, angleDelta);
 
     // Apply impulse
     auto direction = calcAverageDirection(data, object);
@@ -241,7 +242,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
     auto acceleration =
         direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 10.0f;
-    applyAcceleration(statistics, object, acceleration);
+    applyAcceleration(data, statistics, object, acceleration);
 
     radiate(data, object, activation);
 }
@@ -310,8 +311,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (angleFromPrevious + angleDelta < minAngle) {
         angleDelta = minAngle - angleFromPrevious;
     }
-    atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
-    atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
+    shiftPivotAngle(data, object, bendingInfo, angleDelta);
 
     if ((angleDelta > 0 && bending.lastAngleDelta <= 0) || (angleDelta < 0 && bending.lastAngleDelta >= 0)) {
     }
@@ -333,7 +333,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     }
     auto acceleration =
         direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 10.0f;
-    applyAcceleration(statistics, object, acceleration);
+    applyAcceleration(data, statistics, object, acceleration);
 
     radiate(data, object, activation);
 }
@@ -383,8 +383,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (angleFromPrevious + angleDelta < minAngle) {
         angleDelta = minAngle - angleFromPrevious;
     }
-    atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
-    atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
+    shiftPivotAngle(data, object, bendingInfo, angleDelta);
     object->typeData.cell.frontAngle -= angleDelta;
 
     radiate(data, object, activation);
@@ -436,7 +435,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     if (connectionDistance + distanceDelta < minDistance) {
         distanceDelta = minDistance - connectionDistance;
     }
-    if (!tryChangeConnectionDistance(object, distanceDelta)) {
+    if (!tryChangeConnectionDistance(data, object, distanceDelta)) {
         return;
     }
 
@@ -458,7 +457,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 
     auto acceleration = direction * power * cudaSimulationParameters.muscleCrawlingAcceleration.value[object->color] / 7 * 3.0f;
-    applyAcceleration(statistics, object, acceleration);
+    applyAcceleration(data, statistics, object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
     radiate(data, object, activation);
@@ -503,7 +502,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     if (connectionDistance + distanceDelta < minDistance) {
         distanceDelta = minDistance - connectionDistance;
     }
-    if (!tryChangeConnectionDistance(object, distanceDelta)) {
+    if (!tryChangeConnectionDistance(data, object, distanceDelta)) {
         return;
     }
 
@@ -527,7 +526,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
 
     auto acceleration = direction * power * cudaSimulationParameters.muscleCrawlingAcceleration.value[object->color] / 7.0f * 3.0f;
-    applyAcceleration(statistics, object, acceleration);
+    applyAcceleration(data, statistics, object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
     radiate(data, object, activation);
@@ -586,13 +585,19 @@ __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object
     }
 }
 
-__inline__ __device__ bool MuscleProcessor::tryChangeConnectionDistance(Object* object, float distanceDelta)
+__inline__ __device__ bool MuscleProcessor::tryChangeConnectionDistance(SimulationData& data, Object* object, float distanceDelta)
 {
     auto connectedObject = object->connections[0].object;
     for (int i = 0; i < connectedObject->numConnections; ++i) {
         if (connectedObject->connections[i].object == object) {
+            if (connectedObject->isGhost()) {
+                if (!DomainOpEmitter::changeConnectionDistance(data, connectedObject, object, distanceDelta)) {
+                    return false;
+                }
+            } else {
+                atomicAdd(&connectedObject->connections[i].distance, distanceDelta);
+            }
             atomicAdd(&object->connections[0].distance, distanceDelta);
-            atomicAdd(&connectedObject->connections[i].distance, distanceDelta);
             return true;
         }
     }
@@ -646,7 +651,8 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
     return result;
 }
 
-__inline__ __device__ void MuscleProcessor::applyAcceleration(SimulationStatistics& statistics, Object* object, float2 const& acceleration)
+__inline__ __device__ void
+MuscleProcessor::applyAcceleration(SimulationData& data, SimulationStatistics& statistics, Object* object, float2 const& acceleration)
 {
     Object* chain[MaxChainLength];
     int chainLength;
@@ -655,13 +661,27 @@ __inline__ __device__ void MuscleProcessor::applyAcceleration(SimulationStatisti
         min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
         min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
     for (int i = 0; i < chainLength; ++i) {
-        atomicAdd(&chain[i]->vel.x, accPerCell.x);
-        atomicAdd(&chain[i]->vel.y, accPerCell.y);
+        if (chain[i]->isGhost()) {
+            DomainOpEmitter::addVelocity(data, chain[i], accPerCell);
+        } else {
+            atomicAdd(&chain[i]->vel.x, accPerCell.x);
+            atomicAdd(&chain[i]->vel.y, accPerCell.y);
+        }
     }
     auto sumVelocityChanges = Math::length(accPerCell) * toFloat(chainLength);
     if (sumVelocityChanges > NEAR_ZERO) {
         statistics.addMuscleActivity(object->typeData.cell.creature->lineageId, sumVelocityChanges);
     }
+}
+
+__inline__ __device__ void MuscleProcessor::shiftPivotAngle(SimulationData& data, Object* object, BendingInfo const& bendingInfo, float angleDelta)
+{
+    if (bendingInfo.pivotCell->isGhost()) {
+        DomainOpEmitter::shiftConnectionAngle(data, bendingInfo.pivotCell, object, angleDelta);
+        return;
+    }
+    atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
+    atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
 }
 
 __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Object* object)

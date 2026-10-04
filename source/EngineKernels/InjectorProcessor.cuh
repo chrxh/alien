@@ -1,11 +1,15 @@
 #pragma once
 
+#include "DomainOpEmitter.cuh"
 #include "SimulationData.cuh"
 
 class InjectorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
+
+    // The injected cell starts to construct the gene of the injector's genome as a new creature
+    __inline__ __device__ static void injectIntoCell(SimulationData& data, Object* injectedCell, Creature* injectorCreature, int geneIndex);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
@@ -68,14 +72,14 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            EntityFactory factory;
-            factory.init(&data);
-            auto cloneCreature = factory.cloneCreature(object->typeData.cell.creature);
-            cloneCreature->numCells = 1;
-            injectedCell->typeData.cell.creature = cloneCreature;
-            injectedCell->typeData.cell.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
-            injectedCell->typeData.cell.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-            injectedCell->typeData.cell.constructor.currentOffspring = 1;
+            auto geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
+            if (injectedCell->isGhost()) {
+                if (!DomainOpEmitter::inject(data, injectedCell, object->typeData.cell.creature, geneIndex)) {
+                    return;
+                }
+            } else {
+                injectIntoCell(data, injectedCell, object->typeData.cell.creature, geneIndex);
+            }
 
             object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = 1;
 
@@ -86,6 +90,18 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
     }
+}
+
+__inline__ __device__ void InjectorProcessor::injectIntoCell(SimulationData& data, Object* injectedCell, Creature* injectorCreature, int geneIndex)
+{
+    EntityFactory factory;
+    factory.init(&data);
+    auto cloneCreature = factory.cloneCreature(injectorCreature);
+    cloneCreature->numCells = 1;
+    injectedCell->typeData.cell.creature = cloneCreature;
+    injectedCell->typeData.cell.constructor.geneIndex = geneIndex;
+    injectedCell->typeData.cell.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+    injectedCell->typeData.cell.constructor.currentOffspring = 1;
 }
 
 __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatistics& statistics, Object* object)
