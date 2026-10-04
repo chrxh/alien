@@ -43,7 +43,7 @@ Follow the callers of every changed function at least one level out.
    or version bump.
 6. **GUI state.** ImGui widgets whose state is not persisted, reset, or cloned along
    with the object they edit.
-7. **Repository conventions**, from CLAUDE.md — flag only actual violations:
+7. **Repository conventions**, from AGENTS.md — flag only actual violations:
    4 spaces and no tabs, Allman braces, camelCase for variables and functions,
    PascalCase for classes, UPPER_SNAKE_CASE for constants, `.at()` rather than `[]`
    for `std::vector` unless there is a clear local reason, no unnecessary comments,
