@@ -74,13 +74,7 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 
 ## 🤖 Let an AI agent drive ALIEN
 
-ALIEN speaks the [Model Context Protocol](https://modelcontextprotocol.io) (MCP). Open **Windows > MCP server** (Alt+6), click **Start server** and add the server to your agent. For instance, with Claude Code, a single command is enough:
-
-```
-claude mcp add --transport http alien http://127.0.0.1:8765/mcp
-```
-
-Any other agent or chat application that supports MCP servers over HTTP works as well. Then just ask, for example:
+ALIEN contains a built-in server for the [Model Context Protocol](https://modelcontextprotocol.io) (MCP). Connect Claude Code or any other AI agent that supports MCP and simply describe what you want, for example:
 
 - *"Create a mysterious deep sea scene with glowing jellyfish-like creatures."*
 - *"Design a small creature that swims towards energy particles and place five of them."*
