@@ -11,7 +11,6 @@
 #include <ranges>
 #include <stdexcept>
 
-#include <vulkan/vulkan.h>
 #if defined(_WIN32)
 #include <vulkan/vulkan_win32.h>
 #endif
@@ -560,8 +559,8 @@ void VulkanContext::createInstance()
     std::vector<char const*> extensions(glfwExtensions, glfwExtensions + numGlfwExtensions);
 
     std::vector<char const*> layers;
-    _validationEnabled = GlobalSettings::get().isDebugMode() && isLayerAvailable(ValidationLayerName);
-    if (_validationEnabled) {
+    auto validationEnabled = GlobalSettings::get().isDebugMode() && isLayerAvailable(ValidationLayerName);
+    if (validationEnabled) {
         layers.emplace_back(ValidationLayerName);
         extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         log(Priority::Important, "Vulkan validation layer enabled");
@@ -589,7 +588,7 @@ void VulkanContext::createInstance()
     }
     checkVkResult(result, "vkCreateInstance");
 
-    if (_validationEnabled) {
+    if (validationEnabled) {
         auto createMessenger = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
         VkDebugUtilsMessengerCreateInfoEXT messengerInfo{
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -703,13 +702,9 @@ void VulkanContext::selectPhysicalDevice(std::optional<GpuUuid> const& preferred
 
 void VulkanContext::createDevice()
 {
-    auto availableExtensions = getDeviceExtensions(_physicalDevice);
     std::vector<char const*> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     if (_memorySharingSupported) {
         extensions.emplace_back(ExternalMemoryExtensionName);
-    }
-    if (hasExtension(availableExtensions, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME)) {
-        extensions.emplace_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
     }
 
     float queuePriority = 1.0f;

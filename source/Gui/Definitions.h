@@ -169,8 +169,6 @@ struct UserInfo;
 
 struct GLFWvidmode;
 struct GLFWwindow;
-struct ImFont;
-struct ImVec2;
 
 struct TextureData
 {
