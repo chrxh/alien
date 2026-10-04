@@ -28,11 +28,13 @@ public:
 
 private:
     void releaseSharedMemory();
+    void releaseSharedMemory(GeometryBufferType type);
     void releaseDeviceBuffers();
 
     std::array<void*, GeometryBufferType_Count> _activeBuffers = {};
 
     std::weak_ptr<_GeometryBuffers> _importedGeometryBuffers;
+    std::array<uint64_t, GeometryBufferType_Count> _importedGenerations = {};
     std::array<cudaExternalMemory_t, GeometryBufferType_Count> _externalMemories = {};
     std::array<void*, GeometryBufferType_Count> _sharedBuffers = {};
 

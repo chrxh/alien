@@ -1,9 +1,7 @@
 #include "CudaGeometryBuffers.cuh"
 #include "CudaMemoryManager.cuh"
 
-#if defined(_WIN32)
-#include <windows.h>
-#else
+#if !defined(_WIN32)
 #include <unistd.h>
 #endif
 
@@ -26,10 +24,8 @@ namespace
 
         auto importResult = cudaImportExternalMemory(&result, &description);
 
-        // CUDA does not take over NT handles but file descriptors of successful imports
-#if defined(_WIN32)
-        CloseHandle(memory.win32Handle);
-#else
+        // NT handles stay with the geometry buffers, file descriptors of successful imports belong to CUDA
+#if !defined(_WIN32)
         if (importResult != cudaSuccess) {
             close(memory.fd);
         }
@@ -48,13 +44,18 @@ namespace
 
 cudaError_t CudaGeometryBuffers::importSharedMemory(GeometryBuffers const& geometryBuffers)
 {
-    if (_importedGeometryBuffers.lock() == geometryBuffers && !geometryBuffers->hasReallocatedBuffers()) {
-        _activeBuffers = _sharedBuffers;
-        return cudaSuccess;
+    if (_importedGeometryBuffers.lock() != geometryBuffers) {
+        releaseSharedMemory();
+        _importedGeometryBuffers = geometryBuffers;
     }
-    releaseSharedMemory();
 
+    // Only buffers with new memory are imported again
     for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
+        auto generation = geometryBuffers->getGeneration(type);
+        if (_sharedBuffers.at(type) != nullptr && _importedGenerations.at(type) == generation) {
+            continue;
+        }
+        releaseSharedMemory(type);
         auto sharedMemory = geometryBuffers->shareMemory(type);
         if (auto result = importExternalMemory(_externalMemories.at(type), sharedMemory); result != cudaSuccess) {
             releaseSharedMemory();
@@ -65,8 +66,8 @@ cudaError_t CudaGeometryBuffers::importSharedMemory(GeometryBuffers const& geome
             releaseSharedMemory();
             return result;
         }
+        _importedGenerations.at(type) = generation;
     }
-    _importedGeometryBuffers = geometryBuffers;
     _activeBuffers = _sharedBuffers;
     return cudaSuccess;
 }
@@ -109,21 +110,26 @@ void CudaGeometryBuffers::release()
 
 void CudaGeometryBuffers::releaseSharedMemory()
 {
-    auto contextValid = !CudaContextState::get().isInvalid();
     for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
-        auto& sharedBuffer = _sharedBuffers.at(type);
-        auto& externalMemory = _externalMemories.at(type);
-        if (contextValid && sharedBuffer != nullptr) {
-            cudaFree(sharedBuffer);
-        }
-        if (contextValid && externalMemory != nullptr) {
-            cudaDestroyExternalMemory(externalMemory);
-        }
-        sharedBuffer = nullptr;
-        externalMemory = nullptr;
+        releaseSharedMemory(type);
     }
     _importedGeometryBuffers.reset();
     _activeBuffers = {};
+}
+
+void CudaGeometryBuffers::releaseSharedMemory(GeometryBufferType type)
+{
+    auto contextValid = !CudaContextState::get().isInvalid();
+    auto& sharedBuffer = _sharedBuffers.at(type);
+    auto& externalMemory = _externalMemories.at(type);
+    if (contextValid && sharedBuffer != nullptr) {
+        cudaFree(sharedBuffer);
+    }
+    if (contextValid && externalMemory != nullptr) {
+        cudaDestroyExternalMemory(externalMemory);
+    }
+    sharedBuffer = nullptr;
+    externalMemory = nullptr;
 }
 
 void CudaGeometryBuffers::releaseDeviceBuffers()
