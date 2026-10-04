@@ -65,15 +65,29 @@ void _VulkanGeometryBuffers::download(GeometryBufferType type, void* data, uint6
 
 void _VulkanGeometryBuffers::prepareForRendering(VkCommandBuffer commandBuffer)
 {
+    auto copied = false;
     for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
         auto& pendingUploadSize = _pendingUploadSizes.at(type);
         if (pendingUploadSize > 0) {
             VkBufferCopy region{.size = pendingUploadSize};
             vkCmdCopyBuffer(commandBuffer, _stagingBuffers.at(type).buffer, _buffers.at(type).buffer, 1, &region);
             pendingUploadSize = 0;
+            copied = true;
         }
     }
-    VulkanContext::memoryBarrier(commandBuffer);
+
+    // The GPU engine has already finished writing the shared memory when the frame is submitted
+    if (copied) {
+        VkMemoryBarrier2 barrier{
+            .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
+            .srcStageMask = VK_PIPELINE_STAGE_2_COPY_BIT,
+            .srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT | VK_PIPELINE_STAGE_2_INDEX_INPUT_BIT,
+            .dstAccessMask = VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_2_INDEX_READ_BIT,
+        };
+        VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .memoryBarrierCount = 1, .pMemoryBarriers = &barrier};
+        vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+    }
 }
 
 VkBuffer _VulkanGeometryBuffers::getBuffer(GeometryBufferType type) const

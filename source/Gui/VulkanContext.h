@@ -36,7 +36,31 @@ struct VulkanImage
     VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT;
     IntVector2D size;
     uint32_t mipLevels = 1;
+
+    // State after the commands recorded so far
     VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    VkPipelineStageFlags2 lastStages = VK_PIPELINE_STAGE_2_NONE;
+    VkAccessFlags2 lastAccesses = VK_ACCESS_2_NONE;
+};
+
+enum class ImageUsage
+{
+    ColorAttachment,
+    DepthAttachment,
+    ShaderRead,
+    TransferSource,
+    TransferDestination,
+};
+
+// Collects the barriers before images are used in another way and records them in one command. Reads after reads need none.
+class VulkanImageBarriers
+{
+public:
+    VulkanImageBarriers& add(VulkanImage& image, ImageUsage usage);
+    void record(VkCommandBuffer commandBuffer);
+
+private:
+    std::vector<VkImageMemoryBarrier2> _barriers;
 };
 
 enum class VulkanMemory
@@ -83,8 +107,7 @@ public:
     // Creates an image in shader read layout from RGBA pixels
     VulkanImage createSampledImage(uint8_t const* pixels, IntVector2D const& size);
     void destroyImage(VulkanImage& image);
-    static void transitionImage(VkCommandBuffer commandBuffer, VulkanImage& image, VkImageLayout newLayout);
-    static void memoryBarrier(VkCommandBuffer commandBuffer);
+    static void useImage(VkCommandBuffer commandBuffer, VulkanImage& image, ImageUsage usage);
 
     // Records the commands into an own command buffer, submits it and waits for its completion
     void submitAndWait(std::function<void(VkCommandBuffer)> const& recordFunc);

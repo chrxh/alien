@@ -86,7 +86,7 @@ TextureData TextureService::createTexture(uint8_t const* pixels, int width, int 
         {width, height}, vkFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipLevels);
 
     context.submitAndWait([&](VkCommandBuffer commandBuffer) {
-        VulkanContext::transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferDestination);
         VkBufferImageCopy region{
             .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
             .imageExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1},
