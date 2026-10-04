@@ -2,6 +2,8 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <algorithm>
@@ -210,6 +212,9 @@ VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags u
     if (memory == VulkanMemory::HostVisible) {
         checkVkResult(vkMapMemory(_device, result.memory, 0, VK_WHOLE_SIZE, 0, &result.mapped), "vkMapMemory");
     }
+    if (shareable) {
+        exportSharedHandle(result);
+    }
     return result;
 }
 
@@ -222,6 +227,15 @@ void VulkanContext::destroyBuffer(VulkanBuffer& buffer)
         vkDestroyBuffer(_device, buffer.buffer, nullptr);
         vkFreeMemory(_device, buffer.memory, nullptr);
     }
+#if defined(_WIN32)
+    if (buffer.sharedHandle != nullptr) {
+        CloseHandle(buffer.sharedHandle);
+    }
+#else
+    if (buffer.sharedFd != -1) {
+        close(buffer.sharedFd);
+    }
+#endif
     buffer = VulkanBuffer();
 }
 
@@ -229,29 +243,9 @@ SharedGeometryMemory VulkanContext::exportMemory(VulkanBuffer const& buffer)
 {
     SharedGeometryMemory result{.allocationSize = buffer.allocationSize, .dedicatedAllocation = buffer.dedicatedAllocation};
 #if defined(_WIN32)
-    auto getHandle = reinterpret_cast<PFN_vkGetMemoryWin32HandleKHR>(vkGetDeviceProcAddr(_device, "vkGetMemoryWin32HandleKHR"));
-    if (getHandle == nullptr) {
-        throw std::runtime_error("vkGetMemoryWin32HandleKHR is not available.");
-    }
-    VkMemoryGetWin32HandleInfoKHR handleInfo{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
-        .memory = buffer.memory,
-        .handleType = ExternalMemoryHandleType,
-    };
-    HANDLE handle = nullptr;
-    checkVkResult(getHandle(_device, &handleInfo, &handle), "vkGetMemoryWin32HandleKHR");
-    result.win32Handle = handle;
+    result.win32Handle = buffer.sharedHandle;
 #else
-    auto getFd = reinterpret_cast<PFN_vkGetMemoryFdKHR>(vkGetDeviceProcAddr(_device, "vkGetMemoryFdKHR"));
-    if (getFd == nullptr) {
-        throw std::runtime_error("vkGetMemoryFdKHR is not available.");
-    }
-    VkMemoryGetFdInfoKHR fdInfo{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
-        .memory = buffer.memory,
-        .handleType = ExternalMemoryHandleType,
-    };
-    checkVkResult(getFd(_device, &fdInfo, &result.fd), "vkGetMemoryFdKHR");
+    result.fd = dup(buffer.sharedFd);
 #endif
     return result;
 }
@@ -740,6 +734,37 @@ void VulkanContext::createSampler()
         .maxLod = 0.0f,
     };
     checkVkResult(vkCreateSampler(_device, &samplerInfo, nullptr, &_linearClampSampler), "vkCreateSampler");
+}
+
+void VulkanContext::exportSharedHandle(VulkanBuffer& buffer)
+{
+    // The NVIDIA driver rejects every further import of the memory into CUDA once its first exported handle is closed.
+    // Therefore, the handle stays open as long as the buffer exists.
+#if defined(_WIN32)
+    auto getHandle = reinterpret_cast<PFN_vkGetMemoryWin32HandleKHR>(vkGetDeviceProcAddr(_device, "vkGetMemoryWin32HandleKHR"));
+    if (getHandle == nullptr) {
+        throw std::runtime_error("vkGetMemoryWin32HandleKHR is not available.");
+    }
+    VkMemoryGetWin32HandleInfoKHR handleInfo{
+        .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
+        .memory = buffer.memory,
+        .handleType = ExternalMemoryHandleType,
+    };
+    HANDLE handle = nullptr;
+    checkVkResult(getHandle(_device, &handleInfo, &handle), "vkGetMemoryWin32HandleKHR");
+    buffer.sharedHandle = handle;
+#else
+    auto getFd = reinterpret_cast<PFN_vkGetMemoryFdKHR>(vkGetDeviceProcAddr(_device, "vkGetMemoryFdKHR"));
+    if (getFd == nullptr) {
+        throw std::runtime_error("vkGetMemoryFdKHR is not available.");
+    }
+    VkMemoryGetFdInfoKHR fdInfo{
+        .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
+        .memory = buffer.memory,
+        .handleType = ExternalMemoryHandleType,
+    };
+    checkVkResult(getFd(_device, &fdInfo, &buffer.sharedFd), "vkGetMemoryFdKHR");
+#endif
 }
 
 uint32_t VulkanContext::findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const

@@ -23,6 +23,8 @@ struct VulkanBuffer
     VkDeviceSize allocationSize = 0;
     bool dedicatedAllocation = false;
     void* mapped = nullptr;
+    void* sharedHandle = nullptr;  // Windows
+    int sharedFd = -1;             // Linux
 };
 
 struct VulkanImage
@@ -111,6 +113,7 @@ private:
     void createDescriptorPool();
     void createSampler();
 
+    void exportSharedHandle(VulkanBuffer& buffer);
     uint32_t findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
     void runPendingDestructions(std::optional<uint64_t> completedFrameNumber);
 

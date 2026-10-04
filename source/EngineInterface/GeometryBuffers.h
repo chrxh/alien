@@ -115,7 +115,7 @@ namespace GeometryBufferLayout
 // Memory of a geometry buffer that the GPU engine can import and write into directly
 struct SharedGeometryMemory
 {
-    void* win32Handle = nullptr;  // NT handle on Windows, the importer closes it
+    void* win32Handle = nullptr;  // NT handle on Windows, stays owned by the geometry buffers
     int fd = -1;                  // File descriptor on Linux, owned by the importer after a successful import
     uint64_t allocationSize = 0;
     bool dedicatedAllocation = false;
@@ -132,7 +132,8 @@ public:
 
     NumRenderObjects getNumObjects() const;
 
-    bool hasReallocatedBuffers() const;
+    // Changes whenever the buffer gets new memory
+    uint64_t getGeneration(GeometryBufferType type) const;
 
     uint64_t getCapacity(GeometryBufferType type) const;
 
@@ -160,7 +161,7 @@ private:
     std::vector<T> downloadElements(GeometryBufferType type) const;
 
     NumRenderObjects _numObjects = {};
-    bool _reallocatedBuffers = false;
+    std::array<uint64_t, GeometryBufferType_Count> _generations = {};
     std::array<uint64_t, GeometryBufferType_Count> _capacities = {};
 };
 
