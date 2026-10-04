@@ -65,7 +65,9 @@ void SimulationView::resize(IntVector2D const& size)
 void SimulationView::draw()
 {
     if (_renderSimulation) {
-        VulkanFrameRenderer::get().drawScene([this](VkCommandBuffer commandBuffer) -> VulkanImage& { return _renderPipeline->execute(commandBuffer); });
+        VulkanFrameRenderer::get().drawScene(
+            [this] { _renderPipeline->updateGeometry(); },
+            [this](VkCommandBuffer commandBuffer) -> VulkanImage& { return _renderPipeline->execute(commandBuffer); });
 
         if (_SimulationFacade::get()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
@@ -213,6 +215,7 @@ PictureData SimulationView::savePicture(IntVector2D const& resolution)
     Viewport::get().setRenderScale(renderScale);
 
     _renderPipeline->resize(resolution);
+    _renderPipeline->updateGeometry();
     context.submitAndWait([&](VkCommandBuffer commandBuffer) {
         auto& image = _renderPipeline->execute(commandBuffer, target);
         VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);

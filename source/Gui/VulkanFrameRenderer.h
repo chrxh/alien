@@ -28,10 +28,12 @@ public:
     // Fills the screen of the current frame with a color
     void clearScreen(FloatColorRGB const& color);
 
-    // The function records the scene into its own image, which then fills the screen of the current frame.
-    // Its rows are ordered from bottom to top as in OpenGL.
+    // The update function writes the data of the scene into resources that the GPU no longer uses at this point. It is also called for frames
+    // that are not shown, e.g. while the window is minimized. The render function records the scene into its own image, which then fills
+    // the screen of the current frame. Its rows are ordered from bottom to top as in OpenGL.
+    using SceneUpdateFunc = std::function<void()>;
     using SceneRenderFunc = std::function<VulkanImage&(VkCommandBuffer)>;
-    void drawScene(SceneRenderFunc const& sceneRenderFunc);
+    void drawScene(SceneUpdateFunc const& updateFunc, SceneRenderFunc const& renderFunc);
 
     void render(ImDrawData* drawData);
 
@@ -64,5 +66,11 @@ private:
     Shader _presentationShader;
 
     FloatColorRGB _clearColor = {0, 0, 0};
-    std::optional<SceneRenderFunc> _sceneRenderFunc;
+
+    struct Scene
+    {
+        SceneUpdateFunc updateFunc;
+        SceneRenderFunc renderFunc;
+    };
+    std::optional<Scene> _scene;
 };
