@@ -108,7 +108,7 @@ void VulkanFrameRenderer::shutdown()
 
     ImGui_ImplVulkan_Shutdown();
     _presentationShader.reset();
-    _sceneRenderFunc.reset();
+    _scene.reset();
     destroySwapchain();
 
     vkDestroyFence(device, _frameFence, nullptr);
@@ -119,19 +119,19 @@ void VulkanFrameRenderer::shutdown()
 void VulkanFrameRenderer::newFrame()
 {
     _clearColor = {0, 0, 0};
-    _sceneRenderFunc.reset();
+    _scene.reset();
     ImGui_ImplVulkan_NewFrame();
 }
 
 void VulkanFrameRenderer::clearScreen(FloatColorRGB const& color)
 {
     _clearColor = color;
-    _sceneRenderFunc.reset();
+    _scene.reset();
 }
 
-void VulkanFrameRenderer::drawScene(SceneRenderFunc const& sceneRenderFunc)
+void VulkanFrameRenderer::drawScene(SceneUpdateFunc const& updateFunc, SceneRenderFunc const& renderFunc)
 {
-    _sceneRenderFunc = sceneRenderFunc;
+    _scene = Scene{.updateFunc = updateFunc, .renderFunc = renderFunc};
 }
 
 void VulkanFrameRenderer::render(ImDrawData* drawData)
@@ -148,11 +148,17 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
         context.onFrameCompleted(context.getFrameNumber() - 1);
     }
 
-    auto finishFrame = [&] { context.advanceFrameNumber(); };
+    // Frames that are not shown still update the scene since the simulation can be synchronized with the rendering
+    auto skipFrame = [&] {
+        if (_scene) {
+            _scene->updateFunc();
+        }
+        context.advanceFrameNumber();
+    };
 
     auto framebufferSize = getFramebufferSize();
     if (framebufferSize.x <= 0 || framebufferSize.y <= 0) {
-        finishFrame();
+        skipFrame();
         return;
     }
     if (_swapchainOutdated || static_cast<uint32_t>(framebufferSize.x) != _extent.width || static_cast<uint32_t>(framebufferSize.y) != _extent.height) {
@@ -164,7 +170,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     auto acquireResult = vkAcquireNextImageKHR(device, _swapchain, UINT64_MAX, _imageAcquiredSemaphore, VK_NULL_HANDLE, &imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR) {
         _swapchainOutdated = true;
-        finishFrame();
+        skipFrame();
         return;
     }
     if (acquireResult == VK_SUBOPTIMAL_KHR) {
@@ -178,8 +184,9 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     checkVkResult(vkBeginCommandBuffer(_commandBuffer, &beginInfo), "vkBeginCommandBuffer");
 
     VulkanImage* sceneImage = nullptr;
-    if (_sceneRenderFunc) {
-        sceneImage = &(*_sceneRenderFunc)(_commandBuffer);
+    if (_scene) {
+        _scene->updateFunc();
+        sceneImage = &_scene->renderFunc(_commandBuffer);
         VulkanContext::useImage(_commandBuffer, *sceneImage, ImageUsage::ShaderRead);
     }
 
@@ -291,7 +298,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     } else {
         checkVkResult(presentResult, "vkQueuePresentKHR");
     }
-    finishFrame();
+    context.advanceFrameNumber();
 }
 
 VkFormat VulkanFrameRenderer::getScreenFormat() const

@@ -48,6 +48,9 @@ public:
     // The images take the new size at the next execution, so that resizing the window does not create images for every intermediate size
     void resize(IntVector2D const& size);
 
+    // Copies the visible simulation data into the geometry buffers, which the GPU must no longer use
+    void updateGeometry();
+
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
     // Without a final target, the pipeline renders into an own image of the view size.
     VulkanImage& execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget = std::nullopt);

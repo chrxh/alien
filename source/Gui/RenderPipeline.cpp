@@ -32,6 +32,11 @@ void _RenderPipeline::resize(IntVector2D const& size)
     _requestedTextureSize = size;
 }
 
+void _RenderPipeline::updateGeometry()
+{
+    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, Viewport::get().getVisibleWorldRect());
+}
+
 namespace
 {
     std::vector<TextureTarget> getTextures(std::vector<RenderTarget> const& targets)
@@ -50,9 +55,6 @@ VulkanImage& _RenderPipeline::execute(VkCommandBuffer commandBuffer, std::option
 {
     _finalTarget = finalTarget ? RenderTarget(*finalTarget) : RenderTarget(ScreenTarget());
     applyRequestedSize(!finalTarget.has_value());
-
-    // Copy vertex buffer from Cuda to Vulkan
-    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, Viewport::get().getVisibleWorldRect());
     _geometryBuffers->prepareForRendering(commandBuffer);
 
     GeneralRenderInfo generalRenderInfo{.commandBuffer = commandBuffer};
