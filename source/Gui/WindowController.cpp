@@ -106,6 +106,9 @@ void WindowController::init()
         if (isWindowedMode()) {
             log(Priority::Important, "set windowed mode");
             _startupSize = _sizeInWindowedMode;
+
+            // The console window, which Windows Terminal opens with a delay, would otherwise cover the window. Full screen windows stay on top anyway.
+            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
             return glfwCreateWindow(_sizeInWindowedMode.x, _sizeInWindowedMode.y, "alien", nullptr, nullptr);
         } else {
             log(Priority::Important, "set full screen mode");
@@ -224,6 +227,12 @@ void WindowController::showWindow()
         applyMode(_mode);
     }
     glfwFocusWindow(_windowData.window);
+}
+
+void WindowController::showStartupWindow()
+{
+    // GLFW focuses the window when showing it and leaves full screen windows untouched
+    glfwShowWindow(_windowData.window);
 }
 
 void WindowController::applyMode(std::string const& mode)
