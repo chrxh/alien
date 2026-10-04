@@ -14,6 +14,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/AlienExceptions.h>
+#include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
 
 #include <Network/NetworkService.h>
@@ -79,6 +80,7 @@
 #include "Viewport.h"
 #include "VulkanContext.h"
 #include "VulkanFrameRenderer.h"
+#include "VulkanGeometryBuffers.h"
 #include "WindowController.h"
 #include "implot.h"
 
@@ -220,6 +222,23 @@ namespace
             return std::nullopt;
         }
     }
+
+    // Geometry buffers created afterwards are only shareable with the GPU engine if the check succeeds
+    void checkRenderingInterop()
+    {
+        if (!GlobalSettings::get().isInterop() || !VulkanContext::get().isMemorySharingSupported()) {
+            return;
+        }
+        // Without objects, the buffers get their minimum capacity
+        auto geometryBuffers = _VulkanGeometryBuffers::create();
+        geometryBuffers->updateNumObjects({});
+        if (_SimulationFacade::get()->isRenderingInteropWorking(geometryBuffers)) {
+            log(Priority::Important, "CUDA-Vulkan interop is working");
+        } else {
+            GlobalSettings::get().setInterop(false);
+            log(Priority::Important, "CUDA-Vulkan interop is not working on this system, falling back to the transfer over host memory");
+        }
+    }
 }
 
 void _MainWindow::initGlfwAndVulkan()
@@ -236,6 +255,7 @@ void _MainWindow::initGlfwAndVulkan()
     glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
 
     VulkanContext::get().setup(windowData.window, getEngineGpuUuid());
+    checkRenderingInterop();
 
     ImGui::CreateContext();
     ImPlot::CreateContext();

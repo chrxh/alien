@@ -52,6 +52,11 @@ GpuUuid EngineWorker::getGpuUuid() const
     return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuUuid;
 }
 
+bool EngineWorker::isRenderingInteropWorking(GeometryBuffers const& geometryBuffers) const
+{
+    return _SimulationCudaFacade::isRenderingInteropWorking(geometryBuffers);
+}
+
 void EngineWorker::tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     EngineWorkerGuard access(this, FrameTimeout);
