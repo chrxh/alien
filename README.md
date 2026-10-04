@@ -22,7 +22,7 @@ and the conditions for open-ended evolution
 
 ![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
 
-## About
+## 🧬 About
 
 **ALIEN** (**A**rtificial **LI**fe **EN**vironment) is an artificial life simulator built on a specialized 2D particle engine for soft bodies and fluids. Every object in a simulated world consists of particles. They can be bonded into elastic solids, flow as fluids or act as **cells** with specialized functions such as sensors, muscles, weapons and constructors. Each cell is controlled by its own small neural network. Networks of cells form **creatures**, digital organisms that perceive their environment, move, feed, compete and build offspring according to their **genome**. Once mutations are switched on, the simulation needs no further intervention. Populations can adapt, lineages diverge and entire ecosystems emerge.
 
@@ -30,7 +30,7 @@ The engine runs entirely on the graphics card and simulates worlds with millions
 
 The development is driven by the desire to better understand the conditions for (pre-)biotic evolution, the growing complexity of biological systems and the open question of how evolution can keep producing novelty. At the same time, ALIEN aims to be approachable, with a modern user interface, appealing rendering and a playful spirit.
 
-## Highlights
+## ⚡ Highlights
 
 ### Physics on the GPU
 - Particle-based simulation of soft and rigid bodies, fluids, adhesion, fracture and damage
@@ -68,7 +68,7 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 - Built-in documentation with tutorials and a complete reference (press F1)
 - Simulation browser for downloading, uploading and starring the worlds of the community
 
-## Let an AI agent drive ALIEN
+## 🤖 Let an AI agent drive ALIEN
 
 ALIEN speaks the [Model Context Protocol](https://modelcontextprotocol.io) (MCP). Open **Windows > MCP server** (Alt+6), click **Start server** and add the server to your agent. With Claude Code, a single command is enough:
 
@@ -85,16 +85,14 @@ Any other agent or chat application that supports MCP servers over HTTP works as
 
 The chapter [AI agents](resources/docs/ai-agents.md) of the documentation explains the setup in detail and contains many more example prompts.
 
-## What ALIEN is used for
+## ❓ But what is this useful for?
 
-- **Artificial life research.** Tackle fundamental questions of how complexity and life-like structures arise from simple components. How do ecosystems respond to environmental change and find a new equilibrium? Which conditions allow open-ended evolution?
-- **Evolution experiments.** Seed a world with self-replicating creatures, switch on mutations and watch evolution at work.
-- **Physics sandbox.** Draw rocks, pour liquids, build machines and smash hundreds of thousands of them with the mouse cursor. It feels like playing god in a universe with your own rules.
-- **Generative art.** Evolution is a creative force that leads to ever new forms and behaviors. Colors, glow and painted backgrounds turn simulations into living artworks.
+- **A first attempt to answer:** Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
+- **Perhaps the most honest answer:** Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
+- **A more academic answer:** A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
+- **A tool for generative art:** Evolution is a creative force that leads to ever new forms and behaviors.
 
-Many more examples can be found on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw).
-
-## Gallery
+## 🌌 Gallery
 
 **Plant-like populations around a radiation source**
 
@@ -112,7 +110,7 @@ Many more examples can be found on the [YouTube channel](https://youtube.com/cha
 
 <img width="1920" height="1080" alt="Genome editor" src="https://github.com/user-attachments/assets/0b5c8328-31c7-46bb-816c-d4c0e0315f50" />
 
-## Installation
+## 💻 Installation
 
 ### Supported platforms
 
@@ -130,7 +128,7 @@ Download and unpack https://alien-project.org/files/alien-develop.zip, which is 
 - `alien.exe` for NVIDIA GPUs
 - `alien-amd.exe` for AMD GPUs (RDNA2, RDNA3 and RDNA4)
 
-Start it directly from the unpacked folder, otherwise it will not find the resource folder. If the program crashes for an unknown reason, please refer to the [troubleshooting](#troubleshooting) section below.
+Start it directly from the unpacked folder, otherwise it will not find the resource folder. If the program crashes for an unknown reason, please refer to the [troubleshooting](#-troubleshooting) section below.
 
 ### Cloud and Docker
 
@@ -205,7 +203,7 @@ cli -i example.sim -o output.sim -t 1000
 ```
 runs the simulation file `example.sim` for 1000 time steps and writes the result to `output.sim`. Without `-t`, the simulation runs until you press Q or Ctrl+C. All options are described in the chapter [Files and command line](resources/docs/files.md#command-line-interface).
 
-## Documentation
+## 📘 Documentation
 
 ALIEN comes with a complete documentation built into the program. Press **F1** to open it. It is organized in three parts:
 
@@ -215,7 +213,7 @@ ALIEN comes with a complete documentation built into the program. Press **F1** t
 
 The same chapters can also be read here on GitHub in [resources/docs](resources/docs).
 
-## Troubleshooting
+## 🔎 Troubleshooting
 
 If ALIEN does not start or crashes, please make sure that:
 1) You have a supported graphics card: an NVIDIA GPU with compute capability 7.5 or higher (for example GeForce RTX 20 series) or an AMD GPU of the RDNA2 generation or newer.
@@ -227,7 +225,7 @@ If ALIEN does not start or crashes, please make sure that:
 
 If the error still occurs, enable **Settings > Debug mode**, reproduce the error and create a [GitHub issue](https://github.com/chrxh/alien/issues) with the `log.txt` attached. More solutions can be found in the chapter [Troubleshooting](resources/docs/troubleshooting.md).
 
-## Community
+## 💬 Community
 
 - [Website](https://alien-project.org)
 - [Discord](https://discord.gg/7bjyZdXXQ2) for discussions, new developments and feedback around ALIEN and artificial life in general
@@ -235,7 +233,7 @@ If the error still occurs, enable **Settings > Debug mode**, reproduce the error
 - [Reddit](https://www.reddit.com/r/AlienProject)
 - [X (Twitter)](https://twitter.com/chrx_h)
 
-## Citing ALIEN
+## 📖 Citing ALIEN
 
 If you use ALIEN in a scientific publication, please cite:
 
@@ -258,7 +256,7 @@ Note that this paper describes the beginnings of what has become ALIEN. The curr
 
 If you adopt ideas or concepts from ALIEN without using the software itself, that is fine but please just mention ALIEN and link to this repository.
 
-## Contributing
+## 🧩 Contributing
 
 Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
 - Providing new content (simulation or genome files)
@@ -266,7 +264,7 @@ Contributions to the project are very welcome. The most convenient way is to com
 - Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum
 - Pull requests for bug fixes, code cleanings, optimizations or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [Discussion forum](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
 - Extensions or corrections of the documentation, which is written in Markdown in [resources/docs](resources/docs)
-## Credits and dependencies
+## 💎 Credits and dependencies
 
 ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Many thanks to everyone who has contributed to this project in any way. In alphabetical order:
 - [dguerizec](https://github.com/dguerizec)
@@ -305,7 +303,7 @@ Free icons and icon font:
   - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
   - [People icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/people) ([Flaticon license](https://media.flaticon.com/license/license.pdf))
 
-## License
+## 🧾 License
 
 ALIEN is licensed under the [BSD 3-Clause](LICENSE) license.
 
