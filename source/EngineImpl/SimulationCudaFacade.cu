@@ -9,7 +9,6 @@
 #include <cuda_runtime.h>
 
 #include <Base/AlienExceptions.h>
-#include <Base/GlobalSettings.h>
 #include <Base/KernelProfiler.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
@@ -158,7 +157,8 @@ void _SimulationCudaFacade::copyBuffersFromCudaToRenderer(GeometryBuffers const&
     auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     geometryBuffers->updateNumObjects(numRenderObjects);
 
-    if (GlobalSettings::get().isInterop() && GeometryKernelsService::get().prepareInterop(geometryBuffers, *_cudaGeometryBuffers)) {
+    if (geometryBuffers->isMemoryShareable()) {
+        CHECK_FOR_DEVICE_ERRORS(_cudaGeometryBuffers->importSharedMemory(geometryBuffers));
         GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
         syncAndCheck();
     } else {
@@ -774,6 +774,16 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     // Only a successful check is cached, so that each call reports a failure
     cachedResult = result;
     return result;
+}
+
+bool _SimulationCudaFacade::isRenderingInteropWorking(GeometryBuffers const& geometryBuffers)
+{
+    // No simulation might exist yet, which would have selected the device
+    if (cudaSetDevice(checkAndReturnGpuInfo().deviceNumber) != cudaSuccess) {
+        cudaGetLastError();
+        return false;
+    }
+    return GeometryKernelsService::get().isSharedMemoryWorking(geometryBuffers);
 }
 
 void _SimulationCudaFacade::syncAndCheck()

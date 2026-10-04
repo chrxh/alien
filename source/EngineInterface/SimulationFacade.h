@@ -31,6 +31,10 @@ public:
     //*******************************
     //* Methods for rendering interop
     //*******************************
+    // Checks once before rendering whether CUDA can write directly into the shareable memory of geometry buffers,
+    // which is not a given on every system.
+    virtual bool isRenderingInteropWorking(GeometryBuffers const& geometryBuffers) const = 0;
+
     // Transfers the simulation data from CUDA to the provided buffer.
     // Resizes buffers if necessary and fills it with data for rendering.
     // If the GPU is busy for a specified duration, the buffers will not be updated.

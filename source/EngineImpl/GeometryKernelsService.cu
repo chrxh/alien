@@ -3,9 +3,6 @@
 #include <ranges>
 #include <vector>
 
-#include <Base/GlobalSettings.h>
-#include <Base/LoggingService.h>
-
 #include <Data/EngineConstants.h>
 
 #include <EngineInterface/SettingsForSimulation.h>
@@ -38,20 +35,17 @@ void GeometryKernelsService::shutdown()
 
 namespace
 {
-    // Writes a known pattern into the shared memory through CUDA and reads it back through the geometry buffers. Only if
-    // that value survives do both APIs really address the same allocation, which is not a given when the graphics device
-    // and the CUDA device are different GPUs. Leaves no error state behind.
-    bool isSharedMemoryWorking(GeometryBuffers const& geometryBuffers, CudaGeometryBuffers const& renderingData)
+    // Writes a known pattern into the shared memory through CUDA and reads it back through the geometry buffers.
+    // Only if that value survives do both APIs really address the same allocation.
+    bool isPatternVisibleInGeometryBuffers(GeometryBuffers const& geometryBuffers, CudaGeometryBuffers const& renderingData)
     {
         auto constexpr NumValues = 64;
         auto constexpr PatternByte = 0xA5;
         auto constexpr ExpectedValue = 0xA5A5A5A5u;
         auto constexpr SizeInBytes = NumValues * sizeof(uint32_t);
 
-        auto succeeded = cudaMemset(renderingData.getBuffer<void>(GeometryBufferType_Objects), PatternByte, SizeInBytes) == cudaSuccess
-            && cudaDeviceSynchronize() == cudaSuccess;
-        cudaGetLastError();
-        if (!succeeded) {
+        if (cudaMemset(renderingData.getBuffer<void>(GeometryBufferType_Objects), PatternByte, SizeInBytes) != cudaSuccess
+            || cudaDeviceSynchronize() != cudaSuccess) {
             return false;
         }
         std::vector<uint32_t> readBack(NumValues, 0);
@@ -64,27 +58,15 @@ namespace
     }
 }
 
-bool GeometryKernelsService::prepareInterop(GeometryBuffers const& geometryBuffers, CudaGeometryBuffers& renderingData)
+bool GeometryKernelsService::isSharedMemoryWorking(GeometryBuffers const& geometryBuffers)
 {
-    if (!geometryBuffers->isMemoryShareable() || _interopUsable == false) {
-        return false;
-    }
-    auto importResult = renderingData.importSharedMemory(geometryBuffers);
-    if (_interopUsable.has_value()) {
-        CHECK_FOR_DEVICE_ERRORS(importResult);
-        return true;
-    }
+    CudaGeometryBuffers renderingData;
+    auto result = renderingData.importSharedMemory(geometryBuffers) == cudaSuccess && isPatternVisibleInGeometryBuffers(geometryBuffers, renderingData);
+    renderingData.release();
 
-    cudaGetLastError();  // A failed probe must not leave the error state behind for the rest of the program
-    _interopUsable = importResult == cudaSuccess && isSharedMemoryWorking(geometryBuffers, renderingData);
-    if (*_interopUsable) {
-        log(Priority::Important, "CUDA-Vulkan interop is working");
-    } else {
-        renderingData.release();
-        GlobalSettings::get().setInterop(false);
-        log(Priority::Important, "CUDA-Vulkan interop is not working on this system, falling back to the transfer over host memory");
-    }
-    return *_interopUsable;
+    // A failed check must not leave the error state behind for the rest of the program
+    cudaGetLastError();
+    return result;
 }
 
 void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)

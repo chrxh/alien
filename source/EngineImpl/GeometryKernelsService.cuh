@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GeometryBuffers.h>
@@ -19,8 +17,8 @@ public:
     void init();
     void shutdown();
 
-    // Lets the geometry kernels write directly into the geometry buffers if possible
-    bool prepareInterop(GeometryBuffers const& geometryBuffers, CudaGeometryBuffers& renderingData);
+    // Whether the geometry kernels can write directly into the shareable memory of the geometry buffers
+    bool isSharedMemoryWorking(GeometryBuffers const& geometryBuffers);
 
     void correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
     void restorePositions(SettingsForSimulation const& settings, SimulationData data);
@@ -32,5 +30,4 @@ private:
     GeometryKernelsService() = default;
 
     NumRenderObjects* _counters = nullptr;
-    std::optional<bool> _interopUsable;
 };

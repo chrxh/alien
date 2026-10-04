@@ -64,6 +64,11 @@ GpuUuid _SimulationFacadeImpl::getGpuUuid() const
     return _worker.getGpuUuid();
 }
 
+bool _SimulationFacadeImpl::isRenderingInteropWorking(GeometryBuffers const& geometryBuffers) const
+{
+    return _worker.isRenderingInteropWorking(geometryBuffers);
+}
+
 void _SimulationFacadeImpl::tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     _worker.tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
