@@ -44,11 +44,11 @@ https://user-images.githubusercontent.com/73127001/229868357-131fa71f-d03d-45db-
 - Creatures are networks of cells, held together by elastic connections that carry energy and signals
 - 15 cell types, among them sensors, muscles, attackers, injectors, digestors, memory cells and communicators
 - Every cell runs a small neural network. Together, these networks form the nervous system of a creature.
-- Genomes are blueprints made of genes. Constructor cells read them and build offspring cell by cell.
+- Genomes are blueprints made of genes. Cells read them and build offspring cell by cell.
 - Energy never appears out of nothing. It circulates between cells, free energy particles and an optional external pool.
 
 ### Evolution without a fitness function
-- Mutations of neural networks, cell properties and the genome structure, with mutation rates that can evolve themselves
+- Mutations of neural networks, cell properties and the genome structure, with mutation rates that can evolve themselves (meta-mutations)
 - Selection arises naturally from limited energy, predation and competition for space
 - Layers and radiation sources let the simulation parameters vary across the world and create diverse habitats
 - Evolution dashboard with lineages, population statistics and long-term plots
@@ -59,18 +59,22 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 ### AI agents
 - Built-in MCP server: connect an AI agent and describe in plain language what you want
 - Agents build worlds, design genomes, run experiments, read statistics and inspect the result through screenshots
-- A command log lists every step the agent takes
 
 ### Tools for creators
 - Genome editor with live preview for designing your own creatures
 - Freehand and geometric drawing tools and an image converter that turns pictures into matter
 - Inspection windows for every object, creature and genome, plus mass operations
 - Built-in documentation with tutorials and a complete reference (press F1)
-- Simulation browser for downloading, uploading and starring the worlds of the community
+
+### Simulation browser
+- Built-in access to the simulations and genomes on the ALIEN server, no account needed for browsing and downloading
+- **Featured** worlds of the ALIEN project and **Community** worlds shared by other users, shown as a gallery with preview pictures or as a table with folders
+- With an account, upload your own simulations and genomes and keep them private or share them with the community
+- React to the work of others and sort the gallery by reactions, date or downloads
 
 ## 🤖 Let an AI agent drive ALIEN
 
-ALIEN speaks the [Model Context Protocol](https://modelcontextprotocol.io) (MCP). Open **Windows > MCP server** (Alt+6), click **Start server** and add the server to your agent. With Claude Code, a single command is enough:
+ALIEN speaks the [Model Context Protocol](https://modelcontextprotocol.io) (MCP). Open **Windows > MCP server** (Alt+6), click **Start server** and add the server to your agent. For instance, with Claude Code, a single command is enough:
 
 ```
 claude mcp add --transport http alien http://127.0.0.1:8765/mcp
@@ -87,10 +91,12 @@ The chapter [AI agents](resources/docs/ai-agents.md) of the documentation explai
 
 ## ❓ But what is this useful for?
 
-- **A first attempt to answer:** Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
-- **Perhaps the most honest answer:** Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
-- **A more academic answer:** A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
-- **A tool for generative art:** Evolution is a creative force that leads to ever new forms and behaviors.
+- **The curious answer:** Watching evolution at work. Once self-reproducing creatures and mutations come into play, the simulation does the rest.
+- **The honest answer:** Fun! A fast physics engine lets you push, smash and rebuild hundreds of thousands of objects with the mouse. It feels like playing god in a universe with your own rules.
+- **The academic answer:** Artificial life research. How does complexity arise from simple components? How do ecosystems adapt to environmental change? And which conditions keep evolution open-ended instead of letting it stagnate?
+- **The artistic answer:** Generative art. Evolution is a creative force that leads to ever new forms and behaviors.
+
+Plenty of examples can be found on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw).
 
 ## 🌌 Gallery
 
