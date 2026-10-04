@@ -6,8 +6,9 @@
 #include <memory>
 #include <ranges>
 #include <set>
-#include <sstream>
 #include <stdexcept>
+#include <string_view>
+#include <utility>
 #include <regex>
 
 #include <glslang/Public/ResourceLimits.h>
@@ -55,21 +56,20 @@ namespace
         return {4, 4};
     }
 
-    std::vector<std::string> splitLines(std::string const& source)
+    std::vector<std::string> splitLines(std::string_view source)
     {
         std::vector<std::string> result;
-        std::istringstream stream(source);
-        std::string line;
-        while (std::getline(stream, line)) {
+        for (auto const& range : source | std::views::split('\n')) {
+            auto line = std::string(range.begin(), range.end());
             if (!line.empty() && line.back() == '\r') {
                 line.pop_back();
             }
-            result.emplace_back(line);
+            result.emplace_back(std::move(line));
         }
         return result;
     }
 
-    TranslatedProgram translateProgram(std::vector<std::string> const& sources)
+    TranslatedProgram translateProgram(std::vector<std::string_view> const& sources)
     {
         static std::regex const uniformRegex(R"(^\s*uniform\s+(\w+)\s+(\w+)\s*;.*$)");
         static std::regex const interfaceRegex(R"(^(\s*)((?:flat|smooth|noperspective)\s+)?(in|out)\s+(\w+)\s+(\w+)\s*(\[\s*\d*\s*\])?\s*;(.*)$)");
@@ -397,7 +397,7 @@ _Shader::_Shader(std::string_view vertexSource, std::string_view fragmentSource,
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
 
-    std::vector<std::string> sources{std::string(vertexSource)};
+    std::vector<std::string_view> sources{vertexSource};
     std::vector<std::pair<EShLanguage, VkShaderStageFlagBits>> stages{{EShLangVertex, VK_SHADER_STAGE_VERTEX_BIT}};
     if (!geometrySource.empty()) {
         sources.emplace_back(geometrySource);
