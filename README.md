@@ -1,10 +1,10 @@
 <h1 align="center">
-<a href="https://alien-project.org" target="_blank">ALIEN</a>
+<a href="https://alien-project.org" target="_blank">ALIEN: Explore worlds of artificial life</a>
 </h1>
 
 <p align="center">
-<b>Explore worlds of artificial life</b><br>
-A GPU-accelerated simulator in which digital organisms made of particles sense, move, feed, reproduce and evolve.
+A GPU-accelerated artificial life simulator for studying emergent ecosystems<br>
+and the conditions for open-ended evolution
 </p>
 
 <p align="center">
@@ -24,11 +24,11 @@ A GPU-accelerated simulator in which digital organisms made of particles sense, 
 
 ## About
 
-**ALIEN** (**A**rtificial **LI**fe **EN**vironment) is an artificial life simulator built on a specialized 2D particle engine for soft bodies and fluids. Every object in a simulated world consists of particles. They can be bonded into elastic solids, flow as fluids or act as **cells** with specialized functions such as sensors, muscles, weapons and constructors. Each cell is controlled by its own small neural network. Networks of cells form **creatures**, digital organisms that perceive their environment, move, feed, compete and build offspring according to their **genome**. Once mutations are switched on, the simulation needs no further intervention. Populations adapt, lineages split and entire ecosystems emerge.
+**ALIEN** (**A**rtificial **LI**fe **EN**vironment) is an artificial life simulator built on a specialized 2D particle engine for soft bodies and fluids. Every object in a simulated world consists of particles. They can be bonded into elastic solids, flow as fluids or act as **cells** with specialized functions such as sensors, muscles, weapons and constructors. Each cell is controlled by its own small neural network. Networks of cells form **creatures**, digital organisms that perceive their environment, move, feed, compete and build offspring according to their **genome**. Once mutations are switched on, the simulation needs no further intervention. Populations can adapt, lineages diverge and entire ecosystems emerge.
 
 The engine runs entirely on the graphics card and simulates worlds with millions of particles in real time. You can interact with a running world at any moment: draw matter, push creatures around, change the laws of physics or let an AI agent do it for you.
 
-The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems. At the same time, ALIEN aims to be approachable, with a modern user interface, appealing rendering and a playful spirit.
+The development is driven by the desire to better understand the conditions for (pre-)biotic evolution, the growing complexity of biological systems and the open question of how evolution can keep producing novelty. At the same time, ALIEN aims to be approachable, with a modern user interface, appealing rendering and a playful spirit.
 
 ## Highlights
 
@@ -45,9 +45,9 @@ https://user-images.githubusercontent.com/73127001/229868357-131fa71f-d03d-45db-
 - 15 cell types, among them sensors, muscles, attackers, injectors, digestors, memory cells and communicators
 - Every cell runs a small neural network. Together, these networks form the nervous system of a creature.
 - Genomes are blueprints made of genes. Constructor cells read them and build offspring cell by cell.
-- Energy is conserved. It circulates between cells, free energy particles and an optional external pool.
+- Energy never appears out of nothing. It circulates between cells, free energy particles and an optional external pool.
 
-### Open-ended evolution
+### Evolution without a fitness function
 - Mutations of neural networks, cell properties and the genome structure, with mutation rates that can evolve themselves
 - Selection arises naturally from limited energy, predation and competition for space
 - Layers and radiation sources let the simulation parameters vary across the world and create diverse habitats
@@ -266,9 +266,6 @@ Contributions to the project are very welcome. The most convenient way is to com
 - Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum
 - Pull requests for bug fixes, code cleanings, optimizations or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [Discussion forum](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
 - Extensions or corrections of the documentation, which is written in Markdown in [resources/docs](resources/docs)
-
-The file [AGENTS.md](AGENTS.md) summarizes the repository layout, the code style and the build and test commands. It is written for AI coding agents but is just as useful for human contributors.
-
 ## Credits and dependencies
 
 ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Many thanks to everyone who has contributed to this project in any way. In alphabetical order:
