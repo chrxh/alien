@@ -46,7 +46,6 @@ void _TextureTarget::resize(IntVector2D const& size, VkFormat colorFormat)
     if (withDepth) {
         getDepth();
     }
-    initialized = true;
 }
 
 VulkanImage& _TextureTarget::getDepth()
@@ -61,7 +60,6 @@ void _TextureTarget::destroyImages()
 {
     VulkanContext::get().destroyImageLater(color);
     VulkanContext::get().destroyImageLater(_depth);
-    initialized = false;
 }
 
 _RenderStep::_RenderStep(StepParameters const& parameters, DepthTest depthTest)

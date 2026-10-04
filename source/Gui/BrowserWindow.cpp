@@ -504,7 +504,7 @@ void BrowserWindow::processEmojiButton(int emojiType)
     auto emojiHeight = scale(toFloat(emoji.height) * EmojiPopupScale);
     auto leaf = _data->emojiPopupTO->getLeaf();
     ImGui::PushID(emojiType);
-    if (ImGui::ImageButton("emoji_popup", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
+    if (ImGui::ImageButton("emoji_popup", emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
         _data->onToggleLike(_data->emojiPopupTO, toInt(emojiType));
         ImGui::CloseCurrentPopup();
     }

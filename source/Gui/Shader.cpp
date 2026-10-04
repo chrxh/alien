@@ -352,11 +352,6 @@ void _Shader::setTexture(std::string const& name, VulkanImage const& image)
     }
 }
 
-bool _Shader::hasTexture(std::string const& name) const
-{
-    return _samplerBindings.contains(name);
-}
-
 void _Shader::bind(VkCommandBuffer commandBuffer, PipelineState const& state)
 {
     auto& context = VulkanContext::get();

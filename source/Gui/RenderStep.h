@@ -29,7 +29,6 @@ struct _TextureTarget
     // Created on first use since only a few render steps test depth, afterwards it follows the size of the color image
     VulkanImage& getDepth();
 
-    bool initialized = false;
     VulkanImage color;
 
 private:

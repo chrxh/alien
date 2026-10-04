@@ -184,7 +184,7 @@ void MarkdownRenderer::renderImage(MarkdownImage const& image)
         }
     }
     if (imageInfo.has_value() && imageInfo->texture.has_value()) {
-        ImGui::Image((ImTextureID)(intptr_t)imageInfo->texture->textureId, {width, height});
+        ImGui::Image(imageInfo->texture->textureId, {width, height});
     } else {
         ImGui::Dummy({width, height});
     }

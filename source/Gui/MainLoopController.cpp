@@ -371,7 +371,7 @@ void MainLoopController::drawLoadingScreen()
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
         | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
     ImGui::Begin("##startup", NULL, windowFlags);
-    ImGui::Image((ImTextureID)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
+    ImGui::Image(_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();

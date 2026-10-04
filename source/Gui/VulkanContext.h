@@ -141,7 +141,6 @@ private:
     void runPendingDestructions(std::optional<uint64_t> completedFrameNumber);
 
     bool _active = false;
-    bool _validationEnabled = false;
     VkInstance _instance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
     VkSurfaceKHR _surface = VK_NULL_HANDLE;

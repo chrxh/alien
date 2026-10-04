@@ -70,7 +70,6 @@ public:
 
     // The image must be in shader read layout when the draw call is executed
     void setTexture(std::string const& name, VulkanImage const& image);
-    bool hasTexture(std::string const& name) const;
 
     // Binds the pipeline, the uniforms and the textures for the next draw call
     void bind(VkCommandBuffer commandBuffer, PipelineState const& state);

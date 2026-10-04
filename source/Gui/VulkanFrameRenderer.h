@@ -53,7 +53,6 @@ private:
     uint32_t _minImageCount = 2;
     std::vector<VkImage> _swapchainImages;
     std::vector<VkImageView> _swapchainImageViews;
-    std::vector<VkImageLayout> _swapchainImageLayouts;
     std::vector<VkSemaphore> _renderFinishedSemaphores;
     bool _swapchainOutdated = false;
 

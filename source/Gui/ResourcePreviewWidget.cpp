@@ -68,7 +68,7 @@ void ResourcePreviewWidget::processSimulationPreview()
 {
     auto width = std::min(calcAvailableWidth(), scale(toFloat(_texture->width)));
     auto height = width * toFloat(_texture->height) / toFloat(_texture->width);
-    ImGui::Image((ImTextureID)(intptr_t)_texture->textureId, {width, height});
+    ImGui::Image(_texture->textureId, {width, height});
 }
 
 void ResourcePreviewWidget::processGenomePreview()
