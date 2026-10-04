@@ -79,6 +79,7 @@ add_library(EngineKernels
     SelectionKernels.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
+    SensorScans.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu

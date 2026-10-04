@@ -20,6 +20,7 @@ struct EnergyTO
     uint8_t color;
 
     uint8_t selected;
+    bool ghost;  // Copy of a particle of another domain
 };
 
 struct ConnectionTO

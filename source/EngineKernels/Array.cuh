@@ -162,12 +162,15 @@ public:
     }
 
     // Returns nullptr instead of aborting if the array is full
-    __device__ __inline__ T* tryGetNewElement()
+    __device__ __inline__ T* tryGetNewElement(uint64_t* index = nullptr)
     {
         uint64_t oldIndex = alienAtomicAdd64(_numEntries, uint64_t(1));
         if (oldIndex >= *_capacity) {
             alienAtomicAdd64(_numEntries, uint64_t(-1));
             return nullptr;
+        }
+        if (index) {
+            *index = oldIndex;
         }
         return &(*_data)[oldIndex];
     }

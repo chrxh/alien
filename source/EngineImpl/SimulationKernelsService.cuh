@@ -14,6 +14,7 @@
 struct CudaGraphConfig
 {
     int domainIndex;           // The captured kernel parameters point to the data of one domain
+    bool isDecomposed;         // Requests of other domains need to be processed
     int timestepMod3;          // Not every kernel needs to be executed each time
     bool executeCellFunction;  // Cell type functions need to be executed
     bool hasLayers;            // settings.simulationParameters.numLayers > 0

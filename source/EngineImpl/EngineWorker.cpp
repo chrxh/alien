@@ -98,6 +98,11 @@ namespace
                     ghostIds.insert(dataTO.objects[i].id);
                 }
             }
+            for (uint64_t i = 0; i < *dataTO.numEnergyParticles; ++i) {
+                if (dataTO.energyParticles[i].ghost) {
+                    ghostIds.insert(dataTO.energyParticles[i].id);
+                }
+            }
             auto domainData = DescConverterService::get().convertTOtoDescription(dataTO);
 
             std::unordered_set<uint64_t> referencedCreatureIds;
@@ -111,7 +116,9 @@ namespace
                 result._objects.emplace_back(std::move(object));
             }
             for (auto& energy : domainData._energies) {
-                result._energies.emplace_back(std::move(energy));
+                if (!ghostIds.contains(energy._id)) {
+                    result._energies.emplace_back(std::move(energy));
+                }
             }
 
             std::unordered_set<uint64_t> referencedGenomeIds;
@@ -706,6 +713,16 @@ namespace
             view.data = DescConverterService::get().convertTOtoDescription(dataTO);
             for (auto const& object : view.data._objects) {
                 view.objectById.emplace(object._id, &object);
+            }
+        }
+
+        std::unordered_map<uint64_t, int> particleOwnerById;
+        for (auto const& [domainIndex, dataTO] : std::views::enumerate(dataTOs)) {
+            for (uint64_t i = 0; i < *dataTO.numEnergyParticles; ++i) {
+                auto const& particle = dataTO.energyParticles[i];
+                if (!particle.ghost && !particleOwnerById.emplace(particle.id, toInt(domainIndex)).second) {
+                    addError("energy particle " + std::to_string(particle.id) + " is owned by several domains");
+                }
             }
         }
 

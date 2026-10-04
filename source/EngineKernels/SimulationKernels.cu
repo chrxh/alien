@@ -251,7 +251,17 @@ __global__ void cudaNextTimestep_cellType_muscle(SimulationData data, Simulation
 
 __global__ void cudaNextTimestep_cellType_sensor(SimulationData data, SimulationStatistics statistics)
 {
-    SensorProcessor::process(data, statistics);
+    SensorProcessor::process<false>(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_sensor_decomposed(SimulationData data, SimulationStatistics statistics)
+{
+    SensorProcessor::process<true>(data, statistics);
+}
+
+__global__ void cudaNextTimestep_domain_requestSensorContinuations(SimulationData data)
+{
+    SensorProcessor::processContinuations(data);
 }
 
 __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics)
@@ -282,6 +292,23 @@ __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, Simu
 __global__ void cudaNextTimestep_cellType_void(SimulationData data, SimulationStatistics statistics)
 {
     VoidProcessor::process(data, statistics);
+}
+
+// A whole block sweeps the ring of one shock wave front
+__global__ void cudaNextTimestep_domain_applyShockWaves(SimulationData data)
+{
+    auto& shockWaves = data.receivedShockWaves;
+    auto const partition = calcBlockPartition(shockWaves.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& op = shockWaves.at(index);
+        DetonatorProcessor::applyShockWaveFront_block(data, op.pos, op.values[2], op.values[0], op.values[1], op.kind);
+        __syncthreads();
+    }
+}
+
+__global__ void cudaNextTimestep_domain_scanSensorRequests(SimulationData data)
+{
+    SensorProcessor::processScanRequests(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)

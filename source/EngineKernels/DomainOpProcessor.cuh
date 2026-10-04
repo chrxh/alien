@@ -41,6 +41,9 @@ private:
 __inline__ __device__ void DomainOpProcessor::apply(SimulationData& data, SimulationStatistics& statistics, DomainSyncData const& syncData, DomainOp const& op)
 {
     if (op.type == DomainOpType::ShockWave) {
+        if (auto shockWave = data.receivedShockWaves.tryGetNewElement()) {
+            *shockWave = op;
+        }
         return;
     }
     auto target = syncData.objectMap.find(op.targetId);

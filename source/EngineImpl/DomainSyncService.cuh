@@ -45,7 +45,7 @@ public:
 private:
     DomainSyncService() = default;
 
-    void rebuildMaps(Domain& domain, KernelLaunchSettings const& launchSettings, uint64_t numAdditionalEntries);
+    void rebuildMaps(Domain& domain, KernelLaunchSettings const& launchSettings, ArraySizesForGpuEntities const& incomingSizes);
     void calcOwnership(Domain& domain, KernelLaunchSettings const& launchSettings, bool initialAssignment);
     void calcRoi(Domain& domain, KernelLaunchSettings const& launchSettings);
     void pack(Domain& domain, KernelLaunchSettings const& launchSettings);
@@ -54,7 +54,6 @@ private:
     void finishRound(Domain& domain, std::vector<Domain>& domains, KernelLaunchSettings const& launchSettings);
 
     bool readOutgoingCountersAndGrowOnOverflow(std::vector<Domain>& domains);
-    void growOutboxIfNecessary(Domain& domain, uint64_t numOps);
     void transport(std::vector<Domain>& domains);
     void exchangeRoiBitmaps(std::vector<Domain>& domains);
     ArraySizesForGpuEntities calcIncomingSizes(Domain const& receiver, std::vector<Domain> const& domains) const;

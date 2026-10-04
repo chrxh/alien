@@ -18,6 +18,12 @@ struct Energy
     float2 pos;
     float2 vel;
     uint8_t color;
+
+    // Domain decomposition, see Object
+    bool ghost;
+    uint8_t syncRound;
+    uint8_t ownerDomain;
+
     float energy;
     Object* lastAbsorbedObject;  // Could be invalid
 
@@ -750,6 +756,7 @@ __device__ __inline__ float getMassForSPH(ObjectType const& object)
 // Keep the neighbor-scan mirror compact: growing it directly costs memory bandwidth in the hot SPH kernels.
 static_assert(sizeof(LightObject) == 40, "LightObject must stay 40 bytes for the neighbor scan");
 static_assert(offsetof(Object, id) == 56, "The domain fields of Object must fit into the padding before id");
+static_assert(offsetof(Energy, energy) == 28, "The domain fields of Energy must fit into the padding after color");
 
 struct Entities
 {

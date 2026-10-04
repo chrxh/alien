@@ -82,6 +82,8 @@ __inline__ __device__ Energy* EntityFactory::createParticleFromTO(EnergyTO const
     particle->selected = 0;
     particle->color = particleTO.color;
     particle->lastAbsorbedObject = nullptr;
+    particle->ghost = false;
+    particle->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     return particle;
 }
 
@@ -674,6 +676,8 @@ __inline__ __device__ Energy* EntityFactory::createEnergy(float energy, float2 c
     particle->vel = vel;
     particle->color = color;
     particle->lastAbsorbedObject = nullptr;
+    particle->ghost = false;
+    particle->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     return particle;
 }
 

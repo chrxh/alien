@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cfloat>
 
 #include <cuda_runtime.h>
 
@@ -67,6 +68,31 @@ struct DomainContext
             return 0;
         }
         return fminf(relX - width, worldWidth - relX);
+    }
+
+    // Distance from pos along direction to where the ray leaves the strip of the given domain, widened by margin on both sides.
+    // Returns 0 if pos lies outside and FLT_MAX if the ray never leaves.
+    __device__ __inline__ float getStripExitDistance(int domain, float2 const& pos, float2 const& direction, float margin) const
+    {
+        auto const& layoutRef = *layout;
+        auto worldWidth = toFloatValue(layoutRef.worldSize.x);
+        auto start = layoutRef.stripStarts[domain] - margin;
+        auto width = layoutRef.stripStarts[domain + 1] - layoutRef.stripStarts[domain] + 2 * margin;
+        if (width >= worldWidth) {
+            return FLT_MAX;
+        }
+        auto relX = pos.x - start;
+        relX -= floorf(relX / worldWidth) * worldWidth;
+        if (relX >= width) {
+            return 0;
+        }
+        if (direction.x > 1e-6f) {
+            return (width - relX) / direction.x;
+        }
+        if (direction.x < -1e-6f) {
+            return relX / -direction.x;
+        }
+        return FLT_MAX;
     }
 
     __device__ __inline__ int getTileIndex(float2 const& pos) const
