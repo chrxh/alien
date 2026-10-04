@@ -24,6 +24,9 @@ add_library(Base
     LoggingService.cpp
     LoggingService.h
     Macros.h
+    MarkdownDocument.h
+    MarkdownParser.cpp
+    MarkdownParser.h
     Math.cpp
     Math.h
     MathTypes.cpp
@@ -42,10 +45,13 @@ add_library(Base
     StringHelper.h
     UnlockGuard.h
     VersionParserService.cpp
-    VersionParserService.h)
+    VersionParserService.h
+    WebLinkHelper.cpp
+    WebLinkHelper.h)
 
 target_link_libraries(Base Boost::boost)
 target_link_libraries(Base imgui::imgui)
+target_link_libraries(Base md4c::md4c)
 
 if (WIN32)
     target_link_libraries(Base dbghelp)

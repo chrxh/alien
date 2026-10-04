@@ -69,6 +69,7 @@ jobs:
     - name: Run Tests
       run: |
         cd build
+        ./BaseTests
         ./DataTests
         ./EngineInterfaceTests
         ./NetworkTests

@@ -1,9 +1,5 @@
 #include "DocumentationWindow.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #include <algorithm>
 #include <fstream>
 #include <iterator>
@@ -15,10 +11,11 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/MarkdownParser.h>
 #include <Base/Resources.h>
+#include <Base/WebLinkHelper.h>
 
 #include "AlienGui.h"
-#include "MarkdownParser.h"
 #include "StyleService.h"
 #include "WindowController.h"
 
@@ -66,12 +63,17 @@ void DocumentationWindow::shutdownIntern()
 void DocumentationWindow::processIntern()
 {
     if (ImGui::BeginChild("##documentation", {0, ImGui::GetContentRegionAvail().y - scale(BottomSpace)}, 0, ImGuiWindowFlags_NoScrollbar)) {
+        // The stored width only changes by dragging, so that a temporarily narrow window does not shrink it permanently
         auto maxNavigationWidth = std::max(scale(MinNavigationWidth), ImGui::GetContentRegionAvail().x - scale(MinContentWidth));
-        _navigationWidth = std::clamp(_navigationWidth, scale(MinNavigationWidth), maxNavigationWidth);
-        processNavigation();
+        auto navigationWidth = std::clamp(_navigationWidth, scale(MinNavigationWidth), maxNavigationWidth);
+        processNavigation(navigationWidth);
 
         ImGui::SameLine();
-        AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters(), _navigationWidth);
+        auto draggedNavigationWidth = navigationWidth;
+        AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters(), draggedNavigationWidth);
+        if (draggedNavigationWidth != navigationWidth) {
+            _navigationWidth = draggedNavigationWidth;
+        }
 
         ImGui::SameLine();
         processContent();
@@ -80,6 +82,13 @@ void DocumentationWindow::processIntern()
 
     AlienGui::Separator();
     AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
+}
+
+void DocumentationWindow::processBackground()
+{
+    if (!isShown()) {
+        _renderer.releaseTextures();
+    }
 }
 
 namespace
@@ -122,8 +131,8 @@ namespace
         }
         std::string result;
         if (auto note = std::get_if<MarkdownNote>(&block)) {
-            for (auto const& paragraph : note->paragraphs) {
-                appendText(result, MarkdownParser::toPlainText(paragraph));
+            for (auto const& noteBlock : note->blocks) {
+                appendText(result, std::visit([](auto const& value) { return getPlainText(MarkdownBlock(value)); }, noteBlock));
             }
         }
         if (auto table = std::get_if<MarkdownTable>(&block)) {
@@ -261,9 +270,9 @@ void DocumentationWindow::updateSearchResults()
     _searchResults.insert(_searchResults.end(), textMatches.begin(), textMatches.end());
 }
 
-void DocumentationWindow::processNavigation()
+void DocumentationWindow::processNavigation(float width)
 {
-    if (ImGui::BeginChild("##navigation", {_navigationWidth, 0})) {
+    if (ImGui::BeginChild("##navigation", {width, 0})) {
         if (AlienGui::InputFilter(AlienGui::InputFilterParameters().hint("Search"), _searchText)) {
             updateSearchResults();
         }
@@ -408,9 +417,7 @@ void DocumentationWindow::processChapterButtons()
 void DocumentationWindow::openLink(std::string const& link)
 {
     if (link.starts_with("http://") || link.starts_with("https://")) {
-#ifdef _WIN32
-        ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
-#endif
+        WebLinkHelper::openInBrowser(link);
         return;
     }
     auto separatorPos = link.find('#');
@@ -431,10 +438,12 @@ void DocumentationWindow::openLink(std::string const& link)
 
 void DocumentationWindow::openChapter(size_t chapterIndex, std::optional<std::string> const& anchor)
 {
+    // A found anchor overrides the scroll position in the same frame
+    if (chapterIndex != _currentChapterIndex || !anchor.has_value()) {
+        _scrollToTop = true;
+    }
     _currentChapterIndex = chapterIndex;
     if (anchor.has_value()) {
         _renderer.scrollToAnchor(*anchor);
-    } else {
-        _scrollToTop = true;
     }
 }

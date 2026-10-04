@@ -130,9 +130,6 @@ PUBLIC
     MainLoopEntityController.h
     MainWindow.cpp
     MainWindow.h
-    MarkdownDocument.h
-    MarkdownParser.cpp
-    MarkdownParser.h
     MarkdownRenderer.cpp
     MarkdownRenderer.h
     MassOperationsDialog.cpp
@@ -261,7 +258,6 @@ target_link_libraries(alien OpenGL::GL OpenGL::GLU)
 target_link_libraries(alien GLEW::GLEW)
 target_link_libraries(alien imgui::imgui)
 target_link_libraries(alien implot::implot)
-target_link_libraries(alien md4c::md4c)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)

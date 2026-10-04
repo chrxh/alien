@@ -7,8 +7,9 @@
 
 #include <imgui.h>
 
+#include <Base/MarkdownDocument.h>
+
 #include "Definitions.h"
-#include "MarkdownDocument.h"
 
 class MarkdownRenderer
 {
@@ -22,10 +23,10 @@ public:
 
 private:
     void renderHeading(MarkdownHeading const& heading);
-    void renderParagraph(MarkdownParagraph const& paragraph);
-    void renderListItem(MarkdownListItem const& listItem);
+    void renderParagraph(MarkdownParagraph const& paragraph, float rightPadding = 0.0f);
+    void renderListItem(MarkdownListItem const& listItem, float rightPadding = 0.0f);
     void renderImage(MarkdownImage const& image);
-    void renderCodeBlock(MarkdownCodeBlock const& codeBlock);
+    void renderCodeBlock(MarkdownCodeBlock const& codeBlock, float rightPadding = 0.0f);
     void renderNote(MarkdownNote const& note);
     void renderTable(MarkdownTable const& table);
 
@@ -37,12 +38,21 @@ private:
     };
     void renderTextFlow(MarkdownSpans const& spans, TextFlowStyle const& style);
 
-    std::optional<TextureData> getTexture(std::filesystem::path const& path);
+    struct ImageInfo
+    {
+        int width = 0;
+        int height = 0;
+        std::optional<TextureData> texture;
+    };
+    std::optional<ImageInfo>& getImageInfo(std::filesystem::path const& path);
 
     std::filesystem::path _basePath;
     std::optional<std::string> _pendingAnchor;
     std::optional<std::string> _clickedLink;
     std::optional<std::string> _hoveredLink;
     std::optional<std::string> _nextHoveredLink;
-    std::map<std::filesystem::path, std::optional<TextureData>> _textureByPath;
+
+    MarkdownDocument const* _renderedDocument = nullptr;
+    bool _textureCreatedInFrame = false;
+    std::map<std::filesystem::path, std::optional<ImageInfo>> _imageInfoByPath;
 };

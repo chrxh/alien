@@ -53,7 +53,6 @@ private:
     void onDeleteResource(NetworkResourceTreeTO const& treeTO);
     void onExpandFolders();
     void onCollapseFolders();
-    void openWeblink(std::string const& link);
 
     BrowserData _data;
     BrowserGalleryWidget _galleryWidget;

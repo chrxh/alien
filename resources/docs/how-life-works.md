@@ -28,7 +28,7 @@ Cells act in **cycles**. Every 6 time steps, each cell does two things:
 
 The connected cells read this signal in the next cycle. In this way information travels through the creature from cell to cell. A sensor at one end of a creature can steer the muscles at the other end.
 
-By default, the neural network of a cell simply copies the signal of one neighbor. Signals therefore flow along the chain of cells in the order in which they were built, without any further setup. This makes it easy to build working creatures: put a sensor at the beginning of the signal path and muscles behind it.
+By default, the neural network of a cell simply copies the signal of its first connection, which points to the cell of the next node. Signals therefore flow from the last node of a gene towards node 0, against the order in which the cells were built, without any further setup. This makes it easy to build working creatures: put a sensor at the end of a gene and muscles in front of it.
 
 ![Signals travel from cell to cell. Each cell reads the signal of its neighbor in the next cycle.](images/signal-flow.png)
 

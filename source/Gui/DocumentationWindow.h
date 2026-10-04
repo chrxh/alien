@@ -1,12 +1,12 @@
 #pragma once
 
+#include <Base/MarkdownDocument.h>
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
-#include "MarkdownDocument.h"
 #include "MarkdownRenderer.h"
 
 class DocumentationWindow : public AlienWindow
@@ -19,11 +19,12 @@ private:
     void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
+    void processBackground() override;
 
     void loadChapters();
     void updateSearchResults();
 
-    void processNavigation();
+    void processNavigation(float width);
     void processTableOfContents();
     void processSearchResults();
     void processContent();
