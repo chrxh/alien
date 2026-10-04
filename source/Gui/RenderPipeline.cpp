@@ -29,11 +29,7 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
 
 void _RenderPipeline::resize(IntVector2D const& size)
 {
-    _textureSize = size;
-    for (auto const& textureTarget : _textureTargets) {
-        resizeTarget(textureTarget);
-    }
-    _screenTarget->resize(size, ScreenFormat);
+    _requestedTextureSize = size;
 }
 
 namespace
@@ -53,6 +49,7 @@ namespace
 VulkanImage& _RenderPipeline::execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget)
 {
     _finalTarget = finalTarget ? RenderTarget(*finalTarget) : RenderTarget(ScreenTarget());
+    applyRequestedSize(!finalTarget.has_value());
 
     // Copy vertex buffer from Cuda to Vulkan
     _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, Viewport::get().getVisibleWorldRect());
@@ -90,6 +87,21 @@ VulkanImage& _RenderPipeline::execute(VkCommandBuffer commandBuffer, std::option
         });
 
     return std::holds_alternative<ScreenTarget>(_finalTarget) ? _screenTarget->color : std::get<TextureTarget>(_finalTarget)->color;
+}
+
+void _RenderPipeline::applyRequestedSize(bool withScreenTarget)
+{
+    CHECK(_requestedTextureSize.has_value());
+
+    if (_textureSize != _requestedTextureSize) {
+        for (auto const& textureTarget : _textureTargets) {
+            textureTarget->resize(*_requestedTextureSize, IntermediateFormat);
+        }
+        _textureSize = _requestedTextureSize;
+    }
+    if (withScreenTarget && _screenTarget->color.size != *_textureSize) {
+        _screenTarget->resize(*_textureSize, ScreenFormat);
+    }
 }
 
 void _RenderPipeline::resizeTarget(TextureTarget const& target)
