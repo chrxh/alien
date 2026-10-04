@@ -39,24 +39,32 @@ _TextureTarget::~_TextureTarget()
 void _TextureTarget::resize(IntVector2D const& size, VkFormat colorFormat)
 {
     destroyImages();
-    auto& context = VulkanContext::get();
-    color = context.createImage(size, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-    depth = context.createImage(size, DepthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    color =
+        VulkanContext::get().createImage(size, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     initialized = true;
+}
+
+VulkanImage& _TextureTarget::getDepth()
+{
+    if (_depth.image == VK_NULL_HANDLE) {
+        _depth = VulkanContext::get().createImage(color.size, DepthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    }
+    return _depth;
 }
 
 void _TextureTarget::destroyImages()
 {
     VulkanContext::get().destroyImageLater(color);
-    VulkanContext::get().destroyImageLater(depth);
+    VulkanContext::get().destroyImageLater(_depth);
     initialized = false;
 }
 
-_RenderStep::_RenderStep(StepParameters const& parameters)
+_RenderStep::_RenderStep(StepParameters const& parameters, DepthTest depthTest)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
     , _uniformFunc(parameters._uniformFunc)
+    , _depthTest(depthTest)
 {
     if (!parameters._shader.vertex.empty()) {
         _shader = _Shader::createFromSource(parameters._shader.vertex, parameters._shader.fragment, parameters._shader.geometry);
@@ -120,11 +128,16 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     // Barriers are not allowed during rendering
     auto commandBuffer = parameters._renderInfo.commandBuffer;
     auto const& target = parameters._target;
+    auto withDepth = _depthTest != DepthTest::None;
     VulkanImageBarriers barriers;
     for (auto const& texture : sampledTextures) {
         barriers.add(texture->color, ImageUsage::ShaderRead);
     }
-    barriers.add(target->color, ImageUsage::ColorAttachment).add(target->depth, ImageUsage::DepthAttachment).record(commandBuffer);
+    barriers.add(target->color, ImageUsage::ColorAttachment);
+    if (withDepth) {
+        barriers.add(target->getDepth(), ImageUsage::DepthAttachment);
+    }
+    barriers.record(commandBuffer);
 
     auto loadOp = parameters._clearBackground ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     VkRenderingAttachmentInfo colorAttachment{
@@ -137,7 +150,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     };
     VkRenderingAttachmentInfo depthAttachment{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-        .imageView = target->depth.view,
+        .imageView = withDepth ? target->getDepth().view : VK_NULL_HANDLE,
         .imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
         .loadOp = loadOp,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -150,7 +163,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
         .layerCount = 1,
         .colorAttachmentCount = 1,
         .pColorAttachments = &colorAttachment,
-        .pDepthAttachment = &depthAttachment,
+        .pDepthAttachment = withDepth ? &depthAttachment : nullptr,
     };
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -171,8 +184,9 @@ void _RenderStep::draw(ExecutionParameters const& parameters, PipelineState stat
         return;
     }
     auto commandBuffer = parameters._renderInfo.commandBuffer;
+    state.depthTest = _depthTest;
     state.colorFormat = parameters._target->color.format;
-    state.depthFormat = parameters._target->depth.format;
+    state.depthFormat = _depthTest != DepthTest::None ? DepthFormat : VK_FORMAT_UNDEFINED;
     _shader->bind(commandBuffer, state);
 
     VkDeviceSize offset = 0;
@@ -227,10 +241,7 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     auto const& geometryBuffers = parameters._geometryBuffers;
     draw(
         parameters,
-        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
-         .vertexLayout = VertexLayout::Objects,
-         .blendMode = BlendMode::AlphaBlend,
-         .depthTest = DepthTest::LessOrEqual},
+        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, .vertexLayout = VertexLayout::Objects, .blendMode = BlendMode::AlphaBlend},
         geometryBuffers->getBuffer(GeometryBufferType_Objects),
         geometryBuffers->getNumObjects().lineIndices,
         geometryBuffers->getBuffer(GeometryBufferType_LineIndices));
@@ -239,7 +250,7 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
 }
 
 _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
-    : _RenderStep(parameters)
+    : _RenderStep(parameters, DepthTest::LessOrEqual)
 {}
 
 TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
@@ -257,7 +268,7 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     auto const& geometryBuffers = parameters._geometryBuffers;
     draw(
         parameters,
-        {.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, .vertexLayout = VertexLayout::Objects, .depthTest = DepthTest::Less},
+        {.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, .vertexLayout = VertexLayout::Objects},
         geometryBuffers->getBuffer(GeometryBufferType_Objects),
         geometryBuffers->getNumObjects().triangleIndices,
         geometryBuffers->getBuffer(GeometryBufferType_TriangleIndices));
@@ -266,7 +277,7 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
 }
 
 _TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)
-    : _RenderStep(parameters)
+    : _RenderStep(parameters, DepthTest::Less)
 {}
 
 struct FullscreenQuad
