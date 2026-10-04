@@ -26,14 +26,18 @@ struct _TextureTarget
 
     void resize(IntVector2D const& size, VkFormat colorFormat);
 
+    // Created on first use since only a few render steps test depth
+    VulkanImage& getDepth();
+
     bool initialized = false;
     VulkanImage color;
-    VulkanImage depth;
 
 private:
     _TextureTarget() = default;
 
     void destroyImages();
+
+    VulkanImage _depth;
 };
 struct ScreenTarget
 {
@@ -93,7 +97,7 @@ public:
     void setTextureScaling(float scale);
 
 protected:
-    _RenderStep(StepParameters const& parameters);
+    _RenderStep(StepParameters const& parameters, DepthTest depthTest = DepthTest::None);
 
     // Starts rendering into the target, the sampled textures must not be the target
     void prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures = {});
@@ -107,6 +111,7 @@ protected:
     float _textureScale = 1.0f;
     UniformValueMap _uniforms;
     std::function<UniformValueMap(SimulationParameters const&)> _uniformFunc;
+    DepthTest _depthTest = DepthTest::None;
     std::vector<TextureTarget> _inputTextures;
 
 public:
