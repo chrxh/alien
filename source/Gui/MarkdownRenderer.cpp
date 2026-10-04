@@ -7,12 +7,15 @@
 #include <ranges>
 #include <string_view>
 #include <utility>
+#include <vector>
 #include <cfloat>
 
 #include <glad/glad.h>
+#include <stb_image.h>
+
+#include <Base/MarkdownParser.h>
 
 #include "AlienGui.h"
-#include "MarkdownParser.h"
 #include "OpenGLHelper.h"
 #include "StyleService.h"
 
@@ -28,12 +31,32 @@ namespace
     constexpr float ImageOversampling = 2.0f;
 }
 
+namespace
+{
+    float getSpacingAfter(MarkdownBlock const& block)
+    {
+        if (std::holds_alternative<MarkdownHeading>(block) || std::holds_alternative<MarkdownListItem>(block)) {
+            return ListItemSpacing;
+        }
+        if (std::holds_alternative<MarkdownRule>(block)) {
+            return 0.0f;
+        }
+        return ParagraphSpacing;
+    }
+}
+
 std::optional<std::string> MarkdownRenderer::render(MarkdownDocument const& document, std::filesystem::path const& basePath)
 {
+    if (&document != _renderedDocument) {
+        releaseTextures();
+        _renderedDocument = &document;
+    }
     _basePath = basePath;
     _clickedLink.reset();
     _hoveredLink = std::exchange(_nextHoveredLink, std::nullopt);
+    _textureCreatedInFrame = false;
 
+    ImGui::PushID(&document);
     for (auto const& [index, block] : std::views::enumerate(document.blocks)) {
         ImGui::PushID(static_cast<int>(index));
         if (auto heading = std::get_if<MarkdownHeading>(&block)) {
@@ -53,8 +76,13 @@ std::optional<std::string> MarkdownRenderer::render(MarkdownDocument const& docu
         } else {
             AlienGui::Separator();
         }
+        auto spacing = getSpacingAfter(block);
+        if (spacing > 0.0f) {
+            ImGui::Dummy({0.0f, scale(spacing)});
+        }
         ImGui::PopID();
     }
+    ImGui::PopID();
     _pendingAnchor.reset();
     return _clickedLink;
 }
@@ -66,12 +94,12 @@ void MarkdownRenderer::scrollToAnchor(std::string const& anchor)
 
 void MarkdownRenderer::releaseTextures()
 {
-    for (auto const& texture : _textureByPath | std::views::values) {
-        if (texture.has_value()) {
-            glDeleteTextures(1, &texture->textureId);
+    for (auto& imageInfo : _imageInfoByPath | std::views::values) {
+        if (imageInfo.has_value() && imageInfo->texture.has_value()) {
+            glDeleteTextures(1, &imageInfo->texture->textureId);
+            imageInfo->texture.reset();
         }
     }
-    _textureByPath.clear();
 }
 
 void MarkdownRenderer::renderHeading(MarkdownHeading const& heading)
@@ -90,16 +118,15 @@ void MarkdownRenderer::renderHeading(MarkdownHeading const& heading)
     if (heading.level == 1) {
         AlienGui::Separator();
     }
-    ImGui::Dummy({0.0f, scale(ListItemSpacing)});
 }
 
-void MarkdownRenderer::renderParagraph(MarkdownParagraph const& paragraph)
+void MarkdownRenderer::renderParagraph(MarkdownParagraph const& paragraph, float rightPadding)
 {
-    renderTextFlow(paragraph.spans, {.font = StyleService::get().getDefaultFont(), .color = ImGui::GetColorU32(ImGuiCol_Text)});
-    ImGui::Dummy({0.0f, scale(ParagraphSpacing)});
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(ListIndent) * static_cast<float>(paragraph.listIndentLevel));
+    renderTextFlow(paragraph.spans, {.font = StyleService::get().getDefaultFont(), .color = ImGui::GetColorU32(ImGuiCol_Text), .rightPadding = rightPadding});
 }
 
-void MarkdownRenderer::renderListItem(MarkdownListItem const& listItem)
+void MarkdownRenderer::renderListItem(MarkdownListItem const& listItem, float rightPadding)
 {
     auto font = StyleService::get().getDefaultFont();
     auto color = ImGui::GetColorU32(ImGuiCol_Text);
@@ -115,24 +142,53 @@ void MarkdownRenderer::renderListItem(MarkdownListItem const& listItem)
     } else {
         drawList->AddCircleFilled({pos.x - scale(11.0f), pos.y + font->Ascent * 0.65f}, scale(2.5f), Const::HeadlineColor);
     }
-    renderTextFlow(listItem.spans, {.font = font, .color = color});
+    renderTextFlow(listItem.spans, {.font = font, .color = color, .rightPadding = rightPadding});
     ImGui::Unindent(indent);
-    ImGui::Dummy({0.0f, scale(ListItemSpacing)});
+}
+
+namespace
+{
+    std::optional<TextureData> loadTexture(std::filesystem::path const& path)
+    {
+        std::ifstream stream(path, std::ios::binary);
+        if (!stream) {
+            return std::nullopt;
+        }
+        try {
+            std::string encodedImage{std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+            return OpenGLHelper::loadTextureFromMemory(encodedImage);
+        } catch (std::exception const&) {
+            return std::nullopt;
+        }
+    }
 }
 
 void MarkdownRenderer::renderImage(MarkdownImage const& image)
 {
-    auto texture = getTexture(_basePath / image.source);
-    if (!texture.has_value()) {
+    auto path = _basePath / image.source;
+    auto& imageInfo = getImageInfo(path);
+    if (!imageInfo.has_value()) {
         renderTextFlow({{.text = "Image not found: " + image.source}}, {.font = StyleService::get().getDefaultFont(), .color = Const::WarningColor});
-        ImGui::Dummy({0.0f, scale(ParagraphSpacing)});
         return;
     }
     auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto width = std::min(availableWidth, scale(static_cast<float>(texture->width) / ImageOversampling));
-    auto height = width * static_cast<float>(texture->height) / static_cast<float>(texture->width);
+    auto width = std::min(availableWidth, scale(static_cast<float>(imageInfo->width) / ImageOversampling));
+    auto height = width * static_cast<float>(imageInfo->height) / static_cast<float>(imageInfo->width);
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (availableWidth - width) / 2);
-    ImGui::Image((ImTextureID)(intptr_t)texture->textureId, {width, height});
+
+    // Decoding is deferred until the image becomes visible and limited to one image per frame
+    if (!imageInfo->texture.has_value() && !_textureCreatedInFrame && ImGui::IsRectVisible({width, height})) {
+        _textureCreatedInFrame = true;
+        imageInfo->texture = loadTexture(path);
+        if (!imageInfo->texture.has_value()) {
+            imageInfo.reset();
+        }
+    }
+    if (imageInfo.has_value() && imageInfo->texture.has_value()) {
+        ImGui::Image((ImTextureID)(intptr_t)imageInfo->texture->textureId, {width, height});
+    } else {
+        ImGui::Dummy({width, height});
+    }
 
     if (!image.caption.empty()) {
         auto font = StyleService::get().getDefaultFont();
@@ -142,16 +198,17 @@ void MarkdownRenderer::renderImage(MarkdownImage const& image)
         }
         renderTextFlow({{.text = image.caption}}, {.font = font, .color = Const::TextDimColor});
     }
-    ImGui::Dummy({0.0f, scale(ParagraphSpacing)});
 }
 
-void MarkdownRenderer::renderCodeBlock(MarkdownCodeBlock const& codeBlock)
+void MarkdownRenderer::renderCodeBlock(MarkdownCodeBlock const& codeBlock, float rightPadding)
 {
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(ListIndent) * static_cast<float>(codeBlock.listIndentLevel));
+
     auto font = StyleService::get().getMonospaceMediumFont();
     auto padding = scale(BoxPadding);
     auto textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, codeBlock.text.c_str());
     auto min = ImGui::GetCursorScreenPos();
-    auto max = ImVec2{min.x + ImGui::GetContentRegionAvail().x, min.y + textSize.y + padding * 2};
+    auto max = ImVec2{min.x + ImGui::GetContentRegionAvail().x - rightPadding, min.y + textSize.y + padding * 2};
 
     auto drawList = ImGui::GetWindowDrawList();
     drawList->AddRectFilled(min, max, Const::InputColor, scale(BoxRounding));
@@ -160,7 +217,6 @@ void MarkdownRenderer::renderCodeBlock(MarkdownCodeBlock const& codeBlock)
     drawList->PopClipRect();
 
     ImGui::Dummy({0.0f, max.y - min.y});
-    ImGui::Dummy({0.0f, scale(ParagraphSpacing)});
 }
 
 void MarkdownRenderer::renderNote(MarkdownNote const& note)
@@ -176,8 +232,17 @@ void MarkdownRenderer::renderNote(MarkdownNote const& note)
 
     ImGui::SetCursorScreenPos({start.x, start.y + padding});
     ImGui::Indent(padding + barWidth);
-    for (auto const& paragraph : note.paragraphs) {
-        renderTextFlow(paragraph, {.font = StyleService::get().getDefaultFont(), .color = ImGui::GetColorU32(ImGuiCol_Text), .rightPadding = padding});
+    for (auto const& [index, block] : std::views::enumerate(note.blocks)) {
+        if (index > 0) {
+            ImGui::Dummy({0.0f, scale(ListItemSpacing)});
+        }
+        if (auto paragraph = std::get_if<MarkdownParagraph>(&block)) {
+            renderParagraph(*paragraph, padding);
+        } else if (auto listItem = std::get_if<MarkdownListItem>(&block)) {
+            renderListItem(*listItem, padding);
+        } else if (auto codeBlock = std::get_if<MarkdownCodeBlock>(&block)) {
+            renderCodeBlock(*codeBlock, padding);
+        }
     }
     ImGui::Unindent(padding + barWidth);
     auto endY = ImGui::GetCursorScreenPos().y - ImGui::GetStyle().ItemSpacing.y + padding;
@@ -188,7 +253,6 @@ void MarkdownRenderer::renderNote(MarkdownNote const& note)
     drawList->ChannelsMerge();
 
     ImGui::SetCursorScreenPos({start.x, endY});
-    ImGui::Dummy({0.0f, scale(ParagraphSpacing)});
 }
 
 namespace
@@ -246,7 +310,6 @@ void MarkdownRenderer::renderTable(MarkdownTable const& table)
         }
         ImGui::EndTable();
     }
-    ImGui::Dummy({0.0f, scale(ParagraphSpacing)});
 }
 
 namespace
@@ -261,6 +324,65 @@ namespace
         }
         return baseColor;
     }
+
+    struct TextPiece
+    {
+        MarkdownSpan const* span = nullptr;
+        ImFont* font = nullptr;
+        std::string_view text;
+        float width = 0.0f;
+        float spaceWidthBefore = 0.0f;
+        int numLineBreaksBefore = 0;
+    };
+
+    // Pieces contain no whitespace. Pieces without whitespace between them form a word, even if their spans differ.
+    std::vector<TextPiece> splitIntoPieces(MarkdownSpans const& spans, ImFont* baseFont)
+    {
+        std::vector<TextPiece> result;
+        auto spaceWidthBefore = 0.0f;
+        auto numLineBreaksBefore = 0;
+        for (auto const& span : spans) {
+            auto font = getSpanFont(span, baseFont);
+            auto remainingText = std::string_view(span.text);
+            while (!remainingText.empty()) {
+                if (remainingText.front() == '\n') {
+                    ++numLineBreaksBefore;
+                    remainingText.remove_prefix(1);
+                    continue;
+                }
+                if (remainingText.front() == ' ') {
+                    spaceWidthBefore = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, " ").x;
+                    remainingText.remove_prefix(1);
+                    continue;
+                }
+                auto text = remainingText.substr(0, remainingText.find_first_of(" \n"));
+                auto width = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text.data(), text.data() + text.size()).x;
+                result.emplace_back(TextPiece{
+                    .span = &span,
+                    .font = font,
+                    .text = text,
+                    .width = width,
+                    .spaceWidthBefore = spaceWidthBefore,
+                    .numLineBreaksBefore = numLineBreaksBefore});
+                spaceWidthBefore = 0.0f;
+                numLineBreaksBefore = 0;
+                remainingText.remove_prefix(text.size());
+            }
+        }
+        return result;
+    }
+
+    bool continuesWord(TextPiece const&, TextPiece const& nextPiece)
+    {
+        return nextPiece.spaceWidthBefore == 0.0f && nextPiece.numLineBreaksBefore == 0;
+    }
+
+    struct PlacedPiece
+    {
+        MarkdownSpan const* span = nullptr;
+        float endX = 0.0f;
+        float y = 0.0f;
+    };
 }
 
 void MarkdownRenderer::renderTextFlow(MarkdownSpans const& spans, TextFlowStyle const& style)
@@ -272,52 +394,54 @@ void MarkdownRenderer::renderTextFlow(MarkdownSpans const& spans, TextFlowStyle 
     auto windowHovered = ImGui::IsWindowHovered();
     auto pos = origin;
     auto maxLineX = origin.x;
+    std::optional<PlacedPiece> previousPiece;
 
-    for (auto const& span : spans) {
-        auto font = getSpanFont(span, style.font);
-        auto fontSize = font->FontSize;
-        auto yOffset = style.font->Ascent - font->Ascent;
-        auto spaceWidth = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, " ").x;
-        auto color = getSpanColor(span, style.color, span.link.has_value() && span.link == _hoveredLink);
+    auto pieces = splitIntoPieces(spans, style.font);
+    for (auto const& word : pieces | std::views::chunk_by(continuesWord)) {
+        auto const& firstPiece = word.front();
+        if (firstPiece.numLineBreaksBefore > 0) {
+            pos = {origin.x, pos.y + lineHeight * static_cast<float>(firstPiece.numLineBreaksBefore)};
+        } else if (pos.x > origin.x) {
+            pos.x += firstPiece.spaceWidthBefore;
+        }
+        auto wordWidth = 0.0f;
+        for (auto const& piece : word) {
+            wordWidth += piece.width;
+        }
+        if (pos.x + wordWidth > maxX + 1.0f && pos.x > origin.x) {
+            pos = {origin.x, pos.y + lineHeight};
+        }
 
-        std::optional<ImVec2> linkSpaceStart;
-        auto remainingText = std::string_view(span.text);
-        while (!remainingText.empty()) {
-            if (remainingText.front() == '\n') {
-                pos = {origin.x, pos.y + lineHeight};
-                linkSpaceStart.reset();
-                remainingText.remove_prefix(1);
-                continue;
-            }
-            if (remainingText.front() == ' ') {
-                if (pos.x > origin.x) {
-                    if (span.link.has_value() && !linkSpaceStart.has_value()) {
-                        linkSpaceStart = pos;
-                    }
-                    pos.x += spaceWidth;
-                }
-                remainingText.remove_prefix(1);
-                continue;
-            }
-            auto word = remainingText.substr(0, remainingText.find_first_of(" \n"));
-            auto wordWidth = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, word.data(), word.data() + word.size()).x;
-            if (pos.x + wordWidth > maxX + 1.0f && pos.x > origin.x) {
-                pos = {origin.x, pos.y + lineHeight};
-            }
+        for (auto const& piece : word) {
+            auto const& span = *piece.span;
+            auto pieceMin = ImVec2{pos.x, pos.y};
+            auto pieceMax = ImVec2{pos.x + piece.width, pos.y + lineHeight};
 
-            auto wordMin = ImVec2{pos.x, pos.y};
-            auto wordMax = ImVec2{pos.x + wordWidth, pos.y + lineHeight};
+            // Code backgrounds and link underlines continue across the spaces between pieces on the same line
+            auto continuesLine = previousPiece.has_value() && previousPiece->y == pos.y;
             if (span.code) {
+                auto continuesBackground = continuesLine && previousPiece->span == &span;
                 drawList->AddRectFilled(
-                    {wordMin.x - scale(2.0f), wordMin.y}, {wordMax.x + scale(2.0f), wordMax.y - scale(2.0f)}, Const::InputColor, scale(2.0f));
+                    {continuesBackground ? previousPiece->endX : pieceMin.x - scale(2.0f), pieceMin.y},
+                    {pieceMax.x + scale(2.0f), pieceMax.y - scale(2.0f)},
+                    Const::InputColor,
+                    scale(2.0f),
+                    continuesBackground ? ImDrawFlags_RoundCornersRight : ImDrawFlags_None);
             }
-            drawList->AddText(font, fontSize, {pos.x, pos.y + yOffset}, color, word.data(), word.data() + word.size());
+            auto color = getSpanColor(span, style.color, span.link.has_value() && span.link == _hoveredLink);
+            drawList->AddText(
+                piece.font,
+                piece.font->FontSize,
+                {pos.x, pos.y + style.font->Ascent - piece.font->Ascent},
+                color,
+                piece.text.data(),
+                piece.text.data() + piece.text.size());
 
             if (span.link.has_value()) {
                 auto underlineY = pos.y + style.font->Ascent + scale(2.0f);
-                auto underlineStartX = linkSpaceStart.has_value() && linkSpaceStart->y == pos.y ? linkSpaceStart->x : wordMin.x;
-                drawList->AddLine({underlineStartX, underlineY}, {wordMax.x, underlineY}, color);
-                if (windowHovered && ImGui::IsMouseHoveringRect(wordMin, wordMax)) {
+                auto underlineStartX = continuesLine && previousPiece->span->link == span.link ? previousPiece->endX : pieceMin.x;
+                drawList->AddLine({underlineStartX, underlineY}, {pieceMax.x, underlineY}, color);
+                if (windowHovered && ImGui::IsMouseHoveringRect(pieceMin, pieceMax)) {
                     _nextHoveredLink = span.link;
                     ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
                     if (span.link->starts_with("http")) {
@@ -328,26 +452,23 @@ void MarkdownRenderer::renderTextFlow(MarkdownSpans const& spans, TextFlowStyle 
                     }
                 }
             }
-            pos.x += wordWidth;
+            pos.x += piece.width;
             maxLineX = std::max(maxLineX, pos.x);
-            linkSpaceStart.reset();
-            remainingText.remove_prefix(word.size());
+            previousPiece = PlacedPiece{.span = &span, .endX = pos.x, .y = pos.y};
         }
     }
     ImGui::Dummy({maxLineX - origin.x, pos.y + lineHeight - origin.y});
 }
 
-std::optional<TextureData> MarkdownRenderer::getTexture(std::filesystem::path const& path)
+std::optional<MarkdownRenderer::ImageInfo>& MarkdownRenderer::getImageInfo(std::filesystem::path const& path)
 {
-    auto [iterator, inserted] = _textureByPath.try_emplace(path.lexically_normal());
+    auto [iterator, inserted] = _imageInfoByPath.try_emplace(path.lexically_normal());
     if (inserted) {
-        std::ifstream stream(path, std::ios::binary);
-        if (stream) {
-            try {
-                std::string encodedImage{std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
-                iterator->second = OpenGLHelper::loadTextureFromMemory(encodedImage);
-            } catch (std::exception const&) {
-            }
+        auto width = 0;
+        auto height = 0;
+        auto numChannels = 0;
+        if (stbi_info(path.string().c_str(), &width, &height, &numChannels) != 0 && width > 0 && height > 0) {
+            iterator->second = ImageInfo{.width = width, .height = height};
         }
     }
     return iterator->second;

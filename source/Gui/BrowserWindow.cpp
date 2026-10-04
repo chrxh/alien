@@ -1,9 +1,5 @@
 #include "BrowserWindow.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #include <algorithm>
 #include <ranges>
 
@@ -13,6 +9,7 @@
 
 #include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
+#include <Base/WebLinkHelper.h>
 
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
@@ -261,11 +258,11 @@ void BrowserWindow::processToolbar()
                                                 .selected(!_galleryView)
                                                 .action([&] { _galleryView = false; }))};
 
-#ifdef _WIN32
     items.emplace_back(AlienGui::ToolbarItem::createSeparator());
-    items.emplace_back(AlienGui::ToolbarItem::createButton(
-        AlienGui::ToolbarItemParameters().icon(ICON_FA_COMMENTS).name("Open ALIEN Discord server").action([&] { openWeblink(Const::DiscordURL); })));
-#endif
+    items.emplace_back(
+        AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters().icon(ICON_FA_COMMENTS).name("Open ALIEN Discord server").action([] {
+            WebLinkHelper::openInBrowser(Const::DiscordURL);
+        })));
 
     auto toolbarParameters = AlienGui::ToolbarParameters().id("Browser");
 
@@ -645,11 +642,4 @@ void BrowserWindow::onCollapseFolders()
     auto& workspace = _data->getCurrentWorkspace();
     workspace.collapsedFolderNames = NetworkResourceService::get().getFolderNames(workspace.rawTOs, 1);
     _data->createTreeTOs(workspace);
-}
-
-void BrowserWindow::openWeblink(std::string const& link)
-{
-#ifdef _WIN32
-    ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
-#endif
 }

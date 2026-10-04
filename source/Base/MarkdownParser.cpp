@@ -1,6 +1,7 @@
 #include "MarkdownParser.h"
 
 #include <unordered_map>
+#include <utility>
 #include <cctype>
 
 #include <md4c.h>
@@ -32,14 +33,19 @@ namespace
         }
     }
 
-    enum class Collector
+    enum class Leaf
     {
         None,
         Paragraph,
         Heading,
-        ListItem,
         TableCell,
         CodeBlock
+    };
+
+    enum class Container
+    {
+        ListItem,
+        Quote
     };
 
     struct ListLevel
@@ -48,18 +54,26 @@ namespace
         int nextNumber = 1;
     };
 
+    struct OpenListItem
+    {
+        int depth = 0;
+        std::optional<int> number;
+        bool markerAdded = false;
+    };
+
     struct ParserState
     {
         MarkdownDocument document;
 
-        Collector collector = Collector::None;
+        Leaf leaf = Leaf::None;
         MarkdownSpans spans;
         std::string codeText;
         int headingLevel = 1;
+        std::unordered_map<std::string, int> numHeadingsByAnchor;
 
+        std::vector<Container> containers;
         std::vector<ListLevel> lists;
-        std::optional<MarkdownListItem> listItem;
-
+        std::vector<OpenListItem> listItems;
         int quoteDepth = 0;
         MarkdownNote note;
 
@@ -72,6 +86,10 @@ namespace
         int codeDepth = 0;
         std::vector<std::string> links;
         std::optional<MarkdownImage> image;
+
+        bool isInListItem() const { return !containers.empty() && containers.back() == Container::ListItem; }
+
+        int getListIndentLevel() const { return isInListItem() ? static_cast<int>(listItems.size()) : 0; }
 
         void appendText(std::string const& text)
         {
@@ -90,27 +108,52 @@ namespace
             spans.emplace_back(std::move(span));
         }
 
-        void flushParagraph()
+        // Paragraphs, list items and code blocks inside a block quote belong to its note
+        void addBlock(MarkdownNoteBlock&& block)
+        {
+            if (quoteDepth > 0) {
+                note.blocks.emplace_back(std::move(block));
+            } else {
+                std::visit([this](auto&& value) { document.blocks.emplace_back(std::move(value)); }, std::move(block));
+            }
+        }
+
+        // Other blocks interrupt a note, the rest of the block quote continues in a new note
+        void addStandaloneBlock(MarkdownBlock&& block)
+        {
+            flushNote();
+            document.blocks.emplace_back(std::move(block));
+        }
+
+        void flushNote()
+        {
+            if (!note.blocks.empty()) {
+                document.blocks.emplace_back(std::move(note));
+            }
+            note = MarkdownNote();
+        }
+
+        // The first text of a list item carries the marker, further text of the item is indented below it
+        void flushText()
         {
             if (spans.empty()) {
                 return;
             }
-            if (quoteDepth > 0) {
-                note.paragraphs.emplace_back(std::move(spans));
+            if (isInListItem() && !listItems.back().markerAdded) {
+                auto& listItem = listItems.back();
+                addBlock(MarkdownListItem{.depth = listItem.depth, .number = listItem.number, .spans = std::move(spans)});
+                listItem.markerAdded = true;
             } else {
-                document.blocks.emplace_back(MarkdownParagraph{.spans = std::move(spans)});
+                addBlock(MarkdownParagraph{.spans = std::move(spans), .listIndentLevel = getListIndentLevel()});
             }
             spans.clear();
         }
 
-        void flushListItem()
+        std::string createUniqueAnchor(std::string const& headingText)
         {
-            if (listItem.has_value() && !spans.empty()) {
-                listItem->spans = std::move(spans);
-                document.blocks.emplace_back(std::move(*listItem));
-            }
-            listItem.reset();
-            spans.clear();
+            auto anchor = MarkdownParser::toAnchor(headingText);
+            auto numPreviousHeadings = numHeadingsByAnchor[anchor]++;
+            return numPreviousHeadings == 0 ? anchor : anchor + "-" + std::to_string(numPreviousHeadings);
         }
     };
 
@@ -119,50 +162,44 @@ namespace
         auto& state = *static_cast<ParserState*>(userData);
         switch (type) {
         case MD_BLOCK_QUOTE:
-            if (state.quoteDepth++ == 0) {
-                state.note = MarkdownNote();
-            }
+            state.flushText();
+            state.containers.emplace_back(Container::Quote);
+            ++state.quoteDepth;
             break;
         case MD_BLOCK_UL:
-            state.flushListItem();
+            state.flushText();
             state.lists.emplace_back(ListLevel{.ordered = false});
             break;
         case MD_BLOCK_OL:
-            state.flushListItem();
+            state.flushText();
             state.lists.emplace_back(ListLevel{.ordered = true, .nextNumber = static_cast<int>(static_cast<MD_BLOCK_OL_DETAIL*>(detail)->start)});
             break;
         case MD_BLOCK_LI: {
-            state.flushListItem();
             auto& list = state.lists.back();
-            state.listItem = MarkdownListItem{.depth = static_cast<int>(state.lists.size()) - 1};
-            if (list.ordered) {
-                state.listItem->number = list.nextNumber++;
-            }
-            state.collector = Collector::ListItem;
+            auto number = list.ordered ? std::make_optional(list.nextNumber++) : std::nullopt;
+            state.listItems.emplace_back(OpenListItem{.depth = static_cast<int>(state.lists.size()) - 1, .number = number});
+            state.containers.emplace_back(Container::ListItem);
         } break;
         case MD_BLOCK_HR:
-            state.document.blocks.emplace_back(MarkdownRule());
+            state.flushText();
+            state.addStandaloneBlock(MarkdownRule());
             break;
         case MD_BLOCK_H:
+            state.flushText();
             state.headingLevel = static_cast<int>(static_cast<MD_BLOCK_H_DETAIL*>(detail)->level);
-            state.spans.clear();
-            state.collector = Collector::Heading;
+            state.leaf = Leaf::Heading;
             break;
         case MD_BLOCK_CODE:
+            state.flushText();
             state.codeText.clear();
-            state.collector = Collector::CodeBlock;
+            state.leaf = Leaf::CodeBlock;
             break;
         case MD_BLOCK_P:
-            if (state.collector == Collector::ListItem) {
-                if (!state.spans.empty()) {
-                    state.appendText(" ");
-                }
-            } else {
-                state.spans.clear();
-                state.collector = Collector::Paragraph;
-            }
+            state.flushText();
+            state.leaf = Leaf::Paragraph;
             break;
         case MD_BLOCK_TABLE:
+            state.flushText();
             state.table = MarkdownTable();
             break;
         case MD_BLOCK_THEAD:
@@ -180,7 +217,7 @@ namespace
                 state.table.alignments.emplace_back(toAlignment(static_cast<MD_BLOCK_TD_DETAIL*>(detail)->align));
             }
             state.spans.clear();
-            state.collector = Collector::TableCell;
+            state.leaf = Leaf::TableCell;
             break;
         default:
             break;
@@ -193,45 +230,44 @@ namespace
         auto& state = *static_cast<ParserState*>(userData);
         switch (type) {
         case MD_BLOCK_QUOTE:
-            state.flushParagraph();
-            if (--state.quoteDepth == 0 && !state.note.paragraphs.empty()) {
-                state.document.blocks.emplace_back(std::move(state.note));
+            state.flushText();
+            state.containers.pop_back();
+            if (--state.quoteDepth == 0) {
+                state.flushNote();
             }
             break;
         case MD_BLOCK_UL:
         case MD_BLOCK_OL:
-            state.flushListItem();
             state.lists.pop_back();
-            state.collector = state.lists.empty() ? Collector::None : Collector::ListItem;
             break;
         case MD_BLOCK_LI:
-            state.flushListItem();
+            state.flushText();
+            state.listItems.pop_back();
+            state.containers.pop_back();
             break;
         case MD_BLOCK_H: {
-            auto anchor = MarkdownParser::toAnchor(MarkdownParser::toPlainText(state.spans));
-            state.document.blocks.emplace_back(MarkdownHeading{.level = state.headingLevel, .spans = std::move(state.spans), .anchor = std::move(anchor)});
+            auto anchor = state.createUniqueAnchor(MarkdownParser::toPlainText(state.spans));
+            state.addStandaloneBlock(MarkdownHeading{.level = state.headingLevel, .spans = std::move(state.spans), .anchor = std::move(anchor)});
             state.spans.clear();
-            state.collector = Collector::None;
+            state.leaf = Leaf::None;
         } break;
         case MD_BLOCK_CODE:
             while (!state.codeText.empty() && state.codeText.back() == '\n') {
                 state.codeText.pop_back();
             }
-            state.document.blocks.emplace_back(MarkdownCodeBlock{.text = std::move(state.codeText)});
+            state.addBlock(MarkdownCodeBlock{.text = std::move(state.codeText), .listIndentLevel = state.getListIndentLevel()});
             state.codeText.clear();
-            state.collector = Collector::None;
+            state.leaf = Leaf::None;
             break;
         case MD_BLOCK_P:
-            if (state.collector == Collector::Paragraph) {
-                state.flushParagraph();
-                state.collector = Collector::None;
-            }
+            state.flushText();
+            state.leaf = Leaf::None;
             break;
         case MD_BLOCK_TH:
         case MD_BLOCK_TD:
             state.tableRow.emplace_back(std::move(state.spans));
             state.spans.clear();
-            state.collector = Collector::None;
+            state.leaf = Leaf::None;
             break;
         case MD_BLOCK_TR:
             if (state.inTableHead) {
@@ -242,7 +278,7 @@ namespace
             state.tableRow.clear();
             break;
         case MD_BLOCK_TABLE:
-            state.document.blocks.emplace_back(std::move(state.table));
+            state.addStandaloneBlock(std::move(state.table));
             break;
         default:
             break;
@@ -268,8 +304,8 @@ namespace
             break;
         case MD_SPAN_IMG:
             // Images inside lists, tables or notes are not supported and fall back to their caption text
-            if (state.collector == Collector::Paragraph && state.quoteDepth == 0) {
-                state.flushParagraph();
+            if (state.leaf == Leaf::Paragraph && state.containers.empty()) {
+                state.flushText();
                 state.image = MarkdownImage{.source = toString(static_cast<MD_SPAN_IMG_DETAIL*>(detail)->src)};
             }
             break;
@@ -297,7 +333,7 @@ namespace
             break;
         case MD_SPAN_IMG:
             if (state.image.has_value()) {
-                state.document.blocks.emplace_back(std::move(*state.image));
+                state.addStandaloneBlock(std::move(*state.image));
                 state.image.reset();
             }
             break;
@@ -318,11 +354,12 @@ namespace
             state.image->caption += string;
             return 0;
         }
-        if (state.collector == Collector::CodeBlock) {
+        if (state.leaf == Leaf::CodeBlock) {
             state.codeText += string;
             return 0;
         }
-        if (state.collector == Collector::None) {
+        // The text of tight list items is not wrapped in paragraphs
+        if (state.leaf == Leaf::None && !state.isInListItem()) {
             return 0;
         }
         switch (type) {
