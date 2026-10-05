@@ -45,12 +45,14 @@ public:
     void init();
     void shutdown();
 
-    void calcTimestep(
+    // A time step is launched and finished separately, so that the domains on several devices can compute it at the same time
+    void launchTimestep(
         SettingsForSimulation const& settings,
         SimulationData const& simulationData,
         SimulationStatistics const& statistics,
         uint64_t timestep,
         bool forceCellFunctionExecution);
+    void finishTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData);
     void calcTimestepForPreview(
         SettingsForSimulation const& settings,
         SimulationData const& simulationData,
@@ -104,7 +106,12 @@ private:
         SimulationData const& data,
         SimulationStatistics const& statistics);
 
-    std::map<int, cudaStream_t> _streams;
+    struct Stream
+    {
+        cudaStream_t stream;
+        int device;
+    };
+    std::map<int, Stream> _streams;
     std::map<CudaGraphConfig, cudaGraphExec_t> _graphCache;
     std::map<CudaGraphPreviewConfig, cudaGraphExec_t> _previewGraphCache;
 };

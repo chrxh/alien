@@ -42,6 +42,7 @@ using cudaError_t = hipError_t;
 #define cudaErrorMemoryAllocation         hipErrorOutOfMemory
 #define cudaErrorIllegalAddress           hipErrorIllegalAddress
 #define cudaErrorLaunchFailure            hipErrorLaunchFailure
+#define cudaErrorPeerAccessAlreadyEnabled hipErrorPeerAccessAlreadyEnabled
 
 // --- device management ---
 #define cudaDeviceProp                    hipDeviceProp_t
@@ -50,13 +51,17 @@ using cudaError_t = hipError_t;
 #define cudaOccupancyMaxActiveBlocksPerMultiprocessor hipOccupancyMaxActiveBlocksPerMultiprocessor
 #define cudaMemGetInfo                    hipMemGetInfo
 #define cudaSetDevice                     hipSetDevice
+#define cudaGetDevice                     hipGetDevice
 #define cudaDeviceSynchronize             hipDeviceSynchronize
 #define cudaDeviceReset                   hipDeviceReset
+#define cudaDeviceCanAccessPeer           hipDeviceCanAccessPeer
+#define cudaDeviceEnablePeerAccess        hipDeviceEnablePeerAccess
 
 // --- memory ---
 #define cudaMalloc                        hipMalloc
 #define cudaFree                          hipFree
 #define cudaMemcpy                        hipMemcpy
+#define cudaMemcpyPeer                    hipMemcpyPeer
 #define cudaMemset                        hipMemset
 #define cudaMemset2D                      hipMemset2D
 #define cudaMemcpyToSymbol                hipMemcpyToSymbol

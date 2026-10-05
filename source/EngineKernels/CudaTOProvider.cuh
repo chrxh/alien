@@ -1,11 +1,12 @@
 #pragma once
 
-#include <optional>
+#include <map>
 
 #include <EngineInterface/ArraySizesForTOs.h>
 
 #include "TOs.cuh"
 
+// Provides the transfer objects on the current device
 class _CudaTOProvider
 {
 public:
@@ -15,7 +16,7 @@ public:
     TOs provideDataTO(ArraySizesForTOs const& requiredCapacity);
 
 private:
-    void destroy();
+    void destroy(TOs& to);
 
-    std::optional<TOs> _to;
+    std::map<int, TOs> _toByDevice;
 };

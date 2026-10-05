@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include <Base/Singleton.h>
 
 #include <EngineInterface/KernelLaunchSettings.h>
@@ -29,6 +31,8 @@ public:
 private:
     GarbageCollectorKernelsService() = default;
 
-    // GPU memory
-    bool* _cudaBool = nullptr;
+    bool* getCudaBool();
+
+    // GPU memory of each device
+    std::map<int, bool*> _cudaBools;
 };

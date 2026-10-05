@@ -1,5 +1,7 @@
 #include "DataAccessKernelsService.cuh"
 
+#include <ranges>
+
 #include <EngineKernels/DataAccessKernels.cuh>
 #include <EngineKernels/DebugKernels.cuh>
 #include <EngineKernels/KernelLauncher.cuh>
@@ -10,28 +12,28 @@
 
 void DataAccessKernelsService::init()
 {
-    CudaMemoryManager::getInstance().acquireMemory(1, _cudaCellArray);
-    CudaMemoryManager::getInstance().acquireMemory(1, _arraySizesGPU);
-    CudaMemoryManager::getInstance().acquireMemory(1, _arraySizesTO);
-    CudaMemoryManager::getInstance().acquireMemory(1, _foundResult);
+    getDeviceMemory();
 }
 
 void DataAccessKernelsService::shutdown()
 {
-    CudaMemoryManager::getInstance().freeMemory(_cudaCellArray);
-    CudaMemoryManager::getInstance().freeMemory(_arraySizesGPU);
-    CudaMemoryManager::getInstance().freeMemory(_arraySizesTO);
-    CudaMemoryManager::getInstance().freeMemory(_foundResult);
+    for (auto& deviceMemory : _deviceMemories | std::views::values) {
+        CudaMemoryManager::getInstance().freeMemory(deviceMemory.cudaCellArray);
+        CudaMemoryManager::getInstance().freeMemory(deviceMemory.arraySizesGPU);
+        CudaMemoryManager::getInstance().freeMemory(deviceMemory.arraySizesTO);
+    }
+    _deviceMemories.clear();
 }
 
 ArraySizesForTOs DataAccessKernelsService::estimateCapacityNeededForTO(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
-    setValueToDevice(_arraySizesTO, ArraySizesForTOs{});
+    auto arraySizesTO = getDeviceMemory().arraySizesTO;
+    setValueToDevice(arraySizesTO, ArraySizesForTOs{});
     launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForTO_step1), LaunchConfig{launchSettings.numBlocks, 8}, data);
-    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForTO_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, _arraySizesTO);
+    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForTO_step2), LaunchConfig{launchSettings.numBlocks, 8}, data, arraySizesTO);
     cudaDeviceSynchronize();
 
-    return copyToHost(_arraySizesTO);
+    return copyToHost(arraySizesTO);
 }
 
 void DataAccessKernelsService::getData(
@@ -90,22 +92,24 @@ void DataAccessKernelsService::getOverlayData(
 
 ArraySizesForGpuEntities DataAccessKernelsService::estimateCapacityNeededForGpu(KernelLaunchSettings const& launchSettings, TOs const& to)
 {
-    setValueToDevice(_arraySizesGPU, ArraySizesForGpuEntities{});
-    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForGpu), LaunchConfig{launchSettings.numBlocks, 8}, to, _arraySizesGPU);
+    auto arraySizesGPU = getDeviceMemory().arraySizesGPU;
+    setValueToDevice(arraySizesGPU, ArraySizesForGpuEntities{});
+    launchKernelOnDefaultStream(KERNEL(cudaEstimateCapacityNeededForGpu), LaunchConfig{launchSettings.numBlocks, 8}, to, arraySizesGPU);
     cudaDeviceSynchronize();
 
-    return copyToHost(_arraySizesGPU);
+    return copyToHost(arraySizesGPU);
 }
 
 void DataAccessKernelsService::addData(KernelLaunchSettings const& launchSettings, SimulationData const& data, TOs const& to, bool selectData)
 {
+    auto cudaCellArray = getDeviceMemory().cudaCellArray;
     launchKernelOnDefaultStream(KERNEL(cudaSaveNumEntries), LaunchConfig{1, 1}, data);
     launchKernelOnDefaultStream(KERNEL(cudaAdaptNumberGenerator), LaunchConfig{launchSettings.numBlocks, 8}, data.primaryNumberGen, to);
 
-    launchKernelOnDefaultStream(KERNEL(cudaGetArraysBasedOnTO), LaunchConfig{1, 1}, data, to, _cudaCellArray);
+    launchKernelOnDefaultStream(KERNEL(cudaGetArraysBasedOnTO), LaunchConfig{1, 1}, data, to, cudaCellArray);
     launchKernelOnDefaultStream(KERNEL(cudaSetGenomeDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
     launchKernelOnDefaultStream(KERNEL(cudaSetCreatureDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to);
-    launchKernelOnDefaultStream(KERNEL(cudaSetCellAndParticleDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to, _cudaCellArray, selectData);
+    launchKernelOnDefaultStream(KERNEL(cudaSetCellAndParticleDataFromTO), LaunchConfig{launchSettings.numBlocks, 8}, data, to, cudaCellArray, selectData);
     GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(launchSettings, data);
     if (selectData) {
         SelectionKernelsService::get().rolloutSelection(launchSettings, data);
@@ -115,4 +119,15 @@ void DataAccessKernelsService::addData(KernelLaunchSettings const& launchSetting
 void DataAccessKernelsService::clearData(KernelLaunchSettings const& launchSettings, SimulationData const& data)
 {
     launchKernelOnDefaultStream(KERNEL(cudaClearData), LaunchConfig{launchSettings.numBlocks, 8}, data);
+}
+
+DataAccessKernelsService::DeviceMemory& DataAccessKernelsService::getDeviceMemory()
+{
+    auto& result = _deviceMemories[getCurrentDevice()];
+    if (!result.cudaCellArray) {
+        CudaMemoryManager::getInstance().acquireMemory(1, result.cudaCellArray);
+        CudaMemoryManager::getInstance().acquireMemory(1, result.arraySizesGPU);
+        CudaMemoryManager::getInstance().acquireMemory(1, result.arraySizesTO);
+    }
+    return result;
 }

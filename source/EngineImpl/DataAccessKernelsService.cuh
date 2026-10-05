@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include <Base/Singleton.h>
 
 #include <EngineInterface/ArraySizesForGpuEntities.h>
@@ -33,9 +35,13 @@ public:
 private:
     DataAccessKernelsService() = default;
 
-    // Gpu memory
-    Object** _cudaCellArray = nullptr;
-    ArraySizesForGpuEntities* _arraySizesGPU = nullptr;
-    ArraySizesForTOs* _arraySizesTO = nullptr;
-    bool* _foundResult = nullptr;
+    struct DeviceMemory
+    {
+        Object** cudaCellArray = nullptr;
+        ArraySizesForGpuEntities* arraySizesGPU = nullptr;
+        ArraySizesForTOs* arraySizesTO = nullptr;
+    };
+    DeviceMemory& getDeviceMemory();
+
+    std::map<int, DeviceMemory> _deviceMemories;
 };
