@@ -160,6 +160,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         auto objectType = object->type;
         auto objectNumConnections = toInt(object->numConnections);
         auto objectIsStatic = object->isStatic();
+        auto objectIsGhost = object->isGhost();
         auto objectDetached = object->detached();
         auto objectIsSticky = object->isSticky();
 
@@ -271,7 +272,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                             // Fusion
                             if (Math::length(velDelta) >= cellFusionVelocity && objectNumConnections < MAX_OBJECT_CONNECTIONS
-                                && other.numConnections < MAX_OBJECT_CONNECTIONS && (objectIsSticky || other.isSticky()) && !objectIsStatic) {
+                                && other.numConnections < MAX_OBJECT_CONNECTIONS && (objectIsSticky || other.isSticky()) && !objectIsStatic && !objectIsGhost) {
                                 ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, other.self);
                             }
                         }
@@ -443,7 +444,7 @@ __inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         object->density = object->tempValue2.as_float2.x;
-        if (object->isStatic()) {
+        if (object->isStatic() || object->isGhost()) {
             continue;
         }
 
@@ -553,10 +554,15 @@ __inline__ __device__ void ObjectProcessor::tearOverstretchedConnections(Simulat
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->isGhost()) {
+            continue;
+        }
 
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
-            if (connectedObject < object) {
+
+            // A connection to a ghost is only seen from this side
+            if (connectedObject < object && (!data.domain.isDecomposed() || !connectedObject->isGhost())) {
                 continue;
             }
             auto displacement = connectedObject->pos - object->pos;
@@ -661,7 +667,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->isStatic()) {
+        if (object->isStatic() || object->isGhost()) {
             continue;
         }
         if (object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {

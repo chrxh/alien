@@ -13,6 +13,8 @@
 // Captures all runtime-varying parameters that affect kernel execution
 struct CudaGraphConfig
 {
+    int domainIndex;           // The captured kernel parameters point to the data of one domain
+    bool isDecomposed;         // Requests of other domains need to be processed
     int timestepMod3;          // Not every kernel needs to be executed each time
     bool executeCellFunction;  // Cell type functions need to be executed
     bool hasLayers;            // settings.simulationParameters.numLayers > 0
@@ -43,12 +45,14 @@ public:
     void init();
     void shutdown();
 
-    void calcTimestep(
+    // A time step is launched and finished separately, so that the domains on several devices can compute it at the same time
+    void launchTimestep(
         SettingsForSimulation const& settings,
         SimulationData const& simulationData,
         SimulationStatistics const& statistics,
         uint64_t timestep,
         bool forceCellFunctionExecution);
+    void finishTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData);
     void calcTimestepForPreview(
         SettingsForSimulation const& settings,
         SimulationData const& simulationData,
@@ -60,6 +64,11 @@ public:
 
 private:
     SimulationKernelsService() = default;
+
+    static auto constexpr PreviewStreamKey = -1;
+
+    // Each domain gets its own stream so that domains sharing a device can overlap
+    cudaStream_t getStream(int key);
 
     bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
 
@@ -97,7 +106,12 @@ private:
         SimulationData const& data,
         SimulationStatistics const& statistics);
 
-    cudaStream_t _stream = nullptr;
+    struct Stream
+    {
+        cudaStream_t stream;
+        int device;
+    };
+    std::map<int, Stream> _streams;
     std::map<CudaGraphConfig, cudaGraphExec_t> _graphCache;
     std::map<CudaGraphPreviewConfig, cudaGraphExec_t> _previewGraphCache;
 };

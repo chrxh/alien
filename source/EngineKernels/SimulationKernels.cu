@@ -34,7 +34,18 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     data.mutatedGenomes.setMemory(data.processMemory.getTypedSubArray<Genome*>(maxCellTypeOperations), maxCellTypeOperations);
     auto numEnergyParticles = data.entities.energies.getNumEntries();
     data.energyParticlesNearBarriers.setMemory(data.processMemory.getTypedSubArray<int>(numEnergyParticles), numEnergyParticles);
-    *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
+
+    // The domains share the external energy pool
+    auto externalEnergy = cudaSimulationParameters.externalEnergy.value;
+    if (data.domain.isDecomposed()) {
+        if (externalEnergy != Infinity<float>::value) {
+            externalEnergy *= data.domain.layout->externalEnergyShares[data.domain.index];
+        }
+        for (int i = 0; i < ExternalEnergyDemand_Count; ++i) {
+            data.externalEnergyDemands[i] = 0;
+        }
+    }
+    *data.externalEnergy = externalEnergy;
     for (int i = 0; i < MAX_COLORS; ++i) {
         data.numConstructorsNeedingEnergyByColor[i] = 0;
         data.externalEnergyInflowPerConstructorByColor[i] = 0.0f;
@@ -162,6 +173,9 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
     for (int color = 0; color < MAX_COLORS; ++color) {
         totalEnergyNeeded += data.numConstructorsNeedingEnergyByColor[color] * cudaSimulationParameters.externalEnergyInflowForConstructor.value[color];
     }
+    if (data.domain.isDecomposed()) {
+        data.externalEnergyDemands[ExternalEnergyDemand_Constructors] = totalEnergyNeeded;
+    }
     auto externalEnergy = *data.externalEnergy;
     auto factor = 0.0;
     if (totalEnergyNeeded > 0.0 && externalEnergy > 0.0) {
@@ -245,7 +259,17 @@ __global__ void cudaNextTimestep_cellType_muscle(SimulationData data, Simulation
 
 __global__ void cudaNextTimestep_cellType_sensor(SimulationData data, SimulationStatistics statistics)
 {
-    SensorProcessor::process(data, statistics);
+    SensorProcessor::process<false>(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_sensor_decomposed(SimulationData data, SimulationStatistics statistics)
+{
+    SensorProcessor::process<true>(data, statistics);
+}
+
+__global__ void cudaNextTimestep_domain_requestSensorContinuations(SimulationData data)
+{
+    SensorProcessor::processContinuations(data);
 }
 
 __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics)
@@ -276,6 +300,23 @@ __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, Simu
 __global__ void cudaNextTimestep_cellType_void(SimulationData data, SimulationStatistics statistics)
 {
     VoidProcessor::process(data, statistics);
+}
+
+// A whole block sweeps the ring of one shock wave front
+__global__ void cudaNextTimestep_domain_applyShockWaves(SimulationData data)
+{
+    auto& shockWaves = data.receivedShockWaves;
+    auto const partition = calcBlockPartition(shockWaves.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& op = shockWaves.at(index);
+        DetonatorProcessor::applyShockWaveFront_block(data, op.pos, op.values[2], op.values[0], op.values[1], op.kind);
+        __syncthreads();
+    }
+}
+
+__global__ void cudaNextTimestep_domain_scanSensorRequests(SimulationData data)
+{
+    SensorProcessor::processScanRequests(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)

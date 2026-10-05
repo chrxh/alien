@@ -46,6 +46,8 @@ public:
     __inline__ __device__ Gene* createEmptyGenes(int numGenes);
     __inline__ __device__ Node* createEmptyNodes(int numNodes);
 
+    __inline__ __device__ void initDomainData(Creature* creature);
+
 private:
     template <typename T>
     __inline__ __device__ void copyDataToHeap(T sourceSize, uint64_t sourceIndex, uint8_t* heap, T& targetSize, uint8_t*& target);
@@ -80,6 +82,8 @@ __inline__ __device__ Energy* EntityFactory::createParticleFromTO(EnergyTO const
     particle->selected = 0;
     particle->color = particleTO.color;
     particle->lastAbsorbedObject = nullptr;
+    particle->ghost = false;
+    particle->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     return particle;
 }
 
@@ -89,6 +93,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
     genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->entities.heap.getArray());
     genome->id = genomeTO.id;
+    genome->isPlaceholder = false;
     genome->frontAngle = genomeTO.frontAngle;
     genome->resistanceToInjection = genomeTO.resistanceToInjection;
     genome->applyMetaMutations = genomeTO.applyMetaMutations;
@@ -339,6 +344,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->id = creatureTO.id;
     changeCreatureFromTO(creatureTO, creature);
     creature->creatureState = CreatureState_HostConfirmed;
+    initDomainData(creature);
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -358,6 +364,7 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TOs const& to, i
     object->id = objectTO.id;
     object->locked = 0;
     object->selected = 0;
+    object->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     object->numConnections = objectTO.numConnections;
     if (object->type == ObjectType_Cell) {
         auto const& genomeTO = to.creatures[objectTO.typeData.cell.creatureIndex];
@@ -669,6 +676,8 @@ __inline__ __device__ Energy* EntityFactory::createEnergy(float energy, float2 c
     particle->vel = vel;
     particle->color = color;
     particle->lastAbsorbedObject = nullptr;
+    particle->ghost = false;
+    particle->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     return particle;
 }
 
@@ -686,6 +695,7 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     object->locked = 0;
     object->selected = 0;
     object->flags = 0;
+    object->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     object->color = 0;
     object->density = 1.0f;
     object->type = ObjectType_FreeCell;
@@ -702,6 +712,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     auto newId = newCreature->id;
     *newCreature = *creature;
     newCreature->id = newId;
+    initDomainData(newCreature);
     newCreature->ancestorId = creature->id;
     newCreature->generation = creature->generation + 1;
     newCreature->mutationState = MutationState_NotMutated;
@@ -716,6 +727,7 @@ __inline__ __device__ Genome* EntityFactory::cloneGenome(Genome* genome)
     auto newId = newGenome->id;
     *newGenome = *genome;
     newGenome->id = newId;
+    newGenome->isPlaceholder = false;
 
     auto newGenes = createEmptyGenes(genome->numGenes);
     for (int i = 0, numGenes = genome->numGenes; i < numGenes; ++i) {
@@ -762,6 +774,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     object->stiffness = gene->stiffness;
     object->color = node->color;
     object->flags = 0;
+    object->ownerDomain = static_cast<uint8_t>(_data->domain.index);
     object->numConnections = 0;
     object->type = ObjectType_Cell;
     object->selected = 0;
@@ -1020,6 +1033,7 @@ __inline__ __device__ Genome* EntityFactory::createEmptyGenome()
 {
     auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
     genome->id = _data->primaryNumberGen.createEntityId();
+    genome->isPlaceholder = false;
     return genome;
 }
 
@@ -1027,7 +1041,17 @@ __inline__ __device__ Creature* EntityFactory::createEmptyCreature()
 {
     auto creature = _data->entities.heap.getTypedSubArray<Creature>(1);
     creature->id = _data->primaryNumberGen.createEntityId();
+    initDomainData(creature);
     return creature;
+}
+
+__inline__ __device__ void EntityFactory::initDomainData(Creature* creature)
+{
+    creature->ownerDomain = static_cast<uint8_t>(_data->domain.index);
+    creature->isReplica = false;
+    creature->newOwnerDomain = creature->ownerDomain;
+    creature->packedForDomains = 0;
+    creature->constructingCreature = nullptr;
 }
 
 __inline__ __device__ Gene* EntityFactory::createEmptyGenes(int numGenes)

@@ -15,6 +15,12 @@ std::optional<int> CommandLineParser::parse(CommandLineArguments& arguments, int
         arguments.timesteps,
         "The number of time steps to be calculated. If it is not specified, the simulation runs until it is stopped with Q or Ctrl+C, which writes the "
         "output file as well.");
+    app.add_option(
+           "--gpus",
+           arguments.gpus,
+           "Comma-separated indices of the GPUs to use, e.g. 0,1. The world is split into one vertical strip per entry, each simulated on the given GPU. "
+           "An index may appear several times, which splits the world on a single GPU. Without this option the best GPU simulates the whole world.")
+        ->delimiter(',');
     app.add_option("-u,--user", arguments.userName, "The name of the user to log in to the alien server with. Requires a password to be given via -p.");
     app.add_option("-p,--password", arguments.password, "The password of the user given via -u.");
     app.add_option(

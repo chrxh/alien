@@ -2,11 +2,17 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cstdlib>
+#include <ranges>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <Base/ExitScopeGuard.h>
 #include <Base/GlobalSettings.h>
 #include <Base/KernelProfiler.h>
 #include <Base/KernelTracer.h>
+#include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
 #include <Base/Ids.h>
@@ -77,17 +83,79 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
     _syncSimulationWithRenderingRatio = value;
 }
 
+namespace
+{
+    // Every domain contributes its own objects together with their creatures and genomes; ghost copies are dropped
+    ContentDesc mergeDomainData(std::vector<TOs> const& dataTOs)
+    {
+        ContentDesc result;
+        std::unordered_set<uint64_t> creatureIds;
+        std::unordered_set<uint64_t> genomeIds;
+        for (auto const& dataTO : dataTOs) {
+            std::unordered_set<uint64_t> ghostIds;
+            for (uint64_t i = 0; i < *dataTO.numObjects; ++i) {
+                if (dataTO.objects[i].isGhost()) {
+                    ghostIds.insert(dataTO.objects[i].id);
+                }
+            }
+            for (uint64_t i = 0; i < *dataTO.numEnergyParticles; ++i) {
+                if (dataTO.energyParticles[i].ghost) {
+                    ghostIds.insert(dataTO.energyParticles[i].id);
+                }
+            }
+            auto domainData = DescConverterService::get().convertTOtoDescription(dataTO);
+
+            std::unordered_set<uint64_t> referencedCreatureIds;
+            for (auto& object : domainData._objects) {
+                if (ghostIds.contains(object._id)) {
+                    continue;
+                }
+                if (object.getObjectType() == ObjectType_Cell) {
+                    referencedCreatureIds.insert(object.getCellRef()._creatureId);
+                }
+                result._objects.emplace_back(std::move(object));
+            }
+            for (auto& energy : domainData._energies) {
+                if (!ghostIds.contains(energy._id)) {
+                    result._energies.emplace_back(std::move(energy));
+                }
+            }
+
+            std::unordered_set<uint64_t> referencedGenomeIds;
+            for (auto& creature : domainData._creatures) {
+                if (referencedCreatureIds.contains(creature._id) && creatureIds.insert(creature._id).second) {
+                    referencedGenomeIds.insert(creature._genomeId);
+                    result._creatures.emplace_back(std::move(creature));
+                }
+            }
+            for (auto& genome : domainData._genomes) {
+                if (referencedGenomeIds.contains(genome._id) && genomeIds.insert(genome._id).second) {
+                    result._genomes.emplace_back(std::move(genome));
+                }
+            }
+        }
+        return result;
+    }
+}
+
 ContentDesc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
-    TOs dataTO;
+    std::vector<TOs> dataTOs;
     {
         EngineWorkerGuard access(this);
 
-        dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
+        dataTOs = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
     }
-    ExitScopeGuard guard([&dataTO]() { _TOProvider::destroyUnmanagedDataTO(dataTO); });
+    ExitScopeGuard guard([&dataTOs]() {
+        for (auto& dataTO : dataTOs) {
+            _TOProvider::destroyUnmanagedDataTO(dataTO);
+        }
+    });
 
-    return DescConverterService::get().convertTOtoDescription(dataTO);
+    if (dataTOs.size() == 1) {
+        return DescConverterService::get().convertTOtoDescription(dataTOs.front());
+    }
+    return mergeDomainData(dataTOs);
 }
 
 ContentDesc EngineWorker::getSelectedSimulationData(bool includeClusters)
@@ -223,7 +291,28 @@ void EngineWorker::calcTimesteps(uint64_t timesteps)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->calcTimesteps(timesteps, true);
+    // Developer aid: ALIEN_CHECK_DOMAINS=n validates a simulation split into domains every n time steps
+    static auto const checkInterval = [] {
+        auto value = std::getenv("ALIEN_CHECK_DOMAINS");
+        return value ? std::max<uint64_t>(1, std::strtoull(value, nullptr, 10)) : uint64_t(0);
+    }();
+    if (checkInterval == 0) {
+        _simulationCudaFacade->calcTimesteps(timesteps, true);
+        return;
+    }
+    for (uint64_t calculated = 0; calculated < timesteps;) {
+        auto chunk = std::min(checkInterval, timesteps - calculated);
+        _simulationCudaFacade->calcTimesteps(chunk, true);
+        calculated += chunk;
+
+        auto errors = testOnly_getDomainConsistencyErrors();
+        for (auto const& error : errors) {
+            log(Priority::Important, "domain consistency at time step " + std::to_string(getCurrentTimestep()) + ": " + error);
+        }
+        if (!errors.empty()) {
+            throw std::runtime_error("The domains of the simulation are inconsistent.");
+        }
+    }
 }
 
 void EngineWorker::applyCataclysm(int power)
@@ -582,6 +671,175 @@ void EngineWorker::testOnly_syncNumberGenerator()
     EngineWorkerGuard access(this);
     auto maxIds = _simulationCudaFacade->getMaxIds();
     NumberGenerator::get().adaptMaxIds(maxIds);
+}
+
+namespace
+{
+    struct DomainView
+    {
+        ContentDesc data;
+        std::unordered_set<uint64_t> ghostIds;
+        std::unordered_map<uint64_t, ObjectDesc const*> objectById;
+    };
+
+    float calcTorusDistance(RealVector2D const& pos1, RealVector2D const& pos2, IntVector2D const& worldSize)
+    {
+        auto dx = std::abs(pos1.x - pos2.x);
+        auto dy = std::abs(pos1.y - pos2.y);
+        dx = (std::min)(dx, toFloat(worldSize.x) - dx);
+        dy = (std::min)(dy, toFloat(worldSize.y) - dy);
+        return std::sqrt(dx * dx + dy * dy);
+    }
+
+    auto constexpr MaxConsistencyErrors = 100;
+
+    std::vector<DomainView> createDomainViews(std::vector<TOs> const& dataTOs)
+    {
+        std::vector<DomainView> result(dataTOs.size());
+        for (auto const& [dataTO, view] : std::views::zip(dataTOs, result)) {
+            for (uint64_t i = 0; i < *dataTO.numObjects; ++i) {
+                if (dataTO.objects[i].isGhost()) {
+                    view.ghostIds.insert(dataTO.objects[i].id);
+                }
+            }
+            view.data = DescConverterService::get().convertTOtoDescription(dataTO);
+            for (auto const& object : view.data._objects) {
+                view.objectById.emplace(object._id, &object);
+            }
+        }
+        return result;
+    }
+
+    // Holds at any time, unlike the freshness of the ghosts
+    std::unordered_map<uint64_t, int>
+    checkUniqueOwnership(std::vector<TOs> const& dataTOs, std::vector<DomainView> const& views, std::vector<std::string>& errors)
+    {
+        auto addError = [&](std::string const& error) {
+            if (errors.size() < MaxConsistencyErrors) {
+                errors.emplace_back(error);
+            }
+        };
+
+        std::unordered_map<uint64_t, int> particleOwnerById;
+        for (auto const& [domainIndex, dataTO] : std::views::enumerate(dataTOs)) {
+            for (uint64_t i = 0; i < *dataTO.numEnergyParticles; ++i) {
+                auto const& particle = dataTO.energyParticles[i];
+                if (!particle.ghost && !particleOwnerById.emplace(particle.id, toInt(domainIndex)).second) {
+                    addError("energy particle " + std::to_string(particle.id) + " is owned by several domains");
+                }
+            }
+        }
+
+        std::unordered_map<uint64_t, int> result;
+        for (auto const& [domainIndex, view] : std::views::enumerate(views)) {
+            for (auto const& object : view.data._objects) {
+                if (view.ghostIds.contains(object._id)) {
+                    continue;
+                }
+                auto [iter, inserted] = result.emplace(object._id, toInt(domainIndex));
+                if (!inserted) {
+                    addError(
+                        "object " + std::to_string(object._id) + " is owned by domain " + std::to_string(iter->second) + " and domain "
+                        + std::to_string(domainIndex));
+                }
+            }
+        }
+        return result;
+    }
+
+    std::vector<std::string> checkDomainConsistency(std::vector<TOs> const& dataTOs, IntVector2D const& worldSize)
+    {
+        auto constexpr MaxGhostDeviation = 2.0f;
+
+        std::vector<std::string> result;
+        auto addError = [&](std::string const& error) {
+            if (result.size() < MaxConsistencyErrors) {
+                result.emplace_back(error);
+            }
+        };
+
+        auto views = createDomainViews(dataTOs);
+        auto ownerById = checkUniqueOwnership(dataTOs, views, result);
+
+        for (auto const& [domainIndex, view] : std::views::enumerate(views)) {
+            for (auto const& object : view.data._objects) {
+                auto isGhost = view.ghostIds.contains(object._id);
+                auto ownerIter = ownerById.find(object._id);
+                if (ownerIter == ownerById.end()) {
+                    addError("ghost " + std::to_string(object._id) + " in domain " + std::to_string(domainIndex) + " has no owner");
+                    continue;
+                }
+                if (isGhost) {
+                    auto const& original = *views.at(ownerIter->second).objectById.at(object._id);
+                    if (calcTorusDistance(object._pos, original._pos, worldSize) > MaxGhostDeviation) {
+                        addError("ghost " + std::to_string(object._id) + " in domain " + std::to_string(domainIndex) + " deviates from its original");
+                    }
+                    continue;
+                }
+                for (auto const& connection : object._connections) {
+                    if (!view.objectById.contains(connection._objectId)) {
+                        addError(
+                            "object " + std::to_string(object._id) + " in domain " + std::to_string(domainIndex) + " is connected to the absent object "
+                            + std::to_string(connection._objectId));
+                        continue;
+                    }
+                    auto partnerOwnerIter = ownerById.find(connection._objectId);
+                    if (partnerOwnerIter == ownerById.end()) {
+                        continue;
+                    }
+                    auto const& partner = *views.at(partnerOwnerIter->second).objectById.at(connection._objectId);
+                    if (!partner.isConnectedTo(object._id)) {
+                        auto describe = [](ObjectDesc const& o) {
+                            auto result = std::to_string(o._id) + " (type " + std::to_string(o.getObjectType()) + " at " + std::to_string(o._pos.x) + ", "
+                                + std::to_string(o._pos.y) + ", " + std::to_string(o._connections.size()) + " connections";
+                            if (o.getObjectType() == ObjectType_Cell) {
+                                auto const& cell = o.getCellRef();
+                                result += ", creature " + std::to_string(cell._creatureId) + ", state " + std::to_string(cell._cellState)
+                                    + (cell._headCell ? ", head" : "") + (cell._constructor ? ", constructor" : "");
+                            }
+                            return result + ")";
+                        };
+                        addError(
+                            "connection " + describe(object) + " in domain " + std::to_string(domainIndex) + " - " + describe(partner)
+                            + " is missing in domain " + std::to_string(partnerOwnerIter->second));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
+
+std::vector<std::string> EngineWorker::testOnly_getDomainConsistencyErrors()
+{
+    std::vector<TOs> currentDataTOs;
+    std::vector<TOs> settledDataTOs;
+    {
+        EngineWorkerGuard access(this);
+        int2 rectUpperLeft{-10, -10};
+        int2 rectLowerRight{_settings.worldSizeX + 10, _settings.worldSizeY + 10};
+        currentDataTOs = _simulationCudaFacade->getSimulationData(rectUpperLeft, rectLowerRight);
+
+        // After two syncs the ghosts are fresh and all changes across domains and their replies have been delivered
+        _simulationCudaFacade->syncDomains();
+        _simulationCudaFacade->syncDomains();
+        settledDataTOs = _simulationCudaFacade->getSimulationData(rectUpperLeft, rectLowerRight);
+    }
+    ExitScopeGuard guard([&currentDataTOs, &settledDataTOs]() {
+        for (auto& dataTO : currentDataTOs) {
+            _TOProvider::destroyUnmanagedDataTO(dataTO);
+        }
+        for (auto& dataTO : settledDataTOs) {
+            _TOProvider::destroyUnmanagedDataTO(dataTO);
+        }
+    });
+
+    std::vector<std::string> result;
+    checkUniqueOwnership(currentDataTOs, createDomainViews(currentDataTOs), result);
+    for (auto const& error : checkDomainConsistency(settledDataTOs, {_settings.worldSizeX, _settings.worldSizeY})) {
+        result.emplace_back(error);
+    }
+    return result;
 }
 
 

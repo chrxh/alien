@@ -3,6 +3,9 @@
 #include <functional>
 #include <iostream>
 #include <list>
+#include <map>
+#include <ranges>
+#include <set>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
@@ -45,6 +48,7 @@
 #include <EngineKernels/TOs.cuh>
 
 #include "DataAccessKernelsService.cuh"
+#include "DomainSyncService.cuh"
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
 #include "GeometryKernelsService.cuh"
@@ -61,6 +65,9 @@ namespace
     auto constexpr EvolutionStatisticsUpdateInterval = 10;
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
+
+    // Width of the border around the strip of a domain whose objects are mirrored from the neighbor domains
+    auto constexpr DomainHaloWidth = 32.0f;
 }
 
 _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings)
@@ -76,19 +83,16 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     log(Priority::Important, "initialize simulation");
 
-    _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaPreviewData = std::make_shared<SimulationData>();
     _cudaGeometryBuffers = std::make_shared<CudaGeometryBuffers>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();
-    _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
     _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
 
     _simulationTimestep = timestep;
-    _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
+    initDomains();
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
-    _cudaSimulationStatistics->init();
     _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
 
@@ -102,7 +106,9 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     SimulationKernelsService::get().init();
 
     // Default array sizes for empty simulation (will be resized later if not sufficient)
-    _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+    for (auto const& domain : _domains) {
+        domain.data->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+    }
     _cudaPreviewData->resizeObjectsAndTempObjects(PreviewCapacityGpu);
 
     auto memory = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
@@ -116,9 +122,14 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
         log(Priority::Unimportant, "skip CUDA shutdown because the CUDA context is invalid");
     } else {
         try {
-            _cudaSimulationData->free();
+            DomainSyncService::get().shutdown(_domains);
+            for (auto const& domain : _domains) {
+                activateDevice(domain);
+                domain.data->free();
+                domain.statistics->free();
+            }
+            activateDevice(getMainDomain());
             _cudaPreviewData->free();
-            _cudaSimulationStatistics->free();
             _cudaPreviewStatistics->free();
             _cudaSelectionResult->free();
 
@@ -176,6 +187,17 @@ void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateSt
     calcTimestepsInternal(timesteps, forceUpdateStatistics, false);
 }
 
+void _SimulationCudaFacade::syncDomains()
+{
+    if (!isDecomposed()) {
+        return;
+    }
+    DomainSyncService::get().sync(_domains, _settings.kernelLaunchSettings, [this](Domain& domain, ArraySizesForGpuEntities const& sizeDelta) {
+        resizeArraysIfNecessary(domain, sizeDelta);
+    });
+    activateDevice(getMainDomain());
+}
+
 void _SimulationCudaFacade::applyCataclysm(int power)
 {
     for (int i = 0; i < power; ++i) {
@@ -185,16 +207,23 @@ void _SimulationCudaFacade::applyCataclysm(int power)
     }
 }
 
-TOs _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
+std::vector<TOs> _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
-    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    DataAccessKernelsService::get().getData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
-    syncAndCheck();
+    std::vector<TOs> result;
+    for (auto const& domain : _domains) {
+        activateDevice(domain);
+        auto simulationData = getSimulationDataPtrCopy(domain);
+        auto capacities = DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.kernelLaunchSettings, simulationData);
+        auto cudaTO = _cudaTOProvider->provideDataTO(capacities);
+        DataAccessKernelsService::get().getData(_settings.kernelLaunchSettings, simulationData, rectUpperLeft, rectLowerRight, cudaTO);
+        syncAndCheck();
 
-    auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
-    copyDataTOtoHost(to, cudaTO);
-
-    return to;
+        auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
+        copyDataTOtoHost(to, cudaTO);
+        result.emplace_back(to);
+    }
+    activateDevice(getMainDomain());
+    return result;
 }
 
 TOs _SimulationCudaFacade::getSelectedSimulationData(bool includeClusters)
@@ -258,18 +287,28 @@ void _SimulationCudaFacade::addAndSelectSimulationData(TOs const& to)
     updateStatistics();
 }
 
+// Every domain receives the whole world and keeps its own objects and the ghosts it needs
 void _SimulationCudaFacade::setSimulationData(TOs const& to)
 {
-    auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
-    copyDataTOtoGpu(cudaTO, to);
+    for (auto& domain : _domains) {
+        activateDevice(domain);
+        auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
+        copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.kernelLaunchSettings, cudaTO);
-    resizeArraysIfNecessary(sizeDelta);
+        auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.kernelLaunchSettings, cudaTO);
+        resizeArraysIfNecessary(domain, sizeDelta);
 
-    DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
-    DataAccessKernelsService::get().addData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), cudaTO, false);
-    syncAndCheck();
+        auto simulationData = getSimulationDataPtrCopy(domain);
+        DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, simulationData);
+        DataAccessKernelsService::get().addData(_settings.kernelLaunchSettings, simulationData, cudaTO, false);
+        syncAndCheck();
+    }
+    if (isDecomposed()) {
+        DomainSyncService::get().distribute(_domains, _settings.kernelLaunchSettings);
+    }
+    activateDevice(getMainDomain());
 
+    _accumulatedLineageValues.clear();
     updateStatistics();
 }
 
@@ -289,7 +328,15 @@ void _SimulationCudaFacade::relaxSelectedObjects(bool includeClusters)
 
 Ids _SimulationCudaFacade::getMaxIds() const
 {
-    return _cudaSimulationData->primaryNumberGen.getIds_host();
+    Ids result;
+    for (auto const& domain : _domains) {
+        activateDevice(domain);
+        auto ids = domain.data->primaryNumberGen.getIds_host();
+        result.entityId = std::max(result.entityId, ids.entityId);
+        result.lineageId = std::max(result.lineageId, ids.lineageId);
+    }
+    activateDevice(getMainDomain());
+    return result;
 }
 
 void _SimulationCudaFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)
@@ -452,17 +499,99 @@ ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
     return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
 }
 
+namespace
+{
+    // The domains count their own objects, so their statistics add up
+    StatisticsEntry mergeStatisticsEntries(std::vector<StatisticsEntry> const& entries)
+    {
+        if (entries.size() == 1) {
+            return entries.front();
+        }
+        StatisticsEntry result;
+        std::map<uint32_t, LineageStatisticsEntry> lineageEntryById;
+        for (auto const& entry : entries) {
+            auto& objectStatistics = result.objectStatistics;
+            objectStatistics.numSolidObjects += entry.objectStatistics.numSolidObjects;
+            objectStatistics.numFluidObjects += entry.objectStatistics.numFluidObjects;
+            objectStatistics.numFreeCellObjects += entry.objectStatistics.numFreeCellObjects;
+            objectStatistics.numCellObjects += entry.objectStatistics.numCellObjects;
+            objectStatistics.numEnergyParticles += entry.objectStatistics.numEnergyParticles;
+            objectStatistics.totalInternalEnergy += entry.objectStatistics.totalInternalEnergy;
+
+            for (auto const& lineageEntry : entry.lineageEntries) {
+                auto [iter, inserted] = lineageEntryById.try_emplace(lineageEntry.lineageId, lineageEntry);
+                if (inserted) {
+                    continue;
+                }
+                auto& merged = iter->second;
+                merged.colorBitset |= lineageEntry.colorBitset;
+                merged.numCreatures += lineageEntry.numCreatures;
+                merged.numGenomes += lineageEntry.numGenomes;
+                merged.sumCreatureCells += lineageEntry.sumCreatureCells;
+                merged.sumCreatureGenerations += lineageEntry.sumCreatureGenerations;
+                merged.sumGenomeNodes += lineageEntry.sumGenomeNodes;
+                merged.sumMutationRates += lineageEntry.sumMutationRates;
+                merged.sumCreatureEnergy += lineageEntry.sumCreatureEnergy;
+                if (merged.representativeCellId == 0) {
+                    merged.representativeCellId = lineageEntry.representativeCellId;
+                }
+                merged.numCreatedCreatures += lineageEntry.numCreatedCreatures;
+                merged.totalMutations += lineageEntry.totalMutations;
+                merged.totalAttackedEnergy += lineageEntry.totalAttackedEnergy;
+                merged.totalMuscleActivity += lineageEntry.totalMuscleActivity;
+            }
+        }
+        for (auto const& lineageEntry : lineageEntryById | std::views::values) {
+            result.lineageEntries.emplace_back(lineageEntry);
+        }
+        return result;
+    }
+}
+
 void _SimulationCudaFacade::updateStatistics()
 {
-    StatisticsKernelsService::get().updateStatistics(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
-    syncAndCheck();
+    std::vector<StatisticsEntry> entries;
+    for (auto const& domain : _domains) {
+        activateDevice(domain);
+        StatisticsKernelsService::get().updateStatistics(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(domain), *domain.statistics);
+        syncAndCheck();
+        entries.emplace_back(domain.statistics->getStatisticsEntry());
+        if (isDecomposed()) {
+            for (auto const& drainedEntry : domain.statistics->getDrainedAccumulatorEntries()) {
+                auto& values = _accumulatedLineageValues[drainedEntry.lineageId];
+                values.numCreatedCreatures += drainedEntry.numCreatedCreatures;
+                values.totalMutations += drainedEntry.totalMutations;
+                values.totalAttackedEnergy += drainedEntry.totalAttackedEnergy;
+                values.totalMuscleActivity += drainedEntry.totalMuscleActivity;
+            }
+        }
+    }
+    activateDevice(getMainDomain());
 
-    auto statisticsEntry = _cudaSimulationStatistics->getStatisticsEntry();
+    auto statisticsEntry = mergeStatisticsEntries(entries);
+    if (isDecomposed()) {
+        applyAccumulatedLineageValues(statisticsEntry);
+    }
     {
         std::lock_guard lock(_mutexForStatistics);
         _statisticsEntry = statisticsEntry;
     }
     StatisticsService::get().addDataPoint(_statisticsHistory, statisticsEntry, getCurrentTimestep());
+}
+
+// The accumulated values of extinct lineages are discarded, the statistics history keeps them
+void _SimulationCudaFacade::applyAccumulatedLineageValues(StatisticsEntry& statisticsEntry)
+{
+    std::unordered_map<uint32_t, AccumulatedLineageValues> livingLineageValues;
+    for (auto& lineageEntry : statisticsEntry.lineageEntries) {
+        auto values = _accumulatedLineageValues[lineageEntry.lineageId];
+        lineageEntry.numCreatedCreatures = values.numCreatedCreatures;
+        lineageEntry.totalMutations = values.totalMutations;
+        lineageEntry.totalAttackedEnergy = values.totalAttackedEnergy;
+        lineageEntry.totalMuscleActivity = values.totalMuscleActivity;
+        livingLineageValues.emplace(lineageEntry.lineageId, values);
+    }
+    _accumulatedLineageValues = std::move(livingLineageValues);
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -495,7 +624,11 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 {
     {
         std::lock_guard lock(_mutexForSimulationData);
-        copyToDevice(_cudaSimulationData->timestep, &timestep);  // Update GPU timestep
+        for (auto const& domain : _domains) {
+            activateDevice(domain);
+            copyToDevice(domain.data->timestep, &timestep);  // Update GPU timestep
+        }
+        activateDevice(getMainDomain());
         _simulationTimestep = timestep;
     }
     StatisticsService::get().resetTime(_statisticsHistory, timestep);
@@ -503,14 +636,28 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 
 void _SimulationCudaFacade::clear()
 {
-    DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
-    syncAndCheck();
+    for (auto const& domain : _domains) {
+        activateDevice(domain);
+        DataAccessKernelsService::get().clearData(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(domain));
+        syncAndCheck();
+    }
+    activateDevice(getMainDomain());
+    _accumulatedLineageValues.clear();
 }
 
 void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpuEntities const& sizeDelta)
 {
-    if (_cudaSimulationData->shouldResize(sizeDelta)) {
-        resizeArrays(sizeDelta);
+    for (auto& domain : _domains) {
+        activateDevice(domain);
+        resizeArraysIfNecessary(domain, sizeDelta);
+    }
+    activateDevice(getMainDomain());
+}
+
+void _SimulationCudaFacade::resizeArraysIfNecessary(Domain& domain, ArraySizesForGpuEntities const& sizeDelta)
+{
+    if (domain.data->shouldResize(sizeDelta)) {
+        resizeArrays(domain, sizeDelta);
     }
 }
 
@@ -600,7 +747,7 @@ TOs _SimulationCudaFacade::getPreviewData()
 void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics, objectId);
+    TestKernelsService::get().testOnly_mutate(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(), *getMainDomain().statistics, objectId);
     syncAndCheck();
 
     resizeArraysIfNecessary();
@@ -837,15 +984,27 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
     for (uint64_t i = 0; i < timesteps; ++i) {
         checkAndProcessSimulationParameterChanges();
 
-        auto simulationData = getSimulationDataPtrCopy();
+        syncDomains();
+
         auto timestep = getCurrentTimestep();
         reportProfilingContext();
-        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics, timestep, forceCellFunctionExecution);
+        for (auto const& domain : _domains) {
+            activateDevice(domain);
+            SimulationKernelsService::get().launchTimestep(_settings, *domain.data, *domain.statistics, timestep, forceCellFunctionExecution);
+        }
+        for (auto const& domain : _domains) {
+            activateDevice(domain);
+            SimulationKernelsService::get().finishTimestep(_settings, *domain.data);
+        }
         {
             std::lock_guard lock(_mutexForSimulationData);
             ++_simulationTimestep;  // SimulationData::timestep is already updated in the kernels
         }
-        syncAndCheck();
+        for (auto const& domain : _domains) {
+            activateDevice(domain);
+            syncAndCheck();
+        }
+        activateDevice(getMainDomain());
 
         // Make check after every 10th call
         if (++counter % 10 == 0) {
@@ -855,9 +1014,23 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
 
         {
             std::lock_guard lock(_mutexForSimulationParameters);
-            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, simulationData, getCurrentTimestep())) {
-                CHECK_FOR_DEVICE_ERRORS(
-                    cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+            auto readExternalEnergy = [this] {
+                auto result = 0.0;
+                for (auto const& domain : _domains) {
+                    activateDevice(domain);
+                    result += copyToHost(domain.data->externalEnergy);
+                }
+                activateDevice(getMainDomain());
+                return result;
+            };
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, readExternalEnergy, getCurrentTimestep())) {
+                copySimulationParametersToDevices(_settings.simulationParameters);
+            }
+            if (isDecomposed()) {
+                auto isCellFunctionStep = [&](uint64_t value) { return forceCellFunctionExecution || value % TIMESTEPS_PER_CELL_FUNCTION == 0; };
+                DomainSyncService::get().updateExternalEnergyShares(
+                    _domains, _settings.simulationParameters.externalEnergy.value, isCellFunctionStep(timestep), isCellFunctionStep(timestep + 1));
+                activateDevice(getMainDomain());
             }
         }
         if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
@@ -871,25 +1044,35 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
 
 void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDelta)
 {
+    for (auto& domain : _domains) {
+        activateDevice(domain);
+        resizeArrays(domain, sizeDelta);
+    }
+    activateDevice(getMainDomain());
+}
+
+void _SimulationCudaFacade::resizeArrays(Domain& domain, ArraySizesForGpuEntities const& sizeDelta)
+{
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeTempObjects(sizeDelta);
+    auto const& simulationData = domain.data;
+    simulationData->resizeTempObjects(sizeDelta);
 
-    if (!_cudaSimulationData->isEmpty()) {
-        GarbageCollectorKernelsService::get().copyArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
+    if (!simulationData->isEmpty()) {
+        GarbageCollectorKernelsService::get().copyArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(domain));
         syncAndCheck();
 
-        _cudaSimulationData->resizeObjectsByMatchingTempObjects();
+        simulationData->resizeObjectsByMatchingTempObjects();
 
-        GarbageCollectorKernelsService::get().swapArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy());
+        GarbageCollectorKernelsService::get().swapArrays(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(domain));
         syncAndCheck();
     } else {
-        _cudaSimulationData->resizeObjectsByMatchingTempObjects();
+        simulationData->resizeObjectsByMatchingTempObjects();
     }
 
-    auto cellArraySize = _cudaSimulationData->entities.objects.getCapacity_host();
-    auto particleArraySize = _cudaSimulationData->entities.energies.getCapacity_host();
-    auto auxiliaryDataSize = _cudaSimulationData->entities.heap.getCapacity_host();
+    auto cellArraySize = simulationData->entities.objects.getCapacity_host();
+    auto particleArraySize = simulationData->entities.energies.getCapacity_host();
+    auto auxiliaryDataSize = simulationData->entities.heap.getCapacity_host();
 
     CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
 
@@ -928,7 +1111,7 @@ void _SimulationCudaFacade::reportProfilingContext()
     profiler.setReportEntry("world size", std::to_string(_settings.worldSizeX) + " x " + std::to_string(_settings.worldSizeY));
     profiler.setReportEntry("smoothing length", std::to_string(_settings.simulationParameters.smoothingLength.value));
 
-    auto const& entities = _cudaSimulationData->entities;
+    auto const& entities = getMainDomain().data->entities;
     profiler.setReportEntry(
         "objects (used / capacity)", std::to_string(entities.objects.getNumEntries_host()) + " / " + std::to_string(entities.objects.getCapacity_host()));
     profiler.setReportEntry(
@@ -978,18 +1161,114 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
     if (_newSimulationParameters) {
         _settings.simulationParameters = SimulationParametersUpdateService::get().integrateChanges(
             _settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
-        CHECK_FOR_DEVICE_ERRORS(
-            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        copySimulationParametersToDevices(_settings.simulationParameters);
         _newSimulationParameters.reset();
 
-        if (_cudaSimulationData) {
-            SimulationKernelsService::get().prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy());
+        for (auto const& domain : _domains) {
+            activateDevice(domain);
+            SimulationKernelsService::get().prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy(domain));
         }
+        activateDevice(getMainDomain());
     }
 }
 
+void _SimulationCudaFacade::copySimulationParametersToDevices(SimulationParameters const& parameters)
+{
+    std::set<int> devices;
+    for (auto const& domain : _domains) {
+        devices.insert(domain.device);
+    }
+    devices.insert(_gpuInfo.deviceNumber);
+    for (auto const& device : devices) {
+        CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(device));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    }
+    if (!_domains.empty()) {
+        activateDevice(getMainDomain());
+    }
+}
+
+// The operations based on this copy only support a simulation that is not split into domains
 SimulationData _SimulationCudaFacade::getSimulationDataPtrCopy() const
 {
+    checkNotDecomposed("This operation");
     std::lock_guard lock(_mutexForSimulationData);
-    return *_cudaSimulationData;
+    return *getMainDomain().data;
+}
+
+SimulationData _SimulationCudaFacade::getSimulationDataPtrCopy(Domain const& domain) const
+{
+    std::lock_guard lock(_mutexForSimulationData);
+    return *domain.data;
+}
+
+Domain& _SimulationCudaFacade::getMainDomain()
+{
+    return _domains.front();
+}
+
+Domain const& _SimulationCudaFacade::getMainDomain() const
+{
+    return _domains.front();
+}
+
+void _SimulationCudaFacade::initDomains()
+{
+    _domains.clear();
+
+    auto numDomains = GlobalSettings::get().getNumDomains();
+    if (numDomains > DomainLayout::MaxDomains) {
+        throw std::runtime_error("At most " + std::to_string(DomainLayout::MaxDomains) + " domains are supported.");
+    }
+    auto devices = GlobalSettings::get().getDomainDevices();
+    if (devices.empty()) {
+        devices.emplace_back(_gpuInfo.deviceNumber);
+    }
+    int numDevices = 0;
+    CHECK_FOR_DEVICE_ERRORS(cudaGetDeviceCount(&numDevices));
+    for (auto const& device : devices) {
+        if (device < 0 || device >= numDevices) {
+            auto existingDevices = numDevices == 1 ? std::string("only GPU 0 exists") : "the GPUs are numbered from 0 to " + std::to_string(numDevices - 1);
+            throw std::runtime_error("GPU " + std::to_string(device) + " does not exist, " + existingDevices + ".");
+        }
+    }
+
+    for (int index = 0; index < numDomains; ++index) {
+        Domain domain;
+        domain.index = index;
+        domain.device = devices.at(index % devices.size());
+        activateDevice(domain);
+        domain.data = std::make_shared<SimulationData>();
+        domain.statistics = std::make_shared<SimulationStatistics>();
+        domain.data->domain = DomainContext{.index = index, .numDomains = numDomains};
+        domain.data->init({_settings.worldSizeX, _settings.worldSizeY}, _simulationTimestep);
+        domain.statistics->init();
+        if (numDomains > 1) {
+            domain.data->primaryNumberGen.setIdPartition(numDomains, index);
+            domain.statistics->enableDraining();
+        }
+        _domains.emplace_back(domain);
+    }
+    if (numDomains > 1) {
+        DomainSyncService::get().init(_domains, {_settings.worldSizeX, _settings.worldSizeY}, DomainHaloWidth);
+        log(Priority::Important, "world split into " + std::to_string(numDomains) + " domains");
+    }
+    activateDevice(getMainDomain());
+}
+
+bool _SimulationCudaFacade::isDecomposed() const
+{
+    return _domains.size() > 1;
+}
+
+void _SimulationCudaFacade::checkNotDecomposed(std::string const& operation) const
+{
+    if (isDecomposed()) {
+        throw std::runtime_error(operation + " is not supported for a simulation split into several domains.");
+    }
+}
+
+void _SimulationCudaFacade::activateDevice(Domain const& domain) const
+{
+    CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(domain.device));
 }

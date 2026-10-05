@@ -93,7 +93,7 @@ __inline__ __device__ void ConstructorProcessor::checkReadyAndMutate(SimulationD
     auto const partition = calcBlockPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto object = data.entities.objects.at(i);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         if (!object->typeData.cell.constructorAvailable) {
@@ -119,7 +119,7 @@ __inline__ __device__ void ConstructorProcessor::construct(SimulationData& data,
     auto const partition = calcBlockPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto object = data.entities.objects.at(i);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto const& cell = object->typeData.cell;
@@ -146,7 +146,7 @@ __inline__ __device__ void ConstructorProcessor::countConstructorsNeedingEnergy(
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto const& cell = object->typeData.cell;
@@ -174,7 +174,7 @@ __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(Simulatio
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto& cell = object->typeData.cell;
@@ -216,6 +216,12 @@ __inline__ __device__ void ConstructorProcessor::constructCell(SimulationData& d
     auto& constructor = object->typeData.cell.constructor;
 
     constructor.offspring = findOrCreateNewCreature(data, statistics, object);
+
+    // The offspring has just been handed over to another domain, the construction continues there
+    if (constructor.offspring->isReplica) {
+        constructor.offspring = nullptr;
+        return;
+    }
 
     // Check again after cloning the creature, because the offspring genome may diverge from the host genome.
     if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
@@ -419,6 +425,9 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
         }
         if (connectedObject->typeData.cell.cellType == CellType_Muscle && connectedObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
             connectedObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
+            if (connectedObject->isGhost()) {
+                DomainOpEmitter::resetMuscle(data, connectedObject, true, connectedObject->connections[0].object == hostObject);
+            }
 
             // Only muscle cells pivoting on hostObject distort its angles
             if (connectedObject->connections[0].object == hostObject) {

@@ -12,11 +12,13 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
     barrierGrid.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
+    CudaMemoryManager::getInstance().acquireMemory<double>(ExternalEnergyDemand_Count, externalEnergyDemands);
     CudaMemoryManager::getInstance().acquireMemory<uint32_t>(MAX_COLORS, numConstructorsNeedingEnergyByColor);
     CudaMemoryManager::getInstance().acquireMemory<float>(MAX_COLORS, externalEnergyInflowPerConstructorByColor);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, timestep);
     copyToDevice(timestep, &timestep_);
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergy, 0, sizeof(double)));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergyDemands, 0, sizeof(double) * ExternalEnergyDemand_Count));
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(numConstructorsNeedingEnergyByColor, 0, sizeof(uint32_t) * MAX_COLORS));
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergyInflowPerConstructorByColor, 0, sizeof(float) * MAX_COLORS));
 
@@ -30,6 +32,15 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
     }
     mutatedGenomes.init();
     energyParticlesNearBarriers.init();
+    domainOps.init();
+    receivedShockWaves.init();
+    sensorContinuations.init();
+    sensorScanRequests.init();
+    receivedSensorScanRequests.init();
+    sensorScanResponses.init();
+    for (auto& scans : pendingSensorScans) {
+        scans.init();
+    }
 }
 
 namespace
@@ -48,6 +59,20 @@ bool SimulationData::shouldResize(ArraySizesForGpuEntities const& sizeDelta)
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.objectArray, sizeDelta.energyArray);
     return entities.objects.shouldResize_host(cellArraySizeResult) || entities.energies.shouldResize_host(particleArraySizeResult)
         || entities.heap.shouldResize_host(sizeDelta.heap);
+}
+
+bool SimulationData::shouldResize(
+    ArraySizesForGpuEntities const& sizeDelta,
+    ArraySizesForGpuEntities const& numEntries,
+    ArraySizesForGpuEntities const& capacities)
+{
+    uint64_t cellArraySizeResult, particleArraySizeResult;
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.objectArray, sizeDelta.energyArray);
+    auto exceeds = [](uint64_t numEntries, uint64_t increment, uint64_t capacity) {
+        return numEntries + increment > toUInt64(capacity * Const::ArrayFillPercentage);
+    };
+    return exceeds(numEntries.objectArray, cellArraySizeResult, capacities.objectArray)
+        || exceeds(numEntries.energyArray, particleArraySizeResult, capacities.energyArray) || exceeds(numEntries.heap, sizeDelta.heap, capacities.heap);
 }
 
 void SimulationData::resizeTempObjects(ArraySizesForGpuEntities const& size)
@@ -101,6 +126,7 @@ void SimulationData::free()
     secondaryNumberGen.free();
     processMemory.free();
     CudaMemoryManager::getInstance().freeMemory(externalEnergy);
+    CudaMemoryManager::getInstance().freeMemory(externalEnergyDemands);
     CudaMemoryManager::getInstance().freeMemory(numConstructorsNeedingEnergyByColor);
     CudaMemoryManager::getInstance().freeMemory(externalEnergyInflowPerConstructorByColor);
     CudaMemoryManager::getInstance().freeMemory(timestep);
@@ -111,6 +137,15 @@ void SimulationData::free()
     }
     mutatedGenomes.free();
     energyParticlesNearBarriers.free();
+    domainOps.free();
+    receivedShockWaves.free();
+    sensorContinuations.free();
+    sensorScanRequests.free();
+    receivedSensorScanRequests.free();
+    sensorScanResponses.free();
+    for (auto& scans : pendingSensorScans) {
+        scans.free();
+    }
 }
 
 void SimulationData::resizeAuxiliaryData()

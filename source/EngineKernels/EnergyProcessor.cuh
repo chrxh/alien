@@ -6,6 +6,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
+#include "DomainOpEmitter.cuh"
 #include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
 
@@ -38,6 +39,7 @@ private:
     };
 
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
+    __inline__ __device__ static double calcExternalEnergyBackflowLimit(SimulationData& data);
     __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
     __inline__ __device__ static bool isBarrier(Object* object);
     __inline__ __device__ static float calcScanRadius(float barrierSearchRadius, float2 const& displacement);
@@ -115,6 +117,9 @@ __inline__ __device__ void EnergyProcessor::moveParticlesFarFromBarriers(Simulat
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
+        if (particle->ghost) {
+            continue;
+        }
         auto displacement = particle->vel * timestepSize;
         if (data.barrierGrid.hasBarrier(particle->pos + displacement / 2, calcScanRadius(barrierSearchRadius, displacement))) {
             data.energyParticlesNearBarriers.tryAddEntry(particleIndex);
@@ -271,7 +276,7 @@ __inline__ __device__ bool EnergyProcessor::isBarrier(Object* object)
 __inline__ __device__ void EnergyProcessor::mergeOrAbsorb(SimulationData& data, Energy*& particle)
 {
     auto otherParticle = data.energyParticleGrid.get(particle->pos);
-    if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
+    if (otherParticle && otherParticle != particle && !otherParticle->ghost && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
         mergeParticleInto(particle, otherParticle);
     } else if (auto object = data.objectGrid.getFirst(particle->pos + particle->vel)) {
         absorbIntoObject(data, particle, object);
@@ -322,7 +327,11 @@ __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& dat
         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
             energyToTransfer = particle->energy;
         }
-        if (object->type == ObjectType_Cell) {
+        if (object->isGhost()) {
+            if (!DomainOpEmitter::creditEnergy(data, object, EnergyKind::Raw, energyToTransfer)) {
+                energyToTransfer = 0;
+            }
+        } else if (object->type == ObjectType_Cell) {
             object->typeData.cell.rawEnergy += energyToTransfer;
         } else {
             object->typeData.freeCell.energy += energyToTransfer;
@@ -347,7 +356,7 @@ __inline__ __device__ void EnergyProcessor::splitHighEnergyParticles(SimulationD
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
-        if (particle == nullptr) {
+        if (particle == nullptr || particle->ghost) {
             continue;
         }
         if (data.primaryNumberGen.random() >= 0.01f) {
@@ -384,7 +393,7 @@ __inline__ __device__ void EnergyProcessor::transformIntoFreeCells(SimulationDat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         if (auto& particle = data.entities.energies.at(particleIndex)) {
 
-            if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
+            if (!particle->ghost && particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 EntityFactory factory;
                 factory.init(&data);
                 auto object = factory.createFreeCell(particle->energy, particle->pos, particle->vel);
@@ -452,7 +461,7 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
     if (cudaSimulationParameters.externalEnergyBackflowFactor.value[color] > 0) {
         auto energyToAdd = toDouble(energy * cudaSimulationParameters.externalEnergyBackflowFactor.value[color]);
         auto origExternalEnergy = atomicAdd(data.externalEnergy, energyToAdd);
-        if (origExternalEnergy + energyToAdd > cudaSimulationParameters.externalEnergyBackflowLimit.value) {
+        if (origExternalEnergy + energyToAdd > calcExternalEnergyBackflowLimit(data)) {
             atomicAdd(data.externalEnergy, -energyToAdd);
         } else {
             externalEnergyBackflowFactor = cudaSimulationParameters.externalEnergyBackflowFactor.value[color];
@@ -485,12 +494,20 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
     auto const partition = calcSystemThreadPartition(numActiveSources);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(index);
+
+        // Each source is fed by exactly one domain
+        if (data.domain.isDecomposed() && data.domain.getStripOwner(cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].x) != data.domain.index) {
+            continue;
+        }
         auto relativeStrength = cudaSimulationParameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
 
         for (int color = 0; color < MAX_COLORS; ++color) {
             auto requestedEnergy = cudaSimulationParameters.externalEnergyInflowForSources.value[color] * relativeStrength;
             if (requestedEnergy < NEAR_ZERO) {
                 continue;
+            }
+            if (data.domain.isDecomposed()) {
+                atomicAdd(&data.externalEnergyDemands[ExternalEnergyDemand_Sources], toDouble(requestedEnergy));
             }
             auto energy = takeExternalEnergy(data, requestedEnergy);
             if (energy < NEAR_ZERO) {
@@ -508,6 +525,17 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
             }
         }
     }
+}
+
+// The other domains hold the rest of the external energy pool
+__inline__ __device__ double EnergyProcessor::calcExternalEnergyBackflowLimit(SimulationData& data)
+{
+    double result = cudaSimulationParameters.externalEnergyBackflowLimit.value;
+    auto externalEnergy = cudaSimulationParameters.externalEnergy.value;
+    if (data.domain.isDecomposed() && externalEnergy != Infinity<float>::value) {
+        result -= toDouble(externalEnergy) * (1.0 - toDouble(data.domain.layout->externalEnergyShares[data.domain.index]));
+    }
+    return result;
 }
 
 __inline__ __device__ float EnergyProcessor::takeExternalEnergy(SimulationData& data, float energy)

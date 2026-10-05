@@ -115,7 +115,8 @@ __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, Simu
         auto& particles = data.entities.energies;
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            if (auto& particle = particles.at(index)) {
+            auto& particle = particles.at(index);
+            if (particle && !particle->ghost) {
                 auto warp = cg::coalesced_threads();
                 auto energySum = cg::reduce(warp, particle->energy, cg::plus<float>());
                 if (warp.thread_rank() == 0) {
@@ -130,6 +131,9 @@ __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, Simu
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->isGhost()) {
+            continue;
+        }
         addObjectToStatistics(statistics, object->type, object->getEnergy());
 
         if (object->type != ObjectType_Cell) {
@@ -160,7 +164,7 @@ __global__ void cudaCollectGenomeAndEnergyStatistics(SimulationData data, Simula
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
+        if (object->type != ObjectType_Cell || object->isGhost()) {
             continue;
         }
         auto creature = object->typeData.cell.creature;
@@ -196,6 +200,14 @@ __global__ void cudaCompactLineageStatistics(SimulationStatistics statistics)
     auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         statistics.compactLineageSlot(index);
+    }
+}
+
+__global__ void cudaDrainLineageAccumulators(SimulationStatistics statistics)
+{
+    auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        statistics.drainAccumulatorSlot(index);
     }
 }
 

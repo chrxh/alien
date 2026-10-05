@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <mutex>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #if defined(_WIN32)
@@ -28,6 +29,8 @@
 
 #include <vector_types.h>
 
+#include "Domain.cuh"
+
 #if !defined(USE_HIP)
 struct cudaGraphicsResource;  // On HIP, hipGraphicsResource is declared by the HIP runtime
 #endif
@@ -48,10 +51,15 @@ public:
     void calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
+    // Brings the ghost copies up to date; this also happens before every time step
+    void syncDomains();
+
     Ids getMaxIds() const;
 
     void copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
-    TOs getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
+
+    // One unmanaged TO per domain (i.e. must be deleted by the caller), the ghost copies of other domains are flagged in them
+    std::vector<TOs> getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
     TOs getSelectedSimulationData(bool includeClusters);
     TOs getInspectedSimulationData(std::vector<uint64_t> entityIds);
     TOs getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
@@ -128,19 +136,31 @@ public:
 
 private:
     void initCuda();
+    void initDomains();
+    bool isDecomposed() const;
+    void checkNotDecomposed(std::string const& operation) const;
+    void activateDevice(Domain const& domain) const;
 
     void syncAndCheck();
     void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
     void copyDataTOtoHost(TOs const& to, TOs const& cudaTO);
     void calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution);
+    void resizeArraysIfNecessary(Domain& domain, ArraySizesForGpuEntities const& sizeDelta);
     void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
+    void resizeArrays(Domain& domain, ArraySizesForGpuEntities const& sizeDelta);
     void checkAndProcessSimulationParameterChanges();
+    void copySimulationParametersToDevices(SimulationParameters const& parameters);
+    void applyAccumulatedLineageValues(StatisticsEntry& statisticsEntry);
 
     // Adds the launch configuration, the entity counts and the occupancy of the fluid kernel to the profiling
     // report; no-op outside debug mode
     void reportProfilingContext();
 
     SimulationData getSimulationDataPtrCopy() const;
+    SimulationData getSimulationDataPtrCopy(Domain const& domain) const;
+
+    Domain& getMainDomain();
+    Domain const& getMainDomain() const;
 
     GpuInfo _gpuInfo;
     cudaGraphicsResource* _cudaResource = nullptr;
@@ -154,7 +174,7 @@ private:
 
     mutable std::mutex _mutexForSimulationData;
     uint64_t _simulationTimestep = 0;
-    std::shared_ptr<SimulationData> _cudaSimulationData;  // std::shared_ptr to prevent include in header
+    std::vector<Domain> _domains;
 
     uint64_t _previewTimestep = 0;
     std::shared_ptr<SimulationData> _cudaPreviewData;
@@ -167,6 +187,15 @@ private:
     mutable std::mutex _mutexForStatistics;
     StatisticsHistory _statisticsHistory;
     std::optional<StatisticsEntry> _statisticsEntry;
-    std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
+
+    // Domain decomposition: the accumulated values of each living lineage, summed up from the values that the domains hand over
+    struct AccumulatedLineageValues
+    {
+        uint64_t numCreatedCreatures = 0;
+        double totalMutations = 0;
+        double totalAttackedEnergy = 0;
+        double totalMuscleActivity = 0;
+    };
+    std::unordered_map<uint32_t, AccumulatedLineageValues> _accumulatedLineageValues;
 };

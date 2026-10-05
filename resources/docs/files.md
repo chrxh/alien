@@ -55,6 +55,9 @@ cli -i input.sim -o output.sim -t 100000
 | --upload-name, --upload-interval | Upload the running simulation periodically to your private workspace, under the given name followed by a number, every given number of minutes. |
 | -d | Debug mode, which runs slower but writes detailed timing and trace files. |
 | --plain | Plain text output without colors and status panel. |
+| --gpus | The graphics cards to use, for example *--gpus 0,1*. See below. |
+
+With **--gpus**, several graphics cards work on one simulation. The world is split into vertical strips, one per given card, and each card simulates its strip. After every time step, the cards exchange the objects near the strip borders. This pays off for large worlds whose strips are much wider than the sensor range. Each card has to hold the whole world while the simulation is loaded. A rigid body (parameter *Rigidity*) that reaches across a strip border moves as two separate rigid bodies. A card may be given more than once, which splits the world on a single card. That is slower than running without the option and is only meant for testing. The graphical program always runs on a single card.
 
 A Docker image with the command line interface is published as *chrxh/alien:nightly*, see the README of the project for details.
 

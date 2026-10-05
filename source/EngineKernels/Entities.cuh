@@ -18,6 +18,12 @@ struct Energy
     float2 pos;
     float2 vel;
     uint8_t color;
+
+    // Domain decomposition, see Object
+    bool ghost;
+    uint8_t syncRound;
+    uint8_t ownerDomain;
+
     float energy;
     Object* lastAbsorbedObject;  // Could be invalid
 
@@ -460,6 +466,18 @@ struct Creature
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
 
+    // Domain decomposition: all cells of a creature are simulated by the same domain
+    uint8_t ownerDomain;
+    bool isReplica;  // Copy of a creature owned by another domain
+
+    // Temporary data for the domain synchronization
+    uint8_t newOwnerDomain;
+    uint32_t packedForDomains;  // Bit mask of the domains whose sync message already contains the creature
+    uint64_t referenceKey;      // Head cells first, then the lowest cell id
+    float2 referencePos;
+    uint64_t constructingCreatureId;  // The lowest id among the hosts, so that all domains choose the same host
+    Creature* constructingCreature;   // Host creature while the creature is under construction
+
     __device__ __inline__ bool isSameLineage(Creature* other)
     {
         return lineageId == other->lineageId;
@@ -569,13 +587,17 @@ struct Object
     uint8_t numConnections;
     uint8_t color;
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
-    uint8_t flags;     // bit0 = isStatic, bit1 = detached, bit2 = sticky
+    uint8_t flags;     // bit0 = isStatic, bit1 = detached, bit2 = sticky, bit3 = ghost, bit4 = removed ghost
 
     // Internal algorithm data
     TempValue tempValue1;
     TempValue tempValue2;
 
     int locked;  // 0 = unlocked, 1 = locked
+
+    // Domain decomposition: a ghost is the copy of an object that another domain simulates
+    uint8_t ownerDomain;
+    uint8_t syncRound;  // Sync round of the last refresh of a ghost
 
     // General
     uint64_t id;
@@ -584,10 +606,14 @@ struct Object
     __device__ __inline__ bool isStatic() const { return flags & 1; }
     __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
     __device__ __inline__ bool isSticky() const { return flags & 4; }
+    __device__ __inline__ bool isGhost() const { return flags & 8; }
+    __device__ __inline__ bool isRemovedGhost() const { return flags & 16; }
 
     __device__ __inline__ void setStatic(bool value) { flags = value ? (flags | 1) : (flags & ~1); }
     __device__ __inline__ void setDetached(bool value) { flags = value ? (flags | 2) : (flags & ~2); }
     __device__ __inline__ void setSticky(bool value) { flags = value ? (flags | 4) : (flags & ~4); }
+    __device__ __inline__ void setGhost(bool value) { flags = value ? (flags | 8) : (flags & ~8); }
+    __device__ __inline__ void setRemovedGhost(bool value) { flags = value ? (flags | 16) : (flags & ~16); }
 
     ObjectTypeData typeData;
 
@@ -730,6 +756,8 @@ __device__ __inline__ float getMassForSPH(ObjectType const& object)
 
 // Keep the neighbor-scan mirror compact: growing it directly costs memory bandwidth in the hot SPH kernels.
 static_assert(sizeof(LightObject) == 40, "LightObject must stay 40 bytes for the neighbor scan");
+static_assert(offsetof(Object, id) == 56, "The domain fields of Object must fit into the padding before id");
+static_assert(offsetof(Energy, energy) == 28, "The domain fields of Energy must fit into the padding after color");
 
 struct Entities
 {

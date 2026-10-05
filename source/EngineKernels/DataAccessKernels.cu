@@ -329,6 +329,7 @@ namespace
         objectTO.flags = 0;
         objectTO.setStatic(object->isStatic());
         objectTO.setSticky(object->isSticky());
+        objectTO.setGhost(object->isGhost());
         objectTO.type = object->type;
 
         for (int i = 0; i < object->numConnections; ++i) {
@@ -588,6 +589,7 @@ namespace
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
         particleTO.color = particle->color;
+        particleTO.ghost = particle->ghost;
     }
 
 }
