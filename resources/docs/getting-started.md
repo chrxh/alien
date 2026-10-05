@@ -2,7 +2,7 @@
 
 **ALIEN** (**A**rtificial **LI**fe **EN**vironment) is an artificial life simulator built on a GPU-accelerated 2D particle engine for soft bodies and fluids. Every object in a simulated world is composed of particles. They can be bonded into solid structures, flow as liquids or act as cells with specialized functions such as sensors, muscles and constructors, each controlled by a small neural network. Networks of such cells form creatures that perceive their environment, move, feed, compete and build offspring according to their genome. With mutations enabled, populations evolve and entire ecosystems emerge. The engine runs entirely on the graphics card and simulates worlds with millions of particles in real time.
 
-![Particles form cells, cells form creatures, and creatures form populations that evolve](images/particles-to-ecosystems.png)
+![Cells are particles with a neural network, genes and a function. Cells form creatures, and creatures form populations that evolve.](images/particles-to-ecosystems.png)
 
 This documentation is organized in three parts. **Start here** covers the first steps, the user interface and the control of ALIEN by AI agents. **Explore** introduces the central concepts step by step, from the physics sandbox to creature design, evolution and generative art. **Reference** documents every cell type, the genome format, the neural networks, all simulation parameters and the controls in detail. The search field above the table of contents finds any term across all chapters.
 
