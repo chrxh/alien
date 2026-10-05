@@ -961,7 +961,11 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
         reportProfilingContext();
         for (auto const& domain : _domains) {
             activateDevice(domain);
-            SimulationKernelsService::get().calcTimestep(_settings, *domain.data, *domain.statistics, timestep, forceCellFunctionExecution);
+            SimulationKernelsService::get().launchTimestep(_settings, *domain.data, *domain.statistics, timestep, forceCellFunctionExecution);
+        }
+        for (auto const& domain : _domains) {
+            activateDevice(domain);
+            SimulationKernelsService::get().finishTimestep(_settings, *domain.data);
         }
         {
             std::lock_guard lock(_mutexForSimulationData);
@@ -1184,6 +1188,14 @@ void _SimulationCudaFacade::initDomains()
     auto devices = GlobalSettings::get().getDomainDevices();
     if (devices.empty()) {
         devices.emplace_back(_gpuInfo.deviceNumber);
+    }
+    int numDevices = 0;
+    CHECK_FOR_DEVICE_ERRORS(cudaGetDeviceCount(&numDevices));
+    for (auto const& device : devices) {
+        if (device < 0 || device >= numDevices) {
+            auto existingDevices = numDevices == 1 ? std::string("only GPU 0 exists") : "the GPUs are numbered from 0 to " + std::to_string(numDevices - 1);
+            throw std::runtime_error("GPU " + std::to_string(device) + " does not exist, " + existingDevices + ".");
+        }
     }
 
     for (int index = 0; index < numDomains; ++index) {

@@ -22,16 +22,20 @@ void SimulationKernelsService::init()
     _streams.clear();
 }
 
+// Graphs and streams are destroyed on the device they belong to
 void SimulationKernelsService::shutdown()
 {
-    for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
+    for (auto& [config, graphExec] : _graphCache) {
+        DeviceScope deviceScope(_streams.at(config.domainIndex).device);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphExecDestroy(graphExec));
     }
     for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
+        DeviceScope deviceScope(_streams.at(PreviewStreamKey).device);
         CHECK_FOR_DEVICE_ERRORS(cudaGraphExecDestroy(graphExec));
     }
-    for (cudaStream_t& stream : _streams | std::views::values) {
-        CHECK_FOR_DEVICE_ERRORS(cudaStreamDestroy(stream));
+    for (auto const& stream : _streams | std::views::values) {
+        DeviceScope deviceScope(stream.device);
+        CHECK_FOR_DEVICE_ERRORS(cudaStreamDestroy(stream.stream));
     }
     _graphCache.clear();
     _previewGraphCache.clear();
@@ -42,11 +46,11 @@ cudaStream_t SimulationKernelsService::getStream(int key)
 {
     auto findResult = _streams.find(key);
     if (findResult != _streams.end()) {
-        return findResult->second;
+        return findResult->second.stream;
     }
     cudaStream_t stream = nullptr;
     CHECK_FOR_DEVICE_ERRORS(cudaStreamCreate(&stream));
-    _streams.emplace(key, stream);
+    _streams.emplace(key, Stream{stream, getCurrentDevice()});
     return stream;
 }
 
@@ -219,7 +223,7 @@ cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
     return graphExec;
 }
 
-void SimulationKernelsService::calcTimestep(
+void SimulationKernelsService::launchTimestep(
     SettingsForSimulation const& settings,
     SimulationData const& data,
     SimulationStatistics const& statistics,
@@ -248,10 +252,13 @@ void SimulationKernelsService::calcTimestep(
 
         // Execute the cached graph
         CHECK_FOR_DEVICE_ERRORS(cudaGraphLaunch(graphExec, stream));
-
-        // Wait for the graph to complete before garbage collection
-        CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream));
     }
+}
+
+void SimulationKernelsService::finishTimestep(SettingsForSimulation const& settings, SimulationData const& data)
+{
+    // Wait for the graph to complete before garbage collection
+    CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(getStream(data.domain.index)));
 
     // Garbage collection cannot be part of the graph due to dynamic behavior
     GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.kernelLaunchSettings, data);

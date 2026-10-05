@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include "Base.cuh"
 #include "CudaMemoryManager.cuh"
 #include "CudaTOProvider.cuh"
@@ -6,9 +8,9 @@ _CudaTOProvider::_CudaTOProvider() {}
 
 _CudaTOProvider::~_CudaTOProvider() noexcept
 {
-    if (_to) {
+    for (auto& to : _toByDevice | std::views::values) {
         try {
-            destroy();
+            destroy(to);
         } catch (...) {
         }
     }
@@ -30,17 +32,20 @@ namespace
 
 TOs _CudaTOProvider::provideDataTO(ArraySizesForTOs const& requiredCapacity)
 {
+    TOs result;
     try {
-        if (_to.has_value()) {
-            checkAndExtendCapacity(_to->objects, *_to->numObjects, _to->capacities.objects, requiredCapacity.objects);
-            checkAndExtendCapacity(_to->energyParticles, *_to->numEnergyParticles, _to->capacities.energyParticles, requiredCapacity.energyParticles);
-            checkAndExtendCapacity(_to->creatures, *_to->numCreatures, _to->capacities.creatures, requiredCapacity.creatures);
-            checkAndExtendCapacity(_to->genomes, *_to->numGenomes, _to->capacities.genomes, requiredCapacity.genomes);
-            checkAndExtendCapacity(_to->genes, *_to->numGenes, _to->capacities.genes, requiredCapacity.genes);
-            checkAndExtendCapacity(_to->nodes, *_to->numNodes, _to->capacities.nodes, requiredCapacity.nodes);
-            checkAndExtendCapacity(_to->heap, *_to->heapSize, _to->capacities.heap, requiredCapacity.heap);
+        auto findResult = _toByDevice.find(getCurrentDevice());
+        if (findResult != _toByDevice.end()) {
+            auto& to = findResult->second;
+            checkAndExtendCapacity(to.objects, *to.numObjects, to.capacities.objects, requiredCapacity.objects);
+            checkAndExtendCapacity(to.energyParticles, *to.numEnergyParticles, to.capacities.energyParticles, requiredCapacity.energyParticles);
+            checkAndExtendCapacity(to.creatures, *to.numCreatures, to.capacities.creatures, requiredCapacity.creatures);
+            checkAndExtendCapacity(to.genomes, *to.numGenomes, to.capacities.genomes, requiredCapacity.genomes);
+            checkAndExtendCapacity(to.genes, *to.numGenes, to.capacities.genes, requiredCapacity.genes);
+            checkAndExtendCapacity(to.nodes, *to.numNodes, to.capacities.nodes, requiredCapacity.nodes);
+            checkAndExtendCapacity(to.heap, *to.heapSize, to.capacities.heap, requiredCapacity.heap);
+            result = to;
         } else {
-            TOs result;
             result.capacities = requiredCapacity;
             CudaMemoryManager::getInstance().acquireMemory(1, result.numObjects);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numEnergyParticles);
@@ -64,29 +69,29 @@ TOs _CudaTOProvider::provideDataTO(ArraySizesForTOs const& requiredCapacity)
             setValueToDevice(result.numNodes, static_cast<uint64_t>(0));
             setValueToDevice(result.heapSize, static_cast<uint64_t>(0));
 
-            _to = result;
+            _toByDevice.emplace(getCurrentDevice(), result);
         }
-        return _to.value();
     } catch (...) {
         throw std::runtime_error("GPU memory could not be allocated.");
     }
+    return result;
 }
 
-void _CudaTOProvider::destroy()
+void _CudaTOProvider::destroy(TOs& to)
 {
-    CudaMemoryManager::getInstance().freeMemory(_to->objects);
-    CudaMemoryManager::getInstance().freeMemory(_to->energyParticles);
-    CudaMemoryManager::getInstance().freeMemory(_to->creatures);
-    CudaMemoryManager::getInstance().freeMemory(_to->genomes);
-    CudaMemoryManager::getInstance().freeMemory(_to->genes);
-    CudaMemoryManager::getInstance().freeMemory(_to->nodes);
-    CudaMemoryManager::getInstance().freeMemory(_to->heap);
+    CudaMemoryManager::getInstance().freeMemory(to.objects);
+    CudaMemoryManager::getInstance().freeMemory(to.energyParticles);
+    CudaMemoryManager::getInstance().freeMemory(to.creatures);
+    CudaMemoryManager::getInstance().freeMemory(to.genomes);
+    CudaMemoryManager::getInstance().freeMemory(to.genes);
+    CudaMemoryManager::getInstance().freeMemory(to.nodes);
+    CudaMemoryManager::getInstance().freeMemory(to.heap);
 
-    CudaMemoryManager::getInstance().freeMemory(_to->numObjects);
-    CudaMemoryManager::getInstance().freeMemory(_to->numEnergyParticles);
-    CudaMemoryManager::getInstance().freeMemory(_to->numCreatures);
-    CudaMemoryManager::getInstance().freeMemory(_to->numGenomes);
-    CudaMemoryManager::getInstance().freeMemory(_to->numGenes);
-    CudaMemoryManager::getInstance().freeMemory(_to->numNodes);
-    CudaMemoryManager::getInstance().freeMemory(_to->heapSize);
+    CudaMemoryManager::getInstance().freeMemory(to.numObjects);
+    CudaMemoryManager::getInstance().freeMemory(to.numEnergyParticles);
+    CudaMemoryManager::getInstance().freeMemory(to.numCreatures);
+    CudaMemoryManager::getInstance().freeMemory(to.numGenomes);
+    CudaMemoryManager::getInstance().freeMemory(to.numGenes);
+    CudaMemoryManager::getInstance().freeMemory(to.numNodes);
+    CudaMemoryManager::getInstance().freeMemory(to.heapSize);
 }

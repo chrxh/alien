@@ -1,16 +1,30 @@
 #include "GarbageCollectorKernelsService.cuh"
 
+#include <ranges>
+
 #include <EngineKernels/DebugKernels.cuh>
 #include <EngineKernels/KernelLauncher.cuh>
 
 void GarbageCollectorKernelsService::init()
 {
-    CudaMemoryManager::getInstance().acquireMemory<bool>(1, _cudaBool);
+    getCudaBool();
 }
 
 void GarbageCollectorKernelsService::shutdown()
 {
-    CudaMemoryManager::getInstance().freeMemory(_cudaBool);
+    for (auto& cudaBool : _cudaBools | std::views::values) {
+        CudaMemoryManager::getInstance().freeMemory(cudaBool);
+    }
+    _cudaBools.clear();
+}
+
+bool* GarbageCollectorKernelsService::getCudaBool()
+{
+    auto& result = _cudaBools[getCurrentDevice()];
+    if (!result) {
+        CudaMemoryManager::getInstance().acquireMemory<bool>(1, result);
+    }
+    return result;
 }
 
 void GarbageCollectorKernelsService::cleanupAfterTimestep(KernelLaunchSettings const& launchSettings, SimulationData const& data)
@@ -24,9 +38,10 @@ void GarbageCollectorKernelsService::cleanupAfterTimestep(KernelLaunchSettings c
         KERNEL(cudaCleanupPointerArray<Object*>), LaunchConfig{launchSettings.numBlocks, 8}, data.entities.objects, data.tempEntities.objects);
     launchKernelOnDefaultStream(KERNEL(cudaSwapPointerArrays), LaunchConfig{1, 1}, data);
 
-    launchKernelOnDefaultStream(KERNEL(cudaCheckIfCleanupIsNecessary), LaunchConfig{1, 1}, data, _cudaBool);
+    auto cudaBool = getCudaBool();
+    launchKernelOnDefaultStream(KERNEL(cudaCheckIfCleanupIsNecessary), LaunchConfig{1, 1}, data, cudaBool);
     cudaDeviceSynchronize();
-    if (copyToHost(_cudaBool)) {
+    if (copyToHost(cudaBool)) {
         launchKernelOnDefaultStream(KERNEL(cudaPrepareHeapForCleanup), LaunchConfig{1, 1}, data);
         launchKernelOnDefaultStream(KERNEL(cudaCleanupParticles), LaunchConfig{launchSettings.numBlocks, 8}, data.entities.energies, data.tempEntities.heap);
         launchKernelOnDefaultStream(KERNEL(cudaPrepareCleanupCreaturesAndGenomes), LaunchConfig{launchSettings.numBlocks, 8}, data.entities.objects);

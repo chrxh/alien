@@ -109,13 +109,26 @@ namespace
         return true;
     }
 
-    void initSimulation(SimulationFacade const& simulationFacade, SimulationDesc const& simData, std::optional<uint64_t> timesteps)
+    std::string getDomainDescription(std::vector<int> const& gpus)
+    {
+        std::string result = gpus.size() == 1 ? "GPU " : "GPUs ";
+        for (auto const& gpu : gpus) {
+            result += (&gpu == &gpus.front() ? "" : ", ") + std::to_string(gpu);
+        }
+        return result;
+    }
+
+    void initSimulation(SimulationFacade const& simulationFacade, SimulationDesc const& simData, CommandLineArguments const& arguments)
     {
         simulationFacade->newSimulation(simData._timestep, simData._worldSize, simData._simulationParameters);
         simulationFacade->setSimulationData(simData._mainData);
         simulationFacade->setStatisticsHistory(simData._statistics);
         simulationFacade->setRealTime(simData._realTime);
         ConsoleOutput::printStep("device", simulationFacade->getGpuName());
+        if (!arguments.gpus.empty()) {
+            ConsoleOutput::printStep("domains", std::to_string(arguments.gpus.size()) + " vertical strips", getDomainDescription(arguments.gpus));
+        }
+        auto const& timesteps = arguments.timesteps;
         ConsoleOutput::printStep(
             "world",
             std::to_string(simData._worldSize.x) + " x " + std::to_string(simData._worldSize.y),
@@ -230,7 +243,7 @@ int main(int argc, char** argv)
         if (!readSimulation(simData, arguments.inputFilename)) {
             return 1;
         }
-        initSimulation(simulationFacade, simData, arguments.timesteps);
+        initSimulation(simulationFacade, simData, arguments);
 
         auto elapsed = runSimulation(simulationFacade, arguments);
         simulationFacade->setRealTime(simData._realTime + elapsed);

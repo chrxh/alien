@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <bit>
+#include <cstdlib>
+#include <set>
 
 #include <EngineKernels/DomainSyncKernels.cuh>
 #include <EngineKernels/KernelLauncher.cuh>
@@ -32,6 +34,34 @@ namespace
     void activateDevice(Domain const& domain)
     {
         CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(domain.device));
+    }
+
+    // Messages between devices that can access each other's memory are copied without a detour over the host
+    void enablePeerAccess(std::vector<Domain> const& domains)
+    {
+        std::set<int> devices;
+        for (auto const& domain : domains) {
+            devices.insert(domain.device);
+        }
+        for (auto device : devices) {
+            for (auto peerDevice : devices) {
+                if (device == peerDevice) {
+                    continue;
+                }
+                int canAccessPeer = 0;
+                CHECK_FOR_DEVICE_ERRORS(cudaDeviceCanAccessPeer(&canAccessPeer, device, peerDevice));
+                if (!canAccessPeer) {
+                    continue;
+                }
+                DeviceScope deviceScope(device);
+                auto result = cudaDeviceEnablePeerAccess(peerDevice, 0);
+                if (result == cudaErrorPeerAccessAlreadyEnabled) {
+                    cudaGetLastError();
+                } else {
+                    CHECK_FOR_DEVICE_ERRORS(result);
+                }
+            }
+        }
     }
 
     uint64_t calcMapCapacity(uint64_t numEntries)
@@ -67,6 +97,8 @@ namespace
 
 void DomainSyncService::init(std::vector<Domain>& domains, int2 const& worldSize, float haloWidth)
 {
+    enablePeerAccess(domains);
+
     auto numDomains = static_cast<int>(domains.size());
 
     DomainLayout layout;
@@ -472,6 +504,16 @@ void DomainSyncService::freeMessage(SyncMessage& message)
     message = SyncMessage();
 }
 
+namespace
+{
+    // Developer switch that copies the messages between domains on the same device as if they were on different devices
+    bool isMessageCopyForced()
+    {
+        static auto result = std::getenv("ALIEN_COPY_DOMAIN_MESSAGES") != nullptr;
+        return result;
+    }
+}
+
 // A message between domains on the same device is read directly from the buffer of the sender
 void DomainSyncService::connectIncomingMessages(std::vector<Domain>& domains)
 {
@@ -484,7 +526,7 @@ void DomainSyncService::connectIncomingMessages(std::vector<Domain>& domains)
             }
             auto const& outgoing = sender.sync->outgoing.at(receiver.index);
             auto& incoming = receiverSync.incoming.at(sender.index);
-            if (sender.device == receiver.device) {
+            if (sender.device == receiver.device && !isMessageCopyForced()) {
                 incoming = outgoing;
                 receiverSync.isIncomingAliased.at(sender.index) = true;
             } else {

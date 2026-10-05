@@ -5,6 +5,40 @@
 #include <cuda/helper_cuda.h>
 #include "Macros.cuh"
 
+inline int getCurrentDevice()
+{
+    int result = 0;
+    CHECK_FOR_DEVICE_ERRORS(cudaGetDevice(&result));
+    return result;
+}
+
+// Makes the given device the current one for the lifetime of the scope
+class DeviceScope
+{
+public:
+    explicit DeviceScope(int device)
+        : _previousDevice(getCurrentDevice())
+        , _switched(device != _previousDevice)
+    {
+        if (_switched) {
+            CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(device));
+        }
+    }
+    ~DeviceScope()
+    {
+        if (_switched) {
+            cudaSetDevice(_previousDevice);
+        }
+    }
+
+    DeviceScope(DeviceScope const&) = delete;
+    void operator=(DeviceScope const&) = delete;
+
+private:
+    int _previousDevice;
+    bool _switched;
+};
+
 class CudaMemoryManager
 {
 public:
@@ -20,7 +54,7 @@ public:
     void reset()
     {
         _bytes = 0;
-        _pointerToSizeMap.clear();
+        _allocations.clear();
     }
 
     template <typename T>
@@ -28,9 +62,10 @@ public:
     {
         CHECK_FOR_DEVICE_ERRORS(cudaMalloc(&result, sizeof(T) * arraySize));
         _bytes += sizeof(T) * arraySize;
-        _pointerToSizeMap.emplace(reinterpret_cast<void*>(result), arraySize);
+        _allocations.emplace(reinterpret_cast<void*>(result), Allocation{sizeof(T) * arraySize, getCurrentDevice()});
     }
 
+    // The memory may belong to another device than the current one
     template <typename T>
     void freeMemory(T*& memory)
     {
@@ -38,13 +73,14 @@ public:
             return;
         }
         auto const pointer = reinterpret_cast<void*>(memory);
-        auto findResult = _pointerToSizeMap.find(pointer);
-        if (findResult != _pointerToSizeMap.end()) {
+        auto findResult = _allocations.find(pointer);
+        if (findResult != _allocations.end()) {
             if (!CudaContextState::get().isInvalid()) {
+                DeviceScope deviceScope(findResult->second.device);
                 CHECK_FOR_DEVICE_ERRORS(cudaFree(memory));
             }
-            _bytes -= sizeof(T) * findResult->second;
-            _pointerToSizeMap.erase(findResult->first);
+            _bytes -= findResult->second.numBytes;
+            _allocations.erase(findResult);
         }
         memory = nullptr;
     }
@@ -55,6 +91,12 @@ private:
     CudaMemoryManager() {}
     ~CudaMemoryManager() {}
 
+    struct Allocation
+    {
+        uint64_t numBytes;
+        int device;
+    };
+
     uint64_t _bytes = 0;
-    std::map<void*, uint64_t> _pointerToSizeMap;
+    std::map<void*, Allocation> _allocations;
 };
