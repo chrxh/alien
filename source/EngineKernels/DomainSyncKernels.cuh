@@ -4,6 +4,8 @@
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
+__global__ void cudaDomainSync_gatherControl(SimulationData data, DomainSyncControl* control);
+
 // Ownership decisions at the end of a time step
 __global__ void cudaDomainOwnership_resetCreatures(SimulationData data);
 __global__ void cudaDomainOwnership_calcReferenceKeys(SimulationData data);

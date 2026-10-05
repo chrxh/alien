@@ -175,6 +175,22 @@ struct SyncMessage
     }
 };
 
+// The values the host needs for its decisions in a sync round, gathered on the device so that one read suffices
+struct DomainSyncControl
+{
+    uint64_t timestep;
+    uint64_t numObjects;
+    uint64_t numParticles;
+    uint64_t heapSize;
+    uint64_t objectCapacity;
+    uint64_t particleCapacity;
+    uint64_t heapCapacity;
+    uint64_t numOps;
+    uint64_t numSensorContinuations;
+    uint64_t numSensorScanRequests;
+    uint64_t numPublishedSensorScans;  // Of the pending scans that are published in this round
+};
+
 // Synchronization state of one domain that persists across sync rounds
 struct DomainSyncData
 {

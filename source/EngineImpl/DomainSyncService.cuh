@@ -13,6 +13,20 @@
 
 #include "Domain.cuh"
 
+// Capacities of the device arrays that only the sync resizes, kept on the host so that they need not be read back
+struct SyncArrayCapacities
+{
+    uint64_t objectMap = 0;
+    uint64_t particleMap = 0;
+    uint64_t domainOps = 0;
+    uint64_t receivedShockWaves = 0;
+    uint64_t sensorContinuations = 0;
+    uint64_t sensorScanRequests = 0;
+    uint64_t receivedSensorScanRequests = 0;
+    uint64_t sensorScanResponses = 0;
+    uint64_t pendingSensorScans[2] = {};
+};
+
 // Host-side synchronization state of one domain
 struct DomainSyncState
 {
@@ -24,6 +38,11 @@ struct DomainSyncState
     std::vector<SyncMessage> incoming;    // Index = sending domain
     std::vector<bool> isIncomingAliased;  // The incoming message is the outgoing buffer of a sender on the same device
     std::vector<SyncMessageCounters> outgoingCounters;
+
+    DomainSyncControl* controlOnDevice = nullptr;
+    DomainSyncControl control;  // Read back at the beginning of a sync round
+    SyncArrayCapacities capacities;
+    ArraySizesForGpuEntities lastIncomingSizes{0, 0, 0};
 
     double constructorEnergyDemand = 0;  // In the last time step with cell functions
 };
@@ -49,7 +68,9 @@ public:
 private:
     DomainSyncService() = default;
 
-    void rebuildMaps(Domain& domain, KernelLaunchSettings const& launchSettings, ArraySizesForGpuEntities const& incomingSizes);
+    void readControls(std::vector<Domain>& domains);
+    bool reserveMaps(Domain& domain, uint64_t numObjects, uint64_t numParticles);  // Returns true if the maps were resized
+    void fillMaps(Domain& domain, KernelLaunchSettings const& launchSettings);
     void calcOwnership(Domain& domain, KernelLaunchSettings const& launchSettings, bool initialAssignment);
     void calcRoi(Domain& domain, KernelLaunchSettings const& launchSettings);
     void pack(Domain& domain, KernelLaunchSettings const& launchSettings);

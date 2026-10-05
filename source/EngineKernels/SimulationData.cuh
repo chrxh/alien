@@ -72,6 +72,7 @@ struct SimulationData
 
     void init(int2 const& worldSize, uint64_t timestep);
     bool shouldResize(ArraySizesForGpuEntities const& sizeDelta);
+    static bool shouldResize(ArraySizesForGpuEntities const& sizeDelta, ArraySizesForGpuEntities const& numEntries, ArraySizesForGpuEntities const& capacities);
     void resizeTempObjects(ArraySizesForGpuEntities const& size);
     void resizeObjectsAndTempObjects(ArraySizesForGpuEntities const& size);
     void resizeObjectsByMatchingTempObjects();
