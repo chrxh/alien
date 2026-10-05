@@ -61,6 +61,20 @@ bool SimulationData::shouldResize(ArraySizesForGpuEntities const& sizeDelta)
         || entities.heap.shouldResize_host(sizeDelta.heap);
 }
 
+bool SimulationData::shouldResize(
+    ArraySizesForGpuEntities const& sizeDelta,
+    ArraySizesForGpuEntities const& numEntries,
+    ArraySizesForGpuEntities const& capacities)
+{
+    uint64_t cellArraySizeResult, particleArraySizeResult;
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.objectArray, sizeDelta.energyArray);
+    auto exceeds = [](uint64_t numEntries, uint64_t increment, uint64_t capacity) {
+        return numEntries + increment > toUInt64(capacity * Const::ArrayFillPercentage);
+    };
+    return exceeds(numEntries.objectArray, cellArraySizeResult, capacities.objectArray)
+        || exceeds(numEntries.energyArray, particleArraySizeResult, capacities.energyArray) || exceeds(numEntries.heap, sizeDelta.heap, capacities.heap);
+}
+
 void SimulationData::resizeTempObjects(ArraySizesForGpuEntities const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;

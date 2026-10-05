@@ -67,6 +67,12 @@ namespace
         }
     }
 
+    // For kernels whose work is usually small, a large grid would cost more than the work itself
+    LaunchConfig calcSmallLaunchConfig(KernelLaunchSettings const& launchSettings)
+    {
+        return LaunchConfig{std::min(launchSettings.numBlocks, 256), 64};
+    }
+
     uint64_t calcMapCapacity(uint64_t numEntries)
     {
         return std::bit_ceil(std::max<uint64_t>(1024, numEntries * 2));
@@ -77,23 +83,28 @@ namespace
         return required <= current ? current : std::max(required + required / 2, current * 2);
     }
 
+    template <typename T>
+    void resizeArray(Array<T> const& array, uint64_t& capacity, uint64_t newCapacity)
+    {
+        array.resize(newCapacity);
+        capacity = newCapacity;
+    }
+
     // The entries of a time step are collected before they can be sent, so an empty outbox is kept at twice the last usage
     template <typename T>
-    void growOutboxIfNecessary(Array<T> const& outbox, uint64_t lastUsage)
+    void growOutboxIfNecessary(Array<T> const& outbox, uint64_t& capacity, uint64_t lastUsage)
     {
-        auto capacity = outbox.getCapacity_host();
         if (lastUsage * 2 > capacity) {
-            outbox.resize(std::max(capacity * 2, lastUsage * 4));
+            resizeArray(outbox, capacity, std::max(capacity * 2, lastUsage * 4));
         }
     }
 
     // Only for empty arrays, since resizing discards the content
     template <typename T>
-    void ensureCapacity(Array<T> const& array, uint64_t numEntries)
+    void ensureCapacity(Array<T> const& array, uint64_t& capacity, uint64_t numEntries)
     {
-        auto capacity = array.getCapacity_host();
         if (numEntries > capacity) {
-            array.resize(grow(numEntries, capacity));
+            resizeArray(array, capacity, grow(numEntries, capacity));
         }
     }
 }
@@ -138,15 +149,17 @@ void DomainSyncService::init(std::vector<Domain>& domains, int2 const& worldSize
         data.domain.numDomains = numDomains;
         data.domain.layout = sync.layout;
         data.domain.roiBitmaps = sync.roiBitmaps;
-        data.domainOps.resize(InitialOutboxCapacity);
-        data.receivedShockWaves.resize(InitialCapacities.ops);
-        data.sensorContinuations.resize(InitialSensorScanCapacity);
-        data.sensorScanRequests.resize(InitialSensorScanCapacity);
-        data.receivedSensorScanRequests.resize(InitialSensorScanCapacity);
-        data.sensorScanResponses.resize(InitialSensorScanCapacity);
-        for (auto const& scans : data.pendingSensorScans) {
-            scans.resize(InitialSensorScanCapacity);
+        auto& arrayCapacities = sync.capacities;
+        resizeArray(data.domainOps, arrayCapacities.domainOps, InitialOutboxCapacity);
+        resizeArray(data.receivedShockWaves, arrayCapacities.receivedShockWaves, InitialCapacities.ops);
+        resizeArray(data.sensorContinuations, arrayCapacities.sensorContinuations, InitialSensorScanCapacity);
+        resizeArray(data.sensorScanRequests, arrayCapacities.sensorScanRequests, InitialSensorScanCapacity);
+        resizeArray(data.receivedSensorScanRequests, arrayCapacities.receivedSensorScanRequests, InitialSensorScanCapacity);
+        resizeArray(data.sensorScanResponses, arrayCapacities.sensorScanResponses, InitialSensorScanCapacity);
+        for (int parity = 0; parity < 2; ++parity) {
+            resizeArray(data.pendingSensorScans[parity], arrayCapacities.pendingSensorScans[parity], InitialSensorScanCapacity);
         }
+        CudaMemoryManager::getInstance().acquireMemory<DomainSyncControl>(1, sync.controlOnDevice);
 
         sync.data.objectMap.init();
         sync.data.particleMap.init();
@@ -204,6 +217,7 @@ void DomainSyncService::shutdown(std::vector<Domain>& domains)
         CudaMemoryManager::getInstance().freeMemory(sync.data.numGenomesToServe);
         CudaMemoryManager::getInstance().freeMemory(sync.layout);
         CudaMemoryManager::getInstance().freeMemory(sync.roiBitmaps);
+        CudaMemoryManager::getInstance().freeMemory(sync.controlOnDevice);
         domain.sync.reset();
     }
 }
@@ -226,50 +240,83 @@ void DomainSyncService::distribute(std::vector<Domain>& domains, KernelLaunchSet
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize());
     }
     exchangeRoiBitmaps(domains);
+    readControls(domains);
 }
 
+// The work of all domains is queued before the host waits for one of them, so that the devices work at the same time. The host
+// only waits once per domain, for the sizes of the messages and the control values. The maps are sized by the previous round
+// and filled anew if that was too small.
 void DomainSyncService::sync(std::vector<Domain>& domains, KernelLaunchSettings const& launchSettings, EnsureCapacityFunc const& ensureCapacity)
 {
     ++_round;
 
     for (auto& domain : domains) {
         activateDevice(domain);
-        rebuildMaps(domain, launchSettings, ArraySizesForGpuEntities{0, 0, 0});
+        auto const& sync = *domain.sync;
+        reserveMaps(domain, sync.control.numObjects + sync.lastIncomingSizes.objectArray, sync.control.numParticles + sync.lastIncomingSizes.energyArray);
+        fillMaps(domain, launchSettings);
         calcOwnership(domain, launchSettings, false);
         calcRoi(domain, launchSettings);
+        pack(domain, launchSettings);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainSync_gatherControl), LaunchConfig{1, 1}, *domain.data, sync.controlOnDevice);
     }
-
-    do {
+    while (readOutgoingCountersAndGrowOnOverflow(domains)) {
         for (auto& domain : domains) {
             activateDevice(domain);
             pack(domain, launchSettings);
         }
-    } while (readOutgoingCountersAndGrowOnOverflow(domains));
+    }
 
     for (auto& domain : domains) {
         activateDevice(domain);
         auto const& data = *domain.data;
-        auto numOps = data.domainOps.getNumEntries_host();
-        auto numSensorContinuations = data.sensorContinuations.getNumEntries_host();
-        auto numSensorScanRequests = data.sensorScanRequests.getNumEntries_host();
+        auto& sync = *domain.sync;
         commit(domain, launchSettings);
-        growOutboxIfNecessary(data.domainOps, numOps);
-        growOutboxIfNecessary(data.sensorContinuations, numSensorContinuations);
-        growOutboxIfNecessary(data.sensorScanRequests, numSensorScanRequests);
+        growOutboxIfNecessary(data.domainOps, sync.capacities.domainOps, sync.control.numOps);
+        growOutboxIfNecessary(data.sensorContinuations, sync.capacities.sensorContinuations, sync.control.numSensorContinuations);
+        growOutboxIfNecessary(data.sensorScanRequests, sync.capacities.sensorScanRequests, sync.control.numSensorScanRequests);
     }
 
     transport(domains);
 
     for (auto& domain : domains) {
         activateDevice(domain);
+        auto& sync = *domain.sync;
+        auto const& control = sync.control;
         auto incomingSizes = calcIncomingSizes(domain, domains);
-        ensureCapacity(domain, incomingSizes);
-        rebuildMaps(domain, launchSettings, incomingSizes);
+        sync.lastIncomingSizes = incomingSizes;
+
+        // The maps stay valid unless the entities are moved or the maps are too small for the incoming entities
+        auto isMapRefillNeeded = false;
+        ArraySizesForGpuEntities numEntries{control.numObjects, control.numParticles, control.heapSize};
+        ArraySizesForGpuEntities capacities{control.objectCapacity, control.particleCapacity, control.heapCapacity};
+        if (SimulationData::shouldResize(incomingSizes, numEntries, capacities)) {
+            ensureCapacity(domain, incomingSizes);
+            isMapRefillNeeded = true;
+        }
+        if (reserveMaps(domain, control.numObjects + incomingSizes.objectArray, control.numParticles + incomingSizes.energyArray)) {
+            isMapRefillNeeded = true;
+        }
+        if (isMapRefillNeeded) {
+            fillMaps(domain, launchSettings);
+        }
         unpack(domain, domains, launchSettings);
     }
     for (auto& domain : domains) {
         activateDevice(domain);
         finishRound(domain, domains, launchSettings);
+    }
+}
+
+void DomainSyncService::readControls(std::vector<Domain>& domains)
+{
+    for (auto& domain : domains) {
+        activateDevice(domain);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainSync_gatherControl), LaunchConfig{1, 1}, *domain.data, domain.sync->controlOnDevice);
+    }
+    for (auto& domain : domains) {
+        activateDevice(domain);
+        copyToHost(&domain.sync->control, domain.sync->controlOnDevice);
     }
 }
 
@@ -318,22 +365,32 @@ void DomainSyncService::updateExternalEnergyShares(
     }
 }
 
-void DomainSyncService::rebuildMaps(Domain& domain, KernelLaunchSettings const& launchSettings, ArraySizesForGpuEntities const& incomingSizes)
+bool DomainSyncService::reserveMaps(Domain& domain, uint64_t numObjects, uint64_t numParticles)
 {
     auto& sync = *domain.sync;
-    auto const& data = *domain.data;
-    auto objectMapCapacity = calcMapCapacity(data.entities.objects.getNumEntries_host() + incomingSizes.objectArray);
-    if (sync.data.objectMap.getCapacity_host() < objectMapCapacity) {
+    auto result = false;
+    auto objectMapCapacity = calcMapCapacity(numObjects);
+    if (sync.capacities.objectMap < objectMapCapacity) {
         sync.data.objectMap.resize(objectMapCapacity);
         sync.data.creatureMap.resize(objectMapCapacity);
         sync.data.genomeMap.resize(objectMapCapacity);
+        sync.capacities.objectMap = objectMapCapacity;
+        result = true;
     }
-    auto particleMapCapacity = calcMapCapacity(data.entities.energies.getNumEntries_host() + incomingSizes.energyArray);
-    if (sync.data.particleMap.getCapacity_host() < particleMapCapacity) {
+    auto particleMapCapacity = calcMapCapacity(numParticles);
+    if (sync.capacities.particleMap < particleMapCapacity) {
         sync.data.particleMap.resize(particleMapCapacity);
+        sync.capacities.particleMap = particleMapCapacity;
+        result = true;
     }
-    launchKernelOnDefaultStream(KERNEL(cudaDomainMaps_clear), LaunchConfig{launchSettings.numBlocks, 64}, sync.data);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainMaps_insert), LaunchConfig{launchSettings.numBlocks, 8}, data, sync.data);
+    return result;
+}
+
+void DomainSyncService::fillMaps(Domain& domain, KernelLaunchSettings const& launchSettings)
+{
+    auto const& syncData = domain.sync->data;
+    launchKernelOnDefaultStream(KERNEL(cudaDomainMaps_clear), LaunchConfig{launchSettings.numBlocks, 64}, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainMaps_insert), LaunchConfig{launchSettings.numBlocks, 8}, *domain.data, syncData);
 }
 
 void DomainSyncService::calcOwnership(Domain& domain, KernelLaunchSettings const& launchSettings, bool initialAssignment)
@@ -351,24 +408,27 @@ void DomainSyncService::calcRoi(Domain& domain, KernelLaunchSettings const& laun
 {
     auto const& data = *domain.data;
     auto const& syncData = domain.sync->data;
-    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_clearBaseBitmap), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
+    auto constexpr DilateBlockSize = 128;
+    auto numDilateBlocks = std::max(1, (_layout.numBitmapWords * 32 + DilateBlockSize - 1) / DilateBlockSize);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_clearBaseBitmap), calcSmallLaunchConfig(launchSettings), data, syncData);
     launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_markOwnedObjects), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_dilate), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_dilate), LaunchConfig{numDilateBlocks, DilateBlockSize}, data, syncData);
 }
 
 void DomainSyncService::pack(Domain& domain, KernelLaunchSettings const& launchSettings)
 {
     auto const& data = *domain.data;
     auto const& syncData = domain.sync->data;
+    auto smallLaunchConfig = calcSmallLaunchConfig(launchSettings);
     launchKernelOnDefaultStream(KERNEL(cudaDomainPack_reset), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_roiBitmaps), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_roiBitmaps), smallLaunchConfig, data, syncData);
     launchKernelOnDefaultStream(KERNEL(cudaDomainPack_objects), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
     launchKernelOnDefaultStream(KERNEL(cudaDomainPack_particles), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_genomeRequests), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_requestedGenomes), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_transferredGenomes), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_ops), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_sensorScans), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_genomeRequests), smallLaunchConfig, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_requestedGenomes), smallLaunchConfig, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_transferredGenomes), smallLaunchConfig, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_ops), smallLaunchConfig, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainPack_sensorScans), smallLaunchConfig, data, syncData);
 }
 
 void DomainSyncService::commit(Domain& domain, KernelLaunchSettings const& launchSettings)
@@ -384,7 +444,8 @@ void DomainSyncService::commit(Domain& domain, KernelLaunchSettings const& launc
 void DomainSyncService::unpack(Domain& receiver, std::vector<Domain>& domains, KernelLaunchSettings const& launchSettings)
 {
     auto const& data = *receiver.data;
-    auto const& syncData = receiver.sync->data;
+    auto& sync = *receiver.sync;
+    auto const& syncData = sync.data;
 
     // Each received scan request is answered in the next time step
     uint64_t numIncomingOps = 0;
@@ -396,22 +457,23 @@ void DomainSyncService::unpack(Domain& receiver, std::vector<Domain>& domains, K
             numIncomingSensorScanRequests += counters.numSensorScanRequests;
         }
     }
-    ensureCapacity(data.receivedShockWaves, numIncomingOps);
-    ensureCapacity(data.receivedSensorScanRequests, numIncomingSensorScanRequests);
-    ensureCapacity(data.sensorScanResponses, numIncomingSensorScanRequests);
+    ensureCapacity(data.receivedShockWaves, sync.capacities.receivedShockWaves, numIncomingOps);
+    ensureCapacity(data.receivedSensorScanRequests, sync.capacities.receivedSensorScanRequests, numIncomingSensorScanRequests);
+    ensureCapacity(data.sensorScanResponses, sync.capacities.sensorScanResponses, numIncomingSensorScanRequests);
 
+    auto smallLaunchConfig = calcSmallLaunchConfig(launchSettings);
     for (auto const& sender : domains) {
         if (sender.index == receiver.index) {
             continue;
         }
-        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_roiBitmap), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index);
-        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_genomes), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index);
-        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_genomeRequests), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index);
-        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_creatures), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_roiBitmap), smallLaunchConfig, data, syncData, sender.index);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_genomes), smallLaunchConfig, data, syncData, sender.index);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_genomeRequests), smallLaunchConfig, data, syncData, sender.index);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_creatures), smallLaunchConfig, data, syncData, sender.index);
         launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_objects), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index, _round);
         launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_particles), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index, _round);
-        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_sensorScanRequests), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index);
-        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_sensorScanResponses), LaunchConfig{launchSettings.numBlocks, 64}, data, syncData, sender.index);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_sensorScanRequests), smallLaunchConfig, data, syncData, sender.index);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_sensorScanResponses), smallLaunchConfig, data, syncData, sender.index);
     }
 }
 
@@ -425,24 +487,23 @@ void DomainSyncService::finishRound(Domain& domain, std::vector<Domain>& domains
             launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_resolveObjects), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData, sender.index);
         }
     }
+    auto smallLaunchConfig = calcSmallLaunchConfig(launchSettings);
     for (auto const& sender : domains) {
         if (sender.index != domain.index) {
-            launchKernelOnDefaultStream(
-                KERNEL(cudaDomainUnpack_applyOps), LaunchConfig{launchSettings.numBlocks, 8}, data, *domain.statistics, syncData, sender.index);
+            launchKernelOnDefaultStream(KERNEL(cudaDomainUnpack_applyOps), smallLaunchConfig, data, *domain.statistics, syncData, sender.index);
         }
     }
 
-    // The scans that are published now are replaced by the scans of the next time step
-    auto const& pendingSensorScans = data.pendingSensorScans[copyToHost(data.timestep) % 2];
-    auto numPendingSensorScans = pendingSensorScans.getNumEntries_host();
-    launchKernelOnDefaultStream(KERNEL(cudaDomainSync_publishSensorScans), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainSync_publishSensorScans), smallLaunchConfig, data, syncData);
     launchKernelOnDefaultStream(KERNEL(cudaDomainSync_resetPendingSensorScans), LaunchConfig{1, 1}, data);
-
     launchKernelOnDefaultStream(KERNEL(cudaDomainSync_removeConnectionsToRemovedGhosts), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaDomainSync_deleteRemovedGhosts), LaunchConfig{launchSettings.numBlocks, 8}, data);
     GarbageCollectorKernelsService::get().compactPointerArrays(launchSettings, data);
-    CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize());
-    growOutboxIfNecessary(pendingSensorScans, numPendingSensorScans);
+
+    // The scans that were published are replaced by the scans of the next time step
+    auto& sync = *domain.sync;
+    auto parity = sync.control.timestep % 2;
+    growOutboxIfNecessary(data.pendingSensorScans[parity], sync.capacities.pendingSensorScans[parity], sync.control.numPublishedSensorScans);
 }
 
 bool DomainSyncService::readOutgoingCountersAndGrowOnOverflow(std::vector<Domain>& domains)
@@ -450,8 +511,8 @@ bool DomainSyncService::readOutgoingCountersAndGrowOnOverflow(std::vector<Domain
     auto overflow = false;
     for (auto& domain : domains) {
         activateDevice(domain);
-        CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize());
         auto& sync = *domain.sync;
+        copyToHost(&sync.control, sync.controlOnDevice);
         auto domainOverflow = false;
         for (auto const& receiver : domains) {
             if (receiver.index == domain.index) {

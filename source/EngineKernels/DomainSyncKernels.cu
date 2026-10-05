@@ -239,6 +239,26 @@ namespace
 }
 
 /************************************************************************/
+/* Control values                                                       */
+/************************************************************************/
+
+__global__ void cudaDomainSync_gatherControl(SimulationData data, DomainSyncControl* control)
+{
+    auto timestep = *data.timestep;
+    control->timestep = timestep;
+    control->numObjects = data.entities.objects.getNumEntries();
+    control->numParticles = data.entities.energies.getNumEntries();
+    control->heapSize = data.entities.heap.getNumEntries();
+    control->objectCapacity = data.entities.objects.getCapacity();
+    control->particleCapacity = data.entities.energies.getCapacity();
+    control->heapCapacity = data.entities.heap.getCapacity();
+    control->numOps = data.domainOps.getNumEntries();
+    control->numSensorContinuations = data.sensorContinuations.getNumEntries();
+    control->numSensorScanRequests = data.sensorScanRequests.getNumEntries();
+    control->numPublishedSensorScans = data.pendingSensorScans[timestep % 2].getNumEntries();
+}
+
+/************************************************************************/
 /* Ownership                                                            */
 /************************************************************************/
 
@@ -377,7 +397,7 @@ __global__ void cudaDomainRoi_markOwnedObjects(SimulationData data, DomainSyncDa
     }
 }
 
-// Each thread computes one word of the dilated bitmap, so no atomics are needed
+// Each thread decides one tile and each warp assembles the word of its 32 tiles, so the block size must be a multiple of 32
 __global__ void cudaDomainRoi_dilate(SimulationData data, DomainSyncData syncData)
 {
     auto const& domain = data.domain;
@@ -385,34 +405,28 @@ __global__ void cudaDomainRoi_dilate(SimulationData data, DomainSyncData syncDat
     auto radius = static_cast<int>(ceilf(layout.haloWidth / DomainLayout::TileSize)) + 1;
     auto stripReach = layout.haloWidth + DomainLayout::TileSize;
     auto ownBitmap = domain.getRoiBitmap(domain.index);
+    auto numTiles = layout.numTiles.x * layout.numTiles.y;
+    auto wrap = [](int value, int size) { return value < 0 ? value + size : (value >= size ? value - size : value); };
 
-    auto const partition = calcSystemThreadPartition(layout.numBitmapWords);
-    for (int wordIndex = partition.startIndex; wordIndex <= partition.endIndex; wordIndex += partition.step) {
-        uint32_t word = 0;
-        for (int bitIndex = 0; bitIndex < 32; ++bitIndex) {
-            auto tileIndex = wordIndex * 32 + bitIndex;
-            if (tileIndex >= layout.numTiles.x * layout.numTiles.y) {
-                break;
-            }
+    for (int tileIndex = blockIdx.x * blockDim.x + threadIdx.x; tileIndex < layout.numBitmapWords * 32; tileIndex += gridDim.x * blockDim.x) {
+        auto inRoi = false;
+        if (tileIndex < numTiles) {
             auto tileX = tileIndex % layout.numTiles.x;
             auto tileY = tileIndex / layout.numTiles.x;
             auto tileCenterX = (toFloat(tileX) + 0.5f) * DomainLayout::TileSize;
-            auto inRoi = domain.getDistanceToStrip(domain.index, tileCenterX) <= stripReach;
+            inRoi = domain.getDistanceToStrip(domain.index, tileCenterX) <= stripReach;
             for (int dy = -radius; dy <= radius && !inRoi; ++dy) {
+                auto rowStart = wrap(tileY + dy, layout.numTiles.y) * layout.numTiles.x;
                 for (int dx = -radius; dx <= radius && !inRoi; ++dx) {
-                    auto x = ((tileX + dx) % layout.numTiles.x + layout.numTiles.x) % layout.numTiles.x;
-                    auto y = ((tileY + dy) % layout.numTiles.y + layout.numTiles.y) % layout.numTiles.y;
-                    auto otherTileIndex = x + y * layout.numTiles.x;
-                    if ((syncData.baseBitmap[otherTileIndex / 32] >> (otherTileIndex % 32)) & 1) {
-                        inRoi = true;
-                    }
+                    auto otherTileIndex = rowStart + wrap(tileX + dx, layout.numTiles.x);
+                    inRoi = (syncData.baseBitmap[otherTileIndex / 32] >> (otherTileIndex % 32)) & 1;
                 }
             }
-            if (inRoi) {
-                word |= 1u << bitIndex;
-            }
         }
-        ownBitmap[wordIndex] = word;
+        auto word = __ballot_sync(0xffffffff, inRoi);
+        if (threadIdx.x % 32 == 0) {
+            ownBitmap[tileIndex / 32] = word;
+        }
     }
 }
 
