@@ -20,7 +20,7 @@ The energy inside the world is conserved. It changes its form, but it never appe
 
 ## How cells gain energy
 
-- **Absorbing energy particles.** When an energy particle hits a cell or a free cell, the cell absorbs a part of it given by the **Absorption factor**, 1 by default. Absorbed energy becomes raw energy. Fluids let energy particles pass, while solids and most static objects reflect them.
+- **Absorbing energy particles.** When an energy particle hits a cell or a free cell, the cell absorbs a part of it given by the **Absorption factor**, 1 by default. Absorbed energy becomes raw energy. Static cells and static free cells do not absorb energy particles, with the exception of static digestors. Fluids let energy particles pass, while solids reflect them.
 - **Attacking.** Attacker cells steal energy from other cells and free cells. The loot also becomes raw energy.
 - **Digesting.** Digestor cells convert raw energy into usable energy. Raw energy flows from every cell into directly connected digestors.
 - **Sharing.** Usable energy flows along connections between cells. Cells with more energy give to cells with less, and cells that do not need energy themselves pass their surplus above the normal energy to connected cells that are constructing.

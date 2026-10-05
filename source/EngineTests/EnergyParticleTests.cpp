@@ -286,6 +286,25 @@ TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenSolids_fromRight)
     EXPECT_NEAR(0.0f, particle._vel.y, 0.001f);
 }
 
+TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenStaticSolids)
+{
+    auto data = ContentDesc()
+                    .addObjects(
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).isStatic(true).type(SolidDesc()),
+                         ObjectDesc().id(2).pos({100.0f, 101.5f}).isStatic(true).type(SolidDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(99.49f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(-1.0f, particle._vel.x, 0.001f);
+}
+
 TEST_F(EnergyParticleTests, particleBouncesOffConnectionAtWorldBoundary_fromLeft)
 {
     auto data = ContentDesc()
@@ -419,7 +438,7 @@ TEST_F(EnergyParticleTests, particlePassesUnconnectedSolid)
     EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
 }
 
-TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenStaticCells)
+TEST_F(EnergyParticleTests, particlePassesConnectionBetweenStaticCells)
 {
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
 
@@ -427,27 +446,6 @@ TEST_F(EnergyParticleTests, particleBouncesOffConnectionBetweenStaticCells)
                     .addCreature(
                         {ObjectDesc().id(1).pos({100.0f, 98.5f}).isStatic(true).type(CellDesc().usableEnergy(cellEnergy)),
                          ObjectDesc().id(2).pos({100.0f, 101.5f}).isStatic(true).type(CellDesc().usableEnergy(cellEnergy))})
-                    .addConnection(1, 2)
-                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(1, actualData._energies.size());
-    auto const& particle = actualData._energies.at(0);
-    EXPECT_NEAR(99.49f, particle._pos.x, 0.01f);
-    EXPECT_NEAR(-1.0f, particle._vel.x, 0.001f);
-}
-
-TEST_F(EnergyParticleTests, particlePassesConnectionBetweenNonStaticCells)
-{
-    auto cellEnergy = _parameters.normalCellEnergy.value[0];
-
-    auto data = ContentDesc()
-                    .addCreature(
-                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).type(CellDesc().usableEnergy(cellEnergy)),
-                         ObjectDesc().id(2).pos({100.0f, 101.5f}).type(CellDesc().usableEnergy(cellEnergy))})
                     .addConnection(1, 2)
                     .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
 
@@ -461,13 +459,32 @@ TEST_F(EnergyParticleTests, particlePassesConnectionBetweenNonStaticCells)
     EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
 }
 
-TEST_F(EnergyParticleTests, particlePassesConnectionBetweenStaticAndNonStaticCell)
+TEST_F(EnergyParticleTests, particlePassesConnectionBetweenSolidAndStaticFreeCell)
+{
+    auto data = ContentDesc()
+                    .addObjects(
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).isStatic(true).type(SolidDesc()),
+                         ObjectDesc().id(2).pos({100.0f, 101.5f}).isStatic(true).type(FreeCellDesc())})
+                    .addConnection(1, 2)
+                    .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, actualData._energies.size());
+    auto const& particle = actualData._energies.at(0);
+    EXPECT_NEAR(101.5f, particle._pos.x, 0.01f);
+    EXPECT_NEAR(1.0f, particle._vel.x, 0.001f);
+}
+
+TEST_F(EnergyParticleTests, particlePassesConnectionBetweenNonStaticCells)
 {
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = ContentDesc()
                     .addCreature(
-                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).isStatic(true).type(CellDesc().usableEnergy(cellEnergy)),
+                        {ObjectDesc().id(1).pos({100.0f, 98.5f}).type(CellDesc().usableEnergy(cellEnergy)),
                          ObjectDesc().id(2).pos({100.0f, 101.5f}).type(CellDesc().usableEnergy(cellEnergy))})
                     .addConnection(1, 2)
                     .energies({EnergyDesc().pos({98.5f, 100.0f}).vel({1.0f, 0.0f}).energy(10.0f)});
