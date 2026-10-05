@@ -997,6 +997,12 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
             if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, readExternalEnergy, getCurrentTimestep())) {
                 copySimulationParametersToDevices(_settings.simulationParameters);
             }
+            if (isDecomposed()) {
+                auto isCellFunctionStep = [&](uint64_t value) { return forceCellFunctionExecution || value % TIMESTEPS_PER_CELL_FUNCTION == 0; };
+                DomainSyncService::get().updateExternalEnergyShares(
+                    _domains, _settings.simulationParameters.externalEnergy.value, isCellFunctionStep(timestep), isCellFunctionStep(timestep + 1));
+                activateDevice(getMainDomain());
+            }
         }
         if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
             updateStatistics();
