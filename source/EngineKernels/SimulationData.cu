@@ -9,7 +9,7 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
     world.init(worldSize);
     objectGrid.init(worldSize);
     energyParticleGrid.init(worldSize);
-    barrierGrid.init(worldSize);
+    solidGrid.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
     CudaMemoryManager::getInstance().acquireMemory<uint32_t>(MAX_COLORS, numConstructorsNeedingEnergyByColor);
@@ -29,7 +29,7 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
         cellTypeOperations[i].init();
     }
     mutatedGenomes.init();
-    energyParticlesNearBarriers.init();
+    energyParticlesNearSolids.init();
 }
 
 namespace
@@ -96,7 +96,7 @@ void SimulationData::free()
     preprocessedSimulationData.free();
     objectGrid.free();
     energyParticleGrid.free();
-    barrierGrid.free();
+    solidGrid.free();
     primaryNumberGen.free();
     secondaryNumberGen.free();
     processMemory.free();
@@ -110,7 +110,7 @@ void SimulationData::free()
         cellTypeOperations[i].free();
     }
     mutatedGenomes.free();
-    energyParticlesNearBarriers.free();
+    energyParticlesNearSolids.free();
 }
 
 void SimulationData::resizeAuxiliaryData()
@@ -122,7 +122,7 @@ void SimulationData::resizeAuxiliaryData()
 
     auto upperBoundDynamicMemory =
         (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + sizeof(Genome*) + 200) * (estimatedMaxActiveCells + 1000)  // Heuristics
-        + sizeof(int) * estimatedMaxActiveParticles + GpuMemoryAlignmentBytes;  // For energyParticlesNearBarriers
+        + sizeof(int) * estimatedMaxActiveParticles + GpuMemoryAlignmentBytes;  // For energyParticlesNearSolids
     processMemory.resize(upperBoundDynamicMemory);
 }
 

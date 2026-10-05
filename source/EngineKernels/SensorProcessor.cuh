@@ -555,14 +555,14 @@ __inline__ __device__ float2 SensorProcessor::calcRayRangeInSquare(float2 const&
 // Checks the positions around the part of the ray between the distances range.x and range.y relative to pos, the part must lie in the tile of pos
 __inline__ __device__ bool SensorProcessor::isSolidNearSegment(SimulationData& data, float2 const& pos, float2 const& direction, float2 const& range)
 {
-    if (!data.barrierGrid.hasSolidNearBlockOf(pos)) {
+    if (!data.solidGrid.hasSolidNearBlockOf(pos)) {
         return false;
     }
     auto start = pos + direction * range.x;
     auto end = pos + direction * range.y;
     int2 minPos{floorInt(min(start.x, end.x) - SolidHitRadius), floorInt(min(start.y, end.y) - SolidHitRadius)};
     int2 maxPos{floorInt(max(start.x, end.x) + SolidHitRadius), floorInt(max(start.y, end.y) + SolidHitRadius)};
-    return data.barrierGrid.hasSolid(minPos, maxPos);
+    return data.solidGrid.hasSolid(minPos, maxPos);
 }
 
 // Solids behind the ray origin are ignored, otherwise a solid touching the sensor would block every ray
@@ -571,14 +571,14 @@ __inline__ __device__ bool SensorProcessor::isSolidNearPosition(SimulationData& 
     auto records = data.objectGrid.getRecords();
     int2 const minCell{floorInt(pos.x - SolidHitRadius), floorInt(pos.y - SolidHitRadius)};
     int2 const maxCell{floorInt(pos.x + SolidHitRadius), floorInt(pos.y + SolidHitRadius)};
-    if (!data.barrierGrid.hasSolid(minCell, maxCell)) {
+    if (!data.solidGrid.hasSolid(minCell, maxCell)) {
         return false;
     }
     for (int cellY = minCell.y; cellY <= maxCell.y; ++cellY) {
         for (int cellX = minCell.x; cellX <= maxCell.x; ++cellX) {
             int2 cell{cellX, cellY};
             data.world.correctPosition(cell);
-            if (!data.barrierGrid.hasSolid(cell)) {
+            if (!data.solidGrid.hasSolid(cell)) {
                 continue;
             }
             auto index = data.objectGrid.getFirstIndex(cell);
@@ -649,7 +649,7 @@ __inline__ __device__ float SensorProcessor::findSolidAlongRay(
     auto distance = seedDistance;
     while (distance <= endRadius) {
         auto scanPos = data.world.getCorrectedPosition(origin + direction * distance);
-        if (!data.barrierGrid.hasSolidNearBlockOf(scanPos)) {
+        if (!data.solidGrid.hasSolidNearBlockOf(scanPos)) {
             distance += max(calcRayRangeInSquare(scanPos, direction, OccupancyGrid::BlockSize).y, 0.0f) + SquareTransitionEpsilon;
             continue;
         }

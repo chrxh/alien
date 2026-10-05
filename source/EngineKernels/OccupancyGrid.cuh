@@ -8,8 +8,8 @@
 // An area can have up to 17x17 positions and may reach beyond the world boundaries. To avoid splitting it there, the positions near the lower
 // boundaries are copied beyond the upper boundaries.
 //
-// Optionally, a coarse level marks blocks of 32x32 positions that contain set positions inside or at most one position outside. It allows
-// to skip empty regions quickly.
+// A coarse level marks blocks of 32x32 positions that contain set positions inside or at most one position outside. It allows to skip empty
+// regions quickly.
 class OccupancyGrid
 {
 public:
@@ -17,33 +17,22 @@ public:
     static int constexpr BlockSize = 32;
     static int constexpr MaxAreaSize = 17;
 
-    enum class Levels
-    {
-        Positions,
-        PositionsAndBlocks
-    };
-
-    __host__ __inline__ void init(int2 const& worldSize, Levels levels)
+    __host__ __inline__ void init(int2 const& worldSize)
     {
         _worldSize = worldSize;
         _numTiles = {(worldSize.x + MaxAreaSize + TileSize - 1) / TileSize, (worldSize.y + MaxAreaSize + TileSize - 1) / TileSize};
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_numTiles.x * _numTiles.y, _tiles);
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_tiles, 0, sizeof(uint64_t) * _numTiles.x * _numTiles.y));
 
-        _numBlocks =
-            levels == Levels::PositionsAndBlocks ? int2{(worldSize.x + BlockSize - 1) / BlockSize, (worldSize.y + BlockSize - 1) / BlockSize} : int2{0, 0};
-        if (hasBlocks()) {
-            CudaMemoryManager::getInstance().acquireMemory<uint32_t>(getNumBlockWords(), _blocks);
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_blocks, 0, sizeof(uint32_t) * getNumBlockWords()));
-        }
+        _numBlocks = {(worldSize.x + BlockSize - 1) / BlockSize, (worldSize.y + BlockSize - 1) / BlockSize};
+        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(getNumBlockWords(), _blocks);
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_blocks, 0, sizeof(uint32_t) * getNumBlockWords()));
     }
 
     __host__ __inline__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_tiles);
-        if (hasBlocks()) {
-            CudaMemoryManager::getInstance().freeMemory(_blocks);
-        }
+        CudaMemoryManager::getInstance().freeMemory(_blocks);
     }
 
     __device__ __inline__ void clear_system()
@@ -61,9 +50,7 @@ public:
     // The position must lie inside the world
     __device__ __inline__ void set(int2 const& pos)
     {
-        if (hasBlocks()) {
-            markBlocksNear(pos);
-        }
+        markBlocksNear(pos);
         setBit(pos);
         auto isNearLowerBoundaryX = pos.x < MaxAreaSize;
         auto isNearLowerBoundaryY = pos.y < MaxAreaSize;
@@ -162,8 +149,6 @@ private:
         }
     }
 
-    __host__ __device__ __inline__ bool hasBlocks() const { return _numBlocks.x > 0; }
-
     __host__ __device__ __inline__ int getNumBlockWords() const { return (_numBlocks.x * _numBlocks.y + 31) / 32; }
 
     __device__ __inline__ int getBlockIndex(int2 const& block) const { return block.y * _numBlocks.x + block.x; }
@@ -199,5 +184,5 @@ private:
     int2 _numTiles;
     uint64_t* _tiles;
     int2 _numBlocks;
-    uint32_t* _blocks = nullptr;
+    uint32_t* _blocks;
 };

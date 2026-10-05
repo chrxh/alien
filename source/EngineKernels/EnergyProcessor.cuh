@@ -17,8 +17,8 @@ public:
     __inline__ __device__ static void updateGrid(SimulationData& data);
     __inline__ __device__ static void fillDensityGrid(SimulationData& data);
     __inline__ __device__ static void calcActiveSources(SimulationData& data);
-    __inline__ __device__ static void moveParticlesFarFromBarriers(SimulationData& data);
-    __inline__ __device__ static void moveParticlesNearBarriers(SimulationData& data);
+    __inline__ __device__ static void moveParticlesFarFromSolids(SimulationData& data);
+    __inline__ __device__ static void moveParticlesNearSolids(SimulationData& data);
     __inline__ __device__ static void splitHighEnergyParticles(SimulationData& data);
     __inline__ __device__ static void transformIntoFreeCells(SimulationData& data);
 
@@ -27,45 +27,44 @@ public:
     __inline__ __device__ static void provideExternalEnergyForSources(SimulationData& data);
 
 private:
-    static auto constexpr BarrierScanGroupSize = 8;
-    using BarrierScanGroup = cg::thread_block_tile<BarrierScanGroupSize>;
+    static auto constexpr SolidScanGroupSize = 8;
+    using SolidScanGroup = cg::thread_block_tile<SolidScanGroupSize>;
 
-    struct BarrierHit
+    struct ConnectionHit
     {
-        float fraction = NoBarrierHit;  // Fraction of the remaining displacement until the hit
+        float fraction = NoConnectionHit;  // Fraction of the remaining displacement until the hit
         float2 normal = {0, 0};
         float2 velocity = {0, 0};
     };
 
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
     __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
-    __inline__ __device__ static bool isBarrier(Object* object);
-    __inline__ __device__ static float calcScanRadius(float barrierSearchRadius, float2 const& displacement);
+    __inline__ __device__ static float calcScanRadius(float solidSearchRadius, float2 const& displacement);
     __inline__ __device__ static void
-    moveParticleAndBounceOffBarriers(SimulationData& data, BarrierScanGroup const& group, Energy* particle, float barrierSearchRadius);
-    __inline__ __device__ static bool findFirstBarrierHit(
+    moveParticleAndBounceOffSolids(SimulationData& data, SolidScanGroup const& group, Energy* particle, float solidSearchRadius);
+    __inline__ __device__ static bool findFirstConnectionHit(
         SimulationData& data,
-        BarrierScanGroup const& group,
+        SolidScanGroup const& group,
         float2 const& pos,
         float2 const& vel,
         float timeLeft,
         float elapsedTime,
-        float barrierSearchRadius,
-        BarrierHit& hit);
+        float solidSearchRadius,
+        ConnectionHit& hit);
     __inline__ __device__ static void
-    updateFirstBarrierHit(SimulationData& data, Object* object, float2 const& pos, float2 const& vel, float timeLeft, float elapsedTime, BarrierHit& hit);
+    updateFirstConnectionHit(SimulationData& data, Object* solid, float2 const& pos, float2 const& vel, float timeLeft, float elapsedTime, ConnectionHit& hit);
     __inline__ __device__ static void mergeOrAbsorb(SimulationData& data, Energy*& particle);
     __inline__ __device__ static void mergeParticleInto(Energy*& particle, Energy* target);
     __inline__ __device__ static void absorbIntoObject(SimulationData& data, Energy*& particle, Object* object);
 
     static auto constexpr MinEnergyPerSourceParticle = 10.0f;
     static auto constexpr MaxNumParticlesPerSource = 1000;
-    static auto constexpr MaxBarrierBouncesPerTimestep = 3;
-    static auto constexpr BarrierClearance = 0.01f;
-    static auto constexpr MaxBarrierScanRadius = 8.0f;
-    static auto constexpr NoBarrierHit = 2.0f;
+    static auto constexpr MaxBouncesPerTimestep = 3;
+    static auto constexpr BounceClearance = 0.01f;
+    static auto constexpr MaxSolidScanRadius = 8.0f;
+    static auto constexpr NoConnectionHit = 2.0f;
 
-    static_assert(2 * MaxBarrierScanRadius + 1 <= OccupancyGrid::MaxAreaSize);
+    static_assert(2 * MaxSolidScanRadius + 1 <= OccupancyGrid::MaxAreaSize);
 };
 
 /************************************************************************/
@@ -106,18 +105,18 @@ __inline__ __device__ void EnergyProcessor::calcActiveSources(SimulationData& da
     }
 }
 
-// Particles near barriers are only collected here and moved by moveParticlesNearBarriers
-__inline__ __device__ void EnergyProcessor::moveParticlesFarFromBarriers(SimulationData& data)
+// Particles near solids are only collected here and moved by moveParticlesNearSolids
+__inline__ __device__ void EnergyProcessor::moveParticlesFarFromSolids(SimulationData& data)
 {
     auto partition = calcSystemThreadPartition(data.entities.energies.getNumOrigEntries());
-    auto barrierSearchRadius = data.barrierGrid.calcBarrierSearchRadius();
+    auto solidSearchRadius = data.solidGrid.calcSolidSearchRadius();
     auto timestepSize = cudaSimulationParameters.timestepSize.value;
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         auto& particle = data.entities.energies.at(particleIndex);
         auto displacement = particle->vel * timestepSize;
-        if (data.barrierGrid.hasBarrier(particle->pos + displacement / 2, calcScanRadius(barrierSearchRadius, displacement))) {
-            data.energyParticlesNearBarriers.tryAddEntry(particleIndex);
+        if (data.solidGrid.hasSolid(particle->pos + displacement / 2, calcScanRadius(solidSearchRadius, displacement))) {
+            data.energyParticlesNearSolids.tryAddEntry(particleIndex);
         } else {
             particle->pos = particle->pos + displacement;
             data.world.correctPosition(particle->pos);
@@ -126,17 +125,17 @@ __inline__ __device__ void EnergyProcessor::moveParticlesFarFromBarriers(Simulat
     }
 }
 
-__inline__ __device__ void EnergyProcessor::moveParticlesNearBarriers(SimulationData& data)
+__inline__ __device__ void EnergyProcessor::moveParticlesNearSolids(SimulationData& data)
 {
-    auto group = cg::tiled_partition<BarrierScanGroupSize>(cg::this_thread_block());
-    auto groupIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x) / BarrierScanGroupSize;
-    auto numGroups = toInt(gridDim.x * blockDim.x) / BarrierScanGroupSize;
-    auto barrierSearchRadius = data.barrierGrid.calcBarrierSearchRadius();
+    auto group = cg::tiled_partition<SolidScanGroupSize>(cg::this_thread_block());
+    auto groupIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x) / SolidScanGroupSize;
+    auto numGroups = toInt(gridDim.x * blockDim.x) / SolidScanGroupSize;
+    auto solidSearchRadius = data.solidGrid.calcSolidSearchRadius();
 
-    auto const& particlesNearBarriers = data.energyParticlesNearBarriers;
-    for (int index = groupIndex; index < particlesNearBarriers.getNumEntries(); index += numGroups) {
-        auto& particle = data.entities.energies.at(particlesNearBarriers.at(index));
-        moveParticleAndBounceOffBarriers(data, group, particle, barrierSearchRadius);
+    auto const& particlesNearSolids = data.energyParticlesNearSolids;
+    for (int index = groupIndex; index < particlesNearSolids.getNumEntries(); index += numGroups) {
+        auto& particle = data.entities.energies.at(particlesNearSolids.at(index));
+        moveParticleAndBounceOffSolids(data, group, particle, solidSearchRadius);
         if (group.thread_rank() == 0) {
             data.world.correctPosition(particle->pos);
             mergeOrAbsorb(data, particle);
@@ -144,15 +143,15 @@ __inline__ __device__ void EnergyProcessor::moveParticlesNearBarriers(Simulation
     }
 }
 
-__inline__ __device__ float EnergyProcessor::calcScanRadius(float barrierSearchRadius, float2 const& displacement)
+__inline__ __device__ float EnergyProcessor::calcScanRadius(float solidSearchRadius, float2 const& displacement)
 {
-    return min(barrierSearchRadius + Math::length(displacement) / 2, MaxBarrierScanRadius);
+    return min(solidSearchRadius + Math::length(displacement) / 2, MaxSolidScanRadius);
 }
 
 // All threads of the group compute the same movement, the first thread writes it. They start from the values read by the first thread,
 // since other threads may change the particle meanwhile.
 __inline__ __device__ void
-EnergyProcessor::moveParticleAndBounceOffBarriers(SimulationData& data, BarrierScanGroup const& group, Energy* particle, float barrierSearchRadius)
+EnergyProcessor::moveParticleAndBounceOffSolids(SimulationData& data, SolidScanGroup const& group, Energy* particle, float solidSearchRadius)
 {
     auto readByFirstThread = [&](float2 const& value) { return float2{group.shfl(value.x, 0), group.shfl(value.y, 0)}; };
     auto pos = readByFirstThread(particle->pos);
@@ -161,13 +160,13 @@ EnergyProcessor::moveParticleAndBounceOffBarriers(SimulationData& data, BarrierS
     auto timeLeft = timestepSize;
     auto bounced = false;
 
-    for (int i = 0; i < MaxBarrierBouncesPerTimestep; ++i) {
-        BarrierHit hit;
-        if (!findFirstBarrierHit(data, group, pos, vel, timeLeft, timestepSize - timeLeft, barrierSearchRadius, hit)) {
+    for (int i = 0; i < MaxBouncesPerTimestep; ++i) {
+        ConnectionHit hit;
+        if (!findFirstConnectionHit(data, group, pos, vel, timeLeft, timestepSize - timeLeft, solidSearchRadius, hit)) {
             pos = pos + vel * timeLeft;
             break;
         }
-        pos = pos + vel * (timeLeft * hit.fraction) + hit.normal * BarrierClearance;
+        pos = pos + vel * (timeLeft * hit.fraction) + hit.normal * BounceClearance;
         auto relativeVel = vel - hit.velocity;
         vel = relativeVel - hit.normal * (2 * Math::dot(relativeVel, hit.normal)) + hit.velocity;
         timeLeft *= 1.0f - hit.fraction;
@@ -183,23 +182,23 @@ EnergyProcessor::moveParticleAndBounceOffBarriers(SimulationData& data, BarrierS
 }
 
 // The positions around the path are distributed among the threads of the group, the earliest hit of all threads is returned to each thread
-__inline__ __device__ bool EnergyProcessor::findFirstBarrierHit(
+__inline__ __device__ bool EnergyProcessor::findFirstConnectionHit(
     SimulationData& data,
-    BarrierScanGroup const& group,
+    SolidScanGroup const& group,
     float2 const& pos,
     float2 const& vel,
     float timeLeft,
     float elapsedTime,
-    float barrierSearchRadius,
-    BarrierHit& hit)
+    float solidSearchRadius,
+    ConnectionHit& hit)
 {
-    BarrierHit threadHit;
+    ConnectionHit threadHit;
     auto displacement = vel * timeLeft;
-    auto scanRadius = calcScanRadius(barrierSearchRadius, displacement);
-    data.objectGrid.executeForEachBarrierRecord(
-        data.barrierGrid, pos + displacement / 2, scanRadius, toInt(group.thread_rank()), toInt(group.size()), [&](LightObject const& record) {
-            if (record.numConnections > 0 && isBarrier(record.self)) {
-                updateFirstBarrierHit(data, record.self, pos, vel, timeLeft, elapsedTime, threadHit);
+    auto scanRadius = calcScanRadius(solidSearchRadius, displacement);
+    data.objectGrid.executeForEachSolidRecord(
+        data.solidGrid, pos + displacement / 2, scanRadius, toInt(group.thread_rank()), toInt(group.size()), [&](LightObject const& record) {
+            if (record.numConnections > 0) {
+                updateFirstConnectionHit(data, record.self, pos, vel, timeLeft, elapsedTime, threadHit);
             }
         });
 
@@ -207,65 +206,54 @@ __inline__ __device__ bool EnergyProcessor::findFirstBarrierHit(
     auto firstHitThread = __ffsll(static_cast<unsigned long long>(group.ballot(threadHit.fraction == hit.fraction))) - 1;
     hit.normal = {group.shfl(threadHit.normal.x, firstHitThread), group.shfl(threadHit.normal.y, firstHitThread)};
     hit.velocity = {group.shfl(threadHit.velocity.x, firstHitThread), group.shfl(threadHit.velocity.y, firstHitThread)};
-    return hit.fraction != NoBarrierHit;
+    return hit.fraction != NoConnectionHit;
 }
 
-// Checks the connections from the object to its connected barriers and keeps the crossing if it comes before the given hit
-__inline__ __device__ void EnergyProcessor::updateFirstBarrierHit(
+// Checks the connections from the solid to its connected solids and keeps the crossing if it comes before the given hit
+__inline__ __device__ void EnergyProcessor::updateFirstConnectionHit(
     SimulationData& data,
-    Object* object,
+    Object* solid,
     float2 const& pos,
     float2 const& vel,
     float timeLeft,
     float elapsedTime,
-    BarrierHit& hit)
+    ConnectionHit& hit)
 {
-    auto barrierStart = data.world.getCorrectedDirection(object->pos - pos) + object->vel * elapsedTime;
-    for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedObject = object->connections[i].object;
-        if (!isBarrier(connectedObject)) {
+    auto connectionStart = data.world.getCorrectedDirection(solid->pos - pos) + solid->vel * elapsedTime;
+    for (int i = 0; i < solid->numConnections; ++i) {
+        auto connectedObject = solid->connections[i].object;
+        if (connectedObject->type != ObjectType_Solid) {
             continue;
         }
-        auto barrier = data.world.getCorrectedDirection(connectedObject->pos - object->pos) + (connectedObject->vel - object->vel) * elapsedTime;
+        auto connection = data.world.getCorrectedDirection(connectedObject->pos - solid->pos) + (connectedObject->vel - solid->vel) * elapsedTime;
 
-        // The crossing is tested in the reference frame of the barrier
-        auto relativeDisplacement = (vel - (object->vel + connectedObject->vel) / 2) * timeLeft;
-        auto crossProduct = relativeDisplacement.x * barrier.y - relativeDisplacement.y * barrier.x;
+        // The crossing is tested in the reference frame of the connection
+        auto relativeDisplacement = (vel - (solid->vel + connectedObject->vel) / 2) * timeLeft;
+        auto crossProduct = relativeDisplacement.x * connection.y - relativeDisplacement.y * connection.x;
         if (crossProduct == 0.0f) {
             continue;
         }
-        auto fraction = (barrierStart.x * barrier.y - barrierStart.y * barrier.x) / crossProduct;
+        auto fraction = (connectionStart.x * connection.y - connectionStart.y * connection.x) / crossProduct;
         if (fraction <= 0.0f || fraction > 1.0f || fraction >= hit.fraction) {
             continue;
         }
-        auto barrierFraction = (barrierStart.x * relativeDisplacement.y - barrierStart.y * relativeDisplacement.x) / crossProduct;
-        if (barrierFraction < 0.0f || barrierFraction > 1.0f) {
+        auto connectionFraction = (connectionStart.x * relativeDisplacement.y - connectionStart.y * relativeDisplacement.x) / crossProduct;
+        if (connectionFraction < 0.0f || connectionFraction > 1.0f) {
             continue;
         }
 
-        auto barrierVel = object->vel + (connectedObject->vel - object->vel) * barrierFraction;
-        auto normal = float2{-barrier.y, barrier.x} / Math::length(barrier);
+        auto connectionVel = solid->vel + (connectedObject->vel - solid->vel) * connectionFraction;
+        auto normal = float2{-connection.y, connection.x} / Math::length(connection);
         if (crossProduct < 0.0f) {
             normal = normal * -1.0f;
         }
-        if (Math::dot(vel - barrierVel, normal) >= 0.0f) {
+        if (Math::dot(vel - connectionVel, normal) >= 0.0f) {
             continue;
         }
         hit.fraction = fraction;
         hit.normal = normal;
-        hit.velocity = barrierVel;
+        hit.velocity = connectionVel;
     }
-}
-
-__inline__ __device__ bool EnergyProcessor::isBarrier(Object* object)
-{
-    if (object->type == ObjectType_Solid) {
-        return true;
-    }
-    if (object->isStatic()) {
-        return object->type != ObjectType_Cell || object->typeData.cell.cellType != CellType_Digestor;
-    }
-    return false;
 }
 
 __inline__ __device__ void EnergyProcessor::mergeOrAbsorb(SimulationData& data, Energy*& particle)
@@ -299,7 +287,11 @@ __inline__ __device__ void EnergyProcessor::mergeParticleInto(Energy*& particle,
 
 __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& data, Energy*& particle, Object* object)
 {
-    if (object->type == ObjectType_Fluid || isBarrier(object)) {
+    if (object->type == ObjectType_Fluid || object->type == ObjectType_Solid) {
+        return;
+    }
+    auto isDigestor = object->type == ObjectType_Cell && object->typeData.cell.cellType == CellType_Digestor;
+    if (object->isStatic() && !isDigestor) {
         return;
     }
     if (particle->lastAbsorbedObject == object) {
