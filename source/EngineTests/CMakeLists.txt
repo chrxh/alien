@@ -28,6 +28,7 @@ PUBLIC
     DuplicateGeneMutationTests.cpp
     EditTests.cpp
     DigestorTests.cpp
+    DomainTests.cpp
     EnergyFlowTests.cpp
     EnergyParticleTests.cpp
     HeadUpdateTests.cpp
