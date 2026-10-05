@@ -15,7 +15,7 @@ __global__ void cudaDomainOwnership_findConstructingCreatures(SimulationData dat
 __global__ void cudaDomainOwnership_decideCreatureOwners(SimulationData data, bool initialAssignment);
 
 // Region of interest of the own domain
-__global__ void cudaDomainRoi_clearBaseBitmap(SimulationData data, DomainSyncData syncData);
+__global__ void cudaDomainRoi_clearBitmaps(SimulationData data, DomainSyncData syncData);
 __global__ void cudaDomainRoi_markOwnedObjects(SimulationData data, DomainSyncData syncData);
 __global__ void cudaDomainRoi_dilate(SimulationData data, DomainSyncData syncData);
 
