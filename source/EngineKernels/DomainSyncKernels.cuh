@@ -8,6 +8,7 @@
 __global__ void cudaDomainOwnership_resetCreatures(SimulationData data);
 __global__ void cudaDomainOwnership_calcReferenceKeys(SimulationData data);
 __global__ void cudaDomainOwnership_calcReferencePositions(SimulationData data);
+__global__ void cudaDomainOwnership_findConstructingCreatureIds(SimulationData data);
 __global__ void cudaDomainOwnership_findConstructingCreatures(SimulationData data);
 __global__ void cudaDomainOwnership_decideCreatureOwners(SimulationData data, bool initialAssignment);
 
@@ -33,6 +34,7 @@ __global__ void cudaDomainPack_sensorScans(SimulationData data, DomainSyncData s
 
 // Handing over the ownership once the messages are complete
 __global__ void cudaDomainCommit_objects(SimulationData data, uint8_t round);
+__global__ void cudaDomainCommit_creatures(SimulationData data);
 __global__ void cudaDomainCommit_particles(SimulationData data, uint8_t round);
 __global__ void cudaDomainCommit_resetQueues(SimulationData data, DomainSyncData syncData);
 

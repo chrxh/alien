@@ -216,6 +216,7 @@ void DomainSyncService::distribute(std::vector<Domain>& domains, KernelLaunchSet
         auto const& data = *domain.data;
         calcOwnership(domain, launchSettings, true);
         launchKernelOnDefaultStream(KERNEL(cudaDomainDistribute_assignOwners), LaunchConfig{launchSettings.numBlocks, 8}, data, _round);
+        launchKernelOnDefaultStream(KERNEL(cudaDomainCommit_creatures), LaunchConfig{launchSettings.numBlocks, 8}, data);
         calcRoi(domain, launchSettings);
         launchKernelOnDefaultStream(KERNEL(cudaDomainDistribute_removeObjectsOutsideRoi), LaunchConfig{launchSettings.numBlocks, 8}, data);
         launchKernelOnDefaultStream(KERNEL(cudaDomainDistribute_assignParticleOwners), LaunchConfig{launchSettings.numBlocks, 8}, data, _round);
@@ -341,6 +342,7 @@ void DomainSyncService::calcOwnership(Domain& domain, KernelLaunchSettings const
     launchKernelOnDefaultStream(KERNEL(cudaDomainOwnership_resetCreatures), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaDomainOwnership_calcReferenceKeys), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaDomainOwnership_calcReferencePositions), LaunchConfig{launchSettings.numBlocks, 8}, data);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainOwnership_findConstructingCreatureIds), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaDomainOwnership_findConstructingCreatures), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaDomainOwnership_decideCreatureOwners), LaunchConfig{launchSettings.numBlocks, 8}, data, initialAssignment);
 }
@@ -374,6 +376,7 @@ void DomainSyncService::commit(Domain& domain, KernelLaunchSettings const& launc
     auto const& data = *domain.data;
     auto const& syncData = domain.sync->data;
     launchKernelOnDefaultStream(KERNEL(cudaDomainCommit_objects), LaunchConfig{launchSettings.numBlocks, 8}, data, _round);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainCommit_creatures), LaunchConfig{launchSettings.numBlocks, 8}, data);
     launchKernelOnDefaultStream(KERNEL(cudaDomainCommit_particles), LaunchConfig{launchSettings.numBlocks, 8}, data, _round);
     launchKernelOnDefaultStream(KERNEL(cudaDomainCommit_resetQueues), LaunchConfig{1, 1}, data, syncData);
 }
