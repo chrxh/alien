@@ -25,6 +25,21 @@ void SimulationStatistics::free()
     for (auto& map : _accumulatorMaps) {
         map.free();
     }
+    CudaMemoryManager::getInstance().freeMemory(_drainedAccumulatorEntries);
+}
+
+void SimulationStatistics::enableDraining()
+{
+    CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorEntry>(AccumulatorMap::Capacity, _drainedAccumulatorEntries);
+}
+
+std::vector<SimulationStatistics::LineageAccumulatorEntry> SimulationStatistics::getDrainedAccumulatorEntries() const
+{
+    std::vector<LineageAccumulatorEntry> result(readControl().numDrainedAccumulatorEntries);
+    if (!result.empty()) {
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(result.data(), _drainedAccumulatorEntries, sizeof(LineageAccumulatorEntry) * result.size(), cudaMemcpyDeviceToHost));
+    }
+    return result;
 }
 
 StatisticsEntry SimulationStatistics::getStatisticsEntry() const

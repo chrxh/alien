@@ -34,7 +34,7 @@ struct DomainContext
     uint32_t* roiBitmaps = nullptr;  // Device memory, the bitmaps of all domains one after another
     uint8_t* syncRound = nullptr;    // Device memory
 
-    __device__ __inline__ bool isDecomposed() const { return numDomains > 1; }
+    __host__ __device__ __inline__ bool isDecomposed() const { return numDomains > 1; }
 
     __device__ __inline__ int getStripOwner(float x) const
     {

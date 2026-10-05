@@ -58,6 +58,21 @@ public:
     __inline__ __device__ void migrateActiveAccumulatorSlot(int index);
     __inline__ __device__ void flipAccumulatorMaps();
 
+    struct LineageAccumulatorEntry
+    {
+        uint32_t lineageId;  // Key, EmptyLineageId = slot is unused
+        uint64_t numCreatedCreatures;
+        double totalMutations;
+        double totalAttackedEnergy;
+        double totalMuscleActivity;
+    };
+
+    // Domain decomposition: a lineage moves between the domains, so the domains hand over their accumulated values in every
+    // statistics timestep and the host sums them up
+    __host__ void enableDraining();
+    __host__ std::vector<LineageAccumulatorEntry> getDrainedAccumulatorEntries() const;
+    __inline__ __device__ void drainAccumulatorSlot(int index);
+
 private:
     struct LineageMapEntry
     {
@@ -75,18 +90,11 @@ private:
 
         __inline__ __device__ LineageStatisticsEntry toStatisticsEntry() const;
     };
-    struct LineageAccumulatorEntry
-    {
-        uint32_t lineageId;  // Key, EmptyLineageId = slot is unused
-        uint64_t numCreatedCreatures;
-        double totalMutations;
-        double totalAttackedEnergy;
-        double totalMuscleActivity;
-    };
     struct StatisticsControl
     {
         uint32_t numCompactedLineageEntries;  // Number of valid elements in _lineageStatisticsEntries
         uint32_t activeAccumulatorMapIndex;
+        uint32_t numDrainedAccumulatorEntries;
     };
 
     using AccumulatorMap = LineageIdMap<LineageAccumulatorEntry>;
@@ -109,6 +117,8 @@ private:
 
     // Accumulated values, double buffered for garbage collection
     AccumulatorMap _accumulatorMaps[2];
+
+    LineageAccumulatorEntry* _drainedAccumulatorEntries = nullptr;
 };
 
 /************************************************************************/
@@ -169,6 +179,7 @@ __inline__ __device__ void SimulationStatistics::resetLineageMapCounters()
 {
     _lineageMap.resetNumUsedSlots();
     _control->numCompactedLineageEntries = 0;
+    _control->numDrainedAccumulatorEntries = 0;
 }
 
 __inline__ __device__ int SimulationStatistics::insertOrFindLineageSlot(uint32_t lineageId)
@@ -294,6 +305,21 @@ __inline__ __device__ void SimulationStatistics::migrateActiveAccumulatorSlot(in
 __inline__ __device__ void SimulationStatistics::flipAccumulatorMaps()
 {
     _control->activeAccumulatorMapIndex = 1 - _control->activeAccumulatorMapIndex;
+}
+
+__inline__ __device__ void SimulationStatistics::drainAccumulatorSlot(int index)
+{
+    auto& slot = getActiveAccumulatorMap().at(index);
+    if (slot.lineageId == LineageMap::EmptyLineageId
+        || (slot.numCreatedCreatures == 0 && slot.totalMutations == 0 && slot.totalAttackedEnergy == 0 && slot.totalMuscleActivity == 0)) {
+        return;
+    }
+    auto drainedIndex = atomicAdd(&_control->numDrainedAccumulatorEntries, 1u);
+    _drainedAccumulatorEntries[drainedIndex] = slot;
+    slot.numCreatedCreatures = 0;
+    slot.totalMutations = 0;
+    slot.totalAttackedEnergy = 0;
+    slot.totalMuscleActivity = 0;
 }
 
 __inline__ __device__ SimulationStatistics::AccumulatorMap& SimulationStatistics::getActiveAccumulatorMap()

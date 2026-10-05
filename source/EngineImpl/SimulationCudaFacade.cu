@@ -308,6 +308,7 @@ void _SimulationCudaFacade::setSimulationData(TOs const& to)
     }
     activateDevice(getMainDomain());
 
+    _accumulatedLineageValues.clear();
     updateStatistics();
 }
 
@@ -555,15 +556,42 @@ void _SimulationCudaFacade::updateStatistics()
         StatisticsKernelsService::get().updateStatistics(_settings.kernelLaunchSettings, getSimulationDataPtrCopy(domain), *domain.statistics);
         syncAndCheck();
         entries.emplace_back(domain.statistics->getStatisticsEntry());
+        if (isDecomposed()) {
+            for (auto const& drainedEntry : domain.statistics->getDrainedAccumulatorEntries()) {
+                auto& values = _accumulatedLineageValues[drainedEntry.lineageId];
+                values.numCreatedCreatures += drainedEntry.numCreatedCreatures;
+                values.totalMutations += drainedEntry.totalMutations;
+                values.totalAttackedEnergy += drainedEntry.totalAttackedEnergy;
+                values.totalMuscleActivity += drainedEntry.totalMuscleActivity;
+            }
+        }
     }
     activateDevice(getMainDomain());
 
     auto statisticsEntry = mergeStatisticsEntries(entries);
+    if (isDecomposed()) {
+        applyAccumulatedLineageValues(statisticsEntry);
+    }
     {
         std::lock_guard lock(_mutexForStatistics);
         _statisticsEntry = statisticsEntry;
     }
     StatisticsService::get().addDataPoint(_statisticsHistory, statisticsEntry, getCurrentTimestep());
+}
+
+// The accumulated values of extinct lineages are discarded, the statistics history keeps them
+void _SimulationCudaFacade::applyAccumulatedLineageValues(StatisticsEntry& statisticsEntry)
+{
+    std::unordered_map<uint32_t, AccumulatedLineageValues> livingLineageValues;
+    for (auto& lineageEntry : statisticsEntry.lineageEntries) {
+        auto values = _accumulatedLineageValues[lineageEntry.lineageId];
+        lineageEntry.numCreatedCreatures = values.numCreatedCreatures;
+        lineageEntry.totalMutations = values.totalMutations;
+        lineageEntry.totalAttackedEnergy = values.totalAttackedEnergy;
+        lineageEntry.totalMuscleActivity = values.totalMuscleActivity;
+        livingLineageValues.emplace(lineageEntry.lineageId, values);
+    }
+    _accumulatedLineageValues = std::move(livingLineageValues);
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -614,6 +642,7 @@ void _SimulationCudaFacade::clear()
         syncAndCheck();
     }
     activateDevice(getMainDomain());
+    _accumulatedLineageValues.clear();
 }
 
 void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpuEntities const& sizeDelta)
@@ -1213,10 +1242,11 @@ void _SimulationCudaFacade::initDomains()
         domain.statistics = std::make_shared<SimulationStatistics>();
         domain.data->domain = DomainContext{.index = index, .numDomains = numDomains};
         domain.data->init({_settings.worldSizeX, _settings.worldSizeY}, _simulationTimestep);
+        domain.statistics->init();
         if (numDomains > 1) {
             domain.data->primaryNumberGen.setIdPartition(numDomains, index);
+            domain.statistics->enableDraining();
         }
-        domain.statistics->init();
         _domains.emplace_back(domain);
     }
     if (numDomains > 1) {

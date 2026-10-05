@@ -12,6 +12,7 @@ __global__ void cudaResetStatistics(SimulationData data, SimulationStatistics st
 __global__ void cudaCollectObjectAndCreatureStatistics(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaCollectGenomeAndEnergyStatistics(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaCompactLineageStatistics(SimulationStatistics statistics);
+__global__ void cudaDrainLineageAccumulators(SimulationStatistics statistics);
 
 __global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics);
 __global__ void cudaLineageAccumulatorGC(SimulationStatistics statistics);

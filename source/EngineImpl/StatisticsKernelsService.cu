@@ -16,6 +16,9 @@ void StatisticsKernelsService::updateStatistics(
     launchKernelOnDefaultStream(KERNEL(cudaCollectObjectAndCreatureStatistics), LaunchConfig{launchSettings.numBlocks, 8}, data, simulationStatistics);
     launchKernelOnDefaultStream(KERNEL(cudaCollectGenomeAndEnergyStatistics), LaunchConfig{launchSettings.numBlocks, 8}, data, simulationStatistics);
     launchKernelOnDefaultStream(KERNEL(cudaCompactLineageStatistics), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);
+    if (data.domain.isDecomposed()) {
+        launchKernelOnDefaultStream(KERNEL(cudaDrainLineageAccumulators), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);
+    }
     if (simulationStatistics.isLineageAccumulatorGCNeeded()) {
         launchKernelOnDefaultStream(KERNEL(cudaPrepareLineageAccumulatorGC), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);
         launchKernelOnDefaultStream(KERNEL(cudaLineageAccumulatorGC), LaunchConfig{launchSettings.numBlocks, 8}, simulationStatistics);

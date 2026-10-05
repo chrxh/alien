@@ -203,6 +203,14 @@ __global__ void cudaCompactLineageStatistics(SimulationStatistics statistics)
     }
 }
 
+__global__ void cudaDrainLineageAccumulators(SimulationStatistics statistics)
+{
+    auto const partition = calcSystemThreadPartition(SimulationStatistics::LineageMapCapacity);
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        statistics.drainAccumulatorSlot(index);
+    }
+}
+
 __global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
