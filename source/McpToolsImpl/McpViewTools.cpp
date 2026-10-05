@@ -110,14 +110,14 @@ McpToolResult McpViewTools::getStatistics(boost::json::object const& arguments) 
     std::ranges::sort(lineages, std::ranges::greater(), &LineageStatisticsEntry::numCreatures);
     boost::json::array lineageArray;
     for (auto const& lineage : lineages | std::views::take(maxLineages)) {
-        auto average = [&](auto sum) { return lineage.numCreatures > 0 ? toDouble(sum) / lineage.numCreatures : 0.0; };
+        auto average = [](auto sum, auto count) { return count > 0 ? toDouble(sum) / count : 0.0; };
         boost::json::object entry{
             {"lineage_id", lineage.lineageId},
             {"creatures", lineage.numCreatures},
             {"genomes", lineage.numGenomes},
-            {"average_cells_per_creature", average(lineage.sumCreatureCells)},
-            {"average_generation", average(lineage.sumCreatureGenerations)},
-            {"average_genome_nodes", average(lineage.sumGenomeNodes)},
+            {"average_cells_per_creature", average(lineage.sumCreatureCells, lineage.numCreatures)},
+            {"average_generation", average(lineage.sumCreatureGenerations, lineage.numCreatures)},
+            {"average_genome_nodes", average(lineage.sumGenomeNodes, lineage.numGenomes)},
             {"created_creatures", lineage.numCreatedCreatures},
         };
         if (lineage.representativeCellId != 0) {
