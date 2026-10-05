@@ -39,6 +39,7 @@ private:
     };
 
     __inline__ __device__ static void calcPositionAndVelocityInSource(SimulationData& data, int sourceIndex, float2& pos, float2& vel);
+    __inline__ __device__ static double calcExternalEnergyBackflowLimit(SimulationData& data);
     __inline__ __device__ static float takeExternalEnergy(SimulationData& data, float energy);
     __inline__ __device__ static bool isBarrier(Object* object);
     __inline__ __device__ static float calcScanRadius(float barrierSearchRadius, float2 const& displacement);
@@ -460,7 +461,7 @@ __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData&
     if (cudaSimulationParameters.externalEnergyBackflowFactor.value[color] > 0) {
         auto energyToAdd = toDouble(energy * cudaSimulationParameters.externalEnergyBackflowFactor.value[color]);
         auto origExternalEnergy = atomicAdd(data.externalEnergy, energyToAdd);
-        if (origExternalEnergy + energyToAdd > cudaSimulationParameters.externalEnergyBackflowLimit.value) {
+        if (origExternalEnergy + energyToAdd > calcExternalEnergyBackflowLimit(data)) {
             atomicAdd(data.externalEnergy, -energyToAdd);
         } else {
             externalEnergyBackflowFactor = cudaSimulationParameters.externalEnergyBackflowFactor.value[color];
@@ -505,6 +506,9 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
             if (requestedEnergy < NEAR_ZERO) {
                 continue;
             }
+            if (data.domain.isDecomposed()) {
+                atomicAdd(&data.externalEnergyDemands[ExternalEnergyDemand_Sources], toDouble(requestedEnergy));
+            }
             auto energy = takeExternalEnergy(data, requestedEnergy);
             if (energy < NEAR_ZERO) {
                 continue;
@@ -521,6 +525,17 @@ __inline__ __device__ void EnergyProcessor::provideExternalEnergyForSources(Simu
             }
         }
     }
+}
+
+// The other domains hold the rest of the external energy pool
+__inline__ __device__ double EnergyProcessor::calcExternalEnergyBackflowLimit(SimulationData& data)
+{
+    double result = cudaSimulationParameters.externalEnergyBackflowLimit.value;
+    auto externalEnergy = cudaSimulationParameters.externalEnergy.value;
+    if (data.domain.isDecomposed() && externalEnergy != Infinity<float>::value) {
+        result -= toDouble(externalEnergy) * (1.0 - toDouble(data.domain.layout->externalEnergyShares[data.domain.index]));
+    }
+    return result;
 }
 
 __inline__ __device__ float EnergyProcessor::takeExternalEnergy(SimulationData& data, float energy)

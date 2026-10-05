@@ -19,6 +19,13 @@
 #include "SensorScans.cuh"
 #include "WorldGeometry.cuh"
 
+enum ExternalEnergyDemand_
+{
+    ExternalEnergyDemand_Sources,
+    ExternalEnergyDemand_Constructors,
+    ExternalEnergyDemand_Count
+};
+
 struct SimulationData
 {
     // Domain decomposition
@@ -44,6 +51,7 @@ struct SimulationData
 
     // Additional data for cell functions
     double* externalEnergy;
+    double* externalEnergyDemands;  // Requested in the current time step, only counted in a decomposed simulation
     uint32_t* numConstructorsNeedingEnergyByColor;
     float* externalEnergyInflowPerConstructorByColor;
     PreprocessedSimulationData preprocessedSimulationData;

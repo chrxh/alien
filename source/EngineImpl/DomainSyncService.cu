@@ -1,9 +1,12 @@
 #include "DomainSyncService.cuh"
 
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <cstdlib>
 #include <set>
+
+#include <Data/SimulationParametersTypes.h>
 
 #include <EngineKernels/DomainSyncKernels.cuh>
 #include <EngineKernels/KernelLauncher.cuh>
@@ -115,6 +118,7 @@ void DomainSyncService::init(std::vector<Domain>& domains, int2 const& worldSize
     for (int index = 0; index < numDomains; ++index) {
         layout.externalEnergyShares[index] = 1.0f / static_cast<float>(numDomains);
     }
+    _layout = layout;
 
     auto capacities = InitialCapacities;
     capacities.bitmapWords = layout.numBitmapWords;
@@ -265,6 +269,51 @@ void DomainSyncService::sync(std::vector<Domain>& domains, KernelLaunchSettings 
     for (auto& domain : domains) {
         activateDevice(domain);
         finishRound(domain, domains, launchSettings);
+    }
+}
+
+// The domains draw from the external energy pool like a single simulation: the radiation sources first and the constructors from the
+// rest, each in proportion to their demand. The constructors only draw in time steps with cell functions.
+void DomainSyncService::updateExternalEnergyShares(
+    std::vector<Domain>& domains,
+    double externalEnergy,
+    bool constructorDemandsMeasured,
+    bool constructorsDrawNext)
+{
+    if (externalEnergy <= 0 || externalEnergy >= Infinity<float>::value) {
+        return;
+    }
+    std::vector<double> sourceDemands;
+    auto totalSourceDemand = 0.0;
+    auto totalConstructorDemand = 0.0;
+    for (auto& domain : domains) {
+        activateDevice(domain);
+        std::array<double, ExternalEnergyDemand_Count> demands;
+        copyToHost(demands.data(), domain.data->externalEnergyDemands, ExternalEnergyDemand_Count);
+        if (constructorDemandsMeasured) {
+            domain.sync->constructorEnergyDemand = demands.at(ExternalEnergyDemand_Constructors);
+        }
+        sourceDemands.emplace_back(demands.at(ExternalEnergyDemand_Sources));
+        totalSourceDemand += demands.at(ExternalEnergyDemand_Sources);
+        totalConstructorDemand += constructorsDrawNext ? domain.sync->constructorEnergyDemand : 0.0;
+    }
+
+    auto sourceSupply = std::min(externalEnergy, totalSourceDemand);
+    auto constructorSupply = std::min(externalEnergy - sourceSupply, totalConstructorDemand);
+    auto unclaimedSupply = (externalEnergy - sourceSupply - constructorSupply) / static_cast<double>(domains.size());
+    for (auto const& domain : domains) {
+        auto supply = unclaimedSupply;
+        if (totalSourceDemand > 0) {
+            supply += sourceSupply * sourceDemands.at(domain.index) / totalSourceDemand;
+        }
+        if (totalConstructorDemand > 0) {
+            supply += constructorSupply * domain.sync->constructorEnergyDemand / totalConstructorDemand;
+        }
+        _layout.externalEnergyShares[domain.index] = static_cast<float>(supply / externalEnergy);
+    }
+    for (auto const& domain : domains) {
+        activateDevice(domain);
+        copyToDevice(domain.sync->layout, &_layout);
     }
 }
 

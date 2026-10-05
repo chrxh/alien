@@ -12,11 +12,13 @@ void SimulationData::init(int2 const& worldSize, uint64_t timestep_)
     barrierGrid.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
+    CudaMemoryManager::getInstance().acquireMemory<double>(ExternalEnergyDemand_Count, externalEnergyDemands);
     CudaMemoryManager::getInstance().acquireMemory<uint32_t>(MAX_COLORS, numConstructorsNeedingEnergyByColor);
     CudaMemoryManager::getInstance().acquireMemory<float>(MAX_COLORS, externalEnergyInflowPerConstructorByColor);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, timestep);
     copyToDevice(timestep, &timestep_);
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergy, 0, sizeof(double)));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergyDemands, 0, sizeof(double) * ExternalEnergyDemand_Count));
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(numConstructorsNeedingEnergyByColor, 0, sizeof(uint32_t) * MAX_COLORS));
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(externalEnergyInflowPerConstructorByColor, 0, sizeof(float) * MAX_COLORS));
 
@@ -110,6 +112,7 @@ void SimulationData::free()
     secondaryNumberGen.free();
     processMemory.free();
     CudaMemoryManager::getInstance().freeMemory(externalEnergy);
+    CudaMemoryManager::getInstance().freeMemory(externalEnergyDemands);
     CudaMemoryManager::getInstance().freeMemory(numConstructorsNeedingEnergyByColor);
     CudaMemoryManager::getInstance().freeMemory(externalEnergyInflowPerConstructorByColor);
     CudaMemoryManager::getInstance().freeMemory(timestep);

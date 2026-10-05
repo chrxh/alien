@@ -37,8 +37,13 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
 
     // The domains share the external energy pool
     auto externalEnergy = cudaSimulationParameters.externalEnergy.value;
-    if (data.domain.isDecomposed() && externalEnergy != Infinity<float>::value) {
-        externalEnergy *= data.domain.layout->externalEnergyShares[data.domain.index];
+    if (data.domain.isDecomposed()) {
+        if (externalEnergy != Infinity<float>::value) {
+            externalEnergy *= data.domain.layout->externalEnergyShares[data.domain.index];
+        }
+        for (int i = 0; i < ExternalEnergyDemand_Count; ++i) {
+            data.externalEnergyDemands[i] = 0;
+        }
     }
     *data.externalEnergy = externalEnergy;
     for (int i = 0; i < MAX_COLORS; ++i) {
@@ -167,6 +172,9 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
     auto totalEnergyNeeded = 0.0;
     for (int color = 0; color < MAX_COLORS; ++color) {
         totalEnergyNeeded += data.numConstructorsNeedingEnergyByColor[color] * cudaSimulationParameters.externalEnergyInflowForConstructor.value[color];
+    }
+    if (data.domain.isDecomposed()) {
+        data.externalEnergyDemands[ExternalEnergyDemand_Constructors] = totalEnergyNeeded;
     }
     auto externalEnergy = *data.externalEnergy;
     auto factor = 0.0;

@@ -24,6 +24,8 @@ struct DomainSyncState
     std::vector<SyncMessage> incoming;    // Index = sending domain
     std::vector<bool> isIncomingAliased;  // The incoming message is the outgoing buffer of a sender on the same device
     std::vector<SyncMessageCounters> outgoingCounters;
+
+    double constructorEnergyDemand = 0;  // In the last time step with cell functions
 };
 
 // Keeps the domains of a decomposed simulation consistent: hands over objects that leave a domain and refreshes the ghost copies
@@ -41,6 +43,8 @@ public:
     void distribute(std::vector<Domain>& domains, KernelLaunchSettings const& launchSettings);
 
     void sync(std::vector<Domain>& domains, KernelLaunchSettings const& launchSettings, EnsureCapacityFunc const& ensureCapacity);
+
+    void updateExternalEnergyShares(std::vector<Domain>& domains, double externalEnergy, bool constructorDemandsMeasured, bool constructorsDrawNext);
 
 private:
     DomainSyncService() = default;
@@ -64,4 +68,5 @@ private:
     void uploadMessageDescriptors(Domain& domain);
 
     uint8_t _round = 0;
+    DomainLayout _layout;
 };
