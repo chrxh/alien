@@ -2,8 +2,8 @@
 
 #include "cuda_runtime_api.h"
 
-#include "BarrierGrid.cuh"
 #include "Entities.cuh"
+#include "SolidGrid.cuh"
 #include "WorldGeometry.cuh"
 
 // Lists of the objects at each integer position of the world
@@ -109,11 +109,11 @@ public:
         }
     }
 
-    // Calls execFunc for the records at the positions with barriers within the radius.
+    // Calls execFunc for the records of the solids at the positions within the radius.
     // The positions are distributed among numLanes threads, each calling this method with its own lane.
     template <typename ExecFunc>
     __device__ __inline__ void
-    executeForEachBarrierRecord(BarrierGrid const& barrierGrid, float2 const& pos, float radius, int lane, int numLanes, ExecFunc const& execFunc) const
+    executeForEachSolidRecord(SolidGrid const& solidGrid, float2 const& pos, float radius, int lane, int numLanes, ExecFunc const& execFunc) const
     {
         int2 minPos{floorInt(pos.x - radius), floorInt(pos.y - radius)};
         int2 maxPos{floorInt(pos.x + radius), floorInt(pos.y + radius)};
@@ -127,7 +127,7 @@ public:
                 continue;
             }
             _world.correctPosition(scanPos);
-            if (!barrierGrid.hasBarrier(scanPos)) {
+            if (!solidGrid.hasSolid(scanPos)) {
                 continue;
             }
             int index = _mapHead[scanPos.x + scanPos.y * _size.x];
@@ -136,7 +136,9 @@ public:
                     break;
                 }
                 auto const& record = records[index];
-                execFunc(record);
+                if (record.type == ObjectType_Solid) {
+                    execFunc(record);
+                }
                 index = record.nextObjectIndex;
             }
         }

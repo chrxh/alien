@@ -102,7 +102,7 @@ __global__ void cudaCleanupGrids(SimulationData data)
 {
     data.objectGrid.cleanup_system();
     data.energyParticleGrid.cleanup_system();
-    data.barrierGrid.cleanup_system();
+    data.solidGrid.cleanup_system();
 }
 
 __global__ void cudaSwapPointerArrays(SimulationData data)

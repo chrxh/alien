@@ -3,7 +3,6 @@ add_library(EngineKernels
     ActiveRadiationSources.cuh
     Array.cuh
     AttackerProcessor.cuh
-    BarrierGrid.cuh
     Base.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
@@ -77,6 +76,7 @@ add_library(EngineKernels
     SimulationKernels.cuh
     SimulationStatistics.cu
     SimulationStatistics.cuh
+    SolidGrid.cuh
     StatisticsKernels.cu
     StatisticsKernels.cuh
     TestKernels.cu
