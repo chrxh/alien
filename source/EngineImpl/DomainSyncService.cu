@@ -408,11 +408,9 @@ void DomainSyncService::calcRoi(Domain& domain, KernelLaunchSettings const& laun
 {
     auto const& data = *domain.data;
     auto const& syncData = domain.sync->data;
-    auto constexpr DilateBlockSize = 128;
-    auto numDilateBlocks = std::max(1, (_layout.numBitmapWords * 32 + DilateBlockSize - 1) / DilateBlockSize);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_clearBaseBitmap), calcSmallLaunchConfig(launchSettings), data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_clearBitmaps), calcSmallLaunchConfig(launchSettings), data, syncData);
     launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_markOwnedObjects), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
-    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_dilate), LaunchConfig{numDilateBlocks, DilateBlockSize}, data, syncData);
+    launchKernelOnDefaultStream(KERNEL(cudaDomainRoi_dilate), LaunchConfig{launchSettings.numBlocks, 8}, data, syncData);
 }
 
 void DomainSyncService::pack(Domain& domain, KernelLaunchSettings const& launchSettings)
