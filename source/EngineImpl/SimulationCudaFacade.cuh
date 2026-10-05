@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <mutex>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #if defined(_WIN32)
@@ -149,6 +150,7 @@ private:
     void resizeArrays(Domain& domain, ArraySizesForGpuEntities const& sizeDelta);
     void checkAndProcessSimulationParameterChanges();
     void copySimulationParametersToDevices(SimulationParameters const& parameters);
+    void applyAccumulatedLineageValues(StatisticsEntry& statisticsEntry);
 
     // Adds the launch configuration, the entity counts and the occupancy of the fluid kernel to the profiling
     // report; no-op outside debug mode
@@ -186,4 +188,14 @@ private:
     StatisticsHistory _statisticsHistory;
     std::optional<StatisticsEntry> _statisticsEntry;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
+
+    // Domain decomposition: the accumulated values of each living lineage, summed up from the values that the domains hand over
+    struct AccumulatedLineageValues
+    {
+        uint64_t numCreatedCreatures = 0;
+        double totalMutations = 0;
+        double totalAttackedEnergy = 0;
+        double totalMuscleActivity = 0;
+    };
+    std::unordered_map<uint32_t, AccumulatedLineageValues> _accumulatedLineageValues;
 };
