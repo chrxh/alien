@@ -691,20 +691,12 @@ namespace
         return std::sqrt(dx * dx + dy * dy);
     }
 
-    std::vector<std::string> checkDomainConsistency(std::vector<TOs> const& dataTOs, IntVector2D const& worldSize)
+    auto constexpr MaxConsistencyErrors = 100;
+
+    std::vector<DomainView> createDomainViews(std::vector<TOs> const& dataTOs)
     {
-        auto constexpr MaxGhostDeviation = 2.0f;
-        auto constexpr MaxErrors = 100;
-
-        std::vector<std::string> result;
-        auto addError = [&](std::string const& error) {
-            if (result.size() < MaxErrors) {
-                result.emplace_back(error);
-            }
-        };
-
-        std::vector<DomainView> views(dataTOs.size());
-        for (auto const& [dataTO, view] : std::views::zip(dataTOs, views)) {
+        std::vector<DomainView> result(dataTOs.size());
+        for (auto const& [dataTO, view] : std::views::zip(dataTOs, result)) {
             for (uint64_t i = 0; i < *dataTO.numObjects; ++i) {
                 if (dataTO.objects[i].isGhost()) {
                     view.ghostIds.insert(dataTO.objects[i].id);
@@ -715,6 +707,18 @@ namespace
                 view.objectById.emplace(object._id, &object);
             }
         }
+        return result;
+    }
+
+    // Holds at any time, unlike the freshness of the ghosts
+    std::unordered_map<uint64_t, int>
+    checkUniqueOwnership(std::vector<TOs> const& dataTOs, std::vector<DomainView> const& views, std::vector<std::string>& errors)
+    {
+        auto addError = [&](std::string const& error) {
+            if (errors.size() < MaxConsistencyErrors) {
+                errors.emplace_back(error);
+            }
+        };
 
         std::unordered_map<uint64_t, int> particleOwnerById;
         for (auto const& [domainIndex, dataTO] : std::views::enumerate(dataTOs)) {
@@ -726,13 +730,13 @@ namespace
             }
         }
 
-        std::unordered_map<uint64_t, int> ownerById;
+        std::unordered_map<uint64_t, int> result;
         for (auto const& [domainIndex, view] : std::views::enumerate(views)) {
             for (auto const& object : view.data._objects) {
                 if (view.ghostIds.contains(object._id)) {
                     continue;
                 }
-                auto [iter, inserted] = ownerById.emplace(object._id, toInt(domainIndex));
+                auto [iter, inserted] = result.emplace(object._id, toInt(domainIndex));
                 if (!inserted) {
                     addError(
                         "object " + std::to_string(object._id) + " is owned by domain " + std::to_string(iter->second) + " and domain "
@@ -740,6 +744,22 @@ namespace
                 }
             }
         }
+        return result;
+    }
+
+    std::vector<std::string> checkDomainConsistency(std::vector<TOs> const& dataTOs, IntVector2D const& worldSize)
+    {
+        auto constexpr MaxGhostDeviation = 2.0f;
+
+        std::vector<std::string> result;
+        auto addError = [&](std::string const& error) {
+            if (result.size() < MaxConsistencyErrors) {
+                result.emplace_back(error);
+            }
+        };
+
+        auto views = createDomainViews(dataTOs);
+        auto ownerById = checkUniqueOwnership(dataTOs, views, result);
 
         for (auto const& [domainIndex, view] : std::views::enumerate(views)) {
             for (auto const& object : view.data._objects) {
@@ -792,21 +812,34 @@ namespace
 
 std::vector<std::string> EngineWorker::testOnly_getDomainConsistencyErrors()
 {
-    std::vector<TOs> dataTOs;
+    std::vector<TOs> currentDataTOs;
+    std::vector<TOs> settledDataTOs;
     {
         EngineWorkerGuard access(this);
+        int2 rectUpperLeft{-10, -10};
+        int2 rectLowerRight{_settings.worldSizeX + 10, _settings.worldSizeY + 10};
+        currentDataTOs = _simulationCudaFacade->getSimulationData(rectUpperLeft, rectLowerRight);
 
         // After two syncs the ghosts are fresh and all changes across domains and their replies have been delivered
         _simulationCudaFacade->syncDomains();
         _simulationCudaFacade->syncDomains();
-        dataTOs = _simulationCudaFacade->getSimulationData({-10, -10}, {_settings.worldSizeX + 10, _settings.worldSizeY + 10});
+        settledDataTOs = _simulationCudaFacade->getSimulationData(rectUpperLeft, rectLowerRight);
     }
-    ExitScopeGuard guard([&dataTOs]() {
-        for (auto& dataTO : dataTOs) {
+    ExitScopeGuard guard([&currentDataTOs, &settledDataTOs]() {
+        for (auto& dataTO : currentDataTOs) {
+            _TOProvider::destroyUnmanagedDataTO(dataTO);
+        }
+        for (auto& dataTO : settledDataTOs) {
             _TOProvider::destroyUnmanagedDataTO(dataTO);
         }
     });
-    return checkDomainConsistency(dataTOs, {_settings.worldSizeX, _settings.worldSizeY});
+
+    std::vector<std::string> result;
+    checkUniqueOwnership(currentDataTOs, createDomainViews(currentDataTOs), result);
+    for (auto const& error : checkDomainConsistency(settledDataTOs, {_settings.worldSizeX, _settings.worldSizeY})) {
+        result.emplace_back(error);
+    }
+    return result;
 }
 
 

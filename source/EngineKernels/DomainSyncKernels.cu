@@ -253,6 +253,7 @@ __global__ void cudaDomainOwnership_resetCreatures(SimulationData data)
         }
         auto creature = object->typeData.cell.creature;
         creature->referenceKey = NoReferenceKey;
+        creature->constructingCreatureId = NoId;
         creature->constructingCreature = nullptr;
         creature->packedForDomains = 0;
     }
@@ -287,21 +288,46 @@ __global__ void cudaDomainOwnership_calcReferencePositions(SimulationData data)
     }
 }
 
+namespace
+{
+    // Returns the creature under construction that the constructor builds, or nullptr
+    __device__ __inline__ Creature* getOffspringUnderConstruction(Object* object)
+    {
+        if (!isOwnedCell(object) || !object->typeData.cell.constructorAvailable) {
+            return nullptr;
+        }
+        auto lastConstructedCell = ConstructorHelper::getLastConstructedCell(object);
+        if (!lastConstructedCell || lastConstructedCell->type != ObjectType_Cell || lastConstructedCell->isGhost()) {
+            return nullptr;
+        }
+        auto offspring = lastConstructedCell->typeData.cell.creature;
+        if (offspring == object->typeData.cell.creature || lastConstructedCell->typeData.cell.cellState != CellState_UnderConstruction) {
+            return nullptr;
+        }
+        return offspring;
+    }
+}
+
+__global__ void cudaDomainOwnership_findConstructingCreatureIds(SimulationData data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto object = objects.at(index);
+        if (auto offspring = getOffspringUnderConstruction(object)) {
+            alienAtomicMin64(&offspring->constructingCreatureId, object->typeData.cell.creature->id);
+        }
+    }
+}
+
 __global__ void cudaDomainOwnership_findConstructingCreatures(SimulationData data)
 {
     auto& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto object = objects.at(index);
-        if (!isOwnedCell(object) || !object->typeData.cell.constructorAvailable) {
-            continue;
-        }
-        auto lastConstructedCell = ConstructorHelper::getLastConstructedCell(object);
-        if (!lastConstructedCell || lastConstructedCell->type != ObjectType_Cell || lastConstructedCell->isGhost()) {
-            continue;
-        }
-        auto offspring = lastConstructedCell->typeData.cell.creature;
-        if (offspring != object->typeData.cell.creature && lastConstructedCell->typeData.cell.cellState == CellState_UnderConstruction) {
+        auto offspring = getOffspringUnderConstruction(object);
+        if (offspring && offspring->constructingCreatureId == object->typeData.cell.creature->id) {
             offspring->constructingCreature = object->typeData.cell.creature;
         }
     }
@@ -677,13 +703,27 @@ __global__ void cudaDomainCommit_objects(SimulationData data, uint8_t round)
         object->setGhost(true);
         object->ownerDomain = static_cast<uint8_t>(newOwner);
         object->syncRound = round;
-        if (object->type == ObjectType_Cell) {
-            auto& cell = object->typeData.cell;
-            cell.creature->isReplica = true;
-            cell.creature->ownerDomain = static_cast<uint8_t>(newOwner);
-            if (cell.constructorAvailable) {
-                cell.constructor.offspring = nullptr;
-            }
+        if (object->type == ObjectType_Cell && object->typeData.cell.constructorAvailable) {
+            object->typeData.cell.constructor.offspring = nullptr;
+        }
+    }
+}
+
+// Separated from the handover of the cells, since a cell that sees its creature half updated would stay with the wrong domain
+__global__ void cudaDomainCommit_creatures(SimulationData data)
+{
+    auto const& domain = data.domain;
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto object = objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
+        auto creature = object->typeData.cell.creature;
+        if (!creature->isReplica && creature->newOwnerDomain != domain.index) {
+            creature->isReplica = true;
+            creature->ownerDomain = creature->newOwnerDomain;
         }
     }
 }
@@ -1070,13 +1110,8 @@ __global__ void cudaDomainDistribute_assignOwners(SimulationData data, uint8_t r
         object->setGhost(true);
         object->ownerDomain = static_cast<uint8_t>(owner);
         object->syncRound = round;
-        if (object->type == ObjectType_Cell) {
-            auto& cell = object->typeData.cell;
-            cell.creature->isReplica = true;
-            cell.creature->ownerDomain = static_cast<uint8_t>(owner);
-            if (cell.constructorAvailable) {
-                cell.constructor.offspring = nullptr;
-            }
+        if (object->type == ObjectType_Cell && object->typeData.cell.constructorAvailable) {
+            object->typeData.cell.constructor.offspring = nullptr;
         }
     }
 }

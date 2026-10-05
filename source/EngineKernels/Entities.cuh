@@ -475,7 +475,8 @@ struct Creature
     uint32_t packedForDomains;  // Bit mask of the domains whose sync message already contains the creature
     uint64_t referenceKey;      // Head cells first, then the lowest cell id
     float2 referencePos;
-    Creature* constructingCreature;  // Host creature while the creature is under construction
+    uint64_t constructingCreatureId;  // The lowest id among the hosts, so that all domains choose the same host
+    Creature* constructingCreature;   // Host creature while the creature is under construction
 
     __device__ __inline__ bool isSameLineage(Creature* other)
     {
