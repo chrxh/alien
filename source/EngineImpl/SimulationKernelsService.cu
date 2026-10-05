@@ -48,8 +48,8 @@ namespace
         return LaunchConfig{std::max(1, settings.numBlocks / warpsPerBlock), warpsPerBlock * WARP_SIZE};
     }
 
-    // Only energy particles near barriers are processed, so a smaller grid avoids the overhead of idle blocks
-    LaunchConfig calcNearBarrierParticlesLaunchConfig(int numBlocks)
+    // Only energy particles near solids are processed, so a smaller grid avoids the overhead of idle blocks
+    LaunchConfig calcNearSolidParticlesLaunchConfig(int numBlocks)
     {
         auto constexpr BlockSize = 128;
         return LaunchConfig{std::max(1, numBlocks / 16), BlockSize};
@@ -104,7 +104,7 @@ void SimulationKernelsService::launchTimestepKernels(
     }
 
     launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
-    launchKernel(KERNEL(cudaNextTimestep_physics_moveEnergyParticlesNearBarriers), calcNearBarrierParticlesLaunchConfig(numBlocks), _stream, data);
+    launchKernel(KERNEL(cudaNextTimestep_physics_moveEnergyParticlesNearSolids), calcNearSolidParticlesLaunchConfig(numBlocks), _stream, data);
     launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, calcAngularForces);
     launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
     launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, calcAngularForces);
@@ -263,7 +263,7 @@ void SimulationKernelsService::launchPreviewKernels(
         launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidBoundaryForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
-        launchKernel(KERNEL(cudaNextTimestep_physics_moveEnergyParticlesNearBarriers), calcNearBarrierParticlesLaunchConfig(numBlocks), _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_moveEnergyParticlesNearSolids), calcNearSolidParticlesLaunchConfig(numBlocks), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
         launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
@@ -303,7 +303,7 @@ void SimulationKernelsService::launchPreviewKernels(
         launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcFluidBoundaryForces), calcFluidLaunchConfig(settings.kernelLaunchSettings), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_applyForces), LaunchConfig{numBlocks, 16}, _stream, data);
-        launchKernel(KERNEL(cudaNextTimestep_physics_moveEnergyParticlesNearBarriers), calcNearBarrierParticlesLaunchConfig(numBlocks), _stream, data);
+        launchKernel(KERNEL(cudaNextTimestep_physics_moveEnergyParticlesNearSolids), calcNearSolidParticlesLaunchConfig(numBlocks), _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);
         launchKernel(KERNEL(cudaNextTimestep_physics_verletPositionUpdate), LaunchConfig{numBlocks, 16}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_physics_calcConnectionForces), LaunchConfig{numBlocks, 16}, _stream, data, considerForcesFromAngleDifferences);

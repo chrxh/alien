@@ -8,7 +8,7 @@ __global__ void cudaNextTimestep_physics_fillGrids(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data);
-__global__ void cudaNextTimestep_physics_moveEnergyParticlesNearBarriers(SimulationData data);
+__global__ void cudaNextTimestep_physics_moveEnergyParticlesNearSolids(SimulationData data);
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles);
 __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data);

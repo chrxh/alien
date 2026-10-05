@@ -39,7 +39,7 @@ public:
     __inline__ __device__ static void resetDensity(SimulationData& data);
 
 private:
-    static auto constexpr MaxBarrierCellsForCollision = 10;
+    static auto constexpr MaxFixedObjectsForCollision = 10;
 };
 
 /************************************************************************/
@@ -63,7 +63,7 @@ __inline__ __device__ void ObjectProcessor::updateGrids(SimulationData& data)
     auto const partition = calcBlockPartition(data.entities.objects.getNumEntries());
     Object** objectPointers = &data.entities.objects.at(partition.startIndex);
     data.objectGrid.set_block(partition.startIndex, partition.numElements(), objectPointers);
-    data.barrierGrid.set_block(partition.numElements(), objectPointers);
+    data.solidGrid.set_block(partition.numElements(), objectPointers);
 }
 
 __inline__ __device__ void ObjectProcessor::clearDensityGrid(SimulationData& data)
@@ -166,7 +166,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         auto isObjectFluid = objectType == ObjectType_Fluid;
         auto smoothingLength = isObjectFluid ? smoothingLength_base * 2.0f : smoothingLength_base;  // Use larger smoothing length for fluids
 
-        __shared__ Object* fixedCells[MAX_FLUID_WARPS_PER_BLOCK][MaxBarrierCellsForCollision];
+        __shared__ Object* fixedCells[MAX_FLUID_WARPS_PER_BLOCK][MaxFixedObjectsForCollision];
         __shared__ int numFixedObjects_g[MAX_FLUID_WARPS_PER_BLOCK];
 
         auto cellFusionVelocity =
@@ -199,7 +199,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             }
             data.world.correctPosition(scanPos);
             int otherIndex = data.objectGrid.getFirstIndex(scanPos);
-            for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
+            for (int level = 0; level < MaxFixedObjectsForCollision; ++level) {
                 if (otherIndex < 0) {
                     break;
                 }
@@ -222,7 +222,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                     if (other.isStatic()) {
                         auto index = atomicAdd(&numFixedObjects_g[warpIndexInBlock], 1);
-                        if (index < MaxBarrierCellsForCollision) {
+                        if (index < MaxFixedObjectsForCollision) {
                             fixedCells[warpIndexInBlock][index] = other.self;
                         }
                     } else {
@@ -289,7 +289,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
         // Calculate forces with fixed objects
         if (warp.thread_rank() == 0) {
-            auto numFixedObjects = min(MaxBarrierCellsForCollision, numFixedObjects_g[warpIndexInBlock]);
+            auto numFixedObjects = min(MaxFixedObjectsForCollision, numFixedObjects_g[warpIndexInBlock]);
             if (numFixedObjects > 0) {
 
                 // Calc forces only to the closest fixed object
@@ -392,7 +392,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
             }
             data.world.correctPosition(scanPos);
             int otherIndex = data.objectGrid.getFirstIndex(scanPos);
-            for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
+            for (int level = 0; level < MaxFixedObjectsForCollision; ++level) {
                 if (otherIndex < 0) {
                     break;
                 }

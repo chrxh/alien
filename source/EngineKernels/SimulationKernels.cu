@@ -33,7 +33,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     }
     data.mutatedGenomes.setMemory(data.processMemory.getTypedSubArray<Genome*>(maxCellTypeOperations), maxCellTypeOperations);
     auto numEnergyParticles = data.entities.energies.getNumEntries();
-    data.energyParticlesNearBarriers.setMemory(data.processMemory.getTypedSubArray<int>(numEnergyParticles), numEnergyParticles);
+    data.energyParticlesNearSolids.setMemory(data.processMemory.getTypedSubArray<int>(numEnergyParticles), numEnergyParticles);
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
     for (int i = 0; i < MAX_COLORS; ++i) {
         data.numConstructorsNeedingEnergyByColor[i] = 0;
@@ -75,12 +75,12 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
     ObjectProcessor::checkForces(data);
     ObjectProcessor::applyForces(data);
 
-    EnergyProcessor::moveParticlesFarFromBarriers(data);
+    EnergyProcessor::moveParticlesFarFromSolids(data);
 }
 
-__global__ void cudaNextTimestep_physics_moveEnergyParticlesNearBarriers(SimulationData data)
+__global__ void cudaNextTimestep_physics_moveEnergyParticlesNearSolids(SimulationData data)
 {
-    EnergyProcessor::moveParticlesNearBarriers(data);
+    EnergyProcessor::moveParticlesNearSolids(data);
 }
 
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
