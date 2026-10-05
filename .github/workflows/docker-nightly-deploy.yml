@@ -180,6 +180,41 @@ jobs:
         docker push "$IMAGE:$SHA_TAG"
         docker push "$IMAGE:nightly"
 
+    # Docker Hub keeps every pushed tag, so only the newest develop-<sha> tags
+    # are retained as rollback targets. Deleting requires a DOCKERHUB_TOKEN with
+    # the Delete scope.
+    - name: Remove old image tags from Docker Hub
+      if: steps.recent_changes.outputs.should_run == 'true'
+      shell: bash
+      env:
+        DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        KEPT_SHA_TAGS: 5
+      run: |
+        api="https://hub.docker.com/v2/repositories/$IMAGE"
+        token=$(jq -n --arg identifier "$DOCKERHUB_USER" --arg secret "$DOCKERHUB_TOKEN" '{$identifier, $secret}' \
+          | curl -sf -H "Content-Type: application/json" -d @- https://hub.docker.com/v2/auth/token \
+          | jq -er .access_token) || { echo "Docker Hub rejected DOCKERHUB_USER/DOCKERHUB_TOKEN."; exit 1; }
+        echo "::add-mask::$token"
+
+        rm -f "$RUNNER_TEMP/tags.json"
+        url="$api/tags?page_size=100"
+        while [ "$url" != null ]; do
+          url=$(curl -sf -H "Authorization: Bearer $token" "$url" | tee -a "$RUNNER_TEMP/tags.json" | jq -r .next)
+        done
+
+        stale=$(jq -rs --argjson kept "$KEPT_SHA_TAGS" '
+          [.[].results[] | select(.name | test("^develop-[0-9a-f]{7}$"))]
+          | sort_by(.last_updated) | reverse | .[$kept:][].name' "$RUNNER_TEMP/tags.json")
+        for tag in $stale; do
+          status=$(curl -s -o /dev/null -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$api/tags/$tag/")
+          if [[ $status != 2?? ]]; then
+            echo "Deleting $IMAGE:$tag failed with HTTP $status (401/403: the token lacks the Delete scope)."
+            exit 1
+          fi
+          echo "Deleted $IMAGE:$tag"
+        done
+
     # Drop the tags of this run so the runner disk does not collect one image per
     # night. The base image layers stay in the local cache on purpose, otherwise
     # the next run would pull several gigabytes again.
