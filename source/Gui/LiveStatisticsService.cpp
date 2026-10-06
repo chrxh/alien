@@ -13,6 +13,7 @@ namespace
 
 void LiveStatisticsService::addDataPoint(LiveStatisticsHistory& history, StatisticsEntry const& statisticsEntry, uint64_t timestep)
 {
+    discardFuture(history, toDouble(timestep));
     truncate(history);
 
     auto newDataPoint = StatisticsConverterService::get().convert(statisticsEntry, timestep);
@@ -23,6 +24,20 @@ void LiveStatisticsService::addDataPoint(LiveStatisticsHistory& history, Statist
 void LiveStatisticsService::clear(LiveStatisticsHistory& history)
 {
     history.getDataRef().clear();
+    _extinctLineageAccumulator.reset();
+}
+
+void LiveStatisticsService::discardFuture(LiveStatisticsHistory& history, double timestep)
+{
+    // A flashback or step back moves the time backwards without starting a new session; the samples of the discarded
+    // future would otherwise overlap the new ones in the plots and serve as rate references with negative time deltas
+    auto& dataPoints = history.getDataRef();
+    if (dataPoints.empty() || dataPoints.back().timestep <= timestep) {
+        return;
+    }
+    std::erase_if(dataPoints, [&](DataPointCollection const& dataPoint) { return dataPoint.timestep > timestep; });
+
+    // The archived counters of extinct lineages belong to the discarded future
     _extinctLineageAccumulator.reset();
 }
 
