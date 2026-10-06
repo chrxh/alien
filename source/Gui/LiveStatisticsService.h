@@ -25,6 +25,7 @@ public:
     void clear(LiveStatisticsHistory& history);
 
 private:
+    void discardFuture(LiveStatisticsHistory& history, double timestep);
     void truncate(LiveStatisticsHistory& history);
 
     ExtinctLineageAccumulator _extinctLineageAccumulator;
