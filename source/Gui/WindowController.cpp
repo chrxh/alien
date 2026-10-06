@@ -99,10 +99,8 @@ void WindowController::init()
     _userDefinedContentScaleFactor = settings.getValue("settings.display.user defined content scale factor", _userDefinedContentScaleFactor);
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-    _windowData.mode = glfwGetVideoMode(primaryMonitor);
-
-    _desktopVideoMode = std::make_shared<GLFWvidmode>();
-    *_desktopVideoMode = *_windowData.mode;
+    _desktopVideoMode = std::make_shared<GLFWvidmode>(*glfwGetVideoMode(primaryMonitor));
+    _windowData.mode = _desktopVideoMode.get();
 
     _windowData.window = [&] {
         if (isWindowedMode()) {

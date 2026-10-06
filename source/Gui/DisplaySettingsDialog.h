@@ -11,10 +11,12 @@ class DisplaySettingsDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DisplaySettingsDialog);
 
+public:
+    ~DisplaySettingsDialog() override;
+
 private:
     DisplaySettingsDialog();
 
-    void initIntern() override;
     void processIntern() override;
     void openIntern() override;
 
@@ -36,7 +38,7 @@ private:
     bool _pendingAutoContentScaleFactor = true;
     float _pendingContentScaleFactor = 1.0f;
 
-    int _videoModesCount = 0;
-    GLFWvidmode const* _videoModes = nullptr;
+    // Copies, because GLFW frees its mode array when the monitor reconnects (e.g. after standby)
+    std::vector<GLFWvidmode> _videoModes;
     std::vector<std::string> _videoModeStrings;
 };

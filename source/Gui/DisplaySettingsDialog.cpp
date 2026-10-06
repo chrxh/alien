@@ -1,5 +1,6 @@
 #include "DisplaySettingsDialog.h"
 
+#include <algorithm>
 #include <sstream>
 
 #include <imgui.h>
@@ -19,16 +20,11 @@ namespace
     auto const RightColumnWidth = 270.0f;
 }
 
-void DisplaySettingsDialog::initIntern()
-{
-    auto primaryMonitor = glfwGetPrimaryMonitor();
-    _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
-    _videoModeStrings = createVideoModeStrings();
-}
-
 DisplaySettingsDialog::DisplaySettingsDialog()
     : AlienDialog("Display settings", {700.0f, 300.0f})
 {}
+
+DisplaySettingsDialog::~DisplaySettingsDialog() = default;
 
 void DisplaySettingsDialog::processIntern()
 {
@@ -105,6 +101,14 @@ void DisplaySettingsDialog::processIntern()
 
 void DisplaySettingsDialog::openIntern()
 {
+    _videoModes.clear();
+    if (auto primaryMonitor = glfwGetPrimaryMonitor()) {
+        auto videoModesCount = 0;
+        auto videoModes = glfwGetVideoModes(primaryMonitor, &videoModesCount);
+        _videoModes.assign(videoModes, videoModes + videoModesCount);
+    }
+    _videoModeStrings = createVideoModeStrings();
+
     _selectionIndex = getSelectionIndex();
     _origSelectionIndex = _selectionIndex;
     _origFps = WindowController::get().getFps();
@@ -142,7 +146,7 @@ void DisplaySettingsDialog::setFullscreen(int selectionIndex)
     if (0 == selectionIndex) {
         WindowController::get().setDesktopMode();
     } else {
-        WindowController::get().setUserDefinedResolution(_videoModes[selectionIndex - 1]);
+        WindowController::get().setUserDefinedResolution(_videoModes.at(selectionIndex - 1));
     }
 }
 
@@ -160,10 +164,9 @@ int DisplaySettingsDialog::getSelectionIndex() const
     auto result = 0;
     if (!WindowController::get().isWindowedMode() && !WindowController::get().isDesktopMode()) {
         auto userMode = WindowController::get().getUserDefinedResolution();
-        for (int i = 0; i < _videoModesCount; ++i) {
-            if (_videoModes[i] == userMode) {
-                return i + 1;
-            }
+        auto it = std::ranges::find_if(_videoModes, [&](auto const& videoMode) { return videoMode == userMode; });
+        if (it != _videoModes.end()) {
+            return toInt(std::distance(_videoModes.begin(), it)) + 1;
         }
     }
     return result;
@@ -183,8 +186,8 @@ std::vector<std::string> DisplaySettingsDialog::createVideoModeStrings() const
 {
     std::vector<std::string> result;
     result.emplace_back("Desktop");
-    for (int i = 0; i < _videoModesCount; ++i) {
-        result.emplace_back(createVideoModeString(_videoModes[i]));
+    for (auto const& videoMode : _videoModes) {
+        result.emplace_back(createVideoModeString(videoMode));
     }
 
     return result;
