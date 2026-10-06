@@ -38,7 +38,7 @@ The development is driven by the desire to better understand the conditions for 
 - Rendering and post-processing via OpenGL with CUDA-OpenGL interoperability
 - Real-time interaction with the running simulation
 
-https://github.com/user-attachments/assets/e3943239-bfcc-47fa-b8c2-83dee5ba7f8e
+https://github.com/user-attachments/assets/fad1b719-5662-4840-aa75-165346d62cdd
 
 ### Digital organisms
 - Creatures are networks of cells, held together by elastic connections that carry energy and signals
