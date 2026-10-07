@@ -620,6 +620,43 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
     EXPECT_TRUE(actualTarget2.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
+TEST_F(AttackerTests, sensorTargeting_nearbyCreatures)
+{
+    NeuralNetDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    auto lastMatch = SensorLastMatchDesc().creatureIdPart(2).nearbyCreatureIdParts({3, 4}).pos({100.0f, 103.0f});
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+    data.addCreature({ObjectDesc().id(200).pos({102.0f, 102.0f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(300).pos({98.0f, 102.0f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(4));
+    data.addCreature({ObjectDesc().id(400).pos({100.0f, 97.0f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(5));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // Creatures 3 and 4 are nearby creatures of the match, creature 5 is not detected by the sensor
+    for (auto id : {100, 200, 300}) {
+        auto const& target = actualData.getObjectRef(id).getCellRef();
+        EXPECT_TRUE(target._usableEnergy < 100.0f - NEAR_ZERO);
+        EXPECT_EQ(CellEvent_Attacked, target._event);
+        EXPECT_TRUE(target._eventCounter > 0);
+        EXPECT_TRUE(approxCompare(RealVector2D{100.0f, 100.0f}, target._eventPos));
+    }
+    auto const& notTarget = actualData.getObjectRef(400).getCellRef();
+    EXPECT_TRUE(approxCompare(100.0f, notTarget._usableEnergy));
+    EXPECT_NE(CellEvent_Attacked, notTarget._event);
+}
+
 TEST_F(AttackerTests, sensorTargeting_matchingCreatureId_matchingColor)
 {
     // Create attacker with sensor targeting creature 2, restricted to color 1

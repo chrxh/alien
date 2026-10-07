@@ -466,13 +466,16 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
                 cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                cell->cellTypeData.sensor.modeData.detectCreature.minNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
-                cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
+                cell->cellTypeData.sensor.modeData.detectCreature.minNumCells = min(cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells, 0xffffu);
+                cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells = min(cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells, 0xffffu);
                 cell->cellTypeData.sensor.modeData.detectCreature.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                 cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             }
             cell->cellTypeData.sensor.lastMatchAvailable = cellTO.cellTypeData.sensor.lastMatchAvailable;
             cell->cellTypeData.sensor.lastMatch.creatureIdPart = cellTO.cellTypeData.sensor.lastMatch.creatureIdPart;
+            for (int i = 0; i < MAX_SENSOR_NEARBY_CREATURES; ++i) {
+                cell->cellTypeData.sensor.lastMatch.nearbyCreatureIdParts[i] = cellTO.cellTypeData.sensor.lastMatch.nearbyCreatureIdParts[i];
+            }
             cell->cellTypeData.sensor.lastMatch.pos = cellTO.cellTypeData.sensor.lastMatch.pos;
         } break;
         case CellType_Generator: {
@@ -833,8 +836,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             sensor.modeData.detectFreeCell.minDensity = nodeSensor.modeData.detectFreeCell.minDensity;
             sensor.modeData.detectFreeCell.restrictToColors = nodeSensor.modeData.detectFreeCell.restrictToColors;
         } else if (nodeSensor.mode == SensorMode_DetectCreature) {
-            sensor.modeData.detectCreature.minNumCells = nodeSensor.modeData.detectCreature.minNumCells;
-            sensor.modeData.detectCreature.maxNumCells = nodeSensor.modeData.detectCreature.maxNumCells;
+            sensor.modeData.detectCreature.minNumCells = min(nodeSensor.modeData.detectCreature.minNumCells, 0xffffu);
+            sensor.modeData.detectCreature.maxNumCells = min(nodeSensor.modeData.detectCreature.maxNumCells, 0xffffu);
             sensor.modeData.detectCreature.restrictToColors = nodeSensor.modeData.detectCreature.restrictToColors;
             sensor.modeData.detectCreature.restrictToLineage = nodeSensor.modeData.detectCreature.restrictToLineage;
         }

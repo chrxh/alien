@@ -110,10 +110,10 @@ struct DetectFreeCell
 
 struct DetectCreature
 {
-    uint32_t minNumCells;       // 0 = no restriction
-    uint32_t maxNumCells;       // 0 = no restriction
+    uint16_t minNumCells;       // 0 = no restriction
+    uint16_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
-    LineageRestriction restrictToLineage;
+    uint8_t restrictToLineage;  // LineageRestriction
 };
 
 union SensorModeData
@@ -127,6 +127,7 @@ union SensorModeData
 struct SensorLastMatch
 {
     uint16_t creatureIdPart;
+    uint16_t nearbyCreatureIdParts[MAX_SENSOR_NEARBY_CREATURES];  // Unused entries contain creatureIdPart
     float2 pos;
 };
 
@@ -134,13 +135,11 @@ struct Sensor
 {
     bool autoTrigger;
     bool tagForAttackers;
-    SensorMode mode;
+    uint8_t mode;  // SensorMode
+    bool lastMatchAvailable;
     SensorModeData modeData;
     uint16_t minRange;
     uint16_t maxRange;
-
-    // Process data
-    bool lastMatchAvailable;
     SensorLastMatch lastMatch;
 };
 
@@ -417,6 +416,7 @@ union CellTypeData
     Communicator communicator;
     VoidCell voidCell;
 };
+static_assert(sizeof(CellTypeData) == 32, "CellTypeData must stay 32 bytes, a larger size enlarges every cell by 16 bytes");
 
 struct __align__(16) NeuralActivity
 {

@@ -13,6 +13,7 @@ auto constexpr NEURAL_NET_OUTPUTS = STANDARD_NEURONS_PER_CELL + MEMORY_NEURONS_P
 static_assert(NEURAL_NET_INPUTS == 16);
 auto constexpr MAX_COLORS = 10;
 auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
+auto constexpr MAX_SENSOR_NEARBY_CREATURES = 3;
 
 auto constexpr WARP_SIZE = 32;
 

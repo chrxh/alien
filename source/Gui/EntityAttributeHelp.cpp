@@ -213,7 +213,8 @@ namespace
         {EntityAttribute::SensorAutoTrigger,
          "If enabled, the sensor scans in every cycle. Otherwise it only scans when channel #0 exceeds the trigger threshold."},
         {EntityAttribute::SensorTagForAttackers,
-         "If enabled, attacker cells of the same creature in 'Creature' mode may use the last match of this sensor as a target."},
+         "If enabled, attacker cells of the same creature in 'Creature' mode may use the last match of this sensor as a target. In 'Detect creature' "
+         "mode, up to 3 further matching creatures near the match are targets as well."},
         {EntityAttribute::SensorMode,
          "Selects what the sensor scans for."
          "\n" ICON_FA_CHEVRON_RIGHT " Detect energy: searches for accumulations of energy particles."
