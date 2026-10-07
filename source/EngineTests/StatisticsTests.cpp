@@ -172,17 +172,10 @@ TEST_P(StatisticsTests_CellTypeActivation, accumulatedAttackedEnergy)
     NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = activated ? 1.0f : 0.0f;
 
-    SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 2 & 0xffff;
-    lastMatch._pos = RealVector2D{100.0f, 103.0f};
-
     auto data = ContentDesc()
                     .addCreature(
                         {ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-                         ObjectDesc()
-                             .id(2)
-                             .pos({101.0f, 100.0f})
-                             .type(CellDesc().cellType(SensorDesc().autoTrigger(false).mode(DetectCreatureDesc()).lastMatch(lastMatch)))},
+                         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().mode(DetectCreatureDesc())))},
                         CreatureDesc().id(1).lineageId(42))
                     .addCreature({ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(2).lineageId(43));
     data.addConnection(1, 2);

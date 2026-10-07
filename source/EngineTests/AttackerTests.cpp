@@ -27,43 +27,44 @@ public:
     ~AttackerTests() override = default;
 
 protected:
-    // Helper to create an attacker creature with neural net bias for activation and a sensor cell with lastMatch
-    // For creature attack mode, the sensor's lastMatch.creatureId should match the lower 16 bits of the target creature's id
-    ContentDesc createAttacker(
-        const RealVector2D& attackerPos,
-        const RealVector2D& targetPos,
-        uint64_t targetCreatureId = 2,
-        float attackerRawEnergy = 0.0f,
-        int attackerColor = 0,
-        int sensorRestrictToColors = 0x3FF)
+    // Helper to create an attacker creature with neural net bias for activation and a sensor cell which scans in every cycle
+    ContentDesc createAttacker(const RealVector2D& attackerPos, float attackerRawEnergy = 0.0f, int attackerColor = 0, int sensorRestrictToColors = 0x3FF)
     {
-        // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-        NeuralNetDesc nn;
-        nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-        // Create a sensor with lastMatch pointing to the target creature
-        SensorLastMatchDesc lastMatch;
-        lastMatch._creatureIdPart = targetCreatureId & 0xffff; // Sensor stores only lower 16 bits
-        lastMatch._pos = targetPos;
-
         auto data = ContentDesc().addCreature(
             {
                 ObjectDesc()
                 .id(1)
                 .pos(attackerPos)
                 .color(attackerColor)
-                .type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).rawEnergy(attackerRawEnergy).neuralNetwork(nn)),
+                .type(createAttackerCell().rawEnergy(attackerRawEnergy)),
                 ObjectDesc()
                 .id(2)
                 .pos({attackerPos.x + 1.0f, attackerPos.y})
                 .color(attackerColor)
-                .type(
-                    CellDesc().cellType(
-                        SensorDesc().autoTrigger(false).mode(DetectCreatureDesc().restrictToColors(sensorRestrictToColors)).lastMatch(lastMatch))),
+                .type(createSensorCell(SensorDesc().mode(DetectCreatureDesc().restrictToColors(sensorRestrictToColors)))),
             },
             CreatureDesc().id(1));
         data.addConnection(1, 2);
         return data;
+    }
+
+    // Attacker cell which is triggered by a neural net bias and ignores the signals of connected cells
+    CellDesc createAttackerCell()
+    {
+        auto nn = NeuralNetDesc().bias(Channels::CellTypeActivation, 1.0f).connectionWeight(0, 0.0f);
+        return CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn);
+    }
+
+    // A sensor only scans with a front angle
+    CellDesc createSensorCell(SensorDesc const& sensor) { return CellDesc().frontAngle(0.0f).cellType(sensor); }
+
+    std::optional<int> getLastMatchedCreatureIdPart(ContentDesc const& data, uint64_t sensorId)
+    {
+        auto const& lastMatch = std::get<SensorDesc>(data.getObjectRef(sensorId).getCellRef()._cellType)._lastMatch;
+        if (!lastMatch.has_value()) {
+            return std::nullopt;
+        }
+        return lastMatch->_creatureIdPart;
     }
 
     // Helper to create a target creature at a given position
@@ -84,8 +85,8 @@ protected:
  */
 TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
 {
-    // Create attacker with rawEnergy below threshold and sensor targeting creature 2
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, SimulationParameters::attackerMaxRawEnergyThreshold / 2);
+    // Create attacker with rawEnergy below threshold
+    auto data = createAttacker({100.0f, 100.0f}, SimulationParameters::attackerMaxRawEnergyThreshold / 2);
 
     // Add target creature within attack radius
     data.add(createTargetCreature({100.0f, 103.0f}), false);
@@ -110,7 +111,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
 TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
 {
     // Create attacker with rawEnergy above threshold
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, SimulationParameters::attackerMaxRawEnergyThreshold + NEAR_ZERO);
+    auto data = createAttacker({100.0f, 100.0f}, SimulationParameters::attackerMaxRawEnergyThreshold + NEAR_ZERO);
 
     // Add target creature within attack radius
     data.add(createTargetCreature({100.0f, 103.0f}), false);
@@ -134,9 +135,8 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
 {
-    // Create attacker with sensor targeting creature 2
     auto targetPos = RealVector2D{100.0f, 100.0f + _parameters.attackerRadius.value[0] + 0.01f};
-    auto data = createAttacker({100.0f, 100.0f}, targetPos, 2);
+    auto data = createAttacker({100.0f, 100.0f});
 
     // Add target creature outside attack radius
     data.add(createTargetCreature(targetPos), false);
@@ -147,10 +147,10 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = actualData.getObjectRef(1);
     auto actualTarget = actualData.getObjectRef(100);
 
-    // Attacker should NOT attack because target is outside attack radius
+    // Attacker should NOT attack because target is outside attack radius although the sensor detected it
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
@@ -164,7 +164,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     _parameters.attackerFoodChainColorMatrix.baseValue[0][1] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0); // Color 0 attacker
+    auto data = createAttacker({100.0f, 100.0f}, 0.0f, 0);                     // Color 0 attacker
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);              // Color 1 target
 
     _simulationFacade->setSimulationData(data);
@@ -185,7 +185,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     _parameters.attackerFoodChainColorMatrix.baseValue[0][1] = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0); // Color 0 attacker
+    auto data = createAttacker({100.0f, 100.0f}, 0.0f, 0);                     // Color 0 attacker
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);              // Color 1 target
 
     auto origTarget = data.getObjectRef(100);
@@ -202,7 +202,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
 
 TEST_F(AttackerTests, outputSignal_noTarget)
 {
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 999); // Sensor targets non-existent creature
+    auto data = createAttacker({100.0f, 100.0f});
 
     // No target creature - nothing to attack
 
@@ -222,20 +222,11 @@ TEST_F(AttackerTests, outputSignal_noTarget)
  */
 TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create a sensor with lastMatch pointing to creature 1 (same creature)
-    SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 1; // Same creature id
-    lastMatch._pos = {100.0f, 103.0f};
-
     // Create a single creature with attacker, sensor, and potential targets
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc())),
             ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)), // Same creature, in attack range
             ObjectDesc().id(4).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)), // Same creature, in attack range
         },
@@ -265,8 +256,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
  */
 TEST_F(AttackerTests, noAttackOnOffspring)
 {
-    // Create parent creature with attacker and sensor targeting creature 2
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    auto data = createAttacker({100.0f, 100.0f});
     auto parentId = data._creatures.at(0)._id;
 
     // Create offspring creature with ancestorId pointing to parent
@@ -286,14 +276,14 @@ TEST_F(AttackerTests, noAttackOnOffspring)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = actualData.getObjectRef(100);
 
-    // Offspring cells should NOT be attacked
+    // Offspring cells should NOT be attacked although the sensor detected them
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
     EXPECT_TRUE(approxCompare(origCell.getCellRef()._usableEnergy, actualCell.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, attackOnNonOffspring)
 {
-    // Create attacker creature with sensor targeting creature 2
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    auto data = createAttacker({100.0f, 100.0f});
 
     // Create unrelated creature (no ancestorId relationship)
     data.addCreature(
@@ -316,7 +306,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
 
 TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
 {
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    auto data = createAttacker({100.0f, 100.0f});
     data.addCreature(
         {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).cellType(DepotDesc().storedUsableEnergy(200.0f)))},
         CreatureDesc().id(2));
@@ -335,7 +325,7 @@ TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
 
 TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
 {
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    auto data = createAttacker({100.0f, 100.0f});
     data.addCreature(
         {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc().reservedEnergy(200.0f)))},
         CreatureDesc().id(2));
@@ -358,7 +348,7 @@ TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
  */
 TEST_F(AttackerTests, noAttackOnFixedCells)
 {
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    auto data = createAttacker({100.0f, 100.0f});
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 0, 100.0f, true), false); // fixed=true
 
     auto origTarget = data.getObjectRef(100);
@@ -369,7 +359,8 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
 
-    // Fixed cells should NOT be attacked
+    // Fixed cells should NOT be attacked although the sensor detected them
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
@@ -379,26 +370,17 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
  */
 TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create a sensor with lastMatch pointing to creature 2
-    SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 2;
-    lastMatch._pos = {100.0f, 97.0f};
-
-    // Create attacker with connections that block the attack ray
+    // Create attacker with connections that block the attack ray, the sensor sees the target past them
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().lastMatch(lastMatch))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({103.0f, 100.0f}).type(createSensorCell(SensorDesc())),
             // Create a connection that crosses the ray path to target at (100, 99)
             ObjectDesc().id(3).pos({99.0f, 99.0f}),
             ObjectDesc().id(4).pos({101.0f, 99.0f}),
         },
         CreatureDesc().id(1));
-    data.addConnection(1, 2);
+    data.addConnection(4, 2);
     data.addConnection(1, 3);
     data.addConnection(3, 4);
     data.addConnection(1, 4);
@@ -415,33 +397,20 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because ray is blocked by same-creature connections
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create attacker creature with sensor targeting creatures 2 and 3
-    SensorLastMatchDesc lastMatch1;
-    lastMatch1._creatureIdPart = 2;
-    lastMatch1._pos = {100.0f, 97.0f};
-
-    SensorLastMatchDesc lastMatch2;
-    lastMatch2._creatureIdPart = 3;
-    lastMatch2._pos = {99.0f, 98.5f};
-
+    // The sensor detects creature 3 as match and creature 2 as nearby creature
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch2))),
-            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch1))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc())),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
-    data.addConnection(1, 3);
 
     // Create a different creature with connections that would cross the ray path
     data.addCreature(
@@ -469,20 +438,11 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 
 TEST_F(AttackerTests, rayNotBlocked_noIntersection)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create a sensor with lastMatch pointing to creature 2
-    SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 2;
-    lastMatch._pos = {100.0f, 103.0f};
-
     // Create attacker with connections that do NOT block the attack ray
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc())),
             // Connections that don't intersect the ray to target
             ObjectDesc().id(3).pos({102.0f, 99.0f}),
             ObjectDesc().id(4).pos({103.0f, 99.0f}),
@@ -507,14 +467,11 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
 
 /**
  * Test: Sensor-based targeting
- * The attacker should only attack creatures whose creatureId matches sensor lastMatch
+ * The attacker should only attack creatures which a sensor of its creature has detected in the current cycle
  */
-TEST_F(AttackerTests, sensorTargeting_matchingCreatureId)
+TEST_F(AttackerTests, sensorTargeting_detectedCreature)
 {
-    // Create attacker with sensor targeting creature 2
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
-
-    // Add target creature with matching creatureId
+    auto data = createAttacker({100.0f, 100.0f});
     data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
 
     _simulationFacade->setSimulationData(data);
@@ -523,16 +480,15 @@ TEST_F(AttackerTests, sensorTargeting_matchingCreatureId)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
 
-    // Target should be attacked because creatureId matches sensor lastMatch
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
-TEST_F(AttackerTests, sensorTargeting_mismatchingCreatureId)
+TEST_F(AttackerTests, sensorTargeting_undetectedCreature)
 {
-    // Create attacker with sensor targeting creature 3
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 3);
+    auto data = createAttacker({100.0f, 100.0f});
+    std::get<SensorDesc>(data.getObjectRef(2).getCellRef()._cellType)._maxRange = 2;
 
-    // Add target creature with non-matching creatureId (creature 2)
+    // Target is within the attack radius but beyond the sensor range
     data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
 
     auto origTarget = data.getObjectRef(100);
@@ -543,20 +499,67 @@ TEST_F(AttackerTests, sensorTargeting_mismatchingCreatureId)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
 
-    // Target should NOT be attacked because creatureId does not match sensor lastMatch
+    EXPECT_FALSE(getLastMatchedCreatureIdPart(actualData, 2).has_value());
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
-TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
+TEST_F(AttackerTests, sensorTargeting_sensorWithoutScan)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
+    // The sensor has a last match but does not scan in this cycle
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc()
+                .id(2)
+                .pos({101.0f, 100.0f})
+                .type(createSensorCell(SensorDesc().autoTrigger(false).lastMatch(SensorLastMatchDesc().creatureIdPart(2).pos({100.0f, 103.0f})))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
 
+    auto origTarget = data.getObjectRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+}
+
+TEST_F(AttackerTests, sensorTargeting_detectionsOfPreviousCycleExpire)
+{
+    auto data = createAttacker({100.0f, 100.0f});
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+
+    // The sensor no longer detects the target
+    std::get<SensorDesc>(actualData.getObjectRef(2).getCellRef()._cellType)._maxRange = 2;
+
+    // Reset the energies so that only the missing detection prevents another attack
+    actualData.getObjectRef(1).getCellRef()._rawEnergy = 0.0f;
+    actualData.getObjectRef(100).getCellRef()._usableEnergy = 100.0f;
+
+    _simulationFacade->setSimulationData(actualData);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(100).getCellRef()._usableEnergy));
+}
+
+TEST_F(AttackerTests, sensorTargeting_noSensor)
+{
     // Create attacker without sensor (single cell is sufficient for this test)
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).color(0).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).color(0).type(createAttackerCell()),
         },
         CreatureDesc().id(1));
 
@@ -571,42 +574,55 @@ TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
 
-    // Target should NOT be attacked because no sensor has lastMatch
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
-TEST_F(AttackerTests, sensorTargeting_multipleTargets)
+TEST_F(AttackerTests, sensorTargeting_sensorFarFromAttacker)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create a sensor with lastMatch pointing to creature 2 and another to creature 3
-    SensorLastMatchDesc lastMatch1;
-    lastMatch1._creatureIdPart = 2;
-    lastMatch1._pos = {100.0f, 103.0f};
-
-    SensorLastMatchDesc lastMatch2;
-    lastMatch2._creatureIdPart = 4;
-    lastMatch2._pos = {100.0f, 97.0f};
-
+    // The sensor is connected to the attacker through a chain of cells
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch2))),
-            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch1))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(3).pos({101.0f, 100.0f}),
+            ObjectDesc().id(4).pos({102.0f, 100.0f}),
+            ObjectDesc().id(5).pos({103.0f, 100.0f}),
+            ObjectDesc().id(6).pos({104.0f, 100.0f}),
+            ObjectDesc().id(7).pos({105.0f, 100.0f}),
+            ObjectDesc().id(2).pos({106.0f, 100.0f}).type(createSensorCell(SensorDesc())),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 3);
+    data.addConnection(3, 4);
+    data.addConnection(4, 5);
+    data.addConnection(5, 6);
+    data.addConnection(6, 7);
+    data.addConnection(7, 2);
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
+TEST_F(AttackerTests, sensorTargeting_multipleSensors)
+{
+    // Each sensor detects the creature nearest to it
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.5f, 100.5f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.5f, 100.5f}).type(createSensorCell(SensorDesc())),
+            ObjectDesc().id(3).pos({99.5f, 100.5f}).type(createSensorCell(SensorDesc())),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    // Add target creature 2 and creature 4
-    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
-    data.addCreature(
-        {
-            ObjectDesc().id(200).pos({100.0f, 97.0f}).type(CellDesc().usableEnergy(100.0f)),
-        },
-        CreatureDesc().id(4));
+    data.add(createTargetCreature({101.5f, 103.5f}, 2), false);
+    data.addCreature({ObjectDesc().id(200).pos({99.5f, 97.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(4));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -615,17 +631,126 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
     auto actualTarget1 = actualData.getObjectRef(100);
     auto actualTarget2 = actualData.getObjectRef(200);
 
-    // Both targets should be attacked because both creatureIds match sensor lastMatches
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_EQ(std::optional(4), getLastMatchedCreatureIdPart(actualData, 3));
     EXPECT_TRUE(actualTarget1.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
     EXPECT_TRUE(actualTarget2.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
-TEST_F(AttackerTests, sensorTargeting_matchingCreatureId_matchingColor)
+/**
+ * Tests for the nearby creatures which a sensor in SensorMode_DetectCreature detects together with the match
+ * The sensor is at (101.5, 100.5), the match is creature 2 at a distance of 2, the other creatures are farther away from the sensor
+ */
+TEST_F(AttackerTests, sensorTargeting_nearbyCreatures)
 {
-    // Create attacker with sensor targeting creature 2, restricted to color 1
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0, 1 << 1);
+    auto data = createAttacker({100.5f, 100.5f});
+    data.addCreature({ObjectDesc().id(100).pos({101.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(2));
+    data.addCreature({ObjectDesc().id(200).pos({102.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(300).pos({99.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(4));
+    data.addCreature({ObjectDesc().id(400).pos({100.5f, 97.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(5));  // Beyond the nearby radius
 
-    // Add target creature with matching creatureId and matching color
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    for (auto id : {100, 200, 300}) {
+        auto const& target = actualData.getObjectRef(id).getCellRef();
+        EXPECT_TRUE(target._usableEnergy < 100.0f - NEAR_ZERO);
+        EXPECT_EQ(CellEvent_Attacked, target._event);
+        EXPECT_TRUE(target._eventCounter > 0);
+        EXPECT_TRUE(approxCompare(RealVector2D{100.5f, 100.5f}, target._eventPos));
+    }
+    auto const& notTarget = actualData.getObjectRef(400).getCellRef();
+    EXPECT_TRUE(approxCompare(100.0f, notTarget._usableEnergy));
+    EXPECT_NE(CellEvent_Attacked, notTarget._event);
+}
+
+TEST_F(AttackerTests, sensorTargeting_nearbyCreaturesLimitedToNearest)
+{
+    auto data = createAttacker({100.5f, 100.5f});
+    data.addCreature({ObjectDesc().id(100).pos({101.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(2));
+
+    // Creatures sorted by their distance to the match
+    data.addCreature({ObjectDesc().id(200).pos({102.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(300).pos({99.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(4));
+    data.addCreature({ObjectDesc().id(400).pos({99.5f, 101.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(5));
+    data.addCreature({ObjectDesc().id(500).pos({98.5f, 100.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(6));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    for (auto id : {100, 200, 300, 400}) {
+        EXPECT_TRUE(actualData.getObjectRef(id).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    }
+    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(500).getCellRef()._usableEnergy));
+}
+
+TEST_F(AttackerTests, sensorTargeting_nearbyCreaturesRestrictedToColors)
+{
+    auto data = createAttacker({100.5f, 100.5f}, 0.0f, 0, 1 << 1);
+    data.addCreature({ObjectDesc().id(100).pos({101.5f, 102.5f}).color(1).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(2));
+    data.addCreature({ObjectDesc().id(200).pos({102.5f, 102.5f}).color(2).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(300).pos({99.5f, 102.5f}).color(1).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(4));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(200).getCellRef()._usableEnergy));
+    EXPECT_TRUE(actualData.getObjectRef(300).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
+TEST_F(AttackerTests, sensorTargeting_relocation_tracksMatchAndDetectsNearbyCreaturesAgain)
+{
+    // Negative signal in channel #0 triggers the sensor with relocation
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.5f, 100.5f}).type(createAttackerCell()),
+            ObjectDesc()
+                .id(2)
+                .pos({101.5f, 100.5f})
+                .type(createSensorCell(SensorDesc().autoTrigger(false)).neuralNetwork(NeuralNetDesc().bias(0, -1.0f).connectionWeight(0, 0.0f))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addCreature({ObjectDesc().id(100).pos({101.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(2));
+    data.addCreature({ObjectDesc().id(200).pos({102.5f, 102.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(300).pos({100.5f, 97.5f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(4));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualData.getObjectRef(200).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(300).getCellRef()._usableEnergy));
+
+    // Creature 3 is now closer to the sensor than creature 2
+    actualData.getObjectRef(100)._pos = {101.5f, 97.5f};
+    actualData.getObjectRef(1).getCellRef()._rawEnergy = 0.0f;
+    for (auto id : {100, 200, 300}) {
+        actualData.getObjectRef(id).getCellRef()._usableEnergy = 100.0f;
+    }
+    _simulationFacade->setSimulationData(actualData);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(200).getCellRef()._usableEnergy));
+    EXPECT_TRUE(actualData.getObjectRef(300).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
+TEST_F(AttackerTests, sensorTargeting_matchingColor)
+{
+    // Create attacker with sensor restricted to color 1
+    auto data = createAttacker({100.0f, 100.0f}, 0.0f, 0, 1 << 1);
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);
 
     _simulationFacade->setSimulationData(data);
@@ -634,28 +759,61 @@ TEST_F(AttackerTests, sensorTargeting_matchingCreatureId_matchingColor)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
 
-    // Target should be attacked because creatureId matches and color passes restriction
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
-TEST_F(AttackerTests, sensorTargeting_matchingCreatureId_mismatchingColor)
+TEST_F(AttackerTests, sensorTargeting_mismatchingColorOfTargetCell)
 {
-    // Create attacker with sensor targeting creature 2, restricted to color 1
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0, 1 << 1);
+    // Create attacker with sensor restricted to color 1
+    auto data = createAttacker({100.0f, 100.0f}, 0.0f, 0, 1 << 1);
 
-    // Add target creature with matching creatureId but non-matching color (color 0)
-    data.add(createTargetCreature({100.0f, 103.0f}, 2, 0), false);
-
-    auto origTarget = data.getObjectRef(100);
+    // The sensor detects the target creature by its cell with color 1
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).color(1).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).color(0).type(CellDesc().usableEnergy(100.0f)),
+        },
+        CreatureDesc().id(2));
+    data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getObjectRef(100);
 
-    // Target should NOT be attacked because color does not pass sensor restriction
-    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+    // Only the cell with the color of the sensor restriction is attacked, the energy flow within the target drains the other cell as well
+    EXPECT_EQ(CellEvent_Attacked, actualData.getObjectRef(100).getCellRef()._event);
+    EXPECT_NE(CellEvent_Attacked, actualData.getObjectRef(101).getCellRef()._event);
+}
+
+TEST_F(AttackerTests, sensorTargeting_colorRestrictionsOfSensorsAreMerged)
+{
+    // Both sensors detect the target creature, each by the cell with its color
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc().mode(DetectCreatureDesc().restrictToColors(1 << 1)))),
+            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(createSensorCell(SensorDesc().mode(DetectCreatureDesc().restrictToColors(1 << 0)))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).color(1).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).color(0).type(CellDesc().usableEnergy(100.0f)),
+        },
+        CreatureDesc().id(2));
+    data.addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 3));
+    EXPECT_EQ(CellEvent_Attacked, actualData.getObjectRef(100).getCellRef()._event);
+    EXPECT_EQ(CellEvent_Attacked, actualData.getObjectRef(101).getCellRef()._event);
 }
 
 /**
@@ -789,23 +947,14 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
 
 /**
  * Test: tagForAttackers = true (default)
- * The attacker should use the sensor's lastMatch when tagForAttackers is true
+ * The attacker should attack the creatures detected by the sensor when tagForAttackers is true
  */
 TEST_F(AttackerTests, sensorTargeting_tagForAttackers_true)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create a sensor with lastMatch pointing to creature 2, tagForAttackers = true (explicit)
-    SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 2;
-    lastMatch._pos = {100.0f, 103.0f};
-
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc().tagForAttackers(true))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -825,28 +974,18 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_true)
 
 /**
  * Test: tagForAttackers = false
- * The attacker should NOT use the sensor's lastMatch when tagForAttackers is false
+ * The attacker should NOT attack the creatures detected by the sensor when tagForAttackers is false
  */
 TEST_F(AttackerTests, sensorTargeting_tagForAttackers_false)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Create a sensor with lastMatch pointing to creature 2, but tagForAttackers = false
-    SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 2;
-    lastMatch._pos = {100.0f, 103.0f};
-
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc().tagForAttackers(false))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
 
-    // Add target creature with matching creatureId
     data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
 
     auto origTarget = data.getObjectRef(100);
@@ -858,47 +997,35 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_false)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because tagForAttackers is false
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**
  * Test: Multiple sensors, only one tagged for attackers
  * When one sensor has tagForAttackers = true and another has tagForAttackers = false,
- * only the tagged sensor's lastMatch should be used by the attacker
+ * only the creatures detected by the tagged sensor should be attacked
  */
 TEST_F(AttackerTests, sensorTargeting_tagForAttackers_mixedSensors)
 {
-    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetDesc nn;
-    nn._biases[Channels::CellTypeActivation] = 1.0f;
-
-    // Sensor 1: tagForAttackers = false, lastMatch points to creature 2
-    SensorLastMatchDesc lastMatch1;
-    lastMatch1._creatureIdPart = 2;
-    lastMatch1._pos = {100.0f, 103.0f};
-
-    // Sensor 2: tagForAttackers = true, lastMatch points to creature 4
-    SensorLastMatchDesc lastMatch2;
-    lastMatch2._creatureIdPart = 4;
-    lastMatch2._pos = {100.0f, 97.0f};
-
+    // Each sensor detects the creature nearest to it
     auto data = ContentDesc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch1))),
-            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch2))),
+            ObjectDesc().id(1).pos({100.5f, 100.5f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.5f, 100.5f}).type(createSensorCell(SensorDesc().tagForAttackers(false))),
+            ObjectDesc().id(3).pos({99.5f, 100.5f}).type(createSensorCell(SensorDesc().tagForAttackers(true))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
     // Add creature 2 (should NOT be attacked - its sensor is not tagged)
-    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+    data.add(createTargetCreature({101.5f, 103.5f}, 2), false);
 
     // Add creature 4 (should be attacked - its sensor IS tagged)
     data.addCreature(
         {
-            ObjectDesc().id(200).pos({100.0f, 97.0f}).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(200).pos({99.5f, 97.5f}).type(CellDesc().usableEnergy(100.0f)),
         },
         CreatureDesc().id(4));
 
@@ -910,6 +1037,9 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_mixedSensors)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget1 = actualData.getObjectRef(100);
     auto actualTarget2 = actualData.getObjectRef(200);
+
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_EQ(std::optional(4), getLastMatchedCreatureIdPart(actualData, 3));
 
     // Creature 2 should NOT be attacked (sensor for creature 2 has tagForAttackers = false)
     EXPECT_TRUE(approxCompare(origTarget1.getCellRef()._usableEnergy, actualTarget1.getCellRef()._usableEnergy));

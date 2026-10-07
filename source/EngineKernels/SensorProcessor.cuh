@@ -6,6 +6,7 @@ class SensorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
+    __inline__ __device__ static void resetSensorDetections(SimulationData& data);
 
 private:
     static int constexpr MaxSameNearCreatureCells = 9 * 9;
@@ -37,12 +38,18 @@ private:
     __inline__ __device__ static void publishMatch(SimulationData& data, Object* object, uint64_t lookupResult);
     __inline__ __device__ static void publishNoMatch(Object* object);
 
+    __inline__ __device__ static void registerDetections(SimulationData& data, Object* object);
+    template <typename Filter>
+    __inline__ __device__ static Creature* findNearestCreature(SimulationData& data, Object* object, float2 const& pos, Filter const& filter);
+    __inline__ __device__ static void registerDetection(SimulationData& data, Creature* creature, uint16_t creatureIdPart, uint16_t restrictToColors);
+
     __inline__ __device__ static uint64_t matchEnergy(SimulationData& data, float minDensity, float2 const& scanPos, float2 const& delta, float distance);
     __inline__ __device__ static uint64_t
     matchFreeCell(SimulationData& data, float minDensity, uint16_t restrictToColors, float2 const& scanPos, float2 const& delta, float distance);
     __inline__ __device__ static uint64_t matchCreature(SimulationData& data, Object* object, float2 const& scanPos, float2 const& delta, float distance);
     __inline__ __device__ static uint64_t
     matchLastMatchedCreature(SimulationData& data, Object* object, float2 const& scanPos, float2 const& delta, float distance);
+    __inline__ __device__ static bool isMatchingCreature(Object* object, Object* otherObject);
 
     __inline__ __device__ static float calcRayAngle(int rayIdx, float seedAngle);
     __inline__ __device__ static float calcAbsAngle(float2 const& delta);
@@ -89,6 +96,11 @@ private:
     static float constexpr SquareTransitionEpsilon = 0.05f;
 
     static float constexpr DistanceScale = 64.0f;  // Fixed-point resolution of the packed distance, covers distances up to 1023
+
+    static int constexpr MaxNearbyCreatures = 3;
+    static float constexpr NearbyCreatureRadius = 4.0f;
+    static uint32_t constexpr NoNearbyCreature = 0xffffffff;
+    static uint32_t constexpr MinDetectedByCapacity = 4;
 };
 
 /************************************************************************/
@@ -101,6 +113,19 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).object);
+    }
+}
+
+__inline__ __device__ void SensorProcessor::resetSensorDetections(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->type == ObjectType_Cell) {
+            object->typeData.cell.creature->numDetectedBy = 0;
+        }
     }
 }
 
@@ -122,11 +147,17 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 
 __inline__ __device__ void SensorProcessor::processDetection(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
+    auto const& sensor = object->typeData.cell.cellTypeData.sensor;
     auto enableRelocationScan = object->typeData.cell.neuralActivity.signals[Channels::SensorWithRelocationScan] < -NEAR_ZERO;
-    if (enableRelocationScan && object->typeData.cell.cellTypeData.sensor.lastMatchAvailable) {
+    if (enableRelocationScan && sensor.lastMatchAvailable) {
         relocateLastMatch(data, statistics, object);
     } else {
         initialScan(data, statistics, object);
+    }
+    __syncthreads();
+
+    if (sensor.tagForAttackers && sensor.mode == SensorMode_DetectCreature && sensor.lastMatchAvailable) {
+        registerDetections(data, object);
     }
 }
 
@@ -316,7 +347,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     }
     __syncthreads();
 
-    auto centerScanPos = object->typeData.cell.cellTypeData.sensor.lastMatch.pos;
+    auto centerScanPos = object->typeData.cell.cellTypeData.sensor.lastMatchPos;
 
     // Each thread handles multiple columns (deltaX values)
     for (int colIdx = threadIdx.x; colIdx < searchDiameter; colIdx += blockDim.x) {
@@ -386,8 +417,8 @@ __inline__ __device__ void SensorProcessor::publishMatch(SimulationData& data, O
         data.world.correctPosition(matchPos);
 
         cell.cellTypeData.sensor.lastMatchAvailable = true;
-        cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
-        cell.cellTypeData.sensor.lastMatch.pos = matchPos;
+        cell.cellTypeData.sensor.lastMatchCreatureIdPart = creatureIdPart;
+        cell.cellTypeData.sensor.lastMatchPos = matchPos;
     }
 }
 
@@ -395,6 +426,123 @@ __inline__ __device__ void SensorProcessor::publishNoMatch(Object* object)
 {
     object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = false;
     object->typeData.cell.neuralActivity.signals[Channels::SensorFoundResult] = 0;  // Nothing found
+}
+
+// Registers the sensor's creature at the matched creature and at the matching creatures nearest to the match, a creature counts with its nearest cell
+__inline__ __device__ void SensorProcessor::registerDetections(SimulationData& data, Object* object)
+{
+    __shared__ Creature* detectedCreatures[1 + MaxNearbyCreatures];
+
+    auto& cell = object->typeData.cell;
+    auto const& sensor = cell.cellTypeData.sensor;
+    auto creatureIdPart = static_cast<uint16_t>(cell.creature->id & 0xffff);
+    auto restrictToColors = sensor.modeData.detectCreature.restrictToColors;
+
+    if (threadIdx.x == 0) {
+        for (auto& detectedCreature : detectedCreatures) {
+            detectedCreature = nullptr;
+        }
+    }
+    __syncthreads();
+
+    auto matchedCreature = findNearestCreature(data, object, sensor.lastMatchPos, [&](Object* otherObject) {
+        return otherObject->type == ObjectType_Cell && !cell.isSameCreature(&otherObject->typeData.cell)
+            && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatchCreatureIdPart;
+    });
+    if (threadIdx.x == 0 && matchedCreature != nullptr) {
+        detectedCreatures[0] = matchedCreature;
+        registerDetection(data, matchedCreature, creatureIdPart, restrictToColors);
+    }
+    __syncthreads();
+
+    for (int i = 1; i <= MaxNearbyCreatures; ++i) {
+        auto nearbyCreature = findNearestCreature(data, object, sensor.lastMatchPos, [&](Object* otherObject) {
+            if (!isMatchingCreature(object, otherObject)) {
+                return false;
+            }
+            for (auto const& detectedCreature : detectedCreatures) {
+                if (detectedCreature == otherObject->typeData.cell.creature) {
+                    return false;
+                }
+            }
+            return true;
+        });
+        if (nearbyCreature == nullptr) {
+            return;
+        }
+        if (threadIdx.x == 0) {
+            detectedCreatures[i] = nearbyCreature;
+            registerDetection(data, nearbyCreature, creatureIdPart, restrictToColors);
+        }
+        __syncthreads();
+    }
+}
+
+template <typename Filter>
+__inline__ __device__ Creature* SensorProcessor::findNearestCreature(SimulationData& data, Object* object, float2 const& pos, Filter const& filter)
+{
+    __shared__ uint32_t nearestCreatureKey;
+    __shared__ Creature* nearestCreature;
+
+    if (threadIdx.x == 0) {
+        nearestCreatureKey = NoNearbyCreature;
+        nearestCreature = nullptr;
+    }
+    __syncthreads();
+
+    auto creatureKey = NoNearbyCreature;
+    Creature* creature = nullptr;
+    data.objectGrid.executeForEach_block(pos, NearbyCreatureRadius, object->detached(), [&](Object* const& otherObject) {
+        if (!filter(otherObject)) {
+            return;
+        }
+        auto otherCreature = otherObject->typeData.cell.creature;
+        auto distance = Math::length(data.world.getCorrectedDirection(otherObject->pos - pos));
+        auto key = static_cast<uint32_t>(distance * DistanceScale) << 16 | static_cast<uint16_t>(otherCreature->id & 0xffff);
+        if (key < creatureKey) {
+            creatureKey = key;
+            creature = otherCreature;
+        }
+    });
+    atomicMin(&nearestCreatureKey, creatureKey);
+    __syncthreads();
+
+    if (creature != nullptr && creatureKey == nearestCreatureKey) {
+        nearestCreature = creature;
+    }
+    __syncthreads();
+
+    auto result = nearestCreature;
+    __syncthreads();
+    return result;
+}
+
+__inline__ __device__ void SensorProcessor::registerDetection(SimulationData& data, Creature* creature, uint16_t creatureIdPart, uint16_t restrictToColors)
+{
+    creature->getLock();
+
+    auto numDetections = creature->numDetectedBy;
+    auto index = 0u;
+    while (index < numDetections && creature->detectedBy[index].creatureIdPart != creatureIdPart) {
+        ++index;
+    }
+    if (index < numDetections) {
+        creature->detectedBy[index].restrictToColors |= restrictToColors;
+    } else {
+        if (numDetections == creature->detectedByCapacity) {
+            auto newCapacity = max(MinDetectedByCapacity, 2 * numDetections);
+            auto newDetectedBy = data.entities.heap.getTypedSubArray<SensorDetection>(newCapacity);
+            for (uint32_t i = 0; i < numDetections; ++i) {
+                newDetectedBy[i] = creature->detectedBy[i];
+            }
+            creature->detectedBy = newDetectedBy;
+            creature->detectedByCapacity = newCapacity;
+        }
+        creature->detectedBy[numDetections] = SensorDetection{creatureIdPart, restrictToColors};
+        creature->numDetectedBy = numDetections + 1;
+    }
+
+    creature->releaseLock();
 }
 
 __inline__ __device__ uint64_t SensorProcessor::matchEnergy(SimulationData& data, float minDensity, float2 const& scanPos, float2 const& delta, float distance)
@@ -418,47 +566,15 @@ SensorProcessor::matchFreeCell(SimulationData& data, float minDensity, uint16_t 
 
 __inline__ __device__ uint64_t SensorProcessor::matchCreature(SimulationData& data, Object* object, float2 const& scanPos, float2 const& delta, float distance)
 {
-    auto& cell = object->typeData.cell;
-    auto const& minNumCells = cell.cellTypeData.sensor.modeData.detectCreature.minNumCells;
-    auto const& maxNumCells = cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-    auto const& restrictToColors = cell.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
-    auto const& restrictToLineage = cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
-
     auto records = data.objectGrid.getRecords();
     int otherIndex = data.objectGrid.getFirstIndex(scanPos);
     while (otherIndex >= 0) {
         auto const& otherRecord = records[otherIndex];
         auto otherObject = otherRecord.self;
-        // Check if this cell is part of a creature (not solid or free object)
-        if (otherObject->type == ObjectType_Cell && !cell.isSameCreature(&otherObject->typeData.cell)) {
-            bool matches = true;
-
-            if (!((restrictToColors >> otherObject->color) & 1)) {
-                matches = false;
-            }
-            if (matches && minNumCells > 0 && otherObject->typeData.cell.creature->numCells < minNumCells) {
-                matches = false;
-            }
-            if (matches && maxNumCells > 0 && otherObject->typeData.cell.creature->numCells > maxNumCells) {
-                matches = false;
-            }
-            if (matches && restrictToLineage != LineageRestriction_No) {
-                if (restrictToLineage == LineageRestriction_RelatedLineage) {
-                    if (!cell.creature->isSameLineage(otherObject->typeData.cell.creature)) {
-                        matches = false;
-                    }
-                } else if (restrictToLineage == LineageRestriction_UnrelatedLineage) {
-                    if (cell.creature->isSameLineage(otherObject->typeData.cell.creature)) {
-                        matches = false;
-                    }
-                }
-            }
-
-            if (matches) {
-                uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xFFFF);
-                float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
-                return pack(distance, calcAbsAngle(delta), density, creatureIdPart);
-            }
+        if (isMatchingCreature(object, otherObject)) {
+            uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xFFFF);
+            float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
+            return pack(distance, calcAbsAngle(delta), density, creatureIdPart);
         }
         otherIndex = otherRecord.nextObjectIndex;
     }
@@ -474,7 +590,7 @@ SensorProcessor::matchLastMatchedCreature(SimulationData& data, Object* object, 
     while (otherIndex >= 0) {
         auto const& otherRecord = records[otherIndex];
         auto otherObject = otherRecord.self;
-        if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart) {
+        if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatchCreatureIdPart) {
             uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
             float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
             return pack(distance, calcAbsAngle(delta), density, creatureIdPart);
@@ -482,6 +598,35 @@ SensorProcessor::matchLastMatchedCreature(SimulationData& data, Object* object, 
         otherIndex = otherRecord.nextObjectIndex;
     }
     return NoMatch;
+}
+
+__inline__ __device__ bool SensorProcessor::isMatchingCreature(Object* object, Object* otherObject)
+{
+    if (otherObject->type != ObjectType_Cell) {
+        return false;
+    }
+    auto& cell = object->typeData.cell;
+    auto& otherCell = otherObject->typeData.cell;
+    if (cell.isSameCreature(&otherCell)) {
+        return false;
+    }
+    auto const& detectCreature = cell.cellTypeData.sensor.modeData.detectCreature;
+    if (!((detectCreature.restrictToColors >> otherObject->color) & 1)) {
+        return false;
+    }
+    if (detectCreature.minNumCells > 0 && otherCell.creature->numCells < detectCreature.minNumCells) {
+        return false;
+    }
+    if (detectCreature.maxNumCells > 0 && otherCell.creature->numCells > detectCreature.maxNumCells) {
+        return false;
+    }
+    if (detectCreature.restrictToLineage == LineageRestriction_RelatedLineage && !cell.creature->isSameLineage(otherCell.creature)) {
+        return false;
+    }
+    if (detectCreature.restrictToLineage == LineageRestriction_UnrelatedLineage && cell.creature->isSameLineage(otherCell.creature)) {
+        return false;
+    }
+    return true;
 }
 
 __inline__ __device__ float SensorProcessor::calcRayAngle(int rayIdx, float seedAngle)
