@@ -37,8 +37,10 @@ private:
     __inline__ __device__ static void publishMatch(SimulationData& data, Object* object, uint64_t lookupResult);
     __inline__ __device__ static void publishNoMatch(Object* object);
 
-    __inline__ __device__ static void collectNearbyCreatures(SimulationData& data, Object* object);
-    __inline__ __device__ static bool isContainedInLastMatch(Sensor const& sensor, uint16_t creatureIdPart);
+    __inline__ __device__ static void registerDetections(SimulationData& data, Object* object);
+    template <typename Filter>
+    __inline__ __device__ static Creature* findNearestCreature(SimulationData& data, Object* object, float2 const& pos, Filter const& filter);
+    __inline__ __device__ static void registerDetection(SimulationData& data, Creature* creature, uint16_t creatureIdPart, uint16_t restrictToColors);
 
     __inline__ __device__ static uint64_t matchEnergy(SimulationData& data, float minDensity, float2 const& scanPos, float2 const& delta, float distance);
     __inline__ __device__ static uint64_t
@@ -94,8 +96,10 @@ private:
 
     static float constexpr DistanceScale = 64.0f;  // Fixed-point resolution of the packed distance, covers distances up to 1023
 
+    static int constexpr MaxNearbyCreatures = 3;
     static float constexpr NearbyCreatureRadius = 4.0f;
     static uint32_t constexpr NoNearbyCreature = 0xffffffff;
+    static uint32_t constexpr MinDetectedByCapacity = 4;
 };
 
 /************************************************************************/
@@ -138,8 +142,8 @@ __inline__ __device__ void SensorProcessor::processDetection(SimulationData& dat
     }
     __syncthreads();
 
-    if (sensor.mode == SensorMode_DetectCreature && sensor.lastMatchAvailable) {
-        collectNearbyCreatures(data, object);
+    if (sensor.tagForAttackers && sensor.mode == SensorMode_DetectCreature && sensor.lastMatchAvailable) {
+        registerDetections(data, object);
     }
 }
 
@@ -400,9 +404,6 @@ __inline__ __device__ void SensorProcessor::publishMatch(SimulationData& data, O
 
         cell.cellTypeData.sensor.lastMatchAvailable = true;
         cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
-        for (auto& nearbyCreatureIdPart : cell.cellTypeData.sensor.lastMatch.nearbyCreatureIdParts) {
-            nearbyCreatureIdPart = creatureIdPart;
-        }
         cell.cellTypeData.sensor.lastMatch.pos = matchPos;
     }
 }
@@ -413,53 +414,121 @@ __inline__ __device__ void SensorProcessor::publishNoMatch(Object* object)
     object->typeData.cell.neuralActivity.signals[Channels::SensorFoundResult] = 0;  // Nothing found
 }
 
-// Adds the matching creatures nearest to the last match one by one, a creature counts with its nearest cell
-__inline__ __device__ void SensorProcessor::collectNearbyCreatures(SimulationData& data, Object* object)
+// Registers the sensor's creature at the matched creature and at the matching creatures nearest to the match, a creature counts with its nearest cell
+__inline__ __device__ void SensorProcessor::registerDetections(SimulationData& data, Object* object)
 {
-    __shared__ uint32_t nearestCreature;
+    __shared__ Creature* detectedCreatures[1 + MaxNearbyCreatures];
 
-    auto& sensor = object->typeData.cell.cellTypeData.sensor;
-    auto matchPos = sensor.lastMatch.pos;
-    for (int i = 0; i < MAX_SENSOR_NEARBY_CREATURES; ++i) {
-        if (threadIdx.x == 0) {
-            nearestCreature = NoNearbyCreature;
+    auto& cell = object->typeData.cell;
+    auto const& sensor = cell.cellTypeData.sensor;
+    auto creatureIdPart = static_cast<uint16_t>(cell.creature->id & 0xffff);
+    auto restrictToColors = sensor.modeData.detectCreature.restrictToColors;
+
+    if (threadIdx.x == 0) {
+        for (auto& detectedCreature : detectedCreatures) {
+            detectedCreature = nullptr;
         }
-        __syncthreads();
+    }
+    __syncthreads();
 
-        data.objectGrid.executeForEach_block(matchPos, NearbyCreatureRadius, object->detached(), [&](Object* const& otherObject) {
+    auto matchedCreature = findNearestCreature(data, object, sensor.lastMatch.pos, [&](Object* otherObject) {
+        return otherObject->type == ObjectType_Cell && !cell.isSameCreature(&otherObject->typeData.cell)
+            && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart;
+    });
+    if (threadIdx.x == 0 && matchedCreature != nullptr) {
+        detectedCreatures[0] = matchedCreature;
+        registerDetection(data, matchedCreature, creatureIdPart, restrictToColors);
+    }
+    __syncthreads();
+
+    for (int i = 1; i <= MaxNearbyCreatures; ++i) {
+        auto nearbyCreature = findNearestCreature(data, object, sensor.lastMatch.pos, [&](Object* otherObject) {
             if (!isMatchingCreature(object, otherObject)) {
-                return;
+                return false;
             }
-            auto creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
-            if (isContainedInLastMatch(sensor, creatureIdPart)) {
-                return;
+            for (auto const& detectedCreature : detectedCreatures) {
+                if (detectedCreature == otherObject->typeData.cell.creature) {
+                    return false;
+                }
             }
-            auto distance = Math::length(data.world.getCorrectedDirection(otherObject->pos - matchPos));
-            atomicMin(&nearestCreature, static_cast<uint32_t>(distance * DistanceScale) << 16 | creatureIdPart);
+            return true;
         });
-        __syncthreads();
-
-        if (nearestCreature == NoNearbyCreature) {
+        if (nearbyCreature == nullptr) {
             return;
         }
         if (threadIdx.x == 0) {
-            sensor.lastMatch.nearbyCreatureIdParts[i] = static_cast<uint16_t>(nearestCreature & 0xffff);
+            detectedCreatures[i] = nearbyCreature;
+            registerDetection(data, nearbyCreature, creatureIdPart, restrictToColors);
         }
         __syncthreads();
     }
 }
 
-__inline__ __device__ bool SensorProcessor::isContainedInLastMatch(Sensor const& sensor, uint16_t creatureIdPart)
+template <typename Filter>
+__inline__ __device__ Creature* SensorProcessor::findNearestCreature(SimulationData& data, Object* object, float2 const& pos, Filter const& filter)
 {
-    if (sensor.lastMatch.creatureIdPart == creatureIdPart) {
-        return true;
+    __shared__ uint32_t nearestCreatureKey;
+    __shared__ Creature* nearestCreature;
+
+    if (threadIdx.x == 0) {
+        nearestCreatureKey = NoNearbyCreature;
+        nearestCreature = nullptr;
     }
-    for (auto const& nearbyCreatureIdPart : sensor.lastMatch.nearbyCreatureIdParts) {
-        if (nearbyCreatureIdPart == creatureIdPart) {
-            return true;
+    __syncthreads();
+
+    auto creatureKey = NoNearbyCreature;
+    Creature* creature = nullptr;
+    data.objectGrid.executeForEach_block(pos, NearbyCreatureRadius, object->detached(), [&](Object* const& otherObject) {
+        if (!filter(otherObject)) {
+            return;
         }
+        auto otherCreature = otherObject->typeData.cell.creature;
+        auto distance = Math::length(data.world.getCorrectedDirection(otherObject->pos - pos));
+        auto key = static_cast<uint32_t>(distance * DistanceScale) << 16 | static_cast<uint16_t>(otherCreature->id & 0xffff);
+        if (key < creatureKey) {
+            creatureKey = key;
+            creature = otherCreature;
+        }
+    });
+    atomicMin(&nearestCreatureKey, creatureKey);
+    __syncthreads();
+
+    if (creature != nullptr && creatureKey == nearestCreatureKey) {
+        nearestCreature = creature;
     }
-    return false;
+    __syncthreads();
+
+    auto result = nearestCreature;
+    __syncthreads();
+    return result;
+}
+
+__inline__ __device__ void SensorProcessor::registerDetection(SimulationData& data, Creature* creature, uint16_t creatureIdPart, uint16_t restrictToColors)
+{
+    creature->getLock();
+
+    auto numDetections = creature->numDetectedBy;
+    auto index = 0u;
+    while (index < numDetections && creature->detectedBy[index].creatureIdPart != creatureIdPart) {
+        ++index;
+    }
+    if (index < numDetections) {
+        creature->detectedBy[index].restrictToColors |= restrictToColors;
+    } else {
+        if (numDetections == creature->detectedByCapacity) {
+            auto newCapacity = max(MinDetectedByCapacity, 2 * numDetections);
+            auto newDetectedBy = data.entities.heap.getTypedSubArray<SensorDetection>(newCapacity);
+            for (uint32_t i = 0; i < numDetections; ++i) {
+                newDetectedBy[i] = creature->detectedBy[i];
+            }
+            creature->detectedBy = newDetectedBy;
+            creature->detectedByCapacity = newCapacity;
+        }
+        creature->detectedBy[numDetections] = SensorDetection{creatureIdPart, restrictToColors};
+        creature->numDetectedBy = numDetections + 1;
+    }
+
+    creature->releaseLock();
 }
 
 __inline__ __device__ uint64_t SensorProcessor::matchEnergy(SimulationData& data, float minDensity, float2 const& scanPos, float2 const& delta, float distance)

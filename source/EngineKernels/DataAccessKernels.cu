@@ -427,9 +427,6 @@ namespace
                 }
                 cellTO.cellTypeData.sensor.lastMatchAvailable = cell.cellTypeData.sensor.lastMatchAvailable;
                 cellTO.cellTypeData.sensor.lastMatch.creatureIdPart = cell.cellTypeData.sensor.lastMatch.creatureIdPart;
-                for (int i = 0; i < MAX_SENSOR_NEARBY_CREATURES; ++i) {
-                    cellTO.cellTypeData.sensor.lastMatch.nearbyCreatureIdParts[i] = cell.cellTypeData.sensor.lastMatch.nearbyCreatureIdParts[i];
-                }
                 cellTO.cellTypeData.sensor.lastMatch.pos = cell.cellTypeData.sensor.lastMatch.pos;
             } break;
             case CellType_Generator: {

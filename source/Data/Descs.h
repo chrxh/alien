@@ -118,7 +118,6 @@ struct SensorLastMatchDesc
     auto operator<=>(SensorLastMatchDesc const&) const = default;
 
     MEMBER(SensorLastMatchDesc, uint16_t, creatureIdPart, 0);
-    MEMBER(SensorLastMatchDesc, std::vector<int>, nearbyCreatureIdParts, {});
     MEMBER(SensorLastMatchDesc, RealVector2D, pos, RealVector2D());
 };
 

@@ -101,7 +101,7 @@ If channel #0 is negative and the sensor already has a match, it does not scan a
 | Property | Meaning |
 | --- | --- |
 | Auto trigger | Scan in every cycle. Otherwise channel #0 triggers the scan. |
-| Tag for attackers | Attacker cells of the same creature may use the last match of this sensor as target. |
+| Tag for attackers | Attacker cells of the same creature may attack the creatures that this sensor detects in the mode *Detect creature*. These are the match and up to 3 further matching creatures near it. Only the scan of the current cycle counts. |
 | Min range, Max range | Only matches between these distances are detected. |
 | Min density | For energy and free cells: the required density between 0 and 1. |
 | Restrict to colors | Only objects with one of the selected colors are detected. |
@@ -167,11 +167,11 @@ Each attack attempt costs the **energy cost**, which is emitted as energy partic
 | Mode | Targets |
 | --- | --- |
 | Free cell | Free cells, optionally restricted to colors. |
-| Creature | Cells of other creatures. Only creatures that a sensor of the same creature within 5 units has detected and tagged are attacked, see **Tag for attackers** of the sensor. Own offspring are never attacked. |
+| Creature | Cells of other creatures. Only creatures that a sensor of the same creature has detected and tagged in the current cycle are attacked, see **Tag for attackers** of the sensor. Own offspring are never attacked. |
 
 **Parameters:** group *Cell type: Attacker* with **Energy cost**, **Food chain color matrix**, **Attack strength**, **Same lineage protection**, **Size protection** and **Attack radius** (2 by default).
 
-**Example:** A predator needs a sensor in the mode *Detect creature* with **Tag for attackers**, an attacker close to the sensor and a digestor connected to the attacker. The sensor signal can trigger the attacker through channel #0.
+**Example:** A predator needs a sensor in the mode *Detect creature* with **Tag for attackers**, an attacker and a digestor connected to the attacker. The sensor has to scan in the same cycle in which the attacker is triggered, for example with **Auto trigger**. The sensor signal can trigger the attacker through channel #0.
 
 ## Injector
 

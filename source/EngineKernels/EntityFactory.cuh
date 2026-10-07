@@ -339,6 +339,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->id = creatureTO.id;
     changeCreatureFromTO(creatureTO, creature);
     creature->creatureState = CreatureState_HostConfirmed;
+    creature->initDetectedBy();
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -473,9 +474,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             }
             cell->cellTypeData.sensor.lastMatchAvailable = cellTO.cellTypeData.sensor.lastMatchAvailable;
             cell->cellTypeData.sensor.lastMatch.creatureIdPart = cellTO.cellTypeData.sensor.lastMatch.creatureIdPart;
-            for (int i = 0; i < MAX_SENSOR_NEARBY_CREATURES; ++i) {
-                cell->cellTypeData.sensor.lastMatch.nearbyCreatureIdParts[i] = cellTO.cellTypeData.sensor.lastMatch.nearbyCreatureIdParts[i];
-            }
             cell->cellTypeData.sensor.lastMatch.pos = cellTO.cellTypeData.sensor.lastMatch.pos;
         } break;
         case CellType_Generator: {
@@ -710,6 +708,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     newCreature->mutationState = MutationState_NotMutated;
     newCreature->creatureState = CreatureState_HostConfirmed;
     newCreature->externalEnergyInflowCellId = VALUE_NOT_SET_UINT64;
+    newCreature->initDetectedBy();
     return newCreature;
 }
 
@@ -1030,6 +1029,7 @@ __inline__ __device__ Creature* EntityFactory::createEmptyCreature()
 {
     auto creature = _data->entities.heap.getTypedSubArray<Creature>(1);
     creature->id = _data->primaryNumberGen.createEntityId();
+    creature->initDetectedBy();
     return creature;
 }
 

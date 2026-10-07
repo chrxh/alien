@@ -127,7 +127,6 @@ union SensorModeData
 struct SensorLastMatch
 {
     uint16_t creatureIdPart;
-    uint16_t nearbyCreatureIdParts[MAX_SENSOR_NEARBY_CREATURES];  // Unused entries contain creatureIdPart
     float2 pos;
 };
 
@@ -436,6 +435,12 @@ union TempValue
     float2 as_float2;
 };
 
+struct SensorDetection
+{
+    uint16_t creatureIdPart;  // Lower 16 bits of the id of the creature whose sensor detected the target creature
+    uint16_t restrictToColors;
+};
+
 struct Creature
 {
     uint64_t id;
@@ -459,10 +464,45 @@ struct Creature
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
+    SensorDetection* detectedBy;
+    uint32_t numDetectedBy;
+    uint32_t detectedByCapacity;
+    int locked;
 
     __device__ __inline__ bool isSameLineage(Creature* other)
     {
         return lineageId == other->lineageId;
+    }
+
+    __device__ __inline__ void initDetectedBy()
+    {
+        detectedBy = nullptr;
+        numDetectedBy = 0;
+        detectedByCapacity = 0;
+        locked = 0;
+    }
+
+    __device__ __inline__ bool isDetectedBy(uint16_t creatureIdPart, int color) const
+    {
+        for (uint32_t i = 0; i < numDetectedBy; ++i) {
+            if (detectedBy[i].creatureIdPart == creatureIdPart) {
+                return (detectedBy[i].restrictToColors >> color) & 1;
+            }
+        }
+        return false;
+    }
+
+    __device__ __inline__ void getLock()
+    {
+        while (1 == atomicExch(&locked, 1)) {
+        }
+        __threadfence();
+    }
+
+    __device__ __inline__ void releaseLock()
+    {
+        __threadfence();
+        atomicExch(&locked, 0);
     }
 };
 
