@@ -55,7 +55,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                         + " was generated using a more recent\n"
                           "version of ALIEN. Consequently, the "
                         + dataTypeString
-                        + "might not function as expected.\n"
+                        + " might not function as expected.\n"
                           "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
             }
         },
