@@ -48,11 +48,10 @@ protected:
         return data;
     }
 
-    // Attacker cell with a neural net bias on Channels::CellTypeActivation to trigger it
+    // Attacker cell which is triggered by a neural net bias and ignores the signals of connected cells
     CellDesc createAttackerCell()
     {
-        NeuralNetDesc nn;
-        nn._biases[Channels::CellTypeActivation] = 1.0f;
+        auto nn = NeuralNetDesc().bias(Channels::CellTypeActivation, 1.0f).connectionWeight(0, 0.0f);
         return CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn);
     }
 
@@ -541,8 +540,8 @@ TEST_F(AttackerTests, sensorTargeting_detectionsOfPreviousCycleExpire)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 
-    // The sensor stops scanning
-    std::get<SensorDesc>(actualData.getObjectRef(2).getCellRef()._cellType)._autoTrigger = false;
+    // The sensor no longer detects the target
+    std::get<SensorDesc>(actualData.getObjectRef(2).getCellRef()._cellType)._maxRange = 2;
 
     // Reset the energies so that only the missing detection prevents another attack
     actualData.getObjectRef(1).getCellRef()._rawEnergy = 0.0f;
@@ -715,7 +714,7 @@ TEST_F(AttackerTests, sensorTargeting_relocation_tracksMatchAndDetectsNearbyCrea
             ObjectDesc()
                 .id(2)
                 .pos({101.5f, 100.5f})
-                .type(createSensorCell(SensorDesc().autoTrigger(false)).neuralNetwork(NeuralNetDesc().bias(0, -1.0f))),
+                .type(createSensorCell(SensorDesc().autoTrigger(false)).neuralNetwork(NeuralNetDesc().bias(0, -1.0f).connectionWeight(0, 0.0f))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -782,9 +781,9 @@ TEST_F(AttackerTests, sensorTargeting_mismatchingColorOfTargetCell)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Only the cell with the color of the sensor restriction is attacked
-    EXPECT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(101).getCellRef()._usableEnergy));
+    // Only the cell with the color of the sensor restriction is attacked, the energy flow within the target drains the other cell as well
+    EXPECT_EQ(CellEvent_Attacked, actualData.getObjectRef(100).getCellRef()._event);
+    EXPECT_NE(CellEvent_Attacked, actualData.getObjectRef(101).getCellRef()._event);
 }
 
 TEST_F(AttackerTests, sensorTargeting_colorRestrictionsOfSensorsAreMerged)
@@ -813,8 +812,8 @@ TEST_F(AttackerTests, sensorTargeting_colorRestrictionsOfSensorsAreMerged)
     auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
     EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 3));
-    EXPECT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
-    EXPECT_TRUE(actualData.getObjectRef(101).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_EQ(CellEvent_Attacked, actualData.getObjectRef(100).getCellRef()._event);
+    EXPECT_EQ(CellEvent_Attacked, actualData.getObjectRef(101).getCellRef()._event);
 }
 
 /**
