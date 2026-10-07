@@ -102,6 +102,7 @@ union SensorModeTO
 struct SensorLastMatchTO
 {
     uint16_t creatureIdPart;
+    uint16_t nearbyCreatureIdParts[MAX_SENSOR_NEARBY_CREATURES];  // Unused entries contain creatureIdPart
     float2 pos;
 };
 

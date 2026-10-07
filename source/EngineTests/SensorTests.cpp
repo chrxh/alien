@@ -1839,6 +1839,26 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorFoundResult]));
 }
 
+TEST_F(SensorTests, detectCreature_numCellsClampedTo16Bit)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).mode(DetectCreatureDesc().minNumCells(70000).maxNumCells(80000)))),
+        },
+        CreatureDesc().id(1));
+
+    _simulationFacade->setSimulationData(data);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
+    auto detectCreatureDesc = std::get<DetectCreatureDesc>(sensorDesc._mode);
+    EXPECT_EQ(std::optional(0xffff), detectCreatureDesc._minNumCells);
+    EXPECT_EQ(std::optional(0xffff), detectCreatureDesc._maxNumCells);
+}
+
 TEST_F(SensorTests, detectCreature_ignoreSolidObjects)
 {
     auto data = ContentDesc().addCreature(
@@ -2077,4 +2097,127 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
     auto relocationDensity = actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorMass];
     EXPECT_TRUE(relocationDensity > 0.70f);
     EXPECT_TRUE(relocationDensity < 0.80f);
+}
+
+/**
+ * Tests for the nearby creatures which SensorMode_DetectCreature stores together with the match
+ * The match is creature 2 at a distance of 5, the other creatures are farther away from the sensor
+ */
+
+TEST_F(SensorTests, detectCreature_nearbyCreaturesStored)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
+        },
+        CreatureDesc().id(1));
+    data.addCreature({ObjectDesc().id(2).pos({100.5f, 95.5f})}, CreatureDesc().id(2));
+    data.addCreature({ObjectDesc().id(3).pos({101.5f, 94.5f}), ObjectDesc().id(4).pos({102.5f, 94.5f})}, CreatureDesc().id(3));
+    data.addConnection(3, 4);
+    data.addCreature({ObjectDesc().id(5).pos({98.5f, 94.5f})}, CreatureDesc().id(4));
+    data.addCreature({ObjectDesc().id(6).pos({100.5f, 90.5f})}, CreatureDesc().id(5));  // Beyond the nearby radius
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
+    ASSERT_TRUE(sensorDesc._lastMatch.has_value());
+    EXPECT_EQ(2, sensorDesc._lastMatch->_creatureIdPart);
+    auto nearbyCreatureIdParts = sensorDesc._lastMatch->_nearbyCreatureIdParts;
+    std::ranges::sort(nearbyCreatureIdParts);
+    EXPECT_EQ((std::vector<int>{3, 4}), nearbyCreatureIdParts);
+}
+
+TEST_F(SensorTests, detectCreature_nearbyCreaturesLimitedToNearest)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
+        },
+        CreatureDesc().id(1));
+    data.addCreature({ObjectDesc().id(2).pos({100.5f, 95.5f})}, CreatureDesc().id(2));
+
+    // Creatures sorted by their distance to the match
+    data.addCreature({ObjectDesc().id(3).pos({101.5f, 94.5f})}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(4).pos({98.5f, 93.5f})}, CreatureDesc().id(4));
+    data.addCreature({ObjectDesc().id(5).pos({100.5f, 92.5f})}, CreatureDesc().id(5));
+    data.addCreature({ObjectDesc().id(6).pos({102.5f, 92.5f})}, CreatureDesc().id(6));
+    data.addCreature({ObjectDesc().id(7).pos({98.5f, 91.5f})}, CreatureDesc().id(7));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
+    ASSERT_TRUE(sensorDesc._lastMatch.has_value());
+    EXPECT_EQ(2, sensorDesc._lastMatch->_creatureIdPart);
+    auto nearbyCreatureIdParts = sensorDesc._lastMatch->_nearbyCreatureIdParts;
+    std::ranges::sort(nearbyCreatureIdParts);
+    auto expectedNearbyCreatureIdParts = std::vector<int>{3, 4, 5, 6, 7};
+    expectedNearbyCreatureIdParts.resize(MAX_SENSOR_NEARBY_CREATURES);
+    EXPECT_EQ(expectedNearbyCreatureIdParts, nearbyCreatureIdParts);
+}
+
+TEST_F(SensorTests, detectCreature_nearbyCreaturesRestrictedToColors)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColors(1 << 1)))),
+        },
+        CreatureDesc().id(1));
+    data.addCreature({ObjectDesc().id(2).pos({100.5f, 95.5f}).color(1)}, CreatureDesc().id(2));
+    data.addCreature({ObjectDesc().id(3).pos({101.5f, 94.5f}).color(2)}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(4).pos({98.5f, 94.5f}).color(1)}, CreatureDesc().id(4));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
+    ASSERT_TRUE(sensorDesc._lastMatch.has_value());
+    EXPECT_EQ(2, sensorDesc._lastMatch->_creatureIdPart);
+    EXPECT_EQ((std::vector<int>{4}), sensorDesc._lastMatch->_nearbyCreatureIdParts);
+}
+
+TEST_F(SensorTests, detectCreature_relocation_tracksMatchAndCollectsNearbyCreaturesAgain)
+{
+    // Negative signal in channel #0 enables relocation
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc()
+                          .frontAngle(0.0f)
+                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
+                          .cellType(SensorDesc().autoTrigger(false).mode(DetectCreatureDesc()))),
+        },
+        CreatureDesc().id(1));
+    data.addCreature({ObjectDesc().id(2).pos({100.5f, 95.5f})}, CreatureDesc().id(2));
+    data.addCreature({ObjectDesc().id(3).pos({101.5f, 94.5f})}, CreatureDesc().id(3));
+    data.addCreature({ObjectDesc().id(4).pos({100.5f, 86.5f})}, CreatureDesc().id(4));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
+    ASSERT_TRUE(sensorDesc._lastMatch.has_value());
+    EXPECT_EQ(2, sensorDesc._lastMatch->_creatureIdPart);
+    EXPECT_EQ((std::vector<int>{3}), sensorDesc._lastMatch->_nearbyCreatureIdParts);
+
+    // Creature 3 is now closer to the sensor than creature 2
+    actualData.getObjectRef(2)._pos = {101.5f, 87.5f};
+    _simulationFacade->setSimulationData(actualData);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    actualData = _simulationFacade->getSimulationData();
+    sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
+    ASSERT_TRUE(sensorDesc._lastMatch.has_value());
+    EXPECT_EQ(2, sensorDesc._lastMatch->_creatureIdPart);
+    EXPECT_EQ((std::vector<int>{4}), sensorDesc._lastMatch->_nearbyCreatureIdParts);
 }

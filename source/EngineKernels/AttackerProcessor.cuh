@@ -22,13 +22,13 @@ private:
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static bool isContainedInSensorMatches(
-        uint64_t const* sensorTargetCreatureIds,
+        uint16_t const* sensorTargetCreatureIdParts,
         uint16_t const* sensorRestrictToColors,
         int numSensorTargets,
         uint64_t creatureId,
         int color);
 
-    static constexpr int MaxSensorTargets = 8;
+    static constexpr int MaxSensorTargets = 16;
 };
 
 /************************************************************************/
@@ -62,10 +62,25 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto const& attackerMode = cell->cellTypeData.attacker.mode;
 
         // For AttackCreature mode: collect creatureIds and color restrictions from sensor lastMatches in vicinity
-        uint64_t sensorTargetCreatureIds[MaxSensorTargets];
+        uint16_t sensorTargetCreatureIdParts[MaxSensorTargets];
         uint16_t sensorRestrictToColors[MaxSensorTargets];
         int numSensorTargets = 0;
         if (attackerMode == AttackerMode_Creature) {
+            auto addSensorTarget = [&](uint16_t creatureIdPart, uint16_t restrictToColors) {
+                // If creatureId already in list, merge color restrictions
+                for (int i = 0; i < numSensorTargets; ++i) {
+                    if (sensorTargetCreatureIdParts[i] == creatureIdPart) {
+                        sensorRestrictToColors[i] |= restrictToColors;
+                        return;
+                    }
+                }
+                if (numSensorTargets < MaxSensorTargets) {
+                    sensorTargetCreatureIdParts[numSensorTargets] = creatureIdPart;
+                    sensorRestrictToColors[numSensorTargets] = restrictToColors;
+                    ++numSensorTargets;
+                }
+            };
+
             auto creatureId = cell->creature->id;
             data.objectGrid.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached(), [&](auto const& nearObject) {
                 if (nearObject->type != ObjectType_Cell) {
@@ -79,33 +94,23 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (nearCell->cellType != CellType_Sensor) {
                     return;
                 }
+                auto const& sensor = nearCell->cellTypeData.sensor;
                 // Check if sensor has a valid lastMatch
-                if (!nearCell->cellTypeData.sensor.lastMatchAvailable) {
+                if (!sensor.lastMatchAvailable) {
                     return;
                 }
                 // Only use lastMatch if sensor is tagged for attackers
-                if (!nearCell->cellTypeData.sensor.tagForAttackers) {
+                if (!sensor.tagForAttackers) {
                     return;
                 }
-                auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureIdPart;
-
-                // Get the color restriction from the sensor's DetectCreature mode
-                uint16_t restrictToColors = 0x3ff;
-                if (nearCell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                    restrictToColors = nearCell->cellTypeData.sensor.modeData.detectCreature.restrictToColors;
+                if (sensor.mode != SensorMode_DetectCreature) {
+                    addSensorTarget(sensor.lastMatch.creatureIdPart, 0x3ff);
+                    return;
                 }
-
-                // If creatureId already in list, merge color restrictions
-                for (int i = 0; i < numSensorTargets; ++i) {
-                    if (sensorTargetCreatureIds[i] == matchCreatureId) {
-                        sensorRestrictToColors[i] |= restrictToColors;
-                        return;
-                    }
-                }
-                if (numSensorTargets < MaxSensorTargets) {
-                    sensorTargetCreatureIds[numSensorTargets] = matchCreatureId;
-                    sensorRestrictToColors[numSensorTargets] = restrictToColors;
-                    ++numSensorTargets;
+                auto restrictToColors = sensor.modeData.detectCreature.restrictToColors;
+                addSensorTarget(sensor.lastMatch.creatureIdPart, restrictToColors);
+                for (auto const& nearbyCreatureIdPart : sensor.lastMatch.nearbyCreatureIdParts) {
+                    addSensorTarget(nearbyCreatureIdPart, restrictToColors);
                 }
             });
         }
@@ -190,7 +195,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // Check if target creature is in the list of sensor-detected targets (including color restriction)
                     auto otherCreatureId = otherCell->creature->id;
-                    if (!isContainedInSensorMatches(sensorTargetCreatureIds, sensorRestrictToColors, numSensorTargets, otherCreatureId, otherObject->color)) {
+                    if (!isContainedInSensorMatches(
+                            sensorTargetCreatureIdParts, sensorRestrictToColors, numSensorTargets, otherCreatureId, otherObject->color)) {
                         return;
                     }
 
@@ -311,7 +317,7 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
 }
 
 __inline__ __device__ bool AttackerProcessor::isContainedInSensorMatches(
-    uint64_t const* sensorTargetCreatureIds,
+    uint16_t const* sensorTargetCreatureIdParts,
     uint16_t const* sensorRestrictToColors,
     int numSensorTargets,
     uint64_t creatureId,
@@ -320,7 +326,7 @@ __inline__ __device__ bool AttackerProcessor::isContainedInSensorMatches(
     // The sensor stores only the lower 16 bits of the creatureId (creatureIdPart)
     auto creatureIdPart = creatureId & 0xffff;
     for (int i = 0; i < numSensorTargets; ++i) {
-        if (sensorTargetCreatureIds[i] == creatureIdPart && ((sensorRestrictToColors[i] >> color) & 1)) {
+        if (sensorTargetCreatureIdParts[i] == creatureIdPart && ((sensorRestrictToColors[i] >> color) & 1)) {
             return true;
         }
     }

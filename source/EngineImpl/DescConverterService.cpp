@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <ranges>
 #include <span>
 
 #include <boost/range/adaptor/indexed.hpp>
@@ -396,6 +397,11 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             if (objectTO.typeData.cell.cellTypeData.sensor.lastMatchAvailable) {
                 SensorLastMatchDesc lastMatchDesc;
                 lastMatchDesc._creatureIdPart = objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart;
+                for (auto const& creatureIdPart : objectTO.typeData.cell.cellTypeData.sensor.lastMatch.nearbyCreatureIdParts) {
+                    if (creatureIdPart != lastMatchDesc._creatureIdPart) {
+                        lastMatchDesc._nearbyCreatureIdParts.emplace_back(creatureIdPart);
+                    }
+                }
                 lastMatchDesc._pos =
                     RealVector2D{objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.x, objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.y};
                 sensor._lastMatch = lastMatchDesc;
@@ -1384,6 +1390,11 @@ void DescConverterService::convertObjectToTO(
             sensorTO.lastMatchAvailable = sensorDesc._lastMatch.has_value();
             if (sensorDesc._lastMatch.has_value()) {
                 sensorTO.lastMatch.creatureIdPart = sensorDesc._lastMatch->_creatureIdPart;
+                std::ranges::fill(sensorTO.lastMatch.nearbyCreatureIdParts, sensorTO.lastMatch.creatureIdPart);
+                std::ranges::transform(
+                    sensorDesc._lastMatch->_nearbyCreatureIdParts | std::views::take(MAX_SENSOR_NEARBY_CREATURES),
+                    sensorTO.lastMatch.nearbyCreatureIdParts,
+                    [](int creatureIdPart) { return static_cast<uint16_t>(creatureIdPart); });
                 sensorTO.lastMatch.pos = {sensorDesc._lastMatch->_pos.x, sensorDesc._lastMatch->_pos.y};
             }
         } break;
