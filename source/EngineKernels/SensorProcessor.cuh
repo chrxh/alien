@@ -6,6 +6,7 @@ class SensorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
+    __inline__ __device__ static void resetSensorDetections(SimulationData& data);
 
 private:
     static int constexpr MaxSameNearCreatureCells = 9 * 9;
@@ -112,6 +113,19 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).object);
+    }
+}
+
+__inline__ __device__ void SensorProcessor::resetSensorDetections(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->type == ObjectType_Cell) {
+            object->typeData.cell.creature->numDetectedBy = 0;
+        }
     }
 }
 
@@ -333,7 +347,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     }
     __syncthreads();
 
-    auto centerScanPos = object->typeData.cell.cellTypeData.sensor.lastMatch.pos;
+    auto centerScanPos = object->typeData.cell.cellTypeData.sensor.lastMatchPos;
 
     // Each thread handles multiple columns (deltaX values)
     for (int colIdx = threadIdx.x; colIdx < searchDiameter; colIdx += blockDim.x) {
@@ -403,8 +417,8 @@ __inline__ __device__ void SensorProcessor::publishMatch(SimulationData& data, O
         data.world.correctPosition(matchPos);
 
         cell.cellTypeData.sensor.lastMatchAvailable = true;
-        cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
-        cell.cellTypeData.sensor.lastMatch.pos = matchPos;
+        cell.cellTypeData.sensor.lastMatchCreatureIdPart = creatureIdPart;
+        cell.cellTypeData.sensor.lastMatchPos = matchPos;
     }
 }
 
@@ -431,9 +445,9 @@ __inline__ __device__ void SensorProcessor::registerDetections(SimulationData& d
     }
     __syncthreads();
 
-    auto matchedCreature = findNearestCreature(data, object, sensor.lastMatch.pos, [&](Object* otherObject) {
+    auto matchedCreature = findNearestCreature(data, object, sensor.lastMatchPos, [&](Object* otherObject) {
         return otherObject->type == ObjectType_Cell && !cell.isSameCreature(&otherObject->typeData.cell)
-            && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart;
+            && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatchCreatureIdPart;
     });
     if (threadIdx.x == 0 && matchedCreature != nullptr) {
         detectedCreatures[0] = matchedCreature;
@@ -442,7 +456,7 @@ __inline__ __device__ void SensorProcessor::registerDetections(SimulationData& d
     __syncthreads();
 
     for (int i = 1; i <= MaxNearbyCreatures; ++i) {
-        auto nearbyCreature = findNearestCreature(data, object, sensor.lastMatch.pos, [&](Object* otherObject) {
+        auto nearbyCreature = findNearestCreature(data, object, sensor.lastMatchPos, [&](Object* otherObject) {
             if (!isMatchingCreature(object, otherObject)) {
                 return false;
             }
@@ -576,7 +590,7 @@ SensorProcessor::matchLastMatchedCreature(SimulationData& data, Object* object, 
     while (otherIndex >= 0) {
         auto const& otherRecord = records[otherIndex];
         auto otherObject = otherRecord.self;
-        if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart) {
+        if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatchCreatureIdPart) {
             uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
             float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
             return pack(distance, calcAbsAngle(delta), density, creatureIdPart);
