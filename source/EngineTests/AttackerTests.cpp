@@ -541,8 +541,10 @@ TEST_F(AttackerTests, sensorTargeting_detectionsOfPreviousCycleExpire)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_TRUE(actualData.getObjectRef(100).getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 
-    // The sensor stops scanning, the attacker could attack again
+    // The sensor stops scanning
     std::get<SensorDesc>(actualData.getObjectRef(2).getCellRef()._cellType)._autoTrigger = false;
+
+    // Reset the energies so that only the missing detection prevents another attack
     actualData.getObjectRef(1).getCellRef()._rawEnergy = 0.0f;
     actualData.getObjectRef(100).getCellRef()._usableEnergy = 100.0f;
 
