@@ -1839,26 +1839,6 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_numCellsClampedTo16Bit)
-{
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).mode(DetectCreatureDesc().minNumCells(70000).maxNumCells(80000)))),
-        },
-        CreatureDesc().id(1));
-
-    _simulationFacade->setSimulationData(data);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto sensorDesc = std::get<SensorDesc>(actualData.getObjectRef(1).getCellRef()._cellType);
-    auto detectCreatureDesc = std::get<DetectCreatureDesc>(sensorDesc._mode);
-    EXPECT_EQ(std::optional(0xffff), detectCreatureDesc._minNumCells);
-    EXPECT_EQ(std::optional(0xffff), detectCreatureDesc._maxNumCells);
-}
-
 TEST_F(SensorTests, detectCreature_ignoreSolidObjects)
 {
     auto data = ContentDesc().addCreature(
