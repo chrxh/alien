@@ -426,8 +426,8 @@ namespace
                     cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 }
                 cellTO.cellTypeData.sensor.lastMatchAvailable = cell.cellTypeData.sensor.lastMatchAvailable;
-                cellTO.cellTypeData.sensor.lastMatch.creatureIdPart = cell.cellTypeData.sensor.lastMatch.creatureIdPart;
-                cellTO.cellTypeData.sensor.lastMatch.pos = cell.cellTypeData.sensor.lastMatch.pos;
+                cellTO.cellTypeData.sensor.lastMatch.creatureIdPart = cell.cellTypeData.sensor.lastMatchCreatureIdPart;
+                cellTO.cellTypeData.sensor.lastMatch.pos = cell.cellTypeData.sensor.lastMatchPos;
             } break;
             case CellType_Generator: {
                 cellTO.cellTypeData.generator.additive = cell.cellTypeData.generator.additive;

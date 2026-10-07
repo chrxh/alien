@@ -18,7 +18,6 @@ public:
     __inline__ __device__ static void headUpdate_applyFutureValue(SimulationData& data);
 
     __inline__ __device__ static void updateCellEvents(SimulationData& data);
-    __inline__ __device__ static void resetSensorDetections(SimulationData& data);
 
     __inline__ __device__ static void performEnergyFlow(SimulationData& data);
 
@@ -275,19 +274,6 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
             if (object->typeData.freeCell.eventCounter > 0) {
                 --object->typeData.freeCell.eventCounter;
             }
-        }
-    }
-}
-
-__inline__ __device__ void CellProcessor::resetSensorDetections(SimulationData& data)
-{
-    auto& objects = data.entities.objects;
-    auto partition = calcSystemThreadPartition(objects.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = objects.at(index);
-        if (object->type == ObjectType_Cell) {
-            object->typeData.cell.creature->numDetectedBy = 0;
         }
     }
 }

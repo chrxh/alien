@@ -124,22 +124,17 @@ union SensorModeData
     DetectCreature detectCreature;
 };
 
-struct SensorLastMatch
-{
-    uint16_t creatureIdPart;
-    float2 pos;
-};
-
 struct Sensor
 {
-    bool autoTrigger;
-    bool tagForAttackers;
-    uint8_t mode;  // SensorMode
-    bool lastMatchAvailable;
+    SensorMode mode;
     SensorModeData modeData;
     uint16_t minRange;
     uint16_t maxRange;
-    SensorLastMatch lastMatch;
+    float2 lastMatchPos;
+    uint16_t lastMatchCreatureIdPart;
+    bool lastMatchAvailable;
+    bool autoTrigger;
+    bool tagForAttackers;
 };
 
 struct SquareSignal
