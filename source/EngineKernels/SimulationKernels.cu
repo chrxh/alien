@@ -134,6 +134,7 @@ __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
     CellProcessor::collectCellTypeOperations(data);
     CellProcessor::updateCellEvents(data);
+    CellProcessor::resetSensorDetections(data);
 }
 
 __global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics)

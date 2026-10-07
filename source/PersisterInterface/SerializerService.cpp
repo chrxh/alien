@@ -1114,7 +1114,6 @@ namespace
 
     auto constexpr Id_SensorMode_SensorLastMatch_CreatureIdPart = SerializationKey(0, "creatureIdPart");
     auto constexpr Id_SensorMode_SensorLastMatch_Pos = SerializationKey(1, "pos");
-    auto constexpr Id_SensorMode_SensorLastMatch_NearbyCreatureIdParts = SerializationKey(2, "nearbyCreatureIdParts");
 
     auto constexpr Id_SensorMode_DetectCreature_MinNumCells = SerializationKey(0, "minNumCells");
     auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = SerializationKey(1, "maxNumCells");
@@ -1356,7 +1355,6 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SensorMode_SensorLastMatch_CreatureIdPart, data._creatureIdPart, defaultObject._creatureIdPart);
         scope.addMember(Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
-        scope.addMember(Id_SensorMode_SensorLastMatch_NearbyCreatureIdParts, data._nearbyCreatureIdParts, defaultObject._nearbyCreatureIdParts);
     }
     SPLIT_SERIALIZATION(SensorLastMatchDesc)
 
