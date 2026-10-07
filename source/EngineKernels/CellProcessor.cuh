@@ -266,11 +266,14 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
-            continue;
-        }
-        if (object->typeData.cell.eventCounter > 0) {
-            --object->typeData.cell.eventCounter;
+        if (object->type == ObjectType_Cell) {
+            if (object->typeData.cell.eventCounter > 0) {
+                --object->typeData.cell.eventCounter;
+            }
+        } else if (object->type == ObjectType_FreeCell) {
+            if (object->typeData.freeCell.eventCounter > 0) {
+                --object->typeData.freeCell.eventCounter;
+            }
         }
     }
 }
