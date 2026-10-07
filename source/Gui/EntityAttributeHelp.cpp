@@ -213,7 +213,8 @@ namespace
         {EntityAttribute::SensorAutoTrigger,
          "If enabled, the sensor scans in every cycle. Otherwise it only scans when channel #0 exceeds the trigger threshold."},
         {EntityAttribute::SensorTagForAttackers,
-         "If enabled, attacker cells of the same creature in 'Creature' mode may use the last match of this sensor as a target."},
+         "If enabled, attacker cells of the same creature in 'Creature' mode may attack the creatures this sensor detects in 'Detect creature' mode. "
+         "These are the match and up to 3 further matching creatures near the match. Only the scan of the current cycle counts."},
         {EntityAttribute::SensorMode,
          "Selects what the sensor scans for."
          "\n" ICON_FA_CHEVRON_RIGHT " Detect energy: searches for accumulations of energy particles."
@@ -251,7 +252,7 @@ namespace
          "Selects the targets of the attack. The stolen energy is added to the own raw energy."
          "\n" ICON_FA_CHEVRON_RIGHT " Free cell: steals energy from free cells within the attack radius."
          "\n" ICON_FA_CHEVRON_RIGHT " Creature: steals energy from cells of other creatures. Only creatures that a sensor cell of the same creature has "
-         "detected and tagged are attacked."},
+         "detected and tagged in the current cycle are attacked."},
         {EntityAttribute::AttackerRestrictToColors, "Only free cells with one of the selected customization colors are attacked."},
 
         // Injector

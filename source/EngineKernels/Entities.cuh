@@ -110,10 +110,10 @@ struct DetectFreeCell
 
 struct DetectCreature
 {
-    uint32_t minNumCells;       // 0 = no restriction
-    uint32_t maxNumCells;       // 0 = no restriction
+    uint16_t minNumCells;       // 0 = no restriction
+    uint16_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
-    LineageRestriction restrictToLineage;
+    uint8_t restrictToLineage;  // LineageRestriction
 };
 
 union SensorModeData
@@ -124,24 +124,17 @@ union SensorModeData
     DetectCreature detectCreature;
 };
 
-struct SensorLastMatch
-{
-    uint16_t creatureIdPart;
-    float2 pos;
-};
-
 struct Sensor
 {
-    bool autoTrigger;
-    bool tagForAttackers;
     SensorMode mode;
     SensorModeData modeData;
     uint16_t minRange;
     uint16_t maxRange;
-
-    // Process data
+    float2 lastMatchPos;
+    uint16_t lastMatchCreatureIdPart;
     bool lastMatchAvailable;
-    SensorLastMatch lastMatch;
+    bool autoTrigger;
+    bool tagForAttackers;
 };
 
 struct SquareSignal
@@ -417,6 +410,7 @@ union CellTypeData
     Communicator communicator;
     VoidCell voidCell;
 };
+static_assert(sizeof(CellTypeData) == 32, "CellTypeData must stay 32 bytes, a larger size enlarges every cell by 16 bytes");
 
 struct __align__(16) NeuralActivity
 {
@@ -434,6 +428,12 @@ union TempValue
     uint64_t as_uint64;
     uint32_float as_uint32_float;
     float2 as_float2;
+};
+
+struct SensorDetection
+{
+    uint16_t creatureIdPart;  // Lower 16 bits of the id of the creature whose sensor detected the target creature
+    uint16_t restrictToColors;
 };
 
 struct Creature
@@ -459,10 +459,45 @@ struct Creature
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
+    SensorDetection* detectedBy;
+    uint32_t numDetectedBy;
+    uint32_t detectedByCapacity;
+    int locked;
 
     __device__ __inline__ bool isSameLineage(Creature* other)
     {
         return lineageId == other->lineageId;
+    }
+
+    __device__ __inline__ void initDetectedBy()
+    {
+        detectedBy = nullptr;
+        numDetectedBy = 0;
+        detectedByCapacity = 0;
+        locked = 0;
+    }
+
+    __device__ __inline__ bool isDetectedBy(uint16_t creatureIdPart, int color) const
+    {
+        for (uint32_t i = 0; i < numDetectedBy; ++i) {
+            if (detectedBy[i].creatureIdPart == creatureIdPart) {
+                return (detectedBy[i].restrictToColors >> color) & 1;
+            }
+        }
+        return false;
+    }
+
+    __device__ __inline__ void getLock()
+    {
+        while (1 == atomicExch(&locked, 1)) {
+        }
+        __threadfence();
+    }
+
+    __device__ __inline__ void releaseLock()
+    {
+        __threadfence();
+        atomicExch(&locked, 0);
     }
 };
 
