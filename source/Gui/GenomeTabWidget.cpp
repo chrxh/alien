@@ -41,6 +41,7 @@ GenomeDesc _GenomeTabWidget::normalizeForEditor(GenomeDesc genome)
 void _GenomeTabWidget::process()
 {
     doLayout();
+    refreshGenomeIssues();
 
     if (ImGui::BeginChild("CreatureTab", ImVec2(0, -_statusBarHeight))) {
         ImGui::PushID(_editData->id);
@@ -208,19 +209,47 @@ void _GenomeTabWidget::processEditors()
     AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->inspectorWidth);
     ImGui::PopID();
 
-    // Right field: the creature previews
+    refreshGenomeIssues();
+
+    // Right field: the creature previews or the gene graph
     ImGui::SameLine();
-    if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-        processPreview();
+    if (ImGui::BeginChild("RightField", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+        processRightField();
     }
     ImGui::EndChild();
 
     _editData->changesMade = !_editData->origGenome.equalWithoutId(_editData->genome);
 }
 
-void _GenomeTabWidget::processPreview()
+void _GenomeTabWidget::refreshGenomeIssues()
 {
-    _simulatedPreviewWidget->process();
+    _editData->genomeIssues = DescValidationService::get().findGenomeIssues(_editData->genome);
+}
+
+namespace
+{
+    int countWarningsWithoutFollowUps(std::vector<GenomeIssue> const& issues)
+    {
+        return toInt(std::ranges::count_if(issues, [](auto const& issue) { return !issue.isFollowUp(); }));
+    }
+}
+
+void _GenomeTabWidget::processRightField()
+{
+    auto numWarnings = countWarningsWithoutFollowUps(_editData->genomeIssues);
+    auto geneNetworkBadge = numWarnings > 0 ? std::to_string(numWarnings) : std::string();
+    auto selectedTabIndex = toInt(_selectedGenomeView);
+    AlienGui::GroupTabs(
+        AlienGui::GroupTabsParameters().texts({"Phenotype", "Gene network"}).tabBadges({"", geneNetworkBadge}).badgeIcon(ICON_FA_EXCLAMATION_TRIANGLE),
+        selectedTabIndex);
+    _selectedGenomeView = static_cast<GenomeView>(selectedTabIndex);
+
+    if (_selectedGenomeView == GenomeView::Phenotype) {
+        _simulatedPreviewWidget->process();
+    } else if (_selectedGenomeView == GenomeView::GeneNetwork) {
+        _simulatedPreviewWidget->processInBackground();
+        _geneGraphWidget.process(_editData);
+    }
 }
 
 void _GenomeTabWidget::processStatusBar()
@@ -234,7 +263,15 @@ void _GenomeTabWidget::processStatusBar()
     std::vector<std::string> statusItems;
     statusItems.emplace_back(std::to_string(numGenes) + (numGenes == 1 ? " gene" : " genes"));
     statusItems.emplace_back(std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes"));
-    AlienGui::StatusBar(statusItems);
+    auto parameters = AlienGui::StatusBarParameters().infoItems(statusItems);
+
+    auto numWarnings = countWarningsWithoutFollowUps(_editData->genomeIssues);
+    if (numWarnings > 0) {
+        parameters.warningItem(std::to_string(numWarnings) + (numWarnings == 1 ? " warning" : " warnings"))
+            .warningTooltip("Click to show the warnings in the gene network, where the affected genes and constructors are highlighted.")
+            .warningClickedFunc([this] { _selectedGenomeView = GenomeView::GeneNetwork; });
+    }
+    AlienGui::StatusBar(parameters);
 
     _statusBarHeight = ImGui::GetCursorPosY() - startPosY;
 }

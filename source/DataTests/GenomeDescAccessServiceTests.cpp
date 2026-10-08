@@ -1,5 +1,7 @@
 
 #include <algorithm>
+#include <optional>
+#include <set>
 
 #include <gtest/gtest.h>
 
@@ -818,4 +820,57 @@ TEST_F(GenomeDescAccessServiceTests, getGeneIndicesForSubGenomes_keepSeparatingl
     });
     auto result = _genomeDescriptionAccessService.getGeneIndicesForSubGenomes(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2, 1}}), result);
+}
+
+TEST_F(GenomeDescAccessServiceTests, getReachableGenes)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+    });
+
+    EXPECT_EQ((std::set<int>{0, 1, 2}), GenomeDescAccessService::get().getReachableGenes(genome, 0));
+    EXPECT_EQ((std::set<int>{1, 2}), GenomeDescAccessService::get().getReachableGenes(genome, 1));
+    EXPECT_EQ((std::set<int>{1, 2, 3}), GenomeDescAccessService::get().getReachableGenes(genome, 3));
+}
+
+TEST_F(GenomeDescAccessServiceTests, getGeneConstructions_groupsConstructorsOfSameGenePair)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5)),
+        }),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0))}),
+    });
+
+    auto constructions = GenomeDescAccessService::get().getGeneConstructions(genome);
+
+    ASSERT_EQ(2, constructions.size());
+    EXPECT_EQ(0, constructions.at(0).constructingGeneIndex);
+    EXPECT_EQ(1, constructions.at(0).constructedGeneIndex);
+    EXPECT_EQ((std::vector{0, 2}), constructions.at(0).constructorNodeIndices);
+    EXPECT_TRUE(constructions.at(0).anyWithSeparation);
+    EXPECT_EQ(1, constructions.at(1).constructingGeneIndex);
+    EXPECT_EQ(0, constructions.at(1).constructedGeneIndex);
+    EXPECT_FALSE(constructions.at(1).anyWithSeparation);
+}
+
+TEST_F(GenomeDescAccessServiceTests, calcDistancesFromRootGene)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3))}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
+    });
+
+    auto distances = GenomeDescAccessService::get().calcDistancesFromRootGene(genome);
+
+    EXPECT_EQ((std::vector<std::optional<int>>{0, 1, 1, 2, std::nullopt}), distances);
 }

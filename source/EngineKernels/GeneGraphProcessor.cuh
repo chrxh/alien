@@ -3,8 +3,7 @@
 #include <cooperative_groups.h>
 
 #include <Data/CellTypeConstants.h>
-
-#include <EngineInterface/ShapeGenerator.h>
+#include <Data/ShapeGenerator.h>
 
 #include "ConstructorHelper.cuh"
 #include "SimulationData.cuh"
@@ -16,8 +15,6 @@ namespace cg_geneGraph = cooperative_groups;
 class GeneGraphProcessor
 {
 public:
-    static int constexpr MaxGenesWithSeparation = 2;
-
     __inline__ __device__ static void voidNodesUnreachableFromLastNode(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
     __inline__ __device__ static void removeCyclesNotThroughRoot(SimulationData& data, Genome* genome);
@@ -332,7 +329,7 @@ __inline__ __device__ void GeneGraphProcessor::limitGenesWithSeparation(Simulati
     // The search is inherently sequential, but it visits every gene and every node only once, which is cheaper than the passes
     // that already scan the genome per gene.
     if (laneId == 0) {
-        int genesWithSeparation[MaxGenesWithSeparation];
+        int genesWithSeparation[Const::MaxGenesWithSeparation];
         int numGenesWithSeparation = 0;
 
         visited[0] = 1;
@@ -364,7 +361,7 @@ __inline__ __device__ void GeneGraphProcessor::limitGenesWithSeparation(Simulati
                     }
                 }
                 if (!alreadyKnown) {
-                    if (numGenesWithSeparation < MaxGenesWithSeparation) {
+                    if (numGenesWithSeparation < Const::MaxGenesWithSeparation) {
                         genesWithSeparation[numGenesWithSeparation++] = targetGene;
                     } else {
                         node.constructor.separation = false;

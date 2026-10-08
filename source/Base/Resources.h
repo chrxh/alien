@@ -21,7 +21,6 @@ namespace Const
     extern std::filesystem::path const TraceFilename;
     extern std::filesystem::path const AutosaveFileWithoutPath;
     extern std::filesystem::path const AutosaveFile;
-    extern std::filesystem::path const SettingsFilename;
     extern std::filesystem::path const SavepointTableFilename;
 
     extern std::filesystem::path const LogoFilename;

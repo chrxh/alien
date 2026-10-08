@@ -756,7 +756,7 @@ void MutationRatesDialog::processButtons()
         _clipboard = _mutation;
         printOverlayMessage("Mutation rates copied");
     }
-    AlienGui::Tooltip("Copy all mutation rates to the clipboard");
+    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Copy all mutation rates to the clipboard"));
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_clipboard.has_value());
@@ -765,7 +765,7 @@ void MutationRatesDialog::processButtons()
         printOverlayMessage("Mutation rates pasted");
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Paste all mutation rates from the clipboard");
+    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Paste all mutation rates from the clipboard"));
 }
 
 float MutationRatesDialog::calcClipboardButtonsWidth()

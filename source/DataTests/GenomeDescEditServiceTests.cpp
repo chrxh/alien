@@ -152,6 +152,43 @@ TEST_F(GenomeDescEditServiceTests, removeGene_end)
     }
 }
 
+TEST_F(GenomeDescEditServiceTests, removeGene_renumbersInjectors)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().cellType(InjectorGenomeDesc().geneIndex(2))}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
+    });
+
+    GenomeDescEditService::get().removeGene(genome, 1);
+
+    EXPECT_EQ(1, std::get<InjectorGenomeDesc>(genome._genes.at(0)._nodes.at(0)._cellType)._geneIndex);
+}
+
+TEST_F(GenomeDescEditServiceTests, removeGenes)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+            NodeDesc().cellType(InjectorGenomeDesc().geneIndex(2)),
+        }),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().cellType(InjectorGenomeDesc().geneIndex(3))}),
+    });
+
+    auto newGeneIndexByOldGeneIndex = GenomeDescEditService::get().removeGenes(genome, {1, 2});
+
+    EXPECT_EQ((std::map<int, int>{{0, 0}, {3, 1}}), newGeneIndexByOldGeneIndex);
+    ASSERT_EQ(2, genome._genes.size());
+    auto const& rootNodes = genome._genes.at(0)._nodes;
+    EXPECT_EQ(std::nullopt, rootNodes.at(0)._constructor);
+    EXPECT_EQ(1, rootNodes.at(1)._constructor->_geneIndex);
+    EXPECT_EQ(0, std::get<InjectorGenomeDesc>(rootNodes.at(2)._cellType)._geneIndex);
+    EXPECT_EQ(1, std::get<InjectorGenomeDesc>(genome._genes.at(1)._nodes.at(0)._cellType)._geneIndex);
+}
+
 TEST_F(GenomeDescEditServiceTests, swapGenes)
 {
     auto genome = createGenome_complexCycles();

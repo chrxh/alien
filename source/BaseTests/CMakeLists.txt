@@ -1,6 +1,7 @@
 target_sources(BaseTests
 PUBLIC
     MarkdownParserTests.cpp
+    StringHelperTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(BaseTests Base)

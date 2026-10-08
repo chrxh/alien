@@ -9,6 +9,7 @@ struct _GenomeTabLayoutData
     float inspectorWidth = 0;     // Middle field: properties of the selected gene or node
     float desiredConfigurationPreviewWidth = 300.0f;
     float structureHeight = 0;  // Share of the left field taken by the gene/node tree
+    bool headerFittedToContent = false;
     float neuralNetEditorHeight = 0;
 
     GenomeTabLayoutData clone() const

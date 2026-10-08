@@ -35,6 +35,7 @@ class AlienGui
 {
 public:
     static auto constexpr GroupTextIndent = 8.0f;
+    static auto constexpr GroupTabSpacing = 4.0f;
 
     static void HelpMarker(std::string const& text);
 
@@ -460,6 +461,15 @@ public:
     // Returns true if the expand button has been clicked
     static bool Group(GroupParameters const& parameters);
 
+    struct GroupTabsParameters
+    {
+        MEMBER(GroupTabsParameters, std::vector<std::string>, texts, {});
+        MEMBER(GroupTabsParameters, std::vector<std::string>, tabBadges, {});
+        MEMBER(GroupTabsParameters, std::string, badgeIcon, {});
+        MEMBER(GroupTabsParameters, ImColor, badgeColor, Const::WarningColor);
+    };
+    static void GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex);
+
     struct ListBoxParameters
     {
         MEMBER(ListBoxParameters, std::vector<std::string>, items, std::vector<std::string>());
@@ -575,10 +585,23 @@ public:
     };
     static void Spinner(SpinnerParameters const& parameters);
 
-    static void StatusBar(std::vector<std::string> const& textItems);
+    struct StatusBarParameters
+    {
+        MEMBER(StatusBarParameters, std::vector<std::string>, infoItems, {});
+        MEMBER(StatusBarParameters, std::optional<std::string>, warningItem, std::nullopt);
+        MEMBER(StatusBarParameters, std::optional<std::string>, warningTooltip, std::nullopt);
+        MEMBER(StatusBarParameters, std::optional<std::function<void()>>, warningClickedFunc, std::nullopt);
+    };
+    static void StatusBar(StatusBarParameters const& parameters);
 
-    static void Tooltip(std::string const& text, bool delay = true, ImGuiHoveredFlags flags = ImGuiHoveredFlags_AllowWhenDisabled);
-    static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
+    struct TooltipParameters
+    {
+        MEMBER(TooltipParameters, std::string, text, "");
+        MEMBER(TooltipParameters, std::optional<std::function<std::string()>>, textFunc, std::nullopt);
+        MEMBER(TooltipParameters, bool, delay, true);
+        MEMBER(TooltipParameters, ImGuiHoveredFlags, hoveredFlags, ImGuiHoveredFlags_AllowWhenDisabled);
+    };
+    static void Tooltip(TooltipParameters const& parameters);
 
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 

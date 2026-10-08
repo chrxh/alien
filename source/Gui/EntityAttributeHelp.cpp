@@ -103,6 +103,8 @@ namespace
          "If enabled, the mutation rates of this genome are themselves mutated. The step sizes come from the 'Meta-mutations' groups in the simulation "
          "parameters."},
         {EntityAttribute::GenomeMutationRatesEdit, "Opens the editor for all mutation rates. The rows below only list the rates that are currently active."},
+        {EntityAttribute::GenomeMutationRatesSummary,
+         "Opens the editor for all mutation rates. The number counts the mutation types with a probability above zero."},
 
         // Gene
         {EntityAttribute::GeneName, "Name of the gene. It is only used for the display in the structure list."},

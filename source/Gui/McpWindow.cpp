@@ -97,17 +97,18 @@ void McpWindow::processConnectionGuide()
     ImGui::TextUnformatted(ICON_FA_QUESTION_CIRCLE);
     ImGui::PopStyleColor();
     AlienGui::Tooltip(
-        [&] {
-            std::string toolGroups;
-            for (auto const& toolGroup : controller.getToolGroups()) {
-                toolGroups += std::format("\n\n{}:\n{}", toolGroup.name, boost::algorithm::join(toolGroup.toolNames, ", "));
-            }
-            return std::format(
-                "Works with any AI agent or MCP client that supports MCP servers of type HTTP (also called Streamable HTTP), regardless of the AI "
-                "provider.\n\nOnly agents on this computer can connect.\n\nAvailable tools{}",
-                toolGroups);
-        },
-        false);
+        AlienGui::TooltipParameters()
+            .textFunc([&] {
+                std::string toolGroups;
+                for (auto const& toolGroup : controller.getToolGroups()) {
+                    toolGroups += std::format("\n\n{}:\n{}", toolGroup.name, boost::algorithm::join(toolGroup.toolNames, ", "));
+                }
+                return std::format(
+                    "Works with any AI agent or MCP client that supports MCP servers of type HTTP (also called Streamable HTTP), regardless of the AI "
+                    "provider.\n\nOnly agents on this computer can connect.\n\nAvailable tools{}",
+                    toolGroups);
+            })
+            .delay(false));
 
     processStepNumber(1);
     ImGui::TextUnformatted("In your AI agent, add an MCP server of type HTTP.");
@@ -190,7 +191,7 @@ void McpWindow::processCommandLog()
                 AlienGui::Text(AlienGui::TextParameters().text(entry.command).truncate(true));
                 ImGui::PopStyleColor();
                 ImGui::PopFont();
-                AlienGui::Tooltip(entry.command);
+                AlienGui::Tooltip(AlienGui::TooltipParameters().text(entry.command));
 
                 ImGui::TableNextColumn();
                 if (entry.isError) {
@@ -200,7 +201,7 @@ void McpWindow::processCommandLog()
                 if (entry.isError) {
                     ImGui::PopStyleColor();
                 }
-                AlienGui::Tooltip(entry.result);
+                AlienGui::Tooltip(AlienGui::TooltipParameters().text(entry.result));
 
                 ImGui::PopID();
             }

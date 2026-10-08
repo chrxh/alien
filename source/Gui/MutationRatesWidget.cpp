@@ -140,3 +140,24 @@ void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightC
     // BeginDisabled() also applies to popups that are begun inside of it
     _dialog.process();
 }
+
+void MutationRatesWidget::processAsSingleRow(MutationRatesDesc& mutationRates, float rightColumnWidth)
+{
+    auto activeMutationTypes = getActiveMutationTypes(mutationRates);
+    auto tooltip = EntityAttributeHelp::get(EntityAttribute::GenomeMutationRatesSummary);
+    if (!activeMutationTypes.empty()) {
+        tooltip += "\n\nActive mutation types:";
+        for (auto const& [name, probabilities, attribute] : activeMutationTypes) {
+            tooltip += "\n" + name + ": " + probabilities;
+        }
+    }
+
+    if (AlienGui::Button(AlienGui::ButtonParameters()
+                             .buttonText("Edit (" + std::to_string(activeMutationTypes.size()) + " active)")
+                             .name("Mutation rates")
+                             .textWidth(rightColumnWidth)
+                             .tooltip(tooltip))) {
+        _dialog.open(mutationRates, [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; });
+    }
+    _dialog.process();
+}
