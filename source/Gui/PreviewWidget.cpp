@@ -227,7 +227,7 @@ void _PreviewWidget::processActionBar()
         PreviewSettingsDialog::get().setEditData(_genomeEditData, _editData);
         PreviewSettingsDialog::get().open();
     }
-    AlienGui::Tooltip("Preview settings");
+    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Preview settings"));
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);

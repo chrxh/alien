@@ -221,7 +221,7 @@ void _GenomeEditorWidget::processGeneNode(
         _selectionChangedFromTree = true;
     }
     if (mostRelevantGeneLevelIssue.has_value()) {
-        AlienGui::Tooltip([&] { return GenomeIssueDescription::getTooltip(geneLevelIssues, _editData->genome); });
+        AlienGui::Tooltip(AlienGui::TooltipParameters().textFunc([&] { return GenomeIssueDescription::getTooltip(geneLevelIssues, _editData->genome); }));
     }
     if (!gene._name.empty()) {
         ImGui::SameLine();
@@ -301,7 +301,7 @@ void _GenomeEditorWidget::processNodeLeaf(
         _selectionChangedFromTree = true;
     }
     if (mostRelevantIssue.has_value()) {
-        AlienGui::Tooltip([&] { return GenomeIssueDescription::getTooltip(nodeIssues, _editData->genome); });
+        AlienGui::Tooltip(AlienGui::TooltipParameters().textFunc([&] { return GenomeIssueDescription::getTooltip(nodeIssues, _editData->genome); }));
     }
 
     // Column 1: cell type. With homogeneous cell type every node shows the cell type of the first node

@@ -45,7 +45,7 @@ void _BrowserTableWidget::process()
     auto columns = getColumns(workspace);
 
     ImGui::PushID(resourceType == NetworkResourceType_Simulation ? "SimulationList" : "GenomeList");
-    if (ImGui::BeginTable("Browser", toInt(columns.size()), getTableFlags(resourceType), ImVec2(-1, -scale(BrowserHelper::WorkspaceBottomSpace)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", toInt(columns.size()), getTableFlags(resourceType), ImVec2(-1, -BrowserHelper::calcFooterHeight()), 0.0f)) {
         for (auto const& column : columns) {
             ImGui::TableSetupColumn(column.name.c_str(), column.flags, scale(column.width), column.sortId);
         }
@@ -201,7 +201,8 @@ void _BrowserTableWidget::processResourceNameField(NetworkResourceTreeTO const& 
         ImGui::SameLine();
         if (_data->currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip(leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community");
+            AlienGui::Tooltip(
+                AlienGui::TooltipParameters().text(leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community"));
         }
         ImGui::SameLine();
 
@@ -322,7 +323,7 @@ void _BrowserTableWidget::processReactionList(NetworkResourceTreeTO const& treeT
         auto& leaf = treeTO->getLeaf();
 
         auto isAddReaction = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
-        AlienGui::Tooltip("Add a reaction", false);
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text("Add a reaction").delay(false));
         if (isAddReaction) {
             _data->activateEmojiPopup = true;
             _data->emojiPopupTO = treeTO;
@@ -380,7 +381,8 @@ void _BrowserTableWidget::processReactionList(NetworkResourceTreeTO const& treeT
                 }
                 ImGui::PopStyleColor(2);
                 ImGui::PopID();
-                AlienGui::Tooltip([=, this] { return _data->getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }, false);
+                AlienGui::Tooltip(
+                    AlienGui::TooltipParameters().textFunc([=, this] { return _data->getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }).delay(false));
             }
 
             // Separator except for last element

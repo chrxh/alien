@@ -65,7 +65,7 @@ void LogWindow::processIntern()
                 ImGui::PushStyleColor(ImGuiCol_Text, textColor.Value);
                 AlienGui::Text(AlienGui::TextParameters().text(firstLine).truncate(true));
                 ImGui::PopStyleColor();
-                AlienGui::Tooltip(message.text);
+                AlienGui::Tooltip(AlienGui::TooltipParameters().text(message.text));
 
                 ImGui::PopID();
             }

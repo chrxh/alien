@@ -31,6 +31,7 @@ namespace
 {
     auto constexpr HoveredTimer = 0.5f;
     auto constexpr GroupAccentBarWidth = 3.0f;
+    auto constexpr BadgeIconScale = 0.8f;
     auto constexpr ChipPaddingX = 8.0f;
     auto constexpr ChipPaddingY = 2.0f;
     auto constexpr ChipDotTextSpacing = 6.0f;
@@ -164,7 +165,7 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
                 OverlayController::get().showMessage("Select a position in the simulation view");
             }
         }
-        AlienGui::Tooltip("Select a position with the mouse");
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text("Select a position with the mouse"));
         if (parameters._getMousePickerEnabledFunc.value()()) {
             if (auto pos = parameters._getMousePickerPositionFunc.value()()) {
                 valueX = pos->x;
@@ -572,7 +573,7 @@ bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, in
             StringHelper::copy(buffer, bufferSize, (*parameters._generateValueFunc)());
             result = true;
         }
-        AlienGui::Tooltip("Generate a random name");
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text("Generate a random name"));
     }
     if (parameters._defaultValue) {
         ImGui::SameLine();
@@ -1313,7 +1314,7 @@ bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bo
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
     auto result = ImGui::Button(parameters._name.c_str(), {scale(parameters._width), 0});
     if (parameters._tooltip.has_value()) {
-        AlienGui::Tooltip(*parameters._tooltip);
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(*parameters._tooltip));
     }
     if (result) {
         value = !value;
@@ -1437,7 +1438,7 @@ void AlienGui::Text(TextParameters const& parameters)
     }
 
     if (text != parameters._text) {
-        Tooltip(parameters._text, false);
+        Tooltip(TooltipParameters().text(parameters._text).delay(false));
     }
 }
 
@@ -1897,7 +1898,7 @@ namespace
         auto iconPos = RealVector2D{headerMax.x - iconSize - rightMargin, headerMin.y + (headerMax.y - headerMin.y - iconSize) * 0.5f};
 
         auto result = AlienGui::MaximizeButton(iconPos, iconSize, false);
-        AlienGui::Tooltip("Open in a separate window");
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text("Open in a separate window"));
 
         ImGui::SetCursorScreenPos(savedCursorPos);
         return result;
@@ -1986,13 +1987,17 @@ void AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedInd
     auto lowerY = unscrolledCursorPos.y + textHeight + style.FramePadding.y;
     auto accentBarWidth = scale(GroupAccentBarWidth);
     auto textIndent = scale(GroupTextIndent);
+    auto badgeIconSize = ImGui::GetFontSize() * BadgeIconScale;
+    auto badgeIconWidth = parameters._badgeIcon.empty()
+        ? 0.0f
+        : ImGui::GetFont()->CalcTextSizeA(badgeIconSize, FLT_MAX, 0.0f, parameters._badgeIcon.c_str()).x + style.ItemInnerSpacing.x;
 
     auto posX = leftX;
     for (auto const& [index, text] : parameters._texts | boost::adaptors::indexed(0)) {
         auto isSelected = toInt(index) == selectedIndex;
         auto badge = index < toInt(parameters._tabBadges.size()) ? parameters._tabBadges.at(index) : std::string();
         auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-        auto badgeWidth = badge.empty() ? 0.0f : style.ItemInnerSpacing.x + ImGui::CalcTextSize(badge.c_str()).x;
+        auto badgeWidth = badge.empty() ? 0.0f : style.ItemInnerSpacing.x + badgeIconWidth + ImGui::CalcTextSize(badge.c_str()).x;
         auto tabWidth = accentBarWidth + textIndent * 2 + textWidth + badgeWidth;
 
         ImGui::SetCursorScreenPos(ImVec2(posX, upperY));
@@ -2008,7 +2013,13 @@ void AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedInd
         auto textPosX = posX + accentBarWidth + textIndent;
         drawList->AddText(ImVec2(textPosX, unscrolledCursorPos.y), isSelected ? Const::GroupHighTextColor : Const::GroupTextColor, text.c_str());
         if (!badge.empty()) {
-            drawList->AddText(ImVec2(textPosX + textWidth + style.ItemInnerSpacing.x, unscrolledCursorPos.y), parameters._badgeColor, badge.c_str());
+            auto badgePosX = textPosX + textWidth + style.ItemInnerSpacing.x;
+            if (!parameters._badgeIcon.empty()) {
+                auto iconPos = ImVec2(badgePosX, unscrolledCursorPos.y + (textHeight - badgeIconSize) / 2);
+                drawList->AddText(ImGui::GetFont(), badgeIconSize, iconPos, parameters._badgeColor, parameters._badgeIcon.c_str());
+                badgePosX += badgeIconWidth;
+            }
+            drawList->AddText(ImVec2(badgePosX, unscrolledCursorPos.y), parameters._badgeColor, badge.c_str());
         }
         posX += tabWidth + scale(GroupTabSpacing);
     }
@@ -2225,7 +2236,7 @@ namespace
 
         auto tooltip = parameters._tooltip.value_or(parameters._name);
         if (!tooltip.empty()) {
-            AlienGui::Tooltip(tooltip);
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text(tooltip));
         }
         if (clicked) {
             pendingAction = parameters._action;
@@ -2258,7 +2269,7 @@ namespace
                     ImGui::CloseCurrentPopup();
                 }
                 if (parameters._tooltip.has_value()) {
-                    AlienGui::Tooltip(*parameters._tooltip);
+                    AlienGui::Tooltip(AlienGui::TooltipParameters().text(*parameters._tooltip));
                 }
                 auto iconColor = parameters._disabled ? Const::ToolbarButtonDisabledTextColor : Const::ToolbarButtonTextColor;
                 auto textColor = parameters._disabled ? Const::TextFaintColor : Const::TextBaseColor;
@@ -2357,7 +2368,7 @@ void AlienGui::Toolbar(ToolbarParameters const& parameters, std::vector<ToolbarI
             {overflowPos + (overflowSize - iconSize.x) / 2, startPos.y + (toolbarHeight - iconSize.y) / 2},
             hovered || opened ? Const::ToolbarOverflowHoveredColor : Const::ToolbarOverflowColor,
             ICON_FA_ELLIPSIS_H);
-        Tooltip("Show remaining actions");
+        Tooltip(TooltipParameters().text("Show remaining actions"));
 
         auto menuWidth = 0.0f;
         for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
@@ -2744,7 +2755,7 @@ bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
     ImGui::PopStyleColor(4);
 
     if (parameters._tooltip) {
-        AlienGui::Tooltip(*parameters._tooltip);
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(*parameters._tooltip));
     }
 
     return result;
@@ -2782,21 +2793,41 @@ void AlienGui::Spinner(SpinnerParameters const& parameters)
     AlienGui::RotateEnd(spinnerAngle, drawList);
 }
 
-void AlienGui::StatusBar(std::vector<std::string> const& textItems)
+void AlienGui::StatusBar(StatusBarParameters const& parameters)
 {
-    std::string text;
-    for (auto const& textItem : textItems) {
-        text += " " ICON_FA_INFO_CIRCLE " " + textItem + " ";
-    }
     AlienGui::Separator();
+
+    if (parameters._warningItem.has_value()) {
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
+        AlienGui::Text(AlienGui::TextParameters().text(" " ICON_FA_EXCLAMATION_TRIANGLE " " + *parameters._warningItem + " "));
+        ImGui::PopStyleColor();
+        if (parameters._warningClickedFunc.has_value()) {
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+            }
+            if (ImGui::IsItemClicked()) {
+                (*parameters._warningClickedFunc)();
+            }
+        }
+        if (parameters._warningTooltip.has_value()) {
+            Tooltip(TooltipParameters().text(*parameters._warningTooltip).delay(false));
+        }
+        ImGui::SameLine(0, 0);
+    }
+
+    std::string text;
+    for (auto const& infoItem : parameters._infoItems) {
+        text += " " ICON_FA_INFO_CIRCLE " " + infoItem + " ";
+    }
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::StatusBarTextColor);
     AlienGui::Text(AlienGui::TextParameters().text(text));
     ImGui::PopStyleColor();
 }
 
-void AlienGui::Tooltip(std::string const& text, bool delay, ImGuiHoveredFlags flags)
+void AlienGui::Tooltip(TooltipParameters const& parameters)
 {
-    if (ImGui::IsItemHovered(flags) && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
+    if (ImGui::IsItemHovered(parameters._hoveredFlags) && (!parameters._delay || GImGui->HoveredIdTimer > HoveredTimer)) {
+        auto text = parameters._textFunc.has_value() ? (*parameters._textFunc)() : parameters._text;
         ImGui::BeginTooltip();
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -2804,13 +2835,6 @@ void AlienGui::Tooltip(std::string const& text, bool delay, ImGuiHoveredFlags fl
         ImGui::PopTextWrapPos();
         ImGui::PopStyleColor();
         ImGui::EndTooltip();
-    }
-}
-
-void AlienGui::Tooltip(std::function<std::string()> const& textFunc, bool delay)
-{
-    if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
-        Tooltip(textFunc(), delay);
     }
 }
 
@@ -3496,7 +3520,7 @@ ImVec2 AlienGui::RotationCenter(ImDrawList* drawList)
 bool AlienGui::RevertButton(std::string const& id)
 {
     auto result = ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
-    AlienGui::Tooltip("Revert changes", true, ImGuiHoveredFlags_None);
+    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Revert changes").hoveredFlags(ImGuiHoveredFlags_None));
     return result;
 }
 

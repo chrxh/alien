@@ -117,7 +117,7 @@ void _BrowserGalleryWidget::process()
 
     // The tile height follows the tile width, so an appearing scrollbar must not change the available width
     if (ImGui::BeginChild(
-            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserHelper::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+            "##tiles", {0, ImGui::GetContentRegionAvail().y - BrowserHelper::calcFooterHeight()}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto layout = calcTileLayout();
 
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
@@ -139,7 +139,7 @@ void _BrowserGalleryWidget::processPlaceholderTiles()
     ImGui::PushID("GalleryPlaceholder");
 
     if (ImGui::BeginChild(
-            "##tiles", {0, ImGui::GetContentRegionAvail().y - scale(BrowserHelper::WorkspaceBottomSpace)}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+            "##tiles", {0, ImGui::GetContentRegionAvail().y - BrowserHelper::calcFooterHeight()}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto layout = calcTileLayout();
         auto tileHeight = calcTileHeight(layout.tileWidth);
         auto numRows = std::max(1, toInt(std::ceil(ImGui::GetContentRegionAvail().y / (tileHeight + ImGui::GetStyle().ItemSpacing.y))));
@@ -285,7 +285,8 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
 
         if (_data->currentWorkspace.workspaceType == WorkspaceType_Private && rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip(rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community");
+            AlienGui::Tooltip(
+                AlienGui::TooltipParameters().text(rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community"));
             ImGui::SameLine();
         }
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceTextColor);

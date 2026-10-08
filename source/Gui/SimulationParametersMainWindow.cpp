@@ -317,7 +317,7 @@ void SimulationParametersMainWindow::processStatusBar()
     std::vector<std::string> statusItems;
     statusItems.emplace_back("CTRL + click on a slider to type in a precise value");
 
-    AlienGui::StatusBar(statusItems);
+    AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems));
 }
 
 void SimulationParametersMainWindow::processLocationTable()
