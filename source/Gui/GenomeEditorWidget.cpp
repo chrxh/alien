@@ -547,8 +547,8 @@ void _GenomeEditorWidget::onFixAllIssues()
 {
     GenericMessageDialog::get().yesNo(
         "Fix all warnings",
-        "Do you really want to apply the corrections that offspring would receive? Genes and nodes may be removed or voided. A void first or last "
-        "node becomes a base cell.",
+        "Do you really want to apply the corrections that offspring would receive? "
+        "Genes and nodes may be removed or voided.",
         [this] { this->fixAllIssuesIntern(); });
 }
 
