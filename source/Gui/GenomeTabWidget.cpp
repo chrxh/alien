@@ -238,12 +238,15 @@ void _GenomeTabWidget::processRightField()
 {
     auto numWarnings = countWarningsWithoutFollowUps(_editData->genomeIssues);
     auto geneNetworkBadge = numWarnings > 0 ? std::to_string(numWarnings) : std::string();
+    auto selectedTabIndex = toInt(_selectedGenomeView);
     AlienGui::GroupTabs(
         AlienGui::GroupTabsParameters().texts({"Phenotype", "Gene network"}).tabBadges({"", geneNetworkBadge}).badgeIcon(ICON_FA_EXCLAMATION_TRIANGLE),
-        _selectedRightFieldTab);
-    if (_selectedRightFieldTab == PhenotypeTab) {
+        selectedTabIndex);
+    _selectedGenomeView = static_cast<GenomeView>(selectedTabIndex);
+
+    if (_selectedGenomeView == GenomeView::Phenotype) {
         _simulatedPreviewWidget->process();
-    } else if (_selectedRightFieldTab == GeneNetworkTab) {
+    } else if (_selectedGenomeView == GenomeView::GeneNetwork) {
         _simulatedPreviewWidget->processInBackground();
         _geneGraphWidget.process(_editData);
     }
@@ -266,7 +269,7 @@ void _GenomeTabWidget::processStatusBar()
     if (numWarnings > 0) {
         parameters.warningItem(std::to_string(numWarnings) + (numWarnings == 1 ? " warning" : " warnings"))
             .warningTooltip("Click to show the warnings in the gene network, where the affected genes and constructors are highlighted.")
-            .warningClickedFunc([this] { _selectedRightFieldTab = GeneNetworkTab; });
+            .warningClickedFunc([this] { _selectedGenomeView = GenomeView::GeneNetwork; });
     }
     AlienGui::StatusBar(parameters);
 

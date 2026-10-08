@@ -44,8 +44,11 @@ public:
     void revertChanges();
 
 private:
-    static int constexpr PhenotypeTab = 0;
-    static int constexpr GeneNetworkTab = 1;
+    enum class GenomeView
+    {
+        Phenotype,
+        GeneNetwork
+    };
 
     _GenomeTabWidget(
         GenomeWindowEditData const& genomeEditData,
@@ -66,7 +69,7 @@ private:
     NodeEditorWidget _nodeEditorWidget;
     PreviewWidget _simulatedPreviewWidget;
     GeneGraphWidget _geneGraphWidget;
-    int _selectedRightFieldTab = PhenotypeTab;
+    GenomeView _selectedGenomeView = GenomeView::Phenotype;
 
     // Creature data
     GenomeTabEditData _editData;
