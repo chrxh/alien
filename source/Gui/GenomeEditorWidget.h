@@ -4,7 +4,10 @@
 #include <Data/GenomeDesc.h>
 
 #include "Definitions.h"
+#include "GeneGraphWidget.h"
 #include "MutationRatesWidget.h"
+
+struct GenomeIssue;
 
 class _GenomeEditorWidget
 {
@@ -19,10 +22,21 @@ private:
     void processHeaderData();
 
     void processStructureTree();
-    void
-    processGeneNode(int geneIndex, GeneDesc const& gene, bool isUnreachable, bool scrollToSelection, ColorVector<FloatColorRGB> const& customizationColors);
-    void processNodeLeaf(int geneIndex, int nodeIndex, GeneDesc const& gene, NodeDesc const& node, ColorVector<FloatColorRGB> const& customizationColors);
+    void processGeneNode(
+        int geneIndex,
+        GeneDesc const& gene,
+        std::vector<GenomeIssue> const& geneIssues,
+        bool scrollToSelection,
+        ColorVector<FloatColorRGB> const& customizationColors);
+    void processNodeLeaf(
+        int geneIndex,
+        int nodeIndex,
+        GeneDesc const& gene,
+        NodeDesc const& node,
+        std::vector<GenomeIssue> const& geneIssues,
+        ColorVector<FloatColorRGB> const& customizationColors);
     void processStructureButtons();
+    void processValidation();
 
     void onAddGene();
     void onRemoveGene();
@@ -34,11 +48,16 @@ private:
     void onMoveNodeUpward();
     void onMoveNodeDownward();
 
+    void onFixAllIssues();
+
     void removeGeneIntern();
     void moveGeneUpwardIntern();
     void moveGeneDownwardIntern();
+    void fixAllIssuesIntern();
 
     MutationRatesWidget _mutationRatesWidget;
+    GeneGraphWidget _geneGraphWidget;
+    float _validationHeight = 0;
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;

@@ -9,6 +9,8 @@
 #include <Data/DescValidationService.h>
 #include <Data/GenomeDescAccessService.h>
 
+#include <EngineInterface/GenomeValidationService.h>
+
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"
 #include "GenomeEditorWidget.h"
@@ -41,6 +43,7 @@ GenomeDesc _GenomeTabWidget::normalizeForEditor(GenomeDesc genome)
 void _GenomeTabWidget::process()
 {
     doLayout();
+    _editData->genomeIssues = GenomeValidationService::get().validate(_editData->genome);
 
     if (ImGui::BeginChild("CreatureTab", ImVec2(0, -_statusBarHeight))) {
         ImGui::PushID(_editData->id);
@@ -236,6 +239,26 @@ void _GenomeTabWidget::processStatusBar()
     statusItems.emplace_back(std::to_string(numNodes) + (numNodes == 1 ? " node" : " nodes"));
     AlienGui::StatusBar(statusItems);
 
+    // Follow-ups are not counted since they disappear together with their cause
+    auto countIssues = [&](GenomeIssueSeverity severity) {
+        return toInt(std::ranges::count_if(
+            _editData->genomeIssues, [&](auto const& issue) { return !issue.causeIssueIndex.has_value() && issue.getSeverity() == severity; }));
+    };
+    auto numErrors = countIssues(GenomeIssueSeverity::Error);
+    auto numWarnings = countIssues(GenomeIssueSeverity::Warning);
+    if (numErrors > 0) {
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::DangerColor.Value);
+        AlienGui::Text(ICON_FA_TIMES_CIRCLE " " + std::to_string(numErrors) + (numErrors == 1 ? " error " : " errors "));
+        ImGui::PopStyleColor();
+    }
+    if (numWarnings > 0) {
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
+        AlienGui::Text(ICON_FA_EXCLAMATION_TRIANGLE " " + std::to_string(numWarnings) + (numWarnings == 1 ? " warning " : " warnings "));
+        ImGui::PopStyleColor();
+    }
+
     _statusBarHeight = ImGui::GetCursorPosY() - startPosY;
 }
 
@@ -254,6 +277,7 @@ void _GenomeTabWidget::doLayout()
         _layoutData->desiredConfigurationPreviewWidth = width / 2;
         // The tree and the neural net editor benefit from height, the property rows above them do not fill theirs
         _layoutData->structureHeight = height * 0.6f;
+        _layoutData->geneGraphHeight = height * 0.25f;
         _layoutData->neuralNetEditorHeight = height * 0.6f;
         _layoutData->initialized = true;
         _origLayoutData = _layoutData->clone();
@@ -273,6 +297,7 @@ void _GenomeTabWidget::doLayout()
             _layoutData->inspectorWidth *= scalingX;
             _layoutData->desiredConfigurationPreviewWidth *= scalingX;
             _layoutData->structureHeight *= scalingY;
+            _layoutData->geneGraphHeight *= scalingY;
             _layoutData->neuralNetEditorHeight *= scalingY;
             *_origLayoutData = *_layoutData;
             return;
@@ -287,9 +312,17 @@ void _GenomeTabWidget::doLayout()
             return;
         }
     }
+    // The tree keeps a minimum height between the header above and the gene graph below
+    auto treeHeight = _layoutData->structureHeight - _layoutData->geneGraphHeight;
     if (_origLayoutData->structureHeight != _layoutData->structureHeight) {
         auto headerHeight = ImGui::GetContentRegionAvail().y - _layoutData->structureHeight;
-        if (_layoutData->structureHeight < minSectionHeight || headerHeight < minSectionHeight) {
+        if (treeHeight < minSectionHeight || headerHeight < minSectionHeight) {
+            *_layoutData = *_origLayoutData;
+            return;
+        }
+    }
+    if (_origLayoutData->geneGraphHeight != _layoutData->geneGraphHeight) {
+        if (_layoutData->geneGraphHeight < minSectionHeight || treeHeight < minSectionHeight) {
             *_layoutData = *_origLayoutData;
             return;
         }

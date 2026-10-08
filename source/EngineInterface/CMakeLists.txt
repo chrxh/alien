@@ -5,6 +5,8 @@ add_library(EngineInterface
     Definitions.h
     ExtinctLineageAccumulator.cpp
     ExtinctLineageAccumulator.h
+    GenomeValidationService.cpp
+    GenomeValidationService.h
     GeometryBuffers.cpp
     GeometryBuffers.h
     InspectedEntityIds.h

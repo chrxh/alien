@@ -1,6 +1,7 @@
 target_sources(EngineInterfaceTests
 PUBLIC
     ExtinctLineageAccumulatorTests.cpp
+    GenomeValidationServiceTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(EngineInterfaceTests Base)

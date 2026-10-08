@@ -34,6 +34,7 @@ PUBLIC
     GarbageCollectorTests.cpp
     GeneCycleRemovalTests.cpp
     GeneratorTests.cpp
+    GenomeValidationParityTests.cpp
     GeometryMutationTests.cpp
     GeometryTests.cpp
     InjectorTests.cpp

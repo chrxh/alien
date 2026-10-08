@@ -2,6 +2,7 @@
 
 #include <Data/GenomeDesc.h>
 
+#include <EngineInterface/GenomeValidationService.h>
 #include <EngineInterface/ShapeGenerator.h>
 
 #include "Definitions.h"
@@ -19,6 +20,7 @@ struct _GenomeTabEditData
     GenomeDesc genome;
     GenomeDesc origGenome;
     bool changesMade = false;  // true means diff between genome and origGenome
+    std::vector<GenomeIssue> genomeIssues;
 
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
