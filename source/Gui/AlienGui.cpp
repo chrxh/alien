@@ -1355,14 +1355,32 @@ namespace
             return firstLine;
         }
 
-        auto result = firstLine;
-        while (!result.empty() && ImGui::CalcTextSize((result + "...").c_str()).x > availableWidth) {
-            result.pop_back();
-            while (!result.empty() && (static_cast<unsigned char>(result.back()) & 0xc0) == 0x80) {  // Skip UTF-8 continuation bytes
-                result.pop_back();
+        auto isCharBoundary = [&](size_t length) { return length == firstLine.size() || (static_cast<unsigned char>(firstLine.at(length)) & 0xc0) != 0x80; };
+        auto fitsWithEllipsis = [&](size_t length) { return ImGui::CalcTextSize((firstLine.substr(0, length) + "...").c_str()).x <= availableWidth; };
+
+        auto fittingLength = size_t{0};
+        auto exceedingLength = firstLine.size() + 1;
+        while (true) {
+            auto length = fittingLength + (exceedingLength - fittingLength) / 2;
+            while (length > fittingLength && !isCharBoundary(length)) {
+                --length;
+            }
+            if (length == fittingLength) {
+                length = fittingLength + 1;
+                while (length < firstLine.size() && !isCharBoundary(length)) {
+                    ++length;
+                }
+                if (length >= exceedingLength) {
+                    break;
+                }
+            }
+            if (fitsWithEllipsis(length)) {
+                fittingLength = length;
+            } else {
+                exceedingLength = length;
             }
         }
-        return result + "...";
+        return firstLine.substr(0, fittingLength) + "...";
     }
 }
 
