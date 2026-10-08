@@ -36,8 +36,8 @@ namespace
     auto constexpr TaskPollInterval = std::chrono::milliseconds(50);
     auto constexpr ServerStoppedMessage = "The MCP server has been stopped.";
     auto constexpr MaxCommandLogEntries = size_t{1000};
-    auto constexpr MaxResultLength = size_t{1000};
-    auto constexpr MaxResultLines = size_t{20};
+    auto constexpr MaxLogTextLength = size_t{1000};
+    auto constexpr MaxLogTextLines = size_t{20};
 }
 
 McpController::~McpController()
@@ -308,8 +308,8 @@ void McpController::addCommandLogEntry(std::string const& toolName, boost::json:
 
     _commandLog.emplace_back(McpCommandLogEntry{
         .time = std::chrono::system_clock::now(),
-        .command = command,
-        .result = StringHelper::truncate(result.text, MaxResultLength, MaxResultLines),
+        .command = StringHelper::truncate(command, MaxLogTextLength, MaxLogTextLines),
+        .result = StringHelper::truncate(result.text, MaxLogTextLength, MaxLogTextLines),
         .isError = result.isError});
     if (_commandLog.size() > MaxCommandLogEntries) {
         _commandLog.pop_front();
