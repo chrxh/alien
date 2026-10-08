@@ -16,15 +16,7 @@
 namespace
 {
     auto constexpr MaxGenesWithSeparation = 2;
-}
 
-GenomeIssueSeverity GenomeIssue::getSeverity() const
-{
-    return removesGene || !voidedNodeIndices.empty() ? GenomeIssueSeverity::Error : GenomeIssueSeverity::Warning;
-}
-
-namespace
-{
     struct NodeState
     {
         bool isVoid = false;

@@ -18,12 +18,6 @@ enum class GenomeIssueType
     InjectsRemovedGene
 };
 
-enum class GenomeIssueSeverity
-{
-    Error,
-    Warning
-};
-
 // A part of a genome that the simulation corrects in the genome of every offspring. Gene and node indices refer to the uncorrected genome.
 struct GenomeIssue
 {
@@ -34,8 +28,6 @@ struct GenomeIssue
     std::vector<int> relatedGeneIndices;  // The genes of a cycle, the genes keeping their separation or the removed gene
     bool removesGene = false;
     std::optional<int> causeIssueIndex;
-
-    GenomeIssueSeverity getSeverity() const;
 };
 
 // Replays the corrections of MutationProcessor::correctGenome and GeneGraphProcessor in the same order

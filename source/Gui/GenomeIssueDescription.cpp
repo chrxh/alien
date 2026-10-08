@@ -131,13 +131,13 @@ namespace
             return IssueText{
                 .title = "Constructs a removed gene",
                 .problem = "Constructs " + toGeneList(issue.relatedGeneIndices) + ", which is removed.",
-                .explanation = "The constructed gene is removed because of another issue.",
+                .explanation = "The constructed gene is removed because of another warning.",
                 .consequence = "The constructor is turned off."};
         case GenomeIssueType::InjectsRemovedGene:
             return IssueText{
                 .title = "Injects a removed gene",
                 .problem = "Injects " + toGeneList(issue.relatedGeneIndices) + ", which is removed.",
-                .explanation = "The injected gene is removed because of another issue.",
+                .explanation = "The injected gene is removed because of another warning.",
                 .consequence = "The injector uses the first remaining gene instead."};
         default:
             return IssueText();
@@ -147,28 +147,19 @@ namespace
 
 char const* GenomeIssueDescription::getIcon(GenomeIssue const& issue)
 {
-    if (issue.causeIssueIndex.has_value()) {
-        return ICON_FA_LONG_ARROW_ALT_RIGHT;
-    }
-    return issue.getSeverity() == GenomeIssueSeverity::Error ? ICON_FA_TIMES_CIRCLE : ICON_FA_EXCLAMATION_TRIANGLE;
+    return issue.causeIssueIndex.has_value() ? ICON_FA_LONG_ARROW_ALT_RIGHT : ICON_FA_EXCLAMATION_TRIANGLE;
 }
 
 ImColor GenomeIssueDescription::getColor(GenomeIssue const& issue)
 {
-    if (issue.causeIssueIndex.has_value()) {
-        return Const::TextDecentColor;
-    }
-    return issue.getSeverity() == GenomeIssueSeverity::Error ? Const::DangerColor : Const::WarningColor;
+    return issue.causeIssueIndex.has_value() ? Const::TextDecentColor : Const::WarningColor;
 }
 
 namespace
 {
     int getMarkerPriority(GenomeIssue const& issue)
     {
-        if (issue.causeIssueIndex.has_value()) {
-            return 0;
-        }
-        return issue.getSeverity() == GenomeIssueSeverity::Error ? 2 : 1;
+        return issue.causeIssueIndex.has_value() ? 0 : 1;
     }
 }
 

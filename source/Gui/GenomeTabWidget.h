@@ -6,6 +6,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
+#include "GeneGraphWidget.h"
 #include "GenomeTabLayoutData.h"
 
 class _GenomeTabWidget
@@ -50,7 +51,7 @@ private:
         std::optional<int> lineageId = std::nullopt);
 
     void processEditors();
-    void processPreview();
+    void processRightField();
     void processStatusBar();
 
     void doLayout();
@@ -60,6 +61,8 @@ private:
     GeneEditorWidget _geneEditorWidget;
     NodeEditorWidget _nodeEditorWidget;
     PreviewWidget _simulatedPreviewWidget;
+    GeneGraphWidget _geneGraphWidget;
+    int _selectedRightFieldTab = 0;
 
     // Creature data
     GenomeTabEditData _editData;

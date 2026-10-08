@@ -1957,6 +1957,67 @@ bool AlienGui::Group(GroupParameters const& parameters)
     return result;
 }
 
+bool AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex)
+{
+    auto drawList = ImGui::GetWindowDrawList();
+    auto style = ImGui::GetStyle();
+
+    ImGui::Spacing();
+
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto groupWidth = ImGui::GetContentRegionAvail().x;
+    auto textHeight = ImGui::GetTextLineHeight();
+    auto upperY = cursorPos.y - style.FramePadding.y;
+    auto lowerY = cursorPos.y + textHeight + style.FramePadding.y;
+    auto barWidth = scale(3.0f);
+    auto textIndent = scale(GroupTextIndent);
+
+    auto result = false;
+    auto posX = cursorPos.x;
+    for (auto const& [index, text] : parameters._texts | boost::adaptors::indexed(0)) {
+        auto isSelected = toInt(index) == selectedIndex;
+        auto badge = index < toInt(parameters._badges.size()) ? parameters._badges.at(index) : std::string();
+        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+        auto badgeWidth = badge.empty() ? 0.0f : style.ItemInnerSpacing.x + ImGui::CalcTextSize(badge.c_str()).x;
+
+        // Every tab reserves the space of the accent bar so that the widths do not change on selection
+        auto tabWidth = barWidth + textIndent * 2 + textWidth + badgeWidth;
+        ImGui::SetCursorScreenPos(ImVec2(posX, upperY));
+        ImGui::PushID(toInt(index));
+        if (ImGui::InvisibleButton("##tab", ImVec2(tabWidth, lowerY - upperY)) && !isSelected) {
+            selectedIndex = toInt(index);
+            result = true;
+        }
+        auto isHovered = ImGui::IsItemHovered();
+        ImGui::PopID();
+
+        auto color = isSelected ? Const::GroupHighColor : (isHovered ? Const::HeaderHoveredColor : Const::GroupDefaultColor);
+        drawList->AddRectFilled(ImVec2(posX, upperY), ImVec2(posX + tabWidth, lowerY), color, style.FrameRounding);
+        if (isSelected) {
+            drawList->AddRectFilled(
+                ImVec2(posX, upperY), ImVec2(posX + barWidth, lowerY), Const::GroupAccentBarColor, style.FrameRounding, ImDrawFlags_RoundCornersLeft);
+        }
+        auto textPosX = posX + barWidth + textIndent;
+        drawList->AddText(ImVec2(textPosX, cursorPos.y), isSelected ? Const::GroupHighTextColor : Const::GroupTextColor, text.c_str());
+        if (!badge.empty()) {
+            drawList->AddText(ImVec2(textPosX + textWidth + style.ItemInnerSpacing.x, cursorPos.y), parameters._badgeColor, badge.c_str());
+        }
+        posX += tabWidth + scale(GroupTabSpacing);
+    }
+
+    // The rest of the header line keeps the look of an ordinary group
+    if (posX < cursorPos.x + groupWidth) {
+        drawList->AddRectFilled(ImVec2(posX, upperY), ImVec2(cursorPos.x + groupWidth, lowerY), Const::GroupDefaultColor, style.FrameRounding);
+    }
+
+    ImGui::SetCursorScreenPos(cursorPos);
+    ImGui::Dummy(ImVec2(groupWidth, textHeight));
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    return result;
+}
+
 void AlienGui::ListBox(ListBoxParameters const& parameters)
 {
     auto drawList = ImGui::GetWindowDrawList();

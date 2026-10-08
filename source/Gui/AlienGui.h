@@ -35,6 +35,7 @@ class AlienGui
 {
 public:
     static auto constexpr GroupTextIndent = 8.0f;
+    static auto constexpr GroupTabSpacing = 4.0f;
 
     static void HelpMarker(std::string const& text);
 
@@ -459,6 +460,15 @@ public:
     };
     // Returns true if the expand button has been clicked
     static bool Group(GroupParameters const& parameters);
+
+    struct GroupTabsParameters
+    {
+        MEMBER(GroupTabsParameters, std::vector<std::string>, texts, {});
+        MEMBER(GroupTabsParameters, std::vector<std::string>, badges, {});  // Drawn behind the text of the tab with the same index, empty for none
+        MEMBER(GroupTabsParameters, ImColor, badgeColor, Const::WarningColor);
+    };
+    // Group header split into tabs, the selected one is highlighted; returns true if another tab has been selected
+    static bool GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex);
 
     struct ListBoxParameters
     {
