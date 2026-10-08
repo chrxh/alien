@@ -1,7 +1,6 @@
 #pragma once
 
-#include <Data/CellTypeConstants.h>
-
+#include "CellTypeConstants.h"
 #include "Definitions.h"
 
 struct ShapeGeneratorResult

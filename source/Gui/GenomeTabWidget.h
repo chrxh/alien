@@ -44,6 +44,9 @@ public:
     void revertChanges();
 
 private:
+    static int constexpr PhenotypeTab = 0;
+    static int constexpr GeneNetworkTab = 1;
+
     _GenomeTabWidget(
         GenomeWindowEditData const& genomeEditData,
         GenomeDesc const& genome,
@@ -51,6 +54,7 @@ private:
         std::optional<int> lineageId = std::nullopt);
 
     void processEditors();
+    void refreshGenomeIssues();
     void processRightField();
     void processStatusBar();
 
@@ -62,7 +66,7 @@ private:
     NodeEditorWidget _nodeEditorWidget;
     PreviewWidget _simulatedPreviewWidget;
     GeneGraphWidget _geneGraphWidget;
-    int _selectedRightFieldTab = 0;
+    int _selectedRightFieldTab = PhenotypeTab;
 
     // Creature data
     GenomeTabEditData _editData;

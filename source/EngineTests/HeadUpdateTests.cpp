@@ -4,8 +4,8 @@
 
 #include <Data/DescEditService.h>
 #include <Data/Descs.h>
+#include <Data/ShapeGenerator.h>
 
-#include <EngineInterface/ShapeGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <EngineTestData/DescTestDataFactory.h>

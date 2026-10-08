@@ -141,7 +141,7 @@ void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightC
     _dialog.process();
 }
 
-void MutationRatesWidget::processSummary(MutationRatesDesc& mutationRates, float rightColumnWidth)
+void MutationRatesWidget::processAsSingleRow(MutationRatesDesc& mutationRates, float rightColumnWidth)
 {
     auto activeMutationTypes = getActiveMutationTypes(mutationRates);
     auto tooltip = EntityAttributeHelp::get(EntityAttribute::GenomeMutationRatesSummary);

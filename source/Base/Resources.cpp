@@ -17,7 +17,6 @@ namespace Const
     std::filesystem::path const TraceFilename = "trace.txt";
     std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
     std::filesystem::path const AutosaveFile = AutosavePath / AutosaveFileWithoutPath;
-    std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const LogoFilename = ImagesPath / "logo.png";

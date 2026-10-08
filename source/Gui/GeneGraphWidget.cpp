@@ -2,19 +2,18 @@
 
 #include <algorithm>
 #include <cmath>
-#include <deque>
 #include <limits>
 #include <map>
 #include <ranges>
-#include <set>
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptor/indexed.hpp>
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <Fonts/IconsFontAwesome5.h>
+#include <Base/StringHelper.h>
+
+#include <Data/GenomeDescAccessService.h>
 
 #include "AlienGui.h"
 #include "GenomeIssueDescription.h"
@@ -32,29 +31,26 @@ namespace
     auto constexpr VerticalGap = 32.0f;
     auto constexpr Margin = 10.0f;
     auto constexpr BendSize = 14.0f;
-    auto constexpr ArrowSize = 7.0f;
+    auto constexpr ArrowLength = 10.0f;
+    auto constexpr ArrowWidth = 9.0f;
     auto constexpr DashLength = 4.0f;
     auto constexpr EdgeThickness = 1.3f;
     auto constexpr HighlightedEdgeThickness = 2.4f;
     auto constexpr EdgeHoverDistance = 5.0f;
     auto constexpr NumCurveSegments = 32;
 
-    // All constructors of a gene that construct the same gene
     struct GeneEdge
     {
-        int sourceGeneIndex = 0;
-        int targetGeneIndex = 0;
-        std::vector<int> nodeIndices;
-        bool separation = false;
+        GenomeDescAccessService::GeneConstruction construction;
         std::vector<GenomeIssue> issues;
     };
 
     struct GraphLayout
     {
         std::vector<int> layers;
-        std::vector<ImVec2> boxPositions;  // Upper left corners relative to the canvas origin
+        std::vector<ImVec2> boxOffsets;
         ImVec2 boxSize;
-        float boxAreaWidth = 0;  // Without the space for the arrows bending around the right side
+        float boxAreaWidth = 0;
         ImVec2 canvasSize;
     };
 
@@ -66,87 +62,77 @@ namespace
         ImVec2 end;
     };
 
-    bool containsNode(GeneEdge const& edge, int nodeIndex)
+    bool isConstructedByNode(GeneEdge const& edge, int nodeIndex)
     {
-        return std::ranges::find(edge.nodeIndices, nodeIndex) != edge.nodeIndices.end();
+        auto const& nodeIndices = edge.construction.constructorNodeIndices;
+        return std::ranges::find(nodeIndices, nodeIndex) != nodeIndices.end();
     }
 
-    // True if the issue turns off a constructor of the edge or its separation
-    bool affectsEdge(GenomeIssue const& issue, GeneEdge const& edge)
+    bool turnsOffConstructorOrSeparation(GenomeIssue const& issue, GeneEdge const& edge)
     {
-        if (issue.geneIndex != edge.sourceGeneIndex) {
+        if (issue.geneIndex != edge.construction.constructingGeneIndex) {
             return false;
         }
         switch (issue.type) {
         case GenomeIssueType::CycleAvoidingRootGene:
         case GenomeIssueType::TooManyGenesWithSeparation:
         case GenomeIssueType::ConstructsRemovedGene:
-            return issue.nodeIndex.has_value() && containsNode(edge, issue.nodeIndex.value());
+            return issue.nodeIndex.has_value() && isConstructedByNode(edge, issue.nodeIndex.value());
         default:
-            return std::ranges::any_of(issue.voidedNodeIndices, [&](int nodeIndex) { return containsNode(edge, nodeIndex); });
+            return std::ranges::any_of(issue.cutOffNodeIndices, [&](int nodeIndex) { return isConstructedByNode(edge, nodeIndex); });
         }
     }
 
     std::vector<GeneEdge> collectEdges(GenomeDesc const& genome, std::vector<GenomeIssue> const& issues)
     {
-        auto numGenes = toInt(genome._genes.size());
-        std::map<std::pair<int, int>, GeneEdge> edgeByGenePair;
-        for (auto const& [geneIndex, gene] : genome._genes | boost::adaptors::indexed(0)) {
-            for (auto const& [nodeIndex, node] : gene._nodes | boost::adaptors::indexed(0)) {
-                if (!node._constructor.has_value() || node._constructor->_geneIndex < 0 || node._constructor->_geneIndex >= numGenes) {
-                    continue;
-                }
-                auto sourceGeneIndex = toInt(geneIndex);
-                auto targetGeneIndex = node._constructor->_geneIndex;
-                auto& edge =
-                    edgeByGenePair
-                        .try_emplace({sourceGeneIndex, targetGeneIndex}, GeneEdge{.sourceGeneIndex = sourceGeneIndex, .targetGeneIndex = targetGeneIndex})
-                        .first->second;
-                edge.nodeIndices.emplace_back(toInt(nodeIndex));
-                edge.separation = edge.separation || node._constructor->_separation;
-            }
-        }
-
         std::vector<GeneEdge> result;
-        for (auto& edge : edgeByGenePair | std::views::values) {
-            std::ranges::copy_if(issues, std::back_inserter(edge.issues), [&](auto const& issue) { return affectsEdge(issue, edge); });
+        for (auto const& construction : GenomeDescAccessService::get().getGeneConstructions(genome)) {
+            GeneEdge edge{.construction = construction};
+            std::ranges::copy_if(issues, std::back_inserter(edge.issues), [&](auto const& issue) { return turnsOffConstructorOrSeparation(issue, edge); });
             result.emplace_back(edge);
         }
         return result;
     }
 
-    // Breadth-first search from the root gene; genes that are not reachable form an additional last layer
-    std::vector<int> calcLayers(int numGenes, std::vector<GeneEdge> const& edges)
+    std::vector<int> calcLayers(GenomeDesc const& genome)
     {
-        std::vector<int> result(numGenes, -1);
-        result.front() = 0;
-        std::deque<int> genesToScan = {0};
-        while (!genesToScan.empty()) {
-            auto geneIndex = genesToScan.front();
-            genesToScan.pop_front();
+        auto distances = GenomeDescAccessService::get().calcDistancesFromRootGene(genome);
+        auto maxDistance = std::ranges::max(distances | std::views::transform([](auto const& distance) { return distance.value_or(0); }));
+        auto unreachableLayer = maxDistance + 1;
+        auto result = distances | std::views::transform([&](auto const& distance) { return distance.value_or(unreachableLayer); });
+        return std::vector(result.begin(), result.end());
+    }
+
+    std::map<int, float> calcBarycentersOfConstructingGenes(
+        std::vector<int> const& row,
+        int rowIndex,
+        std::vector<GeneEdge> const& edges,
+        std::vector<int> const& layers,
+        std::vector<float> const& boxCenters)
+    {
+        std::map<int, float> result;
+        for (auto geneIndex : row) {
+            auto sum = 0.0f;
+            auto count = 0;
             for (auto const& edge : edges) {
-                if (edge.sourceGeneIndex == geneIndex && result.at(edge.targetGeneIndex) < 0) {
-                    result.at(edge.targetGeneIndex) = result.at(geneIndex) + 1;
-                    genesToScan.emplace_back(edge.targetGeneIndex);
+                auto const& construction = edge.construction;
+                if (construction.constructedGeneIndex == geneIndex && layers.at(construction.constructingGeneIndex) < rowIndex) {
+                    sum += boxCenters.at(construction.constructingGeneIndex);
+                    ++count;
                 }
             }
-        }
-        auto unreachableLayer = std::ranges::max(result) + 1;
-        for (auto& layer : result) {
-            if (layer < 0) {
-                layer = unreachableLayer;
-            }
+            result.emplace(geneIndex, count > 0 ? sum / toFloat(count) : std::numeric_limits<float>::max());
         }
         return result;
     }
 
-    // Every layer forms a row; a gene is placed below the average position of the genes constructing it, which keeps most arrows short
-    GraphLayout calcLayout(int numGenes, std::vector<GeneEdge> const& edges)
+    GraphLayout calcLayout(GenomeDesc const& genome, std::vector<GeneEdge> const& edges)
     {
+        auto numGenes = toInt(genome._genes.size());
         GraphLayout result;
-        result.layers = calcLayers(numGenes, edges);
+        result.layers = calcLayers(genome);
         result.boxSize = {scale(BoxWidth), ImGui::GetFontSize() * 2 + scale(BoxPadding) * 2};
-        result.boxPositions.resize(numGenes);
+        result.boxOffsets.resize(numGenes);
 
         std::vector<std::vector<int>> rows(std::ranges::max(result.layers) + 1);
         for (auto const& [geneIndex, layer] : result.layers | boost::adaptors::indexed(0)) {
@@ -156,77 +142,91 @@ namespace
         auto maxRowWidth = std::ranges::max(rows | std::views::transform([&](auto const& row) { return calcRowWidth(toInt(row.size())); }));
 
         std::vector<float> boxCenters(numGenes, 0.0f);
-        for (auto rowIndex : std::views::iota(0, toInt(rows.size()))) {
-            auto& row = rows.at(rowIndex);
-            std::map<int, float> barycenters;
-            for (auto geneIndex : row) {
-                auto sum = 0.0f;
-                auto count = 0;
-                for (auto const& edge : edges) {
-                    if (edge.targetGeneIndex == geneIndex && result.layers.at(edge.sourceGeneIndex) < rowIndex) {
-                        sum += boxCenters.at(edge.sourceGeneIndex);
-                        ++count;
-                    }
-                }
-                barycenters.emplace(geneIndex, count > 0 ? sum / toFloat(count) : std::numeric_limits<float>::max());
-            }
-            std::ranges::sort(row, [&](int lhs, int rhs) { return std::pair(barycenters.at(lhs), lhs) < std::pair(barycenters.at(rhs), rhs); });
+        for (auto const& [rowIndex, row] : rows | boost::adaptors::indexed(0)) {
+            auto barycenters = calcBarycentersOfConstructingGenes(row, toInt(rowIndex), edges, result.layers, boxCenters);
+            auto sortedRow = row;
+            std::ranges::sort(sortedRow, [&](int lhs, int rhs) { return std::pair(barycenters.at(lhs), lhs) < std::pair(barycenters.at(rhs), rhs); });
 
-            auto startX = scale(Margin) + (maxRowWidth - calcRowWidth(toInt(row.size()))) / 2;
+            auto startX = scale(Margin) + (maxRowWidth - calcRowWidth(toInt(sortedRow.size()))) / 2;
             auto y = scale(Margin) + toFloat(rowIndex) * (result.boxSize.y + scale(VerticalGap));
-            for (auto const& [position, geneIndex] : row | boost::adaptors::indexed(0)) {
+            for (auto const& [position, geneIndex] : sortedRow | boost::adaptors::indexed(0)) {
                 auto x = startX + toFloat(position) * (result.boxSize.x + scale(HorizontalGap));
-                result.boxPositions.at(geneIndex) = {x, y};
+                result.boxOffsets.at(geneIndex) = {x, y};
                 boxCenters.at(geneIndex) = x + result.boxSize.x / 2;
             }
         }
 
-        // Extra space for the arrows bending around the right side and below the last row
+        auto spaceForCurvesAroundRightSide = scale(BendSize) * 3;
+        auto spaceForCurvesBelowLastRow = scale(BendSize) * 2;
         result.boxAreaWidth = scale(Margin) * 2 + maxRowWidth;
         result.canvasSize = {
-            result.boxAreaWidth + scale(BendSize) * 3,
-            scale(Margin) * 2 + toFloat(rows.size()) * (result.boxSize.y + scale(VerticalGap)) - scale(VerticalGap) + scale(BendSize) * 2};
+            result.boxAreaWidth + spaceForCurvesAroundRightSide,
+            scale(Margin) * 2 + toFloat(rows.size()) * (result.boxSize.y + scale(VerticalGap)) - scale(VerticalGap) + spaceForCurvesBelowLastRow};
         return result;
+    }
+
+    ImVec2 calcCenteringOffset(ImVec2 const& availableSize, GraphLayout const& layout)
+    {
+        auto offsetX = std::clamp((availableSize.x - layout.boxAreaWidth) / 2, 0.0f, std::max(0.0f, availableSize.x - layout.canvasSize.x));
+        auto offsetY = std::max(0.0f, (availableSize.y - layout.canvasSize.y) / 2);
+        return {offsetX, offsetY};
+    }
+
+    BezierCurve calcSelfLoopCurve(ImVec2 const& box, ImVec2 const& boxSize)
+    {
+        auto bend = scale(BendSize);
+        auto right = box.x + boxSize.x;
+        return BezierCurve{
+            .start = {right, box.y + boxSize.y * 0.3f},
+            .control1 = {right + bend * 2, box.y - bend / 2},
+            .control2 = {right + bend * 2, box.y + boxSize.y + bend / 2},
+            .end = {right, box.y + boxSize.y * 0.7f}};
+    }
+
+    BezierCurve calcDownwardCurve(ImVec2 const& sourceBox, ImVec2 const& targetBox, ImVec2 const& boxSize)
+    {
+        ImVec2 start{sourceBox.x + boxSize.x / 2, sourceBox.y + boxSize.y};
+        ImVec2 end{targetBox.x + boxSize.x / 2, targetBox.y};
+        auto verticalBend = (end.y - start.y) / 2;
+        return BezierCurve{.start = start, .control1 = {start.x, start.y + verticalBend}, .control2 = {end.x, end.y - verticalBend}, .end = end};
+    }
+
+    BezierCurve calcCurveBelowRow(ImVec2 const& sourceBox, ImVec2 const& targetBox, ImVec2 const& boxSize)
+    {
+        auto bend = scale(BendSize);
+        ImVec2 start{sourceBox.x + boxSize.x / 2, sourceBox.y + boxSize.y};
+        ImVec2 end{targetBox.x + boxSize.x / 2, targetBox.y + boxSize.y};
+        return BezierCurve{.start = start, .control1 = {start.x, start.y + bend * 2}, .control2 = {end.x, end.y + bend * 2}, .end = end};
+    }
+
+    BezierCurve calcCurveAroundRightSide(ImVec2 const& sourceBox, ImVec2 const& targetBox, ImVec2 const& boxSize)
+    {
+        ImVec2 start{sourceBox.x + boxSize.x, sourceBox.y + boxSize.y / 2};
+        ImVec2 end{targetBox.x + boxSize.x, targetBox.y + boxSize.y / 2};
+        auto bendX = std::max(start.x, end.x) + scale(BendSize) * 2;
+        return BezierCurve{.start = start, .control1 = {bendX, start.y}, .control2 = {bendX, end.y}, .end = end};
     }
 
     BezierCurve calcCurve(GeneEdge const& edge, GraphLayout const& layout, ImVec2 const& origin)
     {
-        auto const& boxSize = layout.boxSize;
-        auto const& sourcePosition = layout.boxPositions.at(edge.sourceGeneIndex);
-        auto const& targetPosition = layout.boxPositions.at(edge.targetGeneIndex);
-        ImVec2 source{origin.x + sourcePosition.x, origin.y + sourcePosition.y};
-        ImVec2 target{origin.x + targetPosition.x, origin.y + targetPosition.y};
-        auto bend = scale(BendSize);
+        auto const& construction = edge.construction;
+        auto const& sourceOffset = layout.boxOffsets.at(construction.constructingGeneIndex);
+        auto const& targetOffset = layout.boxOffsets.at(construction.constructedGeneIndex);
+        ImVec2 sourceBox{origin.x + sourceOffset.x, origin.y + sourceOffset.y};
+        ImVec2 targetBox{origin.x + targetOffset.x, origin.y + targetOffset.y};
 
-        if (edge.sourceGeneIndex == edge.targetGeneIndex) {
-            auto right = source.x + boxSize.x;
-            return BezierCurve{
-                .start = {right, source.y + boxSize.y * 0.3f},
-                .control1 = {right + bend * 2, source.y - bend / 2},
-                .control2 = {right + bend * 2, source.y + boxSize.y + bend / 2},
-                .end = {right, source.y + boxSize.y * 0.7f}};
+        if (construction.constructingGeneIndex == construction.constructedGeneIndex) {
+            return calcSelfLoopCurve(sourceBox, layout.boxSize);
         }
-
-        auto sourceLayer = layout.layers.at(edge.sourceGeneIndex);
-        auto targetLayer = layout.layers.at(edge.targetGeneIndex);
+        auto sourceLayer = layout.layers.at(construction.constructingGeneIndex);
+        auto targetLayer = layout.layers.at(construction.constructedGeneIndex);
         if (targetLayer > sourceLayer) {
-            ImVec2 start{source.x + boxSize.x / 2, source.y + boxSize.y};
-            ImVec2 end{target.x + boxSize.x / 2, target.y};
-            auto verticalBend = (end.y - start.y) / 2;
-            return BezierCurve{.start = start, .control1 = {start.x, start.y + verticalBend}, .control2 = {end.x, end.y - verticalBend}, .end = end};
+            return calcDownwardCurve(sourceBox, targetBox, layout.boxSize);
         }
         if (targetLayer == sourceLayer) {
-            // Arrows within a row pass below it
-            ImVec2 start{source.x + boxSize.x / 2, source.y + boxSize.y};
-            ImVec2 end{target.x + boxSize.x / 2, target.y + boxSize.y};
-            return BezierCurve{.start = start, .control1 = {start.x, start.y + bend * 2}, .control2 = {end.x, end.y + bend * 2}, .end = end};
+            return calcCurveBelowRow(sourceBox, targetBox, layout.boxSize);
         }
-
-        // Arrows leading upwards bend around the right side
-        ImVec2 start{source.x + boxSize.x, source.y + boxSize.y / 2};
-        ImVec2 end{target.x + boxSize.x, target.y + boxSize.y / 2};
-        auto bendX = std::max(start.x, end.x) + bend * 2;
-        return BezierCurve{.start = start, .control1 = {bendX, start.y}, .control2 = {bendX, end.y}, .end = end};
+        return calcCurveAroundRightSide(sourceBox, targetBox, layout.boxSize);
     }
 
     std::vector<ImVec2> sampleCurve(BezierCurve const& curve)
@@ -238,44 +238,69 @@ namespace
         return result;
     }
 
-    float calcDistance(ImVec2 const& point, std::vector<ImVec2> const& polyline)
+    float calcDistance(ImVec2 const& point1, ImVec2 const& point2)
+    {
+        return std::hypot(point1.x - point2.x, point1.y - point2.y);
+    }
+
+    float calcDistanceToPolyline(ImVec2 const& point, std::vector<ImVec2> const& polyline)
     {
         auto result = std::numeric_limits<float>::max();
         for (auto const& [start, end] : std::views::zip(polyline, polyline | std::views::drop(1))) {
-            auto closest = ImLineClosestPoint(start, end, point);
-            result = std::min(result, std::hypot(point.x - closest.x, point.y - closest.y));
+            result = std::min(result, calcDistance(point, ImLineClosestPoint(start, end, point)));
         }
         return result;
     }
 
-    void drawEdge(ImDrawList* drawList, std::vector<ImVec2> const& polyline, ImU32 color, float thickness, bool dashed)
+    void drawPolyline(ImDrawList* drawList, std::vector<ImVec2> const& polyline, ImU32 color, float thickness, bool dashed)
     {
-        if (dashed) {
-            auto dashLength = scale(DashLength);
-            auto distance = 0.0f;
-            for (auto const& [start, end] : std::views::zip(polyline, polyline | std::views::drop(1))) {
-                if (std::fmod(distance, dashLength * 2) < dashLength) {
-                    drawList->AddLine(start, end, color, thickness);
-                }
-                distance += std::hypot(end.x - start.x, end.y - start.y);
-            }
-        } else {
+        if (!dashed) {
             drawList->AddPolyline(polyline.data(), toInt(polyline.size()), color, ImDrawFlags_None, thickness);
-        }
-
-        // Arrow head along the last segment
-        auto const& tip = polyline.back();
-        auto const& beforeTip = polyline.at(polyline.size() - 2);
-        auto length = std::hypot(tip.x - beforeTip.x, tip.y - beforeTip.y);
-        if (length <= 0) {
             return;
         }
-        auto directionX = (tip.x - beforeTip.x) / length;
-        auto directionY = (tip.y - beforeTip.y) / length;
-        auto size = scale(ArrowSize);
-        ImVec2 base{tip.x - directionX * size, tip.y - directionY * size};
+        auto dashLength = scale(DashLength);
+        auto distance = 0.0f;
+        for (auto const& [start, end] : std::views::zip(polyline, polyline | std::views::drop(1))) {
+            if (std::fmod(distance, dashLength * 2) < dashLength) {
+                drawList->AddLine(start, end, color, thickness);
+            }
+            distance += calcDistance(start, end);
+        }
+    }
+
+    void drawArrow(ImDrawList* drawList, std::vector<ImVec2> polyline, ImU32 color, float thickness, bool dashed)
+    {
+        auto tip = polyline.back();
+        auto arrowLength = scale(ArrowLength);
+        auto reversedPolyline = polyline | std::views::reverse;
+        auto arrowStart = std::ranges::find_if(reversedPolyline, [&](ImVec2 const& point) { return calcDistance(point, tip) >= arrowLength; });
+        if (arrowStart == reversedPolyline.end()) {
+            drawPolyline(drawList, polyline, color, thickness, dashed);
+            return;
+        }
+
+        auto distance = calcDistance(*arrowStart, tip);
+        auto directionX = (tip.x - arrowStart->x) / distance;
+        auto directionY = (tip.y - arrowStart->y) / distance;
+        ImVec2 base{tip.x - directionX * arrowLength, tip.y - directionY * arrowLength};
+        polyline.erase(arrowStart.base(), polyline.end());
+        polyline.emplace_back(base);
+        drawPolyline(drawList, polyline, color, thickness, dashed);
+
+        auto halfWidth = scale(ArrowWidth) / 2;
         drawList->AddTriangleFilled(
-            tip, {base.x - directionY * size / 2, base.y + directionX * size / 2}, {base.x + directionY * size / 2, base.y - directionX * size / 2}, color);
+            tip, {base.x - directionY * halfWidth, base.y + directionX * halfWidth}, {base.x + directionY * halfWidth, base.y - directionX * halfWidth}, color);
+    }
+
+    void removeLastUtf8Character(std::string& text)
+    {
+        auto isContinuationByte = [](char byte) { return (static_cast<unsigned char>(byte) & 0xc0) == 0x80; };
+        while (!text.empty() && isContinuationByte(text.back())) {
+            text.pop_back();
+        }
+        if (!text.empty()) {
+            text.pop_back();
+        }
     }
 
     std::string truncateToWidth(std::string text, float maxWidth)
@@ -284,15 +309,9 @@ namespace
             return text;
         }
         while (!text.empty() && ImGui::CalcTextSize((text + "...").c_str()).x > maxWidth) {
-            text.pop_back();
+            removeLastUtf8Character(text);
         }
         return text + "...";
-    }
-
-    std::vector<GenomeIssue> getGeneIssues(std::vector<GenomeIssue> const& issues, int geneIndex)
-    {
-        auto result = issues | std::views::filter([&](auto const& issue) { return issue.geneIndex == geneIndex; });
-        return std::vector(result.begin(), result.end());
     }
 
     std::string getGeneTooltip(GenomeDesc const& genome, std::vector<GenomeIssue> const& issues, int geneIndex)
@@ -305,7 +324,7 @@ namespace
         if (geneIndex == 0) {
             result += ", root gene";
         }
-        auto geneIssues = getGeneIssues(issues, geneIndex);
+        auto geneIssues = GenomeIssue::filterByGene(issues, geneIndex);
         if (!geneIssues.empty()) {
             result += "\n\n" + GenomeIssueDescription::getTooltip(geneIssues, genome);
         }
@@ -314,103 +333,109 @@ namespace
 
     std::string getEdgeTooltip(GenomeDesc const& genome, GeneEdge const& edge)
     {
-        auto nodeIndices = edge.nodeIndices | std::views::transform([](int nodeIndex) { return std::to_string(nodeIndex); });
-        auto result = "Gene " + std::to_string(edge.sourceGeneIndex) + " constructs gene " + std::to_string(edge.targetGeneIndex)
-            + (edge.nodeIndices.size() == 1 ? "\nConstructor in node " : "\nConstructors in nodes ")
-            + boost::algorithm::join(std::vector(nodeIndices.begin(), nodeIndices.end()), ", ") + (edge.separation ? ", with separation" : "");
+        auto const& construction = edge.construction;
+        auto result = "Gene " + std::to_string(construction.constructingGeneIndex) + " constructs gene " + std::to_string(construction.constructedGeneIndex)
+            + (construction.constructorNodeIndices.size() == 1 ? "\nConstructor in node " : "\nConstructors in nodes ")
+            + StringHelper::join(construction.constructorNodeIndices) + (construction.anyWithSeparation ? ", with separation" : "");
         if (!edge.issues.empty()) {
             result += "\n\n" + GenomeIssueDescription::getTooltip(edge.issues, genome);
         }
         return result;
     }
 
-    void processGraph(GenomeTabEditData const& editData)
+    ImRect getBoxRect(int geneIndex, GraphLayout const& layout, ImVec2 const& origin)
     {
-        auto const& genome = editData->genome;
-        auto const& issues = editData->genomeIssues;
-        auto numGenes = toInt(genome._genes.size());
-        auto edges = collectEdges(genome, issues);
-        auto layout = calcLayout(numGenes, edges);
+        auto const& offset = layout.boxOffsets.at(geneIndex);
+        ImVec2 boxMin{origin.x + offset.x, origin.y + offset.y};
+        return ImRect(boxMin, {boxMin.x + layout.boxSize.x, boxMin.y + layout.boxSize.y});
+    }
 
-        // The boxes are centered as long as the whole canvas still fits into the visible width
-        auto availableWidth = ImGui::GetContentRegionAvail().x;
-        auto offsetX = std::clamp((availableWidth - layout.boxAreaWidth) / 2, 0.0f, std::max(0.0f, availableWidth - layout.canvasSize.x));
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
-
-        auto origin = ImGui::GetCursorScreenPos();
-        ImGui::InvisibleButton("##canvas", layout.canvasSize);
-        auto isCanvasHovered = ImGui::IsItemHovered();
-        auto isCanvasClicked = ImGui::IsItemClicked();
-
-        auto getBoxRect = [&](int geneIndex) {
-            auto const& position = layout.boxPositions.at(geneIndex);
-            ImVec2 boxMin{origin.x + position.x, origin.y + position.y};
-            return ImRect(boxMin, {boxMin.x + layout.boxSize.x, boxMin.y + layout.boxSize.y});
-        };
-        std::vector<std::vector<ImVec2>> polylines;
-        for (auto const& edge : edges) {
-            polylines.emplace_back(sampleCurve(calcCurve(edge, layout, origin)));
-        }
-
-        // Boxes take precedence over the arrows passing them
-        std::optional<int> hoveredGeneIndex;
-        std::optional<int> hoveredEdgeIndex;
-        if (isCanvasHovered) {
-            auto mousePos = ImGui::GetMousePos();
-            for (auto geneIndex : std::views::iota(0, numGenes)) {
-                if (getBoxRect(geneIndex).Contains(mousePos)) {
-                    hoveredGeneIndex = geneIndex;
-                }
-            }
-            if (!hoveredGeneIndex.has_value()) {
-                auto minDistance = scale(EdgeHoverDistance);
-                for (auto const& [edgeIndex, polyline] : polylines | boost::adaptors::indexed(0)) {
-                    auto distance = calcDistance(mousePos, polyline);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        hoveredEdgeIndex = toInt(edgeIndex);
-                    }
-                }
+    std::optional<int> findGeneAt(ImVec2 const& position, GraphLayout const& layout, ImVec2 const& origin)
+    {
+        for (auto geneIndex : std::views::iota(0, toInt(layout.boxOffsets.size()))) {
+            if (getBoxRect(geneIndex, layout, origin).Contains(position)) {
+                return geneIndex;
             }
         }
+        return std::nullopt;
+    }
 
-        std::set<int> removedGeneIndices;
-        for (auto const& issue : issues) {
-            if (issue.removesGene) {
-                removedGeneIndices.insert(issue.geneIndex);
+    std::optional<int> findEdgeNear(ImVec2 const& position, std::vector<std::vector<ImVec2>> const& polylines)
+    {
+        std::optional<int> result;
+        auto minDistance = scale(EdgeHoverDistance);
+        for (auto const& [edgeIndex, polyline] : polylines | boost::adaptors::indexed(0)) {
+            auto distance = calcDistanceToPolyline(position, polyline);
+            if (distance < minDistance) {
+                minDistance = distance;
+                result = toInt(edgeIndex);
             }
         }
+        return result;
+    }
+
+    void drawEdges(
+        ImDrawList* drawList,
+        GenomeTabEditData const& editData,
+        std::vector<GeneEdge> const& edges,
+        std::vector<std::vector<ImVec2>> const& polylines,
+        std::optional<int> const& hoveredEdgeIndex)
+    {
+        auto removedGeneIndices = GenomeIssue::getRemovedGeneIndices(editData->genomeIssues);
         auto selectedNodeIndex = editData->isNodeLevelSelected() ? editData->getSelectedNodeIndex() : std::nullopt;
-        auto drawList = ImGui::GetWindowDrawList();
 
         for (auto const& [edgeIndex, edge] : edges | boost::adaptors::indexed(0)) {
-            auto markerIssue = GenomeIssueDescription::findMarkerIssue(edge.issues);
-            auto isSelected =
-                editData->selectedGeneIndex == edge.sourceGeneIndex && selectedNodeIndex.has_value() && containsNode(edge, selectedNodeIndex.value());
-            auto isRemoved = removedGeneIndices.contains(edge.sourceGeneIndex) || removedGeneIndices.contains(edge.targetGeneIndex);
+            auto const& construction = edge.construction;
+            auto mostRelevantIssue = GenomeIssueDescription::findMostRelevantIssue(edge.issues);
+            auto isSelected = editData->selectedGeneIndex == construction.constructingGeneIndex && selectedNodeIndex.has_value()
+                && isConstructedByNode(edge, selectedNodeIndex.value());
+            auto isRemoved = removedGeneIndices.contains(construction.constructingGeneIndex) || removedGeneIndices.contains(construction.constructedGeneIndex);
 
             ImColor color = Const::TextDimColor;
-            if (markerIssue.has_value()) {
-                color = GenomeIssueDescription::getColor(markerIssue.value());
+            if (mostRelevantIssue.has_value()) {
+                color = GenomeIssueDescription::getColor(mostRelevantIssue.value());
             } else if (isSelected) {
                 color = Const::AccentColor;
             } else if (isRemoved) {
                 color = Const::TextDecentColor;
             }
             auto isHighlighted = isSelected || hoveredEdgeIndex == edgeIndex;
-            drawEdge(drawList, polylines.at(edgeIndex), color, scale(isHighlighted ? HighlightedEdgeThickness : EdgeThickness), edge.separation);
+            drawArrow(
+                drawList, polylines.at(edgeIndex), color, scale(isHighlighted ? HighlightedEdgeThickness : EdgeThickness), construction.anyWithSeparation);
         }
+    }
 
+    void drawSelectionOutline(ImDrawList* drawList, ImRect const& boxRect)
+    {
+        auto gap = scale(SelectionGap);
+        drawList->AddRect(
+            {boxRect.Min.x - gap, boxRect.Min.y - gap},
+            {boxRect.Max.x + gap, boxRect.Max.y + gap},
+            Const::AccentColor,
+            scale(BoxRounding) + gap,
+            ImDrawFlags_None,
+            scale(SelectionThickness));
+    }
+
+    void drawGenes(
+        ImDrawList* drawList,
+        GenomeTabEditData const& editData,
+        GraphLayout const& layout,
+        ImVec2 const& origin,
+        std::optional<int> const& hoveredGeneIndex)
+    {
+        auto const& genome = editData->genome;
+        auto removedGeneIndices = GenomeIssue::getRemovedGeneIndices(editData->genomeIssues);
         auto padding = scale(BoxPadding);
-        for (auto geneIndex : std::views::iota(0, numGenes)) {
-            auto markerIssue = GenomeIssueDescription::findMarkerIssue(getGeneIssues(issues, geneIndex));
-            auto isRemoved = removedGeneIndices.contains(geneIndex);
-            auto isRoot = geneIndex == 0;
-            auto boxRect = getBoxRect(geneIndex);
 
+        for (auto const& [geneIndex, gene] : genome._genes | boost::adaptors::indexed(0)) {
+            auto mostRelevantIssue = GenomeIssueDescription::findMostRelevantIssue(GenomeIssue::filterByGene(editData->genomeIssues, toInt(geneIndex)));
+            auto isRemoved = removedGeneIndices.contains(toInt(geneIndex));
             auto isHovered = hoveredGeneIndex == geneIndex;
+            auto boxRect = getBoxRect(toInt(geneIndex), layout, origin);
+
             ImColor fillColor = Const::RaisedColor;
-            if (isRoot) {
+            if (geneIndex == 0) {
                 fillColor = isHovered ? Const::HeaderSelectedHoveredColor : Const::HeaderColor;
             } else if (isHovered) {
                 fillColor = Const::TreeNodeHighHoveredColor;
@@ -420,51 +445,78 @@ namespace
             if (isRemoved) {
                 borderColor = Const::WarningColor;
                 labelColor = Const::WarningColor;
-            } else if (markerIssue.has_value()) {
-                borderColor = GenomeIssueDescription::getColor(markerIssue.value());
+            } else if (mostRelevantIssue.has_value()) {
+                borderColor = GenomeIssueDescription::getColor(mostRelevantIssue.value());
                 labelColor = borderColor;
             }
-            auto borderThickness = scale(isRemoved || markerIssue.has_value() ? 1.5f : 1.0f);
+            auto borderThickness = scale(isRemoved || mostRelevantIssue.has_value() ? 1.5f : 1.0f);
             drawList->AddRectFilled(boxRect.Min, boxRect.Max, fillColor, scale(BoxRounding));
             drawList->AddRect(boxRect.Min, boxRect.Max, borderColor, scale(BoxRounding), ImDrawFlags_None, borderThickness);
-
-            // The selection is a separate outline so that the border keeps showing the issue color
             if (editData->selectedGeneIndex == geneIndex) {
-                auto gap = scale(SelectionGap);
-                drawList->AddRect(
-                    {boxRect.Min.x - gap, boxRect.Min.y - gap},
-                    {boxRect.Max.x + gap, boxRect.Max.y + gap},
-                    Const::AccentColor,
-                    scale(BoxRounding) + gap,
-                    ImDrawFlags_None,
-                    scale(SelectionThickness));
+                drawSelectionOutline(drawList, boxRect);
             }
 
             auto label = "Gene " + std::to_string(geneIndex);
             drawList->AddText({boxRect.Min.x + padding, boxRect.Min.y + padding}, labelColor, label.c_str());
-            auto const& name = genome._genes.at(geneIndex)._name;
-            if (!name.empty()) {
+            if (!gene._name.empty()) {
                 drawList->AddText(
                     {boxRect.Min.x + padding, boxRect.Min.y + padding + ImGui::GetFontSize()},
                     Const::TextDecentColor,
-                    truncateToWidth(name, layout.boxSize.x - padding * 2).c_str());
+                    truncateToWidth(gene._name, layout.boxSize.x - padding * 2).c_str());
             }
         }
+    }
+
+    void selectConstructingNode(GenomeTabEditData const& editData, GeneEdge const& edge)
+    {
+        auto mostRelevantIssue = GenomeIssueDescription::findMostRelevantIssue(edge.issues);
+        auto hasIssueAtConstructor =
+            mostRelevantIssue.has_value() && mostRelevantIssue->nodeIndex.has_value() && isConstructedByNode(edge, mostRelevantIssue->nodeIndex.value());
+        auto nodeIndex = hasIssueAtConstructor ? mostRelevantIssue->nodeIndex.value() : edge.construction.constructorNodeIndices.front();
+        editData->selectNode(edge.construction.constructingGeneIndex, nodeIndex);
+    }
+
+    void processGraph(GenomeTabEditData const& editData)
+    {
+        auto const& genome = editData->genome;
+        auto edges = collectEdges(genome, editData->genomeIssues);
+        auto layout = calcLayout(genome, edges);
+
+        auto centeringOffset = calcCenteringOffset(ImGui::GetContentRegionAvail(), layout);
+        ImGui::SetCursorPos({ImGui::GetCursorPosX() + centeringOffset.x, ImGui::GetCursorPosY() + centeringOffset.y});
+        auto origin = ImGui::GetCursorScreenPos();
+        ImGui::InvisibleButton("##canvas", layout.canvasSize);
+        auto isCanvasHovered = ImGui::IsItemHovered();
+        auto isCanvasClicked = ImGui::IsItemClicked();
+
+        std::vector<std::vector<ImVec2>> polylines;
+        for (auto const& edge : edges) {
+            polylines.emplace_back(sampleCurve(calcCurve(edge, layout, origin)));
+        }
+
+        std::optional<int> hoveredGeneIndex;
+        std::optional<int> hoveredEdgeIndex;
+        if (isCanvasHovered) {
+            auto mousePos = ImGui::GetMousePos();
+            hoveredGeneIndex = findGeneAt(mousePos, layout, origin);
+            if (!hoveredGeneIndex.has_value()) {
+                hoveredEdgeIndex = findEdgeNear(mousePos, polylines);
+            }
+        }
+
+        auto drawList = ImGui::GetWindowDrawList();
+        drawEdges(drawList, editData, edges, polylines, hoveredEdgeIndex);
+        drawGenes(drawList, editData, layout, origin, hoveredGeneIndex);
 
         if (isCanvasClicked) {
             if (hoveredGeneIndex.has_value()) {
                 editData->selectGene(hoveredGeneIndex.value());
             } else if (hoveredEdgeIndex.has_value()) {
-                auto const& edge = edges.at(hoveredEdgeIndex.value());
-                auto markerIssue = GenomeIssueDescription::findMarkerIssue(edge.issues);
-                auto nodeIndex = markerIssue.has_value() && markerIssue->nodeIndex.has_value() && containsNode(edge, markerIssue->nodeIndex.value())
-                    ? markerIssue->nodeIndex.value()
-                    : edge.nodeIndices.front();
-                editData->selectNode(edge.sourceGeneIndex, nodeIndex);
+                selectConstructingNode(editData, edges.at(hoveredEdgeIndex.value()));
             }
         }
         if (hoveredGeneIndex.has_value()) {
-            AlienGui::Tooltip(getGeneTooltip(genome, issues, hoveredGeneIndex.value()));
+            AlienGui::Tooltip(getGeneTooltip(genome, editData->genomeIssues, hoveredGeneIndex.value()));
         } else if (hoveredEdgeIndex.has_value()) {
             AlienGui::Tooltip(getEdgeTooltip(genome, edges.at(hoveredEdgeIndex.value())));
         }

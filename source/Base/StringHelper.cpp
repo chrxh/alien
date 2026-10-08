@@ -153,6 +153,52 @@ std::string StringHelper::formatInThousands(double value)
     return result + "K";
 }
 
+namespace
+{
+    std::string joinStrings(std::vector<std::string> const& strings, std::string const& separator)
+    {
+        std::string result;
+        for (auto const& string : strings) {
+            if (!result.empty()) {
+                result += separator;
+            }
+            result += string;
+        }
+        return result;
+    }
+}
+
+std::string StringHelper::join(std::vector<int> const& values)
+{
+    auto strings = values | std::views::transform([](int value) { return std::to_string(value); });
+    return joinStrings(std::vector(strings.begin(), strings.end()), ", ");
+}
+
+std::string StringHelper::formatRanges(std::vector<int> const& sortedValues)
+{
+    std::vector<std::pair<int, int>> ranges;
+    for (auto value : sortedValues) {
+        if (!ranges.empty() && ranges.back().second + 1 == value) {
+            ranges.back().second = value;
+        } else {
+            ranges.emplace_back(value, value);
+        }
+    }
+    auto strings = ranges | std::views::transform([](auto const& range) {
+                       auto const& [first, last] = range;
+                       return first == last ? std::to_string(first) : std::to_string(first) + "-" + std::to_string(last);
+                   });
+    return joinStrings(std::vector(strings.begin(), strings.end()), ", ");
+}
+
+std::string StringHelper::formatEnumeration(std::vector<std::string> const& items)
+{
+    if (items.size() <= 1) {
+        return items.empty() ? std::string() : items.front();
+    }
+    return joinStrings(std::vector(items.begin(), items.end() - 1), ", ") + " and " + items.back();
+}
+
 void StringHelper::copy(char* target, int maxSize, std::string const& source)
 {
     auto sourceSize = source.size();

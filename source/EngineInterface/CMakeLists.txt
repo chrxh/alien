@@ -5,8 +5,6 @@ add_library(EngineInterface
     Definitions.h
     ExtinctLineageAccumulator.cpp
     ExtinctLineageAccumulator.h
-    GenomeValidationService.cpp
-    GenomeValidationService.h
     GeometryBuffers.cpp
     GeometryBuffers.h
     InspectedEntityIds.h
@@ -15,7 +13,6 @@ add_library(EngineInterface
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h
-    ShapeGenerator.h
     SimulationFacade.cpp
     SimulationFacade.h
     SimulationParametersUpdateConfig.h

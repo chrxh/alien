@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -19,6 +20,17 @@ public:
     std::vector<int> getReferencedBy(GenomeDesc const& genome, int geneIndex) const;
     bool isConnectedToRoot(GenomeDesc const& genome, int startGeneIndex) const;
     std::set<int> getReferencedGenesInRootGeneHull(GenomeDesc const& genome) const;
+    std::set<int> getReachableGenes(GenomeDesc const& genome, int startGeneIndex) const;
+
+    struct GeneConstruction
+    {
+        int constructingGeneIndex = 0;
+        int constructedGeneIndex = 0;
+        std::vector<int> constructorNodeIndices;
+        bool anyWithSeparation = false;
+    };
+    std::vector<GeneConstruction> getGeneConstructions(GenomeDesc const& genome) const;
+    std::vector<std::optional<int>> calcDistancesFromRootGene(GenomeDesc const& genome) const;
 
     using GeneIndicesForSubGenome = std::vector<int>;
     std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDesc const& genome) const;

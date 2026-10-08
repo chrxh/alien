@@ -464,11 +464,10 @@ public:
     struct GroupTabsParameters
     {
         MEMBER(GroupTabsParameters, std::vector<std::string>, texts, {});
-        MEMBER(GroupTabsParameters, std::vector<std::string>, badges, {});  // Drawn behind the text of the tab with the same index, empty for none
+        MEMBER(GroupTabsParameters, std::vector<std::string>, tabBadges, {});
         MEMBER(GroupTabsParameters, ImColor, badgeColor, Const::WarningColor);
     };
-    // Group header split into tabs, the selected one is highlighted; returns true if another tab has been selected
-    static bool GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex);
+    static void GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex);
 
     struct ListBoxParameters
     {
