@@ -53,7 +53,7 @@ void _GenomeEditorWidget::process()
 
         processStructureTree();
         processStructureButtons();
-        processValidation();
+        processGeneGraph();
     }
     ImGui::EndChild();
 }
@@ -125,9 +125,9 @@ void _GenomeEditorWidget::processHeaderData()
 
 void _GenomeEditorWidget::processStructureTree()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
+    AlienGui::Group(AlienGui::GroupParameters().text("Structure").highlighted(true));
 
-    if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - _validationHeight))) {
+    if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - _geneGraphSectionHeight))) {
         auto scrollToSelection = _selectedGeneFromPreviousFrame != _editData->selectedGeneIndex && !_selectionChangedFromTree;
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
         _selectionChangedFromTree = false;
@@ -399,26 +399,19 @@ void _GenomeEditorWidget::processStructureButtons()
     ImGui::EndDisabled();
 }
 
-void _GenomeEditorWidget::processValidation()
+void _GenomeEditorWidget::processGeneGraph()
 {
     // The structure buttons may have changed the genome in this frame
     _editData->genomeIssues = GenomeValidationService::get().validate(_editData->genome);
 
     auto startPosY = ImGui::GetCursorPosY();
-    ImGui::PushID("Validation");
+    ImGui::PushID("GeneGraph");
     AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->geneGraphHeight);
     ImGui::PopID();
 
-    AlienGui::Group(
-        AlienGui::GroupParameters()
-            .text("Validation")
-            .tooltip("The genes are drawn as boxes, starting with the root gene at the top, and their constructors as arrows. Dashed arrows construct with "
-                     "separation.\n\nColors mark what the simulation corrects whenever a creature reproduces: red genes lose nodes or are removed completely, "
-                     "orange marks constructors that are turned off or lose their separation, and faded arrows lead to removed genes. The creature built from "
-                     "this genome uses it as it is, but its offspring inherit the corrected genome.\n\nHover over a gene or an arrow for details, click on it "
-                     "to select the gene or the constructing node."));
+    AlienGui::Group(AlienGui::GroupParameters().text("Gene graph").highlighted(true));
     _geneGraphWidget.process(_editData, _layoutData->geneGraphHeight);
-    _validationHeight = ImGui::GetCursorPosY() - startPosY;
+    _geneGraphSectionHeight = ImGui::GetCursorPosY() - startPosY;
 }
 
 void _GenomeEditorWidget::onAddGene()
