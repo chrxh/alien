@@ -36,7 +36,7 @@ private:
         std::vector<GenomeIssue> const& geneIssues,
         ColorVector<FloatColorRGB> const& customizationColors);
     void processStructureButtons();
-    void processValidation();
+    void processGeneGraph();
 
     void onAddGene();
     void onRemoveGene();
@@ -57,7 +57,7 @@ private:
 
     MutationRatesWidget _mutationRatesWidget;
     GeneGraphWidget _geneGraphWidget;
-    float _validationHeight = 0;
+    float _geneGraphSectionHeight = 0;
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
