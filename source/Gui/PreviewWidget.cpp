@@ -148,8 +148,6 @@ namespace
 
 void _PreviewWidget::processCreaturePreviews()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
-
     auto previewRawData = _SimulationFacade::get()->getPreviewData();
 
     // Get phenotypes for all sub-genomes

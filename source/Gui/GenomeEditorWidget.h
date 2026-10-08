@@ -4,7 +4,6 @@
 #include <Data/GenomeDesc.h>
 
 #include "Definitions.h"
-#include "GeneGraphWidget.h"
 #include "MutationRatesWidget.h"
 
 struct GenomeIssue;
@@ -36,7 +35,6 @@ private:
         std::vector<GenomeIssue> const& geneIssues,
         ColorVector<FloatColorRGB> const& customizationColors);
     void processStructureButtons();
-    void processGeneGraph();
 
     void onAddGene();
     void onRemoveGene();
@@ -56,8 +54,6 @@ private:
     void fixAllIssuesIntern();
 
     MutationRatesWidget _mutationRatesWidget;
-    GeneGraphWidget _geneGraphWidget;
-    float _geneGraphSectionHeight = 0;
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;

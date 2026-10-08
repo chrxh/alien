@@ -51,6 +51,7 @@ enum class EntityAttribute
     GenomeResistanceToInjection,
     GenomeApplyMetaMutations,
     GenomeMutationRatesEdit,
+    GenomeMutationRatesSummary,
 
     // Gene
     GeneName,

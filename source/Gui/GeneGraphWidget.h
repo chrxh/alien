@@ -6,5 +6,5 @@
 class GeneGraphWidget
 {
 public:
-    void process(GenomeTabEditData const& editData, float height);
+    void process(GenomeTabEditData const& editData);
 };

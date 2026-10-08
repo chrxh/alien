@@ -26,6 +26,8 @@ namespace
     auto constexpr BoxWidth = 96.0f;
     auto constexpr BoxPadding = 4.0f;
     auto constexpr BoxRounding = 3.0f;
+    auto constexpr SelectionGap = 2.5f;
+    auto constexpr SelectionThickness = 1.5f;
     auto constexpr HorizontalGap = 16.0f;
     auto constexpr VerticalGap = 32.0f;
     auto constexpr Margin = 10.0f;
@@ -52,6 +54,7 @@ namespace
         std::vector<int> layers;
         std::vector<ImVec2> boxPositions;  // Upper left corners relative to the canvas origin
         ImVec2 boxSize;
+        float boxAreaWidth = 0;  // Without the space for the arrows bending around the right side
         ImVec2 canvasSize;
     };
 
@@ -179,8 +182,9 @@ namespace
         }
 
         // Extra space for the arrows bending around the right side and below the last row
+        result.boxAreaWidth = scale(Margin) * 2 + maxRowWidth;
         result.canvasSize = {
-            scale(Margin) * 2 + maxRowWidth + scale(BendSize) * 3,
+            result.boxAreaWidth + scale(BendSize) * 3,
             scale(Margin) * 2 + toFloat(rows.size()) * (result.boxSize.y + scale(VerticalGap)) - scale(VerticalGap) + scale(BendSize) * 2};
         return result;
     }
@@ -328,6 +332,11 @@ namespace
         auto edges = collectEdges(genome, issues);
         auto layout = calcLayout(numGenes, edges);
 
+        // The boxes are centered as long as the whole canvas still fits into the visible width
+        auto availableWidth = ImGui::GetContentRegionAvail().x;
+        auto offsetX = std::clamp((availableWidth - layout.boxAreaWidth) / 2, 0.0f, std::max(0.0f, availableWidth - layout.canvasSize.x));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
+
         auto origin = ImGui::GetCursorScreenPos();
         ImGui::InvisibleButton("##canvas", layout.canvasSize);
         auto isCanvasHovered = ImGui::IsItemHovered();
@@ -399,31 +408,39 @@ namespace
             auto isRoot = geneIndex == 0;
             auto boxRect = getBoxRect(geneIndex);
 
+            auto isHovered = hoveredGeneIndex == geneIndex;
             ImColor fillColor = Const::RaisedColor;
-            if (editData->selectedGeneIndex == geneIndex) {
-                fillColor = Const::HeaderColor;
-            } else if (hoveredGeneIndex == geneIndex) {
+            if (isRoot) {
+                fillColor = isHovered ? Const::HeaderSelectedHoveredColor : Const::HeaderColor;
+            } else if (isHovered) {
                 fillColor = Const::TreeNodeHighHoveredColor;
             }
             ImColor borderColor = Const::LineColor;
             ImColor labelColor = Const::TextBaseColor;
             if (isRemoved) {
-                borderColor = Const::DangerColor;
-                labelColor = Const::DangerColor;
+                borderColor = Const::WarningColor;
+                labelColor = Const::WarningColor;
             } else if (markerIssue.has_value()) {
                 borderColor = GenomeIssueDescription::getColor(markerIssue.value());
                 labelColor = borderColor;
-            } else if (isRoot) {
-                borderColor = Const::AccentColor;
             }
-            auto borderThickness = scale(isRemoved || markerIssue.has_value() || isRoot ? 1.5f : 1.0f);
+            auto borderThickness = scale(isRemoved || markerIssue.has_value() ? 1.5f : 1.0f);
             drawList->AddRectFilled(boxRect.Min, boxRect.Max, fillColor, scale(BoxRounding));
             drawList->AddRect(boxRect.Min, boxRect.Max, borderColor, scale(BoxRounding), ImDrawFlags_None, borderThickness);
 
-            auto label = "Gene " + std::to_string(geneIndex);
-            if (markerIssue.has_value()) {
-                label = std::string(GenomeIssueDescription::getIcon(markerIssue.value())) + " " + label;
+            // The selection is a separate outline so that the border keeps showing the issue color
+            if (editData->selectedGeneIndex == geneIndex) {
+                auto gap = scale(SelectionGap);
+                drawList->AddRect(
+                    {boxRect.Min.x - gap, boxRect.Min.y - gap},
+                    {boxRect.Max.x + gap, boxRect.Max.y + gap},
+                    Const::AccentColor,
+                    scale(BoxRounding) + gap,
+                    ImDrawFlags_None,
+                    scale(SelectionThickness));
             }
+
+            auto label = "Gene " + std::to_string(geneIndex);
             drawList->AddText({boxRect.Min.x + padding, boxRect.Min.y + padding}, labelColor, label.c_str());
             auto const& name = genome._genes.at(geneIndex)._name;
             if (!name.empty()) {
@@ -454,9 +471,9 @@ namespace
     }
 }
 
-void GeneGraphWidget::process(GenomeTabEditData const& editData, float height)
+void GeneGraphWidget::process(GenomeTabEditData const& editData)
 {
-    if (ImGui::BeginChild("GeneGraph", ImVec2(0, height), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("GeneGraph", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
         if (!editData->genome._genes.empty()) {
             processGraph(editData);
         }

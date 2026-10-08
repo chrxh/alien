@@ -48,7 +48,6 @@ TEST_F(GenomeValidationServiceTests, voidNodeInSegment_removesGene)
     EXPECT_EQ(std::nullopt, issues.at(0).nodeIndex);
     EXPECT_EQ(std::vector{0}, issues.at(0).voidedNodeIndices);
     EXPECT_TRUE(issues.at(0).removesGene);
-    EXPECT_EQ(GenomeIssueSeverity::Error, issues.at(0).getSeverity());
 
     EXPECT_EQ(GenomeIssueType::ConstructsRemovedGene, issues.at(1).type);
     EXPECT_EQ(0, issues.at(1).geneIndex);
@@ -127,7 +126,6 @@ TEST_F(GenomeValidationServiceTests, voidLastNode_withNodeMutations_getsRandomCe
     EXPECT_EQ(GenomeIssueType::VoidBoundaryNode, issues.at(0).type);
     EXPECT_EQ(1, issues.at(0).geneIndex);
     EXPECT_EQ(2, issues.at(0).nodeIndex);
-    EXPECT_EQ(GenomeIssueSeverity::Warning, issues.at(0).getSeverity());
 }
 
 TEST_F(GenomeValidationServiceTests, cycleBetweenTwoGenes)
@@ -145,7 +143,6 @@ TEST_F(GenomeValidationServiceTests, cycleBetweenTwoGenes)
     EXPECT_EQ(2, issues.at(0).geneIndex);
     EXPECT_EQ(0, issues.at(0).nodeIndex);
     EXPECT_EQ((std::vector{1, 2, 1}), issues.at(0).relatedGeneIndices);
-    EXPECT_EQ(GenomeIssueSeverity::Warning, issues.at(0).getSeverity());
 }
 
 TEST_F(GenomeValidationServiceTests, selfReferencingGene)
