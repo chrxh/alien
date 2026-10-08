@@ -138,7 +138,7 @@ void AutosaveWindow::processTable()
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-                    AlienGui::Tooltip("Load save point", false);
+                    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Load save point").delay(false));
                     if (triggerLoadSavepoint) {
                         onLoadSavepoint(entry);
                     }
@@ -279,7 +279,7 @@ void AutosaveWindow::processStatusBar()
         statusItems.emplace_back(std::to_string(savepointTable->getSize()) + " save points");
     }
 
-    AlienGui::StatusBar(statusItems);
+    AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems));
 }
 
 void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)

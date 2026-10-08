@@ -1013,7 +1013,7 @@ void _NeuralNetEditorWidget::processInspectorCardContent(
         if (isSelected) {
             ImGui::PopStyleColor();
         }
-        AlienGui::Tooltip(Const::ActivationFunctionStrings.at(i));
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::ActivationFunctionStrings.at(i)));
 
         auto iconMin = ImGui::GetItemRectMin();
         auto iconMax = ImGui::GetItemRectMax();

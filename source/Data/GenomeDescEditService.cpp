@@ -18,6 +18,24 @@ namespace
     auto constexpr PreviewColor = 0;
 }
 
+namespace
+{
+    template <typename Remap>
+    void remapGeneReferences(GenomeDesc& genome, Remap const& remap)
+    {
+        for (auto& gene : genome._genes) {
+            for (auto& node : gene._nodes) {
+                if (node._constructor.has_value()) {
+                    node._constructor->_geneIndex = remap(node._constructor->_geneIndex);
+                }
+                if (auto injector = std::get_if<InjectorGenomeDesc>(&node._cellType)) {
+                    injector->_geneIndex = remap(injector->_geneIndex);
+                }
+            }
+        }
+    }
+}
+
 void GenomeDescEditService::addGene(GenomeDesc& genome, int index, GeneDesc const& newGene) const
 {
     if (genome._genes.empty()) {
@@ -25,56 +43,58 @@ void GenomeDescEditService::addGene(GenomeDesc& genome, int index, GeneDesc cons
         return;
     }
 
-    for (int i = 0; i < genome._genes.size(); ++i) {
-        auto& gene = genome._genes[i];
-        for (auto& node : gene._nodes) {
-            if (node._constructor.has_value()) {
-                auto& constructor = node._constructor.value();
-                if (constructor._geneIndex > index) {
-                    ++constructor._geneIndex;
-                }
-            }
-        }
-    }
-
+    remapGeneReferences(genome, [&](int geneIndex) { return geneIndex > index ? geneIndex + 1 : geneIndex; });
     genome._genes.insert(genome._genes.begin() + index + 1, newGene);
 }
 
 void GenomeDescEditService::removeGene(GenomeDesc& genome, int index) const
 {
-    for (int i = 0; i < genome._genes.size(); ++i) {
-        if (i == index) {
-            continue;
+    genome._genes.erase(genome._genes.begin() + index);
+    remapGeneReferences(genome, [&](int geneIndex) { return geneIndex >= index ? std::max(0, geneIndex - 1) : geneIndex; });
+}
+
+std::map<int, int> GenomeDescEditService::removeGenes(GenomeDesc& genome, std::set<int> const& geneIndices) const
+{
+    std::map<int, int> result;
+    std::vector<GeneDesc> remainingGenes;
+    for (auto const& [geneIndex, gene] : genome._genes | boost::adaptors::indexed(0)) {
+        if (!geneIndices.contains(toInt(geneIndex))) {
+            result.emplace(toInt(geneIndex), toInt(remainingGenes.size()));
+            remainingGenes.emplace_back(gene);
         }
-        auto& gene = genome._genes[i];
+    }
+    genome._genes = std::move(remainingGenes);
+
+    for (auto& gene : genome._genes) {
         for (auto& node : gene._nodes) {
             if (node._constructor.has_value()) {
-                auto& constructor = node._constructor.value();
-                if (constructor._geneIndex >= index) {
-                    --constructor._geneIndex;
+                if (auto newGeneIndex = result.find(node._constructor->_geneIndex); newGeneIndex != result.end()) {
+                    node._constructor->_geneIndex = newGeneIndex->second;
+                } else if (geneIndices.contains(node._constructor->_geneIndex)) {
+                    node._constructor.reset();
+                }
+            }
+            if (auto injector = std::get_if<InjectorGenomeDesc>(&node._cellType)) {
+                if (auto newGeneIndex = result.find(injector->_geneIndex); newGeneIndex != result.end()) {
+                    injector->_geneIndex = newGeneIndex->second;
+                } else if (geneIndices.contains(injector->_geneIndex)) {
+                    injector->_geneIndex = 0;
                 }
             }
         }
     }
-    genome._genes.erase(genome._genes.begin() + index);
+    return result;
 }
 
 void GenomeDescEditService::swapGenes(GenomeDesc& genome, int index) const
 {
     std::swap(genome._genes.at(index), genome._genes.at(index + 1));
-
-    for (auto& gene : genome._genes) {
-        for (auto& node : gene._nodes) {
-            if (node._constructor.has_value()) {
-                auto& constructor = node._constructor.value();
-                if (constructor._geneIndex == index) {
-                    constructor._geneIndex = index + 1;
-                } else if (constructor._geneIndex == index + 1) {
-                    constructor._geneIndex = index;
-                }
-            }
+    remapGeneReferences(genome, [&](int geneIndex) {
+        if (geneIndex == index) {
+            return index + 1;
         }
-    }
+        return geneIndex == index + 1 ? index : geneIndex;
+    });
 }
 
 void GenomeDescEditService::addNode(GeneDesc& gene, int index, NodeDesc const& node) const

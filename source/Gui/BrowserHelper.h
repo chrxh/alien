@@ -10,8 +10,7 @@ class BrowserHelper
 {
 public:
     static auto constexpr RowHeight = 25.0f;
-    static auto constexpr WorkspaceBottomSpace = 34.0f;
-
+    static float calcFooterHeight();
     static bool ActionButton(std::string const& text);
     static void DownloadButton(BrowserData const& data, BrowserLeaf const& leaf);
 };

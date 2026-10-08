@@ -230,7 +230,7 @@ void GenomeEditorWindow::processTabWidget()
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 onScheduleAddTab(getDefaultGenome(), std::nullopt);
             }
-            AlienGui::Tooltip("New genome");
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text("New genome"));
 
             std::optional<int> tabIndexToSelect = _tabIndexToSelect;
             std::optional<int> tabToDelete;

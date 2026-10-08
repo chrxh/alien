@@ -168,7 +168,7 @@ void SimulationInteractionController::processEditWidget()
 
     if (hovered) {
         if (_modes.editMode) {
-            AlienGui::Tooltip("Leave edit mode (ALT+E)", false);
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text("Leave edit mode (ALT+E)").delay(false));
         } else {
             drawEditToggleLabel(drawList, {pos.x + size + scale(EditToggleLabelSpacing), center.y});
         }

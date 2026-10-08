@@ -33,6 +33,7 @@ PUBLIC
     HeadUpdateTests.cpp
     GarbageCollectorTests.cpp
     GeneCycleRemovalTests.cpp
+    GeneGraphProcessorParityTests.cpp
     GeneratorTests.cpp
     GeometryMutationTests.cpp
     GeometryTests.cpp

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <Base/MathTypes.h>
 
@@ -20,6 +21,9 @@ public:
     static std::string formatHexColor(FloatColorRGB const& color);
     static std::string formatInThousands(double value);  // e.g. 12000 -> "12K", 1000000 -> "1,000K"
     static std::string encodeBase64(std::string_view data);
+    static std::string join(std::vector<int> const& values);
+    static std::string formatRanges(std::vector<int> const& sortedValues);
+    static std::string formatEnumeration(std::vector<std::string> const& items);
 
     static void copy(char* target, int maxSize, std::string const& source);
     static bool compare(char const* target, int maxSize, char const* source);

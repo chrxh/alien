@@ -1,10 +1,10 @@
 #include "GenomeEditorWidget.h"
 
+#include <functional>
 #include <ranges>
 #include <set>
 
 #include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptor/indexed.hpp>
 
 #include <imgui.h>
@@ -14,6 +14,7 @@
 #include <Base/NameGeneratorService.h>
 #include <Base/StringHelper.h>
 
+#include <Data/DescValidationService.h>
 #include <Data/GenomeDescAccessService.h>
 #include <Data/GenomeDescEditService.h>
 
@@ -22,6 +23,7 @@
 #include "AlienGui.h"
 #include "EntityAttributeHelp.h"
 #include "GenericMessageDialog.h"
+#include "GenomeIssueDescription.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "MutationRatesWidget.h"
@@ -31,6 +33,9 @@ namespace
 {
     auto constexpr HeaderMinRightColumnWidth = 190.0f;  // Has to hold the longest label and the help marker
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
+
+    auto constexpr StructureTableMinWidth = 400.0f;
+    auto constexpr StretchColumnsToVisibleWidth = 0.0f;
 
     auto constexpr ColorChipSize = 9.0f;
     auto constexpr ColorChipSpacing = 3.0f;
@@ -45,7 +50,15 @@ GenomeEditorWidget _GenomeEditorWidget::create(GenomeTabEditData const& editData
 void _GenomeEditorWidget::process()
 {
     if (ImGui::BeginChild("GenomeEditor", ImVec2(_layoutData->genomeEditorWidth, 0))) {
-        processHeaderData();
+        auto availableHeight = ImGui::GetContentRegionAvail().y;
+        auto headerHeight = processHeaderData();
+        if (!_layoutData->headerFittedToContent) {
+            auto structureHeightBelowFittedHeader = availableHeight - headerHeight;
+            if (structureHeightBelowFittedHeader >= headerHeight) {
+                _layoutData->structureHeight = structureHeightBelowFittedHeader;
+            }
+            _layoutData->headerFittedToContent = true;
+        }
 
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->structureHeight);
 
@@ -73,10 +86,13 @@ _GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& editData, Geno
     }
 }
 
-void _GenomeEditorWidget::processHeaderData()
+float _GenomeEditorWidget::processHeaderData()
 {
+    auto startPosY = ImGui::GetCursorPosY();
     AlienGui::Group(AlienGui::GroupParameters().text("Genome").highlighted(true));
 
+    auto groupHeight = ImGui::GetCursorPosY() - startPosY;
+    auto contentHeight = 0.0f;
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->structureHeight), 0)) {
 
         auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
@@ -113,39 +129,40 @@ void _GenomeEditorWidget::processHeaderData()
                 .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeApplyMetaMutations)),
             &_editData->genome._applyMetaMutations);
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
-
-        _mutationRatesWidget.process(_editData->genome._mutationRates, rightColumnWidth);
+        _mutationRatesWidget.processAsSingleRow(_editData->genome._mutationRates, rightColumnWidth);
+        contentHeight = ImGui::GetCursorPosY();
     }
     ImGui::EndChild();
+    return groupHeight + contentHeight;
 }
 
 void _GenomeEditorWidget::processStructureTree()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
+    AlienGui::Group(AlienGui::GroupParameters().text("Structure").highlighted(true));
 
     if (ImGui::BeginChild("Structure", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()))) {
         auto scrollToSelection = _selectedGeneFromPreviousFrame != _editData->selectedGeneIndex && !_selectionChangedFromTree;
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
         _selectionChangedFromTree = false;
 
-        auto rootHull = GenomeDescAccessService::get().getReferencedGenesInRootGeneHull(_editData->genome);
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Structure list", 4, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
-            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
-            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_WidthFixed, scale(75.0f));
-            ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        auto isWideEnough = ImGui::GetContentRegionAvail().x >= scale(StructureTableMinWidth);
+        auto innerWidth = isWideEnough ? StretchColumnsToVisibleWidth : scale(StructureTableMinWidth);
+        if (ImGui::BeginTable("Structure list", 4, flags, ImVec2(-1, -1), innerWidth)) {
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 150.0f);
+            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch, 130.0f);
+            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_WidthStretch, 75.0f);
+            ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_WidthStretch, 90.0f);
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
 
             for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                 auto geneIndex = toInt(index);
-                processGeneNode(geneIndex, gene, !rootHull.contains(geneIndex), scrollToSelection, customizationColors);
+                processGeneNode(geneIndex, gene, GenomeIssue::filterByGene(_editData->genomeIssues, geneIndex), scrollToSelection, customizationColors);
             }
             ImGui::EndTable();
         }
@@ -155,17 +172,22 @@ void _GenomeEditorWidget::processStructureTree()
 
 namespace
 {
-    std::string toIndexList(std::vector<int> const& indices)
+    std::vector<GenomeIssue> filterIssues(std::vector<GenomeIssue> const& issues, std::function<bool(GenomeIssue const&)> const& predicate)
     {
-        auto strings = indices | std::views::transform([](auto const& index) { return std::to_string(index); });
-        return boost::algorithm::join(std::vector(strings.begin(), strings.end()), ", ");
+        auto result = issues | std::views::filter(predicate);
+        return std::vector(result.begin(), result.end());
+    }
+
+    int countWithoutFollowUps(std::vector<GenomeIssue> const& issues)
+    {
+        return toInt(std::ranges::count_if(issues, [](auto const& issue) { return !issue.isFollowUp(); }));
     }
 }
 
 void _GenomeEditorWidget::processGeneNode(
     int geneIndex,
     GeneDesc const& gene,
-    bool isUnreachable,
+    std::vector<GenomeIssue> const& geneIssues,
     bool scrollToSelection,
     ColorVector<FloatColorRGB> const& customizationColors)
 {
@@ -183,20 +205,34 @@ void _GenomeEditorWidget::processGeneNode(
 
     // Column 0: identity, followed by the optional name in decent parentheses
     ImGui::TableNextColumn();
-    if (isUnreachable) {
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextConflictColor.Value);
+    auto geneLevelIssues = filterIssues(geneIssues, [](auto const& issue) { return !issue.nodeIndex.has_value() || issue.removesGene; });
+    auto mostRelevantGeneLevelIssue = GenomeIssueDescription::findMostRelevantIssue(geneLevelIssues);
+    auto isRemoved = std::ranges::any_of(geneIssues, &GenomeIssue::removesGene);
+    if (mostRelevantGeneLevelIssue.has_value()) {
+        ImGui::PushStyleColor(
+            ImGuiCol_Text, isRemoved ? Const::WarningColor.Value : GenomeIssueDescription::getColor(mostRelevantGeneLevelIssue.value()).Value);
     }
     auto isOpen = AlienGui::TableRowTreeNode("##gene", "Gene " + std::to_string(geneIndex), flags);
-    if (isUnreachable) {
+    if (mostRelevantGeneLevelIssue.has_value()) {
         ImGui::PopStyleColor();
     }
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
         _editData->selectGene(geneIndex);
         _selectionChangedFromTree = true;
     }
+    if (mostRelevantGeneLevelIssue.has_value()) {
+        AlienGui::Tooltip(AlienGui::TooltipParameters().textFunc([&] { return GenomeIssueDescription::getTooltip(geneLevelIssues, _editData->genome); }));
+    }
     if (!gene._name.empty()) {
         ImGui::SameLine();
         AlienGui::Text(AlienGui::TextParameters().text("(" + gene._name + ")").style(AlienGui::TextStyle::Decent));
+    }
+    auto numNodeLevelWarnings = countWithoutFollowUps(filterIssues(geneIssues, [](auto const& issue) { return issue.nodeIndex.has_value(); }));
+    if (!isOpen && numNodeLevelWarnings > 0) {
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
+        AlienGui::Text(ICON_FA_EXCLAMATION_TRIANGLE " " + std::to_string(numNodeLevelWarnings));
+        ImGui::PopStyleColor();
     }
     if (scrollToSelection && isSelectedGene) {
         ImGui::SetScrollHereY();
@@ -217,15 +253,15 @@ void _GenomeEditorWidget::processGeneNode(
 
     // Column 2: referenced genes
     ImGui::TableNextColumn();
-    AlienGui::Text(toIndexList(GenomeDescAccessService::get().getReferences(gene)));
+    AlienGui::Text(StringHelper::join(GenomeDescAccessService::get().getReferences(gene)));
 
     // Column 3: referencing genes
     ImGui::TableNextColumn();
-    AlienGui::Text(toIndexList(GenomeDescAccessService::get().getReferencedBy(_editData->genome, geneIndex)));
+    AlienGui::Text(StringHelper::join(GenomeDescAccessService::get().getReferencedBy(_editData->genome, geneIndex)));
 
     if (isOpen) {
         for (auto const& [index, node] : gene._nodes | boost::adaptors::indexed(0)) {
-            processNodeLeaf(geneIndex, toInt(index), gene, node, customizationColors);
+            processNodeLeaf(geneIndex, toInt(index), gene, node, geneIssues, customizationColors);
         }
         ImGui::TreePop();
     }
@@ -237,6 +273,7 @@ void _GenomeEditorWidget::processNodeLeaf(
     int nodeIndex,
     GeneDesc const& gene,
     NodeDesc const& node,
+    std::vector<GenomeIssue> const& geneIssues,
     ColorVector<FloatColorRGB> const& customizationColors)
 {
     ImGui::PushID(nodeIndex);
@@ -250,10 +287,21 @@ void _GenomeEditorWidget::processNodeLeaf(
 
     // Column 0: identity
     ImGui::TableNextColumn();
+    auto nodeIssues = filterIssues(geneIssues, [&](auto const& issue) { return issue.nodeIndex == nodeIndex; });
+    auto mostRelevantIssue = GenomeIssueDescription::findMostRelevantIssue(nodeIssues);
+    if (mostRelevantIssue.has_value()) {
+        ImGui::PushStyleColor(ImGuiCol_Text, GenomeIssueDescription::getColor(mostRelevantIssue.value()).Value);
+    }
     AlienGui::TableRowTreeNode("##node", "Node " + std::to_string(nodeIndex), flags);
+    if (mostRelevantIssue.has_value()) {
+        ImGui::PopStyleColor();
+    }
     if (ImGui::IsItemClicked()) {
         _editData->selectNode(geneIndex, nodeIndex);
         _selectionChangedFromTree = true;
+    }
+    if (mostRelevantIssue.has_value()) {
+        AlienGui::Tooltip(AlienGui::TooltipParameters().textFunc([&] { return GenomeIssueDescription::getTooltip(nodeIssues, _editData->genome); }));
     }
 
     // Column 1: cell type. With homogeneous cell type every node shows the cell type of the first node
@@ -263,6 +311,14 @@ void _GenomeEditorWidget::processNodeLeaf(
     AlienGui::Chip(AlienGui::ChipParameters().dotColor(ImColor::HSV(h, s, v)).dotSize(ColorChipSize).spacing(ColorChipSpacing));
     auto nodeType = gene.getCellType(nodeIndex);
     AlienGui::Text(Const::CellTypeStrings.at(nodeType));
+    auto isCutOff = std::ranges::any_of(
+        geneIssues, [&](auto const& issue) { return std::ranges::find(issue.cutOffNodeIndices, nodeIndex) != issue.cutOffNodeIndices.end(); });
+    if (isCutOff && nodeType != CellType_Void) {
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
+        AlienGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT " Void");
+        ImGui::PopStyleColor();
+    }
 
     // Column 2: the gene this node constructs
     ImGui::TableNextColumn();
@@ -343,6 +399,16 @@ void _GenomeEditorWidget::processStructureButtons()
         } else {
             onMoveGeneDownward();
         }
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    AlienGui::VerticalSeparator(20.0f);
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_editData->genomeIssues.empty());
+    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MAGIC).tooltip("Fix all warnings shown in the gene network"))) {
+        onFixAllIssues();
     }
     ImGui::EndDisabled();
 }
@@ -460,11 +526,9 @@ void _GenomeEditorWidget::onRemoveGene()
 {
     auto referencedBy = GenomeDescAccessService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
     if (!referencedBy.empty()) {
-        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex); });
-        auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
         auto text = referencedBy.size() == 1 ? "This gene could not be removed since it is still used by gene "
                                              : "This gene could not be removed since it is still used by genes ";
-        GenericMessageDialog::get().information("Error", text + referencedByString + ".");
+        GenericMessageDialog::get().information("Error", text + StringHelper::join(referencedBy) + ".");
         return;
     }
     if (_editData->selectedGeneIndex.value() == 0) {
@@ -493,6 +557,15 @@ void _GenomeEditorWidget::onMoveGeneDownward()
         return;
     }
     moveGeneDownwardIntern();
+}
+
+void _GenomeEditorWidget::onFixAllIssues()
+{
+    GenericMessageDialog::get().yesNo(
+        "Fix all warnings",
+        "Do you really want to apply the corrections that offspring would receive? "
+        "Genes and nodes may be removed or voided.",
+        [this] { this->fixAllIssuesIntern(); });
 }
 
 void _GenomeEditorWidget::removeGeneIntern()
@@ -563,6 +636,28 @@ void _GenomeEditorWidget::moveGeneDownwardIntern()
             newSelectedNodeByGeneIndex.emplace(index - 1, selectedNode);
         } else {
             newSelectedNodeByGeneIndex.emplace(index, selectedNode);
+        }
+    }
+    _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
+}
+
+void _GenomeEditorWidget::fixAllIssuesIntern()
+{
+    auto newGeneIndexByOldGeneIndex = DescValidationService::get().fixGenomeIssues(_editData->genome);
+
+    if (_editData->selectedGeneIndex.has_value()) {
+        auto newGeneIndex = newGeneIndexByOldGeneIndex.find(_editData->selectedGeneIndex.value());
+        if (newGeneIndex != newGeneIndexByOldGeneIndex.end()) {
+            _editData->selectedGeneIndex = newGeneIndex->second;
+        } else {
+            _editData->selectGene(0);
+        }
+    }
+
+    std::map<int, int> newSelectedNodeByGeneIndex;
+    for (auto const& [oldGeneIndex, selectedNode] : _editData->selectedNodeByGeneIndex) {
+        if (auto newGeneIndex = newGeneIndexByOldGeneIndex.find(oldGeneIndex); newGeneIndex != newGeneIndexByOldGeneIndex.end()) {
+            newSelectedNodeByGeneIndex.emplace(newGeneIndex->second, selectedNode);
         }
     }
     _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;

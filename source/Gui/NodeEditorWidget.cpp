@@ -1069,7 +1069,7 @@ void _NodeEditorWidget::processNeuralNetEditor()
 {
     AlienGui::MoveTickUp();
     AlienGui::MoveTickUp();
-    if (AlienGui::Group(AlienGui::GroupParameters().text("Neural network").expandButton(true))) {
+    if (AlienGui::Group(AlienGui::GroupParameters().text("Neural network").highlighted(true).expandButton(true))) {
         _neuralNetWidget->openDialog();
     }
 

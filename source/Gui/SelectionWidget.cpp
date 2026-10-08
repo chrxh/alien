@@ -119,7 +119,7 @@ namespace
             result.hovered = ImGui::IsItemHovered();
             result.active = ImGui::IsItemActive();
             if (!result.active) {
-                AlienGui::Tooltip(tooltip, false);
+                AlienGui::Tooltip(AlienGui::TooltipParameters().text(tooltip).delay(false));
             }
         }
         ImGui::End();

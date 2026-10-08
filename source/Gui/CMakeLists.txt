@@ -84,10 +84,14 @@ PUBLIC
     GenericMessageDialog.h
     GeneEditorWidget.cpp
     GeneEditorWidget.h
+    GeneGraphWidget.cpp
+    GeneGraphWidget.h
     GenomeEditorWidget.cpp
     GenomeEditorWidget.h
     GenomeEditorWindow.cpp
     GenomeEditorWindow.h
+    GenomeIssueDescription.cpp
+    GenomeIssueDescription.h
     GenomeTabEditData.h
     GenomeTabLayoutData.h
     GenomeTabWidget.cpp

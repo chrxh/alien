@@ -318,7 +318,7 @@ void BrowserWindow::processResourceView()
     if (isLoginRequired()) {
         auto viewPos = ImGui::GetCursorScreenPos();
         auto viewSize = ImGui::GetContentRegionAvail();
-        viewSize.y -= scale(BrowserHelper::WorkspaceBottomSpace);
+        viewSize.y -= BrowserHelper::calcFooterHeight();
 
         if (_galleryView) {
             _galleryWidget->processPlaceholderTiles();
@@ -453,7 +453,7 @@ void BrowserWindow::processStatusBar()
         statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
     }
 
-    AlienGui::StatusBar(statusItems);
+    AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems));
 }
 
 void BrowserWindow::processEmojiWindow()

@@ -1,8 +1,12 @@
 #include "GenomeDescAccessService.h"
 
 #include <algorithm>
+#include <deque>
 #include <iterator>
 #include <map>
+#include <ranges>
+
+#include <boost/range/adaptor/indexed.hpp>
 
 int GenomeDescAccessService::getNumberOfNodes(GenomeDesc const& genome) const
 {
@@ -97,8 +101,12 @@ std::set<int> GenomeDescAccessService::getReferencedGenesInRootGeneHull(GenomeDe
     if (genome._genes.empty()) {
         return {};
     }
+    return getReachableGenes(genome, 0);
+}
 
-    std::set<int> alreadyInspectedGeneIndices = {0};
+std::set<int> GenomeDescAccessService::getReachableGenes(GenomeDesc const& genome, int startGeneIndex) const
+{
+    std::set<int> alreadyInspectedGeneIndices = {startGeneIndex};
     std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
     do {
         std::set<int> newGeneIndices;
@@ -120,6 +128,53 @@ std::set<int> GenomeDescAccessService::getReferencedGenesInRootGeneHull(GenomeDe
     } while (!toInspectedGeneIndices.empty());
 
     return alreadyInspectedGeneIndices;
+}
+
+auto GenomeDescAccessService::getGeneConstructions(GenomeDesc const& genome) const -> std::vector<GeneConstruction>
+{
+    auto numGenes = toInt(genome._genes.size());
+    std::map<std::pair<int, int>, GeneConstruction> constructionByGenePair;
+    for (auto const& [geneIndex, gene] : genome._genes | boost::adaptors::indexed(0)) {
+        for (auto const& [nodeIndex, node] : gene._nodes | boost::adaptors::indexed(0)) {
+            if (!node._constructor.has_value() || node._constructor->_geneIndex < 0 || node._constructor->_geneIndex >= numGenes) {
+                continue;
+            }
+            auto constructingGeneIndex = toInt(geneIndex);
+            auto constructedGeneIndex = node._constructor->_geneIndex;
+            auto& construction = constructionByGenePair
+                                     .try_emplace(
+                                         {constructingGeneIndex, constructedGeneIndex},
+                                         GeneConstruction{.constructingGeneIndex = constructingGeneIndex, .constructedGeneIndex = constructedGeneIndex})
+                                     .first->second;
+            construction.constructorNodeIndices.emplace_back(toInt(nodeIndex));
+            construction.anyWithSeparation = construction.anyWithSeparation || node._constructor->_separation;
+        }
+    }
+
+    auto result = constructionByGenePair | std::views::values;
+    return std::vector(result.begin(), result.end());
+}
+
+std::vector<std::optional<int>> GenomeDescAccessService::calcDistancesFromRootGene(GenomeDesc const& genome) const
+{
+    std::vector<std::optional<int>> result(genome._genes.size());
+    if (genome._genes.empty()) {
+        return result;
+    }
+    auto constructions = getGeneConstructions(genome);
+    result.front() = 0;
+    std::deque<int> genesToScan = {0};
+    while (!genesToScan.empty()) {
+        auto geneIndex = genesToScan.front();
+        genesToScan.pop_front();
+        for (auto const& construction : constructions) {
+            if (construction.constructingGeneIndex == geneIndex && !result.at(construction.constructedGeneIndex).has_value()) {
+                result.at(construction.constructedGeneIndex) = result.at(geneIndex).value() + 1;
+                genesToScan.emplace_back(construction.constructedGeneIndex);
+            }
+        }
+    }
+    return result;
 }
 
 auto GenomeDescAccessService::getGeneIndicesForSubGenomes(GenomeDesc const& genome) const -> std::vector<GeneIndicesForSubGenome>

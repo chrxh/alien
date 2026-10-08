@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include <variant>
 #include <vector>
 
@@ -59,6 +60,8 @@ public:
     std::vector<NodeParameter> getAllNodeParameters() const;
     NodeDesc createNonDefaultNodeDesc(NodeParameter nodeParameter) const;
     std::pair<CreatureDesc, GenomeDesc> createNonDefaultCreatureDesc(NodeParameter nodeParameter) const;
+
+    GenomeDesc createRandomGenome(std::mt19937& randomEngine) const;
 
     bool compare(ContentDesc left, ContentDesc right) const;
     bool compare(ObjectDesc left, ObjectDesc right) const;

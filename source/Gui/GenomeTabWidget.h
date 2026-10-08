@@ -6,6 +6,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
+#include "GeneGraphWidget.h"
 #include "GenomeTabLayoutData.h"
 
 class _GenomeTabWidget
@@ -43,6 +44,12 @@ public:
     void revertChanges();
 
 private:
+    enum class GenomeView
+    {
+        Phenotype,
+        GeneNetwork
+    };
+
     _GenomeTabWidget(
         GenomeWindowEditData const& genomeEditData,
         GenomeDesc const& genome,
@@ -50,7 +57,8 @@ private:
         std::optional<int> lineageId = std::nullopt);
 
     void processEditors();
-    void processPreview();
+    void refreshGenomeIssues();
+    void processRightField();
     void processStatusBar();
 
     void doLayout();
@@ -60,6 +68,8 @@ private:
     GeneEditorWidget _geneEditorWidget;
     NodeEditorWidget _nodeEditorWidget;
     PreviewWidget _simulatedPreviewWidget;
+    GeneGraphWidget _geneGraphWidget;
+    GenomeView _selectedGenomeView = GenomeView::Phenotype;
 
     // Creature data
     GenomeTabEditData _editData;

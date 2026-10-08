@@ -1,7 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <optional>
+#include <set>
 #include <vector>
 
 #include <Base/Cache.h>
@@ -21,6 +23,7 @@ class GenomeDescEditService
 public:
     void addGene(GenomeDesc& genome, int index, GeneDesc const& newGene) const;  // Adds gene after index
     void removeGene(GenomeDesc& genome, int index) const;
+    std::map<int, int> removeGenes(GenomeDesc& genome, std::set<int> const& geneIndices) const;
     void swapGenes(GenomeDesc& genome, int index) const;  // Swaps gene at index with gene at index + 1
 
     void addNode(GeneDesc& gene, int index, NodeDesc const& node) const;  // Adds node after index

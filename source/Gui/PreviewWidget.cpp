@@ -1,5 +1,7 @@
 #include "PreviewWidget.h"
 
+#include <ranges>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/combine.hpp>
@@ -35,6 +37,37 @@ PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData,
 
 void _PreviewWidget::process()
 {
+    updatePreview();
+    processCreaturePreviews();
+    processActionBar();
+}
+
+void _PreviewWidget::processInBackground()
+{
+    updatePreview();
+    auto phenotypes = extractPhenotypes();
+    for (auto const& [creatureWidget, phenotype] : std::views::zip(_creatureWidgets, phenotypes)) {
+        creatureWidget->updatePreviewDesc(phenotype, _editData->genome);
+    }
+    cachePhenotypes(phenotypes);
+}
+
+std::vector<PreviewDesc> _PreviewWidget::getPreviewDescs() const
+{
+    std::vector<PreviewDesc> result;
+    for (auto const& creatureWidget : _creatureWidgets) {
+        result.emplace_back(creatureWidget->getPreviewDesc());
+    }
+    return result;
+}
+
+_PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
+    : _genomeEditData(genomeEditData)
+    , _editData(editData)
+{}
+
+void _PreviewWidget::updatePreview()
+{
     // Has genome changed?
     auto sessionId = _SimulationFacade::get()->getSessionId();
     if (_editData->scheduleReload || !_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome
@@ -54,27 +87,10 @@ void _PreviewWidget::process()
         setupPreviewData();
     }
     calcPreview();
-    processCreaturePreviews();
-
-    processActionBar();
 
     _genomeFromPreviousFrame = _editData->genome;
     _sessionIdFromPreviousFrame = sessionId;
 }
-
-std::vector<PreviewDesc> _PreviewWidget::getPreviewDescs() const
-{
-    std::vector<PreviewDesc> result;
-    for (auto const& creatureWidget : _creatureWidgets) {
-        result.emplace_back(creatureWidget->getPreviewDesc());
-    }
-    return result;
-}
-
-_PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
-    : _genomeEditData(genomeEditData)
-    , _editData(editData)
-{}
 
 void _PreviewWidget::createSubGenomesForPreview()
 {
@@ -146,16 +162,22 @@ namespace
     }
 }
 
+std::vector<ContentDesc> _PreviewWidget::extractPhenotypes() const
+{
+    auto previewRawData = _SimulationFacade::get()->getPreviewData();
+    return GenomeDescEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), getSeedCreatureIds());
+}
+
+void _PreviewWidget::cachePhenotypes(std::vector<ContentDesc> const& phenotypes)
+{
+    for (auto const& [subGenome, phenotype] : boost::combine(getSubGenomes(), phenotypes)) {
+        _genomeEditData->genotypeToPhenotypeCache.insertOrAssign(subGenome, phenotype);
+    }
+}
+
 void _PreviewWidget::processCreaturePreviews()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
-
-    auto previewRawData = _SimulationFacade::get()->getPreviewData();
-
-    // Get phenotypes for all sub-genomes
-    auto seedCreatureIds = getSeedCreatureIds();
-    auto subGenomesForPreview = getSubGenomes();
-    auto phenotypes = GenomeDescEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), seedCreatureIds);
+    auto phenotypes = extractPhenotypes();
 
     // Display and edit previews
     auto phenotypeChanged = false;
@@ -168,9 +190,7 @@ void _PreviewWidget::processCreaturePreviews()
     }
 
     // Update cache for new phenotypes
-    for (auto const& [subGenome, phenotype] : boost::combine(subGenomesForPreview, phenotypes)) {
-        _genomeEditData->genotypeToPhenotypeCache.insertOrAssign(subGenome, phenotype);
-    }
+    cachePhenotypes(phenotypes);
     if (phenotypeChanged) {
         setupPreviewData();
     }
@@ -207,7 +227,7 @@ void _PreviewWidget::processActionBar()
         PreviewSettingsDialog::get().setEditData(_genomeEditData, _editData);
         PreviewSettingsDialog::get().open();
     }
-    AlienGui::Tooltip("Preview settings");
+    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Preview settings"));
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);
