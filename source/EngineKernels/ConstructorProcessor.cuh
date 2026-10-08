@@ -1,8 +1,7 @@
 #pragma once
 
 #include <Data/CellTypeConstants.h>
-
-#include <EngineInterface/ShapeGenerator.h>
+#include <Data/ShapeGenerator.h>
 
 #include "CellProcessor.cuh"
 #include "GeneGraphProcessor.cuh"

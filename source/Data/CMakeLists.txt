@@ -2,6 +2,8 @@
 add_library(Data
     CellTypeConstants.h
     Colors.h
+    CpuGeneGraphProcessor.cpp
+    CpuGeneGraphProcessor.h
     CreatorService.cpp
     CreatorService.h
     DataPointCollection.cpp
@@ -21,6 +23,8 @@ add_library(Data
     GenomeDescEditService.cpp
     GenomeDescEditService.h
     GenomeDescHash.h
+    GenomeIssue.cpp
+    GenomeIssue.h
     LocationAccessService.cpp
     LocationAccessService.h
     LocationEditService.cpp
@@ -43,6 +47,7 @@ add_library(Data
     PreviewDescConverterService.h
     RadiationStrengthService.cpp
     RadiationStrengthService.h
+    ShapeGenerator.h
     SimulationParameters.cpp
     SimulationParameters.h
     SimulationParametersSpecification.h

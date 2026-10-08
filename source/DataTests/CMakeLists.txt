@@ -1,6 +1,7 @@
 target_sources(DataTests
 PUBLIC
     DescEditServiceTests.cpp
+    DescValidationServiceGenomeIssueTests.cpp
     DescValidationServiceTests.cpp
     GenomeDescAccessServiceTests.cpp
     GenomeDescEditServiceTests.cpp

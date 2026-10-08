@@ -18,7 +18,7 @@ public:
 private:
     _GenomeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
-    void processHeaderData();
+    float processHeaderData();
 
     void processStructureTree();
     void processGeneNode(

@@ -17,15 +17,19 @@ public:
     static PreviewWidget create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void process();
+    void processInBackground();
 
     std::vector<PreviewDesc> getPreviewDescs() const;
 
 private:
     _PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
+    void updatePreview();
     void createSubGenomesForPreview();
     void setupPreviewData(bool useCache = true);
     void calcPreview();
+    std::vector<ContentDesc> extractPhenotypes() const;
+    void cachePhenotypes(std::vector<ContentDesc> const& phenotypes);
     void processCreaturePreviews();
     void processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float height);
     void processActionBar();

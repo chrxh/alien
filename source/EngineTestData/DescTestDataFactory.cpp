@@ -1,6 +1,7 @@
 #include "DescTestDataFactory.h"
 
 #include <algorithm>
+#include <ranges>
 
 #include <boost/range/combine.hpp>
 
@@ -229,6 +230,32 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .genomeId(genome._id);
 
     return {creature, genome};
+}
+
+GenomeDesc DescTestDataFactory::createRandomGenome(std::mt19937& randomEngine) const
+{
+    auto randomInt = [&](int min, int max) { return std::uniform_int_distribution(min, max)(randomEngine); };
+    auto randomEvent = [&](double probability) { return std::bernoulli_distribution(probability)(randomEngine); };
+
+    auto numGenes = randomInt(1, 6);
+    std::vector<GeneDesc> genes;
+    for ([[maybe_unused]] auto geneIndex : std::views::iota(0, numGenes)) {
+        std::vector<NodeDesc> nodes;
+        for ([[maybe_unused]] auto nodeIndex : std::views::iota(0, randomInt(1, 12))) {
+            NodeDesc node;
+            if (randomEvent(0.15)) {
+                node.cellType(VoidGenomeDesc());
+            } else if (randomEvent(0.1)) {
+                node.cellType(InjectorGenomeDesc().geneIndex(randomInt(0, numGenes - 1)));
+            }
+            if (randomEvent(0.35)) {
+                node.constructor(ConstructorGenomeDesc().geneIndex(randomInt(0, numGenes - 1)).separation(randomEvent(0.3)));
+            }
+            nodes.emplace_back(node);
+        }
+        genes.emplace_back(GeneDesc().shape(randomInt(0, ConstructorShape_Count - 1)).homogeneousCellType(randomEvent(0.1)).nodes(nodes));
+    }
+    return GenomeDesc().genes(genes);
 }
 
 bool DescTestDataFactory::compare(ContentDesc left, ContentDesc right) const

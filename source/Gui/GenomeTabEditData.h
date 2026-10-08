@@ -1,9 +1,8 @@
 #pragma once
 
 #include <Data/GenomeDesc.h>
-
-#include <EngineInterface/GenomeValidationService.h>
-#include <EngineInterface/ShapeGenerator.h>
+#include <Data/GenomeIssue.h>
+#include <Data/ShapeGenerator.h>
 
 #include "Definitions.h"
 

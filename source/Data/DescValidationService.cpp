@@ -5,7 +5,9 @@
 
 #include <Base/Math.h>
 
+#include "CpuGeneGraphProcessor.h"
 #include "EngineConstants.h"
+#include "GenomeDescEditService.h"
 
 void DescValidationService::validateAndCorrect(GenomeDesc& genome)
 {
@@ -513,4 +515,34 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
                 std::clamp(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
         }
     }
+}
+
+std::vector<GenomeIssue> DescValidationService::findGenomeIssues(GenomeDesc const& genome) const
+{
+    return CpuGeneGraphProcessor(genome).process();
+}
+
+std::map<int, int> DescValidationService::fixGenomeIssues(GenomeDesc& genome) const
+{
+    auto issues = findGenomeIssues(genome);
+    for (auto const& issue : issues) {
+        auto& gene = genome._genes.at(issue.geneIndex);
+        for (auto nodeIndex : issue.cutOffNodeIndices) {
+            auto& node = gene._nodes.at(nodeIndex);
+            node._cellType = VoidGenomeDesc();
+            node._constructor.reset();
+        }
+        if (!issue.nodeIndex.has_value()) {
+            continue;
+        }
+        auto& node = gene._nodes.at(issue.nodeIndex.value());
+        if (issue.type == GenomeIssueType::VoidBoundaryNode) {
+            node._cellType = BaseGenomeDesc();
+        } else if (issue.type == GenomeIssueType::CycleAvoidingRootGene || issue.type == GenomeIssueType::ConstructsRemovedGene) {
+            node._constructor.reset();
+        } else if (issue.type == GenomeIssueType::TooManyGenesWithSeparation) {
+            node._constructor->_separation = false;
+        }
+    }
+    return GenomeDescEditService::get().removeGenes(genome, GenomeIssue::getRemovedGeneIndices(issues));
 }

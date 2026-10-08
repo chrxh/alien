@@ -134,6 +134,7 @@ namespace Const
     auto constexpr ConstructorAutoTriggerInterval_Default = 100;
     auto constexpr ConstructorConstructionAngle_Min = -180.0f;
     auto constexpr ConstructorConstructionAngle_Max = 180.0f;
+    auto constexpr MaxGenesWithSeparation = 2;
 }
 
 using ConstructorShape = int;

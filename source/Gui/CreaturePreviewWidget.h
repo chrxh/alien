@@ -13,6 +13,7 @@ public:
     create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
     void process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float height);
+    void updatePreviewDesc(ContentDesc const& phenotype, GenomeDesc const& genome);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);

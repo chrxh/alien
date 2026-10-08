@@ -11,10 +11,6 @@ struct SettingsForSimulation;
 class _SimulationFacade;
 using SimulationFacade = std::shared_ptr<_SimulationFacade>;
 
-class ShapeGenerator;
-
-struct ShapeGeneratorResult;
-
 struct ConversionResult;
 
 class _GeometryBuffers;

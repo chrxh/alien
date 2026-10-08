@@ -71,14 +71,7 @@ _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesFor
 
 void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenotype, GenomeDesc const& genome, float height)
 {
-    auto phenotypeWithoutSeed = phenotype;
-    GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
-
-    auto geneStartIndex = _subGenome.startIndex;
-
-    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
-    _visualFrontAngle = conversionResult.visualFrontAngle;
-    _previewDesc = std::move(conversionResult.description);
+    updatePreviewDesc(phenotype, genome);
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, Const::GenomePreviewBackgroundColor.Value);
 
@@ -95,6 +88,18 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, ContentDesc& phenot
     ImGui::EndChild();
 
     ImGui::PopStyleColor();
+}
+
+void _CreaturePreviewWidget::updatePreviewDesc(ContentDesc const& phenotype, GenomeDesc const& genome)
+{
+    auto phenotypeWithoutSeed = phenotype;
+    GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
+
+    auto geneStartIndex = _subGenome.startIndex;
+
+    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
+    _visualFrontAngle = conversionResult.visualFrontAngle;
+    _previewDesc = std::move(conversionResult.description);
 }
 
 uint64_t _CreaturePreviewWidget::getCreatureId() const
