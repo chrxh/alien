@@ -31,7 +31,7 @@ namespace
 {
     auto constexpr HoveredTimer = 0.5f;
     auto constexpr GroupAccentBarWidth = 3.0f;
-    auto constexpr BadgeIconScale = 0.8f;
+    auto constexpr SmallIconScale = 0.8f;
     auto constexpr ChipPaddingX = 8.0f;
     auto constexpr ChipPaddingY = 2.0f;
     auto constexpr ChipDotTextSpacing = 6.0f;
@@ -1970,6 +1970,21 @@ bool AlienGui::Group(GroupParameters const& parameters)
     return result;
 }
 
+namespace
+{
+    float calcSmallIconWidth(std::string const& icon)
+    {
+        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
+    }
+
+    void drawSmallIcon(ImDrawList* drawList, ImVec2 const& textPos, std::string const& icon, ImColor const& color)
+    {
+        auto iconSize = ImGui::GetFontSize() * SmallIconScale;
+        auto iconPos = ImVec2(textPos.x, textPos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
+        drawList->AddText(ImGui::GetFont(), iconSize, iconPos, color, icon.c_str());
+    }
+}
+
 void AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex)
 {
     auto drawList = ImGui::GetWindowDrawList();
@@ -1987,10 +2002,7 @@ void AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedInd
     auto lowerY = unscrolledCursorPos.y + textHeight + style.FramePadding.y;
     auto accentBarWidth = scale(GroupAccentBarWidth);
     auto textIndent = scale(GroupTextIndent);
-    auto badgeIconSize = ImGui::GetFontSize() * BadgeIconScale;
-    auto badgeIconWidth = parameters._badgeIcon.empty()
-        ? 0.0f
-        : ImGui::GetFont()->CalcTextSizeA(badgeIconSize, FLT_MAX, 0.0f, parameters._badgeIcon.c_str()).x + style.ItemInnerSpacing.x;
+    auto badgeIconWidth = parameters._badgeIcon.empty() ? 0.0f : calcSmallIconWidth(parameters._badgeIcon) + style.ItemInnerSpacing.x;
 
     auto posX = leftX;
     for (auto const& [index, text] : parameters._texts | boost::adaptors::indexed(0)) {
@@ -2015,8 +2027,7 @@ void AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedInd
         if (!badge.empty()) {
             auto badgePosX = textPosX + textWidth + style.ItemInnerSpacing.x;
             if (!parameters._badgeIcon.empty()) {
-                auto iconPos = ImVec2(badgePosX, unscrolledCursorPos.y + (textHeight - badgeIconSize) / 2);
-                drawList->AddText(ImGui::GetFont(), badgeIconSize, iconPos, parameters._badgeColor, parameters._badgeIcon.c_str());
+                drawSmallIcon(drawList, ImVec2(badgePosX, unscrolledCursorPos.y), parameters._badgeIcon, parameters._badgeColor);
                 badgePosX += badgeIconWidth;
             }
             drawList->AddText(ImVec2(badgePosX, unscrolledCursorPos.y), parameters._badgeColor, badge.c_str());
@@ -2798,9 +2809,14 @@ void AlienGui::StatusBar(StatusBarParameters const& parameters)
     AlienGui::Separator();
 
     if (parameters._warningItem.has_value()) {
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
-        AlienGui::Text(AlienGui::TextParameters().text(" " ICON_FA_EXCLAMATION_TRIANGLE " " + *parameters._warningItem + " "));
-        ImGui::PopStyleColor();
+        auto spaceWidth = ImGui::CalcTextSize(" ").x;
+        auto iconWidth = calcSmallIconWidth(ICON_FA_EXCLAMATION_TRIANGLE);
+        auto text = *parameters._warningItem + " ";
+        auto pos = ImGui::GetCursorScreenPos();
+        ImGui::Dummy(ImVec2(spaceWidth * 2 + iconWidth + ImGui::CalcTextSize(text.c_str()).x, ImGui::GetTextLineHeight()));
+        auto drawList = ImGui::GetWindowDrawList();
+        drawSmallIcon(drawList, ImVec2(pos.x + spaceWidth, pos.y), ICON_FA_EXCLAMATION_TRIANGLE, Const::WarningColor);
+        drawList->AddText(ImVec2(pos.x + spaceWidth * 2 + iconWidth, pos.y), Const::WarningColor, text.c_str());
         if (parameters._warningClickedFunc.has_value()) {
             if (ImGui::IsItemHovered()) {
                 ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
