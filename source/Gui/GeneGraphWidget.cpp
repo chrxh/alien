@@ -516,9 +516,9 @@ namespace
             }
         }
         if (hoveredGeneIndex.has_value()) {
-            AlienGui::Tooltip(getGeneTooltip(genome, editData->genomeIssues, hoveredGeneIndex.value()));
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text(getGeneTooltip(genome, editData->genomeIssues, hoveredGeneIndex.value())));
         } else if (hoveredEdgeIndex.has_value()) {
-            AlienGui::Tooltip(getEdgeTooltip(genome, edges.at(hoveredEdgeIndex.value())));
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text(getEdgeTooltip(genome, edges.at(hoveredEdgeIndex.value()))));
         }
     }
 }
