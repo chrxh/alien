@@ -227,11 +227,11 @@ If the error still occurs, enable **Settings > Debug mode**, reproduce the error
 
 ## 💬 Community
 
-- [Website](https://alien-project.org)
 - [Discord](https://discord.gg/7bjyZdXXQ2) for discussions, new developments and feedback around ALIEN and artificial life in general
 - [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 - [Reddit](https://www.reddit.com/r/AlienProject)
 - [X (Twitter)](https://twitter.com/chrx_h)
+- [Website](https://alien-project.org)
 
 ## 📖 Citing ALIEN
 
