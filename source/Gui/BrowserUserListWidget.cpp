@@ -66,82 +66,81 @@ void _BrowserUserListWidget::process()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTabBar("##Simulators", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-        if (ImGui::BeginTabItem("Simulators", nullptr, ImGuiTabItemFlags_None)) {
+    auto selectedTabIndex = 0;
+    AlienGui::TabBar(
+        AlienGui::TabBarParameters().id("##Simulators").style(AlienGui::TabBarStyle::Group),
+        {AlienGui::TabItemParameters().name("Simulators")},
+        selectedTabIndex);
 
-            if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
-                ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-                auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
-                ImGui::TableSetupColumn(
-                    isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
-                    ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-                    styleService.scale(200.0f));
-                ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(80.0f));
-                ImGui::TableSetupColumn(
-                    "Reactions received",
-                    ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-                    scale(120.0f));
-                ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(100.0f));
-                ImGui::TableSetupScrollFreeze(0, 1);
-                ImGui::TableHeadersRow();
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
+    if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
+        ImGui::TableSetupColumn(
+            isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleService.scale(200.0f));
+        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(80.0f));
+        ImGui::TableSetupColumn(
+            "Reactions received",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
+            scale(120.0f));
+        ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(100.0f));
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
-                ImGuiListClipper clipper;
-                clipper.Begin(_data->userTOs.size());
-                while (clipper.Step()) {
-                    for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                        auto const& user = _data->userTOs.at(row);
+        ImGuiListClipper clipper;
+        clipper.Begin(_data->userTOs.size());
+        while (clipper.Step()) {
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                auto const& user = _data->userTOs.at(row);
 
-                        ImGui::PushID(row);
-                        ImGui::TableNextRow(0, scale(BrowserHelper::RowHeight));
+                ImGui::PushID(row);
+                ImGui::TableNextRow(0, scale(BrowserHelper::RowHeight));
 
-                        ImGui::TableNextColumn();
-                        auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == user.userName;
+                ImGui::TableNextColumn();
+                auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == user.userName;
 
-                        if (user.online) {
-                            drawOnlineSymbol();
-                            ImGui::SameLine();
-                        } else if (user.lastDayOnline) {
-                            drawLastDayOnlineSymbol();
-                            ImGui::SameLine();
-                        }
-                        AlienGui::Text(AlienGui::TextParameters().text(user.userName).style(getTextStyle(isBoldFont)).truncate(true));
-
-                        ImGui::TableNextColumn();
-                        if (isLoggedIn && LoginController::get().shareGpuInfo()) {
-                            AlienGui::Text(AlienGui::TextParameters().text(getGpuString(user.gpu)).style(getTextStyle(isBoldFont)).truncate(true));
-                        }
-
-                        ImGui::TableNextColumn();
-                        if (user.timeSpent > 0) {
-                            // ``timeSpent`` is the cumulative online time
-                            // in seconds. Format as ``Xh`` for >= 1 hour,
-                            // otherwise as ``Ym`` so short-lived users do
-                            // not collapse to ``0h``.
-                            auto totalSeconds = user.timeSpent;
-                            std::string text;
-                            if (totalSeconds >= 3600) {
-                                text = StringHelper::format(static_cast<uint64_t>(totalSeconds / 3600)) + "h";
-                            } else {
-                                text = std::to_string(totalSeconds / 60) + "m";
-                            }
-                            AlienGui::Text(AlienGui::TextParameters().text(text).style(getTextStyle(isBoldFont)).truncate(true));
-                        }
-
-                        ImGui::TableNextColumn();
-                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsReceived)).style(getTextStyle(isBoldFont)).rightAligned(true));
-
-                        ImGui::TableNextColumn();
-                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsGiven)).style(getTextStyle(isBoldFont)).rightAligned(true));
-
-                        ImGui::PopID();
-                    }
+                if (user.online) {
+                    drawOnlineSymbol();
+                    ImGui::SameLine();
+                } else if (user.lastDayOnline) {
+                    drawLastDayOnlineSymbol();
+                    ImGui::SameLine();
                 }
-                ImGui::EndTable();
+                AlienGui::Text(AlienGui::TextParameters().text(user.userName).style(getTextStyle(isBoldFont)).truncate(true));
+
+                ImGui::TableNextColumn();
+                if (isLoggedIn && LoginController::get().shareGpuInfo()) {
+                    AlienGui::Text(AlienGui::TextParameters().text(getGpuString(user.gpu)).style(getTextStyle(isBoldFont)).truncate(true));
+                }
+
+                ImGui::TableNextColumn();
+                if (user.timeSpent > 0) {
+                    // ``timeSpent`` is the cumulative online time
+                    // in seconds. Format as ``Xh`` for >= 1 hour,
+                    // otherwise as ``Ym`` so short-lived users do
+                    // not collapse to ``0h``.
+                    auto totalSeconds = user.timeSpent;
+                    std::string text;
+                    if (totalSeconds >= 3600) {
+                        text = StringHelper::format(static_cast<uint64_t>(totalSeconds / 3600)) + "h";
+                    } else {
+                        text = std::to_string(totalSeconds / 60) + "m";
+                    }
+                    AlienGui::Text(AlienGui::TextParameters().text(text).style(getTextStyle(isBoldFont)).truncate(true));
+                }
+
+                ImGui::TableNextColumn();
+                AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsReceived)).style(getTextStyle(isBoldFont)).rightAligned(true));
+
+                ImGui::TableNextColumn();
+                AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsGiven)).style(getTextStyle(isBoldFont)).rightAligned(true));
+
+                ImGui::PopID();
             }
-            ImGui::EndTabItem();
         }
-        ImGui::EndTabBar();
+        ImGui::EndTable();
     }
     ImGui::PopID();
 }

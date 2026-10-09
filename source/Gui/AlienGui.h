@@ -35,7 +35,6 @@ class AlienGui
 {
 public:
     static auto constexpr GroupTextIndent = 8.0f;
-    static auto constexpr GroupTabSpacing = 4.0f;
 
     static void HelpMarker(std::string const& text);
 
@@ -461,15 +460,6 @@ public:
     // Returns true if the expand button has been clicked
     static bool Group(GroupParameters const& parameters);
 
-    struct GroupTabsParameters
-    {
-        MEMBER(GroupTabsParameters, std::vector<std::string>, texts, {});
-        MEMBER(GroupTabsParameters, std::vector<std::string>, tabBadges, {});
-        MEMBER(GroupTabsParameters, std::string, badgeIcon, {});
-        MEMBER(GroupTabsParameters, ImColor, badgeColor, Const::WarningColor);
-    };
-    static void GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex);
-
     struct ListBoxParameters
     {
         MEMBER(ListBoxParameters, std::vector<std::string>, items, std::vector<std::string>());
@@ -548,6 +538,21 @@ public:
     static bool BeginTreeNode(TreeNodeParameters const& parameters, bool* expandButtonClicked = nullptr);  // Returns true if the tree node is open.
     static void EndTreeNode();
 
+    enum class TabBarStyle
+    {
+        Document,
+        Group
+    };
+    struct TabBarParameters
+    {
+        MEMBER(TabBarParameters, std::string, id, std::string());
+        MEMBER(TabBarParameters, TabBarStyle, style, TabBarStyle::Document);
+        MEMBER(TabBarParameters, bool, reorderable, false);
+        MEMBER(TabBarParameters, bool, autoSelectNewTabs, false);
+    };
+    static bool BeginTabBar(TabBarParameters const& parameters);
+    static void EndTabBar();
+
     struct TabItemParameters
     {
         MEMBER(TabItemParameters, std::string, name, std::string());
@@ -555,9 +560,22 @@ public:
         MEMBER(TabItemParameters, bool, selected, false);
         MEMBER(TabItemParameters, bool*, open, nullptr);
         MEMBER(TabItemParameters, std::optional<ImColor>, markerColor, std::nullopt);
+        MEMBER(TabItemParameters, std::string, badge, std::string());
+        MEMBER(TabItemParameters, std::string, badgeIcon, std::string());
+        MEMBER(TabItemParameters, ImColor, badgeColor, Const::WarningColor);
     };
     static bool BeginTabItem(TabItemParameters const& parameters);
     static void EndTabItem();
+
+    struct TrailingTabButtonParameters
+    {
+        MEMBER(TrailingTabButtonParameters, std::string, text, std::string());
+        MEMBER(TrailingTabButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool TrailingTabButton(TrailingTabButtonParameters const& parameters);
+
+    // Convenience method
+    static void TabBar(TabBarParameters const& parameters, std::vector<TabItemParameters> const& items, int& selectedIndex);
 
     struct ButtonParameters
     {
@@ -675,6 +693,9 @@ private:
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
     static std::unordered_map<std::string, bool> _savedTreeNodeStatesByName;
     static std::vector<unsigned int> _treeNodeIdStack;
+
+    static std::vector<TabBarStyle> _tabBarStyleStack;
+    static std::unordered_map<unsigned int, int> _selectedTabIndexByTabBarId;
 
     static std::unordered_set<unsigned int> _expandedColorControlIds;
 

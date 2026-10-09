@@ -224,13 +224,11 @@ void GenomeEditorWindow::processTabWidget()
 {
     if (ImGui::BeginChild("TabWidget", ImVec2(0, 0), 0, 0)) {
 
-        if (ImGui::BeginTabBar(
-                "##GenomeTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
+        if (AlienGui::BeginTabBar(AlienGui::TabBarParameters().id("##GenomeTabWidget").reorderable(true).autoSelectNewTabs(true))) {
 
-            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+            if (AlienGui::TrailingTabButton(AlienGui::TrailingTabButtonParameters().text("+").tooltip("New genome"))) {
                 onScheduleAddTab(getDefaultGenome(), std::nullopt);
             }
-            AlienGui::Tooltip(AlienGui::TooltipParameters().text("New genome"));
 
             std::optional<int> tabIndexToSelect = _tabIndexToSelect;
             std::optional<int> tabToDelete;
@@ -275,7 +273,7 @@ void GenomeEditorWindow::processTabWidget()
             }
             _tabsToAdd.clear();
 
-            ImGui::EndTabBar();
+            AlienGui::EndTabBar();
         }
     }
     ImGui::EndChild();
