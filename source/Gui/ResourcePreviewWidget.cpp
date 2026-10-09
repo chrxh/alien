@@ -6,9 +6,10 @@
 
 #include <Base/LoggingService.h>
 
+#include <Rendering/TextureService.h>
+
 #include "PictureGuiService.h"
 #include "StyleService.h"
-#include "TextureService.h"
 
 void ResourcePreviewWidget::createForSimulation()
 {

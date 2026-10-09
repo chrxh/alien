@@ -13,11 +13,12 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/TaskProcessor.h>
 
+#include <Rendering/TextureService.h>
+
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
-#include "TextureService.h"
 
 BrowserData _BrowserData::create()
 {

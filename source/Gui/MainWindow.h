@@ -16,6 +16,6 @@ public:
     void shutdown();
 
 private:
-    void initGlfwAndVulkan();
+    void initGlfwAndRendering();
     void initFileDialogs();
 };

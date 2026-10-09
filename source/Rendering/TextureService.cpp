@@ -6,24 +6,49 @@
 #include <ranges>
 #include <stdexcept>
 
+#include <unordered_map>
+
 #include <stb_image.h>
 #include <imgui_impl_vulkan.h>
+
+#include "VulkanContext.h"
+
+struct TextureService::Resources
+{
+    struct Texture
+    {
+        VulkanImage image;
+        VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    };
+    std::unordered_map<ImTextureID, Texture> textures;
+
+    VkSampler smoothSampler = VK_NULL_HANDLE;
+    VkSampler nearestSampler = VK_NULL_HANDLE;
+
+    VkSampler getSampler(TextureFilter filter);
+};
+
+TextureService::TextureService()
+    : _resources(std::make_unique<Resources>())
+{}
+
+TextureService::~TextureService() = default;
 
 void TextureService::shutdown()
 {
     auto& context = VulkanContext::get();
     context.waitIdle();
-    for (auto& texture : _textures | std::views::values) {
+    for (auto& texture : _resources->textures | std::views::values) {
         ImGui_ImplVulkan_RemoveTexture(texture.descriptorSet);
         context.destroyImage(texture.image);
     }
-    _textures.clear();
+    _resources->textures.clear();
 
     auto device = context.getDevice();
-    vkDestroySampler(device, _smoothSampler, nullptr);
-    vkDestroySampler(device, _nearestSampler, nullptr);
-    _smoothSampler = VK_NULL_HANDLE;
-    _nearestSampler = VK_NULL_HANDLE;
+    vkDestroySampler(device, _resources->smoothSampler, nullptr);
+    vkDestroySampler(device, _resources->nearestSampler, nullptr);
+    _resources->smoothSampler = VK_NULL_HANDLE;
+    _resources->nearestSampler = VK_NULL_HANDLE;
 }
 
 TextureData TextureService::loadTexture(std::filesystem::path const& filename)
@@ -116,9 +141,9 @@ TextureData TextureService::createTexture(uint8_t const* pixels, int width, int 
     image.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     context.destroyBuffer(stagingBuffer);
 
-    auto descriptorSet = ImGui_ImplVulkan_AddTexture(getSampler(filter), image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    auto descriptorSet = ImGui_ImplVulkan_AddTexture(_resources->getSampler(filter), image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     auto textureId = reinterpret_cast<ImTextureID>(descriptorSet);
-    _textures.emplace(textureId, Texture{.image = image, .descriptorSet = descriptorSet});
+    _resources->textures.emplace(textureId, Resources::Texture{.image = image, .descriptorSet = descriptorSet});
     return {textureId, width, height};
 }
 
@@ -129,12 +154,12 @@ void TextureService::deleteTexture(TextureData const& texture)
 
 void TextureService::deleteTexture(ImTextureID textureId)
 {
-    auto findResult = _textures.find(textureId);
-    if (findResult == _textures.end()) {
+    auto findResult = _resources->textures.find(textureId);
+    if (findResult == _resources->textures.end()) {
         return;
     }
     auto texture = findResult->second;
-    _textures.erase(findResult);
+    _resources->textures.erase(findResult);
 
     // The texture may still be part of the frame being prepared
     VulkanContext::get().destroyLater([texture]() mutable {
@@ -143,9 +168,9 @@ void TextureService::deleteTexture(ImTextureID textureId)
     });
 }
 
-VkSampler TextureService::getSampler(TextureFilter filter)
+VkSampler TextureService::Resources::getSampler(TextureFilter filter)
 {
-    auto& sampler = filter == TextureFilter::Smooth ? _smoothSampler : _nearestSampler;
+    auto& sampler = filter == TextureFilter::Smooth ? smoothSampler : nearestSampler;
     if (sampler == VK_NULL_HANDLE) {
         auto vkFilter = filter == TextureFilter::Smooth ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
         VkSamplerCreateInfo samplerInfo{

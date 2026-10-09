@@ -9,7 +9,6 @@
 
 #include "RenderStep.h"
 #include "Shader.h"
-#include "Viewport.h"
 
 namespace
 {
@@ -27,14 +26,9 @@ _RenderGraph::_RenderGraph(RenderBlocks&& blocks)
     CHECK(_blocks.back().size() == 1);
 }
 
-void _RenderGraph::resize(IntVector2D const& size)
+void _RenderGraph::updateGeometry(RealRect const& visibleWorldRect)
 {
-    _requestedTextureSize = size;
-}
-
-void _RenderGraph::updateGeometry()
-{
-    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, Viewport::get().getVisibleWorldRect());
+    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, visibleWorldRect);
 }
 
 namespace
@@ -51,10 +45,11 @@ namespace
     }
 }
 
-VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget)
+VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, RenderView const& view, std::optional<TextureTarget> const& finalTarget)
 {
+    _view = view;
     _finalTarget = finalTarget ? RenderTarget(*finalTarget) : RenderTarget(ScreenTarget());
-    applyRequestedSize(!finalTarget.has_value());
+    applyViewSize(!finalTarget.has_value());
     _geometryBuffers->prepareForRendering(commandBuffer);
 
     GeneralRenderInfo generalRenderInfo{.commandBuffer = commandBuffer};
@@ -80,6 +75,7 @@ VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, std::optional<
 
             auto textureTarget = std::holds_alternative<ScreenTarget>(target) ? _screenTarget : std::get<TextureTarget>(target);
             step->execute(ExecutionParameters()
+                              .view(_view)
                               .geometryBuffers(_geometryBuffers)
                               .textures(allTextures)
                               .target(textureTarget)
@@ -91,17 +87,15 @@ VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, std::optional<
     return std::holds_alternative<ScreenTarget>(_finalTarget) ? _screenTarget->color : std::get<TextureTarget>(_finalTarget)->color;
 }
 
-void _RenderGraph::applyRequestedSize(bool withScreenTarget)
+void _RenderGraph::applyViewSize(bool withScreenTarget)
 {
-    CHECK(_requestedTextureSize.has_value());
-
-    if (_textureSize != _requestedTextureSize) {
+    if (_textureSize != _view.viewSize) {
         // A failed resize, e.g. due to a lack of memory, is repeated at the next execution
         _textureSize.reset();
         for (auto const& textureTarget : _textureTargets) {
-            textureTarget->resize(*_requestedTextureSize, IntermediateFormat);
+            textureTarget->resize(_view.viewSize, IntermediateFormat);
         }
-        _textureSize = _requestedTextureSize;
+        _textureSize = _view.viewSize;
     }
     if (withScreenTarget && _screenTarget->color.size != *_textureSize) {
         _screenTarget->resize(*_textureSize, ScreenFormat);
@@ -131,7 +125,7 @@ void _RenderGraph::forEachStep(
             auto& sequence = block.at(j);
 
             std::vector<RenderTarget> previousTargets = previousBlockTargets;
-            auto repetitions = sequence.getRepetitions();
+            auto repetitions = sequence.getRepetitions(_view);
             for (int k = 0; k < repetitions; ++k) {
                 for (size_t l = 0; l < sequence._steps.size(); ++l) {
                     auto& step = sequence._steps.at(l);
@@ -187,7 +181,7 @@ RenderTarget _RenderGraph::determineRenderTarget(
         if (std::holds_alternative<TextureTarget>(target) && usedTargets.contains(target)) {
             TargetInfo targetInfo{
                 .block = blockIndex,
-                .lastStepInSequence = (stepIndex == sequence._steps.size() - 1) && (repetitionIndex == sequence.getRepetitions() - 1),
+                .lastStepInSequence = (stepIndex == sequence._steps.size() - 1) && (repetitionIndex == sequence.getRepetitions(_view) - 1),
             };
             usedTargets.at(target) = targetInfo;
         }
@@ -210,11 +204,11 @@ RenderTarget _RenderGraph::determineRenderTarget(
                 }
                 // Do not reuse targets from the previous block if they are still used in the current block
                 if (targetInfo.block == blockIndex - 1 && targetInfo.lastStepInSequence
-                    && (stepIndex < sequence._steps.size() - 1 || repetitionIndex < sequence.getRepetitions() - 1)) {
+                    && (stepIndex < sequence._steps.size() - 1 || repetitionIndex < sequence.getRepetitions(_view) - 1)) {
                     continue;
                 }
                 if (targetInfo.block == blockIndex - 1 && targetInfo.lastStepInSequence
-                    && (sequenceIndex < block.size() - 1 || repetitionIndex < sequence.getRepetitions() - 1)) {
+                    && (sequenceIndex < block.size() - 1 || repetitionIndex < sequence.getRepetitions(_view) - 1)) {
                     continue;
                 }
                 target = usedTarget;
@@ -227,7 +221,7 @@ RenderTarget _RenderGraph::determineRenderTarget(
 
             TargetInfo targetInfo{
                 .block = blockIndex,
-                .lastStepInSequence = (stepIndex == sequence._steps.size() - 1) && (repetitionIndex == sequence.getRepetitions() - 1),
+                .lastStepInSequence = (stepIndex == sequence._steps.size() - 1) && (repetitionIndex == sequence.getRepetitions(_view) - 1),
             };
             usedTargets.insert_or_assign(target, targetInfo);
         }

@@ -14,6 +14,7 @@
 #include <EngineInterface/Definitions.h>
 
 #include "Definitions.h"
+#include "RenderView.h"
 #include "Shader.h"
 #include "VulkanContext.h"
 #include "VulkanGeometryBuffers.h"
@@ -54,6 +55,7 @@ struct GeneralRenderInfo
 
 using UniformValueType = std::variant<int, float, FloatColorRGB>;
 using UniformValueMap = std::map<std::string, UniformValueType>;
+using UniformFunc = std::function<UniformValueMap(SimulationParameters const&, RenderView const&)>;
 
 struct StepParameters
 {
@@ -61,7 +63,7 @@ struct StepParameters
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
-    MEMBER(StepParameters, std::function<UniformValueMap(SimulationParameters const&)>, uniformFunc, {});
+    MEMBER(StepParameters, UniformFunc, uniformFunc, {});
 
     StepParameters& addUniform(std::string const& key, UniformValueType const& value);
 };
@@ -69,6 +71,7 @@ struct StepParameters
 struct ExecutionParameters
 {
     // Input
+    MEMBER(ExecutionParameters, RenderView, view, RenderView());
     MEMBER(ExecutionParameters, VulkanGeometryBuffers, geometryBuffers, VulkanGeometryBuffers());
     MEMBER(ExecutionParameters, std::vector<TextureTarget>, textures, {});
     MEMBER(ExecutionParameters, bool, clearBackground, false);
@@ -109,7 +112,7 @@ protected:
     std::optional<int> _previousTargetSelection;
     float _textureScale = 1.0f;
     UniformValueMap _uniforms;
-    std::function<UniformValueMap(SimulationParameters const&)> _uniformFunc;
+    UniformFunc _uniformFunc;
     DepthTest _depthTest = DepthTest::None;
     std::vector<TextureTarget> _inputTextures;
 
@@ -222,16 +225,16 @@ private:
 class _CellTypeOverlayRenderStep : public _RenderStep
 {
 public:
-    static CellTypeOverlayRenderStep create(StepParameters const& parameters);
+    static CellTypeOverlayRenderStep create(StepParameters const& parameters, ImFont* labelFont);
     ~_CellTypeOverlayRenderStep();
 
 protected:
     void execute(ExecutionParameters parameters) override;
 
 private:
-    _CellTypeOverlayRenderStep(StepParameters const& parameters);
+    _CellTypeOverlayRenderStep(StepParameters const& parameters, ImFont* labelFont);
 
-    void createCellTypeTextureAtlas();
+    void createCellTypeTextureAtlas(ImFont* labelFont);
 
     VulkanImage _cellTypeTextureAtlas;
 };
