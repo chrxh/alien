@@ -38,9 +38,11 @@ uniform vec2 viewportSize;
 uniform float zoom;
 uniform float renderScale;
 
-void main()
+// Outputs are undefined after EmitVertex, so each vertex sets all of them
+void emitVertex(vec4 position, vec2 quadCoord)
 {
-    // Pass through all attributes
+    gl_Position = position;
+    gQuadCoord = quadCoord;
     gColor = vColor[0];
     gWorldPos = vWorldPos[0];
     gShapeType = vShapeType[0];
@@ -52,7 +54,11 @@ void main()
     gFieldParam1 = vFieldParam1[0];
     gFieldParam2 = vFieldParam2[0];
     gColored = vColored[0];
+    EmitVertex();
+}
 
+void main()
+{
     // Calculate the size of the quad in world coordinates
     float maxDim;
     if (vShapeType[0] == 0) {
@@ -76,24 +82,16 @@ void main()
     
     // Generate quad (4 vertices as triangle strip)
     // Bottom-left
-    gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(-0.5, 0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0), vec2(-0.5, 0.5));
     
     // Bottom-right
-    gl_Position = vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(0.5, 0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0), vec2(0.5, 0.5));
     
     // Top-left
-    gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(-0.5, -0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0), vec2(-0.5, -0.5));
     
     // Top-right
-    gl_Position = vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(0.5, -0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0), vec2(0.5, -0.5));
     
     EndPrimitive();
 }
