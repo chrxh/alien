@@ -1,4 +1,4 @@
-#include "RenderPipeline.h"
+#include "RenderGraph.h"
 
 #include <ranges>
 
@@ -17,22 +17,22 @@ namespace
     auto constexpr ScreenFormat = VK_FORMAT_R8G8B8A8_UNORM;
 }
 
-_RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
+_RenderGraph::_RenderGraph(RenderBlocks&& blocks)
     : _geometryBuffers(_VulkanGeometryBuffers::create())
     , _blocks(std::move(blocks))
     , _screenTarget(_TextureTarget::create())
 {
-    // Check for supported pipeline structure
+    // Check for supported graph structure
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);
 }
 
-void _RenderPipeline::resize(IntVector2D const& size)
+void _RenderGraph::resize(IntVector2D const& size)
 {
     _requestedTextureSize = size;
 }
 
-void _RenderPipeline::updateGeometry()
+void _RenderGraph::updateGeometry()
 {
     _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, Viewport::get().getVisibleWorldRect());
 }
@@ -51,7 +51,7 @@ namespace
     }
 }
 
-VulkanImage& _RenderPipeline::execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget)
+VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget)
 {
     _finalTarget = finalTarget ? RenderTarget(*finalTarget) : RenderTarget(ScreenTarget());
     applyRequestedSize(!finalTarget.has_value());
@@ -91,7 +91,7 @@ VulkanImage& _RenderPipeline::execute(VkCommandBuffer commandBuffer, std::option
     return std::holds_alternative<ScreenTarget>(_finalTarget) ? _screenTarget->color : std::get<TextureTarget>(_finalTarget)->color;
 }
 
-void _RenderPipeline::applyRequestedSize(bool withScreenTarget)
+void _RenderGraph::applyRequestedSize(bool withScreenTarget)
 {
     CHECK(_requestedTextureSize.has_value());
 
@@ -108,14 +108,14 @@ void _RenderPipeline::applyRequestedSize(bool withScreenTarget)
     }
 }
 
-void _RenderPipeline::resizeTarget(TextureTarget const& target)
+void _RenderGraph::resizeTarget(TextureTarget const& target)
 {
     CHECK(_textureSize.has_value());
 
     target->resize(*_textureSize, IntermediateFormat);
 }
 
-void _RenderPipeline::forEachStep(
+void _RenderGraph::forEachStep(
     std::function<TextureTarget()> const& getTextureTarget,
     std::function<void(RenderStep&, std::vector<TextureTarget> const&, RenderTarget const&)> const& executeStep)
 {
@@ -168,7 +168,7 @@ namespace
 
 }
 
-RenderTarget _RenderPipeline::determineRenderTarget(
+RenderTarget _RenderGraph::determineRenderTarget(
     RenderStep const& step,
     RenderSequence const& sequence,
     RenderBlock const& block,

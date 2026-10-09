@@ -43,7 +43,7 @@ struct ScreenTarget
     auto operator<=>(ScreenTarget const&) const = default;
     bool operator==(ScreenTarget const&) const = default;
 
-    // Image is provided by the render pipeline
+    // Image is provided by the render graph
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
 
@@ -131,7 +131,7 @@ private:
 
 class _LineRenderStep : public _RenderStep
 {
-    friend _RenderPipeline;
+    friend _RenderGraph;
 
 public:
     static LineRenderStep create(StepParameters const& parameters);

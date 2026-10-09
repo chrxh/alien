@@ -11,7 +11,7 @@
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "RenderPipeline.h"
+#include "RenderGraph.h"
 #include "Shader.h"
 #include "SimulationView.h"
 #include "StyleService.h"

@@ -18,7 +18,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "RenderPipeline.h"
+#include "RenderGraph.h"
 #include "RenderStep.h"
 #include "Shader.h"
 #include "SimulationScrollbars.h"
@@ -35,7 +35,7 @@ void SimulationView::setup()
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
-    setupRenderPipeline();
+    setupRenderGraph();
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
@@ -52,12 +52,12 @@ void SimulationView::shutdown()
 
 void SimulationView::releaseGraphicsResources()
 {
-    _renderPipeline.reset();
+    _renderGraph.reset();
 }
 
 void SimulationView::resize(IntVector2D const& size)
 {
-    _renderPipeline->resize(size);
+    _renderGraph->resize(size);
 
     Viewport::get().setViewSize(size);
 }
@@ -66,8 +66,7 @@ void SimulationView::draw()
 {
     if (_renderSimulation) {
         VulkanFrameRenderer::get().drawScene(
-            [this] { _renderPipeline->updateGeometry(); },
-            [this](VkCommandBuffer commandBuffer) -> VulkanImage& { return _renderPipeline->execute(commandBuffer); });
+            [this] { _renderGraph->updateGeometry(); }, [this](VkCommandBuffer commandBuffer) -> VulkanImage& { return _renderGraph->execute(commandBuffer); });
 
         if (_SimulationFacade::get()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
@@ -214,7 +213,7 @@ PictureData SimulationView::renderPicture(IntVector2D const& resolution)
         Viewport::get().setViewSize(origViewSize);
         Viewport::get().setZoomFactor(origZoomFactor);
         Viewport::get().setRenderScale(origRenderScale);
-        _renderPipeline->resize(origViewSize);
+        _renderGraph->resize(origViewSize);
     });
 
     target->resize(resolution, VK_FORMAT_R8G8B8A8_UNORM);
@@ -227,10 +226,10 @@ PictureData SimulationView::renderPicture(IntVector2D const& resolution)
     Viewport::get().setZoomFactor(origZoomFactor * renderScale);
     Viewport::get().setRenderScale(renderScale);
 
-    _renderPipeline->resize(resolution);
-    _renderPipeline->updateGeometry();
+    _renderGraph->resize(resolution);
+    _renderGraph->updateGeometry();
     context.submitAndWait([&](VkCommandBuffer commandBuffer) {
-        auto& image = _renderPipeline->execute(commandBuffer, target);
+        auto& image = _renderGraph->execute(commandBuffer, target);
         VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);
         VkBufferImageCopy region{
             .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
@@ -245,7 +244,7 @@ PictureData SimulationView::renderPicture(IntVector2D const& resolution)
         std::ranges::copy(rgba | std::views::take(PictureData::NumChannels), rgb.begin());
     }
 
-    // The render pipeline provides the rows bottom-up as OpenGL did
+    // The render graph provides the rows bottom-up as OpenGL did
     auto bytesPerRow = static_cast<size_t>(resolution.x) * PictureData::NumChannels;
     for (auto row : std::views::iota(0, resolution.y / 2)) {
         auto upperRow = result.pixels.begin() + row * bytesPerRow;
@@ -255,9 +254,9 @@ PictureData SimulationView::renderPicture(IntVector2D const& resolution)
     return result;
 }
 
-void SimulationView::setupRenderPipeline()
+void SimulationView::setupRenderGraph()
 {
-    // Define lambdas for render pipeline
+    // Define lambdas for render graph
     auto backgroundUniformFunc = [this](SimulationParameters const& parameters) {
         return UniformValueMap{
             {"background", parameters.backgroundColor.baseValue},
@@ -332,8 +331,8 @@ void SimulationView::setupRenderPipeline()
         return UniformValueMap{{"colorFactor2", std::lerp(2.0f, 1.3f, organicFadeIn())}};
     };
 
-    // Define render pipeline
-    _renderPipeline = std::make_shared<_RenderPipeline>(RenderBlocks{
+    // Define render graph
+    _renderGraph = std::make_shared<_RenderGraph>(RenderBlocks{
 
         // Render block: Render fluid particles
         RenderBlock{

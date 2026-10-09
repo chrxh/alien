@@ -46,7 +46,7 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void setupRenderPipeline();
+    void setupRenderGraph();
 
     PictureData renderPicture(IntVector2D const& resolution);
 
@@ -58,7 +58,7 @@ private:
     // Overlay
     bool _cellDetailOverlayActive = false;
 
-    RenderPipeline _renderPipeline;
+    RenderGraph _renderGraph;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

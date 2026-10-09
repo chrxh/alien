@@ -179,8 +179,8 @@ PUBLIC
     PreviewViewport.h
     PreviewWidget.cpp
     PreviewWidget.h
-    RenderPipeline.cpp
-    RenderPipeline.h
+    RenderGraph.cpp
+    RenderGraph.h
     RenderStep.cpp
     RenderStep.h
     ReplaceSimulationDialog.cpp
