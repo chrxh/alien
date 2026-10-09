@@ -17,7 +17,6 @@ public:
     void init();
     void shutdown();
 
-    // Whether the geometry kernels can write directly into the shareable memory of the geometry buffers
     bool isSharedMemoryWorking(GeometryBuffers const& geometryBuffers);
 
     void correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);

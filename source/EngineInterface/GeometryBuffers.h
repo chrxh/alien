@@ -93,9 +93,10 @@ enum GeometryBufferType_
     GeometryBufferType_Count
 };
 
-namespace GeometryBufferLayout
+class GeometryBufferLayout
 {
-    inline constexpr std::array<uint64_t, GeometryBufferType_Count> ElementSizes = {
+public:
+    static constexpr std::array<uint64_t, GeometryBufferType_Count> ElementSizes = {
         sizeof(ObjectVertexData),
         sizeof(FluidParticleVertexData),
         sizeof(LocationVertexData),
@@ -107,10 +108,10 @@ namespace GeometryBufferLayout
         sizeof(DetonationEventVertexData),
     };
 
-    inline constexpr std::array<uint64_t, GeometryBufferType_Count> MinCapacities = {100000, 100000, 1000, 10000, 100000, 100000, 100000, 10000, 10000};
+    static constexpr std::array<uint64_t, GeometryBufferType_Count> MinCapacities = {100000, 100000, 1000, 10000, 100000, 100000, 100000, 10000, 10000};
 
-    uint64_t getNumElements(NumRenderObjects const& numObjects, GeometryBufferType type);
-}
+    static uint64_t getNumElements(NumRenderObjects const& numObjects, GeometryBufferType type);
+};
 
 // Memory of a geometry buffer that the GPU engine can import and write into directly
 struct SharedGeometryMemory
@@ -133,7 +134,7 @@ public:
     NumRenderObjects getNumObjects() const;
 
     // Changes whenever the buffer gets new memory
-    uint64_t getGeneration(GeometryBufferType type) const;
+    uint64_t getAllocationId(GeometryBufferType type) const;
 
     uint64_t getCapacity(GeometryBufferType type) const;
 
@@ -161,7 +162,7 @@ private:
     std::vector<T> downloadElements(GeometryBufferType type) const;
 
     NumRenderObjects _numObjects = {};
-    std::array<uint64_t, GeometryBufferType_Count> _generations = {};
+    std::array<uint64_t, GeometryBufferType_Count> _allocationIds = {};
     std::array<uint64_t, GeometryBufferType_Count> _capacities = {};
 };
 
