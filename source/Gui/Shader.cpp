@@ -5,6 +5,7 @@
 #include <cstring>
 #include <memory>
 #include <ranges>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <regex>
@@ -37,6 +38,7 @@ namespace
         std::vector<UniformDeclaration> uniforms;
         uint32_t uniformBlockSize = 0;
         std::map<std::string, uint32_t> samplerBindings;
+        std::set<uint32_t> vertexInputLocations;
     };
 
     std::pair<uint32_t, uint32_t> getSizeAndAlignment(std::string const& type)
@@ -72,11 +74,19 @@ namespace
         static std::regex const uniformRegex(R"(^\s*uniform\s+(\w+)\s+(\w+)\s*;.*$)");
         static std::regex const interfaceRegex(R"(^(\s*)((?:flat|smooth|noperspective)\s+)?(in|out)\s+(\w+)\s+(\w+)\s*(\[\s*\d*\s*\])?\s*;(.*)$)");
         static std::regex const versionRegex(R"(^\s*#version\s+.*$)");
+        static std::regex const vertexInputRegex(R"(^\s*layout\s*\(\s*location\s*=\s*(\d+)\s*\)\s*in\s.*$)");
 
         TranslatedProgram result;
         std::vector<std::vector<std::string>> stageLines;
         for (auto const& source : sources) {
             stageLines.emplace_back(splitLines(source));
+        }
+
+        for (auto const& line : stageLines.front()) {
+            std::smatch match;
+            if (std::regex_match(line, match, vertexInputRegex)) {
+                result.vertexInputLocations.insert(static_cast<uint32_t>(std::stoul(match[1].str())));
+            }
         }
 
         for (auto const& lines : stageLines) {
@@ -158,7 +168,8 @@ namespace
         shader->setStrings(&sourcePtr, 1);
         shader->setEnvInput(glslang::EShSourceGlsl, stage, glslang::EShClientVulkan, 100);
         shader->setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
-        shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
+        // SPIR-V 1.6 would turn discard into a demotion to a helper invocation
+        shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
         if (!shader->parse(GetDefaultResources(), 450, false, messages)) {
             throw std::runtime_error(std::string("Shader compilation failed:\n") + shader->getInfoLog() + "\n" + source);
         }
@@ -418,6 +429,7 @@ _Shader::_Shader(std::string_view vertexSource, std::string_view fragmentSource,
     }
     _uniformData.resize(program.uniformBlockSize, 0);
     _samplerBindings = program.samplerBindings;
+    _vertexInputLocations = program.vertexInputLocations;
 
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     for (auto const& binding : _samplerBindings | std::views::values) {
@@ -469,7 +481,9 @@ VkPipeline _Shader::getPipeline(PipelineState const& state)
         });
     }
 
+    // Attributes the vertex shader does not declare would only cost performance
     auto vertexInput = getVertexInputDescription(state.vertexLayout);
+    std::erase_if(vertexInput.attributes, [this](auto const& attribute) { return !_vertexInputLocations.contains(attribute.location); });
     VkVertexInputBindingDescription vertexBinding{.binding = 0, .stride = vertexInput.stride, .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,

@@ -240,7 +240,7 @@ void _MainWindow::initGlfwAndVulkan()
     ImGui::CreateContext();
     ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForVulkan(windowData.window, true);
-    VulkanFrameRenderer::get().setup();
+    VulkanFrameRenderer::get().setup(windowData.window);
 }
 
 void _MainWindow::initFileDialogs()

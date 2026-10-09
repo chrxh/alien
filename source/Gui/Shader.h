@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -91,4 +92,5 @@ private:
 
     std::map<std::string, uint32_t> _samplerBindings;
     std::map<uint32_t, VkImageView> _boundTextures;
+    std::set<uint32_t> _vertexInputLocations;
 };
