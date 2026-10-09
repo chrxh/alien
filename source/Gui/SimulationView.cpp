@@ -2,26 +2,19 @@
 
 #include <algorithm>
 #include <cmath>
-#include <ranges>
 #include <vector>
-
-#include <glad/glad.h>
 
 #include <imgui.h>
 
-#include <Base/AlienExceptions.h>
 #include <Base/ExitScopeGuard.h>
 #include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
 
-#include <Data/SpaceCalculator.h>
-
 #include <EngineInterface/SimulationFacade.h>
 
+#include <RenderingInterface/RenderingFacade.h>
+
 #include "AlienGui.h"
-#include "RenderPipeline.h"
-#include "RenderStep.h"
-#include "Shader.h"
 #include "SimulationScrollbars.h"
 #include "StyleService.h"
 #include "Viewport.h"
@@ -34,11 +27,9 @@ void SimulationView::setup()
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
-    setupRenderPipeline();
+    _RenderingFacade::get()->setupSimulationRendering(StyleService::get().getDefaultFont());
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
-
-    resize(Viewport::get().getViewSize());
 }
 
 void SimulationView::shutdown()
@@ -51,23 +42,20 @@ void SimulationView::shutdown()
 
 void SimulationView::resize(IntVector2D const& size)
 {
-    _renderPipeline->resize(size);
-
     Viewport::get().setViewSize(size);
 }
 
 void SimulationView::draw()
 {
     if (_renderSimulation) {
-        _renderPipeline->execute();
+        _RenderingFacade::get()->drawSimulation(createRenderView());
 
         if (_SimulationFacade::get()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
     } else {
-        glClearColor(0, 0, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        _RenderingFacade::get()->clearScreen({0, 0, 0});
 
         auto textWidth = scale(300.0f);
         auto textHeight = scale(80.0f);
@@ -170,364 +158,42 @@ void SimulationView::setMotionBlur(float value)
     _motionBlur = value;
 }
 
-namespace
-{
-    void initPictureTarget(TextureTarget const& target, IntVector2D const& resolution)
-    {
-        glGenTextures(1, &target->texture);
-        glBindTexture(GL_TEXTURE_2D, target->texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, resolution.x, resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-        glGenRenderbuffers(1, &target->depthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, target->depthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution.x, resolution.y);
-
-        glGenFramebuffers(1, &target->fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target->texture, 0);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->depthBuffer);
-
-        target->initialized = true;
-    }
-}
-
 PictureData SimulationView::savePicture(IntVector2D const& resolution)
 {
-    GLint maxTextureSize = 0;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    if (resolution.x > maxTextureSize || resolution.y > maxTextureSize) {
-        throw AlienException("The resolution must not exceed " + std::to_string(maxTextureSize) + " pixels per dimension on this GPU.");
-    }
-
-    auto origViewSize = Viewport::get().getViewSize();
-    auto origZoomFactor = Viewport::get().getZoomFactor();
-    auto origRenderScale = Viewport::get().getRenderScale();
-    GLint origFbo = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
-
-    auto target = _TextureTarget::create();
-    ExitScopeGuard restoreState([&] {
-        glBindFramebuffer(GL_FRAMEBUFFER, origFbo);
-        glDeleteFramebuffers(1, &target->fbo);
-        glDeleteRenderbuffers(1, &target->depthBuffer);
-        glDeleteTextures(1, &target->texture);
-
-        Viewport::get().setViewSize(origViewSize);
-        Viewport::get().setZoomFactor(origZoomFactor);
-        Viewport::get().setRenderScale(origRenderScale);
-        _renderPipeline->resize(origViewSize);
-    });
-
-    initPictureTarget(target, resolution);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        throw AlienException("The offscreen framebuffer for the picture could not be created.");
-    }
+    auto& viewport = Viewport::get();
+    auto origViewSize = viewport.getViewSize();
+    auto origZoomFactor = viewport.getZoomFactor();
+    auto origRenderScale = viewport.getRenderScale();
 
     // The visible world rect equals view size / zoom factor. Thus, scaling both by the same amount keeps the
     // horizontally visible world range while the vertical range follows from the aspect ratio of the picture.
     // The render scale lets the render steps enlarge all effects with a size in pixels accordingly.
     auto renderScale = origRenderScale * toFloat(resolution.x) / toFloat(origViewSize.x);
-    Viewport::get().setViewSize(resolution);
-    Viewport::get().setZoomFactor(origZoomFactor * renderScale);
-    Viewport::get().setRenderScale(renderScale);
-
-    _renderPipeline->resize(resolution);
-    _renderPipeline->execute(target);
-
-    PictureData result{.resolution = resolution, .pixels = std::vector<uint8_t>(static_cast<size_t>(resolution.x) * resolution.y * PictureData::NumChannels)};
-    glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, result.pixels.data());
-
-    // OpenGL provides the rows bottom-up
-    auto bytesPerRow = static_cast<size_t>(resolution.x) * PictureData::NumChannels;
-    for (auto row : std::views::iota(0, resolution.y / 2)) {
-        auto upperRow = result.pixels.begin() + row * bytesPerRow;
-        auto lowerRow = result.pixels.begin() + (resolution.y - 1 - row) * bytesPerRow;
-        std::swap_ranges(upperRow, upperRow + bytesPerRow, lowerRow);
+    RenderView pictureView;
+    {
+        ExitScopeGuard restoreViewport([&] {
+            viewport.setViewSize(origViewSize);
+            viewport.setZoomFactor(origZoomFactor);
+            viewport.setRenderScale(origRenderScale);
+        });
+        viewport.setViewSize(resolution);
+        viewport.setZoomFactor(origZoomFactor * renderScale);
+        viewport.setRenderScale(renderScale);
+        pictureView = createRenderView();
     }
-    return result;
+    return _RenderingFacade::get()->renderSimulationPicture(pictureView);
 }
 
-void SimulationView::setupRenderPipeline()
+RenderView SimulationView::createRenderView() const
 {
-    // Define lambdas for render pipeline
-    auto backgroundUniformFunc = [this](SimulationParameters const& parameters) {
-        return UniformValueMap{
-            {"background", parameters.backgroundColor.baseValue},
-            {"borderlessRendering", parameters.borderlessRendering.value},
-        };
+    auto& viewport = Viewport::get();
+    return RenderView{
+        .viewSize = viewport.getViewSize(),
+        .zoomFactor = viewport.getZoomFactor(),
+        .renderScale = viewport.getRenderScale(),
+        .visibleWorldRect = viewport.getVisibleWorldRect(),
+        .cellDetailOverlay = _cellDetailOverlayActive,
     };
-    auto gridLinesUniformFunc = [](SimulationParameters const& parameters) {
-        return UniformValueMap{
-            {"gridLines", parameters.gridLines.value},
-        };
-    };
-    auto moduloUniformFunc = [](SimulationParameters const& parameters) {
-        return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
-    };
-
-    // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality.
-    // The screen zoom factor is used so that a picture rendered at a higher resolution keeps the same appearance.
-    auto blurStrengthFunc = [](SimulationParameters const& parameters) {
-        auto zoom = Viewport::get().getScreenZoomFactor();
-        float strength = 0.035f;
-        if (zoom < 100.0f) {
-            strength *= 3.5f;
-        }
-        if (zoom < 50.0f) {
-            strength *= 2.5f;
-        }
-        if (zoom < 25.0f) {
-            strength *= 2.5f;
-        }
-        if (zoom < 12.0f) {
-            strength *= 2.5f;
-        }
-        if (zoom < 6.0f) {
-            strength *= 2.5f;
-        }
-        return UniformValueMap{{"strength", strength}};
-    };
-    auto blurRepetitionsFunc = [] {
-        auto zoom = Viewport::get().getScreenZoomFactor();
-        auto result = 7;
-        if (zoom < 100.0f) {
-            --result;
-        }
-        if (zoom < 50.0f) {
-            --result;
-        }
-        if (zoom < 25.0f) {
-            --result;
-        }
-        if (zoom < 12.0f) {
-            --result;
-        }
-        if (zoom < 6.0f) {
-            --result;
-        }
-        return result;
-    };
-
-    auto organicFadeIn = [] { return std::clamp((Viewport::get().getScreenZoomFactor() - 4.0f) / 12.0f, 0.0f, 1.0f); };
-
-    auto organicSurfaceUniformFunc = [organicFadeIn](SimulationParameters const&) { return UniformValueMap{{"effectStrength", organicFadeIn()}}; };
-
-    auto cellAppearanceUniformFunc = [organicFadeIn](SimulationParameters const&) {
-        auto fadeIn = organicFadeIn();
-        auto dimmed = 0.54f * std::min(1.0f, Viewport::get().getScreenZoomFactor() * 0.5f);
-        return UniformValueMap{
-            {"brightness", std::lerp(dimmed, 1.0f, fadeIn)},
-            {"sizeScale", std::lerp(0.87f, 1.0f, fadeIn)},
-        };
-    };
-    auto objectMergeUniformFunc = [organicFadeIn](SimulationParameters const&) {
-        return UniformValueMap{{"colorFactor2", std::lerp(2.0f, 1.3f, organicFadeIn())}};
-    };
-
-    // Define render pipeline
-    _renderPipeline = std::make_shared<_RenderPipeline>(RenderBlocks{
-
-        // Render block: Render fluid particles
-        RenderBlock{
-            RenderSequence().steps({
-                _FluidParticleRenderStep::create(StepParameters().shader(ShaderSources::FluidParticle).addUniform("onBackground", true)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-            }),
-        },
-
-        // Render block: Downscale blur for fluid particles
-        RenderBlock{
-            RenderSequence().repetitions(1).steps({
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
-            }),
-            RenderSequence().steps({
-                _FluidParticleRenderStep::create(StepParameters().shader(ShaderSources::FluidParticle).addUniform("onBackground", false)),
-            }),
-        },
-
-        // Render block: Upscale blur for fluid particles
-        RenderBlock{
-            RenderSequence().repetitions(1).steps({
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
-            }),
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-            }),
-        },
-
-        // Render block: Merge fluid particles for bloom
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeMax).addUniform("colorFactor1", 0.8f)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 8.0f)),
-            }),
-        },
-
-        // Render block: Render objects in different sequences
-        RenderBlock{
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-            }),
-            RenderSequence().steps({
-                _LineRenderStep::create(StepParameters().shader(ShaderSources::Line)),
-                _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
-                _NonFluidObjectRenderStep::create(
-                    StepParameters().shader(ShaderSources::NonFluidObject).uniformFunc(cellAppearanceUniformFunc).previousTargetSelection(0)),
-                _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
-                _PostProcessingRenderStep::create(StepParameters()
-                                                      .shader(ShaderSources::OrganicSurface)
-                                                      .uniformFunc(organicSurfaceUniformFunc)
-                                                      .addUniform("warpStrength", 0.0f)
-                                                      .addUniform("warpFrequency", 3.5f)
-                                                      .addUniform("smoothingStrength", 0.3f)
-                                                      .addUniform("depthStrength", 0.5f)
-                                                      .addUniform("roundingStrength", 0.35f)
-                                                      .addUniform("reliefStrength", 4.0f)
-                                                      .addUniform("shadingStrength", 0.8f)
-                                                      .addUniform("membraneStrength", 0.15f)
-                                                      .addUniform("scatterStrength", 0.08f)
-                                                      .addUniform("specularStrength", 0.08f)
-                                                      .addUniform("cavityStrength", 0.5f)
-                                                      .addUniform("grainStrength", 0.0f)
-                                                      .addUniform("grainFrequency", 25.0f)),
-                //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Fresnel)),
-                //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
-            }),
-        },
-
-        // Render block: Merge fluid, connections and objects sequence
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(objectMergeUniformFunc)),
-            }),
-        },
-
-        // Render block: Two outputs: Detonation flashes lighting the scene and the scene
-        RenderBlock{
-            RenderSequence().steps({
-                _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent)),
-            }),
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-            }),
-        },
-
-        // Render block: Add detonation flashes to the scene
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
-            }),
-        },
-
-        // Render block: Two outputs: Threshold and original
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Threshold)),
-            }),
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-            }),
-        },
-
-        // Render block: Two outputs: downscale blur and original
-        RenderBlock{
-            RenderSequence()
-                .repetitions(blurRepetitionsFunc)
-                .steps({
-                    _PostProcessingRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::BlurHorizontal)
-                                                          .uniformFunc(blurStrengthFunc)
-                                                          //.addUniform("strength", 0.12f / 8)
-                                                          .addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::BlurVertical)
-                                                          .uniformFunc(blurStrengthFunc)
-                                                          //.addUniform("strength", 0.12f / 8)
-                                                          .addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f)),
-                }),
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-            })},
-
-        // Render block: Two outputs: upscale blur and original
-        RenderBlock{
-            RenderSequence()
-                .repetitions(blurRepetitionsFunc)
-                .steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                }),
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-            })},
-
-        // Render block: Merge and tone mapping
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeAdditive).uniformFunc([](SimulationParameters const& parameters) {
-                    float bloom = parameters.glow.value;
-                    return UniformValueMap{
-                        {"colorFactor1", bloom},
-                        {"colorFactor2", 1.5f - bloom},
-                    };
-                })),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ToneMapping)),
-            }),
-        },
-
-        // Render block: Background
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundUniformFunc)),
-                _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::GridLines).uniformFunc(gridLinesUniformFunc)),
-                _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-            }),
-            RenderSequence().steps({
-                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-            }),
-        },
-
-        // Render block: Merge background and foreground
-        RenderBlock{
-            RenderSequence().steps({
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
-                _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
-                _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
-            }),
-        },
-    });
 }
 
 void SimulationView::markReferenceDomain()

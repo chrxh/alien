@@ -67,8 +67,8 @@ IncludeCategories:
   - Regex: '^<(algorithm|array|atomic|bit|cassert|chrono|cmath|condition_variable|cstddef|cstdint|cstdlib|cstring|ctime|deque|exception|filesystem|fstream|functional|initializer_list|iomanip|iostream|iterator|limits|list|map|memory|mutex|optional|ostream|random|ranges|set|sstream|stdexcept|string|string_view|thread|tuple|type_traits|unordered_map|unordered_set|utility|variant|vector)>$'
     Priority: 1
 
-  # glad headers
-  - Regex: '^<glad/.*>$'
+  # Vulkan headers
+  - Regex: '^<(volk\.h|(vulkan|glslang)/.*)>$'
     Priority: 99
 
   # Boost headers
@@ -83,8 +83,8 @@ IncludeCategories:
   - Regex: '^<(cuda.*|cooperative_groups.*|sm_\d+.*|device_launch_parameters\.h)>$'
     Priority: 102
 
-  # OpenGL headers
-  - Regex: '^<(GL/.*|glm/.*|stb_image\.h)>$'
+  # Image headers
+  - Regex: '^<stb_image\.h>$'
     Priority: 103
 
   # Cereal serialization headers
@@ -167,9 +167,17 @@ IncludeCategories:
   - Regex: '^<McpToolsImpl/.*>$'
     Priority: 215
 
+  # Rendering interface includes
+  - Regex: '^<RenderingInterface/.*>$'
+    Priority: 216
+
+  # Rendering implementation includes
+  - Regex: '^<RenderingImpl/.*>$'
+    Priority: 217
+
   # GUI module includes
   - Regex: '^<Gui/.*>$'
-    Priority: 216
+    Priority: 218
 
   # All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.c?(uh|h)"$'

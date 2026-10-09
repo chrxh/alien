@@ -7,8 +7,10 @@
 
 #include <EngineInterface/Definitions.h>
 
+#include <RenderingInterface/PictureData.h>
+#include <RenderingInterface/RenderView.h>
+
 #include "Definitions.h"
-#include "PictureData.h"
 
 class SimulationView
 {
@@ -45,7 +47,7 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void setupRenderPipeline();
+    RenderView createRenderView() const;
 
     void markReferenceDomain();
 
@@ -54,13 +56,6 @@ private:
 
     // Overlay
     bool _cellDetailOverlayActive = false;
-
-    RenderPipeline _renderPipeline;
-
-    // Screen background texture (dark blue background)
-    unsigned int _screenBackgroundTexture;
-
-    bool _areTexturesInitialized = false;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

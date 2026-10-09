@@ -7,9 +7,6 @@ using MainWindow = std::shared_ptr<_MainWindow>;
 
 class SimulationView;
 
-class _Shader;
-using Shader = std::shared_ptr<_Shader>;
-
 class _SimulationScrollbars;
 using SimulationScrollbars = std::shared_ptr<_SimulationScrollbars>;
 
@@ -167,58 +164,3 @@ struct UserInfo;
 
 struct GLFWvidmode;
 struct GLFWwindow;
-struct ImFont;
-struct ImVec2;
-
-struct TextureData
-{
-    unsigned int textureId;
-    int width;
-    int height;
-};
-
-class _RenderPipeline;
-using RenderPipeline = std::shared_ptr<_RenderPipeline>;
-
-class _RenderStep;
-using RenderStep = std::shared_ptr<_RenderStep>;
-
-class _NonFluidObjectRenderStep;
-using CellRenderStep = std::shared_ptr<_NonFluidObjectRenderStep>;
-
-class _LineRenderStep;
-using LineRenderStep = std::shared_ptr<_LineRenderStep>;
-
-class _TriangleRenderStep;
-using TriangleRenderStep = std::shared_ptr<_TriangleRenderStep>;
-
-class _PostProcessingRenderStep;
-using PostProcessingRenderStep = std::shared_ptr<_PostProcessingRenderStep>;
-
-class _ForwardRenderStep;
-using ForwardRenderStep = std::shared_ptr<_ForwardRenderStep>;
-
-class _FluidParticleRenderStep;
-using FluidParticleRenderStep = std::shared_ptr<_FluidParticleRenderStep>;
-
-class _LocationRenderStep;
-using LocationRenderStep = std::shared_ptr<_LocationRenderStep>;
-
-class _SelectedObjectRenderStep;
-using SelectedObjectRenderStep = std::shared_ptr<_SelectedObjectRenderStep>;
-
-class _CellTypeOverlayRenderStep;
-using CellTypeOverlayRenderStep = std::shared_ptr<_CellTypeOverlayRenderStep>;
-
-class _SelectedConnectionRenderStep;
-using SelectedConnectionRenderStep = std::shared_ptr<_SelectedConnectionRenderStep>;
-
-class _AttackEventRenderStep;
-using AttackEventRenderStep = std::shared_ptr<_AttackEventRenderStep>;
-class _DetonationEventRenderStep;
-using DetonationEventRenderStep = std::shared_ptr<_DetonationEventRenderStep>;
-
-class _TextureTarget;
-using TextureTarget = std::shared_ptr<_TextureTarget>;
-
-struct GeneralRenderInfo;

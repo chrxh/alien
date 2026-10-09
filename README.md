@@ -35,7 +35,7 @@ The development is driven by the desire to better understand the conditions for 
 ### Physics on the GPU
 - Particle-based simulation of soft and rigid bodies, fluids, adhesion, fracture and damage
 - Millions of particles in real time, written entirely in CUDA and also available for AMD GPUs
-- Rendering and post-processing via OpenGL with CUDA-OpenGL interoperability
+- Rendering and post-processing via Vulkan with CUDA-Vulkan interoperability
 - Real-time interaction with the running simulation
 
 https://github.com/user-attachments/assets/fad1b719-5662-4840-aa75-165346d62cdd
@@ -160,9 +160,9 @@ The `--recursive` parameter is necessary to check out the vcpkg submodule as wel
 **Prerequisites**
 - [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) for NVIDIA GPUs, or [ROCm 7.2+](https://rocm.docs.amd.com/) providing HIP for AMD GPUs
 - Windows: [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components (the latter ships Ninja). The MSVC environment must be active while building.
-- Linux: GCC, ninja-build and the X11/OpenGL development libraries:
+- Linux: GCC, ninja-build, pkg-config and the X11 development libraries:
   ```
-  sudo apt-get install ninja-build libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+  sudo apt-get install ninja-build libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev libxcb1-dev pkg-config
   ```
 
 **NVIDIA GPUs (CUDA)**
@@ -217,7 +217,7 @@ The same chapters can also be read here on GitHub in [resources/docs](resources/
 
 If ALIEN does not start or crashes, please make sure that:
 1) You have a supported graphics card: an NVIDIA GPU with compute capability 7.5 or higher (for example GeForce RTX 20 series) or an AMD GPU of the RDNA2 generation or newer.
-2) You have the latest graphics driver installed.
+2) You have the latest graphics driver installed. It has to support Vulkan 1.3.
 3) The name of the installation directory (including the parent directories) contains no non-English characters. On Windows, the user name should not contain such characters either.
 4) ALIEN has write access to its own directory.
 5) With multiple graphics cards, your primary monitor is connected to the card that ALIEN uses. ALIEN computes and renders on the same card and chooses the one with the highest compute capability.
@@ -283,9 +283,10 @@ The following external libraries are used:
 - [ImPlot](https://github.com/epezent/implot)
 - [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [boost](https://www.boost.org)
-- [Glad](https://glad.dav1d.de)
 - [GLFW](https://www.glfw.org)
-- [glew](https://github.com/nigels-com/glew)
+- [glslang](https://github.com/KhronosGroup/glslang)
+- [volk](https://github.com/zeux/volk)
+- [Vulkan-Headers](https://github.com/KhronosGroup/Vulkan-Headers)
 - [stb](https://github.com/nothings/stb)
 - [cereal](https://github.com/USCiLab/cereal)
 - [Zstandard](https://github.com/facebook/zstd)

@@ -79,10 +79,6 @@ target_include_directories(EngineTests
 
 target_link_libraries(EngineTests cudart)
 target_link_libraries(EngineTests Boost::boost)
-target_link_libraries(EngineTests OpenGL::GL OpenGL::GLU)
-target_link_libraries(EngineTests GLEW::GLEW)
-target_link_libraries(EngineTests glfw)
-target_link_libraries(EngineTests glad::glad)
 target_link_libraries(EngineTests GTest::GTest GTest::Main)
 
 target_precompile_headers(EngineTests PRIVATE

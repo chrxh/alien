@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -77,46 +78,72 @@ struct DetonationEventVertexData
     float radius;  // Detonator radius
 };
 
+using GeometryBufferType = int;
+enum GeometryBufferType_
+{
+    GeometryBufferType_Objects,
+    GeometryBufferType_FluidParticles,
+    GeometryBufferType_Locations,
+    GeometryBufferType_SelectedObjects,
+    GeometryBufferType_LineIndices,
+    GeometryBufferType_TriangleIndices,
+    GeometryBufferType_SelectedConnections,
+    GeometryBufferType_AttackEvents,
+    GeometryBufferType_DetonationEvents,
+    GeometryBufferType_Count
+};
+
+class GeometryBufferLayout
+{
+public:
+    static constexpr std::array<uint64_t, GeometryBufferType_Count> ElementSizes = {
+        sizeof(ObjectVertexData),
+        sizeof(FluidParticleVertexData),
+        sizeof(LocationVertexData),
+        sizeof(SelectedObjectVertexData),
+        sizeof(unsigned int),
+        sizeof(unsigned int),
+        sizeof(ConnectionArrowVertexData),
+        sizeof(AttackEventVertexData),
+        sizeof(DetonationEventVertexData),
+    };
+
+    static constexpr std::array<uint64_t, GeometryBufferType_Count> MinCapacities = {100000, 100000, 1000, 10000, 100000, 100000, 100000, 10000, 10000};
+
+    static uint64_t getNumElements(NumRenderObjects const& numObjects, GeometryBufferType type);
+};
+
+// Memory of a geometry buffer that the GPU engine can import and write into directly
+struct SharedGeometryMemory
+{
+    void* win32Handle = nullptr;  // NT handle on Windows, stays owned by the geometry buffers
+    int fd = -1;                  // File descriptor on Linux, owned by the importer after a successful import
+    uint64_t allocationSize = 0;
+    bool dedicatedAllocation = false;
+};
+
+// Vertex and index buffers holding the visible part of the simulation for rendering
 class _GeometryBuffers
 {
 public:
-    static GeometryBuffers create();
+    virtual ~_GeometryBuffers() = default;
 
-    unsigned int getVaoForPointsAndLines() const { return _vaoForPointsAndLines; }
-    unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
-    unsigned int getVaoForFluidParticles() const { return _vaoForFluidParticles; }
-    unsigned int getVaoForLocations() const { return _vaoForLocations; }
-    unsigned int getVaoForSelectedObjects() const { return _vaoForSelectedObjects; }
-    unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
-    unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
-    unsigned int getVboForObjects() const { return _vboForObjects; }
-    unsigned int getVboForFluidParticles() const { return _vboForFluidParticles; }
-    unsigned int getVboForLocations() const { return _vboForLocations; }
-    unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
-    unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
-    unsigned int getVboForAttackEvents() const { return _vboForAttackEvents; }
-    unsigned int getVboForDetonationEvents() const { return _vboForDetonationEvents; }
-    unsigned int getEboForLines() const { return _eboForLines; }
-    unsigned int getEboForTriangles() const { return _eboForTriangles; }
-
+    // Enlarges the buffers if necessary
     void updateNumObjects(NumRenderObjects const& numRenderObjects);
 
     NumRenderObjects getNumObjects() const;
 
-    bool hasReallocatedBuffers() const;
+    // Changes whenever the buffer gets new memory
+    uint64_t getAllocationId(GeometryBufferType type) const;
 
-    // Methods for uploading data from host memory (used in no-interop mode)
-    void setCellData(ObjectVertexData const* data, uint64_t count);
-    void setFluidParticleData(FluidParticleVertexData const* data, uint64_t count);
-    void setLocationData(LocationVertexData const* data, uint64_t count);
-    void setSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count);
-    void setLineIndices(unsigned int const* data, uint64_t count);
-    void setTriangleIndices(unsigned int const* data, uint64_t count);
-    void setSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
-    void setAttackEventData(AttackEventVertexData const* data, uint64_t count);
-    void setDetonationEventData(DetonationEventVertexData const* data, uint64_t count);
+    uint64_t getCapacity(GeometryBufferType type) const;
 
-    // Methods for downloading data from OpenGL buffers to host memory (for tests)
+    virtual bool isMemoryShareable() const = 0;
+    virtual SharedGeometryMemory shareMemory(GeometryBufferType type) = 0;
+
+    virtual void upload(GeometryBufferType type, void const* data, uint64_t sizeInBytes) = 0;
+    virtual void download(GeometryBufferType type, void* data, uint64_t sizeInBytes) const = 0;
+
     std::vector<ObjectVertexData> getCellData() const;
     std::vector<FluidParticleVertexData> getFluidParticleData() const;
     std::vector<LocationVertexData> getLocationData() const;
@@ -127,36 +154,35 @@ public:
     std::vector<AttackEventVertexData> getAttackEventData() const;
     std::vector<DetonationEventVertexData> getDetonationEventData() const;
 
+protected:
+    virtual void reallocate(GeometryBufferType type, uint64_t sizeInBytes) = 0;
+
 private:
-    unsigned int _vaoForPointsAndLines = 0;
-    unsigned int _vaoForTriangles = 0;
-    unsigned int _vaoForFluidParticles = 0;
-    unsigned int _vaoForLocations = 0;
-    unsigned int _vaoForSelectedObjects = 0;
-    unsigned int _vaoForSelectedConnections = 0;
-    unsigned int _vaoForAttackEvents = 0;
-    unsigned int _vboForObjects = 0;
-    unsigned int _vboForFluidParticles = 0;
-    unsigned int _vboForLocations = 0;
-    unsigned int _vboForSelectedObjects = 0;
-    unsigned int _vboForSelectedConnections = 0;
-    unsigned int _vboForAttackEvents = 0;
-    unsigned int _vboForDetonationEvents = 0;
-    unsigned int _eboForLines = 0;
-    unsigned int _eboForTriangles = 0;
+    template <typename T>
+    std::vector<T> downloadElements(GeometryBufferType type) const;
 
-    bool _reallocatedBuffers = false;
-    uint64_t _vertexBufferCapacity = 0;
-    uint64_t _fluidParticleBufferCapacity = 0;
-    uint64_t _locationBufferCapacity = 0;
-    uint64_t _selectedObjectBufferCapacity = 0;
-    uint64_t _connectionArrowVertexBufferCapacity = 0;
-    uint64_t _attackEventVertexBufferCapacity = 0;
-    uint64_t _detonationEventVertexBufferCapacity = 0;
-    uint64_t _lineIndexBufferCapacity = 0;
-    uint64_t _triangleIndexBufferCapacity = 0;
+    NumRenderObjects _numObjects = {};
+    std::array<uint64_t, GeometryBufferType_Count> _allocationIds = {};
+    std::array<uint64_t, GeometryBufferType_Count> _capacities = {};
+};
 
-    NumRenderObjects _numObjects;
+// Geometry buffers in host memory, e.g. for tests without a graphics device
+class _HostGeometryBuffers : public _GeometryBuffers
+{
+public:
+    static GeometryBuffers create();
 
-    _GeometryBuffers() = default;
+    bool isMemoryShareable() const override;
+    SharedGeometryMemory shareMemory(GeometryBufferType type) override;
+
+    void upload(GeometryBufferType type, void const* data, uint64_t sizeInBytes) override;
+    void download(GeometryBufferType type, void* data, uint64_t sizeInBytes) const override;
+
+protected:
+    void reallocate(GeometryBufferType type, uint64_t sizeInBytes) override;
+
+private:
+    _HostGeometryBuffers() = default;
+
+    std::array<std::vector<uint8_t>, GeometryBufferType_Count> _buffers;
 };

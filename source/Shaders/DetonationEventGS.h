@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const DetonationEventGS = R"(
-#version 330 core
+#version 450
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 

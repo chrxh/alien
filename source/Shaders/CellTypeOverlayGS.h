@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const CellTypeOverlayGS = R"(
-#version 330 core
+#version 450
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
@@ -33,6 +33,17 @@ const int ObjectType_Cell = 3;
 // Number of cell types (matching CellType_Count)
 const int CellType_Count = 14;
 
+// Outputs are undefined after EmitVertex, so each vertex sets all of them
+void emitVertex(vec4 position, vec2 quadCoord, vec2 texCoord)
+{
+    gl_Position = position;
+    gQuadCoord = quadCoord;
+    gTexCoord = texCoord;
+    gColor = vColor[0];
+    gWorldPos = vWorldPos[0];
+    EmitVertex();
+}
+
 void main()
 {
     int objectType = vObjectType[0];
@@ -54,9 +65,6 @@ void main()
         textureRow = CellType_Count + 2;  // Row 15 (ObjectType_FreeCell)
     }
     
-    gColor = vColor[0];
-    gWorldPos = vWorldPos[0];
-    
     // Calculate size in NDC coordinates
     float clampedZoom = min(40, zoom / renderScale);
     float ndcWidth = 480.0 * renderScale / viewportSize.x * 2.0 * clampedZoom / 30;
@@ -77,28 +85,16 @@ void main()
     
     // Generate quad (4 vertices as triangle strip) positioned to the right of the cell
     // Bottom-left
-    gl_Position = vec4(center.x, center.y - ndcHeight * 0.5, center.z, 1.0);
-    gQuadCoord = vec2(0.0, 1.0);
-    gTexCoord = vec2(0.0, texMaxY);
-    EmitVertex();
+    emitVertex(vec4(center.x, center.y - ndcHeight * 0.5, center.z, 1.0), vec2(0.0, 1.0), vec2(0.0, texMaxY));
     
     // Bottom-right
-    gl_Position = vec4(center.x + ndcWidth, center.y - ndcHeight * 0.5, center.z, 1.0);
-    gQuadCoord = vec2(1.0, 1.0);
-    gTexCoord = vec2(1.0, texMaxY);
-    EmitVertex();
+    emitVertex(vec4(center.x + ndcWidth, center.y - ndcHeight * 0.5, center.z, 1.0), vec2(1.0, 1.0), vec2(1.0, texMaxY));
     
     // Top-left
-    gl_Position = vec4(center.x, center.y + ndcHeight * 0.5, center.z, 1.0);
-    gQuadCoord = vec2(0.0, 0.0);
-    gTexCoord = vec2(0.0, texMinY);
-    EmitVertex();
+    emitVertex(vec4(center.x, center.y + ndcHeight * 0.5, center.z, 1.0), vec2(0.0, 0.0), vec2(0.0, texMinY));
     
     // Top-right
-    gl_Position = vec4(center.x + ndcWidth, center.y + ndcHeight * 0.5, center.z, 1.0);
-    gQuadCoord = vec2(1.0, 0.0);
-    gTexCoord = vec2(1.0, texMinY);
-    EmitVertex();
+    emitVertex(vec4(center.x + ndcWidth, center.y + ndcHeight * 0.5, center.z, 1.0), vec2(1.0, 0.0), vec2(1.0, texMinY));
     
     EndPrimitive();
 }

@@ -9,6 +9,8 @@
 
 #include <Base/MarkdownDocument.h>
 
+#include <RenderingInterface/TextureData.h>
+
 #include "Definitions.h"
 
 class MarkdownRenderer

@@ -1,5 +1,6 @@
 #include "SimulationCudaFacade.cuh"
 
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -8,7 +9,6 @@
 #include <cuda_runtime.h>
 
 #include <Base/AlienExceptions.h>
-#include <Base/GlobalSettings.h>
 #include <Base/KernelProfiler.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
@@ -116,6 +116,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
         log(Priority::Unimportant, "skip CUDA shutdown because the CUDA context is invalid");
     } else {
         try {
+            _cudaGeometryBuffers->release();
             _cudaSimulationData->free();
             _cudaPreviewData->free();
             _cudaSimulationStatistics->free();
@@ -145,7 +146,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
     log(Priority::Important, "simulation closed");
 }
 
-void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+void _SimulationCudaFacade::copyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     checkAndProcessSimulationParameterChanges();
 
@@ -153,18 +154,23 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     auto simulationData = getSimulationDataPtrCopy();
 
     GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
-    auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
-    geometryBuffers->updateNumObjects(numRenderObjects);
+    try {
+        auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
+        geometryBuffers->updateNumObjects(numRenderObjects);
 
-    if (GlobalSettings::get().isInterop() && GeometryKernelsService::get().checkForInterop()) {
-        _cudaGeometryBuffers->registerBuffers(geometryBuffers);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, true);
-        syncAndCheck();
-    } else {
-        _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, false);
-        syncAndCheck();
-        _cudaGeometryBuffers->copyToOpenGL(geometryBuffers, numRenderObjects);
+        if (geometryBuffers->isMemoryShareable()) {
+            CHECK_FOR_DEVICE_ERRORS(_cudaGeometryBuffers->importSharedMemory(geometryBuffers));
+            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+            syncAndCheck();
+        } else {
+            _cudaGeometryBuffers->allocateDeviceBuffers(geometryBuffers);
+            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+            syncAndCheck();
+            _cudaGeometryBuffers->copyDeviceBuffersTo(geometryBuffers, numRenderObjects);
+        }
+    } catch (...) {
+        GeometryKernelsService::get().restorePositions(_settings, simulationData);
+        throw;
     }
 
     GeometryKernelsService::get().restorePositions(_settings, simulationData);
@@ -727,7 +733,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     if (cachedResult) {
         return *cachedResult;
     }
-    cachedResult = GpuInfo();
+    GpuInfo result;
 
     int numberOfDevices;
     CHECK_FOR_DEVICE_ERRORS(cudaGetDeviceCount(&numberOfDevices));
@@ -755,9 +761,10 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 
         int computeCapability = prop.major * 100 + prop.minor;
         if (computeCapability > highestComputeCapability) {
-            cachedResult->deviceNumber = deviceNumber;
+            result.deviceNumber = deviceNumber;
             highestComputeCapability = computeCapability;
-            cachedResult->gpuModelName = prop.name;
+            result.gpuModelName = prop.name;
+            std::memcpy(result.gpuUuid.data(), &prop.uuid, result.gpuUuid.size());
         }
     }
 #if !defined(USE_HIP)
@@ -769,7 +776,19 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     }
 #endif
 
-    return *cachedResult;
+    // Only a successful check is cached, so that each call reports a failure
+    cachedResult = result;
+    return result;
+}
+
+bool _SimulationCudaFacade::isRenderingInteropWorking(GeometryBuffers const& geometryBuffers)
+{
+    // No simulation might exist yet, which would have selected the device
+    if (cudaSetDevice(checkAndReturnGpuInfo().deviceNumber) != cudaSuccess) {
+        cudaGetLastError();
+        return false;
+    }
+    return GeometryKernelsService::get().isSharedMemoryWorking(geometryBuffers);
 }
 
 void _SimulationCudaFacade::syncAndCheck()
