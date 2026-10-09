@@ -12,6 +12,8 @@
 
 #include "Shader.h"
 
+static_assert(IMGUI_VERSION_NUM == 19190, "The Vulkan backend in external/imgui_impl_vulkan has to be replaced together with the ImGui version");
+
 namespace
 {
     auto constexpr ImGuiDescriptorPoolSize = 8192;

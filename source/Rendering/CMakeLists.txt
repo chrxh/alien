@@ -25,7 +25,7 @@ add_library(Rendering
 # Vulkan stays an implementation detail of this component
 target_link_libraries(Rendering PUBLIC Base imgui::imgui)
 target_link_libraries(Rendering PRIVATE Data EngineInterface Shaders Boost::boost glfw)
-target_link_libraries(Rendering PRIVATE Vulkan::Vulkan glslang::glslang glslang::glslang-default-resource-limits glslang::SPIRV)
+target_link_libraries(Rendering PRIVATE imgui_impl_vulkan volk::volk glslang::glslang glslang::glslang-default-resource-limits glslang::SPIRV)
 
 # GLFW must not pull in the OpenGL headers
 target_compile_definitions(Rendering PRIVATE GLFW_INCLUDE_NONE)
