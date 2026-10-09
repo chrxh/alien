@@ -41,7 +41,7 @@ public:
 
 private:
     void createSwapchain();
-    void destroySwapchain();
+    void destroySwapchainImageResources();
     void createPresentationShader();
 
     IntVector2D getFramebufferSize() const;

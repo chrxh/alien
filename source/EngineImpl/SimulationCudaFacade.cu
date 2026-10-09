@@ -154,18 +154,23 @@ void _SimulationCudaFacade::copyBuffersFromCudaToRenderer(GeometryBuffers const&
     auto simulationData = getSimulationDataPtrCopy();
 
     GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
-    auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
-    geometryBuffers->updateNumObjects(numRenderObjects);
+    try {
+        auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
+        geometryBuffers->updateNumObjects(numRenderObjects);
 
-    if (geometryBuffers->isMemoryShareable()) {
-        CHECK_FOR_DEVICE_ERRORS(_cudaGeometryBuffers->importSharedMemory(geometryBuffers));
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
-        syncAndCheck();
-    } else {
-        _cudaGeometryBuffers->allocateDeviceBuffers(geometryBuffers);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
-        syncAndCheck();
-        _cudaGeometryBuffers->copyDeviceBuffersTo(geometryBuffers, numRenderObjects);
+        if (geometryBuffers->isMemoryShareable()) {
+            CHECK_FOR_DEVICE_ERRORS(_cudaGeometryBuffers->importSharedMemory(geometryBuffers));
+            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+            syncAndCheck();
+        } else {
+            _cudaGeometryBuffers->allocateDeviceBuffers(geometryBuffers);
+            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+            syncAndCheck();
+            _cudaGeometryBuffers->copyDeviceBuffersTo(geometryBuffers, numRenderObjects);
+        }
+    } catch (...) {
+        GeometryKernelsService::get().restorePositions(_settings, simulationData);
+        throw;
     }
 
     GeometryKernelsService::get().restorePositions(_settings, simulationData);

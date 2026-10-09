@@ -5,11 +5,12 @@
 #include <cstring>
 #include <ranges>
 #include <stdexcept>
-
 #include <unordered_map>
 
 #include <stb_image.h>
 #include <imgui_impl_vulkan.h>
+
+#include <Base/ExitScopeGuard.h>
 
 #include "VulkanContext.h"
 
@@ -96,31 +97,19 @@ namespace
         VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 1, .pImageMemoryBarriers = &barrier};
         vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
     }
-}
 
-TextureData TextureService::createTexture(uint8_t const* pixels, int width, int height, TextureFormat format, TextureFilter filter)
-{
-    auto& context = VulkanContext::get();
-    auto sizeInBytes = static_cast<VkDeviceSize>(width) * height * 4;
-    auto stagingBuffer = context.createBuffer(sizeInBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VulkanMemory::HostVisible);
-    std::memcpy(stagingBuffer.mapped, pixels, sizeInBytes);
-
-    auto mipLevels = filter == TextureFilter::Smooth ? static_cast<uint32_t>(std::bit_width(static_cast<uint32_t>(std::max(width, height)))) : 1u;
-    auto vkFormat = format == TextureFormat::Bgra ? VK_FORMAT_B8G8R8A8_UNORM : VK_FORMAT_R8G8B8A8_UNORM;
-    auto image = context.createImage(
-        {width, height}, vkFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipLevels);
-
-    context.submitAndWait([&](VkCommandBuffer commandBuffer) {
+    void recordUpload(VkCommandBuffer commandBuffer, VulkanBuffer const& stagingBuffer, VulkanImage& image)
+    {
         VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferDestination);
         VkBufferImageCopy region{
             .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
-            .imageExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1},
+            .imageExtent = {static_cast<uint32_t>(image.size.x), static_cast<uint32_t>(image.size.y), 1},
         };
         vkCmdCopyBufferToImage(commandBuffer, stagingBuffer.buffer, image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-        auto levelWidth = width;
-        auto levelHeight = height;
-        for (uint32_t level = 1; level < mipLevels; ++level) {
+        auto levelWidth = image.size.x;
+        auto levelHeight = image.size.y;
+        for (uint32_t level = 1; level < image.mipLevels; ++level) {
             transitionMipLevel(commandBuffer, image.image, level - 1, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
             auto nextWidth = std::max(1, levelWidth / 2);
             auto nextHeight = std::max(1, levelHeight / 2);
@@ -136,10 +125,29 @@ TextureData TextureService::createTexture(uint8_t const* pixels, int width, int 
             levelWidth = nextWidth;
             levelHeight = nextHeight;
         }
-        transitionMipLevel(commandBuffer, image.image, mipLevels - 1, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    });
-    image.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    context.destroyBuffer(stagingBuffer);
+        transitionMipLevel(commandBuffer, image.image, image.mipLevels - 1, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        image.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    }
+}
+
+TextureData TextureService::createTexture(uint8_t const* pixels, int width, int height, TextureFormat format, TextureFilter filter)
+{
+    auto& context = VulkanContext::get();
+    auto sizeInBytes = static_cast<VkDeviceSize>(width) * height * 4;
+    auto stagingBuffer = context.createBuffer(sizeInBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VulkanMemory::HostVisible);
+    ExitScopeGuard destroyStagingBuffer([&] { context.destroyBuffer(stagingBuffer); });
+    std::memcpy(stagingBuffer.mapped, pixels, sizeInBytes);
+
+    auto mipLevels = filter == TextureFilter::Smooth ? static_cast<uint32_t>(std::bit_width(static_cast<uint32_t>(std::max(width, height)))) : 1u;
+    auto vkFormat = format == TextureFormat::Bgra ? VK_FORMAT_B8G8R8A8_UNORM : VK_FORMAT_R8G8B8A8_UNORM;
+    auto image = context.createImage(
+        {width, height}, vkFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipLevels);
+    try {
+        context.submitAndWait([&](VkCommandBuffer commandBuffer) { recordUpload(commandBuffer, stagingBuffer, image); });
+    } catch (...) {
+        context.destroyImage(image);
+        throw;
+    }
 
     auto descriptorSet = ImGui_ImplVulkan_AddTexture(_resources->getSampler(filter), image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     auto textureId = reinterpret_cast<ImTextureID>(descriptorSet);

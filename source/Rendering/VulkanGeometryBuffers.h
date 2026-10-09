@@ -23,7 +23,8 @@ public:
     void upload(GeometryBufferType type, void const* data, uint64_t sizeInBytes) override;
     void download(GeometryBufferType type, void* data, uint64_t sizeInBytes) const override;
 
-    // Copies the uploaded data to the device local buffers and makes all buffers visible for rendering
+    // Copies the uploaded data to the device local buffers. Shared memory needs no barrier since the GPU engine has finished writing it when
+    // the frame is submitted.
     void prepareForRendering(VkCommandBuffer commandBuffer);
 
     VkBuffer getBuffer(GeometryBufferType type) const;

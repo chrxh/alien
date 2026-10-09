@@ -30,6 +30,9 @@ struct _TextureTarget
     // Created on first use since only a few render steps test depth, afterwards it follows the size of the color image
     VulkanImage& getDepth();
 
+    // Required if the recorded commands are discarded instead of submitted. The contents become undefined.
+    void resetImageStates();
+
     VulkanImage color;
 
 private:
@@ -95,9 +98,6 @@ public:
 
     std::optional<int> const& getPreviousTargetSelection() const;
 
-    float getTextureScaling() const;
-    void setTextureScaling(float scale);
-
 protected:
     _RenderStep(StepParameters const& parameters, DepthTest depthTest = DepthTest::None);
 
@@ -114,10 +114,6 @@ protected:
     UniformValueMap _uniforms;
     UniformFunc _uniformFunc;
     DepthTest _depthTest = DepthTest::None;
-    std::vector<TextureTarget> _inputTextures;
-
-public:
-    std::vector<TextureTarget> const& getInputTextures() const { return _inputTextures; }
 };
 
 class _NonFluidObjectRenderStep : public _RenderStep
@@ -134,8 +130,6 @@ private:
 
 class _LineRenderStep : public _RenderStep
 {
-    friend _RenderGraph;
-
 public:
     static LineRenderStep create(StepParameters const& parameters);
 

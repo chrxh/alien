@@ -109,7 +109,9 @@ void VulkanFrameRenderer::shutdown()
     ImGui_ImplVulkan_Shutdown();
     _presentationShader.reset();
     _scene.reset();
-    destroySwapchain();
+    destroySwapchainImageResources();
+    vkDestroySwapchainKHR(device, _swapchain, nullptr);
+    _swapchain = VK_NULL_HANDLE;
 
     vkDestroyFence(device, _frameFence, nullptr);
     vkDestroySemaphore(device, _imageAcquiredSemaphore, nullptr);
@@ -375,13 +377,8 @@ void VulkanFrameRenderer::createSwapchain()
         .oldSwapchain = oldSwapchain,
     };
     checkVkResult(vkCreateSwapchainKHR(device, &swapchainInfo, nullptr, &_swapchain), "vkCreateSwapchainKHR");
+    destroySwapchainImageResources();
     if (oldSwapchain != VK_NULL_HANDLE) {
-        for (auto const& view : _swapchainImageViews) {
-            vkDestroyImageView(device, view, nullptr);
-        }
-        for (auto const& semaphore : _renderFinishedSemaphores) {
-            vkDestroySemaphore(device, semaphore, nullptr);
-        }
         vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
     }
 
@@ -390,8 +387,6 @@ void VulkanFrameRenderer::createSwapchain()
     _swapchainImages.resize(numImages);
     vkGetSwapchainImagesKHR(device, _swapchain, &numImages, _swapchainImages.data());
 
-    _swapchainImageViews.clear();
-    _renderFinishedSemaphores.clear();
     for (auto const& image : _swapchainImages) {
         VkImageViewCreateInfo viewInfo{
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -412,7 +407,7 @@ void VulkanFrameRenderer::createSwapchain()
     _swapchainOutdated = false;
 }
 
-void VulkanFrameRenderer::destroySwapchain()
+void VulkanFrameRenderer::destroySwapchainImageResources()
 {
     auto device = VulkanContext::get().getDevice();
     for (auto const& view : _swapchainImageViews) {
@@ -421,11 +416,9 @@ void VulkanFrameRenderer::destroySwapchain()
     for (auto const& semaphore : _renderFinishedSemaphores) {
         vkDestroySemaphore(device, semaphore, nullptr);
     }
+    _swapchainImages.clear();
     _swapchainImageViews.clear();
     _renderFinishedSemaphores.clear();
-    _swapchainImages.clear();
-    vkDestroySwapchainKHR(device, _swapchain, nullptr);
-    _swapchain = VK_NULL_HANDLE;
 }
 
 void VulkanFrameRenderer::createPresentationShader()

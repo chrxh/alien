@@ -38,11 +38,7 @@ SharedGeometryMemory _VulkanGeometryBuffers::shareMemory(GeometryBufferType type
 
 void _VulkanGeometryBuffers::upload(GeometryBufferType type, void const* data, uint64_t sizeInBytes)
 {
-    auto& stagingBuffer = _stagingBuffers.at(type);
-    if (stagingBuffer.buffer == VK_NULL_HANDLE) {
-        stagingBuffer = VulkanContext::get().createBuffer(_buffers.at(type).size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VulkanMemory::HostVisible);
-    }
-    std::memcpy(stagingBuffer.mapped, data, sizeInBytes);
+    std::memcpy(_stagingBuffers.at(type).mapped, data, sizeInBytes);
     _pendingUploadSizes.at(type) = std::max(_pendingUploadSizes.at(type), sizeInBytes);
 }
 
@@ -75,19 +71,18 @@ void _VulkanGeometryBuffers::prepareForRendering(VkCommandBuffer commandBuffer)
             copied = true;
         }
     }
-
-    // The GPU engine has already finished writing the shared memory when the frame is submitted
-    if (copied) {
-        VkMemoryBarrier2 barrier{
-            .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
-            .srcStageMask = VK_PIPELINE_STAGE_2_COPY_BIT,
-            .srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT | VK_PIPELINE_STAGE_2_INDEX_INPUT_BIT,
-            .dstAccessMask = VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_2_INDEX_READ_BIT,
-        };
-        VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .memoryBarrierCount = 1, .pMemoryBarriers = &barrier};
-        vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+    if (!copied) {
+        return;
     }
+    VkMemoryBarrier2 barrier{
+        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
+        .srcStageMask = VK_PIPELINE_STAGE_2_COPY_BIT,
+        .srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT | VK_PIPELINE_STAGE_2_INDEX_INPUT_BIT,
+        .dstAccessMask = VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_2_INDEX_READ_BIT,
+    };
+    VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .memoryBarrierCount = 1, .pMemoryBarriers = &barrier};
+    vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 }
 
 VkBuffer _VulkanGeometryBuffers::getBuffer(GeometryBufferType type) const
@@ -98,14 +93,22 @@ VkBuffer _VulkanGeometryBuffers::getBuffer(GeometryBufferType type) const
 void _VulkanGeometryBuffers::reallocate(GeometryBufferType type, uint64_t sizeInBytes)
 {
     auto& context = VulkanContext::get();
+    auto buffer = context.createBuffer(sizeInBytes, BufferUsage, _shareable ? VulkanMemory::DeviceLocalShareable : VulkanMemory::DeviceLocal);
+    VulkanBuffer stagingBuffer;
+    if (!_shareable) {
+        try {
+            stagingBuffer = context.createBuffer(sizeInBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VulkanMemory::HostVisible);
+        } catch (...) {
+            context.destroyBuffer(buffer);
+            throw;
+        }
+    }
+
     context.destroyBufferLater(_buffers.at(type));
     context.destroyBufferLater(_stagingBuffers.at(type));
+    _buffers.at(type) = buffer;
+    _stagingBuffers.at(type) = stagingBuffer;
     _pendingUploadSizes.at(type) = 0;
-
-    _buffers.at(type) = context.createBuffer(sizeInBytes, BufferUsage, _shareable ? VulkanMemory::DeviceLocalShareable : VulkanMemory::DeviceLocal);
-    if (!_shareable) {
-        _stagingBuffers.at(type) = context.createBuffer(sizeInBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VulkanMemory::HostVisible);
-    }
 }
 
 _VulkanGeometryBuffers::_VulkanGeometryBuffers()

@@ -53,6 +53,9 @@ public:
     // The images take a new view size only here, so that resizing the window does not create images for every intermediate size.
     VulkanImage& execute(VkCommandBuffer commandBuffer, RenderView const& view, std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
+    // Required if the recorded commands are discarded instead of submitted
+    void resetImageStates();
+
 private:
     void applyViewSize(bool withScreenTarget);
     void resizeTarget(TextureTarget const& target);

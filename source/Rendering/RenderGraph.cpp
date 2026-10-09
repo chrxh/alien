@@ -2,8 +2,6 @@
 
 #include <ranges>
 
-#include <boost/range/adaptor/indexed.hpp>
-
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -69,15 +67,11 @@ VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, RenderView con
             }
         },
         [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<TextureTarget> const& textures, RenderTarget const& target) {
-            // Merge inputTextures from step parameters with textures from previous targets
-            auto allTextures = step->getInputTextures();
-            allTextures.insert(allTextures.end(), textures.begin(), textures.end());
-
             auto textureTarget = std::holds_alternative<ScreenTarget>(target) ? _screenTarget : std::get<TextureTarget>(target);
             step->execute(ExecutionParameters()
                               .view(_view)
                               .geometryBuffers(_geometryBuffers)
-                              .textures(allTextures)
+                              .textures(textures)
                               .target(textureTarget)
                               .renderInfo(generalRenderInfo)
                               .simulationFacade(_SimulationFacade::get())
@@ -85,6 +79,14 @@ VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, RenderView con
         });
 
     return std::holds_alternative<ScreenTarget>(_finalTarget) ? _screenTarget->color : std::get<TextureTarget>(_finalTarget)->color;
+}
+
+void _RenderGraph::resetImageStates()
+{
+    for (auto const& textureTarget : _textureTargets) {
+        textureTarget->resetImageStates();
+    }
+    _screenTarget->resetImageStates();
 }
 
 void _RenderGraph::applyViewSize(bool withScreenTarget)

@@ -62,15 +62,20 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
     target->resize(resolution, VK_FORMAT_R8G8B8A8_UNORM);
 
     _renderGraph->updateGeometry(view.visibleWorldRect);
-    context.submitAndWait([&](VkCommandBuffer commandBuffer) {
-        auto& image = _renderGraph->execute(commandBuffer, view, target);
-        VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);
-        VkBufferImageCopy region{
-            .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
-            .imageExtent = {static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y), 1},
-        };
-        vkCmdCopyImageToBuffer(commandBuffer, image.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, readbackBuffer.buffer, 1, &region);
-    });
+    try {
+        context.submitAndWait([&](VkCommandBuffer commandBuffer) {
+            auto& image = _renderGraph->execute(commandBuffer, view, target);
+            VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);
+            VkBufferImageCopy region{
+                .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
+                .imageExtent = {static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y), 1},
+            };
+            vkCmdCopyImageToBuffer(commandBuffer, image.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, readbackBuffer.buffer, 1, &region);
+        });
+    } catch (...) {
+        _renderGraph->resetImageStates();
+        throw;
+    }
 
     PictureData result{.resolution = resolution, .pixels = std::vector<uint8_t>(static_cast<size_t>(resolution.x) * resolution.y * PictureData::NumChannels)};
     auto rgbaPixels = std::span(static_cast<uint8_t const*>(readbackBuffer.mapped), static_cast<size_t>(resolution.x) * resolution.y * 4);
