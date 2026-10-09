@@ -51,8 +51,8 @@ cudaError_t CudaGeometryBuffers::importSharedMemory(GeometryBuffers const& geome
 
     // Only buffers with new memory are imported again
     for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
-        auto generation = geometryBuffers->getGeneration(type);
-        if (_sharedBuffers.at(type) != nullptr && _importedGenerations.at(type) == generation) {
+        auto allocationId = geometryBuffers->getAllocationId(type);
+        if (_sharedBuffers.at(type) != nullptr && _importedAllocationIds.at(type) == allocationId) {
             continue;
         }
         releaseSharedMemory(type);
@@ -66,7 +66,7 @@ cudaError_t CudaGeometryBuffers::importSharedMemory(GeometryBuffers const& geome
             releaseSharedMemory();
             return result;
         }
-        _importedGenerations.at(type) = generation;
+        _importedAllocationIds.at(type) = allocationId;
     }
     _activeBuffers = _sharedBuffers;
     return cudaSuccess;
