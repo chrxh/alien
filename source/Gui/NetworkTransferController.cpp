@@ -49,14 +49,11 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
             }
             if (VersionParserService::get().isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-                GenericMessageDialog::get().information(
+                GenericMessageDialog::get().markdownInformation(
                     "Warning",
-                    "The download was successful but the " + dataTypeString
-                        + " was generated using a more recent\n"
-                          "version of ALIEN. Consequently, the "
+                    "The download was successful but the " + dataTypeString + " was generated using a more recent version of ALIEN. Consequently, the "
                         + dataTypeString
-                        + " might not function as expected.\n"
-                          "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
+                        + " might not function as expected.\n\nPlease visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
             }
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });

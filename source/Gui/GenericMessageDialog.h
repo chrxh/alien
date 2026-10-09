@@ -1,5 +1,8 @@
 #pragma once
 
+#include <optional>
+
+#include <Base/MarkdownDocument.h>
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
@@ -9,6 +12,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 #include "MainLoopEntity.h"
+#include "MarkdownRenderer.h"
 
 class GenericMessageDialog : public AlienDialog
 {
@@ -17,6 +21,7 @@ class GenericMessageDialog : public AlienDialog
 public:
     void information(std::string const& title, std::string const& message);
     void information(std::string const& title, std::vector<PersisterErrorInfo> const& errors);
+    void markdownInformation(std::string const& title, std::string const& markdownMessage);
     void yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction);
 
 private:
@@ -37,6 +42,8 @@ private:
     DialogType _dialogType = DialogType::Information;
     std::string _title;
     std::string _message;
+    std::optional<MarkdownDocument> _markdownMessage;
+    MarkdownRenderer _markdownRenderer;
     std::function<void()> _execFunction;
 };
 
