@@ -18,10 +18,17 @@ uniform vec2 viewportSize;
 uniform float zoom;
 uniform float radius;
 
+// Outputs are undefined after EmitVertex, so each vertex sets all of them
+void emitVertex(vec4 position, vec2 quadCoord)
+{
+    gl_Position = position;
+    gQuadCoord = quadCoord;
+    gWorldPos = vWorldPos[0];
+    EmitVertex();
+}
+
 void main()
 {
-    gWorldPos = vWorldPos[0];
-    
     // Circle radius in world coordinates (thin white circle)
     float circleRadius = radius * 0.35;
     
@@ -34,24 +41,16 @@ void main()
     
     // Generate quad (4 vertices as triangle strip)
     // Bottom-left
-    gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(-0.5, 0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0), vec2(-0.5, 0.5));
     
     // Bottom-right
-    gl_Position = vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(0.5, 0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0), vec2(0.5, 0.5));
     
     // Top-left
-    gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(-0.5, -0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0), vec2(-0.5, -0.5));
     
     // Top-right
-    gl_Position = vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(0.5, -0.5);
-    EmitVertex();
+    emitVertex(vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0), vec2(0.5, -0.5));
     
     EndPrimitive();
 }
