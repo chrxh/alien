@@ -11,203 +11,20 @@
 #include "Shader.h"
 #include "Viewport.h"
 
-_RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
-    : _geometryBuffers(_GeometryBuffers::create())
-    , _blocks(std::move(blocks))
+namespace
 {
-    {
-        auto vao = _geometryBuffers->getVaoForPointsAndLines();
-        auto vbo = _geometryBuffers->getVboForObjects();
-        auto ebo = _geometryBuffers->getEboForLines();
+    auto constexpr IntermediateFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+    auto constexpr ScreenFormat = VK_FORMAT_R8G8B8A8_UNORM;
+}
 
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for CellVertexData (same as PointRenderStep)
-        // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // States (1 int)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-
-        // Signal strength (1 float)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(3);
-
-        // Bind EBO (will be filled by CUDA later)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    }
-    {
-        auto vao = _geometryBuffers->getVaoForTriangles();
-        auto vbo = _geometryBuffers->getVboForObjects();
-        auto ebo = _geometryBuffers->getEboForTriangles();
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for CellVertexData (same as PointRenderStep)
-        // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // States (1 int)
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-
-        // Signal strength (1 float)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(3);
-
-        // Bind EBO (will be filled by CUDA later)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    }
-    {
-        auto vao = _geometryBuffers->getVaoForFluidParticles();
-        auto vbo = _geometryBuffers->getVboForFluidParticles();
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for FluidParticleVertexData
-        // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // Glow (1 float)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-    }
-    {
-        auto vao = _geometryBuffers->getVaoForLocations();
-        auto vbo = _geometryBuffers->getVboForLocations();
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for LocationVertexData
-        // Position (2 floats: x, y)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // Shape type (1 int)
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(LocationVertexData), (void*)(5 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-
-        // Dimension1 (1 float: radius or width)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(5 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(3);
-
-        // Dimension2 (1 float: unused or height)
-        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(4);
-
-        // FadeoutRadius (1 float)
-        glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(7 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(5);
-
-        // Opacity (1 float)
-        glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(8 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(6);
-
-        // Force field type (1 int)
-        glVertexAttribIPointer(7, 1, GL_INT, sizeof(LocationVertexData), (void*)(9 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(7);
-
-        // Force field parameter 1 (1 float)
-        glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(9 * sizeof(float) + 2 * sizeof(int)));
-        glEnableVertexAttribArray(8);
-
-        // Force field parameter 2 (1 float)
-        glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(10 * sizeof(float) + 2 * sizeof(int)));
-        glEnableVertexAttribArray(9);
-
-        // Colored flag (1 int)
-        glVertexAttribIPointer(10, 1, GL_INT, sizeof(LocationVertexData), (void*)(11 * sizeof(float) + 2 * sizeof(int)));
-        glEnableVertexAttribArray(10);
-    }
-    {
-        auto vao = _geometryBuffers->getVaoForSelectedObjects();
-        auto vbo = _geometryBuffers->getVboForSelectedObjects();
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for SelectedObjectVertexData
-        // Position (2 floats: x, y)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-    }
-    {
-        auto vao = _geometryBuffers->getVaoForSelectedConnections();
-        auto vbo = _geometryBuffers->getVboForSelectedConnections();
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for ConnectionArrowVertexData
-        // Position (2 floats: x, y)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // Connection weight to object1 (1 float)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(5 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-
-        // Connection weight to object2 (1 float)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(3);
-    }
-    {
-        auto vao = _geometryBuffers->getVaoForAttackEvents();
-        auto vbo = _geometryBuffers->getVboForAttackEvents();
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        // Setup vertex attributes for AttackEventVertexData
-        // Position (2 floats: x, y)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-    }
-
+_RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
+    : _geometryBuffers(_VulkanGeometryBuffers::create())
+    , _blocks(std::move(blocks))
+    , _screenTarget(_TextureTarget::create())
+{
     // Check for supported pipeline structure
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);
-
-    //// Create texture targets for all steps which need one
-    //forEachStep(
-    //    [this]() {
-    //        auto result = _TextureTarget::create();
-    //        _textureTargets.emplace_back(result);
-    //        return result;
-    //    },
-    //    [](RenderStep&, std::vector<unsigned int> const&, RenderTarget const&) {});
 }
 
 void _RenderPipeline::resize(IntVector2D const& size)
@@ -216,31 +33,32 @@ void _RenderPipeline::resize(IntVector2D const& size)
     for (auto const& textureTarget : _textureTargets) {
         resizeTarget(textureTarget);
     }
+    _screenTarget->resize(size, ScreenFormat);
 }
 
 namespace
 {
-    std::vector<unsigned int> getTextures(std::vector<RenderTarget> const& targets)
+    std::vector<TextureTarget> getTextures(std::vector<RenderTarget> const& targets)
     {
-        std::vector<unsigned int> result;
+        std::vector<TextureTarget> result;
         for (auto const& target : targets) {
             if (std::holds_alternative<TextureTarget>(target)) {
-                result.emplace_back(std::get<TextureTarget>(target)->texture);
+                result.emplace_back(std::get<TextureTarget>(target));
             }
         }
         return result;
     }
 }
 
-void _RenderPipeline::execute(RenderTarget const& finalTarget)
+VulkanImage& _RenderPipeline::execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget)
 {
-    _finalTarget = finalTarget;
+    _finalTarget = finalTarget ? RenderTarget(*finalTarget) : RenderTarget(ScreenTarget());
 
-    // Copy vertex buffer from Cuda to OpenGL
-    _SimulationFacade::get()->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers, Viewport::get().getVisibleWorldRect());
+    // Copy vertex buffer from Cuda to Vulkan
+    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, Viewport::get().getVisibleWorldRect());
+    _geometryBuffers->prepareForRendering(commandBuffer);
 
-    GeneralRenderInfo generalRenderInfo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
+    GeneralRenderInfo generalRenderInfo{.commandBuffer = commandBuffer};
 
     auto simParameters = std::make_shared<SimulationParameters>(_SimulationFacade::get()->getSimulationParameters());
     int currentTextureTargetIndex = 0;
@@ -256,59 +74,34 @@ void _RenderPipeline::execute(RenderTarget const& finalTarget)
                 return result;
             }
         },
-        [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target) {
+        [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<TextureTarget> const& textures, RenderTarget const& target) {
             // Merge inputTextures from step parameters with textures from previous targets
             auto allTextures = step->getInputTextures();
             allTextures.insert(allTextures.end(), textures.begin(), textures.end());
 
+            auto textureTarget = std::holds_alternative<ScreenTarget>(target) ? _screenTarget : std::get<TextureTarget>(target);
             step->execute(ExecutionParameters()
                               .geometryBuffers(_geometryBuffers)
                               .textures(allTextures)
-                              .target(target)
+                              .target(textureTarget)
                               .renderInfo(generalRenderInfo)
                               .simulationFacade(_SimulationFacade::get())
                               .simulationParameters(simParameters));
         });
 
-    glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
+    return std::holds_alternative<ScreenTarget>(_finalTarget) ? _screenTarget->color : std::get<TextureTarget>(_finalTarget)->color;
 }
 
 void _RenderPipeline::resizeTarget(TextureTarget const& target)
 {
     CHECK(_textureSize.has_value());
 
-    if (target->initialized) {
-        glDeleteFramebuffers(1, &target->fbo);
-        glDeleteTextures(1, &target->texture);
-        glDeleteRenderbuffers(1, &target->depthBuffer);
-    }
-    // Init output texture
-    glGenTextures(1, &target->texture);
-    glBindTexture(GL_TEXTURE_2D, target->texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _textureSize->x, _textureSize->y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    // Init depth buffer
-    glGenRenderbuffers(1, &target->depthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, target->depthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, _textureSize->x, _textureSize->y);
-
-    // Init framebuffer
-    glGenFramebuffers(1, &target->fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target->texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->depthBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    target->initialized = true;
+    target->resize(*_textureSize, IntermediateFormat);
 }
 
 void _RenderPipeline::forEachStep(
     std::function<TextureTarget()> const& getTextureTarget,
-    std::function<void(RenderStep&, std::vector<unsigned> const&, RenderTarget const&)> const& executeStep)
+    std::function<void(RenderStep&, std::vector<TextureTarget> const&, RenderTarget const&)> const& executeStep)
 {
     std::map<RenderTarget, TargetInfo> usedTargets;
 

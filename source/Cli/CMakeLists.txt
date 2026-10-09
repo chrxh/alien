@@ -30,12 +30,7 @@ target_include_directories(cli
 
 target_link_libraries(cli cudart)
 target_link_libraries(cli Boost::boost)
-target_link_libraries(cli OpenGL::GL OpenGL::GLU)
-target_link_libraries(cli GLEW::GLEW)
-target_link_libraries(cli glfw)
-target_link_libraries(cli glad::glad)
 target_link_libraries(cli GTest::GTest GTest::Main)
-target_link_libraries(cli glad::glad)
 target_link_libraries(cli CLI11::CLI11)
 
 target_precompile_headers(cli PRIVATE

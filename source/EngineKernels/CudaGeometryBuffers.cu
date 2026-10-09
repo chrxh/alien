@@ -3,260 +3,135 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
-#include <algorithm>
 #include <vector>
-#include <cuda_gl_interop.h>
 
 namespace
 {
-    cudaGraphicsResource* registerBufferResource(GLuint buffer)
+    cudaError_t importExternalMemory(cudaExternalMemory_t& result, SharedGeometryMemory const& memory)
     {
-        cudaGraphicsResource* result = nullptr;
-        CHECK_FOR_DEVICE_ERRORS(cudaGraphicsGLRegisterBuffer(&result, buffer, cudaGraphicsMapFlagsWriteDiscard));
+        cudaExternalMemoryHandleDesc description = {};
+#if defined(_WIN32)
+        description.type = cudaExternalMemoryHandleTypeOpaqueWin32;
+        description.handle.win32.handle = memory.win32Handle;
+#else
+        description.type = cudaExternalMemoryHandleTypeOpaqueFd;
+        description.handle.fd = memory.fd;
+#endif
+        description.size = memory.allocationSize;
+        description.flags = memory.dedicatedAllocation ? cudaExternalMemoryDedicated : 0;
 
-        return result;
+        auto importResult = cudaImportExternalMemory(&result, &description);
+
+        // CUDA does not take over NT handles but file descriptors of successful imports
+#if defined(_WIN32)
+        CloseHandle(memory.win32Handle);
+#else
+        if (importResult != cudaSuccess) {
+            close(memory.fd);
+        }
+#endif
+        return importResult;
     }
 
-    void unregisterBufferResource(cudaGraphicsResource* buffer)
+    cudaError_t mapExternalMemory(void*& result, cudaExternalMemory_t memory, uint64_t sizeInBytes)
     {
-        CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnregisterResource(buffer));
+        cudaExternalMemoryBufferDesc description = {};
+        description.offset = 0;
+        description.size = sizeInBytes;
+        return cudaExternalMemoryGetMappedBuffer(&result, memory, &description);
     }
 }
 
-void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
+cudaError_t CudaGeometryBuffers::importSharedMemory(GeometryBuffers const& geometryBuffers)
 {
-    if (vertexBuffer != nullptr && !buffers->hasReallocatedBuffers()) {
-        return;
+    if (_importedGeometryBuffers.lock() == geometryBuffers && !geometryBuffers->hasReallocatedBuffers()) {
+        _activeBuffers = _sharedBuffers;
+        return cudaSuccess;
     }
+    releaseSharedMemory();
 
-    if (vertexBuffer != nullptr) {
-        unregisterBufferResource(vertexBuffer);
+    for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
+        auto sharedMemory = geometryBuffers->shareMemory(type);
+        if (auto result = importExternalMemory(_externalMemories.at(type), sharedMemory); result != cudaSuccess) {
+            releaseSharedMemory();
+            return result;
+        }
+        auto sizeInBytes = geometryBuffers->getCapacity(type) * GeometryBufferLayout::ElementSizes.at(type);
+        if (auto result = mapExternalMemory(_sharedBuffers.at(type), _externalMemories.at(type), sizeInBytes); result != cudaSuccess) {
+            releaseSharedMemory();
+            return result;
+        }
     }
-    vertexBuffer = registerBufferResource(buffers->getVboForObjects());
-
-    if (fluidParticleBuffer != nullptr) {
-        unregisterBufferResource(fluidParticleBuffer);
-    }
-    fluidParticleBuffer = registerBufferResource(buffers->getVboForFluidParticles());
-
-    if (locationBuffer != nullptr) {
-        unregisterBufferResource(locationBuffer);
-    }
-    locationBuffer = registerBufferResource(buffers->getVboForLocations());
-
-    if (selectedObjectBuffer != nullptr) {
-        unregisterBufferResource(selectedObjectBuffer);
-    }
-    selectedObjectBuffer = registerBufferResource(buffers->getVboForSelectedObjects());
-
-    if (lineIndexBuffer != nullptr) {
-        unregisterBufferResource(lineIndexBuffer);
-    }
-    lineIndexBuffer = registerBufferResource(buffers->getEboForLines());
-
-    if (triangleIndexBuffer != nullptr) {
-        unregisterBufferResource(triangleIndexBuffer);
-    }
-    triangleIndexBuffer = registerBufferResource(buffers->getEboForTriangles());
-
-    if (selectedConnectionBuffer != nullptr) {
-        unregisterBufferResource(selectedConnectionBuffer);
-    }
-    selectedConnectionBuffer = registerBufferResource(buffers->getVboForSelectedConnections());
-
-    if (attackEventBuffer != nullptr) {
-        unregisterBufferResource(attackEventBuffer);
-    }
-    attackEventBuffer = registerBufferResource(buffers->getVboForAttackEvents());
-
-    if (detonationEventBuffer != nullptr) {
-        unregisterBufferResource(detonationEventBuffer);
-    }
-    detonationEventBuffer = registerBufferResource(buffers->getVboForDetonationEvents());
+    _importedGeometryBuffers = geometryBuffers;
+    _activeBuffers = _sharedBuffers;
+    return cudaSuccess;
 }
 
-void CudaGeometryBuffers::allocateBuffersForNoInterop(NumRenderObjects const& numObjects)
+void CudaGeometryBuffers::allocateDeviceBuffers(GeometryBuffers const& geometryBuffers)
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
-
-    // Allocate or reallocate cell buffer
-    auto requiredCellCapacity = std::max(numObjects.objects * 2, static_cast<uint64_t>(100000));
-    if (numObjects.objects >= deviceObjectBufferCapacity) {
-        if (deviceObjectBuffer != nullptr) {
-            memoryManager.freeMemory(deviceObjectBuffer);
+    for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
+        auto sizeInBytes = geometryBuffers->getCapacity(type) * GeometryBufferLayout::ElementSizes.at(type);
+        auto& deviceBuffer = _deviceBuffers.at(type);
+        auto& deviceBufferSize = _deviceBufferSizes.at(type);
+        if (sizeInBytes > deviceBufferSize) {
+            memoryManager.freeMemory(deviceBuffer);
+            memoryManager.acquireMemory(sizeInBytes, deviceBuffer);
+            deviceBufferSize = sizeInBytes;
         }
-        memoryManager.acquireMemory(requiredCellCapacity, deviceObjectBuffer);
-        deviceObjectBufferCapacity = requiredCellCapacity;
-    }
-
-    // Allocate or reallocate fluid particle buffer
-    auto requiredFluidParticleCapacity = std::max(numObjects.fluidParticles * 2, static_cast<uint64_t>(100000));
-    if (numObjects.fluidParticles >= deviceFluidParticleBufferCapacity) {
-        if (deviceFluidParticleBuffer != nullptr) {
-            memoryManager.freeMemory(deviceFluidParticleBuffer);
-        }
-        memoryManager.acquireMemory(requiredFluidParticleCapacity, deviceFluidParticleBuffer);
-        deviceFluidParticleBufferCapacity = requiredFluidParticleCapacity;
-    }
-
-    // Allocate or reallocate location buffer
-    auto requiredLocationCapacity = std::max(numObjects.locations * 2, static_cast<uint64_t>(1000));
-    if (numObjects.locations >= deviceLocationBufferCapacity) {
-        if (deviceLocationBuffer != nullptr) {
-            memoryManager.freeMemory(deviceLocationBuffer);
-        }
-        memoryManager.acquireMemory(requiredLocationCapacity, deviceLocationBuffer);
-        deviceLocationBufferCapacity = requiredLocationCapacity;
-    }
-
-    // Allocate or reallocate selected object buffer
-    auto requiredSelectedObjectCapacity = std::max(numObjects.selectedObjects * 2, static_cast<uint64_t>(10000));
-    if (numObjects.selectedObjects >= deviceSelectedObjectBufferCapacity) {
-        if (deviceSelectedObjectBuffer != nullptr) {
-            memoryManager.freeMemory(deviceSelectedObjectBuffer);
-        }
-        memoryManager.acquireMemory(requiredSelectedObjectCapacity, deviceSelectedObjectBuffer);
-        deviceSelectedObjectBufferCapacity = requiredSelectedObjectCapacity;
-    }
-
-    // Allocate or reallocate line index buffer
-    auto requiredLineIndexCapacity = std::max(numObjects.lineIndices * 2, static_cast<uint64_t>(100000));
-    if (numObjects.lineIndices >= deviceLineIndexBufferCapacity) {
-        if (deviceLineIndexBuffer != nullptr) {
-            memoryManager.freeMemory(deviceLineIndexBuffer);
-        }
-        memoryManager.acquireMemory(requiredLineIndexCapacity, deviceLineIndexBuffer);
-        deviceLineIndexBufferCapacity = requiredLineIndexCapacity;
-    }
-
-    // Allocate or reallocate triangle index buffer
-    auto requiredTriangleIndexCapacity = std::max(numObjects.triangleIndices * 2, static_cast<uint64_t>(100000));
-    if (numObjects.triangleIndices >= deviceTriangleIndexBufferCapacity) {
-        if (deviceTriangleIndexBuffer != nullptr) {
-            memoryManager.freeMemory(deviceTriangleIndexBuffer);
-        }
-        memoryManager.acquireMemory(requiredTriangleIndexCapacity, deviceTriangleIndexBuffer);
-        deviceTriangleIndexBufferCapacity = requiredTriangleIndexCapacity;
-    }
-
-    // Allocate or reallocate selected connection buffer
-    auto requiredSelectedConnectionCapacity = std::max(numObjects.connectionArrowVertices * 2, static_cast<uint64_t>(100000));
-    if (numObjects.connectionArrowVertices >= deviceSelectedConnectionBufferCapacity) {
-        if (deviceSelectedConnectionBuffer != nullptr) {
-            memoryManager.freeMemory(deviceSelectedConnectionBuffer);
-        }
-        memoryManager.acquireMemory(requiredSelectedConnectionCapacity, deviceSelectedConnectionBuffer);
-        deviceSelectedConnectionBufferCapacity = requiredSelectedConnectionCapacity;
-    }
-
-    // Allocate or reallocate attack event buffer
-    auto requiredAttackEventCapacity = std::max(numObjects.attackEventVertices * 2, static_cast<uint64_t>(10000));
-    if (numObjects.attackEventVertices >= deviceAttackEventBufferCapacity) {
-        if (deviceAttackEventBuffer != nullptr) {
-            memoryManager.freeMemory(deviceAttackEventBuffer);
-        }
-        memoryManager.acquireMemory(requiredAttackEventCapacity, deviceAttackEventBuffer);
-        deviceAttackEventBufferCapacity = requiredAttackEventCapacity;
-    }
-
-    // Allocate or reallocate detonation event buffer
-    auto requiredDetonationEventCapacity = std::max(numObjects.detonationEventVertices * 2, static_cast<uint64_t>(10000));
-    if (numObjects.detonationEventVertices >= deviceDetonationEventBufferCapacity) {
-        if (deviceDetonationEventBuffer != nullptr) {
-            memoryManager.freeMemory(deviceDetonationEventBuffer);
-        }
-        memoryManager.acquireMemory(requiredDetonationEventCapacity, deviceDetonationEventBuffer);
-        deviceDetonationEventBufferCapacity = requiredDetonationEventCapacity;
+        _activeBuffers.at(type) = deviceBuffer;
     }
 }
 
-void CudaGeometryBuffers::freeBuffersForNoInterop()
+void CudaGeometryBuffers::copyDeviceBuffersTo(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
+{
+    std::vector<uint8_t> hostBuffer;
+    for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
+        auto sizeInBytes = GeometryBufferLayout::getNumElements(numObjects, type) * GeometryBufferLayout::ElementSizes.at(type);
+        if (sizeInBytes == 0) {
+            continue;
+        }
+        hostBuffer.resize(sizeInBytes);
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(hostBuffer.data(), _deviceBuffers.at(type), sizeInBytes, cudaMemcpyDeviceToHost));
+        geometryBuffers->upload(type, hostBuffer.data(), sizeInBytes);
+    }
+}
+
+void CudaGeometryBuffers::release()
+{
+    releaseSharedMemory();
+    releaseDeviceBuffers();
+}
+
+void CudaGeometryBuffers::releaseSharedMemory()
+{
+    auto contextValid = !CudaContextState::get().isInvalid();
+    for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
+        auto& sharedBuffer = _sharedBuffers.at(type);
+        auto& externalMemory = _externalMemories.at(type);
+        if (contextValid && sharedBuffer != nullptr) {
+            cudaFree(sharedBuffer);
+        }
+        if (contextValid && externalMemory != nullptr) {
+            cudaDestroyExternalMemory(externalMemory);
+        }
+        sharedBuffer = nullptr;
+        externalMemory = nullptr;
+    }
+    _importedGeometryBuffers.reset();
+    _activeBuffers = {};
+}
+
+void CudaGeometryBuffers::releaseDeviceBuffers()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
-
-    memoryManager.freeMemory(deviceObjectBuffer);
-    memoryManager.freeMemory(deviceFluidParticleBuffer);
-    memoryManager.freeMemory(deviceLocationBuffer);
-    memoryManager.freeMemory(deviceSelectedObjectBuffer);
-    memoryManager.freeMemory(deviceLineIndexBuffer);
-    memoryManager.freeMemory(deviceTriangleIndexBuffer);
-    memoryManager.freeMemory(deviceSelectedConnectionBuffer);
-    memoryManager.freeMemory(deviceAttackEventBuffer);
-    memoryManager.freeMemory(deviceDetonationEventBuffer);
-}
-
-void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
-{
-    if (numObjects.objects > 0) {
-        std::vector<ObjectVertexData> hostObjectBuffer(numObjects.objects);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(hostObjectBuffer.data(), deviceObjectBuffer, numObjects.objects * sizeof(ObjectVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setCellData(hostObjectBuffer.data(), numObjects.objects);
+    for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
+        memoryManager.freeMemory(_deviceBuffers.at(type));
+        _deviceBufferSizes.at(type) = 0;
     }
-
-    if (numObjects.fluidParticles > 0) {
-        std::vector<FluidParticleVertexData> hostFluidParticleBuffer(numObjects.fluidParticles);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
-            hostFluidParticleBuffer.data(), deviceFluidParticleBuffer, numObjects.fluidParticles * sizeof(FluidParticleVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setFluidParticleData(hostFluidParticleBuffer.data(), numObjects.fluidParticles);
-    }
-
-    if (numObjects.locations > 0) {
-        std::vector<LocationVertexData> hostLocationBuffer(numObjects.locations);
-        CHECK_FOR_DEVICE_ERRORS(
-            cudaMemcpy(hostLocationBuffer.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setLocationData(hostLocationBuffer.data(), numObjects.locations);
-    }
-
-    if (numObjects.selectedObjects > 0) {
-        std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
-            hostSelectedObjectBuffer.data(),
-            deviceSelectedObjectBuffer,
-            numObjects.selectedObjects * sizeof(SelectedObjectVertexData),
-            cudaMemcpyDeviceToHost));
-        geometryBuffers->setSelectedObjectData(hostSelectedObjectBuffer.data(), numObjects.selectedObjects);
-    }
-
-    if (numObjects.lineIndices > 0) {
-        std::vector<unsigned int> hostLineIndexBuffer(numObjects.lineIndices);
-        CHECK_FOR_DEVICE_ERRORS(
-            cudaMemcpy(hostLineIndexBuffer.data(), deviceLineIndexBuffer, numObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-        geometryBuffers->setLineIndices(hostLineIndexBuffer.data(), numObjects.lineIndices);
-    }
-
-    if (numObjects.triangleIndices > 0) {
-        std::vector<unsigned int> hostTriangleIndexBuffer(numObjects.triangleIndices);
-        CHECK_FOR_DEVICE_ERRORS(
-            cudaMemcpy(hostTriangleIndexBuffer.data(), deviceTriangleIndexBuffer, numObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
-        geometryBuffers->setTriangleIndices(hostTriangleIndexBuffer.data(), numObjects.triangleIndices);
-    }
-
-    if (numObjects.connectionArrowVertices > 0) {
-        std::vector<ConnectionArrowVertexData> hostSelectedConnectionBuffer(numObjects.connectionArrowVertices);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
-            hostSelectedConnectionBuffer.data(),
-            deviceSelectedConnectionBuffer,
-            numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData),
-            cudaMemcpyDeviceToHost));
-        geometryBuffers->setSelectedConnectionData(hostSelectedConnectionBuffer.data(), numObjects.connectionArrowVertices);
-    }
-
-    if (numObjects.attackEventVertices > 0) {
-        std::vector<AttackEventVertexData> hostAttackEventBuffer(numObjects.attackEventVertices);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
-            hostAttackEventBuffer.data(), deviceAttackEventBuffer, numObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setAttackEventData(hostAttackEventBuffer.data(), numObjects.attackEventVertices);
-    }
-
-    if (numObjects.detonationEventVertices > 0) {
-        std::vector<DetonationEventVertexData> hostDetonationEventBuffer(numObjects.detonationEventVertices);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
-            hostDetonationEventBuffer.data(),
-            deviceDetonationEventBuffer,
-            numObjects.detonationEventVertices * sizeof(DetonationEventVertexData),
-            cudaMemcpyDeviceToHost));
-        geometryBuffers->setDetonationEventData(hostDetonationEventBuffer.data(), numObjects.detonationEventVertices);
-    }
+    _activeBuffers = {};
 }

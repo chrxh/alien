@@ -166,8 +166,6 @@ PUBLIC
     NewPasswordDialog.h
     NodeEditorWidget.cpp
     NodeEditorWidget.h
-    OpenGLHelper.cpp
-    OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
     PictureData.h
@@ -229,12 +227,20 @@ PUBLIC
     StyleService.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
+    TextureService.cpp
+    TextureService.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
     Viewport.cpp
     Viewport.h
+    VulkanContext.cpp
+    VulkanContext.h
+    VulkanFrameRenderer.cpp
+    VulkanFrameRenderer.h
+    VulkanGeometryBuffers.cpp
+    VulkanGeometryBuffers.h
     WindowController.cpp
     WindowController.h)
 
@@ -258,13 +264,15 @@ target_include_directories(alien
 target_link_libraries(alien cudart)
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien Boost::boost)
-target_link_libraries(alien OpenGL::GL OpenGL::GLU)
-target_link_libraries(alien GLEW::GLEW)
+target_link_libraries(alien Vulkan::Vulkan)
+target_link_libraries(alien glslang::glslang glslang::glslang-default-resource-limits glslang::SPIRV)
 target_link_libraries(alien imgui::imgui)
 target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
-target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
+
+# GLFW must not pull in the OpenGL headers
+target_compile_definitions(alien PRIVATE GLFW_INCLUDE_NONE)
 
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 

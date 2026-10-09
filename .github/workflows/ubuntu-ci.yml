@@ -36,7 +36,7 @@ jobs:
     - name: Install Packages
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+        sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev libxcb1-dev pkg-config
         
     - name: Install CUDA (via NVIDIA's repo)
       run: |

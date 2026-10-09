@@ -1,46 +1,41 @@
 #pragma once
 
+#include <array>
+#include <memory>
+
 #include <EngineInterface/GeometryBuffers.h>
 
 #include "Base.cuh"
 
+// Device memory the geometry kernels write the rendering data into
 struct CudaGeometryBuffers
 {
-    // CUDA-OpenGL interop resources (used when interop is enabled)
-    cudaGraphicsResource* vertexBuffer = nullptr;
-    cudaGraphicsResource* fluidParticleBuffer = nullptr;
-    cudaGraphicsResource* locationBuffer = nullptr;
-    cudaGraphicsResource* selectedObjectBuffer = nullptr;
-    cudaGraphicsResource* lineIndexBuffer = nullptr;
-    cudaGraphicsResource* triangleIndexBuffer = nullptr;
-    cudaGraphicsResource* selectedConnectionBuffer = nullptr;
-    cudaGraphicsResource* attackEventBuffer = nullptr;
-    cudaGraphicsResource* detonationEventBuffer = nullptr;
+public:
+    // Interop mode: the kernels write directly into the memory of the geometry buffers
+    cudaError_t importSharedMemory(GeometryBuffers const& geometryBuffers);
 
-    // CUDA device buffers for non-interop mode (data is copied to CPU then uploaded to OpenGL)
-    ObjectVertexData* deviceObjectBuffer = nullptr;
-    FluidParticleVertexData* deviceFluidParticleBuffer = nullptr;
-    LocationVertexData* deviceLocationBuffer = nullptr;
-    SelectedObjectVertexData* deviceSelectedObjectBuffer = nullptr;
-    unsigned int* deviceLineIndexBuffer = nullptr;
-    unsigned int* deviceTriangleIndexBuffer = nullptr;
-    ConnectionArrowVertexData* deviceSelectedConnectionBuffer = nullptr;
-    AttackEventVertexData* deviceAttackEventBuffer = nullptr;
-    DetonationEventVertexData* deviceDetonationEventBuffer = nullptr;
+    // Host transfer mode: the kernels write into own device buffers, which are then copied to the geometry buffers over host memory
+    void allocateDeviceBuffers(GeometryBuffers const& geometryBuffers);
+    void copyDeviceBuffersTo(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
 
-    // Capacity tracking for device buffers
-    uint64_t deviceObjectBufferCapacity = 0;
-    uint64_t deviceFluidParticleBufferCapacity = 0;
-    uint64_t deviceLocationBufferCapacity = 0;
-    uint64_t deviceSelectedObjectBufferCapacity = 0;
-    uint64_t deviceLineIndexBufferCapacity = 0;
-    uint64_t deviceTriangleIndexBufferCapacity = 0;
-    uint64_t deviceSelectedConnectionBufferCapacity = 0;
-    uint64_t deviceAttackEventBufferCapacity = 0;
-    uint64_t deviceDetonationEventBufferCapacity = 0;
+    void release();
 
-    void registerBuffers(GeometryBuffers const& buffers);
-    void allocateBuffersForNoInterop(NumRenderObjects const& numObjects);
-    void freeBuffersForNoInterop();
-    void copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
+    template <typename T>
+    T* getBuffer(GeometryBufferType type) const
+    {
+        return static_cast<T*>(_activeBuffers.at(type));
+    }
+
+private:
+    void releaseSharedMemory();
+    void releaseDeviceBuffers();
+
+    std::array<void*, GeometryBufferType_Count> _activeBuffers = {};
+
+    std::weak_ptr<_GeometryBuffers> _importedGeometryBuffers;
+    std::array<cudaExternalMemory_t, GeometryBufferType_Count> _externalMemories = {};
+    std::array<void*, GeometryBufferType_Count> _sharedBuffers = {};
+
+    std::array<uint8_t*, GeometryBufferType_Count> _deviceBuffers = {};
+    std::array<uint64_t, GeometryBufferType_Count> _deviceBufferSizes = {};
 };

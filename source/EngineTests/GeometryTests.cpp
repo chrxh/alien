@@ -1,8 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <Base/GlobalSettings.h>
 
 #include <Data/Descs.h>
@@ -17,35 +14,16 @@ class GeometryTests : public IntegrationTestFramework
 public:
     GeometryTests()
         : IntegrationTestFramework()
-    {
-        glfwInit();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        _window = glfwCreateWindow(100, 100, "Test", nullptr, nullptr);
-        if (_window) {
-            glfwMakeContextCurrent(_window);
-            gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
-        }
-    }
-
-    ~GeometryTests()
-    {
-        if (_window) {
-            glfwDestroyWindow(_window);
-        }
-        glfwTerminate();
-    }
-
-protected:
-    GLFWwindow* _window = nullptr;
+    {}
 };
 
 TEST_F(GeometryTests, copyBuffers_emptySim)
 {
     _simulationFacade->clear();
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(0u, numObjects.objects);
@@ -62,10 +40,10 @@ TEST_F(GeometryTests, copyBuffers_objects)
         ObjectDesc().id(3).pos({102.0f, 100.0f}),
     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
@@ -83,10 +61,10 @@ TEST_F(GeometryTests, copyBuffers_cullsObjectsOutsideVisibleRect)
         ObjectDesc().id(2).pos({500.0f, 500.0f}),
     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(1u, numObjects.objects);
@@ -106,10 +84,10 @@ TEST_F(GeometryTests, copyBuffers_fluidParticles)
         EnergyDesc().id(4).pos({103.0f, 100.0f}).energy(10.0f),
     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(4u, numObjects.fluidParticles);
@@ -126,10 +104,10 @@ TEST_F(GeometryTests, copyBuffers_cullsFluidParticlesOutsideVisibleRect)
         EnergyDesc().id(2).pos({500.0f, 500.0f}).energy(10.0f),
     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(1u, numObjects.fluidParticles);
@@ -149,10 +127,10 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
@@ -175,10 +153,10 @@ TEST_F(GeometryTests, copyBuffers_cullsConnectionsOutsideVisibleRect)
     data.addConnection(3, 4);
     _simulationFacade->setSimulationData(data);
 
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
@@ -199,10 +177,10 @@ TEST_F(GeometryTests, copyBuffers_triangle)
     data.addConnection(2, 3);
     data.addConnection(3, 1);
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
@@ -230,10 +208,10 @@ TEST_F(GeometryTests, copyBuffers_quad)
     data.addConnection(3, 4);
     data.addConnection(4, 1);
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(4u, numObjects.objects);
@@ -261,10 +239,10 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
                         EnergyDesc().id(5).pos({202.0f, 200.0f}).energy(10.0f),
                     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
@@ -290,10 +268,10 @@ TEST_F(GeometryTests, copyBuffers_creature)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
+    auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);

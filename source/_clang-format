@@ -67,8 +67,8 @@ IncludeCategories:
   - Regex: '^<(algorithm|array|atomic|bit|cassert|chrono|cmath|condition_variable|cstddef|cstdint|cstdlib|cstring|ctime|deque|exception|filesystem|fstream|functional|initializer_list|iomanip|iostream|iterator|limits|list|map|memory|mutex|optional|ostream|random|ranges|set|sstream|stdexcept|string|string_view|thread|tuple|type_traits|unordered_map|unordered_set|utility|variant|vector)>$'
     Priority: 1
 
-  # glad headers
-  - Regex: '^<glad/.*>$'
+  # Vulkan headers
+  - Regex: '^<(vulkan|glslang)/.*>$'
     Priority: 99
 
   # Boost headers

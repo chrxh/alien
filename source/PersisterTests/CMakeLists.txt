@@ -20,10 +20,6 @@ target_include_directories(PersisterTests
 
 target_link_libraries(PersisterTests cudart)
 target_link_libraries(PersisterTests Boost::boost)
-target_link_libraries(PersisterTests OpenGL::GL OpenGL::GLU)
-target_link_libraries(PersisterTests GLEW::GLEW)
-target_link_libraries(PersisterTests glfw)
-target_link_libraries(PersisterTests glad::glad)
 target_link_libraries(PersisterTests GTest::GTest GTest::Main)
 
 target_precompile_headers(PersisterTests PRIVATE

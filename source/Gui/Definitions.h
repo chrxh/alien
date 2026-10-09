@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui.h>
+
 #include <Base/Definitions.h>
 
 class _MainWindow;
@@ -172,7 +174,7 @@ struct ImVec2;
 
 struct TextureData
 {
-    unsigned int textureId;
+    ImTextureID textureId;
     int width;
     int height;
 };

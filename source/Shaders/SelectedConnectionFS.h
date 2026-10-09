@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const SelectedConnectionFS = R"(
-#version 330 core
+#version 450
 in vec3 fragColor;
 out vec4 FragColor;
 

@@ -28,14 +28,14 @@ public:
     virtual void setSimulationData(ContentDesc const& dataToUpdate) = 0;
     virtual void clear() = 0;
 
-    //*****************************
-    //* OpenGL-CUDA interop methods
-    //*****************************
+    //*******************************
+    //* Methods for rendering interop
+    //*******************************
     // Transfers the simulation data from CUDA to the provided buffer.
     // Resizes buffers if necessary and fills it with data for rendering.
     // If the GPU is busy for a specified duration, the buffers will not be updated.
     //
-    virtual void tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
+    virtual void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
     virtual bool isSyncSimulationWithRendering() const = 0;
     virtual void setSyncSimulationWithRendering(bool value) = 0;
     virtual int getSyncSimulationWithRenderingRatio() const = 0;
@@ -100,6 +100,7 @@ public:
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
     virtual std::string getGpuName() const = 0;
+    virtual GpuUuid getGpuUuid() const = 0;
 
     virtual void setDebugMode(bool value) = 0;
 

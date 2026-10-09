@@ -59,9 +59,14 @@ std::string _SimulationFacadeImpl::getGpuName() const
     return _worker.getGpuName();
 }
 
-void _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+GpuUuid _SimulationFacadeImpl::getGpuUuid() const
 {
-    _worker.tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+    return _worker.getGpuUuid();
+}
+
+void _SimulationFacadeImpl::tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+{
+    _worker.tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 }
 
 bool _SimulationFacadeImpl::isSyncSimulationWithRendering() const

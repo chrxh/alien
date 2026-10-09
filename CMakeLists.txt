@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 
-# Some vcpkg ports (e.g. glad) still declare cmake_minimum_required(VERSION <3.5),
+# Some vcpkg ports still declare cmake_minimum_required(VERSION <3.5),
 # which CMake 4.x rejects. Raise the minimum policy version for the child CMake
 # processes that vcpkg spawns to build those ports so configuration succeeds.
 if(NOT DEFINED ENV{CMAKE_POLICY_VERSION_MINIMUM})
@@ -302,14 +302,13 @@ add_executable(PersisterTests)
 
 # find_package(CUDAToolkit REQUIRED) is too slow
 find_package(Boost REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
+find_package(Vulkan REQUIRED)
+find_package(glslang CONFIG REQUIRED)
 find_package(cereal CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 find_package(md4c CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
 find_package(GTest REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)

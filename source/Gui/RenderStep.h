@@ -14,31 +14,39 @@
 #include <EngineInterface/Definitions.h>
 
 #include "Definitions.h"
+#include "Shader.h"
+#include "VulkanContext.h"
+#include "VulkanGeometryBuffers.h"
 
+// Color and depth image with the same memory layout as an OpenGL framebuffer, i.e. its rows are ordered from bottom to top
 struct _TextureTarget
 {
     static TextureTarget create();
+    ~_TextureTarget();
+
+    void resize(IntVector2D const& size, VkFormat colorFormat);
 
     bool initialized = false;
-    unsigned int fbo = 0;
-    unsigned int texture = 0;
-    unsigned int depthBuffer = 0;
+    VulkanImage color;
+    VulkanImage depth;
 
 private:
     _TextureTarget() = default;
+
+    void destroyImages();
 };
 struct ScreenTarget
 {
     auto operator<=>(ScreenTarget const&) const = default;
     bool operator==(ScreenTarget const&) const = default;
 
-    // FBO is automatically determined
+    // Image is provided by the render pipeline
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
 
 struct GeneralRenderInfo
 {
-    int screenFbo = 0;
+    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
 };
 
 using UniformValueType = std::variant<int, float, FloatColorRGB>;
@@ -58,12 +66,12 @@ struct StepParameters
 struct ExecutionParameters
 {
     // Input
-    MEMBER(ExecutionParameters, GeometryBuffers, geometryBuffers, GeometryBuffers());
-    MEMBER(ExecutionParameters, std::vector<unsigned int>, textures, {});
+    MEMBER(ExecutionParameters, VulkanGeometryBuffers, geometryBuffers, VulkanGeometryBuffers());
+    MEMBER(ExecutionParameters, std::vector<TextureTarget>, textures, {});
     MEMBER(ExecutionParameters, bool, clearBackground, false);
 
     // Output
-    MEMBER(ExecutionParameters, RenderTarget, target, ScreenTarget());
+    MEMBER(ExecutionParameters, TextureTarget, target, TextureTarget());
 
     // Misc
     MEMBER(ExecutionParameters, float, minBallRadius, 6.0f);
@@ -87,17 +95,22 @@ public:
 protected:
     _RenderStep(StepParameters const& parameters);
 
-    void prepareExecution(ExecutionParameters const& parameters);
+    // Starts rendering into the target, the sampled textures must not be the target
+    void prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures = {});
+    void finishExecution(ExecutionParameters const& parameters);
+
+    // Draws the vertices or, if an index buffer is given, the indexed vertices into the target
+    void draw(ExecutionParameters const& parameters, PipelineState state, VkBuffer vertexBuffer, uint64_t numElements, VkBuffer indexBuffer = VK_NULL_HANDLE);
 
     Shader _shader;
     std::optional<int> _previousTargetSelection;
     float _textureScale = 1.0f;
     UniformValueMap _uniforms;
     std::function<UniformValueMap(SimulationParameters const&)> _uniformFunc;
-    std::vector<unsigned int> _inputTextures;
+    std::vector<TextureTarget> _inputTextures;
 
 public:
-    std::vector<unsigned int> const& getInputTextures() const { return _inputTextures; }
+    std::vector<TextureTarget> const& getInputTextures() const { return _inputTextures; }
 };
 
 class _NonFluidObjectRenderStep : public _RenderStep
@@ -138,6 +151,8 @@ private:
     _TriangleRenderStep(StepParameters const& parameters);
 };
 
+struct FullscreenQuad;
+
 class _PostProcessingRenderStep : public _RenderStep
 {
 public:
@@ -149,9 +164,7 @@ protected:
 private:
     _PostProcessingRenderStep(StepParameters const& parameters);
 
-    unsigned int _vao = 0;
-    unsigned int _vbo = 0;
-    unsigned int _ebo = 0;
+    std::shared_ptr<FullscreenQuad> _fullscreenQuad;
 };
 
 class _ForwardRenderStep : public _RenderStep
@@ -216,7 +229,7 @@ private:
 
     void createCellTypeTextureAtlas();
 
-    unsigned int _cellTypeTextureAtlas = 0;
+    VulkanImage _cellTypeTextureAtlas;
 };
 
 class _SelectedConnectionRenderStep : public _RenderStep
@@ -266,6 +279,5 @@ private:
     };
     std::unordered_map<uint64_t, Detonation> _detonations;
 
-    unsigned int _vao = 0;
-    unsigned int _vbo = 0;
+    VulkanBuffer _instanceBuffer;
 };

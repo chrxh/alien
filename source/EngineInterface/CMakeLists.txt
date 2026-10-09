@@ -26,7 +26,6 @@ target_link_libraries(EngineInterface Base)
 target_link_libraries(EngineInterface Data)
 
 target_link_libraries(EngineInterface Boost::boost)
-target_link_libraries(EngineInterface glad::glad)
 
 target_precompile_headers(EngineInterface PRIVATE
     <algorithm>
