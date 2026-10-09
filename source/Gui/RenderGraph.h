@@ -40,10 +40,10 @@ using RenderBlock = std::vector<RenderSequence>;
 // Contains RenderBlocks that must be executed in order
 using RenderBlocks = std::vector<RenderBlock>;
 
-class _RenderPipeline
+class _RenderGraph
 {
 public:
-    _RenderPipeline(RenderBlocks&& blocks);
+    _RenderGraph(RenderBlocks&& blocks);
 
     // The images take the new size at the next execution, so that resizing the window does not create images for every intermediate size
     void resize(IntVector2D const& size);
@@ -52,7 +52,7 @@ public:
     void updateGeometry();
 
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
-    // Without a final target, the pipeline renders into an own image of the view size.
+    // Without a final target, the graph renders into an own image of the view size.
     VulkanImage& execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
 private:
