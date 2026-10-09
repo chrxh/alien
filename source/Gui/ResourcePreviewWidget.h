@@ -8,6 +8,8 @@
 
 #include <Network/Definitions.h>
 
+#include <RenderingInterface/TextureData.h>
+
 #include "Definitions.h"
 #include "PreviewDescView.h"
 

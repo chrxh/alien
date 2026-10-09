@@ -28,10 +28,6 @@
 
 #include <vector_types.h>
 
-#if !defined(USE_HIP)
-struct cudaGraphicsResource;  // On HIP, hipGraphicsResource is declared by the HIP runtime
-#endif
-
 class _SimulationCudaFacade
 {
 public:
@@ -39,8 +35,10 @@ public:
     {
         int deviceNumber = 0;
         std::string gpuModelName;
+        GpuUuid gpuUuid = {};
     };
     static GpuInfo checkAndReturnGpuInfo();
+    static bool isRenderingInteropWorking(GeometryBuffers const& geometryBuffers);
 
     _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);
     ~_SimulationCudaFacade() noexcept;
@@ -50,7 +48,7 @@ public:
 
     Ids getMaxIds() const;
 
-    void copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
+    void copyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
     TOs getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TOs getSelectedSimulationData(bool includeClusters);
     TOs getInspectedSimulationData(std::vector<uint64_t> entityIds);
@@ -143,7 +141,6 @@ private:
     SimulationData getSimulationDataPtrCopy() const;
 
     GpuInfo _gpuInfo;
-    cudaGraphicsResource* _cudaResource = nullptr;
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;

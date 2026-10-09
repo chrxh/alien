@@ -7,7 +7,7 @@
 namespace Shaders
 {
     std::string_view const LocationFS = R"(
-#version 330 core
+#version 450
 out vec4 FragColor;
 
 in vec3 gColor;

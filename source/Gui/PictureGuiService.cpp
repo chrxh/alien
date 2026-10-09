@@ -1,14 +1,10 @@
 #include "PictureGuiService.h"
 
 #include <algorithm>
-#include <ranges>
-
-#include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -17,8 +13,9 @@
 #include <stb_image_resize2.h>
 
 #include <Base/AlienExceptions.h>
-#include <Base/ExitScopeGuard.h>
 #include <Base/LoggingService.h>
+
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "PreviewDescView.h"
 #include "SimulationView.h"
@@ -50,74 +47,6 @@ std::optional<std::string> PictureGuiService::createSimulationPreviewJpg()
     }
 }
 
-namespace
-{
-    PictureData renderOffscreen(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor, int supersampling)
-    {
-        IntVector2D renderResolution{resolution.x * supersampling, resolution.y * supersampling};
-
-        GLint origFbo = 0;
-        GLint origTexture = 0;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
-        glGetIntegerv(GL_TEXTURE_BINDING_2D, &origTexture);
-        auto origScissorTest = glIsEnabled(GL_SCISSOR_TEST);
-
-        GLuint texture = 0;
-        GLuint fbo = 0;
-        ExitScopeGuard restoreState([&] {
-            glBindFramebuffer(GL_FRAMEBUFFER, origFbo);
-            glDeleteFramebuffers(1, &fbo);
-            glDeleteTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, origTexture);
-            if (origScissorTest) {
-                glEnable(GL_SCISSOR_TEST);
-            }
-        });
-
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, renderResolution.x, renderResolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            throw AlienException("The offscreen framebuffer for the picture could not be created.");
-        }
-
-        ImDrawData drawData;
-        drawData.Valid = true;
-        drawData.DisplayPos = {0, 0};
-        drawData.DisplaySize = {toFloat(resolution.x), toFloat(resolution.y)};
-        drawData.FramebufferScale = {toFloat(supersampling), toFloat(supersampling)};
-        drawData.AddDrawList(drawList);
-
-        // A scissor rect left over from the surrounding frame would clip the clear
-        glDisable(GL_SCISSOR_TEST);
-        glClearColor(backgroundColor.Value.x, backgroundColor.Value.y, backgroundColor.Value.z, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(&drawData);
-
-        PictureData result{
-            .resolution = renderResolution,
-            .pixels = std::vector<uint8_t>(static_cast<size_t>(renderResolution.x) * renderResolution.y * PictureData::NumChannels)};
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(0, 0, renderResolution.x, renderResolution.y, GL_RGB, GL_UNSIGNED_BYTE, result.pixels.data());
-
-        // OpenGL provides the rows bottom-up
-        auto bytesPerRow = static_cast<size_t>(renderResolution.x) * PictureData::NumChannels;
-        for (auto row : std::views::iota(0, renderResolution.y / 2)) {
-            auto upperRow = result.pixels.begin() + row * bytesPerRow;
-            auto lowerRow = result.pixels.begin() + (renderResolution.y - 1 - row) * bytesPerRow;
-            std::swap_ranges(upperRow, upperRow + bytesPerRow, lowerRow);
-        }
-        return result;
-    }
-}
-
 std::optional<std::string> PictureGuiService::createGenomePreviewJpg(std::vector<PreviewDesc> const& previews)
 {
     if (previews.empty()) {
@@ -138,9 +67,10 @@ std::optional<std::string> PictureGuiService::createGenomePreviewJpg(std::vector
         drawList.PopClipRect();
         drawList.PopTextureID();
 
-        auto picture = renderOffscreen(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor, PreviewPictureSupersampling);
+        auto picture =
+            _RenderingFacade::get()->renderDrawList(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor, PreviewPictureSupersampling);
         return encodeJpg(brighten(scale(picture, PreviewPictureResolution), PreviewPictureBrightness));
-    } catch (AlienException const& exception) {
+    } catch (std::exception const& exception) {
         log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());
         return std::nullopt;
     }

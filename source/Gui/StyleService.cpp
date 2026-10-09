@@ -13,7 +13,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 #include <Fonts/Reef.h>
 
-#include <GLFW/glfw3.h>  // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>
 #include <ImFileDialog.h>
 #include <implot.h>
 

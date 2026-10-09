@@ -368,7 +368,7 @@ void _BrowserTableWidget::processReactionList(NetworkResourceTreeTO const& treeT
                 ImGui::PushID(emojiType);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() - scale(3.0f));
-                if (ImGui::ImageButton("reaction_emoji", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
+                if (ImGui::ImageButton("reaction_emoji", emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
                     toggleEmojiType = emojiType;
                 }
                 bool isLiked = _data->ownEmojiTypeBySimId.contains(leaf.rawTO->id) && _data->ownEmojiTypeBySimId.at(leaf.rawTO->id) == emojiType;

@@ -166,11 +166,8 @@ PUBLIC
     NewPasswordDialog.h
     NodeEditorWidget.cpp
     NodeEditorWidget.h
-    OpenGLHelper.cpp
-    OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
-    PictureData.h
     PictureGuiService.cpp
     PictureGuiService.h
     PreviewDescView.cpp
@@ -181,10 +178,6 @@ PUBLIC
     PreviewViewport.h
     PreviewWidget.cpp
     PreviewWidget.h
-    RenderPipeline.cpp
-    RenderPipeline.h
-    RenderStep.cpp
-    RenderStep.h
     ReplaceSimulationDialog.cpp
     ReplaceSimulationDialog.h
     ResetPasswordDialog.cpp
@@ -201,8 +194,6 @@ PUBLIC
     SelectionController.h
     SelectionWidget.cpp
     SelectionWidget.h
-    Shader.cpp
-    Shader.h
     SignalsBufferDialog.cpp
     SignalsBufferDialog.h
     SimulationInteractionController.cpp
@@ -249,6 +240,8 @@ target_link_libraries(alien McpToolsInterface)
 target_link_libraries(alien Network)
 target_link_libraries(alien PersisterInterface)
 target_link_libraries(alien PersisterImpl)
+target_link_libraries(alien RenderingImpl)
+target_link_libraries(alien RenderingInterface)
 
 target_include_directories(alien
     PRIVATE
@@ -258,13 +251,13 @@ target_include_directories(alien
 target_link_libraries(alien cudart)
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien Boost::boost)
-target_link_libraries(alien OpenGL::GL OpenGL::GLU)
-target_link_libraries(alien GLEW::GLEW)
 target_link_libraries(alien imgui::imgui)
 target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
-target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
+
+# GLFW must not pull in the OpenGL headers
+target_compile_definitions(alien PRIVATE GLFW_INCLUDE_NONE)
 
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 

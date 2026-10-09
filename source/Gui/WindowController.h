@@ -37,6 +37,9 @@ public:
     void hideWindow();
     void showWindow();
 
+    // A window in windowed mode is created invisible and appears when the user interface is ready
+    void showStartupWindow();
+
     void updateWindowTitle(std::string const& projectName);
 
     int getFps();

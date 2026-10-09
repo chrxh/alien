@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const AttackEventFS = R"(
-#version 330 core
+#version 450
 in vec3 fragColor;
 in vec2 lineCoord;
 out vec4 FragColor;

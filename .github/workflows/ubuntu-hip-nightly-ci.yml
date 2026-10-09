@@ -52,7 +52,7 @@ jobs:
         sudo apt-get install -y --no-install-recommends \
           ninja-build \
           libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
-          libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+          libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev libxcb1-dev pkg-config
 
     - name: Install ROCm/HIP
       if: steps.recent_changes.outputs.should_run == 'true'

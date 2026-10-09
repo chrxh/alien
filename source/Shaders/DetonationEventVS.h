@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const DetonationEventVS = R"(
-#version 330 core
+#version 450
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in float aRadius;
 layout (location = 2) in float aAge;

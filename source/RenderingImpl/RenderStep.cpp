@@ -1,6 +1,7 @@
 #include "RenderStep.h"
 
 #include <cstddef>
+#include <cstring>
 #include <ranges>
 
 #include <Base/Math.h>
@@ -10,11 +11,8 @@
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "RenderPipeline.h"
+#include "RenderGraph.h"
 #include "Shader.h"
-#include "SimulationView.h"
-#include "StyleService.h"
-#include "Viewport.h"
 
 namespace
 {
@@ -22,6 +20,7 @@ namespace
     auto constexpr CellTypeLabelShadowOffset = 1.0f;
     auto constexpr CellTypeLabelShadowAlpha = 0.8f;
     auto constexpr DetonationLifetime = 0.1f;  // In seconds
+    auto constexpr DepthFormat = VK_FORMAT_D32_SFLOAT;
 }
 
 TextureTarget _TextureTarget::create()
@@ -29,11 +28,52 @@ TextureTarget _TextureTarget::create()
     return TextureTarget(new _TextureTarget());
 }
 
-_RenderStep::_RenderStep(StepParameters const& parameters)
+_TextureTarget::~_TextureTarget()
+{
+    destroyImages();
+}
+
+void _TextureTarget::resize(IntVector2D const& size, VkFormat colorFormat)
+{
+    // A used depth image is recreated right away, so that a lack of memory shows up before any commands are recorded
+    auto withDepth = _depth.image != VK_NULL_HANDLE;
+    destroyImages();
+    color =
+        VulkanContext::get().createImage(size, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+    if (withDepth) {
+        getDepth();
+    }
+}
+
+VulkanImage& _TextureTarget::getDepth()
+{
+    if (_depth.image == VK_NULL_HANDLE) {
+        _depth = VulkanContext::get().createImage(color.size, DepthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    }
+    return _depth;
+}
+
+void _TextureTarget::resetImageStates()
+{
+    for (auto image : {&color, &_depth}) {
+        image->layout = VK_IMAGE_LAYOUT_UNDEFINED;
+        image->lastStages = VK_PIPELINE_STAGE_2_NONE;
+        image->lastAccesses = VK_ACCESS_2_NONE;
+    }
+}
+
+void _TextureTarget::destroyImages()
+{
+    VulkanContext::get().destroyImageLater(color);
+    VulkanContext::get().destroyImageLater(_depth);
+}
+
+_RenderStep::_RenderStep(StepParameters const& parameters, DepthTest depthTest)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
     , _uniformFunc(parameters._uniformFunc)
+    , _depthTest(depthTest)
 {
     if (!parameters._shader.vertex.empty()) {
         _shader = _Shader::createFromSource(parameters._shader.vertex, parameters._shader.fragment, parameters._shader.geometry);
@@ -51,26 +91,15 @@ std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
     return _previousTargetSelection;
 }
 
-float _RenderStep::getTextureScaling() const
-{
-    return _textureScale;
-}
-
-void _RenderStep::setTextureScaling(float scale)
-{
-    _textureScale = scale;
-}
-
-void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
+void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures)
 {
     auto worldSize = parameters._simulationFacade->getWorldSize();
-    auto worldRect = Viewport::get().getVisibleWorldRect();
-    auto viewSize = Viewport::get().getViewSize();
-    auto zoom = Viewport::get().getZoomFactor();
-    auto renderScale = Viewport::get().getRenderScale();
-    //auto timestep = simulationFacade->getCurrentTimestep();
+    auto const& view = parameters._view;
+    auto const& worldRect = view.visibleWorldRect;
+    auto viewSize = view.viewSize;
+    auto zoom = view.zoomFactor;
+    auto renderScale = view.renderScale;
 
-    _shader->use();
     _shader->setFloat("zoom", zoom);
     _shader->setFloat("renderScale", renderScale);
     _shader->setFloat("radius", std::max(parameters._minBallRadius * renderScale, zoom));
@@ -78,11 +107,10 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     _shader->setVec2("rectUpperLeft", worldRect.topLeft);
     _shader->setVec2("rectLowerRight", worldRect.bottomRight);
     _shader->setVec2("viewportSize", toRealVector2D(viewSize));
-    //_shader->setFloat("lightAngle", toFloat(timestep % 10000) / 10000.0f * 360.0f);
 
     auto uniforms = _uniforms;
     if (_uniformFunc) {
-        auto uniformFunc = _uniformFunc(*parameters._simulationParameters);
+        auto uniformFunc = _uniformFunc(*parameters._simulationParameters, view);
         uniforms.insert(uniformFunc.begin(), uniformFunc.end());
     }
     for (auto const& [key, value] : uniforms) {
@@ -97,17 +125,77 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
         }
     }
 
-    if (std::holds_alternative<ScreenTarget>(parameters._target)) {
-        glBindFramebuffer(GL_FRAMEBUFFER, parameters._renderInfo.screenFbo);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, std::get<TextureTarget>(parameters._target)->fbo);
+    // Barriers are not allowed during rendering
+    auto commandBuffer = parameters._renderInfo.commandBuffer;
+    auto const& target = parameters._target;
+    auto withDepth = _depthTest != DepthTest::None;
+    VulkanImageBarriers barriers;
+    for (auto const& texture : sampledTextures) {
+        barriers.add(texture->color, ImageUsage::ShaderRead);
     }
-    glViewport(0, 0, toInt(toFloat(viewSize.x) * _textureScale), toInt(toFloat(viewSize.y) * _textureScale));
+    barriers.add(target->color, ImageUsage::ColorAttachment);
+    if (withDepth) {
+        barriers.add(target->getDepth(), ImageUsage::DepthAttachment);
+    }
+    barriers.record(commandBuffer);
 
-    if (parameters._clearBackground) {
-        // Clear with black background
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    auto loadOp = parameters._clearBackground ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+    VkRenderingAttachmentInfo colorAttachment{
+        .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+        .imageView = target->color.view,
+        .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        .loadOp = loadOp,
+        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+        .clearValue = {.color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}},
+    };
+    VkRenderingAttachmentInfo depthAttachment{
+        .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+        .imageView = withDepth ? target->getDepth().view : VK_NULL_HANDLE,
+        .imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        .loadOp = loadOp,
+        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+        .clearValue = {.depthStencil = {1.0f, 0}},
+    };
+    auto targetExtent = VkExtent2D{static_cast<uint32_t>(target->color.size.x), static_cast<uint32_t>(target->color.size.y)};
+    VkRenderingInfo renderingInfo{
+        .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+        .renderArea = {{0, 0}, targetExtent},
+        .layerCount = 1,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachment,
+        .pDepthAttachment = withDepth ? &depthAttachment : nullptr,
+    };
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
+
+    VkViewport viewport{0, 0, toFloat(viewSize.x) * _textureScale, toFloat(viewSize.y) * _textureScale, 0.0f, 1.0f};
+    VkRect2D scissor{{0, 0}, targetExtent};
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+}
+
+void _RenderStep::finishExecution(ExecutionParameters const& parameters)
+{
+    vkCmdEndRendering(parameters._renderInfo.commandBuffer);
+}
+
+void _RenderStep::draw(ExecutionParameters const& parameters, PipelineState state, VkBuffer vertexBuffer, uint64_t numElements, VkBuffer indexBuffer)
+{
+    if (numElements == 0) {
+        return;
+    }
+    auto commandBuffer = parameters._renderInfo.commandBuffer;
+    state.depthTest = _depthTest;
+    state.colorFormat = parameters._target->color.format;
+    state.depthFormat = _depthTest != DepthTest::None ? DepthFormat : VK_FORMAT_UNDEFINED;
+    _shader->bind(commandBuffer, state);
+
+    VkDeviceSize offset = 0;
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
+    if (indexBuffer != VK_NULL_HANDLE) {
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(numElements), 1, 0, 0, 0);
+    } else {
+        vkCmdDraw(commandBuffer, static_cast<uint32_t>(numElements), 1, 0, 0);
     }
 }
 
@@ -123,21 +211,14 @@ void _NonFluidObjectRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable point sprites
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glEnable(GL_POINT_SPRITE);
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST, .vertexLayout = VertexLayout::Objects, .blendMode = BlendMode::AlphaAdditive},
+        geometryBuffers->getBuffer(GeometryBufferType_Objects),
+        geometryBuffers->getNumObjects().objects);
 
-    // Enable blending for anti-aliasing
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-    // Draw points
-    glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().objects));
-
-    // Disable blending and point sprites
-    glDisable(GL_PROGRAM_POINT_SIZE);
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 _NonFluidObjectRenderStep::_NonFluidObjectRenderStep(StepParameters const& parameters)
@@ -156,25 +237,20 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable depth testing for proper occlusion
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+    // The geometry shader converts the lines to quads with proper width
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, .vertexLayout = VertexLayout::Objects, .blendMode = BlendMode::AlphaBlend},
+        geometryBuffers->getBuffer(GeometryBufferType_Objects),
+        geometryBuffers->getNumObjects().lineIndices,
+        geometryBuffers->getBuffer(GeometryBufferType_LineIndices));
 
-    // Enable blending for anti-aliasing
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Draw lines (geometry shader will convert to quads with proper width)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
-
-    // Disable blending and depth testing
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+    finishExecution(parameters);
 }
 
 _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
-    : _RenderStep(parameters)
+    : _RenderStep(parameters, DepthTest::LessOrEqual)
 {}
 
 TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
@@ -189,27 +265,66 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable depth testing for proper occlusion
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, .vertexLayout = VertexLayout::Objects},
+        geometryBuffers->getBuffer(GeometryBufferType_Objects),
+        geometryBuffers->getNumObjects().triangleIndices,
+        geometryBuffers->getBuffer(GeometryBufferType_TriangleIndices));
 
-    // Enable blending for anti-aliasing
-    glEnable(GL_BLEND);
-    glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
-
-    // Draw triangles
-    glBindVertexArray(parameters._geometryBuffers->getVaoForTriangles());
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
-    glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
-
-    // Disable blending and depth testing
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+    finishExecution(parameters);
 }
 
 _TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)
-    : _RenderStep(parameters)
+    : _RenderStep(parameters, DepthTest::Less)
 {}
+
+struct FullscreenQuad
+{
+    VulkanBuffer vertices;
+    VulkanBuffer indices;
+};
+
+namespace
+{
+    float const QuadVertices[] = {
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // Top right
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // Bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // Bottom left
+        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // Top left
+    };
+    unsigned int const QuadIndices[] = {0, 1, 3, 1, 2, 3};
+
+    VulkanBuffer createHostBuffer(void const* data, VkDeviceSize size, VkBufferUsageFlags usage)
+    {
+        auto result = VulkanContext::get().createBuffer(size, usage, VulkanMemory::HostVisible);
+        std::memcpy(result.mapped, data, size);
+        return result;
+    }
+
+    // Shared by all post-processing steps and released with the last one
+    std::weak_ptr<FullscreenQuad> sharedFullscreenQuad;
+
+    std::shared_ptr<FullscreenQuad> getFullscreenQuad()
+    {
+        if (auto result = sharedFullscreenQuad.lock()) {
+            return result;
+        }
+        auto result = std::shared_ptr<FullscreenQuad>(
+            new FullscreenQuad{
+                .vertices = createHostBuffer(QuadVertices, sizeof(QuadVertices), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT),
+                .indices = createHostBuffer(QuadIndices, sizeof(QuadIndices), VK_BUFFER_USAGE_INDEX_BUFFER_BIT),
+            },
+            [](FullscreenQuad* quad) {
+                VulkanContext::get().destroyBufferLater(quad->vertices);
+                VulkanContext::get().destroyBufferLater(quad->indices);
+                delete quad;
+            });
+        sharedFullscreenQuad = result;
+        return result;
+    }
+}
 
 PostProcessingRenderStep _PostProcessingRenderStep::create(StepParameters const& parameters)
 {
@@ -219,71 +334,26 @@ PostProcessingRenderStep _PostProcessingRenderStep::create(StepParameters const&
 void _PostProcessingRenderStep::execute(ExecutionParameters parameters)
 {
     parameters._clearBackground = false;
-    prepareExecution(parameters);
 
-    glBindVertexArray(_vao);
-
-    auto numTextures = parameters._textures.size();
+    auto const& textures = parameters._textures;
+    auto numTextures = textures.size();
     CHECK(numTextures <= 3);
+    prepareExecution(parameters, textures);
+
     _shader->setInt("numTextures", toInt(numTextures));
-    if (numTextures >= 1) {
-        _shader->setInt("inputTexture1", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, parameters._textures.at(0));
-    }
-    if (numTextures >= 2) {
-        _shader->setInt("inputTexture2", 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, parameters._textures.at(1));
-    }
-    if (numTextures >= 3) {
-        _shader->setInt("inputTexture3", 2);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, parameters._textures.at(2));
+    for (auto const& [number, texture] : std::views::zip(std::views::iota(1), textures)) {
+        _shader->setTexture("inputTexture" + std::to_string(number), texture->color);
     }
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    draw(parameters, {.vertexLayout = VertexLayout::FullscreenQuad}, _fullscreenQuad->vertices.buffer, 6, _fullscreenQuad->indices.buffer);
+
+    finishExecution(parameters);
 }
 
 _PostProcessingRenderStep::_PostProcessingRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-{
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
-    glGenBuffers(1, &_ebo);
-
-    // Setup full-screen quad
-    float vertices[] = {
-        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // Top right
-        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // Bottom right
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // Bottom left
-        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // Top left
-    };
-    unsigned int indices[] = {
-        0,
-        1,
-        3,  // First triangle
-        1,
-        2,
-        3  // Second triangle
-    };
-
-    glBindVertexArray(_vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Texture coordinate attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-}
+    , _fullscreenQuad(getFullscreenQuad())
+{}
 
 ForwardRenderStep _ForwardRenderStep::create(StepParameters const& parameters)
 {
@@ -312,21 +382,14 @@ void _FluidParticleRenderStep::execute(ExecutionParameters parameters)
     parameters._minBallRadius = 0.0f;
     prepareExecution(parameters);
 
-    // Enable point sprites
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glEnable(GL_POINT_SPRITE);
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST, .vertexLayout = VertexLayout::FluidParticles, .blendMode = BlendMode::AlphaAdditive},
+        geometryBuffers->getBuffer(GeometryBufferType_FluidParticles),
+        geometryBuffers->getNumObjects().fluidParticles);
 
-    // Enable additive blending for fluid particles
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-    // Draw fluid particles
-    glBindVertexArray(parameters._geometryBuffers->getVaoForFluidParticles());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().fluidParticles));
-
-    // Disable blending and point sprites
-    glDisable(GL_PROGRAM_POINT_SIZE);
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 _FluidParticleRenderStep::_FluidParticleRenderStep(StepParameters const& parameters)
@@ -346,16 +409,15 @@ void _LocationRenderStep::execute(ExecutionParameters parameters)
     prepareExecution(parameters);
     _shader->setBool("borderlessRendering", parameters._simulationParameters->borderlessRendering.value);
 
-    // Enable blending for semi-transparent locations
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // The geometry shader converts the location points to quads
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST, .vertexLayout = VertexLayout::Locations, .blendMode = BlendMode::AlphaBlend},
+        geometryBuffers->getBuffer(GeometryBufferType_Locations),
+        geometryBuffers->getNumObjects().locations);
 
-    // Draw location points (geometry shader will convert to quads)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForLocations());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().locations));
-
-    // Disable blending
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 _LocationRenderStep::_LocationRenderStep(StepParameters const& parameters)
@@ -374,42 +436,35 @@ void _SelectedObjectRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable blending for semi-transparent circles
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // The geometry shader converts the selected objects to quads
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST, .vertexLayout = VertexLayout::SelectedObjects, .blendMode = BlendMode::AlphaBlend},
+        geometryBuffers->getBuffer(GeometryBufferType_SelectedObjects),
+        geometryBuffers->getNumObjects().selectedObjects);
 
-    // Draw selected objects (cells and energy particles) as points (geometry shader will convert to quads)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForSelectedObjects());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().selectedObjects));
-
-    // Disable blending
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 _SelectedObjectRenderStep::_SelectedObjectRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
 
-CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters)
+CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters, ImFont* labelFont)
 {
-    return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters));
+    return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters, labelFont));
 }
 
 _CellTypeOverlayRenderStep::~_CellTypeOverlayRenderStep()
 {
-    if (_cellTypeTextureAtlas != 0) {
-        glDeleteTextures(1, &_cellTypeTextureAtlas);
-        _cellTypeTextureAtlas = 0;
-    }
+    VulkanContext::get().destroyImageLater(_cellTypeTextureAtlas);
 }
 
 void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 {
     // Only render if zoom exceeds threshold and overlay is active
-    auto zoom = Viewport::get().getScreenZoomFactor();
-    auto overlayActive = SimulationView::get().isOverlayActive();
-
-    if (zoom <= ZoomFactorForCellDetails || !overlayActive) {
+    if (parameters._view.getScreenZoomFactor() <= ZoomFactorForCellDetails || !parameters._view.cellDetailOverlay) {
         return;
     }
 
@@ -417,27 +472,22 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
     parameters._clearBackground = false;
     prepareExecution(parameters);
 
-    // Enable blending for semi-transparent overlay
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // The geometry shader converts the points to textured quads
+    _shader->setTexture("overlayTexture", _cellTypeTextureAtlas);
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST, .vertexLayout = VertexLayout::Objects, .blendMode = BlendMode::AlphaBlend},
+        geometryBuffers->getBuffer(GeometryBufferType_Objects),
+        geometryBuffers->getNumObjects().objects);
 
-    // Bind overlay texture
-    _shader->setInt("overlayTexture", 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _cellTypeTextureAtlas);
-
-    // Draw overlay points (geometry shader will convert to textured quads)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().objects));
-
-    // Disable blending
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
-_CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters)
+_CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters, ImFont* labelFont)
     : _RenderStep(parameters)
 {
-    createCellTypeTextureAtlas();
+    createCellTypeTextureAtlas(labelFont);
 }
 
 namespace
@@ -458,7 +508,7 @@ namespace
     }
 }
 
-void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
+void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas(ImFont* labelFont)
 {
     // Create a texture atlas containing all cell type strings and object type strings
     // We'll arrange them in a vertical strip, one per row
@@ -466,7 +516,6 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     // Row 13: "Solid" (for ObjectType_Solid)
     // Row 14: "Fluid" (for ObjectType_Fluid)
     // Row 15: "Free Cell" (for ObjectType_FreeCell)
-    auto font = StyleService::get().getDefaultFont();
     float fontSize = 16.0f;  // Base font size for rendering
 
     // Build combined list of labels: cell types + object types (Solid, Fluid, Free Cell)
@@ -488,16 +537,16 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     // Get font atlas data
     int atlasWidth, atlasHeight;
     unsigned char* atlasData;
-    font->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
+    labelFont->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
 
     // Render each label string to the buffer using ImGui font
     int rowHeight = 20;
-    float scale = fontSize / font->FontSize;
+    float scale = fontSize / labelFont->FontSize;
 
     auto renderLabel = [&](std::string const& label, float startPosX, float posY, float brightness, float alphaFactor) {
         auto posX = startPosX;
         for (auto const& character : label) {
-            auto glyph = font->FindGlyph(static_cast<ImWchar>(character));
+            auto glyph = labelFont->FindGlyph(static_cast<ImWchar>(character));
             CHECK(glyph);
 
             // Calculate glyph position and size
@@ -542,18 +591,7 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
         ++rowIndex;
     }
 
-    // Create OpenGL texture
-    glGenTextures(1, &_cellTypeTextureAtlas);
-    glBindTexture(GL_TEXTURE_2D, _cellTypeTextureAtlas);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+    _cellTypeTextureAtlas = VulkanContext::get().createSampledImage(pixels.data(), {textureWidth, textureHeight});
 }
 
 SelectedConnectionRenderStep _SelectedConnectionRenderStep::create(StepParameters const& parameters)
@@ -563,8 +601,7 @@ SelectedConnectionRenderStep _SelectedConnectionRenderStep::create(StepParameter
 
 void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
 {
-    auto zoom = Viewport::get().getScreenZoomFactor();
-    if (zoom <= ZoomFactorForCellDetails) {
+    if (parameters._view.getScreenZoomFactor() <= ZoomFactorForCellDetails) {
         return;
     }
 
@@ -573,16 +610,15 @@ void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable blending for arrows
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // The geometry shader converts the connections to lines with arrows
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, .vertexLayout = VertexLayout::SelectedConnections, .blendMode = BlendMode::AlphaAdditive},
+        geometryBuffers->getBuffer(GeometryBufferType_SelectedConnections),
+        geometryBuffers->getNumObjects().connectionArrowVertices);
 
-    // Draw connection arrows (geometry shader will convert to lines with arrows)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForSelectedConnections());
-    glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().connectionArrowVertices));
-
-    // Disable blending
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 _SelectedConnectionRenderStep::_SelectedConnectionRenderStep(StepParameters const& parameters)
@@ -601,16 +637,15 @@ void _AttackEventRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable blending for dashed lines
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // The geometry shader converts the attack event lines to dashed quads
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    draw(
+        parameters,
+        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, .vertexLayout = VertexLayout::AttackEvents, .blendMode = BlendMode::AlphaAdditive},
+        geometryBuffers->getBuffer(GeometryBufferType_AttackEvents),
+        geometryBuffers->getNumObjects().attackEventVertices);
 
-    // Draw attack event lines (geometry shader will convert to dashed quads)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForAttackEvents());
-    glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().attackEventVertices));
-
-    // Disable blending
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 _AttackEventRenderStep::_AttackEventRenderStep(StepParameters const& parameters)
@@ -624,8 +659,7 @@ DetonationEventRenderStep _DetonationEventRenderStep::create(StepParameters cons
 
 _DetonationEventRenderStep::~_DetonationEventRenderStep()
 {
-    glDeleteBuffers(1, &_vbo);
-    glDeleteVertexArrays(1, &_vao);
+    VulkanContext::get().destroyBufferLater(_instanceBuffer);
 }
 
 namespace
@@ -643,9 +677,6 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
     auto now = std::chrono::steady_clock::now();
     updateDetonations(parameters._geometryBuffers, now);
 
-    parameters._clearBackground = true;
-    prepareExecution(parameters);
-
     std::vector<DetonationInstance> instances;
     for (auto const& detonation : _detonations | std::views::values) {
         auto age = std::chrono::duration<float>(now - detonation.startTime).count();
@@ -657,25 +688,29 @@ void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
             });
         }
     }
-    if (instances.empty()) {
-        return;
+
+    parameters._clearBackground = true;
+    auto const& textures = parameters._textures;
+    prepareExecution(parameters, textures);
+
+    if (!instances.empty()) {
+        auto sizeInBytes = instances.size() * sizeof(DetonationInstance);
+        if (_instanceBuffer.size < sizeInBytes) {
+            VulkanContext::get().destroyBufferLater(_instanceBuffer);
+            _instanceBuffer = VulkanContext::get().createBuffer(sizeInBytes * 2, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VulkanMemory::HostVisible);
+        }
+        std::memcpy(_instanceBuffer.mapped, instances.data(), sizeInBytes);
+
+        _shader->setFloat("lifetime", DetonationLifetime);
+        _shader->setTexture("inputTexture1", textures.at(0)->color);
+        draw(
+            parameters,
+            {.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST, .vertexLayout = VertexLayout::DetonationInstances, .blendMode = BlendMode::Additive},
+            _instanceBuffer.buffer,
+            instances.size());
     }
 
-    _shader->setFloat("lifetime", DetonationLifetime);
-    _shader->setInt("inputTexture1", 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, parameters._textures.at(0));
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, toInt(instances.size() * sizeof(DetonationInstance)), instances.data(), GL_STREAM_DRAW);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-
-    glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, toInt(instances.size()));
-
-    glDisable(GL_BLEND);
+    finishExecution(parameters);
 }
 
 void _DetonationEventRenderStep::updateDetonations(GeometryBuffers const& geometryBuffers, std::chrono::steady_clock::time_point now)
@@ -698,19 +733,4 @@ void _DetonationEventRenderStep::updateDetonations(GeometryBuffers const& geomet
 
 _DetonationEventRenderStep::_DetonationEventRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-{
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
-
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, pos));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, radius));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationInstance), (void*)offsetof(DetonationInstance, age));
-    glEnableVertexAttribArray(2);
-
-    glBindVertexArray(0);
-}
+{}

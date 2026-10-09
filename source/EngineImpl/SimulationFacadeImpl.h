@@ -25,8 +25,10 @@ public:
     void clear() override;
 
     std::string getGpuName() const override;
+    GpuUuid getGpuUuid() const override;
 
-    void tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) override;
+    bool isRenderingInteropWorking(GeometryBuffers const& geometryBuffers) const override;
+    void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) override;
 
     bool isSyncSimulationWithRendering() const override;
     void setSyncSimulationWithRendering(bool value) override;

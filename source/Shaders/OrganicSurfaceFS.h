@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const OrganicSurfaceFS = R"(
-#version 330 core
+#version 450
 
 // Reshapes the object layer into rounded, translucent bodies. Every shading term is neutral on flat
 // interior areas, so only the boundaries are formed. Applied techniques:

@@ -7,8 +7,6 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
-#include <glad/glad.h>
-
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -22,10 +20,11 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/TaskProcessor.h>
 
+#include <RenderingInterface/RenderingFacade.h>
+
 #include "AlienGui.h"
 #include "BrowserData.h"
 #include "BrowserHelper.h"
-#include "OpenGLHelper.h"
 #include "PictureGuiService.h"
 #include "StyleService.h"
 
@@ -210,7 +209,7 @@ void _BrowserGalleryWidget::invalidatePicture(std::string const& resourceId)
         return;
     }
     if (findResult->second.has_value()) {
-        glDeleteTextures(1, &findResult->second->textureId);
+        _RenderingFacade::get()->deleteTexture(*findResult->second);
     }
     _pictureBySimId.erase(findResult);
 }
@@ -395,7 +394,7 @@ void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO
     auto findResult = _pictureBySimId.find(rawTO->id);
     if (findResult != _pictureBySimId.end() && findResult->second.has_value()) {
         auto const& picture = *findResult->second;
-        ImGui::Image((ImTextureID)(intptr_t)picture.textureId, {scale(toFloat(picture.width)), scale(toFloat(picture.height))});
+        ImGui::Image(picture.textureId, {scale(toFloat(picture.width)), scale(toFloat(picture.height))});
     }
 
     auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
@@ -425,7 +424,7 @@ void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO
         for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
             if (emojiType < toInt(_data->emojis.size())) {
                 auto const& emoji = _data->emojis.at(emojiType);
-                ImGui::Image((ImTextureID)(intptr_t)emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
+                ImGui::Image(emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
                 ImGui::SameLine();
             }
             AlienGui::Text(std::to_string(numLikes));
@@ -469,7 +468,7 @@ void _BrowserGalleryWidget::processPicture(NetworkResourceRawTO const& rawTO, fl
 
         auto drawList = ImGui::GetWindowDrawList();
         drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
-        drawList->AddImage((ImTextureID)(intptr_t)picture.textureId, picturePos, {picturePos.x + pictureWidth, picturePos.y + pictureHeight});
+        drawList->AddImage(picture.textureId, picturePos, {picturePos.x + pictureWidth, picturePos.y + pictureHeight});
         ImGui::Dummy({width, height});
         return;
     }
@@ -506,7 +505,7 @@ void _BrowserGalleryWidget::processReactionTooltip(NetworkResourceRawTO const& r
         for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
             if (emojiType < toInt(_data->emojis.size())) {
                 auto const& emoji = _data->emojis.at(emojiType);
-                ImGui::Image((ImTextureID)(intptr_t)emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
+                ImGui::Image(emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
                 ImGui::SameLine();
             }
             AlienGui::Text(std::to_string(numLikes) + "   " + _data->getUserNamesToEmojiType(rawTO->id, emojiType));
@@ -574,7 +573,7 @@ void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRa
                 std::optional<TextureData> picture;
                 if (findResult != data.jpgBySimId.end() && !findResult->second.empty()) {
                     try {
-                        picture = OpenGLHelper::loadTextureFromMemory(findResult->second);
+                        picture = _RenderingFacade::get()->loadTextureFromMemory(findResult->second);
                     } catch (std::exception const&) {
                         log(Priority::Important, "browser: preview picture of simulation " + simId + " could not be decoded");
                     }

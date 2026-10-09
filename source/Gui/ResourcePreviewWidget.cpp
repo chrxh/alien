@@ -2,13 +2,12 @@
 
 #include <algorithm>
 
-#include <glad/glad.h>
-
 #include <imgui.h>
 
 #include <Base/LoggingService.h>
 
-#include "OpenGLHelper.h"
+#include <RenderingInterface/RenderingFacade.h>
+
 #include "PictureGuiService.h"
 #include "StyleService.h"
 
@@ -21,7 +20,7 @@ void ResourcePreviewWidget::createForSimulation()
         return;
     }
     try {
-        _texture = OpenGLHelper::loadTextureFromMemory(_jpg);
+        _texture = _RenderingFacade::get()->loadTextureFromMemory(_jpg);
     } catch (std::exception const&) {
         log(Priority::Important, "preview picture could not be decoded");
     }
@@ -70,7 +69,7 @@ void ResourcePreviewWidget::processSimulationPreview()
 {
     auto width = std::min(calcAvailableWidth(), scale(toFloat(_texture->width)));
     auto height = width * toFloat(_texture->height) / toFloat(_texture->width);
-    ImGui::Image((ImTextureID)(intptr_t)_texture->textureId, {width, height});
+    ImGui::Image(_texture->textureId, {width, height});
 }
 
 void ResourcePreviewWidget::processGenomePreview()
@@ -94,7 +93,7 @@ void ResourcePreviewWidget::processGenomePreview()
 void ResourcePreviewWidget::clear()
 {
     if (_texture.has_value()) {
-        glDeleteTextures(1, &_texture->textureId);
+        _RenderingFacade::get()->deleteTexture(*_texture);
         _texture.reset();
     }
     _jpg.clear();

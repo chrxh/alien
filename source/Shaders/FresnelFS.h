@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const FresnelFS = R"(
-#version 330 core
+#version 450
 out vec4 FragColor;
 
 in vec2 texCoord;
@@ -34,15 +34,15 @@ void main()
     for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
             vec2 offset = vec2(x, y) * texelSize;
-            float sample = dot(texture(inputTexture1, texCoord + offset).rgb, vec3(0.333, 0.333, 0.333));
+            float neighborBrightness = dot(texture(inputTexture1, texCoord + offset).rgb, vec3(0.333, 0.333, 0.333));
             
             // Sobel kernel for X direction
             float kx = float(x);
-            gradX += sample * kx;
+            gradX += neighborBrightness * kx;
             
             // Sobel kernel for Y direction
             float ky = float(y);
-            gradY += sample * ky;
+            gradY += neighborBrightness * ky;
         }
     }
     

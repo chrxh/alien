@@ -2,16 +2,13 @@
   "name": "alien",
   "dependencies": [
     {
-      "name": "glew",
-      "version>=": "2.2.0#3"
-    },
-    {
       "name": "glfw3",
       "version>=": "3.4"
     },
+    "volk",
     {
-      "name": "glad",
-      "version>=": "0.1.34#3"
+      "name": "glslang",
+      "version>=": "15.0.0"
     },
     {
       "name": "stb",
@@ -70,8 +67,7 @@
       "name": "imgui",
       "features": [
         "glfw-binding",
-        "freetype",
-        "opengl3-binding"
+        "freetype"
       ],
       "version>=": "1.90"
     },

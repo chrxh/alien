@@ -18,6 +18,8 @@
 
 #include <PersisterImpl/PersisterFacadeImpl.h>
 
+#include <RenderingImpl/RenderingFacadeImpl.h>
+
 #include "HelpStrings.h"
 #include "MainWindow.h"
 
@@ -62,6 +64,7 @@ int main(int argc, char** argv)
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());
         _McpToolsFacadeImpl::set(std::make_shared<_McpToolsFacadeImpl>());
+        _RenderingFacadeImpl::set(std::make_shared<_RenderingFacadeImpl>());
 
         mainWindow = std::make_shared<_MainWindow>();
         mainWindow->mainLoop();
