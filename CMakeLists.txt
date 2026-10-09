@@ -353,7 +353,8 @@ add_subdirectory(source/NetworkTests)
 add_subdirectory(source/PersisterImpl)
 add_subdirectory(source/PersisterInterface)
 add_subdirectory(source/PersisterTests)
-add_subdirectory(source/Rendering)
+add_subdirectory(source/RenderingImpl)
+add_subdirectory(source/RenderingInterface)
 add_subdirectory(source/Shaders)
 
 # Executables linking the HIP relocatable-device-code engine libraries must run

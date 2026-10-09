@@ -18,6 +18,8 @@
 #include <PersisterInterface/Definitions.h>
 #include <PersisterInterface/DownloadCache.h>
 
+#include <RenderingInterface/TextureData.h>
+
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 

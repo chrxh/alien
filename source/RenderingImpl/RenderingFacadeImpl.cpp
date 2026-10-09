@@ -1,7 +1,9 @@
-#include "RenderingService.h"
+#include "RenderingFacadeImpl.h"
 
 #include <ranges>
 #include <span>
+
+#include <GLFW/glfw3.h>
 
 #include <imgui_impl_vulkan.h>
 
@@ -11,10 +13,22 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
+#include "SimulationRenderer.h"
 #include "TextureService.h"
 #include "VulkanContext.h"
 #include "VulkanFrameRenderer.h"
 #include "VulkanGeometryBuffers.h"
+
+void _RenderingFacadeImpl::set(RenderingFacade const& instance)
+{
+    _instance = instance;
+}
+
+void _RenderingFacadeImpl::setWindowHints()
+{
+    // Vulkan renders into a surface of the window instead of an OpenGL context
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+}
 
 namespace
 {
@@ -52,15 +66,22 @@ namespace
     }
 }
 
-void RenderingService::setup(GLFWwindow* window)
+void _RenderingFacadeImpl::setup(GLFWwindow* window)
 {
     VulkanContext::get().setup(window, getEngineGpuUuid());
     checkInterop();
     VulkanFrameRenderer::get().setup(window);
 }
 
-void RenderingService::shutdown()
+void _RenderingFacadeImpl::setupSimulationRendering(ImFont* labelFont)
 {
+    SimulationRenderer::get().setup(labelFont);
+}
+
+void _RenderingFacadeImpl::shutdown()
+{
+    SimulationRenderer::get().shutdown();
+
     auto& context = VulkanContext::get();
     context.releasePendingResources();
     TextureService::get().shutdown();
@@ -68,22 +89,32 @@ void RenderingService::shutdown()
     context.shutdown();
 }
 
-void RenderingService::newFrame()
+void _RenderingFacadeImpl::newFrame()
 {
     VulkanFrameRenderer::get().newFrame();
 }
 
-void RenderingService::clearScreen(FloatColorRGB const& color)
+void _RenderingFacadeImpl::drawSimulation(RenderView const& view)
+{
+    SimulationRenderer::get().draw(view);
+}
+
+void _RenderingFacadeImpl::clearScreen(FloatColorRGB const& color)
 {
     VulkanFrameRenderer::get().clearScreen(color);
 }
 
-void RenderingService::render(ImDrawData* drawData)
+void _RenderingFacadeImpl::render(ImDrawData* drawData)
 {
     VulkanFrameRenderer::get().render(drawData);
 }
 
-PictureData RenderingService::renderDrawList(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor, int supersampling)
+PictureData _RenderingFacadeImpl::renderSimulationPicture(RenderView const& view)
+{
+    return SimulationRenderer::get().renderPicture(view);
+}
+
+PictureData _RenderingFacadeImpl::renderDrawList(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor, int supersampling)
 {
     IntVector2D renderResolution{resolution.x * supersampling, resolution.y * supersampling};
 
@@ -146,4 +177,29 @@ PictureData RenderingService::renderDrawList(ImDrawList* drawList, IntVector2D c
         destination[2] = isBgra ? source[0] : source[2];
     }
     return result;
+}
+
+TextureData _RenderingFacadeImpl::loadTexture(std::filesystem::path const& filename)
+{
+    return TextureService::get().loadTexture(filename);
+}
+
+TextureData _RenderingFacadeImpl::loadTextureFromMemory(std::string const& encodedImage)
+{
+    return TextureService::get().loadTextureFromMemory(encodedImage);
+}
+
+TextureData _RenderingFacadeImpl::createTexture(uint8_t const* pixels, int width, int height, TextureFormat format, TextureFilter filter)
+{
+    return TextureService::get().createTexture(pixels, width, height, format, filter);
+}
+
+void _RenderingFacadeImpl::deleteTexture(TextureData const& texture)
+{
+    TextureService::get().deleteTexture(texture);
+}
+
+void _RenderingFacadeImpl::deleteTexture(ImTextureID textureId)
+{
+    TextureService::get().deleteTexture(textureId);
 }

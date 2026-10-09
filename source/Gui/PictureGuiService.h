@@ -9,7 +9,7 @@
 
 #include <Data/PreviewDesc.h>
 
-#include <Rendering/PictureData.h>
+#include <RenderingInterface/PictureData.h>
 
 class PictureGuiService
 {

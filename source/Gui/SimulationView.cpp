@@ -12,8 +12,7 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
-#include <Rendering/RenderingService.h>
-#include <Rendering/SimulationRenderer.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "AlienGui.h"
 #include "SimulationScrollbars.h"
@@ -28,7 +27,7 @@ void SimulationView::setup()
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
-    SimulationRenderer::get().setup(StyleService::get().getDefaultFont());
+    _RenderingFacade::get()->setupSimulationRendering(StyleService::get().getDefaultFont());
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 }
@@ -49,14 +48,14 @@ void SimulationView::resize(IntVector2D const& size)
 void SimulationView::draw()
 {
     if (_renderSimulation) {
-        SimulationRenderer::get().draw(createRenderView());
+        _RenderingFacade::get()->drawSimulation(createRenderView());
 
         if (_SimulationFacade::get()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
     } else {
-        RenderingService::get().clearScreen({0, 0, 0});
+        _RenderingFacade::get()->clearScreen({0, 0, 0});
 
         auto textWidth = scale(300.0f);
         auto textHeight = scale(80.0f);
@@ -182,7 +181,7 @@ PictureData SimulationView::savePicture(IntVector2D const& resolution)
         viewport.setRenderScale(renderScale);
         pictureView = createRenderView();
     }
-    return SimulationRenderer::get().renderPicture(pictureView);
+    return _RenderingFacade::get()->renderSimulationPicture(pictureView);
 }
 
 RenderView SimulationView::createRenderView() const

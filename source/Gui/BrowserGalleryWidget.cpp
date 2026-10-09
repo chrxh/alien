@@ -20,7 +20,7 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/TaskProcessor.h>
 
-#include <Rendering/TextureService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "AlienGui.h"
 #include "BrowserData.h"
@@ -209,7 +209,7 @@ void _BrowserGalleryWidget::invalidatePicture(std::string const& resourceId)
         return;
     }
     if (findResult->second.has_value()) {
-        TextureService::get().deleteTexture(*findResult->second);
+        _RenderingFacade::get()->deleteTexture(*findResult->second);
     }
     _pictureBySimId.erase(findResult);
 }
@@ -573,7 +573,7 @@ void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRa
                 std::optional<TextureData> picture;
                 if (findResult != data.jpgBySimId.end() && !findResult->second.empty()) {
                     try {
-                        picture = TextureService::get().loadTextureFromMemory(findResult->second);
+                        picture = _RenderingFacade::get()->loadTextureFromMemory(findResult->second);
                     } catch (std::exception const&) {
                         log(Priority::Important, "browser: preview picture of simulation " + simId + " could not be decoded");
                     }

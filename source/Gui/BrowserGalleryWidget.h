@@ -9,6 +9,8 @@
 
 #include <PersisterInterface/Definitions.h>
 
+#include <RenderingInterface/TextureData.h>
+
 #include "Definitions.h"
 
 enum GallerySorting
