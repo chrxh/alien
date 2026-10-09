@@ -2,7 +2,8 @@ name: windows-deploy
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 0 * * *'
+      timezone: 'Europe/Berlin'
   workflow_dispatch:
 
 
