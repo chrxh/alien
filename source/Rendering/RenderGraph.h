@@ -17,18 +17,18 @@ struct RenderSequence
         _repetitions = value;
         return *this;
     }
-    using RepetitionFunc = std::function<int(void)>;
+    using RepetitionFunc = std::function<int(RenderView const&)>;
     RenderSequence& repetitions(RepetitionFunc const& value)
     {
         _repetitions = value;
         return *this;
     }
-    int getRepetitions() const
+    int getRepetitions(RenderView const& view) const
     {
         if (std::holds_alternative<int>(_repetitions)) {
             return std::get<int>(_repetitions);
         } else {
-            return std::get<RepetitionFunc>(_repetitions)();
+            return std::get<RepetitionFunc>(_repetitions)(view);
         }
     }
     std::variant<int, RepetitionFunc> _repetitions = 1;
@@ -45,18 +45,16 @@ class _RenderGraph
 public:
     _RenderGraph(RenderBlocks&& blocks);
 
-    // The images take the new size at the next execution, so that resizing the window does not create images for every intermediate size
-    void resize(IntVector2D const& size);
-
     // Copies the visible simulation data into the geometry buffers, which the GPU must no longer use
-    void updateGeometry();
+    void updateGeometry(RealRect const& visibleWorldRect);
 
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
     // Without a final target, the graph renders into an own image of the view size.
-    VulkanImage& execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget = std::nullopt);
+    // The images take a new view size only here, so that resizing the window does not create images for every intermediate size.
+    VulkanImage& execute(VkCommandBuffer commandBuffer, RenderView const& view, std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
 private:
-    void applyRequestedSize(bool withScreenTarget);
+    void applyViewSize(bool withScreenTarget);
     void resizeTarget(TextureTarget const& target);
 
     void forEachStep(
@@ -84,10 +82,10 @@ private:
     VulkanGeometryBuffers _geometryBuffers;
     RenderBlocks _blocks;
 
+    RenderView _view;
     RenderTarget _finalTarget = ScreenTarget();
 
     TextureTarget _screenTarget;
     std::vector<TextureTarget> _textureTargets;
     std::optional<IntVector2D> _textureSize;
-    std::optional<IntVector2D> _requestedTextureSize;
 };

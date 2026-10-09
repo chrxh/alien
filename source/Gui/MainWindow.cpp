@@ -14,7 +14,6 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/AlienExceptions.h>
-#include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
 
 #include <Network/NetworkService.h>
@@ -23,6 +22,10 @@
 
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SerializerService.h>
+
+#include <Rendering/RenderingService.h>
+#include <Rendering/SimulationRenderer.h>
+#include <Rendering/TextureService.h>
 
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
@@ -74,13 +77,9 @@
 #include "StartupCheckService.h"
 #include "StyleService.h"
 #include "TemporalControlWindow.h"
-#include "TextureService.h"
 #include "UiController.h"
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"
-#include "VulkanContext.h"
-#include "VulkanFrameRenderer.h"
-#include "VulkanGeometryBuffers.h"
 #include "WindowController.h"
 #include "implot.h"
 
@@ -105,8 +104,8 @@ _MainWindow::_MainWindow()
 
     StartupCheckService::get().check();
 
-    log(Priority::Important, "initialize GLFW and Vulkan");
-    initGlfwAndVulkan();
+    log(Priority::Important, "initialize GLFW and rendering");
+    initGlfwAndRendering();
 
     LogWindow::get().setup();
 
@@ -187,24 +186,18 @@ void _MainWindow::shutdown()
     auto window = WindowController::get().getWindowData().window;
     glfwHideWindow(window);
 
-    // The simulation releases its imports of the geometry buffers before Vulkan frees them
+    // The simulation releases its imports of the geometry buffers before the renderer frees them
     _PersisterFacade::get()->shutdown();
     _SimulationFacade::get()->closeSimulation();
 
     NetworkService::get().shutdown();
 
-    auto& vulkanContext = VulkanContext::get();
-    vulkanContext.waitIdle();
-    SimulationView::get().releaseGraphicsResources();
-    vulkanContext.releasePendingResources();
-    TextureService::get().shutdown();
-    VulkanFrameRenderer::get().shutdown();
+    SimulationRenderer::get().shutdown();
+    RenderingService::get().shutdown();
     ImGui_ImplGlfw_Shutdown();
 
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
-
-    vulkanContext.shutdown();
 
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -212,56 +205,25 @@ void _MainWindow::shutdown()
     log(Priority::Important, "user interface shut down");
 }
 
-namespace
-{
-    // Errors of the GPU engine are reported when the simulation is created
-    std::optional<GpuUuid> getEngineGpuUuid()
-    {
-        try {
-            return _SimulationFacade::get()->getGpuUuid();
-        } catch (std::exception const&) {
-            return std::nullopt;
-        }
-    }
-
-    // Geometry buffers created afterwards are only shareable with the GPU engine if the check succeeds
-    void checkRenderingInterop()
-    {
-        if (!GlobalSettings::get().isInterop() || !VulkanContext::get().isMemorySharingSupported()) {
-            return;
-        }
-        // Without objects, the buffers get their minimum capacity
-        auto geometryBuffers = _VulkanGeometryBuffers::create();
-        geometryBuffers->updateNumObjects({});
-        if (_SimulationFacade::get()->isRenderingInteropWorking(geometryBuffers)) {
-            log(Priority::Important, "CUDA-Vulkan interop is working");
-        } else {
-            GlobalSettings::get().setInterop(false);
-            log(Priority::Important, "CUDA-Vulkan interop is not working on this system, falling back to the transfer over host memory");
-        }
-    }
-}
-
-void _MainWindow::initGlfwAndVulkan()
+void _MainWindow::initGlfwAndRendering()
 {
     glfwSetErrorCallback(glfwErrorCallback);
 
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize Glfw.");
     }
+
+    // The renderer creates its own surface for the window
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     WindowController::get().setup();
     auto windowData = WindowController::get().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
 
-    VulkanContext::get().setup(windowData.window, getEngineGpuUuid());
-    checkRenderingInterop();
-
     ImGui::CreateContext();
     ImPlot::CreateContext();
-    ImGui_ImplGlfw_InitForVulkan(windowData.window, true);
-    VulkanFrameRenderer::get().setup(windowData.window);
+    ImGui_ImplGlfw_InitForOther(windowData.window, true);
+    RenderingService::get().setup(windowData.window);
 }
 
 void _MainWindow::initFileDialogs()

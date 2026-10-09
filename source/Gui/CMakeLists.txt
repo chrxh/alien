@@ -168,7 +168,6 @@ PUBLIC
     NodeEditorWidget.h
     OverlayController.cpp
     OverlayController.h
-    PictureData.h
     PictureGuiService.cpp
     PictureGuiService.h
     PreviewDescView.cpp
@@ -179,10 +178,6 @@ PUBLIC
     PreviewViewport.h
     PreviewWidget.cpp
     PreviewWidget.h
-    RenderGraph.cpp
-    RenderGraph.h
-    RenderStep.cpp
-    RenderStep.h
     ReplaceSimulationDialog.cpp
     ReplaceSimulationDialog.h
     ResetPasswordDialog.cpp
@@ -199,8 +194,6 @@ PUBLIC
     SelectionController.h
     SelectionWidget.cpp
     SelectionWidget.h
-    Shader.cpp
-    Shader.h
     SignalsBufferDialog.cpp
     SignalsBufferDialog.h
     SimulationInteractionController.cpp
@@ -227,20 +220,12 @@ PUBLIC
     StyleService.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
-    TextureService.cpp
-    TextureService.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
     Viewport.cpp
     Viewport.h
-    VulkanContext.cpp
-    VulkanContext.h
-    VulkanFrameRenderer.cpp
-    VulkanFrameRenderer.h
-    VulkanGeometryBuffers.cpp
-    VulkanGeometryBuffers.h
     WindowController.cpp
     WindowController.h)
 
@@ -255,6 +240,7 @@ target_link_libraries(alien McpToolsInterface)
 target_link_libraries(alien Network)
 target_link_libraries(alien PersisterInterface)
 target_link_libraries(alien PersisterImpl)
+target_link_libraries(alien Rendering)
 
 target_include_directories(alien
     PRIVATE
@@ -264,8 +250,6 @@ target_include_directories(alien
 target_link_libraries(alien cudart)
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien Boost::boost)
-target_link_libraries(alien Vulkan::Vulkan)
-target_link_libraries(alien glslang::glslang glslang::glslang-default-resource-limits glslang::SPIRV)
 target_link_libraries(alien imgui::imgui)
 target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)

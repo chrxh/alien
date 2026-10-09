@@ -20,6 +20,9 @@
 #include <PersisterInterface/SerializerService.h>
 #include <PersisterInterface/TaskProcessor.h>
 
+#include <Rendering/RenderingService.h>
+#include <Rendering/TextureService.h>
+
 #include "AboutDialog.h"
 #include "AlienGui.h"
 #include "AutosaveWindow.h"
@@ -51,11 +54,9 @@
 #include "SpatialControlWindow.h"
 #include "StyleService.h"
 #include "TemporalControlWindow.h"
-#include "TextureService.h"
 #include "UiController.h"
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"
-#include "VulkanFrameRenderer.h"
 
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/PersisterFacade.h>
@@ -93,7 +94,7 @@ void MainLoopController::process()
 
     StyleService::get().process();
 
-    VulkanFrameRenderer::get().newFrame();
+    RenderingService::get().newFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
@@ -116,7 +117,7 @@ void MainLoopController::process()
     }
 
     ImGui::Render();
-    VulkanFrameRenderer::get().render(ImGui::GetDrawData());
+    RenderingService::get().render(ImGui::GetDrawData());
 
     GlobalSettings::get().saveImGuiSettingsIfDirty();
 }
@@ -359,7 +360,7 @@ void MainLoopController::processExiting()
 void MainLoopController::drawLoadingScreen()
 {
     // Background color
-    VulkanFrameRenderer::get().clearScreen({0, 0, 0.1f});
+    RenderingService::get().clearScreen({0, 0, 0.1f});
 
     auto& styleRep = StyleService::get();
     auto center = ImGui::GetMainViewport()->GetCenter();

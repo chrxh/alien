@@ -20,12 +20,13 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/TaskProcessor.h>
 
+#include <Rendering/TextureService.h>
+
 #include "AlienGui.h"
 #include "BrowserData.h"
 #include "BrowserHelper.h"
 #include "PictureGuiService.h"
 #include "StyleService.h"
-#include "TextureService.h"
 
 namespace
 {

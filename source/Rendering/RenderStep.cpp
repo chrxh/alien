@@ -13,9 +13,6 @@
 
 #include "RenderGraph.h"
 #include "Shader.h"
-#include "SimulationView.h"
-#include "StyleService.h"
-#include "Viewport.h"
 
 namespace
 {
@@ -98,10 +95,11 @@ void _RenderStep::setTextureScaling(float scale)
 void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures)
 {
     auto worldSize = parameters._simulationFacade->getWorldSize();
-    auto worldRect = Viewport::get().getVisibleWorldRect();
-    auto viewSize = Viewport::get().getViewSize();
-    auto zoom = Viewport::get().getZoomFactor();
-    auto renderScale = Viewport::get().getRenderScale();
+    auto const& view = parameters._view;
+    auto const& worldRect = view.visibleWorldRect;
+    auto viewSize = view.viewSize;
+    auto zoom = view.zoomFactor;
+    auto renderScale = view.renderScale;
 
     _shader->setFloat("zoom", zoom);
     _shader->setFloat("renderScale", renderScale);
@@ -113,7 +111,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
 
     auto uniforms = _uniforms;
     if (_uniformFunc) {
-        auto uniformFunc = _uniformFunc(*parameters._simulationParameters);
+        auto uniformFunc = _uniformFunc(*parameters._simulationParameters, view);
         uniforms.insert(uniformFunc.begin(), uniformFunc.end());
     }
     for (auto const& [key, value] : uniforms) {
@@ -454,9 +452,9 @@ _SelectedObjectRenderStep::_SelectedObjectRenderStep(StepParameters const& param
     : _RenderStep(parameters)
 {}
 
-CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters)
+CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters, ImFont* labelFont)
 {
-    return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters));
+    return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters, labelFont));
 }
 
 _CellTypeOverlayRenderStep::~_CellTypeOverlayRenderStep()
@@ -467,10 +465,7 @@ _CellTypeOverlayRenderStep::~_CellTypeOverlayRenderStep()
 void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 {
     // Only render if zoom exceeds threshold and overlay is active
-    auto zoom = Viewport::get().getScreenZoomFactor();
-    auto overlayActive = SimulationView::get().isOverlayActive();
-
-    if (zoom <= ZoomFactorForCellDetails || !overlayActive) {
+    if (parameters._view.getScreenZoomFactor() <= ZoomFactorForCellDetails || !parameters._view.cellDetailOverlay) {
         return;
     }
 
@@ -490,10 +485,10 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
     finishExecution(parameters);
 }
 
-_CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters)
+_CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters, ImFont* labelFont)
     : _RenderStep(parameters)
 {
-    createCellTypeTextureAtlas();
+    createCellTypeTextureAtlas(labelFont);
 }
 
 namespace
@@ -514,7 +509,7 @@ namespace
     }
 }
 
-void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
+void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas(ImFont* labelFont)
 {
     // Create a texture atlas containing all cell type strings and object type strings
     // We'll arrange them in a vertical strip, one per row
@@ -522,7 +517,6 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     // Row 13: "Solid" (for ObjectType_Solid)
     // Row 14: "Fluid" (for ObjectType_Fluid)
     // Row 15: "Free Cell" (for ObjectType_FreeCell)
-    auto font = StyleService::get().getDefaultFont();
     float fontSize = 16.0f;  // Base font size for rendering
 
     // Build combined list of labels: cell types + object types (Solid, Fluid, Free Cell)
@@ -544,16 +538,16 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     // Get font atlas data
     int atlasWidth, atlasHeight;
     unsigned char* atlasData;
-    font->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
+    labelFont->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
 
     // Render each label string to the buffer using ImGui font
     int rowHeight = 20;
-    float scale = fontSize / font->FontSize;
+    float scale = fontSize / labelFont->FontSize;
 
     auto renderLabel = [&](std::string const& label, float startPosX, float posY, float brightness, float alphaFactor) {
         auto posX = startPosX;
         for (auto const& character : label) {
-            auto glyph = font->FindGlyph(static_cast<ImWchar>(character));
+            auto glyph = labelFont->FindGlyph(static_cast<ImWchar>(character));
             CHECK(glyph);
 
             // Calculate glyph position and size
@@ -608,8 +602,7 @@ SelectedConnectionRenderStep _SelectedConnectionRenderStep::create(StepParameter
 
 void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
 {
-    auto zoom = Viewport::get().getScreenZoomFactor();
-    if (zoom <= ZoomFactorForCellDetails) {
+    if (parameters._view.getScreenZoomFactor() <= ZoomFactorForCellDetails) {
         return;
     }
 

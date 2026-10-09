@@ -14,9 +14,10 @@
 
 #include <Base/MarkdownParser.h>
 
+#include <Rendering/TextureService.h>
+
 #include "AlienGui.h"
 #include "StyleService.h"
-#include "TextureService.h"
 
 namespace
 {

@@ -7,8 +7,10 @@
 
 #include <EngineInterface/Definitions.h>
 
+#include <Rendering/PictureData.h>
+#include <Rendering/RenderView.h>
+
 #include "Definitions.h"
-#include "PictureData.h"
 
 class SimulationView
 {
@@ -17,7 +19,6 @@ class SimulationView
 public:
     void setup();
     void shutdown();
-    void releaseGraphicsResources();
 
     void resize(IntVector2D const& viewportSize);
 
@@ -46,9 +47,7 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void setupRenderGraph();
-
-    PictureData renderPicture(IntVector2D const& resolution);
+    RenderView createRenderView() const;
 
     void markReferenceDomain();
 
@@ -57,8 +56,6 @@ private:
 
     // Overlay
     bool _cellDetailOverlayActive = false;
-
-    RenderGraph _renderGraph;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

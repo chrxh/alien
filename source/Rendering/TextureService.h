@@ -2,15 +2,14 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <string>
-#include <unordered_map>
 
 #include <imgui.h>
 
 #include <Base/Singleton.h>
 
 #include "Definitions.h"
-#include "VulkanContext.h"
 
 enum class TextureFormat
 {
@@ -27,9 +26,11 @@ enum class TextureFilter
 // Textures for the user interface
 class TextureService
 {
-    MAKE_SINGLETON(TextureService);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TextureService);
 
 public:
+    ~TextureService();
+
     void shutdown();
 
     TextureData loadTexture(std::filesystem::path const& filename);
@@ -41,15 +42,8 @@ public:
     void deleteTexture(ImTextureID textureId);
 
 private:
-    VkSampler getSampler(TextureFilter filter);
+    TextureService();
 
-    struct Texture
-    {
-        VulkanImage image;
-        VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-    };
-    std::unordered_map<ImTextureID, Texture> _textures;
-
-    VkSampler _smoothSampler = VK_NULL_HANDLE;
-    VkSampler _nearestSampler = VK_NULL_HANDLE;
+    struct Resources;
+    std::unique_ptr<Resources> _resources;
 };
