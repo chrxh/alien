@@ -34,10 +34,16 @@ namespace
         if (!GlobalSettings::get().isInterop() || !VulkanContext::get().isMemorySharingSupported()) {
             return;
         }
-        // Without objects, the buffers get their minimum capacity
-        auto geometryBuffers = _VulkanGeometryBuffers::create();
-        geometryBuffers->updateNumObjects({});
-        if (_SimulationFacade::get()->isRenderingInteropWorking(geometryBuffers)) {
+        auto interopWorking = false;
+        try {
+            // Without objects, the buffers get their minimum capacity
+            auto geometryBuffers = _VulkanGeometryBuffers::create();
+            geometryBuffers->updateNumObjects({});
+            interopWorking = _SimulationFacade::get()->isRenderingInteropWorking(geometryBuffers);
+        } catch (std::exception const& exception) {
+            log(Priority::Important, std::string("CUDA-Vulkan interop check failed: ") + exception.what());
+        }
+        if (interopWorking) {
             log(Priority::Important, "CUDA-Vulkan interop is working");
         } else {
             GlobalSettings::get().setInterop(false);
@@ -56,7 +62,6 @@ void RenderingService::setup(GLFWwindow* window)
 void RenderingService::shutdown()
 {
     auto& context = VulkanContext::get();
-    context.waitIdle();
     context.releasePendingResources();
     TextureService::get().shutdown();
     VulkanFrameRenderer::get().shutdown();

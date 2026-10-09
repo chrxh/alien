@@ -17,6 +17,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <Base/ExitScopeGuard.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
@@ -173,51 +174,53 @@ VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags u
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
     };
     checkVkResult(vkCreateBuffer(_device, &bufferInfo, nullptr, &result.buffer), "vkCreateBuffer");
+    try {
+        VkMemoryRequirements requirements;
+        vkGetBufferMemoryRequirements(_device, result.buffer, &requirements);
 
-    VkMemoryRequirements requirements;
-    vkGetBufferMemoryRequirements(_device, result.buffer, &requirements);
+        auto properties = memory == VulkanMemory::HostVisible ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+                                                              : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-    auto properties =
-        memory == VulkanMemory::HostVisible ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-    VkExportMemoryAllocateInfo exportInfo{
-        .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO,
-        .handleTypes = static_cast<VkExternalMemoryHandleTypeFlags>(ExternalMemoryHandleType),
-    };
-    VkMemoryDedicatedAllocateInfo dedicatedInfo{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
-        .pNext = &exportInfo,
-        .buffer = result.buffer,
-    };
-    if (shareable) {
-        VkPhysicalDeviceExternalBufferInfo externalInfo{
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_BUFFER_INFO,
-            .usage = usage,
-            .handleType = ExternalMemoryHandleType,
+        VkExportMemoryAllocateInfo exportInfo{
+            .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO,
+            .handleTypes = static_cast<VkExternalMemoryHandleTypeFlags>(ExternalMemoryHandleType),
         };
-        VkExternalBufferProperties externalProperties{.sType = VK_STRUCTURE_TYPE_EXTERNAL_BUFFER_PROPERTIES};
-        vkGetPhysicalDeviceExternalBufferProperties(_physicalDevice, &externalInfo, &externalProperties);
-        result.dedicatedAllocation = (externalProperties.externalMemoryProperties.externalMemoryFeatures & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT) != 0;
-    }
+        VkMemoryDedicatedAllocateInfo dedicatedInfo{
+            .sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+            .pNext = &exportInfo,
+            .buffer = result.buffer,
+        };
+        if (shareable) {
+            VkPhysicalDeviceExternalBufferInfo externalInfo{
+                .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_BUFFER_INFO,
+                .usage = usage,
+                .handleType = ExternalMemoryHandleType,
+            };
+            VkExternalBufferProperties externalProperties{.sType = VK_STRUCTURE_TYPE_EXTERNAL_BUFFER_PROPERTIES};
+            vkGetPhysicalDeviceExternalBufferProperties(_physicalDevice, &externalInfo, &externalProperties);
+            result.dedicatedAllocation =
+                (externalProperties.externalMemoryProperties.externalMemoryFeatures & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT) != 0;
+        }
 
-    VkMemoryAllocateInfo allocateInfo{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .pNext = shareable ? (result.dedicatedAllocation ? static_cast<void const*>(&dedicatedInfo) : static_cast<void const*>(&exportInfo)) : nullptr,
-        .allocationSize = requirements.size,
-        .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, properties),
-    };
-    if (auto allocateResult = vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory); allocateResult != VK_SUCCESS) {
-        vkDestroyBuffer(_device, result.buffer, nullptr);
-        checkVkResult(allocateResult, "vkAllocateMemory");
-    }
-    result.allocationSize = requirements.size;
-    checkVkResult(vkBindBufferMemory(_device, result.buffer, result.memory, 0), "vkBindBufferMemory");
+        VkMemoryAllocateInfo allocateInfo{
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .pNext = shareable ? (result.dedicatedAllocation ? static_cast<void const*>(&dedicatedInfo) : static_cast<void const*>(&exportInfo)) : nullptr,
+            .allocationSize = requirements.size,
+            .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, properties),
+        };
+        checkVkResult(vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory), "vkAllocateMemory");
+        result.allocationSize = requirements.size;
+        checkVkResult(vkBindBufferMemory(_device, result.buffer, result.memory, 0), "vkBindBufferMemory");
 
-    if (memory == VulkanMemory::HostVisible) {
-        checkVkResult(vkMapMemory(_device, result.memory, 0, VK_WHOLE_SIZE, 0, &result.mapped), "vkMapMemory");
-    }
-    if (shareable) {
-        exportSharedHandle(result);
+        if (memory == VulkanMemory::HostVisible) {
+            checkVkResult(vkMapMemory(_device, result.memory, 0, VK_WHOLE_SIZE, 0, &result.mapped), "vkMapMemory");
+        }
+        if (shareable) {
+            exportSharedHandle(result);
+        }
+    } catch (...) {
+        destroyBuffer(result);
+        throw;
     }
     return result;
 }
@@ -277,28 +280,29 @@ VulkanImage VulkanContext::createImage(IntVector2D const& size, VkFormat format,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
     checkVkResult(vkCreateImage(_device, &imageInfo, nullptr, &result.image), "vkCreateImage");
+    try {
+        VkMemoryRequirements requirements;
+        vkGetImageMemoryRequirements(_device, result.image, &requirements);
+        VkMemoryAllocateInfo allocateInfo{
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .allocationSize = requirements.size,
+            .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
+        };
+        checkVkResult(vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory), "vkAllocateMemory");
+        checkVkResult(vkBindImageMemory(_device, result.image, result.memory, 0), "vkBindImageMemory");
 
-    VkMemoryRequirements requirements;
-    vkGetImageMemoryRequirements(_device, result.image, &requirements);
-    VkMemoryAllocateInfo allocateInfo{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .allocationSize = requirements.size,
-        .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
-    };
-    if (auto allocateResult = vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory); allocateResult != VK_SUCCESS) {
-        vkDestroyImage(_device, result.image, nullptr);
-        checkVkResult(allocateResult, "vkAllocateMemory");
+        VkImageViewCreateInfo viewInfo{
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image = result.image,
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = format,
+            .subresourceRange = {result.aspect, 0, mipLevels, 0, 1},
+        };
+        checkVkResult(vkCreateImageView(_device, &viewInfo, nullptr, &result.view), "vkCreateImageView");
+    } catch (...) {
+        destroyImage(result);
+        throw;
     }
-    checkVkResult(vkBindImageMemory(_device, result.image, result.memory, 0), "vkBindImageMemory");
-
-    VkImageViewCreateInfo viewInfo{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .image = result.image,
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
-        .format = format,
-        .subresourceRange = {result.aspect, 0, mipLevels, 0, 1},
-    };
-    checkVkResult(vkCreateImageView(_device, &viewInfo, nullptr, &result.view), "vkCreateImageView");
     return result;
 }
 
@@ -306,19 +310,24 @@ VulkanImage VulkanContext::createSampledImage(uint8_t const* pixels, IntVector2D
 {
     auto sizeInBytes = static_cast<VkDeviceSize>(size.x) * size.y * 4;
     auto stagingBuffer = createBuffer(sizeInBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VulkanMemory::HostVisible);
+    ExitScopeGuard destroyStagingBuffer([&] { destroyBuffer(stagingBuffer); });
     std::memcpy(stagingBuffer.mapped, pixels, sizeInBytes);
 
     auto result = createImage(size, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-    submitAndWait([&](VkCommandBuffer commandBuffer) {
-        useImage(commandBuffer, result, ImageUsage::TransferDestination);
-        VkBufferImageCopy region{
-            .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
-            .imageExtent = {static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y), 1},
-        };
-        vkCmdCopyBufferToImage(commandBuffer, stagingBuffer.buffer, result.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-        useImage(commandBuffer, result, ImageUsage::ShaderRead);
-    });
-    destroyBuffer(stagingBuffer);
+    try {
+        submitAndWait([&](VkCommandBuffer commandBuffer) {
+            useImage(commandBuffer, result, ImageUsage::TransferDestination);
+            VkBufferImageCopy region{
+                .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
+                .imageExtent = {static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y), 1},
+            };
+            vkCmdCopyBufferToImage(commandBuffer, stagingBuffer.buffer, result.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+            useImage(commandBuffer, result, ImageUsage::ShaderRead);
+        });
+    } catch (...) {
+        destroyImage(result);
+        throw;
+    }
     return result;
 }
 
@@ -422,16 +431,22 @@ void VulkanContext::submitAndWait(std::function<void(VkCommandBuffer)> const& re
     };
     VkCommandBuffer commandBuffer;
     checkVkResult(vkAllocateCommandBuffers(_device, &allocateInfo, &commandBuffer), "vkAllocateCommandBuffers");
+    ExitScopeGuard freeCommandBuffer([&] { vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer); });
 
     VkCommandBufferBeginInfo beginInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT};
     checkVkResult(vkBeginCommandBuffer(commandBuffer, &beginInfo), "vkBeginCommandBuffer");
-    try {
-        recordFunc(commandBuffer);
-    } catch (...) {
-        vkEndCommandBuffer(commandBuffer);
-        vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
-        throw;
-    }
+    recordFunc(commandBuffer);
+
+    // A fence alone does not make the results of copies visible to reads of mapped memory
+    VkMemoryBarrier2 hostReadBarrier{
+        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
+        .srcStageMask = VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT,
+        .srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_HOST_BIT,
+        .dstAccessMask = VK_ACCESS_2_HOST_READ_BIT,
+    };
+    VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .memoryBarrierCount = 1, .pMemoryBarriers = &hostReadBarrier};
+    vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
     checkVkResult(vkEndCommandBuffer(commandBuffer), "vkEndCommandBuffer");
 
     VkSubmitInfo submitInfo{
@@ -442,7 +457,6 @@ void VulkanContext::submitAndWait(std::function<void(VkCommandBuffer)> const& re
     checkVkResult(vkResetFences(_device, 1, &_submitFence), "vkResetFences");
     checkVkResult(vkQueueSubmit(_queue, 1, &submitInfo, _submitFence), "vkQueueSubmit");
     checkVkResult(vkWaitForFences(_device, 1, &_submitFence, VK_TRUE, UINT64_MAX), "vkWaitForFences");
-    vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
 }
 
 void VulkanContext::waitIdle()

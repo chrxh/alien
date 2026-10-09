@@ -53,6 +53,15 @@ VulkanImage& _TextureTarget::getDepth()
     return _depth;
 }
 
+void _TextureTarget::resetImageStates()
+{
+    for (auto image : {&color, &_depth}) {
+        image->layout = VK_IMAGE_LAYOUT_UNDEFINED;
+        image->lastStages = VK_PIPELINE_STAGE_2_NONE;
+        image->lastAccesses = VK_ACCESS_2_NONE;
+    }
+}
+
 void _TextureTarget::destroyImages()
 {
     VulkanContext::get().destroyImageLater(color);
@@ -80,16 +89,6 @@ StepParameters& StepParameters::addUniform(std::string const& key, UniformValueT
 std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
 {
     return _previousTargetSelection;
-}
-
-float _RenderStep::getTextureScaling() const
-{
-    return _textureScale;
-}
-
-void _RenderStep::setTextureScaling(float scale)
-{
-    _textureScale = scale;
 }
 
 void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures)

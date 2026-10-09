@@ -32,16 +32,17 @@ uint64_t GeometryBufferLayout::getNumElements(NumRenderObjects const& numObjects
 
 void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
-    _numObjects = numRenderObjects;
     for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
         auto numElements = GeometryBufferLayout::getNumElements(numRenderObjects, type);
         auto& capacity = _capacities.at(type);
         if (numElements >= capacity) {
-            capacity = std::max(numElements * 2, GeometryBufferLayout::MinCapacities.at(type));
-            reallocate(type, capacity * GeometryBufferLayout::ElementSizes.at(type));
+            auto newCapacity = std::max(numElements * 2, GeometryBufferLayout::MinCapacities.at(type));
+            reallocate(type, newCapacity * GeometryBufferLayout::ElementSizes.at(type));
+            capacity = newCapacity;
             ++_allocationIds.at(type);
         }
     }
+    _numObjects = numRenderObjects;
 }
 
 NumRenderObjects _GeometryBuffers::getNumObjects() const
