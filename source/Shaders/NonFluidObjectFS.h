@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const NonFluidObjectFS = R"(
-#version 330 core
+#version 450
 out vec4 FragColor;
 
 in vec3 vColor;
@@ -14,8 +14,8 @@ uniform float brightness;
 
 void main()
 {
-    // Coordinates on the sprite in [-1, 1]
-    vec2 coord = (gl_PointCoord - vec2(0.5, 0.5)) * 2.0;
+    // Coordinates on the sprite in [-1, 1], with the y axis flipped to match the memory layout of the render targets
+    vec2 coord = (vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y) - vec2(0.5, 0.5)) * 2.0;
     float radiusSquared = dot(coord, coord);
     if (radiusSquared > 1.0) {
         discard;

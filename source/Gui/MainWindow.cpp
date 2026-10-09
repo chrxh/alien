@@ -2,16 +2,10 @@
 
 #include <iostream>
 
-#include <glad/glad.h>
-
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h>  // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
@@ -79,9 +73,12 @@
 #include "StartupCheckService.h"
 #include "StyleService.h"
 #include "TemporalControlWindow.h"
+#include "TextureService.h"
 #include "UiController.h"
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"
+#include "VulkanContext.h"
+#include "VulkanFrameRenderer.h"
 #include "WindowController.h"
 #include "implot.h"
 
@@ -96,7 +93,6 @@ namespace
     {
         if (width > 0 && height > 0) {
             SimulationView::get().resize({width, height});
-            glViewport(0, 0, width, height);
         }
     }
 }
@@ -107,13 +103,10 @@ _MainWindow::_MainWindow()
 
     StartupCheckService::get().check();
 
-    log(Priority::Important, "initialize GLFW and OpenGL");
-    initGlfwAndOpenGL();
+    log(Priority::Important, "initialize GLFW and Vulkan");
+    initGlfwAndVulkan();
 
     LogWindow::get().setup();
-
-    log(Priority::Important, "initialize GLAD");
-    initGlad();
 
     log(Priority::Important, "initialize services");
     StyleService::get().setup();
@@ -191,17 +184,24 @@ void _MainWindow::shutdown()
     auto window = WindowController::get().getWindowData().window;
     glfwHideWindow(window);
 
-    // Closing the simulation releases the CUDA-OpenGL interop resources, which requires the OpenGL context
+    // The simulation releases its imports of the geometry buffers before Vulkan frees them
     _PersisterFacade::get()->shutdown();
     _SimulationFacade::get()->closeSimulation();
 
     NetworkService::get().shutdown();
 
-    ImGui_ImplOpenGL3_Shutdown();
+    auto& vulkanContext = VulkanContext::get();
+    vulkanContext.waitIdle();
+    SimulationView::get().releaseGraphicsResources();
+    vulkanContext.releasePendingResources();
+    TextureService::get().shutdown();
+    VulkanFrameRenderer::get().shutdown();
     ImGui_ImplGlfw_Shutdown();
 
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
+
+    vulkanContext.shutdown();
 
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -209,73 +209,47 @@ void _MainWindow::shutdown()
     log(Priority::Important, "user interface shut down");
 }
 
-void _MainWindow::initGlfwAndOpenGL()
+namespace
+{
+    // Errors of the GPU engine are reported when the simulation is created
+    std::optional<GpuUuid> getEngineGpuUuid()
+    {
+        try {
+            return _SimulationFacade::get()->getGpuUuid();
+        } catch (std::exception const&) {
+            return std::nullopt;
+        }
+    }
+}
+
+void _MainWindow::initGlfwAndVulkan()
 {
     glfwSetErrorCallback(glfwErrorCallback);
 
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize Glfw.");
     }
-
-    // Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-    // GL ES 2.0 + GLSL 100
-    const char* glslVersion = "#version 100";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__APPLE__)
-    // GL 3.2 + GLSL 150
-    const char* glslVersion = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
-    // GL 3.0 + GLSL 130
-    const char* glslVersion = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     WindowController::get().setup();
     auto windowData = WindowController::get().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
-    //glfwSwapInterval(1);  //enable vsync
+
+    VulkanContext::get().setup(windowData.window, getEngineGpuUuid());
+
     ImGui::CreateContext();
     ImPlot::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  // Setup Platform/Renderer back-ends
-    ImGui_ImplOpenGL3_Init(glslVersion);
-}
-
-void _MainWindow::initGlad()
-{
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw std::runtime_error("Failed to initialize GLAD.");
-    }
+    ImGui_ImplGlfw_InitForVulkan(windowData.window, true);
+    VulkanFrameRenderer::get().setup();
 }
 
 void _MainWindow::initFileDialogs()
 {
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
-        GLuint tex;
-
-        glGenTextures(1, &tex);
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        return reinterpret_cast<void*>(uintptr_t(tex));
+        auto texture = TextureService::get().createTexture(data, w, h, fmt == 0 ? TextureFormat::Bgra : TextureFormat::Rgba, TextureFilter::Nearest);
+        return reinterpret_cast<void*>(static_cast<uintptr_t>(texture.textureId));
     };
-    ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
-        GLuint texID = reinterpret_cast<uintptr_t>(tex);
-        glDeleteTextures(1, &texID);
+    ifd::FileDialog::Instance().DeleteTexture = [](void* texture) {
+        TextureService::get().deleteTexture(static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(texture)));
     };
 }

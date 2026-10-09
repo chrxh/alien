@@ -4,8 +4,7 @@
 #include <cmath>
 #include <ranges>
 #include <vector>
-
-#include <glad/glad.h>
+#include <span>
 
 #include <imgui.h>
 
@@ -25,6 +24,8 @@
 #include "SimulationScrollbars.h"
 #include "StyleService.h"
 #include "Viewport.h"
+#include "VulkanContext.h"
+#include "VulkanFrameRenderer.h"
 
 void SimulationView::setup()
 {
@@ -49,6 +50,11 @@ void SimulationView::shutdown()
     GlobalSettings::get().setValue("windows.simulation view.motion blur factor", _motionBlur);
 }
 
+void SimulationView::releaseGraphicsResources()
+{
+    _renderPipeline.reset();
+}
+
 void SimulationView::resize(IntVector2D const& size)
 {
     _renderPipeline->resize(size);
@@ -59,15 +65,14 @@ void SimulationView::resize(IntVector2D const& size)
 void SimulationView::draw()
 {
     if (_renderSimulation) {
-        _renderPipeline->execute();
+        VulkanFrameRenderer::get().drawScene([this](VkCommandBuffer commandBuffer) -> VulkanImage& { return _renderPipeline->execute(commandBuffer); });
 
         if (_SimulationFacade::get()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
     } else {
-        glClearColor(0, 0, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        VulkanFrameRenderer::get().clearScreen({0, 0, 0});
 
         auto textWidth = scale(300.0f);
         auto textHeight = scale(80.0f);
@@ -170,51 +175,26 @@ void SimulationView::setMotionBlur(float value)
     _motionBlur = value;
 }
 
-namespace
-{
-    void initPictureTarget(TextureTarget const& target, IntVector2D const& resolution)
-    {
-        glGenTextures(1, &target->texture);
-        glBindTexture(GL_TEXTURE_2D, target->texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, resolution.x, resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-        glGenRenderbuffers(1, &target->depthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, target->depthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution.x, resolution.y);
-
-        glGenFramebuffers(1, &target->fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target->texture, 0);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->depthBuffer);
-
-        target->initialized = true;
-    }
-}
-
 PictureData SimulationView::savePicture(IntVector2D const& resolution)
 {
-    GLint maxTextureSize = 0;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    auto& context = VulkanContext::get();
+    auto maxTextureSize = toInt(context.getProperties().limits.maxImageDimension2D);
     if (resolution.x > maxTextureSize || resolution.y > maxTextureSize) {
         throw AlienException("The resolution must not exceed " + std::to_string(maxTextureSize) + " pixels per dimension on this GPU.");
     }
 
+    // The rendering resources are shared with the frame that might still be in flight
+    context.waitIdle();
+
     auto origViewSize = Viewport::get().getViewSize();
     auto origZoomFactor = Viewport::get().getZoomFactor();
     auto origRenderScale = Viewport::get().getRenderScale();
-    GLint origFbo = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &origFbo);
 
     auto target = _TextureTarget::create();
+    auto readbackBuffer =
+        context.createBuffer(static_cast<VkDeviceSize>(resolution.x) * resolution.y * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::HostVisible);
     ExitScopeGuard restoreState([&] {
-        glBindFramebuffer(GL_FRAMEBUFFER, origFbo);
-        glDeleteFramebuffers(1, &target->fbo);
-        glDeleteRenderbuffers(1, &target->depthBuffer);
-        glDeleteTextures(1, &target->texture);
+        context.destroyBuffer(readbackBuffer);
 
         Viewport::get().setViewSize(origViewSize);
         Viewport::get().setZoomFactor(origZoomFactor);
@@ -222,10 +202,7 @@ PictureData SimulationView::savePicture(IntVector2D const& resolution)
         _renderPipeline->resize(origViewSize);
     });
 
-    initPictureTarget(target, resolution);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        throw AlienException("The offscreen framebuffer for the picture could not be created.");
-    }
+    target->resize(resolution, VK_FORMAT_R8G8B8A8_UNORM);
 
     // The visible world rect equals view size / zoom factor. Thus, scaling both by the same amount keeps the
     // horizontally visible world range while the vertical range follows from the aspect ratio of the picture.
@@ -236,15 +213,23 @@ PictureData SimulationView::savePicture(IntVector2D const& resolution)
     Viewport::get().setRenderScale(renderScale);
 
     _renderPipeline->resize(resolution);
-    _renderPipeline->execute(target);
+    context.submitAndWait([&](VkCommandBuffer commandBuffer) {
+        auto& image = _renderPipeline->execute(commandBuffer, target);
+        VulkanContext::transitionImage(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        VkBufferImageCopy region{
+            .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
+            .imageExtent = {static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y), 1},
+        };
+        vkCmdCopyImageToBuffer(commandBuffer, image.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, readbackBuffer.buffer, 1, &region);
+    });
 
     PictureData result{.resolution = resolution, .pixels = std::vector<uint8_t>(static_cast<size_t>(resolution.x) * resolution.y * PictureData::NumChannels)};
-    glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, resolution.x, resolution.y, GL_RGB, GL_UNSIGNED_BYTE, result.pixels.data());
+    auto rgbaPixels = std::span(static_cast<uint8_t const*>(readbackBuffer.mapped), static_cast<size_t>(resolution.x) * resolution.y * 4);
+    for (auto const& [rgba, rgb] : std::views::zip(rgbaPixels | std::views::chunk(4), result.pixels | std::views::chunk(PictureData::NumChannels))) {
+        std::ranges::copy(rgba | std::views::take(PictureData::NumChannels), rgb.begin());
+    }
 
-    // OpenGL provides the rows bottom-up
+    // The render pipeline provides the rows bottom-up as OpenGL did
     auto bytesPerRow = static_cast<size_t>(resolution.x) * PictureData::NumChannels;
     for (auto row : std::views::iota(0, resolution.y / 2)) {
         auto upperRow = result.pixels.begin() + row * bytesPerRow;

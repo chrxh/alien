@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const SubsurfaceScatterFS = R"(
-#version 330 core
+#version 450
 out vec4 FragColor;
 
 in vec2 texCoord;
@@ -48,13 +48,13 @@ void main()
             float dist = length(vec2(x, y));
             if (dist <= scatterRadius) {
                 vec2 offset = vec2(x, y) * texelSize * scanDist;
-                vec4 sample = texture(inputTexture1, texCoord + offset);
+                vec4 neighborColor = texture(inputTexture1, texCoord + offset);
                 
                 // Weight based on distance and thickness
                 // Thinner areas allow more light to penetrate from neighbors
                 // Reduced brightness dampening for stronger effect
                 float weight = exp(-dist / scatterRadius) * (1.0 - brightness * 0.3);
-                scattered += sample.rgb * weight;
+                scattered += neighborColor.rgb * weight;
                 totalWeight += weight;
             }
         }

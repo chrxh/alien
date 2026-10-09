@@ -19,17 +19,14 @@ public:
     void init();
     void shutdown();
 
-    bool checkForInterop();
+    // Lets the geometry kernels write directly into the geometry buffers if possible
+    bool prepareInterop(GeometryBuffers const& geometryBuffers, CudaGeometryBuffers& renderingData);
 
     void correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
     void restorePositions(SettingsForSimulation const& settings, SimulationData data);
     NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
-    void extractObjectData(
-        SettingsForSimulation const& settings,
-        SimulationData data,
-        CudaGeometryBuffers& renderingData,
-        RealRect const& visibleWorldRect,
-        bool useInterop);
+    void
+    extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers const& renderingData, RealRect const& visibleWorldRect);
 
 private:
     GeometryKernelsService() = default;

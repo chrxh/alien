@@ -35,8 +35,6 @@ add_library(EngineImpl
 target_link_libraries(EngineImpl Base)
 target_link_libraries(EngineImpl EngineKernels)
 
-target_link_libraries(EngineImpl OpenGL::GL)
-target_link_libraries(EngineImpl glad::glad)
 target_link_libraries(EngineImpl Boost::boost)
 target_include_directories(EngineImpl
     PRIVATE

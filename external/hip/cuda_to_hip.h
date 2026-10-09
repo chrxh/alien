@@ -6,7 +6,7 @@
 // HIP and host translation unit of the AMD build (via
 // add_compile_options($<$<COMPILE_LANGUAGE:HIP|CXX>:-include ...>) in the
 // top-level CMakeLists.txt) and aliases the
-// CUDA runtime, graph, cooperative-groups and OpenGL-interop symbols the
+// CUDA runtime, graph, cooperative-groups and external-memory symbols the
 // project uses to their HIP equivalents. On the NVIDIA path this header is not
 // compiled at all, so the CUDA build is byte-for-byte unchanged.
 //
@@ -81,14 +81,16 @@ using cudaError_t = hipError_t;
 #define cudaGraphDestroy                  hipGraphDestroy
 #define cudaGraphExecDestroy              hipGraphExecDestroy
 
-// --- OpenGL interop (render path only) ---
-#define cudaGraphicsResource              hipGraphicsResource
-#define cudaGraphicsGLRegisterBuffer      hipGraphicsGLRegisterBuffer
-#define cudaGraphicsMapFlagsWriteDiscard  hipGraphicsRegisterFlagsWriteDiscard
-#define cudaGraphicsMapResources          hipGraphicsMapResources
-#define cudaGraphicsResourceGetMappedPointer hipGraphicsResourceGetMappedPointer
-#define cudaGraphicsUnmapResources        hipGraphicsUnmapResources
-#define cudaGraphicsUnregisterResource    hipGraphicsUnregisterResource
+// --- External memory interop with Vulkan (render path only) ---
+#define cudaExternalMemory_t              hipExternalMemory_t
+#define cudaExternalMemoryHandleDesc      hipExternalMemoryHandleDesc
+#define cudaExternalMemoryBufferDesc      hipExternalMemoryBufferDesc
+#define cudaExternalMemoryHandleTypeOpaqueWin32 hipExternalMemoryHandleTypeOpaqueWin32
+#define cudaExternalMemoryHandleTypeOpaqueFd hipExternalMemoryHandleTypeOpaqueFd
+#define cudaExternalMemoryDedicated       hipExternalMemoryDedicated
+#define cudaImportExternalMemory          hipImportExternalMemory
+#define cudaExternalMemoryGetMappedBuffer hipExternalMemoryGetMappedBuffer
+#define cudaDestroyExternalMemory         hipDestroyExternalMemory
 
 // --- device intrinsics ---
 // CUDA's block-scoped atomics; HIP's plain atomics are correct on shared and

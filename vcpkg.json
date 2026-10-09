@@ -2,16 +2,21 @@
   "name": "alien",
   "dependencies": [
     {
-      "name": "glew",
-      "version>=": "2.2.0#3"
-    },
-    {
       "name": "glfw3",
       "version>=": "3.4"
     },
+    "vulkan",
     {
-      "name": "glad",
-      "version>=": "0.1.34#3"
+      "name": "vulkan-loader",
+      "features": [
+        "xcb",
+        "xlib"
+      ],
+      "platform": "linux"
+    },
+    {
+      "name": "glslang",
+      "version>=": "15.0.0"
     },
     {
       "name": "stb",
@@ -71,7 +76,7 @@
       "features": [
         "glfw-binding",
         "freetype",
-        "opengl3-binding"
+        "vulkan-binding"
       ],
       "version>=": "1.90"
     },

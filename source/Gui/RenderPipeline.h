@@ -5,6 +5,7 @@
 
 #include "Definitions.h"
 #include "RenderStep.h"
+#include "VulkanGeometryBuffers.h"
 
 // Contains RenderSteps that must be executed in order
 struct RenderSequence
@@ -46,14 +47,16 @@ public:
 
     void resize(IntVector2D const& size);
 
-    void execute(RenderTarget const& finalTarget = ScreenTarget());
+    // Records the rendering of the simulation into the command buffer and returns the image of the final target.
+    // Without a final target, the pipeline renders into an own image of the view size.
+    VulkanImage& execute(VkCommandBuffer commandBuffer, std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
 private:
     void resizeTarget(TextureTarget const& target);
 
     void forEachStep(
         std::function<TextureTarget()> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target)> const& executeStep);
+        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, RenderTarget const& target)> const& executeStep);
 
     struct TargetInfo
     {
@@ -73,11 +76,12 @@ private:
         std::vector<RenderTarget> const& previousTargets,
         std::map<RenderTarget, TargetInfo>& usedTargets);
 
+    VulkanGeometryBuffers _geometryBuffers;
     RenderBlocks _blocks;
 
     RenderTarget _finalTarget = ScreenTarget();
 
-    GeometryBuffers _geometryBuffers;
+    TextureTarget _screenTarget;
     std::vector<TextureTarget> _textureTargets;
     std::optional<IntVector2D> _textureSize;
 };

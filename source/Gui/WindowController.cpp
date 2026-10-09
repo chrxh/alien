@@ -118,7 +118,6 @@ void WindowController::init()
         throw std::runtime_error("Failed to create window.");
     }
     setWindowIcon(_windowData.window);
-    glfwMakeContextCurrent(_windowData.window);
 
     if (!isWindowedMode() && !isDesktopMode()) {
         auto userMode = getUserDefinedResolution();

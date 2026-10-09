@@ -17,6 +17,7 @@ class SimulationView
 public:
     void setup();
     void shutdown();
+    void releaseGraphicsResources();
 
     void resize(IntVector2D const& viewportSize);
 
@@ -56,11 +57,6 @@ private:
     bool _cellDetailOverlayActive = false;
 
     RenderPipeline _renderPipeline;
-
-    // Screen background texture (dark blue background)
-    unsigned int _screenBackgroundTexture;
-
-    bool _areTexturesInitialized = false;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

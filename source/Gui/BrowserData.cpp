@@ -17,7 +17,7 @@
 #include "GenericMessageDialog.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
-#include "OpenGLHelper.h"
+#include "TextureService.h"
 
 BrowserData _BrowserData::create()
 {
@@ -37,7 +37,7 @@ _BrowserData::_BrowserData()
     }
     for (int i = 1; i <= numEmojis; ++i) {
         auto reactionName = "emoji" + std::to_string(i) + ".png";
-        emojis.emplace_back(OpenGLHelper::loadTexture(Const::ImagesPath / std::filesystem::path(reactionName)));
+        emojis.emplace_back(TextureService::get().loadTexture(Const::ImagesPath / std::filesystem::path(reactionName)));
     }
 
     for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {

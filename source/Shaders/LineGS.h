@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const LineGS = R"(
-#version 330 core
+#version 450
 layout (lines) in;
 layout (triangle_strip, max_vertices = 4) out;
 

@@ -7,8 +7,6 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
-#include <glad/glad.h>
-
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -25,9 +23,9 @@
 #include "AlienGui.h"
 #include "BrowserData.h"
 #include "BrowserHelper.h"
-#include "OpenGLHelper.h"
 #include "PictureGuiService.h"
 #include "StyleService.h"
+#include "TextureService.h"
 
 namespace
 {
@@ -210,7 +208,7 @@ void _BrowserGalleryWidget::invalidatePicture(std::string const& resourceId)
         return;
     }
     if (findResult->second.has_value()) {
-        glDeleteTextures(1, &findResult->second->textureId);
+        TextureService::get().deleteTexture(*findResult->second);
     }
     _pictureBySimId.erase(findResult);
 }
@@ -574,7 +572,7 @@ void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRa
                 std::optional<TextureData> picture;
                 if (findResult != data.jpgBySimId.end() && !findResult->second.empty()) {
                     try {
-                        picture = OpenGLHelper::loadTextureFromMemory(findResult->second);
+                        picture = TextureService::get().loadTextureFromMemory(findResult->second);
                     } catch (std::exception const&) {
                         log(Priority::Important, "browser: preview picture of simulation " + simId + " could not be decoded");
                     }

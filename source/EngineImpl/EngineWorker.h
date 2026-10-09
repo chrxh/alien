@@ -44,8 +44,9 @@ public:
     void clear();
 
     std::string getGpuName() const;
+    GpuUuid getGpuUuid() const;
 
-    void tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
+    void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
 
     bool isSyncSimulationWithRendering() const;
     void setSyncSimulationWithRendering(bool value);

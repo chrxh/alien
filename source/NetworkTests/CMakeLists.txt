@@ -12,10 +12,6 @@ target_link_libraries(NetworkTests EngineInterface)
 target_link_libraries(NetworkTests Network)
 
 target_link_libraries(NetworkTests Boost::boost)
-target_link_libraries(NetworkTests OpenGL::GL OpenGL::GLU)
-target_link_libraries(NetworkTests GLEW::GLEW)
-target_link_libraries(NetworkTests glfw)
-target_link_libraries(NetworkTests glad::glad)
 target_link_libraries(NetworkTests GTest::GTest GTest::Main)
 
 target_precompile_headers(NetworkTests PRIVATE

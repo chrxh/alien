@@ -10,14 +10,13 @@
 #include <vector>
 #include <cfloat>
 
-#include <glad/glad.h>
 #include <stb_image.h>
 
 #include <Base/MarkdownParser.h>
 
 #include "AlienGui.h"
-#include "OpenGLHelper.h"
 #include "StyleService.h"
+#include "TextureService.h"
 
 namespace
 {
@@ -96,7 +95,7 @@ void MarkdownRenderer::releaseTextures()
 {
     for (auto& imageInfo : _imageInfoByPath | std::views::values) {
         if (imageInfo.has_value() && imageInfo->texture.has_value()) {
-            glDeleteTextures(1, &imageInfo->texture->textureId);
+            TextureService::get().deleteTexture(*imageInfo->texture);
             imageInfo->texture.reset();
         }
     }
@@ -156,7 +155,7 @@ namespace
         }
         try {
             std::string encodedImage{std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
-            return OpenGLHelper::loadTextureFromMemory(encodedImage);
+            return TextureService::get().loadTextureFromMemory(encodedImage);
         } catch (std::exception const&) {
             return std::nullopt;
         }

@@ -5,7 +5,7 @@
 namespace Shaders
 {
     std::string_view const MergeAdditiveFS = R"(
-#version 330 core
+#version 450
 out vec4 FragColor;
 
 in vec2 texCoord;
