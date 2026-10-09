@@ -48,7 +48,7 @@ void checkVkResult(VkResult result, char const* operation)
 
 void VulkanContext::setup(GLFWwindow* window, std::optional<GpuUuid> const& preferredGpu)
 {
-    if (!glfwVulkanSupported()) {
+    if (volkInitialize() != VK_SUCCESS || !glfwVulkanSupported()) {
         throw std::runtime_error("Vulkan is not supported on this system. Please update your graphics driver.");
     }
     createInstance();
@@ -81,10 +81,7 @@ void VulkanContext::shutdown()
     vkDestroyDevice(_device, nullptr);
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
     if (_debugMessenger != VK_NULL_HANDLE) {
-        auto destroyMessenger = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT"));
-        if (destroyMessenger != nullptr) {
-            destroyMessenger(_instance, _debugMessenger, nullptr);
-        }
+        vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
     }
     vkDestroyInstance(_instance, nullptr);
     _active = false;
@@ -601,9 +598,9 @@ void VulkanContext::createInstance()
         throw std::runtime_error("Vulkan 1.3 is not supported by the graphics driver. Please update your graphics driver.");
     }
     checkVkResult(result, "vkCreateInstance");
+    volkLoadInstance(_instance);
 
     if (validationEnabled) {
-        auto createMessenger = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
         VkDebugUtilsMessengerCreateInfoEXT messengerInfo{
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
             .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
@@ -611,9 +608,7 @@ void VulkanContext::createInstance()
                 VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
             .pfnUserCallback = debugCallback,
         };
-        if (createMessenger != nullptr) {
-            createMessenger(_instance, &messengerInfo, nullptr, &_debugMessenger);
-        }
+        vkCreateDebugUtilsMessengerEXT(_instance, &messengerInfo, nullptr, &_debugMessenger);
     }
 }
 
@@ -749,6 +744,7 @@ void VulkanContext::createDevice()
         .ppEnabledExtensionNames = extensions.data(),
     };
     checkVkResult(vkCreateDevice(_physicalDevice, &deviceInfo, nullptr, &_device), "vkCreateDevice");
+    volkLoadDevice(_device);
     vkGetDeviceQueue(_device, _queueFamily, 0, &_queue);
 
     VkCommandPoolCreateInfo poolInfo{

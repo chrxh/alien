@@ -296,7 +296,6 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-*ui_*
 *moc_*
 .ssh/
 temp/

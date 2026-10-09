@@ -5,15 +5,7 @@
       "name": "glfw3",
       "version>=": "3.4"
     },
-    "vulkan",
-    {
-      "name": "vulkan-loader",
-      "features": [
-        "xcb",
-        "xlib"
-      ],
-      "platform": "linux"
-    },
+    "volk",
     {
       "name": "glslang",
       "version>=": "15.0.0"
@@ -75,8 +67,7 @@
       "name": "imgui",
       "features": [
         "glfw-binding",
-        "freetype",
-        "vulkan-binding"
+        "freetype"
       ],
       "version>=": "1.90"
     },

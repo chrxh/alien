@@ -302,7 +302,7 @@ add_executable(PersisterTests)
 
 # find_package(CUDAToolkit REQUIRED) is too slow
 find_package(Boost REQUIRED)
-find_package(Vulkan REQUIRED)
+find_package(volk CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(cereal CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -332,6 +332,7 @@ if(USE_HIP)
 endif()
 
 add_subdirectory(external/ImFileDialog)
+add_subdirectory(external/imgui_impl_vulkan)
 add_subdirectory(source/Base)
 add_subdirectory(source/BaseTests)
 add_subdirectory(source/Cli)

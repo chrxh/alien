@@ -18,10 +18,9 @@
 ARG BASE_IMAGE=vastai/base-image:cuda-13.0.3-auto
 FROM ${BASE_IMAGE}
 
-# Base links ImGui for settings serialization, which comes with the GLFW and
-# Vulkan backends of the GUI. cli never opens a window and calls none of it, but
-# shared libraries of the windowing stack may still have to resolve when the
-# executable is loaded.
+# Base links ImGui for settings serialization, which comes with the GLFW backend
+# of the GUI. cli never opens a window and calls none of it, but shared libraries
+# of the windowing stack may still have to resolve when the executable is loaded.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         libgl1 \
