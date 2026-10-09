@@ -2,9 +2,8 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/ExtinctLineageAccumulator.h>
-#include <EngineInterface/StatisticsConverterService.h>
-#include <EngineInterface/StatisticsEntry.h>
+#include <Data/DataPointCollection.h>
+#include <Data/ExtinctLineageAccumulator.h>
 
 class ExtinctLineageAccumulatorTests : public ::testing::Test
 {
@@ -13,22 +12,26 @@ public:
     virtual ~ExtinctLineageAccumulatorTests() = default;
 
 protected:
-    LineageStatisticsEntry createLineageEntry(uint32_t lineageId, uint32_t colorBitset, uint64_t numCreatedCreatures, double totalMutations) const
+    std::pair<uint32_t, LineageDataPoint> createLineageEntry(uint32_t lineageId, uint32_t colorBitset, double numCreatedCreatures, double totalMutations) const
     {
-        LineageStatisticsEntry result;
-        result.lineageId = lineageId;
-        result.colorBitset = colorBitset;
-        result.numCreatures = 1;
-        result.numCreatedCreatures = numCreatedCreatures;
-        result.totalMutations = totalMutations;
-        return result;
+        LineageDataPoint lineage;
+        lineage.colorBitset = colorBitset;
+        lineage.numCreatures = 1;
+        lineage.numCreatedCreatures = numCreatedCreatures;
+        lineage.totalMutations = totalMutations;
+        return {lineageId, lineage};
     }
 
-    DataPointCollection addDataPoint(std::vector<LineageStatisticsEntry> const& lineageEntries)
+    DataPointCollection addDataPoint(std::vector<std::pair<uint32_t, LineageDataPoint>> const& lineageEntries)
     {
-        StatisticsEntry statisticsEntry;
-        statisticsEntry.lineageEntries = lineageEntries;
-        auto result = StatisticsConverterService::get().convert(statisticsEntry, 0);
+        DataPointCollection result;
+        for (auto const& [lineageId, lineage] : lineageEntries) {
+            result.lineages[lineageId] = lineage;
+            auto& colorPoint = result.overall[lineage.colorBitset];
+            colorPoint.numCreatures += lineage.numCreatures;
+            colorPoint.numCreatedCreatures += lineage.numCreatedCreatures;
+            colorPoint.totalMutations += lineage.totalMutations;
+        }
         _accumulator.addExtinctLineageValues(result);
         return result;
     }

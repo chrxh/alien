@@ -16,6 +16,8 @@ add_library(Data
     DescValidationService.cpp
     DescValidationService.h
     EngineConstants.h
+    ExtinctLineageAccumulator.cpp
+    ExtinctLineageAccumulator.h
     GenomeDesc.cpp
     GenomeDesc.h
     GenomeDescAccessService.cpp

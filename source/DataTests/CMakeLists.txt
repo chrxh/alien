@@ -3,6 +3,7 @@ PUBLIC
     DescEditServiceTests.cpp
     DescValidationServiceGenomeIssueTests.cpp
     DescValidationServiceTests.cpp
+    ExtinctLineageAccumulatorTests.cpp
     GenomeDescAccessServiceTests.cpp
     GenomeDescEditServiceTests.cpp
     LocationEditServiceTests.cpp

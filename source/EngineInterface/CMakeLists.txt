@@ -3,8 +3,6 @@ add_library(EngineInterface
     ArraySizesForGpuEntities.h
     ArraySizesForTOs.h
     Definitions.h
-    ExtinctLineageAccumulator.cpp
-    ExtinctLineageAccumulator.h
     GeometryBuffers.cpp
     GeometryBuffers.h
     InspectedEntityIds.h

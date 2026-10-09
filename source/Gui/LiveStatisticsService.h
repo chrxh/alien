@@ -4,7 +4,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/ExtinctLineageAccumulator.h>
+#include <Data/ExtinctLineageAccumulator.h>
+
 #include <EngineInterface/StatisticsEntry.h>
 
 #include "LiveStatisticsHistory.h"
