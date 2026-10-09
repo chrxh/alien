@@ -17,8 +17,8 @@ name: docker-nightly-deploy
 
 on:
   schedule:
-    # Both other nightly workflows start at 03:00 on the same machine.
-    - cron: '0 1 * * *'
+    - cron: '0 0 * * *'
+      timezone: 'Europe/Berlin'
   workflow_dispatch:
 
 env:
