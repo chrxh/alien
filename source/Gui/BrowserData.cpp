@@ -13,7 +13,7 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/TaskProcessor.h>
 
-#include <Rendering/TextureService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
@@ -38,7 +38,7 @@ _BrowserData::_BrowserData()
     }
     for (int i = 1; i <= numEmojis; ++i) {
         auto reactionName = "emoji" + std::to_string(i) + ".png";
-        emojis.emplace_back(TextureService::get().loadTexture(Const::ImagesPath / std::filesystem::path(reactionName)));
+        emojis.emplace_back(_RenderingFacade::get()->loadTexture(Const::ImagesPath / std::filesystem::path(reactionName)));
     }
 
     for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {

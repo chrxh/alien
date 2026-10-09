@@ -13,6 +13,8 @@
 #include <PersisterInterface/Definitions.h>
 #include <PersisterInterface/PersisterRequestId.h>
 
+#include <RenderingInterface/TextureData.h>
+
 #include "Definitions.h"
 
 class MainLoopController

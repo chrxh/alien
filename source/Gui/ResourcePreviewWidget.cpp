@@ -6,7 +6,7 @@
 
 #include <Base/LoggingService.h>
 
-#include <Rendering/TextureService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "PictureGuiService.h"
 #include "StyleService.h"
@@ -20,7 +20,7 @@ void ResourcePreviewWidget::createForSimulation()
         return;
     }
     try {
-        _texture = TextureService::get().loadTextureFromMemory(_jpg);
+        _texture = _RenderingFacade::get()->loadTextureFromMemory(_jpg);
     } catch (std::exception const&) {
         log(Priority::Important, "preview picture could not be decoded");
     }
@@ -93,7 +93,7 @@ void ResourcePreviewWidget::processGenomePreview()
 void ResourcePreviewWidget::clear()
 {
     if (_texture.has_value()) {
-        TextureService::get().deleteTexture(*_texture);
+        _RenderingFacade::get()->deleteTexture(*_texture);
         _texture.reset();
     }
     _jpg.clear();

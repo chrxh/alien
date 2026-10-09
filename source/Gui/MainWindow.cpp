@@ -23,9 +23,7 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SerializerService.h>
 
-#include <Rendering/RenderingService.h>
-#include <Rendering/SimulationRenderer.h>
-#include <Rendering/TextureService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
@@ -192,8 +190,7 @@ void _MainWindow::shutdown()
 
     NetworkService::get().shutdown();
 
-    SimulationRenderer::get().shutdown();
-    RenderingService::get().shutdown();
+    _RenderingFacade::get()->shutdown();
     ImGui_ImplGlfw_Shutdown();
 
     ImPlot::DestroyContext();
@@ -213,9 +210,7 @@ void _MainWindow::initGlfwAndRendering()
         throw std::runtime_error("Failed to initialize Glfw.");
     }
 
-    // The renderer creates its own surface for the window
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
+    _RenderingFacade::get()->setWindowHints();
     WindowController::get().setup();
     auto windowData = WindowController::get().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
@@ -223,16 +218,16 @@ void _MainWindow::initGlfwAndRendering()
     ImGui::CreateContext();
     ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForOther(windowData.window, true);
-    RenderingService::get().setup(windowData.window);
+    _RenderingFacade::get()->setup(windowData.window);
 }
 
 void _MainWindow::initFileDialogs()
 {
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
-        auto texture = TextureService::get().createTexture(data, w, h, fmt == 0 ? TextureFormat::Bgra : TextureFormat::Rgba, TextureFilter::Nearest);
+        auto texture = _RenderingFacade::get()->createTexture(data, w, h, fmt == 0 ? TextureFormat::Bgra : TextureFormat::Rgba, TextureFilter::Nearest);
         return reinterpret_cast<void*>(static_cast<uintptr_t>(texture.textureId));
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void* texture) {
-        TextureService::get().deleteTexture(static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(texture)));
+        _RenderingFacade::get()->deleteTexture(static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(texture)));
     };
 }

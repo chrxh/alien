@@ -14,7 +14,7 @@
 
 #include <Base/MarkdownParser.h>
 
-#include <Rendering/TextureService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"
@@ -96,7 +96,7 @@ void MarkdownRenderer::releaseTextures()
 {
     for (auto& imageInfo : _imageInfoByPath | std::views::values) {
         if (imageInfo.has_value() && imageInfo->texture.has_value()) {
-            TextureService::get().deleteTexture(*imageInfo->texture);
+            _RenderingFacade::get()->deleteTexture(*imageInfo->texture);
             imageInfo->texture.reset();
         }
     }
@@ -156,7 +156,7 @@ namespace
         }
         try {
             std::string encodedImage{std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
-            return TextureService::get().loadTextureFromMemory(encodedImage);
+            return _RenderingFacade::get()->loadTextureFromMemory(encodedImage);
         } catch (std::exception const&) {
             return std::nullopt;
         }

@@ -1,17 +1,8 @@
 #pragma once
 
-#include <imgui.h>
-
 #include <Base/Definitions.h>
 
-struct GLFWwindow;
-
-struct TextureData
-{
-    ImTextureID textureId;
-    int width;
-    int height;
-};
+#include <RenderingInterface/Definitions.h>
 
 class _Shader;
 using Shader = std::shared_ptr<_Shader>;

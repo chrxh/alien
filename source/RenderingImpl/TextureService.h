@@ -9,19 +9,9 @@
 
 #include <Base/Singleton.h>
 
+#include <RenderingInterface/TextureData.h>
+
 #include "Definitions.h"
-
-enum class TextureFormat
-{
-    Rgba,
-    Bgra,
-};
-
-enum class TextureFilter
-{
-    Smooth,
-    Nearest,
-};
 
 // Textures for the user interface
 class TextureService

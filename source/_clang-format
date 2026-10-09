@@ -167,9 +167,17 @@ IncludeCategories:
   - Regex: '^<McpToolsImpl/.*>$'
     Priority: 215
 
+  # Rendering interface includes
+  - Regex: '^<RenderingInterface/.*>$'
+    Priority: 216
+
+  # Rendering implementation includes
+  - Regex: '^<RenderingImpl/.*>$'
+    Priority: 217
+
   # GUI module includes
   - Regex: '^<Gui/.*>$'
-    Priority: 216
+    Priority: 218
 
   # All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.c?(uh|h)"$'

@@ -240,7 +240,8 @@ target_link_libraries(alien McpToolsInterface)
 target_link_libraries(alien Network)
 target_link_libraries(alien PersisterInterface)
 target_link_libraries(alien PersisterImpl)
-target_link_libraries(alien Rendering)
+target_link_libraries(alien RenderingImpl)
+target_link_libraries(alien RenderingInterface)
 
 target_include_directories(alien
     PRIVATE

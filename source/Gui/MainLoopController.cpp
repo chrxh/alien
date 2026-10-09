@@ -20,8 +20,7 @@
 #include <PersisterInterface/SerializerService.h>
 #include <PersisterInterface/TaskProcessor.h>
 
-#include <Rendering/RenderingService.h>
-#include <Rendering/TextureService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "AboutDialog.h"
 #include "AlienGui.h"
@@ -74,7 +73,7 @@ void MainLoopController::setup()
 {
     GlobalSettings::get().loadImGuiSettings();
 
-    _logo = TextureService::get().loadTexture(Const::LogoFilename);
+    _logo = _RenderingFacade::get()->loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
 
     _autosaveProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
@@ -94,7 +93,7 @@ void MainLoopController::process()
 
     StyleService::get().process();
 
-    RenderingService::get().newFrame();
+    _RenderingFacade::get()->newFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
@@ -117,7 +116,7 @@ void MainLoopController::process()
     }
 
     ImGui::Render();
-    RenderingService::get().render(ImGui::GetDrawData());
+    _RenderingFacade::get()->render(ImGui::GetDrawData());
 
     GlobalSettings::get().saveImGuiSettingsIfDirty();
 }
@@ -360,7 +359,7 @@ void MainLoopController::processExiting()
 void MainLoopController::drawLoadingScreen()
 {
     // Background color
-    RenderingService::get().clearScreen({0, 0, 0.1f});
+    _RenderingFacade::get()->clearScreen({0, 0, 0.1f});
 
     auto& styleRep = StyleService::get();
     auto center = ImGui::GetMainViewport()->GetCenter();

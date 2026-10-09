@@ -7,8 +7,8 @@
 
 #include <EngineInterface/Definitions.h>
 
-#include <Rendering/PictureData.h>
-#include <Rendering/RenderView.h>
+#include <RenderingInterface/PictureData.h>
+#include <RenderingInterface/RenderView.h>
 
 #include "Definitions.h"
 

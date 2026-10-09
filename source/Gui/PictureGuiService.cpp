@@ -15,7 +15,7 @@
 #include <Base/AlienExceptions.h>
 #include <Base/LoggingService.h>
 
-#include <Rendering/RenderingService.h>
+#include <RenderingInterface/RenderingFacade.h>
 
 #include "PreviewDescView.h"
 #include "SimulationView.h"
@@ -68,7 +68,7 @@ std::optional<std::string> PictureGuiService::createGenomePreviewJpg(std::vector
         drawList.PopTextureID();
 
         auto picture =
-            RenderingService::get().renderDrawList(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor, PreviewPictureSupersampling);
+            _RenderingFacade::get()->renderDrawList(&drawList, PreviewPictureResolution, Const::GenomePreviewBackgroundColor, PreviewPictureSupersampling);
         return encodeJpg(brighten(scale(picture, PreviewPictureResolution), PreviewPictureBrightness));
     } catch (std::exception const& exception) {
         log(Priority::Important, std::string("preview picture could not be created: ") + exception.what());

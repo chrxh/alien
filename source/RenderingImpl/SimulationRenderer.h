@@ -1,10 +1,13 @@
 #pragma once
 
+#include <imgui.h>
+
 #include <Base/Singleton.h>
 
+#include <RenderingInterface/PictureData.h>
+#include <RenderingInterface/RenderView.h>
+
 #include "Definitions.h"
-#include "PictureData.h"
-#include "RenderView.h"
 
 // Renders the simulation into the frames of the window and into pictures
 class SimulationRenderer

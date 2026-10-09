@@ -1,10 +1,6 @@
 #pragma once
 
-#include <imgui.h>
-
 #include <Base/Definitions.h>
-
-#include <Rendering/Definitions.h>
 
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
