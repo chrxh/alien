@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include <Data/DataPointCollection.h>
+#include "DataPointCollection.h"
 
 // The accumulated counters of the overall statistics (numCreatedCreatures, totalMutations, totalAttackedEnergy,
 // totalMuscleActivity) are summed up from the currently living lineages only, so they would drop as soon as a lineage
