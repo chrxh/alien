@@ -1,6 +1,7 @@
 #include "AlienGui.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <ranges>
@@ -37,6 +38,8 @@ namespace
     auto constexpr ChipDotTextSpacing = 6.0f;
     auto constexpr TabMarkerSize = 11.0f;
     auto constexpr TabMarkerRounding = 3.0f;
+    auto constexpr MaxTabWidthInFontSizes = 20.0f;
+    auto constexpr GroupStyleTransparentTabColors = std::array{ImGuiCol_Tab, ImGuiCol_TabHovered, ImGuiCol_TabSelected};
     auto constexpr MinColorMatrixWidth = 50.0f;
     auto constexpr ColorMatrixGrabSize = 4.0f;
     auto constexpr ReadOnlyCellPadding = 1.0f;
@@ -111,6 +114,8 @@ std::unordered_set<unsigned int> AlienGui::_expandedColorControlIds;
 std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
 std::unordered_map<std::string, bool> AlienGui::_savedTreeNodeStatesByName;
+std::vector<AlienGui::TabBarStyle> AlienGui::_tabBarStyleStack;
+std::unordered_map<unsigned int, int> AlienGui::_selectedTabIndexByTabBarId;
 std::unordered_map<unsigned int, int> AlienGui::_signalMemorySelection;
 
 int AlienGui::_rotationStartIndex = 0;
@@ -1970,81 +1975,6 @@ bool AlienGui::Group(GroupParameters const& parameters)
     return result;
 }
 
-namespace
-{
-    float calcSmallIconWidth(std::string const& icon)
-    {
-        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
-    }
-
-    void drawSmallIcon(ImDrawList* drawList, ImVec2 const& textPos, std::string const& icon, ImColor const& color)
-    {
-        auto iconSize = ImGui::GetFontSize() * SmallIconScale;
-        auto iconPos = ImVec2(textPos.x, textPos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
-        drawList->AddText(ImGui::GetFont(), iconSize, iconPos, color, icon.c_str());
-    }
-}
-
-void AlienGui::GroupTabs(GroupTabsParameters const& parameters, int& selectedIndex)
-{
-    auto drawList = ImGui::GetWindowDrawList();
-    auto const& style = ImGui::GetStyle();
-
-    ImGui::Spacing();
-
-    auto scrollOffset = ImGui::GetScrollX();
-    auto unscrolledCursorPos = ImGui::GetCursorScreenPos();
-    auto contentMaxPosX = ImGui::GetCurrentWindow()->DC.CursorMaxPos.x;
-    auto groupWidth = ImGui::GetContentRegionAvail().x;
-    auto textHeight = ImGui::GetTextLineHeight();
-    auto leftX = unscrolledCursorPos.x + scrollOffset;
-    auto upperY = unscrolledCursorPos.y - style.FramePadding.y;
-    auto lowerY = unscrolledCursorPos.y + textHeight + style.FramePadding.y;
-    auto accentBarWidth = scale(GroupAccentBarWidth);
-    auto textIndent = scale(GroupTextIndent);
-    auto badgeIconWidth = parameters._badgeIcon.empty() ? 0.0f : calcSmallIconWidth(parameters._badgeIcon) + style.ItemInnerSpacing.x;
-
-    auto posX = leftX;
-    for (auto const& [index, text] : parameters._texts | boost::adaptors::indexed(0)) {
-        auto isSelected = toInt(index) == selectedIndex;
-        auto badge = index < toInt(parameters._tabBadges.size()) ? parameters._tabBadges.at(index) : std::string();
-        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-        auto badgeWidth = badge.empty() ? 0.0f : style.ItemInnerSpacing.x + badgeIconWidth + ImGui::CalcTextSize(badge.c_str()).x;
-        auto tabWidth = accentBarWidth + textIndent * 2 + textWidth + badgeWidth;
-
-        ImGui::SetCursorScreenPos(ImVec2(posX, upperY));
-        ImGui::PushID(text.c_str());
-        if (ImGui::InvisibleButton("##tab", ImVec2(tabWidth, lowerY - upperY))) {
-            selectedIndex = toInt(index);
-        }
-        auto isHovered = ImGui::IsItemHovered();
-        ImGui::PopID();
-
-        auto color = isSelected ? Const::GroupHighColor : (isHovered ? Const::HeaderHoveredColor : Const::GroupDefaultColor);
-        drawGroupHeaderBackground(drawList, ImVec2(posX, upperY), ImVec2(posX + tabWidth, lowerY), color, isSelected);
-        auto textPosX = posX + accentBarWidth + textIndent;
-        drawList->AddText(ImVec2(textPosX, unscrolledCursorPos.y), isSelected ? Const::GroupHighTextColor : Const::GroupTextColor, text.c_str());
-        if (!badge.empty()) {
-            auto badgePosX = textPosX + textWidth + style.ItemInnerSpacing.x;
-            if (!parameters._badgeIcon.empty()) {
-                drawSmallIcon(drawList, ImVec2(badgePosX, unscrolledCursorPos.y), parameters._badgeIcon, parameters._badgeColor);
-                badgePosX += badgeIconWidth;
-            }
-            drawList->AddText(ImVec2(badgePosX, unscrolledCursorPos.y), parameters._badgeColor, badge.c_str());
-        }
-        posX += tabWidth + scale(GroupTabSpacing);
-    }
-    if (posX < leftX + groupWidth) {
-        drawGroupHeaderBackground(drawList, ImVec2(posX, upperY), ImVec2(leftX + groupWidth, lowerY), Const::GroupDefaultColor, false);
-    }
-
-    ImGui::SetCursorScreenPos(unscrolledCursorPos);
-    ImGui::Dummy(ImVec2(groupWidth, textHeight));
-    ImGui::GetCurrentWindow()->DC.CursorMaxPos.x = std::max(contentMaxPosX, unscrolledCursorPos.x + groupWidth);
-    ImGui::Spacing();
-    ImGui::Spacing();
-}
-
 void AlienGui::ListBox(ListBoxParameters const& parameters)
 {
     auto drawList = ImGui::GetWindowDrawList();
@@ -2679,46 +2609,184 @@ void AlienGui::EndTreeNode()
 
 namespace
 {
-    std::string const& getTabMarkerPrefix()
+    void pushGroupStyleTabColors()
     {
-        static std::string prefix;
-        static float lastMarkerWidth = 0.0f;
-        static float lastSpaceWidth = 0.0f;
-
-        auto markerWidth = scale(TabMarkerSize) + ImGui::GetStyle().ItemInnerSpacing.x;
-        auto spaceWidth = ImGui::CalcTextSize(" ").x;
-        if (markerWidth != lastMarkerWidth || spaceWidth != lastSpaceWidth) {
-            lastMarkerWidth = markerWidth;
-            lastSpaceWidth = spaceWidth;
-            prefix = std::string(toInt(std::ceil(markerWidth / spaceWidth)), ' ');
+        for (auto color : GroupStyleTransparentTabColors) {
+            ImGui::PushStyleColor(color, ImVec4(0, 0, 0, 0));
         }
-        return prefix;
     }
 
-    void drawTabMarker(ImColor const& color)
+    void popGroupStyleTabColors()
     {
+        ImGui::PopStyleColor(toInt(GroupStyleTransparentTabColors.size()));
+    }
+}
+
+bool AlienGui::BeginTabBar(TabBarParameters const& parameters)
+{
+    auto isGroupStyle = parameters._style == TabBarStyle::Group;
+    if (isGroupStyle) {
+        // Same vertical placement as the header of a group
+        ImGui::Spacing();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().FramePadding.y);
+        pushGroupStyleTabColors();
+    }
+
+    ImGuiTabBarFlags flags = ImGuiTabBarFlags_FittingPolicyResizeDown;
+    if (parameters._reorderable) {
+        flags |= ImGuiTabBarFlags_Reorderable;
+    }
+    if (parameters._autoSelectNewTabs) {
+        flags |= ImGuiTabBarFlags_AutoSelectNewTabs;
+    }
+    auto result = ImGui::BeginTabBar(parameters._id.c_str(), flags);
+
+    if (isGroupStyle) {
+        popGroupStyleTabColors();
+    }
+    if (result) {
+        _tabBarStyleStack.emplace_back(parameters._style);
+    }
+    return result;
+}
+
+void AlienGui::EndTabBar()
+{
+    if (_tabBarStyleStack.back() == TabBarStyle::Group) {
+        auto tabBar = ImGui::GetCurrentTabBar();
+        auto fillStartX = tabBar->BarRect.Min.x + tabBar->WidthAllTabs + ImGui::GetStyle().ItemInnerSpacing.x;
+        if (fillStartX < tabBar->BarRect.Max.x) {
+            drawGroupHeaderBackground(
+                ImGui::GetWindowDrawList(), ImVec2(fillStartX, tabBar->BarRect.Min.y), tabBar->BarRect.Max, Const::GroupDefaultColor, false);
+        }
+    }
+    _tabBarStyleStack.pop_back();
+    ImGui::EndTabBar();
+}
+
+namespace
+{
+    float calcSmallIconWidth(std::string const& icon)
+    {
+        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
+    }
+
+    void drawSmallIcon(ImDrawList* drawList, ImVec2 const& textPos, std::string const& icon, ImColor const& color)
+    {
+        auto iconSize = ImGui::GetFontSize() * SmallIconScale;
+        auto iconPos = ImVec2(textPos.x, textPos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
+        drawList->AddText(ImGui::GetFont(), iconSize, iconPos, color, icon.c_str());
+    }
+
+    struct TabItemPadding
+    {
+        float left = 0;
+        float right = 0;
+    };
+
+    TabItemPadding calcTabItemPadding(AlienGui::TabBarStyle style, bool hasCloseButton)
+    {
+        if (style == AlienGui::TabBarStyle::Group) {
+            return {.left = scale(GroupAccentBarWidth) + scale(AlienGui::GroupTextIndent), .right = scale(AlienGui::GroupTextIndent)};
+        }
+        auto const& imguiStyle = ImGui::GetStyle();
+        auto closeButtonWidth = hasCloseButton ? imguiStyle.ItemInnerSpacing.x + ImGui::GetFontSize() : 1.0f;
+        return {.left = imguiStyle.FramePadding.x, .right = imguiStyle.FramePadding.x + closeButtonWidth};
+    }
+
+    float calcTabMarkerWidth(AlienGui::TabItemParameters const& parameters)
+    {
+        return parameters._markerColor.has_value() ? scale(TabMarkerSize) + ImGui::GetStyle().ItemInnerSpacing.x : 0.0f;
+    }
+
+    float calcTabBadgeWidth(AlienGui::TabItemParameters const& parameters)
+    {
+        if (parameters._badge.empty()) {
+            return 0.0f;
+        }
+        auto innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x;
+        auto iconWidth = parameters._badgeIcon.empty() ? 0.0f : calcSmallIconWidth(parameters._badgeIcon) + innerSpacing;
+        return innerSpacing + iconWidth + ImGui::CalcTextSize(parameters._badge.c_str()).x;
+    }
+
+    void drawTabItem(AlienGui::TabItemParameters const& parameters, AlienGui::TabBarStyle style, TabItemPadding const& padding, bool selected)
+    {
+        auto drawList = ImGui::GetWindowDrawList();
         auto tabMin = ImGui::GetItemRectMin();
         auto tabMax = ImGui::GetItemRectMax();
-        auto markerSize = scale(TabMarkerSize);
-        auto left = tabMin.x + ImGui::GetStyle().FramePadding.x;
-        auto top = tabMin.y + (tabMax.y - tabMin.y - markerSize) / 2;
+        auto isGroupStyle = style == AlienGui::TabBarStyle::Group;
 
-        // Tabs shrink when they no longer fit, so keep the marker inside its own tab
-        auto drawList = ImGui::GetWindowDrawList();
-        drawList->PushClipRect(tabMin, tabMax, true);
-        drawList->AddRectFilled({left, top}, {left + markerSize, top + markerSize}, color, scale(TabMarkerRounding));
+        if (isGroupStyle) {
+            auto color = selected ? Const::GroupHighColor : (ImGui::IsItemHovered() ? Const::HeaderHoveredColor : Const::GroupDefaultColor);
+            drawGroupHeaderBackground(drawList, tabMin, tabMax, color, selected);
+        }
+
+        // Tabs shrink when they no longer fit, so keep the content inside its own tab
+        auto contentMaxX = std::max(tabMin.x, tabMax.x - padding.right);
+        drawList->PushClipRect(tabMin, ImVec2(contentMaxX, tabMax.y), true);
+
+        auto posX = tabMin.x + padding.left;
+        auto textPosY = tabMin.y + ImGui::GetStyle().FramePadding.y;
+        if (parameters._markerColor.has_value()) {
+            auto markerSize = scale(TabMarkerSize);
+            auto markerTop = tabMin.y + (tabMax.y - tabMin.y - markerSize) / 2;
+            drawList->AddRectFilled({posX, markerTop}, {posX + markerSize, markerTop + markerSize}, *parameters._markerColor, scale(TabMarkerRounding));
+            posX += calcTabMarkerWidth(parameters);
+        }
+
+        auto nameSize = ImGui::CalcTextSize(parameters._name.c_str());
+        auto nameMaxX = std::max(posX, contentMaxX - calcTabBadgeWidth(parameters));
+        if (isGroupStyle) {
+            ImGui::PushStyleColor(ImGuiCol_Text, selected ? Const::GroupHighTextColor.Value : Const::GroupTextColor.Value);
+        }
+        ImGui::RenderTextEllipsis(
+            drawList, ImVec2(posX, textPosY), ImVec2(nameMaxX, tabMax.y), nameMaxX, nameMaxX, parameters._name.c_str(), nullptr, &nameSize);
+        if (isGroupStyle) {
+            ImGui::PopStyleColor();
+        }
+
+        if (!parameters._badge.empty()) {
+            auto badgePosX = std::min(posX + nameSize.x, nameMaxX) + ImGui::GetStyle().ItemInnerSpacing.x;
+            if (!parameters._badgeIcon.empty()) {
+                drawSmallIcon(drawList, ImVec2(badgePosX, textPosY), parameters._badgeIcon, parameters._badgeColor);
+                badgePosX += calcSmallIconWidth(parameters._badgeIcon) + ImGui::GetStyle().ItemInnerSpacing.x;
+            }
+            drawList->AddText(ImVec2(badgePosX, textPosY), parameters._badgeColor, parameters._badge.c_str());
+        }
         drawList->PopClipRect();
+
+        if (posX + nameSize.x > nameMaxX) {
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text(parameters._name));
+        }
     }
 }
 
 bool AlienGui::BeginTabItem(TabItemParameters const& parameters)
 {
-    auto label = parameters._markerColor.has_value() ? getTabMarkerPrefix() + parameters._name : parameters._name;
-    label += "###" + parameters._id;
+    auto style = _tabBarStyleStack.back();
+    auto isGroupStyle = style == TabBarStyle::Group;
+    auto padding = calcTabItemPadding(style, parameters._open != nullptr);
+    auto width =
+        padding.left + calcTabMarkerWidth(parameters) + ImGui::CalcTextSize(parameters._name.c_str()).x + calcTabBadgeWidth(parameters) + padding.right;
+    ImGui::SetNextItemWidth(std::min(width, ImGui::GetFontSize() * MaxTabWidthInFontSizes));
 
+    if (isGroupStyle) {
+        pushGroupStyleTabColors();
+    }
+    auto label = "###" + (parameters._id.empty() ? parameters._name : parameters._id);
     auto result = ImGui::BeginTabItem(label.c_str(), parameters._open, parameters._selected ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None);
-    if (parameters._markerColor.has_value() && ImGui::IsItemVisible()) {
-        drawTabMarker(*parameters._markerColor);
+    if (isGroupStyle) {
+        popGroupStyleTabColors();
+    }
+
+    if (ImGui::IsItemVisible()) {
+        drawTabItem(parameters, style, padding, result);
+    }
+    if (result && isGroupStyle) {
+        // Same spacing below the tabs as below the header of a group
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().FramePadding.y);
+        ImGui::Spacing();
+        ImGui::Spacing();
     }
     return result;
 }
@@ -2726,6 +2794,43 @@ bool AlienGui::BeginTabItem(TabItemParameters const& parameters)
 void AlienGui::EndTabItem()
 {
     ImGui::EndTabItem();
+}
+
+bool AlienGui::TrailingTabButton(TrailingTabButtonParameters const& parameters)
+{
+    auto result = ImGui::TabItemButton(parameters._text.c_str(), ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip);
+    if (parameters._tooltip.has_value()) {
+        Tooltip(TooltipParameters().text(*parameters._tooltip));
+    }
+    return result;
+}
+
+void AlienGui::TabBar(TabBarParameters const& parameters, std::vector<TabItemParameters> const& items, int& selectedIndex)
+{
+    auto tabBarId = ImGui::GetID(parameters._id.c_str());
+    if (!BeginTabBar(parameters)) {
+        return;
+    }
+
+    // ImGui applies a selection one frame later, so a requested index is reported unchanged until then
+    auto [lastSelectedIndexIter, isNewTabBar] = _selectedTabIndexByTabBarId.try_emplace(tabBarId, selectedIndex);
+    auto& lastSelectedIndex = lastSelectedIndexIter->second;
+    auto selectionRequested = isNewTabBar || selectedIndex != lastSelectedIndex;
+    auto newSelectedIndex = selectedIndex;
+    for (auto const& [index, item] : items | boost::adaptors::indexed(0)) {
+        auto itemParameters = item;
+        itemParameters._selected = selectionRequested && toInt(index) == selectedIndex;
+        if (BeginTabItem(itemParameters)) {
+            if (!selectionRequested) {
+                newSelectedIndex = toInt(index);
+            }
+            EndTabItem();
+        }
+    }
+    EndTabBar();
+
+    selectedIndex = newSelectedIndex;
+    lastSelectedIndex = newSelectedIndex;
 }
 
 bool AlienGui::Button(ButtonParameters const& parameters)

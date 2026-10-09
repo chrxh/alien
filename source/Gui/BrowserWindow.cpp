@@ -281,25 +281,16 @@ void BrowserWindow::processWorkspace()
             ImVec2(sizeAvailable.x - _userTableWidth, sizeAvailable.y - scale(BrowserBottomSpace)),
             false,
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-        if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-            if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
-                if (_data->currentWorkspace.resourceType != NetworkResourceType_Simulation) {
-                    _data->currentWorkspace.resourceType = NetworkResourceType_Simulation;
-                    _data->selectedTreeTO = nullptr;
-                }
-                processResourceView();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
-                if (_data->currentWorkspace.resourceType != NetworkResourceType_Genome) {
-                    _data->currentWorkspace.resourceType = NetworkResourceType_Genome;
-                    _data->selectedTreeTO = nullptr;
-                }
-                processResourceView();
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
+        auto resourceType = _data->currentWorkspace.resourceType;
+        AlienGui::TabBar(
+            AlienGui::TabBarParameters().id("##Type").style(AlienGui::TabBarStyle::Group),
+            {AlienGui::TabItemParameters().name("Simulations"), AlienGui::TabItemParameters().name("Genomes")},
+            resourceType);
+        if (_data->currentWorkspace.resourceType != resourceType) {
+            _data->currentWorkspace.resourceType = resourceType;
+            _data->selectedTreeTO = nullptr;
         }
+        processResourceView();
     }
     ImGui::EndChild();
 }
