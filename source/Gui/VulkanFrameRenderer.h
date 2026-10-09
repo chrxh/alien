@@ -20,7 +20,7 @@ class VulkanFrameRenderer
     MAKE_SINGLETON(VulkanFrameRenderer);
 
 public:
-    void setup();
+    void setup(GLFWwindow* window);
     void shutdown();
 
     void newFrame();
@@ -44,6 +44,7 @@ private:
 
     IntVector2D getFramebufferSize() const;
 
+    GLFWwindow* _window = nullptr;
     VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
     VkSurfaceFormatKHR _surfaceFormat = {};
     VkExtent2D _extent = {};

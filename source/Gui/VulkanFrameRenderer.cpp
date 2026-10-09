@@ -11,7 +11,6 @@
 #include <Base/LoggingService.h>
 
 #include "Shader.h"
-#include "WindowController.h"
 
 namespace
 {
@@ -50,8 +49,9 @@ void main()
     }
 }
 
-void VulkanFrameRenderer::setup()
+void VulkanFrameRenderer::setup(GLFWwindow* window)
 {
+    _window = window;
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
 
@@ -429,6 +429,6 @@ void VulkanFrameRenderer::createPresentationShader()
 IntVector2D VulkanFrameRenderer::getFramebufferSize() const
 {
     IntVector2D result;
-    glfwGetFramebufferSize(WindowController::get().getWindowData().window, &result.x, &result.y);
+    glfwGetFramebufferSize(_window, &result.x, &result.y);
     return result;
 }
