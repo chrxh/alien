@@ -59,6 +59,19 @@ TEST_F(MarkdownParserTests, parse_inlineStyles)
     EXPECT_EQ(expectedBlocks, document.blocks);
 }
 
+TEST_F(MarkdownParserTests, parse_bareUrl)
+{
+    auto document = MarkdownParser::parse("Please visit https://github.com/chrxh/alien for updates.\n");
+
+    std::vector<MarkdownBlock> expectedBlocks = {MarkdownParagraph{
+        .spans = {
+            {.text = "Please visit "},
+            {.text = "https://github.com/chrxh/alien", .link = "https://github.com/chrxh/alien"},
+            {.text = " for updates."},
+        }}};
+    EXPECT_EQ(expectedBlocks, document.blocks);
+}
+
 TEST_F(MarkdownParserTests, parse_lineBreaks)
 {
     auto document = MarkdownParser::parse("First line\nsame paragraph\\\nnew line\n");
