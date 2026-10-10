@@ -132,17 +132,17 @@ Start it directly from the unpacked folder, otherwise it will not find the resou
 
 ### Cloud and Docker
 
-For long runs without local hardware, a nightly image containing the headless [command-line interface](#command-line-interface) is published on Docker Hub as `chrxh/alien:nightly`. It holds `cli` and its resource folder. There is no GUI in the image.
+For long runs without local hardware, a nightly image containing the headless [command-line interface](#command-line-interface) is published on Docker Hub as `chrxh/alien:nightly`. It holds `alien-cli` and its resource folder. There is no GUI in the image.
 
 On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for a GeForce RTX 20 to 50 series GPU. Upload your simulation file to the instance with `scp`, then connect via SSH and start it by hand:
 ```
 cd /opt/alien
-cli -i example.sim -o output.sim
+alien-cli -i example.sim -o output.sim
 ```
 
 Locally, with an NVIDIA GPU and the NVIDIA container toolkit installed:
 ```
-docker run --rm --gpus all -v "$PWD":/data --entrypoint cli chrxh/alien:nightly -i /data/example.sim -o /data/output.sim -t 1000
+docker run --rm --gpus all -v "$PWD":/data --entrypoint alien-cli chrxh/alien:nightly -i /data/example.sim -o /data/output.sim -t 1000
 ```
 
 ### Building from the sources
@@ -197,9 +197,9 @@ cmake --build --preset ninja-release
 
 ### Command-line interface
 
-Besides the graphical program, ALIEN includes `cli` (`cli.exe` on Windows), which runs simulations without a window. It is useful for long experiments, performance measurements and the automated evaluation of simulations with different parameters. For example,
+Besides the graphical program, ALIEN includes `alien-cli` (`alien-cli.exe` on Windows), which runs simulations without a window. It is useful for long experiments, performance measurements and the automated evaluation of simulations with different parameters. For example,
 ```
-cli -i example.sim -o output.sim -t 1000
+alien-cli -i example.sim -o output.sim -t 1000
 ```
 runs the simulation file `example.sim` for 1000 time steps and writes the result to `output.sim`. Without `-t`, the simulation runs until you press Q or Ctrl+C. All options are described in the chapter [Files and command line](resources/docs/files.md#command-line-interface).
 

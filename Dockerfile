@@ -1,4 +1,4 @@
-# Runtime image with the headless ALIEN console build (cli), meant for rented GPU
+# Runtime image with the headless ALIEN console build (alien-cli), meant for rented GPU
 # instances such as vast.ai.
 #
 # The binary is not compiled here. .github/workflows/docker-nightly-deploy.yml
@@ -19,7 +19,7 @@ ARG BASE_IMAGE=vastai/base-image:cuda-13.0.3-auto
 FROM ${BASE_IMAGE}
 
 # Base links ImGui for settings serialization, which comes with the GLFW backend
-# of the GUI. cli never opens a window and calls none of it, but shared libraries
+# of the GUI. alien-cli never opens a window and calls none of it, but shared libraries
 # of the windowing stack may still have to resolve when the executable is loaded.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -38,7 +38,7 @@ RUN apt-get update \
 # It is unrelated to ALIEN and only affects the Jupyter launch mode.
 RUN mkdir -p /workspace
 
-COPY cli /opt/alien/cli
+COPY alien-cli /opt/alien/alien-cli
 COPY resources /opt/alien/resources
 
 # NetworkService reads ./resources/ca-bundle.crt through a relative path, so the

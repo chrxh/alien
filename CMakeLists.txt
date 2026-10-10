@@ -292,8 +292,8 @@ endfunction()
 add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CONFIG:Debug,RelWithDebInfo>>:-g>)
 
 add_executable(alien)
+add_executable(alien-cli)
 add_executable(BaseTests)
-add_executable(cli)
 add_executable(DataTests)
 add_executable(EngineTests)
 add_executable(EngineInterfaceTests)
@@ -362,7 +362,7 @@ add_subdirectory(source/Rendering/Shaders)
 # Executables linking the HIP relocatable-device-code engine libraries must run
 # the device link themselves (see alien_link_hip_rdc).
 alien_link_hip_rdc(alien)
-alien_link_hip_rdc(cli)
+alien_link_hip_rdc(alien-cli)
 alien_link_hip_rdc(EngineTests)
 alien_link_hip_rdc(PersisterTests)
 
