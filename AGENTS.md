@@ -61,7 +61,7 @@ tree. Without an argument the script uses the IDE tree. Only Claude Code (`CLAUD
 is set) and `ALIEN_BUILD_TREE=agent` switch to the agent tree automatically, so every
 other agent needs the explicit `agent` argument.
 
-Executables (`alien.exe`, `cli.exe`, `EngineTests.exe`) land under the `Release\`
+Executables (`alien.exe`, `alien-cli.exe`, `EngineTests.exe`) land under the `Release\`
 subdirectory of the respective tree — not the older `build\Release\`.
 
 A struct / constant-memory / kernel `.cuh` change needs a clean rebuild, otherwise
