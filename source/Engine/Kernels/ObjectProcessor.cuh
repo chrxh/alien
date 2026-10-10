@@ -1,0 +1,736 @@
+#pragma once
+
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
+
+#include <Data/Interface/CellTypeConstants.h>
+
+#include "cuda_runtime_api.h"
+#include "sm_60_atomic_functions.h"
+
+#include "ConstructorHelper.cuh"
+#include "ObjectConnectionProcessor.cuh"
+
+namespace cg = cooperative_groups;
+
+class ObjectProcessor
+{
+public:
+    __inline__ __device__ static void init(SimulationData& data);
+    __inline__ __device__ static void updateGrids(SimulationData& data);
+    __inline__ __device__ static void clearDensityGrid(SimulationData& data);
+    __inline__ __device__ static void fillDensityGrid(SimulationData& data);
+
+    __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
+    __inline__ __device__ static void calcFluidBoundaryForces(SimulationData& data);
+    __inline__ __device__ static void checkForces(SimulationData& data);
+    __inline__ __device__ static void applyForces(SimulationData& data);  // Prerequisite: data from calcCollisions_reconnectCells_correctOverlap
+
+    __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool calcAngularForces);
+    __inline__ __device__ static void tearOverstretchedConnections(SimulationData& data);
+    __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
+    __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
+
+    __inline__ __device__ static void applyInnerFriction(SimulationData& data);
+    __inline__ __device__ static void applyFriction(SimulationData& data);
+
+    __inline__ __device__ static void radiation(SimulationData& data);
+
+    __inline__ __device__ static void resetDensity(SimulationData& data);
+
+private:
+    static auto constexpr MaxFixedObjectsForCollision = 10;
+};
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+
+__inline__ __device__ void ObjectProcessor::init(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+
+        data.objectGrid.resetRecordLink(index);
+        object->tempValue1.as_uint64 = 0;
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::updateGrids(SimulationData& data)
+{
+    auto const partition = calcBlockPartition(data.entities.objects.getNumEntries());
+    Object** objectPointers = &data.entities.objects.at(partition.startIndex);
+    data.objectGrid.set_block(partition.startIndex, partition.numElements(), objectPointers);
+    data.solidGrid.set_block(partition.numElements(), objectPointers);
+}
+
+__inline__ __device__ void ObjectProcessor::clearDensityGrid(SimulationData& data)
+{
+    data.preprocessedSimulationData.densityGrid.clear();
+}
+
+__inline__ __device__ void ObjectProcessor::fillDensityGrid(SimulationData& data)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto object = data.entities.objects.at(index);
+        if (object->type == ObjectType_FreeCell) {
+            data.preprocessedSimulationData.densityGrid.addFreeCell(object);
+        }
+    }
+}
+
+namespace
+{
+    __inline__ __device__ float calcKernel(float q)
+    {
+        float result;
+        if (q < 1) {
+            result = 2.0f / 3.0f - q * q + 0.5f * q * q * q;
+        } else if (q < 2) {
+            result = 2.0f - q;
+            result = result * result * result / 6;
+        } else {
+            result = 0;
+        }
+        result *= 3.0f / (2.0f * Const::PI);
+        return result;
+    }
+
+    __inline__ __device__ float calcKernel_d(float q)
+    {
+        float result;
+        if (q < 1) {
+            result = -2 * q + 3.0f / 2.0f * q * q;
+        } else if (q < 2) {
+            result = -0.5f * (2.0f - q) * (2.0f - q);
+        } else {
+            result = 0;
+        }
+        result *= 3.0f / (2.0f * Const::PI);
+        return result;
+    }
+
+    // An object is registered in the map cell that contains its position, so all objects of a cell lie within
+    // its unit square. If that square is entirely farther away than the interaction cutoff, the cell cannot
+    // contribute and neither its map lookup nor its object chain has to be touched. The scan rectangle is a
+    // square around a circular interaction range, so this skips its corners.
+    __inline__ __device__ bool isCellInRange(float2 const& pos, int cellPosX, int cellPosY, float cutoffSquared)
+    {
+        auto deltaX = fmaxf(fmaxf(toFloat(cellPosX) - pos.x, pos.x - toFloat(cellPosX + 1)), 0.0f);
+        auto deltaY = fmaxf(fmaxf(toFloat(cellPosY) - pos.y, pos.y - toFloat(cellPosY + 1)), 0.0f);
+        return deltaX * deltaX + deltaY * deltaY <= cutoffSquared;
+    }
+
+    // Splits the linear scan index into a row and a column without an integer division, which the GPU
+    // emulates in software. The rounding of the float division is corrected by the following comparisons.
+    __inline__ __device__ int2 calcScanPos(int2 const& scanOrigin, int scanIndex, int scanLength, float invScanLength)
+    {
+        auto row = toInt(toFloat(scanIndex) * invScanLength);
+        auto column = scanIndex - row * scanLength;
+        if (column < 0) {
+            --row;
+            column += scanLength;
+        } else if (column >= scanLength) {
+            ++row;
+            column -= scanLength;
+        }
+        return {scanOrigin.x + column, scanOrigin.y + row};
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
+{
+    auto const warp = cg::tiled_partition<WARP_SIZE>(cg::this_thread_block());
+    auto const warpIndexInBlock = toInt(threadIdx.x) / WARP_SIZE;
+
+    auto& objects = data.entities.objects;
+    auto const partition = calcWarpPartition(objects.getNumEntries());
+    auto const& smoothingLength_base = cudaSimulationParameters.smoothingLength.value;
+
+    for (int objectIndex = partition.startIndex; objectIndex <= partition.endIndex; ++objectIndex) {
+        auto& object = objects.at(objectIndex);
+
+        // Own fields in registers: the writes inside the scan would force a reload from the full Object per neighbor
+        auto objectPos = object->pos;
+        auto objectVel = object->vel;
+        auto objectDensity = object->density;
+        auto objectType = object->type;
+        auto objectNumConnections = toInt(object->numConnections);
+        auto objectIsStatic = object->isStatic();
+        auto objectDetached = object->detached();
+        auto objectIsSticky = object->isSticky();
+
+        auto isObjectFluid = objectType == ObjectType_Fluid;
+        auto smoothingLength = isObjectFluid ? smoothingLength_base * 2.0f : smoothingLength_base;  // Use larger smoothing length for fluids
+
+        __shared__ Object* fixedCells[MAX_FLUID_WARPS_PER_BLOCK][MaxFixedObjectsForCollision];
+        __shared__ int numFixedObjects_g[MAX_FLUID_WARPS_PER_BLOCK];
+
+        auto cellFusionVelocity =
+            warp.thread_rank() == 0 ? ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, objectPos) : 0.0f;
+        cellFusionVelocity = warp.shfl(cellFusionVelocity, 0);
+
+        if (warp.thread_rank() == 0) {
+            numFixedObjects_g[warpIndexInBlock] = 0;
+        }
+        warp.sync();
+
+        // Per-thread accumulators
+        float2 localF_pressure = {0, 0};
+        float2 localF_viscosity = {0, 0};
+        float2 localCellPosDelta = {0, 0};
+        float localDensity = 0;
+
+        auto radiusInt = toInt(ceilf(smoothingLength * 2));
+        auto scanLength = radiusInt * 2 + 1;
+        auto scanOrigin = int2{floorInt(objectPos.x) - radiusInt, floorInt(objectPos.y) - radiusInt};
+        auto cutoffSquared = smoothingLength * smoothingLength * 4;
+        auto cutoff = smoothingLength * 2;
+        auto invScanLength = 1.0f / toFloat(scanLength);
+
+        auto records = data.objectGrid.getRecords();
+        for (int scanIndex = toInt(warp.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += warp.size()) {
+            int2 scanPos = calcScanPos(scanOrigin, scanIndex, scanLength, invScanLength);
+            if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
+                continue;
+            }
+            data.world.correctPosition(scanPos);
+            int otherIndex = data.objectGrid.getFirstIndex(scanPos);
+            for (int level = 0; level < MaxFixedObjectsForCollision; ++level) {
+                if (otherIndex < 0) {
+                    break;
+                }
+                auto other = records[otherIndex];  // One vectorized load instead of a global access per field
+                otherIndex = other.nextObjectIndex;
+                if ((isObjectFluid && other.type == ObjectType_Fluid) || (!isObjectFluid && other.type != ObjectType_Fluid)) {
+                    auto posDelta = objectPos - other.pos;
+
+                    data.world.correctDirection(posDelta);
+                    auto adaptedDistance = Math::length(posDelta);
+                    auto origDistance = adaptedDistance;
+                    if ((objectNumConnections < 3 || other.numConnections < 3) && objectType == ObjectType_Cell && other.type == ObjectType_Cell
+                        && object->typeData.cell.isSameCreature(&other.self->typeData.cell)
+                        && object->typeData.cell.constructionId != other.self->typeData.cell.constructionId) {
+                        adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
+                    }
+                    if (adaptedDistance > cutoff || objectDetached + other.detached() == 1) {
+                        continue;
+                    }
+
+                    if (other.isStatic()) {
+                        auto index = atomicAdd(&numFixedObjects_g[warpIndexInBlock], 1);
+                        if (index < MaxFixedObjectsForCollision) {
+                            fixedCells[warpIndexInBlock][index] = other.self;
+                        }
+                    } else {
+
+                        // Calc density
+                        auto otherMass = getMassForSPH(&other);
+                        localDensity += otherMass * calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
+
+                        if (object != other.self) {
+
+                            // Overlap correction
+                            if (!objectIsStatic && origDistance < cudaSimulationParameters.minObjectDistance.value) {
+                                localCellPosDelta.x += posDelta.x * cudaSimulationParameters.minObjectDistance.value / 5;
+                                localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minObjectDistance.value / 5;
+                            }
+
+                            auto velDelta = objectVel - other.vel;
+                            bool isConnected = false;
+                            for (int i = 0; i < objectNumConnections; ++i) {
+                                auto const& connectedObject = object->connections[i].object;
+                                if (connectedObject == other.self) {
+                                    isConnected = true;
+                                }
+                            }
+                            if (!isConnected) {
+
+                                // Calc forces: for simplicity pressure = density
+                                auto const& cellPressure = objectDensity;         // Optimization: using the density from last time step
+                                auto const& otherObjectPressure = other.density;  // Optimization: using the density from last time step
+                                auto factor =
+                                    cellPressure / max(NEAR_ZERO, objectDensity * objectDensity) + otherObjectPressure / (other.density * other.density);
+
+                                if (adaptedDistance > NEAR_ZERO) {
+                                    float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
+
+                                    auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d * otherMass;
+                                    localF_pressure.x += F_pressureDelta.x;
+                                    localF_pressure.y += F_pressureDelta.y;
+
+                                    auto F_viscosityDelta =
+                                        velDelta / other.density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f) * otherMass;
+                                    localF_viscosity.x += F_viscosityDelta.x;
+                                    localF_viscosity.y += F_viscosityDelta.y;
+                                }
+                            }
+
+                            // Fusion
+                            if (Math::length(velDelta) >= cellFusionVelocity && objectNumConnections < MAX_OBJECT_CONNECTIONS
+                                && other.numConnections < MAX_OBJECT_CONNECTIONS && (objectIsSticky || other.isSticky()) && !objectIsStatic) {
+                                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, other.self);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Warp-level reduction: the leader ends up with this object's totals in registers
+        float2 F_pressure = {cg::reduce(warp, localF_pressure.x, cg::plus<float>()), cg::reduce(warp, localF_pressure.y, cg::plus<float>())};
+        float2 F_viscosity = {cg::reduce(warp, localF_viscosity.x, cg::plus<float>()), cg::reduce(warp, localF_viscosity.y, cg::plus<float>())};
+        float2 cellPosDelta = {cg::reduce(warp, localCellPosDelta.x, cg::plus<float>()), cg::reduce(warp, localCellPosDelta.y, cg::plus<float>())};
+        float density = cg::reduce(warp, localDensity, cg::plus<float>());
+        warp.sync();
+
+        // Calculate forces with fixed objects
+        if (warp.thread_rank() == 0) {
+            auto numFixedObjects = min(MaxFixedObjectsForCollision, numFixedObjects_g[warpIndexInBlock]);
+            if (numFixedObjects > 0) {
+
+                // Calc forces only to the closest fixed object
+                Object* closestFixedObject = nullptr;
+                float closestFixedObjectDistance;
+                for (int i = 0; i < numFixedObjects; ++i) {
+                    auto const& fixedCell = fixedCells[warpIndexInBlock][i];
+                    auto distance = data.world.getDistance(objectPos, fixedCell->pos);
+                    if (!closestFixedObject || distance < closestFixedObjectDistance) {
+                        closestFixedObject = fixedCell;
+                        closestFixedObjectDistance = distance;
+                    }
+                }
+                auto connectedToObject = false;
+                auto numConnections = closestFixedObject->numConnections;
+                for (int i = 0; i < numConnections; ++i) {
+                    if (closestFixedObject->connections[i].object == object) {
+                        connectedToObject = true;
+                        break;
+                    }
+                }
+
+                if (!connectedToObject) {
+                    float2 r{0, 0};
+                    if (closestFixedObject->numConnections <= 1) {
+                        r = data.world.getCorrectedDirection(objectPos - closestFixedObject->pos);
+                    } else {
+                        auto angleToObject = Math::angleOfVector(data.world.getCorrectedDirection(objectPos - closestFixedObject->pos));
+                        for (int i = 0; i < numConnections; ++i) {
+                            auto otherObject1 = closestFixedObject->connections[i].object;
+                            auto otherObject2 = closestFixedObject->connections[(i + 1) % numConnections].object;
+                            auto angleToOtherObject1 = Math::angleOfVector(data.world.getCorrectedDirection(otherObject1->pos - closestFixedObject->pos));
+                            auto angleToOtherObject2 = Math::angleOfVector(data.world.getCorrectedDirection(otherObject2->pos - closestFixedObject->pos));
+                            if (Math::isAngleInBetween(angleToOtherObject1, angleToOtherObject2, angleToObject)) {
+                                r = otherObject2->pos - otherObject1->pos;
+                                Math::rotateQuarterCounterClockwise(r);
+                                break;
+                            }
+                        }
+                    }
+                    auto vr = objectVel - closestFixedObject->vel;
+                    auto dot_vr_r = Math::dot(vr, r);
+
+                    if (dot_vr_r < 0) {
+                        auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
+                        auto truncated_distance = max(0.05f, closestFixedObjectDistance);
+                        object->tempValue1.as_float2 +=
+                            (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedObject->vel - objectVel) / truncated_distance;
+                    }
+                }
+            }
+
+            object->pos = objectPos + cellPosDelta;
+            object->tempValue1.as_float2 +=
+                (F_pressure * cudaSimulationParameters.pressureStrength.value * density + F_viscosity * cudaSimulationParameters.viscosityStrength.value)
+                * 2.0f;
+            object->tempValue2.as_float2.x = density;
+        }
+        warp.sync();
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationData& data)
+{
+    auto const warp = cg::tiled_partition<WARP_SIZE>(cg::this_thread_block());
+
+    auto& objects = data.entities.objects;
+    auto const partition = calcWarpPartition(objects.getNumEntries());
+    auto const smoothingLength = cudaSimulationParameters.smoothingLength.value * 2.0f;  // Fluid uses 2x base smoothing length
+
+    // The scan geometry only depends on the smoothing length, so it is the same for every fluid object
+    auto radiusInt = toInt(ceilf(smoothingLength * 2));
+    auto scanLength = radiusInt * 2 + 1;
+    auto invScanLength = 1.0f / toFloat(scanLength);
+    auto cutoff = smoothingLength * 2;
+    auto cutoffSquared = cutoff * cutoff;
+    auto pressureStrength = cudaSimulationParameters.pressureStrength.value;
+    auto records = data.objectGrid.getRecords();
+
+    for (int objectIndex = partition.startIndex; objectIndex <= partition.endIndex; ++objectIndex) {
+        auto& object = objects.at(objectIndex);
+
+        if (object->type != ObjectType_Fluid) {
+            continue;
+        }
+
+        // Own fields in registers: the atomics on neighbors would force a reload from the full Object otherwise
+        auto objectPos = object->pos;
+        auto objectDetached = object->detached();
+        auto symmetricPressureFactor = 2.0f / max(NEAR_ZERO, object->density);
+        auto scanOrigin = int2{floorInt(objectPos.x) - radiusInt, floorInt(objectPos.y) - radiusInt};
+
+        float2 localF_boundary = {0, 0};
+
+        for (int scanIndex = toInt(warp.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += warp.size()) {
+            int2 scanPos = calcScanPos(scanOrigin, scanIndex, scanLength, invScanLength);
+
+            if (!isCellInRange(objectPos, scanPos.x, scanPos.y, cutoffSquared)) {
+                continue;
+            }
+            data.world.correctPosition(scanPos);
+            int otherIndex = data.objectGrid.getFirstIndex(scanPos);
+            for (int level = 0; level < MaxFixedObjectsForCollision; ++level) {
+                if (otherIndex < 0) {
+                    break;
+                }
+                auto other = records[otherIndex];  // One vectorized load instead of a global access per field
+                otherIndex = other.nextObjectIndex;
+                auto otherObject = other.self;  // Read fields live: this runs after calcFluidForces nudged positions
+                if (other.type != ObjectType_Fluid && otherObject != object && objectDetached + otherObject->detached() != 1) {
+
+                    auto posDelta = objectPos - otherObject->pos;
+                    data.world.correctDirection(posDelta);
+                    auto adaptedDistance = Math::length(posDelta);
+
+                    if (adaptedDistance <= cutoff && adaptedDistance > NEAR_ZERO) {
+                        auto solidMass = getMassForSPH(&other);
+
+                        float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
+
+                        // Repulsion force on fluid from solid boundary.
+                        // Factor 2/rho_f mirrors the symmetric SPH pressure factor (1/rho_f + 1/rho_f)
+                        // and is proportional to solid mass so that a heavier boundary repels more strongly.
+                        auto F_on_fluid = posDelta / (-adaptedDistance) * symmetricPressureFactor * kernel_d_val * solidMass * 0.3f;
+                        localF_boundary += F_on_fluid;
+
+                        // Counter-force on solid: equal and opposite (Newton's 3rd law).
+                        // pressureStrength is applied here directly since this force bypasses the
+                        // accumulation path of localF_boundary (which gets pressureStrength at the end).
+                        atomicAdd(&otherObject->tempValue1.as_float2.x, -F_on_fluid.x * pressureStrength);
+                        atomicAdd(&otherObject->tempValue1.as_float2.y, -F_on_fluid.y * pressureStrength);
+                    }
+                }
+            }
+        }
+
+        // Warp-level reduction: the leader ends up with this object's total in registers
+        float2 F_boundary = {cg::reduce(warp, localF_boundary.x, cg::plus<float>()), cg::reduce(warp, localF_boundary.y, cg::plus<float>())};
+
+        if (warp.thread_rank() == 0) {
+            object->tempValue1.as_float2 += F_boundary * pressureStrength;
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        object->density = object->tempValue2.as_float2.x;
+        if (object->isStatic()) {
+            continue;
+        }
+
+        if (Math::length(object->tempValue1.as_float2)
+            > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, object->pos, object->color)) {
+            if (data.primaryNumberGen.random() < cudaSimulationParameters.maxForceDecayProbability) {
+                ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->isStatic()) {
+            continue;
+        }
+        auto acceleration = object->tempValue1.as_float2 / max(0.05f, object->density) * 0.5f;
+        if (Math::length(acceleration) > cudaSimulationParameters.maxAcceleration) {
+            acceleration = Math::getNormalized(acceleration) * cudaSimulationParameters.maxAcceleration;
+        }
+        object->vel += acceleration;
+        if (Math::length(object->vel) > cudaSimulationParameters.maxVelocity.value) {
+            object->vel = Math::getNormalized(object->vel) * cudaSimulationParameters.maxVelocity.value;
+        }
+        object->tempValue1.as_float2 = {0, 0};
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData& data, bool calcAngularForces)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (0 == object->numConnections /* || object->isStatic()*/) {
+            continue;
+        }
+        float2 force{0, 0};
+        float2 prevDisplacement = object->connections[object->numConnections - 1].object->pos - object->pos;
+        data.world.correctDirection(prevDisplacement);
+        auto cellStiffnessSquared = object->stiffness * object->stiffness;
+
+        auto numConnections = object->numConnections;
+        auto prevAngle = calcAngularForces ? Math::angleOfVector(prevDisplacement) : 0.0f;
+        for (int i = 0; i < numConnections; ++i) {
+            auto connectedObject = object->connections[i].object;
+            auto connectedObjectStiffnessSquared = connectedObject->stiffness * connectedObject->stiffness;
+
+            auto displacement = connectedObject->pos - object->pos;
+            data.world.correctDirection(displacement);
+
+            auto actualDistance = Math::length(displacement);
+            auto bondDistance = object->connections[i].distance;
+            auto deviation = actualDistance - bondDistance;
+            auto direction = actualDistance > NEAR_ZERO ? displacement / actualDistance : float2{1.0f, 0.0f};
+            force = force + direction * deviation * (cellStiffnessSquared + connectedObjectStiffnessSquared) / 6;
+            if (calcAngularForces) {
+                auto lastIndex = (i + numConnections - 1) % numConnections;
+                auto lastConnectedObject = object->connections[lastIndex].object;
+
+                auto referenceAngleFromPrevious = object->connections[i].angleFromPrevious;
+
+                auto r1 = prevDisplacement;
+                auto r2 = displacement;
+                Math::rotateQuarterClockwise(r1);
+                Math::rotateQuarterCounterClockwise(r2);
+
+                auto angle = Math::angleOfVector(displacement);
+                auto theta = Math::getNormalizedAngle(angle - prevAngle, 0.0f);
+                prevAngle = angle;
+
+                if (theta < referenceAngleFromPrevious) {
+                    r1 *= -1.0f;
+                    r2 *= -1.0f;
+                }
+                auto g = 5e-4f * abs(Math::getNormalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
+                auto strength1 = g / max(Math::lengthSquared(r1), 0.1f);
+                auto strength2 = g / max(Math::lengthSquared(r2), 0.1f);
+                auto force2 = r1 * strength1;
+                auto force1 = r2 * strength2;
+
+                atomicAdd(&connectedObject->tempValue1.as_float2.x, force1.x);
+                atomicAdd(&connectedObject->tempValue1.as_float2.y, force1.y);
+                atomicAdd(&lastConnectedObject->tempValue1.as_float2.x, force2.x);
+                atomicAdd(&lastConnectedObject->tempValue1.as_float2.y, force2.y);
+                force -= force1 + force2;
+            }
+
+            prevDisplacement = displacement;
+        }
+        atomicAdd(&object->tempValue1.as_float2.x, force.x);
+        atomicAdd(&object->tempValue1.as_float2.y, force.y);
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::tearOverstretchedConnections(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+
+        for (int i = 0; i < object->numConnections; ++i) {
+            auto connectedObject = object->connections[i].object;
+            if (connectedObject < object) {
+                continue;
+            }
+            auto displacement = connectedObject->pos - object->pos;
+            data.world.correctDirection(displacement);
+            auto maxDistance = min(
+                cudaSimulationParameters.maxBindingDistance.value[object->color], cudaSimulationParameters.maxBindingDistance.value[connectedObject->color]);
+            if (Math::length(displacement) > maxDistance) {
+                ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->isStatic()) {
+            object->pos += object->vel * cudaSimulationParameters.timestepSize.value;
+            data.world.correctPosition(object->pos);
+        } else {
+            object->pos += object->vel * cudaSimulationParameters.timestepSize.value
+                + object->tempValue1.as_float2 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
+            data.world.correctPosition(object->pos);
+            object->tempValue2.as_float2 = object->tempValue1.as_float2;  // Save forces from first step for averaging
+            object->tempValue1.as_float2 = {0, 0};
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::verletVelocityUpdate(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->isStatic()) {
+            continue;
+        }
+        auto acceleration = (object->tempValue1.as_float2 + object->tempValue2.as_float2) / 2;
+        object->vel += acceleration * cudaSimulationParameters.timestepSize.value;
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    auto const innerFriction = cudaSimulationParameters.innerFriction.value;
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->isStatic()) {
+            continue;
+        }
+        for (int index = 0; index < object->numConnections; ++index) {
+            auto connectedObject = object->connections[index].object;
+            if (connectedObject->isStatic()) {
+                continue;
+            }
+            auto posDelta = object->pos - connectedObject->pos;
+            auto distance = Math::length(posDelta);
+            if (distance > NEAR_ZERO) {
+                auto direction = posDelta / distance;
+                auto velDelta = object->vel - connectedObject->vel;
+                auto velDelta_part = Math::dot(velDelta, direction);
+
+                auto delta = direction * innerFriction * velDelta_part;
+                atomicAdd(&object->vel.x, -delta.x * 0.5f);
+                atomicAdd(&object->vel.y, -delta.y * 0.5f);
+                atomicAdd(&connectedObject->vel.x, delta.x * 0.5f);
+                atomicAdd(&connectedObject->vel.y, delta.y * 0.5f);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::applyFriction(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->isStatic()) {
+            continue;
+        }
+
+        auto friction = ParameterCalculator::calcParameter(cudaSimulationParameters.friction, data, object->pos);
+        object->vel = object->vel * (1.0f - friction);
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->isStatic()) {
+            continue;
+        }
+        if (object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {
+            continue;
+        }
+        if (data.primaryNumberGen.randomForAllThreads() < cudaSimulationParameters.radiationProbability) {
+
+            auto radiation1 = 0.0f;
+            auto radiation2 = 0.0f;
+            auto usableEnergy = 0.0f;
+            auto rawEnergy = 0.0f;
+            auto age = 0u;
+
+            // Fill radiation values based on object type
+            if (object->type == ObjectType_Cell) {
+                usableEnergy = object->typeData.cell.usableEnergy;
+                rawEnergy = object->typeData.cell.rawEnergy;
+                age = object->typeData.cell.age;
+            } else if (object->type == ObjectType_FreeCell) {
+                rawEnergy = object->typeData.freeCell.energy;
+                age = object->typeData.freeCell.age;
+            }
+
+            if (usableEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
+                radiation1 += cudaSimulationParameters.radiationType2_strength.value[object->color];
+            }
+            if (rawEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
+                radiation2 += cudaSimulationParameters.radiationType2_strength.value[object->color];
+            }
+            if (age > cudaSimulationParameters.radiationType1_minimumAge.value[object->color]) {
+                radiation1 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
+                radiation2 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
+            }
+            radiation1 *= usableEnergy;
+            radiation2 *= rawEnergy;
+
+            radiation1 = max(min(radiation1 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, usableEnergy - 1), 0.0f);
+            radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, rawEnergy - 1), 0.0f);
+
+            // Radiate (same code for both cases)
+            if (radiation1 > 0 || radiation2 > 0) {
+                float2 particleVel = object->vel * cudaSimulationParameters.radiationVelocityMultiplier
+                    + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
+                    - particleVel;  // Minus particleVel because particle will still be moved in current time step
+                data.world.correctPosition(particlePos);
+
+                EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);
+
+                // Update energy based on object type
+                if (object->type == ObjectType_Cell) {
+                    object->typeData.cell.usableEnergy -= radiation1;
+                    object->typeData.cell.rawEnergy -= radiation2;
+                } else if (object->type == ObjectType_FreeCell) {
+                    object->typeData.freeCell.energy -= radiation2;
+                }
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::resetDensity(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+
+        object->density = 1.0f;
+    }
+}

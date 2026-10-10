@@ -1,0 +1,71 @@
+#pragma once
+
+#include <chrono>
+
+#include <Data/Interface/Descs.h>
+#include <Data/Interface/GenomeDesc.h>
+#include <Data/Interface/GenomeDescEditService.h>
+#include <Data/Interface/PreviewDesc.h>
+
+#include <Engine/Interface/Definitions.h>
+
+#include "Definitions.h"
+
+class _PreviewWidget
+{
+public:
+    static PreviewWidget create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
+
+    void process();
+    void processInBackground();
+
+    std::vector<PreviewDesc> getPreviewDescs() const;
+
+private:
+    _PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
+
+    void updatePreview();
+    void createSubGenomesForPreview();
+    void setupPreviewData(bool useCache = true);
+    void calcPreview();
+    std::vector<ContentDesc> extractPhenotypes() const;
+    void cachePhenotypes(std::vector<ContentDesc> const& phenotypes);
+    void processCreaturePreviews();
+    void processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, ContentDesc& phenotype, float height);
+    void processActionBar();
+
+    int calcTpsForPreview();
+
+private:
+    void onRun();
+    void onStepBackward();
+    void onStepForward();
+    void onRestart();
+
+    std::vector<uint64_t> getSeedCreatureIds() const;
+    void setSeedCreatureIds(std::vector<uint64_t> const& value);
+
+    std::vector<SubGenomeDesc> getSubGenomes() const;
+
+    std::vector<CreaturePreviewWidget> _creatureWidgets;
+
+    GenomeWindowEditData _genomeEditData;
+    GenomeTabEditData _editData;
+    GenomeTabLayoutData _layoutData;
+
+    struct Savepoint
+    {
+        uint64_t timestep = 0;
+        ContentDesc description;
+        std::vector<uint64_t> seedCreatureIds;
+    };
+    std::vector<Savepoint> _savepoints;
+
+    std::optional<GenomeDesc> _genomeFromPreviousFrame;
+    std::optional<uint64_t> _sessionIdFromPreviousFrame;
+
+    std::optional<uint64_t> _previewTimestepFromPreviousMeasure;
+    std::optional<std::chrono::steady_clock::time_point> _timepointFromPreviousMeasure;
+    uint64_t _currentTimestep = 0;
+    std::optional<int> _tpsFromPreviousMeasure;
+};

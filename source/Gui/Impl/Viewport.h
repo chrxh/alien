@@ -1,0 +1,50 @@
+#pragma once
+
+#include <Base/Interface/Definitions.h>
+#include <Base/Interface/Singleton.h>
+
+#include <Engine/Interface/Definitions.h>
+
+#include "Definitions.h"
+
+class Viewport
+{
+    MAKE_SINGLETON(Viewport);
+
+public:
+    void setup();
+
+    // Rendered pixels per world unit
+    float getZoomFactor();
+    void setZoomFactor(float zoomFactor);
+
+    // Rendered pixels per screen pixel (greater than 1 if picture is rendered with a higher resolution)
+    float getRenderScale();
+    void setRenderScale(float value);
+
+    // Screen pixels per world unit
+    float getScreenZoomFactor();
+
+    RealVector2D getCenterInWorldPos();
+    void setCenterInWorldPos(RealVector2D const& worldCenter);
+
+    IntVector2D getViewSize();
+    void setViewSize(IntVector2D const& viewSize);
+
+    void zoom(IntVector2D const& viewPos, float factor);
+    float getZoomSensitivity();
+    void setZoomSensitivity(float value);
+
+    void moveCenter(RealVector2D const& startWorldPosition, IntVector2D const& endViewPos);
+    RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos);
+    RealVector2D mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering = true);
+    RealRect getVisibleWorldRect();
+    bool isVisible(RealVector2D const& viewPos);
+
+private:
+    float _zoomFactor = 1.0f;
+    float _renderScale = 1.0f;
+    float _zoomSensitivity = 1.04f;
+    RealVector2D _centerInWorldPos;
+    IntVector2D _viewSize;
+};

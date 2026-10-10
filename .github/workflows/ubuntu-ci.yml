@@ -88,12 +88,8 @@ jobs:
           echo "changed=true" >> $GITHUB_OUTPUT
         else
           CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
-            source/Data \
-            source/EngineInterface \
-            source/EngineImpl \
-            source/EngineKernels \
-            source/EngineTestData \
-            source/EngineTests)
+            source/Data/Interface \
+            source/Engine)
           if [ -n "$CHANGED" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
