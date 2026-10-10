@@ -104,15 +104,15 @@ IncludeCategories:
     Priority: 107
 
   # Base module includes
-  - Regex: '^<Base/Interface/.*>$'
+  - Regex: '^<Base/Interface/[^/]+>$'
     Priority: 200
 
   # Network module includes
-  - Regex: '^<Network/Interface/.*>$'
+  - Regex: '^<Network/Interface/[^/]+>$'
     Priority: 201
 
   # Network tests includes
-  - Regex: '^<Network/Tests/.*>$'
+  - Regex: '^<Network/Interface/Tests/.*>$'
     Priority: 202
 
   # Shader module includes
@@ -120,11 +120,11 @@ IncludeCategories:
     Priority: 203
 
   # Data module includes
-  - Regex: '^<Data/Interface/.*>$'
+  - Regex: '^<Data/Interface/[^/]+>$'
     Priority: 204
 
   # Data tests includes
-  - Regex: '^<Data/Tests/.*>$'
+  - Regex: '^<Data/Interface/Tests/.*>$'
     Priority: 205
 
   # Engine interface includes
@@ -140,7 +140,7 @@ IncludeCategories:
     Priority: 208
 
   # Engine implementation includes
-  - Regex: '^<Engine/Impl/.*>$'
+  - Regex: '^<Engine/Impl/[^/]+>$'
     Priority: 209
 
   # Engine GPU kernels includes
@@ -148,7 +148,7 @@ IncludeCategories:
     Priority: 210
 
   # Engine tests includes
-  - Regex: '^<Engine/Tests/.*>$'
+  - Regex: '^<Engine/Impl/Tests/.*>$'
     Priority: 211
 
   # Persister interface includes

@@ -89,7 +89,9 @@ jobs:
         else
           CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
             source/Data/Interface \
-            source/Engine)
+            source/Engine \
+            ':(exclude)source/Data/Interface/Tests' \
+            ':(exclude)source/Engine/Interface/Tests')
           if [ -n "$CHANGED" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
