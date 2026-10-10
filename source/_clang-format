@@ -104,80 +104,84 @@ IncludeCategories:
     Priority: 107
 
   # Base module includes
-  - Regex: '^<Base/.*>$'
+  - Regex: '^<Base/Interface/[^/]+>$'
     Priority: 200
 
   # Network module includes
-  - Regex: '^<Network/.*>$'
+  - Regex: '^<Network/Interface/[^/]+>$'
     Priority: 201
 
-  # NetworkTests module includes
-  - Regex: '^<NetworkTests/.*>$'
+  # Network tests includes
+  - Regex: '^<Network/Interface/Tests/.*>$'
     Priority: 202
 
   # Shader module includes
-  - Regex: '^<Shaders/.*>$'
+  - Regex: '^<Rendering/Shaders/.*>$'
     Priority: 203
 
   # Data module includes
-  - Regex: '^<Data/.*>$'
+  - Regex: '^<Data/Interface/[^/]+>$'
     Priority: 204
 
   # Data tests includes
-  - Regex: '^<DataTests/.*>$'
+  - Regex: '^<Data/Interface/Tests/.*>$'
     Priority: 205
 
   # Engine interface includes
-  - Regex: '^<EngineInterface/.*>$'
+  - Regex: '^<Engine/Interface/[^/]+>$'
     Priority: 206
 
   # Engine test data includes
-  - Regex: '^<EngineTestData/.*>$'
+  - Regex: '^<Engine/Interface/TestData/.*>$'
     Priority: 207
 
   # Engine interface tests includes
-  - Regex: '^<EngineInterfaceTests/.*>$'
+  - Regex: '^<Engine/Interface/Tests/.*>$'
     Priority: 208
 
   # Engine implementation includes
-  - Regex: '^<EngineImpl/.*>$'
+  - Regex: '^<Engine/Impl/[^/]+>$'
     Priority: 209
 
   # Engine GPU kernels includes
-  - Regex: '^<EngineKernels/.*>$'
+  - Regex: '^<Engine/Kernels/.*>$'
     Priority: 210
 
   # Engine tests includes
-  - Regex: '^<EngineTests/.*>$'
+  - Regex: '^<Engine/Impl/Tests/.*>$'
     Priority: 211
 
   # Persister interface includes
-  - Regex: '^<PersisterInterface/.*>$'
+  - Regex: '^<Persister/Interface/[^/]+>$'
     Priority: 212
 
   # Persister implementation includes
-  - Regex: '^<PersisterImpl/.*>$'
+  - Regex: '^<Persister/Impl/.*>$'
     Priority: 213
 
   # MCP tools interface includes
-  - Regex: '^<McpToolsInterface/.*>$'
+  - Regex: '^<McpTools/Interface/.*>$'
     Priority: 214
 
   # MCP tools implementation includes
-  - Regex: '^<McpToolsImpl/.*>$'
+  - Regex: '^<McpTools/Impl/.*>$'
     Priority: 215
 
   # Rendering interface includes
-  - Regex: '^<RenderingInterface/.*>$'
+  - Regex: '^<Rendering/Interface/.*>$'
     Priority: 216
 
   # Rendering implementation includes
-  - Regex: '^<RenderingImpl/.*>$'
+  - Regex: '^<Rendering/Impl/.*>$'
     Priority: 217
 
-  # GUI module includes
-  - Regex: '^<Gui/.*>$'
+  # GUI interface includes
+  - Regex: '^<Gui/Interface/.*>$'
     Priority: 218
+
+  # GUI implementation includes
+  - Regex: '^<Gui/Impl/.*>$'
+    Priority: 219
 
   # All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.c?(uh|h)"$'

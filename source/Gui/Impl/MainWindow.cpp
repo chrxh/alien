@@ -1,0 +1,233 @@
+#include "MainWindow.h"
+
+#include <iostream>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+
+#include <GLFW/glfw3.h>
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
+
+#include <Fonts/IconsFontAwesome5.h>
+
+#include <Base/Interface/AlienExceptions.h>
+#include <Base/Interface/Resources.h>
+
+#include <Network/Interface/NetworkService.h>
+
+#include <Engine/Interface/SimulationFacade.h>
+
+#include <Persister/Interface/PersisterFacade.h>
+#include <Persister/Interface/SerializerService.h>
+
+#include <Rendering/Interface/RenderingFacade.h>
+
+#include "AboutDialog.h"
+#include "ActivateUserDialog.h"
+#include "AlienGui.h"
+#include "AutosaveController.h"
+#include "AutosaveWindow.h"
+#include "BrowserController.h"
+#include "BrowserWindow.h"
+#include "CreateUserDialog.h"
+#include "DelayedExecutionController.h"
+#include "DeleteUserDialog.h"
+#include "DisplaySettingsDialog.h"
+#include "DocumentationWindow.h"
+#include "EditSimulationDialog.h"
+#include "EditorController.h"
+#include "EvolutionDashboardWindow.h"
+#include "ExitDialog.h"
+#include "FileTransferController.h"
+#include "FpsController.h"
+#include "GenericFileDialog.h"
+#include "GenericMessageDialog.h"
+#include "GuiLogger.h"
+#include "ImFileDialog.h"
+#include "ImageToPatternDialog.h"
+#include "LocationController.h"
+#include "LogWindow.h"
+#include "LoginController.h"
+#include "LoginDialog.h"
+#include "MainLoopController.h"
+#include "MainLoopEntityController.h"
+#include "MassOperationsDialog.h"
+#include "McpController.h"
+#include "McpSettingsDialog.h"
+#include "McpWindow.h"
+#include "NetworkSettingsDialog.h"
+#include "NetworkTransferController.h"
+#include "NewPasswordDialog.h"
+#include "NewSimulationDialog.h"
+#include "OverlayController.h"
+#include "PreviewSettingsDialog.h"
+#include "ReplaceSimulationDialog.h"
+#include "ResetPasswordDialog.h"
+#include "SavePictureDialog.h"
+#include "SignalsBufferDialog.h"
+#include "SimulationInteractionController.h"
+#include "SimulationParametersMainWindow.h"
+#include "SimulationView.h"
+#include "SpatialControlWindow.h"
+#include "StartupCheckService.h"
+#include "StyleService.h"
+#include "TemporalControlWindow.h"
+#include "UiController.h"
+#include "UploadSimulationDialog.h"
+#include "Viewport.h"
+#include "WindowController.h"
+#include "implot.h"
+
+namespace
+{
+    void glfwErrorCallback(int error, const char* description)
+    {
+        throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
+    }
+
+    void framebufferSizeCallback(GLFWwindow* window, int width, int height)
+    {
+        if (width > 0 && height > 0) {
+            SimulationView::get().resize({width, height});
+        }
+    }
+}
+
+_MainWindow::_MainWindow()
+{
+    IMGUI_CHECKVERSION();
+
+    StartupCheckService::get().check();
+
+    log(Priority::Important, "initialize GLFW and rendering");
+    initGlfwAndRendering();
+
+    LogWindow::get().setup();
+
+    log(Priority::Important, "initialize services");
+    StyleService::get().setup();
+    NetworkService::get().setup();
+
+    log(Priority::Important, "initialize facades");
+    _PersisterFacade::get()->setup();
+
+    log(Priority::Important, "initialize main loop elements");
+    Viewport::get().setup();
+    EditorController::get().setup();
+    SimulationView::get().setup();
+    SimulationInteractionController::get().setup();
+    EvolutionDashboardWindow::get().setup();
+    TemporalControlWindow::get().setup();
+    SpatialControlWindow::get().setup();
+    SimulationParametersMainWindow::get().setup();
+    LocationController::get().setup();
+    MainLoopController::get().setup();
+    ExitDialog::get().setup();
+    MassOperationsDialog::get().setup();
+    DocumentationWindow::get().setup();
+    NewSimulationDialog::get().setup();
+    BrowserController::get().setup();
+    BrowserWindow::get().setup();
+    ActivateUserDialog::get().setup();
+    NewPasswordDialog::get().setup();
+    LoginDialog::get().setup();
+    UploadSimulationDialog::get().setup();
+    ReplaceSimulationDialog::get().setup();
+    ImageToPatternDialog::get().setup();
+    AutosaveController::get().setup();
+    AutosaveWindow::get().setup();
+    OverlayController::get().setup();
+    FileTransferController::get().setup();
+    NetworkTransferController::get().setup();
+    LoginController::get().setup();
+    AboutDialog::get().setup();
+    CreateUserDialog::get().setup();
+    DeleteUserDialog::get().setup();
+    DisplaySettingsDialog::get().setup();
+    NetworkSettingsDialog::get().setup();
+    NewPasswordDialog::get().setup();
+    PreviewSettingsDialog::get().setup();
+    ResetPasswordDialog::get().setup();
+    GenericMessageDialog::get().setup();
+    GenericFileDialog::get().setup();
+    SavePictureDialog::get().setup();
+    SignalsBufferDialog::get().setup();
+    DelayedExecutionController::get().setup();
+    UiController::get().setup();
+    McpController::get().setup();
+    McpSettingsDialog::get().setup();
+    McpWindow::get().setup();
+
+    log(Priority::Important, "initialize file dialogs");
+    initFileDialogs();
+
+    log(Priority::Important, "user interface initialized");
+    WindowController::get().showStartupWindow();
+}
+
+void _MainWindow::mainLoop()
+{
+    while (!MainLoopController::get().shouldClose()) {
+        MainLoopController::get().process();
+    }
+}
+
+void _MainWindow::shutdown()
+{
+    MainLoopController::get().shutdown();
+    MainLoopEntityController::get().shutdown();
+    SimulationView::get().shutdown();
+
+    auto window = WindowController::get().getWindowData().window;
+    glfwHideWindow(window);
+
+    // The simulation releases its imports of the geometry buffers before the renderer frees them
+    _PersisterFacade::get()->shutdown();
+    _SimulationFacade::get()->closeSimulation();
+
+    NetworkService::get().shutdown();
+
+    _RenderingFacade::get()->shutdown();
+    ImGui_ImplGlfw_Shutdown();
+
+    ImPlot::DestroyContext();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+
+    log(Priority::Important, "user interface shut down");
+}
+
+void _MainWindow::initGlfwAndRendering()
+{
+    glfwSetErrorCallback(glfwErrorCallback);
+
+    if (!glfwInit()) {
+        throw std::runtime_error("Failed to initialize Glfw.");
+    }
+
+    _RenderingFacade::get()->setWindowHints();
+    WindowController::get().setup();
+    auto windowData = WindowController::get().getWindowData();
+    glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
+
+    ImGui::CreateContext();
+    ImPlot::CreateContext();
+    ImGui_ImplGlfw_InitForOther(windowData.window, true);
+    _RenderingFacade::get()->setup(windowData.window);
+}
+
+void _MainWindow::initFileDialogs()
+{
+    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
+        auto texture = _RenderingFacade::get()->createTexture(data, w, h, fmt == 0 ? TextureFormat::Bgra : TextureFormat::Rgba, TextureFilter::Nearest);
+        return reinterpret_cast<void*>(static_cast<uintptr_t>(texture.textureId));
+    };
+    ifd::FileDialog::Instance().DeleteTexture = [](void* texture) {
+        _RenderingFacade::get()->deleteTexture(static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(texture)));
+    };
+}

@@ -1,0 +1,72 @@
+#include <gtest/gtest.h>
+
+#include <Data/Interface/CellTypeConstants.h>
+#include <Data/Interface/Descs.h>
+
+#include <Engine/Interface/SimulationFacade.h>
+
+#include "MutationTestsBase.h"
+
+class TrimGeneMutationTests : public MutationTestsBase
+{};
+
+TEST_F(TrimGeneMutationTests, trimGeneMutation_removesExactlyOneNodePerPass)
+{
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(2, actualGenome._genes.at(0)._nodes.size());
+}
+
+TEST_F(TrimGeneMutationTests, trimGeneMutation_keepsAtLeastOneNode)
+{
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 5; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(1, actualGenome._genes.at(0)._nodes.size());
+}
+
+TEST_F(TrimGeneMutationTests, trimGeneMutation_keepsFirstAndLastNonVoid)
+{
+    // Trimming a boundary node exposes the interior void node; it must be corrected to a non-void cell type.
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc()})});
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+    auto const& nodes = actualGenome._genes.at(0)._nodes;
+    EXPECT_NE(CellType_Void, nodes.front().getCellType());
+    EXPECT_NE(CellType_Void, nodes.back().getCellType());
+}
+
+TEST_F(TrimGeneMutationTests, trimGeneMutation_zeroProbabilityNoChange)
+{
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(0.0f);
+
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(genome, actualGenome);
+}

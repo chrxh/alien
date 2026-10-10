@@ -1,0 +1,21 @@
+#pragma once
+
+#include <Data/Interface/Colors.h>
+#include <Data/Interface/SimulationParameters.h>
+
+#include <Engine/Interface/ShallowUpdateSelectionData.h>
+
+#include "cuda_runtime_api.h"
+#include "sm_60_atomic_functions.h"
+
+#include "EntityFactory.cuh"
+#include "GarbageCollectorKernels.cuh"
+#include "SelectionResult.cuh"
+
+__global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelection);
+__global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data);
+__global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result);
+__global__ void cudaSetSelectionAtPoint(float2 pos, float radius, SimulationData data);
+__global__ void cudaSetSelectionInArea(AreaSelectionData selectionData, SimulationData data);
+
+__global__ void cudaRolloutSelectionStep(SimulationData data, int* result);
