@@ -1,0 +1,252 @@
+#pragma once
+
+#include <Data/Interface/CellTypeConstants.h>
+#include <Data/Interface/SimulationParameters.h>
+
+#include "NeuronProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
+#include "SimulationStatistics.cuh"
+
+class AttackerProcessor
+{
+public:
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
+
+private:
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
+
+    __inline__ __device__ static float calcAttackableEnergy(Cell* cell);
+    __inline__ __device__ static float absorbAttackableEnergy(Cell* cell, float energy);
+    __inline__ __device__ static float absorbEnergy(float* energy, float maxEnergy);
+
+    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
+};
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+
+__device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationStatistics& result)
+{
+    auto& operations = data.cellTypeOperations[CellType_Attacker];
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
+        processCell(data, result, operations.at(i).object);
+    }
+}
+
+__device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
+{
+    if (object->isStatic()) {
+        return;
+    }
+    auto const& cell = &object->typeData.cell;
+    if (NeuronProcessor::isManuallyTriggered(data, object) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
+
+        auto attackerEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, object->pos, object->color);
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
+        if (cell->usableEnergy - attackerEnergyCost < cellMinEnergy) {
+            cell->neuralActivity.signals[Channels::AttackerSuccess] = 0;
+            return;
+        }
+
+        auto const& attackerMode = cell->cellTypeData.attacker.mode;
+        auto creatureIdPart = static_cast<uint16_t>(cell->creature->id & 0xffff);
+
+        auto sumEnergyToTransfer = 0.0f;
+        data.objectGrid.executeForEach(
+            object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
+                if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
+                    return;
+                }
+                if (otherObject->isStatic()) {
+                    return;
+                }
+
+                // Only attack other cells which are in a visible cone with respect to the attack cell
+                if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
+                    return;
+                }
+
+                // Attack Free Cell
+                if (attackerMode == AttackerMode_FreeCell) {
+                    if (otherObject->type != ObjectType_FreeCell) {
+                        return;
+                    }
+                    auto const& otherFreeCell = &otherObject->typeData.freeCell;
+
+                    // Filter by color restriction
+                    auto const& restrictToColors = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
+                    if (!((restrictToColors >> otherObject->color) & 1)) {
+                        return;
+                    }
+
+                    // Calc base energy for attacking
+                    auto energyToTransfer =
+                        atomicAdd(&otherFreeCell->energy, 0) * min(1.0f, cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION);
+
+                    if (energyToTransfer < 0) {
+                        return;
+                    }
+
+                    // Evaluate food chain color matrix
+                    auto color = calcMod(object->color, MAX_COLORS);
+                    auto otherColor = calcMod(otherObject->color, MAX_COLORS);
+                    energyToTransfer *=
+                        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
+
+                    if (energyToTransfer > NEAR_ZERO) {
+                        otherFreeCell->event = CellEvent_Attacked;
+                        otherFreeCell->eventCounter = 10;
+                        otherFreeCell->eventPos = object->pos;
+
+                        // Absorb energy from attacked cell
+                        auto origEnergy = atomicAdd(&otherFreeCell->energy, -energyToTransfer);
+                        if (origEnergy > energyToTransfer) {
+                            sumEnergyToTransfer += energyToTransfer;
+                        }
+
+                        // Revert
+                        else {
+                            atomicAdd(&otherFreeCell->energy, energyToTransfer);
+                        }
+                    }
+                }
+
+                // Attack Cell
+                else if (attackerMode == AttackerMode_Creature) {
+                    if (otherObject->type != ObjectType_Cell) {
+                        return;
+                    }
+                    auto const& otherCell = &otherObject->typeData.cell;
+                    if (cell->isSameCreature(otherCell)) {
+                        return;
+                    }
+                    // Do not attack offspring
+                    if (otherCell->creature->ancestorId == cell->creature->id) {
+                        return;
+                    }
+
+                    // Calculate energy gain
+                    auto energyToTransfer =
+                        calcAttackableEnergy(otherCell) * min(1.0f, cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION);
+
+                    if (!otherCell->creature->isDetectedBy(creatureIdPart, otherObject->color)) {
+                        return;
+                    }
+
+                    auto color = calcMod(object->color, MAX_COLORS);
+                    auto otherColor = calcMod(otherObject->color, MAX_COLORS);
+
+                    // Evaluate defender strength
+                    auto numDefenderCells = countDefenderCells(statistics, otherObject);
+                    auto defendStrength =
+                        numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength.value[color] + 1.0f, numDefenderCells);
+                    energyToTransfer /= defendStrength;
+
+                    // Evaluate food chain color matrix
+                    energyToTransfer *=
+                        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
+
+                    // Evaluate lineage
+                    if (cell->creature->isSameLineage(otherCell->creature)) {
+                        energyToTransfer *= (1.0f - cudaSimulationParameters.attackerRelatedLineageProtection.value[object->color]);
+                    }
+
+                    // There is a slight systematic disadvantage for smaller creatures. This factor balances that out.
+                    if (otherCell->creature->numCells > cell->creature->numCells) {
+                        energyToTransfer *= 1.0f - ParameterCalculator::calcParameter(cudaSimulationParameters.attackerSizeProtection, data, object->pos);
+                    }
+
+                    if (energyToTransfer > NEAR_ZERO) {
+
+                        // Notify attacked cell
+                        otherCell->event = CellEvent_Attacked;
+                        otherCell->eventCounter = 10;
+                        otherCell->eventPos = object->pos;
+
+                        // Absorb energy from attacked cell
+                        sumEnergyToTransfer += absorbAttackableEnergy(otherCell, energyToTransfer);
+                    }
+                }
+            });
+
+        // Energy gain
+        if (sumEnergyToTransfer > NEAR_ZERO) {
+            atomicAdd(&cell->rawEnergy, sumEnergyToTransfer);
+            statistics.addAttackedEnergy(cell->creature->lineageId, sumEnergyToTransfer);
+
+            cell->event = CellEvent_Attacking;
+            cell->eventCounter = 6;
+        }
+
+        // Radiation
+        if (attackerEnergyCost > 0) {
+            EnergyProcessor::radiate(data, object, attackerEnergyCost);
+        }
+
+        // Output (signal is already present since attacker can only be manually triggered)
+        cell->neuralActivity.signals[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
+    }
+}
+
+__inline__ __device__ float AttackerProcessor::calcAttackableEnergy(Cell* cell)
+{
+    auto result = alienAtomicRead(&cell->usableEnergy);
+    if (cell->cellType == CellType_Depot) {
+        result += alienAtomicRead(&cell->cellTypeData.depot.storedUsableEnergy);
+    }
+    if (cell->constructorAvailable) {
+        result += alienAtomicRead(&cell->constructor.reservedEnergy);
+    }
+    return result;
+}
+
+__inline__ __device__ float AttackerProcessor::absorbAttackableEnergy(Cell* cell, float energy)
+{
+    auto result = 0.0f;
+    if (cell->cellType == CellType_Depot) {
+        result += absorbEnergy(&cell->cellTypeData.depot.storedUsableEnergy, energy);
+    }
+    if (result < energy && cell->constructorAvailable) {
+        result += absorbEnergy(&cell->constructor.reservedEnergy, energy - result);
+    }
+    if (result < energy) {
+        result += absorbEnergy(&cell->usableEnergy, energy - result);
+    }
+    return result;
+}
+
+__inline__ __device__ float AttackerProcessor::absorbEnergy(float* energy, float maxEnergy)
+{
+    auto energyToTransfer = min(alienAtomicRead(energy), maxEnergy);
+    if (energyToTransfer <= NEAR_ZERO) {
+        return 0.0f;
+    }
+    auto origEnergy = atomicAdd(energy, -energyToTransfer);
+    if (origEnergy > energyToTransfer - NEAR_ZERO) {
+        return energyToTransfer;
+    }
+
+    atomicAdd(energy, energyToTransfer);
+    return 0.0f;
+}
+
+__inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatistics& statistics, Object* object)
+{
+    int result = 0;
+    if (object->typeData.cell.cellType == CellType_Defender && object->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
+        ++result;
+    }
+    for (int i = 0; i < object->numConnections; ++i) {
+        auto connectedObject = object->connections[i].object;
+        if (connectedObject->type != ObjectType_Cell) {
+            continue;
+        }
+        if (connectedObject->typeData.cell.cellType == CellType_Defender
+            && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
+            ++result;
+        }
+    }
+    return result;
+}

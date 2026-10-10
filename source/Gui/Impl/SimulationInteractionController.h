@@ -1,0 +1,90 @@
+#pragma once
+
+#include <chrono>
+
+#include <imgui.h>
+
+#include <Base/Interface/Singleton.h>
+
+#include <Engine/Interface/Definitions.h>
+
+#include "Definitions.h"
+#include "EditorModel.h"
+#include "MainLoopEntity.h"
+
+using InteractionMode = int;
+enum InteractionMode_
+{
+    InteractionMode_Normal,
+    InteractionMode_PositionSelection
+};
+
+class SimulationInteractionController : public MainLoopEntity
+{
+    MAKE_SINGLETON(SimulationInteractionController);
+
+public:
+    bool isEditMode() const;
+    void setEditMode(bool value);
+
+    InteractionMode getInteractionMode() const;
+    void setInteractionMode(InteractionMode value);
+
+    std::optional<RealVector2D> getPositionSelectionData() const;
+
+    // Right center of the edit mode toggle in screen coordinates
+    RealVector2D getEditToggleAnchor() const;
+
+private:
+    void init() override;
+    void process() override;
+    void shutdown() override;
+
+    void processEditWidget();
+    void processEvents();
+
+    void leftMouseButtonPressed(IntVector2D const& mousePos);
+    void leftMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos);
+    void mouseWheelUp(IntVector2D const& mousePos, float strongness);
+    void leftMouseButtonReleased(IntVector2D const& mousePos, IntVector2D const& prevMousePos);
+
+    void rightMouseButtonPressed(IntVector2D const& mousePos);
+    void rightMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos);
+    void mouseWheelDown(IntVector2D const& mousePos, float strongness);
+    void rightMouseButtonReleased();
+
+    void processMouseWheel(IntVector2D const& mousePos);
+
+    void middleMouseButtonPressed(IntVector2D const& mousePos);
+    void middleMouseButtonHold(IntVector2D const& mousePos);
+    void middleMouseButtonReleased();
+
+    void drawCursor();
+
+    float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
+
+    struct Modes
+    {
+        bool editMode = false;
+        InteractionMode interactionMode = InteractionMode_Normal;
+        EditTool tool = EditTool_Select;
+    };
+    Modes _modes;
+    Modes _modesAtClick;
+    RealVector2D _editToggleAnchor;
+
+    // Navigation
+    std::optional<RealVector2D> _worldPosForPanning;
+    std::optional<IntVector2D> _prevMousePosInt;
+
+    std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
+
+    struct MouseWheelAction
+    {
+        bool up;  // false=down
+        float strongness;
+        std::chrono::steady_clock::time_point start;
+        std::chrono::steady_clock::time_point lastTime;
+    };
+    std::optional<MouseWheelAction> _mouseWheelAction;
+};

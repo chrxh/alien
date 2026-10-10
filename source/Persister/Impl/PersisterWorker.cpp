@@ -1,0 +1,698 @@
+#include "PersisterWorker.h"
+
+#include <algorithm>
+#include <filesystem>
+
+#include <Fonts/IconsFontAwesome5.h>
+
+#include <Base/Interface/LoggingService.h>
+#include <Base/Interface/StringHelper.h>
+#include <Base/Interface/UnlockGuard.h>
+
+#include <Network/Interface/NetworkService.h>
+
+#include <Data/Interface/GenomeDescAccessService.h>
+
+#include <Engine/Interface/SimulationFacade.h>
+
+#include <Persister/Interface/PersisterRequestResult.h>
+#include <Persister/Interface/SerializerService.h>
+
+_PersisterWorker::_PersisterWorker() {}
+
+void _PersisterWorker::runThreadLoop()
+{
+    std::unique_lock lock(_requestMutex);
+    while (!_isShutdown.load()) {
+        if (_openRequests.empty()) {
+            _conditionVariable.wait(lock);
+        }
+        processRequests(lock);
+    }
+}
+
+void _PersisterWorker::restart()
+{
+    _isShutdown = false;
+}
+
+void _PersisterWorker::shutdown()
+{
+    {
+        std::unique_lock lock(_requestMutex);
+        _isShutdown = true;
+    }
+    _conditionVariable.notify_all();
+}
+
+bool _PersisterWorker::isBusy() const
+{
+    std::unique_lock uniqueLock(_requestMutex);
+
+    return !_openRequests.empty() || !_inProgressRequests.empty();
+}
+
+std::optional<PersisterRequestState> _PersisterWorker::getRequestState(PersisterRequestId const& id) const
+{
+    std::unique_lock uniqueLock(_requestMutex);
+
+    if (std::ranges::find_if(_openRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _openRequests.end()) {
+        return PersisterRequestState::InQueue;
+    }
+    if (std::ranges::find_if(_inProgressRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; })
+        != _inProgressRequests.end()) {
+        return PersisterRequestState::InProgress;
+    }
+    if (std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& request) { return request->getRequestId() == id; })
+        != _finishedRequests.end()) {
+        return PersisterRequestState::Finished;
+    }
+    if (std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& request) { return request->getRequestId() == id; }) != _requestErrors.end()) {
+        return PersisterRequestState::Error;
+    }
+    return std::nullopt;
+}
+
+void _PersisterWorker::addRequest(PersisterRequest const& job)
+{
+    {
+        std::unique_lock uniqueLock(_requestMutex);
+
+        _openRequests.emplace_back(job);
+    }
+    _conditionVariable.notify_all();
+}
+
+PersisterRequestResult _PersisterWorker::fetchRequestResult(PersisterRequestId const& id)
+{
+    std::unique_lock uniqueLock(_requestMutex);
+
+    auto finishedJobsIter = std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& job) { return job->getRequestId() == id; });
+    if (finishedJobsIter != _finishedRequests.end()) {
+        auto resultCopy = *finishedJobsIter;
+        _finishedRequests.erase(finishedJobsIter);
+        return resultCopy;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+PersisterRequestError _PersisterWorker::fetchJobError(PersisterRequestId const& id)
+{
+    std::unique_lock uniqueLock(_requestMutex);
+
+    auto jobsErrorsIter = std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& job) { return job->getRequestId() == id; });
+    if (jobsErrorsIter != _requestErrors.end()) {
+        auto resultCopy = *jobsErrorsIter;
+        _requestErrors.erase(jobsErrorsIter);
+        return resultCopy;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+std::vector<PersisterErrorInfo> _PersisterWorker::fetchAllErrorInfos(SenderId const& senderId)
+{
+    std::unique_lock lock(_requestMutex);
+
+    std::vector<PersisterErrorInfo> result;
+    std::deque<PersisterRequestError> filteredErrorJobs;
+    for (auto const& errorJob : _requestErrors) {
+        if (errorJob->getSenderId() == senderId) {
+            result.emplace_back(errorJob->getErrorInfo());
+        } else {
+            filteredErrorJobs.emplace_back(errorJob);
+        }
+    }
+    _requestErrors = filteredErrorJobs;
+    return result;
+}
+
+void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
+{
+    if (_openRequests.empty()) {
+        return;
+    }
+
+    while (!_openRequests.empty()) {
+
+        auto request = _openRequests.front();
+        _openRequests.pop_front();
+
+        _inProgressRequests.push_back(request);
+
+        std::variant<PersisterRequestResult, PersisterRequestError> processingResult;
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_SaveSimulationRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReadSimulationRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_LoginRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_DownloadNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_UploadNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReplaceNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetSimulationPicturesRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetUserNamesForEmojiRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_DeleteNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_EditNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_MoveNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ToggleReactionNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetPeakSimulationRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        }
+        auto inProgressJobsIter = std::ranges::find_if(
+            _inProgressRequests, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
+        _inProgressRequests.erase(inProgressJobsIter);
+
+        if (std::holds_alternative<PersisterRequestResult>(processingResult)) {
+            if (request->getSenderInfo().wishResultData) {
+                _finishedRequests.emplace_back(std::get<PersisterRequestResult>(processingResult));
+            }
+        }
+        if (std::holds_alternative<PersisterRequestError>(processingResult)) {
+            if (request->getSenderInfo().wishErrorInfo) {
+                _requestErrors.emplace_back(std::get<PersisterRequestError>(processingResult));
+            }
+        }
+    }
+}
+
+namespace
+{
+    std::filesystem::path generateFilename(std::filesystem::path const& directory, uint64_t timestep)
+    {
+        std::filesystem::path result;
+        int i = 0;
+        do {
+            auto postfix = i == 0 ? std::string() : "-" + std::to_string(i);
+            result = directory / ("save_" + StringHelper::format(timestep, '_') + postfix + ".sim");
+            ++i;
+        } while (std::filesystem::exists(result) && i < 100);
+        return result;
+    }
+}
+
+auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSimulationRequest const& request) -> PersisterRequestResultOrError
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    SimulationDesc deserializedData;
+    std::chrono::system_clock::time_point timestamp;
+
+    try {
+        timestamp = std::chrono::system_clock::now();
+        deserializedData.statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
+            .realTime(_SimulationFacade::get()->getRealTime())
+            .zoom(requestData.zoom)
+            .center(requestData.center)
+            .worldSize(_SimulationFacade::get()->getWorldSize())
+            .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
+            .timestep(_SimulationFacade::get()->getCurrentTimestep())
+            .mainData(_SimulationFacade::get()->getSimulationData());
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{"The simulation could not be saved because no valid data could be obtained from the GPU."});
+    }
+
+    try {
+        auto filename = requestData.filename;
+        if (requestData.generateNameFromTimestep) {
+            filename = generateFilename(filename, deserializedData._timestep);
+        }
+        if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
+        }
+
+        return std::make_shared<_SaveSimulationRequestResult>(
+            request->getRequestId(),
+            SaveSimulationResultData{
+                .filename = filename,
+                .projectName = deserializedData._simulationParameters.projectName.value,
+                .timestep = deserializedData._timestep,
+                .timestamp = timestamp});
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
+    }
+}
+
+auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSimulationRequest const& request) -> PersisterRequestResultOrError
+{
+    UnlockGuard unlockGuard(lock);
+
+    try {
+        auto const& requestData = request->getData();
+
+        SimulationDesc deserializedData;
+        if (!SerializerService::get().deserializeSimulationFromFiles(deserializedData, requestData.filename)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
+        }
+        if (requestData.initSimulation) {
+            try {
+                _SimulationFacade::get()->closeSimulation();
+                _SimulationFacade::get()->newSimulation(deserializedData._timestep, deserializedData._worldSize, deserializedData._simulationParameters);
+                _SimulationFacade::get()->setSimulationData(deserializedData._mainData);
+                _SimulationFacade::get()->setStatisticsHistory(deserializedData._statistics);
+                _SimulationFacade::get()->setRealTime(deserializedData._realTime);
+            } catch (CudaMemoryAllocationException const& exception) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{exception.what()});
+            }
+        }
+
+        return std::make_shared<_ReadSimulationRequestResult>(
+            request->getRequestId(), ReadSimulationResultData{std::filesystem::path(requestData.filename).filename(), deserializedData});
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to load simulation."});
+    }
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, LoginRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    LoginErrorCode errorCode;
+    if (!NetworkService::get().login(errorCode, requestData.userName, requestData.password, requestData.userInfo)) {
+        if (errorCode != LoginErrorCode_UnknownUser) {
+            return std::make_shared<_PersisterRequestError>(request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Login failed."});
+        }
+        if (errorCode == LoginErrorCode_UnknownUser) {
+            return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = true});
+        }
+    }
+    return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = false});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetNetworkResourcesRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    NetworkService::get().refreshLogin();
+
+    GetNetworkResourcesResultData data;
+
+    auto withRetry = true;
+    bool success = NetworkService::get().getNetworkResourceList(data.resourceTOs, withRetry);
+    if (success) {
+        success &= NetworkService::get().getUserList(data.userTOs, withRetry);
+    }
+    if (success && NetworkService::get().getLoggedInUserName()) {
+        success &= NetworkService::get().getEmojiTypeByResourceId(data.emojiTypeByResourceId);
+    }
+
+    if (!success) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to retrieve browser data. Please try again."});
+    }
+
+    return std::make_shared<_GetNetworkResourcesRequestResult>(request->getRequestId(), data);
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    DownloadNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+    DownloadNetworkResourceResultData resultData;
+    resultData.resourceName = requestData.resourceName;
+    resultData.resourceVersion = requestData.resourceVersion;
+    resultData.resourceType = requestData.resourceType;
+
+    std::string dataTypeString = requestData.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+    std::optional<SimulationDesc> cachedSimulation;
+    if (requestData.resourceType == NetworkResourceType_Simulation) {
+        cachedSimulation = requestData.downloadCache->find(requestData.resourceId);
+    }
+    std::string serializedSim;
+    if (!cachedSimulation.has_value()) {
+        if (!NetworkService::get().downloadResource(serializedSim, requestData.resourceId)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to download " + dataTypeString + "."});
+        }
+    }
+
+    if (requestData.resourceType == NetworkResourceType_Simulation) {
+        SimulationDesc deserializedSimulation;
+        if (!cachedSimulation.has_value()) {
+            if (!SerializerService::get().deserializeSimulationFromString(deserializedSimulation, serializedSim)) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(),
+                    request->getSenderInfo().senderId,
+                    PersisterErrorInfo{"Failed to load simulation. Your program version may not match."});
+            }
+            requestData.downloadCache->insertOrAssign(requestData.resourceId, deserializedSimulation);
+        } else {
+            log(Priority::Important, "browser: get resource with id=" + requestData.resourceId + " from simulation cache");
+            std::swap(deserializedSimulation, *cachedSimulation);
+            NetworkService::get().incDownloadCounter(requestData.resourceId);
+        }
+        resultData.resourceData.emplace<SimulationDesc>(std::move(deserializedSimulation));
+    } else {
+        GenomeDesc genome;
+        if (!SerializerService::get().deserializeGenomeFromString(genome, serializedSim)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
+        }
+        resultData.resourceData.emplace<GenomeDesc>(std::move(genome));
+    }
+
+    return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    UploadNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+    DownloadNetworkResourceResultData resultData;
+
+    std::string mainData;
+    std::string pictureJpg;
+    IntVector2D size;
+    int numObjects = 0;
+
+    auto resourceType = std::holds_alternative<UploadNetworkResourceRequestData::SimulationData>(requestData.data) ? NetworkResourceType_Simulation
+                                                                                                                   : NetworkResourceType_Genome;
+    SimulationDesc deserializedSim;
+    if (resourceType == NetworkResourceType_Simulation) {
+        try {
+            auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
+            deserializedSim.timestep(_SimulationFacade::get()->getCurrentTimestep())
+                .realTime(_SimulationFacade::get()->getRealTime())
+                .zoom(simulationData.zoom)
+                .center(simulationData.center)
+                .worldSize(_SimulationFacade::get()->getWorldSize())
+                .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
+                .statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
+                .mainData(_SimulationFacade::get()->getSimulationData());
+        } catch (...) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be uploaded because no valid data could be obtained from the GPU."});
+        }
+
+        if (!SerializerService::get().serializeSimulationToString(mainData, deserializedSim)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for uploading."});
+        }
+        size = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
+        numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
+        pictureJpg = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
+    } else {
+        auto const& creatureData = std::get<UploadNetworkResourceRequestData::CreatureData>(requestData.data);
+        auto const& genome = creatureData.description;
+        if (genome._genes.empty()) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"There is no valid genome for uploading selected."});
+        }
+        if (!SerializerService::get().serializeGenomeToString(mainData, genome)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
+        }
+        numObjects = GenomeDescAccessService::get().getNumberOfNodes(genome);
+        pictureJpg = creatureData.jpg;
+    }
+
+    std::string resourceId;
+    if (!NetworkService::get().uploadResource(
+            resourceId,
+            requestData.folderName + requestData.resourceWithoutFolderName,
+            requestData.resourceDescription,
+            size,
+            numObjects,
+            mainData,
+            pictureJpg,
+            resourceType,
+            requestData.workspaceType)) {
+        std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{
+                "Failed to upload " + dataTypeString
+                + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
+                  " The total size of your uploads exceeds the allowed storage limit."});
+    }
+    if (resourceType == NetworkResourceType_Simulation) {
+        requestData.downloadCache->insertOrAssign(resourceId, deserializedSim);
+    }
+
+    return std::make_shared<_UploadNetworkResourceRequestResult>(request->getRequestId(), UploadNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    ReplaceNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    auto resourceType = std::holds_alternative<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data) ? NetworkResourceType_Simulation
+                                                                                                                    : NetworkResourceType_Genome;
+    std::string mainData;
+    IntVector2D worldSize;
+    int numObjects = 0;
+    std::string pictureJpg;
+
+    SimulationDesc deserializedSim;
+    if (resourceType == NetworkResourceType_Simulation) {
+        try {
+            auto simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
+            deserializedSim.timestep(_SimulationFacade::get()->getCurrentTimestep())
+                .realTime(_SimulationFacade::get()->getRealTime())
+                .zoom(simulationData.zoom)
+                .center(simulationData.center)
+                .worldSize(_SimulationFacade::get()->getWorldSize())
+                .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
+                .statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
+                .mainData(_SimulationFacade::get()->getSimulationData());
+        } catch (...) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be replaced because no valid data could be obtained from the GPU."});
+        }
+
+        if (!SerializerService::get().serializeSimulationToString(mainData, deserializedSim)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for replacing."});
+        }
+        worldSize = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
+        numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
+        pictureJpg = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
+    } else {
+        auto const& creatureData = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data);
+        auto const& genome = creatureData.description;
+        if (genome._genes.empty()) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"There is no valid genome for replacing selected."});
+        }
+        if (!SerializerService::get().serializeGenomeToString(mainData, genome)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for replacing."});
+        }
+        numObjects = GenomeDescAccessService::get().getNumberOfNodes(genome);
+        pictureJpg = creatureData.jpg;
+    }
+
+    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, pictureJpg)) {
+
+        std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{
+                "Failed to replace " + dataTypeString
+                + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
+                  " The total size of your uploads exceeds the allowed storage limit."});
+    }
+    if (resourceType == NetworkResourceType_Simulation) {
+        requestData.downloadCache->insertOrAssign(requestData.resourceId, deserializedSim);
+    }
+    return std::make_shared<_ReplaceNetworkResourceRequestResult>(request->getRequestId(), ReplaceNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    GetSimulationPicturesRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    GetSimulationPicturesResultData resultData;
+    if (!NetworkService::get().getResourcePictures(resultData.jpgBySimId, requestData.simIds)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load preview pictures."});
+    }
+
+    return std::make_shared<_GetSimulationPicturesRequestResult>(request->getRequestId(), resultData);
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    GetUserNamesForReactionResultData resultData;
+    resultData.resourceId = requestData.resourceId;
+    resultData.emojiType = requestData.emojiType;
+    if (!NetworkService::get().getUserNamesForResourceAndEmojiType(resultData.userNames, requestData.resourceId, requestData.emojiType)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load user names."});
+    }
+
+    return std::make_shared<_GetUserNamesForEmojiRequestResult>(request->getRequestId(), resultData);
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    DeleteNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    for (auto const& entry : requestData.entries) {
+        if (!NetworkService::get().deleteResource(entry.resourceId)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to delete item. Please try again later."});
+        }
+    }
+
+    return std::make_shared<_DeleteNetworkResourceRequestResult>(request->getRequestId(), DeleteNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, EditNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    for (auto const& entry : requestData.entries) {
+        if (!NetworkService::get().editResource(entry.resourceId, entry.newName, entry.newDescription)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to edit item. Please try again later."});
+        }
+    }
+
+    return std::make_shared<_EditNetworkResourceRequestResult>(request->getRequestId(), EditNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, MoveNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    for (auto const& entry : requestData.entries) {
+        if (!NetworkService::get().moveResource(entry.resourceId, entry.workspaceType)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to change visibility of item. Please try again later."});
+        }
+    }
+
+    return std::make_shared<_MoveNetworkResourceRequestResult>(request->getRequestId(), MoveNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    ToggleReactionNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    if (!NetworkService::get().toggleReactionForResource(requestData.resourceId, requestData.emojiType)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to toggle reaction. Please try again later."});
+    }
+
+    return std::make_shared<_ToggleReactionNetworkResourceRequestResult>(request->getRequestId(), ToggleReactionNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetPeakSimulationRequest const& request)
+{
+    try {
+        UnlockGuard unlockGuard(lock);
+
+        SimulationDesc deserializedSimulation;
+        deserializedSimulation.statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData());
+        return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"No valid data could be obtained from the GPU."});
+    }
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    SaveDeserializedSimulationRequest const& request)
+{
+    try {
+        UnlockGuard unlockGuard(lock);
+
+        auto const& requestData = request->getData();
+
+        auto deserializedData = requestData.sharedDeserializedSimulation->getDeserializedSimulation();
+
+        auto filename = requestData.filename;
+        if (requestData.generateNameFromTimestep) {
+            filename = generateFilename(filename, deserializedData._timestep);
+        }
+        if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
+        }
+        auto result = std::make_shared<_SaveDeserializedSimulationRequestResult>(
+            request->getRequestId(),
+            SaveDeserializedSimulationResultData{
+                .filename = filename,
+                .projectName = deserializedData._simulationParameters.projectName.value,
+                .timestep = deserializedData._timestep,
+                .timestamp = requestData.sharedDeserializedSimulation->getTimestamp()});
+
+        if (requestData.resetDeserializedSimulation) {
+            requestData.sharedDeserializedSimulation->reset();
+        }
+        return result;
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
+    }
+}

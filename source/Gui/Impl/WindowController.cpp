@@ -1,0 +1,333 @@
+#include "WindowController.h"
+
+#include <algorithm>
+#include <sstream>
+
+#include <boost/algorithm/string.hpp>
+
+#include <Base/Interface/GlobalSettings.h>
+#include <Base/Interface/LoggingService.h>
+#include <Base/Interface/Resources.h>
+
+#include "MainLoopEntityController.h"
+
+#include <stb_image.h>
+#include <GLFW/glfw3.h>
+
+namespace
+{
+    auto const WindowedMode = std::string("window");
+    auto const DesktopMode = std::string("desktop");
+    auto constexpr MinWindowSize = 100;
+
+    GLFWvidmode convert(std::string const& mode)
+    {
+        std::vector<std::string> modeParts;
+        boost::split(modeParts, mode, [](char c) { return c == ' '; });
+
+        CHECK(modeParts.size() == 6);
+
+        GLFWvidmode result;
+        result.width = std::stoi(modeParts.at(0));
+        result.height = std::stoi(modeParts.at(1));
+        result.redBits = std::stoi(modeParts.at(2));
+        result.greenBits = std::stoi(modeParts.at(3));
+        result.blueBits = std::stoi(modeParts.at(4));
+        result.refreshRate = std::stoi(modeParts.at(5));
+        return result;
+    }
+
+    std::string convert(GLFWvidmode const& vidmode)
+    {
+        std::vector<std::string> modeParts;
+        modeParts.emplace_back(std::to_string(vidmode.width));
+        modeParts.emplace_back(std::to_string(vidmode.height));
+        modeParts.emplace_back(std::to_string(vidmode.redBits));
+        modeParts.emplace_back(std::to_string(vidmode.greenBits));
+        modeParts.emplace_back(std::to_string(vidmode.blueBits));
+        modeParts.emplace_back(std::to_string(vidmode.refreshRate));
+
+        return boost::join(modeParts, " ");
+    }
+}
+
+namespace
+{
+    void setWindowIcon(GLFWwindow* window)
+    {
+        // Wayland has no window icon protocol and GLFW reports an error there, which the error callback turns into an exception.
+        if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
+            return;
+        }
+
+        std::vector<GLFWimage> icons;
+        for (auto const& filename : Const::WindowIconFilenames) {
+            int width, height, numChannels;
+            auto pixels = stbi_load(filename.string().c_str(), &width, &height, &numChannels, 4);
+            if (pixels == nullptr) {
+                log(Priority::Important, "could not load window icon " + filename.string());
+                continue;
+            }
+            icons.push_back(GLFWimage{width, height, pixels});
+        }
+        if (icons.empty()) {
+            return;
+        }
+
+        glfwSetWindowIcon(window, static_cast<int>(icons.size()), icons.data());
+        for (auto const& icon : icons) {
+            stbi_image_free(icon.pixels);
+        }
+    }
+}
+
+void WindowController::init()
+{
+    auto& settings = GlobalSettings::get();
+    _mode = settings.getValue("settings.display.mode", DesktopMode);
+    auto storedSize = IntVector2D{
+        settings.getValue("settings.display.window width", _sizeInWindowedMode.x), settings.getValue("settings.display.window height", _sizeInWindowedMode.y)};
+    if (storedSize.x >= MinWindowSize && storedSize.y >= MinWindowSize) {
+        _sizeInWindowedMode = storedSize;
+    }
+    _fps = settings.getValue("settings.display.fps", _fps);
+    auto lastContentScaleFactor = settings.getValue("settings.display.content scale factor", 0.0f);
+    if (lastContentScaleFactor > 0.0f) {
+        _lastContentScaleFactor = lastContentScaleFactor;
+    }
+    _autoContentScaleFactor = settings.getValue("settings.display.auto content scale factor", _autoContentScaleFactor);
+    _userDefinedContentScaleFactor = settings.getValue("settings.display.user defined content scale factor", _userDefinedContentScaleFactor);
+
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    _desktopVideoMode = std::make_shared<GLFWvidmode>(*glfwGetVideoMode(primaryMonitor));
+    _windowData.mode = _desktopVideoMode.get();
+
+    _windowData.window = [&] {
+        if (isWindowedMode()) {
+            log(Priority::Important, "set windowed mode");
+            _startupSize = _sizeInWindowedMode;
+
+            // The console window, which Windows Terminal opens with a delay, would otherwise cover the window. Full screen windows stay on top anyway.
+            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+            return glfwCreateWindow(_sizeInWindowedMode.x, _sizeInWindowedMode.y, "alien", nullptr, nullptr);
+        } else {
+            log(Priority::Important, "set full screen mode");
+            _startupSize = {_windowData.mode->width, _windowData.mode->height};
+            return glfwCreateWindow(_windowData.mode->width, _windowData.mode->height, "alien", primaryMonitor, nullptr);
+        }
+    }();
+
+    if (_windowData.window == nullptr) {
+        throw std::runtime_error("Failed to create window.");
+    }
+    setWindowIcon(_windowData.window);
+
+    if (!isWindowedMode() && !isDesktopMode()) {
+        auto userMode = getUserDefinedResolution();
+        _startupSize = {userMode.width, userMode.height};
+        log(Priority::Important, "switching to  " + createLogString(userMode));
+        glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
+    }
+
+    float temp;
+    glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &_osContentScaleFactor, &temp);  // Consider only horizontal content scale
+    if (_userDefinedContentScaleFactor <= 0.0f) {
+        _userDefinedContentScaleFactor = _osContentScaleFactor;
+    }
+    _contentScaleFactor = getConfiguredContentScaleFactor();
+}
+
+void WindowController::shutdown()
+{
+    if (isWindowedMode()) {
+        updateWindowSize();
+    }
+    auto& settings = GlobalSettings::get();
+    settings.setValue("settings.display.mode", _mode);
+    settings.setValue("settings.display.window width", _sizeInWindowedMode.x);
+    settings.setValue("settings.display.window height", _sizeInWindowedMode.y);
+    settings.setValue("settings.display.fps", _fps);
+    settings.setValue("settings.display.content scale factor", _contentScaleFactor);
+    settings.setValue("settings.display.auto content scale factor", _autoContentScaleFactor);
+    settings.setValue("settings.display.user defined content scale factor", _userDefinedContentScaleFactor);
+}
+
+auto WindowController::getWindowData() -> WindowData
+{
+    return _windowData;
+}
+
+bool WindowController::isWindowedMode()
+{
+    return _mode == WindowedMode;
+}
+
+void WindowController::setWindowedMode()
+{
+    setMode(WindowedMode);
+}
+
+bool WindowController::isDesktopMode()
+{
+    return _mode == DesktopMode;
+}
+
+void WindowController::setDesktopMode()
+{
+    setMode(DesktopMode);
+}
+
+GLFWvidmode WindowController::getUserDefinedResolution()
+{
+    return convert(_mode);
+}
+
+void WindowController::setUserDefinedResolution(GLFWvidmode const& videoMode)
+{
+    setMode(convert(videoMode));
+}
+
+IntVector2D WindowController::getStartupWindowSize()
+{
+    return _startupSize;
+}
+
+std::string WindowController::getMode()
+{
+    return _mode;
+}
+
+void WindowController::setMode(std::string const& mode)
+{
+    if (getMode() == mode) {
+        return;
+    }
+    if (isWindowedMode()) {
+        updateWindowSize();
+    }
+    applyMode(mode);
+    _mode = mode;
+}
+
+void WindowController::hideWindow()
+{
+    // GLFW ignores hiding a full screen window, so it has to leave full screen first
+    if (!isWindowedMode()) {
+        applyMode(WindowedMode);
+    }
+    glfwIconifyWindow(_windowData.window);
+    glfwHideWindow(_windowData.window);
+}
+
+void WindowController::showWindow()
+{
+    glfwShowWindow(_windowData.window);
+    glfwRestoreWindow(_windowData.window);
+    if (!isWindowedMode()) {
+        applyMode(_mode);
+    }
+    glfwFocusWindow(_windowData.window);
+}
+
+void WindowController::showStartupWindow()
+{
+    // GLFW focuses the window when showing it and leaves full screen windows untouched
+    glfwShowWindow(_windowData.window);
+}
+
+void WindowController::applyMode(std::string const& mode)
+{
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+
+    if (mode == WindowedMode) {
+        log(Priority::Important, "set windowed mode");
+        GLFWvidmode const* desktopVideoMode = glfwGetVideoMode(primaryMonitor);
+        glfwSetWindowMonitor(_windowData.window, nullptr, 0, 0, _sizeInWindowedMode.x, _sizeInWindowedMode.y, desktopVideoMode->refreshRate);
+    } else if (mode == DesktopMode) {
+        log(Priority::Important, "set full screen mode with " + createLogString(*_desktopVideoMode));
+        glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, _desktopVideoMode->width, _desktopVideoMode->height, _desktopVideoMode->refreshRate);
+    } else {
+        auto userMode = convert(mode);
+        log(Priority::Important, "set full screen mode with " + createLogString(userMode));
+        glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
+    }
+}
+
+void WindowController::updateWindowSize()
+{
+    // A minimized window reports a zero size, which must not overwrite the remembered size
+    if (glfwGetWindowAttrib(_windowData.window, GLFW_ICONIFIED) != 0) {
+        return;
+    }
+    IntVector2D size;
+    glfwGetWindowSize(_windowData.window, &size.x, &size.y);
+    if (size.x > 0 && size.y > 0) {
+        _sizeInWindowedMode = size;
+    }
+}
+
+std::string WindowController::createLogString(GLFWvidmode const& videoMode)
+{
+    std::stringstream ss;
+    ss << videoMode.width << " x " << videoMode.height << " @ " << videoMode.refreshRate << "Hz";
+    return ss.str();
+}
+
+void WindowController::updateWindowTitle(std::string const& projectName)
+{
+    if (_lastProjectName != projectName) {
+        _lastProjectName = projectName;
+        auto title = std::string("Alien - Simulation: ") + projectName;
+        glfwSetWindowTitle(_windowData.window, title.c_str());
+    }
+}
+
+int WindowController::getFps()
+{
+    return _fps;
+}
+
+void WindowController::setFps(int value)
+{
+    _fps = value;
+}
+
+float WindowController::getContentScaleFactor()
+{
+    return _contentScaleFactor;
+}
+
+float WindowController::getContentScaleCorrection()
+{
+    return _lastContentScaleFactor ? _contentScaleFactor / *_lastContentScaleFactor : 1.0f;
+}
+
+float WindowController::getOsContentScaleFactor()
+{
+    return _osContentScaleFactor;
+}
+
+float WindowController::getConfiguredContentScaleFactor()
+{
+    return _autoContentScaleFactor ? _osContentScaleFactor : _userDefinedContentScaleFactor;
+}
+
+bool WindowController::isAutoContentScaleFactor()
+{
+    return _autoContentScaleFactor;
+}
+
+void WindowController::setAutoContentScaleFactor(bool value)
+{
+    _autoContentScaleFactor = value;
+}
+
+float WindowController::getUserDefinedContentScaleFactor()
+{
+    return _userDefinedContentScaleFactor;
+}
+
+void WindowController::setUserDefinedContentScaleFactor(float value)
+{
+    _userDefinedContentScaleFactor = std::clamp(value, MinContentScaleFactor, MaxContentScaleFactor);
+}

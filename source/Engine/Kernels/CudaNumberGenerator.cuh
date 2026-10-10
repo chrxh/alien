@@ -1,0 +1,122 @@
+#pragma once
+
+#include <bit>
+#include <vector>
+
+#include <cooperative_groups.h>
+#include <cuda/helper_cuda.h>
+#include <cuda_runtime.h>
+
+#include <Base/Interface/Macros.h>
+
+#include <Base/Interface/Ids.h>
+
+#include <device_launch_parameters.h>
+#include "Array.cuh"
+
+namespace cg = cooperative_groups;
+
+class CudaNumberGenerator
+{
+public:
+    // Methods for host
+    __host__ void init(int size)
+    {
+        CHECK(std::has_single_bit(static_cast<uint32_t>(size)));
+        _indexMask = static_cast<uint32_t>(size) - 1;
+
+        CudaMemoryManager::getInstance().acquireMemory(1, _currentRandomNumberIndex);
+        CudaMemoryManager::getInstance().acquireMemory(size, _array);
+        CudaMemoryManager::getInstance().acquireMemory(1, _ids);
+
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_currentRandomNumberIndex, 0, sizeof(uint32_t)));
+        std::vector<int> randomNumbers(size);
+        for (int i = 0; i < size; ++i) {
+            randomNumbers[i] = rand();
+        }
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
+
+        Ids hostIds;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_ids, &hostIds, sizeof(hostIds), cudaMemcpyHostToDevice));
+    }
+
+    __host__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_currentRandomNumberIndex);
+        CudaMemoryManager::getInstance().freeMemory(_array);
+        CudaMemoryManager::getInstance().freeMemory(_ids);
+    }
+
+    __host__ __inline__ Ids getIds_host()
+    {
+        Ids hostIds;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&hostIds, _ids, sizeof(hostIds), cudaMemcpyDeviceToHost));
+        return hostIds;
+    }
+
+    // Methods for device
+    __device__ __inline__ int random(int maxVal)
+    {
+        int number = getRandomNumber();
+        return number % (maxVal + 1);
+    }
+
+    __device__ __inline__ float random(float maxVal)
+    {
+        int number = getRandomNumber();
+        return maxVal * static_cast<float>(number) / RAND_MAX;
+    }
+
+    __device__ __inline__ float random(float minVal, float maxVal)
+    {
+        int number = getRandomNumber();
+        return minVal + (maxVal - minVal) * static_cast<float>(number) / RAND_MAX;
+    }
+
+    __device__ __inline__ float random()
+    {
+        int number = getRandomNumber();
+        return static_cast<float>(number) / RAND_MAX;
+    }
+
+    // Same result as random(), but one atomic serves the whole warp.
+    __device__ __inline__ float randomForAllThreads()
+    {
+        auto const warp = cg::coalesced_threads();
+        uint32_t firstIndex = 0;
+        if (warp.thread_rank() == 0) {
+            firstIndex = atomicAdd(_currentRandomNumberIndex, warp.size());
+        }
+        firstIndex = warp.shfl(firstIndex, 0);
+        return static_cast<float>(_array[(firstIndex + warp.thread_rank()) & _indexMask]) / RAND_MAX;
+    }
+
+    __device__ __inline__ bool randomBool() { return random(1) == 0; }
+
+    __device__ __inline__ uint8_t randomByte() { return static_cast<uint8_t>(random(255)); }
+
+    __device__ __inline__ void randomBytes(uint8_t* data, int size)
+    {
+        for (int i = 0; i < size; ++i) {
+            data[i] = randomByte();
+        }
+    }
+
+    __device__ __inline__ uint64_t createEntityId() { return alienAtomicAdd64(&_ids->entityId, static_cast<uint64_t>(1)); }
+    __device__ __inline__ uint64_t createLineageId() { return alienAtomicAdd32(&_ids->lineageId, static_cast<uint32_t>(1)); }
+
+    __device__ __inline__ void adaptMaxIds(Ids const& ids)
+    {
+        alienAtomicMax64(&_ids->entityId, ids.entityId + 1);
+        alienAtomicMax32(&_ids->lineageId, ids.lineageId + 1);
+    }
+
+private:
+    __device__ __inline__ int getRandomNumber() { return _array[atomicAdd(_currentRandomNumberIndex, 1u) & _indexMask]; }
+
+    uint32_t* _currentRandomNumberIndex = nullptr;
+    int* _array = nullptr;
+    uint32_t _indexMask = 0;
+
+    Ids* _ids = nullptr;
+};

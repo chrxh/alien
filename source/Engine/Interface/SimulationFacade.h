@@ -1,0 +1,150 @@
+#pragma once
+
+#include <Data/Interface/PreviewDesc.h>
+#include <Data/Interface/StatisticsHistory.h>
+
+#include "ArraySizesForGpuEntities.h"
+#include "Definitions.h"
+#include "GeometryBuffers.h"
+#include "StatisticsEntry.h"
+#include "SelectionShallowData.h"
+#include "SettingsForSimulation.h"
+#include "ShallowUpdateSelectionData.h"
+#include "SimulationParametersUpdateConfig.h"
+
+class _SimulationFacade
+{
+public:
+    virtual ~_SimulationFacade() = default;
+
+    static SimulationFacade get();
+
+    //***********************************
+    //* Main simulation data manipulation
+    //***********************************
+    virtual void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& simulationParameters) = 0;
+    virtual int getSessionId() const = 0;
+    virtual ContentDesc getSimulationData() = 0;
+    virtual void setSimulationData(ContentDesc const& dataToUpdate) = 0;
+    virtual void clear() = 0;
+
+    //*******************************
+    //* Methods for rendering interop
+    //*******************************
+    // Checks once before rendering whether CUDA can write directly into the shareable memory of geometry buffers,
+    // which is not a given on every system.
+    virtual bool isRenderingInteropWorking(GeometryBuffers const& geometryBuffers) const = 0;
+
+    // Transfers the simulation data from CUDA to the provided buffer.
+    // Resizes buffers if necessary and fills it with data for rendering.
+    // If the GPU is busy for a specified duration, the buffers will not be updated.
+    //
+    virtual void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
+    virtual bool isSyncSimulationWithRendering() const = 0;
+    virtual void setSyncSimulationWithRendering(bool value) = 0;
+    virtual int getSyncSimulationWithRenderingRatio() const = 0;
+    virtual void setSyncSimulationWithRenderingRatio(int value) = 0;
+
+    //****************************************
+    //* Methods for selection and manipulation
+    //****************************************
+    virtual void addAndSelectSimulationData(ContentDesc&& dataToAdd) = 0;
+    virtual ContentDesc getSelectedSimulationData(bool includeClusters) = 0;
+    virtual ContentDesc getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
+    virtual void removeSelectedObjects(bool includeClusters) = 0;
+    virtual void relaxSelectedObjects(bool includeClusters) = 0;
+    virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
+    virtual void makeSticky(bool includeClusters) = 0;
+    virtual void removeStickiness(bool includeClusters) = 0;
+    virtual void setStatic(bool value, bool includeClusters) = 0;
+    virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
+    virtual void reconnectSelectedObjects() = 0;
+    virtual void glueSelectedObjects(bool includeClusters) = 0;
+    virtual void cutConnections(RealVector2D const& start, RealVector2D const& end, bool onlySelected, bool includeClusters) = 0;
+    virtual void setDetached(bool value) = 0;
+    virtual void changeCell(ExtendedObjectDesc const& changedCell) = 0;
+    virtual void changeParticle(EnergyDesc const& changedParticle) = 0;
+    virtual int injectGenomeToSelectedCreatures(GenomeDesc const& genome) = 0;
+    virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
+    virtual void swapSelection(RealVector2D const& pos, float radius) = 0;
+    virtual SelectionShallowData getSelectionShallowData() = 0;
+    virtual void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) = 0;
+    virtual void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) = 0;
+    virtual void removeSelection() = 0;
+    virtual void updateSelection() = 0;
+    virtual bool updateSelectionIfNecessary() = 0;
+    virtual void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) = 0;
+
+    //********************
+    //* Simulation control
+    //********************
+    virtual void calcTimesteps(uint64_t timesteps) = 0;
+    virtual void runSimulation() = 0;
+    virtual void pauseSimulation() = 0;
+    virtual void applyCataclysm(int power) = 0;
+    virtual bool isSimulationRunning() const = 0;
+    virtual void checkAndThrowException() const = 0;
+    virtual void closeSimulation() = 0;
+    virtual uint64_t getCurrentTimestep() const = 0;
+    virtual void setCurrentTimestep(uint64_t value) = 0;
+    virtual std::chrono::milliseconds getRealTime() const = 0;
+    virtual void setRealTime(std::chrono::milliseconds const& value) = 0;
+    virtual std::optional<int> getTpsRestriction() const = 0;
+    virtual void setTpsRestriction(std::optional<int> const& value) = 0;
+    virtual float getTps() const = 0;
+
+    //*********************
+    //* Simulation settings
+    //*********************
+    virtual IntVector2D getWorldSize() const = 0;
+    virtual SimulationParameters getSimulationParameters() const = 0;
+    virtual SimulationParameters const& getOriginalSimulationParameters() const = 0;
+    virtual void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) = 0;
+    virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
+    virtual std::string getGpuName() const = 0;
+    virtual GpuUuid getGpuUuid() const = 0;
+
+    virtual void setDebugMode(bool value) = 0;
+
+    //************
+    //* Statistics
+    //************
+    virtual StatisticsHistory const& getStatisticsHistory() const = 0;
+    virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
+    virtual StatisticsEntry getStatisticsEntry() const = 0;
+
+    //********************
+    //* Preview simulation
+    //********************
+    virtual ContentDesc getPreviewData() = 0;
+    virtual void setPreviewData(ContentDesc const& description) = 0;
+    virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation = false) = 0;
+    virtual void calcTimestepsForPreview(int numSteps, bool detailSimulation = false) = 0;
+    virtual uint64_t getCurrentTimestepForPreview() = 0;
+    virtual void setCurrentTimestepForPreview(uint64_t timestep) = 0;
+
+    //****************
+    //* Only for tests
+    //****************
+    virtual void testOnly_mutate(uint64_t objectId) = 0;
+    virtual void testOnly_voidUnreachableNodes(uint64_t objectId) = 0;
+    virtual void testOnly_removeUnusedGenes(uint64_t objectId) = 0;
+    virtual void testOnly_removeGeneCycles(uint64_t objectId) = 0;
+    virtual void testOnly_limitGenesWithSeparation(uint64_t objectId) = 0;
+    virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
+    virtual void
+    testOnly_createConnectionWithAbsAngle(uint64_t objectId1, uint64_t objectId2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2) = 0;
+    virtual void testOnly_cleanupAfterTimestep() = 0;
+    virtual void testOnly_cleanupAfterDataManipulation() = 0;
+    virtual void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta) = 0;
+    virtual bool testOnly_isDataValid() = 0;
+    virtual void testOnly_calcTimestepWithCellFunctions() = 0;
+    virtual void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation = false) = 0;
+    virtual void testOnly_zeroTransferData() = 0;
+    virtual void testOnly_syncNumberGenerator() = 0;
+
+protected:
+    static SimulationFacade _instance;
+};
