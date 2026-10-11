@@ -559,7 +559,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
         blocks,
         RenderBlocks{
 
-            // Render block: Merge, tone mapping and overlays
+            // Render block: Merge, tone mapping, overlays and the light smoothing of the rasterized view
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeAdditive).uniformFunc(getBloomMergeUniforms)),
@@ -567,6 +567,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                     _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
                     _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0), labelFont),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
                 }),
             },
         });
