@@ -21,6 +21,10 @@ namespace
 {
     // Ray traced pictures average this many frames with jittered rays for the anti-aliasing
     auto constexpr NumRayTracedPictureFrames = 16;
+
+    // The wide glow carries the light of bright regions into dark ones, where it appears brighter after the tone mapping. It is weakened, so
+    // that the overall brightness does not increase.
+    auto constexpr GlowWeight = 0.7f;
 }
 
 void SimulationRenderer::setup(ImFont* labelFont)
@@ -186,7 +190,7 @@ namespace
     int getBlurRepetitions(RenderView const& view)
     {
         auto zoom = view.getScreenZoomFactor();
-        auto result = 7;
+        auto result = 9;
         if (zoom < 100.0f) {
             --result;
         }
@@ -229,7 +233,7 @@ namespace
     {
         float bloom = parameters.glow.value;
         return UniformValueMap{
-            {"colorFactor1", bloom},
+            {"colorFactor1", bloom * GlowWeight},
             {"colorFactor2", 1.5f - bloom},
         };
     }
