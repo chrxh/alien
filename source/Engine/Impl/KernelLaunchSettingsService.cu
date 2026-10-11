@@ -9,8 +9,8 @@
 
 #include <Data/EngineConstants.h>
 
-#include <Engine/Kernels/Base.cuh>
-#include <Engine/Kernels/SimulationKernels.cuh>
+#include <Engine/Impl/Kernels/Base.cuh>
+#include <Engine/Impl/Kernels/SimulationKernels.cuh>
 
 namespace
 {

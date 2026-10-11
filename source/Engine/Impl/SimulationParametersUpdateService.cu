@@ -5,8 +5,8 @@
 #include <Data/SimulationParameters.h>
 #include <Data/SpaceCalculator.h>
 
-#include <Engine/Kernels/Base.cuh>
-#include <Engine/Kernels/SimulationData.cuh>
+#include <Engine/Impl/Kernels/Base.cuh>
+#include <Engine/Impl/Kernels/SimulationData.cuh>
 
 SimulationParameters SimulationParametersUpdateService::integrateChanges(
     SimulationParameters const& currentParameters,

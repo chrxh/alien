@@ -1,10 +1,10 @@
 #include "EditKernelsService.cuh"
 
-#include <Engine/Kernels/DataAccessKernels.cuh>
-#include <Engine/Kernels/EditKernels.cuh>
-#include <Engine/Kernels/KernelLauncher.cuh>
-#include <Engine/Kernels/SelectionKernels.cuh>
-#include <Engine/Kernels/SimulationKernels.cuh>
+#include <Engine/Impl/Kernels/DataAccessKernels.cuh>
+#include <Engine/Impl/Kernels/EditKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/SelectionKernels.cuh>
+#include <Engine/Impl/Kernels/SimulationKernels.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
 #include "SelectionKernelsService.cuh"

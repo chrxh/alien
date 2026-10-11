@@ -23,7 +23,7 @@
 #include <Engine/Interface/ShallowUpdateSelectionData.h>
 #include <Engine/Interface/SimulationParametersUpdateConfig.h>
 
-#include <Engine/Kernels/Definitions.h>
+#include <Engine/Impl/Kernels/Definitions.h>
 
 #include "Definitions.h"
 

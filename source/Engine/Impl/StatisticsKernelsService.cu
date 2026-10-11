@@ -1,7 +1,7 @@
 #include "StatisticsKernelsService.cuh"
 
-#include <Engine/Kernels/KernelLauncher.cuh>
-#include <Engine/Kernels/StatisticsKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/StatisticsKernels.cuh>
 
 void StatisticsKernelsService::init() {}
 

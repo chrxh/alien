@@ -8,9 +8,9 @@
 #include <Engine/Interface/KernelLaunchSettings.h>
 #include <Engine/Interface/ShallowUpdateSelectionData.h>
 
-#include <Engine/Kernels/Base.cuh>
-#include <Engine/Kernels/Definitions.cuh>
-#include <Engine/Kernels/Macros.cuh>
+#include <Engine/Impl/Kernels/Base.cuh>
+#include <Engine/Impl/Kernels/Definitions.cuh>
+#include <Engine/Impl/Kernels/Macros.cuh>
 
 class DataAccessKernelsService
 {

@@ -136,11 +136,11 @@ source/ConsoleUi/                 Console widgets of the CLI and the console mod
 source/Data/                      Descriptions, genomes, simulation parameters and their services
 source/Data/Tests/                Data unit tests
 source/Engine/Impl/               CPU-side engine implementation
+source/Engine/Impl/Kernels/       CUDA kernels
 source/Engine/Impl/Tests/         CUDA engine integration tests
 source/Engine/Interface/          Abstract simulation APIs
 source/Engine/Interface/TestData/ Test data shared by the test suites
 source/Engine/Interface/Tests/    Engine interface unit tests
-source/Engine/Kernels/            CUDA kernels
 source/Gui/Impl/                  Dear ImGui GUI, free of graphics API code
 source/Gui/Interface/             Abstract GUI API that manages the main window
 source/McpTools/Impl/             MCP tools operating on the simulation
@@ -151,8 +151,8 @@ source/Persister/Impl/            Worker thread processing the persister request
 source/Persister/Interface/       Abstract persistence APIs, file I/O and serialization
 source/Persister/Interface/Tests/ Serialization tests
 source/Rendering/Impl/            Vulkan rendering of the simulation and the user interface
+source/Rendering/Impl/Shaders/    GLSL shader sources
 source/Rendering/Interface/       Abstract rendering APIs, free of graphics API code
-source/Rendering/Shaders/         GLSL shader sources
 source/Server/                    Python (FastAPI) server behind the cloud features
 external/                         Third-party dependencies incl. the pinned vcpkg submodule
 resources/                        Runtime assets
