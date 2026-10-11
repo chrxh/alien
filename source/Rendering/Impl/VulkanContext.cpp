@@ -27,8 +27,8 @@ namespace
     auto constexpr ApiVersion = VK_API_VERSION_1_3;
     auto constexpr ValidationLayerName = "VK_LAYER_KHRONOS_validation";
     auto constexpr FrameDescriptorPoolSize = 512;
-    auto constexpr ImageWriteAccesses =
-        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT;
+    auto constexpr ImageWriteAccesses = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT
+        | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
 
 #if defined(_WIN32)
     auto constexpr ExternalMemoryHandleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
@@ -37,6 +37,12 @@ namespace
     auto constexpr ExternalMemoryHandleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
     auto constexpr ExternalMemoryExtensionName = VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME;
 #endif
+
+    std::vector<char const*> const RayTracingExtensions = {
+        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+        VK_KHR_RAY_QUERY_EXTENSION_NAME,
+        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+    };
 }
 
 void checkVkResult(VkResult result, char const* operation)
@@ -153,6 +159,16 @@ bool VulkanContext::isMemorySharingSupported() const
     return _memorySharingSupported;
 }
 
+bool VulkanContext::isRayTracingSupported() const
+{
+    return _rayTracingSupported;
+}
+
+VkDeviceSize VulkanContext::getAccelerationStructureScratchAlignment() const
+{
+    return _accelerationStructureScratchAlignment;
+}
+
 VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VulkanMemory memory)
 {
     VulkanBuffer result;
@@ -199,9 +215,17 @@ VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags u
                 (externalProperties.externalMemoryProperties.externalMemoryFeatures & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT) != 0;
         }
 
+        void const* sharingInfo =
+            shareable ? (result.dedicatedAllocation ? static_cast<void const*>(&dedicatedInfo) : static_cast<void const*>(&exportInfo)) : nullptr;
+        VkMemoryAllocateFlagsInfo flagsInfo{
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO,
+            .pNext = sharingInfo,
+            .flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT,
+        };
+        auto withDeviceAddress = (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) != 0;
         VkMemoryAllocateInfo allocateInfo{
             .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-            .pNext = shareable ? (result.dedicatedAllocation ? static_cast<void const*>(&dedicatedInfo) : static_cast<void const*>(&exportInfo)) : nullptr,
+            .pNext = withDeviceAddress ? &flagsInfo : sharingInfo,
             .allocationSize = requirements.size,
             .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, properties),
         };
@@ -252,6 +276,12 @@ SharedGeometryMemory VulkanContext::exportMemory(VulkanBuffer const& buffer)
     result.fd = dup(buffer.sharedFd);
 #endif
     return result;
+}
+
+VkDeviceAddress VulkanContext::getDeviceAddress(VulkanBuffer const& buffer) const
+{
+    VkBufferDeviceAddressInfo addressInfo{.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO, .buffer = buffer.buffer};
+    return vkGetBufferDeviceAddress(_device, &addressInfo);
 }
 
 VulkanImage VulkanContext::createImage(IntVector2D const& size, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
@@ -361,7 +391,14 @@ namespace
                 VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
                 VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT};
         case ImageUsage::ShaderRead:
-            return {VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT};
+            return {
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+                VK_ACCESS_2_SHADER_SAMPLED_READ_BIT};
+        case ImageUsage::ComputeRead:
+            return {VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT};
+        case ImageUsage::ComputeReadWrite:
+            return {VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT};
         case ImageUsage::TransferSource:
             return {VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT};
         case ImageUsage::TransferDestination:
@@ -653,6 +690,23 @@ namespace
         std::memcpy(result.data(), idProperties.deviceUUID, result.size());
         return result;
     }
+
+    bool isRayTracingAvailable(VkPhysicalDevice device, std::vector<VkExtensionProperties> const& extensions)
+    {
+        if (!std::ranges::all_of(RayTracingExtensions, [&](auto const& name) { return hasExtension(extensions, name); })) {
+            return false;
+        }
+        VkPhysicalDeviceRayQueryFeaturesKHR rayQueryFeatures{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR};
+        VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
+            .pNext = &rayQueryFeatures,
+        };
+        VkPhysicalDeviceVulkan12Features features12{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &accelerationStructureFeatures};
+        VkPhysicalDeviceFeatures2 features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &features12};
+        vkGetPhysicalDeviceFeatures2(device, &features);
+        return rayQueryFeatures.rayQuery == VK_TRUE && accelerationStructureFeatures.accelerationStructure == VK_TRUE
+            && features12.bufferDeviceAddress == VK_TRUE;
+    }
 }
 
 void VulkanContext::selectPhysicalDevice(std::optional<GpuUuid> const& preferredGpu)
@@ -702,11 +756,20 @@ void VulkanContext::selectPhysicalDevice(std::optional<GpuUuid> const& preferred
     auto extensions = getDeviceExtensions(_physicalDevice);
     auto sameGpuAsEngine = preferredGpu.has_value() && getDeviceUuid(_physicalDevice) == *preferredGpu;
     _memorySharingSupported = sameGpuAsEngine && hasExtension(extensions, ExternalMemoryExtensionName);
+    _rayTracingSupported = isRayTracingAvailable(_physicalDevice, extensions);
+    if (_rayTracingSupported) {
+        VkPhysicalDeviceAccelerationStructurePropertiesKHR accelerationStructureProperties{
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
+        VkPhysicalDeviceProperties2 properties{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &accelerationStructureProperties};
+        vkGetPhysicalDeviceProperties2(_physicalDevice, &properties);
+        _accelerationStructureScratchAlignment = std::max(1u, accelerationStructureProperties.minAccelerationStructureScratchOffsetAlignment);
+    }
 
     log(Priority::Important, std::string("Vulkan device ") + _properties.deviceName + " selected");
     if (!sameGpuAsEngine) {
         log(Priority::Important, "the Vulkan device differs from the CUDA device, rendering data takes the detour over host memory");
     }
+    log(Priority::Important, std::string("hardware ray tracing is ") + (_rayTracingSupported ? "available" : "not available"));
 }
 
 void VulkanContext::createDevice()
@@ -714,6 +777,9 @@ void VulkanContext::createDevice()
     std::vector<char const*> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     if (_memorySharingSupported) {
         extensions.emplace_back(ExternalMemoryExtensionName);
+    }
+    if (_rayTracingSupported) {
+        extensions.insert(extensions.end(), RayTracingExtensions.begin(), RayTracingExtensions.end());
     }
 
     float queuePriority = 1.0f;
@@ -723,8 +789,20 @@ void VulkanContext::createDevice()
         .queueCount = 1,
         .pQueuePriorities = &queuePriority,
     };
+    VkPhysicalDeviceRayQueryFeaturesKHR rayQueryFeatures{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR, .rayQuery = VK_TRUE};
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
+        .pNext = &rayQueryFeatures,
+        .accelerationStructure = VK_TRUE,
+    };
+    VkPhysicalDeviceVulkan12Features features12{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+        .pNext = &accelerationStructureFeatures,
+        .bufferDeviceAddress = VK_TRUE,
+    };
     VkPhysicalDeviceVulkan13Features features13{
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+        .pNext = _rayTracingSupported ? &features12 : nullptr,
         .synchronization2 = VK_TRUE,
         .dynamicRendering = VK_TRUE,
     };
@@ -760,12 +838,20 @@ void VulkanContext::createDevice()
 
 void VulkanContext::createDescriptorPool()
 {
-    VkDescriptorPoolSize poolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, FrameDescriptorPoolSize * 4};
+    std::vector<VkDescriptorPoolSize> poolSizes{
+        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, FrameDescriptorPoolSize * 4},
+        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, FrameDescriptorPoolSize},
+        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, FrameDescriptorPoolSize},
+        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, FrameDescriptorPoolSize / 8},
+    };
+    if (_rayTracingSupported) {
+        poolSizes.emplace_back(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, FrameDescriptorPoolSize / 8);
+    }
     VkDescriptorPoolCreateInfo poolInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .maxSets = FrameDescriptorPoolSize,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
+        .poolSizeCount = static_cast<uint32_t>(poolSizes.size()),
+        .pPoolSizes = poolSizes.data(),
     };
     VkDescriptorPool pool;
     checkVkResult(vkCreateDescriptorPool(_device, &poolInfo, nullptr, &pool), "vkCreateDescriptorPool");

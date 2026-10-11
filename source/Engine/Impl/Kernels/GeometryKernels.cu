@@ -624,6 +624,10 @@ cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEve
         }
         // Only process cells that have been attacked and have attackVisualization enabled
         if (eventCounter > 0 && event == CellEvent_Attacked) {
+
+            // The attacker position follows the attacked object only when the cell functions are executed, in between it is extrapolated
+            eventPos += object->vel * (cudaSimulationParameters.timestepSize.value * toFloat(*data.timestep % TIMESTEPS_PER_CELL_FUNCTION));
+
             if (!isInVisibleRect(eventPos, context)) {
                 continue;
             }

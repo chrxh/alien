@@ -38,6 +38,9 @@ public:
     // Requires that the simulation is closed since the GPU engine writes into memory of the renderer
     virtual void shutdown() = 0;
 
+    // Whether the GPU can render the simulation with hardware ray tracing, see RenderView::rayTracing
+    virtual bool isRayTracingSupported() const = 0;
+
     //*********
     //* Frames
     //*********

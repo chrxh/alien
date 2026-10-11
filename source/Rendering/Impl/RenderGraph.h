@@ -43,10 +43,8 @@ using RenderBlocks = std::vector<RenderBlock>;
 class _RenderGraph
 {
 public:
-    _RenderGraph(RenderBlocks&& blocks);
-
-    // Copies the visible simulation data into the geometry buffers, which the GPU must no longer use
-    void updateGeometry(RealRect const& visibleWorldRect);
+    // Graphs for different ways of rendering can share the geometry buffers
+    _RenderGraph(RenderBlocks&& blocks, VulkanGeometryBuffers const& geometryBuffers);
 
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
     // Without a final target, the graph renders into an own image of the view size.

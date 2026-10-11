@@ -48,6 +48,11 @@ enum class ImageUsage
     ColorAttachment,
     DepthAttachment,
     ShaderRead,
+
+    // Accesses of compute shaders to images that stay in the general layout, read either as storage image or through a sampler
+    ComputeRead,
+    ComputeReadWrite,
+
     TransferSource,
     TransferDestination,
 };
@@ -98,9 +103,15 @@ public:
     // Whether buffer memory can be exported to the GPU engine
     bool isMemorySharingSupported() const;
 
+    // Whether acceleration structures and ray queries are available, i.e. whether the GPU has ray tracing hardware
+    bool isRayTracingSupported() const;
+    VkDeviceSize getAccelerationStructureScratchAlignment() const;
+
+    // Buffers with VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT get memory that provides a device address
     VulkanBuffer createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VulkanMemory memory);
     void destroyBuffer(VulkanBuffer& buffer);
     SharedGeometryMemory exportMemory(VulkanBuffer const& buffer);
+    VkDeviceAddress getDeviceAddress(VulkanBuffer const& buffer) const;
 
     VulkanImage createImage(IntVector2D const& size, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = 1);
 
@@ -149,6 +160,8 @@ private:
     VkPhysicalDeviceMemoryProperties _memoryProperties = {};
     bool _memorySharingSupported = false;
     bool _largePointsSupported = false;
+    bool _rayTracingSupported = false;
+    VkDeviceSize _accelerationStructureScratchAlignment = 256;
     VkDevice _device = VK_NULL_HANDLE;
     uint32_t _queueFamily = 0;
     VkQueue _queue = VK_NULL_HANDLE;

@@ -33,6 +33,10 @@ public:
     bool isOverlayActive() const;
     void setOverlayActive(bool active);
 
+    bool isRayTracingSupported() const;
+    bool isRayTracingActive() const;
+    void setRayTracingActive(bool active);
+
     float getBrightness() const;
     void setBrightness(float value);
     float getContrast() const;
@@ -56,6 +60,8 @@ private:
 
     // Overlay
     bool _cellDetailOverlayActive = false;
+
+    bool _rayTracingActive = false;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

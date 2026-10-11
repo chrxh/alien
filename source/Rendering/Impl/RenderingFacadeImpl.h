@@ -14,6 +14,7 @@ public:
     void setup(GLFWwindow* window) override;
     void setupSimulationRendering(ImFont* labelFont) override;
     void shutdown() override;
+    bool isRayTracingSupported() const override;
 
     void newFrame() override;
     void drawSimulation(RenderView const& view) override;
