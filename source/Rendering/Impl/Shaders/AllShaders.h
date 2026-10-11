@@ -50,6 +50,8 @@
 #include "RayTracingAntiAliasingCS.h"
 #include "RayTracingCommonCS.h"
 #include "RayTracingGasBlurCS.h"
+#include "RayTracingGasIrradianceCS.h"
+#include "RayTracingGasLightsCS.h"
 #include "RayTracingGasShadingCS.h"
 #include "RayTracingGasSplatCS.h"
 #include "RayTracingPrepareCS.h"

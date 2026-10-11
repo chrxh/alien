@@ -94,10 +94,10 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     vec4 tissue;      // x: 1 close up, 0 zoomed out, y: visibility of the cell details, z: world size of a pixel, w: visibility of the tissue
     vec4 parameters;  // x: scale of the background color, y: bioluminescence, z: 1 for anti-aliasing within the frame, w: weight of the frame
                       // in the average with the previous frames, 1 if there is no average
-    vec4 gasGrid;     // xy: world position of the first node of the gas grid, z: distance of the nodes, w: phase of the turbulence
+    vec4 gasGrid;     // xy: world position of the first node of the gas grid, z: distance of the nodes, w: standard deviation of the blur in nodes
     ivec4 gasSize;    // xy: number of nodes of the gas grid, z: blur radius in nodes, w: number of fluid particles
-    vec4 gasSpread;   // x: standard deviation of the particle spread in nodes, y: radius of the glow around the gas in world units,
-                      // z: standard deviation of the spark spread in nodes
+    vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid
+    ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
 } frame;
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT scene;
@@ -123,6 +123,10 @@ layout(set = 0, binding = 20, std430) readonly buffer FluidParticleBuffer { Flui
 layout(set = 0, binding = 21, std430) buffer GasAccumulationBuffer { uint gasAccumulation[]; };
 layout(set = 0, binding = 22, std430) buffer GasIntermediateBuffer { vec4 gasIntermediate[]; };
 layout(set = 0, binding = 23, rgba16f) uniform image2D gasImage;
+layout(set = 0, binding = 24) uniform sampler2D energyParticleTexture;
+layout(set = 0, binding = 25, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
+layout(set = 0, binding = 26, rgba16f) uniform image2D gasIrradianceImage;
+layout(set = 0, binding = 27) uniform sampler2D gasIrradianceSampler;
 
 //*******************
 //* General helpers
@@ -312,33 +316,98 @@ vec3 getBackgroundRadiance(vec2 world)
 //* Gas of the fluid particles
 //*******************************
 
-// The left half of the image holds the gas at the nodes of the gas grid, the right half the sparks of glowing particles. The sums per node
-// are fixed point numbers: number of particles, color sum and spark color sum.
+// The particles accumulate fixed point sums at the nodes of the gas grid, which are blurred into two layers of the gas image side by side.
+// The sums per node are the number of particles, their color sum and the number of cells, which cast shadows in the gas.
 const int GasImageSize = 512;
+const int GasLayers = 2;
 const float GasFixedPointScale = 1024.0;
-const uint GasAccumulationStride = 8u;
+const uint GasAccumulationStride = 5u;
+
+// The cells light the gas. Their light is collected in clusters of the light cluster grid with the sums of the luminance weighted offsets
+// to the cluster corner, the luminance and the color.
+const uint GasLightClusterStride = 6u;
+const int GasIrradianceImageSize = 256;
+
+// Clouds: color sum and number of particles. Cells: number of cells in x.
+const int GasLayer_Clouds = 0;
+const int GasLayer_Cells = 1;
+
+bool isFluid(FluidParticle particle)
+{
+    return particle.pos[2] >= 0.5;
+}
 
 uint getGasNodeIndex(ivec2 node)
 {
     return uint(node.y * frame.gasSize.x + node.x);
 }
 
-vec2 getGasImageCoord(vec2 world, float halfOffset)
+// Fast linear sampling within a region of a texture, which starts at the given texel and has the given size in texels
+vec4 sampleRegionLinear(sampler2D image, vec2 texel, vec2 regionStart, vec2 regionSize, vec2 imageSize)
 {
-    vec2 node = clamp((world - frame.gasGrid.xy) / frame.gasGrid.z, vec2(0.0), vec2(frame.gasSize.xy - 1));
-    return (node + vec2(halfOffset + 0.5, 0.5)) / vec2(2 * GasImageSize, GasImageSize);
+    return texture(image, (regionStart + clamp(texel, vec2(0.5), regionSize - 0.5)) / imageSize);
 }
 
-// rgb: sum of the particle colors per area, a: number of particles per area
-vec4 sampleGas(vec2 world)
+// Smooth sampling with a cubic B-spline, which avoids the kinks of the linear interpolation of coarse grids. Four linear samples combine the
+// sixteen weights.
+vec4 sampleRegionCubic(sampler2D image, vec2 texel, vec2 regionStart, vec2 regionSize, vec2 imageSize)
 {
-    return texture(gasSampler, getGasImageCoord(world, 0.0));
+    vec2 coord = texel - 0.5;
+    vec2 index = floor(coord);
+    vec2 fraction = coord - index;
+    vec2 inverse = 1.0 - fraction;
+    vec2 weight0 = inverse * inverse * inverse / 6.0;
+    vec2 weight1 = (4.0 - 6.0 * fraction * fraction + 3.0 * fraction * fraction * fraction) / 6.0;
+    vec2 weight3 = fraction * fraction * fraction / 6.0;
+    vec2 weight2 = 1.0 - weight0 - weight1 - weight3;
+    vec2 lowerWeight = weight0 + weight1;
+    vec2 upperWeight = weight2 + weight3;
+    vec2 lowerTexel = index - 0.5 + weight1 / lowerWeight;
+    vec2 upperTexel = index + 1.5 + weight3 / upperWeight;
+    return lowerWeight.y * (lowerWeight.x * sampleRegionLinear(image, vec2(lowerTexel.x, lowerTexel.y), regionStart, regionSize, imageSize)
+                            + upperWeight.x * sampleRegionLinear(image, vec2(upperTexel.x, lowerTexel.y), regionStart, regionSize, imageSize))
+        + upperWeight.y * (lowerWeight.x * sampleRegionLinear(image, vec2(lowerTexel.x, upperTexel.y), regionStart, regionSize, imageSize)
+                           + upperWeight.x * sampleRegionLinear(image, vec2(upperTexel.x, upperTexel.y), regionStart, regionSize, imageSize));
 }
 
-// Sum of the colors of glowing particles per area
-vec3 sampleSparks(vec2 world)
+vec2 getGasTexel(vec2 world)
 {
-    return texture(gasSampler, getGasImageCoord(world, float(GasImageSize))).rgb;
+    return (world - frame.gasGrid.xy) / frame.gasGrid.z + 0.5;
+}
+
+vec2 getGasLayerStart(int layer)
+{
+    return vec2(float(layer * GasImageSize), 0.0);
+}
+
+vec2 getGasImageSize()
+{
+    return vec2(GasLayers * GasImageSize, GasImageSize);
+}
+
+// Fast sampling for the many samples along the paths to the lights
+vec4 sampleGasLayer(vec2 world, int layer)
+{
+    return sampleRegionLinear(gasSampler, getGasTexel(world), getGasLayerStart(layer), vec2(frame.gasSize.xy), getGasImageSize());
+}
+
+// Smooth sampling for the visible gas
+vec4 sampleGasLayerSmooth(vec2 world, int layer)
+{
+    return sampleRegionCubic(gasSampler, getGasTexel(world), getGasLayerStart(layer), vec2(frame.gasSize.xy), getGasImageSize());
+}
+
+// Light of the cells that reaches a position in the gas
+vec3 sampleGasIrradiance(vec2 world)
+{
+    vec2 texel = (world - frame.gasGrid.xy) / frame.gasLight.z + 0.5;
+    return sampleRegionCubic(gasIrradianceSampler, texel, vec2(0.0), vec2(frame.gasLightGrid.zw), vec2(GasIrradianceImageSize)).rgb;
+}
+
+// The energy particles and the cores of glowing fluids keep the look of the rasterized view
+vec3 getEnergyParticleRadiance(vec2 world)
+{
+    return texture(energyParticleTexture, worldToGraphTextureCoord(world)).rgb;
 }
 )";
 }

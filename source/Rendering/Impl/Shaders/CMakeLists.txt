@@ -49,6 +49,8 @@ add_library(Shaders INTERFACE
     RayTracingAntiAliasingCS.h
     RayTracingCommonCS.h
     RayTracingGasBlurCS.h
+    RayTracingGasIrradianceCS.h
+    RayTracingGasLightsCS.h
     RayTracingGasShadingCS.h
     RayTracingGasSplatCS.h
     RayTracingPrepareCS.h
