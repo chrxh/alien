@@ -118,6 +118,23 @@ TEST_F(GeometryTests, copyBuffers_cullsFluidParticlesOutsideVisibleRect)
     EXPECT_FLOAT_EQ(5.0f, particleData.at(0).pos[1]);
 }
 
+TEST_F(GeometryTests, copyBuffers_energyParticleVelocity)
+{
+    auto data = ContentDesc().energies({
+        EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.5f, -0.25f}).energy(10.0f),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    auto particleData = geometryBuffers->getFluidParticleData();
+    ASSERT_EQ(1u, particleData.size());
+    EXPECT_FLOAT_EQ(0.5f, particleData.at(0).vel[0]);
+    EXPECT_FLOAT_EQ(-0.25f, particleData.at(0).vel[1]);
+}
+
 TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 {
     auto data = ContentDesc().addCreature({

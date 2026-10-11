@@ -9,16 +9,19 @@ namespace Shaders
 out vec4 FragColor;
 
 in vec3 vColor;
+in vec2 vAxis;
+in float vElongation;
 uniform float zoom;
 uniform bool onBackground;
 
 void main()
 {
-    // Calculate distance from center of point
+    // Distance from the center of the ellipse relative to the point size. The point grows with the square root of the elongation, so that the
+    // ellipse becomes longer along the axis and narrower across it by this factor and keeps the area of the circle.
     vec2 coord = gl_PointCoord - vec2(0.5, 0.5);
-    float dist = length(coord);
-    
-    // Discard pixels outside the circle
+    float dist = length(vec2(dot(coord, vAxis), dot(coord, vec2(-vAxis.y, vAxis.x)) * vElongation));
+
+    // Discard pixels outside the ellipse
     if (dist > 0.5) {
         discard;
     }
