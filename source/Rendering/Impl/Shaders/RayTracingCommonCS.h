@@ -77,6 +77,13 @@ struct Aabb
     float maxZ;
 };
 
+struct FluidParticle
+{
+    float pos[3];
+    float color[3];
+    float glow;
+};
+
 layout(set = 0, binding = 0, std140) uniform FrameConstants
 {
     vec4 view;        // xy: size in pixels, z: pixels per world unit, w: screen pixels per world unit
@@ -87,6 +94,10 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     vec4 tissue;      // x: 1 close up, 0 zoomed out, y: visibility of the cell details, z: world size of a pixel, w: visibility of the tissue
     vec4 parameters;  // x: scale of the background color, y: bioluminescence, z: 1 for anti-aliasing within the frame, w: weight of the frame
                       // in the average with the previous frames, 1 if there is no average
+    vec4 gasGrid;     // xy: world position of the first node of the gas grid, z: distance of the nodes, w: phase of the turbulence
+    ivec4 gasSize;    // xy: number of nodes of the gas grid, z: blur radius in nodes, w: number of fluid particles
+    vec4 gasSpread;   // x: standard deviation of the particle spread in nodes, y: radius of the glow around the gas in world units,
+                      // z: standard deviation of the spark spread in nodes
 } frame;
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT scene;
@@ -106,8 +117,12 @@ layout(set = 0, binding = 14, rgba16f) uniform image2D sceneColor;
 layout(set = 0, binding = 15, rgba16f) uniform image2D antiAliased;
 layout(set = 0, binding = 16) uniform sampler2D previousAntiAliased;
 layout(set = 0, binding = 17) uniform sampler2D groundTexture;
-layout(set = 0, binding = 18) uniform sampler2D fluidTexture;
+layout(set = 0, binding = 18) uniform sampler2D gasSampler;
 layout(set = 0, binding = 19) uniform sampler2D sceneColorSampler;
+layout(set = 0, binding = 20, std430) readonly buffer FluidParticleBuffer { FluidParticle fluidParticles[]; };
+layout(set = 0, binding = 21, std430) buffer GasAccumulationBuffer { uint gasAccumulation[]; };
+layout(set = 0, binding = 22, std430) buffer GasIntermediateBuffer { vec4 gasIntermediate[]; };
+layout(set = 0, binding = 23, rgba16f) uniform image2D gasImage;
 
 //*******************
 //* General helpers
@@ -293,9 +308,37 @@ vec3 getBackgroundRadiance(vec2 world)
     return inverseToneMapping(texture(groundTexture, worldToGraphTextureCoord(world)).rgb) * frame.parameters.x;
 }
 
-vec3 getFluidRadiance(vec2 world)
+//*******************************
+//* Gas of the fluid particles
+//*******************************
+
+// The left half of the image holds the gas at the nodes of the gas grid, the right half the sparks of glowing particles. The sums per node
+// are fixed point numbers: number of particles, color sum and spark color sum.
+const int GasImageSize = 512;
+const float GasFixedPointScale = 1024.0;
+const uint GasAccumulationStride = 8u;
+
+uint getGasNodeIndex(ivec2 node)
 {
-    return texture(fluidTexture, worldToGraphTextureCoord(world)).rgb;
+    return uint(node.y * frame.gasSize.x + node.x);
+}
+
+vec2 getGasImageCoord(vec2 world, float halfOffset)
+{
+    vec2 node = clamp((world - frame.gasGrid.xy) / frame.gasGrid.z, vec2(0.0), vec2(frame.gasSize.xy - 1));
+    return (node + vec2(halfOffset + 0.5, 0.5)) / vec2(2 * GasImageSize, GasImageSize);
+}
+
+// rgb: sum of the particle colors per area, a: number of particles per area
+vec4 sampleGas(vec2 world)
+{
+    return texture(gasSampler, getGasImageCoord(world, 0.0));
+}
+
+// Sum of the colors of glowing particles per area
+vec3 sampleSparks(vec2 world)
+{
+    return texture(gasSampler, getGasImageCoord(world, float(GasImageSize))).rgb;
 }
 )";
 }

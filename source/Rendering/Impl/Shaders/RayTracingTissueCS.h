@@ -514,13 +514,13 @@ void main()
         return;
     }
     vec2 position = pixelToWorld(vec2(pixel) + 0.5 + frame.rect.zw);
-    vec3 medium = getBackgroundRadiance(position) + getFluidRadiance(position);
-    vec3 color = medium;
 
-    // Zoomed out, the rasterized objects replace the tissue, whose scene is not built then
+    // Zoomed out, the rasterized objects replace the tissue, whose scene and lights are not built then
     float tissueVisibility = frame.tissue.w;
+    vec3 scattered = tissueVisibility > 0.0 ? getScatteredLight(position) : vec3(0.0);
+    vec3 medium = shadeGas(position, getBackgroundRadiance(position), scattered * tissueVisibility);
+    vec3 color = medium;
     if (tissueVisibility > 0.0) {
-        vec3 scattered = getScatteredLight(position);
         vec3 lightedMedium = medium + scattered * MediumScattering;
         color = lightedMedium;
         Neighborhood neighborhood;
