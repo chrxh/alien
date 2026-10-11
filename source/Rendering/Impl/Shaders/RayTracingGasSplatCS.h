@@ -7,8 +7,6 @@ namespace Shaders
     // Distributes each fluid bilinearly over the four surrounding nodes of the gas grid, energy particles and the cores of glowing fluids keep
     // the rasterized look. The sums are fixed point numbers, so that the atomic additions give the same result in any order.
     std::string_view const RayTracingGasSplatCS = R"(
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-
 // Glowing fluids appear brighter as in the rasterized view
 const float GlowBrightening = 3.0;
 
@@ -35,8 +33,7 @@ void main()
         if (any(lessThan(target, ivec2(0))) || any(greaterThanEqual(target, frame.gasSize.xy))) {
             continue;
         }
-        vec2 axisWeights = mix(1.0 - fraction, fraction, vec2(offset));
-        float weight = axisWeights.x * axisWeights.y * GasFixedPointScale;
+        float weight = getBilinearWeight(fraction, offset) * GasFixedPointScale;
         uint entry = getGasNodeIndex(target) * GasAccumulationStride;
         atomicAdd(gasAccumulation[entry], uint(weight + 0.5));
         atomicAdd(gasAccumulation[entry + 1u], uint(weight * color.r + 0.5));

@@ -7,8 +7,6 @@ namespace Shaders
     // Adds the cells to the gas grid, where they cast shadows, and their light to the light clusters. The light of a cell grows with its
     // energy. The activity of its neuron, which lets the cell itself flash, does not change it, so that the gas does not flicker.
     std::string_view const RayTracingGasLightsCS = R"(
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-
 const float CellLight = 1.5;
 
 // The cells are provided up to at least this distance outside the view, see Engine/Impl/GeometryKernelsService.cu. Their light fades out
@@ -31,7 +29,7 @@ void main()
         return;
     }
     ObjectVertex object = objects[index];
-    int objectType = (object.state >> 8) & 0xff;
+    int objectType = getObjectType(object);
     if (objectType != ObjectType_Cell && objectType != ObjectType_FreeCell) {
         return;
     }
@@ -46,15 +44,11 @@ void main()
         if (any(lessThan(target, ivec2(0))) || any(greaterThanEqual(target, frame.gasSize.xy))) {
             continue;
         }
-        vec2 axisWeights = mix(1.0 - fraction, fraction, vec2(offset));
-        atomicAdd(gasAccumulation[getGasNodeIndex(target) * GasAccumulationStride + 4u], uint(axisWeights.x * axisWeights.y * GasFixedPointScale + 0.5));
+        atomicAdd(gasAccumulation[getGasNodeIndex(target) * GasAccumulationStride + 4u], uint(getBilinearWeight(fraction, offset) * GasFixedPointScale + 0.5));
     }
 
     vec3 color = vec3(object.color[0], object.color[1], object.color[2]);
-    float colorBrightness = maxComponent(color);
-    vec3 hue = colorBrightness > 0.02 ? clamp(color / colorBrightness, 0.0, 1.0) : vec3(0.5);
-    float brightness = min(colorBrightness, 1.0) + 0.5 * log(max(colorBrightness, 1.0));
-    vec3 light = hue * CellLight * brightness * getVisibility(position);
+    vec3 light = getHue(color) * CellLight * getBrightness(color) * getVisibility(position);
     float lightLuminance = luminance(light);
     if (lightLuminance <= 0.0) {
         return;
@@ -70,8 +64,7 @@ void main()
         if (any(lessThan(cluster, ivec2(0))) || any(greaterThanEqual(cluster, frame.gasLightGrid.xy))) {
             continue;
         }
-        vec2 axisWeights = mix(1.0 - clusterFraction, clusterFraction, vec2(offset));
-        float weight = axisWeights.x * axisWeights.y * GasFixedPointScale;
+        float weight = getBilinearWeight(clusterFraction, offset) * GasFixedPointScale;
         vec2 lightOffset = clusterPosition - vec2(cluster) + GasLightOffsetShift;
         uint entry = uint(cluster.y * frame.gasLightGrid.x + cluster.x) * GasLightClusterStride;
         atomicAdd(gasLightClusters[entry], uint(weight * lightLuminance * lightOffset.x + 0.5));

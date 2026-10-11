@@ -17,7 +17,6 @@ enum class RayTracingResource
     CapsuleAabbs,
     TriangleAabbs,
     CellCounts,
-    CellOffsets,
     CellCursors,
     CellEntries,
     Allocation,
@@ -57,7 +56,7 @@ public:
     // Zoomed out, the rasterized objects replace the tissue, so that the view keeps the details and the brightness of the rasterized view
     static float getTissueVisibility(RenderView const& view);
 
-    // The background is scaled by the inverse of the factor with which the bloom weights the scene
+    // The background is scaled by the inverse of the factor with which the bloom weights the scene, see SimulationRenderer
     static float getBackgroundScale(SimulationParameters const& parameters);
 
     // Radiation sources shine with a brightness above 0
@@ -66,11 +65,11 @@ public:
     // The objects form a scene for the tissue and for the shadows of the light of the radiation sources
     static bool isSceneNeeded(RenderView const& view, SimulationParameters const& parameters);
 
-    // Allocates the resources for the view and the visible objects. Calling it before the commands are recorded lets a lack of memory
-    // surface without leaving a partially recorded frame behind.
+    // Allocates the resources for the view and the visible objects, before the commands of the frames with this view and these parameters
+    // are recorded. A lack of memory thus surfaces without leaving a partially recorded frame behind.
     void prepare(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters);
 
-    // Successive frames of a still picture are averaged with rays jittered within the pixels
+    // Successive frames of a still picture are averaged with rays jittered within the pixels, each change starts a new average
     void setStillPicture(bool value);
 
     void resetImageStates();
@@ -78,9 +77,9 @@ public:
     // The pipelines share the layout of the descriptor set
     RayTracingComputePipeline createPipeline(std::string const& source, IntVector2D const& workGroupSize) const;
 
-    // Called by the first and the last step of a frame. The textures of the first step are the ground and the energy particles.
+    // Called by the first and the last step of a frame, after prepare. The textures of the first step are the ground and the energy particles.
     void beginFrame(ExecutionParameters const& parameters);
-    void finishFrame(RenderView const& view);
+    void finishFrame();
 
     void bindDescriptorSet(VkCommandBuffer commandBuffer) const;
 
@@ -174,7 +173,6 @@ private:
     VkDeviceSize getUsedSize(RayTracingResource resource) const;
 
     int getPrevious() const;
-    bool isSameViewAsPrevious(RenderView const& view) const;
 
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
     VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
@@ -188,7 +186,6 @@ private:
     LightGrid _lightGrid;
     uint64_t _cellCapacity = 0;
     VulkanBuffer _cellCounts;
-    VulkanBuffer _cellOffsets;
     VulkanBuffer _cellCursors;
     VulkanBuffer _allocation;
 
@@ -200,7 +197,5 @@ private:
     VulkanImage _gasIrradiance;
 
     bool _stillPicture = false;
-    bool _previousFrameValid = false;
-    RenderView _previousView;
     uint32_t _numAveragedFrames = 0;
 };

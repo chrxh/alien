@@ -7,13 +7,9 @@ namespace Shaders
     // Declarations shared by the compute shaders of the ray tracing, which shows the creatures as living tissue under a microscope. The
     // polygons of connected cells form translucent bodies, the cells bulge slightly out of them, free connections become thin strands.
     // Everything is computed without random samples, so that the frames are free of noise.
-    // Pixel coordinates of the internal images start at the upper left corner of the view, i.e. their rows run along the world y axis.
+    // Pixel coordinates of the internal images start at the upper left corner of the view, i.e. their rows run along the world y axis. The
+    // version, the work group size and the sizes shared with Rendering/Impl/RayTracingResources.cpp are declared before, see createPipeline.
     std::string_view const RayTracingCommonCS = R"(
-#version 460
-#extension GL_EXT_ray_query : require
-
-#define PI 3.14159265
-
 const float CameraHeight = 20.0;
 const float EmissionToRadiance = 0.6;
 const float MinLightRadiance = 0.06;
@@ -66,10 +62,10 @@ struct ObjectVertex
 
 struct Sphere
 {
-    vec4 centerRadius;  // xyz: center, w: radius
+    vec4 centerRadius;  // xy: center, w: radius
     vec4 hueMaterial;   // rgb: hue, w: material
     vec4 emission;      // rgb: glow, w: brightness of the color
-    vec4 details;       // x: cell type, y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
+    vec4 details;       // y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
 };
 
 struct Aabb
@@ -89,15 +85,13 @@ struct FluidParticle
     float glow;
 };
 
-// A radiation source that shines from its circular or rectangular area. The maximum number must match MaxSourceLights in
-// Rendering/Impl/RayTracingResources.cpp.
-const int MaxSourceLights = 64;
-
+// A radiation source that shines from its circular or rectangular area
 struct SourceLight
 {
-    vec4 centerRange;  // xy: world position of the center, z: range of the light beyond the area, w: number of shadow rays
-    vec4 colorShape;   // rgb: color times brightness, w: 0 for a circular, 1 for a rectangular area
-    vec4 extent;       // xy: radius of a circular area in both components or half the size of a rectangular area
+    vec4 centerRangeShape;  // xy: world position of the center, z: range of the light beyond the area, w: 0 for a circular, 1 for a
+                            // rectangular area
+    vec4 color;             // rgb: color times brightness
+    vec4 extent;            // xy: radius of a circular area in both components or half the size of a rectangular area
 };
 
 layout(set = 0, binding = 0, std140) uniform FrameConstants
@@ -105,11 +99,11 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     vec4 view;        // xy: size in pixels, z: pixels per world unit, w: screen pixels per world unit
     vec4 rect;        // xy: world position of the upper left corner, zw: jitter of the rays in pixels
     uvec4 counts;     // x: number of objects, y: number of connections, z: number of triangles, w: number of light grid cells
-    vec4 lightGrid;   // xy: world position of the light grid, z: size of a grid cell, w: range of the lights
+    vec4 lightGrid;   // xy: world position of the light grid, z: size of a grid cell, which is also the range of the lights
     ivec4 gridSize;   // xy: number of cells of the light grid
     vec4 tissue;      // x: 1 close up, 0 zoomed out, y: visibility of the cell details, z: world size of a pixel, w: visibility of the tissue
-    vec4 parameters;  // x: scale of the background color, y: bioluminescence, z: 1 for anti-aliasing within the frame, w: weight of the frame
-                      // in the average with the previous frames, 1 if there is no average
+    vec4 parameters;  // x: scale of the background color, y: 1 for anti-aliasing within the frame, z: weight of the frame in the average with
+                      // the previous frames, 1 if there is no average
     vec4 gasGrid;     // xy: world position of the first node of the gas grid, z: distance of the nodes, w: standard deviation of the blur in nodes
     ivec4 gasSize;    // xy: number of nodes of the gas grid, z: blur radius in nodes, w: number of fluid particles
     vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid,
@@ -130,24 +124,23 @@ layout(set = 0, binding = 6, std430) buffer SphereAabbBuffer { Aabb sphereAabbs[
 layout(set = 0, binding = 7, std430) buffer CapsuleAabbBuffer { Aabb capsuleAabbs[]; };
 layout(set = 0, binding = 8, std430) buffer TriangleAabbBuffer { Aabb triangleAabbs[]; };
 layout(set = 0, binding = 9, std430) buffer CellCountBuffer { uint cellCounts[]; };
-layout(set = 0, binding = 10, std430) buffer CellOffsetBuffer { uint cellOffsets[]; };
-layout(set = 0, binding = 11, std430) buffer CellCursorBuffer { uint cellCursors[]; };
-layout(set = 0, binding = 12, std430) buffer CellEntryBuffer { uint cellEntries[]; };
-layout(set = 0, binding = 13, std430) buffer AllocationBuffer { uint allocatedEntries; };
-layout(set = 0, binding = 14, rgba16f) uniform image2D sceneColor;
-layout(set = 0, binding = 15, rgba16f) uniform image2D antiAliased;
-layout(set = 0, binding = 16) uniform sampler2D previousAntiAliased;
-layout(set = 0, binding = 17) uniform sampler2D groundTexture;
-layout(set = 0, binding = 18) uniform sampler2D gasSampler;
-layout(set = 0, binding = 19) uniform sampler2D sceneColorSampler;
-layout(set = 0, binding = 20, std430) readonly buffer FluidParticleBuffer { FluidParticle fluidParticles[]; };
-layout(set = 0, binding = 21, std430) buffer GasAccumulationBuffer { uint gasAccumulation[]; };
-layout(set = 0, binding = 22, std430) buffer GasIntermediateBuffer { vec4 gasIntermediate[]; };
-layout(set = 0, binding = 23, rgba16f) uniform image2D gasImage;
-layout(set = 0, binding = 24) uniform sampler2D energyParticleTexture;
-layout(set = 0, binding = 25, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
-layout(set = 0, binding = 26, rgba16f) uniform image2D gasIrradianceImage;
-layout(set = 0, binding = 27) uniform sampler2D gasIrradianceSampler;
+layout(set = 0, binding = 10, std430) buffer CellCursorBuffer { uint cellCursors[]; };
+layout(set = 0, binding = 11, std430) buffer CellEntryBuffer { uint cellEntries[]; };
+layout(set = 0, binding = 12, std430) buffer AllocationBuffer { uint allocatedEntries; };
+layout(set = 0, binding = 13, rgba16f) uniform image2D sceneColor;
+layout(set = 0, binding = 14, rgba16f) uniform image2D antiAliased;
+layout(set = 0, binding = 15) uniform sampler2D previousAntiAliased;
+layout(set = 0, binding = 16) uniform sampler2D groundTexture;
+layout(set = 0, binding = 17) uniform sampler2D gasSampler;
+layout(set = 0, binding = 18) uniform sampler2D sceneColorSampler;
+layout(set = 0, binding = 19, std430) readonly buffer FluidParticleBuffer { FluidParticle fluidParticles[]; };
+layout(set = 0, binding = 20, std430) buffer GasAccumulationBuffer { uint gasAccumulation[]; };
+layout(set = 0, binding = 21, std430) buffer GasIntermediateBuffer { vec4 gasIntermediate[]; };
+layout(set = 0, binding = 22, rgba16f) uniform image2D gasImage;
+layout(set = 0, binding = 23) uniform sampler2D energyParticleTexture;
+layout(set = 0, binding = 24, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
+layout(set = 0, binding = 25, rgba16f) uniform image2D gasIrradianceImage;
+layout(set = 0, binding = 26) uniform sampler2D gasIrradianceSampler;
 
 //*******************
 //* General helpers
@@ -205,6 +198,47 @@ float valueNoise(vec2 position)
     vec2 weight = offset * offset * (3.0 - 2.0 * offset);
     return mix(
         mix(hash(cell), hash(cell + vec2(1.0, 0.0)), weight.x), mix(hash(cell + vec2(0.0, 1.0)), hash(cell + vec2(1.0, 1.0)), weight.x), weight.y);
+}
+
+// Weight of the corner at the offset when a value is distributed bilinearly to the four corners around a position with the fraction
+float getBilinearWeight(vec2 fraction, ivec2 offset)
+{
+    vec2 axisWeights = mix(1.0 - fraction, fraction, vec2(offset));
+    return axisWeights.x * axisWeights.y;
+}
+
+int getObjectType(ObjectVertex object)
+{
+    return (object.state >> 8) & 0xff;
+}
+
+// The color of an object scales with its energy, the hue does not
+vec3 getHue(vec3 color)
+{
+    float colorBrightness = maxComponent(color);
+    return colorBrightness > 0.02 ? clamp(color / colorBrightness, 0.0, 1.0) : vec3(0.5);
+}
+
+// Objects with much energy have colors far above 1, which would outshine their structure
+float getBrightness(vec3 color)
+{
+    float colorBrightness = maxComponent(color);
+    return min(colorBrightness, 1.0) + 0.5 * log(max(colorBrightness, 1.0));
+}
+
+// The tissue shows the hue of its objects slightly desaturated and absorbs light mainly in the complementary colors
+const float TissueSaturation = 0.9;
+const float TissueHueTransmission = 0.85;
+
+vec3 getSaturatedHue(vec3 hue)
+{
+    return mix(vec3(luminance(hue)), hue, TissueSaturation);
+}
+
+// Share of each color component that the tissue absorbs
+vec3 getAbsorbedShare(vec3 saturatedHue)
+{
+    return vec3(1.0) - TissueHueTransmission * saturatedHue;
 }
 
 //*******************
@@ -298,15 +332,17 @@ bool isLight(Sphere sphere)
 vec3 getScatteredLight(vec2 position)
 {
     vec3 result = vec3(0.0);
-    float range = frame.lightGrid.w;
+    float range = frame.lightGrid.z;
     ivec2 center = getLightCell(position);
     for (int i = 0; i < 9; ++i) {
         uint cellIndex = getLightCellIndex(center + ivec2(i % 3 - 1, i / 3 - 1));
         if (cellIndex == NoEntry) {
             continue;
         }
-        uint offset = cellOffsets[cellIndex];
+
+        // The scatter pass has advanced the cursor from the start of the entries of the cell to their end
         uint count = cellCounts[cellIndex];
+        uint offset = cellCursors[cellIndex] - count;
         for (uint j = 0u; j < count; ++j) {
             Sphere light = spheres[cellEntries[offset + j]];
             vec2 toLight = light.centerRadius.xy - position;
@@ -351,20 +387,16 @@ vec3 getBackgroundRadiance(vec2 world)
 //* Gas of the fluid particles
 //*******************************
 
-// The particles accumulate fixed point sums at the nodes of the gas grid, which are blurred into two layers of the gas image side by side.
-// The sums per node are the number of particles, their color sum and the number of cells, which cast shadows in the gas.
-const int GasImageSize = 512;
-const int GasLayers = 2;
+// The particles accumulate fixed point sums at the nodes of the gas grid, which are blurred into the layers of the gas image side by side.
+// The GasAccumulationStride sums per node are the number of particles, their color sum and the number of cells, which cast shadows in the
+// gas.
 const float GasFixedPointScale = 1024.0;
-const uint GasAccumulationStride = 5u;
 
 // The light of the cells is collected in clusters of the light cluster grid with the sums of the luminance weighted offsets to the cluster
 // corner, the luminance and the color. Each cell contributes bilinearly to the four clusters around it, so that the light changes smoothly
 // when cells move from one cluster to another. The offsets are shifted by one cluster to stay positive. The irradiance image holds the light
 // of the cells and the light of the radiation sources side by side.
-const uint GasLightClusterStride = 6u;
 const float GasLightOffsetShift = 1.0;
-const int GasIrradianceImageSize = 512;
 
 // Clouds: color sum and number of particles. Cells: number of cells in x.
 const int GasLayer_Clouds = 0;
@@ -453,9 +485,27 @@ vec3 sampleGasIrradiance(vec2 world)
 //* Light of the radiation sources
 //*******************************
 
+// The shadow rays to the radiation sources stand for beams that lead from the parts of a node of the irradiance grid to the parts of the
+// shining area side by side, see Shaders/RayTracingGasIrradianceCS.h. At least this many rays start from a node.
+const int NodeRayStarts = 4;
+
+// The beams may be as wide as the parts of a node, but at least half a world unit, so that large areas need not too many rays when zoomed in
+const float MinBeamWidthLimit = 0.5;
+
+float getMaxBeamWidth()
+{
+    return max(sqrt(2.0) * frame.gasLight.z / float(NodeRayStarts), MinBeamWidthLimit);
+}
+
 bool isSourceLightActive()
 {
     return frame.numSourceLights.x > 0;
+}
+
+// The bounding boxes of the objects are enlarged by half the width of the widest beam, so that the beams meet the objects next to them
+float getShadowBeamMargin()
+{
+    return isSourceLightActive() ? 0.5 * getMaxBeamWidth() : 0.0;
 }
 
 // The light of each source approaches its brightness close to it, see Shaders/RayTracingGasIrradianceCS.h

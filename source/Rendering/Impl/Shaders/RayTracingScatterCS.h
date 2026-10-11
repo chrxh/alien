@@ -6,8 +6,6 @@ namespace Shaders
 {
     // Writes the lights into the ranges of their grid cells. The criteria have to match the counting in RayTracingPrepareCS.
     std::string_view const RayTracingScatterCS = R"(
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-
 void main()
 {
     uint index = gl_GlobalInvocationID.x;

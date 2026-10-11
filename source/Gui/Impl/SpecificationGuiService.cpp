@@ -505,7 +505,8 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
                 .textWidth(TextColumnWidth)
                 .highlightedSubString(filter.containedText)
                 .defaultValue(*origValue)
-                .defaultEnabledValue(origEnabledValue != nullptr ? std::make_optional(*origEnabledValue) : std::nullopt),
+                .defaultEnabledValue(origEnabledValue != nullptr ? std::make_optional(*origEnabledValue) : std::nullopt)
+                .tooltip(parameterSpec._description),
             *value,
             enabledValue);
     }

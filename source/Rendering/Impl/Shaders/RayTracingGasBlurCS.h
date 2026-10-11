@@ -7,7 +7,11 @@ namespace Shaders
     // Gaussian blur of the gas grid in two passes. The horizontal pass reads the fixed point sums, the vertical pass writes the sums per area
     // into the gas image. The direction is defined in front of the source.
     std::string_view const RayTracingGasBlurCS = R"(
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+#ifdef VERTICAL
+const ivec2 BlurDirection = ivec2(0, 1);
+#else
+const ivec2 BlurDirection = ivec2(1, 0);
+#endif
 
 float readAccumulation(uint entry)
 {

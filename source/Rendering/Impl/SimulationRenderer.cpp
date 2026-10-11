@@ -49,7 +49,10 @@ void SimulationRenderer::draw(RenderView const& view)
 {
     VulkanFrameRenderer::get().drawScene(
         [this, view] { updateGeometry(view.visibleWorldRect); },
-        [this, view](VkCommandBuffer commandBuffer) -> VulkanImage& { return selectGraph(view, false)->execute(commandBuffer, view); });
+        [this, view](VkCommandBuffer commandBuffer) -> VulkanImage& {
+            auto parameters = _SimulationFacade::get()->getSimulationParameters();
+            return selectGraph(view, parameters, false)->execute(commandBuffer, view, parameters);
+        });
 }
 
 PictureData SimulationRenderer::renderPicture(RenderView const& view)
@@ -69,6 +72,11 @@ PictureData SimulationRenderer::renderPicture(RenderView const& view)
     }
 }
 
+float SimulationRenderer::getBloomSceneWeight(SimulationParameters const& parameters)
+{
+    return 1.5f - parameters.glow.value;
+}
+
 PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
 {
     auto& context = VulkanContext::get();
@@ -85,7 +93,8 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
     target->resize(resolution, VK_FORMAT_R8G8B8A8_UNORM);
 
     updateGeometry(view.visibleWorldRect);
-    auto const& graph = selectGraph(view, true);
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto const& graph = selectGraph(view, parameters, true);
     auto rayTraced = graph == _rayTracingGraph;
     if (rayTraced) {
         _rayTracingResources->setStillPicture(true);
@@ -98,11 +107,11 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
     try {
         if (rayTraced) {
             for ([[maybe_unused]] auto frame : std::views::iota(1, NumRayTracedPictureFrames)) {
-                context.submitAndWait([&](VkCommandBuffer commandBuffer) { graph->execute(commandBuffer, view, target); });
+                context.submitAndWait([&](VkCommandBuffer commandBuffer) { graph->execute(commandBuffer, view, parameters, target); });
             }
         }
         context.submitAndWait([&](VkCommandBuffer commandBuffer) {
-            auto& image = graph->execute(commandBuffer, view, target);
+            auto& image = graph->execute(commandBuffer, view, parameters, target);
             VulkanContext::useImage(commandBuffer, image, ImageUsage::TransferSource);
             VkBufferImageCopy region{
                 .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
@@ -112,6 +121,9 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
         });
     } catch (...) {
         graph->resetImageStates();
+        if (rayTraced) {
+            _rayTracingResources->resetImageStates();
+        }
         throw;
     }
 
@@ -136,13 +148,12 @@ void SimulationRenderer::updateGeometry(RealRect const& visibleWorldRect)
     _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, visibleWorldRect);
 }
 
-RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, bool forPicture)
+RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, SimulationParameters const& parameters, bool forPicture)
 {
     if (!_rayTracingGraph) {
         return _rasterGraph;
     }
     auto numObjects = _geometryBuffers->getNumObjects();
-    auto parameters = _SimulationFacade::get()->getSimulationParameters();
     RayTracingDemand demand{
         .viewSize = view.viewSize,
         .numSceneObjects = _RayTracingResources::isSceneNeeded(view, parameters) ? numObjects.objects : 0,
@@ -239,7 +250,7 @@ namespace
         float bloom = parameters.glow.value;
         return UniformValueMap{
             {"colorFactor1", bloom * GlowWeight},
-            {"colorFactor2", 1.5f - bloom},
+            {"colorFactor2", SimulationRenderer::getBloomSceneWeight(parameters)},
         };
     }
 

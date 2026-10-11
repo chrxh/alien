@@ -36,11 +36,6 @@ vec3 limitLight(vec3 light, float limit)
     return light / sqrt(1.0 + level * level);
 }
 
-vec3 getHaze(vec2 position)
-{
-    return isSourceLightActive() && isInWorld(position) ? getSourceLight(position) * HazeScattering : vec3(0.0);
-}
-
 float getThickness(vec2 position)
 {
     vec4 clouds = sampleGasLayerSmooth(position, GasLayer_Clouds);
@@ -58,9 +53,11 @@ vec2 getThicknessGradient(vec2 position)
     return vec2(right - left, lower - upper) / (2.0 * offset);
 }
 
-vec3 shadeGas(vec2 position, vec3 background)
+vec3 shadeGas(vec2 position, vec3 background, vec3 sourceLight)
 {
-    background += getHaze(position);
+    if (isInWorld(position)) {
+        background += sourceLight * HazeScattering;
+    }
     vec4 clouds = sampleGasLayerSmooth(position, GasLayer_Clouds);
     float density = max(clouds.a, 0.0);
     if (density < 1e-4) {
@@ -91,8 +88,7 @@ vec3 shadeGas(vec2 position, vec3 background)
     float scattering = 1.0 - exp(-GasScattering * density);
     vec3 tint = mix(vec3(1.0), hue, CellLightTint) * scattering;
     vec3 cellLight = limitLight(sampleGasIrradiance(position) * tint, CellLightLimit);
-    vec3 sourceLight = isSourceLightActive() ? getSourceLight(position) * tint : vec3(0.0);
-    return background + nebula + frame.gasLighting.z * (cellLight + sourceLight);
+    return background + nebula + frame.gasLighting.z * (cellLight + sourceLight * tint);
 }
 )";
 }

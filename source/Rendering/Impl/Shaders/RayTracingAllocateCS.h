@@ -4,11 +4,9 @@
 
 namespace Shaders
 {
-    // Reserves a range of the entry buffer for every cell of the light grid. A work group reserves the ranges of its cells with a single
-    // atomic operation.
+    // Reserves a range of the entry buffer for every cell of the light grid and sets the cursor of the cell to its start. A work group
+    // reserves the ranges of its cells with a single atomic operation.
     std::string_view const RayTracingAllocateCS = R"(
-layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
-
 shared uint groupCount;
 shared uint groupOffset;
 
@@ -33,7 +31,6 @@ void main()
     barrier();
 
     if (cellIndex < frame.counts.w) {
-        cellOffsets[cellIndex] = groupOffset + localOffset;
         cellCursors[cellIndex] = groupOffset + localOffset;
     }
 }

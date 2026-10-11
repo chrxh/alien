@@ -7,8 +7,6 @@ namespace Shaders
     // Frames on the screen are smoothed within themselves, so that nothing changes over time when the simulation stops. Still pictures
     // average the frames of jittered rays instead.
     std::string_view const RayTracingAntiAliasingCS = R"(
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-
 const float FxaaSpanMax = 8.0;
 const float FxaaReduceMultiplier = 1.0 / 8.0;
 const float FxaaReduceMinimum = 1.0 / 128.0;
@@ -58,9 +56,9 @@ void main()
         return;
     }
     vec4 sceneColorValue = imageLoad(sceneColor, pixel);
-    vec4 color = vec4(frame.parameters.z > 0.5 ? applyFxaa(pixel) : sceneColorValue.rgb, sceneColorValue.a);
-    if (frame.parameters.w < 1.0) {
-        color = mix(texelFetch(previousAntiAliased, pixel, 0), color, frame.parameters.w);
+    vec4 color = vec4(frame.parameters.y > 0.5 ? applyFxaa(pixel) : sceneColorValue.rgb, sceneColorValue.a);
+    if (frame.parameters.z < 1.0) {
+        color = mix(texelFetch(previousAntiAliased, pixel, 0), color, frame.parameters.z);
     }
     imageStore(antiAliased, pixel, color);
 }
