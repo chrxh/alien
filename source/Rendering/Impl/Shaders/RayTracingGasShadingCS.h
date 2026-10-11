@@ -4,102 +4,75 @@
 
 namespace Shaders
 {
-    // Shows the fluid particles as gas, a participating medium that absorbs the background, scatters the light of a lamp at the upper left
-    // and of glowing cells and glows weakly by itself. Glowing particles appear as sparks inside. The lamp light reaches each point through
-    // the gas towards the lamp, which gives the clouds bright edges on one side and shaded cores. Turbulence adds detail that evolves with
-    // the simulation time and stays still while the simulation pauses.
+    // Shows the fluids as a glowing nebula. Each fluid contributes as much light as its soft disk in the rasterized view and the clouds take
+    // the outline of the rasterized fluids, so that brightness and shapes match the rasterized view at every zoom level. Thin gas glows in
+    // saturated colors, dense gas towards warm white, and the edges of the clouds glow brighter. The gas also scatters the colored light of
+    // the cells around it, see Shaders/RayTracingGasIrradianceCS.h.
     std::string_view const RayTracingGasShadingCS = R"(
-const vec2 GasLampDirection = vec2(-0.7071, -0.7071);
-const float GasExtinction = 2.5;
-const float GasLampIntensity = 2.0;
-const float GasAmbientLight = 0.2;
-const float GasEmission = 0.5;
-const float GasSparkIntensity = 4.0;
-const float GasBioluminescence = 0.6;
-const float GasShadowDistance = 5.0;
-const int GasShadowSteps = 8;
-const float GasShadowStrength = 0.8;
-const float GasGlowIntensity = 1.2;
-const int GasGlowTaps = 16;
+// Light of a fluid in the rasterized view: a soft disk of radius 7.5 with a peak of 0.15
+const float RasterDiskIntegral = 7.95;
+const float RasterCloudFactor = 0.8;
+const float RasterThresholdLow = 0.05;
+const float RasterThresholdHigh = 0.55;
 
-const float GasDetailFrequency = 0.2;
-const float GasDetailContrast = 1.0;
-const float GasDetailWarp = 2.5;
-const int GasDetailOctaves = 5;
-const float GasDetailLacunarity = 2.03;
+const float NebulaSaturation = 1.8;
+const float NebulaMaxLuminanceGain = 1.3;
+const vec3 NebulaCoreColor = vec3(1.0, 0.88, 0.75);
+const float NebulaCoreWeight = 0.75;
+const float NebulaCoreStart = 2.0;
+const float NebulaCoreEnd = 8.0;
+const float NebulaEdgeGlow = 1.5;
 
-// Octaves with wavelengths below a few pixels would flicker, they fade to the mean value instead
-const float GasDetailMinWavelengthInPixels = 3.0;
+const float GasScattering = 0.6;
+const float CellLightTint = 0.2;
 
-float getGasFbm(vec2 position, float numOctaves)
+float getThickness(vec2 position)
 {
-    float result = 0.0;
-    float amplitude = 0.5;
-    float amplitudeSum = 0.0;
-    for (int i = 0; i < GasDetailOctaves; ++i) {
-        float visibility = clamp(numOctaves - float(i), 0.0, 1.0);
-        result += amplitude * mix(0.5, valueNoise(position), visibility);
-        amplitudeSum += amplitude;
-        position = position * GasDetailLacunarity + vec2(17.1, 9.3);
-        amplitude *= 0.5;
-    }
-    return result / amplitudeSum;
+    vec4 clouds = sampleGasLayerSmooth(position, GasLayer_Clouds);
+    return RasterDiskIntegral * max(clouds.r + clouds.g + clouds.b, 0.0);
 }
 
-float getGasTurbulence(vec2 position)
+// Gradient of the logarithmic thickness, which is high at the edges of the clouds
+vec2 getThicknessGradient(vec2 position)
 {
-    float coarsestWavelengthInPixels = 1.0 / (GasDetailFrequency * getPixelSize());
-    float numOctaves = log2(coarsestWavelengthInPixels / GasDetailMinWavelengthInPixels) / log2(GasDetailLacunarity) + 1.0;
-    numOctaves = clamp(numOctaves, 0.0, float(GasDetailOctaves));
-
-    vec2 scaledPosition = position * GasDetailFrequency;
-    float phase = frame.gasGrid.w;
-    vec2 warp = vec2(getGasFbm(scaledPosition + vec2(phase, 0.0), numOctaves), getGasFbm(scaledPosition + vec2(5.2, 1.3 - phase), numOctaves));
-    return getGasFbm(scaledPosition + GasDetailWarp * (warp - 0.5) + vec2(0.0, 0.7 * phase), numOctaves);
+    float offset = max(frame.gasGrid.z, 0.5);
+    float right = log(1.0 + getThickness(position + vec2(offset, 0.0)));
+    float left = log(1.0 + getThickness(position - vec2(offset, 0.0)));
+    float lower = log(1.0 + getThickness(position + vec2(0.0, offset)));
+    float upper = log(1.0 + getThickness(position - vec2(0.0, offset)));
+    return vec2(right - left, lower - upper) / (2.0 * offset);
 }
 
-// Light scattered once more spreads around the gas as a soft glow. The taps lie on a spiral and sample the already smooth density, the
-// sharp sparks would appear repeatedly.
-vec3 getGasGlow(vec2 position)
+vec3 shadeGas(vec2 position, vec3 background)
 {
-    float radius = frame.gasSpread.y;
-    vec3 sum = vec3(0.0);
-    float weightSum = 0.0;
-    for (int i = 0; i < GasGlowTaps; ++i) {
-        float fraction = (float(i) + 0.5) / float(GasGlowTaps);
-        float angle = float(i) * 2.39996;
-        float weight = exp(-2.0 * fraction);
-        sum += weight * sampleGas(position + radius * sqrt(fraction) * vec2(cos(angle), sin(angle))).rgb;
-        weightSum += weight;
+    vec4 clouds = sampleGasLayerSmooth(position, GasLayer_Clouds);
+    float density = max(clouds.a, 0.0);
+    if (density < 1e-4) {
+        return background;
     }
-    return sum / weightSum;
-}
 
-vec3 shadeGas(vec2 position, vec3 background, vec3 scatteredLight)
-{
-    vec3 glow = GasGlowIntensity * getGasGlow(position) + GasSparkIntensity * sampleSparks(position);
-    vec4 gas = sampleGas(position);
-    if (gas.a < 1e-3) {
-        return background + glow;
-    }
-    vec3 color = gas.rgb / gas.a;
-    float turbulence = max(1.0 + GasDetailContrast * (2.0 * getGasTurbulence(position) - 1.0), 0.0);
-    float opticalDepth = GasExtinction * gas.a * turbulence;
-    float transmittance = exp(-opticalDepth);
+    // The soft disks of the fluids add up and a threshold cuts the clouds as in the rasterized view, which dims the fluids when zoomed out
+    // very far
+    vec3 rasterClouds = RasterDiskIntegral * max(clouds.rgb, vec3(0.0));
+    float thickness = rasterClouds.r + rasterClouds.g + rasterClouds.b;
+    float coverage = smoothstep(RasterThresholdLow, RasterThresholdHigh, thickness);
+    float zoomCorrection = min(1.0, 8.0 * frame.view.w);
+    float brightness = RasterCloudFactor * maxComponent(rasterClouds) * coverage * zoomCorrection;
 
-    // Emitted light partly gets absorbed by the gas itself, the fraction that escapes decreases in dense gas
-    float escapingFraction = (1.0 - transmittance) / max(opticalDepth, 1e-4);
-    vec3 emission = GasEmission * gas.rgb * turbulence * escapingFraction;
+    // The saturated colors keep the luminance of the original colors up to a limit, so that the nebula is about as bright as the rasterized
+    // fluids without overexposing deep blue
+    vec3 color = clouds.rgb / density;
+    vec3 hue = color / max(maxComponent(color), 1e-4);
+    vec3 saturatedHue = pow(hue, vec3(NebulaSaturation));
+    saturatedHue *= min(luminance(hue) / max(luminance(saturatedHue), 1e-4), NebulaMaxLuminanceGain);
+    float core = NebulaCoreWeight * smoothstep(NebulaCoreStart, NebulaCoreEnd, thickness);
+    vec3 nebulaColor = mix(saturatedHue, NebulaCoreColor, core);
+    float edge = smoothstep(0.1, 0.5, length(getThicknessGradient(position))) * coverage;
+    vec3 nebula = brightness * nebulaColor * (1.0 + NebulaEdgeGlow * edge);
 
-    float shadowDensity = 0.0;
-    float stepLength = GasShadowDistance / float(GasShadowSteps);
-    for (int i = 1; i <= GasShadowSteps; ++i) {
-        shadowDensity += sampleGas(position + GasLampDirection * (stepLength * float(i))).a;
-    }
-    float lampTransmittance = exp(-GasExtinction * GasShadowStrength * shadowDensity * stepLength);
-
-    vec3 light = vec3(GasLampIntensity * lampTransmittance + GasAmbientLight) + GasBioluminescence * scatteredLight;
-    return background * transmittance + color * light * (1.0 - transmittance) + emission + glow;
+    float scattering = 1.0 - exp(-GasScattering * density);
+    vec3 cellLight = sampleGasIrradiance(position) * mix(vec3(1.0), hue, CellLightTint) * scattering;
+    return background + nebula + cellLight;
 }
 )";
 }

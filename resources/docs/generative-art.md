@@ -33,7 +33,7 @@ On a GPU with ray tracing hardware, **View > Ray tracing** (Alt+R) shows the cre
 
 Zoomed in, every cell shows wavy walls towards its neighbors, a nucleus with a nucleolus and small vesicles. These details stay with their cell while it moves. On a dark background the tissue is visible by its glow as in a fluorescence microscope. On a bright background it absorbs light as in a brightfield microscope and appears slightly embossed. When zoomed out, the tissue fades into the normal view, so that small structures keep their details and the brightness stays the same.
 
-Fluids appear as gas. Thin gas is translucent, dense gas hides the background. A lamp at the upper left lights the gas, so clouds get bright edges on one side and shaded cores. Turbulent swirls inside the gas evolve with the simulation time. Glowing fluid particles shine as sparks that brighten the gas around them, and light from flashing cells scatters in the gas as well.
+Fluids appear as a glowing nebula, while energy particles keep their normal look. Thin gas glows in saturated colors, dense gas shines towards warm white, and the edges of the clouds glow brighter. The cells light the nebula around them in their colors. Their light fades with the distance, dense gas and creatures cast shadows, and the nebula flares up when the neurons of nearby cells are active. Glowing fluid particles shine as sparks.
 
 Cells flash when the activity of their neuron changes, and their light illuminates the neighboring tissue and the surrounding medium. Every frame is computed completely without random samples, so the image stays free of noise in motion and does not change when the simulation pauses. Pictures saved with **Simulation > Save picture** average several frames for smoother edges.
 

@@ -335,7 +335,7 @@ cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluid
             if (fluidParticleData != nullptr) {
                 fluidParticleData[idx].pos[0] = object->pos.x;
                 fluidParticleData[idx].pos[1] = object->pos.y;
-                fluidParticleData[idx].pos[2] = 0.0f;
+                fluidParticleData[idx].pos[2] = 1.0f;
                 auto color = getObjectColor(object);
                 fluidParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
                 fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;

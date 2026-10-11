@@ -4,22 +4,21 @@
 
 namespace Shaders
 {
-    // Gaussian blur of the gas grid in two passes, the sparks get a smaller blur than the gas. The horizontal pass reads the fixed point
-    // sums, the vertical pass writes the densities per area into the gas image. The direction is defined in front of the source.
+    // Gaussian blur of the gas grid in two passes. The horizontal pass reads the fixed point sums, the vertical pass writes the sums per area
+    // into the gas image. The direction is defined in front of the source.
     std::string_view const RayTracingGasBlurCS = R"(
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
-void readHorizontalInput(ivec2 node, out vec4 gas, out vec4 spark)
+float readAccumulation(uint entry)
 {
-    uint entry = getGasNodeIndex(node) * GasAccumulationStride;
-    gas = vec4(float(gasAccumulation[entry + 1u]), float(gasAccumulation[entry + 2u]), float(gasAccumulation[entry + 3u]), float(gasAccumulation[entry]))
-        / GasFixedPointScale;
-    spark = vec4(float(gasAccumulation[entry + 4u]), float(gasAccumulation[entry + 5u]), float(gasAccumulation[entry + 6u]), 0.0) / GasFixedPointScale;
+    return float(gasAccumulation[entry]) / GasFixedPointScale;
 }
 
-float getGaussian(int offset, float sigma)
+void readHorizontalInput(ivec2 node, out vec4 layers[GasLayers])
 {
-    return exp(-0.5 * float(offset * offset) / (sigma * sigma));
+    uint entry = getGasNodeIndex(node) * GasAccumulationStride;
+    layers[GasLayer_Clouds] = vec4(readAccumulation(entry + 1u), readAccumulation(entry + 2u), readAccumulation(entry + 3u), readAccumulation(entry));
+    layers[GasLayer_Cells] = vec4(readAccumulation(entry + 4u), 0.0, 0.0, 0.0);
 }
 
 void main()
@@ -28,44 +27,40 @@ void main()
     if (any(greaterThanEqual(node, frame.gasSize.xy))) {
         return;
     }
+    float sigma = max(frame.gasGrid.w, 1e-3);
+    vec4 sums[GasLayers] = vec4[GasLayers](vec4(0.0), vec4(0.0));
+    float weightSum = 0.0;
     int radius = frame.gasSize.z;
-    float gasSigma = max(frame.gasSpread.x, 1e-3);
-    float sparkSigma = max(frame.gasSpread.z, 1e-3);
-    vec4 gasSum = vec4(0.0);
-    vec4 sparkSum = vec4(0.0);
-    float gasWeightSum = 0.0;
-    float sparkWeightSum = 0.0;
     for (int offset = -radius; offset <= radius; ++offset) {
-        float gasWeight = getGaussian(offset, gasSigma);
-        float sparkWeight = getGaussian(offset, sparkSigma);
-        gasWeightSum += gasWeight;
-        sparkWeightSum += sparkWeight;
+        float weight = exp(-0.5 * float(offset * offset) / (sigma * sigma));
+        weightSum += weight;
         ivec2 source = node + BlurDirection * offset;
         if (any(lessThan(source, ivec2(0))) || any(greaterThanEqual(source, frame.gasSize.xy))) {
             continue;
         }
+        vec4 layers[GasLayers];
 #ifdef VERTICAL
-        uint entry = getGasNodeIndex(source) * 2u;
-        gasSum += gasWeight * gasIntermediate[entry];
-        sparkSum += sparkWeight * gasIntermediate[entry + 1u];
+        uint entry = getGasNodeIndex(source) * uint(GasLayers);
+        for (int layer = 0; layer < GasLayers; ++layer) {
+            layers[layer] = gasIntermediate[entry + uint(layer)];
+        }
 #else
-        vec4 gas;
-        vec4 spark;
-        readHorizontalInput(source, gas, spark);
-        gasSum += gasWeight * gas;
-        sparkSum += sparkWeight * spark;
+        readHorizontalInput(source, layers);
 #endif
+        for (int layer = 0; layer < GasLayers; ++layer) {
+            sums[layer] += weight * layers[layer];
+        }
     }
-    gasSum /= gasWeightSum;
-    sparkSum /= sparkWeightSum;
 #ifdef VERTICAL
     float area = frame.gasGrid.z * frame.gasGrid.z;
-    imageStore(gasImage, node, gasSum / area);
-    imageStore(gasImage, node + ivec2(GasImageSize, 0), sparkSum / area);
+    for (int layer = 0; layer < GasLayers; ++layer) {
+        imageStore(gasImage, node + ivec2(layer * GasImageSize, 0), sums[layer] / (weightSum * area));
+    }
 #else
-    uint entry = getGasNodeIndex(node) * 2u;
-    gasIntermediate[entry] = gasSum;
-    gasIntermediate[entry + 1u] = sparkSum;
+    uint entry = getGasNodeIndex(node) * uint(GasLayers);
+    for (int layer = 0; layer < GasLayers; ++layer) {
+        gasIntermediate[entry + uint(layer)] = sums[layer] / weightSum;
+    }
 #endif
 }
 )";

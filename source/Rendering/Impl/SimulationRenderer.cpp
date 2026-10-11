@@ -320,14 +320,17 @@ namespace
     }
 
     // Blurred and merged into a glowing fluid layer
-    RenderBlocks createFluidParticleBlocks()
+    RenderBlocks createFluidParticleBlocks(bool energyParticlesOnly)
     {
         return RenderBlocks{
 
             // Render block: Render fluid particles
             RenderBlock{
                 RenderSequence().steps({
-                    _FluidParticleRenderStep::create(StepParameters().shader(ShaderSources::FluidParticle).addUniform("onBackground", true)),
+                    _FluidParticleRenderStep::create(StepParameters()
+                                                         .shader(ShaderSources::FluidParticle)
+                                                         .addUniform("onBackground", true)
+                                                         .addUniform("energyParticlesOnly", energyParticlesOnly)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
                 }),
             },
@@ -342,7 +345,10 @@ namespace
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
                 }),
                 RenderSequence().steps({
-                    _FluidParticleRenderStep::create(StepParameters().shader(ShaderSources::FluidParticle).addUniform("onBackground", false)),
+                    _FluidParticleRenderStep::create(StepParameters()
+                                                         .shader(ShaderSources::FluidParticle)
+                                                         .addUniform("onBackground", false)
+                                                         .addUniform("energyParticlesOnly", energyParticlesOnly)),
                 }),
             },
 
@@ -445,7 +451,7 @@ namespace
 
 void SimulationRenderer::createRasterGraph(ImFont* labelFont)
 {
-    auto blocks = createFluidParticleBlocks();
+    auto blocks = createFluidParticleBlocks(false);
     append(
         blocks,
         RenderBlocks{
@@ -511,18 +517,21 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
 {
     _rayTracingStep = _RayTracingRenderStep::create(StepParameters().shader(ShaderSources::RayTracingPresent));
 
-    // The ray tracing renders the fluid particles itself as gas
-    RenderBlocks blocks;
+    // The ray tracing renders the fluids itself as gas, the energy particles and the cores of glowing fluids keep the look of the rasterized view
+    auto blocks = createFluidParticleBlocks(true);
     append(
         blocks,
         RenderBlocks{
 
-            // Render block: The background as ground
+            // Render block: Two outputs: The background as ground and the energy particles
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(getBackgroundUniforms)),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::GridLines).uniformFunc(getGridLinesUniforms)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
             },
 
