@@ -24,25 +24,25 @@
 
 #include <iomanip>
 #include <sstream>
-#include <Engine/Kernels/Base.cuh>
-#include <Engine/Kernels/ConstantMemory.cuh>
-#include <Engine/Kernels/CudaGeometryBuffers.cuh>
+#include <Engine/Impl/Kernels/Base.cuh>
+#include <Engine/Impl/Kernels/ConstantMemory.cuh>
+#include <Engine/Impl/Kernels/CudaGeometryBuffers.cuh>
 
-#include <Engine/Kernels/CudaMemoryManager.cuh>
-#include <Engine/Kernels/CudaTOProvider.cuh>
-#include <Engine/Kernels/DataAccessKernels.cuh>
-#include <Engine/Kernels/EditKernels.cuh>
-#include <Engine/Kernels/Entities.cuh>
-#include <Engine/Kernels/GarbageCollectorKernels.cuh>
-#include <Engine/Kernels/GeometryKernels.cuh>
-#include <Engine/Kernels/ObjectGrid.cuh>
-#include <Engine/Kernels/SelectionResult.cuh>
-#include <Engine/Kernels/SimulationData.cuh>
-#include <Engine/Kernels/SimulationKernels.cuh>
-#include <Engine/Kernels/SimulationStatistics.cuh>
-#include <Engine/Kernels/StatisticsKernels.cuh>
-#include <Engine/Kernels/TOProvider.cuh>
-#include <Engine/Kernels/TOs.cuh>
+#include <Engine/Impl/Kernels/CudaMemoryManager.cuh>
+#include <Engine/Impl/Kernels/CudaTOProvider.cuh>
+#include <Engine/Impl/Kernels/DataAccessKernels.cuh>
+#include <Engine/Impl/Kernels/EditKernels.cuh>
+#include <Engine/Impl/Kernels/Entities.cuh>
+#include <Engine/Impl/Kernels/GarbageCollectorKernels.cuh>
+#include <Engine/Impl/Kernels/GeometryKernels.cuh>
+#include <Engine/Impl/Kernels/ObjectGrid.cuh>
+#include <Engine/Impl/Kernels/SelectionResult.cuh>
+#include <Engine/Impl/Kernels/SimulationData.cuh>
+#include <Engine/Impl/Kernels/SimulationKernels.cuh>
+#include <Engine/Impl/Kernels/SimulationStatistics.cuh>
+#include <Engine/Impl/Kernels/StatisticsKernels.cuh>
+#include <Engine/Impl/Kernels/TOProvider.cuh>
+#include <Engine/Impl/Kernels/TOs.cuh>
 
 #include "DataAccessKernelsService.cuh"
 #include "EditKernelsService.cuh"

@@ -6,7 +6,7 @@
 
 #include <Engine/Interface/StatisticsConverterService.h>
 
-#include <Engine/Kernels/Base.cuh>
+#include <Engine/Impl/Kernels/Base.cuh>
 
 namespace
 {

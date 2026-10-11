@@ -1,7 +1,7 @@
 #include "GarbageCollectorKernelsService.cuh"
 
-#include <Engine/Kernels/DebugKernels.cuh>
-#include <Engine/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/DebugKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
 
 void GarbageCollectorKernelsService::init()
 {

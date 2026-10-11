@@ -7,10 +7,10 @@
 
 #include <Data/SpaceCalculator.h>
 
-#include <Engine/Kernels/ForceFieldKernels.cuh>
-#include <Engine/Kernels/KernelLauncher.cuh>
-#include <Engine/Kernels/SimulationKernels.cuh>
-#include <Engine/Kernels/SimulationStatistics.cuh>
+#include <Engine/Impl/Kernels/ForceFieldKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/SimulationKernels.cuh>
+#include <Engine/Impl/Kernels/SimulationStatistics.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
 
