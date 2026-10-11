@@ -179,6 +179,7 @@ namespace
                     {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(FluidParticleVertexData, pos)},
                     {1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(FluidParticleVertexData, color)},
                     {2, 0, VK_FORMAT_R32_SFLOAT, offsetof(FluidParticleVertexData, glow)},
+                    {3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(FluidParticleVertexData, vel)},
                 }};
         case VertexLayout::Locations:
             return {
