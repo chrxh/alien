@@ -42,14 +42,18 @@ namespace
     auto constexpr CloudSpread = 2.6f;
     auto constexpr MinCloudSpreadInPixels = 2.0f;
 
-    // The cells light the gas within this range. Their light is collected in clusters of at least the given size and two node distances, the
-    // irradiance grid has twice the node distance of the gas grid. The sizes must match GasLightClusterStride and GasIrradianceImageSize in
-    // Shaders/RayTracingCommonCS.h.
-    auto constexpr GasLightRange = 20.0f;
+    // The light of the cells falls off beyond a distance, which must match LightFalloffDistance in Shaders/RayTracingGasIrradianceCS.h. The
+    // falloff distance covers a minimum number of nodes of the irradiance grid, so that moving cells do not flicker. The irradiance grid has
+    // twice the node distance of the gas grid as long as this holds, otherwise the node distance of the gas grid. Zoomed out further, the
+    // falloff distance grows with it, and so does the range of the lights. The light is collected in clusters of at least the given size and
+    // two node distances. The sizes must match GasLightClusterStride and GasIrradianceImageSize in Shaders/RayTracingCommonCS.h.
+    auto constexpr LightFalloffDistance = 5.0f;
+    auto constexpr MinLightFalloffInIrradianceNodes = 1.5f;
+    auto constexpr LightRangeInFalloffDistances = 4.0f;
     auto constexpr MinLightClusterSize = 4.0f;
     auto constexpr MaxLightClusters = 256;
     auto constexpr GasLightClusterStride = 6;
-    auto constexpr GasIrradianceImageSize = 256;
+    auto constexpr GasIrradianceImageSize = MaxGasNodes;
 
     auto constexpr SphereSize = VkDeviceSize(64);
     auto constexpr AabbBufferUsage =
@@ -574,29 +578,43 @@ void _RayTracingRenderStep::updateGasGrid(RenderView const& view)
 {
     auto pixelSize = 1.0f / view.zoomFactor;
     auto cloudSpread = std::max(CloudSpread, MinCloudSpreadInPixels * pixelSize);
-    auto margin = std::max(3.0f * cloudSpread, GasLightRange);
-    auto topLeft = view.visibleWorldRect.topLeft - RealVector2D{margin, margin};
-    auto bottomRight = view.visibleWorldRect.bottomRight + RealVector2D{margin, margin};
-    auto extent = bottomRight - topLeft;
+    auto const& visibleRect = view.visibleWorldRect;
+    auto visibleExtent = std::max(visibleRect.bottomRight.x - visibleRect.topLeft.x, visibleRect.bottomRight.y - visibleRect.topLeft.y);
     auto nodeDistance = MinGasNodeDistance;
-    while (std::max(extent.x, extent.y) / nodeDistance > toFloat(MaxGasNodes - 2)) {
+    auto irradianceNodeDistance = 0.0f;
+    auto lightFalloffDistance = 0.0f;
+    auto margin = 0.0f;
+    while (true) {
+        irradianceNodeDistance = MinLightFalloffInIrradianceNodes * 2.0f * nodeDistance <= LightFalloffDistance ? 2.0f * nodeDistance : nodeDistance;
+        lightFalloffDistance = std::max(LightFalloffDistance, MinLightFalloffInIrradianceNodes * irradianceNodeDistance);
+        margin = std::max(3.0f * cloudSpread, LightRangeInFalloffDistances * lightFalloffDistance);
+        if ((visibleExtent + 2.0f * margin) / nodeDistance <= toFloat(MaxGasNodes - 2)) {
+            break;
+        }
         nodeDistance *= 2.0f;
     }
+    auto topLeft = visibleRect.topLeft - RealVector2D{margin, margin};
+    auto bottomRight = visibleRect.bottomRight + RealVector2D{margin, margin};
     RealVector2D origin{std::floor(topLeft.x / nodeDistance) * nodeDistance, std::floor(topLeft.y / nodeDistance) * nodeDistance};
     IntVector2D size{
         std::min(toInt(std::ceil((bottomRight.x - origin.x) / nodeDistance)) + 1, MaxGasNodes),
         std::min(toInt(std::ceil((bottomRight.y - origin.y) / nodeDistance)) + 1, MaxGasNodes)};
     auto lightClusterSize = std::max(MinLightClusterSize, 2.0f * nodeDistance);
     auto getNumLightClusters = [&](int numNodes) { return std::min(toInt(std::ceil(toFloat(numNodes) * nodeDistance / lightClusterSize)), MaxLightClusters); };
+    auto getNumIrradianceNodes = [&](int numNodes) {
+        return std::min(toInt(std::ceil(toFloat(numNodes - 1) * nodeDistance / irradianceNodeDistance)) + 1, GasIrradianceImageSize);
+    };
     _gasGrid = GasGrid{
         .origin = origin,
         .nodeDistance = nodeDistance,
         .size = size,
         .blurRadius = std::min(toInt(std::ceil(3.0f * cloudSpread / nodeDistance)), MaxGasBlurRadius),
         .cloudSpreadInNodes = cloudSpread / nodeDistance,
+        .lightFalloffDistance = lightFalloffDistance,
         .lightClusterSize = lightClusterSize,
         .numLightClusters = {getNumLightClusters(size.x), getNumLightClusters(size.y)},
-        .irradianceSize = {std::min((size.x + 1) / 2, GasIrradianceImageSize), std::min((size.y + 1) / 2, GasIrradianceImageSize)},
+        .irradianceNodeDistance = irradianceNodeDistance,
+        .irradianceSize = {getNumIrradianceNodes(size.x), getNumIrradianceNodes(size.y)},
     };
 }
 
@@ -653,7 +671,11 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
         .parameters = {backgroundScale, Bioluminescence, _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1)},
         .gasGrid = {_gasGrid.origin.x, _gasGrid.origin.y, _gasGrid.nodeDistance, _gasGrid.cloudSpreadInNodes},
         .gasSize = {_gasGrid.size.x, _gasGrid.size.y, _gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
-        .gasLight = {_gasGrid.lightClusterSize, GasLightRange, 2.0f * _gasGrid.nodeDistance, 0.0f},
+        .gasLight =
+            {_gasGrid.lightClusterSize,
+             LightRangeInFalloffDistances * _gasGrid.lightFalloffDistance,
+             _gasGrid.irradianceNodeDistance,
+             _gasGrid.lightFalloffDistance},
         .gasLightGrid = {_gasGrid.numLightClusters.x, _gasGrid.numLightClusters.y, _gasGrid.irradianceSize.x, _gasGrid.irradianceSize.y},
     };
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));

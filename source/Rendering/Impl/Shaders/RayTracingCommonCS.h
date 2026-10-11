@@ -96,7 +96,8 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
                       // in the average with the previous frames, 1 if there is no average
     vec4 gasGrid;     // xy: world position of the first node of the gas grid, z: distance of the nodes, w: standard deviation of the blur in nodes
     ivec4 gasSize;    // xy: number of nodes of the gas grid, z: blur radius in nodes, w: number of fluid particles
-    vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid
+    vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid,
+                      // w: falloff distance of the lights
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
 } frame;
 
@@ -324,9 +325,11 @@ const float GasFixedPointScale = 1024.0;
 const uint GasAccumulationStride = 5u;
 
 // The cells light the gas. Their light is collected in clusters of the light cluster grid with the sums of the luminance weighted offsets
-// to the cluster corner, the luminance and the color.
+// to the cluster corner, the luminance and the color. Each cell contributes bilinearly to the four clusters around it, so that the light
+// changes smoothly when cells move from one cluster to another. The offsets are shifted by one cluster to stay positive.
 const uint GasLightClusterStride = 6u;
-const int GasIrradianceImageSize = 256;
+const float GasLightOffsetShift = 1.0;
+const int GasIrradianceImageSize = 512;
 
 // Clouds: color sum and number of particles. Cells: number of cells in x.
 const int GasLayer_Clouds = 0;
