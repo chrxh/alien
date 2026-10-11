@@ -2,7 +2,7 @@
 
 Provides the HTTP endpoints
 (`/createuser`, `/activateuser`, `/login`, ...) that the C++ client in
-`source/Network/NetworkService.cpp` talks to.
+`source/Network/Interface/NetworkService.cpp` talks to.
 
 ## Runtime configuration
 
@@ -77,7 +77,7 @@ server {
 }
 ```
 
-The C++ client (`source/Base/Resources.h`, `AlienServerURL`) defaults to
+The C++ client (`source/Base/Interface/Resources.h`, `AlienServerURL`) defaults to
 `http://85.214.181.38`; `httplib::Client` selects HTTP:80 from the scheme.
 
 ## Storage quota

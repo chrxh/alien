@@ -1,0 +1,52 @@
+#pragma once
+
+#include <vector>
+
+#include <Base/Interface/Definitions.h>
+#include <Base/Interface/Macros.h>
+
+#include "CellTypeConstants.h"
+
+struct SignalPreviewDesc
+{
+    SignalPreviewDesc();
+    auto operator<=>(SignalPreviewDesc const&) const = default;
+
+    MEMBER(SignalPreviewDesc, std::vector<float>, channels, {});
+};
+
+struct CellPreviewDesc
+{
+    auto operator<=>(CellPreviewDesc const&) const = default;
+
+    MEMBER(CellPreviewDesc, uint64_t, id, 0);
+    MEMBER(CellPreviewDesc, RealVector2D, pos, {});
+    MEMBER(CellPreviewDesc, int, color, 0);
+    MEMBER(CellPreviewDesc, bool, inactive, false);
+    MEMBER(CellPreviewDesc, int, geneIndex, 0);
+    MEMBER(CellPreviewDesc, int, nodeIndex, 0);
+    MEMBER(CellPreviewDesc, int, cellType, 0);
+    MEMBER(CellPreviewDesc, SignalPreviewDesc, signal, SignalPreviewDesc());
+    MEMBER(CellPreviewDesc, uint8_t, highlightIntensity, 0);
+    MEMBER(CellPreviewDesc, std::vector<float>, memory, std::vector<float>(MEMORY_NEURONS_PER_CELL, 0.0f));
+    MEMBER(CellPreviewDesc, std::optional<int>, constructorGeneIndex, std::nullopt);
+};
+
+struct ConnectionPreviewDesc
+{
+    auto operator<=>(ConnectionPreviewDesc const&) const = default;
+
+    MEMBER(ConnectionPreviewDesc, RealVector2D, cell1, {});
+    MEMBER(ConnectionPreviewDesc, RealVector2D, cell2, {});
+    MEMBER(ConnectionPreviewDesc, bool, inactive, false);
+    MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject1, 0.0f);
+    MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject2, 0.0f);
+};
+
+struct PreviewDesc
+{
+    auto operator<=>(PreviewDesc const&) const = default;
+
+    MEMBER(PreviewDesc, std::vector<CellPreviewDesc>, cells, {});
+    MEMBER(PreviewDesc, std::vector<ConnectionPreviewDesc>, connections, {});
+};

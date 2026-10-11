@@ -1,0 +1,397 @@
+#include <filesystem>
+#include <fstream>
+#include <ranges>
+#include <sstream>
+
+#include <gtest/gtest.h>
+
+#include <Base/Interface/Resources.h>
+#include <Engine/Interface/TestData/DescTestDataFactory.h>
+
+#include <Persister/Interface/SerializerService.h>
+
+class SerializerServiceTests : public ::testing::Test
+{
+public:
+    SerializerServiceTests()
+    {
+        _descTestDataFactory = &DescTestDataFactory::get();
+        _serializerService = &SerializerService::get();
+        _testDirectory = std::filesystem::temp_directory_path() / "alien-serializer-service-tests";
+        std::filesystem::create_directories(_testDirectory);
+    }
+
+    ~SerializerServiceTests() override { std::filesystem::remove_all(_testDirectory); }
+
+    void testSerializationAndDeserialization(ContentDesc const& data)
+    {
+        auto deserializedSimulationBefore = SimulationDesc().mainData(data);
+        std::string serializedSimulation;
+        _serializerService->serializeSimulationToString(serializedSimulation, deserializedSimulationBefore);
+
+        SimulationDesc deserializedSimulationAfter;
+        _serializerService->deserializeSimulationFromString(deserializedSimulationAfter, serializedSimulation);
+
+        EXPECT_TRUE(_descTestDataFactory->compare(deserializedSimulationBefore._mainData, deserializedSimulationAfter._mainData));
+    }
+
+protected:
+    ColorSamples createOverallSample(double base)
+    {
+        ColorSamples result;
+        result.timestep = base + 1;
+        result.systemClock = base + 2;
+
+        // The same set of color combinations in every sample, so the column-wise round-trip is exact
+        for (auto&& [colorBitset, offset] : {std::pair{0x1u, 3.0}, std::pair{0x6u, 12.0}}) {
+            ColorOverallDataPoint colorPoint;
+            colorPoint.numCreatures = base + offset;
+            colorPoint.numGenomes = base + offset + 1;
+            colorPoint.sumCreatureCells = base + offset + 2;
+            colorPoint.sumCreatureGenerations = base + offset + 3;
+            colorPoint.sumGenomeNodes = base + offset + 4;
+            colorPoint.sumMutationRates = base + offset + 5;
+            colorPoint.sumCreatureEnergy = base + offset + 6;
+            colorPoint.numCreatedCreatures = base + offset + 7;
+            colorPoint.totalMutations = base + offset + 8;
+            colorPoint.totalAttackedEnergy = base + offset + 9;
+            colorPoint.totalMuscleActivity = base + offset + 10;
+            result.data.emplace(colorBitset, colorPoint);
+        }
+        return result;
+    }
+
+    LineageSample createLineageSample(double base)
+    {
+        LineageSample result;
+        result.timestep = base + 1;
+        result.systemClock = base + 2;
+        result.data.colorBitset = static_cast<uint32_t>(base) + 3;
+        result.data.representativeCellId = (1ull << 60) + static_cast<uint64_t>(base);
+        result.data.numCreatures = base + 4;
+        result.data.numGenomes = base + 5;
+        result.data.sumCreatureCells = base + 6;
+        result.data.sumCreatureGenerations = base + 7;
+        result.data.sumGenomeNodes = base + 8;
+        result.data.sumMutationRates = base + 9;
+        result.data.sumCreatureEnergy = base + 10;
+        result.data.numCreatedCreatures = base + 11;
+        result.data.totalMutations = base + 12;
+        result.data.totalAttackedEnergy = base + 13;
+        result.data.totalMuscleActivity = base + 14;
+        return result;
+    }
+
+    LineageSample createLineageSample(double base, double numCreatures)
+    {
+        auto result = createLineageSample(base);
+        result.data.numCreatures = numCreatures;
+        return result;
+    }
+
+
+    void compare(ColorSamples const& expected, ColorSamples const& actual)
+    {
+        EXPECT_EQ(expected.timestep, actual.timestep);
+        EXPECT_EQ(expected.systemClock, actual.systemClock);
+
+        ASSERT_EQ(expected.data.size(), actual.data.size());
+        for (auto const& [colorBitset, expectedColor] : expected.data) {
+            auto actualColorIt = actual.data.find(colorBitset);
+            ASSERT_TRUE(actualColorIt != actual.data.end());
+            auto const& actualColor = actualColorIt->second;
+            EXPECT_EQ(expectedColor.numCreatures, actualColor.numCreatures);
+            EXPECT_EQ(expectedColor.numGenomes, actualColor.numGenomes);
+            EXPECT_EQ(expectedColor.sumCreatureCells, actualColor.sumCreatureCells);
+            EXPECT_EQ(expectedColor.sumCreatureGenerations, actualColor.sumCreatureGenerations);
+            EXPECT_EQ(expectedColor.sumGenomeNodes, actualColor.sumGenomeNodes);
+            EXPECT_EQ(expectedColor.sumMutationRates, actualColor.sumMutationRates);
+            EXPECT_EQ(expectedColor.sumCreatureEnergy, actualColor.sumCreatureEnergy);
+            EXPECT_EQ(expectedColor.numCreatedCreatures, actualColor.numCreatedCreatures);
+            EXPECT_EQ(expectedColor.totalMutations, actualColor.totalMutations);
+            EXPECT_EQ(expectedColor.totalAttackedEnergy, actualColor.totalAttackedEnergy);
+            EXPECT_EQ(expectedColor.totalMuscleActivity, actualColor.totalMuscleActivity);
+        }
+    }
+
+    void compare(LineageSample const& expected, LineageSample const& actual)
+    {
+        EXPECT_EQ(expected.timestep, actual.timestep);
+        EXPECT_EQ(expected.systemClock, actual.systemClock);
+        EXPECT_EQ(expected.data.colorBitset, actual.data.colorBitset);
+        EXPECT_EQ(expected.data.representativeCellId, actual.data.representativeCellId);
+        EXPECT_EQ(expected.data.numCreatures, actual.data.numCreatures);
+        EXPECT_EQ(expected.data.numGenomes, actual.data.numGenomes);
+        EXPECT_EQ(expected.data.sumCreatureCells, actual.data.sumCreatureCells);
+        EXPECT_EQ(expected.data.sumCreatureGenerations, actual.data.sumCreatureGenerations);
+        EXPECT_EQ(expected.data.sumGenomeNodes, actual.data.sumGenomeNodes);
+        EXPECT_EQ(expected.data.sumMutationRates, actual.data.sumMutationRates);
+        EXPECT_EQ(expected.data.sumCreatureEnergy, actual.data.sumCreatureEnergy);
+        EXPECT_EQ(expected.data.numCreatedCreatures, actual.data.numCreatedCreatures);
+        EXPECT_EQ(expected.data.totalMutations, actual.data.totalMutations);
+        EXPECT_EQ(expected.data.totalAttackedEnergy, actual.data.totalAttackedEnergy);
+        EXPECT_EQ(expected.data.totalMuscleActivity, actual.data.totalMuscleActivity);
+    }
+
+    void compare(StatisticsHistoryData const& expected, StatisticsHistoryData const& actual)
+    {
+        ASSERT_EQ(expected.colors.size(), actual.colors.size());
+        for (auto const& [expectedSample, actualSample] : std::views::zip(expected.colors, actual.colors)) {
+            compare(expectedSample, actualSample);
+        }
+        ASSERT_EQ(expected.lineages.size(), actual.lineages.size());
+        for (auto const& [lineageId, expectedSamples] : expected.lineages) {
+            auto actualSamplesIt = actual.lineages.find(lineageId);
+            ASSERT_TRUE(actualSamplesIt != actual.lineages.end());
+            ASSERT_EQ(expectedSamples.size(), actualSamplesIt->second.size());
+            for (auto const& [expectedSample, actualSample] : std::views::zip(expectedSamples, actualSamplesIt->second)) {
+                compare(expectedSample, actualSample);
+            }
+        }
+    }
+
+    std::string readFile(std::filesystem::path const& filename)
+    {
+        std::ifstream stream(filename, std::ios::binary);
+        std::stringstream result;
+        result << stream.rdbuf();
+        return result.str();
+    }
+
+    DescTestDataFactory* _descTestDataFactory;
+    SerializerService* _serializerService;
+    std::filesystem::path _testDirectory;
+};
+
+TEST_F(SerializerServiceTests, simulationFiles)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    SimulationDesc before;
+    before._mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    before._timestep = 1234;
+    before._realTime = std::chrono::milliseconds(9876543210);
+    before._zoom = 3.5f;
+    before._center = {111.0f, 222.0f};
+    before._worldSize = {700, 300};
+    before._simulationParameters.timestepSize.value = 0.5f;
+    before._statistics.colors.emplace_back(createOverallSample(100));
+
+    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, before));
+
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromFiles(after, filename));
+
+    EXPECT_EQ(before._timestep, after._timestep);
+    EXPECT_EQ(before._realTime, after._realTime);
+    EXPECT_EQ(before._zoom, after._zoom);
+    EXPECT_EQ(before._center, after._center);
+    EXPECT_EQ(before._worldSize, after._worldSize);
+    EXPECT_EQ(before._simulationParameters.timestepSize.value, after._simulationParameters.timestepSize.value);
+    EXPECT_TRUE(_descTestDataFactory->compare(before._mainData, after._mainData));
+    compare(before._statistics, after._statistics);
+
+    EXPECT_TRUE(_serializerService->deleteSimulation(filename));
+    EXPECT_FALSE(std::filesystem::exists(filename));
+}
+
+TEST_F(SerializerServiceTests, simulationParametersFile)
+{
+    auto filename = _testDirectory / "parameters.settings.json";
+
+    SimulationParameters before;
+    before.timestepSize.value = 0.5f;
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(filename, before));
+    EXPECT_NE(std::string::npos, readFile(filename).find(Const::ProgramVersion));
+
+    SimulationParameters after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationParametersFromFile(after, filename));
+
+    EXPECT_EQ(before.timestepSize.value, after.timestepSize.value);
+}
+
+TEST_F(SerializerServiceTests, simulationParametersFile_assignsLocationIds)
+{
+    auto filename = _testDirectory / "parameters.settings.json";
+
+    SimulationParameters before;
+    before.numLayers = 1;
+    before.layerOrderNumbers[0] = 2;
+    before.layerIds[0] = 7;
+    before.numSources = 1;
+    before.sourceOrderNumbers[0] = 1;
+    before.sourceIds[0] = 3;
+    ASSERT_TRUE(_serializerService->serializeSimulationParametersToFile(filename, before));
+
+    SimulationParameters after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationParametersFromFile(after, filename));
+
+    EXPECT_EQ(1, after.layerIds[0]);
+    EXPECT_EQ(2, after.sourceIds[0]);
+}
+
+TEST_F(SerializerServiceTests, statisticsHistory)
+{
+    SimulationDesc before;
+    for (int i = 0; i < 5; ++i) {
+        before._statistics.colors.emplace_back(createOverallSample(toDouble(i) * 100));
+    }
+    before._statistics.lineages.emplace(7, std::vector{createLineageSample(1000), createLineageSample(2000)});
+    before._statistics.lineages.emplace(42, std::vector{createLineageSample(3000)});
+    before._statistics.lineages.emplace(43, std::vector<LineageSample>{});
+
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
+
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
+
+    compare(before._statistics, after._statistics);
+}
+
+TEST_F(SerializerServiceTests, statisticsHistoryWithManyLineages)
+{
+    auto constexpr NumLineages = 260;
+    auto constexpr MaxSavedLineages = 250;
+
+    SimulationDesc before;
+    for (uint32_t lineageId = 1; lineageId <= NumLineages; ++lineageId) {
+        // The higher the lineage id, the more creatures; the history samples suggest the opposite order
+        for (uint32_t i = 0; i < lineageId; ++i) {
+            before._mainData._creatures.emplace_back(CreatureDesc().lineageId(toInt(lineageId)));
+        }
+        before._statistics.lineages.emplace(lineageId, std::vector{createLineageSample(1000, toDouble(NumLineages - lineageId))});
+    }
+
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
+
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
+
+    // Only the lineages with the most creatures are saved
+    StatisticsHistoryData expected;
+    for (uint32_t lineageId = NumLineages - MaxSavedLineages + 1; lineageId <= NumLineages; ++lineageId) {
+        expected.lineages.emplace(lineageId, before._statistics.lineages.at(lineageId));
+    }
+    compare(expected, after._statistics);
+}
+
+TEST_F(SerializerServiceTests, statisticsHistoryWithDeduplicatedColorTimelines)
+{
+    // Many color combinations share the same timeline; a few carry distinct data
+    auto createSample = [](double base) {
+        ColorSamples result;
+        result.timestep = base + 1;
+        result.systemClock = base + 2;
+        for (uint32_t colorBitset = 1; colorBitset < 64; ++colorBitset) {
+            ColorOverallDataPoint colorPoint;
+            if (colorBitset == 0x1u) {
+                colorPoint.numCreatures = base + 100;
+            } else if (colorBitset == 0x2u) {
+                colorPoint.numCreatures = base + 200;
+            }
+            result.data.emplace(colorBitset, colorPoint);
+        }
+        return result;
+    };
+
+    SimulationDesc before;
+    for (int i = 0; i < 5; ++i) {
+        before._statistics.colors.emplace_back(createSample(toDouble(i) * 100));
+    }
+
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
+
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
+
+    compare(before._statistics, after._statistics);
+}
+
+TEST_F(SerializerServiceTests, emptyStatisticsHistory)
+{
+    SimulationDesc before;
+
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
+
+    SimulationDesc after;
+    ASSERT_TRUE(_serializerService->deserializeSimulationFromString(after, serialized));
+
+    EXPECT_TRUE(after._statistics.colors.empty());
+    EXPECT_TRUE(after._statistics.lineages.empty());
+}
+
+TEST_F(SerializerServiceTests, truncatedSimulationIsRejected)
+{
+    SimulationDesc before;
+    before._mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    before._statistics.colors.emplace_back(createOverallSample(100));
+
+    std::string serialized;
+    ASSERT_TRUE(_serializerService->serializeSimulationToString(serialized, before));
+
+    // Reads that fail in a deferred operation must be reported as an error instead of terminating the process
+    for (auto length = size_t(0); length < serialized.size(); length += 7) {
+        SimulationDesc after;
+        EXPECT_FALSE(_serializerService->deserializeSimulationFromString(after, serialized.substr(0, length)));
+    }
+}
+
+TEST_F(SerializerServiceTests, singleEnergyParticle)
+{
+    ContentDesc data;
+    data._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+
+    testSerializationAndDeserialization(data);
+}
+
+using ObjectParameter = DescTestDataFactory::ObjectParameter;
+class SerializerServiceTests_AllCellTypes
+    : public SerializerServiceTests
+    , public testing::WithParamInterface<ObjectParameter>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    SerializerServiceTests_AllCellTypes,
+    SerializerServiceTests_AllCellTypes,
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllObjectParameters()));
+
+TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
+{
+    auto objectParameter = GetParam();
+
+    ContentDesc data;
+    if (objectParameter.objectType == ObjectType_Cell) {
+        data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+    } else {
+        data.objects({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+    }
+
+
+    testSerializationAndDeserialization(data);
+}
+
+using NodeParameter = DescTestDataFactory::NodeParameter;
+class SerializerServiceTests_AllNodeTypes
+    : public SerializerServiceTests
+    , public testing::WithParamInterface<NodeParameter>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    SerializerServiceTests_AllNodeTypes,
+    SerializerServiceTests_AllNodeTypes,
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllNodeParameters()));
+
+TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
+{
+    auto nodeParameter = GetParam();
+
+    auto [creature, genome] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
+
+    auto data = ContentDesc().addCreature({ObjectDesc()}, creature, genome);
+
+    testSerializationAndDeserialization(data);
+}
