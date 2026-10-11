@@ -12,7 +12,6 @@ layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 // Falloff distance when zoomed in, which must match LightFalloffDistance in Rendering/Impl/RayTracingRenderStep.cpp
 const float LightFalloffDistance = 5.0;
-const float SourceClearance = 1.5;
 const int ShadowSteps = 8;
 const float GasExtinction = 0.2;
 const float CellExtinction = 1.0;
@@ -22,9 +21,10 @@ float getExtinction(vec2 position)
     return GasExtinction * sampleGasLayer(position, GasLayer_Clouds).a + CellExtinction * sampleGasLayer(position, GasLayer_Cells).x;
 }
 
+// The path ends one cluster before the light, so that the cells around a light do not shadow it
 float getTransmittance(vec2 position, vec2 direction, float distance)
 {
-    float pathLength = distance - SourceClearance;
+    float pathLength = distance - frame.gasLight.x;
     if (pathLength <= 0.0) {
         return 1.0;
     }
@@ -47,9 +47,9 @@ void main()
     float range = frame.gasLight.y;
     float falloffDistance = frame.gasLight.w;
 
-    // The light of a cluster comes from the cells within one cluster around it. The loops only run over the clusters inside the grid, since
-    // skipping the clusters outside within the loops returned no light at all for larger ranges on an NVIDIA GPU.
-    ivec2 center = ivec2(floor((position - frame.gasGrid.xy) / clusterSize));
+    // The light of a cluster comes from the cells within one cluster around it. The bounds of the loops stay inside the grid, because loops
+    // that skipped the clusters outside returned no light at all on an NVIDIA GPU with driver 610.88 once the range grew.
+    ivec2 center = ivec2(floor((position - frame.gasLightOrigin.xy) / clusterSize));
     int clusterRange = int(ceil(range / clusterSize)) + 1;
     ivec2 lowerCluster = max(center - clusterRange, ivec2(0));
     ivec2 upperCluster = min(center + clusterRange, frame.gasLightGrid.xy - 1);
@@ -64,13 +64,14 @@ void main()
                 continue;
             }
             vec2 lightOffset = vec2(float(gasLightClusters[entry]), float(gasLightClusters[entry + 1u])) / lightLuminance - GasLightOffsetShift;
-            vec2 lightPosition = frame.gasGrid.xy + (vec2(cluster) + lightOffset) * clusterSize;
+            vec2 lightPosition = frame.gasLightOrigin.xy + (vec2(cluster) + lightOffset) * clusterSize;
             vec2 toLight = lightPosition - position;
             float distance = length(toLight);
             if (distance >= range) {
                 continue;
             }
-            vec3 light = vec3(float(gasLightClusters[entry + 3u]), float(gasLightClusters[entry + 4u]), float(gasLightClusters[entry + 5u])) / GasFixedPointScale;
+            vec3 light =
+                vec3(float(gasLightClusters[entry + 3u]), float(gasLightClusters[entry + 4u]), float(gasLightClusters[entry + 5u])) / GasFixedPointScale;
             float falloff = LightFalloffDistance * LightFalloffDistance / (falloffDistance * falloffDistance + distance * distance)
                 * (1.0 - smoothstep(range * 0.6, range, distance));
             irradiance += light * falloff * getTransmittance(position, toLight / max(distance, 1e-4), distance);

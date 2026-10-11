@@ -99,6 +99,7 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid,
                       // w: falloff distance of the lights
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
+    vec4 gasLightOrigin;  // xy: world position of the first light cluster
 } frame;
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT scene;
@@ -287,7 +288,7 @@ vec3 getScatteredLight(vec2 position)
             vec2 toLight = light.centerRadius.xy - position;
             float distanceSquared = dot(toLight, toLight);
             float radiusSquared = light.centerRadius.w * light.centerRadius.w;
-            float window = smoothstep(range, range * 0.5, sqrt(distanceSquared));
+            float window = 1.0 - smoothstep(range * 0.5, range, sqrt(distanceSquared));
             result += light.emission.rgb * EmissionToRadiance * radiusSquared / (radiusSquared + distanceSquared) * window;
         }
     }

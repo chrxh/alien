@@ -89,6 +89,7 @@ private:
 
         // The light of the cells is collected in clusters and reaches the nodes of the irradiance grid
         float lightFalloffDistance = 1.0f;
+        RealVector2D lightClusterOrigin;
         float lightClusterSize = 1.0f;
         IntVector2D numLightClusters;
         float irradianceNodeDistance = 1.0f;
