@@ -7,8 +7,8 @@
 #include "ComputePipeline.h"
 #include "RenderStep.h"
 
-// Renders the creatures with hardware ray tracing as living tissue under a microscope, see Shaders/RayTracingTissueCS.h.
-// The inputs are the background and the fluid particles, which form the medium around the tissue. The output is the scene in high dynamic
+// Renders the creatures with hardware ray tracing as living tissue under a microscope, see Shaders/RayTracingTissueCS.h, and the fluid
+// particles as gas around it, see Shaders/RayTracingGasShadingCS.h. The input is the background, the output is the scene in high dynamic
 // range. Each frame is computed completely, only still pictures average several frames for the anti-aliasing.
 class _RayTracingRenderStep : public _RenderStep
 {
@@ -77,12 +77,28 @@ private:
         uint64_t getNumCells() const;
     };
 
-    void createPipelines();
-    void updateLightGrid(RealRect const& visibleWorldRect);
+    // Grid in world coordinates whose nodes hold the density of the gas. The nodes are aligned to the world and their distance is a power of
+    // two multiple of a base distance, so that moving or zooming the view keeps the gas stable.
+    struct GasGrid
+    {
+        RealVector2D origin;
+        float nodeDistance = 1.0f;
+        IntVector2D size;
+        int blurRadius = 0;
+        float spreadInNodes = 1.0f;
+        float sparkSpreadInNodes = 1.0f;
+        float glowRadius = 1.0f;
+    };
 
-    void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters);
+    void createPipelines();
+    void createGasResources();
+    void updateLightGrid(RealRect const& visibleWorldRect);
+    void updateGasGrid(RenderView const& view);
+
+    void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters, uint64_t timestep);
     VkDescriptorSet writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures);
     void buildScene(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects);
+    void buildGas(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects);
     void shade(VkCommandBuffer commandBuffer);
     void present(ExecutionParameters const& parameters);
 
@@ -94,6 +110,9 @@ private:
     ComputePipeline _preparePipeline;
     ComputePipeline _allocatePipeline;
     ComputePipeline _scatterPipeline;
+    ComputePipeline _gasSplatPipeline;
+    ComputePipeline _gasBlurHorizontalPipeline;
+    ComputePipeline _gasBlurVerticalPipeline;
     ComputePipeline _tissuePipeline;
     ComputePipeline _antiAliasingPipeline;
     VulkanBuffer _frameConstants;
@@ -108,6 +127,11 @@ private:
     VulkanBuffer _cellOffsets;
     VulkanBuffer _cellCursors;
     VulkanBuffer _allocation;
+
+    GasGrid _gasGrid;
+    VulkanBuffer _gasAccumulation;
+    VulkanBuffer _gasIntermediate;
+    VulkanImage _gasImage;
 
     bool _stillPicture = false;
     bool _previousFrameValid = false;

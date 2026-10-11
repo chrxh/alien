@@ -5,6 +5,8 @@
 #include <cstring>
 #include <ranges>
 
+#include <Engine/Interface/SimulationFacade.h>
+
 #include <Rendering/Impl/Shaders/ShaderSources.h>
 
 #include "VulkanContext.h"
@@ -28,6 +30,26 @@ namespace
     // Cell details such as walls and nuclei appear between these screen zoom factors
     auto constexpr DetailZoomStart = 8.0f;
     auto constexpr DetailZoomEnd = 20.0f;
+
+    // The gas grid covers the view and a margin for the paths to the lamp and the glow around the gas, whose lengths must match
+    // GasShadowDistance in Shaders/RayTracingGasShadingCS.h. Its number of nodes and the sums per node must match GasImageSize and
+    // GasAccumulationStride in Shaders/RayTracingCommonCS.h. Zoomed out, the particles spread and glow over a minimum number of pixels, so
+    // that the gas stays smooth.
+    auto constexpr MinGasNodeDistance = 0.25f;
+    auto constexpr MaxGasNodes = 512;
+    auto constexpr GasAccumulationStride = 8;
+    auto constexpr MaxGasBlurRadius = 24;
+    auto constexpr GasShadowDistance = 5.0f;
+    auto constexpr GasSpread = 2.0f;
+    auto constexpr MinGasSpreadInPixels = 6.0f;
+    auto constexpr SparkSpread = 0.3f;
+    auto constexpr MinSparkSpreadInPixels = 1.2f;
+    auto constexpr GasGlowRadius = 6.0f;
+    auto constexpr MinGasGlowRadiusInPixels = 24.0f;
+
+    // Phase of the turbulence per timestep, it wraps around after a long time to keep the precision
+    auto constexpr GasTurbulenceSpeed = 0.003;
+    auto constexpr GasTurbulencePeriod = 1000.0;
 
     auto constexpr SphereSize = VkDeviceSize(64);
     auto constexpr AabbBufferUsage =
@@ -55,26 +77,34 @@ namespace
         Binding_AntiAliased,
         Binding_PreviousAntiAliased,
         Binding_GroundTexture,
-        Binding_FluidTexture,
+        Binding_GasSampler,
         Binding_SceneColorSampler,
+        Binding_FluidParticles,
+        Binding_GasAccumulation,
+        Binding_GasIntermediate,
+        Binding_GasImage,
         Binding_Count
     };
 
     VkDescriptorType getDescriptorType(uint32_t binding)
     {
-        if (binding == Binding_FrameConstants) {
+        switch (binding) {
+        case Binding_FrameConstants:
             return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        }
-        if (binding == Binding_Scene) {
+        case Binding_Scene:
             return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-        }
-        if (binding <= Binding_Allocation) {
+        case Binding_SceneColor:
+        case Binding_AntiAliased:
+        case Binding_GasImage:
+            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        case Binding_PreviousAntiAliased:
+        case Binding_GroundTexture:
+        case Binding_GasSampler:
+        case Binding_SceneColorSampler:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        default:
             return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         }
-        if (binding <= Binding_AntiAliased) {
-            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-        }
-        return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     }
 
     // Layout of the uniform block FrameConstants in Shaders/RayTracingCommonCS.h
@@ -87,6 +117,9 @@ namespace
         int32_t gridSize[4];
         float tissue[4];
         float parameters[4];
+        float gasGrid[4];
+        int32_t gasSize[4];
+        float gasSpread[4];
     };
 }
 
@@ -103,9 +136,10 @@ _RayTracingRenderStep::~_RayTracingRenderStep()
     }
     destroySceneResources(_scene, false);
     destroyViewResources(_view, false);
-    for (auto buffer : {&_cellCounts, &_cellOffsets, &_cellCursors, &_allocation, &_frameConstants}) {
+    for (auto buffer : {&_cellCounts, &_cellOffsets, &_cellCursors, &_allocation, &_frameConstants, &_gasAccumulation, &_gasIntermediate}) {
         context.destroyBufferLater(*buffer);
     }
+    context.destroyImageLater(_gasImage);
     context.destroyLater([device = context.getDevice(), pipelineLayout = _pipelineLayout, descriptorSetLayout = _descriptorSetLayout] {
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
@@ -132,6 +166,7 @@ void _RayTracingRenderStep::prepareResources(RenderView const& view, NumRenderOb
     }
 
     updateLightGrid(view.visibleWorldRect);
+    updateGasGrid(view);
 
     if (_view.size != view.viewSize) {
         destroyViewResources(_view, false);
@@ -148,7 +183,9 @@ void _RayTracingRenderStep::setStillPicture(bool value)
 
 void _RayTracingRenderStep::resetImageStates()
 {
-    for (auto image : _view.getImages()) {
+    auto images = _view.getImages();
+    images.emplace_back(&_gasImage);
+    for (auto image : images) {
         image->layout = VK_IMAGE_LAYOUT_UNDEFINED;
         image->lastStages = VK_PIPELINE_STAGE_2_NONE;
         image->lastAccesses = VK_ACCESS_2_NONE;
@@ -165,19 +202,20 @@ void _RayTracingRenderStep::execute(ExecutionParameters parameters)
 
     auto commandBuffer = parameters._renderInfo.commandBuffer;
     auto const& textures = parameters._textures;
-    CHECK(textures.size() == 2);
-    VulkanImageBarriers().add(textures.at(0)->color, ImageUsage::ShaderRead).add(textures.at(1)->color, ImageUsage::ShaderRead).record(commandBuffer);
+    CHECK(textures.size() == 1);
+    VulkanImageBarriers().add(textures.at(0)->color, ImageUsage::ShaderRead).record(commandBuffer);
 
     if (!_stillPicture || !isSameViewAsPrevious(view)) {
         _numAveragedFrames = 0;
     }
-    updateFrameConstants(view, numObjects, *parameters._simulationParameters);
+    updateFrameConstants(view, numObjects, *parameters._simulationParameters, parameters._simulationFacade->getCurrentTimestep());
     auto descriptorSet = writeDescriptorSet(geometryBuffers, textures);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
     if (getTissueVisibility(view) > 0.0f) {
         buildScene(commandBuffer, numObjects);
     }
+    buildGas(commandBuffer, numObjects);
     shade(commandBuffer);
     present(parameters);
 
@@ -452,13 +490,31 @@ void _RayTracingRenderStep::createPipelines()
     };
     _allocatePipeline = createPipeline(Shaders::RayTracingAllocateCS, {256, 1});
     _scatterPipeline = createPipeline(Shaders::RayTracingScatterCS, {64, 1});
-    _tissuePipeline = createPipeline(Shaders::RayTracingTissueCS, {8, 8});
+    _gasSplatPipeline = createPipeline(Shaders::RayTracingGasSplatCS, {64, 1});
+    _gasBlurHorizontalPipeline = createPipeline("const ivec2 BlurDirection = ivec2(1, 0);\n" + std::string(Shaders::RayTracingGasBlurCS), {8, 8});
+    _gasBlurVerticalPipeline =
+        createPipeline("#define VERTICAL\nconst ivec2 BlurDirection = ivec2(0, 1);\n" + std::string(Shaders::RayTracingGasBlurCS), {8, 8});
+    _tissuePipeline = createPipeline(std::string(Shaders::RayTracingGasShadingCS) + std::string(Shaders::RayTracingTissueCS), {8, 8});
     _antiAliasingPipeline = createPipeline(Shaders::RayTracingAntiAliasingCS, {8, 8});
     _frameConstants = context.createBuffer(sizeof(FrameConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VulkanMemory::HostVisible);
     _allocation = context.createBuffer(sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::DeviceLocal);
+    createGasResources();
 
     // Created last since it marks the pipelines as complete
     _preparePipeline = createPipeline(Shaders::RayTracingPrepareCS, {64, 1});
+}
+
+void _RayTracingRenderStep::createGasResources()
+{
+    auto& context = VulkanContext::get();
+    context.destroyBufferLater(_gasAccumulation);
+    context.destroyBufferLater(_gasIntermediate);
+    context.destroyImageLater(_gasImage);
+    auto numNodes = static_cast<VkDeviceSize>(MaxGasNodes) * MaxGasNodes;
+    _gasAccumulation = context.createBuffer(
+        numNodes * GasAccumulationStride * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::DeviceLocal);
+    _gasIntermediate = context.createBuffer(numNodes * 2 * 4 * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
+    _gasImage = context.createImage({2 * MaxGasNodes, MaxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
 }
 
 // Extreme zoom levels enlarge the cells and thus the range of the lights. A margin of one cell covers the lights next to the view.
@@ -497,6 +553,34 @@ void _RayTracingRenderStep::updateLightGrid(RealRect const& visibleWorldRect)
     _lightGrid = grid;
 }
 
+void _RayTracingRenderStep::updateGasGrid(RenderView const& view)
+{
+    auto pixelSize = 1.0f / view.zoomFactor;
+    auto spread = std::max(GasSpread, MinGasSpreadInPixels * pixelSize);
+    auto sparkSpread = std::max(SparkSpread, MinSparkSpreadInPixels * pixelSize);
+    auto glowRadius = std::max(GasGlowRadius, MinGasGlowRadiusInPixels * pixelSize);
+    auto margin = GasShadowDistance + glowRadius;
+    auto topLeft = view.visibleWorldRect.topLeft - RealVector2D{margin, margin};
+    auto bottomRight = view.visibleWorldRect.bottomRight + RealVector2D{margin, margin};
+    auto extent = bottomRight - topLeft;
+    auto nodeDistance = MinGasNodeDistance;
+    while (std::max(extent.x, extent.y) / nodeDistance > toFloat(MaxGasNodes - 2)) {
+        nodeDistance *= 2.0f;
+    }
+    RealVector2D origin{std::floor(topLeft.x / nodeDistance) * nodeDistance, std::floor(topLeft.y / nodeDistance) * nodeDistance};
+    _gasGrid = GasGrid{
+        .origin = origin,
+        .nodeDistance = nodeDistance,
+        .size =
+            {std::min(toInt(std::ceil((bottomRight.x - origin.x) / nodeDistance)) + 1, MaxGasNodes),
+             std::min(toInt(std::ceil((bottomRight.y - origin.y) / nodeDistance)) + 1, MaxGasNodes)},
+        .blurRadius = std::min(toInt(std::ceil(3.0f * spread / nodeDistance)), MaxGasBlurRadius),
+        .spreadInNodes = spread / nodeDistance,
+        .sparkSpreadInNodes = sparkSpread / nodeDistance,
+        .glowRadius = glowRadius,
+    };
+}
+
 namespace
 {
     float getHaltonValue(uint32_t index, uint32_t base)
@@ -523,7 +607,11 @@ float _RayTracingRenderStep::getTissueVisibility(RenderView const& view)
     return getSmoothTransition(view.getScreenZoomFactor(), TissueZoomStart, TissueZoomEnd);
 }
 
-void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters)
+void _RayTracingRenderStep::updateFrameConstants(
+    RenderView const& view,
+    NumRenderObjects const& numObjects,
+    SimulationParameters const& parameters,
+    uint64_t timestep)
 {
     auto const& topLeft = view.visibleWorldRect.topLeft;
     RealVector2D jitter;
@@ -535,6 +623,7 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
     auto closeUpWeight = getSmoothTransition(screenZoom, CloseUpZoomStart, CloseUpZoomEnd);
     auto detailVisibility = getSmoothTransition(screenZoom, DetailZoomStart, DetailZoomEnd);
     auto backgroundScale = 1.0f / std::max(1.5f - parameters.glow.value, 0.1f);
+    auto turbulencePhase = static_cast<float>(std::fmod(static_cast<double>(timestep) * GasTurbulenceSpeed, GasTurbulencePeriod));
 
     FrameConstants constants{
         .view = {toFloat(view.viewSize.x), toFloat(view.viewSize.y), view.zoomFactor, screenZoom},
@@ -548,6 +637,9 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
         .gridSize = {_lightGrid.size.x, _lightGrid.size.y, 0, 0},
         .tissue = {closeUpWeight, detailVisibility, 1.0f / view.zoomFactor, getTissueVisibility(view)},
         .parameters = {backgroundScale, Bioluminescence, _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1)},
+        .gasGrid = {_gasGrid.origin.x, _gasGrid.origin.y, _gasGrid.nodeDistance, turbulencePhase},
+        .gasSize = {_gasGrid.size.x, _gasGrid.size.y, _gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
+        .gasSpread = {_gasGrid.spreadInNodes, _gasGrid.glowRadius, _gasGrid.sparkSpreadInNodes, 0.0f},
     };
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 }
@@ -576,8 +668,12 @@ VkDescriptorSet _RayTracingRenderStep::writeDescriptorSet(VulkanGeometryBuffers 
         .storageImage(Binding_AntiAliased, _view.antiAliased.at(_current).view)
         .sampledImage(Binding_PreviousAntiAliased, _view.antiAliased.at(getPrevious()).view, General)
         .sampledImage(Binding_GroundTexture, textures.at(0)->color.view, ShaderReadOnly)
-        .sampledImage(Binding_FluidTexture, textures.at(1)->color.view, ShaderReadOnly)
+        .sampledImage(Binding_GasSampler, _gasImage.view, General)
         .sampledImage(Binding_SceneColorSampler, _view.sceneColor.view, General)
+        .storageBuffer(Binding_FluidParticles, geometryBuffers->getBuffer(GeometryBufferType_FluidParticles))
+        .storageBuffer(Binding_GasAccumulation, _gasAccumulation.buffer)
+        .storageBuffer(Binding_GasIntermediate, _gasIntermediate.buffer)
+        .storageImage(Binding_GasImage, _gasImage.view)
         .write(descriptorSet);
     return descriptorSet;
 }
@@ -674,11 +770,29 @@ void _RayTracingRenderStep::buildScene(VkCommandBuffer commandBuffer, NumRenderO
         VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR);
 }
 
+void _RayTracingRenderStep::buildGas(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects)
+{
+    auto numNodes = static_cast<VkDeviceSize>(_gasGrid.size.x) * _gasGrid.size.y;
+    vkCmdFillBuffer(commandBuffer, _gasAccumulation.buffer, 0, numNodes * GasAccumulationStride * sizeof(uint32_t), 0);
+    recordMemoryBarrier(
+        commandBuffer,
+        VK_PIPELINE_STAGE_2_CLEAR_BIT,
+        VK_ACCESS_2_TRANSFER_WRITE_BIT,
+        VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT);
+    _gasSplatPipeline->dispatch(commandBuffer, {toInt(numObjects.fluidParticles), 1});
+    recordComputeBarrier(commandBuffer);
+    _gasBlurHorizontalPipeline->dispatch(commandBuffer, _gasGrid.size);
+    recordComputeBarrier(commandBuffer);
+    VulkanImageBarriers().add(_gasImage, ImageUsage::ComputeReadWrite).record(commandBuffer);
+    _gasBlurVerticalPipeline->dispatch(commandBuffer, _gasGrid.size);
+}
+
 void _RayTracingRenderStep::shade(VkCommandBuffer commandBuffer)
 {
     auto& view = _view;
     recordComputeBarrier(commandBuffer);
-    VulkanImageBarriers().add(view.sceneColor, ImageUsage::ComputeReadWrite).record(commandBuffer);
+    VulkanImageBarriers().add(view.sceneColor, ImageUsage::ComputeReadWrite).add(_gasImage, ImageUsage::ComputeRead).record(commandBuffer);
     _tissuePipeline->dispatch(commandBuffer, view.size);
 
     recordComputeBarrier(commandBuffer);

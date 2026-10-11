@@ -511,20 +511,18 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
 {
     _rayTracingStep = _RayTracingRenderStep::create(StepParameters().shader(ShaderSources::RayTracingPresent));
 
-    auto blocks = createFluidParticleBlocks();
+    // The ray tracing renders the fluid particles itself as gas
+    RenderBlocks blocks;
     append(
         blocks,
         RenderBlocks{
 
-            // Render block: Two outputs: The background as ground and the fluid particles
+            // Render block: The background as ground
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(getBackgroundUniforms)),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::GridLines).uniformFunc(getGridLinesUniforms)),
-                }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
             },
 
