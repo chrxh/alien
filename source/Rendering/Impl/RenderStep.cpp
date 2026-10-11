@@ -337,7 +337,7 @@ void _PostProcessingRenderStep::execute(ExecutionParameters parameters)
 
     auto const& textures = parameters._textures;
     auto numTextures = textures.size();
-    CHECK(numTextures <= 3);
+    CHECK(numTextures <= 4);
     prepareExecution(parameters, textures);
 
     _shader->setInt("numTextures", toInt(numTextures));

@@ -20,6 +20,9 @@ public:
     // Zoomed out, the rasterized objects replace the tissue, so that the view keeps the details and the brightness of the rasterized view
     static float getTissueVisibility(RenderView const& view);
 
+    // The background is scaled by the inverse of the factor with which the bloom weights the scene
+    static float getBackgroundScale(SimulationParameters const& parameters);
+
     // Allocates the resources for the view and the visible objects. Calling it before the commands are recorded lets a lack of memory
     // surface without leaving a partially recorded frame behind.
     void prepareResources(RenderView const& view, NumRenderObjects const& numObjects);
