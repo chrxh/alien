@@ -5,7 +5,7 @@
 namespace Shaders
 {
     // Adds the cells to the gas grid, where they cast shadows, and their light to the light clusters. The light of a cell grows with its
-    // energy and flashes with the activity of its neuron.
+    // energy. The activity of its neuron, which lets the cell itself flash, does not change it, so that the gas does not flicker.
     std::string_view const RayTracingGasLightsCS = R"(
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
@@ -13,10 +13,10 @@ const int ObjectType_FreeCell = 2;
 const int ObjectType_Cell = 3;
 
 const float CellLight = 1.5;
-const float FlashLight = 8.0;
 
 // The cells are provided up to at least this distance outside the view, see Engine/Impl/GeometryKernelsService.cu. Their light fades out
-// towards it, so that it does not appear suddenly.
+// towards it, so that it does not appear suddenly when cells approach the view. This does not cover lights whose range exceeds the margin
+// when zoomed out, and cells to the left of and above the view in borderless worlds, which are not provided at all.
 const float CellCullingMargin = 10.0;
 
 float getVisibility(vec2 position)
@@ -57,14 +57,13 @@ void main()
     float colorBrightness = maxComponent(color);
     vec3 hue = colorBrightness > 0.02 ? clamp(color / colorBrightness, 0.0, 1.0) : vec3(0.5);
     float brightness = min(colorBrightness, 1.0) + 0.5 * log(max(colorBrightness, 1.0));
-    float flash = objectType == ObjectType_Cell ? object.highlightIntensity : 0.0;
-    vec3 light = hue * (CellLight * brightness + FlashLight * flash) * getVisibility(position);
+    vec3 light = hue * CellLight * brightness * getVisibility(position);
     float lightLuminance = luminance(light);
     if (lightLuminance <= 0.0) {
         return;
     }
 
-    vec2 clusterPosition = (position - frame.gasGrid.xy) / frame.gasLight.x;
+    vec2 clusterPosition = (position - frame.gasLightOrigin.xy) / frame.gasLight.x;
     vec2 clusterCoord = clusterPosition - 0.5;
     ivec2 lowerCluster = ivec2(floor(clusterCoord));
     vec2 clusterFraction = clusterCoord - vec2(lowerCluster);
