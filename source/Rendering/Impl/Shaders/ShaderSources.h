@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include <Rendering/Shaders/AllShaders.h>
+#include <Rendering/Impl/Shaders/AllShaders.h>
 
 namespace ShaderSources
 {

@@ -9,7 +9,7 @@
 
 #include <Base/MathTypes.h>
 
-#include <Rendering/Shaders/ShaderSources.h>
+#include <Rendering/Impl/Shaders/ShaderSources.h>
 
 #include <Data/SimulationParameters.h>
 

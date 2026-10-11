@@ -1,8 +1,8 @@
 #include "DataAccessKernelsService.cuh"
 
-#include <Engine/Kernels/DataAccessKernels.cuh>
-#include <Engine/Kernels/DebugKernels.cuh>
-#include <Engine/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/DataAccessKernels.cuh>
+#include <Engine/Impl/Kernels/DebugKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
 
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"

@@ -2,9 +2,9 @@
 
 #include <Data/EngineConstants.h>
 
-#include <Engine/Kernels/KernelLauncher.cuh>
-#include <Engine/Kernels/Macros.cuh>
-#include <Engine/Kernels/TestKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/Macros.cuh>
+#include <Engine/Impl/Kernels/TestKernels.cuh>
 
 void TestKernelsService::init()
 {

@@ -116,7 +116,7 @@ IncludeCategories:
     Priority: 202
 
   # Shader module includes
-  - Regex: '^<Rendering/Shaders/.*>$'
+  - Regex: '^<Rendering/Impl/Shaders/.*>$'
     Priority: 203
 
   # Data module includes
@@ -144,7 +144,7 @@ IncludeCategories:
     Priority: 209
 
   # Engine GPU kernels includes
-  - Regex: '^<Engine/Kernels/.*>$'
+  - Regex: '^<Engine/Impl/Kernels/.*>$'
     Priority: 210
 
   # Engine tests includes
