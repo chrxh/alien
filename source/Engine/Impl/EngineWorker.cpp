@@ -3,16 +3,16 @@
 #include <algorithm>
 #include <chrono>
 
-#include <Base/Interface/ExitScopeGuard.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/KernelProfiler.h>
-#include <Base/Interface/KernelTracer.h>
-#include <Base/Interface/Resources.h>
+#include <Base/ExitScopeGuard.h>
+#include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
+#include <Base/Resources.h>
 
-#include <Base/Interface/Ids.h>
-#include <Base/Interface/NumberGenerator.h>
+#include <Base/Ids.h>
+#include <Base/NumberGenerator.h>
 
-#include <Data/Interface/DescEditService.h>
+#include <Data/DescEditService.h>
 
 #include <Engine/Interface/GeometryBuffers.h>
 

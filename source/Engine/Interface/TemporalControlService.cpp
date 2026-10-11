@@ -3,7 +3,7 @@
 #include <cmath>
 #include <ranges>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 #include "SimulationFacade.h"
 

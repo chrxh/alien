@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <Data/Interface/DataPointCollection.h>
+#include <Data/DataPointCollection.h>
 
 class LiveStatisticsHistory
 {

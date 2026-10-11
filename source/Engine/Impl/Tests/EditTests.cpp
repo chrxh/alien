@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
-#include <Data/Interface/CreatorService.h>
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/SpaceCalculator.h>
+#include <Data/CreatorService.h>
+#include <Data/Descs.h>
+#include <Data/SpaceCalculator.h>
 
 #include <Engine/Interface/SelectionShallowData.h>
 #include <Engine/Interface/ShallowUpdateSelectionData.h>

@@ -4,10 +4,10 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/DescValidationService.h>
-#include <Data/Interface/GenomeDescAccessService.h>
+#include <Data/DescValidationService.h>
+#include <Data/GenomeDescAccessService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"

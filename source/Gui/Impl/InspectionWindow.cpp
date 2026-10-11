@@ -7,12 +7,12 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/DescEditService.h>
-#include <Data/Interface/DescValidationService.h>
-#include <Data/Interface/EngineConstants.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/DescEditService.h>
+#include <Data/DescValidationService.h>
+#include <Data/EngineConstants.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

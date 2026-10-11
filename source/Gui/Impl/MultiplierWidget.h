@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/MultiplierService.h>
+#include <Data/MultiplierService.h>
 
 #include <Engine/Interface/SelectionShallowData.h>
 

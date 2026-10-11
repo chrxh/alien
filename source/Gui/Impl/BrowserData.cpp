@@ -5,10 +5,10 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-#include <Base/Interface/Resources.h>
+#include <Base/Resources.h>
 
-#include <Network/Interface/NetworkResourceService.h>
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/TaskProcessor.h>

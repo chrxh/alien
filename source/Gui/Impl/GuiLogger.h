@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Base/Interface/LoggingService.h>
+#include <Base/LoggingService.h>
 
 #include "Definitions.h"
 

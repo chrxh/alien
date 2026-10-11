@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include <Base/Interface/Resources.h>
+#include <Base/Resources.h>
 #include <Engine/Interface/TestData/DescTestDataFactory.h>
 
 #include <Persister/Interface/SerializerService.h>

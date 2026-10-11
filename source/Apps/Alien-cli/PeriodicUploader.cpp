@@ -2,10 +2,10 @@
 
 #include <thread>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <ConsoleUi/Interface/ConsoleLiveOutput.h>
-#include <ConsoleUi/Interface/ConsoleWidgets.h>
+#include <ConsoleUi/ConsoleLiveOutput.h>
+#include <ConsoleUi/ConsoleWidgets.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

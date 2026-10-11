@@ -5,16 +5,16 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/Math.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Math.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/DescEditService.h>
+#include <Data/DescEditService.h>
 
 #include <Engine/Interface/ShallowUpdateSelectionData.h>
 #include <Engine/Interface/SimulationFacade.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

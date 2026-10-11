@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include <Base/Interface/Cache.h>
+#include <Base/Cache.h>
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
 #include "DownloadCache.h"
 

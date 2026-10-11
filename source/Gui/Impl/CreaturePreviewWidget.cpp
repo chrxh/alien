@@ -11,11 +11,11 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/PreviewDescConverterService.h>
-#include <Data/Interface/SpaceCalculator.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/PreviewDescConverterService.h>
+#include <Data/SpaceCalculator.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"

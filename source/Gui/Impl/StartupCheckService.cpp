@@ -2,9 +2,9 @@
 
 #include <filesystem>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
+#include <Base/AlienExceptions.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 void StartupCheckService::check()
 {

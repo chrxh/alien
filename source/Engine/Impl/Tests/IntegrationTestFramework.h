@@ -5,10 +5,10 @@
 #include <string>
 #include <gtest/gtest.h>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/Descs.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/Definitions.h>
 

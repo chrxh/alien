@@ -2,13 +2,13 @@
 
 #include <chrono>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
+#include <Data/Descs.h>
 
 #include <Engine/Interface/Definitions.h>
 
-#include <Network/Interface/NetworkResourceRawTO.h>
+#include <Network/NetworkResourceRawTO.h>
 
 #include <Persister/Interface/Definitions.h>
 #include <Persister/Interface/PersisterRequestId.h>

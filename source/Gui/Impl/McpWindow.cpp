@@ -11,7 +11,7 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
 #include "AlienGui.h"
 #include "McpController.h"

@@ -7,12 +7,12 @@
 #include <string>
 #include <vector>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/KernelProfiler.h>
-#include <Base/Interface/KernelTracer.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/AlienExceptions.h>
+#include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
+#include <Base/LoggingService.h>
+#include <Base/Singleton.h>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>

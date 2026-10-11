@@ -4,10 +4,10 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <Base/Interface/JsonParser.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/JsonParser.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include "Definitions.h"
 

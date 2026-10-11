@@ -5,10 +5,10 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include <Data/Interface/SimulationParameters.h>
-#include <Data/Interface/SimulationParametersTypes.h>
-#include <Data/Interface/SpecificationEvaluationService.h>
-#include <Data/Interface/SpecificationFilterService.h>
+#include <Data/SimulationParameters.h>
+#include <Data/SimulationParametersTypes.h>
+#include <Data/SpecificationEvaluationService.h>
+#include <Data/SpecificationFilterService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

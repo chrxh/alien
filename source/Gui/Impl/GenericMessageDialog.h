@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include <Base/Interface/MarkdownDocument.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/MarkdownDocument.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/Definitions.h>
 

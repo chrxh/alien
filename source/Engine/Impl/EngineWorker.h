@@ -8,11 +8,11 @@
 #include <windows.h>
 #endif
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
-#include <Data/Interface/PreviewDesc.h>
-#include <Data/Interface/SimulationParameters.h>
-#include <Data/Interface/StatisticsHistory.h>
+#include <Data/PreviewDesc.h>
+#include <Data/SimulationParameters.h>
+#include <Data/StatisticsHistory.h>
 
 #include <Engine/Interface/ArraySizesForGpuEntities.h>
 #include <Engine/Interface/Definitions.h>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Base/Interface/Cache.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/Cache.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/ParametersFilterHash.h>
-#include <Data/Interface/SimulationParametersSpecification.h>
+#include <Data/ParametersFilterHash.h>
+#include <Data/SimulationParametersSpecification.h>
 
 #include "ColorMatrixDialog.h"
 #include "Definitions.h"

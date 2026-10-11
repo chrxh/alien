@@ -12,7 +12,7 @@
 
 #include <cereal/cereal.hpp>
 
-#include <Base/Interface/MathTypes.h>
+#include <Base/MathTypes.h>
 
 struct SerializationKey
 {

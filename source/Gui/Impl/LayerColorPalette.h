@@ -2,9 +2,9 @@
 
 #include <cstdint>
 
-#include <Base/Interface/MathTypes.h>
+#include <Base/MathTypes.h>
 
-#include <Data/Interface/SimulationParametersTypes.h>
+#include <Data/SimulationParametersTypes.h>
 
 class LayerColorPalette
 {

@@ -7,7 +7,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
 #include "AlienGui.h"
 #include "CreatorController.h"

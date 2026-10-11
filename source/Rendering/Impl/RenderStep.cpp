@@ -4,9 +4,9 @@
 #include <cstring>
 #include <ranges>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
-#include <Data/Interface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 #include <Engine/Interface/GeometryBuffers.h>
 #include <Engine/Interface/SimulationFacade.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 // Part of the simulation that is rendered and how it is shown
 struct RenderView

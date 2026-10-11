@@ -5,9 +5,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include "MainLoopEntityController.h"
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/EngineConstants.h>
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDesc.h>
 
 #include <Engine/Interface/Definitions.h>
 

@@ -8,15 +8,15 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/NameGeneratorService.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/NameGeneratorService.h>
+#include <Base/StringHelper.h>
 
-#include <Base/Interface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
-#include <Data/Interface/GenomeDescAccessService.h>
-#include <Data/Interface/GenomeDescEditService.h>
-#include <Data/Interface/ObjectColoring.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
+#include <Data/ObjectColoring.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

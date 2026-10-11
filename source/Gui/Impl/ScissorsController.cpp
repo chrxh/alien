@@ -4,8 +4,8 @@
 
 #include <Fonts/AlienIconFont.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/Math.h>
+#include <Base/GlobalSettings.h>
+#include <Base/Math.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

@@ -7,11 +7,11 @@
 #include <set>
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/DataPointCollection.h>
-#include <Data/Interface/EngineConstants.h>
-#include <Data/Interface/StatisticsHistory.h>
+#include <Data/DataPointCollection.h>
+#include <Data/EngineConstants.h>
+#include <Data/StatisticsHistory.h>
 
 #include <Engine/Interface/StatisticsEntry.h>
 

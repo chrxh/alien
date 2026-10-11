@@ -8,7 +8,7 @@
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 
-#include <Base/Interface/LoggingService.h>
+#include <Base/LoggingService.h>
 
 #include "Shader.h"
 
