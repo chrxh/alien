@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/KernelLaunchSettings.h>
 #include <Engine/Interface/ShallowUpdateSelectionData.h>

@@ -17,7 +17,7 @@
 #include <ImFileDialog.h>
 #include <implot.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
 #include "WindowController.h"
 

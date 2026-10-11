@@ -7,9 +7,9 @@
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 
-#include <Base/Interface/Macros.h>
+#include <Base/Macros.h>
 
-#include <Base/Interface/Ids.h>
+#include <Base/Ids.h>
 
 #include <device_launch_parameters.h>
 #include "Array.cuh"

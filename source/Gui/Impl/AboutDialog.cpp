@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Resources.h>
+#include <Base/Resources.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

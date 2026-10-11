@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
 namespace
 {

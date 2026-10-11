@@ -14,12 +14,12 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Math.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Math.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/Colors.h>
-#include <Data/Interface/EngineConstants.h>
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/Colors.h>
+#include <Data/EngineConstants.h>
+#include <Data/SimulationParameters.h>
 
 #include "ColorMatrixDialog.h"
 #include "GenericFileDialog.h"

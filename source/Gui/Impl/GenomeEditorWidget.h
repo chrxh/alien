@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Data/Interface/Colors.h>
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/Colors.h>
+#include <Data/GenomeDesc.h>
 
 #include "Definitions.h"
 #include "MutationRatesWidget.h"

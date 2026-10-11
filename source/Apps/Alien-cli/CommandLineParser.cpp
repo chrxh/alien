@@ -2,7 +2,7 @@
 
 #include <CLI/CLI.hpp>
 
-#include <Base/Interface/Resources.h>
+#include <Base/Resources.h>
 
 std::optional<int> CommandLineParser::parse(CommandLineArguments& arguments, int argc, char** argv)
 {

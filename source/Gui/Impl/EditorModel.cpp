@@ -1,6 +1,6 @@
 #include "EditorModel.h"
 
-#include <Data/Interface/DescEditService.h>
+#include <Data/DescEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

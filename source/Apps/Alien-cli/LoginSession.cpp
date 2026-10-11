@@ -4,9 +4,9 @@
 #include <condition_variable>
 #include <mutex>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 namespace
 {

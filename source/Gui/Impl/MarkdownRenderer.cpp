@@ -12,7 +12,7 @@
 
 #include <stb_image.h>
 
-#include <Base/Interface/MarkdownParser.h>
+#include <Base/MarkdownParser.h>
 
 #include <Rendering/Interface/RenderingFacade.h>
 

@@ -118,10 +118,11 @@ builder-chain assignments beyond 160, and that is accepted.
 
 ## Layout
 
-Each component lives in `source/<Component>/`. `Interface` holds its API, or the whole
-library if the component has no separate implementation. `Impl` holds the implementation
-behind the facade. Tests always sit in a `Tests` directory below the `Interface` or `Impl`
-directory whose code they test. Includes are relative to `source/`, for example
+Each component lives in `source/<Component>/`. A component with a separate implementation
+splits into `Interface`, which holds its API, and `Impl`, which holds the implementation
+behind the facade. A component without one keeps its whole library directly in
+`source/<Component>/`. Tests always sit in a `Tests` directory below the directory whose
+code they test. Includes are relative to `source/`, for example
 `#include <Engine/Interface/SimulationFacade.h>`. Only the applications in `source/Apps/`
 and the test suites include `*FacadeImpl.h` headers, to register the facade
 implementations.
@@ -129,11 +130,11 @@ implementations.
 ```
 source/Apps/Alien/                GUI application, composition root of the facades
 source/Apps/Alien-cli/            Command-line interface
-source/Base/Interface/            Common utilities, math, logging, Markdown parsing
-source/Base/Interface/Tests/      Base unit tests
-source/ConsoleUi/Interface/       Console widgets of the CLI and the console mode of the GUI
-source/Data/Interface/            Descriptions, genomes, simulation parameters and their services
-source/Data/Interface/Tests/      Data unit tests
+source/Base/                      Common utilities, math, logging, Markdown parsing
+source/Base/Tests/                Base unit tests
+source/ConsoleUi/                 Console widgets of the CLI and the console mode of the GUI
+source/Data/                      Descriptions, genomes, simulation parameters and their services
+source/Data/Tests/                Data unit tests
 source/Engine/Impl/               CPU-side engine implementation
 source/Engine/Impl/Tests/         CUDA engine integration tests
 source/Engine/Interface/          Abstract simulation APIs
@@ -144,8 +145,8 @@ source/Gui/Impl/                  Dear ImGui GUI, free of graphics API code
 source/Gui/Interface/             Abstract GUI API that manages the main window
 source/McpTools/Impl/             MCP tools operating on the simulation
 source/McpTools/Interface/        Abstract MCP tools API
-source/Network/Interface/         HTTP / cloud features, MCP server
-source/Network/Interface/Tests/   Network unit tests
+source/Network/                   HTTP / cloud features, MCP server
+source/Network/Tests/             Network unit tests
 source/Persister/Impl/            Worker thread processing the persister requests
 source/Persister/Interface/       Abstract persistence APIs, file I/O and serialization
 source/Persister/Interface/Tests/ Serialization tests

@@ -3,9 +3,9 @@
 #include <optional>
 #include <string>
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #include "DownloadCache.h"
 

@@ -8,11 +8,11 @@
 #include <windows.h>
 #endif
 
-#include <Base/Interface/Console.h>
-#include <Base/Interface/Resources.h>
+#include <Base/Console.h>
+#include <Base/Resources.h>
 
-#include <ConsoleUi/Interface/ConsoleInput.h>
-#include <ConsoleUi/Interface/ConsoleWidgets.h>
+#include <ConsoleUi/ConsoleInput.h>
+#include <ConsoleUi/ConsoleWidgets.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

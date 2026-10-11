@@ -8,10 +8,10 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
+#include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>

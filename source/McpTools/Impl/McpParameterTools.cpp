@@ -17,22 +17,22 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/LocationAccessService.h>
-#include <Data/Interface/LocationEditService.h>
-#include <Data/Interface/ParametersAccessService.h>
-#include <Data/Interface/ParametersValidationService.h>
-#include <Data/Interface/RadiationStrengthService.h>
-#include <Data/Interface/SpecificationEvaluationService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/LocationEditService.h>
+#include <Data/ParametersAccessService.h>
+#include <Data/ParametersValidationService.h>
+#include <Data/RadiationStrengthService.h>
+#include <Data/SpecificationEvaluationService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Persister/Interface/SerializerService.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpJson.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpJson.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

@@ -2,10 +2,10 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
-#include <Network/Interface/NetworkService.h>
-#include <Network/Interface/NetworkValidationService.h>
+#include <Network/NetworkService.h>
+#include <Network/NetworkValidationService.h>
 
 #include <Persister/Interface/SerializerService.h>
 

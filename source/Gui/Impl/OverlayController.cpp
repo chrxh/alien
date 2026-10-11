@@ -7,7 +7,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include "AlienGui.h"

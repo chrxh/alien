@@ -2,9 +2,9 @@
 
 #include <boost/range/combine.hpp>
 
-#include <Base/Interface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

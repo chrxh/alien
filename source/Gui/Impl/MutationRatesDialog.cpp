@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
 #include "AlienGui.h"
 #include "EntityAttributeHelp.h"

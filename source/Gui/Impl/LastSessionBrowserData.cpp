@@ -1,8 +1,8 @@
 #include "LastSessionBrowserData.h"
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
-#include <Network/Interface/NetworkResourceRawTO.h>
+#include <Network/NetworkResourceRawTO.h>
 
 void LastSessionBrowserData::load(std::unordered_set<NetworkResourceRawTO> const& rawTOs)
 {

@@ -20,9 +20,9 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
 
-#include <Base/Interface/MathTypes.h>
+#include <Base/MathTypes.h>
 
-#include <Data/Interface/NeuralNetWeight.h>
+#include <Data/NeuralNetWeight.h>
 
 #include "SerializedTypeIds.h"
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Network/Interface/Definitions.h>
-#include <Network/Interface/NetworkResourceTreeTO.h>
+#include <Network/Definitions.h>
+#include <Network/NetworkResourceTreeTO.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

@@ -13,13 +13,13 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/ObjectColoring.h>
-#include <Data/Interface/SimulationParametersTypes.h>
+#include <Data/Descs.h>
+#include <Data/ObjectColoring.h>
+#include <Data/SimulationParametersTypes.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

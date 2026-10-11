@@ -5,9 +5,9 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Macros.h>
+#include <Base/Macros.h>
 
-#include <Data/Interface/PreviewDesc.h>
+#include <Data/PreviewDesc.h>
 
 #include "Definitions.h"
 #include "PreviewViewport.h"

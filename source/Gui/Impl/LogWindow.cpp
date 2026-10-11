@@ -4,8 +4,8 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/StringHelper.h>
 
 #include "AlienGui.h"
 #include "GuiLogger.h"

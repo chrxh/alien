@@ -8,20 +8,20 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/DescValidationService.h>
-#include <Data/Interface/EngineConstants.h>
-#include <Data/Interface/GenomeDesc.h>
-#include <Data/Interface/MassOperationsService.h>
+#include <Data/DescValidationService.h>
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDesc.h>
+#include <Data/MassOperationsService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
 
 #include <Persister/Interface/SerializerService.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 std::vector<McpTool> McpMassOperationTools::getTools(McpToolContext& context)
 {

@@ -9,11 +9,11 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Hashes.h>
+#include <Base/Hashes.h>
 
-#include <Network/Interface/NetworkResourceRawTO.h>
-#include <Network/Interface/NetworkResourceTreeTO.h>
-#include <Network/Interface/UserTO.h>
+#include <Network/NetworkResourceRawTO.h>
+#include <Network/NetworkResourceTreeTO.h>
+#include <Network/UserTO.h>
 
 #include <Persister/Interface/Definitions.h>
 #include <Persister/Interface/DownloadCache.h>

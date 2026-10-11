@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include "Definitions.h"
 

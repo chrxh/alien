@@ -11,10 +11,10 @@
 #include <unistd.h>
 #endif
 
-#include <Base/Interface/Console.h>
-#include <Base/Interface/Resources.h>
+#include <Base/Console.h>
+#include <Base/Resources.h>
 
-#include <ConsoleUi/Interface/ConsoleWidgets.h>
+#include <ConsoleUi/ConsoleWidgets.h>
 
 namespace
 {

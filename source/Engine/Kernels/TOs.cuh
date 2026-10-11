@@ -3,8 +3,8 @@
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/EngineConstants.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <Engine/Interface/ArraySizesForTOs.h>
 

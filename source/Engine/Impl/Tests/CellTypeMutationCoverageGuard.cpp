@@ -15,7 +15,7 @@
 
 #include <boost/pfr.hpp>
 
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #define ALIEN_MUTATION_FIELD_COUNT(Type, Count) \
     static_assert( \

@@ -11,9 +11,9 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/GenomeDescAccessService.h>
+#include <Data/GenomeDescAccessService.h>
 
 #include "AlienGui.h"
 #include "GenomeIssueDescription.h"

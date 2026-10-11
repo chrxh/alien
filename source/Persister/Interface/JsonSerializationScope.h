@@ -19,9 +19,9 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/MathTypes.h>
+#include <Base/MathTypes.h>
 
-#include <Data/Interface/NeuralNetWeight.h>
+#include <Data/NeuralNetWeight.h>
 
 #include "SerializationScope.h"
 #include "SerializedTypeIds.h"

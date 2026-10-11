@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <ranges>
 
-#include <Base/Interface/KernelTracer.h>
+#include <Base/KernelTracer.h>
 
-#include <Data/Interface/SpaceCalculator.h>
+#include <Data/SpaceCalculator.h>
 
 #include <Engine/Kernels/ForceFieldKernels.cuh>
 #include <Engine/Kernels/KernelLauncher.cuh>

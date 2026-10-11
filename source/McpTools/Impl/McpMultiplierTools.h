@@ -3,14 +3,14 @@
 #include <optional>
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/MultiplierService.h>
+#include <Data/Descs.h>
+#include <Data/MultiplierService.h>
 
 #include <Engine/Interface/SelectionShallowData.h>
 
-#include <Network/Interface/McpServer.h>
+#include <Network/McpServer.h>
 #include <McpTools/Interface/McpToolContext.h>
 
 class McpMultiplierTools

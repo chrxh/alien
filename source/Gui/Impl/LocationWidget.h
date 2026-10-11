@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Data/Interface/ParametersFilter.h>
+#include <Data/ParametersFilter.h>
 
 #include "Definitions.h"
 

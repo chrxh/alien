@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <Network/Interface/McpServer.h>
+#include <Network/McpServer.h>
 
 #include "Definitions.h"
 #include "McpToolContext.h"

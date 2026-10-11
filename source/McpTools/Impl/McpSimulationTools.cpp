@@ -6,17 +6,17 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/NameGeneratorService.h>
+#include <Base/NameGeneratorService.h>
 
-#include <Data/Interface/DescEditService.h>
+#include <Data/DescEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

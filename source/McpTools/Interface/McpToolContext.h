@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 struct SimulationDesc;
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Data/Interface/PreviewDesc.h>
-#include <Data/Interface/StatisticsHistory.h>
+#include <Data/PreviewDesc.h>
+#include <Data/StatisticsHistory.h>
 
 #include "ArraySizesForGpuEntities.h"
 #include "Definitions.h"

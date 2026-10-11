@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

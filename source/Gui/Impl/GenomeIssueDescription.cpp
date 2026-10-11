@@ -8,8 +8,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Definitions.h>
+#include <Base/StringHelper.h>
 
 #include "StyleService.h"
 

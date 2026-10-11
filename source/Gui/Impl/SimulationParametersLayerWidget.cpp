@@ -1,7 +1,7 @@
 #include "SimulationParametersLayerWidget.h"
 
-#include <Data/Interface/LocationAccessService.h>
-#include <Data/Interface/ParametersValidationService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/ParametersValidationService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

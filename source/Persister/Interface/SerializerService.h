@@ -5,11 +5,11 @@
 
 #include <boost/json/value.hpp>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/Definitions.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/StatisticsHistory.h>
+#include <Data/Descs.h>
+#include <Data/StatisticsHistory.h>
 
 #include "Definitions.h"
 

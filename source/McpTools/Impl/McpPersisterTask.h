@@ -3,7 +3,7 @@
 #include <functional>
 #include <optional>
 
-#include <Network/Interface/McpServer.h>
+#include <Network/McpServer.h>
 
 #include <Persister/Interface/Definitions.h>
 #include <Persister/Interface/PersisterRequestId.h>

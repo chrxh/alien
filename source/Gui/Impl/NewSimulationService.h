@@ -3,11 +3,11 @@
 #include <optional>
 #include <string>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/Macros.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/Definitions.h>
+#include <Base/Macros.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
+#include <Data/Descs.h>
 
 class NewSimulationService
 {

@@ -6,9 +6,9 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/MarkdownParser.h>
-#include <Base/Interface/WebLinkHelper.h>
+#include <Base/LoggingService.h>
+#include <Base/MarkdownParser.h>
+#include <Base/WebLinkHelper.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

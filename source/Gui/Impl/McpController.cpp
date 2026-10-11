@@ -8,10 +8,10 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

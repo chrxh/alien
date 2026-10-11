@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Base/Interface/Resources.h>
+#include <Base/Resources.h>
 
 namespace Const
 {

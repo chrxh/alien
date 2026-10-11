@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/Definitions.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/Definitions.h>
 

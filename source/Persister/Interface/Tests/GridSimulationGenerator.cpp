@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include <Base/Interface/Math.h>
-#include <Data/Interface/Descs.h>
+#include <Base/Math.h>
+#include <Data/Descs.h>
 #include <Persister/Interface/SerializerService.h>
 
 namespace

@@ -13,10 +13,10 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/Resources.h>
+#include <Base/AlienExceptions.h>
+#include <Base/Resources.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

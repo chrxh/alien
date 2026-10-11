@@ -8,19 +8,19 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
-#include <Data/Interface/DescEditService.h>
-#include <Data/Interface/DescValidationService.h>
+#include <Data/DescEditService.h>
+#include <Data/DescValidationService.h>
 
 #include <Engine/Interface/InspectedEntityIds.h>
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Persister/Interface/SerializerService.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpJson.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpJson.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

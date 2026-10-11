@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/KernelLaunchSettings.h>
 

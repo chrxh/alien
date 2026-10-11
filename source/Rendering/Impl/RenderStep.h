@@ -7,11 +7,11 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/MathTypes.h>
+#include <Base/MathTypes.h>
 
 #include <Rendering/Shaders/ShaderSources.h>
 
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/Definitions.h>
 

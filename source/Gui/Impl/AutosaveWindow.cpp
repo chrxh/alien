@@ -5,9 +5,9 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
 #include <Persister/Interface/SavepointTableService.h>
 

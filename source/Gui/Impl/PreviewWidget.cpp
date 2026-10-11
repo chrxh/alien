@@ -8,12 +8,12 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/DescEditService.h>
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/GenomeDescAccessService.h>
-#include <Data/Interface/GenomeDescEditService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

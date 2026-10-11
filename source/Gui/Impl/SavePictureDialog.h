@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/Descs.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/Descs.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

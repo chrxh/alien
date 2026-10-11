@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #include "AlienDialog.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Data/Interface/GenomeDesc.h>
-#include <Data/Interface/PreviewDesc.h>
+#include <Data/GenomeDesc.h>
+#include <Data/PreviewDesc.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

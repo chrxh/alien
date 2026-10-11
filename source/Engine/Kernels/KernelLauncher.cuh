@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <chrono>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/KernelProfiler.h>
-#include <Base/Interface/KernelTracer.h>
+#include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
 
-#include <Data/Interface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include "Macros.cuh"
 

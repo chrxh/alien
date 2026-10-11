@@ -8,14 +8,14 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/StringHelper.h>
-#include <Base/Interface/VersionParserService.h>
+#include <Base/StringHelper.h>
+#include <Base/VersionParserService.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpJson.h>
-#include <Network/Interface/McpSchema.h>
-#include <Network/Interface/NetworkResourceRawTO.h>
-#include <Network/Interface/NetworkService.h>
+#include <Network/McpArguments.h>
+#include <Network/McpJson.h>
+#include <Network/McpSchema.h>
+#include <Network/NetworkResourceRawTO.h>
+#include <Network/NetworkService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/SerializerService.h>

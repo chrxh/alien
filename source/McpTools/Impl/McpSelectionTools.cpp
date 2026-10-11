@@ -6,16 +6,16 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <Engine/Interface/ShallowUpdateSelectionData.h>
 #include <Engine/Interface/SimulationFacade.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpJson.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpJson.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

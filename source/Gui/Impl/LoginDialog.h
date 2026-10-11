@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 

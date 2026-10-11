@@ -8,8 +8,8 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Math.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Math.h>
+#include <Base/StringHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
