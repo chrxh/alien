@@ -252,14 +252,12 @@ namespace
     }
 
     // Zoomed out, the rasterized objects replace the ray traced tissue and its attack events
-    UniformValueMap getRayTracingMergeUniforms(SimulationParameters const&, RenderView const& view)
+    UniformValueMap getRayTracingMergeUniforms(SimulationParameters const& parameters, RenderView const& view)
     {
-        auto tissueVisibility = _RayTracingRenderStep::getTissueVisibility(view);
-        auto gain = getObjectGain(view);
         return UniformValueMap{
-            {"colorFactor1", 1.0f},
-            {"colorFactor2", gain * tissueVisibility},
-            {"colorFactor3", gain * (1.0f - tissueVisibility)},
+            {"objectGain", getObjectGain(view)},
+            {"tissueVisibility", _RayTracingRenderStep::getTissueVisibility(view)},
+            {"backgroundScale", _RayTracingRenderStep::getBackgroundScale(parameters)},
         };
     }
 
@@ -539,8 +537,8 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                 }),
             },
 
-            // Render block: Three outputs: Ray tracing of the objects on the ground, its attack events softened as in the rasterized view and
-            // the rasterized objects, which replace the ray tracing when zoomed out
+            // Render block: Four outputs: Ray tracing of the objects on the ground, its attack events softened as in the rasterized view, the
+            // rasterized objects, which replace the ray tracing when zoomed out, and the ground, which they absorb like the tissue
             RenderBlock{
                 RenderSequence().steps({
                     _rayTracingStep,
@@ -556,12 +554,15 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
                 createObjectSequence(),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+                }),
             },
 
             // Render block: Merge ray tracing, attack events and rasterized objects
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeAdditive).uniformFunc(getRayTracingMergeUniforms)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::RayTracingMerge).uniformFunc(getRayTracingMergeUniforms)),
                 }),
             },
         });

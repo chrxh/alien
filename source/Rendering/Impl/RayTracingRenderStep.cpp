@@ -656,6 +656,11 @@ float _RayTracingRenderStep::getTissueVisibility(RenderView const& view)
     return getSmoothTransition(view.getScreenZoomFactor(), TissueZoomStart, TissueZoomEnd);
 }
 
+float _RayTracingRenderStep::getBackgroundScale(SimulationParameters const& parameters)
+{
+    return 1.0f / std::max(1.5f - parameters.glow.value, 0.1f);
+}
+
 void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters)
 {
     auto const& topLeft = view.visibleWorldRect.topLeft;
@@ -667,7 +672,6 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
     auto screenZoom = view.getScreenZoomFactor();
     auto closeUpWeight = getSmoothTransition(screenZoom, CloseUpZoomStart, CloseUpZoomEnd);
     auto detailVisibility = getSmoothTransition(screenZoom, DetailZoomStart, DetailZoomEnd);
-    auto backgroundScale = 1.0f / std::max(1.5f - parameters.glow.value, 0.1f);
 
     FrameConstants constants{
         .view = {toFloat(view.viewSize.x), toFloat(view.viewSize.y), view.zoomFactor, screenZoom},
@@ -680,7 +684,7 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
         .lightGrid = {_lightGrid.origin.x, _lightGrid.origin.y, _lightGrid.cellSize, _lightGrid.cellSize},
         .gridSize = {_lightGrid.size.x, _lightGrid.size.y, 0, 0},
         .tissue = {closeUpWeight, detailVisibility, 1.0f / view.zoomFactor, getTissueVisibility(view)},
-        .parameters = {backgroundScale, Bioluminescence, _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1)},
+        .parameters = {getBackgroundScale(parameters), Bioluminescence, _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1)},
         .gasGrid = {_gasGrid.origin.x, _gasGrid.origin.y, _gasGrid.nodeDistance, _gasGrid.cloudSpreadInNodes},
         .gasSize = {_gasGrid.size.x, _gasGrid.size.y, _gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
         .gasLight =

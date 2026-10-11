@@ -53,6 +53,7 @@ add_library(Shaders INTERFACE
     RayTracingGasLightsCS.h
     RayTracingGasShadingCS.h
     RayTracingGasSplatCS.h
+    RayTracingMergeFS.h
     RayTracingPrepareCS.h
     RayTracingPresentFS.h
     RayTracingPresentVS.h
