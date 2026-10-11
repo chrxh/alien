@@ -15,6 +15,18 @@ const int ObjectType_Cell = 3;
 const float CellLight = 1.5;
 const float FlashLight = 8.0;
 
+// The cells are provided up to at least this distance outside the view, see Engine/Impl/GeometryKernelsService.cu. Their light fades out
+// towards it, so that it does not appear suddenly.
+const float CellCullingMargin = 10.0;
+
+float getVisibility(vec2 position)
+{
+    vec2 visibleTopLeft = frame.rect.xy;
+    vec2 visibleBottomRight = visibleTopLeft + frame.view.xy / frame.view.z;
+    vec2 outside = max(max(visibleTopLeft - position, position - visibleBottomRight), vec2(0.0));
+    return 1.0 - smoothstep(0.0, CellCullingMargin, max(outside.x, outside.y));
+}
+
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
@@ -46,25 +58,33 @@ void main()
     vec3 hue = colorBrightness > 0.02 ? clamp(color / colorBrightness, 0.0, 1.0) : vec3(0.5);
     float brightness = min(colorBrightness, 1.0) + 0.5 * log(max(colorBrightness, 1.0));
     float flash = objectType == ObjectType_Cell ? object.highlightIntensity : 0.0;
-    vec3 light = hue * (CellLight * brightness + FlashLight * flash);
+    vec3 light = hue * (CellLight * brightness + FlashLight * flash) * getVisibility(position);
     float lightLuminance = luminance(light);
     if (lightLuminance <= 0.0) {
         return;
     }
 
     vec2 clusterPosition = (position - frame.gasGrid.xy) / frame.gasLight.x;
-    ivec2 cluster = ivec2(floor(clusterPosition));
-    if (any(lessThan(cluster, ivec2(0))) || any(greaterThanEqual(cluster, frame.gasLightGrid.xy))) {
-        return;
+    vec2 clusterCoord = clusterPosition - 0.5;
+    ivec2 lowerCluster = ivec2(floor(clusterCoord));
+    vec2 clusterFraction = clusterCoord - vec2(lowerCluster);
+    for (int i = 0; i < 4; ++i) {
+        ivec2 offset = ivec2(i & 1, i >> 1);
+        ivec2 cluster = lowerCluster + offset;
+        if (any(lessThan(cluster, ivec2(0))) || any(greaterThanEqual(cluster, frame.gasLightGrid.xy))) {
+            continue;
+        }
+        vec2 axisWeights = mix(1.0 - clusterFraction, clusterFraction, vec2(offset));
+        float weight = axisWeights.x * axisWeights.y * GasFixedPointScale;
+        vec2 lightOffset = clusterPosition - vec2(cluster) + GasLightOffsetShift;
+        uint entry = uint(cluster.y * frame.gasLightGrid.x + cluster.x) * GasLightClusterStride;
+        atomicAdd(gasLightClusters[entry], uint(weight * lightLuminance * lightOffset.x + 0.5));
+        atomicAdd(gasLightClusters[entry + 1u], uint(weight * lightLuminance * lightOffset.y + 0.5));
+        atomicAdd(gasLightClusters[entry + 2u], uint(weight * lightLuminance + 0.5));
+        atomicAdd(gasLightClusters[entry + 3u], uint(weight * light.r + 0.5));
+        atomicAdd(gasLightClusters[entry + 4u], uint(weight * light.g + 0.5));
+        atomicAdd(gasLightClusters[entry + 5u], uint(weight * light.b + 0.5));
     }
-    vec2 offset = clusterPosition - vec2(cluster);
-    uint entry = uint(cluster.y * frame.gasLightGrid.x + cluster.x) * GasLightClusterStride;
-    atomicAdd(gasLightClusters[entry], uint(lightLuminance * offset.x * GasFixedPointScale + 0.5));
-    atomicAdd(gasLightClusters[entry + 1u], uint(lightLuminance * offset.y * GasFixedPointScale + 0.5));
-    atomicAdd(gasLightClusters[entry + 2u], uint(lightLuminance * GasFixedPointScale + 0.5));
-    atomicAdd(gasLightClusters[entry + 3u], uint(light.r * GasFixedPointScale + 0.5));
-    atomicAdd(gasLightClusters[entry + 4u], uint(light.g * GasFixedPointScale + 0.5));
-    atomicAdd(gasLightClusters[entry + 5u], uint(light.b * GasFixedPointScale + 0.5));
 }
 )";
 }

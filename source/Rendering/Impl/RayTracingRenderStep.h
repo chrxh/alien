@@ -87,9 +87,11 @@ private:
         int blurRadius = 0;
         float cloudSpreadInNodes = 1.0f;
 
-        // The light of the cells is collected in clusters and reaches the nodes of the irradiance grid, which is half as fine
+        // The light of the cells is collected in clusters and reaches the nodes of the irradiance grid
+        float lightFalloffDistance = 1.0f;
         float lightClusterSize = 1.0f;
         IntVector2D numLightClusters;
+        float irradianceNodeDistance = 1.0f;
         IntVector2D irradianceSize;
     };
 
