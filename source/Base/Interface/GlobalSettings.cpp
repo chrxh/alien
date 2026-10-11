@@ -1,0 +1,396 @@
+#include "GlobalSettings.h"
+
+#include <fstream>
+#include <sstream>
+
+#include <boost/property_tree/json_parser.hpp>
+
+#include <imgui.h>
+
+#ifdef _WIN32
+#include "WinReg/WinReg.hpp"
+#else
+#include <cstdlib>
+
+#include <pwd.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
+#include <Base/Interface/LoggingService.h>
+#include <Base/Interface/Resources.h>
+
+#include "JsonParser.h"
+
+#ifdef _WIN32
+namespace
+{
+    std::string ConvertWideToUtf8(std::wstring const& wstr)
+    {
+        int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL);
+        std::string str(count, 0);
+        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
+        return str;
+    }
+
+    std::wstring ConvertUtf8ToWide(std::string const& str)
+    {
+        int count = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), NULL, 0);
+        std::wstring wstr(count, 0);
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), &wstr[0], count);
+        return wstr;
+    }
+
+    winreg::RegKey getOrCreateAlienRegKey()
+    {
+        std::wstring const testSubKey = L"SOFTWARE\\alien";
+        winreg::RegKey key{HKEY_CURRENT_USER, testSubKey};
+        if (key.TryOpen(HKEY_CURRENT_USER, testSubKey)) {
+            return key;
+        } else {
+            auto result = key.TryCreate(HKEY_CURRENT_USER, testSubKey);
+            if (result.IsOk()) {
+                if (key.TryOpen(HKEY_CURRENT_USER, testSubKey)) {
+                    return key;
+                }
+            }
+        }
+        throw std::runtime_error("Could not open a registry key.");
+    }
+
+    std::string getStringFromWinReg(std::string const& name, std::string const& defaultValue)
+    {
+        try {
+            auto key = getOrCreateAlienRegKey();
+            auto regResult = key.TryGetStringValue(ConvertUtf8ToWide(name));
+            if (regResult.IsValid()) {
+                return ConvertWideToUtf8(regResult.GetValue());
+            } else {
+                return defaultValue;
+            }
+
+        } catch (std::exception const& exception) {
+            log(Priority::Important, exception.what());
+            return defaultValue;
+        }
+    }
+
+    void setStringToWinReg(std::string const& name, std::string const& value)
+    {
+        try {
+            auto key = getOrCreateAlienRegKey();
+            key.SetStringValue(ConvertUtf8ToWide(name), ConvertUtf8ToWide(value));
+
+        } catch (std::exception const& exception) {
+            log(Priority::Important, exception.what());
+        }
+    }
+
+    int getIntFromWinReg(std::string const& name, int const& defaultValue)
+    {
+        try {
+            auto key = getOrCreateAlienRegKey();
+            auto regResult = key.TryGetDwordValue(ConvertUtf8ToWide(name));
+            if (regResult.IsValid()) {
+                return regResult.GetValue();
+            } else {
+                return defaultValue;
+            }
+
+        } catch (std::exception const& exception) {
+            log(Priority::Important, exception.what());
+            return defaultValue;
+        }
+    }
+
+    void setIntToWinReg(std::string const& name, int const& value)
+    {
+        try {
+            auto key = getOrCreateAlienRegKey();
+            key.SetDwordValue(ConvertUtf8ToWide(name), value);
+
+        } catch (std::exception const& exception) {
+            log(Priority::Important, exception.what());
+        }
+    }
+
+    float getFloatFromWinReg(std::string const& name, float const& defaultValue)
+    {
+        auto resultAsString = getStringFromWinReg(name, std::to_string(defaultValue));
+        return std::stof(resultAsString);
+    }
+
+    void setFloatToWinReg(std::string const& name, float const& value)
+    {
+        setStringToWinReg(name, std::to_string(value));
+    }
+
+    bool getBoolFromWinReg(std::string const& name, bool const& defaultValue)
+    {
+        auto resultAsString = getStringFromWinReg(name, defaultValue ? "1" : "0");
+        return resultAsString == "1" ? true : false;
+    }
+
+    void setBoolToWinReg(std::string const& name, bool const& value)
+    {
+        setStringToWinReg(name, value ? "1" : "0");
+    }
+}
+#endif
+
+#ifndef _WIN32
+namespace
+{
+    std::filesystem::path getLinuxConfigPath()
+    {
+        std::filesystem::path configHome;
+
+        // First, try XDG_CONFIG_HOME environment variable
+        char const* xdgConfigHome = std::getenv("XDG_CONFIG_HOME");
+        if (xdgConfigHome && xdgConfigHome[0] != '\0') {
+            configHome = xdgConfigHome;
+        } else {
+            // Fallback to ~/.config
+            char const* home = std::getenv("HOME");
+            if (!home || home[0] == '\0') {
+                // Last resort: use getpwuid
+                struct passwd* pw = getpwuid(getuid());
+                if (pw && pw->pw_dir) {
+                    home = pw->pw_dir;
+                }
+            }
+            if (home && home[0] != '\0') {
+                configHome = std::filesystem::path(home) / ".config";
+            } else {
+                // If all else fails, use current directory
+                configHome = ".";
+            }
+        }
+
+        return configHome / "alien";
+    }
+
+    std::filesystem::path getLinuxSettingsFilePath()
+    {
+        return getLinuxConfigPath() / "settings.json";
+    }
+
+    void ensureLinuxConfigDirectoryExists()
+    {
+        auto configPath = getLinuxConfigPath();
+        if (!std::filesystem::exists(configPath)) {
+            std::filesystem::create_directories(configPath);
+        }
+    }
+
+    void saveLinuxSettings(boost::property_tree::ptree const& tree)
+    {
+        try {
+            ensureLinuxConfigDirectoryExists();
+
+            std::stringstream ss;
+            boost::property_tree::json_parser::write_json(ss, tree);
+            auto data = ss.str();
+
+            auto settingsPath = getLinuxSettingsFilePath();
+            std::ofstream stream(settingsPath, std::ios::binary);
+            if (stream) {
+                stream << data;
+                stream.close();
+            }
+        } catch (...) {
+            // Do nothing
+        }
+    }
+}
+#endif
+
+struct GlobalSettingsImpl
+{
+    boost::property_tree::ptree _tree;
+    bool _debugMode = false;
+    bool _interop = false;
+};
+
+
+GlobalSettings& GlobalSettings::get()
+{
+    static GlobalSettings instance;
+    return instance;
+}
+
+bool GlobalSettings::isDebugMode() const
+{
+    return _impl->_debugMode;
+}
+
+void GlobalSettings::setDebugMode(bool value) const
+{
+    _impl->_debugMode = value;
+}
+
+bool GlobalSettings::isInterop() const
+{
+    return _impl->_interop;
+}
+
+void GlobalSettings::setInterop(bool value) const
+{
+    _impl->_interop = value;
+}
+
+bool GlobalSettings::getValue(std::string const& key, bool defaultValue)
+{
+    bool result;
+#ifdef _WIN32
+    result = getBoolFromWinReg(key, defaultValue);
+#else
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, key, ParserTask::Decode);
+#endif
+    return result;
+}
+
+void GlobalSettings::setValue(std::string const& key, bool value)
+{
+#ifdef _WIN32
+    setBoolToWinReg(key, value);
+#else
+    JsonParser::encodeDecode(_impl->_tree, value, false, key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
+#endif
+}
+
+int GlobalSettings::getValue(std::string const& key, int defaultValue)
+{
+    int result;
+#ifdef _WIN32
+    result = getIntFromWinReg(key, defaultValue);
+#else
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, key, ParserTask::Decode);
+#endif
+    return result;
+}
+
+void GlobalSettings::setValue(std::string const& key, int value)
+{
+#ifdef _WIN32
+    setIntToWinReg(key, value);
+#else
+    JsonParser::encodeDecode(_impl->_tree, value, 0, key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
+#endif
+}
+
+float GlobalSettings::getValue(std::string const& key, float defaultValue)
+{
+    float result;
+#ifdef _WIN32
+    result = getFloatFromWinReg(key, defaultValue);
+#else
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, key, ParserTask::Decode);
+#endif
+    return result;
+}
+
+void GlobalSettings::setValue(std::string const& key, float value)
+{
+#ifdef _WIN32
+    setFloatToWinReg(key, value);
+#else
+    JsonParser::encodeDecode(_impl->_tree, value, 0.0f, key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
+#endif
+}
+
+std::string GlobalSettings::getValue(std::string const& key, std::string const& defaultValue)
+{
+    std::string result;
+#ifdef _WIN32
+    result = getStringFromWinReg(key, defaultValue);
+#else
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, key, ParserTask::Decode);
+#endif
+    return result;
+}
+
+void GlobalSettings::setValue(std::string const& key, std::string value)
+{
+#ifdef _WIN32
+    setStringToWinReg(key, value);
+#else
+    JsonParser::encodeDecode(_impl->_tree, value, std::string(), key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
+#endif
+}
+
+std::vector<std::string> GlobalSettings::getValue(std::string const& key, std::vector<std::string> const& defaultValue)
+{
+    auto joinedString = getValue(key, boost::join(defaultValue, "\\"));
+    std::vector<std::string> result;
+    boost::split(result, joinedString, boost::is_any_of("\\"));
+    return result;
+}
+
+void GlobalSettings::setValue(std::string const& key, std::vector<std::string> value)
+{
+    setValue(key, boost::join(value, "\\"));
+}
+
+namespace
+{
+    std::string const ImGuiSettingsKey = "gui.imgui settings";
+}
+
+void GlobalSettings::loadImGuiSettings()
+{
+    ImGui::GetIO().IniFilename = nullptr;  // No imgui.ini file; the state is persisted here instead
+    auto settings = getValue(ImGuiSettingsKey, std::string());
+    if (!settings.empty()) {
+        ImGui::LoadIniSettingsFromMemory(settings.c_str(), settings.size());
+    }
+}
+
+void GlobalSettings::saveImGuiSettingsIfDirty()
+{
+    auto& io = ImGui::GetIO();
+    if (io.WantSaveIniSettings) {
+        saveImGuiSettings();
+        io.WantSaveIniSettings = false;  // IniFilename is null, so we must clear the flag ourselves
+    }
+}
+
+void GlobalSettings::saveImGuiSettings()
+{
+    size_t size = 0;
+    auto data = ImGui::SaveIniSettingsToMemory(&size);
+    setValue(ImGuiSettingsKey, std::string(data, size));
+}
+
+GlobalSettings::GlobalSettings()
+{
+    _impl = std::make_shared<GlobalSettingsImpl>();
+#ifndef _WIN32
+    try {
+        auto settingsPath = getLinuxSettingsFilePath();
+        std::ifstream stream(settingsPath, std::ios::binary);
+        if (!stream) {
+            return;
+        }
+        auto data = std::string(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
+        stream.close();
+
+        std::stringstream ss;
+        ss << data;
+        boost::property_tree::read_json(ss, _impl->_tree);
+    } catch (...) {
+        // Do nothing
+    }
+#endif
+}
+
+GlobalSettings::~GlobalSettings()
+{
+#ifndef _WIN32
+    saveLinuxSettings(_impl->_tree);
+#endif
+}

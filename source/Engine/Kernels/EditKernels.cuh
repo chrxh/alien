@@ -1,0 +1,53 @@
+#pragma once
+
+#include <Data/Interface/Colors.h>
+#include <Data/Interface/SimulationParameters.h>
+
+#include <Engine/Interface/ShallowUpdateSelectionData.h>
+
+#include "cuda_runtime_api.h"
+#include "sm_60_atomic_functions.h"
+
+#include "GarbageCollectorKernels.cuh"
+#include "ObjectProcessor.cuh"
+#include "SelectionResult.cuh"
+
+__global__ void cudaColorSelectedObjects(SimulationData data, unsigned char color, bool includeClusters);
+__global__ void cudaChangeObject(SimulationData data, TOs changeTO);    // changeTO contains only 1 cell
+__global__ void cudaChangeParticle(SimulationData data, TOs changeTO);  // changeTO contains only 1 particle
+
+__global__ void cudaCreateGenomeFromTO(SimulationData data, TOs to, Genome** newGenome);
+__global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome** newGenome, int* counter);
+
+__global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
+__global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool includeClusters);
+__global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);
+__global__ void cudaScheduleConnectSelection(SimulationData data, bool includeClusters, bool onlyWithinSelection, int* result);
+__global__ void cudaPrepareMapForReconnection(SimulationData data);
+__global__ void cudaUpdateMapForReconnection(SimulationData data);
+__global__ void cudaAccumulateSelectionAngles(SimulationData data, float4* angleSums);
+__global__ void cudaInitSelectionAnchorKeys(SimulationData data, float2 refPos);
+__global__ void cudaPropagateSelectionAnchorKeys(SimulationData data, int* result);
+__global__ void cudaPlaceSelectionAnchors(SimulationData data, float2 refPos);
+__global__ void cudaPropagateFlattenedSelectionPositions(SimulationData data, int* result);
+__global__ void cudaCalcFlattenedSelectionCenter(SimulationData data, float2 refPos, float2* center, int* numEntities, bool includeClusters);
+__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 refPos, float2 center);
+__global__ void cudaCalcAccumulatedVel(SimulationData data, float2* velocity, int* numEntities, bool includeClusters);
+__global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);
+__global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters);
+__global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
+__global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters);
+__global__ void cudaSetStatic(SimulationData data, bool value, bool includeClusters);
+__global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData data, int* result);
+__global__ void cudaScheduleCutConnections(SimulationData data, float2 cutStart, float2 cutEnd, bool onlySelected, bool includeClusters, int* result);
+__global__ void cudaPrepareConnectionChanges(SimulationData data);
+__global__ void cudaProcessDeleteConnectionChanges(SimulationData data);
+__global__ void cudaProcessAddConnectionChanges(SimulationData data);
+__global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
+__global__ void cudaSetDetached(SimulationData data, bool value);
+__global__ void cudaApplyCataclysm(SimulationData data);
+
+__global__ void cudaResetSelectionResult(SelectionResult result);
+__global__ void cudaGetSelectionShallowData_step1(SimulationData data);
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, float2 refPos, SelectionResult result);
+__global__ void cudaFinalizeSelectionResult(SelectionResult result, WorldGeometry world);

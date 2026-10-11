@@ -1,0 +1,34 @@
+#pragma once
+
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <vector>
+
+#include <Base/Interface/Singleton.h>
+
+#include <Data/Interface/PreviewDesc.h>
+
+#include <Rendering/Interface/PictureData.h>
+
+class PictureGuiService
+{
+    MAKE_SINGLETON(PictureGuiService);
+
+public:
+    static auto constexpr PreviewPictureResolution = IntVector2D{600, 400};
+
+    // Preview picture of the currently rendered simulation, ready for upload
+    std::optional<std::string> createSimulationPreviewJpg();
+
+    // Preview picture showing the creatures of a genome as a collage, ready for upload
+    std::optional<std::string> createGenomePreviewJpg(std::vector<PreviewDesc> const& previews);
+
+    PictureData scale(PictureData const& picture, IntVector2D const& resolution);
+    PictureData brighten(PictureData const& picture, float factor);
+
+    std::string encodeJpg(PictureData const& picture);
+    std::string encodePng(PictureData const& picture);
+
+    void savePng(PictureData const& picture, std::filesystem::path const& filename);
+};
