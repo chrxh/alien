@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

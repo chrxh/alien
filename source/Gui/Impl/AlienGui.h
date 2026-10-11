@@ -5,14 +5,14 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/Colors.h>
-#include <Data/Interface/EngineConstants.h>
-#include <Data/Interface/GenomeDesc.h>
-#include <Data/Interface/PreviewDesc.h>
-#include <Data/Interface/SimulationParametersTypes.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/Colors.h>
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDesc.h>
+#include <Data/PreviewDesc.h>
+#include <Data/SimulationParametersTypes.h>
 
 #include "Definitions.h"
 #include "StyleService.h"

@@ -1,6 +1,6 @@
 #include "NetworkTransferController.h"
 
-#include <Base/Interface/VersionParserService.h>
+#include <Base/VersionParserService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

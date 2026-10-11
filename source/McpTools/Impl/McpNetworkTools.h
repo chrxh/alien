@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Network/Interface/Definitions.h>
-#include <Network/Interface/McpServer.h>
+#include <Network/Definitions.h>
+#include <Network/McpServer.h>
 #include <McpTools/Interface/McpToolContext.h>
 
 #include <Persister/Interface/DownloadCache.h>

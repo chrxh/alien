@@ -10,7 +10,7 @@
 #include <stb_image.h>
 #include <imgui_impl_vulkan.h>
 
-#include <Base/Interface/ExitScopeGuard.h>
+#include <Base/ExitScopeGuard.h>
 
 #include "VulkanContext.h"
 

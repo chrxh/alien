@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/GlobalSettings.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

@@ -2,11 +2,11 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/ImageFileService.h>
+#include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
+#include <Base/ImageFileService.h>
 
-#include <Data/Interface/CreatorService.h>
+#include <Data/CreatorService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

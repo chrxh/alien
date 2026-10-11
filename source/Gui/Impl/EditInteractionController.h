@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 // Handles the mouse input of an edit tool in the simulation view (positions in view coordinates)
 class EditInteractionController

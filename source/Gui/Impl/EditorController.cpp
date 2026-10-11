@@ -4,9 +4,9 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
-#include <Data/Interface/DescEditService.h>
+#include <Data/DescEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

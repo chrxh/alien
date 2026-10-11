@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/LoggingService.h>
+#include <Base/LoggingService.h>
 
 #include <Rendering/Interface/RenderingFacade.h>
 

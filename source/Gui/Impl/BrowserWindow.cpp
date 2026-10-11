@@ -7,12 +7,12 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/WebLinkHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
+#include <Base/WebLinkHelper.h>
 
-#include <Network/Interface/NetworkResourceService.h>
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 

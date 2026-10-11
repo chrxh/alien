@@ -1,5 +1,5 @@
-#include <Base/Interface/Ids.h>
-#include <Base/Interface/Macros.h>
+#include <Base/Ids.h>
+#include <Base/Macros.h>
 
 #include "DataAccessKernels.cuh"
 

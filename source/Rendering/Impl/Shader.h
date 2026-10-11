@@ -9,7 +9,7 @@
 
 #include <volk.h>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 #include "Definitions.h"
 

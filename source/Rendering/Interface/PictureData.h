@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 // RGB pixels ordered row-wise from top to bottom
 struct PictureData

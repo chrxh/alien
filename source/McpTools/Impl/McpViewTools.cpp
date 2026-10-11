@@ -7,15 +7,15 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/ExitScopeGuard.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/ExitScopeGuard.h>
+#include <Base/StringHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/StatisticsEntry.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpJson.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpJson.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

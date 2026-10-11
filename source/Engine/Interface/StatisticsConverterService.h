@@ -1,8 +1,8 @@
 #include <optional>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/DataPointCollection.h>
+#include <Data/DataPointCollection.h>
 
 #include <Engine/Interface/StatisticsEntry.h>
 

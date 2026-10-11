@@ -7,7 +7,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/MarkdownDocument.h>
+#include <Base/MarkdownDocument.h>
 
 #include <Rendering/Interface/TextureData.h>
 

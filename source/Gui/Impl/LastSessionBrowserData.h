@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_set>
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
 class LastSessionBrowserData
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Base/Interface/MathTypes.h>
+#include <Base/MathTypes.h>
 
 #include "Definitions.h"
 

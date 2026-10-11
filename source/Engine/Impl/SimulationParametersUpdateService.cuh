@@ -1,6 +1,6 @@
 #include <optional>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/SettingsForSimulation.h>
 #include <Engine/Interface/SimulationParametersUpdateConfig.h>

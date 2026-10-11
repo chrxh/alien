@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include "KernelLaunchSettings.h"
 

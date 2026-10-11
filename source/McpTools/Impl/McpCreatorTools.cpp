@@ -8,16 +8,16 @@
 
 #include <boost/json.hpp>
 
-#include <Base/Interface/ImageFileService.h>
-#include <Base/Interface/Math.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/ImageFileService.h>
+#include <Base/Math.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

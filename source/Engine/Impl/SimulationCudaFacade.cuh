@@ -9,9 +9,9 @@
 #include <windows.h>
 #endif
 
-#include <Base/Interface/Ids.h>
+#include <Base/Ids.h>
 
-#include <Data/Interface/StatisticsHistory.h>
+#include <Data/StatisticsHistory.h>
 
 #include <Engine/Interface/ArraySizesForGpuEntities.h>
 #include <Engine/Interface/ArraySizesForTOs.h>

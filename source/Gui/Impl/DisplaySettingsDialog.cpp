@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/LoggingService.h>
+#include <Base/LoggingService.h>
 
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"

@@ -2,7 +2,7 @@
 
 #include <ranges>
 
-#include <Data/Interface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 namespace
 {

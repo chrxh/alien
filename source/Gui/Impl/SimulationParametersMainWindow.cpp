@@ -4,11 +4,11 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/LocationAccessService.h>
-#include <Data/Interface/LocationEditService.h>
-#include <Data/Interface/RadiationStrengthService.h>
+#include <Data/LocationAccessService.h>
+#include <Data/LocationEditService.h>
+#include <Data/RadiationStrengthService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

@@ -2,9 +2,9 @@
 
 #include <imgui.h>
 
-#include <Network/Interface/NetworkResourceService.h>
-#include <Network/Interface/NetworkService.h>
-#include <Network/Interface/NetworkValidationService.h>
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkService.h>
+#include <Network/NetworkValidationService.h>
 
 #include "AlienGui.h"
 #include "BrowserWindow.h"

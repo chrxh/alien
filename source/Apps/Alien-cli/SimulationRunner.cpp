@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <chrono>
 
-#include <ConsoleUi/Interface/ConsoleInput.h>
-#include <ConsoleUi/Interface/ConsoleLiveOutput.h>
-#include <ConsoleUi/Interface/ConsoleSimulationPanel.h>
+#include <ConsoleUi/ConsoleInput.h>
+#include <ConsoleUi/ConsoleLiveOutput.h>
+#include <ConsoleUi/ConsoleSimulationPanel.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

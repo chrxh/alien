@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/SimulationParametersTypes.h>
+#include <Data/SimulationParametersTypes.h>
 
-#include <Network/Interface/McpServer.h>
+#include <Network/McpServer.h>
 
 class McpParameterTools
 {

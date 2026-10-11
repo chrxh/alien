@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

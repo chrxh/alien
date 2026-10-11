@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/SettingsForSimulation.h>
 

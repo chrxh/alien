@@ -6,9 +6,9 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/ExitScopeGuard.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/Resources.h>
+#include <Base/ExitScopeGuard.h>
+#include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

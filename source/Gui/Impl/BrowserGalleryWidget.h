@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <Network/Interface/NetworkResourceRawTO.h>
+#include <Network/NetworkResourceRawTO.h>
 
 #include <Persister/Interface/Definitions.h>
 

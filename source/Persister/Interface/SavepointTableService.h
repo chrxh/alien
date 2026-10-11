@@ -7,8 +7,8 @@
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
-#include <Base/Interface/JsonParser.h>
-#include <Base/Interface/Singleton.h>
+#include <Base/JsonParser.h>
+#include <Base/Singleton.h>
 
 #include "Definitions.h"
 #include "SavepointTable.h"

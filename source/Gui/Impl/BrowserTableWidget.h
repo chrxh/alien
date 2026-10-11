@@ -7,7 +7,7 @@
 
 #include <imgui.h>
 
-#include <Network/Interface/NetworkResourceTreeTO.h>
+#include <Network/NetworkResourceTreeTO.h>
 
 #include "Definitions.h"
 

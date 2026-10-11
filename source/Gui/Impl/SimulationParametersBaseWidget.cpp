@@ -2,8 +2,8 @@
 
 #include <imgui.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/ParametersValidationService.h>
+#include <Data/Descs.h>
+#include <Data/ParametersValidationService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/SimulationParametersUpdateConfig.h>

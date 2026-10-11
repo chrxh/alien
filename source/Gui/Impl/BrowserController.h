@@ -3,7 +3,7 @@
 #include <chrono>
 #include <optional>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Persister/Interface/Definitions.h>
 

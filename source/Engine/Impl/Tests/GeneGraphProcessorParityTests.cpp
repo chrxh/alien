@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <Data/Interface/DescValidationService.h>
-#include <Data/Interface/Descs.h>
+#include <Data/DescValidationService.h>
+#include <Data/Descs.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

@@ -1,6 +1,6 @@
 #include "FileTransferController.h"
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

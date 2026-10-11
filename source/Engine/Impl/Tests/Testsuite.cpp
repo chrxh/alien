@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
 #include "IntegrationTestFramework.h"
 

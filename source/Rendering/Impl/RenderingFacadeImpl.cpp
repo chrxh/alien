@@ -7,9 +7,9 @@
 
 #include <imgui_impl_vulkan.h>
 
-#include <Base/Interface/ExitScopeGuard.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/LoggingService.h>
+#include <Base/ExitScopeGuard.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

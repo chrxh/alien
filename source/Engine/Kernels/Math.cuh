@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Data/Interface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 #include "Base.cuh"
 

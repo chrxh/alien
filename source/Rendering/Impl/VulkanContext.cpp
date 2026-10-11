@@ -17,10 +17,10 @@
 
 #include <GLFW/glfw3.h>
 
-#include <Base/Interface/ExitScopeGuard.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
+#include <Base/ExitScopeGuard.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 namespace
 {

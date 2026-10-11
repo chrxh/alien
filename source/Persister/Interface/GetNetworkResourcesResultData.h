@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Network/Interface/NetworkResourceRawTO.h>
-#include <Network/Interface/UserTO.h>
+#include <Network/NetworkResourceRawTO.h>
+#include <Network/UserTO.h>
 
 struct GetNetworkResourcesResultData
 {

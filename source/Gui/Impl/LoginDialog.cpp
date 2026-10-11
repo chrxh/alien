@@ -2,9 +2,9 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include <Data/Interface/PreviewDesc.h>
+#include <Data/PreviewDesc.h>
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
 #include <Rendering/Interface/TextureData.h>
 

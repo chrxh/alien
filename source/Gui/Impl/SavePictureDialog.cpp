@@ -5,8 +5,8 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/AlienExceptions.h>
+#include <Base/GlobalSettings.h>
 
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
