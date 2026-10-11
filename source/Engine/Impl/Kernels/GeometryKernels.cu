@@ -313,6 +313,8 @@ cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluid
                 fluidParticleData[idx].color[1] = intensity * 0.25f;
                 fluidParticleData[idx].color[2] = intensity * 1.0f;
                 fluidParticleData[idx].glow = 0.0f;
+                fluidParticleData[idx].vel[0] = energy->vel.x;
+                fluidParticleData[idx].vel[1] = energy->vel.y;
             }
         }
     }
@@ -344,6 +346,8 @@ cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluid
                 fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
                 fluidParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
                 fluidParticleData[idx].glow = object->typeData.fluid.glow;
+                fluidParticleData[idx].vel[0] = object->vel.x;
+                fluidParticleData[idx].vel[1] = object->vel.y;
             }
         }
     }

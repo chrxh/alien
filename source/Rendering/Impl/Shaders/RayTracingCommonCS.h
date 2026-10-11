@@ -83,6 +83,7 @@ struct FluidParticle
     float pos[3];
     float color[3];
     float glow;
+    float vel[2];
 };
 
 // A radiation source that shines from its circular or rectangular area
