@@ -14,6 +14,9 @@ env:
   # AMD build: the generic targets each cover a whole GPU family and all of them
   # go into one fat binary, so a single alien-amd.exe runs on RDNA2, RDNA3 and RDNA4.
   HIP_ARCHS: gfx10-3-generic;gfx11-generic;gfx12-generic
+  # The runner shares its machine with other work. With one job per core the
+  # compilers exhaust the commit limit (C3859 "Failed to create virtual memory for PCH").
+  BUILD_JOBS: 16
 
 jobs:
   windows-deploy:
@@ -54,13 +57,13 @@ jobs:
 
     - name: Build for NVIDIA GPUs (Ninja, CUDA)
       shell: cmd
-      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }}
+      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }} ${{ env.BUILD_JOBS }}
 
     - name: Build for AMD GPUs (Ninja, HIP)
       shell: cmd
       env:
         ALIEN_HIP_ARCH: ${{ env.HIP_ARCHS }}
-      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }} HIP
+      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }} HIP ${{ env.BUILD_JOBS }}
 
     - name: Package deployment
       shell: pwsh
