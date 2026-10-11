@@ -592,6 +592,15 @@ void MainLoopController::processMenubar()
         [&] { SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
+            .name("Ray tracing")
+            .keyAlt(true)
+            .key(ImGuiKey_R)
+            .selected(SimulationView::get().isRayTracingActive())
+            .disabled(!SimulationView::get().isRayTracingSupported())
+            .closeMenuWhenItemClicked(false),
+        [&] { SimulationView::get().setRayTracingActive(!SimulationView::get().isRayTracingActive()); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
             .name("Message overlay")
             .keyAlt(true)
             .key(ImGuiKey_X)

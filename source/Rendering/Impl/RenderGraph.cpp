@@ -14,19 +14,14 @@ namespace
     auto constexpr ScreenFormat = VK_FORMAT_R8G8B8A8_UNORM;
 }
 
-_RenderGraph::_RenderGraph(RenderBlocks&& blocks)
-    : _geometryBuffers(_VulkanGeometryBuffers::create())
+_RenderGraph::_RenderGraph(RenderBlocks&& blocks, VulkanGeometryBuffers const& geometryBuffers)
+    : _geometryBuffers(geometryBuffers)
     , _blocks(std::move(blocks))
     , _screenTarget(_TextureTarget::create())
 {
     // Check for supported graph structure
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);
-}
-
-void _RenderGraph::updateGeometry(RealRect const& visibleWorldRect)
-{
-    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, visibleWorldRect);
 }
 
 namespace
@@ -87,6 +82,13 @@ void _RenderGraph::resetImageStates()
         textureTarget->resetImageStates();
     }
     _screenTarget->resetImageStates();
+    for (auto const& block : _blocks) {
+        for (auto const& sequence : block) {
+            for (auto const& step : sequence._steps) {
+                step->resetImageStates();
+            }
+        }
+    }
 }
 
 void _RenderGraph::applyViewSize(bool withScreenTarget)

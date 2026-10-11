@@ -27,6 +27,14 @@ The **brightness** of an object follows its energy. Objects with little energy l
 
 > **Tip:** Dense fluids with high energy and high glow add up to a saturated white. For colorful liquids, use a low energy per particle, for example 10 to 15, a glow of at most 0.4 and an object distance of 1.2 or more.
 
+## Ray tracing
+
+On a GPU with ray tracing hardware, **View > Ray tracing** (Alt+R) shows the creatures as living tissue under a microscope. Triangles and quadrangles of connected cells form translucent bodies with soft, slightly irregular outlines. The cells bulge gently out of these bodies. Connections without a polygon become thin strands, so chains of cells look like filaments. Only connected cells merge into one body. Cells without a connection stay apart, even when they touch.
+
+Zoomed in, every cell shows wavy walls towards its neighbors, a nucleus with a nucleolus and small vesicles. These details stay with their cell while it moves. On a dark background the tissue is visible by its glow as in a fluorescence microscope. On a bright background it absorbs light as in a brightfield microscope and appears slightly embossed. When zoomed out, the tissue fades into the normal view, so that small structures keep their details and the brightness stays the same.
+
+Cells flash when the activity of their neuron changes, and their light illuminates the neighboring tissue and the surrounding medium. Every frame is computed completely without random samples, so the image stays free of noise in motion and does not change when the simulation pauses. Pictures saved with **Simulation > Save picture** average several frames for smoother edges.
+
 ## Painted backgrounds
 
 **Layers** can paint the background. A layer covers a circular or rectangular area, and its **Background color** tints this area when the color override of the layer is enabled. Layers fade out at their edges, so several overlapping layers blend into soft color fields.

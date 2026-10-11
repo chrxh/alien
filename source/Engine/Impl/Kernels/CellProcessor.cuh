@@ -26,6 +26,9 @@ public:
 private:
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
+
+    // While an attack is shown, the position of the attacker keeps its offset to the attacked object
+    __inline__ __device__ static void moveAttackerPosition(SimulationData& data, float2& attackerPos, Object* attackedObject);
 };
 
 /************************************************************************/
@@ -267,15 +270,29 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type == ObjectType_Cell) {
-            if (object->typeData.cell.eventCounter > 0) {
-                --object->typeData.cell.eventCounter;
+            auto& cell = object->typeData.cell;
+            if (cell.eventCounter > 0) {
+                --cell.eventCounter;
+                if (cell.event == CellEvent_Attacked) {
+                    moveAttackerPosition(data, cell.eventPos, object);
+                }
             }
         } else if (object->type == ObjectType_FreeCell) {
-            if (object->typeData.freeCell.eventCounter > 0) {
-                --object->typeData.freeCell.eventCounter;
+            auto& freeCell = object->typeData.freeCell;
+            if (freeCell.eventCounter > 0) {
+                --freeCell.eventCounter;
+                if (freeCell.event == CellEvent_Attacked) {
+                    moveAttackerPosition(data, freeCell.eventPos, object);
+                }
             }
         }
     }
+}
+
+__inline__ __device__ void CellProcessor::moveAttackerPosition(SimulationData& data, float2& attackerPos, Object* attackedObject)
+{
+    attackerPos += attackedObject->vel * (cudaSimulationParameters.timestepSize.value * TIMESTEPS_PER_CELL_FUNCTION);
+    data.world.correctPosition(attackerPos);
 }
 
 __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data)

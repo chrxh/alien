@@ -45,6 +45,14 @@ add_library(Shaders INTERFACE
     NonFluidObjectVS.h
     OrganicSurfaceFS.h
     OrganicSurfaceVS.h
+    RayTracingAllocateCS.h
+    RayTracingAntiAliasingCS.h
+    RayTracingCommonCS.h
+    RayTracingPrepareCS.h
+    RayTracingPresentFS.h
+    RayTracingPresentVS.h
+    RayTracingScatterCS.h
+    RayTracingTissueCS.h
     SelectedConnectionFS.h
     SelectedConnectionGS.h
     SelectedConnectionVS.h

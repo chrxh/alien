@@ -23,6 +23,7 @@ void SimulationView::setup()
 {
 
     _cellDetailOverlayActive = GlobalSettings::get().getValue("settings.simulation view.overlay", _cellDetailOverlayActive);
+    _rayTracingActive = GlobalSettings::get().getValue("settings.simulation view.ray tracing", _rayTracingActive);
     _brightness = GlobalSettings::get().getValue("windows.simulation view.brightness", _brightness);
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
@@ -35,6 +36,7 @@ void SimulationView::setup()
 void SimulationView::shutdown()
 {
     GlobalSettings::get().setValue("settings.simulation view.overlay", _cellDetailOverlayActive);
+    GlobalSettings::get().setValue("settings.simulation view.ray tracing", _rayTracingActive);
     GlobalSettings::get().setValue("windows.simulation view.brightness", _brightness);
     GlobalSettings::get().setValue("windows.simulation view.contrast", _contrast);
     GlobalSettings::get().setValue("windows.simulation view.motion blur factor", _motionBlur);
@@ -128,6 +130,21 @@ void SimulationView::setOverlayActive(bool active)
     _cellDetailOverlayActive = active;
 }
 
+bool SimulationView::isRayTracingSupported() const
+{
+    return _RenderingFacade::get()->isRayTracingSupported();
+}
+
+bool SimulationView::isRayTracingActive() const
+{
+    return _rayTracingActive && isRayTracingSupported();
+}
+
+void SimulationView::setRayTracingActive(bool active)
+{
+    _rayTracingActive = active;
+}
+
 float SimulationView::getBrightness() const
 {
     return _brightness;
@@ -193,6 +210,7 @@ RenderView SimulationView::createRenderView() const
         .renderScale = viewport.getRenderScale(),
         .visibleWorldRect = viewport.getVisibleWorldRect(),
         .cellDetailOverlay = _cellDetailOverlayActive,
+        .rayTracing = isRayTracingActive(),
     };
 }
 

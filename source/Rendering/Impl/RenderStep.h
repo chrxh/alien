@@ -99,6 +99,9 @@ public:
 
     virtual void execute(ExecutionParameters parameters) = 0;
 
+    // Required for images of the step if the recorded commands are discarded instead of submitted
+    virtual void resetImageStates() {}
+
     std::optional<int> const& getPreviousTargetSelection() const;
 
 protected:
