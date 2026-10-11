@@ -5,7 +5,7 @@
 #include <Engine/Interface/SettingsForSimulation.h>
 #include <Engine/Interface/SimulationParametersUpdateConfig.h>
 
-#include <Engine/Kernels/Definitions.cuh>
+#include <Engine/Impl/Kernels/Definitions.cuh>
 
 class SimulationParametersUpdateService
 {

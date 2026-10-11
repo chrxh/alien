@@ -7,9 +7,9 @@
 
 #include <Engine/Interface/SettingsForSimulation.h>
 
-#include <Engine/Kernels/CudaGeometryBuffers.cuh>
-#include <Engine/Kernels/GeometryKernels.cuh>
-#include <Engine/Kernels/KernelLauncher.cuh>
+#include <Engine/Impl/Kernels/CudaGeometryBuffers.cuh>
+#include <Engine/Impl/Kernels/GeometryKernels.cuh>
+#include <Engine/Impl/Kernels/KernelLauncher.cuh>
 
 namespace
 {

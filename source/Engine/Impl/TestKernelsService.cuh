@@ -4,7 +4,7 @@
 
 #include <Engine/Interface/KernelLaunchSettings.h>
 
-#include <Engine/Kernels/Definitions.cuh>
+#include <Engine/Impl/Kernels/Definitions.cuh>
 
 class TestKernelsService
 {

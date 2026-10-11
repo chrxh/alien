@@ -4,10 +4,10 @@
 
 #include <Engine/Interface/GeometryBuffers.h>
 
-#include <Engine/Kernels/Base.cuh>
-#include <Engine/Kernels/DataAccessKernels.cuh>
-#include <Engine/Kernels/Definitions.cuh>
-#include <Engine/Kernels/Macros.cuh>
+#include <Engine/Impl/Kernels/Base.cuh>
+#include <Engine/Impl/Kernels/DataAccessKernels.cuh>
+#include <Engine/Impl/Kernels/Definitions.cuh>
+#include <Engine/Impl/Kernels/Macros.cuh>
 
 class GeometryKernelsService
 {

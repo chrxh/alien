@@ -16,8 +16,8 @@
 
 #include <Engine/Interface/GeometryBuffers.h>
 
-#include <Engine/Kernels/TOProvider.cuh>
-#include <Engine/Kernels/TOs.cuh>
+#include <Engine/Impl/Kernels/TOProvider.cuh>
+#include <Engine/Impl/Kernels/TOs.cuh>
 
 #include "DescConverterService.h"
 
