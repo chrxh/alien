@@ -18,8 +18,6 @@ uniform sampler2D inputTexture1;
 uniform sampler2D inputTexture2;
 uniform sampler2D inputTexture3;
 uniform sampler2D inputTexture4;
-uniform vec2 viewportSize;
-uniform float zoom;
 uniform float objectGain;
 uniform float tissueVisibility;
 uniform float backgroundScale;
@@ -30,10 +28,9 @@ const float CoverageBrightness = 0.3;
 // The rasterized objects are whitened with their energy, while the tissue shows their saturated colors. The strongest component is kept.
 const float WhiteRemoval = 0.6;
 
-// The absorption of the tissue and how it scatters the light of the radiation sources, see Shaders/RayTracingTissueCS.h
+// The absorption of the tissue, see Shaders/RayTracingTissueCS.h
 const float Saturation = 0.9;
 const float Absorption = 2.2;
-const float TissueSourceLight = 0.8;
 
 // The tone mapping of Shaders/RayTracingCommonCS.h
 vec3 toneMapping(vec3 color)
@@ -87,8 +84,8 @@ void main()
     vec3 transmittance = exp(-Absorption * (vec3(1.0) - color * 0.85));
     float coverage = clamp(brightness / CoverageBrightness, 0.0, 1.0);
 
-    // The ray tracing passes on the strength of the light of the radiation sources in its alpha channel
-    vec3 sourceLight = coverage * color * rayTracingOutput.a * TissueSourceLight;
+    // The ray tracing passes on the strength of the light of the radiation sources that the tissue scatters in its alpha channel
+    vec3 sourceLight = coverage * color * rayTracingOutput.a;
     vec3 objectLight = (removeWhite(objects) + sourceLight) * bloomScale - background * coverage * (vec3(1.0) - transmittance);
 
     vec3 light = rayTracing + objectLight * (1.0 - tissueVisibility);

@@ -39,7 +39,11 @@ namespace
     }
 }
 
-VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, RenderView const& view, std::optional<TextureTarget> const& finalTarget)
+VulkanImage& _RenderGraph::execute(
+    VkCommandBuffer commandBuffer,
+    RenderView const& view,
+    SimulationParameters const& parameters,
+    std::optional<TextureTarget> const& finalTarget)
 {
     _view = view;
     _finalTarget = finalTarget ? RenderTarget(*finalTarget) : RenderTarget(ScreenTarget());
@@ -48,7 +52,7 @@ VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, RenderView con
 
     GeneralRenderInfo generalRenderInfo{.commandBuffer = commandBuffer};
 
-    auto simParameters = std::make_shared<SimulationParameters>(_SimulationFacade::get()->getSimulationParameters());
+    auto simParameters = std::make_shared<SimulationParameters>(parameters);
     int currentTextureTargetIndex = 0;
     forEachStep(
         [this, &currentTextureTargetIndex] {
@@ -63,11 +67,6 @@ VulkanImage& _RenderGraph::execute(VkCommandBuffer commandBuffer, RenderView con
             }
         },
         [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target) {
-            auto active = step->isActive(*simParameters, _view);
-            CHECK(active || !target.has_value());
-            if (!active) {
-                return;
-            }
             TextureTarget textureTarget;
             if (target.has_value()) {
                 textureTarget = std::holds_alternative<ScreenTarget>(*target) ? _screenTarget : std::get<TextureTarget>(*target);
@@ -91,13 +90,6 @@ void _RenderGraph::resetImageStates()
         textureTarget->resetImageStates();
     }
     _screenTarget->resetImageStates();
-    for (auto const& block : _blocks) {
-        for (auto const& sequence : block) {
-            for (auto const& step : sequence._steps) {
-                step->resetImageStates();
-            }
-        }
-    }
 }
 
 void _RenderGraph::applyViewSize(bool withScreenTarget)

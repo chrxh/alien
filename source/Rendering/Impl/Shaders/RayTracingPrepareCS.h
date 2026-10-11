@@ -7,21 +7,15 @@ namespace Shaders
     // Derives the objects from the geometry buffers, counts the lights per cell of the light grid and creates the bounding boxes of the
     // groups that form the tissue: each cell alone, each connection together with its two cells and each triangle together with its corners
     std::string_view const RayTracingPrepareCS = R"(
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-
 // The highlight intensity reflects the activity of the neuron of a cell, which makes the cell glow and light up its surroundings
 const float ActivityGlow = 1.5;
 
 Sphere createSphere(uint index)
 {
     ObjectVertex object = objects[index];
-    int objectType = (object.state >> 8) & 0xff;
+    int objectType = getObjectType(object);
     vec3 color = vec3(object.color[0], object.color[1], object.color[2]);
-    float colorBrightness = maxComponent(color);
-    vec3 hue = colorBrightness > 0.02 ? clamp(color / colorBrightness, 0.0, 1.0) : vec3(0.5);
-
-    // The color of an object scales with its energy. Objects with much energy have colors far above 1, which would outshine their structure.
-    float brightness = min(colorBrightness, 1.0) + 0.5 * log(max(colorBrightness, 1.0));
+    vec3 hue = getHue(color);
 
     float radius = CellRadius;
     float material = Material_Tissue;
@@ -36,17 +30,17 @@ Sphere createSphere(uint index)
 
     vec3 emission = vec3(0.0);
     if (objectType == ObjectType_Cell) {
-        emission = hue * ActivityGlow * object.highlightIntensity * frame.parameters.y;
+        emission = hue * ActivityGlow * object.highlightIntensity;
     }
 
     // The height of an object derives from its id and the id of its creature and therefore stays the same over time
     float seed = fract(object.pos[2] * 997.13 + 0.31);
 
     Sphere result;
-    result.centerRadius = vec4(object.pos[0], object.pos[1], object.pos[2], radius);
+    result.centerRadius = vec4(object.pos[0], object.pos[1], 0.0, radius);
     result.hueMaterial = vec4(hue, material);
-    result.emission = vec4(emission, brightness);
-    result.details = vec4(float(object.state & 0xff), seed, float((object.state >> 16) & 1), 0.0);
+    result.emission = vec4(emission, getBrightness(color));
+    result.details = vec4(0.0, seed, float((object.state >> 16) & 1), 0.0);
     return result;
 }
 
@@ -65,7 +59,8 @@ bool isSceneForShadowsOnly()
 
 float getCellExtent(Sphere sphere)
 {
-    return isSceneForShadowsOnly() ? sphere.centerRadius.w : getMaxCellKernelRadius(sphere);
+    float shadowExtent = sphere.centerRadius.w + getShadowBeamMargin();
+    return isSceneForShadowsOnly() ? shadowExtent : max(getMaxCellKernelRadius(sphere), shadowExtent);
 }
 
 void main()
@@ -91,7 +86,8 @@ void main()
         getCapsuleSpheres(index, sphereA, sphereB);
         Sphere a = createSphere(sphereA);
         Sphere b = createSphere(sphereB);
-        float strandExtent = isSceneForShadowsOnly() ? StrandHalfWidth : getStrandKernelRadius();
+        float strandShadowExtent = StrandHalfWidth + getShadowBeamMargin();
+        float strandExtent = isSceneForShadowsOnly() ? strandShadowExtent : max(getStrandKernelRadius(), strandShadowExtent);
         float extent = max(strandExtent, max(getCellExtent(a), getCellExtent(b)));
         bool enabled = a.hueMaterial.w != Material_Inactive && b.hueMaterial.w != Material_Inactive;
         capsuleAabbs[index] =

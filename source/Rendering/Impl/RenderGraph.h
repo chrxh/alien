@@ -49,7 +49,11 @@ public:
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
     // Without a final target, the graph renders into an own image of the view size.
     // The images take a new view size only here, so that resizing the window does not create images for every intermediate size.
-    VulkanImage& execute(VkCommandBuffer commandBuffer, RenderView const& view, std::optional<TextureTarget> const& finalTarget = std::nullopt);
+    VulkanImage& execute(
+        VkCommandBuffer commandBuffer,
+        RenderView const& view,
+        SimulationParameters const& parameters,
+        std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
     // Required if the recorded commands are discarded instead of submitted
     void resetImageStates();

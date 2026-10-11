@@ -11,8 +11,6 @@ namespace Shaders
     // cells show wavy walls towards their neighbors, a nucleus and vesicles. On a dark background the tissue is visible by its glow as in
     // a fluorescence microscope, on a bright background by its absorption as in a brightfield microscope.
     std::string_view const RayTracingTissueCS = R"(
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
-
 // Ranges of densities in which the groups blend into each other. Adjacent triangles differ by their third corner, a wider range hides the
 // change of the material along their common edge.
 const float GroupBlending = 0.03;
@@ -21,7 +19,6 @@ const float MaterialBlending = 0.25;
 const float ThicknessGain = 1.6;
 
 // The glow of the tissue matches the brightness of the rasterized objects
-const float Saturation = 0.9;
 const float Absorption = 2.2;
 const float CytoplasmGlow = 1.0;
 const float OutlineGlow = 1.0;
@@ -460,30 +457,22 @@ CellDetails getCellDetails(Neighborhood neighborhood, vec2 position)
     return result;
 }
 
+// The material of the gathered tissue is normalized, see getBlendedTissue
 vec3 getTissueColor(Tissue tissue)
 {
-    vec3 hue = tissue.hue / tissue.weight;
-    return mix(vec3(luminance(hue)), hue, Saturation);
+    return getSaturatedHue(tissue.hue);
 }
 
 // Light scattered at the edge of the tissue surrounds it with a faint halo as in a dark field microscope
 vec3 getHalo(Tissue tissue)
 {
     float distance = max(DensityThreshold - tissue.density, 0.0) / max(length(tissue.gradient), 1e-4);
-    float brightness = tissue.brightness / tissue.weight;
-    float solid = tissue.solid / tissue.weight;
-    return getTissueColor(tissue) * brightness * HaloGlow * getCloseUpWeight() * exp(-distance / HaloWidth) * (1.0 - solid);
+    return getTissueColor(tissue) * tissue.brightness * HaloGlow * getCloseUpWeight() * exp(-distance / HaloWidth) * (1.0 - tissue.solid);
 }
 
-// The tissue scatters the light of the radiation sources in its color, see Shaders/RayTracingGasIrradianceCS.h
-const float SourceLightScattering = 2.0;
-const float TissueSourceLight = 0.8;
-const float SolidSourceLight = 0.6;
-
-vec3 getSourceLightOnTissue(vec2 position)
-{
-    return isSourceLightActive() ? getSourceLight(position) * SourceLightScattering : vec3(0.0);
-}
+// The tissue and the solids scatter the light of the radiation sources in their colors, see Shaders/RayTracingGasIrradianceCS.h
+const float TissueSourceLight = 1.6;
+const float SolidSourceLight = 1.2;
 
 // Zoomed out, the structures are only a few pixels wide and appear as dense lines without outline
 vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 medium, vec3 scattered, vec3 sourceLight)
@@ -498,26 +487,24 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
     vec2 thicknessGradient = closeUpWeight * ThicknessGain * exp(-totalExcess * ThicknessGain) * tissue.totalGradient;
 
     vec3 color = getTissueColor(tissue);
-    float brightness = tissue.brightness / tissue.weight;
-    vec3 emission = tissue.emission / tissue.weight;
-    float solid = tissue.solid / tissue.weight;
     CellDetails details = getCellDetails(neighborhood, position);
     float cytoplasm = thickness * (1.0 + 0.35 * details.grain) * (1.0 - 0.55 * details.nucleus);
 
     float opticalDensity =
         cytoplasm + outline * 0.8 + details.wall * 0.6 + details.nucleus * 0.45 + details.nucleolus * 0.5 + details.vesicle * 0.3;
-    vec3 transmittance = exp(-Absorption * opticalDensity * (vec3(1.0) - color * 0.85));
-    vec3 fluorescence = color * brightness
+    vec3 transmittance = exp(-Absorption * opticalDensity * getAbsorbedShare(color));
+    vec3 fluorescence = color * tissue.brightness
         * (CytoplasmGlow * cytoplasm + OutlineGlow * outline + WallGlow * details.wall + NucleusRimGlow * details.nucleusRim
            + NucleolusGlow * details.nucleolus + VesicleGlow * details.vesicle);
-    vec3 glow = emission * CoreGlow * min(tissue.bulge, 1.0) + (scattered * TissueScattering + sourceLight * TissueSourceLight) * thickness * color;
+    vec3 glow =
+        tissue.emission * CoreGlow * min(tissue.bulge, 1.0) + (scattered * TissueScattering + sourceLight * TissueSourceLight) * thickness * color;
     float relief = 1.0 + MaxRelief * tanh(ReliefStrength * dot(thicknessGradient, ReliefDirection) / MaxRelief);
     vec3 result = (medium * transmittance + (fluorescence + glow) * mix(FarGlowGain, 1.0, closeUpWeight)) * relief;
 
     // Solids are dense grains without the inner structure of cells
     vec3 solidColor =
-        (medium * exp(-6.0 * opticalDensity) + color * brightness * (0.3 + 0.5 * thickness) + sourceLight * SolidSourceLight * color) * relief;
-    return mix(result, solidColor, solid);
+        (medium * exp(-6.0 * opticalDensity) + color * tissue.brightness * (0.3 + 0.5 * thickness) + sourceLight * SolidSourceLight * color) * relief;
+    return mix(result, solidColor, tissue.solid);
 }
 
 // As in the rasterized view, the background is added after the bloom and the tone mapping, so the light in front of it is passed on alone.
@@ -545,8 +532,8 @@ void main()
     float tissueVisibility = frame.tissue.w;
     vec3 scattered = tissueVisibility > 0.0 ? getScatteredLight(position) : vec3(0.0);
     vec3 background = getBackgroundRadiance(position);
-    vec3 medium = shadeGas(position, background) + getEnergyParticleRadiance(position);
-    vec3 sourceLight = getSourceLightOnTissue(position);
+    vec3 sourceLight = isSourceLightActive() ? getSourceLight(position) : vec3(0.0);
+    vec3 medium = shadeGas(position, background, sourceLight) + getEnergyParticleRadiance(position);
     vec3 color = medium;
     if (tissueVisibility > 0.0) {
         vec3 lightedMedium = medium + scattered * MediumScattering;
@@ -562,7 +549,7 @@ void main()
 
     // The rasterized objects scatter the light of the radiation sources as well, its strength is passed on to them in the alpha channel,
     // see Shaders/RayTracingMergeFS.h
-    imageStore(sceneColor, pixel, vec4(getForeground(color, background), luminance(sourceLight)));
+    imageStore(sceneColor, pixel, vec4(getForeground(color, background), luminance(sourceLight) * TissueSourceLight));
 }
 )";
 }
