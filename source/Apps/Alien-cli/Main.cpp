@@ -3,26 +3,26 @@
 #include <iostream>
 #include <optional>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/Console.h>
-#include <Base/Interface/ExitScopeGuard.h>
-#include <Base/Interface/FileLogger.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/KernelProfiler.h>
-#include <Base/Interface/KernelTracer.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/AlienExceptions.h>
+#include <Base/Console.h>
+#include <Base/ExitScopeGuard.h>
+#include <Base/FileLogger.h>
+#include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
-#include <ConsoleUi/Interface/ConsoleLiveOutput.h>
-#include <ConsoleUi/Interface/ConsoleSimulationPanel.h>
+#include <ConsoleUi/ConsoleLiveOutput.h>
+#include <ConsoleUi/ConsoleSimulationPanel.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Engine/Impl/SimulationFacadeImpl.h>
 
-#include <Network/Interface/NetworkService.h>
-#include <Network/Interface/NetworkValidationService.h>
+#include <Network/NetworkService.h>
+#include <Network/NetworkValidationService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/SerializerService.h>

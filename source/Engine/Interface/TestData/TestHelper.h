@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/Math.h>
+#include <Base/Definitions.h>
+#include <Base/Math.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 class TestHelper
 {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/CreatorService.h>
-#include <Data/Interface/DescEditService.h>
-#include <Data/Interface/Descs.h>
+#include <Data/CreatorService.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
 
 #include "Definitions.h"
 #include "EditInteractionController.h"

@@ -6,19 +6,19 @@
 
 #include <boost/json.hpp>
 
-#include <Data/Interface/DescEditService.h>
-#include <Data/Interface/DescValidationService.h>
-#include <Data/Interface/EngineConstants.h>
-#include <Data/Interface/GenomeDescAccessService.h>
-#include <Data/Interface/GenomeDescEditService.h>
+#include <Data/DescEditService.h>
+#include <Data/DescValidationService.h>
+#include <Data/EngineConstants.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/GenomeDescEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Persister/Interface/SerializerService.h>
 
-#include <Network/Interface/McpArguments.h>
-#include <Network/Interface/McpJson.h>
-#include <Network/Interface/McpSchema.h>
+#include <Network/McpArguments.h>
+#include <Network/McpJson.h>
+#include <Network/McpSchema.h>
 
 namespace
 {

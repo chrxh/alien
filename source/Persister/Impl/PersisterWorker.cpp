@@ -5,13 +5,13 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/StringHelper.h>
-#include <Base/Interface/UnlockGuard.h>
+#include <Base/LoggingService.h>
+#include <Base/StringHelper.h>
+#include <Base/UnlockGuard.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
-#include <Data/Interface/GenomeDescAccessService.h>
+#include <Data/GenomeDescAccessService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

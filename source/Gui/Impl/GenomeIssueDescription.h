@@ -6,8 +6,8 @@
 
 #include <imgui.h>
 
-#include <Data/Interface/GenomeDesc.h>
-#include <Data/Interface/GenomeIssue.h>
+#include <Data/GenomeDesc.h>
+#include <Data/GenomeIssue.h>
 
 class GenomeIssueDescription
 {

@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
+#include <Data/Descs.h>
 
-#include <Network/Interface/McpServer.h>
+#include <Network/McpServer.h>
 #include <McpTools/Interface/McpToolContext.h>
 
 class McpInspectionTools

@@ -2,13 +2,13 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
 
-#include <Data/Interface/Colors.h>
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/GenomeDescAccessService.h>
-#include <Data/Interface/MassOperationsService.h>
+#include <Data/Colors.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDescAccessService.h>
+#include <Data/MassOperationsService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

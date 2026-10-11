@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 class _PersisterFacade;
 using PersisterFacade = std::shared_ptr<_PersisterFacade>;

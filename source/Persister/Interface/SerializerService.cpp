@@ -21,14 +21,14 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
 
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/VersionParserService.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
+#include <Base/VersionParserService.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/GenomeDesc.h>
-#include <Data/Interface/ParametersValidationService.h>
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
+#include <Data/ParametersValidationService.h>
+#include <Data/SimulationParameters.h>
 
 #include "JsonSerializationScope.h"
 #include "SerializationScope.h"

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory>
 
-#include <Data/Interface/Definitions.h>
+#include <Data/Definitions.h>
 
 struct KernelLaunchSettings;
 

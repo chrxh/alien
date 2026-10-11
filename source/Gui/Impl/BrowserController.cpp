@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/TaskProcessor.h>

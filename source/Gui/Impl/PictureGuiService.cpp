@@ -12,8 +12,8 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize2.h>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/LoggingService.h>
+#include <Base/AlienExceptions.h>
+#include <Base/LoggingService.h>
 
 #include <Rendering/Interface/RenderingFacade.h>
 

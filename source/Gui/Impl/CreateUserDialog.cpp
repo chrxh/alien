@@ -4,7 +4,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"

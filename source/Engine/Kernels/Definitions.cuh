@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <Data/Interface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>

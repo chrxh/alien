@@ -2,9 +2,9 @@
 
 #include <cstdint>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/ExtinctLineageAccumulator.h>
+#include <Data/ExtinctLineageAccumulator.h>
 
 #include <Engine/Interface/StatisticsEntry.h>
 

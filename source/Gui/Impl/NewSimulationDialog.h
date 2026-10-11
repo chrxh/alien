@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/Descs.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/Definitions.h>
 

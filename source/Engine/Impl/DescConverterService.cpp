@@ -10,11 +10,11 @@
 
 #include <cuda_fp16.h>
 
-#include <Base/Interface/AlienExceptions.h>
+#include <Base/AlienExceptions.h>
 
-#include <Base/Interface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
-#include <Data/Interface/Descs.h>
+#include <Data/Descs.h>
 
 #include <Engine/Kernels/TOProvider.cuh>
 

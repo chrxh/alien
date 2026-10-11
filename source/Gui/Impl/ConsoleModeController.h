@@ -3,10 +3,10 @@
 #include <chrono>
 #include <optional>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <ConsoleUi/Interface/ConsoleLiveOutput.h>
-#include <ConsoleUi/Interface/ConsoleSimulationPanel.h>
+#include <ConsoleUi/ConsoleLiveOutput.h>
+#include <ConsoleUi/ConsoleSimulationPanel.h>
 
 #include "Definitions.h"
 

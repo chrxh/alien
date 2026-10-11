@@ -1,4 +1,4 @@
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/PerlinNoiseSource.h>
 

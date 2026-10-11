@@ -11,11 +11,11 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/StringHelper.h>
 
-#include <Network/Interface/NetworkResourceService.h>
+#include <Network/NetworkResourceService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/TaskProcessor.h>

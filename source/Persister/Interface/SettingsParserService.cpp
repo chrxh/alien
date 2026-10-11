@@ -4,11 +4,11 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
-#include <Base/Interface/Resources.h>
+#include <Base/Resources.h>
 
-#include <Data/Interface/LocationEditService.h>
-#include <Data/Interface/SimulationParametersSpecification.h>
-#include <Data/Interface/SpecificationEvaluationService.h>
+#include <Data/LocationEditService.h>
+#include <Data/SimulationParametersSpecification.h>
+#include <Data/SpecificationEvaluationService.h>
 
 #include "ParameterParser.h"
 

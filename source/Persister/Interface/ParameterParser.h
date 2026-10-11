@@ -2,10 +2,10 @@
 
 #include <chrono>
 
-#include <Base/Interface/JsonParser.h>
+#include <Base/JsonParser.h>
 
-#include <Data/Interface/Colors.h>
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/Colors.h>
+#include <Data/SimulationParameters.h>
 
 class ParameterParser
 {

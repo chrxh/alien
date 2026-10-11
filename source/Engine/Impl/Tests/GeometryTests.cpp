@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <Base/Interface/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 
-#include <Data/Interface/Descs.h>
+#include <Data/Descs.h>
 
 #include <Engine/Interface/GeometryBuffers.h>
 #include <Engine/Interface/SimulationFacade.h>

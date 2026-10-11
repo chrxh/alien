@@ -5,7 +5,7 @@
 #include <ranges>
 #include <span>
 
-#include <Base/Interface/ExitScopeGuard.h>
+#include <Base/ExitScopeGuard.h>
 
 #include "RenderGraph.h"
 #include "RenderStep.h"

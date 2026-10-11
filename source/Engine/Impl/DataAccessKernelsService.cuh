@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Engine/Interface/ArraySizesForGpuEntities.h>
 #include <Engine/Interface/ArraySizesForTOs.h>

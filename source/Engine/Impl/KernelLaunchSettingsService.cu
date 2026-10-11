@@ -5,9 +5,9 @@
 
 #include <cuda_runtime.h>
 
-#include <Base/Interface/LoggingService.h>
+#include <Base/LoggingService.h>
 
-#include <Data/Interface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <Engine/Kernels/Base.cuh>
 #include <Engine/Kernels/SimulationKernels.cuh>

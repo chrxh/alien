@@ -4,10 +4,10 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Definitions.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Definitions.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/SpaceCalculator.h>
+#include <Data/SpaceCalculator.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>

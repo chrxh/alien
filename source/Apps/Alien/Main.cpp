@@ -1,13 +1,13 @@
 #include <cstring>
 #include <iostream>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/FileLogger.h>
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/KernelProfiler.h>
-#include <Base/Interface/KernelTracer.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Resources.h>
+#include <Base/AlienExceptions.h>
+#include <Base/FileLogger.h>
+#include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
+#include <Base/KernelTracer.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include <Engine/Impl/SimulationFacadeImpl.h>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Network/Interface/NetworkResourceTreeTO.h>
+#include <Network/NetworkResourceTreeTO.h>
 
 #include <Persister/Interface/Definitions.h>
 #include <Persister/Interface/DownloadCache.h>

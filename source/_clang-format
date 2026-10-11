@@ -104,15 +104,15 @@ IncludeCategories:
     Priority: 107
 
   # Base module includes
-  - Regex: '^<Base/Interface/[^/]+>$'
+  - Regex: '^<Base/[^/]+>$'
     Priority: 200
 
   # Network module includes
-  - Regex: '^<Network/Interface/[^/]+>$'
+  - Regex: '^<Network/[^/]+>$'
     Priority: 201
 
   # Network tests includes
-  - Regex: '^<Network/Interface/Tests/.*>$'
+  - Regex: '^<Network/Tests/.*>$'
     Priority: 202
 
   # Shader module includes
@@ -120,11 +120,11 @@ IncludeCategories:
     Priority: 203
 
   # Data module includes
-  - Regex: '^<Data/Interface/[^/]+>$'
+  - Regex: '^<Data/[^/]+>$'
     Priority: 204
 
   # Data tests includes
-  - Regex: '^<Data/Interface/Tests/.*>$'
+  - Regex: '^<Data/Tests/.*>$'
     Priority: 205
 
   # Engine interface includes

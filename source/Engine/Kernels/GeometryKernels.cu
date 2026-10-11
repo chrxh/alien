@@ -1,6 +1,6 @@
 ﻿#include "GeometryKernels.cuh"
 
-#include <Data/Interface/ObjectColoring.h>
+#include <Data/ObjectColoring.h>
 
 #include "ParameterCalculator.cuh"
 

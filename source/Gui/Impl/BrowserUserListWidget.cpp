@@ -6,9 +6,9 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include "AlienGui.h"
 #include "BrowserData.h"

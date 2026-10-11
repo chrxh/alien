@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/PreviewDesc.h>
+#include <Data/PreviewDesc.h>
 
 #include <Rendering/Interface/PictureData.h>
 

@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 struct DownloadNetworkResourceResultData
 {

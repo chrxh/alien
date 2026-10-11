@@ -6,7 +6,7 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 #include "Definitions.h"
 #include "PictureData.h"

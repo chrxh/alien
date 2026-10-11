@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <Data/Interface/DescEditService.h>
-#include <Data/Interface/Descs.h>
+#include <Data/DescEditService.h>
+#include <Data/Descs.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Network/Interface/NetworkService.h>
+#include <Network/NetworkService.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

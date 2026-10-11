@@ -4,10 +4,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/ExtinctLineageAccumulator.h>
-#include <Data/Interface/StatisticsHistory.h>
+#include <Data/ExtinctLineageAccumulator.h>
+#include <Data/StatisticsHistory.h>
 
 #include <Engine/Interface/StatisticsEntry.h>
 

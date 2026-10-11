@@ -4,10 +4,10 @@
 #include <variant>
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/Descs.h>
+#include <Data/GenomeDesc.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include <Base/Interface/Definitions.h>
+#include <Base/Definitions.h>
 
 DataPointCollection StatisticsConverterService::convert(StatisticsEntry const& statisticsEntry, uint64_t timestep)
 {

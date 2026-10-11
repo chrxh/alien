@@ -7,12 +7,12 @@
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/Math.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/Math.h>
+#include <Base/StringHelper.h>
 
-#include <Base/Interface/NumberGenerator.h>
+#include <Base/NumberGenerator.h>
 
-#include <Data/Interface/CellTypeConstants.h>
+#include <Data/CellTypeConstants.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

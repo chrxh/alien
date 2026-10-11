@@ -1,8 +1,8 @@
 #include "NewSimulationService.h"
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>

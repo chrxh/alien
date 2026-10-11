@@ -8,16 +8,16 @@
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 
-#include <Base/Interface/AlienExceptions.h>
-#include <Base/Interface/KernelProfiler.h>
-#include <Base/Interface/LoggingService.h>
-#include <Base/Interface/Macros.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/AlienExceptions.h>
+#include <Base/KernelProfiler.h>
+#include <Base/LoggingService.h>
+#include <Base/Macros.h>
+#include <Base/StringHelper.h>
 
-#include <Base/Interface/Ids.h>
+#include <Base/Ids.h>
 
-#include <Data/Interface/SimulationParameters.h>
-#include <Data/Interface/SpaceCalculator.h>
+#include <Data/SimulationParameters.h>
+#include <Data/SpaceCalculator.h>
 
 #include <Engine/Interface/InspectedEntityIds.h>
 #include <Engine/Interface/KernelLaunchSettings.h>

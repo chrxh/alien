@@ -4,10 +4,10 @@
 #include <deque>
 #include <optional>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Data/Interface/Descs.h>
-#include <Data/Interface/SimulationParameters.h>
+#include <Data/Descs.h>
+#include <Data/SimulationParameters.h>
 
 class TemporalControlService
 {

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/SavepointTable.h>

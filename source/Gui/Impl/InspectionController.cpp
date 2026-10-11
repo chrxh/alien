@@ -3,10 +3,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <Base/Interface/Math.h>
+#include <Base/Math.h>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/DescEditService.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/DescEditService.h>
 
 #include <Engine/Interface/InspectedEntityIds.h>
 #include <Engine/Interface/SimulationFacade.h>

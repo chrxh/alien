@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/StringHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 

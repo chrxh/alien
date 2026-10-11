@@ -2,8 +2,8 @@
 
 #include <atomic>
 
-#include <Data/Interface/CellTypeConstants.h>
-#include <Data/Interface/Colors.h>
+#include <Data/CellTypeConstants.h>
+#include <Data/Colors.h>
 
 #include <Engine/Interface/ArraySizesForGpuEntities.h>
 #include <Engine/Interface/KernelLaunchSettings.h>

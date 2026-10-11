@@ -4,7 +4,7 @@
 
 #include <cuda_fp16.h>
 
-#include <Data/Interface/EngineConstants.h>
+#include <Data/EngineConstants.h>
 
 #include <Engine/Interface/KernelLaunchSettings.h>
 

@@ -10,10 +10,10 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/GlobalSettings.h>
-#include <Base/Interface/MarkdownParser.h>
-#include <Base/Interface/Resources.h>
-#include <Base/Interface/WebLinkHelper.h>
+#include <Base/GlobalSettings.h>
+#include <Base/MarkdownParser.h>
+#include <Base/Resources.h>
+#include <Base/WebLinkHelper.h>
 
 #include "AlienGui.h"
 #include "StyleService.h"

@@ -6,10 +6,10 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Interface/StringHelper.h>
-#include <Base/Interface/VersionParserService.h>
+#include <Base/StringHelper.h>
+#include <Base/VersionParserService.h>
 
-#include <Network/Interface/NetworkResourceService.h>
+#include <Network/NetworkResourceService.h>
 
 #include "AlienGui.h"
 #include "BrowserData.h"

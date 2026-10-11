@@ -7,9 +7,9 @@
 
 #include <imgui.h>
 
-#include <Base/Interface/StringHelper.h>
+#include <Base/StringHelper.h>
 
-#include <Data/Interface/GenomeDesc.h>
+#include <Data/GenomeDesc.h>
 
 #include "AlienGui.h"
 #include "EntityAttributeHelp.h"

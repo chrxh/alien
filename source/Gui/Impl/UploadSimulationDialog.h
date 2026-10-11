@@ -3,9 +3,9 @@
 #include <optional>
 #include <string>
 
-#include <Base/Interface/Singleton.h>
+#include <Base/Singleton.h>
 
-#include <Network/Interface/Definitions.h>
+#include <Network/Definitions.h>
 
 #include <Engine/Interface/Definitions.h>
 
