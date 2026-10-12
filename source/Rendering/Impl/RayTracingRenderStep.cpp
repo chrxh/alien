@@ -55,6 +55,9 @@ namespace
     auto constexpr GasLightClusterStride = 6;
     auto constexpr GasIrradianceImageSize = MaxGasNodes;
 
+    // Factor of the cell light in the gas at the highest fluid illumination
+    auto constexpr MaxFluidIllumination = 4.0f;
+
     auto constexpr SphereSize = VkDeviceSize(64);
     auto constexpr AabbBufferUsage =
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
@@ -693,7 +696,7 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
              _gasGrid.irradianceNodeDistance,
              _gasGrid.lightFalloffDistance},
         .gasLightGrid = {_gasGrid.numLightClusters.x, _gasGrid.numLightClusters.y, _gasGrid.irradianceSize.x, _gasGrid.irradianceSize.y},
-        .gasLighting = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, parameters.fluidIllumination.value, 0.0f},
+        .gasLighting = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
     };
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 }

@@ -36,7 +36,7 @@ struct SimulationParameters
     BaseParameter<ColorVector<CellColoring>> objectColoring = {ColorVector<CellColoring>::uniform(CellColoring_Customization)};
     BaseParameter<CellType> highlightedCellType = {CellType_Base};
     BaseParameter<float> glow = {0.3f};
-    BaseParameter<float> fluidIllumination = {1.0f};
+    BaseParameter<float> fluidIllumination = {0.25f};
     BaseParameter<bool> borderlessRendering = {false};
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};

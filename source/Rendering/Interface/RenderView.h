@@ -16,9 +16,6 @@ struct RenderView
     RealRect visibleWorldRect;
     bool cellDetailOverlay = false;
 
-    // Only takes effect if the GPU supports hardware ray tracing
-    bool rayTracing = false;
-
     // Screen pixels per world unit
     float getScreenZoomFactor() const { return zoomFactor / renderScale; }
 };

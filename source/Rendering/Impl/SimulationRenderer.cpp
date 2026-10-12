@@ -31,7 +31,7 @@ void SimulationRenderer::setup(ImFont* labelFont)
 {
     _geometryBuffers = _VulkanGeometryBuffers::create();
     createRasterGraph(labelFont);
-    if (isRayTracingSupported()) {
+    if (VulkanContext::get().isRayTracingSupported()) {
         createRayTracingGraph(labelFont);
     }
 }
@@ -42,11 +42,6 @@ void SimulationRenderer::shutdown()
     _rayTracingGraph.reset();
     _rasterGraph.reset();
     _geometryBuffers.reset();
-}
-
-bool SimulationRenderer::isRayTracingSupported() const
-{
-    return VulkanContext::get().isRayTracingSupported();
 }
 
 void SimulationRenderer::draw(RenderView const& view)
@@ -142,20 +137,28 @@ void SimulationRenderer::updateGeometry(RealRect const& visibleWorldRect)
 
 RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, bool forPicture)
 {
-    if (!view.rayTracing) {
-        _rayTracingFailed = false;
+    if (!_rayTracingGraph) {
         return _rasterGraph;
     }
-    if (!_rayTracingGraph || (_rayTracingFailed && !forPicture)) {
+    auto numObjects = _geometryBuffers->getNumObjects();
+    RayTracingDemand demand{
+        .viewSize = view.viewSize,
+        .numTissueObjects = _RayTracingRenderStep::getTissueVisibility(view) > 0.0f ? numObjects.objects : 0,
+    };
+    if (!forPicture && _failedRayTracingDemand && _failedRayTracingDemand->viewSize == demand.viewSize
+        && demand.numTissueObjects * 3 >= _failedRayTracingDemand->numTissueObjects * 2) {
         return _rasterGraph;
     }
     try {
-        _rayTracingStep->prepareResources(view, _geometryBuffers->getNumObjects());
+        _rayTracingStep->prepareResources(view, numObjects);
+        if (!forPicture) {
+            _failedRayTracingDemand.reset();
+        }
         return _rayTracingGraph;
     } catch (std::exception const& exception) {
         log(Priority::Important, std::string("ray tracing is not possible, the simulation is rasterized instead: ") + exception.what());
         if (!forPicture) {
-            _rayTracingFailed = true;
+            _failedRayTracingDemand = demand;
         }
         return _rasterGraph;
     }

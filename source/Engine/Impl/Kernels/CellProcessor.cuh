@@ -26,9 +26,6 @@ public:
 private:
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
-
-    // While an attack is shown, the position of the attacker keeps its offset to the attacked object
-    __inline__ __device__ static void moveAttackerPosition(SimulationData& data, float2& attackerPos, Object* attackedObject);
 };
 
 /************************************************************************/
@@ -267,6 +264,9 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
+    // While an attack is shown, the position of the attacker moves with the attacked object, so that it keeps its offset
+    auto updateInterval = cudaSimulationParameters.timestepSize.value * TIMESTEPS_PER_CELL_FUNCTION;
+
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type == ObjectType_Cell) {
@@ -274,7 +274,8 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
             if (cell.eventCounter > 0) {
                 --cell.eventCounter;
                 if (cell.event == CellEvent_Attacked) {
-                    moveAttackerPosition(data, cell.eventPos, object);
+                    cell.eventPos += object->vel * updateInterval;
+                    data.world.correctPosition(cell.eventPos);
                 }
             }
         } else if (object->type == ObjectType_FreeCell) {
@@ -282,17 +283,12 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
             if (freeCell.eventCounter > 0) {
                 --freeCell.eventCounter;
                 if (freeCell.event == CellEvent_Attacked) {
-                    moveAttackerPosition(data, freeCell.eventPos, object);
+                    freeCell.eventPos += object->vel * updateInterval;
+                    data.world.correctPosition(freeCell.eventPos);
                 }
             }
         }
     }
-}
-
-__inline__ __device__ void CellProcessor::moveAttackerPosition(SimulationData& data, float2& attackerPos, Object* attackedObject)
-{
-    attackerPos += attackedObject->vel * (cudaSimulationParameters.timestepSize.value * TIMESTEPS_PER_CELL_FUNCTION);
-    data.world.correctPosition(attackerPos);
 }
 
 __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data)
