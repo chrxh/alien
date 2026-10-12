@@ -132,7 +132,7 @@ namespace
         int32_t gasSize[4];
         float gasLight[4];
         int32_t gasLightGrid[4];
-        float gasLightOrigin[4];
+        float gasLighting[4];
     };
 }
 
@@ -689,7 +689,7 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
              _gasGrid.irradianceNodeDistance,
              _gasGrid.lightFalloffDistance},
         .gasLightGrid = {_gasGrid.numLightClusters.x, _gasGrid.numLightClusters.y, _gasGrid.irradianceSize.x, _gasGrid.irradianceSize.y},
-        .gasLightOrigin = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, 0.0f, 0.0f},
+        .gasLighting = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, parameters.fluidIllumination.value, 0.0f},
     };
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 }

@@ -49,7 +49,7 @@ void main()
 
     // The light of a cluster comes from the cells within one cluster around it. The bounds of the loops stay inside the grid, because loops
     // that skipped the clusters outside returned no light at all on an NVIDIA GPU with driver 610.88 once the range grew.
-    ivec2 center = ivec2(floor((position - frame.gasLightOrigin.xy) / clusterSize));
+    ivec2 center = ivec2(floor((position - frame.gasLighting.xy) / clusterSize));
     int clusterRange = int(ceil(range / clusterSize)) + 1;
     ivec2 lowerCluster = max(center - clusterRange, ivec2(0));
     ivec2 upperCluster = min(center + clusterRange, frame.gasLightGrid.xy - 1);
@@ -64,7 +64,7 @@ void main()
                 continue;
             }
             vec2 lightOffset = vec2(float(gasLightClusters[entry]), float(gasLightClusters[entry + 1u])) / lightLuminance - GasLightOffsetShift;
-            vec2 lightPosition = frame.gasLightOrigin.xy + (vec2(cluster) + lightOffset) * clusterSize;
+            vec2 lightPosition = frame.gasLighting.xy + (vec2(cluster) + lightOffset) * clusterSize;
             vec2 toLight = lightPosition - position;
             float distance = length(toLight);
             if (distance >= range) {

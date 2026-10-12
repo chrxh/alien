@@ -63,7 +63,7 @@ void main()
         return;
     }
 
-    vec2 clusterPosition = (position - frame.gasLightOrigin.xy) / frame.gasLight.x;
+    vec2 clusterPosition = (position - frame.gasLighting.xy) / frame.gasLight.x;
     vec2 clusterCoord = clusterPosition - 0.5;
     ivec2 lowerCluster = ivec2(floor(clusterCoord));
     vec2 clusterFraction = clusterCoord - vec2(lowerCluster);

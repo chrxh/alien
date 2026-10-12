@@ -99,7 +99,7 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid,
                       // w: falloff distance of the lights
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
-    vec4 gasLightOrigin;  // xy: world position of the first light cluster
+    vec4 gasLighting;  // xy: world position of the first light cluster, z: strength of the light of the cells in the gas
 } frame;
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT scene;
