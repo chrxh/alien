@@ -359,7 +359,10 @@ const uint GasLightEntry_Cells = 0u;
 const uint GasLightEntry_Energy = 6u;
 const float GasLightOffsetShift = 1.0;
 const int GasIrradianceImageSize = 512;
-const float EnergyLightFixedPointScale = 64.0;
+
+// The energy light needs a fine scale, since its sums of offsets per object are small and rounding them would let the light jitter, which
+// changes the shadows of the objects close to it from frame to frame
+const float EnergyLightFixedPointScale = 1024.0;
 
 // Clouds: color sum and number of particles. Cells: number of cells in x.
 const int GasLayer_Clouds = 0;
@@ -450,9 +453,15 @@ vec3 sampleGasIrradiance(vec2 world)
 
 // Regions with a high energy density radiate. The energy of the objects is collected bilinearly in the energy grid, which is aligned to
 // the world and has a fixed cell size as long as it does not get too large, so that the regions radiate the same at all zoom levels. The
-// rendered colors of the objects scale with their energy. Solids belong to the scenery and do not count.
+// rendered colors of the objects scale with their energy. Solids belong to the scenery and do not count. Each cell holds the energy and its
+// first moments, i.e. the energy times the offset of the objects from the center of the cell in cells, shifted by one to stay positive.
+// The stride must match EnergyCellStride in Rendering/Impl/RayTracingResources.cpp.
 const float EnergyFixedPointScale = 4.0;
 const float EnergyPerColorBrightness = 320.0;
+const uint EnergyCellStride = 3u;
+
+// The window of the energy center has full weight up to one cell before this distance in cells
+const float EnergyCenterWindow = 4.0;
 
 // The strength of the energy light is limited: it approaches its maximum where the light is strong, while weak light stays visible. The
 // shadows keep their share of the light, so that the columns of light remain at every strength. The irradiance of the energy light holds
@@ -512,10 +521,41 @@ float getEnergyDensity(vec2 world)
         ivec2 cell = lowerCell + offset;
         if (isInEnergyGrid(cell)) {
             vec2 axisWeights = mix(1.0 - fraction, fraction, vec2(offset));
-            result += axisWeights.x * axisWeights.y * float(energyGrid[getEnergyCellIndex(cell)]);
+            result += axisWeights.x * axisWeights.y * float(energyGrid[getEnergyCellIndex(cell) * EnergyCellStride]);
         }
     }
     return result / (EnergyFixedPointScale * frame.energyGrid.z * frame.energyGrid.z);
+}
+
+// Center of the energy of the objects around a position. The moments of a region whose objects all lie within the full weight of the
+// window give its exact center, independent of how the region lies in the grid. The window fades out over one cell, so that the center
+// changes continuously with the position.
+vec2 getEnergyCenter(vec2 world)
+{
+    vec2 coord = getEnergyCellCoord(world);
+    ivec2 centerCell = ivec2(round(coord));
+    int radius = int(EnergyCenterWindow);
+    float energySum = 0.0;
+    vec2 momentSum = vec2(0.0);
+    for (int y = -radius; y <= radius; ++y) {
+        for (int x = -radius; x <= radius; ++x) {
+            ivec2 cell = centerCell + ivec2(x, y);
+            vec2 axisWeights = clamp(EnergyCenterWindow - abs(vec2(cell) - coord), 0.0, 1.0);
+            float weight = axisWeights.x * axisWeights.y;
+            if (weight <= 0.0 || !isInEnergyGrid(cell)) {
+                continue;
+            }
+            uint entry = getEnergyCellIndex(cell) * EnergyCellStride;
+            float energy = float(energyGrid[entry]);
+            vec2 moment = vec2(float(energyGrid[entry + 1u]), float(energyGrid[entry + 2u])) - energy;
+            energySum += weight * energy;
+            momentSum += weight * (energy * vec2(cell) + moment);
+        }
+    }
+    if (energySum <= 0.0) {
+        return world;
+    }
+    return frame.energyGrid.xy + (momentSum / energySum + 0.5) * frame.energyGrid.z;
 }
 
 // The energy particles and the cores of glowing fluids keep the look of the rasterized view

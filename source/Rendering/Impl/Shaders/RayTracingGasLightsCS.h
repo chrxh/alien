@@ -71,12 +71,14 @@ void main()
     vec2 position = vec2(object.pos[0], object.pos[1]);
     vec3 color = vec3(object.color[0], object.color[1], object.color[2]);
     // The radiation per area grows with the logarithm of the energy density above the threshold, so that it sets in softly and the
-    // regions with very much energy do not outshine everything. Each object contributes its share of the energy.
+    // regions with very much energy do not outshine everything. Each object contributes its share of the energy. The light shines from the
+    // center of the energy around the object, which moves with a compact region of objects. The shadows that the objects of the region
+    // cast on their own light therefore move with the region instead of changing with every move of the objects.
     if (isEnergyLightActive()) {
         float density = getEnergyDensity(position);
         if (density > frame.energyLight.y) {
             float emission = frame.energyLight.x * log(density / frame.energyLight.y) * getObjectEnergy(object) / density * getVisibility(position);
-            addLight(position, getHue(color) * emission, GasLightEntry_Energy, EnergyLightFixedPointScale);
+            addLight(getEnergyCenter(position), getHue(color) * emission, GasLightEntry_Energy, EnergyLightFixedPointScale);
         }
     }
 

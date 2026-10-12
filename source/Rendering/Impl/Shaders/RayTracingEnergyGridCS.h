@@ -28,7 +28,12 @@ void main()
         ivec2 cell = lowerCell + offset;
         if (isInEnergyGrid(cell)) {
             vec2 axisWeights = mix(1.0 - fraction, fraction, vec2(offset));
-            atomicAdd(energyGrid[getEnergyCellIndex(cell)], uint(axisWeights.x * axisWeights.y * energy * EnergyFixedPointScale + 0.5));
+            float cellEnergy = axisWeights.x * axisWeights.y * energy * EnergyFixedPointScale;
+            vec2 shiftedOffset = coord - vec2(cell) + 1.0;
+            uint entry = getEnergyCellIndex(cell) * EnergyCellStride;
+            atomicAdd(energyGrid[entry], uint(cellEnergy + 0.5));
+            atomicAdd(energyGrid[entry + 1u], uint(cellEnergy * shiftedOffset.x + 0.5));
+            atomicAdd(energyGrid[entry + 2u], uint(cellEnergy * shiftedOffset.y + 0.5));
         }
     }
 }
