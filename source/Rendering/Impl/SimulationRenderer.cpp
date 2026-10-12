@@ -141,16 +141,17 @@ RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, bool 
         return _rasterGraph;
     }
     auto numObjects = _geometryBuffers->getNumObjects();
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
     RayTracingDemand demand{
         .viewSize = view.viewSize,
-        .numTissueObjects = _RayTracingRenderStep::getTissueVisibility(view) > 0.0f ? numObjects.objects : 0,
+        .numSceneObjects = _RayTracingRenderStep::isSceneNeeded(view, parameters) ? numObjects.objects : 0,
     };
     if (!forPicture && _failedRayTracingDemand && _failedRayTracingDemand->viewSize == demand.viewSize
-        && demand.numTissueObjects * 3 >= _failedRayTracingDemand->numTissueObjects * 2) {
+        && demand.numSceneObjects * 3 >= _failedRayTracingDemand->numSceneObjects * 2) {
         return _rasterGraph;
     }
     try {
-        _rayTracingStep->prepareResources(view, numObjects);
+        _rayTracingStep->prepareResources(view, numObjects, parameters);
         if (!forPicture) {
             _failedRayTracingDemand.reset();
         }

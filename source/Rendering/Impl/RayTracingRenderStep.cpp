@@ -5,6 +5,8 @@
 #include <cstring>
 #include <ranges>
 
+#include <Engine/Interface/SimulationFacade.h>
+
 #include <Rendering/Impl/Shaders/ShaderSources.h>
 
 #include "VulkanContext.h"
@@ -52,11 +54,19 @@ namespace
     auto constexpr LightRangeInFalloffDistances = 4.0f;
     auto constexpr LightClusterSizeInFalloffDistances = 0.8f;
     auto constexpr MaxLightClusters = 256;
-    auto constexpr GasLightClusterStride = 6;
+    auto constexpr GasLightClusterStride = 12;
     auto constexpr GasIrradianceImageSize = MaxGasNodes;
 
     // Factor of the cell light in the gas at the highest fluid illumination
     auto constexpr MaxFluidIllumination = 4.0f;
+
+    // Regions with a high energy density radiate, see the energy light in Shaders/RayTracingCommonCS.h. The energy grid keeps its cell size
+    // while it covers the gas grid with at most the maximum number of cells per dimension. The energy light reaches farther than the light of
+    // the cells.
+    auto constexpr EnergyCellSize = 4.0f;
+    auto constexpr MaxEnergyCells = 2048;
+    auto constexpr EnergyLightRangeInFalloffDistances = 8.0f;
+    auto constexpr EnergyRadiation = 0.4f;
 
     auto constexpr SphereSize = VkDeviceSize(64);
     auto constexpr AabbBufferUsage =
@@ -94,6 +104,7 @@ namespace
         Binding_GasLightClusters,
         Binding_GasIrradiance,
         Binding_GasIrradianceSampler,
+        Binding_EnergyCells,
         Binding_Count
     };
 
@@ -136,7 +147,15 @@ namespace
         float gasLight[4];
         int32_t gasLightGrid[4];
         float gasLighting[4];
+        float energyGrid[4];
+        int32_t energyGridSize[4];
+        float energyLight[4];
     };
+
+    bool isEnergyLightActive(SimulationParameters const& parameters)
+    {
+        return parameters.energyLight.value > 0.0f;
+    }
 }
 
 RayTracingRenderStep _RayTracingRenderStep::create(StepParameters const& parameters)
@@ -152,7 +171,8 @@ _RayTracingRenderStep::~_RayTracingRenderStep()
     }
     destroySceneResources(_scene, false);
     destroyViewResources(_view, false);
-    for (auto buffer : {&_cellCounts, &_cellOffsets, &_cellCursors, &_allocation, &_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+    for (auto buffer :
+         {&_cellCounts, &_cellOffsets, &_cellCursors, &_allocation, &_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters, &_energyCells}) {
         context.destroyBufferLater(*buffer);
     }
     context.destroyImageLater(_gasImage);
@@ -163,17 +183,17 @@ _RayTracingRenderStep::~_RayTracingRenderStep()
     });
 }
 
-void _RayTracingRenderStep::prepareResources(RenderView const& view, NumRenderObjects const& numObjects)
+void _RayTracingRenderStep::prepareResources(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters)
 {
     if (!_preparePipeline) {
         createPipelines();
     }
 
-    // The descriptor set always refers to the scene, which only grows while the tissue is visible
-    auto tissueVisible = getTissueVisibility(view) > 0.0f;
-    auto numSpheres = tissueVisible ? numObjects.objects : 0;
-    auto numCapsules = tissueVisible ? numObjects.lineIndices / 2 : 0;
-    auto numTriangles = tissueVisible ? numObjects.triangleIndices / 3 : 0;
+    // The descriptor set always refers to the scene, which only grows while it is needed
+    auto sceneNeeded = isSceneNeeded(view, parameters);
+    auto numSpheres = sceneNeeded ? numObjects.objects : 0;
+    auto numCapsules = sceneNeeded ? numObjects.lineIndices / 2 : 0;
+    auto numTriangles = sceneNeeded ? numObjects.triangleIndices / 3 : 0;
     if (_scene.objectCapacity == 0 || numSpheres > _scene.objectCapacity || numCapsules > _scene.capsuleCapacity || numTriangles > _scene.triangleCapacity) {
         auto grow = [](uint64_t capacity, uint64_t required) { return std::max({MinCapacity, capacity, required * 3 / 2}); };
         auto scene = createSceneResources(
@@ -184,6 +204,7 @@ void _RayTracingRenderStep::prepareResources(RenderView const& view, NumRenderOb
 
     updateLightGrid(view.visibleWorldRect);
     updateGasGrid(view);
+    updateEnergyGrid();
 
     if (_view.size != view.viewSize) {
         destroyViewResources(_view, false);
@@ -215,8 +236,9 @@ void _RayTracingRenderStep::execute(ExecutionParameters parameters)
 {
     auto const& geometryBuffers = parameters._geometryBuffers;
     auto const& view = parameters._view;
+    auto const& simulationParameters = *parameters._simulationParameters;
     auto numObjects = geometryBuffers->getNumObjects();
-    prepareResources(view, numObjects);
+    prepareResources(view, numObjects, simulationParameters);
 
     auto commandBuffer = parameters._renderInfo.commandBuffer;
     auto const& textures = parameters._textures;
@@ -226,14 +248,14 @@ void _RayTracingRenderStep::execute(ExecutionParameters parameters)
     if (!_stillPicture || !isSameViewAsPrevious(view)) {
         _numAveragedFrames = 0;
     }
-    updateFrameConstants(view, numObjects, *parameters._simulationParameters);
+    updateFrameConstants(view, numObjects, simulationParameters, parameters._simulationFacade->getWorldSize());
     auto descriptorSet = writeDescriptorSet(geometryBuffers, textures);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
-    if (getTissueVisibility(view) > 0.0f) {
+    if (isSceneNeeded(view, simulationParameters)) {
         buildScene(commandBuffer, numObjects);
     }
-    buildGas(commandBuffer, numObjects);
+    buildGas(commandBuffer, numObjects, isEnergyLightActive(simulationParameters));
     shade(commandBuffer);
     present(parameters);
 
@@ -509,6 +531,7 @@ void _RayTracingRenderStep::createPipelines()
     _allocatePipeline = createPipeline(Shaders::RayTracingAllocateCS, {256, 1});
     _scatterPipeline = createPipeline(Shaders::RayTracingScatterCS, {64, 1});
     _gasSplatPipeline = createPipeline(Shaders::RayTracingGasSplatCS, {64, 1});
+    _energyGridPipeline = createPipeline(Shaders::RayTracingEnergyGridCS, {64, 1});
     _gasLightsPipeline = createPipeline(Shaders::RayTracingGasLightsCS, {64, 1});
     _gasIrradiancePipeline = createPipeline(Shaders::RayTracingGasIrradianceCS, {8, 8});
     _gasBlurHorizontalPipeline = createPipeline("const ivec2 BlurDirection = ivec2(1, 0);\n" + std::string(Shaders::RayTracingGasBlurCS), {8, 8});
@@ -530,6 +553,7 @@ void _RayTracingRenderStep::createGasResources()
     context.destroyBufferLater(_gasAccumulation);
     context.destroyBufferLater(_gasIntermediate);
     context.destroyBufferLater(_gasLightClusters);
+    context.destroyBufferLater(_energyCells);
     context.destroyImageLater(_gasImage);
     context.destroyImageLater(_gasIrradiance);
     auto numNodes = static_cast<VkDeviceSize>(MaxGasNodes) * MaxGasNodes;
@@ -538,8 +562,10 @@ void _RayTracingRenderStep::createGasResources()
     _gasIntermediate = context.createBuffer(numNodes * GasLayers * 4 * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
     auto numClusters = static_cast<VkDeviceSize>(MaxLightClusters) * MaxLightClusters;
     _gasLightClusters = context.createBuffer(numClusters * GasLightClusterStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
+    auto numEnergyCells = static_cast<VkDeviceSize>(MaxEnergyCells) * MaxEnergyCells;
+    _energyCells = context.createBuffer(numEnergyCells * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
     _gasImage = context.createImage({GasLayers * MaxGasNodes, MaxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
-    _gasIrradiance = context.createImage({GasIrradianceImageSize, GasIrradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _gasIrradiance = context.createImage({2 * GasIrradianceImageSize, GasIrradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
 }
 
 // Extreme zoom levels enlarge the cells and thus the range of the lights. A margin of one cell covers the lights next to the view.
@@ -633,6 +659,26 @@ void _RayTracingRenderStep::updateGasGrid(RenderView const& view)
     };
 }
 
+// The energy grid covers the gas grid and is aligned to the world
+void _RayTracingRenderStep::updateEnergyGrid()
+{
+    auto const& gasGrid = _gasGrid;
+    auto cellSize = EnergyCellSize;
+    while (toFloat(std::max(gasGrid.size.x, gasGrid.size.y)) * gasGrid.nodeDistance / cellSize + 2.0f > toFloat(MaxEnergyCells)) {
+        cellSize *= 2.0f;
+    }
+    RealVector2D origin{std::floor(gasGrid.origin.x / cellSize) * cellSize, std::floor(gasGrid.origin.y / cellSize) * cellSize};
+    auto getNumCells = [&](float gasOrigin, int numNodes, float energyOrigin) {
+        auto gasEnd = gasOrigin + toFloat(numNodes - 1) * gasGrid.nodeDistance;
+        return std::min(toInt(std::ceil((gasEnd - energyOrigin) / cellSize)) + 1, MaxEnergyCells);
+    };
+    _energyGrid = EnergyGrid{
+        .origin = origin,
+        .cellSize = cellSize,
+        .size = {getNumCells(gasGrid.origin.x, gasGrid.size.x, origin.x), getNumCells(gasGrid.origin.y, gasGrid.size.y, origin.y)},
+    };
+}
+
 namespace
 {
     float getHaltonValue(uint32_t index, uint32_t base)
@@ -664,7 +710,16 @@ float _RayTracingRenderStep::getBackgroundScale(SimulationParameters const& para
     return 1.0f / std::max(1.5f - parameters.glow.value, 0.1f);
 }
 
-void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters)
+bool _RayTracingRenderStep::isSceneNeeded(RenderView const& view, SimulationParameters const& parameters)
+{
+    return getTissueVisibility(view) > 0.0f || isEnergyLightActive(parameters);
+}
+
+void _RayTracingRenderStep::updateFrameConstants(
+    RenderView const& view,
+    NumRenderObjects const& numObjects,
+    SimulationParameters const& parameters,
+    IntVector2D const& worldSize)
 {
     auto const& topLeft = view.visibleWorldRect.topLeft;
     RealVector2D jitter;
@@ -697,6 +752,13 @@ void _RayTracingRenderStep::updateFrameConstants(RenderView const& view, NumRend
              _gasGrid.lightFalloffDistance},
         .gasLightGrid = {_gasGrid.numLightClusters.x, _gasGrid.numLightClusters.y, _gasGrid.irradianceSize.x, _gasGrid.irradianceSize.y},
         .gasLighting = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
+        .energyGrid = {_energyGrid.origin.x, _energyGrid.origin.y, _energyGrid.cellSize, EnergyLightRangeInFalloffDistances * _gasGrid.lightFalloffDistance},
+        .energyGridSize = {_energyGrid.size.x, _energyGrid.size.y, worldSize.x, worldSize.y},
+        .energyLight =
+            {isEnergyLightActive(parameters) ? EnergyRadiation : 0.0f,
+             parameters.energyLightThreshold.value,
+             parameters.borderlessRendering.value ? 1.0f : 0.0f,
+             parameters.energyLight.value},
     };
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 }
@@ -735,6 +797,7 @@ VkDescriptorSet _RayTracingRenderStep::writeDescriptorSet(VulkanGeometryBuffers 
         .storageBuffer(Binding_GasLightClusters, _gasLightClusters.buffer)
         .storageImage(Binding_GasIrradiance, _gasIrradiance.view)
         .sampledImage(Binding_GasIrradianceSampler, _gasIrradiance.view, General)
+        .storageBuffer(Binding_EnergyCells, _energyCells.buffer)
         .write(descriptorSet);
     return descriptorSet;
 }
@@ -831,12 +894,16 @@ void _RayTracingRenderStep::buildScene(VkCommandBuffer commandBuffer, NumRenderO
         VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR);
 }
 
-void _RayTracingRenderStep::buildGas(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects)
+void _RayTracingRenderStep::buildGas(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects, bool energyLightActive)
 {
     auto numNodes = static_cast<VkDeviceSize>(_gasGrid.size.x) * _gasGrid.size.y;
     auto numClusters = static_cast<VkDeviceSize>(_gasGrid.numLightClusters.x) * _gasGrid.numLightClusters.y;
     vkCmdFillBuffer(commandBuffer, _gasAccumulation.buffer, 0, numNodes * GasAccumulationStride * sizeof(uint32_t), 0);
     vkCmdFillBuffer(commandBuffer, _gasLightClusters.buffer, 0, numClusters * GasLightClusterStride * sizeof(uint32_t), 0);
+    if (energyLightActive) {
+        auto numEnergyCells = static_cast<VkDeviceSize>(_energyGrid.size.x) * _energyGrid.size.y;
+        vkCmdFillBuffer(commandBuffer, _energyCells.buffer, 0, numEnergyCells * sizeof(uint32_t), 0);
+    }
     recordMemoryBarrier(
         commandBuffer,
         VK_PIPELINE_STAGE_2_CLEAR_BIT,
@@ -844,6 +911,9 @@ void _RayTracingRenderStep::buildGas(VkCommandBuffer commandBuffer, NumRenderObj
         VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
         VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT);
     _gasSplatPipeline->dispatch(commandBuffer, {toInt(numObjects.fluidParticles), 1});
+    if (energyLightActive) {
+        _energyGridPipeline->dispatch(commandBuffer, {toInt(numObjects.objects), 1});
+    }
     recordComputeBarrier(commandBuffer);
     _gasLightsPipeline->dispatch(commandBuffer, {toInt(numObjects.objects), 1});
     recordComputeBarrier(commandBuffer);

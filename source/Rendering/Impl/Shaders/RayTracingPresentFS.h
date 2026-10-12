@@ -4,7 +4,8 @@
 
 namespace Shaders
 {
-    // Copies the ray traced image into the render target, whose rows run from the bottom to the top
+    // Copies the ray traced image into the render target, whose rows run from the bottom to the top. The alpha channel holds the strength
+    // of the energy light for the rasterized objects.
     std::string_view const RayTracingPresentFS = R"(
 #version 450
 in vec2 texCoord;
@@ -14,7 +15,7 @@ uniform sampler2D inputTexture1;
 
 void main()
 {
-    FragColor = vec4(texture(inputTexture1, vec2(texCoord.x, 1.0 - texCoord.y)).rgb, 1.0);
+    FragColor = texture(inputTexture1, vec2(texCoord.x, 1.0 - texCoord.y));
 }
 )";
 }

@@ -8,9 +8,11 @@
 #include "RenderStep.h"
 
 // Renders the creatures with hardware ray tracing as living tissue under a microscope, see Shaders/RayTracingTissueCS.h, and the fluids as
-// gas around it, see Shaders/RayTracingGasShadingCS.h. The inputs are the background and the energy particles, the output is the light in
-// front of the background in high dynamic range, to which the background is added after the tone mapping as in the rasterized view. Each
-// frame is computed completely, only still pictures average several frames for the anti-aliasing.
+// gas around it, see Shaders/RayTracingGasShadingCS.h. Regions with a high energy density radiate light, which forms columns of light and
+// shadow behind the objects on its way, see Shaders/RayTracingGasIrradianceCS.h. The inputs are the background and the energy particles,
+// the output is the light in front of the background in high dynamic range, to which the background is added after the tone mapping as in
+// the rasterized view, and in the alpha channel the strength of the energy light for the rasterized objects. Each frame is computed
+// completely, only still pictures average several frames for the anti-aliasing.
 class _RayTracingRenderStep : public _RenderStep
 {
 public:
@@ -23,9 +25,12 @@ public:
     // The background is scaled by the inverse of the factor with which the bloom weights the scene
     static float getBackgroundScale(SimulationParameters const& parameters);
 
+    // The objects form a scene for the tissue and for the shadows of the energy light
+    static bool isSceneNeeded(RenderView const& view, SimulationParameters const& parameters);
+
     // Allocates the resources for the view and the visible objects. Calling it before the commands are recorded lets a lack of memory
     // surface without leaving a partially recorded frame behind.
-    void prepareResources(RenderView const& view, NumRenderObjects const& numObjects);
+    void prepareResources(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters);
 
     // Successive frames of a still picture are averaged with rays jittered within the pixels
     void setStillPicture(bool value);
@@ -100,15 +105,25 @@ private:
         IntVector2D irradianceSize;
     };
 
+    // Grid in world coordinates whose cells collect the energy of the objects. Its cells have the same size at all zoom levels unless the
+    // grid would get too large, so that the regions with a high energy density stay the same.
+    struct EnergyGrid
+    {
+        RealVector2D origin;
+        float cellSize = 1.0f;
+        IntVector2D size;
+    };
+
     void createPipelines();
     void createGasResources();
     void updateLightGrid(RealRect const& visibleWorldRect);
     void updateGasGrid(RenderView const& view);
+    void updateEnergyGrid();
 
-    void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters);
+    void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters, IntVector2D const& worldSize);
     VkDescriptorSet writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures);
     void buildScene(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects);
-    void buildGas(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects);
+    void buildGas(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects, bool energyLightActive);
     void shade(VkCommandBuffer commandBuffer);
     void present(ExecutionParameters const& parameters);
 
@@ -121,6 +136,7 @@ private:
     RayTracingComputePipeline _allocatePipeline;
     RayTracingComputePipeline _scatterPipeline;
     RayTracingComputePipeline _gasSplatPipeline;
+    RayTracingComputePipeline _energyGridPipeline;
     RayTracingComputePipeline _gasLightsPipeline;
     RayTracingComputePipeline _gasIrradiancePipeline;
     RayTracingComputePipeline _gasBlurHorizontalPipeline;
@@ -146,6 +162,9 @@ private:
     VulkanBuffer _gasLightClusters;
     VulkanImage _gasImage;
     VulkanImage _gasIrradiance;
+
+    EnergyGrid _energyGrid;
+    VulkanBuffer _energyCells;
 
     bool _stillPicture = false;
     bool _previousFrameValid = false;

@@ -37,6 +37,8 @@ struct SimulationParameters
     BaseParameter<CellType> highlightedCellType = {CellType_Base};
     BaseParameter<float> glow = {0.3f};
     BaseParameter<float> fluidIllumination = {0.25f};
+    BaseParameter<float> energyLight = {0.25f};
+    BaseParameter<float> energyLightThreshold = {60.0f};
     BaseParameter<bool> borderlessRendering = {false};
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};

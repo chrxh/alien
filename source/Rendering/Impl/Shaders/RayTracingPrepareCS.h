@@ -9,11 +9,6 @@ namespace Shaders
     std::string_view const RayTracingPrepareCS = R"(
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-const int ObjectType_Solid = 0;
-const int ObjectType_Fluid = 1;
-const int ObjectType_FreeCell = 2;
-const int ObjectType_Cell = 3;
-
 // The highlight intensity reflects the activity of the neuron of a cell, which makes the cell glow and light up its surroundings
 const float ActivityGlow = 1.5;
 
@@ -61,6 +56,17 @@ Aabb createAabb(vec2 lower, vec2 upper, bool enabled)
     return Aabb(enabled ? lower.x : uintBitsToFloat(0x7fc00000u), lower.y, -1.0, upper.x, upper.y, 2.0);
 }
 
+// Without visible tissue, the scene only serves the shadows of the energy light, which need the sizes of the objects close up
+bool isSceneForShadowsOnly()
+{
+    return frame.tissue.w <= 0.0;
+}
+
+float getCellExtent(Sphere sphere)
+{
+    return isSceneForShadowsOnly() ? sphere.centerRadius.w : getMaxCellKernelRadius(sphere);
+}
+
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
@@ -68,7 +74,7 @@ void main()
         Sphere sphere = createSphere(index);
         spheres[index] = sphere;
         vec2 center = sphere.centerRadius.xy;
-        float extent = getMaxCellKernelRadius(sphere);
+        float extent = getCellExtent(sphere);
         bool enabled = sphere.hueMaterial.w != Material_Inactive;
         sphereAabbs[index] = createAabb(center - extent, center + extent, enabled);
         if (enabled && isLight(sphere)) {
@@ -84,7 +90,8 @@ void main()
         getCapsuleSpheres(index, sphereA, sphereB);
         Sphere a = createSphere(sphereA);
         Sphere b = createSphere(sphereB);
-        float extent = max(getStrandKernelRadius(), max(getMaxCellKernelRadius(a), getMaxCellKernelRadius(b)));
+        float strandExtent = isSceneForShadowsOnly() ? StrandHalfWidth : getStrandKernelRadius();
+        float extent = max(strandExtent, max(getCellExtent(a), getCellExtent(b)));
         bool enabled = a.hueMaterial.w != Material_Inactive && b.hueMaterial.w != Material_Inactive;
         capsuleAabbs[index] =
             createAabb(min(a.centerRadius.xy, b.centerRadius.xy) - extent, max(a.centerRadius.xy, b.centerRadius.xy) + extent, enabled);
@@ -97,7 +104,8 @@ void main()
         Sphere a = createSphere(sphereA);
         Sphere b = createSphere(sphereB);
         Sphere c = createSphere(sphereC);
-        float extent = max(getFillFalloff(), max(getMaxCellKernelRadius(a), max(getMaxCellKernelRadius(b), getMaxCellKernelRadius(c))));
+        float fillExtent = isSceneForShadowsOnly() ? 0.0 : getFillFalloff();
+        float extent = max(fillExtent, max(getCellExtent(a), max(getCellExtent(b), getCellExtent(c))));
         bool enabled = a.hueMaterial.w != Material_Inactive && b.hueMaterial.w != Material_Inactive && c.hueMaterial.w != Material_Inactive;
         vec2 lower = min(min(a.centerRadius.xy, b.centerRadius.xy), c.centerRadius.xy);
         vec2 upper = max(max(a.centerRadius.xy, b.centerRadius.xy), c.centerRadius.xy);

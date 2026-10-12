@@ -37,13 +37,13 @@ private:
     void updateGeometry(RealRect const& visibleWorldRect);
 
     // Ray tracing falls back to rasterization if its resources cannot be allocated. Frames only retry once the view size has changed or the
-    // tissue has clearly fewer objects, so that a lack of memory does not stall every frame.
+    // scene has clearly fewer objects, so that a lack of memory does not stall every frame.
     RenderGraph const& selectGraph(RenderView const& view, bool forPicture);
 
     struct RayTracingDemand
     {
         IntVector2D viewSize;
-        uint64_t numTissueObjects = 0;
+        uint64_t numSceneObjects = 0;
     };
 
     VulkanGeometryBuffers _geometryBuffers;
