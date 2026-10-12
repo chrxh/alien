@@ -99,6 +99,11 @@ public:
 
     virtual void execute(ExecutionParameters parameters) = 0;
 
+    // Steps without target compute into resources outside the render graph, which hands their input textures on to the next step. Only such
+    // steps can be inactive, the render graph skips them.
+    virtual bool hasTarget() const { return true; }
+    virtual bool isActive(SimulationParameters const& parameters, RenderView const& view) const { return true; }
+
     // Required for images of the step if the recorded commands are discarded instead of submitted
     virtual void resetImageStates() {}
 

@@ -29,6 +29,8 @@ namespace
     auto constexpr FrameDescriptorPoolSize = 512;
     auto constexpr ImageWriteAccesses = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT
         | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+    auto constexpr BufferWriteAccesses =
+        VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT | VK_ACCESS_2_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
 
 #if defined(_WIN32)
     auto constexpr ExternalMemoryHandleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
@@ -408,7 +410,7 @@ namespace
     }
 }
 
-VulkanImageBarriers& VulkanImageBarriers::add(VulkanImage& image, ImageUsage usage)
+VulkanBarriers& VulkanBarriers::add(VulkanImage& image, ImageUsage usage)
 {
     auto access = getImageAccess(usage);
     auto pendingWrites = image.lastAccesses & ImageWriteAccesses;
@@ -417,7 +419,7 @@ VulkanImageBarriers& VulkanImageBarriers::add(VulkanImage& image, ImageUsage usa
         image.lastAccesses |= access.accesses;
         return *this;
     }
-    _barriers.emplace_back(VkImageMemoryBarrier2{
+    _imageBarriers.emplace_back(VkImageMemoryBarrier2{
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
         .srcStageMask = image.lastStages,
         .srcAccessMask = pendingWrites,
@@ -436,23 +438,78 @@ VulkanImageBarriers& VulkanImageBarriers::add(VulkanImage& image, ImageUsage usa
     return *this;
 }
 
-void VulkanImageBarriers::record(VkCommandBuffer commandBuffer)
+namespace
 {
-    if (_barriers.empty()) {
+    struct BufferAccess
+    {
+        VkPipelineStageFlags2 stages = VK_PIPELINE_STAGE_2_NONE;
+        VkAccessFlags2 accesses = VK_ACCESS_2_NONE;
+    };
+
+    BufferAccess getBufferAccess(BufferUsage usage)
+    {
+        switch (usage) {
+        case BufferUsage::ComputeRead:
+            return {VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT};
+        case BufferUsage::ComputeReadWrite:
+            return {VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT};
+        case BufferUsage::ClearDestination:
+            return {VK_PIPELINE_STAGE_2_CLEAR_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT};
+        case BufferUsage::BuildInput:
+            return {VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR};
+        case BufferUsage::BuildOutput:
+            return {
+                VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR | VK_ACCESS_2_ACCELERATION_STRUCTURE_WRITE_BIT_KHR};
+        case BufferUsage::RayQuery:
+            return {VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR};
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
+}
+
+VulkanBarriers& VulkanBarriers::add(VulkanBuffer& buffer, BufferUsage usage)
+{
+    auto access = getBufferAccess(usage);
+    auto pendingWrites = buffer.lastAccesses & BufferWriteAccesses;
+    auto writes = (access.accesses & BufferWriteAccesses) != 0;
+    if (pendingWrites == 0 && (!writes || buffer.lastStages == VK_PIPELINE_STAGE_2_NONE)) {
+        buffer.lastStages |= access.stages;
+        buffer.lastAccesses |= access.accesses;
+        return *this;
+    }
+    if (!_memoryBarrier) {
+        _memoryBarrier = VkMemoryBarrier2{.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
+    }
+    _memoryBarrier->srcStageMask |= buffer.lastStages;
+    _memoryBarrier->srcAccessMask |= pendingWrites;
+    _memoryBarrier->dstStageMask |= access.stages;
+    _memoryBarrier->dstAccessMask |= access.accesses;
+    buffer.lastStages = access.stages;
+    buffer.lastAccesses = access.accesses;
+    return *this;
+}
+
+void VulkanBarriers::record(VkCommandBuffer commandBuffer)
+{
+    if (_imageBarriers.empty() && !_memoryBarrier) {
         return;
     }
     VkDependencyInfo dependencyInfo{
         .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .imageMemoryBarrierCount = static_cast<uint32_t>(_barriers.size()),
-        .pImageMemoryBarriers = _barriers.data(),
+        .memoryBarrierCount = _memoryBarrier ? 1u : 0u,
+        .pMemoryBarriers = _memoryBarrier ? &*_memoryBarrier : nullptr,
+        .imageMemoryBarrierCount = static_cast<uint32_t>(_imageBarriers.size()),
+        .pImageMemoryBarriers = _imageBarriers.data(),
     };
     vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
-    _barriers.clear();
+    _imageBarriers.clear();
+    _memoryBarrier.reset();
 }
 
 void VulkanContext::useImage(VkCommandBuffer commandBuffer, VulkanImage& image, ImageUsage usage)
 {
-    VulkanImageBarriers().add(image, usage).record(commandBuffer);
+    VulkanBarriers().add(image, usage).record(commandBuffer);
 }
 
 void VulkanContext::submitAndWait(std::function<void(VkCommandBuffer)> const& recordFunc)

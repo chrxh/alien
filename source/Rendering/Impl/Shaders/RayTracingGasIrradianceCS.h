@@ -12,7 +12,7 @@ namespace Shaders
     std::string_view const RayTracingGasIrradianceCS = R"(
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
-// Falloff distance when zoomed in, which must match LightFalloffDistance in Rendering/Impl/RayTracingRenderStep.cpp
+// Falloff distance when zoomed in, which must match LightFalloffDistance in Rendering/Impl/RayTracingResources.cpp
 const float LightFalloffDistance = 5.0;
 const int ShadowSteps = 8;
 const float GasExtinction = 0.2;

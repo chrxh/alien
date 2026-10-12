@@ -49,8 +49,8 @@ using AttackEventRenderStep = std::shared_ptr<_AttackEventRenderStep>;
 class _DetonationEventRenderStep;
 using DetonationEventRenderStep = std::shared_ptr<_DetonationEventRenderStep>;
 
-class _RayTracingRenderStep;
-using RayTracingRenderStep = std::shared_ptr<_RayTracingRenderStep>;
+class _RayTracingResources;
+using RayTracingResources = std::shared_ptr<_RayTracingResources>;
 
 class _RayTracingComputePipeline;
 using RayTracingComputePipeline = std::shared_ptr<_RayTracingComputePipeline>;

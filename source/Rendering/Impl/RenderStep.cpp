@@ -129,7 +129,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     auto commandBuffer = parameters._renderInfo.commandBuffer;
     auto const& target = parameters._target;
     auto withDepth = _depthTest != DepthTest::None;
-    VulkanImageBarriers barriers;
+    VulkanBarriers barriers;
     for (auto const& texture : sampledTextures) {
         barriers.add(texture->color, ImageUsage::ShaderRead);
     }

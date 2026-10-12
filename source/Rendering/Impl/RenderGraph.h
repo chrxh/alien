@@ -58,9 +58,10 @@ private:
     void applyViewSize(bool withScreenTarget);
     void resizeTarget(TextureTarget const& target);
 
+    // Steps without target get no render target
     void forEachStep(
         std::function<TextureTarget()> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, RenderTarget const& target)> const& executeStep);
+        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target)> const& executeStep);
 
     struct TargetInfo
     {

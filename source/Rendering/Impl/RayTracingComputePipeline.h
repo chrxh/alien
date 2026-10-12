@@ -10,7 +10,7 @@
 
 #include "Definitions.h"
 
-// One pass of the ray tracing, see RayTracingRenderStep.h, as compute shader written in GLSL for Vulkan. Pipelines created with the same
+// One pass of the ray tracing, see RayTracingSteps.h, as compute shader written in GLSL for Vulkan. Pipelines created with the same
 // layout can share their descriptor sets.
 class _RayTracingComputePipeline
 {

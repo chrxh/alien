@@ -11,7 +11,8 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
-#include "RayTracingRenderStep.h"
+#include "RayTracingResources.h"
+#include "RayTracingSteps.h"
 #include "RenderGraph.h"
 #include "RenderStep.h"
 #include "VulkanContext.h"
@@ -38,7 +39,7 @@ void SimulationRenderer::setup(ImFont* labelFont)
 
 void SimulationRenderer::shutdown()
 {
-    _rayTracingStep.reset();
+    _rayTracingResources.reset();
     _rayTracingGraph.reset();
     _rasterGraph.reset();
     _geometryBuffers.reset();
@@ -87,11 +88,11 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
     auto const& graph = selectGraph(view, true);
     auto rayTraced = graph == _rayTracingGraph;
     if (rayTraced) {
-        _rayTracingStep->setStillPicture(true);
+        _rayTracingResources->setStillPicture(true);
     }
     ExitScopeGuard resetStillPicture([&] {
         if (rayTraced) {
-            _rayTracingStep->setStillPicture(false);
+            _rayTracingResources->setStillPicture(false);
         }
     });
     try {
@@ -144,14 +145,14 @@ RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, bool 
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     RayTracingDemand demand{
         .viewSize = view.viewSize,
-        .numSceneObjects = _RayTracingRenderStep::isSceneNeeded(view, parameters) ? numObjects.objects : 0,
+        .numSceneObjects = _RayTracingResources::isSceneNeeded(view, parameters) ? numObjects.objects : 0,
     };
     if (!forPicture && _failedRayTracingDemand && _failedRayTracingDemand->viewSize == demand.viewSize
         && demand.numSceneObjects * 3 >= _failedRayTracingDemand->numSceneObjects * 2) {
         return _rasterGraph;
     }
     try {
-        _rayTracingStep->prepareResources(view, numObjects, parameters);
+        _rayTracingResources->prepare(view, numObjects, parameters);
         if (!forPicture) {
             _failedRayTracingDemand.reset();
         }
@@ -264,8 +265,8 @@ namespace
     {
         return UniformValueMap{
             {"objectGain", getObjectGain(view)},
-            {"tissueVisibility", _RayTracingRenderStep::getTissueVisibility(view)},
-            {"backgroundScale", _RayTracingRenderStep::getBackgroundScale(parameters)},
+            {"tissueVisibility", _RayTracingResources::getTissueVisibility(view)},
+            {"backgroundScale", _RayTracingResources::getBackgroundScale(parameters)},
         };
     }
 
@@ -525,7 +526,9 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
 
 void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
 {
-    _rayTracingStep = _RayTracingRenderStep::create(StepParameters().shader(ShaderSources::RayTracingPresent));
+    _rayTracingResources = _RayTracingResources::create();
+    auto rayTracingSteps = createRayTracingSteps(_rayTracingResources);
+    rayTracingSteps.emplace_back(_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)));
 
     // The ray tracing renders the fluids itself as gas, the energy particles and the cores of glowing fluids keep the look of the rasterized view
     auto blocks = createFluidParticleBlocks(true);
@@ -548,10 +551,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
             // Render block: Four outputs: Ray tracing of the objects on the ground, its attack events softened as in the rasterized view, the
             // rasterized objects, which replace the ray tracing when zoomed out, and the ground, which they absorb like the tissue
             RenderBlock{
-                RenderSequence().steps({
-                    _rayTracingStep,
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
-                }),
+                RenderSequence().steps(rayTracingSteps),
                 RenderSequence().steps({
                     _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
