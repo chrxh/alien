@@ -49,6 +49,6 @@ private:
     VulkanGeometryBuffers _geometryBuffers;
     RenderGraph _rasterGraph;
     RenderGraph _rayTracingGraph;
-    RayTracingRenderStep _rayTracingStep;
+    RayTracingResources _rayTracingResources;
     std::optional<RayTracingDemand> _failedRayTracingDemand;
 };

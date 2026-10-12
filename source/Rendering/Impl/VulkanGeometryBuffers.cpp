@@ -8,7 +8,7 @@
 namespace
 {
     // Storage access lets the ray tracing derive its scene from the buffers
-    auto constexpr BufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+    auto constexpr GeometryBufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
         | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 }
 
@@ -94,7 +94,7 @@ VkBuffer _VulkanGeometryBuffers::getBuffer(GeometryBufferType type) const
 void _VulkanGeometryBuffers::reallocate(GeometryBufferType type, uint64_t sizeInBytes)
 {
     auto& context = VulkanContext::get();
-    auto buffer = context.createBuffer(sizeInBytes, BufferUsage, _shareable ? VulkanMemory::DeviceLocalShareable : VulkanMemory::DeviceLocal);
+    auto buffer = context.createBuffer(sizeInBytes, GeometryBufferUsage, _shareable ? VulkanMemory::DeviceLocalShareable : VulkanMemory::DeviceLocal);
     VulkanBuffer stagingBuffer;
     if (!_shareable) {
         try {
