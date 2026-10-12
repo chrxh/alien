@@ -114,9 +114,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("Controls the bloom effect intensity. At 0, no glow is applied. At 1, maximum glow is applied."),
                     ParameterSpec()
                         .name("Fluid illumination")
-                        .reference(FloatSpec().member(&SimulationParameters::fluidIllumination).min(0.0f).max(4.0f))
-                        .description("In the ray traced view, the cells light the surrounding fluids in their colors. This parameter scales the strength of "
-                                     "this light. At 0, the fluids are not lit by the cells."),
+                        .reference(FloatSpec().member(&SimulationParameters::fluidIllumination).min(0.0f).max(1.0f))
+                        .description("With hardware ray tracing, the cells light the surrounding fluids in their colors. This parameter controls the "
+                                     "strength of this light. At 0, the fluids are not lit by the cells. At 1, they are lit most strongly."),
                     ParameterSpec()
                         .name("Borderless rendering")
                         .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))

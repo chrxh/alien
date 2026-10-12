@@ -89,11 +89,6 @@ void _RenderingFacadeImpl::shutdown()
     context.shutdown();
 }
 
-bool _RenderingFacadeImpl::isRayTracingSupported() const
-{
-    return VulkanContext::get().isActive() && VulkanContext::get().isRayTracingSupported();
-}
-
 void _RenderingFacadeImpl::newFrame()
 {
     VulkanFrameRenderer::get().newFrame();

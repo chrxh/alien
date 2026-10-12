@@ -58,7 +58,6 @@ A compact list of all mouse actions and keyboard shortcuts. Shortcuts do not wor
 | Shortcut | Function |
 | --- | --- |
 | Alt+O | Cell info overlay |
-| Alt+R | Ray tracing (requires a GPU with ray tracing hardware) |
 | Alt+X | Message overlay |
 | Alt+U | Show or hide the user interface |
 | Alt+I | Show or hide the simulation |

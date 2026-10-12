@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <imgui.h>
 
 #include <Base/Singleton.h>
@@ -10,7 +12,8 @@
 #include "Definitions.h"
 #include "VulkanGeometryBuffers.h"
 
-// Renders the simulation into the frames of the window and into pictures, either by rasterization or with hardware ray tracing
+// Renders the simulation into the frames of the window and into pictures, with hardware ray tracing if the GPU supports it and by
+// rasterization otherwise
 class SimulationRenderer
 {
     MAKE_SINGLETON(SimulationRenderer);
@@ -19,8 +22,6 @@ public:
     // The font is used for the labels of the cell types
     void setup(ImFont* labelFont);
     void shutdown();
-
-    bool isRayTracingSupported() const;
 
     // Shows the simulation as background of the current frame
     void draw(RenderView const& view);
@@ -35,12 +36,19 @@ private:
 
     void updateGeometry(RealRect const& visibleWorldRect);
 
-    // Ray tracing falls back to rasterization if its resources cannot be allocated, frames only retry when it is requested anew
+    // Ray tracing falls back to rasterization if its resources cannot be allocated. Frames only retry once the view size has changed or the
+    // tissue has clearly fewer objects, so that a lack of memory does not stall every frame.
     RenderGraph const& selectGraph(RenderView const& view, bool forPicture);
+
+    struct RayTracingDemand
+    {
+        IntVector2D viewSize;
+        uint64_t numTissueObjects = 0;
+    };
 
     VulkanGeometryBuffers _geometryBuffers;
     RenderGraph _rasterGraph;
     RenderGraph _rayTracingGraph;
     RayTracingRenderStep _rayTracingStep;
-    bool _rayTracingFailed = false;
+    std::optional<RayTracingDemand> _failedRayTracingDemand;
 };
