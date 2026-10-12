@@ -41,8 +41,8 @@ struct SimulationParameters
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};
     SourceParameter<bool> sourceShowRadiationCenter = {true};
-    SourceParameter<float> sourceLightBrightness = {{0.25f}};
     SourceParameter<FloatColorRGB> sourceLightColor = {{{1.0f, 1.0f, 1.0f}}};
+    SourceParameter<float> sourceLightBrightness = {{0.25f}};
     SourceParameter<float> sourceLightRange = {{150.0f}};
     LayerParameter<bool> layerShowForceField = {{true}};
 

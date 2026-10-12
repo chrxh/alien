@@ -453,21 +453,15 @@ vec3 sampleGasIrradiance(vec2 world)
 //* Light of the radiation sources
 //*******************************
 
-// The strength of the light of the radiation sources is limited: it approaches the brightness of a source close to it, while weak light
-// stays visible. The shadows keep their share of the light, so that the columns of light remain at every strength. The irradiance of the
-// sources holds the shadowed light in the colors of the sources and in its alpha channel the strength of the unshadowed light.
-const float SourceLightKnee = 1.0;
-
 bool isSourceLightActive()
 {
     return frame.numSourceLights.x > 0;
 }
 
-// Its luminance stays below the brightness of the sources
+// The light of each source approaches its brightness close to it, see Shaders/RayTracingGasIrradianceCS.h
 vec3 getSourceLight(vec2 world)
 {
-    vec4 irradiance = sampleIrradiance(world, float(GasIrradianceImageSize));
-    return max(irradiance.rgb, vec3(0.0)) / (SourceLightKnee + max(irradiance.a, 0.0));
+    return max(sampleIrradiance(world, float(GasIrradianceImageSize)).rgb, vec3(0.0));
 }
 
 // Without borderless rendering, the space outside the world stays dark

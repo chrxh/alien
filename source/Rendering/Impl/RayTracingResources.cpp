@@ -62,9 +62,9 @@ namespace
     // Factor of the cell light in the gas at the highest fluid illumination
     auto constexpr MaxFluidIllumination = 4.0f;
 
-    // The radiation sources shine from their area, see the light of the radiation sources in Shaders/RayTracingCommonCS.h. A source counts
-    // once for every periodic copy whose light reaches the gas grid. Larger sources trace more shadow rays, about one per this distance across
-    // the source. The maximum number of lights must match MaxSourceLights in Shaders/RayTracingCommonCS.h.
+    // The radiation sources shine from their area, see the light of the radiation sources in Shaders/RayTracingGasIrradianceCS.h. Larger
+    // sources trace more shadow rays, about one per this distance across the source. The maximum number of lights must match MaxSourceLights
+    // in Shaders/RayTracingCommonCS.h.
     auto constexpr MaxSourceLights = 64;
     auto constexpr MaxSourceLightSamples = 16;
     auto constexpr SourceLightSampleDistance = 2.0f;
@@ -732,18 +732,12 @@ bool _RayTracingResources::isSceneNeeded(RenderView const& view, SimulationParam
 
 namespace
 {
-    // The light of a radiation source counts once for every periodic copy whose light reaches the region. The positions are corrected for
-    // the rendering in the same way as the objects, see Engine/Impl/Kernels/GeometryKernels.cu.
-    int getSourceLights(
-        SimulationParameters const& parameters,
-        IntVector2D const& worldSize,
-        RealVector2D const& visibleTopLeft,
-        RealRect const& region,
-        SourceLight (&result)[MaxSourceLights])
+    // A radiation source counts if the light of one of its periodic copies reaches the region. The shader takes the copy next to each
+    // position.
+    int getSourceLights(SimulationParameters const& parameters, IntVector2D const& worldSize, RealRect const& region, SourceLight (&result)[MaxSourceLights])
     {
-        auto borderless = parameters.borderlessRendering.value;
+        static_assert(MAX_SOURCES <= MaxSourceLights);
         auto world = toRealVector2D(worldSize);
-        auto origin = borderless ? visibleTopLeft : RealVector2D{};
         auto numLights = 0;
         for (auto index : std::views::iota(0, parameters.numSources)) {
             auto brightness = parameters.sourceLightBrightness.sourceValues[index];
@@ -754,29 +748,24 @@ namespace
             auto circular = parameters.sourceShapeType.sourceValues[index] == SourceShapeType_Circular;
             auto radius = parameters.sourceCircularRadius.sourceValues[index];
             auto halfExtent = circular ? RealVector2D{radius, radius} : parameters.sourceRectangularRect.sourceValues[index] / 2.0f;
+            auto position = parameters.sourcePosition.sourceValues[index];
+            auto reach = halfExtent + RealVector2D{range, range};
+            auto reachesRegion = [&](float regionStart, float regionEnd, float center, float reach, float period) {
+                auto offset = Math::modulo(center - regionStart, period);
+                return offset - reach <= regionEnd - regionStart || offset + reach >= period;
+            };
+            if (!reachesRegion(region.topLeft.x, region.bottomRight.x, position.x, reach.x, world.x)
+                || !reachesRegion(region.topLeft.y, region.bottomRight.y, position.y, reach.y, world.y)) {
+                continue;
+            }
             auto halfWidth = circular ? radius : std::sqrt(halfExtent.x * halfExtent.x + halfExtent.y * halfExtent.y);
             auto numSamples = std::clamp(toInt(std::ceil(2.0f * halfWidth / SourceLightSampleDistance)), 1, MaxSourceLightSamples);
             auto const& color = parameters.sourceLightColor.sourceValues[index];
-            auto position = parameters.sourcePosition.sourceValues[index] - origin;
-            position = origin + RealVector2D{Math::modulo(position.x, world.x), Math::modulo(position.y, world.y)};
-            for (auto copyY : {-1.0f, 0.0f, 1.0f}) {
-                for (auto copyX : {-1.0f, 0.0f, 1.0f}) {
-                    auto center = position + RealVector2D{copyX * world.x, copyY * world.y};
-                    auto reach = halfExtent + RealVector2D{range, range};
-                    if (center.x + reach.x < region.topLeft.x || center.x - reach.x > region.bottomRight.x || center.y + reach.y < region.topLeft.y
-                        || center.y - reach.y > region.bottomRight.y) {
-                        continue;
-                    }
-                    if (numLights == MaxSourceLights) {
-                        return numLights;
-                    }
-                    result[numLights++] = SourceLight{
-                        .centerRange = {center.x, center.y, range, toFloat(numSamples)},
-                        .colorShape = {color.r * brightness, color.g * brightness, color.b * brightness, circular ? 0.0f : 1.0f},
-                        .extent = {halfExtent.x, halfExtent.y, 0.0f, 0.0f},
-                    };
-                }
-            }
+            result[numLights++] = SourceLight{
+                .centerRange = {position.x, position.y, range, toFloat(numSamples)},
+                .colorShape = {color.r * brightness, color.g * brightness, color.b * brightness, circular ? 0.0f : 1.0f},
+                .extent = {halfExtent.x, halfExtent.y, 0.0f, 0.0f},
+            };
         }
         return numLights;
     }
@@ -829,7 +818,7 @@ void _RayTracingResources::updateFrameConstants(
         litRegion.topLeft = {std::max(litRegion.topLeft.x, 0.0f), std::max(litRegion.topLeft.y, 0.0f)};
         litRegion.bottomRight = {std::min(litRegion.bottomRight.x, toFloat(worldSize.x)), std::min(litRegion.bottomRight.y, toFloat(worldSize.y))};
     }
-    constants.numSourceLights[0] = getSourceLights(parameters, worldSize, topLeft, litRegion, constants.sourceLights);
+    constants.numSourceLights[0] = getSourceLights(parameters, worldSize, litRegion, constants.sourceLights);
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 }
 
