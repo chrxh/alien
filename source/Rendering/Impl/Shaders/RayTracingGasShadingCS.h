@@ -7,8 +7,8 @@ namespace Shaders
     // Shows the fluids as a glowing nebula. Each fluid contributes as much light as its soft disk in the rasterized view and the clouds take
     // the outline of the rasterized fluids, so that brightness and shapes match the rasterized view at every zoom level. Thin gas glows in
     // saturated colors, dense gas towards warm white, and the edges of the clouds glow brighter. The gas also scatters the colored light of
-    // the cells and the energy light around it, see Shaders/RayTracingGasIrradianceCS.h. A faint haze everywhere scatters the energy light,
-    // so that it appears as columns of light and shadow in empty space.
+    // the cells and the light of the radiation sources around it, see Shaders/RayTracingGasIrradianceCS.h. A faint haze everywhere scatters
+    // the light of the radiation sources, so that it appears as columns of light and shadow in empty space.
     std::string_view const RayTracingGasShadingCS = R"(
 // Light of a fluid in the rasterized view: a soft disk of radius 7.5 with a peak of 0.15
 const float RasterDiskIntegral = 7.95;
@@ -38,7 +38,7 @@ vec3 limitLight(vec3 light, float limit)
 
 vec3 getHaze(vec2 position)
 {
-    return isEnergyLightActive() && isInWorld(position) ? getEnergyLight(position) * HazeScattering : vec3(0.0);
+    return isSourceLightActive() && isInWorld(position) ? getSourceLight(position) * HazeScattering : vec3(0.0);
 }
 
 float getThickness(vec2 position)
@@ -91,8 +91,8 @@ vec3 shadeGas(vec2 position, vec3 background)
     float scattering = 1.0 - exp(-GasScattering * density);
     vec3 tint = mix(vec3(1.0), hue, CellLightTint) * scattering;
     vec3 cellLight = limitLight(sampleGasIrradiance(position) * tint, CellLightLimit);
-    vec3 energyLight = isEnergyLightActive() ? getEnergyLight(position) * tint : vec3(0.0);
-    return background + nebula + frame.gasLighting.z * (cellLight + energyLight);
+    vec3 sourceLight = isSourceLightActive() ? getSourceLight(position) * tint : vec3(0.0);
+    return background + nebula + frame.gasLighting.z * (cellLight + sourceLight);
 }
 )";
 }

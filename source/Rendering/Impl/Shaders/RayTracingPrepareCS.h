@@ -56,7 +56,8 @@ Aabb createAabb(vec2 lower, vec2 upper, bool enabled)
     return Aabb(enabled ? lower.x : uintBitsToFloat(0x7fc00000u), lower.y, -1.0, upper.x, upper.y, 2.0);
 }
 
-// Without visible tissue, the scene only serves the shadows of the energy light, which need the sizes of the objects close up
+// Without visible tissue, the scene only serves the shadows of the light of the radiation sources, which need the sizes of the objects close
+// up
 bool isSceneForShadowsOnly()
 {
     return frame.tissue.w <= 0.0;

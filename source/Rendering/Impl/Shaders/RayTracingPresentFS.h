@@ -5,7 +5,7 @@
 namespace Shaders
 {
     // Copies the ray traced image into the render target, whose rows run from the bottom to the top. The alpha channel holds the strength
-    // of the energy light for the rasterized objects.
+    // of the light of the radiation sources for the rasterized objects.
     std::string_view const RayTracingPresentFS = R"(
 #version 450
 in vec2 texCoord;

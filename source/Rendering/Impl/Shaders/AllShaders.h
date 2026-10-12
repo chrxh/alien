@@ -49,7 +49,6 @@
 #include "RayTracingAllocateCS.h"
 #include "RayTracingAntiAliasingCS.h"
 #include "RayTracingCommonCS.h"
-#include "RayTracingEnergyGridCS.h"
 #include "RayTracingGasBlurCS.h"
 #include "RayTracingGasIrradianceCS.h"
 #include "RayTracingGasLightsCS.h"
