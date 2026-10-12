@@ -62,9 +62,10 @@ namespace
 
     // Regions with a high energy density radiate, see the energy light in Shaders/RayTracingCommonCS.h. The energy grid keeps its cell size
     // while it covers the gas grid with at most the maximum number of cells per dimension. The energy light reaches farther than the light of
-    // the cells.
+    // the cells. The values per cell must match EnergyCellStride in Shaders/RayTracingCommonCS.h.
     auto constexpr EnergyCellSize = 4.0f;
     auto constexpr MaxEnergyCells = 2048;
+    auto constexpr EnergyCellStride = 3;
     auto constexpr EnergyLightRangeInFalloffDistances = 8.0f;
     auto constexpr EnergyRadiation = 0.4f;
 
@@ -582,7 +583,7 @@ void _RayTracingResources::createFrameResources()
     auto numClusters = static_cast<VkDeviceSize>(MaxLightClusters) * MaxLightClusters;
     _gasLightClusters = context.createBuffer(numClusters * GasLightClusterStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
     auto numEnergyCells = static_cast<VkDeviceSize>(MaxEnergyCells) * MaxEnergyCells;
-    _energyCells = context.createBuffer(numEnergyCells * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
+    _energyCells = context.createBuffer(numEnergyCells * EnergyCellStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
     _gasImage = context.createImage({GasLayers * MaxGasNodes, MaxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
     _gasIrradiance = context.createImage({2 * GasIrradianceImageSize, GasIrradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
 
@@ -929,7 +930,7 @@ VkDeviceSize _RayTracingResources::getUsedSize(RayTracingResource resource) cons
     case RayTracingResource::GasLightClusters:
         return static_cast<VkDeviceSize>(_gasGrid.numLightClusters.x) * _gasGrid.numLightClusters.y * GasLightClusterStride * sizeof(uint32_t);
     case RayTracingResource::EnergyCells:
-        return static_cast<VkDeviceSize>(_energyGrid.size.x) * _energyGrid.size.y * sizeof(uint32_t);
+        return static_cast<VkDeviceSize>(_energyGrid.size.x) * _energyGrid.size.y * EnergyCellStride * sizeof(uint32_t);
     default:
         THROW_NOT_IMPLEMENTED();
     }
