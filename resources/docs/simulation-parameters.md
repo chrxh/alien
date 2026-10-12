@@ -53,6 +53,7 @@ The following parameters can be overridden by layers: background color, friction
 | Customization colors | palette | The ten colors used for rendering and in all color selections. |
 | Object coloring | Customization | How objects are colored: by energy, by customization color, by lineage or by creature. |
 | Glow | 0.3 | Strength of the bloom effect. |
+| Fluid illumination | 1 | In the ray traced view: how strongly the cells light the surrounding fluids. At 0, the fluids are not lit. |
 | Borderless rendering | off | Repeats the world periodically in the view. |
 | Grid lines | off | Draws a grid that adapts to the zoom level. |
 | Mark reference domain | on | Draws a frame around the world. |

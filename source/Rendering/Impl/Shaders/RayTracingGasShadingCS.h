@@ -24,7 +24,8 @@ const float NebulaCoreEnd = 8.0;
 const float NebulaEdgeGlow = 1.5;
 
 const float GasScattering = 0.6;
-const float CellLightTint = 0.2;
+const float CellLightTint = 0.5;
+const float CellLightLimit = 0.3;
 
 float getThickness(vec2 position)
 {
@@ -70,9 +71,13 @@ vec3 shadeGas(vec2 position, vec3 background)
     float edge = smoothstep(0.1, 0.5, length(getThicknessGradient(position))) * coverage;
     vec3 nebula = brightness * nebulaColor * (1.0 + NebulaEdgeGlow * edge);
 
+    // The light of many cells, for example along chains of cells, would outshine the gas. It is limited softly, so that weak light stays
+    // unchanged. The simulation parameter fluid illumination scales the result.
     float scattering = 1.0 - exp(-GasScattering * density);
     vec3 cellLight = sampleGasIrradiance(position) * mix(vec3(1.0), hue, CellLightTint) * scattering;
-    return background + nebula + cellLight;
+    float lightLevel = luminance(cellLight) / CellLightLimit;
+    cellLight /= sqrt(1.0 + lightLevel * lightLevel);
+    return background + nebula + frame.gasLighting.z * cellLight;
 }
 )";
 }
