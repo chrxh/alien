@@ -10,19 +10,20 @@
 
 #include "Definitions.h"
 
-// Compute shader written in GLSL for Vulkan. Pipelines created with the same layout can share their descriptor sets.
-class _ComputePipeline
+// One pass of the ray tracing, see RayTracingRenderStep.h, as compute shader written in GLSL for Vulkan. Pipelines created with the same
+// layout can share their descriptor sets.
+class _RayTracingComputePipeline
 {
 public:
     // The work group size has to match the local size declared in the source
-    static ComputePipeline create(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize);
-    ~_ComputePipeline();
+    static RayTracingComputePipeline create(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize);
+    ~_RayTracingComputePipeline();
 
     // Dispatches at least one invocation per element
     void dispatch(VkCommandBuffer commandBuffer, IntVector2D const& numElements) const;
 
 private:
-    _ComputePipeline(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize);
+    _RayTracingComputePipeline(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize);
 
     VkShaderModule _module = VK_NULL_HANDLE;
     VkPipeline _pipeline = VK_NULL_HANDLE;

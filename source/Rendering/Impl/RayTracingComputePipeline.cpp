@@ -1,14 +1,14 @@
-#include "ComputePipeline.h"
+#include "RayTracingComputePipeline.h"
 
 #include "GlslCompiler.h"
 #include "VulkanContext.h"
 
-ComputePipeline _ComputePipeline::create(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize)
+RayTracingComputePipeline _RayTracingComputePipeline::create(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize)
 {
-    return ComputePipeline(new _ComputePipeline(source, layout, workGroupSize));
+    return RayTracingComputePipeline(new _RayTracingComputePipeline(source, layout, workGroupSize));
 }
 
-_ComputePipeline::~_ComputePipeline()
+_RayTracingComputePipeline::~_RayTracingComputePipeline()
 {
     auto& context = VulkanContext::get();
     if (!context.isActive()) {
@@ -20,7 +20,7 @@ _ComputePipeline::~_ComputePipeline()
     });
 }
 
-void _ComputePipeline::dispatch(VkCommandBuffer commandBuffer, IntVector2D const& numElements) const
+void _RayTracingComputePipeline::dispatch(VkCommandBuffer commandBuffer, IntVector2D const& numElements) const
 {
     if (numElements.x <= 0 || numElements.y <= 0) {
         return;
@@ -31,7 +31,7 @@ void _ComputePipeline::dispatch(VkCommandBuffer commandBuffer, IntVector2D const
     vkCmdDispatch(commandBuffer, static_cast<uint32_t>(numGroupsX), static_cast<uint32_t>(numGroupsY), 1);
 }
 
-_ComputePipeline::_ComputePipeline(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize)
+_RayTracingComputePipeline::_RayTracingComputePipeline(std::string const& source, VkPipelineLayout layout, IntVector2D const& workGroupSize)
     : _workGroupSize(workGroupSize)
 {
     auto device = VulkanContext::get().getDevice();

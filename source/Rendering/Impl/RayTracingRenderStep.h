@@ -4,7 +4,7 @@
 
 #include <Engine/Interface/GeometryBuffers.h>
 
-#include "ComputePipeline.h"
+#include "RayTracingComputePipeline.h"
 #include "RenderStep.h"
 
 // Renders the creatures with hardware ray tracing as living tissue under a microscope, see Shaders/RayTracingTissueCS.h, and the fluids as
@@ -117,16 +117,16 @@ private:
 
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
     VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
-    ComputePipeline _preparePipeline;
-    ComputePipeline _allocatePipeline;
-    ComputePipeline _scatterPipeline;
-    ComputePipeline _gasSplatPipeline;
-    ComputePipeline _gasLightsPipeline;
-    ComputePipeline _gasIrradiancePipeline;
-    ComputePipeline _gasBlurHorizontalPipeline;
-    ComputePipeline _gasBlurVerticalPipeline;
-    ComputePipeline _tissuePipeline;
-    ComputePipeline _antiAliasingPipeline;
+    RayTracingComputePipeline _preparePipeline;
+    RayTracingComputePipeline _allocatePipeline;
+    RayTracingComputePipeline _scatterPipeline;
+    RayTracingComputePipeline _gasSplatPipeline;
+    RayTracingComputePipeline _gasLightsPipeline;
+    RayTracingComputePipeline _gasIrradiancePipeline;
+    RayTracingComputePipeline _gasBlurHorizontalPipeline;
+    RayTracingComputePipeline _gasBlurVerticalPipeline;
+    RayTracingComputePipeline _tissuePipeline;
+    RayTracingComputePipeline _antiAliasingPipeline;
     VulkanBuffer _frameConstants;
 
     SceneResources _scene;
