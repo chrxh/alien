@@ -504,7 +504,7 @@ void _RayTracingRenderStep::createPipelines()
     checkVkResult(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &_pipelineLayout), "vkCreatePipelineLayout");
 
     auto createPipeline = [this](std::string_view source, IntVector2D const& workGroupSize) {
-        return _ComputePipeline::create(std::string(Shaders::RayTracingCommonCS) + std::string(source), _pipelineLayout, workGroupSize);
+        return _RayTracingComputePipeline::create(std::string(Shaders::RayTracingCommonCS) + std::string(source), _pipelineLayout, workGroupSize);
     };
     _allocatePipeline = createPipeline(Shaders::RayTracingAllocateCS, {256, 1});
     _scatterPipeline = createPipeline(Shaders::RayTracingScatterCS, {64, 1});

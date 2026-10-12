@@ -1,10 +1,10 @@
 
 add_library(RenderingImpl
-    ComputePipeline.cpp
-    ComputePipeline.h
     Definitions.h
     GlslCompiler.cpp
     GlslCompiler.h
+    RayTracingComputePipeline.cpp
+    RayTracingComputePipeline.h
     RayTracingRenderStep.cpp
     RayTracingRenderStep.h
     RenderGraph.cpp
