@@ -509,6 +509,19 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
     return mix(result, solidColor, solid);
 }
 
+// As in the rasterized view, the background is added after the bloom and the tone mapping, so the light in front of it is passed on alone.
+// Where the tissue absorbs the background, the darkening is converted, so that adding the background yields the tone mapped absorption. The
+// bloom scales the scene by the inverse of the background scale.
+vec3 getForeground(vec3 color, vec3 background)
+{
+    vec3 foreground = color - background;
+    float bloomScale = 1.0 / frame.parameters.x;
+    vec3 scaledBackground = background * bloomScale;
+    vec3 darkening = toneMapping(scaledBackground) - toneMapping(max(scaledBackground + foreground * bloomScale, vec3(0.0)));
+    vec3 absorption = -inverseToneMapping(darkening) / bloomScale;
+    return mix(absorption, foreground, step(vec3(0.0), foreground));
+}
+
 void main()
 {
     ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
@@ -520,7 +533,8 @@ void main()
     // Zoomed out, the rasterized objects replace the tissue, whose scene and lights are not built then
     float tissueVisibility = frame.tissue.w;
     vec3 scattered = tissueVisibility > 0.0 ? getScatteredLight(position) : vec3(0.0);
-    vec3 medium = shadeGas(position, getBackgroundRadiance(position)) + getEnergyParticleRadiance(position);
+    vec3 background = getBackgroundRadiance(position);
+    vec3 medium = shadeGas(position, background) + getEnergyParticleRadiance(position);
     vec3 color = medium;
     if (tissueVisibility > 0.0) {
         vec3 lightedMedium = medium + scattered * MediumScattering;
@@ -533,7 +547,7 @@ void main()
         }
         color = mix(medium, color, tissueVisibility);
     }
-    imageStore(sceneColor, pixel, vec4(color, 1.0));
+    imageStore(sceneColor, pixel, vec4(getForeground(color, background), 1.0));
 }
 )";
 }

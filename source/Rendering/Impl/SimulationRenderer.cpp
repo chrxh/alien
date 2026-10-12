@@ -447,35 +447,11 @@ namespace
                 })},
         };
     }
-}
 
-void SimulationRenderer::createRasterGraph(ImFont* labelFont)
-{
-    auto blocks = createFluidParticleBlocks(false);
-    append(
-        blocks,
-        RenderBlocks{
-
-            // Render block: Render objects in different sequences
-            RenderBlock{
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-                }),
-                createObjectSequence(),
-            },
-
-            // Render block: Merge fluid, connections and objects sequence
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(getObjectMergeUniforms)),
-                }),
-            },
-        });
-    append(blocks, createDetonationAndBloomBlocks());
-    append(
-        blocks,
-        RenderBlocks{
+    // The background is added after the bloom and the tone mapping, so that it keeps its color and does not glow
+    RenderBlocks createToneMappingAndBackgroundBlocks(ImFont* labelFont)
+    {
+        return RenderBlocks{
 
             // Render block: Merge and tone mapping
             RenderBlock{
@@ -509,7 +485,35 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
                 }),
             },
+        };
+    }
+}
+
+void SimulationRenderer::createRasterGraph(ImFont* labelFont)
+{
+    auto blocks = createFluidParticleBlocks(false);
+    append(
+        blocks,
+        RenderBlocks{
+
+            // Render block: Render objects in different sequences
+            RenderBlock{
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+                }),
+                createObjectSequence(),
+            },
+
+            // Render block: Merge fluid, connections and objects sequence
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(getObjectMergeUniforms)),
+                }),
+            },
         });
+    append(blocks, createDetonationAndBloomBlocks());
+    append(blocks, createToneMappingAndBackgroundBlocks(labelFont));
     _rasterGraph = std::make_shared<_RenderGraph>(std::move(blocks), _geometryBuffers);
 }
 
@@ -562,21 +566,6 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
             },
         });
     append(blocks, createDetonationAndBloomBlocks());
-    append(
-        blocks,
-        RenderBlocks{
-
-            // Render block: Merge, tone mapping, overlays and the light smoothing of the rasterized view
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeAdditive).uniformFunc(getBloomMergeUniforms)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ToneMapping)),
-                    _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
-                    _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
-                    _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0), labelFont),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
-                }),
-            },
-        });
+    append(blocks, createToneMappingAndBackgroundBlocks(labelFont));
     _rayTracingGraph = std::make_shared<_RenderGraph>(std::move(blocks), _geometryBuffers);
 }

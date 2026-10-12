@@ -37,14 +37,15 @@ vec3 gammaCorrect(vec3 color, float gamma) {
 void main()
 {
     vec4 color = texture(inputTexture1, texCoord);
-    
+
     // Apply tone mapping (using ACES for better results with HDR content)
-    vec3 toneMappedColor = toneMapACES(color.rgb);
-    
+    vec3 toneMappedColor = toneMapACES(abs(color.rgb));
+
     // Apply gamma correction (standard gamma 2.2)
     vec3 gammaCorrectedColor = gammaCorrect(toneMappedColor.rgb, 1.6);
-    
-    FragColor = vec4(gammaCorrectedColor, color.a);
+
+    // Negative colors darken the background, which is added afterwards, see Shaders/RayTracingTissueCS.h
+    FragColor = vec4(sign(color.rgb) * gammaCorrectedColor, color.a);
 }
 )";
 }
