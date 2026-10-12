@@ -135,16 +135,16 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
                         .description("If activated, the area of the radiation source is highlighted in the background."),
                     ParameterSpec()
+                        .name("Light color")
+                        .reference(ColorSpec().member(&SimulationParameters::sourceLightColor))
+                        .description("Color of the light of the radiation source."),
+                    ParameterSpec()
                         .name("Light brightness")
                         .reference(FloatSpec().member(&SimulationParameters::sourceLightBrightness).min(0.0f).max(1.0f))
                         .description("With hardware ray tracing, the area of the radiation source shines. Its light illuminates the objects and fluids "
                                      "around it and appears as columns of light in a faint haze. The objects on the way cast shadows, which become softer "
-                                     "the larger the source is. This parameter sets the brightness that the light approaches close to the source. At 0, "
-                                     "the source does not shine."),
-                    ParameterSpec()
-                        .name("Light color")
-                        .reference(ColorSpec().member(&SimulationParameters::sourceLightColor))
-                        .description("Color of the light of the radiation source."),
+                                     "the farther they fall. This parameter sets the brightness that the light approaches close to the source. At 0, the "
+                                     "source does not shine."),
                     ParameterSpec()
                         .name("Light range")
                         .reference(FloatSpec().member(&SimulationParameters::sourceLightRange).min(1.0f).max(1000.0f).format("%.0f").logarithmic(true))

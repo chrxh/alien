@@ -22,8 +22,15 @@ const float CellExtinction = 1.0;
 const float TissueExtinction = 6.0;
 const float SolidExtinction = 8.0;
 
-// Strength of the light of a radiation source at its area, where the light approaches the brightness of the source
+// The light of a radiation source is limited, so that it approaches the brightness of the source at its area, while weak light stays
+// visible. Each source is limited by itself, so a brighter source never darkens the light of another one. The shadows keep their share of
+// the light, so that the columns of light remain at every strength.
 const float SourceLightStrength = 4.0;
+const float SourceLightKnee = 1.0;
+
+// The light reaches a position from the part of the area of a source next to it. Its half width grows with this factor times the distance
+// to the area, so that the shadows become softer the farther they fall.
+const float SourceLightSpread = 0.25;
 
 // The rays to a source start at least from this many positions within the area of a node
 const int NodeRayStarts = 4;
@@ -207,64 +214,39 @@ bool isCircular(SourceLight light)
     return light.colorShape.w < 0.5;
 }
 
-float getSourceDistance(SourceLight light, vec2 position)
-{
-    vec2 offset = position - light.centerRange.xy;
-    if (isCircular(light)) {
-        return max(length(offset) - light.extent.x, 0.0);
-    }
-    return length(max(abs(offset) - light.extent.xy, vec2(0.0)));
-}
-
-// Length of the line through a rectangle around the origin, which runs along the direction at the offset across it, and the position of
-// the middle of the line along the direction
-float getRectangleChord(vec2 halfSize, vec2 direction, vec2 across, float offset, out float middle)
-{
-    vec2 start = across * offset;
-    float enter = -1e20;
-    float exit = 1e20;
-    middle = 0.0;
-    for (int axis = 0; axis < 2; ++axis) {
-        if (abs(direction[axis]) < 1e-6) {
-            if (abs(start[axis]) > halfSize[axis]) {
-                return 0.0;
-            }
-            continue;
-        }
-        float t0 = (-halfSize[axis] - start[axis]) / direction[axis];
-        float t1 = (halfSize[axis] - start[axis]) / direction[axis];
-        enter = max(enter, min(t0, t1));
-        exit = min(exit, max(t0, t1));
-    }
-    middle = 0.5 * (enter + exit);
-    return max(exit - enter, 0.0);
-}
-
-// The area of a source is divided into strips along the direction to the source. A ray runs to the middle of each strip and counts with
-// the length of the strip, so that the shadows become soft behind large areas. The rays start at fixed positions within the area of the
-// node, so that sharp edges of the shadows are smoothed instead of being cut into steps by the grid. The strips follow the direction, so
-// the shadows do not flicker.
-vec3 getSourceTransmittance(SourceLight light, vec2 position)
+vec2 getClosestSourcePoint(SourceLight light, vec2 position)
 {
     vec2 center = light.centerRange.xy;
-    vec2 toCenter = center - position;
-    float centerDistance = length(toCenter);
-    vec2 direction = centerDistance > 1e-4 ? toCenter / centerDistance : vec2(1.0, 0.0);
+    vec2 offset = position - center;
+    if (isCircular(light)) {
+        float distance = length(offset);
+        return distance > light.extent.x ? center + offset * (light.extent.x / distance) : position;
+    }
+    return center + clamp(offset, -light.extent.xy, light.extent.xy);
+}
+
+// The rays run to fixed points of the part of the area next to the position, spread across the direction to the area. Closer points count
+// more. The rays start at fixed positions within the area of the node, so that sharp edges of the shadows are smoothed instead of being cut
+// into steps by the grid. Within the area, the light comes from all sides and casts no shadows.
+vec3 getSourceTransmittance(SourceLight light, vec2 position, vec2 closestPoint, float distance)
+{
+    if (distance < 1e-3) {
+        return vec3(1.0);
+    }
+    vec2 direction = (closestPoint - position) / distance;
     vec2 across = vec2(-direction.y, direction.x);
-    bool circular = isCircular(light);
-    float halfWidth = circular ? light.extent.x : dot(abs(across), light.extent.xy);
+    float spread = SourceLightSpread * distance;
     int numRays = max(int(light.centerRange.w), NodeRayStarts);
     vec3 transmittance = vec3(0.0);
     float weightSum = 0.0;
     for (int i = 0; i < numRays; ++i) {
-        float offset = ((float(i) + 0.5) / float(numRays) * 2.0 - 1.0) * halfWidth;
-        float middle = 0.0;
-        float weight = circular ? sqrt(max(halfWidth * halfWidth - offset * offset, 0.0))
-                                : getRectangleChord(light.extent.xy, direction, across, offset, middle);
-        weight = max(weight, 1e-6);
+        float offset = ((float(i) + 0.5) / float(numRays) * 2.0 - 1.0) * spread;
+        vec2 target = getClosestSourcePoint(light, closestPoint + across * offset);
         vec2 start = position + (vec2(float(i & 1), float((i >> 1) & 1)) - 0.5) * 0.5 * frame.gasLight.z;
-        vec2 toTarget = center + across * offset + direction * middle - start;
+        vec2 toTarget = target - start;
         float targetDistance = length(toTarget);
+        float closeness = distance / max(targetDistance, distance);
+        float weight = closeness * closeness;
         vec3 rayTransmittance = vec3(1.0);
         if (targetDistance > 1e-3) {
             rayTransmittance = getObjectTransmittance(start, toTarget / targetDistance, targetDistance);
@@ -272,22 +254,24 @@ vec3 getSourceTransmittance(SourceLight light, vec2 position)
         transmittance += weight * rayTransmittance;
         weightSum += weight;
     }
-    float gasTransmittance = centerDistance > 1e-3 ? getGasTransmittance(position, direction, centerDistance) : 1.0;
-    return transmittance / max(weightSum, 1e-6) * gasTransmittance;
+    return transmittance / weightSum * getGasTransmittance(position, direction, distance);
 }
 
-// The shadowed light in the color of the source and the strength of the unshadowed light. The light is strongest at the area of the source
-// and fades smoothly to its range beyond it.
-vec4 getSourceIrradiance(SourceLight light, vec2 position)
+// The light is strongest at the area of the source and fades smoothly to its range beyond it. In the periodic world, the copy of the source
+// next to the position shines, so that a source does not add up with its copies where they adjoin.
+vec3 getSourceIrradiance(SourceLight light, vec2 position)
 {
+    light.centerRange.xy += frame.world.xy * round((position - light.centerRange.xy) / frame.world.xy);
     float range = light.centerRange.z;
-    float distance = getSourceDistance(light, position);
+    vec2 closestPoint = getClosestSourcePoint(light, position);
+    float distance = length(closestPoint - position);
     if (distance >= range) {
-        return vec4(0.0);
+        return vec3(0.0);
     }
     float fade = 1.0 - distance / range;
     float strength = SourceLightStrength * fade * fade;
-    return vec4(light.colorShape.rgb * strength * getSourceTransmittance(light, position), strength);
+    float limitedStrength = strength / (SourceLightKnee + strength);
+    return light.colorShape.rgb * limitedStrength * getSourceTransmittance(light, position, closestPoint, distance);
 }
 
 // The bounds of the loops stay inside the grid, because loops that skipped the clusters outside returned no light at all on an NVIDIA GPU
@@ -320,11 +304,11 @@ void main()
     }
     imageStore(gasIrradianceImage, node, vec4(irradiance, 1.0));
 
-    vec4 sourceIrradiance = vec4(0.0);
+    vec3 sourceIrradiance = vec3(0.0);
     for (int i = 0; i < frame.numSourceLights.x; ++i) {
         sourceIrradiance += getSourceIrradiance(frame.sourceLights[i], position);
     }
-    imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), sourceIrradiance);
+    imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), vec4(sourceIrradiance, 1.0));
 }
 )";
 }

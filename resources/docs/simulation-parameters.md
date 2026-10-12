@@ -58,8 +58,8 @@ The following parameters can be overridden by layers: background color, friction
 | Grid lines | off | Draws a grid that adapts to the zoom level. |
 | Mark reference domain | on | Draws a frame around the world. |
 | Show radiation center | on | For radiation sources: highlights their area. |
-| Light brightness | 0.25 | For radiation sources with hardware ray tracing: the brightness that the light of the source approaches close to its area. The light forms columns of light and shadow in a faint haze. At 0, the source does not shine. |
 | Light color | white | For radiation sources: the color of their light. |
+| Light brightness | 0.25 | For radiation sources with hardware ray tracing: the brightness that the light of the source approaches close to its area. The light forms columns of light and shadow in a faint haze. At 0, the source does not shine. |
 | Light range | 150 | For radiation sources: the distance from their area up to which their light reaches. |
 | Show force field | on | For layers: darkens the background according to the force field. |
 
