@@ -47,8 +47,10 @@ const float CytoplasmGrain = 1.8;
 const float WallWaveAmplitude = 0.09;
 const float WallWaveFrequency = 2.5;
 
-// The tissue appears embossed as in a microscope with differential interference contrast
+// The tissue appears embossed as in a microscope with differential interference contrast. The relief is limited softly, so that the steep
+// edges of the tissue do not turn dark on one side.
 const float ReliefStrength = 0.1;
+const float MaxRelief = 0.2;
 const vec2 ReliefDirection = vec2(-0.7071, -0.7071);
 
 // Density and material of a group of connected objects
@@ -499,7 +501,7 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
         * (CytoplasmGlow * cytoplasm + OutlineGlow * outline + WallGlow * details.wall + NucleusRimGlow * details.nucleusRim
            + NucleolusGlow * details.nucleolus + VesicleGlow * details.vesicle);
     vec3 glow = emission * CoreGlow * min(tissue.bulge, 1.0) + scattered * TissueScattering * thickness * color;
-    float relief = max(1.0 + ReliefStrength * dot(thicknessGradient, ReliefDirection), 0.2);
+    float relief = 1.0 + MaxRelief * tanh(ReliefStrength * dot(thicknessGradient, ReliefDirection) / MaxRelief);
     vec3 result = (medium * transmittance + (fluorescence + glow) * mix(FarGlowGain, 1.0, closeUpWeight)) * relief;
 
     // Solids are dense grains without the inner structure of cells
