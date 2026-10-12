@@ -29,7 +29,6 @@ std::vector<RenderStep> createRayTracingSteps(RayTracingResources const& resourc
     using enum RayTracingResource;
     using enum RayTracingAccess;
     auto isSceneNeeded = [](SimulationParameters const& parameters, RenderView const& view) { return _RayTracingResources::isSceneNeeded(view, parameters); };
-    auto isEnergyLightActive = [](SimulationParameters const& parameters, RenderView const&) { return _RayTracingResources::isEnergyLightActive(parameters); };
 
     // The lights are sorted into the light grid while the acceleration structures are built
     return {
@@ -71,18 +70,10 @@ std::vector<RenderStep> createRayTracingSteps(RayTracingResources const& resourc
         _RayTracingComputeStep::create(
             resources,
             RayTracingComputeStepParameters()
-                .shader(std::string(Shaders::RayTracingEnergyGridCS))
-                .workGroupSize({64, 1})
-                .dispatchSize(perObject)
-                .accesses({{EnergyCells, Clear}})
-                .condition(isEnergyLightActive)),
-        _RayTracingComputeStep::create(
-            resources,
-            RayTracingComputeStepParameters()
                 .shader(std::string(Shaders::RayTracingGasLightsCS))
                 .workGroupSize({64, 1})
                 .dispatchSize(perObject)
-                .accesses({{GasAccumulation, Read}, {EnergyCells, Read}, {GasLightClusters, Clear}})),
+                .accesses({{GasAccumulation, Read}, {GasLightClusters, Clear}})),
         _RayTracingComputeStep::create(
             resources,
             RayTracingComputeStepParameters()
@@ -98,14 +89,14 @@ std::vector<RenderStep> createRayTracingSteps(RayTracingResources const& resourc
                 .dispatchSize(perGasNode)
                 .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
 
-        // The light reaches the gas through the gas and the cells
+        // The light of the cells and of the radiation sources reaches the gas through the gas and the objects
         _RayTracingComputeStep::create(
             resources,
             RayTracingComputeStepParameters()
                 .shader(std::string(Shaders::RayTracingGasIrradianceCS))
                 .workGroupSize({8, 8})
                 .dispatchSize([](_RayTracingResources const& resources, auto const&) { return resources.getGasGrid().irradianceSize; })
-                .accesses({{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {EnergyCells, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
+                .accesses({{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
         _RayTracingComputeStep::create(
             resources,
             RayTracingComputeStepParameters()

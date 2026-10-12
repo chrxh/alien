@@ -32,7 +32,7 @@ The **base parameters** apply to the whole world. **Layers** override some of th
 
 The following parameters can be overridden by layers: background color, friction, rigidity of solids, maximum force, fusion velocity, absorption factor, radiation type I strength, minimum energy, decay rate of dying cells, the attacker energy cost, food chain color matrix and size protection, the color transition rules and **Disable radiation sources**, which switches off all radiation sources inside the layer.
 
-**Radiation sources** are places where energy particles appear. They have a position, a velocity, a circular or rectangular shape, a relative strength and an optional radiation angle. See [Energy](energy.md#radiation-sources).
+**Radiation sources** are places where energy particles appear. They have a position, a velocity, a circular or rectangular shape, a relative strength and an optional radiation angle. With hardware ray tracing, they also shine with their own brightness, color and range. See [Energy](energy.md#radiation-sources).
 
 > **Note:** There is no gravity parameter. Gravity, wind and currents are created by layers with a linear force field. A layer that covers the whole world with a weak downward force acts as gravity.
 
@@ -54,12 +54,13 @@ The following parameters can be overridden by layers: background color, friction
 | Object coloring | Customization | How objects are colored: by energy, by customization color, by lineage or by creature. |
 | Glow | 0.3 | Strength of the bloom effect. |
 | Fluid illumination | 0.25 | With hardware ray tracing: how strongly the cells light the surrounding fluids. At 0, the fluids are not lit. At 1, they are lit most strongly. |
-| Energy light | 0.25 | With hardware ray tracing: the brightness that the light of regions with a high energy density approaches where it is strong. Their light forms columns of light and shadow in a faint haze. At 0, nothing radiates. |
-| Energy light threshold | 60 | Energy per unit area above which a region radiates. Solids do not count. |
 | Borderless rendering | off | Repeats the world periodically in the view. |
 | Grid lines | off | Draws a grid that adapts to the zoom level. |
 | Mark reference domain | on | Draws a frame around the world. |
 | Show radiation center | on | For radiation sources: highlights their area. |
+| Light brightness | 0.25 | For radiation sources with hardware ray tracing: the brightness that the light of the source approaches close to its area. The light forms columns of light and shadow in a faint haze. At 0, the source does not shine. |
+| Light color | white | For radiation sources: the color of their light. |
+| Light range | 150 | For radiation sources: the distance from their area up to which their light reaches. |
 | Show force field | on | For layers: darkens the background according to the force field. |
 
 ## Guided energy supply

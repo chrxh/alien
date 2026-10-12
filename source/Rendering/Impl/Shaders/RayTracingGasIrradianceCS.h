@@ -4,11 +4,11 @@
 
 namespace Shaders
 {
-    // Computes the light of the cells and the energy light at the nodes of the irradiance grid. Each light cluster shines from the center of
-    // its light, which fades with the distance and is weakened by the gas and the objects on the way, so that dense gas and creatures cast
-    // shadows. The light of the cells passes the cells in the gas grid. The energy light passes the exact objects along rays, so that it
-    // forms sharp columns of light and shadow. Zoomed out, the light spreads over a larger falloff distance near its source, while it stays
-    // the same farther away.
+    // Computes the light of the cells and the light of the radiation sources at the nodes of the irradiance grid. Each light cluster shines
+    // from the center of its light, which fades with the distance and is weakened by the gas and the cells in the gas grid on the way, so that
+    // dense gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while
+    // it stays the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so
+    // that it forms columns of light and shadow.
     std::string_view const RayTracingGasIrradianceCS = R"(
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -22,9 +22,11 @@ const float CellExtinction = 1.0;
 const float TissueExtinction = 6.0;
 const float SolidExtinction = 8.0;
 
-// Only the strongest energy lights at a node cast shadows, the others add their light unshadowed. Negligible light is skipped.
-const int MaxShadowedEnergyLights = 8;
-const float MinEnergyLight = 1e-3;
+// Strength of the light of a radiation source at its area, where the light approaches the brightness of the source
+const float SourceLightStrength = 4.0;
+
+// The rays to a source start at least from this many positions within the area of a node
+const int NodeRayStarts = 4;
 
 // A ray stops once the light is blocked
 const float MaxOpticalDepth = 5.0;
@@ -173,16 +175,16 @@ struct ClusterLight
     float distance;
 };
 
-ClusterLight getClusterLight(vec2 position, ivec2 cluster, uint firstEntry, float fixedPointScale)
+ClusterLight getClusterLight(vec2 position, ivec2 cluster)
 {
     ClusterLight result = ClusterLight(vec3(0.0), vec2(0.0), 0.0);
-    uint entry = uint(cluster.y * frame.gasLightGrid.x + cluster.x) * GasLightClusterStride + firstEntry;
+    uint entry = uint(cluster.y * frame.gasLightGrid.x + cluster.x) * GasLightClusterStride;
     float lightLuminance = float(gasLightClusters[entry + 2u]);
     if (lightLuminance > 0.0) {
         vec2 lightOffset = vec2(float(gasLightClusters[entry]), float(gasLightClusters[entry + 1u])) / lightLuminance - GasLightOffsetShift;
         result.toLight = frame.gasLighting.xy + (vec2(cluster) + lightOffset) * frame.gasLight.x - position;
         result.distance = length(result.toLight);
-        result.color = vec3(float(gasLightClusters[entry + 3u]), float(gasLightClusters[entry + 4u]), float(gasLightClusters[entry + 5u])) / fixedPointScale;
+        result.color = vec3(float(gasLightClusters[entry + 3u]), float(gasLightClusters[entry + 4u]), float(gasLightClusters[entry + 5u])) / GasFixedPointScale;
     }
     return result;
 }
@@ -191,7 +193,7 @@ vec3 getCellLight(vec2 position, ivec2 cluster)
 {
     float range = frame.gasLight.y;
     float falloffDistance = frame.gasLight.w;
-    ClusterLight light = getClusterLight(position, cluster, GasLightEntry_Cells, GasFixedPointScale);
+    ClusterLight light = getClusterLight(position, cluster);
     if (light.distance >= range || luminance(light.color) <= 0.0) {
         return vec3(0.0);
     }
@@ -200,73 +202,92 @@ vec3 getCellLight(vec2 position, ivec2 cluster)
     return light.color * falloff * getTransmittance(position, light.toLight / max(light.distance, 1e-4), light.distance);
 }
 
-// The energy light reaches farther than the light of the cells and fades smoothly to its range. Zoomed out, it reaches as far on the screen
-// as close up and is weakened, so that single regions stay visible while many overlapping regions do not outshine everything.
-vec3 getUnshadowedEnergyLight(ClusterLight light)
+bool isCircular(SourceLight light)
 {
-    float range = frame.energyGrid.w;
-    float falloffDistance = frame.gasLight.w;
-    if (light.distance >= range) {
-        return vec3(0.0);
-    }
-    float fade = 1.0 - light.distance / range;
-    float falloff = sqrt(LightFalloffDistance / falloffDistance) * LightFalloffDistance / (falloffDistance + light.distance);
-    return light.color * falloff * fade * fade;
+    return light.colorShape.w < 0.5;
 }
 
-// The path ends half a cluster before the light, so that the objects of the radiating region do not shadow it
-vec3 getShadowedEnergyLight(vec2 position, ClusterLight light, vec3 unshadowedLight)
+float getSourceDistance(SourceLight light, vec2 position)
 {
-    float pathLength = light.distance - 0.5 * frame.gasLight.x;
-    if (pathLength <= 0.0) {
-        return unshadowedLight;
+    vec2 offset = position - light.centerRange.xy;
+    if (isCircular(light)) {
+        return max(length(offset) - light.extent.x, 0.0);
     }
-    vec2 direction = light.toLight / light.distance;
-    return unshadowedLight * getGasTransmittance(position, direction, pathLength) * getObjectTransmittance(position, direction, pathLength);
+    return length(max(abs(offset) - light.extent.xy, vec2(0.0)));
 }
 
-// The luminance above which the strongest energy lights lie, each of which is traced
-float getShadowedEnergyLightThreshold(vec2 position, ivec2 lowerCluster, ivec2 upperCluster)
+// Length of the line through a rectangle around the origin, which runs along the direction at the offset across it, and the position of
+// the middle of the line along the direction
+float getRectangleChord(vec2 halfSize, vec2 direction, vec2 across, float offset, out float middle)
 {
-    float strongest[MaxShadowedEnergyLights];
-    for (int i = 0; i < MaxShadowedEnergyLights; ++i) {
-        strongest[i] = MinEnergyLight;
-    }
-    for (int y = lowerCluster.y; y <= upperCluster.y; ++y) {
-        for (int x = lowerCluster.x; x <= upperCluster.x; ++x) {
-            ClusterLight light = getClusterLight(position, ivec2(x, y), GasLightEntry_Energy, EnergyLightFixedPointScale);
-            float lightLuminance = luminance(getUnshadowedEnergyLight(light));
-            for (int i = 0; i < MaxShadowedEnergyLights; ++i) {
-                if (lightLuminance > strongest[i]) {
-                    float weaker = strongest[i];
-                    strongest[i] = lightLuminance;
-                    lightLuminance = weaker;
-                }
+    vec2 start = across * offset;
+    float enter = -1e20;
+    float exit = 1e20;
+    middle = 0.0;
+    for (int axis = 0; axis < 2; ++axis) {
+        if (abs(direction[axis]) < 1e-6) {
+            if (abs(start[axis]) > halfSize[axis]) {
+                return 0.0;
             }
+            continue;
         }
+        float t0 = (-halfSize[axis] - start[axis]) / direction[axis];
+        float t1 = (halfSize[axis] - start[axis]) / direction[axis];
+        enter = max(enter, min(t0, t1));
+        exit = min(exit, max(t0, t1));
     }
-    return strongest[MaxShadowedEnergyLights - 1];
+    middle = 0.5 * (enter + exit);
+    return max(exit - enter, 0.0);
 }
 
-// The shadowed light and the luminance of the unshadowed light
-vec4 getEnergyIrradiance(vec2 position, ivec2 lowerCluster, ivec2 upperCluster)
+// The area of a source is divided into strips along the direction to the source. A ray runs to the middle of each strip and counts with
+// the length of the strip, so that the shadows become soft behind large areas. The rays start at fixed positions within the area of the
+// node, so that sharp edges of the shadows are smoothed instead of being cut into steps by the grid. The strips follow the direction, so
+// the shadows do not flicker.
+vec3 getSourceTransmittance(SourceLight light, vec2 position)
 {
-    float shadowThreshold = getShadowedEnergyLightThreshold(position, lowerCluster, upperCluster);
-    vec4 result = vec4(0.0);
-    for (int y = lowerCluster.y; y <= upperCluster.y; ++y) {
-        for (int x = lowerCluster.x; x <= upperCluster.x; ++x) {
-            ClusterLight light = getClusterLight(position, ivec2(x, y), GasLightEntry_Energy, EnergyLightFixedPointScale);
-            vec3 unshadowedLight = getUnshadowedEnergyLight(light);
-            float lightLuminance = luminance(unshadowedLight);
-            result.a += lightLuminance;
-            if (lightLuminance >= shadowThreshold) {
-                result.rgb += getShadowedEnergyLight(position, light, unshadowedLight);
-            } else {
-                result.rgb += unshadowedLight;
-            }
+    vec2 center = light.centerRange.xy;
+    vec2 toCenter = center - position;
+    float centerDistance = length(toCenter);
+    vec2 direction = centerDistance > 1e-4 ? toCenter / centerDistance : vec2(1.0, 0.0);
+    vec2 across = vec2(-direction.y, direction.x);
+    bool circular = isCircular(light);
+    float halfWidth = circular ? light.extent.x : dot(abs(across), light.extent.xy);
+    int numRays = max(int(light.centerRange.w), NodeRayStarts);
+    vec3 transmittance = vec3(0.0);
+    float weightSum = 0.0;
+    for (int i = 0; i < numRays; ++i) {
+        float offset = ((float(i) + 0.5) / float(numRays) * 2.0 - 1.0) * halfWidth;
+        float middle = 0.0;
+        float weight = circular ? sqrt(max(halfWidth * halfWidth - offset * offset, 0.0))
+                                : getRectangleChord(light.extent.xy, direction, across, offset, middle);
+        weight = max(weight, 1e-6);
+        vec2 start = position + (vec2(float(i & 1), float((i >> 1) & 1)) - 0.5) * 0.5 * frame.gasLight.z;
+        vec2 toTarget = center + across * offset + direction * middle - start;
+        float targetDistance = length(toTarget);
+        vec3 rayTransmittance = vec3(1.0);
+        if (targetDistance > 1e-3) {
+            rayTransmittance = getObjectTransmittance(start, toTarget / targetDistance, targetDistance);
         }
+        transmittance += weight * rayTransmittance;
+        weightSum += weight;
     }
-    return result;
+    float gasTransmittance = centerDistance > 1e-3 ? getGasTransmittance(position, direction, centerDistance) : 1.0;
+    return transmittance / max(weightSum, 1e-6) * gasTransmittance;
+}
+
+// The shadowed light in the color of the source and the strength of the unshadowed light. The light is strongest at the area of the source
+// and fades smoothly to its range beyond it.
+vec4 getSourceIrradiance(SourceLight light, vec2 position)
+{
+    float range = light.centerRange.z;
+    float distance = getSourceDistance(light, position);
+    if (distance >= range) {
+        return vec4(0.0);
+    }
+    float fade = 1.0 - distance / range;
+    float strength = SourceLightStrength * fade * fade;
+    return vec4(light.colorShape.rgb * strength * getSourceTransmittance(light, position), strength);
 }
 
 // The bounds of the loops stay inside the grid, because loops that skipped the clusters outside returned no light at all on an NVIDIA GPU
@@ -299,12 +320,11 @@ void main()
     }
     imageStore(gasIrradianceImage, node, vec4(irradiance, 1.0));
 
-    vec4 energyIrradiance = vec4(0.0);
-    if (isEnergyLightActive()) {
-        getClusterBounds(position, frame.energyGrid.w, lowerCluster, upperCluster);
-        energyIrradiance = getEnergyIrradiance(position, lowerCluster, upperCluster);
+    vec4 sourceIrradiance = vec4(0.0);
+    for (int i = 0; i < frame.numSourceLights.x; ++i) {
+        sourceIrradiance += getSourceIrradiance(frame.sourceLights[i], position);
     }
-    imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), energyIrradiance);
+    imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), sourceIrradiance);
 }
 )";
 }

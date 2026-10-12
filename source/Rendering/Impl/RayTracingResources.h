@@ -24,7 +24,6 @@ enum class RayTracingResource
     GasAccumulation,
     GasIntermediate,
     GasLightClusters,
-    EnergyCells,
 
     // Top level acceleration structure
     Scene,
@@ -61,9 +60,10 @@ public:
     // The background is scaled by the inverse of the factor with which the bloom weights the scene
     static float getBackgroundScale(SimulationParameters const& parameters);
 
-    static bool isEnergyLightActive(SimulationParameters const& parameters);
+    // Radiation sources shine with a brightness above 0
+    static bool isSourceLightActive(SimulationParameters const& parameters);
 
-    // The objects form a scene for the tissue and for the shadows of the energy light
+    // The objects form a scene for the tissue and for the shadows of the light of the radiation sources
     static bool isSceneNeeded(RenderView const& view, SimulationParameters const& parameters);
 
     // Allocates the resources for the view and the visible objects. Calling it before the commands are recorded lets a lack of memory
@@ -162,19 +162,9 @@ private:
     static ViewResources createViewResources(IntVector2D const& size);
     static void destroyViewResources(ViewResources& resources, bool immediately);
 
-    // Grid in world coordinates whose cells collect the energy of the objects. Its cells have the same size at all zoom levels unless the
-    // grid would get too large, so that the regions with a high energy density stay the same.
-    struct EnergyGrid
-    {
-        RealVector2D origin;
-        float cellSize = 1.0f;
-        IntVector2D size;
-    };
-
     void createFrameResources();
     void updateLightGrid(RealRect const& visibleWorldRect);
     void updateGasGrid(RenderView const& view);
-    void updateEnergyGrid();
 
     void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters, IntVector2D const& worldSize);
     void writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures);
@@ -208,9 +198,6 @@ private:
     VulkanBuffer _gasLightClusters;
     VulkanImage _gasImage;
     VulkanImage _gasIrradiance;
-
-    EnergyGrid _energyGrid;
-    VulkanBuffer _energyCells;
 
     bool _stillPicture = false;
     bool _previousFrameValid = false;
