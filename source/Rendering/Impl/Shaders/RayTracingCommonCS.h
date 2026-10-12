@@ -299,6 +299,13 @@ vec3 getScatteredLight(vec2 position)
 //* Background
 //*************************
 
+// The tone mapping of Shaders/ToneMappingFS.h for non-negative colors
+vec3 toneMapping(vec3 color)
+{
+    vec3 mapped = clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), 0.0, 1.0);
+    return pow(mapped, vec3(1.0 / 1.6));
+}
+
 // The background color is meant as the color after the tone mapping, so that empty regions keep their look
 vec3 inverseToneMapping(vec3 color)
 {

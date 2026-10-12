@@ -8,8 +8,9 @@
 #include "RenderStep.h"
 
 // Renders the creatures with hardware ray tracing as living tissue under a microscope, see Shaders/RayTracingTissueCS.h, and the fluids as
-// gas around it, see Shaders/RayTracingGasShadingCS.h. The inputs are the background and the energy particles, the output is the scene in
-// high dynamic range. Each frame is computed completely, only still pictures average several frames for the anti-aliasing.
+// gas around it, see Shaders/RayTracingGasShadingCS.h. The inputs are the background and the energy particles, the output is the light in
+// front of the background in high dynamic range, to which the background is added after the tone mapping as in the rasterized view. Each
+// frame is computed completely, only still pictures average several frames for the anti-aliasing.
 class _RayTracingRenderStep : public _RenderStep
 {
 public:
