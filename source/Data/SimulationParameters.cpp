@@ -118,6 +118,17 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("With hardware ray tracing, the cells light the surrounding fluids in their colors. This parameter controls the "
                                      "strength of this light. At 0, the fluids are not lit by the cells. At 1, they are lit most strongly."),
                     ParameterSpec()
+                        .name("Energy light")
+                        .reference(FloatSpec().member(&SimulationParameters::energyLight).min(0.0f).max(1.0f))
+                        .description("With hardware ray tracing, regions with a high energy density radiate light, which illuminates the objects and "
+                                     "fluids around them and appears as columns of light in a faint haze. The objects on the way cast shadows. This "
+                                     "parameter sets the brightness that the light approaches where it is strong. At 0, nothing radiates."),
+                    ParameterSpec()
+                        .name("Energy light threshold")
+                        .reference(FloatSpec().member(&SimulationParameters::energyLightThreshold).min(0.0f).max(500.0f))
+                        .description("Energy per unit area above which a region radiates. Dense groups of objects and objects with much energy "
+                                     "exceed it and radiate more strongly the more they exceed it. Solids do not count."),
+                    ParameterSpec()
                         .name("Borderless rendering")
                         .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))
                         .description("If activated, the simulation is rendered periodically in the view port."),

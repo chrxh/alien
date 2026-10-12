@@ -51,6 +51,11 @@ const float Material_Tissue = 0.0;
 const float Material_Solid = 1.0;
 const float Material_Inactive = 2.0;
 
+const int ObjectType_Solid = 0;
+const int ObjectType_Fluid = 1;
+const int ObjectType_FreeCell = 2;
+const int ObjectType_Cell = 3;
+
 struct ObjectVertex
 {
     float pos[3];
@@ -100,6 +105,10 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
                       // w: falloff distance of the lights
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
     vec4 gasLighting;  // xy: world position of the first light cluster, z: strength of the light of the cells in the gas
+    vec4 energyGrid;   // xy: world position of the first cell of the energy grid, z: size of a cell, w: range of the energy light
+    ivec4 energyGridSize;  // xy: number of cells of the energy grid, zw: size of the world
+    vec4 energyLight;  // x: factor of the radiation per area, y: energy per area above which regions radiate, z: 1 for borderless rendering,
+                       // w: brightness of the energy light
 } frame;
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT scene;
@@ -129,6 +138,7 @@ layout(set = 0, binding = 24) uniform sampler2D energyParticleTexture;
 layout(set = 0, binding = 25, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
 layout(set = 0, binding = 26, rgba16f) uniform image2D gasIrradianceImage;
 layout(set = 0, binding = 27) uniform sampler2D gasIrradianceSampler;
+layout(set = 0, binding = 28, std430) buffer EnergyGridBuffer { uint energyGrid[]; };
 
 //*******************
 //* General helpers
@@ -165,6 +175,11 @@ float luminance(vec3 color)
 float maxComponent(vec3 value)
 {
     return max(value.x, max(value.y, value.z));
+}
+
+float minComponent(vec3 value)
+{
+    return min(value.x, min(value.y, value.z));
 }
 
 float hash(vec2 position)
@@ -321,6 +336,8 @@ vec3 getBackgroundRadiance(vec2 world)
     return inverseToneMapping(texture(groundTexture, worldToGraphTextureCoord(world)).rgb) * frame.parameters.x;
 }
 
+)"
+                                                R"(
 //*******************************
 //* Gas of the fluid particles
 //*******************************
@@ -332,12 +349,17 @@ const int GasLayers = 2;
 const float GasFixedPointScale = 1024.0;
 const uint GasAccumulationStride = 5u;
 
-// The cells light the gas. Their light is collected in clusters of the light cluster grid with the sums of the luminance weighted offsets
-// to the cluster corner, the luminance and the color. Each cell contributes bilinearly to the four clusters around it, so that the light
-// changes smoothly when cells move from one cluster to another. The offsets are shifted by one cluster to stay positive.
-const uint GasLightClusterStride = 6u;
+// The cells light the gas, and regions with a high energy density light everything around them. Both lights are collected in clusters of
+// the light cluster grid with the sums of the luminance weighted offsets to the cluster corner, the luminance and the color, first the
+// light of the cells, then the energy light. Each object contributes bilinearly to the four clusters around it, so that the light changes
+// smoothly when objects move from one cluster to another. The offsets are shifted by one cluster to stay positive. The irradiance image
+// holds the light of the cells and the energy light side by side.
+const uint GasLightClusterStride = 12u;
+const uint GasLightEntry_Cells = 0u;
+const uint GasLightEntry_Energy = 6u;
 const float GasLightOffsetShift = 1.0;
 const int GasIrradianceImageSize = 512;
+const float EnergyLightFixedPointScale = 64.0;
 
 // Clouds: color sum and number of particles. Cells: number of cells in x.
 const int GasLayer_Clouds = 0;
@@ -408,11 +430,92 @@ vec4 sampleGasLayerSmooth(vec2 world, int layer)
     return sampleRegionCubic(gasSampler, getGasTexel(world), getGasLayerStart(layer), vec2(frame.gasSize.xy), getGasImageSize());
 }
 
+vec4 sampleIrradiance(vec2 world, float regionStart)
+{
+    vec2 texel = (world - frame.gasGrid.xy) / frame.gasLight.z + 0.5;
+    vec2 imageSize = vec2(2 * GasIrradianceImageSize, GasIrradianceImageSize);
+    return sampleRegionCubic(gasIrradianceSampler, texel, vec2(regionStart, 0.0), vec2(frame.gasLightGrid.zw), imageSize);
+}
+
 // Light of the cells that reaches a position in the gas
 vec3 sampleGasIrradiance(vec2 world)
 {
-    vec2 texel = (world - frame.gasGrid.xy) / frame.gasLight.z + 0.5;
-    return sampleRegionCubic(gasIrradianceSampler, texel, vec2(0.0), vec2(frame.gasLightGrid.zw), vec2(GasIrradianceImageSize)).rgb;
+    return sampleIrradiance(world, 0.0).rgb;
+}
+)"
+                                                R"(
+//*******************************
+//* Energy light
+//*******************************
+
+// Regions with a high energy density radiate. The energy of the objects is collected bilinearly in the energy grid, which is aligned to
+// the world and has a fixed cell size as long as it does not get too large, so that the regions radiate the same at all zoom levels. The
+// rendered colors of the objects scale with their energy. Solids belong to the scenery and do not count.
+const float EnergyFixedPointScale = 4.0;
+const float EnergyPerColorBrightness = 320.0;
+
+// The strength of the energy light is limited: it approaches its maximum where the light is strong, while weak light stays visible. The
+// shadows keep their share of the light, so that the columns of light remain at every strength. The irradiance of the energy light holds
+// the shadowed light and in its alpha channel the luminance of the unshadowed light.
+const float EnergyLightKnee = 1.0;
+
+bool isEnergyLightActive()
+{
+    return frame.energyLight.x > 0.0;
+}
+
+// Its luminance stays below the brightness of the energy light
+vec3 getEnergyLight(vec2 world)
+{
+    vec4 irradiance = sampleIrradiance(world, float(GasIrradianceImageSize));
+    return frame.energyLight.w * max(irradiance.rgb, vec3(0.0)) / (EnergyLightKnee + max(irradiance.a, 0.0));
+}
+
+// Without borderless rendering, the space outside the world stays dark
+bool isInWorld(vec2 world)
+{
+    return frame.energyLight.z > 0.5 || (all(greaterThanEqual(world, vec2(0.0))) && all(lessThanEqual(world, vec2(frame.energyGridSize.zw))));
+}
+
+float getObjectEnergy(ObjectVertex object)
+{
+    if (((object.state >> 8) & 0xff) == ObjectType_Solid) {
+        return 0.0;
+    }
+    return maxComponent(vec3(object.color[0], object.color[1], object.color[2])) * EnergyPerColorBrightness;
+}
+
+vec2 getEnergyCellCoord(vec2 world)
+{
+    return (world - frame.energyGrid.xy) / frame.energyGrid.z - 0.5;
+}
+
+uint getEnergyCellIndex(ivec2 cell)
+{
+    return uint(cell.y * frame.energyGridSize.x + cell.x);
+}
+
+bool isInEnergyGrid(ivec2 cell)
+{
+    return all(greaterThanEqual(cell, ivec2(0))) && all(lessThan(cell, frame.energyGridSize.xy));
+}
+
+// Energy per area at a position
+float getEnergyDensity(vec2 world)
+{
+    vec2 coord = getEnergyCellCoord(world);
+    ivec2 lowerCell = ivec2(floor(coord));
+    vec2 fraction = coord - vec2(lowerCell);
+    float result = 0.0;
+    for (int i = 0; i < 4; ++i) {
+        ivec2 offset = ivec2(i & 1, i >> 1);
+        ivec2 cell = lowerCell + offset;
+        if (isInEnergyGrid(cell)) {
+            vec2 axisWeights = mix(1.0 - fraction, fraction, vec2(offset));
+            result += axisWeights.x * axisWeights.y * float(energyGrid[getEnergyCellIndex(cell)]);
+        }
+    }
+    return result / (EnergyFixedPointScale * frame.energyGrid.z * frame.energyGrid.z);
 }
 
 // The energy particles and the cores of glowing fluids keep the look of the rasterized view

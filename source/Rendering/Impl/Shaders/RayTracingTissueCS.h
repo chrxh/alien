@@ -475,8 +475,18 @@ vec3 getHalo(Tissue tissue)
     return getTissueColor(tissue) * brightness * HaloGlow * getCloseUpWeight() * exp(-distance / HaloWidth) * (1.0 - solid);
 }
 
+// The tissue scatters the energy light in its color, see Shaders/RayTracingGasIrradianceCS.h
+const float EnergyLightScattering = 2.0;
+const float TissueEnergyLight = 0.8;
+const float SolidEnergyLight = 0.6;
+
+vec3 getEnergyLightOnTissue(vec2 position)
+{
+    return isEnergyLightActive() ? getEnergyLight(position) * EnergyLightScattering : vec3(0.0);
+}
+
 // Zoomed out, the structures are only a few pixels wide and appear as dense lines without outline
-vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 medium, vec3 scattered)
+vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 medium, vec3 scattered, vec3 energyLight)
 {
     float closeUpWeight = getCloseUpWeight();
     float excess = max(tissue.density - DensityThreshold, 0.0);
@@ -500,12 +510,13 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
     vec3 fluorescence = color * brightness
         * (CytoplasmGlow * cytoplasm + OutlineGlow * outline + WallGlow * details.wall + NucleusRimGlow * details.nucleusRim
            + NucleolusGlow * details.nucleolus + VesicleGlow * details.vesicle);
-    vec3 glow = emission * CoreGlow * min(tissue.bulge, 1.0) + scattered * TissueScattering * thickness * color;
+    vec3 glow = emission * CoreGlow * min(tissue.bulge, 1.0) + (scattered * TissueScattering + energyLight * TissueEnergyLight) * thickness * color;
     float relief = 1.0 + MaxRelief * tanh(ReliefStrength * dot(thicknessGradient, ReliefDirection) / MaxRelief);
     vec3 result = (medium * transmittance + (fluorescence + glow) * mix(FarGlowGain, 1.0, closeUpWeight)) * relief;
 
     // Solids are dense grains without the inner structure of cells
-    vec3 solidColor = (medium * exp(-6.0 * opticalDensity) + color * brightness * (0.3 + 0.5 * thickness)) * relief;
+    vec3 solidColor =
+        (medium * exp(-6.0 * opticalDensity) + color * brightness * (0.3 + 0.5 * thickness) + energyLight * SolidEnergyLight * color) * relief;
     return mix(result, solidColor, solid);
 }
 
@@ -535,6 +546,7 @@ void main()
     vec3 scattered = tissueVisibility > 0.0 ? getScatteredLight(position) : vec3(0.0);
     vec3 background = getBackgroundRadiance(position);
     vec3 medium = shadeGas(position, background) + getEnergyParticleRadiance(position);
+    vec3 energyLight = getEnergyLightOnTissue(position);
     vec3 color = medium;
     if (tissueVisibility > 0.0) {
         vec3 lightedMedium = medium + scattered * MediumScattering;
@@ -543,11 +555,14 @@ void main()
         Tissue tissue = gatherTissue(position, neighborhood);
         if (tissue.weight > 0.0) {
             float coverage = getCoverage(tissue);
-            color = mix(lightedMedium + getHalo(tissue), shadeTissue(tissue, neighborhood, position, medium, scattered), coverage);
+            color = mix(lightedMedium + getHalo(tissue), shadeTissue(tissue, neighborhood, position, medium, scattered, energyLight), coverage);
         }
         color = mix(medium, color, tissueVisibility);
     }
-    imageStore(sceneColor, pixel, vec4(getForeground(color, background), 1.0));
+
+    // The rasterized objects scatter the energy light as well, its strength is passed on to them in the alpha channel, see
+    // Shaders/RayTracingMergeFS.h
+    imageStore(sceneColor, pixel, vec4(getForeground(color, background), luminance(energyLight)));
 }
 )";
 }

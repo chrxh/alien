@@ -7,7 +7,8 @@ namespace Shaders
     // Shows the fluids as a glowing nebula. Each fluid contributes as much light as its soft disk in the rasterized view and the clouds take
     // the outline of the rasterized fluids, so that brightness and shapes match the rasterized view at every zoom level. Thin gas glows in
     // saturated colors, dense gas towards warm white, and the edges of the clouds glow brighter. The gas also scatters the colored light of
-    // the cells around it, see Shaders/RayTracingGasIrradianceCS.h.
+    // the cells and the energy light around it, see Shaders/RayTracingGasIrradianceCS.h. A faint haze everywhere scatters the energy light,
+    // so that it appears as columns of light and shadow in empty space.
     std::string_view const RayTracingGasShadingCS = R"(
 // Light of a fluid in the rasterized view: a soft disk of radius 7.5 with a peak of 0.15
 const float RasterDiskIntegral = 7.95;
@@ -26,6 +27,19 @@ const float NebulaEdgeGlow = 1.5;
 const float GasScattering = 0.6;
 const float CellLightTint = 0.5;
 const float CellLightLimit = 0.3;
+const float HazeScattering = 0.45;
+
+// Light is limited softly, so that weak light stays unchanged
+vec3 limitLight(vec3 light, float limit)
+{
+    float level = luminance(light) / limit;
+    return light / sqrt(1.0 + level * level);
+}
+
+vec3 getHaze(vec2 position)
+{
+    return isEnergyLightActive() && isInWorld(position) ? getEnergyLight(position) * HazeScattering : vec3(0.0);
+}
 
 float getThickness(vec2 position)
 {
@@ -46,6 +60,7 @@ vec2 getThicknessGradient(vec2 position)
 
 vec3 shadeGas(vec2 position, vec3 background)
 {
+    background += getHaze(position);
     vec4 clouds = sampleGasLayerSmooth(position, GasLayer_Clouds);
     float density = max(clouds.a, 0.0);
     if (density < 1e-4) {
@@ -71,13 +86,13 @@ vec3 shadeGas(vec2 position, vec3 background)
     float edge = smoothstep(0.1, 0.5, length(getThicknessGradient(position))) * coverage;
     vec3 nebula = brightness * nebulaColor * (1.0 + NebulaEdgeGlow * edge);
 
-    // The light of many cells, for example along chains of cells, would outshine the gas. It is limited softly, so that weak light stays
-    // unchanged. The simulation parameter fluid illumination scales the result.
+    // The light of many cells, for example along chains of cells, would outshine the gas, hence it is limited. The simulation parameter
+    // fluid illumination scales the light in the gas.
     float scattering = 1.0 - exp(-GasScattering * density);
-    vec3 cellLight = sampleGasIrradiance(position) * mix(vec3(1.0), hue, CellLightTint) * scattering;
-    float lightLevel = luminance(cellLight) / CellLightLimit;
-    cellLight /= sqrt(1.0 + lightLevel * lightLevel);
-    return background + nebula + frame.gasLighting.z * cellLight;
+    vec3 tint = mix(vec3(1.0), hue, CellLightTint) * scattering;
+    vec3 cellLight = limitLight(sampleGasIrradiance(position) * tint, CellLightLimit);
+    vec3 energyLight = isEnergyLightActive() ? getEnergyLight(position) * tint : vec3(0.0);
+    return background + nebula + frame.gasLighting.z * (cellLight + energyLight);
 }
 )";
 }

@@ -57,11 +57,12 @@ void main()
     if (!isInView(pixel)) {
         return;
     }
-    vec3 color = frame.parameters.z > 0.5 ? applyFxaa(pixel) : imageLoad(sceneColor, pixel).rgb;
+    vec4 sceneColorValue = imageLoad(sceneColor, pixel);
+    vec4 color = vec4(frame.parameters.z > 0.5 ? applyFxaa(pixel) : sceneColorValue.rgb, sceneColorValue.a);
     if (frame.parameters.w < 1.0) {
-        color = mix(texelFetch(previousAntiAliased, pixel, 0).rgb, color, frame.parameters.w);
+        color = mix(texelFetch(previousAntiAliased, pixel, 0), color, frame.parameters.w);
     }
-    imageStore(antiAliased, pixel, vec4(color, 1.0));
+    imageStore(antiAliased, pixel, color);
 }
 )";
 }
