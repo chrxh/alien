@@ -137,7 +137,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Light color")
                         .reference(ColorSpec().member(&SimulationParameters::sourceLightColor))
-                        .description("Color of the light of the radiation source."),
+                        .description("Color of the light of the radiation source. The highlighted area of the radiation source takes this color as well."),
                     ParameterSpec()
                         .name("Light brightness")
                         .reference(FloatSpec().member(&SimulationParameters::sourceLightBrightness).min(0.0f).max(1.0f))

@@ -6,6 +6,9 @@
 
 namespace
 {
+    // The radiation center shows the light color of its source darkened, so that it stays in the background
+    __device__ float constexpr RadiationCenterBrightness = 0.45f;
+
     __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
@@ -440,7 +443,8 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
         correctPositionForRendering(pos, visibleTopLeft, data.world.getSize());
 
-        float3 color = {0.15f, 0.15f, 0.45f};
+        auto const& lightColor = cudaSimulationParameters.sourceLightColor.sourceValues[i];
+        float3 color = {lightColor.r * RadiationCenterBrightness, lightColor.g * RadiationCenterBrightness, lightColor.b * RadiationCenterBrightness};
         auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];
         auto radius = cudaSimulationParameters.sourceCircularRadius.sourceValues[i];
         auto rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[i];
