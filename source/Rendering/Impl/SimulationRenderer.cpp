@@ -14,7 +14,7 @@
 #include "RayTracingResources.h"
 #include "RayTracingSteps.h"
 #include "RenderGraph.h"
-#include "RenderStep.h"
+#include "RenderSteps.h"
 #include "VulkanContext.h"
 #include "VulkanFrameRenderer.h"
 
@@ -26,6 +26,10 @@ namespace
     // The wide glow carries the light of bright regions into dark ones, where it appears brighter after the tone mapping. It is weakened, so
     // that the overall brightness does not increase.
     auto constexpr GlowWeight = 0.7f;
+
+    // Threads that share the work of a node of the irradiance grid, so that its rays to the radiation sources run in parallel, see
+    // Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
+    auto constexpr ThreadsPerIrradianceNode = 16;
 }
 
 void SimulationRenderer::setup(ImFont* labelFont)
@@ -535,11 +539,132 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
     _rasterGraph = std::make_shared<_RenderGraph>(std::move(blocks), _geometryBuffers);
 }
 
+namespace
+{
+    IntVector2D perObject(_RayTracingResources const&, NumRenderObjects const& numObjects)
+    {
+        return {toInt(numObjects.objects), 1};
+    }
+
+    IntVector2D perGasNode(_RayTracingResources const& resources, NumRenderObjects const&)
+    {
+        return resources.getGasGrid().size;
+    }
+
+    IntVector2D perPixel(_RayTracingResources const& resources, NumRenderObjects const&)
+    {
+        return resources.getViewSize();
+    }
+
+    // The ray tracing steps compute into the shared resources, see RayTracingSteps.h. The lights are sorted into the light grid while the
+    // acceleration structures are built.
+    RenderSequence createRayTracingSequence(RayTracingResources const& resources)
+    {
+        using enum RayTracingResource;
+        using enum RayTracingAccess;
+
+        return RenderSequence().steps({
+            _RayTracingFrameStep::create(resources),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingPrepareCS))
+                    .workGroupSize({64, 1})
+                    .dispatchSize([](auto const&, NumRenderObjects const& numObjects) {
+                        return IntVector2D{toInt(std::max({numObjects.objects, numObjects.lineIndices / 2, numObjects.triangleIndices / 3})), 1};
+                    })
+                    .accesses({{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}, {CellCounts, Clear}})
+                    .requiresScene(true)),
+            _RayTracingSceneStep::create(resources),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingAllocateCS))
+                    .workGroupSize({256, 1})
+                    .dispatchSize(
+                        [](_RayTracingResources const& resources, auto const&) { return IntVector2D{toInt(resources.getLightGrid().getNumCells()), 1}; })
+                    .accesses({{CellCounts, Read}, {CellCursors, ReadWrite}, {Allocation, Clear}})
+                    .requiresScene(true)),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingScatterCS))
+                    .workGroupSize({64, 1})
+                    .dispatchSize(perObject)
+                    .accesses({{Spheres, Read}, {CellCursors, ReadWrite}, {CellEntries, ReadWrite}})
+                    .requiresScene(true)),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingGasSplatCS))
+                    .workGroupSize({64, 1})
+                    .dispatchSize([](auto const&, NumRenderObjects const& numObjects) { return IntVector2D{toInt(numObjects.fluidParticles), 1}; })
+                    .accesses({{GasAccumulation, Clear}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingGasLightsCS))
+                    .workGroupSize({64, 1})
+                    .dispatchSize(perObject)
+                    .accesses({{GasAccumulation, ReadWrite}, {GasLightClusters, Clear}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingGasBlurCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize(perGasNode)
+                    .accesses({{GasAccumulation, Read}, {GasIntermediate, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader("#define VERTICAL\n" + std::string(Shaders::RayTracingGasBlurCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize(perGasNode)
+                    .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
+
+            // The light of the cells and of the radiation sources reaches the gas through the gas and the objects. The threads of a work group
+            // row share a node, so that the many rays of the nodes close to large sources spread over the GPU.
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingGasIrradianceCS))
+                    .workGroupSize({ThreadsPerIrradianceNode, 4})
+                    .dispatchSize([](_RayTracingResources const& resources, auto const&) {
+                        auto const& size = resources.getGasGrid().irradianceSize;
+                        return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
+                    })
+                    .accesses({{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingGasShadingCS) + std::string(Shaders::RayTracingTissueCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize(perPixel)
+                    .accesses(
+                        {{Scene, Read},
+                         {Spheres, Read},
+                         {CellCounts, Read},
+                         {CellCursors, Read},
+                         {CellEntries, Read},
+                         {GasImage, Read},
+                         {GasIrradiance, Read},
+                         {SceneColor, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingAntiAliasingCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize(perPixel)
+                    .accesses({{SceneColor, Read}, {PreviousAntiAliased, Read}, {AntiAliased, ReadWrite}})),
+            _RayTracingPresentStep::create(resources),
+            _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
+        });
+    }
+}
+
 void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
 {
     _rayTracingResources = _RayTracingResources::create();
-    auto rayTracingSteps = createRayTracingSteps(_rayTracingResources);
-    rayTracingSteps.emplace_back(_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)));
 
     // The ray tracing renders the fluids itself as gas, the energy particles and the cores of glowing fluids keep the look of the rasterized view
     auto blocks = createFluidParticleBlocks(true);
@@ -562,7 +687,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
             // Render block: Four outputs: Ray tracing of the objects on the ground, its attack events softened as in the rasterized view, the
             // rasterized objects, which replace the ray tracing when zoomed out, and the ground, which they absorb like the tissue
             RenderBlock{
-                RenderSequence().steps(rayTracingSteps),
+                createRayTracingSequence(_rayTracingResources),
                 RenderSequence().steps({
                     _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),

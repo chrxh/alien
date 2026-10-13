@@ -46,7 +46,7 @@ namespace
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
     };
 
-    // The ray traced light of a node of the irradiance grid is summed over 16 threads of a subgroup, see RayTracingSteps.cpp
+    // The ray traced light of a node of the irradiance grid is summed over 16 threads of a subgroup, see SimulationRenderer.cpp
     auto constexpr MinRayTracingSubgroupSize = 16u;
 }
 
