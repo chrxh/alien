@@ -44,17 +44,34 @@ Sphere createSphere(uint index)
     return result;
 }
 
-// A NaN as minimum deactivates the bounding box. The boxes extend over all heights, since the rays run vertically.
-Aabb createAabb(vec2 lower, vec2 upper, bool enabled)
-{
-    return Aabb(enabled ? lower.x : uintBitsToFloat(0x7fc00000u), lower.y, -1.0, upper.x, upper.y, 2.0);
-}
-
 // Without visible tissue, the scene only serves the shadows of the light of the radiation sources, which need the sizes of the objects close
 // up
 bool isSceneForShadowsOnly()
 {
     return frame.tissue.w <= 0.0;
+}
+
+// The rays to a radiation source start at most about one node of the irradiance grid beyond its range around the area of the source
+bool isInSourceLightRange(vec2 lower, vec2 upper)
+{
+    vec2 center = 0.5 * (lower + upper);
+    float radius = 0.5 * length(upper - lower) + frame.gasLight.z;
+    for (int i = 0; i < frame.numSourceLights.x; ++i) {
+        SourceLight light = frame.sourceLights[i];
+        light.centerRangeShape.xy = getNearestSourceCenter(light, center);
+        if (length(getClosestSourcePoint(light, center) - center) <= light.centerRangeShape.z + radius) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// A NaN as minimum deactivates the bounding box. The boxes extend over all heights, since the rays run vertically. Shadows only need the
+// objects in the range of the sources.
+Aabb createAabb(vec2 lower, vec2 upper, bool enabled)
+{
+    enabled = enabled && (!isSceneForShadowsOnly() || isInSourceLightRange(lower, upper));
+    return Aabb(enabled ? lower.x : uintBitsToFloat(0x7fc00000u), lower.y, -1.0, upper.x, upper.y, 2.0);
 }
 
 float getCellExtent(Sphere sphere)

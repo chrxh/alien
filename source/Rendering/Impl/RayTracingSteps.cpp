@@ -8,6 +8,10 @@
 
 namespace
 {
+    // Threads that share the work of a node of the irradiance grid, so that its rays to the radiation sources run in parallel, see
+    // Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
+    auto constexpr ThreadsPerIrradianceNode = 16;
+
     // Steps that compute into the shared resources. Steps that work on the scene of the objects are skipped while it is not needed.
     class _RayTracingStep : public _RenderStep
     {
@@ -222,13 +226,17 @@ std::vector<RenderStep> createRayTracingSteps(RayTracingResources const& resourc
                 .dispatchSize(perGasNode)
                 .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
 
-        // The light of the cells and of the radiation sources reaches the gas through the gas and the objects
+        // The light of the cells and of the radiation sources reaches the gas through the gas and the objects. The threads of a work group row
+        // share a node, so that the many rays of the nodes close to large sources spread over the GPU.
         _RayTracingComputeStep::create(
             resources,
             ComputeStepParameters()
                 .shader(std::string(Shaders::RayTracingGasIrradianceCS))
-                .workGroupSize({8, 8})
-                .dispatchSize([](_RayTracingResources const& resources, auto const&) { return resources.getGasGrid().irradianceSize; })
+                .workGroupSize({ThreadsPerIrradianceNode, 4})
+                .dispatchSize([](_RayTracingResources const& resources, auto const&) {
+                    auto const& size = resources.getGasGrid().irradianceSize;
+                    return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
+                })
                 .accesses({{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
         _RayTracingComputeStep::create(
             resources,

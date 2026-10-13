@@ -502,6 +502,29 @@ bool isSourceLightActive()
     return frame.numSourceLights.x > 0;
 }
 
+bool isCircular(SourceLight light)
+{
+    return light.centerRangeShape.w < 0.5;
+}
+
+vec2 getClosestSourcePoint(SourceLight light, vec2 position)
+{
+    vec2 center = light.centerRangeShape.xy;
+    vec2 offset = position - center;
+    if (isCircular(light)) {
+        float distance = length(offset);
+        return distance > light.extent.x ? center + offset * (light.extent.x / distance) : position;
+    }
+    return center + clamp(offset, -light.extent.xy, light.extent.xy);
+}
+
+// Center of the periodic copy of a source next to the position
+vec2 getNearestSourceCenter(SourceLight light, vec2 position)
+{
+    vec2 world = frame.world.xy;
+    return light.centerRangeShape.xy + world * round((position - light.centerRangeShape.xy) / world);
+}
+
 // The bounding boxes of the objects are enlarged by half the width of the widest beam, so that the beams meet the objects next to them
 float getShadowBeamMargin()
 {

@@ -45,6 +45,9 @@ namespace
         VK_KHR_RAY_QUERY_EXTENSION_NAME,
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
     };
+
+    // The ray traced light of a node of the irradiance grid is summed over 16 threads of a subgroup, see RayTracingSteps.cpp
+    auto constexpr MinRayTracingSubgroupSize = 16u;
 }
 
 void checkVkResult(VkResult result, char const* operation)
@@ -761,8 +764,13 @@ namespace
         VkPhysicalDeviceVulkan12Features features12{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &accelerationStructureFeatures};
         VkPhysicalDeviceFeatures2 features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &features12};
         vkGetPhysicalDeviceFeatures2(device, &features);
+        VkPhysicalDeviceSubgroupProperties subgroupProperties{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES};
+        VkPhysicalDeviceProperties2 properties{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &subgroupProperties};
+        vkGetPhysicalDeviceProperties2(device, &properties);
+        auto hasClusteredSubgroups = (subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_CLUSTERED_BIT) != 0
+            && (subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) != 0 && subgroupProperties.subgroupSize >= MinRayTracingSubgroupSize;
         return rayQueryFeatures.rayQuery == VK_TRUE && accelerationStructureFeatures.accelerationStructure == VK_TRUE
-            && features12.bufferDeviceAddress == VK_TRUE;
+            && features12.bufferDeviceAddress == VK_TRUE && hasClusteredSubgroups;
     }
 }
 
