@@ -24,8 +24,6 @@
 namespace
 {
     auto constexpr DarkModeSettingsKey = "settings.dark mode";
-
-    // Inline icons span one em of 1000 units, while the font size covers ascent plus descent (1328 units)
     auto constexpr InlineIconSizeFactor = 1.328f;
 }
 
