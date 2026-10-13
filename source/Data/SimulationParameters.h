@@ -36,10 +36,14 @@ struct SimulationParameters
     BaseParameter<ColorVector<CellColoring>> objectColoring = {ColorVector<CellColoring>::uniform(CellColoring_Customization)};
     BaseParameter<CellType> highlightedCellType = {CellType_Base};
     BaseParameter<float> glow = {0.3f};
+    BaseParameter<float> fluidIllumination = {0.25f};
     BaseParameter<bool> borderlessRendering = {false};
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};
     SourceParameter<bool> sourceShowRadiationCenter = {true};
+    SourceParameter<FloatColorRGB> sourceLightColor = {{{1.0f, 1.0f, 1.0f}}};
+    SourceParameter<float> sourceLightBrightness = {{0.25f}};
+    SourceParameter<float> sourceLightRange = {{150.0f}};
     LayerParameter<bool> layerShowForceField = {{true}};
 
     // External energy control

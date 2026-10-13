@@ -113,6 +113,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(FloatSpec().member(&SimulationParameters::glow).min(0.0f).max(1.0f))
                         .description("Controls the bloom effect intensity. At 0, no glow is applied. At 1, maximum glow is applied."),
                     ParameterSpec()
+                        .name("Fluid illumination")
+                        .reference(FloatSpec().member(&SimulationParameters::fluidIllumination).min(0.0f).max(1.0f))
+                        .description("With hardware ray tracing, the cells light the surrounding fluids in their colors. This parameter controls the "
+                                     "strength of this light. At 0, the fluids are not lit by the cells. At 1, they are lit most strongly."),
+                    ParameterSpec()
                         .name("Borderless rendering")
                         .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))
                         .description("If activated, the simulation is rendered periodically in the view port."),
@@ -129,6 +134,22 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Show radiation center")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
                         .description("If activated, the area of the radiation source is highlighted in the background."),
+                    ParameterSpec()
+                        .name("Light color")
+                        .reference(ColorSpec().member(&SimulationParameters::sourceLightColor))
+                        .description("Color of the light of the radiation source. The highlighted area of the radiation source takes this color as well."),
+                    ParameterSpec()
+                        .name("Light brightness")
+                        .reference(FloatSpec().member(&SimulationParameters::sourceLightBrightness).min(0.0f).max(1.0f))
+                        .description("With hardware ray tracing, the area of the radiation source shines. Its light illuminates the objects and fluids "
+                                     "around it and appears as columns of light in a faint haze. The objects on the way cast shadows, which become softer "
+                                     "the farther they fall. This parameter sets the brightness that the light approaches close to the source. At 0, the "
+                                     "source does not shine."),
+                    ParameterSpec()
+                        .name("Light range")
+                        .reference(FloatSpec().member(&SimulationParameters::sourceLightRange).min(1.0f).max(1000.0f).format("%.0f").logarithmic(true))
+                        .description("Distance from the area of the radiation source up to which its light reaches. The light fades out smoothly "
+                                     "towards this distance."),
                     ParameterSpec()
                         .name("Show force field")
                         .reference(BoolSpec().member(&SimulationParameters::layerShowForceField))

@@ -7,8 +7,9 @@
 
 namespace
 {
-    auto constexpr BufferUsage =
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    // Storage access lets the ray tracing derive its scene from the buffers
+    auto constexpr GeometryBufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 }
 
 VulkanGeometryBuffers _VulkanGeometryBuffers::create()
@@ -78,8 +79,8 @@ void _VulkanGeometryBuffers::prepareForRendering(VkCommandBuffer commandBuffer)
         .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
         .srcStageMask = VK_PIPELINE_STAGE_2_COPY_BIT,
         .srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT | VK_PIPELINE_STAGE_2_INDEX_INPUT_BIT,
-        .dstAccessMask = VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_2_INDEX_READ_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT | VK_PIPELINE_STAGE_2_INDEX_INPUT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .dstAccessMask = VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_2_INDEX_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT,
     };
     VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .memoryBarrierCount = 1, .pMemoryBarriers = &barrier};
     vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
@@ -93,7 +94,7 @@ VkBuffer _VulkanGeometryBuffers::getBuffer(GeometryBufferType type) const
 void _VulkanGeometryBuffers::reallocate(GeometryBufferType type, uint64_t sizeInBytes)
 {
     auto& context = VulkanContext::get();
-    auto buffer = context.createBuffer(sizeInBytes, BufferUsage, _shareable ? VulkanMemory::DeviceLocalShareable : VulkanMemory::DeviceLocal);
+    auto buffer = context.createBuffer(sizeInBytes, GeometryBufferUsage, _shareable ? VulkanMemory::DeviceLocalShareable : VulkanMemory::DeviceLocal);
     VulkanBuffer stagingBuffer;
     if (!_shareable) {
         try {

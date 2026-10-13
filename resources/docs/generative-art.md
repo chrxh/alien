@@ -20,12 +20,26 @@ The look of a world is controlled by the parameter group **Visualization** in th
   - *Lineage + Customization* keeps the palette color but shifts the hue slightly per lineage.
   - *Lineage* and *Creature* give every lineage or every creature its own color.
 - **Glow** controls the bloom effect that makes bright objects shine.
+- **Fluid illumination** sets how strongly the cells light the fluids with hardware ray tracing.
+- **Light color**, **Light brightness** and **Light range** of a radiation source let it shine with hardware ray tracing.
 - **Borderless rendering** repeats the world periodically, which is useful for seamless patterns.
 - **Grid lines** and **Mark reference domain** draw helper lines, which you usually switch off for pictures.
 
 The **brightness** of an object follows its energy. Objects with little energy look dim, energetic objects bright. Use this deliberately: give a rock zones with different energies to shade it, or keep creatures at a higher energy so that they stand out.
 
 > **Tip:** Dense fluids with high energy and high glow add up to a saturated white. For colorful liquids, use a low energy per particle, for example 10 to 15, a glow of at most 0.4 and an object distance of 1.2 or more.
+
+## Ray tracing
+
+On a GPU with ray tracing hardware, ALIEN automatically shows the creatures as living tissue under a microscope. Other GPUs show the normal view. Triangles and quadrangles of connected cells form translucent bodies with soft, slightly irregular outlines. The cells bulge gently out of these bodies. Connections without a polygon become thin strands, so chains of cells look like filaments. Only connected cells merge into one body. Cells without a connection stay apart, even when they touch.
+
+Zoomed in, every cell shows wavy walls towards its neighbors, a nucleus with a nucleolus and small vesicles. These details stay with their cell while it moves. On a dark background the tissue is visible by its glow as in a fluorescence microscope. On a bright background it absorbs light as in a brightfield microscope and appears slightly embossed. When zoomed out, the tissue fades into the normal view, so that small structures keep their details and the brightness stays the same.
+
+Fluids appear as a glowing nebula, while energy particles keep their normal look. Thin gas glows in saturated colors, dense gas shines towards warm white, and the edges of the clouds glow brighter. The cells light the nebula around them in their colors, as strongly as the simulation parameter **Fluid illumination** allows. Their light fades with the distance, and dense gas and creatures cast shadows. The flashing of active neurons stays in the cells, so the nebula does not flicker. Glowing fluid particles shine as sparks.
+
+The radiation sources shine from their areas. Their light illuminates the objects and fluids around them and appears as columns of light in a faint haze, while the objects on its way cast colored shadows. The shadows become softer the farther they fall. Within the area of a source, the light comes from all sides and casts no shadows. The parameters **Light color**, **Light brightness** and **Light range** of each radiation source set in which color, how bright and how far it shines.
+
+Cells flash when the activity of their neuron changes, and their light illuminates the neighboring tissue and the surrounding medium. Every frame is computed completely without random samples, so the image stays free of noise in motion and does not change when the simulation pauses. Pictures saved with **Simulation > Save picture** average several frames for smoother edges.
 
 ## Painted backgrounds
 

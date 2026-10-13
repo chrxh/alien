@@ -239,6 +239,10 @@ ValueRef<FloatColorRGB> SpecificationEvaluationService::getRef(FloatColorRGBMemb
         }
         }
     }
+    if (locationType == LocationType::Source && std::holds_alternative<FloatColorRGBSourceMember>(member)) {
+        auto index = LocationAccessService::get().findLocationArrayIndex(parameters, orderNumber);
+        return ValueRef{.value = &(parameters.**std::get<FloatColorRGBSourceMember>(member)).sourceValues[index]};
+    }
     return {};
 }
 
@@ -390,6 +394,11 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             auto const& alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
             if (std::holds_alternative<IntSourceMember>(alternativeSpec._member)) {
+                return true;
+            }
+        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
+            auto const& colorPickerSpec = std::get<ColorSpec>(parameterSpec._reference);
+            if (std::holds_alternative<FloatColorRGBSourceMember>(colorPickerSpec._member)) {
                 return true;
             }
         }

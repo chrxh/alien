@@ -1,4 +1,4 @@
-#include "RenderStep.h"
+#include "RenderSteps.h"
 
 #include <cstddef>
 #include <cstring>
@@ -129,7 +129,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     auto commandBuffer = parameters._renderInfo.commandBuffer;
     auto const& target = parameters._target;
     auto withDepth = _depthTest != DepthTest::None;
-    VulkanImageBarriers barriers;
+    VulkanBarriers barriers;
     for (auto const& texture : sampledTextures) {
         barriers.add(texture->color, ImageUsage::ShaderRead);
     }
@@ -337,7 +337,7 @@ void _PostProcessingRenderStep::execute(ExecutionParameters parameters)
 
     auto const& textures = parameters._textures;
     auto numTextures = textures.size();
-    CHECK(numTextures <= 3);
+    CHECK(numTextures <= 4);
     prepareExecution(parameters, textures);
 
     _shader->setInt("numTextures", toInt(numTextures));

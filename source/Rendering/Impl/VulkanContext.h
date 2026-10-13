@@ -25,6 +25,10 @@ struct VulkanBuffer
     void* mapped = nullptr;
     void* sharedHandle = nullptr;  // Windows
     int sharedFd = -1;             // Linux
+
+    // State after the commands recorded so far, only tracked for buffers used with VulkanBarriers
+    VkPipelineStageFlags2 lastStages = VK_PIPELINE_STAGE_2_NONE;
+    VkAccessFlags2 lastAccesses = VK_ACCESS_2_NONE;
 };
 
 struct VulkanImage
@@ -48,19 +52,41 @@ enum class ImageUsage
     ColorAttachment,
     DepthAttachment,
     ShaderRead,
+
+    // Accesses of compute shaders to images that stay in the general layout, read either as storage image or through a sampler
+    ComputeRead,
+    ComputeReadWrite,
+
     TransferSource,
     TransferDestination,
 };
 
-// Collects the barriers before images are used in another way and records them in one command. Reads after reads need none.
-class VulkanImageBarriers
+enum class BufferUsage
+{
+    ComputeRead,
+    ComputeReadWrite,
+    ClearDestination,
+
+    // Inputs and outputs of acceleration structure builds, the outputs include the acceleration structures and the scratch memory
+    BuildInput,
+    BuildOutput,
+
+    // Acceleration structure traversed by ray queries in compute shaders
+    RayQuery,
+};
+
+// Collects the barriers before images and buffers are used in another way and records them in one command. Reads after reads need none.
+// The buffers share one memory barrier.
+class VulkanBarriers
 {
 public:
-    VulkanImageBarriers& add(VulkanImage& image, ImageUsage usage);
+    VulkanBarriers& add(VulkanImage& image, ImageUsage usage);
+    VulkanBarriers& add(VulkanBuffer& buffer, BufferUsage usage);
     void record(VkCommandBuffer commandBuffer);
 
 private:
-    std::vector<VkImageMemoryBarrier2> _barriers;
+    std::vector<VkImageMemoryBarrier2> _imageBarriers;
+    std::optional<VkMemoryBarrier2> _memoryBarrier;
 };
 
 enum class VulkanMemory
@@ -98,9 +124,15 @@ public:
     // Whether buffer memory can be exported to the GPU engine
     bool isMemorySharingSupported() const;
 
+    // Whether acceleration structures and ray queries are available, i.e. whether the GPU has ray tracing hardware
+    bool isRayTracingSupported() const;
+    VkDeviceSize getAccelerationStructureScratchAlignment() const;
+
+    // Buffers with VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT get memory that provides a device address
     VulkanBuffer createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VulkanMemory memory);
     void destroyBuffer(VulkanBuffer& buffer);
     SharedGeometryMemory exportMemory(VulkanBuffer const& buffer);
+    VkDeviceAddress getDeviceAddress(VulkanBuffer const& buffer) const;
 
     VulkanImage createImage(IntVector2D const& size, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = 1);
 
@@ -149,6 +181,8 @@ private:
     VkPhysicalDeviceMemoryProperties _memoryProperties = {};
     bool _memorySharingSupported = false;
     bool _largePointsSupported = false;
+    bool _rayTracingSupported = false;
+    VkDeviceSize _accelerationStructureScratchAlignment = 256;
     VkDevice _device = VK_NULL_HANDLE;
     uint32_t _queueFamily = 0;
     VkQueue _queue = VK_NULL_HANDLE;

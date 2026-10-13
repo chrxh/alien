@@ -32,7 +32,7 @@ struct ObjectVertexData
 
 struct FluidParticleVertexData
 {
-    float pos[3];    // x, y, z position
+    float pos[3];    // x, y position, z: 0 for energy particles, 1 for fluids
     float color[3];  // r, g, b color
     float glow;      // Glow intensity (0.0 = no glow, 1.0 = full glow)
 };

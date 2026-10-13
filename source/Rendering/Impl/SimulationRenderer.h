@@ -1,15 +1,21 @@
 #pragma once
 
+#include <optional>
+
 #include <imgui.h>
 
 #include <Base/Singleton.h>
+
+#include <Data/Definitions.h>
 
 #include <Rendering/Interface/PictureData.h>
 #include <Rendering/Interface/RenderView.h>
 
 #include "Definitions.h"
+#include "VulkanGeometryBuffers.h"
 
-// Renders the simulation into the frames of the window and into pictures
+// Renders the simulation into the frames of the window and into pictures, with hardware ray tracing if the GPU supports it and by
+// rasterization otherwise
 class SimulationRenderer
 {
     MAKE_SINGLETON(SimulationRenderer);
@@ -25,9 +31,30 @@ public:
     // Throws an AlienException if the picture cannot be rendered, e.g. because the GPU memory does not suffice
     PictureData renderPicture(RenderView const& view);
 
+    // Factor with which the bloom weights the scene
+    static float getBloomSceneWeight(SimulationParameters const& parameters);
+
 private:
-    void createRenderGraph(ImFont* labelFont);
+    void createRasterGraph(ImFont* labelFont);
+    void createRayTracingGraph(ImFont* labelFont);
     PictureData renderPictureInternal(RenderView const& view);
 
-    RenderGraph _renderGraph;
+    void updateGeometry(RealRect const& visibleWorldRect);
+
+    // Ray tracing falls back to rasterization if its resources cannot be allocated. Frames only retry once the view size has changed or the
+    // scene has clearly fewer objects, so that a lack of memory does not stall every frame.
+    // Selecting the ray tracing prepares its resources for the view and the parameters with which the graph is executed.
+    RenderGraph const& selectGraph(RenderView const& view, SimulationParameters const& parameters, bool forPicture);
+
+    struct RayTracingDemand
+    {
+        IntVector2D viewSize;
+        uint64_t numSceneObjects = 0;
+    };
+
+    VulkanGeometryBuffers _geometryBuffers;
+    RenderGraph _rasterGraph;
+    RenderGraph _rayTracingGraph;
+    RayTracingResources _rayTracingResources;
+    std::optional<RayTracingDemand> _failedRayTracingDemand;
 };

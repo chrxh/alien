@@ -11,12 +11,9 @@
 #include <utility>
 #include <regex>
 
-#include <glslang/Public/ResourceLimits.h>
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
-
 #include <Engine/Interface/GeometryBuffers.h>
 
+#include "GlslCompiler.h"
 #include "VulkanContext.h"
 
 namespace
@@ -152,34 +149,6 @@ namespace
             result.stageSources.emplace_back(translated);
         }
         result.uniformBlockSize = (result.uniformBlockSize + 3) / 4 * 4;
-        return result;
-    }
-
-    void initGlslang()
-    {
-        [[maybe_unused]] static auto initialized = glslang::InitializeProcess();
-    }
-
-    std::vector<uint32_t> compileStage(EShLanguage stage, std::string const& source)
-    {
-        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
-        auto shader = std::make_unique<glslang::TShader>(stage);
-        auto sourcePtr = source.c_str();
-        shader->setStrings(&sourcePtr, 1);
-        shader->setEnvInput(glslang::EShSourceGlsl, stage, glslang::EShClientVulkan, 100);
-        shader->setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
-        // SPIR-V 1.6 would turn discard into a demotion to a helper invocation
-        shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
-        if (!shader->parse(GetDefaultResources(), 450, false, messages)) {
-            throw std::runtime_error(std::string("Shader compilation failed:\n") + shader->getInfoLog() + "\n" + source);
-        }
-        glslang::TProgram program;
-        program.addShader(shader.get());
-        if (!program.link(messages)) {
-            throw std::runtime_error(std::string("Shader linking failed:\n") + program.getInfoLog());
-        }
-        std::vector<uint32_t> result;
-        glslang::GlslangToSpv(*program.getIntermediate(stage), result);
         return result;
     }
 
@@ -388,18 +357,17 @@ void _Shader::bind(VkCommandBuffer commandBuffer, PipelineState const& state)
 
 _Shader::_Shader(std::string_view vertexSource, std::string_view fragmentSource, std::string_view geometrySource)
 {
-    initGlslang();
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
 
     std::vector<std::string_view> sources{vertexSource};
-    std::vector<std::pair<EShLanguage, VkShaderStageFlagBits>> stages{{EShLangVertex, VK_SHADER_STAGE_VERTEX_BIT}};
+    std::vector<VkShaderStageFlagBits> stages{VK_SHADER_STAGE_VERTEX_BIT};
     if (!geometrySource.empty()) {
         sources.emplace_back(geometrySource);
-        stages.emplace_back(EShLangGeometry, VK_SHADER_STAGE_GEOMETRY_BIT);
+        stages.emplace_back(VK_SHADER_STAGE_GEOMETRY_BIT);
     }
     sources.emplace_back(fragmentSource);
-    stages.emplace_back(EShLangFragment, VK_SHADER_STAGE_FRAGMENT_BIT);
+    stages.emplace_back(VK_SHADER_STAGE_FRAGMENT_BIT);
 
     auto program = translateProgram(sources);
     if (program.uniformBlockSize > context.getProperties().limits.maxPushConstantsSize) {
@@ -407,7 +375,7 @@ _Shader::_Shader(std::string_view vertexSource, std::string_view fragmentSource,
     }
 
     for (auto const& [source, stage] : std::views::zip(program.stageSources, stages)) {
-        auto spirv = compileStage(stage.first, source);
+        auto spirv = GlslCompiler::compile(stage, source);
         VkShaderModuleCreateInfo moduleInfo{
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
             .codeSize = spirv.size() * sizeof(uint32_t),
@@ -415,8 +383,8 @@ _Shader::_Shader(std::string_view vertexSource, std::string_view fragmentSource,
         };
         VkShaderModule module;
         checkVkResult(vkCreateShaderModule(device, &moduleInfo, nullptr, &module), "vkCreateShaderModule");
-        _modules.emplace_back(stage.second, module);
-        _stages |= stage.second;
+        _modules.emplace_back(stage, module);
+        _stages |= stage;
     }
 
     for (auto const& uniform : program.uniforms) {

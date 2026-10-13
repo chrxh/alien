@@ -6,6 +6,9 @@
 
 namespace
 {
+    // The radiation center shows the light color of its source darkened, so that it stays in the background
+    __device__ float constexpr RadiationCenterBrightness = 0.45f;
+
     __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
@@ -335,7 +338,7 @@ cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluid
             if (fluidParticleData != nullptr) {
                 fluidParticleData[idx].pos[0] = object->pos.x;
                 fluidParticleData[idx].pos[1] = object->pos.y;
-                fluidParticleData[idx].pos[2] = 0.0f;
+                fluidParticleData[idx].pos[2] = 1.0f;
                 auto color = getObjectColor(object);
                 fluidParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
                 fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
@@ -440,7 +443,8 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
         correctPositionForRendering(pos, visibleTopLeft, data.world.getSize());
 
-        float3 color = {0.15f, 0.15f, 0.45f};
+        auto const& lightColor = cudaSimulationParameters.sourceLightColor.sourceValues[i];
+        float3 color = {lightColor.r * RadiationCenterBrightness, lightColor.g * RadiationCenterBrightness, lightColor.b * RadiationCenterBrightness};
         auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];
         auto radius = cudaSimulationParameters.sourceCircularRadius.sourceValues[i];
         auto rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[i];
@@ -624,6 +628,10 @@ cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEve
         }
         // Only process cells that have been attacked and have attackVisualization enabled
         if (eventCounter > 0 && event == CellEvent_Attacked) {
+
+            // The attacker position follows the attacked object only when the cell functions are executed, in between it is extrapolated
+            eventPos += object->vel * (cudaSimulationParameters.timestepSize.value * toFloat(*data.timestep % TIMESTEPS_PER_CELL_FUNCTION));
+
             if (!isInVisibleRect(eventPos, context)) {
                 continue;
             }

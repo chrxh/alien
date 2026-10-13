@@ -99,6 +99,9 @@ public:
 
     virtual void execute(ExecutionParameters parameters) = 0;
 
+    // Steps without target compute into resources outside the render graph, which hands their input textures on to the next step
+    virtual bool hasTarget() const { return true; }
+
     std::optional<int> const& getPreviousTargetSelection() const;
 
 protected:
