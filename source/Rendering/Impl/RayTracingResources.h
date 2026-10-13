@@ -7,7 +7,7 @@
 #include <Engine/Interface/GeometryBuffers.h>
 
 #include "RayTracingComputePipeline.h"
-#include "RenderStep.h"
+#include "RenderSteps.h"
 
 // Resources of the ray tracing steps, see RayTracingSteps.h, which the steps access by these names
 enum class RayTracingResource

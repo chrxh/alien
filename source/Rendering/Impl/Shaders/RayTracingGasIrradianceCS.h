@@ -9,7 +9,7 @@ namespace Shaders
     // dense gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while
     // it stays the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so
     // that it forms columns of light and shadow. The threads of a work group row share a node and split its light clusters, rays and gas
-    // samples, see RayTracingSteps.cpp.
+    // samples, see SimulationRenderer.cpp.
     std::string_view const RayTracingGasIrradianceCS = R"(
 const int ShadowSteps = 8;
 const float GasExtinction = 0.2;

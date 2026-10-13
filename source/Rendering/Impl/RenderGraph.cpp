@@ -6,7 +6,7 @@
 #include <Engine/Interface/GeometryBuffers.h>
 #include <Engine/Interface/SimulationFacade.h>
 
-#include "RenderStep.h"
+#include "RenderSteps.h"
 #include "Shader.h"
 
 namespace

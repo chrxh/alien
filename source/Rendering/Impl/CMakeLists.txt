@@ -13,8 +13,8 @@ add_library(RenderingImpl
     RenderGraph.h
     RenderingFacadeImpl.cpp
     RenderingFacadeImpl.h
-    RenderStep.cpp
-    RenderStep.h
+    RenderSteps.cpp
+    RenderSteps.h
     Shader.cpp
     Shader.h
     SimulationRenderer.cpp
