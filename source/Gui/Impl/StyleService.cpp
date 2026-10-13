@@ -24,6 +24,9 @@
 namespace
 {
     auto constexpr DarkModeSettingsKey = "settings.dark mode";
+
+    // Inline icons span one em of 1000 units, while the font size covers ascent plus descent (1328 units)
+    auto constexpr InlineIconSizeFactor = 1.328f;
 }
 
 namespace Const
@@ -250,6 +253,10 @@ void StyleService::setup()
         static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
         io.Fonts->AddFontFromMemoryCompressedTTF(
             FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f * scaleFactor, &configMerge, rangesIcons);
+
+        static const ImWchar rangesInlineIcons[] = {ICON_MIN_INLINE, ICON_MAX_INLINE, 0};
+        io.Fonts->AddFontFromMemoryCompressedTTF(
+            AlienIconFont_compressed_data, AlienIconFont_compressed_size, 16.0f * InlineIconSizeFactor * scaleFactor, &configMerge, rangesInlineIcons);
     }
 
     // Tiny font
