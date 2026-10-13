@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iterator>
 #include <ranges>
+#include <format>
 #include <span>
 
 #include <Base/ExitScopeGuard.h>
@@ -617,7 +618,7 @@ namespace
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()
-                    .shader("#define VERTICAL\n" + std::string(Shaders::RayTracingGasBlurCS))
+                    .shader(std::format("#define VERTICAL\n{}", Shaders::RayTracingGasBlurCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perGasNode)
                     .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
