@@ -231,6 +231,7 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
     auto declarations = std::format(
         "#version 460\n"
         "#extension GL_EXT_ray_query : require\n"
+        "#extension GL_KHR_shader_subgroup_clustered : require\n"
         "layout(local_size_x = {}, local_size_y = {}, local_size_z = 1) in;\n"
         "const int MaxSourceLights = {};\n"
         "const int GasImageSize = {};\n"

@@ -8,7 +8,8 @@ namespace Shaders
     // from the center of its light, which fades with the distance and is weakened by the gas and the cells in the gas grid on the way, so that
     // dense gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while
     // it stays the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so
-    // that it forms columns of light and shadow.
+    // that it forms columns of light and shadow. The threads of a work group row share a node and split its light clusters, rays and gas
+    // samples, see RayTracingSteps.cpp.
     std::string_view const RayTracingGasIrradianceCS = R"(
 const int ShadowSteps = 8;
 const float GasExtinction = 0.2;
@@ -34,11 +35,18 @@ const int MaxSourceRays = 16;
 // Strands and triangles are sampled at points across a beam
 const int BeamSamples = 4;
 
-// A ray stops once the light is blocked
+// A ray stops once the light of the source is blocked in all of its colors
 const float MaxOpticalDepth = 5.0;
 
 const float GasStepInNodes = 2.0;
 const int MaxGasSteps = 64;
+
+const uint NodeThreads = gl_WorkGroupSize.x;
+
+uint getNodeThread()
+{
+    return gl_LocalInvocationID.x;
+}
 
 float getExtinction(vec2 position)
 {
@@ -90,10 +98,10 @@ float getGasTransmittance(vec2 position, vec2 direction, float pathLength)
     int numSteps = clamp(int(ceil((exit - enter) / (GasStepInNodes * frame.gasGrid.z))), 1, MaxGasSteps);
     float stepLength = (exit - enter) / float(numSteps);
     float opticalDepth = 0.0;
-    for (int i = 0; i < numSteps; ++i) {
+    for (int i = int(getNodeThread()); i < numSteps; i += int(NodeThreads)) {
         opticalDepth += sampleGasLayer(position + direction * (enter + stepLength * (float(i) + 0.5)), GasLayer_Clouds).a;
     }
-    return exp(-GasExtinction * opticalDepth * stepLength);
+    return exp(-GasExtinction * subgroupClusteredAdd(opticalDepth, NodeThreads) * stepLength);
 }
 
 float getDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 center, float radius)
@@ -218,10 +226,11 @@ float getAverageTriangleChord(vec2 origin, vec2 direction, float pathLength, vec
 // The ray stands for a beam with the given widths at its start and its end and collects the average length of its path inside every cell,
 // strand and filled triangle on its way. Objects narrower than the beam therefore cast fainter shadows instead of being hit or missed, which
 // would cut thin shadows into dashes.
-vec3 getObjectTransmittance(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths)
+vec3 getObjectTransmittance(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec3 lightColor)
 {
     rayQueryEXT query;
     rayQueryInitializeEXT(query, scene, gl_RayFlagsNoneEXT, 0xffu, vec3(origin, 0.5), 0.0, vec3(direction, 0.0), pathLength);
+    vec3 maxOpticalDepth = mix(vec3(MaxOpticalDepth), vec3(0.0), equal(lightColor, vec3(0.0)));
     vec3 opticalDepth = vec3(0.0);
     while (rayQueryProceedEXT(query)) {
         uint kind = uint(rayQueryGetIntersectionGeometryIndexEXT(query, false)) + 1u;
@@ -249,7 +258,7 @@ vec3 getObjectTransmittance(vec2 origin, vec2 direction, float pathLength, vec2 
             float chord = getAverageTriangleChord(origin, direction, pathLength, beamWidths, a.centerRadius.xy, b.centerRadius.xy, c.centerRadius.xy);
             opticalDepth += chord * (getAbsorption(a) + getAbsorption(b) + getAbsorption(c)) / 3.0;
         }
-        if (minComponent(opticalDepth) > MaxOpticalDepth) {
+        if (all(greaterThanEqual(opticalDepth, maxOpticalDepth))) {
             rayQueryTerminateEXT(query);
         }
     }
@@ -291,22 +300,6 @@ vec3 getCellLight(vec2 position, ivec2 cluster)
     return light.color * falloff * getTransmittance(position, light.toLight / max(light.distance, 1e-4), light.distance);
 }
 
-bool isCircular(SourceLight light)
-{
-    return light.centerRangeShape.w < 0.5;
-}
-
-vec2 getClosestSourcePoint(SourceLight light, vec2 position)
-{
-    vec2 center = light.centerRangeShape.xy;
-    vec2 offset = position - center;
-    if (isCircular(light)) {
-        float distance = length(offset);
-        return distance > light.extent.x ? center + offset * (light.extent.x / distance) : position;
-    }
-    return center + clamp(offset, -light.extent.xy, light.extent.xy);
-}
-
 // The light comes from the shining part of the area next to the position, which spreads across the direction to the area. The rays run from
 // points across the width of the node to points across the shining part, closer points count more. They stand for beams that lead from
 // the parts of the node to the parts of the shining part side by side, so that thin shadows are averaged over the node instead of being cut
@@ -323,9 +316,8 @@ vec3 getSourceTransmittance(SourceLight light, vec2 position, vec2 closestPoint,
     float shiningWidth = 2.0 * min(SourceLightSpread * distance, areaHalfWidth);
     int numRays = clamp(int(ceil(shiningWidth / getMaxBeamWidth())), NodeRayStarts, MaxSourceRays);
     vec2 beamWidths = vec2(nodeWidth, shiningWidth) / float(numRays);
-    vec3 transmittance = vec3(0.0);
-    float weightSum = 0.0;
-    for (int i = 0; i < numRays; ++i) {
+    vec4 weightedTransmittance = vec4(0.0);
+    for (int i = int(getNodeThread()); i < numRays; i += int(NodeThreads)) {
         float fraction = (float(i) + 0.5) / float(numRays) - 0.5;
         vec2 target = getClosestSourcePoint(light, closestPoint + across * (fraction * shiningWidth));
         vec2 start = position + across * (fraction * nodeWidth);
@@ -335,12 +327,12 @@ vec3 getSourceTransmittance(SourceLight light, vec2 position, vec2 closestPoint,
         float weight = closeness * closeness;
         vec3 rayTransmittance = vec3(1.0);
         if (targetDistance > 1e-3) {
-            rayTransmittance = getObjectTransmittance(start, toTarget / targetDistance, targetDistance, beamWidths);
+            rayTransmittance = getObjectTransmittance(start, toTarget / targetDistance, targetDistance, beamWidths, light.color.rgb);
         }
-        transmittance += weight * rayTransmittance;
-        weightSum += weight;
+        weightedTransmittance += vec4(weight * rayTransmittance, weight);
     }
-    return transmittance / weightSum * getGasTransmittance(position, direction, distance);
+    weightedTransmittance = subgroupClusteredAdd(weightedTransmittance, NodeThreads);
+    return weightedTransmittance.rgb / weightedTransmittance.w * getGasTransmittance(position, direction, distance);
 }
 
 // The light is strongest at the area of the source and fades smoothly to its range beyond it
@@ -363,7 +355,7 @@ vec3 getSourceIrradiance(SourceLight light, vec2 position)
 vec3 getPeriodicSourceIrradiance(SourceLight light, vec2 position)
 {
     vec2 world = frame.world.xy;
-    vec2 nearestCenter = light.centerRangeShape.xy + world * round((position - light.centerRangeShape.xy) / world);
+    vec2 nearestCenter = getNearestSourceCenter(light, position);
     ivec2 copyRange = ivec2(lessThan(2.0 * light.extent.xy, world));
     vec3 result = vec3(0.0);
     for (int copyY = -copyRange.y; copyY <= copyRange.y; ++copyY) {
@@ -387,7 +379,7 @@ void getClusterBounds(vec2 position, float range, out ivec2 lowerCluster, out iv
 
 void main()
 {
-    ivec2 node = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 node = ivec2(gl_WorkGroupID.x, gl_GlobalInvocationID.y);
     if (any(greaterThanEqual(node, frame.gasLightGrid.zw))) {
         return;
     }
@@ -398,18 +390,24 @@ void main()
     ivec2 upperCluster;
     getClusterBounds(position, frame.gasLight.y, lowerCluster, upperCluster);
     vec3 irradiance = vec3(0.0);
+    uint clusterIndex = 0u;
     for (int y = lowerCluster.y; y <= upperCluster.y; ++y) {
         for (int x = lowerCluster.x; x <= upperCluster.x; ++x) {
-            irradiance += getCellLight(position, ivec2(x, y));
+            if (clusterIndex++ % NodeThreads == getNodeThread()) {
+                irradiance += getCellLight(position, ivec2(x, y));
+            }
         }
     }
-    imageStore(gasIrradianceImage, node, vec4(irradiance, 1.0));
+    irradiance = subgroupClusteredAdd(irradiance, NodeThreads);
 
     vec3 sourceIrradiance = vec3(0.0);
     for (int i = 0; i < frame.numSourceLights.x; ++i) {
         sourceIrradiance += getPeriodicSourceIrradiance(frame.sourceLights[i], position);
     }
-    imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), vec4(sourceIrradiance, 1.0));
+    if (getNodeThread() == 0u) {
+        imageStore(gasIrradianceImage, node, vec4(irradiance, 1.0));
+        imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), vec4(sourceIrradiance, 1.0));
+    }
 }
 )";
 }
