@@ -355,7 +355,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 ImGui::SameLine();
                 std::string icon;
                 if (entry.type == LocationType::Base) {
-                    icon = "";
+                    icon = ICON_FA_SQUARE_FULL " ";
                 } else if (entry.type == LocationType::Layer) {
                     icon = ICON_FA_LAYER_GROUP " ";
                 } else if (entry.type == LocationType::Source) {
