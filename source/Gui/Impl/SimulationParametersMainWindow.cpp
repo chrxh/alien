@@ -2,7 +2,6 @@
 
 #include <functional>
 
-#include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
@@ -356,7 +355,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 ImGui::SameLine();
                 std::string icon;
                 if (entry.type == LocationType::Base) {
-                    icon = ICON_BASE_LOCATION " ";
+                    icon = ICON_FA_SQUARE_FULL " ";
                 } else if (entry.type == LocationType::Layer) {
                     icon = ICON_FA_LAYER_GROUP " ";
                 } else if (entry.type == LocationType::Source) {
