@@ -20,11 +20,21 @@ uniform vec2 viewportSize;
 uniform bool onBackground;
 uniform float renderScale;
 
+// The ray tracing renders the fluids itself as gas, only the cores of glowing fluids stay. The z coordinate of fluids is 1.
+uniform bool energyParticlesOnly;
+
 const float CoreHiddenZoom = 2.0;
 const float CoreDetailZoom = 7.0;
 
 void main()
 {
+    if (energyParticlesOnly && aPos.z >= 0.5 && (onBackground || aGlow <= 0.0)) {
+        gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
+        gl_PointSize = 0.0;
+        vColor = vec3(0.0);
+        return;
+    }
+
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos.xy - rectUpperLeft;
     vec2 screenPos = relativePos * zoom;

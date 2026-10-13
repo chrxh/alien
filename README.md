@@ -36,6 +36,7 @@ The development is driven by the desire to better understand the conditions for 
 - Particle-based simulation of soft and rigid bodies, fluids, adhesion, fracture and damage
 - Millions of particles in real time, written entirely in CUDA and also available for AMD GPUs
 - Rendering and post-processing via Vulkan with CUDA-Vulkan interoperability
+- Hardware ray tracing where the GPU supports it: creatures appear as living tissue, fluids as glowing nebulae, and radiation sources cast columns of light and shadow
 - Real-time interaction with the running simulation
 
 https://github.com/user-attachments/assets/fad1b719-5662-4840-aa75-165346d62cdd

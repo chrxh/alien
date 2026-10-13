@@ -1,12 +1,20 @@
 
 add_library(RenderingImpl
     Definitions.h
+    GlslCompiler.cpp
+    GlslCompiler.h
+    RayTracingComputePipeline.cpp
+    RayTracingComputePipeline.h
+    RayTracingResources.cpp
+    RayTracingResources.h
+    RayTracingSteps.cpp
+    RayTracingSteps.h
     RenderGraph.cpp
     RenderGraph.h
     RenderingFacadeImpl.cpp
     RenderingFacadeImpl.h
-    RenderStep.cpp
-    RenderStep.h
+    RenderSteps.cpp
+    RenderSteps.h
     Shader.cpp
     Shader.h
     SimulationRenderer.cpp

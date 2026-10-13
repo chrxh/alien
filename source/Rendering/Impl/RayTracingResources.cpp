@@ -1,0 +1,979 @@
+#include "RayTracingResources.h"
+
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <ranges>
+#include <format>
+
+#include <Base/Math.h>
+
+#include <Engine/Interface/SimulationFacade.h>
+
+#include <Rendering/Impl/Shaders/ShaderSources.h>
+
+#include "SimulationRenderer.h"
+#include "VulkanContext.h"
+
+namespace
+{
+    auto constexpr MinCapacity = uint64_t(4096);
+    auto constexpr LightRange = 3.0f;
+    auto constexpr MaxLightGridCellsPerDimension = 512.0f;
+    auto constexpr NumJitterPositions = 16u;
+
+    // Between these screen zoom factors, the tissue fades in over the rasterized objects
+    auto constexpr TissueZoomStart = 4.0f;
+    auto constexpr TissueZoomEnd = 10.0f;
+
+    // Between these screen zoom factors, the thin lines of the zoomed out view grow into the tissue
+    auto constexpr CloseUpZoomStart = 3.0f;
+    auto constexpr CloseUpZoomEnd = 12.0f;
+
+    // Cell details such as walls and nuclei appear between these screen zoom factors
+    auto constexpr DetailZoomStart = 8.0f;
+    auto constexpr DetailZoomEnd = 20.0f;
+
+    // The gas grid covers the view and a margin for the spread of the particles and the range of the lights. The sizes here and below are
+    // declared for the shaders as well, see createPipeline.
+    auto constexpr MinGasNodeDistance = 0.25f;
+    auto constexpr MaxGasNodes = 512;
+    auto constexpr GasAccumulationStride = 5;
+    auto constexpr GasLayers = 2;
+    auto constexpr MaxGasBlurRadius = 32;
+
+    // Standard deviation of the spread of the particles, like the soft disks of radius 7.5 in the rasterized view. Zoomed out, the spread
+    // covers a minimum number of pixels.
+    auto constexpr CloudSpread = 2.6f;
+    auto constexpr MinCloudSpreadInPixels = 2.0f;
+
+    // The light of the cells falls off beyond a distance. Zoomed out, the falloff distance grows continuously, so that it covers a minimum
+    // number of nodes of the irradiance grid and moving cells do not flicker. The range of the lights and the size of the clusters, which
+    // collect the light, grow with it. The irradiance grid has twice the node distance of the gas grid as long as it resolves the falloff,
+    // otherwise the node distance of the gas grid.
+    auto constexpr LightFalloffDistance = 5.0f;
+    auto constexpr MinLightFalloffInIrradianceNodes = 1.5f;
+    auto constexpr LightRangeInFalloffDistances = 4.0f;
+    auto constexpr LightClusterSizeInFalloffDistances = 0.8f;
+    auto constexpr MaxLightClusters = 256;
+    auto constexpr GasLightClusterStride = 6;
+    auto constexpr GasIrradianceImageSize = MaxGasNodes;
+
+    // Factor of the cell light in the gas at the highest fluid illumination
+    auto constexpr MaxFluidIllumination = 4.0f;
+
+    auto constexpr SphereSize = VkDeviceSize(64);
+    auto constexpr AabbBufferUsage =
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    auto constexpr ViewImageUsage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+
+    // Bindings declared in Shaders/RayTracingCommonCS.h
+    enum Binding_ : uint32_t
+    {
+        Binding_FrameConstants,
+        Binding_Scene,
+        Binding_Objects,
+        Binding_LineIndices,
+        Binding_TriangleIndices,
+        Binding_Spheres,
+        Binding_SphereAabbs,
+        Binding_CapsuleAabbs,
+        Binding_TriangleAabbs,
+        Binding_CellCounts,
+        Binding_CellCursors,
+        Binding_CellEntries,
+        Binding_Allocation,
+        Binding_SceneColor,
+        Binding_AntiAliased,
+        Binding_PreviousAntiAliased,
+        Binding_GroundTexture,
+        Binding_GasSampler,
+        Binding_SceneColorSampler,
+        Binding_FluidParticles,
+        Binding_GasAccumulation,
+        Binding_GasIntermediate,
+        Binding_GasImage,
+        Binding_EnergyParticleTexture,
+        Binding_GasLightClusters,
+        Binding_GasIrradiance,
+        Binding_GasIrradianceSampler,
+        Binding_Count
+    };
+
+    VkDescriptorType getDescriptorType(uint32_t binding)
+    {
+        switch (binding) {
+        case Binding_FrameConstants:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case Binding_Scene:
+            return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        case Binding_SceneColor:
+        case Binding_AntiAliased:
+        case Binding_GasImage:
+        case Binding_GasIrradiance:
+            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        case Binding_PreviousAntiAliased:
+        case Binding_GroundTexture:
+        case Binding_GasSampler:
+        case Binding_SceneColorSampler:
+        case Binding_EnergyParticleTexture:
+        case Binding_GasIrradianceSampler:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        default:
+            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        }
+    }
+
+    // Layouts of the uniform block FrameConstants and the struct SourceLight in Shaders/RayTracingCommonCS.h
+    struct SourceLight
+    {
+        float centerRangeShape[4];
+        float color[4];
+        float extent[4];
+    };
+
+    struct FrameConstants
+    {
+        float view[4];
+        float rect[4];
+        uint32_t counts[4];
+        float lightGrid[4];
+        int32_t gridSize[4];
+        float tissue[4];
+        float parameters[4];
+        float gasGrid[4];
+        int32_t gasSize[4];
+        float gasLight[4];
+        int32_t gasLightGrid[4];
+        float gasLighting[4];
+        float world[4];
+        int32_t numSourceLights[4];
+        SourceLight sourceLights[MAX_SOURCES];
+    };
+}
+
+RayTracingResources _RayTracingResources::create()
+{
+    return RayTracingResources(new _RayTracingResources());
+}
+
+_RayTracingResources::~_RayTracingResources()
+{
+    auto& context = VulkanContext::get();
+    if (!context.isActive()) {
+        return;
+    }
+    destroySceneResources(_scene, false);
+    destroyViewResources(_view, false);
+    for (auto buffer : {&_cellCounts, &_cellCursors, &_allocation, &_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+        context.destroyBufferLater(*buffer);
+    }
+    context.destroyImageLater(_gasImage);
+    context.destroyImageLater(_gasIrradiance);
+    context.destroyLater([device = context.getDevice(), pipelineLayout = _pipelineLayout, descriptorSetLayout = _descriptorSetLayout] {
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+    });
+}
+
+void _RayTracingResources::prepare(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters)
+{
+    if (_frameConstants.buffer == VK_NULL_HANDLE) {
+        createFrameResources();
+    }
+
+    // The descriptor set always refers to the scene, which only grows while it is needed
+    auto sceneNeeded = isSceneNeeded(view, parameters);
+    auto numSpheres = sceneNeeded ? numObjects.objects : 0;
+    auto numCapsules = sceneNeeded ? numObjects.lineIndices / 2 : 0;
+    auto numTriangles = sceneNeeded ? numObjects.triangleIndices / 3 : 0;
+    if (_scene.objectCapacity == 0 || numSpheres > _scene.objectCapacity || numCapsules > _scene.capsuleCapacity || numTriangles > _scene.triangleCapacity) {
+        auto grow = [](uint64_t capacity, uint64_t required) { return std::max({MinCapacity, capacity, required * 3 / 2}); };
+        auto scene = createSceneResources(
+            grow(_scene.objectCapacity, numSpheres), grow(_scene.capsuleCapacity, numCapsules), grow(_scene.triangleCapacity, numTriangles));
+        destroySceneResources(_scene, false);
+        _scene = scene;
+    }
+
+    updateLightGrid(view.visibleWorldRect);
+    updateGasGrid(view);
+
+    if (_view.size != view.viewSize) {
+        destroyViewResources(_view, false);
+        _view = createViewResources(view.viewSize);
+        _current = 0;
+        _numAveragedFrames = 0;
+    }
+}
+
+void _RayTracingResources::setStillPicture(bool value)
+{
+    _stillPicture = value;
+    _numAveragedFrames = 0;
+}
+
+void _RayTracingResources::resetImageStates()
+{
+    auto images = _view.getImages();
+    images.emplace_back(&_gasImage);
+    images.emplace_back(&_gasIrradiance);
+    for (auto image : images) {
+        image->layout = VK_IMAGE_LAYOUT_UNDEFINED;
+        image->lastStages = VK_PIPELINE_STAGE_2_NONE;
+        image->lastAccesses = VK_ACCESS_2_NONE;
+    }
+    _numAveragedFrames = 0;
+}
+
+// The sizes shared with the shaders and the work group size are declared here, so that they cannot diverge
+RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const& source, IntVector2D const& workGroupSize) const
+{
+    auto declarations = std::format(
+        "#version 460\n"
+        "#extension GL_EXT_ray_query : require\n"
+        "#extension GL_KHR_shader_subgroup_clustered : require\n"
+        "layout(local_size_x = {}, local_size_y = {}, local_size_z = 1) in;\n"
+        "const int MaxSourceLights = {};\n"
+        "const int GasImageSize = {};\n"
+        "const int GasLayers = {};\n"
+        "const uint GasAccumulationStride = {}u;\n"
+        "const uint GasLightClusterStride = {}u;\n"
+        "const int GasIrradianceImageSize = {};\n"
+        "const float LightFalloffDistance = {:.6f};\n",
+        workGroupSize.x,
+        workGroupSize.y,
+        MAX_SOURCES,
+        MaxGasNodes,
+        GasLayers,
+        GasAccumulationStride,
+        GasLightClusterStride,
+        GasIrradianceImageSize,
+        LightFalloffDistance);
+    return _RayTracingComputePipeline::create(declarations + std::string(Shaders::RayTracingCommonCS) + source, _pipelineLayout, workGroupSize);
+}
+
+void _RayTracingResources::beginFrame(ExecutionParameters const& parameters)
+{
+    auto const& view = parameters._view;
+    CHECK(_frameConstants.buffer != VK_NULL_HANDLE && _view.size == view.viewSize);
+
+    auto const& textures = parameters._textures;
+    CHECK(textures.size() == 2);
+    VulkanBarriers()
+        .add(textures.at(0)->color, ImageUsage::ShaderRead)
+        .add(textures.at(1)->color, ImageUsage::ShaderRead)
+        .record(parameters._renderInfo.commandBuffer);
+
+    auto const& geometryBuffers = parameters._geometryBuffers;
+    updateFrameConstants(view, geometryBuffers->getNumObjects(), *parameters._simulationParameters, parameters._simulationFacade->getWorldSize());
+    writeDescriptorSet(geometryBuffers, textures);
+}
+
+void _RayTracingResources::finishFrame()
+{
+    _numAveragedFrames = _stillPicture ? _numAveragedFrames + 1 : 0;
+    _current = getPrevious();
+}
+
+void _RayTracingResources::bindDescriptorSet(VkCommandBuffer commandBuffer) const
+{
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+}
+
+void _RayTracingResources::access(VkCommandBuffer commandBuffer, RayTracingAccesses const& accesses)
+{
+    auto clears = accesses | std::views::filter([](auto const& access) { return access.second == RayTracingAccess::Clear; }) | std::views::keys;
+    if (!clears.empty()) {
+        VulkanBarriers barriers;
+        for (auto resource : clears) {
+            barriers.add(getBuffer(resource), BufferUsage::ClearDestination);
+        }
+        barriers.record(commandBuffer);
+        for (auto resource : clears) {
+            vkCmdFillBuffer(commandBuffer, getBuffer(resource).buffer, 0, getUsedSize(resource), 0);
+        }
+    }
+
+    VulkanBarriers barriers;
+    for (auto const& [resource, access] : accesses) {
+        auto write = access != RayTracingAccess::Read;
+        if (auto image = getImage(resource)) {
+            CHECK(access != RayTracingAccess::Clear);
+            barriers.add(*image, write ? ImageUsage::ComputeReadWrite : ImageUsage::ComputeRead);
+        } else if (resource == RayTracingResource::Scene) {
+            CHECK(!write);
+            barriers.add(_scene.topLevelBuffer, BufferUsage::RayQuery);
+        } else {
+            barriers.add(getBuffer(resource), write ? BufferUsage::ComputeReadWrite : BufferUsage::ComputeRead);
+        }
+    }
+    barriers.record(commandBuffer);
+}
+
+VulkanImage& _RayTracingResources::getOutput()
+{
+    return _view.antiAliased.at(_current);
+}
+
+_RayTracingResources::LightGrid const& _RayTracingResources::getLightGrid() const
+{
+    return _lightGrid;
+}
+
+_RayTracingResources::GasGrid const& _RayTracingResources::getGasGrid() const
+{
+    return _gasGrid;
+}
+
+IntVector2D const& _RayTracingResources::getViewSize() const
+{
+    return _view.size;
+}
+
+_RayTracingResources::_RayTracingResources()
+{
+    auto device = VulkanContext::get().getDevice();
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+    for (auto binding : std::views::iota(0u, static_cast<uint32_t>(Binding_Count))) {
+        bindings.emplace_back(VkDescriptorSetLayoutBinding{
+            .binding = binding,
+            .descriptorType = getDescriptorType(binding),
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+        });
+    }
+    VkDescriptorSetLayoutCreateInfo setLayoutInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = static_cast<uint32_t>(bindings.size()),
+        .pBindings = bindings.data(),
+    };
+    checkVkResult(vkCreateDescriptorSetLayout(device, &setLayoutInfo, nullptr, &_descriptorSetLayout), "vkCreateDescriptorSetLayout");
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        .setLayoutCount = 1,
+        .pSetLayouts = &_descriptorSetLayout,
+    };
+    auto result = vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &_pipelineLayout);
+    if (result != VK_SUCCESS) {
+        vkDestroyDescriptorSetLayout(device, _descriptorSetLayout, nullptr);
+        checkVkResult(result, "vkCreatePipelineLayout");
+    }
+}
+
+namespace
+{
+    VkAccelerationStructureGeometryKHR createAabbGeometry(VkDeviceAddress address)
+    {
+        return VkAccelerationStructureGeometryKHR{
+            .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
+            .geometryType = VK_GEOMETRY_TYPE_AABBS_KHR,
+            .geometry =
+                {.aabbs =
+                     {
+                         .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR,
+                         .data = {.deviceAddress = address},
+                         .stride = sizeof(VkAabbPositionsKHR),
+                     }},
+            // The search for the nearest cells requires that every primitive is found exactly once
+            .flags = VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR,
+        };
+    }
+
+    // The order determines the geometry index in the shaders
+    std::vector<VkAccelerationStructureGeometryKHR>
+    createBottomLevelGeometries(VulkanBuffer const& sphereAabbs, VulkanBuffer const& capsuleAabbs, VulkanBuffer const& triangleAabbs)
+    {
+        auto& context = VulkanContext::get();
+        return {
+            createAabbGeometry(context.getDeviceAddress(sphereAabbs)),
+            createAabbGeometry(context.getDeviceAddress(capsuleAabbs)),
+            createAabbGeometry(context.getDeviceAddress(triangleAabbs)),
+        };
+    }
+
+    VkAccelerationStructureGeometryKHR createInstanceGeometry(VkDeviceAddress address)
+    {
+        return VkAccelerationStructureGeometryKHR{
+            .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
+            .geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR,
+            .geometry =
+                {.instances =
+                     {
+                         .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
+                         .arrayOfPointers = VK_FALSE,
+                         .data = {.deviceAddress = address},
+                     }},
+        };
+    }
+
+    // The objects change every frame and are rebuilt from scratch, a fast build pays off more than fast tracing
+    VkAccelerationStructureBuildGeometryInfoKHR createBuildInfo(
+        VkAccelerationStructureTypeKHR type,
+        std::vector<VkAccelerationStructureGeometryKHR> const& geometries)
+    {
+        return VkAccelerationStructureBuildGeometryInfoKHR{
+            .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR,
+            .type = type,
+            .flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
+            .mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+            .geometryCount = static_cast<uint32_t>(geometries.size()),
+            .pGeometries = geometries.data(),
+        };
+    }
+
+    VkAccelerationStructureKHR createAccelerationStructure(VkAccelerationStructureTypeKHR type, VulkanBuffer const& buffer)
+    {
+        VkAccelerationStructureCreateInfoKHR createInfo{
+            .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+            .buffer = buffer.buffer,
+            .size = buffer.size,
+            .type = type,
+        };
+        VkAccelerationStructureKHR result;
+        checkVkResult(vkCreateAccelerationStructureKHR(VulkanContext::get().getDevice(), &createInfo, nullptr, &result), "vkCreateAccelerationStructureKHR");
+        return result;
+    }
+
+    VkDeviceAddress getAlignedScratchAddress(VulkanBuffer const& scratchBuffer)
+    {
+        auto& context = VulkanContext::get();
+        auto alignment = context.getAccelerationStructureScratchAlignment();
+        return (context.getDeviceAddress(scratchBuffer) + alignment - 1) / alignment * alignment;
+    }
+}
+
+_RayTracingResources::SceneResources _RayTracingResources::createSceneResources(uint64_t objectCapacity, uint64_t capsuleCapacity, uint64_t triangleCapacity)
+{
+    auto& context = VulkanContext::get();
+    auto device = context.getDevice();
+    SceneResources result{.objectCapacity = objectCapacity, .capsuleCapacity = capsuleCapacity, .triangleCapacity = triangleCapacity};
+    try {
+        result.spheres = context.createBuffer(objectCapacity * SphereSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
+        result.sphereAabbs = context.createBuffer(objectCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
+        result.capsuleAabbs = context.createBuffer(capsuleCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
+        result.triangleAabbs = context.createBuffer(triangleCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
+        result.lightEntries = context.createBuffer(objectCapacity * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
+
+        auto bottomLevelGeometries = createBottomLevelGeometries(result.sphereAabbs, result.capsuleAabbs, result.triangleAabbs);
+        auto bottomLevelBuildInfo = createBuildInfo(VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, bottomLevelGeometries);
+        std::array maxPrimitiveCounts{static_cast<uint32_t>(objectCapacity), static_cast<uint32_t>(capsuleCapacity), static_cast<uint32_t>(triangleCapacity)};
+        VkAccelerationStructureBuildSizesInfoKHR bottomLevelSizes{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
+        vkGetAccelerationStructureBuildSizesKHR(
+            device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &bottomLevelBuildInfo, maxPrimitiveCounts.data(), &bottomLevelSizes);
+        result.bottomLevelBuffer = context.createBuffer(
+            bottomLevelSizes.accelerationStructureSize,
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            VulkanMemory::DeviceLocal);
+        result.bottomLevel = createAccelerationStructure(VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, result.bottomLevelBuffer);
+
+        VkAccelerationStructureDeviceAddressInfoKHR addressInfo{
+            .sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
+            .accelerationStructure = result.bottomLevel,
+        };
+        VkAccelerationStructureInstanceKHR instance{
+            .transform = {.matrix = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}}},
+            .instanceCustomIndex = 0,
+            .mask = 0xff,
+            .instanceShaderBindingTableRecordOffset = 0,
+            .flags = 0,
+            .accelerationStructureReference = vkGetAccelerationStructureDeviceAddressKHR(device, &addressInfo),
+        };
+        result.instanceBuffer = context.createBuffer(
+            sizeof(VkAccelerationStructureInstanceKHR),
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            VulkanMemory::HostVisible);
+        std::memcpy(result.instanceBuffer.mapped, &instance, sizeof(instance));
+
+        std::vector<VkAccelerationStructureGeometryKHR> topLevelGeometries{createInstanceGeometry(context.getDeviceAddress(result.instanceBuffer))};
+        auto topLevelBuildInfo = createBuildInfo(VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR, topLevelGeometries);
+        uint32_t numInstances = 1;
+        VkAccelerationStructureBuildSizesInfoKHR topLevelSizes{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
+        vkGetAccelerationStructureBuildSizesKHR(device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &topLevelBuildInfo, &numInstances, &topLevelSizes);
+        result.topLevelBuffer = context.createBuffer(
+            topLevelSizes.accelerationStructureSize,
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            VulkanMemory::DeviceLocal);
+        result.topLevel = createAccelerationStructure(VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR, result.topLevelBuffer);
+
+        // Both builds use the same scratch memory one after the other
+        result.scratchBuffer = context.createBuffer(
+            std::max(bottomLevelSizes.buildScratchSize, topLevelSizes.buildScratchSize) + context.getAccelerationStructureScratchAlignment(),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            VulkanMemory::DeviceLocal);
+    } catch (...) {
+        destroySceneResources(result, true);
+        throw;
+    }
+    return result;
+}
+
+void _RayTracingResources::destroySceneResources(SceneResources& resources, bool immediately)
+{
+    auto& context = VulkanContext::get();
+    if (context.isActive()) {
+        auto destroyFunc = [device = context.getDevice(), bottomLevel = resources.bottomLevel, topLevel = resources.topLevel] {
+            vkDestroyAccelerationStructureKHR(device, topLevel, nullptr);
+            vkDestroyAccelerationStructureKHR(device, bottomLevel, nullptr);
+        };
+        if (immediately) {
+            destroyFunc();
+        } else {
+            context.destroyLater(destroyFunc);
+        }
+    }
+    for (auto buffer : {
+             &resources.spheres,
+             &resources.sphereAabbs,
+             &resources.capsuleAabbs,
+             &resources.triangleAabbs,
+             &resources.lightEntries,
+             &resources.bottomLevelBuffer,
+             &resources.topLevelBuffer,
+             &resources.scratchBuffer,
+             &resources.instanceBuffer,
+         }) {
+        if (immediately) {
+            context.destroyBuffer(*buffer);
+        } else {
+            context.destroyBufferLater(*buffer);
+        }
+    }
+    resources = SceneResources();
+}
+
+std::vector<VulkanImage*> _RayTracingResources::ViewResources::getImages()
+{
+    return {&sceneColor, &antiAliased.at(0), &antiAliased.at(1)};
+}
+
+_RayTracingResources::ViewResources _RayTracingResources::createViewResources(IntVector2D const& size)
+{
+    auto& context = VulkanContext::get();
+    ViewResources result{.size = size};
+    try {
+        for (auto image : result.getImages()) {
+            *image = context.createImage(size, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+        }
+    } catch (...) {
+        destroyViewResources(result, true);
+        throw;
+    }
+    return result;
+}
+
+void _RayTracingResources::destroyViewResources(ViewResources& resources, bool immediately)
+{
+    auto& context = VulkanContext::get();
+    for (auto image : resources.getImages()) {
+        if (immediately) {
+            context.destroyImage(*image);
+        } else {
+            context.destroyImageLater(*image);
+        }
+    }
+    resources = ViewResources();
+}
+
+uint64_t _RayTracingResources::LightGrid::getNumCells() const
+{
+    return static_cast<uint64_t>(size.x) * size.y;
+}
+
+void _RayTracingResources::createFrameResources()
+{
+    auto& context = VulkanContext::get();
+    for (auto buffer : {&_allocation, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+        context.destroyBufferLater(*buffer);
+    }
+    context.destroyImageLater(_gasImage);
+    context.destroyImageLater(_gasIrradiance);
+    _allocation = context.createBuffer(sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::DeviceLocal);
+    auto numNodes = static_cast<VkDeviceSize>(MaxGasNodes) * MaxGasNodes;
+    auto clearableUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    _gasAccumulation = context.createBuffer(numNodes * GasAccumulationStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
+    _gasIntermediate = context.createBuffer(numNodes * GasLayers * 4 * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
+    auto numClusters = static_cast<VkDeviceSize>(MaxLightClusters) * MaxLightClusters;
+    _gasLightClusters = context.createBuffer(numClusters * GasLightClusterStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
+    _gasImage = context.createImage({GasLayers * MaxGasNodes, MaxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _gasIrradiance = context.createImage({2 * GasIrradianceImageSize, GasIrradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+
+    // Created last since it marks the resources as complete
+    _frameConstants = context.createBuffer(sizeof(FrameConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VulkanMemory::HostVisible);
+}
+
+// Extreme zoom levels enlarge the cells and thus the range of the lights. A margin of one cell covers the lights next to the view.
+void _RayTracingResources::updateLightGrid(RealRect const& visibleWorldRect)
+{
+    auto extent = visibleWorldRect.bottomRight - visibleWorldRect.topLeft;
+    auto cellSize = std::max(LightRange, std::max(extent.x, extent.y) / MaxLightGridCellsPerDimension);
+    LightGrid grid{
+        .origin = visibleWorldRect.topLeft - RealVector2D{cellSize, cellSize},
+        .cellSize = cellSize,
+        .size = {toInt(std::ceil(extent.x / cellSize)) + 2, toInt(std::ceil(extent.y / cellSize)) + 2},
+    };
+    auto numCells = grid.getNumCells();
+    if (numCells > _cellCapacity) {
+        auto& context = VulkanContext::get();
+        auto capacity = numCells * 3 / 2;
+        std::array<VulkanBuffer, 2> buffers;
+        try {
+            for (auto& buffer : buffers) {
+                buffer = context.createBuffer(
+                    capacity * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::DeviceLocal);
+            }
+        } catch (...) {
+            for (auto& buffer : buffers) {
+                context.destroyBuffer(buffer);
+            }
+            throw;
+        }
+        std::array cellBuffers{&_cellCounts, &_cellCursors};
+        for (auto const& [buffer, newBuffer] : std::views::zip(cellBuffers, buffers)) {
+            context.destroyBufferLater(*buffer);
+            *buffer = newBuffer;
+        }
+        _cellCapacity = capacity;
+    }
+    _lightGrid = grid;
+}
+
+void _RayTracingResources::updateGasGrid(RenderView const& view)
+{
+    auto pixelSize = 1.0f / view.zoomFactor;
+    auto cloudSpread = std::max(CloudSpread, MinCloudSpreadInPixels * pixelSize);
+    auto const& visibleRect = view.visibleWorldRect;
+    auto visibleExtent = std::max(visibleRect.bottomRight.x - visibleRect.topLeft.x, visibleRect.bottomRight.y - visibleRect.topLeft.y);
+    CHECK(std::isfinite(visibleExtent) && std::isfinite(cloudSpread));
+
+    // The node distance of the gas grid is less than twice the extent of the view with the margins divided by the number of nodes. The falloff
+    // distance covers the minimum number of irradiance nodes at any such node distance, so it does not change in steps with the node distance.
+    auto maxNodes = toFloat(MaxGasNodes - 2);
+    auto falloffPerNodeDistance = 2.0f * MinLightFalloffInIrradianceNodes;
+    auto lightFalloffDistance = std::max(
+        {LightFalloffDistance,
+         falloffPerNodeDistance * visibleExtent / (maxNodes - 2.0f * LightRangeInFalloffDistances * falloffPerNodeDistance),
+         falloffPerNodeDistance * (visibleExtent + 6.0f * cloudSpread) / maxNodes});
+    auto margin = std::max(3.0f * cloudSpread, LightRangeInFalloffDistances * lightFalloffDistance);
+    auto nodeDistance = MinGasNodeDistance;
+    while ((visibleExtent + 2.0f * margin) / nodeDistance > maxNodes) {
+        nodeDistance *= 2.0f;
+    }
+    auto irradianceNodeDistance = MinLightFalloffInIrradianceNodes * 2.0f * nodeDistance <= lightFalloffDistance ? 2.0f * nodeDistance : nodeDistance;
+
+    auto topLeft = visibleRect.topLeft - RealVector2D{margin, margin};
+    auto bottomRight = visibleRect.bottomRight + RealVector2D{margin, margin};
+    RealVector2D origin{std::floor(topLeft.x / nodeDistance) * nodeDistance, std::floor(topLeft.y / nodeDistance) * nodeDistance};
+    IntVector2D size{
+        std::min(toInt(std::ceil((bottomRight.x - origin.x) / nodeDistance)) + 1, MaxGasNodes),
+        std::min(toInt(std::ceil((bottomRight.y - origin.y) / nodeDistance)) + 1, MaxGasNodes)};
+
+    // The light clusters are aligned to the world, so that moving the view does not change how the light of the cells is collected
+    auto lightClusterSize = LightClusterSizeInFalloffDistances * lightFalloffDistance;
+    RealVector2D lightClusterOrigin{std::floor(origin.x / lightClusterSize) * lightClusterSize, std::floor(origin.y / lightClusterSize) * lightClusterSize};
+    auto getNumLightClusters = [&](float gridOrigin, int numNodes, float clusterOrigin) {
+        auto gridEnd = gridOrigin + toFloat(numNodes - 1) * nodeDistance;
+        return std::min(toInt(std::ceil((gridEnd - clusterOrigin) / lightClusterSize)) + 1, MaxLightClusters);
+    };
+    auto getNumIrradianceNodes = [&](int numNodes) {
+        return std::min(toInt(std::ceil(toFloat(numNodes - 1) * nodeDistance / irradianceNodeDistance)) + 1, GasIrradianceImageSize);
+    };
+    _gasGrid = GasGrid{
+        .origin = origin,
+        .nodeDistance = nodeDistance,
+        .size = size,
+        .blurRadius = std::min(toInt(std::ceil(3.0f * cloudSpread / nodeDistance)), MaxGasBlurRadius),
+        .cloudSpreadInNodes = cloudSpread / nodeDistance,
+        .lightFalloffDistance = lightFalloffDistance,
+        .lightClusterOrigin = lightClusterOrigin,
+        .lightClusterSize = lightClusterSize,
+        .numLightClusters = {getNumLightClusters(origin.x, size.x, lightClusterOrigin.x), getNumLightClusters(origin.y, size.y, lightClusterOrigin.y)},
+        .irradianceNodeDistance = irradianceNodeDistance,
+        .irradianceSize = {getNumIrradianceNodes(size.x), getNumIrradianceNodes(size.y)},
+    };
+}
+
+namespace
+{
+    float getHaltonValue(uint32_t index, uint32_t base)
+    {
+        auto result = 0.0f;
+        auto fraction = 1.0f;
+        while (index > 0) {
+            fraction /= toFloat(base);
+            result += fraction * toFloat(index % base);
+            index /= base;
+        }
+        return result;
+    }
+
+    float getSmoothTransition(float value, float start, float end)
+    {
+        auto fraction = std::clamp((value - start) / (end - start), 0.0f, 1.0f);
+        return fraction * fraction * (3.0f - 2.0f * fraction);
+    }
+}
+
+float _RayTracingResources::getTissueVisibility(RenderView const& view)
+{
+    return getSmoothTransition(view.getScreenZoomFactor(), TissueZoomStart, TissueZoomEnd);
+}
+
+float _RayTracingResources::getBackgroundScale(SimulationParameters const& parameters)
+{
+    return 1.0f / SimulationRenderer::getBloomSceneWeight(parameters);
+}
+
+bool _RayTracingResources::isSourceLightActive(SimulationParameters const& parameters)
+{
+    for (auto index : std::views::iota(0, parameters.numSources)) {
+        if (parameters.sourceLightBrightness.sourceValues[index] > 0.0f) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool _RayTracingResources::isSceneNeeded(RenderView const& view, SimulationParameters const& parameters)
+{
+    return getTissueVisibility(view) > 0.0f || isSourceLightActive(parameters);
+}
+
+namespace
+{
+    // A radiation source counts if the light of one of its periodic copies reaches the region. Sources with the same area and range shine as
+    // one, so that their light is traced only once.
+    int getSourceLights(SimulationParameters const& parameters, IntVector2D const& worldSize, RealRect const& region, SourceLight (&result)[MAX_SOURCES])
+    {
+        auto world = toRealVector2D(worldSize);
+        auto numLights = 0;
+        for (auto index : std::views::iota(0, parameters.numSources)) {
+            auto brightness = parameters.sourceLightBrightness.sourceValues[index];
+            auto range = parameters.sourceLightRange.sourceValues[index];
+            if (brightness <= 0.0f || range <= 0.0f) {
+                continue;
+            }
+            auto circular = parameters.sourceShapeType.sourceValues[index] == SourceShapeType_Circular;
+            auto radius = parameters.sourceCircularRadius.sourceValues[index];
+            auto halfExtent = circular ? RealVector2D{radius, radius} : parameters.sourceRectangularRect.sourceValues[index] / 2.0f;
+            auto position = parameters.sourcePosition.sourceValues[index];
+            auto reach = halfExtent + RealVector2D{range, range};
+            auto reachesRegion = [&](float regionStart, float regionEnd, float center, float reach, float period) {
+                auto offset = Math::modulo(center - regionStart, period);
+                return offset - reach <= regionEnd - regionStart || offset + reach >= period;
+            };
+            if (!reachesRegion(region.topLeft.x, region.bottomRight.x, position.x, reach.x, world.x)
+                || !reachesRegion(region.topLeft.y, region.bottomRight.y, position.y, reach.y, world.y)) {
+                continue;
+            }
+            auto const& color = parameters.sourceLightColor.sourceValues[index];
+            SourceLight light{
+                .centerRangeShape = {position.x, position.y, range, circular ? 0.0f : 1.0f},
+                .color = {color.r * brightness, color.g * brightness, color.b * brightness, 0.0f},
+                .extent = {halfExtent.x, halfExtent.y, 0.0f, 0.0f},
+            };
+            auto lightsEnd = result + numLights;
+            auto sameArea = std::ranges::find_if(result, lightsEnd, [&](SourceLight const& other) {
+                return std::ranges::equal(other.centerRangeShape, light.centerRangeShape) && std::ranges::equal(other.extent, light.extent);
+            });
+            if (sameArea == lightsEnd) {
+                result[numLights++] = light;
+            } else {
+                for (auto&& [sum, value] : std::views::zip(sameArea->color, light.color)) {
+                    sum += value;
+                }
+            }
+        }
+        return numLights;
+    }
+}
+
+void _RayTracingResources::updateFrameConstants(
+    RenderView const& view,
+    NumRenderObjects const& numObjects,
+    SimulationParameters const& parameters,
+    IntVector2D const& worldSize)
+{
+    auto const& topLeft = view.visibleWorldRect.topLeft;
+    RealVector2D jitter;
+    if (_stillPicture) {
+        auto jitterIndex = _numAveragedFrames % NumJitterPositions + 1;
+        jitter = {getHaltonValue(jitterIndex, 2) - 0.5f, getHaltonValue(jitterIndex, 3) - 0.5f};
+    }
+    auto screenZoom = view.getScreenZoomFactor();
+    auto closeUpWeight = getSmoothTransition(screenZoom, CloseUpZoomStart, CloseUpZoomEnd);
+    auto detailVisibility = getSmoothTransition(screenZoom, DetailZoomStart, DetailZoomEnd);
+
+    FrameConstants constants{
+        .view = {toFloat(view.viewSize.x), toFloat(view.viewSize.y), view.zoomFactor, screenZoom},
+        .rect = {topLeft.x, topLeft.y, jitter.x, jitter.y},
+        .counts =
+            {static_cast<uint32_t>(numObjects.objects),
+             static_cast<uint32_t>(numObjects.lineIndices / 2),
+             static_cast<uint32_t>(numObjects.triangleIndices / 3),
+             static_cast<uint32_t>(_lightGrid.getNumCells())},
+        .lightGrid = {_lightGrid.origin.x, _lightGrid.origin.y, _lightGrid.cellSize, 0.0f},
+        .gridSize = {_lightGrid.size.x, _lightGrid.size.y, 0, 0},
+        .tissue = {closeUpWeight, detailVisibility, 1.0f / view.zoomFactor, getTissueVisibility(view)},
+        .parameters = {getBackgroundScale(parameters), _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1), 0.0f},
+        .gasGrid = {_gasGrid.origin.x, _gasGrid.origin.y, _gasGrid.nodeDistance, _gasGrid.cloudSpreadInNodes},
+        .gasSize = {_gasGrid.size.x, _gasGrid.size.y, _gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
+        .gasLight =
+            {_gasGrid.lightClusterSize,
+             LightRangeInFalloffDistances * _gasGrid.lightFalloffDistance,
+             _gasGrid.irradianceNodeDistance,
+             _gasGrid.lightFalloffDistance},
+        .gasLightGrid = {_gasGrid.numLightClusters.x, _gasGrid.numLightClusters.y, _gasGrid.irradianceSize.x, _gasGrid.irradianceSize.y},
+        .gasLighting = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
+        .world = {toFloat(worldSize.x), toFloat(worldSize.y), parameters.borderlessRendering.value ? 1.0f : 0.0f, 0.0f},
+    };
+
+    // Without borderless rendering, only the world is lit
+    auto gasGridExtent = RealVector2D{toFloat(_gasGrid.size.x - 1), toFloat(_gasGrid.size.y - 1)} * _gasGrid.nodeDistance;
+    RealRect litRegion{_gasGrid.origin, _gasGrid.origin + gasGridExtent};
+    if (!parameters.borderlessRendering.value) {
+        litRegion.topLeft = {std::max(litRegion.topLeft.x, 0.0f), std::max(litRegion.topLeft.y, 0.0f)};
+        litRegion.bottomRight = {std::min(litRegion.bottomRight.x, toFloat(worldSize.x)), std::min(litRegion.bottomRight.y, toFloat(worldSize.y))};
+    }
+    constants.numSourceLights[0] = getSourceLights(parameters, worldSize, litRegion, constants.sourceLights);
+    std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
+}
+
+void _RayTracingResources::writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures)
+{
+    _descriptorSet = VulkanContext::get().allocateFrameDescriptorSet(_descriptorSetLayout);
+    auto constexpr General = VK_IMAGE_LAYOUT_GENERAL;
+    auto constexpr ShaderReadOnly = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    DescriptorSetWriter()
+        .uniformBuffer(Binding_FrameConstants, _frameConstants.buffer)
+        .accelerationStructure(Binding_Scene, _scene.topLevel)
+        .storageBuffer(Binding_Objects, geometryBuffers->getBuffer(GeometryBufferType_Objects))
+        .storageBuffer(Binding_LineIndices, geometryBuffers->getBuffer(GeometryBufferType_LineIndices))
+        .storageBuffer(Binding_TriangleIndices, geometryBuffers->getBuffer(GeometryBufferType_TriangleIndices))
+        .storageBuffer(Binding_Spheres, _scene.spheres.buffer)
+        .storageBuffer(Binding_SphereAabbs, _scene.sphereAabbs.buffer)
+        .storageBuffer(Binding_CapsuleAabbs, _scene.capsuleAabbs.buffer)
+        .storageBuffer(Binding_TriangleAabbs, _scene.triangleAabbs.buffer)
+        .storageBuffer(Binding_CellCounts, _cellCounts.buffer)
+        .storageBuffer(Binding_CellCursors, _cellCursors.buffer)
+        .storageBuffer(Binding_CellEntries, _scene.lightEntries.buffer)
+        .storageBuffer(Binding_Allocation, _allocation.buffer)
+        .storageImage(Binding_SceneColor, _view.sceneColor.view)
+        .storageImage(Binding_AntiAliased, _view.antiAliased.at(_current).view)
+        .sampledImage(Binding_PreviousAntiAliased, _view.antiAliased.at(getPrevious()).view, General)
+        .sampledImage(Binding_GroundTexture, textures.at(0)->color.view, ShaderReadOnly)
+        .sampledImage(Binding_GasSampler, _gasImage.view, General)
+        .sampledImage(Binding_SceneColorSampler, _view.sceneColor.view, General)
+        .storageBuffer(Binding_FluidParticles, geometryBuffers->getBuffer(GeometryBufferType_FluidParticles))
+        .storageBuffer(Binding_GasAccumulation, _gasAccumulation.buffer)
+        .storageBuffer(Binding_GasIntermediate, _gasIntermediate.buffer)
+        .storageImage(Binding_GasImage, _gasImage.view)
+        .sampledImage(Binding_EnergyParticleTexture, textures.at(1)->color.view, ShaderReadOnly)
+        .storageBuffer(Binding_GasLightClusters, _gasLightClusters.buffer)
+        .storageImage(Binding_GasIrradiance, _gasIrradiance.view)
+        .sampledImage(Binding_GasIrradianceSampler, _gasIrradiance.view, General)
+        .write(_descriptorSet);
+}
+
+void _RayTracingResources::buildScene(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects)
+{
+    VulkanBarriers()
+        .add(_scene.sphereAabbs, BufferUsage::BuildInput)
+        .add(_scene.capsuleAabbs, BufferUsage::BuildInput)
+        .add(_scene.triangleAabbs, BufferUsage::BuildInput)
+        .add(_scene.bottomLevelBuffer, BufferUsage::BuildOutput)
+        .add(_scene.scratchBuffer, BufferUsage::BuildOutput)
+        .record(commandBuffer);
+    auto bottomLevelGeometries = createBottomLevelGeometries(_scene.sphereAabbs, _scene.capsuleAabbs, _scene.triangleAabbs);
+    auto bottomLevelBuildInfo = createBuildInfo(VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, bottomLevelGeometries);
+    bottomLevelBuildInfo.dstAccelerationStructure = _scene.bottomLevel;
+    bottomLevelBuildInfo.scratchData.deviceAddress = getAlignedScratchAddress(_scene.scratchBuffer);
+    std::array bottomLevelRanges{
+        VkAccelerationStructureBuildRangeInfoKHR{.primitiveCount = static_cast<uint32_t>(numObjects.objects)},
+        VkAccelerationStructureBuildRangeInfoKHR{.primitiveCount = static_cast<uint32_t>(numObjects.lineIndices / 2)},
+        VkAccelerationStructureBuildRangeInfoKHR{.primitiveCount = static_cast<uint32_t>(numObjects.triangleIndices / 3)},
+    };
+    auto bottomLevelRangesPointer = bottomLevelRanges.data();
+    vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &bottomLevelBuildInfo, &bottomLevelRangesPointer);
+
+    VulkanBarriers()
+        .add(_scene.bottomLevelBuffer, BufferUsage::BuildInput)
+        .add(_scene.topLevelBuffer, BufferUsage::BuildOutput)
+        .add(_scene.scratchBuffer, BufferUsage::BuildOutput)
+        .record(commandBuffer);
+    std::vector<VkAccelerationStructureGeometryKHR> topLevelGeometries{createInstanceGeometry(VulkanContext::get().getDeviceAddress(_scene.instanceBuffer))};
+    auto topLevelBuildInfo = createBuildInfo(VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR, topLevelGeometries);
+    topLevelBuildInfo.dstAccelerationStructure = _scene.topLevel;
+    topLevelBuildInfo.scratchData.deviceAddress = getAlignedScratchAddress(_scene.scratchBuffer);
+    VkAccelerationStructureBuildRangeInfoKHR topLevelRange{.primitiveCount = 1};
+    auto topLevelRangePointer = &topLevelRange;
+    vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &topLevelBuildInfo, &topLevelRangePointer);
+}
+
+VulkanBuffer& _RayTracingResources::getBuffer(RayTracingResource resource)
+{
+    switch (resource) {
+    case RayTracingResource::Spheres:
+        return _scene.spheres;
+    case RayTracingResource::SphereAabbs:
+        return _scene.sphereAabbs;
+    case RayTracingResource::CapsuleAabbs:
+        return _scene.capsuleAabbs;
+    case RayTracingResource::TriangleAabbs:
+        return _scene.triangleAabbs;
+    case RayTracingResource::CellCounts:
+        return _cellCounts;
+    case RayTracingResource::CellCursors:
+        return _cellCursors;
+    case RayTracingResource::CellEntries:
+        return _scene.lightEntries;
+    case RayTracingResource::Allocation:
+        return _allocation;
+    case RayTracingResource::GasAccumulation:
+        return _gasAccumulation;
+    case RayTracingResource::GasIntermediate:
+        return _gasIntermediate;
+    case RayTracingResource::GasLightClusters:
+        return _gasLightClusters;
+    default:
+        THROW_NOT_IMPLEMENTED();
+    }
+}
+
+VulkanImage* _RayTracingResources::getImage(RayTracingResource resource)
+{
+    switch (resource) {
+    case RayTracingResource::GasImage:
+        return &_gasImage;
+    case RayTracingResource::GasIrradiance:
+        return &_gasIrradiance;
+    case RayTracingResource::SceneColor:
+        return &_view.sceneColor;
+    case RayTracingResource::AntiAliased:
+        return &_view.antiAliased.at(_current);
+    case RayTracingResource::PreviousAntiAliased:
+        return &_view.antiAliased.at(getPrevious());
+    default:
+        return nullptr;
+    }
+}
+
+VkDeviceSize _RayTracingResources::getUsedSize(RayTracingResource resource) const
+{
+    switch (resource) {
+    case RayTracingResource::CellCounts:
+        return _lightGrid.getNumCells() * sizeof(uint32_t);
+    case RayTracingResource::Allocation:
+        return sizeof(uint32_t);
+    case RayTracingResource::GasAccumulation:
+        return static_cast<VkDeviceSize>(_gasGrid.size.x) * _gasGrid.size.y * GasAccumulationStride * sizeof(uint32_t);
+    case RayTracingResource::GasLightClusters:
+        return static_cast<VkDeviceSize>(_gasGrid.numLightClusters.x) * _gasGrid.numLightClusters.y * GasLightClusterStride * sizeof(uint32_t);
+    default:
+        THROW_NOT_IMPLEMENTED();
+    }
+}
+
+int _RayTracingResources::getPrevious() const
+{
+    return 1 - _current;
+}

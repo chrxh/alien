@@ -256,6 +256,25 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
     EXPECT_EQ(2u, cellData.size());
 }
 
+TEST_F(GeometryTests, copyBuffers_marksFluids)
+{
+    auto data = ContentDesc().energies({EnergyDesc().id(1).pos({200.0f, 200.0f}).energy(10.0f)});
+    data._objects.emplace_back(ObjectDesc().id(2).pos({100.0f, 100.0f}).type(FluidDesc()));
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    // The z coordinate is 1 for fluids and 0 for energy particles
+    auto particleData = geometryBuffers->getFluidParticleData();
+    ASSERT_EQ(2u, particleData.size());
+    for (auto const& particle : particleData) {
+        auto isFluid = particle.pos[0] < 150.0f;
+        EXPECT_FLOAT_EQ(isFluid ? 1.0f : 0.0f, particle.pos[2]);
+    }
+}
+
 TEST_F(GeometryTests, copyBuffers_creature)
 {
     auto data = ContentDesc().addCreature(

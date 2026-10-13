@@ -105,7 +105,9 @@ using _FloatColorRGBBaseLayerMember = BaseLayerParameter<FloatColorRGB> Simulati
 using FloatColorRGBBaseLayerMember = std::shared_ptr<_FloatColorRGBBaseLayerMember>;
 using _ColorVectorRGBMember = BaseParameter<ColorVector<FloatColorRGB>> SimulationParameters::*;
 using ColorVectorRGBMember = std::shared_ptr<_ColorVectorRGBMember>;
-using FloatColorRGBMemberVariant = std::variant<std::monostate, FloatColorRGBBaseLayerMember, ColorVectorRGBMember>;
+using _FloatColorRGBSourceMember = SourceParameter<FloatColorRGB> SimulationParameters::*;
+using FloatColorRGBSourceMember = std::shared_ptr<_FloatColorRGBSourceMember>;
+using FloatColorRGBMemberVariant = std::variant<std::monostate, FloatColorRGBBaseLayerMember, ColorVectorRGBMember, FloatColorRGBSourceMember>;
 
 using _ColorTransitionRulesBaseLayerMember = BaseLayerParameter<ColorVector<ColorTransitionRule>> SimulationParameters::*;
 using ColorTransitionRulesBaseLayerMember = std::shared_ptr<_ColorTransitionRulesBaseLayerMember>;
@@ -218,6 +220,7 @@ struct ColorSpec
 {
     SETTER_SHARED_PTR(ColorSpec, FloatColorRGBBaseLayerMember, member);
     SETTER_SHARED_PTR(ColorSpec, ColorVectorRGBMember, member);
+    SETTER_SHARED_PTR(ColorSpec, FloatColorRGBSourceMember, member);
     FloatColorRGBMemberVariant _member = std::monostate();
 };
 

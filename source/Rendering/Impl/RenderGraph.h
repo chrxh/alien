@@ -4,7 +4,7 @@
 #include <Engine/Interface/SimulationFacade.h>
 
 #include "Definitions.h"
-#include "RenderStep.h"
+#include "RenderSteps.h"
 #include "VulkanGeometryBuffers.h"
 
 // Contains RenderSteps that must be executed in order
@@ -43,15 +43,17 @@ using RenderBlocks = std::vector<RenderBlock>;
 class _RenderGraph
 {
 public:
-    _RenderGraph(RenderBlocks&& blocks);
-
-    // Copies the visible simulation data into the geometry buffers, which the GPU must no longer use
-    void updateGeometry(RealRect const& visibleWorldRect);
+    // Graphs for different ways of rendering can share the geometry buffers
+    _RenderGraph(RenderBlocks&& blocks, VulkanGeometryBuffers const& geometryBuffers);
 
     // Records the rendering of the simulation into the command buffer and returns the image of the final target.
     // Without a final target, the graph renders into an own image of the view size.
     // The images take a new view size only here, so that resizing the window does not create images for every intermediate size.
-    VulkanImage& execute(VkCommandBuffer commandBuffer, RenderView const& view, std::optional<TextureTarget> const& finalTarget = std::nullopt);
+    VulkanImage& execute(
+        VkCommandBuffer commandBuffer,
+        RenderView const& view,
+        SimulationParameters const& parameters,
+        std::optional<TextureTarget> const& finalTarget = std::nullopt);
 
     // Required if the recorded commands are discarded instead of submitted
     void resetImageStates();
@@ -60,9 +62,10 @@ private:
     void applyViewSize(bool withScreenTarget);
     void resizeTarget(TextureTarget const& target);
 
+    // Steps without target get no render target
     void forEachStep(
         std::function<TextureTarget()> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, RenderTarget const& target)> const& executeStep);
+        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target)> const& executeStep);
 
     struct TargetInfo
     {

@@ -264,15 +264,28 @@ __inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
+    // While an attack is shown, the position of the attacker moves with the attacked object, so that it keeps its offset
+    auto updateInterval = cudaSimulationParameters.timestepSize.value * TIMESTEPS_PER_CELL_FUNCTION;
+
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type == ObjectType_Cell) {
-            if (object->typeData.cell.eventCounter > 0) {
-                --object->typeData.cell.eventCounter;
+            auto& cell = object->typeData.cell;
+            if (cell.eventCounter > 0) {
+                --cell.eventCounter;
+                if (cell.event == CellEvent_Attacked) {
+                    cell.eventPos += object->vel * updateInterval;
+                    data.world.correctPosition(cell.eventPos);
+                }
             }
         } else if (object->type == ObjectType_FreeCell) {
-            if (object->typeData.freeCell.eventCounter > 0) {
-                --object->typeData.freeCell.eventCounter;
+            auto& freeCell = object->typeData.freeCell;
+            if (freeCell.eventCounter > 0) {
+                --freeCell.eventCounter;
+                if (freeCell.event == CellEvent_Attacked) {
+                    freeCell.eventPos += object->vel * updateInterval;
+                    data.world.correctPosition(freeCell.eventPos);
+                }
             }
         }
     }
