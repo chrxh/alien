@@ -39,7 +39,7 @@ The development is driven by the desire to better understand the conditions for 
 - Hardware ray tracing: living tissue, glowing nebulae, and shafts of light and shadow
 - Real-time interaction with the running simulation
 
-https://github.com/user-attachments/assets/fad1b719-5662-4840-aa75-165346d62cdd
+https://github.com/user-attachments/assets/27f244b2-2792-4854-9042-6c8b179638c0
 
 ### Digital organisms
 - Creatures are networks of cells, held together by elastic connections that carry energy and signals
