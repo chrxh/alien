@@ -9,6 +9,10 @@ namespace
     // The radiation center shows the light color of its source darkened, so that it stays in the background
     __device__ float constexpr RadiationCenterBrightness = 0.45f;
 
+    // The light organs approach the signals with this time constant, so that signals changing with every cell function pass do not let them
+    // flicker
+    __device__ float constexpr LightOrganResponseTimesteps = 30.0f;
+
     __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
@@ -103,6 +107,29 @@ namespace
         return pos.x >= context.visibleTopLeft.x - context.cullingMargin && pos.x <= context.visibleBottomRight.x + context.cullingMargin
             && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
     }
+
+    // Only visible cells are updated, hence the elapsed simulation time is measured per cell. Paused simulations keep their light organs.
+    __device__ __inline__ void updateLightOrgans(Cell& cell, uint64_t timestep)
+    {
+        auto timestepBits = static_cast<uint16_t>(timestep);
+        auto elapsedTimesteps = static_cast<uint16_t>(timestepBits - cell.lightOrganTimestep);
+        if (elapsedTimesteps == 0) {
+            return;
+        }
+        cell.lightOrganTimestep = timestepBits;
+        auto remainingDifference = expf(-toFloat(elapsedTimesteps) / LightOrganResponseTimesteps);
+        for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
+            auto intensity = toInt(cell.lightOrganIntensities[i]);
+            auto target = toInt(Cell::getLightOrganTarget(cell.neuralActivity.signals[i]));
+            auto newIntensity = target + toInt(roundf(toFloat(intensity - target) * remainingDifference));
+
+            // Differences below one step of the 8 bit intensities would otherwise remain forever
+            if (newIntensity == intensity && intensity != target) {
+                newIntensity += intensity < target ? 1 : -1;
+            }
+            cell.lightOrganIntensities[i] = static_cast<uint8_t>(newIntensity);
+        }
+    }
 }
 
 __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects, GeometryExtractionContext context)
@@ -166,15 +193,24 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             objectData[idx].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
             objectData[idx].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-            // Compute highlight intensity from cell
+            // Compute highlight intensity and light organs from cell
             float highlightIntensity = 0.0f;
+            float lightOrganIntensities[LIGHT_ORGANS_PER_CELL] = {};
             if (object->type == ObjectType_Cell) {
-                highlightIntensity = toFloat(object->typeData.cell.highlightIntensity) / 255.0f;
+                auto& cell = object->typeData.cell;
+                highlightIntensity = toFloat(cell.highlightIntensity) / 255.0f;
+                updateLightOrgans(cell, *data.timestep);
+                for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
+                    lightOrganIntensities[i] = toFloat(cell.lightOrganIntensities[i]) / 255.0f;
+                }
             }
 
             // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolatedOrTail (bit 16) into state field
             objectData[idx].state = cellType | (object->type << 8) | (isIsolatedOrTail << 16);
             objectData[idx].highlightIntensity = highlightIntensity;
+            for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
+                objectData[idx].lightOrganIntensities[i] = lightOrganIntensities[i];
+            }
 
             object->tempValue1.as_uint64 = idx;
         }

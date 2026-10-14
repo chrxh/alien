@@ -58,6 +58,7 @@ struct ObjectVertex
     float color[3];
     int state;
     float highlightIntensity;
+    float lightOrganIntensities[LightOrgansPerCell];
 };
 
 struct Sphere
@@ -65,7 +66,8 @@ struct Sphere
     vec4 centerRadius;  // xy: center, w: radius
     vec4 hueMaterial;   // rgb: hue, w: material
     vec4 emission;      // rgb: glow, w: brightness of the color
-    vec4 details;       // y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
+    vec4 details;       // x: 8 bit intensities of the light organs packed into an integer, negative without light organs, y: random seed
+                        // that stays with the object, z: 1 if isolated or at the end of a chain
 };
 
 struct Aabb
