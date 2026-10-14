@@ -21,4 +21,5 @@ private:
 
     std::string _serverAddress;
     std::string _origServerAddress;
+    bool _countAsActive = true;
 };

@@ -563,6 +563,7 @@ public:
         MEMBER(TabItemParameters, std::string, badge, std::string());
         MEMBER(TabItemParameters, std::string, badgeIcon, std::string());
         MEMBER(TabItemParameters, ImColor, badgeColor, Const::WarningColor);
+        MEMBER(TabItemParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool BeginTabItem(TabItemParameters const& parameters);
     static void EndTabItem();

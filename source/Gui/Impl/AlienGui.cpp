@@ -2755,7 +2755,9 @@ namespace
         }
         drawList->PopClipRect();
 
-        if (posX + nameSize.x > nameMaxX) {
+        if (parameters._tooltip.has_value()) {
+            AlienGui::Tooltip(AlienGui::TooltipParameters().text(*parameters._tooltip));
+        } else if (posX + nameSize.x > nameMaxX) {
             AlienGui::Tooltip(AlienGui::TooltipParameters().text(parameters._name));
         }
     }

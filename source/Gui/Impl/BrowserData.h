@@ -53,6 +53,7 @@ public:
     NetworkResourceTreeTO selectedTreeTO;
     std::string filter;
     std::vector<UserTO> userTOs;
+    std::optional<int> numActiveSimulators;
     LastSessionBrowserData lastSessionData;
     DownloadCache downloadCache;
 
