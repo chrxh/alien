@@ -71,6 +71,7 @@ void BrowserController::refresh(bool withRetry)
             auto data = _PersisterFacade::get()->fetchGetNetworkResourcesData(requestId);
             _data->userTOs = data.userTOs;
             _data->ownEmojiTypeBySimId = data.emojiTypeByResourceId;
+            _data->numActiveSimulators = data.numActiveSimulators;
 
             auto userName = NetworkService::get().getLoggedInUserName();
             for (auto& [workspaceId, workspace] : _data->workspaces) {
