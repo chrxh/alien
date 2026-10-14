@@ -10,6 +10,16 @@ namespace Shaders
 // The highlight intensity reflects the activity of the neuron of a cell, which makes the cell glow and light up its surroundings
 const float ActivityGlow = 1.5;
 
+// The 8 bit intensities fit exactly into the mantissa of a float, see getLightOrganIntensity in Shaders/RayTracingTissueCS.h
+float packLightOrganIntensities(ObjectVertex object)
+{
+    uint result = 0u;
+    for (int i = 0; i < LightOrgansPerCell; ++i) {
+        result |= uint(round(clamp(object.lightOrganIntensities[i], 0.0, 1.0) * 255.0)) << (8 * i);
+    }
+    return float(result);
+}
+
 Sphere createSphere(uint index)
 {
     ObjectVertex object = objects[index];
@@ -29,8 +39,10 @@ Sphere createSphere(uint index)
     }
 
     vec3 emission = vec3(0.0);
+    float lightOrgans = -1.0;
     if (objectType == ObjectType_Cell) {
         emission = hue * ActivityGlow * object.highlightIntensity;
+        lightOrgans = packLightOrganIntensities(object);
     }
 
     // The height of an object derives from its id and the id of its creature and therefore stays the same over time
@@ -40,7 +52,7 @@ Sphere createSphere(uint index)
     result.centerRadius = vec4(object.pos[0], object.pos[1], 0.0, radius);
     result.hueMaterial = vec4(hue, material);
     result.emission = vec4(emission, getBrightness(color));
-    result.details = vec4(0.0, seed, float((object.state >> 16) & 1), 0.0);
+    result.details = vec4(lightOrgans, seed, float((object.state >> 16) & 1), 0.0);
     return result;
 }
 

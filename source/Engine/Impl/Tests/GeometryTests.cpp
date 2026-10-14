@@ -292,6 +292,50 @@ TEST_F(GeometryTests, copyBuffers_marksFluids)
     }
 }
 
+TEST_F(GeometryTests, copyBuffers_lightOrgansShowPositiveSignals)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({0.5f, -1.0f, 2.0f, 1.0f, 0, 0, 0, 0}))),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(1u, cellData.size());
+    EXPECT_NEAR(0.5f, cellData.at(0).lightOrganIntensities[0], 1.0f / 255);
+    EXPECT_FLOAT_EQ(0.0f, cellData.at(0).lightOrganIntensities[1]);
+    EXPECT_FLOAT_EQ(1.0f, cellData.at(0).lightOrganIntensities[2]);
+}
+
+TEST_F(GeometryTests, copyBuffers_lightOrgansSmoothAlternatingSignals)
+{
+    // By default, connected cells swap their signals with every cell function pass
+    auto data = ContentDesc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+                        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({0, 0, 0, 0, 0, 0, 0, 0}))),
+                    })
+                    .addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    for (int i = 0; i < 30; ++i) {
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    }
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(2u, cellData.size());
+    for (auto const& cell : cellData) {
+        EXPECT_GT(cell.lightOrganIntensities[0], 0.3f);
+        EXPECT_LT(cell.lightOrganIntensities[0], 0.7f);
+    }
+}
+
 TEST_F(GeometryTests, copyBuffers_creature)
 {
     auto data = ContentDesc().addCreature(
