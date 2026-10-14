@@ -323,6 +323,9 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (success && NetworkService::get().getLoggedInUserName()) {
         success &= NetworkService::get().getEmojiTypeByResourceId(data.emojiTypeByResourceId);
     }
+    if (success) {
+        data.numActiveSimulators = NetworkService::get().getNumActiveSimulators();
+    }
 
     if (!success) {
         return std::make_shared<_PersisterRequestError>(

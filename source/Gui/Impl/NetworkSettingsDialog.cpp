@@ -6,6 +6,7 @@
 
 #include "AlienGui.h"
 #include "BrowserWindow.h"
+#include "HelpStrings.h"
 #include "StyleService.h"
 
 namespace
@@ -21,6 +22,8 @@ void NetworkSettingsDialog::processIntern()
 {
     AlienGui::InputText(
         AlienGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
+    AlienGui::Checkbox(
+        AlienGui::CheckboxParameters().name("Count me as active").textWidth(RightColumnWidth).tooltip(Const::NetworkCountAsActiveTooltip), &_countAsActive);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
@@ -41,10 +44,12 @@ void NetworkSettingsDialog::openIntern()
 {
     _origServerAddress = NetworkService::get().getServerAddress();
     _serverAddress = _origServerAddress;
+    _countAsActive = NetworkService::get().isCountAsActive();
 }
 
 void NetworkSettingsDialog::onChangeSettings()
 {
     NetworkService::get().setServerAddress(_serverAddress);
+    NetworkService::get().setCountAsActive(_countAsActive);
     BrowserWindow::get().onRefresh();
 }

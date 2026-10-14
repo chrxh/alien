@@ -86,6 +86,19 @@ The C++ client (`source/Base/Resources.h`, `AlienServerURL`) defaults to
 simulations and genomes at 1 GB. `/uploadsimulation` and `/replacesimulation`
 answer `{"result": false}` beyond it.
 
+## Active simulator count
+
+Every running client fetches `/getversionedsimulationlist` on startup and then
+every 20 minutes. The server remembers a keyed hash of each caller's IP address
+for 25 minutes and `/getactivesimulatorcount` answers with the number of these
+hashes. The key is random per server start, and the hashes live only in memory,
+never in the database. Clients whose user disabled the option send
+`countAsActive=false` and are not recorded.
+
+This requires a single uvicorn process (no `--workers`). Behind a reverse proxy,
+uvicorn has to take the client address from `X-Forwarded-For` (its default for
+a proxy on 127.0.0.1), otherwise all clients share one address and count as one.
+
 ## Tests
 
 ```bash

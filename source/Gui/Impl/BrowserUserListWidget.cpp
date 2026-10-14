@@ -13,6 +13,7 @@
 #include "AlienGui.h"
 #include "BrowserData.h"
 #include "BrowserHelper.h"
+#include "HelpStrings.h"
 #include "LoginController.h"
 #include "StyleService.h"
 
@@ -50,6 +51,17 @@ namespace
         ImGui::PopStyleColor();
     }
 
+    AlienGui::TabItemParameters getSimulatorsTabParameters(std::optional<int> const& numActiveSimulators)
+    {
+        auto result = AlienGui::TabItemParameters().name("Simulators");
+        if (numActiveSimulators) {
+            result.badge("  " + std::to_string(*numActiveSimulators) + " active")
+                .badgeColor(ImColor::HSV(0.0f, 0.4f, 0.9f))
+                .tooltip(Const::BrowserActiveSimulatorsTooltip);
+        }
+        return result;
+    }
+
     void drawLastDayOnlineSymbol()
     {
         auto color = ImColor::HSV(0.16f, 0.5f, 0.66f);
@@ -69,7 +81,7 @@ void _BrowserUserListWidget::process()
     auto selectedTabIndex = 0;
     AlienGui::TabBar(
         AlienGui::TabBarParameters().id("##Simulators").style(AlienGui::TabBarStyle::Group),
-        {AlienGui::TabItemParameters().name("Simulators")},
+        {getSimulatorsTabParameters(_data->numActiveSimulators)},
         selectedTabIndex);
 
     if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
