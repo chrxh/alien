@@ -353,6 +353,7 @@ void SimulationParametersMainWindow::processLocationTable()
                     _selectedOrderNumber = row;
                 }
                 ImGui::SameLine();
+                ImGui::AlignTextToFramePadding();
                 std::string icon;
                 if (entry.type == LocationType::Base) {
                     icon = ICON_FA_SQUARE_FULL " ";
@@ -366,6 +367,7 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // Column: Type
                 ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
                 if (entry.type == LocationType::Base) {
                     AlienGui::Text("Base parameters");
                 } else if (entry.type == LocationType::Layer) {
@@ -376,6 +378,7 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // Column: Position
                 ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
                 if (row > 0) {
                     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
                         onCenterLocation(row);
@@ -387,6 +390,7 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // Column: Strength
                 ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
                 if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
                     AlienGui::Text(entry.strength);
                 } else {
@@ -395,6 +399,7 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // Column: Opacity
                 ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
                 if (entry.type == LocationType::Layer) {
                     AlienGui::Text(entry.strength);
                 } else {
