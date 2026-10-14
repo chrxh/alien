@@ -6,6 +6,8 @@ import os
 import secrets
 import smtplib
 import struct
+import threading
+import time
 import urllib.request
 import urllib.error
 
@@ -220,6 +222,50 @@ def startup():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# --- Active simulator count ---
+# Every running client fetches ``/getversionedsimulationlist`` on startup and
+# then every 20 minutes. The server remembers the callers of the last
+# ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` to count the running simulators. Callers
+# are told apart by a keyed hash of their IP address. The key is random,
+# created at server start and never stored, and the hashes are kept in memory
+# only. Clients that opt out send ``countAsActive=false`` and are not recorded.
+# This requires a single server process, which is how the server is deployed.
+ACTIVE_SIMULATOR_TIMEOUT_SECONDS = 25 * 60
+MAX_ACTIVE_SIMULATORS = 100_000
+
+_active_simulator_key = secrets.token_bytes(32)
+_active_simulators: dict[str, float] = {}
+_active_simulators_lock = threading.Lock()
+
+
+def _remove_inactive_simulators(now: float):
+    inactive = [
+        caller_hash
+        for caller_hash, last_seen in _active_simulators.items()
+        if now - last_seen > ACTIVE_SIMULATOR_TIMEOUT_SECONDS
+    ]
+    for caller_hash in inactive:
+        del _active_simulators[caller_hash]
+
+
+def _record_active_simulator(request: Request):
+    if request.client is None:
+        return
+    caller_hash = hmac.new(_active_simulator_key, request.client.host.encode("utf-8"), hashlib.sha256).hexdigest()
+    now = time.monotonic()
+    with _active_simulators_lock:
+        _remove_inactive_simulators(now)
+        if caller_hash in _active_simulators or len(_active_simulators) < MAX_ACTIVE_SIMULATORS:
+            _active_simulators[caller_hash] = now
+
+
+@app.get("/getactivesimulatorcount")
+def get_active_simulator_count():
+    with _active_simulators_lock:
+        _remove_inactive_simulators(time.monotonic())
+        return {"activeSimulators": len(_active_simulators)}
 
 
 # --- Helpers ---
@@ -931,9 +977,11 @@ def set_new_password(
 
 @app.post("/getversionedsimulationlist")
 def get_versioned_simulation_list(
+    request: Request,
     userName: str | None = Form(None),
     password: str | None = Form(None),
     version: str | None = Form(None),
+    countAsActive: bool = Form(True),
 ):
     """Return all visible simulations (the C++ getNetworkResources endpoint).
 
@@ -942,6 +990,8 @@ def get_versioned_simulation_list(
     not used to filter results.
     """
     _ = version
+    if countAsActive:
+        _record_active_simulator(request)
 
     with Session(engine) as session:
         # Aggregate likes by (simulation_id, type).

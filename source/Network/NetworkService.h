@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <unordered_map>
 
@@ -32,6 +33,8 @@ public:
 
     std::string getServerAddress();
     void setServerAddress(std::string const& value);
+    bool isCountAsActive();
+    void setCountAsActive(bool value);
     bool isLoggedIn();
     std::optional<std::string> getLoggedInUserName();
     std::optional<std::string> getPassword();
@@ -49,6 +52,7 @@ public:
     bool getNetworkResourceList(std::vector<NetworkResourceRawTO>& result, bool withRetry);
     bool getResourcePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds);
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
+    std::optional<int> getNumActiveSimulators();
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     bool toggleReactionForResource(std::string const& simId, int likeType);
@@ -72,6 +76,7 @@ public:
 
 private:
     std::string _serverAddress;
+    std::atomic<bool> _countAsActive = true;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
     UserInfo _userInfo;

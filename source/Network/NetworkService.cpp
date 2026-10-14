@@ -88,11 +88,13 @@ namespace
 void NetworkService::setup()
 {
     _serverAddress = GlobalSettings::get().getValue("settings.server url", std::string(Const::AlienServerURL));
+    _countAsActive = GlobalSettings::get().getValue("settings.count as active", true);
 }
 
 void NetworkService::shutdown()
 {
     GlobalSettings::get().setValue("settings.server url", _serverAddress);
+    GlobalSettings::get().setValue("settings.count as active", _countAsActive.load());
     logout();
 }
 
@@ -105,6 +107,16 @@ void NetworkService::setServerAddress(std::string const& value)
 {
     _serverAddress = value;
     logout();
+}
+
+bool NetworkService::isCountAsActive()
+{
+    return _countAsActive;
+}
+
+void NetworkService::setCountAsActive(bool value)
+{
+    _countAsActive = value;
 }
 
 bool NetworkService::isLoggedIn()
@@ -325,6 +337,7 @@ bool NetworkService::getNetworkResourceList(std::vector<NetworkResourceRawTO>& r
         params.emplace("userName", *_loggedInUserName);
         params.emplace("password", *_password);
     }
+    params.emplace("countAsActive", _countAsActive ? "true" : "false");
 
     try {
         auto postResult = executeRequest([&] { return client.Post("/getversionedsimulationlist", params); }, withRetry);
@@ -446,6 +459,18 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
     } catch (...) {
         logNetworkError();
         return false;
+    }
+}
+
+std::optional<int> NetworkService::getNumActiveSimulators()
+{
+    auto client = createClient(_serverAddress);
+
+    try {
+        auto result = executeRequest([&] { return client.Get("/getactivesimulatorcount"); }, false);
+        return parseValueFromKey<int>(result->body, "activeSimulators");
+    } catch (...) {
+        return std::nullopt;
     }
 }
 
