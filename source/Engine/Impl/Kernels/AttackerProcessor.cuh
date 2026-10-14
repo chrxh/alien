@@ -126,6 +126,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     if (otherCell->creature->ancestorId == cell->creature->id) {
                         return;
                     }
+                    // Do not attack siblings
+                    if (cell->creature->ancestorId != VALUE_NOT_SET_UINT64 && otherCell->creature->ancestorId == cell->creature->ancestorId) {
+                        return;
+                    }
 
                     // Calculate energy gain
                     auto energyToTransfer =

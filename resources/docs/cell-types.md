@@ -167,7 +167,7 @@ Each attack attempt costs the **energy cost**, which is emitted as energy partic
 | Mode | Targets |
 | --- | --- |
 | Free cell | Free cells, optionally restricted to colors. |
-| Creature | Cells of other creatures. Only creatures that a sensor of the same creature has detected and tagged in the current cycle are attacked, see **Tag for attackers** of the sensor. Own offspring are never attacked. |
+| Creature | Cells of other creatures. Only creatures that a sensor of the same creature has detected and tagged in the current cycle are attacked, see **Tag for attackers** of the sensor. Own offspring and siblings (offspring of the same parent) are never attacked. |
 
 **Parameters:** group *Cell type: Attacker* with **Energy cost**, **Food chain color matrix**, **Attack strength**, **Same lineage protection**, **Size protection** and **Attack radius** (2 by default).
 
