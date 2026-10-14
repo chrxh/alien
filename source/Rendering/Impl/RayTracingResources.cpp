@@ -30,7 +30,7 @@ namespace
     auto constexpr CloseUpZoomStart = 3.0f;
     auto constexpr CloseUpZoomEnd = 12.0f;
 
-    // Cell details such as walls and nuclei appear between these screen zoom factors
+    // Cell details such as walls and light organs appear between these screen zoom factors
     auto constexpr DetailZoomStart = 8.0f;
     auto constexpr DetailZoomEnd = 20.0f;
 
@@ -228,11 +228,13 @@ void _RayTracingResources::resetImageStates()
 // The sizes shared with the shaders and the work group size are declared here, so that they cannot diverge
 RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const& source, IntVector2D const& workGroupSize) const
 {
+    static_assert(LIGHT_ORGANS_PER_CELL <= 3, "The 8 bit intensities of the light organs have to fit exactly into the mantissa of a float");
     auto declarations = std::format(
         "#version 460\n"
         "#extension GL_EXT_ray_query : require\n"
         "#extension GL_KHR_shader_subgroup_clustered : require\n"
         "layout(local_size_x = {}, local_size_y = {}, local_size_z = 1) in;\n"
+        "const int LightOrgansPerCell = {};\n"
         "const int MaxSourceLights = {};\n"
         "const int GasImageSize = {};\n"
         "const int GasLayers = {};\n"
@@ -242,6 +244,7 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
         "const float LightFalloffDistance = {:.6f};\n",
         workGroupSize.x,
         workGroupSize.y,
+        LIGHT_ORGANS_PER_CELL,
         MAX_SOURCES,
         MaxGasNodes,
         GasLayers,
