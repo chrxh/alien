@@ -8,7 +8,7 @@ namespace Shaders
 #version 450
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
-layout (location = 2) in int isActive;
+layout (location = 2) in int state;
 
 out vec3 vertexColor;
 
@@ -16,6 +16,19 @@ uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
 uniform float zoom;
 uniform vec2 viewportSize;
+uniform float solidBrightness;
+
+const int ObjectType_Solid = 0;
+
+// See Shaders/NonFluidObjectVS.h
+const float MinDimmedSolidBrightness = 0.6;
+
+vec3 getSolidColor(vec3 color)
+{
+    float brightness = color.r + color.g + color.b;
+    float dimmedBrightness = max(brightness * solidBrightness, min(brightness, MinDimmedSolidBrightness));
+    return color * dimmedBrightness / max(brightness, 1e-4);
+}
 
 void main()
 {
@@ -27,7 +40,8 @@ void main()
     gl_Position = vec4(screenPos, aPos.z, 1.0);
     
     // Pass color to geometry shader
-    vertexColor = aColor;
+    int objectType = (state >> 8) & 0xFF;
+    vertexColor = objectType == ObjectType_Solid ? getSolidColor(aColor) : aColor;
 }
 )";
 }

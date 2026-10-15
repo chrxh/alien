@@ -8,7 +8,7 @@ namespace Shaders
 #version 450
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
-layout (location = 2) in int isActive;
+layout (location = 2) in int state;
 
 out vec3 vertexColor;
 
@@ -17,6 +17,19 @@ uniform vec2 rectUpperLeft;
 uniform float zoom;
 uniform vec2 viewportSize;
 uniform float renderScale;
+uniform float solidBrightness;
+
+const int ObjectType_Solid = 0;
+
+// See Shaders/NonFluidObjectVS.h
+const float MinDimmedSolidBrightness = 0.6;
+
+vec3 getSolidColor(vec3 color)
+{
+    float brightness = color.r + color.g + color.b;
+    float dimmedBrightness = max(brightness * solidBrightness, min(brightness, MinDimmedSolidBrightness));
+    return color * dimmedBrightness / max(brightness, 1e-4);
+}
 
 void main()
 {
@@ -30,6 +43,10 @@ void main()
     
     // At zoom 3 there are not individual cells visible anymore, so no need to highlight the polygone more
     vertexColor = zoom / renderScale < 3.0 ? aColor * 1.4 : aColor;
+    int objectType = (state >> 8) & 0xFF;
+    if (objectType == ObjectType_Solid) {
+        vertexColor = getSolidColor(vertexColor);
+    }
 }
 )";
 }

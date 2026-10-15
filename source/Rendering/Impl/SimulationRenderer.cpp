@@ -24,9 +24,19 @@ namespace
     // Ray traced pictures average this many frames with jittered rays for the anti-aliasing
     auto constexpr NumRayTracedPictureFrames = 16;
 
+    // The glow spreads the light of the bright regions into their surroundings. At the reference glow, the scene and its glow are added. Any
+    // other glow takes its additional light from the bright regions or returns it to them, so that the brightness does not depend on the
+    // glow.
+    auto constexpr SceneWeight = 1.2f;
+    auto constexpr ReferenceGlow = 0.3f;
+
     // The wide glow carries the light of bright regions into dark ones, where it appears brighter after the tone mapping. It is weakened, so
     // that the overall brightness does not increase.
     auto constexpr GlowWeight = 0.7f;
+
+    // The tissue shows the solids darker than the cells, see Shaders/RayTracingTissueCS.h. The rasterized solids, which replace it when zoomed
+    // out, match it.
+    auto constexpr RayTracedSolidBrightness = 0.65f;
 
     // Threads that share the work of a node of the irradiance grid, so that its rays to the radiation sources run in parallel, see
     // Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
@@ -77,9 +87,9 @@ PictureData SimulationRenderer::renderPicture(RenderView const& view)
     }
 }
 
-float SimulationRenderer::getBloomSceneWeight(SimulationParameters const& parameters)
+float SimulationRenderer::getBloomSceneWeight()
 {
-    return 1.5f - parameters.glow.value;
+    return SceneWeight;
 }
 
 PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
@@ -250,12 +260,14 @@ namespace
         return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
     }
 
+    // Inputs: glow, scene and its bright regions
     UniformValueMap getBloomMergeUniforms(SimulationParameters const& parameters, RenderView const&)
     {
-        float bloom = parameters.glow.value;
+        auto glow = parameters.glow.value;
         return UniformValueMap{
-            {"colorFactor1", bloom * GlowWeight},
-            {"colorFactor2", SimulationRenderer::getBloomSceneWeight(parameters)},
+            {"colorFactor1", glow * GlowWeight},
+            {"colorFactor2", SceneWeight},
+            {"colorFactor3", (ReferenceGlow - glow) * GlowWeight},
         };
     }
 
@@ -277,12 +289,12 @@ namespace
     }
 
     // Zoomed out, the rasterized objects replace the ray traced tissue and its attack events
-    UniformValueMap getRayTracingMergeUniforms(SimulationParameters const& parameters, RenderView const& view)
+    UniformValueMap getRayTracingMergeUniforms(SimulationParameters const&, RenderView const& view)
     {
         return UniformValueMap{
             {"objectGain", getObjectGain(view)},
             {"tissueVisibility", _RayTracingResources::getTissueVisibility(view)},
-            {"backgroundScale", _RayTracingResources::getBackgroundScale(parameters)},
+            {"backgroundScale", _RayTracingResources::getBackgroundScale()},
         };
     }
 
@@ -302,13 +314,17 @@ namespace
     }
 
     // Connections, polygons, cells and attack events of the rasterized view on a black layer
-    RenderSequence createObjectSequence()
+    RenderSequence createObjectSequence(float solidBrightness)
     {
         return RenderSequence().steps({
-            _LineRenderStep::create(StepParameters().shader(ShaderSources::Line)),
-            _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
-            _NonFluidObjectRenderStep::create(
-                StepParameters().shader(ShaderSources::NonFluidObject).uniformFunc(getCellAppearanceUniforms).previousTargetSelection(0)),
+            _LineRenderStep::create(StepParameters().shader(ShaderSources::Line).addUniform("solidBrightness", solidBrightness)),
+            _TriangleRenderStep::create(
+                StepParameters().shader(ShaderSources::Triangle).addUniform("solidBrightness", solidBrightness).previousTargetSelection(0)),
+            _NonFluidObjectRenderStep::create(StepParameters()
+                                                  .shader(ShaderSources::NonFluidObject)
+                                                  .uniformFunc(getCellAppearanceUniforms)
+                                                  .addUniform("solidBrightness", solidBrightness)
+                                                  .previousTargetSelection(0)),
             _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
             _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
             _PostProcessingRenderStep::create(
@@ -400,7 +416,7 @@ namespace
         };
     }
 
-    // Detonation flashes, a blurred copy of the bright regions and the original remain for the merge
+    // Detonation flashes, a blurred copy of the bright regions, the original and its bright regions remain for the merge
     RenderBlocks createDetonationAndBloomBlocks()
     {
         return RenderBlocks{
@@ -433,7 +449,7 @@ namespace
                 }),
             },
 
-            // Render block: Two outputs: downscale blur and original
+            // Render block: Three outputs: downscale blur, original and threshold
             RenderBlock{
                 RenderSequence()
                     .repetitions(getBlurRepetitions)
@@ -452,9 +468,12 @@ namespace
                     }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 })},
 
-            // Render block: Two outputs: upscale blur and original
+            // Render block: Three outputs: upscale blur, original and threshold
             RenderBlock{
                 RenderSequence()
                     .repetitions(getBlurRepetitions)
@@ -467,6 +486,9 @@ namespace
                     }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(2)),
                 })},
         };
     }
@@ -524,7 +546,7 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
-                createObjectSequence(),
+                createObjectSequence(1.0f),
             },
 
             // Render block: Merge fluid, connections and objects sequence
@@ -698,7 +720,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                         StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
-                createObjectSequence(),
+                createObjectSequence(RayTracedSolidBrightness),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),

@@ -25,8 +25,9 @@ uniform float backgroundScale;
 // Brightness of the rasterized objects above which they cover the background completely
 const float CoverageBrightness = 0.3;
 
-// The rasterized objects are whitened with their energy, while the tissue shows their saturated colors. The strongest component is kept.
-const float WhiteRemoval = 0.6;
+// The rasterized objects shine like the tissue, so that the colors do not change when zooming. Brighter objects would also shift the hues
+// in the tone mapping.
+const float ObjectBrightness = 0.88;
 
 // The absorption of the tissue, see Shaders/RayTracingTissueCS.h
 const float Saturation = 0.9;
@@ -46,13 +47,6 @@ vec3 inverseToneMapping(vec3 color)
     vec3 qb = mapped * 0.59 - 0.03;
     vec3 qc = mapped * 0.14;
     return (-qb - sqrt(max(qb * qb - 4.0 * qa * qc, vec3(0.0)))) / (2.0 * qa);
-}
-
-vec3 removeWhite(vec3 color)
-{
-    float maxComponent = max(color.r, max(color.g, color.b));
-    float white = WhiteRemoval * min(color.r, min(color.g, color.b));
-    return (color - white) * maxComponent / max(maxComponent - white, 1e-4);
 }
 
 // The background is added after the tone mapping, so an absorption is encoded such that adding the background yields the tone mapped
@@ -86,7 +80,7 @@ void main()
 
     // The ray tracing passes on the strength of the light of the radiation sources that the tissue scatters in its alpha channel
     vec3 sourceLight = coverage * color * rayTracingOutput.a;
-    vec3 objectLight = (removeWhite(objects) + sourceLight) * bloomScale - background * coverage * (vec3(1.0) - transmittance);
+    vec3 objectLight = (objects * ObjectBrightness + sourceLight) * bloomScale - background * coverage * (vec3(1.0) - transmittance);
 
     vec3 light = rayTracing + objectLight * (1.0 - tissueVisibility);
     FragColor = vec4(encodeAbsorption(light, background) * backgroundScale + attackEvents, 1.0);

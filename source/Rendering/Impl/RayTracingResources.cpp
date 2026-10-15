@@ -721,9 +721,9 @@ float _RayTracingResources::getTissueVisibility(RenderView const& view)
     return getSmoothTransition(view.getScreenZoomFactor(), TissueZoomStart, TissueZoomEnd);
 }
 
-float _RayTracingResources::getBackgroundScale(SimulationParameters const& parameters)
+float _RayTracingResources::getBackgroundScale()
 {
-    return 1.0f / SimulationRenderer::getBloomSceneWeight(parameters);
+    return 1.0f / SimulationRenderer::getBloomSceneWeight();
 }
 
 bool _RayTracingResources::isSourceLightActive(SimulationParameters const& parameters)
@@ -817,7 +817,7 @@ void _RayTracingResources::updateFrameConstants(
         .lightGrid = {_lightGrid.origin.x, _lightGrid.origin.y, _lightGrid.cellSize, 0.0f},
         .gridSize = {_lightGrid.size.x, _lightGrid.size.y, 0, 0},
         .tissue = {closeUpWeight, detailVisibility, 1.0f / view.zoomFactor, getTissueVisibility(view)},
-        .parameters = {getBackgroundScale(parameters), _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1), 0.0f},
+        .parameters = {getBackgroundScale(), _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1), 0.0f},
         .gasGrid = {_gasGrid.origin.x, _gasGrid.origin.y, _gasGrid.nodeDistance, _gasGrid.cloudSpreadInNodes},
         .gasSize = {_gasGrid.size.x, _gasGrid.size.y, _gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
         .gasLight =

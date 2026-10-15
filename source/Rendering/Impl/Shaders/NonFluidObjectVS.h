@@ -20,9 +20,22 @@ uniform float radius;
 uniform vec2 viewportSize;
 uniform float renderScale;
 uniform float sizeScale;
+uniform float solidBrightness;
 
+const int ObjectType_Solid = 0;
 const int ObjectType_Fluid = 1;
 const float DetailZoom = 5.0;
+
+// The solids can be dimmed, see SimulationRenderer.cpp. Since the metaballs step would shrink dim solids, they are only dimmed down to this
+// brightness.
+const float MinDimmedSolidBrightness = 0.6;
+
+vec3 getSolidColor(vec3 color)
+{
+    float brightness = color.r + color.g + color.b;
+    float dimmedBrightness = max(brightness * solidBrightness, min(brightness, MinDimmedSolidBrightness));
+    return color * dimmedBrightness / max(brightness, 1e-4);
+}
 
 void main()
 {
@@ -54,6 +67,9 @@ void main()
 
     float visibleHighlightIntensity = screenZoom < DetailZoom ? 0.0 : highlightIntensity;
     vColor = mix(aColor, vec3(1.0), visibleHighlightIntensity * 0.2);
+    if (objectType == ObjectType_Solid) {
+        vColor = getSolidColor(vColor);
+    }
     gl_PointSize = radius * (0.4 + visibleHighlightIntensity * 0.2) * sizeFactor * sizeScale;
 }
 )";

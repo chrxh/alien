@@ -32,7 +32,7 @@ public:
     PictureData renderPicture(RenderView const& view);
 
     // Factor with which the bloom weights the scene
-    static float getBloomSceneWeight(SimulationParameters const& parameters);
+    static float getBloomSceneWeight();
 
 private:
     void createRasterGraph(ImFont* labelFont);
