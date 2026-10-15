@@ -13,6 +13,17 @@ namespace
     // flicker
     __device__ float constexpr LightOrganResponseTimesteps = 30.0f;
 
+    // The outlines of solids follow the lattice of their particles in steps. Where an outline changes between bending outwards and inwards, its
+    // particles are rendered closer to the middle of their neighbors on the outline. Outlines that bend in one direction only, such as those of
+    // small round solids, keep their shape.
+    __device__ float constexpr SolidOutlineSmoothing = 0.5f;
+
+    // Bends of an outline below this angle in radians count as straight
+    __device__ float constexpr MinSolidOutlineBend = 0.17f;
+
+    // The steps of the lattice are smaller than this distance in world units, so particles that stick out further stay close to their position
+    __device__ float constexpr MaxSolidOutlineShift = 0.5f;
+
     __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
@@ -217,6 +228,151 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
     }
 }
 
+namespace
+{
+    // Isolated particles, the ends of chains and the particles with the maximum number of connections, which lie inside, keep their positions
+    __device__ __inline__ bool isMovableOnOutline(Object* object)
+    {
+        return object->type == ObjectType_Solid && object->numConnections >= 2 && object->numConnections < MAX_OBJECT_CONNECTIONS;
+    }
+
+    // The passes of the smoothing alternate between the positions in the vertex data and temporary positions of the particles that may move
+    struct RenderPositions
+    {
+        ObjectVertexData* objectData;
+        GeometryExtractionContext context;
+        bool fromTemporaryPositions;
+
+        __device__ __inline__ float2 get(Object* object) const
+        {
+            if (!isInVisibleRect(object->pos, context)) {
+                return object->pos;
+            }
+            if (fromTemporaryPositions && isMovableOnOutline(object)) {
+                return object->tempValue2.as_float2;
+            }
+            auto const& pos = objectData[object->tempValue1.as_uint64].pos;
+            return {pos[0], pos[1]};
+        }
+
+        __device__ __inline__ void setNext(Object* object, float2 const& value) const
+        {
+            if (fromTemporaryPositions) {
+                auto& pos = objectData[object->tempValue1.as_uint64].pos;
+                pos[0] = value.x;
+                pos[1] = value.y;
+            } else {
+                object->tempValue2.as_float2 = value;
+            }
+        }
+    };
+
+    // Two consecutive connections of an object enclose a sector. It belongs to a triangle if the connected objects are connected with each
+    // other, or to a quad if both are connected to a common fourth object. The back indices are those of the connections to the object.
+    struct Sector
+    {
+        bool isTriangle;
+        Object* quadCorner;
+
+        __device__ __inline__ bool isCovered() const { return isTriangle || quadCorner != nullptr; }
+    };
+
+    __device__ __inline__ Sector getSector(Object* object, Object* connectedObject, int backIndex, Object* prevConnectedObject, int prevBackIndex)
+    {
+        auto candidate = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
+        if (candidate == connectedObject) {
+            return {true, nullptr};
+        }
+        auto isQuad = candidate == connectedObject->getConnectedObject(backIndex + 1) && candidate != object && connectedObject != prevConnectedObject;
+        return {false, isQuad ? candidate : nullptr};
+    }
+
+    struct SolidOutline
+    {
+        Object* previous;
+        Object* next;
+        int bend;  // 1: outwards, -1: inwards, 0: straight
+    };
+
+    // A solid particle lies on an outline if exactly one sector between its connections is not covered by a polygon
+    __device__ __inline__ bool getSolidOutline(SimulationData const& data, Object* object, RenderPositions const& positions, SolidOutline& result)
+    {
+        if (!isMovableOnOutline(object)) {
+            return false;
+        }
+        int numConnections = object->numConnections;
+        auto pos = positions.get(object);
+        float2 directions[MAX_OBJECT_CONNECTIONS];
+        int backIndices[MAX_OBJECT_CONNECTIONS];
+        for (int i = 0; i < numConnections; ++i) {
+            auto connectedObject = object->connections[i].object;
+            directions[i] = data.world.getCorrectedDirection(positions.get(connectedObject) - pos);
+            backIndices[i] = connectedObject->getConnectionIndex(object);
+        }
+        auto uncoveredSector = -1;
+        auto coveredAngle = 0.0f;
+        for (int i = 0; i < numConnections; ++i) {
+            auto prevIndex = (i + numConnections - 1) % numConnections;
+            auto sector = getSector(object, object->connections[i].object, backIndices[i], object->connections[prevIndex].object, backIndices[prevIndex]);
+            if (!sector.isCovered()) {
+                if (uncoveredSector != -1) {
+                    return false;
+                }
+                uncoveredSector = i;
+                continue;
+            }
+            coveredAngle += atan2f(abs(Math::cross(directions[prevIndex], directions[i]).z), Math::dot(directions[prevIndex], directions[i]));
+        }
+        if (uncoveredSector == -1) {
+            return false;
+        }
+        auto openAngle = 2.0f * Const::PI - coveredAngle;
+        result.previous = object->connections[(uncoveredSector + numConnections - 1) % numConnections].object;
+        result.next = object->connections[uncoveredSector].object;
+        result.bend = openAngle > Const::PI + MinSolidOutlineBend ? 1 : (openAngle < Const::PI - MinSolidOutlineBend ? -1 : 0);
+        return true;
+    }
+
+    __device__ __inline__ float2 getSmoothedPosition(SimulationData const& data, Object* object, RenderPositions const& positions)
+    {
+        auto pos = positions.get(object);
+        SolidOutline outline;
+        if (!getSolidOutline(data, object, positions, outline) || outline.bend == 0) {
+            return pos;
+        }
+        if (outline.previous->type != ObjectType_Solid || outline.next->type != ObjectType_Solid) {
+            return pos;
+        }
+        SolidOutline neighborOutline;
+        auto previousBend = getSolidOutline(data, outline.previous, positions, neighborOutline) ? neighborOutline.bend : 0;
+        auto nextBend = getSolidOutline(data, outline.next, positions, neighborOutline) ? neighborOutline.bend : 0;
+        if (previousBend == outline.bend && nextBend == outline.bend) {
+            return pos;
+        }
+        auto toPrevious = data.world.getCorrectedDirection(positions.get(outline.previous) - pos);
+        auto toNext = data.world.getCorrectedDirection(positions.get(outline.next) - pos);
+        auto shift = data.world.getCorrectedDirection(pos + (toPrevious + toNext) * (SolidOutlineSmoothing / 2) - object->pos);
+        auto shiftLength = Math::length(shift);
+        if (shiftLength > MaxSolidOutlineShift) {
+            shift = shift * (MaxSolidOutlineShift / shiftLength);
+        }
+        return object->pos + shift;
+    }
+}
+
+__global__ void cudaSmoothSolidOutlines(SimulationData data, ObjectVertexData* objectData, GeometryExtractionContext context, bool fromTemporaryPositions)
+{
+    RenderPositions positions{objectData, context, fromTemporaryPositions};
+    auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (!isMovableOnOutline(object) || !isInVisibleRect(object->pos, context)) {
+            continue;
+        }
+        positions.setNext(object, getSmoothedPosition(data, object, positions));
+    }
+}
+
 __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -282,37 +438,27 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         if (object->numConnections <= 1) {
             continue;
         }
-        bool first = true;
+        int numConnections = object->numConnections;
         int backIndices[MAX_OBJECT_CONNECTIONS];
-        for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
-            auto connectionIndex = i % numConnections;
-            auto const& connectedObject = object->connections[connectionIndex].object;
-            auto backIndex = connectedObject->getConnectionIndex(object);
-            backIndices[connectionIndex] = backIndex;
-            if (first) {
-                first = false;
+        for (int i = 0; i < numConnections; ++i) {
+            backIndices[i] = object->connections[i].object->getConnectionIndex(object);
+        }
+        for (int i = 0; i < numConnections; ++i) {
+            auto prevIndex = (i + numConnections - 1) % numConnections;
+            auto const& connectedObject = object->connections[i].object;
+            auto const& prevConnectedObject = object->connections[prevIndex].object;
+            auto sector = getSector(object, connectedObject, backIndices[i], prevConnectedObject, backIndices[prevIndex]);
+
+            // Each polygon is added once, by its corner with the lowest id
+            if (object->id > connectedObject->id || object->id > prevConnectedObject->id) {
                 continue;
             }
-            auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-            auto const& prevConnectedObject = object->connections[prevIndex].object;
-            auto prevBackIndex = backIndices[prevIndex];
-
-            // Triangle?
-            if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
-                if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
-                    addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
-                }
+            if (sector.isTriangle) {
+                addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
             }
-
-            // Rectangle?
-            auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
-            auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
-            if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
-                && connectedObject != prevConnectedObject) {
-                if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {
-                    addTriangle(object, object->tempValue1.as_uint64, connectedObject, fourthCellCandidate1);
-                    addTriangle(object, object->tempValue1.as_uint64, fourthCellCandidate1, prevConnectedObject);
-                }
+            if (sector.quadCorner != nullptr && object->id < sector.quadCorner->id) {
+                addTriangle(object, object->tempValue1.as_uint64, connectedObject, sector.quadCorner);
+                addTriangle(object, object->tempValue1.as_uint64, sector.quadCorner, prevConnectedObject);
             }
         }
     }

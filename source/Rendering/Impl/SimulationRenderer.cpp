@@ -38,6 +38,10 @@ namespace
     // out, match it.
     auto constexpr RayTracedSolidBrightness = 0.65f;
 
+    // Between these screen zoom factors, the structure of the solids fades in
+    auto constexpr SolidDetailZoomStart = 15.0f;
+    auto constexpr SolidDetailZoomEnd = 40.0f;
+
     // Threads that share the work of a node of the irradiance grid, so that its rays to the radiation sources run in parallel, see
     // Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
     auto constexpr ThreadsPerIrradianceNode = 16;
@@ -90,6 +94,12 @@ PictureData SimulationRenderer::renderPicture(RenderView const& view)
 float SimulationRenderer::getBloomSceneWeight()
 {
     return SceneWeight;
+}
+
+float SimulationRenderer::getSolidDetailVisibility(RenderView const& view)
+{
+    auto fraction = std::clamp((view.getScreenZoomFactor() - SolidDetailZoomStart) / (SolidDetailZoomEnd - SolidDetailZoomStart), 0.0f, 1.0f);
+    return fraction * fraction * (3.0f - 2.0f * fraction);
 }
 
 PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
@@ -310,6 +320,7 @@ namespace
         return UniformValueMap{
             {"brightness", std::lerp(dimmed, 1.0f, fadeIn)},
             {"sizeScale", std::lerp(0.87f, 1.0f, fadeIn)},
+            {"solidDetailVisibility", SimulationRenderer::getSolidDetailVisibility(view)},
         };
     }
 

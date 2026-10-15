@@ -25,7 +25,7 @@ The look of a world is controlled by the parameter group **Visualization** in th
 - **Borderless rendering** repeats the world periodically, which is useful for seamless patterns.
 - **Grid lines** and **Mark reference domain** draw helper lines, which you usually switch off for pictures.
 
-The **brightness** of an object follows its energy. Objects with little energy look dim, energetic objects bright. Use this deliberately: give a rock zones with different energies to shade it, or keep creatures at a higher energy so that they stand out.
+The **brightness** of an object follows its energy. Objects with little energy look dim, energetic objects bright. Use this deliberately: give a rock zones with different energies to shade it, or keep creatures at a higher energy so that they stand out. Connected solids appear as smooth surfaces with smooth outlines, so a rock shows its shading instead of its particles. The particles only become visible when you zoom in closely.
 
 > **Tip:** Dense fluids with high energy and high glow add up to a saturated white. For colorful liquids, use a low energy per particle, for example 10 to 15, a glow of at most 0.4 and an object distance of 1.2 or more.
 

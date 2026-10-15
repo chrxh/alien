@@ -106,7 +106,7 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     ivec4 gridSize;   // xy: number of cells of the light grid
     vec4 tissue;      // x: 1 close up, 0 zoomed out, y: visibility of the cell details, z: world size of a pixel, w: visibility of the tissue
     vec4 parameters;  // x: scale of the background color, y: 1 for anti-aliasing within the frame, z: weight of the frame in the average with
-                      // the previous frames, 1 if there is no average
+                      // the previous frames, 1 if there is no average, w: visibility of the structure of the solids
     vec4 gasGrid;     // xy: world position of the first node of the gas grid, z: distance of the nodes, w: standard deviation of the blur in nodes
     ivec4 gasSize;    // xy: number of nodes of the gas grid, z: blur radius in nodes, w: number of fluid particles
     vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid,
@@ -258,22 +258,36 @@ float getCloseUpWeight()
     return frame.tissue.x;
 }
 
+float getSolidDetailVisibility()
+{
+    return frame.parameters.w;
+}
+
 // Ratio of the visible size of a single contribution to the range of its kernel
 float getContourFraction(float weight)
 {
     return sqrt(1.0 - pow(DensityThreshold / weight, 1.0 / 3.0));
 }
 
-float getStrandHalfWidth()
+// Connected solids appear as smooth areas unless their structure is visible. Their strands are then as wide as their particles, which do not
+// add to the density of their strands and polygons, so that the particles do not bulge out of the outlines.
+float getSolidSmoothing(Sphere sphere)
 {
-    return max(mix(FarStrandHalfWidth, StrandHalfWidth, getCloseUpWeight()), MinStrandHalfWidthInPixels * getPixelSize());
+    return sphere.hueMaterial.w == Material_Solid && sphere.details.z < 0.5 ? 1.0 - getSolidDetailVisibility() : 0.0;
+}
+
+float getStrandHalfWidth(float solidSmoothing)
+{
+    float closeUpHalfWidth = mix(StrandHalfWidth, SolidRadius, solidSmoothing);
+    return max(mix(FarStrandHalfWidth, closeUpHalfWidth, getCloseUpWeight()), MinStrandHalfWidthInPixels * getPixelSize());
 }
 
 // Zoomed out, connected cells shrink to the width of the strands, while isolated cells and the ends of chains remain dots
 float getCellRadius(Sphere sphere)
 {
-    float farRadius = sphere.details.z > 0.5 ? max(FarDotRadius, MinDotRadiusInPixels * getPixelSize()) : getStrandHalfWidth();
-    return mix(farRadius, max(sphere.centerRadius.w, farRadius), getCloseUpWeight());
+    float farRadius = sphere.details.z > 0.5 ? max(FarDotRadius, MinDotRadiusInPixels * getPixelSize()) : getStrandHalfWidth(0.0);
+    float radius = mix(farRadius, max(sphere.centerRadius.w, farRadius), getCloseUpWeight());
+    return mix(radius, getStrandHalfWidth(1.0), getSolidSmoothing(sphere));
 }
 
 float getCellKernelRadius(Sphere sphere)
@@ -287,9 +301,14 @@ float getMaxCellKernelRadius(Sphere sphere)
     return getCellKernelRadius(sphere) * (1.0 + CellShapeVariation);
 }
 
-float getStrandKernelRadius()
+float getStrandSolidSmoothing(Sphere a, Sphere b)
 {
-    return getStrandHalfWidth() / getContourFraction(StrandWeight);
+    return min(getSolidSmoothing(a), getSolidSmoothing(b));
+}
+
+float getStrandKernelRadius(float solidSmoothing)
+{
+    return getStrandHalfWidth(solidSmoothing) / getContourFraction(StrandWeight);
 }
 
 float getFillFalloff()

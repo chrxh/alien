@@ -116,7 +116,7 @@ void main()
         Sphere a = createSphere(sphereA);
         Sphere b = createSphere(sphereB);
         float strandShadowExtent = StrandHalfWidth + getShadowBeamMargin();
-        float strandExtent = isSceneForShadowsOnly() ? strandShadowExtent : max(getStrandKernelRadius(), strandShadowExtent);
+        float strandExtent = isSceneForShadowsOnly() ? strandShadowExtent : max(getStrandKernelRadius(getStrandSolidSmoothing(a, b)), strandShadowExtent);
         float extent = max(strandExtent, max(getCellExtent(a), getCellExtent(b)));
         bool enabled = a.hueMaterial.w != Material_Inactive && b.hueMaterial.w != Material_Inactive;
         capsuleAabbs[index] =
