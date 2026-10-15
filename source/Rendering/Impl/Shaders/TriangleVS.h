@@ -11,6 +11,7 @@ layout (location = 1) in vec3 aColor;
 layout (location = 2) in int state;
 
 out vec3 vertexColor;
+out float vertexSolid;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -41,12 +42,16 @@ void main()
     
     gl_Position = vec4(ndc, aPos.z, 1.0);
     
-    // At zoom 3 there are not individual cells visible anymore, so no need to highlight the polygone more
-    vertexColor = zoom / renderScale < 3.0 ? aColor * 1.4 : aColor;
     int objectType = (state >> 8) & 0xFF;
-    if (objectType == ObjectType_Solid) {
-        vertexColor = getSolidColor(vertexColor);
+    bool isSolid = objectType == ObjectType_Solid;
+    if (isSolid) {
+        // Solids keep the brightness of their connections, so that their structure does not show
+        vertexColor = getSolidColor(aColor);
+    } else {
+        // At zoom 3 there are not individual cells visible anymore, so no need to highlight the polygone more
+        vertexColor = zoom / renderScale < 3.0 ? aColor * 1.4 : aColor;
     }
+    vertexSolid = isSolid ? 1.0 : 0.0;
 }
 )";
 }

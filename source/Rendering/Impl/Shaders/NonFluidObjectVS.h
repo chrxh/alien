@@ -21,6 +21,7 @@ uniform vec2 viewportSize;
 uniform float renderScale;
 uniform float sizeScale;
 uniform float solidBrightness;
+uniform float solidDetailVisibility;
 
 const int ObjectType_Solid = 0;
 const int ObjectType_Fluid = 1;
@@ -59,7 +60,10 @@ void main()
     float screenZoom = zoom / renderScale;
 
     bool isIsolatedOrTail = ((state >> 16) & 0x1) == 1;
-    if (!isIsolatedOrTail && screenZoom < DetailZoom) {
+
+    // Connected solids form smooth areas, their particles only appear close up
+    float visibility = !isIsolatedOrTail && objectType == ObjectType_Solid ? solidDetailVisibility : 1.0;
+    if ((!isIsolatedOrTail && screenZoom < DetailZoom) || visibility <= 0.0) {
         // Discard cells that have connections when zoomed out to avoid Moire patterns
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
     }
@@ -68,7 +72,7 @@ void main()
     float visibleHighlightIntensity = screenZoom < DetailZoom ? 0.0 : highlightIntensity;
     vColor = mix(aColor, vec3(1.0), visibleHighlightIntensity * 0.2);
     if (objectType == ObjectType_Solid) {
-        vColor = getSolidColor(vColor);
+        vColor = getSolidColor(vColor) * visibility;
     }
     gl_PointSize = radius * (0.4 + visibleHighlightIntensity * 0.2) * sizeFactor * sizeScale;
 }
