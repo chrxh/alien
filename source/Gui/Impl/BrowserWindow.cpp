@@ -174,7 +174,7 @@ namespace
     std::string getAccountChipText()
     {
         auto userName = NetworkService::get().getLoggedInUserName();
-        return userName.has_value() ? ICON_FA_USER "  " + *userName + "  " ICON_FA_CARET_DOWN : std::string(ICON_FA_SIGN_IN_ALT "  Log in or register");
+        return userName.has_value() ? ICON_FA_USER "  " + *userName + "  " ICON_FA_CARET_DOWN : std::string(ICON_FA_SIGN_IN_ALT "  Log in");
     }
 }
 
@@ -264,13 +264,9 @@ void BrowserWindow::processToolbar()
             WebLinkHelper::openInBrowser(Const::DiscordURL);
         })));
 
-    auto toolbarParameters = AlienGui::ToolbarParameters().id("Browser");
-
-    if (!_loginBannerWidget->isVisible()) {
-        toolbarParameters.trailing([this] { processAccountChip(); }).trailingWidth(calcAccountChipWidth()).trailingAsButton(true);
-    }
-
-    AlienGui::Toolbar(toolbarParameters, items);
+    AlienGui::Toolbar(
+        AlienGui::ToolbarParameters().id("Browser").trailing([this] { processAccountChip(); }).trailingWidth(calcAccountChipWidth()).trailingAsButton(true),
+        items);
 }
 
 void BrowserWindow::processWorkspace()
@@ -366,11 +362,12 @@ float BrowserWindow::calcAccountChipWidth() const
 void BrowserWindow::processAccountChip()
 {
     auto userName = NetworkService::get().getLoggedInUserName();
+    auto invitesToLogin = !userName.has_value() && !_loginBannerWidget->isVisible();
 
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
                                    .buttonText(getAccountChipText())
-                                   .highlighted(!userName.has_value())
-                                   .frame(!userName.has_value())
+                                   .highlighted(invitesToLogin)
+                                   .frame(invitesToLogin)
                                    .transparentBackground(false)
                                    .tooltip(userName.has_value() ? std::string("Show the account menu") : Const::BrowserLoginChipTooltip))) {
         if (userName.has_value()) {
