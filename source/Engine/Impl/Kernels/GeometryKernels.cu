@@ -21,6 +21,9 @@ namespace
     // Bends of an outline below this angle in radians count as straight
     __device__ float constexpr MinSolidOutlineBend = 0.17f;
 
+    // The steps of the lattice are smaller than this distance in world units, so particles that stick out further stay close to their position
+    __device__ float constexpr MaxSolidOutlineShift = 0.5f;
+
     __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
@@ -264,17 +267,24 @@ namespace
         }
     };
 
-    // Consecutive connections enclose a sector, which is rendered as a polygon if it belongs to a triangle or a quad, see
-    // cudaExtractTriangleIndices
-    __device__ __inline__ bool isCoveredByPolygon(Object* object, Object* connectedObject, Object* prevConnectedObject)
+    // Two consecutive connections of an object enclose a sector. It belongs to a triangle if the connected objects are connected with each
+    // other, or to a quad if both are connected to a common fourth object. The back indices are those of the connections to the object.
+    struct Sector
     {
-        auto backIndex = connectedObject->getConnectionIndex(object);
-        auto prevBackIndex = prevConnectedObject->getConnectionIndex(object);
+        bool isTriangle;
+        Object* quadCorner;
+
+        __device__ __inline__ bool isCovered() const { return isTriangle || quadCorner != nullptr; }
+    };
+
+    __device__ __inline__ Sector getSector(Object* object, Object* connectedObject, int backIndex, Object* prevConnectedObject, int prevBackIndex)
+    {
         auto candidate = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
         if (candidate == connectedObject) {
-            return true;
+            return {true, nullptr};
         }
-        return candidate == connectedObject->getConnectedObject(backIndex + 1) && candidate != object && connectedObject != prevConnectedObject;
+        auto isQuad = candidate == connectedObject->getConnectedObject(backIndex + 1) && candidate != object && connectedObject != prevConnectedObject;
+        return {false, isQuad ? candidate : nullptr};
     }
 
     struct SolidOutline
@@ -293,14 +303,18 @@ namespace
         int numConnections = object->numConnections;
         auto pos = positions.get(object);
         float2 directions[MAX_OBJECT_CONNECTIONS];
+        int backIndices[MAX_OBJECT_CONNECTIONS];
         for (int i = 0; i < numConnections; ++i) {
-            directions[i] = data.world.getCorrectedDirection(positions.get(object->connections[i].object) - pos);
+            auto connectedObject = object->connections[i].object;
+            directions[i] = data.world.getCorrectedDirection(positions.get(connectedObject) - pos);
+            backIndices[i] = connectedObject->getConnectionIndex(object);
         }
         auto uncoveredSector = -1;
         auto coveredAngle = 0.0f;
         for (int i = 0; i < numConnections; ++i) {
             auto prevIndex = (i + numConnections - 1) % numConnections;
-            if (!isCoveredByPolygon(object, object->connections[i].object, object->connections[prevIndex].object)) {
+            auto sector = getSector(object, object->connections[i].object, backIndices[i], object->connections[prevIndex].object, backIndices[prevIndex]);
+            if (!sector.isCovered()) {
                 if (uncoveredSector != -1) {
                     return false;
                 }
@@ -337,7 +351,12 @@ namespace
         }
         auto toPrevious = data.world.getCorrectedDirection(positions.get(outline.previous) - pos);
         auto toNext = data.world.getCorrectedDirection(positions.get(outline.next) - pos);
-        return pos + (toPrevious + toNext) * (SolidOutlineSmoothing / 2);
+        auto shift = data.world.getCorrectedDirection(pos + (toPrevious + toNext) * (SolidOutlineSmoothing / 2) - object->pos);
+        auto shiftLength = Math::length(shift);
+        if (shiftLength > MaxSolidOutlineShift) {
+            shift = shift * (MaxSolidOutlineShift / shiftLength);
+        }
+        return object->pos + shift;
     }
 }
 
@@ -419,37 +438,27 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         if (object->numConnections <= 1) {
             continue;
         }
-        bool first = true;
+        int numConnections = object->numConnections;
         int backIndices[MAX_OBJECT_CONNECTIONS];
-        for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
-            auto connectionIndex = i % numConnections;
-            auto const& connectedObject = object->connections[connectionIndex].object;
-            auto backIndex = connectedObject->getConnectionIndex(object);
-            backIndices[connectionIndex] = backIndex;
-            if (first) {
-                first = false;
+        for (int i = 0; i < numConnections; ++i) {
+            backIndices[i] = object->connections[i].object->getConnectionIndex(object);
+        }
+        for (int i = 0; i < numConnections; ++i) {
+            auto prevIndex = (i + numConnections - 1) % numConnections;
+            auto const& connectedObject = object->connections[i].object;
+            auto const& prevConnectedObject = object->connections[prevIndex].object;
+            auto sector = getSector(object, connectedObject, backIndices[i], prevConnectedObject, backIndices[prevIndex]);
+
+            // Each polygon is added once, by its corner with the lowest id
+            if (object->id > connectedObject->id || object->id > prevConnectedObject->id) {
                 continue;
             }
-            auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-            auto const& prevConnectedObject = object->connections[prevIndex].object;
-            auto prevBackIndex = backIndices[prevIndex];
-
-            // Triangle?
-            if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
-                if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
-                    addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
-                }
+            if (sector.isTriangle) {
+                addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
             }
-
-            // Rectangle?
-            auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
-            auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
-            if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
-                && connectedObject != prevConnectedObject) {
-                if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {
-                    addTriangle(object, object->tempValue1.as_uint64, connectedObject, fourthCellCandidate1);
-                    addTriangle(object, object->tempValue1.as_uint64, fourthCellCandidate1, prevConnectedObject);
-                }
+            if (sector.quadCorner != nullptr && object->id < sector.quadCorner->id) {
+                addTriangle(object, object->tempValue1.as_uint64, connectedObject, sector.quadCorner);
+                addTriangle(object, object->tempValue1.as_uint64, sector.quadCorner, prevConnectedObject);
             }
         }
     }

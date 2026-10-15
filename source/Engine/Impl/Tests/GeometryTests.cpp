@@ -296,6 +296,39 @@ TEST_F(GeometryTests, copyBuffers_smoothsStepInSolidOutline)
     EXPECT_FLOAT_EQ(100.0f, solidOnStraightOutline.pos[1]);
 }
 
+TEST_F(GeometryTests, copyBuffers_keepsDistantSolidCloseToItsPosition)
+{
+    // Two rows of solids with a single solid far above, which is connected to two solids of the upper row
+    auto constexpr RowDistance = 0.866f;
+    auto constexpr DistantSolidPos = RealVector2D{102.0f, 100.0f - RowDistance - 2.5f};
+    auto data = ContentDesc().objects({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({102.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(4).pos({103.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(5).pos({104.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(6).pos({100.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(7).pos({101.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(8).pos({102.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(9).pos({103.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(10).pos(DistantSolidPos).type(SolidDesc()),
+    });
+    for (auto const& [id1, id2] : std::vector<std::pair<uint64_t, uint64_t>>{
+             {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {8, 9}, {6, 1}, {6, 2}, {7, 2}, {7, 3}, {8, 3}, {8, 4}, {9, 4}, {9, 5}, {10, 7}, {10, 8}}) {
+        data.addConnection(id1, id2);
+    }
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    auto vertices = geometryBuffers->getCellData();
+    ASSERT_EQ(10u, vertices.size());
+    auto distantSolid = getVertexNextTo(vertices, DistantSolidPos);
+    EXPECT_LE(std::hypot(distantSolid.pos[0] - DistantSolidPos.x, distantSolid.pos[1] - DistantSolidPos.y), 0.51f);
+}
+
 TEST_F(GeometryTests, copyBuffers_keepsOutlineOfRoundSolid)
 {
     // Hexagon of solids around a central solid

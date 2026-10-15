@@ -18,8 +18,8 @@ const float MaterialBlending = 0.25;
 
 const float ThicknessGain = 1.6;
 
-// The polygons, connections and particles of a solid add up to a density that varies with its structure. The thickness of smooth solids
-// saturates quickly, so that they appear as even areas with shaded edges, see getSolidSmoothing in Shaders/RayTracingCommonCS.h.
+// The polygons, connections and particles of a solid add up to a density that varies with its structure. Unless the structure is visible, the
+// thickness of solids saturates quickly, so that they appear as even areas with shaded edges.
 const float SmoothSolidThicknessGain = 8.0;
 
 // The glow of the tissue matches the brightness of the rasterized objects
@@ -75,12 +75,11 @@ struct Tissue
     vec3 emission;
     float brightness;
     float solid;
-    float solidSmoothing;
 };
 
 Tissue createTissue()
 {
-    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0);
+    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0);
 }
 
 // Smooth maximum of the group densities as the logarithm of a sum of exponentials. The gradient of the density is averaged with the same
@@ -106,7 +105,6 @@ void scaleMaterial(inout Tissue sum, float factor)
     sum.emission *= factor;
     sum.brightness *= factor;
     sum.solid *= factor;
-    sum.solidSmoothing *= factor;
 }
 
 void addGroup(inout TissueBlend blend, Tissue group)
@@ -136,7 +134,6 @@ void addGroup(inout TissueBlend blend, Tissue group)
     blend.weightedSum.emission += materialWeight * group.emission;
     blend.weightedSum.brightness += materialWeight * group.brightness;
     blend.weightedSum.solid += materialWeight * group.solid;
-    blend.weightedSum.solidSmoothing += materialWeight * group.solidSmoothing;
 }
 
 // The material of the result is normalized, i.e. its weight is 1
@@ -187,7 +184,6 @@ void addMaterial(inout Tissue tissue, Sphere sphere, float weight)
     tissue.emission += sphere.emission.rgb * weight;
     tissue.brightness += sphere.emission.w * weight;
     tissue.solid += sphere.hueMaterial.w == Material_Solid ? weight : 0.0;
-    tissue.solidSmoothing += getSolidSmoothing(sphere) * weight;
 }
 
 // Living cells are not perfectly round, their outline varies with the direction
@@ -499,7 +495,7 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
     float outline = exp(-square(edgeDistance / max(0.05, 0.8 * getPixelSize()))) * closeUpWeight;
 
     float totalExcess = max(tissue.totalDensity - DensityThreshold, 0.0);
-    float thicknessGain = mix(ThicknessGain, SmoothSolidThicknessGain, tissue.solidSmoothing);
+    float thicknessGain = mix(ThicknessGain, SmoothSolidThicknessGain, tissue.solid * (1.0 - getSolidDetailVisibility()));
     float thickness = mix(1.0, 1.0 - exp(-totalExcess * thicknessGain), closeUpWeight);
     vec2 thicknessGradient = closeUpWeight * thicknessGain * exp(-totalExcess * thicknessGain) * tissue.totalGradient;
 
