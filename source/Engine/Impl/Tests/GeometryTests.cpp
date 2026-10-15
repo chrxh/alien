@@ -1,6 +1,13 @@
+#include <algorithm>
+#include <cmath>
+#include <ranges>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/Math.h>
 
 #include <Data/Descs.h>
 
@@ -15,6 +22,16 @@ public:
     GeometryTests()
         : IntegrationTestFramework()
     {}
+
+protected:
+    ObjectVertexData getVertexNextTo(std::vector<ObjectVertexData> const& vertices, RealVector2D const& pos) const
+    {
+        return *std::ranges::min_element(vertices, {}, [&](ObjectVertexData const& vertex) {
+            auto dx = vertex.pos[0] - pos.x;
+            auto dy = vertex.pos[1] - pos.y;
+            return dx * dx + dy * dy;
+        });
+    }
 };
 
 TEST_F(GeometryTests, copyBuffers_emptySim)
@@ -241,6 +258,69 @@ TEST_F(GeometryTests, copyBuffers_quad)
 
     auto triangles = geometryBuffers->getTriangleIndices();
     EXPECT_EQ(12u, triangles.size());
+}
+
+TEST_F(GeometryTests, copyBuffers_smoothsStepInSolidOutline)
+{
+    // Two rows of solids with a single solid on top, where the outline steps out and back in
+    auto constexpr RowDistance = 0.866f;
+    auto data = ContentDesc().objects({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({102.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(4).pos({103.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(5).pos({104.0f, 100.0f}).type(SolidDesc()),
+        ObjectDesc().id(6).pos({100.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(7).pos({101.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(8).pos({102.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(9).pos({103.5f, 100.0f - RowDistance}).type(SolidDesc()),
+        ObjectDesc().id(10).pos({102.0f, 100.0f - 2 * RowDistance}).type(SolidDesc()),
+    });
+    for (auto const& [id1, id2] : std::vector<std::pair<uint64_t, uint64_t>>{
+             {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {8, 9}, {6, 1}, {6, 2}, {7, 2}, {7, 3}, {8, 3}, {8, 4}, {9, 4}, {9, 5}, {10, 7}, {10, 8}}) {
+        data.addConnection(id1, id2);
+    }
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    auto vertices = geometryBuffers->getCellData();
+    ASSERT_EQ(10u, vertices.size());
+    auto topSolid = getVertexNextTo(vertices, {102.0f, 100.0f - 2 * RowDistance});
+    EXPECT_FLOAT_EQ(102.0f, topSolid.pos[0]);
+    EXPECT_GT(topSolid.pos[1], 100.0f - 1.6f * RowDistance);
+    auto solidOnStraightOutline = getVertexNextTo(vertices, {102.0f, 100.0f});
+    EXPECT_FLOAT_EQ(102.0f, solidOnStraightOutline.pos[0]);
+    EXPECT_FLOAT_EQ(100.0f, solidOnStraightOutline.pos[1]);
+}
+
+TEST_F(GeometryTests, copyBuffers_keepsOutlineOfRoundSolid)
+{
+    // Hexagon of solids around a central solid
+    auto data = ContentDesc().objects({ObjectDesc().id(1).pos({100.0f, 100.0f}).type(SolidDesc())});
+    for (auto const& index : std::views::iota(0, 6)) {
+        auto angle = toFloat(index) * Const::Pi / 3;
+        data._objects.emplace_back(ObjectDesc().id(index + 2).pos({100.0f + std::cos(angle), 100.0f + std::sin(angle)}).type(SolidDesc()));
+    }
+    for (auto const& index : std::views::iota(0, 6)) {
+        data.addConnection(1, index + 2);
+        data.addConnection(index + 2, (index + 1) % 6 + 2);
+    }
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    auto vertices = geometryBuffers->getCellData();
+    ASSERT_EQ(7u, vertices.size());
+    for (auto const& object : data._objects) {
+        auto vertex = getVertexNextTo(vertices, object._pos);
+        EXPECT_NEAR(object._pos.x, vertex.pos[0], 1e-4f);
+        EXPECT_NEAR(object._pos.y, vertex.pos[1], 1e-4f);
+    }
 }
 
 TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)

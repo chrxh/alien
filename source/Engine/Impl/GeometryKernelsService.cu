@@ -13,6 +13,11 @@
 
 namespace
 {
+    // Each pass smooths the steps in the outlines of the solids a little further, see cudaSmoothSolidOutlines. The passes alternate between the
+    // vertex data and temporary positions, the last one writes the vertex data.
+    auto constexpr SolidOutlineSmoothingPasses = 4;
+    static_assert(SolidOutlineSmoothingPasses % 2 == 0);
+
     float computeCullingMargin(SettingsForSimulation const& settings)
     {
         float result = 10.0f;
@@ -127,13 +132,11 @@ void GeometryKernelsService::extractObjectData(
 
     CHECK_FOR_DEVICE_ERRORS(cudaMemset(_counters, 0, sizeof(NumRenderObjects)));
 
-    launchKernelOnDefaultStream(
-        KERNEL(cudaExtractObjectData),
-        LaunchConfig{launchSettings.numBlocks, 8},
-        data,
-        renderingData.getBuffer<ObjectVertexData>(GeometryBufferType_Objects),
-        &_counters->objects,
-        context);
+    auto objectData = renderingData.getBuffer<ObjectVertexData>(GeometryBufferType_Objects);
+    launchKernelOnDefaultStream(KERNEL(cudaExtractObjectData), LaunchConfig{launchSettings.numBlocks, 8}, data, objectData, &_counters->objects, context);
+    for (auto pass : std::views::iota(0, SolidOutlineSmoothingPasses)) {
+        launchKernelOnDefaultStream(KERNEL(cudaSmoothSolidOutlines), LaunchConfig{launchSettings.numBlocks, 8}, data, objectData, context, pass % 2 == 1);
+    }
     launchKernelOnDefaultStream(
         KERNEL(cudaExtractFluidParticleData),
         LaunchConfig{launchSettings.numBlocks, 8},

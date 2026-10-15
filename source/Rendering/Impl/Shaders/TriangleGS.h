@@ -10,12 +10,17 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 in vec3 vertexColor[];
+in float vertexSolid[];
 out vec3 fragColor;
 
 uniform float zoom;
 //uniform float lightAngle;
 
 #define PI 3.1415926538
+
+// The heights of the objects vary randomly, so the lighting of small triangles is random as well. Solids are lit evenly with about the mean of
+// this lighting, so that their polygons and connections merge into a smooth area.
+const float SolidLighting = 0.94;
 
 void main()
 {
@@ -47,7 +52,7 @@ void main()
         // Keep the per triangle lighting subtle, the rounded shape of a body comes from the organic
         // surface filter. A strong term would show the triangulation as hard facets. The constant is
         // chosen so that the mean over both triangle windings stays at the one of the former term.
-        fragColor = vertexColor[i] * (0.9 + lightIntensity * 0.16);
+        fragColor = vertexColor[i] * mix(0.9 + lightIntensity * 0.16, SolidLighting, vertexSolid[i]);
         EmitVertex();
     }
     EndPrimitive();
