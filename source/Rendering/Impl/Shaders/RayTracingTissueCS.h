@@ -18,6 +18,10 @@ const float MaterialBlending = 0.25;
 
 const float ThicknessGain = 1.6;
 
+// The polygons, connections and particles of a solid add up to a density that varies with its structure. The thickness of smooth solids
+// saturates quickly, so that they appear as even areas with shaded edges, see getSolidSmoothing in Shaders/RayTracingCommonCS.h.
+const float SmoothSolidThicknessGain = 8.0;
+
 // The glow of the tissue matches the brightness of the rasterized objects
 const float Absorption = 2.2;
 const float CytoplasmGlow = 1.0;
@@ -71,11 +75,12 @@ struct Tissue
     vec3 emission;
     float brightness;
     float solid;
+    float solidSmoothing;
 };
 
 Tissue createTissue()
 {
-    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0);
+    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0, 0.0);
 }
 
 // Smooth maximum of the group densities as the logarithm of a sum of exponentials. The gradient of the density is averaged with the same
@@ -101,6 +106,7 @@ void scaleMaterial(inout Tissue sum, float factor)
     sum.emission *= factor;
     sum.brightness *= factor;
     sum.solid *= factor;
+    sum.solidSmoothing *= factor;
 }
 
 void addGroup(inout TissueBlend blend, Tissue group)
@@ -130,6 +136,7 @@ void addGroup(inout TissueBlend blend, Tissue group)
     blend.weightedSum.emission += materialWeight * group.emission;
     blend.weightedSum.brightness += materialWeight * group.brightness;
     blend.weightedSum.solid += materialWeight * group.solid;
+    blend.weightedSum.solidSmoothing += materialWeight * group.solidSmoothing;
 }
 
 // The material of the result is normalized, i.e. its weight is 1
@@ -180,6 +187,7 @@ void addMaterial(inout Tissue tissue, Sphere sphere, float weight)
     tissue.emission += sphere.emission.rgb * weight;
     tissue.brightness += sphere.emission.w * weight;
     tissue.solid += sphere.hueMaterial.w == Material_Solid ? weight : 0.0;
+    tissue.solidSmoothing += getSolidSmoothing(sphere) * weight;
 }
 
 // Living cells are not perfectly round, their outline varies with the direction
@@ -189,22 +197,27 @@ float getCellShape(vec2 offset, float seed)
     return 1.0 + CellShapeVariation * (0.6 * sin(2.0 * angle + seed * 47.0) + 0.4 * sin(3.0 * angle + seed * 91.0));
 }
 
-void addCell(inout Tissue tissue, Sphere sphere, vec2 position)
+// The share weights the contribution of the cell to its group, see getSolidSmoothing in Shaders/RayTracingCommonCS.h
+void addCell(inout Tissue tissue, Sphere sphere, vec2 position, float share)
 {
+    if (share <= 0.0) {
+        return;
+    }
     vec2 offset = position - sphere.centerRadius.xy;
     float distanceSquared = dot(offset, offset);
     float kernelRadius = getCellKernelRadius(sphere);
     if (distanceSquared >= square(kernelRadius * (1.0 + CellShapeVariation))) {
         return;
     }
-    float kernelRadiusSquared = square(kernelRadius * getCellShape(offset, sphere.details.y));
+    float shape = mix(getCellShape(offset, sphere.details.y), 1.0, getSolidSmoothing(sphere));
+    float kernelRadiusSquared = square(kernelRadius * shape);
     if (distanceSquared >= kernelRadiusSquared) {
         return;
     }
     float derivative;
-    float weight = CellWeight * getKernel(distanceSquared / kernelRadiusSquared, derivative);
+    float weight = share * CellWeight * getKernel(distanceSquared / kernelRadiusSquared, derivative);
     tissue.density += weight;
-    tissue.gradient += CellWeight * derivative * 2.0 * offset / kernelRadiusSquared;
+    tissue.gradient += share * CellWeight * derivative * 2.0 * offset / kernelRadiusSquared;
     tissue.bulge += weight;
     addMaterial(tissue, sphere, weight);
 }
@@ -230,7 +243,7 @@ void addStrand(inout Tissue tissue, Sphere a, Sphere b, vec2 position)
     float axisParameter = clamp(dot(position - a.centerRadius.xy, axis) / max(dot(axis, axis), 1e-8), 0.0, 1.0);
     vec2 offset = position - (a.centerRadius.xy + axis * axisParameter);
     float distanceSquared = dot(offset, offset);
-    float kernelRadiusSquared = square(getStrandKernelRadius());
+    float kernelRadiusSquared = square(getStrandKernelRadius(getStrandSolidSmoothing(a, b)));
     if (distanceSquared >= kernelRadiusSquared) {
         return;
     }
@@ -327,7 +340,7 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood)
         Tissue group = createTissue();
         if (kind == Kind_Sphere) {
             Sphere sphere = spheres[primitive];
-            addCell(group, sphere, position);
+            addCell(group, sphere, position, 1.0);
             totalDensity += group.density;
             totalGradient += group.gradient;
             if (group.weight > 0.0) {
@@ -342,8 +355,8 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood)
             addStrand(group, a, b, position);
             totalDensity += group.density;
             totalGradient += group.gradient;
-            addCell(group, a, position);
-            addCell(group, b, position);
+            addCell(group, a, position, 1.0 - getSolidSmoothing(a));
+            addCell(group, b, position, 1.0 - getSolidSmoothing(b));
         } else if (kind == Kind_Triangle) {
             uint indexA;
             uint indexB;
@@ -355,9 +368,9 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood)
             addFill(group, a, b, c, position);
             totalDensity += group.density;
             totalGradient += group.gradient;
-            addCell(group, a, position);
-            addCell(group, b, position);
-            addCell(group, c, position);
+            addCell(group, a, position, 1.0 - getSolidSmoothing(a));
+            addCell(group, b, position, 1.0 - getSolidSmoothing(b));
+            addCell(group, c, position, 1.0 - getSolidSmoothing(c));
         }
         addGroup(blend, group);
     }
@@ -449,6 +462,7 @@ CellDetails getCellDetails(Neighborhood neighborhood, vec2 position)
         result.wall = exp(-square(wallDistance / max(0.035, 0.7 * pixelSize))) * visibility;
     }
     if (cell.hueMaterial.w == Material_Solid) {
+        result.wall *= getSolidDetailVisibility();
         return result;
     }
     vec2 local = position - cell.centerRadius.xy;
@@ -485,8 +499,9 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
     float outline = exp(-square(edgeDistance / max(0.05, 0.8 * getPixelSize()))) * closeUpWeight;
 
     float totalExcess = max(tissue.totalDensity - DensityThreshold, 0.0);
-    float thickness = mix(1.0, 1.0 - exp(-totalExcess * ThicknessGain), closeUpWeight);
-    vec2 thicknessGradient = closeUpWeight * ThicknessGain * exp(-totalExcess * ThicknessGain) * tissue.totalGradient;
+    float thicknessGain = mix(ThicknessGain, SmoothSolidThicknessGain, tissue.solidSmoothing);
+    float thickness = mix(1.0, 1.0 - exp(-totalExcess * thicknessGain), closeUpWeight);
+    vec2 thicknessGradient = closeUpWeight * thicknessGain * exp(-totalExcess * thicknessGain) * tissue.totalGradient;
 
     vec3 color = getTissueColor(tissue);
     CellDetails details = getCellDetails(neighborhood, position);

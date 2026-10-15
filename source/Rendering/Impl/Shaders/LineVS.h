@@ -11,6 +11,7 @@ layout (location = 1) in vec3 aColor;
 layout (location = 2) in int state;
 
 out vec3 vertexColor;
+out float vertexSolid;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -41,7 +42,9 @@ void main()
     
     // Pass color to geometry shader
     int objectType = (state >> 8) & 0xFF;
-    vertexColor = objectType == ObjectType_Solid ? getSolidColor(aColor) : aColor;
+    bool isSolid = objectType == ObjectType_Solid;
+    vertexColor = isSolid ? getSolidColor(aColor) : aColor;
+    vertexSolid = isSolid ? 1.0 : 0.0;
 }
 )";
 }

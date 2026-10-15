@@ -13,6 +13,14 @@ namespace
     // flicker
     __device__ float constexpr LightOrganResponseTimesteps = 30.0f;
 
+    // The outlines of solids follow the lattice of their particles in steps. Where an outline changes between bending outwards and inwards, its
+    // particles are rendered closer to the middle of their neighbors on the outline. Outlines that bend in one direction only, such as those of
+    // small round solids, keep their shape.
+    __device__ float constexpr SolidOutlineSmoothing = 0.5f;
+
+    // Bends of an outline below this angle in radians count as straight
+    __device__ float constexpr MinSolidOutlineBend = 0.17f;
+
     __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
@@ -214,6 +222,135 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 
             object->tempValue1.as_uint64 = idx;
         }
+    }
+}
+
+namespace
+{
+    // Isolated particles, the ends of chains and the particles with the maximum number of connections, which lie inside, keep their positions
+    __device__ __inline__ bool isMovableOnOutline(Object* object)
+    {
+        return object->type == ObjectType_Solid && object->numConnections >= 2 && object->numConnections < MAX_OBJECT_CONNECTIONS;
+    }
+
+    // The passes of the smoothing alternate between the positions in the vertex data and temporary positions of the particles that may move
+    struct RenderPositions
+    {
+        ObjectVertexData* objectData;
+        GeometryExtractionContext context;
+        bool fromTemporaryPositions;
+
+        __device__ __inline__ float2 get(Object* object) const
+        {
+            if (!isInVisibleRect(object->pos, context)) {
+                return object->pos;
+            }
+            if (fromTemporaryPositions && isMovableOnOutline(object)) {
+                return object->tempValue2.as_float2;
+            }
+            auto const& pos = objectData[object->tempValue1.as_uint64].pos;
+            return {pos[0], pos[1]};
+        }
+
+        __device__ __inline__ void setNext(Object* object, float2 const& value) const
+        {
+            if (fromTemporaryPositions) {
+                auto& pos = objectData[object->tempValue1.as_uint64].pos;
+                pos[0] = value.x;
+                pos[1] = value.y;
+            } else {
+                object->tempValue2.as_float2 = value;
+            }
+        }
+    };
+
+    // Consecutive connections enclose a sector, which is rendered as a polygon if it belongs to a triangle or a quad, see
+    // cudaExtractTriangleIndices
+    __device__ __inline__ bool isCoveredByPolygon(Object* object, Object* connectedObject, Object* prevConnectedObject)
+    {
+        auto backIndex = connectedObject->getConnectionIndex(object);
+        auto prevBackIndex = prevConnectedObject->getConnectionIndex(object);
+        auto candidate = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
+        if (candidate == connectedObject) {
+            return true;
+        }
+        return candidate == connectedObject->getConnectedObject(backIndex + 1) && candidate != object && connectedObject != prevConnectedObject;
+    }
+
+    struct SolidOutline
+    {
+        Object* previous;
+        Object* next;
+        int bend;  // 1: outwards, -1: inwards, 0: straight
+    };
+
+    // A solid particle lies on an outline if exactly one sector between its connections is not covered by a polygon
+    __device__ __inline__ bool getSolidOutline(SimulationData const& data, Object* object, RenderPositions const& positions, SolidOutline& result)
+    {
+        if (!isMovableOnOutline(object)) {
+            return false;
+        }
+        int numConnections = object->numConnections;
+        auto pos = positions.get(object);
+        float2 directions[MAX_OBJECT_CONNECTIONS];
+        for (int i = 0; i < numConnections; ++i) {
+            directions[i] = data.world.getCorrectedDirection(positions.get(object->connections[i].object) - pos);
+        }
+        auto uncoveredSector = -1;
+        auto coveredAngle = 0.0f;
+        for (int i = 0; i < numConnections; ++i) {
+            auto prevIndex = (i + numConnections - 1) % numConnections;
+            if (!isCoveredByPolygon(object, object->connections[i].object, object->connections[prevIndex].object)) {
+                if (uncoveredSector != -1) {
+                    return false;
+                }
+                uncoveredSector = i;
+                continue;
+            }
+            coveredAngle += atan2f(abs(Math::cross(directions[prevIndex], directions[i]).z), Math::dot(directions[prevIndex], directions[i]));
+        }
+        if (uncoveredSector == -1) {
+            return false;
+        }
+        auto openAngle = 2.0f * Const::PI - coveredAngle;
+        result.previous = object->connections[(uncoveredSector + numConnections - 1) % numConnections].object;
+        result.next = object->connections[uncoveredSector].object;
+        result.bend = openAngle > Const::PI + MinSolidOutlineBend ? 1 : (openAngle < Const::PI - MinSolidOutlineBend ? -1 : 0);
+        return true;
+    }
+
+    __device__ __inline__ float2 getSmoothedPosition(SimulationData const& data, Object* object, RenderPositions const& positions)
+    {
+        auto pos = positions.get(object);
+        SolidOutline outline;
+        if (!getSolidOutline(data, object, positions, outline) || outline.bend == 0) {
+            return pos;
+        }
+        if (outline.previous->type != ObjectType_Solid || outline.next->type != ObjectType_Solid) {
+            return pos;
+        }
+        SolidOutline neighborOutline;
+        auto previousBend = getSolidOutline(data, outline.previous, positions, neighborOutline) ? neighborOutline.bend : 0;
+        auto nextBend = getSolidOutline(data, outline.next, positions, neighborOutline) ? neighborOutline.bend : 0;
+        if (previousBend == outline.bend && nextBend == outline.bend) {
+            return pos;
+        }
+        auto toPrevious = data.world.getCorrectedDirection(positions.get(outline.previous) - pos);
+        auto toNext = data.world.getCorrectedDirection(positions.get(outline.next) - pos);
+        return pos + (toPrevious + toNext) * (SolidOutlineSmoothing / 2);
+    }
+}
+
+__global__ void cudaSmoothSolidOutlines(SimulationData data, ObjectVertexData* objectData, GeometryExtractionContext context, bool fromTemporaryPositions)
+{
+    RenderPositions positions{objectData, context, fromTemporaryPositions};
+    auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (!isMovableOnOutline(object) || !isInVisibleRect(object->pos, context)) {
+            continue;
+        }
+        positions.setNext(object, getSmoothedPosition(data, object, positions));
     }
 }
 
