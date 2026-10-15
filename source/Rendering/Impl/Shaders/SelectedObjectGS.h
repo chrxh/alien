@@ -12,46 +12,46 @@ layout (triangle_strip, max_vertices = 4) out;
 in vec2 vWorldPos[];
 
 out vec2 gWorldPos;
-out vec2 gQuadCoord;
+out vec2 gPixelOffset;
+flat out float gCircleRadius;
+flat out float gSmoothSpread;
+flat out float gDetail;
 
 uniform vec2 viewportSize;
 uniform float zoom;
 uniform float radius;
+uniform float renderScale;
+
+const float MinDetailZoom = 4.0;
+const float MaxDetailZoom = 8.0;
+const float SmoothSpreadWorld = 0.55;
+const float MinSmoothSpreadPixels = 0.6;
 
 // Outputs are undefined after EmitVertex, so each vertex sets all of them
-void emitVertex(vec4 position, vec2 quadCoord)
+void emitVertex(vec4 center, vec2 pixelOffset, float circleRadius, float smoothSpread, float detail)
 {
-    gl_Position = position;
-    gQuadCoord = quadCoord;
+    gl_Position = vec4(center.xy + pixelOffset / viewportSize * vec2(2.0, -2.0), center.z, 1.0);
+    gPixelOffset = pixelOffset;
     gWorldPos = vWorldPos[0];
+    gCircleRadius = circleRadius;
+    gSmoothSpread = smoothSpread;
+    gDetail = detail;
     EmitVertex();
 }
 
 void main()
 {
-    // Circle radius in world coordinates (thin white circle)
+    // Thin circle at high zoom, smooth highlight below
     float circleRadius = radius * 0.35;
-    
-    // Calculate size in NDC coordinates
-    float ndcHalfWidth = circleRadius / viewportSize.x * 2.0;
-    float ndcHalfHeight = circleRadius / viewportSize.y * 2.0;
-    
-    // Get center position
+    float smoothSpread = max(SmoothSpreadWorld * zoom, MinSmoothSpreadPixels * renderScale);
+    float detail = smoothstep(MinDetailZoom, MaxDetailZoom, zoom / renderScale);
+    float halfSize = max(detail > 0.0 ? circleRadius : 0.0, detail < 1.0 ? 3.0 * smoothSpread : 0.0);
+
     vec4 center = gl_in[0].gl_Position;
-    
-    // Generate quad (4 vertices as triangle strip)
-    // Bottom-left
-    emitVertex(vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0), vec2(-0.5, 0.5));
-    
-    // Bottom-right
-    emitVertex(vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0), vec2(0.5, 0.5));
-    
-    // Top-left
-    emitVertex(vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0), vec2(-0.5, -0.5));
-    
-    // Top-right
-    emitVertex(vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0), vec2(0.5, -0.5));
-    
+    emitVertex(center, vec2(-halfSize, halfSize), circleRadius, smoothSpread, detail);
+    emitVertex(center, vec2(halfSize, halfSize), circleRadius, smoothSpread, detail);
+    emitVertex(center, vec2(-halfSize, -halfSize), circleRadius, smoothSpread, detail);
+    emitVertex(center, vec2(halfSize, -halfSize), circleRadius, smoothSpread, detail);
     EndPrimitive();
 }
 )";
