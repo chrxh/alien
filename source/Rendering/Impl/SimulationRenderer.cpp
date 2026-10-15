@@ -36,7 +36,7 @@ namespace
 
     // The tissue shows the solids darker than the cells, see Shaders/RayTracingTissueCS.h. The rasterized solids, which replace it when zoomed
     // out, match it.
-    auto constexpr RayTracedSolidBrightness = 0.65f;
+    auto constexpr RayTracedSolidBrightness = 0.5f;
 
     // Between these screen zoom factors, the structure of the solids fades in
     auto constexpr SolidDetailZoomStart = 15.0f;
