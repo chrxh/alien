@@ -29,6 +29,11 @@ uniform bool energyParticlesOnly;
 const float CoreHiddenZoom = 2.0;
 const float CoreDetailZoom = 7.0;
 
+// The glow of the cores fades out when zooming out, the stronger the glow the later. It vanishes where the zoom times the glow falls to
+// GlowCoreHiddenZoomGlow and is complete from twice that value.
+const float GlowCoreHiddenZoomGlow = 0.3;
+const float GlowCoreFadeZoomFactor = 2.0;
+
 // Weak energy particles contribute to the clouds with a softly raised minimum intensity, so that crowds of them merge into visible clouds. A
 // higher minimum would let a few particles passing each other flash up as a cloud.
 const float MinEnergyCloudIntensity = 0.2;
@@ -43,7 +48,10 @@ void main()
 {
     vAxis = vec2(1.0, 0.0);
     vElongation = 1.0;
-    if (energyParticlesOnly && aPos.z >= 0.5 && (onBackground || aGlow <= 0.0)) {
+    float screenZoom = zoom / renderScale;
+    float glow = clamp(aGlow, 0.0, 1.0);
+    float glowCoreVisibility = smoothstep(GlowCoreHiddenZoomGlow, GlowCoreHiddenZoomGlow * GlowCoreFadeZoomFactor, screenZoom * glow);
+    if (energyParticlesOnly && aPos.z >= 0.5 && (onBackground || glowCoreVisibility <= 0.0)) {
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
         gl_PointSize = 0.0;
         vColor = vec3(0.0);
@@ -63,17 +71,21 @@ void main()
     if (onBackground) {
         ballSize = 15.0;
     } else {
-        float screenZoom = zoom / renderScale;
         ballSize = screenZoom < CoreDetailZoom ? 0.0 : 0.2;
         coreVisibility = clamp((screenZoom - CoreHiddenZoom) / (CoreDetailZoom - CoreHiddenZoom), 0.0, 1.0);
     }
 
-    float g = clamp(aGlow, 0.0, 1.0);
     if (onBackground) {
-        vColor = aColor * mix(1.0, 4.0, g);
+        vColor = aColor * mix(1.0, 4.0, glow);
     } else {
-        ballSize = mix(ballSize, 1.0, g);
-        vColor = aColor * mix(coreVisibility, 20.0, g);
+        float coreGlow = glow * glowCoreVisibility;
+        ballSize = mix(ballSize, 1.0, coreGlow);
+        vColor = aColor * mix(coreVisibility, 20.0, coreGlow);
+
+        // The ray tracing shows no raster cores of fluids without glow, hence the whole core fades out with the glow
+        if (energyParticlesOnly && !energyParticle) {
+            vColor *= glowCoreVisibility;
+        }
     }
 
     float size = radius * ballSize;
