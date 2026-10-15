@@ -17,9 +17,10 @@ uniform float strength;
 
 void main()
 {
+    // The glow takes its light from the bright regions, see SimulationRenderer.cpp. A soft threshold keeps the brightness continuous there.
     vec3 color = texture(inputTexture1, texCoord).rgb;
     float brightness = dot(color, vec3(1.0));
-    FragColor = vec4(brightness > 0.2 ? color : vec3(0.0), 1.0);
+    FragColor = vec4(color * smoothstep(0.08, 0.28, brightness), 1.0);
 }
 )";
 }

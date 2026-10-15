@@ -57,7 +57,7 @@ public:
     static float getTissueVisibility(RenderView const& view);
 
     // The background is scaled by the inverse of the factor with which the bloom weights the scene, see SimulationRenderer
-    static float getBackgroundScale(SimulationParameters const& parameters);
+    static float getBackgroundScale();
 
     // Radiation sources shine with a brightness above 0
     static bool isSourceLightActive(SimulationParameters const& parameters);
