@@ -52,8 +52,11 @@ McpToolResult McpDocumentationTools::readDocumentation(boost::json::object const
     }
     auto chapter = std::ranges::find(chapters, filename, &DocumentationChapter::filename);
     if (chapter == chapters.end()) {
-        auto filenames = chapters | std::views::transform(&DocumentationChapter::filename) | std::ranges::to<std::vector>();
-        throw std::invalid_argument(std::format("Unknown chapter '{}'. Available chapters: {}.", *chapterArgument, StringHelper::formatEnumeration(filenames)));
+        auto filenames = chapters | std::views::transform(&DocumentationChapter::filename);
+        throw std::invalid_argument(std::format(
+            "Unknown chapter '{}'. Available chapters: {}.",
+            *chapterArgument,
+            StringHelper::formatEnumeration(std::vector(filenames.begin(), filenames.end()))));
     }
     auto text = DocumentationReader::readChapter(*chapter);
     if (text.empty()) {
