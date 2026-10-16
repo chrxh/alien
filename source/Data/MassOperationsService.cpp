@@ -173,3 +173,10 @@ void MassOperationsService::setMutationRates(ContentDesc& description, MutationR
         genome._mutationRates = mutationRates;
     }
 }
+
+void MassOperationsService::setApplyMetaMutations(ContentDesc& description, bool value) const
+{
+    for (auto& genome : description._genomes) {
+        genome._applyMetaMutations = value;
+    }
+}

@@ -19,4 +19,5 @@ public:
     void randomizeLineageIds(ContentDesc& description) const;
     void randomizeGlow(ContentDesc& description, float minGlow, float maxGlow) const;
     void setMutationRates(ContentDesc& description, MutationRatesDesc const& mutationRates) const;
+    void setApplyMetaMutations(ContentDesc& description, bool value) const;
 };

@@ -55,6 +55,7 @@ std::vector<McpTool> McpMassOperationTools::getTools(McpToolContext& context)
                 {"mutation_rates",
                  McpSchema::jsonObject("Mutation rates set for all genomes, in the format of the field 'mutationRates' of a genome, see get_json_format "
                                        "with kind 'genome'. Omitted fields take their default values.")},
+                {"apply_meta_mutations", McpSchema::boolean("Set the flag 'applyMetaMutations' of all genomes to this value")},
             }),
             .handler = [this](boost::json::object const& arguments) { return applyMassOperations(arguments); },
         },
@@ -117,8 +118,9 @@ McpToolResult McpMassOperationTools::applyMassOperations(boost::json::object con
     auto randomizeLineageIds = McpArguments::getOptionalBool(arguments, "randomize_lineage_ids").value_or(false);
     auto glows = getOptionalRange(arguments, "min_glow", "max_glow", 1.0f);
     auto mutationRates = arguments.contains("mutation_rates") ? std::make_optional(getMutationRates(arguments.at("mutation_rates"))) : std::nullopt;
+    auto applyMetaMutations = McpArguments::getOptionalBool(arguments, "apply_meta_mutations");
 
-    if (!objectColors && !genomeColors && !energies && !ages && !countdowns && !randomizeLineageIds && !glows && !mutationRates) {
+    if (!objectColors && !genomeColors && !energies && !ages && !countdowns && !randomizeLineageIds && !glows && !mutationRates && !applyMetaMutations) {
         throw std::invalid_argument("No operation given.");
     }
 
@@ -163,6 +165,10 @@ McpToolResult McpMassOperationTools::applyMassOperations(boost::json::object con
     if (mutationRates) {
         service.setMutationRates(content, *mutationRates);
         operations.emplace_back("mutation rates");
+    }
+    if (applyMetaMutations) {
+        service.setApplyMetaMutations(content, *applyMetaMutations);
+        operations.emplace_back("meta-mutation flags");
     }
 
     auto numObjects = content._objects.size();
