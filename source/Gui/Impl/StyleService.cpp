@@ -212,6 +212,8 @@ namespace Const
     ImColor BrowserResourceTextColor;
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
     ImColor BrowserResourceNewTextColor;
+    ImColor BrowserNewBadgeColor;
+    ImColor BrowserNewBadgeBorderColor;
     ImColor BrowserResourceSymbolColor;
     ImColor BrowserOwnReactionFrameColor;
 
@@ -464,6 +466,8 @@ void StyleService::setupPalette() const
     BrowserLeafTextColor = themed(ImColor::HSV(0.58f, 0.2f, 1.0f), ImColor::HSV(0.58f, 0.6f, 0.45f));
     BrowserResourceTextColor = TextStrongColor;
     BrowserResourceNewTextColor = themed(ImColor::HSV(0.15f, 0.8f, 1.0f), ImColor::HSV(0.11f, 0.9f, 0.75f));
+    BrowserNewBadgeColor = themed(ImColor::HSV(0.583f, 0.316f, 0.075f, 0.820f), ImColor::HSV(0.583f, 0.025f, 0.985f, 0.880f));
+    BrowserNewBadgeBorderColor = themed(ImColor::HSV(0.15f, 0.8f, 1.0f, 0.55f), ImColor::HSV(0.11f, 0.9f, 0.75f, 0.55f));
     BrowserResourceSymbolColor = TextStrongColor;
     BrowserOwnReactionFrameColor = themed(ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f), ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f));
 

@@ -12,6 +12,13 @@ TEST_F(StringHelperTests, join)
     EXPECT_EQ("1, 4, 0", StringHelper::join({1, 4, 0}));
 }
 
+TEST_F(StringHelperTests, formatUtc)
+{
+    auto day = std::chrono::sys_days(std::chrono::year(2026) / std::chrono::October / std::chrono::day(7));
+    EXPECT_EQ("2026-10-07 00:00:00", StringHelper::formatUtc(day));
+    EXPECT_EQ("2026-10-07 18:19:05", StringHelper::formatUtc(day + std::chrono::hours(18) + std::chrono::minutes(19) + std::chrono::milliseconds(5900)));
+}
+
 TEST_F(StringHelperTests, formatRanges)
 {
     EXPECT_EQ("", StringHelper::formatRanges({}));

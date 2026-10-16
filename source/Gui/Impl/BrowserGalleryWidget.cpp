@@ -39,6 +39,12 @@ namespace
     auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
     auto const PictureAspectRatio = toFloat(PictureGuiService::PreviewPictureResolution.y) / toFloat(PictureGuiService::PreviewPictureResolution.x);
 
+    auto constexpr NewBadgeMargin = 6.0f;
+    auto constexpr NewBadgePaddingX = 5.0f;
+    auto constexpr NewBadgeHeight = 15.0f;
+    auto constexpr NewBadgeRounding = 4.0f;
+    auto constexpr NewBadgeFontScale = 0.72f;
+
     auto constexpr PlaceholderBarHeight = 5.0f;
     auto const PlaceholderBarWidthFactors = std::array{0.55f, 0.80f, 0.65f};
 
@@ -235,6 +241,26 @@ namespace
         drawList->PopClipRect();
     }
 
+    void processNewBadge(ImVec2 const& picturePos)
+    {
+        auto font = StyleService::get().getSmallBoldFont();
+        auto fontSize = font->FontSize * NewBadgeFontScale;
+        auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, "NEW");
+
+        auto badgeMin = ImVec2{picturePos.x + scale(NewBadgeMargin), picturePos.y + scale(NewBadgeMargin)};
+        auto badgeMax = ImVec2{badgeMin.x + textSize.x + scale(NewBadgePaddingX) * 2, badgeMin.y + scale(NewBadgeHeight)};
+
+        auto drawList = ImGui::GetWindowDrawList();
+        drawList->AddRectFilled(badgeMin, badgeMax, Const::BrowserNewBadgeColor, scale(NewBadgeRounding));
+        drawList->AddRect(badgeMin, badgeMax, Const::BrowserNewBadgeBorderColor, scale(NewBadgeRounding));
+        drawList->AddText(
+            font,
+            fontSize,
+            {badgeMin.x + scale(NewBadgePaddingX), badgeMin.y + (badgeMax.y - badgeMin.y - textSize.y) / 2},
+            Const::BrowserResourceNewTextColor,
+            "NEW");
+    }
+
     NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO)
     {
         auto result = std::make_shared<_NetworkResourceTreeTO>();
@@ -275,7 +301,11 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
     if (ImGui::BeginChild("##tile", {tileWidth, tileHeight}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         auto textWidth = ImGui::GetContentRegionAvail().x;
+        auto picturePos = ImGui::GetCursorScreenPos();
         processPicture(rawTO, textWidth);
+        if (!_data->isOwner(rawTO) && _data->lastSessionData.isNew(rawTO)) {
+            processNewBadge(picturePos);
+        }
 
         auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);

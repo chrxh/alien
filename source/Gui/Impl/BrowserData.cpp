@@ -110,6 +110,11 @@ bool _BrowserData::isOwner(NetworkResourceTreeTO const& treeTO) const
     return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 
+bool _BrowserData::isOwner(NetworkResourceRawTO const& rawTO) const
+{
+    return rawTO->userName == NetworkService::get().getLoggedInUserName().value_or("");
+}
+
 bool _BrowserData::isSelected(NetworkResourceRawTO const& rawTO) const
 {
     return selectedTreeTO != nullptr && selectedTreeTO->isLeaf() && selectedTreeTO->getLeaf().rawTO->id == rawTO->id;

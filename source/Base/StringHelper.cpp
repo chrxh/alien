@@ -105,6 +105,21 @@ std::string StringHelper::format(std::chrono::system_clock::time_point const& ti
     return ss.str();
 }
 
+std::string StringHelper::formatUtc(std::chrono::system_clock::time_point const& timePoint)
+{
+    auto day = std::chrono::floor<std::chrono::days>(timePoint);
+    auto date = std::chrono::year_month_day(day);
+    auto time = std::chrono::hh_mm_ss(std::chrono::floor<std::chrono::seconds>(timePoint - day));
+    return std::format(
+        "{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
+        static_cast<int>(date.year()),
+        static_cast<unsigned>(date.month()),
+        static_cast<unsigned>(date.day()),
+        time.hours().count(),
+        time.minutes().count(),
+        time.seconds().count());
+}
+
 std::string StringHelper::formatInHex(uint64_t value)
 {
     std::stringstream ss;
