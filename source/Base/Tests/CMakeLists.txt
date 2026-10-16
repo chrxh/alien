@@ -1,5 +1,6 @@
 target_sources(BaseTests
 PUBLIC
+    DocumentationReaderTests.cpp
     MarkdownParserTests.cpp
     StringHelperTests.cpp
     Testsuite.cpp)

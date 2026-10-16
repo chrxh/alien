@@ -51,7 +51,8 @@ namespace
         return boost::json::serialize(boost::json::object{{"jsonrpc", JsonRpcVersion}, {"id", id}, {"result", std::move(result)}});
     }
 
-    boost::json::object initialize(boost::json::object const& params, std::string const& serverName, std::string const& serverVersion)
+    boost::json::object
+    initialize(boost::json::object const& params, std::string const& serverName, std::string const& serverVersion, std::string const& instructions)
     {
         std::string protocolVersion = DefaultProtocolVersion;
         if (auto requestedVersion = params.if_contains("protocolVersion"); requestedVersion && requestedVersion->is_string()) {
@@ -60,11 +61,15 @@ namespace
                 protocolVersion = version;
             }
         }
-        return {
+        boost::json::object result{
             {"protocolVersion", protocolVersion},
             {"capabilities", boost::json::object{{"tools", boost::json::object{{"listChanged", false}}}}},
             {"serverInfo", boost::json::object{{"name", serverName}, {"version", serverVersion}}},
         };
+        if (!instructions.empty()) {
+            result["instructions"] = instructions;
+        }
+        return result;
     }
 
     boost::json::object listTools(std::vector<McpTool> const& tools)
@@ -147,9 +152,10 @@ namespace
     }
 }
 
-McpServer::McpServer(std::string const& serverName, std::string const& serverVersion, std::vector<McpTool> tools)
+McpServer::McpServer(std::string const& serverName, std::string const& serverVersion, std::string const& instructions, std::vector<McpTool> tools)
     : _serverName(serverName)
     , _serverVersion(serverVersion)
+    , _instructions(instructions)
     , _tools(std::move(tools))
 {}
 
@@ -266,7 +272,7 @@ std::optional<std::string> McpServer::handleMessage(std::string const& message) 
     try {
         auto const& methodName = method->as_string();
         if (methodName == "initialize") {
-            return createResultResponse(*id, initialize(paramsObject, _serverName, _serverVersion));
+            return createResultResponse(*id, initialize(paramsObject, _serverName, _serverVersion, _instructions));
         }
         if (methodName == "ping") {
             return createResultResponse(*id, {});

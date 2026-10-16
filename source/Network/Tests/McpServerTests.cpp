@@ -16,6 +16,7 @@ public:
         : _server(
               "alien",
               "1.0",
+              "Read the documentation first.",
               {McpTool{
                    .name = "echo",
                    .description = "Returns the text argument",
@@ -69,6 +70,17 @@ TEST_F(McpServerTests, initialize_supportedVersion)
     EXPECT_EQ("2025-03-26", result.at("protocolVersion").as_string());
     EXPECT_EQ("alien", result.at("serverInfo").as_object().at("name").as_string());
     EXPECT_TRUE(result.at("capabilities").as_object().contains("tools"));
+    EXPECT_EQ("Read the documentation first.", result.at("instructions").as_string());
+}
+
+TEST_F(McpServerTests, initialize_withoutInstructions)
+{
+    McpServer server("alien", "1.0", "", {});
+
+    auto response = server.handleMessage(R"({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}})");
+
+    ASSERT_TRUE(response.has_value());
+    EXPECT_FALSE(boost::json::parse(*response).as_object().at("result").as_object().contains("instructions"));
 }
 
 TEST_F(McpServerTests, initialize_unsupportedVersion)
