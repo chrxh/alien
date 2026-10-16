@@ -42,7 +42,7 @@ struct McpTool
 class McpServer
 {
 public:
-    McpServer(std::string const& serverName, std::string const& serverVersion, std::vector<McpTool> tools);
+    McpServer(std::string const& serverName, std::string const& serverVersion, std::string const& instructions, std::vector<McpTool> tools);
     ~McpServer();
 
     bool start(int port);
@@ -55,6 +55,7 @@ public:
 private:
     std::string _serverName;
     std::string _serverVersion;
+    std::string _instructions;
     std::vector<McpTool> _tools;
 
     std::unique_ptr<httplib::Server> _server;

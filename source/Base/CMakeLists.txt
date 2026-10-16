@@ -7,6 +7,8 @@ add_library(Base
     Console.h
     Definitions.cpp
     Definitions.h
+    DocumentationReader.cpp
+    DocumentationReader.h
     ExitScopeGuard.h
     FileLogger.cpp
     FileLogger.h

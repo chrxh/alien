@@ -214,7 +214,7 @@ void McpController::startServer()
     if (_server) {
         return;
     }
-    auto server = std::make_unique<McpServer>(ServerName, Const::ProgramVersion, createTools());
+    auto server = std::make_unique<McpServer>(ServerName, Const::ProgramVersion, _McpToolsFacade::get()->getInstructions(), createTools());
     if (!server->start(_port)) {
         log(Priority::Important, std::format("mcp: could not start server on port {}", _port));
         GenericMessageDialog::get().information("MCP server", std::format("The MCP server could not be started because port {} is not available.", _port));
