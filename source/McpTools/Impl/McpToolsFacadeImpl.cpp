@@ -1,6 +1,7 @@
 #include "McpToolsFacadeImpl.h"
 
 #include "McpCreatorTools.h"
+#include "McpDocumentationTools.h"
 #include "McpEditTools.h"
 #include "McpGenomeTools.h"
 #include "McpInspectionTools.h"
@@ -13,9 +14,22 @@
 #include "McpTemporalTools.h"
 #include "McpViewTools.h"
 
+namespace
+{
+    auto constexpr Instructions =
+        "ALIEN is an artificial life simulation of soft bodies and fluids in which creatures grow from genomes, sense, move, feed and evolve. Before "
+        "designing creatures, building worlds or tuning simulation parameters, read the relevant chapters of the documentation with read_documentation, "
+        "e.g. 'how-life-works.md', 'cell-types.md', 'genomes.md', 'energy.md' and 'simulation-parameters.md'.";
+}
+
 void _McpToolsFacadeImpl::set(McpToolsFacade const& instance)
 {
     _instance = instance;
+}
+
+std::string _McpToolsFacadeImpl::getInstructions()
+{
+    return Instructions;
 }
 
 std::vector<McpTool> _McpToolsFacadeImpl::getTools(McpToolContext& context)
@@ -41,6 +55,7 @@ std::vector<McpTool> _McpToolsFacadeImpl::getTools(McpToolContext& context)
          McpGenomeTools::get().getTools(context)});
     addGroup("Inspection and view", {McpViewTools::get().getTools(context), McpInspectionTools::get().getTools(context)});
     addGroup("Simulation parameters", {McpParameterTools::get().getTools()});
+    addGroup("Documentation", {McpDocumentationTools::get().getTools()});
     return result;
 }
 

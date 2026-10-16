@@ -1,7 +1,6 @@
 #include "DocumentationWindow.h"
 
 #include <algorithm>
-#include <fstream>
 #include <iterator>
 #include <ranges>
 #include <cctype>
@@ -10,6 +9,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/DocumentationReader.h>
 #include <Base/GlobalSettings.h>
 #include <Base/MarkdownParser.h>
 #include <Base/Resources.h>
@@ -29,7 +29,6 @@ namespace
     constexpr float SectionIndent = 12.0f;
     constexpr size_t SnippetLeadLength = 30;
     constexpr size_t SnippetLength = 100;
-    constexpr auto ContentsFilename = "contents.md";
 }
 
 DocumentationWindow::DocumentationWindow()
@@ -93,12 +92,6 @@ void DocumentationWindow::processBackground()
 
 namespace
 {
-    std::string readFile(std::filesystem::path const& path)
-    {
-        std::ifstream stream(path);
-        return {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
-    }
-
     void appendText(std::string& target, std::string const& text)
     {
         if (text.empty()) {
@@ -151,25 +144,9 @@ void DocumentationWindow::loadChapters()
 {
     _chapters.clear();
 
-    // The table of contents lists the chapters as links, grouped under part headings
-    auto contents = MarkdownParser::parse(readFile(Const::DocsPath / ContentsFilename));
-    std::string part;
-    for (auto const& contentsBlock : contents.blocks) {
-        if (auto heading = std::get_if<MarkdownHeading>(&contentsBlock)) {
-            part = MarkdownParser::toPlainText(heading->spans);
-            continue;
-        }
-        auto listItem = std::get_if<MarkdownListItem>(&contentsBlock);
-        if (!listItem) {
-            continue;
-        }
-        auto linkSpan = std::ranges::find_if(listItem->spans, [](auto const& span) { return span.link.has_value(); });
-        if (linkSpan == listItem->spans.end()) {
-            continue;
-        }
-
-        Chapter chapter{.filename = *linkSpan->link, .title = linkSpan->text, .part = part};
-        chapter.document = MarkdownParser::parse(readFile(Const::DocsPath / chapter.filename));
+    for (auto const& contentsChapter : DocumentationReader::getChapters()) {
+        Chapter chapter{.filename = contentsChapter.filename, .title = contentsChapter.title, .part = contentsChapter.part};
+        chapter.document = MarkdownParser::parse(DocumentationReader::readChapter(contentsChapter));
         chapter.sections.emplace_back(Section{.title = chapter.title});
         for (auto const& block : chapter.document.blocks) {
             auto heading = std::get_if<MarkdownHeading>(&block);

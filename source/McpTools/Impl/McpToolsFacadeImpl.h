@@ -7,6 +7,7 @@ class _McpToolsFacadeImpl : public _McpToolsFacade
 public:
     static void set(McpToolsFacade const& instance);
 
+    std::string getInstructions() override;
     std::vector<McpTool> getTools(McpToolContext& context) override;
     void process() override;
 };
