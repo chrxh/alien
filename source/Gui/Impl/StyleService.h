@@ -206,6 +206,8 @@ namespace Const
     extern ImColor BrowserLoginHintIconColor;
     extern ImColor BrowserPlaceholderTilePictureColor;
     extern ImColor BrowserPlaceholderTileBarColor;
+    extern ImColor BrowserHiddenGpuBarColor;
+    extern ImColor BrowserLoginHintFrameColor;
 }
 
 class StyleService
