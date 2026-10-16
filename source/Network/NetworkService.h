@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <mutex>
 #include <unordered_map>
 
 #include <Base/Cache.h>
@@ -45,6 +46,7 @@ public:
     bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
     bool logout();
     void refreshLogin();
+    void setUserInfo(UserInfo const& value);
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
@@ -79,6 +81,7 @@ private:
     std::atomic<bool> _countAsActive = true;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
+    std::mutex _userInfoMutex;
     UserInfo _userInfo;
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 

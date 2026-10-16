@@ -90,7 +90,14 @@ bool LoginController::shareGpuInfo() const
 
 void LoginController::setShareGpuInfo(bool value)
 {
+    if (_shareGpuInfo == value) {
+        return;
+    }
     _shareGpuInfo = value;
+    if (NetworkService::get().isLoggedIn()) {
+        NetworkService::get().setUserInfo(getUserInfo());
+        BrowserWindow::get().onRefresh();
+    }
 }
 
 bool LoginController::isRemember() const

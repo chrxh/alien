@@ -223,6 +223,8 @@ namespace Const
     ImColor BrowserLoginHintIconColor;
     ImColor BrowserPlaceholderTilePictureColor;
     ImColor BrowserPlaceholderTileBarColor;
+    ImColor BrowserHiddenGpuBarColor;
+    ImColor BrowserLoginHintFrameColor;
 }
 
 void StyleService::setup()
@@ -473,6 +475,8 @@ void StyleService::setupPalette() const
     BrowserLoginHintIconColor = AccentColor;
     BrowserPlaceholderTilePictureColor = themed(ImColor::HSV(0.583f, 0.300f, 0.090f), ImColor::HSV(0.583f, 0.060f, 0.880f));
     BrowserPlaceholderTileBarColor = LineSoftColor;
+    BrowserHiddenGpuBarColor = themed(ImColor::HSV(0.570f, 0.222f, 0.459f, 0.420f), ImColor::HSV(0.570f, 0.120f, 0.560f, 0.420f));
+    BrowserLoginHintFrameColor = themed(ImColor::HSV(0.0f, 0.0f, 0.0f), ImColor::HSV(0.574f, 0.120f, 0.740f));
 }
 
 void StyleService::setupColors(ImGuiStyle& style) const

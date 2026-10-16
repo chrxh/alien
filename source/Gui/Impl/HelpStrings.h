@@ -69,4 +69,8 @@ namespace Const
         "Each user account has its own private space. The simulations and genomes are only visible to the logged-in user.";
 
     std::string const BrowserLoginChipTooltip = "Log in or create a new account to upload your own simulations and genomes and to react to those of others.";
+
+    std::string const BrowserGpuHiddenLoggedOutTooltip = "The GPU models are only visible to logged-in users who share their own GPU model.";
+    std::string const BrowserGpuHiddenNotSharedTooltip = "The GPU models are only visible if you share your own GPU model.";
+    std::string const BrowserShareGpuTooltip = "Other users will be able to see in the browser window that you have the following graphics card: ";
 }

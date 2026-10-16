@@ -384,6 +384,15 @@ public:
     };
     static void Text(TextParameters const& parameters);
     static void Text(std::string const& text);
+
+    struct SmallIconParameters
+    {
+        MEMBER(SmallIconParameters, std::string, icon, "");
+        MEMBER(SmallIconParameters, RealVector2D, pos, RealVector2D());
+        MEMBER(SmallIconParameters, ImColor, color, Const::TextBaseColor);
+    };
+    static void SmallIcon(SmallIconParameters const& parameters);
+
     static void AddTextWithSubpixelAccuracy(
         ImDrawList* drawList,
         ImFont* font,

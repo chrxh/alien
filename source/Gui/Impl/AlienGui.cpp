@@ -2664,18 +2664,18 @@ void AlienGui::EndTabBar()
     ImGui::EndTabBar();
 }
 
+void AlienGui::SmallIcon(SmallIconParameters const& parameters)
+{
+    auto iconSize = ImGui::GetFontSize() * SmallIconScale;
+    auto iconPos = ImVec2(parameters._pos.x, parameters._pos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
+    ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), iconSize, iconPos, parameters._color, parameters._icon.c_str());
+}
+
 namespace
 {
     float calcSmallIconWidth(std::string const& icon)
     {
         return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
-    }
-
-    void drawSmallIcon(ImDrawList* drawList, ImVec2 const& textPos, std::string const& icon, ImColor const& color)
-    {
-        auto iconSize = ImGui::GetFontSize() * SmallIconScale;
-        auto iconPos = ImVec2(textPos.x, textPos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
-        drawList->AddText(ImGui::GetFont(), iconSize, iconPos, color, icon.c_str());
     }
 
     struct TabItemPadding
@@ -2748,7 +2748,7 @@ namespace
         if (!parameters._badge.empty()) {
             auto badgePosX = std::min(posX + nameSize.x, nameMaxX) + ImGui::GetStyle().ItemInnerSpacing.x;
             if (!parameters._badgeIcon.empty()) {
-                drawSmallIcon(drawList, ImVec2(badgePosX, textPosY), parameters._badgeIcon, parameters._badgeColor);
+                AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(parameters._badgeIcon).pos({badgePosX, textPosY}).color(parameters._badgeColor));
                 badgePosX += calcSmallIconWidth(parameters._badgeIcon) + ImGui::GetStyle().ItemInnerSpacing.x;
             }
             drawList->AddText(ImVec2(badgePosX, textPosY), parameters._badgeColor, parameters._badge.c_str());
@@ -2922,7 +2922,7 @@ void AlienGui::StatusBar(StatusBarParameters const& parameters)
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::Dummy(ImVec2(spaceWidth * 2 + iconWidth + ImGui::CalcTextSize(text.c_str()).x, ImGui::GetTextLineHeight()));
         auto drawList = ImGui::GetWindowDrawList();
-        drawSmallIcon(drawList, ImVec2(pos.x + spaceWidth, pos.y), ICON_FA_EXCLAMATION_TRIANGLE, Const::WarningColor);
+        AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(ICON_FA_EXCLAMATION_TRIANGLE).pos({pos.x + spaceWidth, pos.y}).color(Const::WarningColor));
         drawList->AddText(ImVec2(pos.x + spaceWidth * 2 + iconWidth, pos.y), Const::WarningColor, text.c_str());
         if (parameters._warningClickedFunc.has_value()) {
             if (ImGui::IsItemHovered()) {
