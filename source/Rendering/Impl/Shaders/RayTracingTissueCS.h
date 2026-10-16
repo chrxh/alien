@@ -150,7 +150,8 @@ Tissue getBlendedTissue(TissueBlend blend)
     return result;
 }
 
-// The two cells nearest to a position, the walls lie where both are equally far away
+// The two cells nearest to a position, the walls lie where both are equally far away. Connections and polygons contribute their cells
+// wherever they reach, so that cells far apart still show walls.
 struct Neighborhood
 {
     uint nearestSphere;
@@ -220,6 +221,9 @@ void addCell(inout Tissue tissue, Sphere sphere, vec2 position, float share)
 
 void addToNeighborhood(inout Neighborhood neighborhood, uint index, Sphere sphere, vec2 position)
 {
+    if (index == neighborhood.nearestSphere || index == neighborhood.secondNearestSphere) {
+        return;
+    }
     vec2 offset = position - sphere.centerRadius.xy;
     float distanceSquared = dot(offset, offset);
     if (distanceSquared < neighborhood.nearestDistanceSquared) {
@@ -351,6 +355,10 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood)
             addStrand(group, a, b, position);
             totalDensity += group.density;
             totalGradient += group.gradient;
+            if (group.density > 0.0) {
+                addToNeighborhood(neighborhood, indexA, a, position);
+                addToNeighborhood(neighborhood, indexB, b, position);
+            }
             addCell(group, a, position, 1.0 - getSolidSmoothing(a));
             addCell(group, b, position, 1.0 - getSolidSmoothing(b));
         } else if (kind == Kind_Triangle) {
@@ -364,6 +372,11 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood)
             addFill(group, a, b, c, position);
             totalDensity += group.density;
             totalGradient += group.gradient;
+            if (group.density > 0.0) {
+                addToNeighborhood(neighborhood, indexA, a, position);
+                addToNeighborhood(neighborhood, indexB, b, position);
+                addToNeighborhood(neighborhood, indexC, c, position);
+            }
             addCell(group, a, position, 1.0 - getSolidSmoothing(a));
             addCell(group, b, position, 1.0 - getSolidSmoothing(b));
             addCell(group, c, position, 1.0 - getSolidSmoothing(c));
