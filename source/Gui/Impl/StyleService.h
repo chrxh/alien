@@ -195,6 +195,8 @@ namespace Const
     extern ImColor BrowserResourceTextColor;
     extern ImColor const BrowserResourceLineColor;
     extern ImColor BrowserResourceNewTextColor;
+    extern ImColor BrowserNewBadgeColor;
+    extern ImColor BrowserNewBadgeBorderColor;
     extern ImColor BrowserResourceSymbolColor;
     extern ImColor BrowserOwnReactionFrameColor;
 

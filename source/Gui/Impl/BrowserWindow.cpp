@@ -91,7 +91,7 @@ void BrowserWindow::initIntern()
         _data->createTreeTOs(workspace);
     }
 
-    _data->lastSessionData.load(_data->getAllRawTOs());
+    _data->lastSessionData.load();
 
     EditSimulationDialog::get().setup();
 }
@@ -111,7 +111,7 @@ void BrowserWindow::shutdownIntern()
             NetworkResourceService::get().convertFolderNamesToSettings(workspace.collapsedFolderNames));
     }
     _galleryWidget->shutdown();
-    _data->lastSessionData.save();
+    _data->lastSessionData.save(_data->getAllRawTOs());
 }
 
 void BrowserWindow::onRefresh()
