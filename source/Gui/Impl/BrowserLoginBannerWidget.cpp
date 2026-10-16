@@ -48,7 +48,7 @@ void _BrowserLoginBannerWidget::process()
 
     auto loginButtonWidth = ImGui::CalcTextSize(ButtonText.c_str()).x + style.FramePadding.x * 2;
     auto dismissButtonWidth = ImGui::CalcTextSize(ICON_FA_TIMES).x + style.FramePadding.x * 2;
-    auto buttonsPosX = pos.x + width - scale(PaddingX) - loginButtonWidth - dismissButtonWidth - style.ItemSpacing.x;
+    auto dismissButtonPosX = pos.x + width - scale(PaddingX) - dismissButtonWidth;
 
     auto textPosY = pos.y + (height - ImGui::GetTextLineHeight()) / 2;
     auto textPosX = pos.x + scale(PaddingX) + scale(BarWidth);
@@ -58,16 +58,18 @@ void _BrowserLoginBannerWidget::process()
     drawList->AddText({textPosX, textPosY}, Const::TextBaseColor, Headline.c_str());
 
     textPosX += ImGui::CalcTextSize(Headline.c_str()).x + scale(TextSpacing);
-    if (textPosX + ImGui::CalcTextSize(SubText.c_str()).x < buttonsPosX - scale(TextSpacing)) {
+    auto subTextWidth = ImGui::CalcTextSize(SubText.c_str()).x;
+    if (textPosX + subTextWidth + scale(TextSpacing) + loginButtonWidth < dismissButtonPosX - style.ItemSpacing.x) {
         drawList->AddText({textPosX, textPosY}, Const::TextDecentColor, SubText.c_str());
+        textPosX += subTextWidth + scale(TextSpacing);
     }
 
-    ImGui::SetCursorScreenPos({buttonsPosX, pos.y + scale(PaddingY)});
+    ImGui::SetCursorScreenPos({textPosX, pos.y + scale(PaddingY)});
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ButtonText).highlighted(true).frame(true).transparentBackground(false))) {
         LoginDialog::get().open();
     }
 
-    ImGui::SameLine();
+    ImGui::SetCursorScreenPos({dismissButtonPosX, pos.y + scale(PaddingY)});
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_TIMES).tooltip("Hide the invitation until the next program start"))) {
         _dismissed = true;
     }
