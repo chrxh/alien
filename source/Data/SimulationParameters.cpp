@@ -147,7 +147,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      "source does not shine."),
                     ParameterSpec()
                         .name("Light range")
-                        .reference(FloatSpec().member(&SimulationParameters::sourceLightRange).min(1.0f).max(1000.0f).format("%.0f").logarithmic(true))
+                        .reference(FloatSpec().member(&SimulationParameters::sourceLightRange).min(1.0f).max(1000.0f).format("%.0f"))
                         .description("Distance from the area of the radiation source up to which its light reaches. The light fades out smoothly "
                                      "towards this distance."),
                     ParameterSpec()
