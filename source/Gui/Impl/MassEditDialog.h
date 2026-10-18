@@ -11,12 +11,12 @@
 #include "Definitions.h"
 #include "MutationRatesWidget.h"
 
-class MassOperationsDialog : public AlienDialog
+class MassEditDialog : public AlienDialog
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MassOperationsDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MassEditDialog);
 
 private:
-    MassOperationsDialog();
+    MassEditDialog();
 
     void initIntern() override;
     void shutdownIntern() override;
