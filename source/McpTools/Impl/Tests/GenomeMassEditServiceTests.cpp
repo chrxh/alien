@@ -13,7 +13,7 @@
 #include <Data/Descs.h>
 #include <Data/GenomeDesc.h>
 
-#include <Persister/Interface/GenomeMassEditService.h>
+#include <McpTools/Impl/GenomeMassEditService.h>
 
 namespace
 {

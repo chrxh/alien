@@ -1,4 +1,8 @@
 add_library(McpToolsImpl
+    GenomeMassEditService.cpp
+    GenomeMassEditService.h
+    JsonPath.cpp
+    JsonPath.h
     McpCreatorTools.cpp
     McpCreatorTools.h
     McpDocumentationTools.cpp

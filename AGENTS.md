@@ -75,6 +75,7 @@ Executables under `build-agent\Release\` (`build-ninja\Release\` for a manual bu
 BaseTests.exe              (<1s)
 DataTests.exe              (<1s)
 EngineInterfaceTests.exe   (<1s)
+McpToolsTests.exe          (<1s)
 NetworkTests.exe           (<1s)
 PersisterTests.exe         (~1.4s)
 EngineTests.exe            (~150s — needs the GPU; do not cancel)
@@ -94,7 +95,7 @@ the executables land directly in it:
 ```
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 cmake --build build -j32
-cd build && ./BaseTests && ./DataTests && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests
+cd build && ./BaseTests && ./DataTests && ./EngineInterfaceTests && ./McpToolsTests && ./NetworkTests && ./PersisterTests && ./EngineTests
 ```
 
 The setup workflow already runs the configure step. The GUI (`./alien`) needs an X11
@@ -144,6 +145,7 @@ source/Engine/Interface/Tests/    Engine interface unit tests
 source/Gui/Impl/                  Dear ImGui GUI, free of graphics API code
 source/Gui/Interface/             Abstract GUI API that manages the main window
 source/McpTools/Impl/             MCP tools operating on the simulation
+source/McpTools/Impl/Tests/       MCP tools unit tests
 source/McpTools/Interface/        Abstract MCP tools API
 source/Network/                   HTTP / cloud features, MCP server
 source/Network/Tests/             Network unit tests

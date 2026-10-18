@@ -8,8 +8,6 @@ add_library(PersisterInterface
     DownloadNetworkResourceResultData.h
     EditNetworkResourceRequestData.h
     EditNetworkResourceResultData.h
-    GenomeMassEditService.cpp
-    GenomeMassEditService.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
     GetPeakSimulationRequestData.h
@@ -19,8 +17,6 @@ add_library(PersisterInterface
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
     LoginRequestData.h
-    JsonPath.cpp
-    JsonPath.h
     JsonSerializationScope.h
     LoginResultData.h
     MoveNetworkResourceRequestData.h
