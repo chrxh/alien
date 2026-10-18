@@ -11,7 +11,7 @@
 
 #include "DescEditService.h"
 #include "GenomeDescAccessService.h"
-#include "MassOperationsService.h"
+#include "MassEditService.h"
 
 namespace
 {
@@ -432,7 +432,7 @@ ContentDesc GenomeDescEditService::createSeed(GenomeDesc const& genome, RealVect
                                  .separation(true)))},
         CreatureDesc(),
         genome);
-    MassOperationsService::get().randomizeLineageIds(result);
+    MassEditService::get().randomizeLineageIds(result);
     return result;
 }
 

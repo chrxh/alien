@@ -33,7 +33,7 @@ class ExitDialog;
 
 class AboutDialog;
 
-class MassOperationsDialog;
+class MassEditDialog;
 
 class LogWindow;
 

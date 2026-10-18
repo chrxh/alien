@@ -136,8 +136,8 @@ add_library(GuiImpl
     MainWindow.h
     MarkdownRenderer.cpp
     MarkdownRenderer.h
-    MassOperationsDialog.cpp
-    MassOperationsDialog.h
+    MassEditDialog.cpp
+    MassEditDialog.h
     McpController.cpp
     McpController.h
     McpSettingsDialog.cpp

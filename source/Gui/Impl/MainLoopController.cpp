@@ -41,7 +41,7 @@
 #include "InspectionController.h"
 #include "LogWindow.h"
 #include "LoginDialog.h"
-#include "MassOperationsDialog.h"
+#include "MassEditDialog.h"
 #include "McpWindow.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
@@ -616,7 +616,7 @@ void MainLoopController::processMenubar()
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassEditDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::EndMenu();
 

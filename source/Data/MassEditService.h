@@ -6,9 +6,9 @@
 
 #include "Descs.h"
 
-class MassOperationsService
+class MassEditService
 {
-    MAKE_SINGLETON(MassOperationsService);
+    MAKE_SINGLETON(MassEditService);
 
 public:
     void randomizeCellColors(ContentDesc& description, std::vector<int> const& colorCodes) const;
