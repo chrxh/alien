@@ -8,7 +8,7 @@
 #include <Data/Colors.h>
 #include <Data/Descs.h>
 #include <Data/GenomeDescAccessService.h>
-#include <Data/MassOperationsService.h>
+#include <Data/MassEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
@@ -276,28 +276,28 @@ void MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        MassOperationsService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
+        MassEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        MassOperationsService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
+        MassEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        MassOperationsService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
+        MassEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        MassOperationsService::get().randomizeAges(content, _minAge, _maxAge);
+        MassEditService::get().randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        MassOperationsService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
+        MassEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
     if (_randomizeLineageId) {
-        MassOperationsService::get().randomizeLineageIds(content);
+        MassEditService::get().randomizeLineageIds(content);
     }
     if (_randomizeGlow) {
-        MassOperationsService::get().randomizeGlow(content, _minGlow, _maxGlow);
+        MassEditService::get().randomizeGlow(content, _minGlow, _maxGlow);
     }
     if (_randomizeMutationRates) {
-        MassOperationsService::get().setMutationRates(content, _mutationRates);
+        MassEditService::get().setMutationRates(content, _mutationRates);
     }
 
     if (_restrictToSelectedCreatures) {

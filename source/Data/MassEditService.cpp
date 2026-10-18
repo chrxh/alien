@@ -1,4 +1,4 @@
-#include "MassOperationsService.h"
+#include "MassEditService.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -68,7 +68,7 @@ namespace
     }
 }
 
-void MassOperationsService::randomizeCellColors(ContentDesc& description, std::vector<int> const& colorCodes) const
+void MassEditService::randomizeCellColors(ContentDesc& description, std::vector<int> const& colorCodes) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -79,7 +79,7 @@ void MassOperationsService::randomizeCellColors(ContentDesc& description, std::v
     }
 }
 
-void MassOperationsService::randomizeGenomeColors(ContentDesc& description, std::vector<int> const& colorCodes) const
+void MassEditService::randomizeGenomeColors(ContentDesc& description, std::vector<int> const& colorCodes) const
 {
     for (auto& genome : description._genomes) {
         auto newColor = colorCodes.at(NumberGenerator::get().getRandomInt(toInt(colorCodes.size())));
@@ -91,7 +91,7 @@ void MassOperationsService::randomizeGenomeColors(ContentDesc& description, std:
     }
 }
 
-void MassOperationsService::randomizeEnergies(ContentDesc& description, float minEnergy, float maxEnergy) const
+void MassEditService::randomizeEnergies(ContentDesc& description, float minEnergy, float maxEnergy) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -112,7 +112,7 @@ void MassOperationsService::randomizeEnergies(ContentDesc& description, float mi
     }
 }
 
-void MassOperationsService::randomizeAges(ContentDesc& description, int minAge, int maxAge) const
+void MassEditService::randomizeAges(ContentDesc& description, int minAge, int maxAge) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -129,7 +129,7 @@ void MassOperationsService::randomizeAges(ContentDesc& description, int minAge, 
     }
 }
 
-void MassOperationsService::randomizeCountdowns(ContentDesc& description, int minValue, int maxValue) const
+void MassEditService::randomizeCountdowns(ContentDesc& description, int minValue, int maxValue) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -146,14 +146,14 @@ void MassOperationsService::randomizeCountdowns(ContentDesc& description, int mi
     }
 }
 
-void MassOperationsService::randomizeLineageIds(ContentDesc& description) const
+void MassEditService::randomizeLineageIds(ContentDesc& description) const
 {
     for (auto& creature : description._creatures) {
         creature._lineageId = toInt(NumberGenerator::get().createLineageId());
     }
 }
 
-void MassOperationsService::randomizeGlow(ContentDesc& description, float minGlow, float maxGlow) const
+void MassEditService::randomizeGlow(ContentDesc& description, float minGlow, float maxGlow) const
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
@@ -167,14 +167,14 @@ void MassOperationsService::randomizeGlow(ContentDesc& description, float minGlo
     }
 }
 
-void MassOperationsService::setMutationRates(ContentDesc& description, MutationRatesDesc const& mutationRates) const
+void MassEditService::setMutationRates(ContentDesc& description, MutationRatesDesc const& mutationRates) const
 {
     for (auto& genome : description._genomes) {
         genome._mutationRates = mutationRates;
     }
 }
 
-void MassOperationsService::setApplyMetaMutations(ContentDesc& description, bool value) const
+void MassEditService::setApplyMetaMutations(ContentDesc& description, bool value) const
 {
     for (auto& genome : description._genomes) {
         genome._applyMetaMutations = value;

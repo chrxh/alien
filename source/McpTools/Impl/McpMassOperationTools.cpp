@@ -13,7 +13,7 @@
 #include <Data/DescValidationService.h>
 #include <Data/EngineConstants.h>
 #include <Data/GenomeDesc.h>
-#include <Data/MassOperationsService.h>
+#include <Data/MassEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
@@ -132,7 +132,7 @@ McpToolResult McpMassOperationTools::applyMassOperations(boost::json::object con
     }
     auto content = restrictToSelection ? _SimulationFacade::get()->getSelectedSimulationData(true) : _SimulationFacade::get()->getSimulationData();
 
-    auto const& service = MassOperationsService::get();
+    auto const& service = MassEditService::get();
     std::vector<std::string> operations;
     if (objectColors) {
         service.randomizeCellColors(content, *objectColors);

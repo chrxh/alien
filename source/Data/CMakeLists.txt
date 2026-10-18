@@ -31,8 +31,8 @@ add_library(Data
     LocationAccessService.h
     LocationEditService.cpp
     LocationEditService.h
-    MassOperationsService.cpp
-    MassOperationsService.h
+    MassEditService.cpp
+    MassEditService.h
     MultiplierService.cpp
     MultiplierService.h
     NeuralNetWeight.h
