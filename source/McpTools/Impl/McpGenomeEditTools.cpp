@@ -237,7 +237,7 @@ namespace
         return McpSchema::object(
             {
                 {"level", McpSchema::enumeration("Level of the field", {"genome", "gene", "node"})},
-                {"where", McpSchema::jsonObject("For the level 'gene' a gene filter, for the level 'node' a node filter, as in edit_genomes")},
+                {"where", McpSchema::jsonObject("For the level 'gene' a gene filter, for the level 'node' a node filter, as in mass_edit_genomes")},
                 {"path", McpSchema::string("Path relative to the level, e.g. 'cellType.sensor.maxRange' for a node")},
             },
             {"level", "path"});
@@ -254,7 +254,7 @@ std::vector<McpTool> McpGenomeEditTools::getTools(McpToolContext& context)
 
     return {
         McpTool{
-            .name = "edit_genomes",
+            .name = "mass_edit_genomes",
             .description =
                 std::string("Edits the genomes of many creatures at once. 'where' selects the creatures and thereby their genomes, 'edits' lists the "
                             "changes, which are applied in order to each selected genome. Each edit works on a level: 'genome' (fields like "
@@ -287,15 +287,15 @@ std::vector<McpTool> McpGenomeEditTools::getTools(McpToolContext& context)
                     {"max_genomes", McpSchema::integer("Change nothing if more genomes would be modified", 0)},
                 },
                 {"edits"}),
-            .handler = [this](boost::json::object const& arguments) { return editGenomes(arguments); },
+            .handler = [this](boost::json::object const& arguments) { return massEditGenomes(arguments); },
         },
         McpTool{
             .name = "summarize_genomes",
             .description =
-                std::string("Summarizes the genomes of the creatures selected by 'where', which accepts the same filters as in edit_genomes: the "
+                std::string("Summarizes the genomes of the creatures selected by 'where', which accepts the same filters as in mass_edit_genomes: the "
                             "numbers of creatures, genomes and lineages, the largest lineages, the numbers of genes and nodes, the cell types and "
                             "colors of the nodes and statistics of the values at the given 'fields'. Each genome counts once, regardless of how many "
-                            "creatures share it. Useful to explore a population and to check a filter before edit_genomes. ")
+                            "creatures share it. Useful to explore a population and to check a filter before mass_edit_genomes. ")
                 + PathConventions,
             .inputSchema = McpSchema::object({
                 {"restrict_to_selection", restrictToSelectionSchema},
@@ -868,7 +868,7 @@ namespace
     }
 }
 
-McpToolResult McpGenomeEditTools::editGenomes(boost::json::object const& arguments) const
+McpToolResult McpGenomeEditTools::massEditGenomes(boost::json::object const& arguments) const
 {
     auto restrictToSelection = McpArguments::getOptionalBool(arguments, "restrict_to_selection").value_or(true);
     auto dryRun = McpArguments::getOptionalBool(arguments, "dry_run").value_or(false);

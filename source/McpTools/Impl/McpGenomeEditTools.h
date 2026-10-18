@@ -17,7 +17,7 @@ public:
     std::vector<McpTool> getTools(McpToolContext& context);
 
 private:
-    McpToolResult editGenomes(boost::json::object const& arguments) const;
+    McpToolResult massEditGenomes(boost::json::object const& arguments) const;
     McpToolResult summarizeGenomes(boost::json::object const& arguments) const;
 
     ContentDesc getContent(bool restrictToSelection) const;
