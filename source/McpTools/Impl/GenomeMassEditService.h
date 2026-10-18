@@ -24,6 +24,8 @@ struct GenomeGeneFilter
 {
     std::optional<std::vector<int>> indices;
     std::optional<std::vector<std::string>> names;
+    std::optional<int> minNodes;
+    std::optional<int> maxNodes;
     std::shared_ptr<GenomeNodeFilter const> hasNode;
     std::vector<JsonCondition> conditions;
 };
@@ -269,7 +271,9 @@ public:
     std::vector<std::string> const& getCellTypeNames() const;
 
     GenomeEditResult edit(ContentDesc& content, GenomeFilter const& filter, std::vector<GenomeEdit> const& edits) const;
-    GenomeSummary summarize(ContentDesc const& content, GenomeFilter const& filter, std::vector<GenomeFieldQuery> const& fields) const;
+    // Without countPerCreature each genome counts once in the statistics of genes, nodes and fields, with it each creature
+    GenomeSummary summarize(ContentDesc const& content, GenomeFilter const& filter, std::vector<GenomeFieldQuery> const& fields, bool countPerCreature = false)
+        const;
 
 private:
     GenomeMassEditService();

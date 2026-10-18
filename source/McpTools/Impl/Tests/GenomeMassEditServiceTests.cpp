@@ -165,6 +165,32 @@ TEST_F(GenomeMassEditServiceTests, scaleGeneStiffness)
     EXPECT_EQ(1, genes.at(1)._nodes.size());
 }
 
+TEST_F(GenomeMassEditServiceTests, geneFilterByNumberOfNodes)
+{
+    ContentDesc content;
+    addCreature(
+        content,
+        10,
+        GenomeDesc().id(1).genes({
+            GeneDesc().nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
+        }));
+
+    edit(
+        content,
+        {},
+        GenomeEdit{
+            .level = GenomeEditLevel::Gene,
+            .geneFilter = {.minNodes = 3, .maxNodes = 3},
+            .operation = GenomeSetOperation{.path = JsonPath("name"), .value = "leg"}});
+
+    auto const& genes = content.getGenomeRef(1)._genes;
+    EXPECT_NE("leg", genes.at(0)._name);
+    EXPECT_EQ("leg", genes.at(1)._name);
+    EXPECT_NE("leg", genes.at(2)._name);
+}
+
 TEST_F(GenomeMassEditServiceTests, copyGenomeSharedWithOtherCreatures)
 {
     auto genome = createGenome(1, {NodeDesc().color(2)});
@@ -556,6 +582,30 @@ TEST_F(GenomeMassEditServiceTests, summarizeFields)
     EXPECT_EQ(60, field.mean);
     EXPECT_EQ(2, field.frequentValues.size());
     EXPECT_EQ(2, summary.exampleCellIds.size());
+}
+
+TEST_F(GenomeMassEditServiceTests, summarizePerCreature)
+{
+    auto sharedGenome = createGenome(1, {NodeDesc().cellType(SensorGenomeDesc().maxRange(80))});
+    ContentDesc content;
+    addCreature(content, 10, sharedGenome);
+    addCreature(content, 20, sharedGenome);
+    addCreature(content, 30, sharedGenome);
+    addCreature(content, 40, createGenome(2, {NodeDesc().cellType(SensorGenomeDesc().maxRange(40)), NodeDesc()}));
+    std::vector<GenomeFieldQuery> fields = {GenomeFieldQuery{.level = GenomeEditLevel::Node, .path = JsonPath("cellType.sensor.maxRange")}};
+
+    auto perGenome = GenomeMassEditService::get().summarize(content, {}, fields);
+    EXPECT_EQ(2, perGenome.fields.front().numValues);
+    EXPECT_EQ(60, perGenome.fields.front().mean);
+    EXPECT_EQ(1.5, perGenome.nodesPerGenome.mean);
+
+    auto perCreature = GenomeMassEditService::get().summarize(content, {}, fields, true);
+    EXPECT_EQ(4, perCreature.numCreatures);
+    EXPECT_EQ(4, perCreature.fields.front().numValues);
+    EXPECT_EQ(70, perCreature.fields.front().mean);
+    EXPECT_EQ(1.25, perCreature.nodesPerGenome.mean);
+    ASSERT_FALSE(perCreature.fields.front().frequentValues.empty());
+    EXPECT_EQ(3, perCreature.fields.front().frequentValues.front().second);
 }
 
 TEST_F(GenomeMassEditServiceTests, invalidEdits)
