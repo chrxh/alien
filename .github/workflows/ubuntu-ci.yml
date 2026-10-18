@@ -72,6 +72,7 @@ jobs:
         ./BaseTests
         ./DataTests
         ./EngineInterfaceTests
+        ./McpToolsTests
         ./NetworkTests
         ./PersisterTests
 

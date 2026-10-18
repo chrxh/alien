@@ -1,4 +1,4 @@
-#include "MassOperationsDialog.h"
+#include "MassEditDialog.h"
 
 #include <imgui.h>
 
@@ -8,7 +8,7 @@
 #include <Data/Colors.h>
 #include <Data/Descs.h>
 #include <Data/GenomeDescAccessService.h>
-#include <Data/MassOperationsService.h>
+#include <Data/MassEditService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
@@ -24,7 +24,7 @@ namespace
     auto constexpr SettingsPrefix = "dialogs.mass operations.";
 }
 
-void MassOperationsDialog::initIntern()
+void MassEditDialog::initIntern()
 {
     auto& settings = GlobalSettings::get();
     auto const settingsPrefix = std::string(SettingsPrefix);
@@ -64,7 +64,7 @@ void MassOperationsDialog::initIntern()
     validateAndCorrect();
 }
 
-void MassOperationsDialog::shutdownIntern()
+void MassEditDialog::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
     auto const settingsPrefix = std::string(SettingsPrefix);
@@ -103,7 +103,7 @@ void MassOperationsDialog::shutdownIntern()
     settings.setValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
 }
 
-void MassOperationsDialog::processIntern()
+void MassEditDialog::processIntern()
 {
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
@@ -237,11 +237,11 @@ void MassOperationsDialog::processIntern()
     validateAndCorrect();
 }
 
-MassOperationsDialog::MassOperationsDialog()
+MassEditDialog::MassEditDialog()
     : AlienDialog("Mass operations")
 {}
 
-void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
+void MassEditDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
     float h, s, v;
     AlienGui::ConvertRGBtoHSV(cellColor, h, s, v);
@@ -253,7 +253,7 @@ void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, boo
     ImGui::PopStyleColor(4);
 }
 
-void MassOperationsDialog::onExecute()
+void MassEditDialog::onExecute()
 {
     auto timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
@@ -276,28 +276,28 @@ void MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        MassOperationsService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
+        MassEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        MassOperationsService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
+        MassEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        MassOperationsService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
+        MassEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        MassOperationsService::get().randomizeAges(content, _minAge, _maxAge);
+        MassEditService::get().randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        MassOperationsService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
+        MassEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
     if (_randomizeLineageId) {
-        MassOperationsService::get().randomizeLineageIds(content);
+        MassEditService::get().randomizeLineageIds(content);
     }
     if (_randomizeGlow) {
-        MassOperationsService::get().randomizeGlow(content, _minGlow, _maxGlow);
+        MassEditService::get().randomizeGlow(content, _minGlow, _maxGlow);
     }
     if (_randomizeMutationRates) {
-        MassOperationsService::get().setMutationRates(content, _mutationRates);
+        MassEditService::get().setMutationRates(content, _mutationRates);
     }
 
     if (_restrictToSelectedCreatures) {
@@ -310,7 +310,7 @@ void MassOperationsDialog::onExecute()
     }
 }
 
-bool MassOperationsDialog::isOkEnabled()
+bool MassEditDialog::isOkEnabled()
 {
     bool result = false;
     if (_randomizeCellColors) {
@@ -345,7 +345,7 @@ bool MassOperationsDialog::isOkEnabled()
     return result;
 }
 
-void MassOperationsDialog::validateAndCorrect()
+void MassEditDialog::validateAndCorrect()
 {
     _minAge = std::max(0, _minAge);
     _maxAge = std::max(0, _maxAge);
