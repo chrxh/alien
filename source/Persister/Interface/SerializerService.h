@@ -41,11 +41,15 @@ public:
     boost::json::value serializeToJson(EnergyDesc const& energy, bool omitDefaultValues = true) const;
     boost::json::value serializeToJson(CreatureDesc const& creature, bool omitDefaultValues = true) const;
     boost::json::value serializeToJson(GenomeDesc const& genome, bool omitDefaultValues = true) const;
+    boost::json::value serializeToJson(GeneDesc const& gene, bool omitDefaultValues = true) const;
+    boost::json::value serializeToJson(NodeDesc const& node, bool omitDefaultValues = true) const;
 
     void deserializeFromJson(ObjectDesc& object, boost::json::value const& json, bool patch = false) const;
     void deserializeFromJson(EnergyDesc& energy, boost::json::value const& json, bool patch = false) const;
     void deserializeFromJson(CreatureDesc& creature, boost::json::value const& json, bool patch = false) const;
     void deserializeFromJson(GenomeDesc& genome, boost::json::value const& json, bool patch = false) const;
+    void deserializeFromJson(GeneDesc& gene, boost::json::value const& json, bool patch = false) const;
+    void deserializeFromJson(NodeDesc& node, boost::json::value const& json, bool patch = false) const;
 
     boost::json::value getJsonFormatOfObject() const;
     boost::json::value getJsonFormatOfGenome() const;

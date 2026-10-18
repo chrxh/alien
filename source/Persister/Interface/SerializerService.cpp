@@ -2088,6 +2088,16 @@ boost::json::value SerializerService::serializeToJson(GenomeDesc const& genome, 
     return serializeDescToJson(genome, {.omitDefaultValues = omitDefaultValues});
 }
 
+boost::json::value SerializerService::serializeToJson(GeneDesc const& gene, bool omitDefaultValues) const
+{
+    return serializeDescToJson(gene, {.omitDefaultValues = omitDefaultValues});
+}
+
+boost::json::value SerializerService::serializeToJson(NodeDesc const& node, bool omitDefaultValues) const
+{
+    return serializeDescToJson(node, {.omitDefaultValues = omitDefaultValues});
+}
+
 namespace
 {
     template <typename T>
@@ -2117,6 +2127,16 @@ void SerializerService::deserializeFromJson(CreatureDesc& creature, boost::json:
 void SerializerService::deserializeFromJson(GenomeDesc& genome, boost::json::value const& json, bool patch) const
 {
     deserializeDescFromJson(genome, json, patch);
+}
+
+void SerializerService::deserializeFromJson(GeneDesc& gene, boost::json::value const& json, bool patch) const
+{
+    deserializeDescFromJson(gene, json, patch);
+}
+
+void SerializerService::deserializeFromJson(NodeDesc& node, boost::json::value const& json, bool patch) const
+{
+    deserializeDescFromJson(node, json, patch);
 }
 
 boost::json::value SerializerService::getJsonFormatOfObject() const
