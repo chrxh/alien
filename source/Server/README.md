@@ -103,7 +103,9 @@ At every full hour (UTC) the server stores the current count with its
 timestamp in the `active_simulator_counts` table. The count needs 25 minutes
 after a server start to cover all running clients, so no value is stored
 during that time. `/getactivesimulatorhistory` returns all stored values in
-chronological order:
+chronological order. It allows requests from any origin
+(`Access-Control-Allow-Origin: *`), so web pages elsewhere and local HTML files
+can read it:
 
 ```json
 [{"timestamp": "2026-10-18T14:00:00+00:00", "activeSimulators": 12}, ...]

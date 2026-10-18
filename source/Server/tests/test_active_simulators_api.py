@@ -89,6 +89,12 @@ def test_history_is_empty_without_snapshots(app_client):
     assert _history(app_client) == []
 
 
+def test_history_is_readable_from_other_origins(app_client):
+    resp = app_client.get("/getactivesimulatorhistory", headers={"Origin": "null"})
+
+    assert resp.headers["access-control-allow-origin"] == "*"
+
+
 def test_snapshots_store_the_active_simulator_count(app_client, monkeypatch):
     main = app_client.app_module
     _end_warm_up(main, monkeypatch)

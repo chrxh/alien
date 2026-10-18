@@ -335,7 +335,8 @@ def _as_utc(timestamp: datetime) -> datetime:
 
 
 @app.get("/getactivesimulatorhistory")
-def get_active_simulator_history():
+def get_active_simulator_history(response: Response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
     with Session(engine) as session:
         rows = session.execute(
             select(ActiveSimulatorCount.timestamp, ActiveSimulatorCount.count).order_by(ActiveSimulatorCount.timestamp)
