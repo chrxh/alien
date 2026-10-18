@@ -15,9 +15,8 @@
 
 #include <Persister/Interface/GenomeMassEditService.h>
 
-class GenomeMassEditServiceTests : public ::testing::Test
+namespace
 {
-protected:
     struct CreatureParameters
     {
         int numCells = 1;
@@ -25,7 +24,11 @@ protected:
         RealVector2D pos;
         int lineageId = 0;
     };
+}
 
+class GenomeMassEditServiceTests : public ::testing::Test
+{
+protected:
     void addCreature(ContentDesc& content, uint64_t creatureId, GenomeDesc const& genome, CreatureParameters const& parameters = {})
     {
         std::vector<ObjectDesc> cells;
