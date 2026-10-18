@@ -109,6 +109,8 @@ namespace
         return withDescription(
             McpSchema::object({
                 {"indices", McpSchema::array("Gene indices, 0 is the root gene", McpSchema::integer("Gene index", 0), 1)},
+                {"min_nodes", McpSchema::integer("Minimum number of nodes of a gene", 0)},
+                {"max_nodes", McpSchema::integer("Maximum number of nodes of a gene", 0)},
                 {"names", McpSchema::array("Gene names", McpSchema::string("Gene name"), 1)},
                 {"has_node", McpSchema::jsonObject("Genes containing a node that matches this node filter, see 'has_node' of the tool's 'where'")},
                 {"conditions", conditionsSchema("gene")},
@@ -294,13 +296,17 @@ std::vector<McpTool> McpGenomeEditTools::getTools(McpToolContext& context)
             .description =
                 std::string("Summarizes the genomes of the creatures selected by 'where', which accepts the same filters as in mass_edit_genomes: the "
                             "numbers of creatures, genomes and lineages, the largest lineages, the numbers of genes and nodes, the cell types and "
-                            "colors of the nodes and statistics of the values at the given 'fields'. Each genome counts once, regardless of how many "
-                            "creatures share it. Useful to explore a population and to check a filter before mass_edit_genomes. ")
+                            "colors of the nodes and statistics of the values at the given 'fields'. By default each genome counts once in these "
+                            "statistics, regardless of how many creatures share it, which describes the genetic variety. With count_per_creature each "
+                            "creature counts, which describes shares of the population. Useful to explore a population and to check a filter before "
+                            "mass_edit_genomes. ")
                 + PathConventions,
             .inputSchema = McpSchema::object({
                 {"restrict_to_selection", restrictToSelectionSchema},
                 {"where", whereSchema()},
                 {"fields", McpSchema::array("Fields whose values are evaluated", fieldSchema(), 1)},
+                {"count_per_creature",
+                 McpSchema::boolean("Count each creature instead of each genome in the statistics of genes, nodes and fields. Default: false")},
             }),
             .handler = [this](boost::json::object const& arguments) { return summarizeGenomes(arguments); },
         },
@@ -413,10 +419,12 @@ namespace
 
     GenomeGeneFilter parseGeneFilter(boost::json::object const& object)
     {
-        checkKeys(object, {"indices", "names", "has_node", "conditions"});
+        checkKeys(object, {"indices", "names", "min_nodes", "max_nodes", "has_node", "conditions"});
         GenomeGeneFilter result;
         result.indices = McpArguments::getOptionalInts(object, "indices", 1, 0);
         result.names = getOptionalStrings(object, "names");
+        result.minNodes = McpArguments::getOptionalInt(object, "min_nodes", 0);
+        result.maxNodes = McpArguments::getOptionalInt(object, "max_nodes", 0);
         if (object.contains("has_node")) {
             result.hasNode = std::make_shared<GenomeNodeFilter const>(parseNodeFilter(getObject(object, "has_node")));
         }
@@ -964,14 +972,16 @@ namespace
         return entries.empty() ? std::string("none") : boost::algorithm::join(entries, ", ");
     }
 
-    std::string formatSummary(GenomeSummary const& summary, std::vector<ParsedField> const& parsedFields, bool restrictToSelection)
+    std::string formatSummary(GenomeSummary const& summary, std::vector<ParsedField> const& parsedFields, bool restrictToSelection, bool countPerCreature)
     {
         auto text = std::format(
-            "{} with {} in {} match the filter in the {}. Each genome counts once in the following statistics.",
+            "{} with {} in {} match the filter in the {}. {}",
             formatCount(summary.numCreatures, "creature"),
             formatCount(summary.numGenomes, "genome"),
             formatCount(summary.numLineages, "lineage"),
-            restrictToSelection ? "selection" : "whole world");
+            restrictToSelection ? "selection" : "whole world",
+            countPerCreature ? "Each creature counts once in the following statistics, i.e. a genome counts as often as creatures share it."
+                             : "Each genome counts once in the following statistics.");
         if (summary.numGenomes == 0) {
             return text;
         }
@@ -1002,6 +1012,7 @@ namespace
 McpToolResult McpGenomeEditTools::summarizeGenomes(boost::json::object const& arguments) const
 {
     auto restrictToSelection = McpArguments::getOptionalBool(arguments, "restrict_to_selection").value_or(true);
+    auto countPerCreature = McpArguments::getOptionalBool(arguments, "count_per_creature").value_or(false);
     auto filter = withContext("where", [&] { return parseFilter(arguments); });
     std::vector<ParsedField> parsedFields;
     if (arguments.contains("fields")) {
@@ -1016,8 +1027,8 @@ McpToolResult McpGenomeEditTools::summarizeGenomes(boost::json::object const& ar
     }
 
     auto content = getContent(restrictToSelection);
-    auto summary = GenomeMassEditService::get().summarize(content, filter, fields);
-    return {.text = formatSummary(summary, parsedFields, restrictToSelection)};
+    auto summary = GenomeMassEditService::get().summarize(content, filter, fields, countPerCreature);
+    return {.text = formatSummary(summary, parsedFields, restrictToSelection, countPerCreature)};
 }
 
 ContentDesc McpGenomeEditTools::getContent(bool restrictToSelection) const

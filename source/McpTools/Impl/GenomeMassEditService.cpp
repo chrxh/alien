@@ -235,6 +235,10 @@ namespace
         if (!isAllowed(filter.indices, geneIndex) || !isAllowed(filter.names, gene._name)) {
             return false;
         }
+        auto numNodes = toInt(gene._nodes.size());
+        if ((filter.minNodes && numNodes < *filter.minNodes) || (filter.maxNodes && numNodes > *filter.maxNodes)) {
+            return false;
+        }
         if (filter.hasNode && !hasMatchingNode(*filter.hasNode, gene, geneIndex, cellTypeNames)) {
             return false;
         }
@@ -974,17 +978,19 @@ GenomeEditResult GenomeMassEditService::edit(ContentDesc& content, GenomeFilter 
 
 namespace
 {
-    GenomeCountStatistics calcCountStatistics(std::vector<int> const& counts)
+    GenomeCountStatistics calcCountStatistics(std::vector<int> const& counts, std::vector<int> const& weights)
     {
         if (counts.empty()) {
             return {};
         }
         auto [min, max] = std::ranges::minmax(counts);
         auto sum = 0.0;
-        for (auto count : counts) {
-            sum += count;
+        auto sumOfWeights = 0.0;
+        for (auto const& [count, weight] : std::views::zip(counts, weights)) {
+            sum += count * weight;
+            sumOfWeights += weight;
         }
-        return {.min = min, .max = max, .mean = sum / toDouble(counts.size())};
+        return {.min = min, .max = max, .mean = sum / sumOfWeights};
     }
 
     template <typename Key>
@@ -998,22 +1004,22 @@ namespace
     class FieldStatisticsAccumulator
     {
     public:
-        void add(boost::json::value const& value)
+        void add(boost::json::value const& value, int weight)
         {
-            ++_result.numValues;
+            _result.numValues += weight;
             if (value.is_number()) {
                 auto number = value.to_number<double>();
                 _result.min = _result.numNumbers == 0 ? number : std::min(_result.min, number);
                 _result.max = _result.numNumbers == 0 ? number : std::max(_result.max, number);
-                _sum += number;
-                ++_result.numNumbers;
+                _sum += number * weight;
+                _result.numNumbers += weight;
             }
             if (_hasManyDistinctValues) {
                 return;
             }
             auto key = boost::json::serialize(value);
             auto [iter, inserted] = _frequencies.try_emplace(key, value, 0);
-            ++iter->second.second;
+            iter->second.second += weight;
             if (_frequencies.size() > MaxDistinctValues) {
                 _hasManyDistinctValues = true;
                 _frequencies.clear();
@@ -1048,12 +1054,13 @@ namespace
     void collectFieldValues(
         GenomeFieldQuery const& field,
         GenomeDesc const& genome,
+        int weight,
         FieldStatisticsAccumulator& accumulator,
         std::vector<std::string> const& cellTypeNames)
     {
         auto addValues = [&](boost::json::value const& json) {
             for (auto value : field.path.find(json)) {
-                accumulator.add(*value);
+                accumulator.add(*value, weight);
             }
         };
         switch (field.level) {
@@ -1102,7 +1109,11 @@ namespace
     }
 }
 
-GenomeSummary GenomeMassEditService::summarize(ContentDesc const& content, GenomeFilter const& filter, std::vector<GenomeFieldQuery> const& fields) const
+GenomeSummary GenomeMassEditService::summarize(
+    ContentDesc const& content,
+    GenomeFilter const& filter,
+    std::vector<GenomeFieldQuery> const& fields,
+    bool countPerCreature) const
 {
     checkFilter(filter);
     for (auto const& [fieldIndex, field] : fields | std::views::enumerate) {
@@ -1122,10 +1133,12 @@ GenomeSummary GenomeMassEditService::summarize(ContentDesc const& content, Genom
     std::map<int, int> numNodesByColor;
     std::vector<int> numGenesPerGenome;
     std::vector<int> numNodesPerGenome;
+    std::vector<int> weights;
     std::vector<FieldStatisticsAccumulator> accumulators(fields.size());
     std::vector<uint64_t> exampleCreatureIds;
     for (auto const& selectedGenome : selectedGenomes) {
-        result.numCreatures += toInt(selectedGenome.creatureIndices.size());
+        auto numCreatures = toInt(selectedGenome.creatureIndices.size());
+        result.numCreatures += numCreatures;
         for (auto creatureIndex : selectedGenome.creatureIndices) {
             ++numCreaturesByLineage[content._creatures.at(creatureIndex)._lineageId];
         }
@@ -1133,20 +1146,22 @@ GenomeSummary GenomeMassEditService::summarize(ContentDesc const& content, Genom
             exampleCreatureIds.emplace_back(content._creatures.at(selectedGenome.creatureIndices.front())._id);
         }
 
+        auto weight = countPerCreature ? numCreatures : 1;
         auto const& genome = content._genomes.at(selectedGenome.genomeIndex);
         auto numNodes = 0;
         for (auto const& gene : genome._genes) {
             for (auto const& node : gene._nodes) {
-                ++numNodesByCellType[_cellTypeNames.at(node._cellType.index())];
-                ++numNodesByColor[node._color];
+                numNodesByCellType[_cellTypeNames.at(node._cellType.index())] += weight;
+                numNodesByColor[node._color] += weight;
                 ++numNodes;
             }
         }
         numGenesPerGenome.emplace_back(toInt(genome._genes.size()));
         numNodesPerGenome.emplace_back(numNodes);
+        weights.emplace_back(weight);
 
         for (auto&& [field, accumulator] : std::views::zip(fields, accumulators)) {
-            collectFieldValues(field, genome, accumulator, _cellTypeNames);
+            collectFieldValues(field, genome, weight, accumulator, _cellTypeNames);
         }
     }
 
@@ -1155,8 +1170,8 @@ GenomeSummary GenomeMassEditService::summarize(ContentDesc const& content, Genom
     if (result.largestLineages.size() > MaxLargestLineages) {
         result.largestLineages.resize(MaxLargestLineages);
     }
-    result.genesPerGenome = calcCountStatistics(numGenesPerGenome);
-    result.nodesPerGenome = calcCountStatistics(numNodesPerGenome);
+    result.genesPerGenome = calcCountStatistics(numGenesPerGenome, weights);
+    result.nodesPerGenome = calcCountStatistics(numNodesPerGenome, weights);
     result.numNodesByCellType = sortByFrequency(numNodesByCellType);
     result.numNodesByColor = sortByFrequency(numNodesByColor);
     for (auto const& accumulator : accumulators) {
@@ -1236,6 +1251,7 @@ void GenomeMassEditService::checkFilter(GenomeFilter const& filter) const
 
 void GenomeMassEditService::checkGeneFilter(GenomeGeneFilter const& filter) const
 {
+    checkRange(filter.minNodes, filter.maxNodes, "number of nodes");
     if (filter.hasNode) {
         checkNodeFilter(*filter.hasNode);
     }
