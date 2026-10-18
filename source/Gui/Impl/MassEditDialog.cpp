@@ -1,4 +1,4 @@
-#include "MassOperationsDialog.h"
+#include "MassEditDialog.h"
 
 #include <imgui.h>
 
@@ -24,7 +24,7 @@ namespace
     auto constexpr SettingsPrefix = "dialogs.mass operations.";
 }
 
-void MassOperationsDialog::initIntern()
+void MassEditDialog::initIntern()
 {
     auto& settings = GlobalSettings::get();
     auto const settingsPrefix = std::string(SettingsPrefix);
@@ -64,7 +64,7 @@ void MassOperationsDialog::initIntern()
     validateAndCorrect();
 }
 
-void MassOperationsDialog::shutdownIntern()
+void MassEditDialog::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
     auto const settingsPrefix = std::string(SettingsPrefix);
@@ -103,7 +103,7 @@ void MassOperationsDialog::shutdownIntern()
     settings.setValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
 }
 
-void MassOperationsDialog::processIntern()
+void MassEditDialog::processIntern()
 {
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
@@ -237,11 +237,11 @@ void MassOperationsDialog::processIntern()
     validateAndCorrect();
 }
 
-MassOperationsDialog::MassOperationsDialog()
+MassEditDialog::MassEditDialog()
     : AlienDialog("Mass operations")
 {}
 
-void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
+void MassEditDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
     float h, s, v;
     AlienGui::ConvertRGBtoHSV(cellColor, h, s, v);
@@ -253,7 +253,7 @@ void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, boo
     ImGui::PopStyleColor(4);
 }
 
-void MassOperationsDialog::onExecute()
+void MassEditDialog::onExecute()
 {
     auto timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
@@ -310,7 +310,7 @@ void MassOperationsDialog::onExecute()
     }
 }
 
-bool MassOperationsDialog::isOkEnabled()
+bool MassEditDialog::isOkEnabled()
 {
     bool result = false;
     if (_randomizeCellColors) {
@@ -345,7 +345,7 @@ bool MassOperationsDialog::isOkEnabled()
     return result;
 }
 
-void MassOperationsDialog::validateAndCorrect()
+void MassEditDialog::validateAndCorrect()
 {
     _minAge = std::max(0, _minAge);
     _maxAge = std::max(0, _maxAge);

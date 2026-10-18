@@ -54,7 +54,7 @@
 #include "LoginDialog.h"
 #include "MainLoopController.h"
 #include "MainLoopEntityController.h"
-#include "MassOperationsDialog.h"
+#include "MassEditDialog.h"
 #include "McpController.h"
 #include "McpSettingsDialog.h"
 #include "McpWindow.h"
@@ -126,7 +126,7 @@ _MainWindow::_MainWindow()
     LocationController::get().setup();
     MainLoopController::get().setup();
     ExitDialog::get().setup();
-    MassOperationsDialog::get().setup();
+    MassEditDialog::get().setup();
     DocumentationWindow::get().setup();
     NewSimulationDialog::get().setup();
     BrowserController::get().setup();
