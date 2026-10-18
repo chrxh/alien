@@ -1,0 +1,1826 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Active Simulators</title>
+<style>
+    :root {
+        color-scheme: light;
+        --page: #f9f9f7;
+        --surface: #fcfcfb;
+        --surface-raised: #ffffff;
+        --text-primary: #0b0b0b;
+        --text-secondary: #52514e;
+        --text-muted: #898781;
+        --grid: #e1e0d9;
+        --baseline: #c3c2b7;
+        --border: rgba(11, 11, 11, 0.10);
+        --wash: rgba(11, 11, 11, 0.05);
+        --series-hourly: #2a78d6;
+        --series-average: #eb6834;
+        --area-opacity: 0.10;
+        --band-opacity: 0.22;
+        --good: #006300;
+        --critical: #d03b3b;
+        --warning: #c98500;
+        --selected-background: #0b0b0b;
+        --selected-text: #ffffff;
+        --tooltip-shadow: 0 1px 2px rgba(11, 11, 11, 0.06), 0 8px 24px rgba(11, 11, 11, 0.10);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+            color-scheme: dark;
+            --page: #0d0d0d;
+            --surface: #1a1a19;
+            --surface-raised: #242422;
+            --text-primary: #ffffff;
+            --text-secondary: #c3c2b7;
+            --text-muted: #898781;
+            --grid: #2c2c2a;
+            --baseline: #383835;
+            --border: rgba(255, 255, 255, 0.10);
+            --wash: rgba(255, 255, 255, 0.06);
+            --series-hourly: #3987e5;
+            --series-average: #d95926;
+            --area-opacity: 0.16;
+            --band-opacity: 0.30;
+            --good: #0ca30c;
+            --critical: #e66767;
+            --warning: #fab219;
+            --selected-background: #ffffff;
+            --selected-text: #0b0b0b;
+            --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
+    }
+
+    :root[data-theme="dark"] {
+        color-scheme: dark;
+        --page: #0d0d0d;
+        --surface: #1a1a19;
+        --surface-raised: #242422;
+        --text-primary: #ffffff;
+        --text-secondary: #c3c2b7;
+        --text-muted: #898781;
+        --grid: #2c2c2a;
+        --baseline: #383835;
+        --border: rgba(255, 255, 255, 0.10);
+        --wash: rgba(255, 255, 255, 0.06);
+        --series-hourly: #3987e5;
+        --series-average: #d95926;
+        --area-opacity: 0.16;
+        --band-opacity: 0.30;
+        --good: #0ca30c;
+        --critical: #e66767;
+        --warning: #fab219;
+        --selected-background: #ffffff;
+        --selected-text: #0b0b0b;
+        --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+
+    body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text-primary);
+        font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 32px 24px 48px;
+    }
+
+    button {
+        font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+        outline: 2px solid var(--series-hourly);
+        outline-offset: 2px;
+    }
+
+    .header {
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        font-size: 26px;
+        line-height: 1.2;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .badge {
+        padding: 2px 9px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--wash);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0;
+    }
+
+    .subtitle {
+        max-width: 64ch;
+        margin: 6px 0 0;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .segmented {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+    }
+
+    .segmented button {
+        padding: 5px 12px;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 550;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .segmented button:hover {
+        background: var(--wash);
+        color: var(--text-primary);
+    }
+
+    .segmented button[aria-pressed="true"] {
+        background: var(--selected-background);
+        color: var(--selected-text);
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .button {
+        padding: 6px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 550;
+        cursor: pointer;
+    }
+
+    .button:hover {
+        background: var(--wash);
+    }
+
+    .button:disabled {
+        opacity: 0.45;
+        cursor: default;
+    }
+
+    .button.primary {
+        border-color: transparent;
+        background: var(--selected-background);
+        color: var(--selected-text);
+    }
+
+    .kpis {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .tile {
+        min-width: 0;
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+    }
+
+    .tile-label {
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 550;
+    }
+
+    .tile-value {
+        margin-top: 4px;
+        font-size: 30px;
+        line-height: 1.2;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .tile-hero .tile-value {
+        font-size: 48px;
+        line-height: 1.05;
+    }
+
+    .tile-note {
+        margin-top: 6px;
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    .delta {
+        font-weight: 600;
+    }
+
+    .delta.up {
+        color: var(--good);
+    }
+
+    .delta.down {
+        color: var(--critical);
+    }
+
+    .warning-icon {
+        color: var(--warning);
+        font-weight: 700;
+    }
+
+    .card {
+        margin: 0;
+        padding: 16px 20px 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface);
+    }
+
+    .card-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px 16px;
+        margin-bottom: 6px;
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        margin-left: -6px;
+    }
+
+    .legend button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 3px 6px;
+        border: 0;
+        border-radius: 6px;
+        background: none;
+        color: var(--text-secondary);
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .legend button:hover {
+        background: var(--wash);
+    }
+
+    .legend button[aria-pressed="false"] {
+        opacity: 0.4;
+    }
+
+    .key {
+        display: inline-block;
+        width: 16px;
+        border-top: 2px solid;
+        border-radius: 1px;
+    }
+
+    .key-hourly {
+        border-color: var(--series-hourly);
+    }
+
+    .key-average {
+        border-color: var(--series-average);
+    }
+
+    .key-band {
+        height: 10px;
+        border: 0;
+        border-radius: 2px;
+        background: color-mix(in srgb, var(--series-hourly) calc(var(--band-opacity) * 100%), transparent);
+    }
+
+    .card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 14px;
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    .text-button {
+        padding: 3px 6px;
+        border: 0;
+        border-radius: 6px;
+        background: none;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 550;
+        text-decoration: underline;
+        text-decoration-color: var(--baseline);
+        text-underline-offset: 3px;
+        cursor: pointer;
+    }
+
+    .text-button:hover {
+        background: var(--wash);
+        color: var(--text-primary);
+    }
+
+    .chart {
+        position: relative;
+        min-height: 320px;
+        border-radius: 6px;
+        touch-action: pan-y;
+    }
+
+    .chart:focus-visible {
+        outline: 2px solid var(--series-hourly);
+        outline-offset: 4px;
+    }
+
+    .chart.refreshing .chart-canvas {
+        opacity: 0.55;
+    }
+
+    .chart-canvas svg {
+        display: block;
+    }
+
+    .grid-line {
+        stroke: var(--grid);
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    .baseline,
+    .tick {
+        stroke: var(--baseline);
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    .axis-label {
+        fill: var(--text-muted);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .area-hourly {
+        fill: var(--series-hourly);
+        fill-opacity: var(--area-opacity);
+    }
+
+    .line-hourly,
+    .line-average {
+        fill: none;
+        stroke-width: 2;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .line-hourly {
+        stroke: var(--series-hourly);
+    }
+
+    .line-hourly.dense {
+        stroke-width: 1.25;
+    }
+
+    .band-hourly {
+        fill: var(--series-hourly);
+        fill-opacity: var(--band-opacity);
+    }
+
+    .line-average {
+        stroke: var(--series-average);
+    }
+
+    .point-hourly {
+        fill: var(--series-hourly);
+    }
+
+    .dot {
+        stroke: var(--surface);
+        stroke-width: 2;
+    }
+
+    .dot-hourly {
+        fill: var(--series-hourly);
+    }
+
+    .dot-average {
+        fill: var(--series-average);
+    }
+
+    .end-label {
+        fill: var(--text-primary);
+        font-size: 12px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .crosshair {
+        stroke: var(--text-muted);
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    .tooltip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        min-width: 168px;
+        padding: 8px 12px 9px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-raised);
+        box-shadow: var(--tooltip-shadow);
+        font-size: 13px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 80ms linear;
+    }
+
+    .tooltip.visible {
+        opacity: 1;
+    }
+
+    .tooltip-time {
+        margin-bottom: 4px;
+        color: var(--text-secondary);
+    }
+
+    .tooltip-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        line-height: 1.6;
+    }
+
+    .tooltip-row strong {
+        min-width: 3ch;
+        font-weight: 650;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tooltip-row span:last-child {
+        color: var(--text-secondary);
+    }
+
+    .state {
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 24px 8px;
+        color: var(--text-secondary);
+        text-align: center;
+    }
+
+    .state-title {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .state-text {
+        max-width: 60ch;
+        font-size: 14px;
+    }
+
+    .state code {
+        max-width: 100%;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: var(--wash);
+        color: var(--text-primary);
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+        overflow-wrap: anywhere;
+    }
+
+    .state-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 6px;
+    }
+
+    .table-wrap {
+        max-height: 360px;
+        margin-top: 12px;
+        overflow: auto;
+        border-top: 1px solid var(--grid);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--grid);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    th {
+        position: sticky;
+        top: 0;
+        background: var(--surface);
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .caption {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 4px 16px;
+        margin-top: 10px;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .caption span {
+        overflow-wrap: anywhere;
+    }
+
+    .caption a {
+        color: inherit;
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    body.dragging::after {
+        content: "Drop the JSON file to show its history";
+        position: fixed;
+        inset: 12px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--series-hourly);
+        border-radius: 16px;
+        background: color-mix(in srgb, var(--page) 88%, transparent);
+        font-size: 16px;
+        font-weight: 600;
+        pointer-events: none;
+    }
+
+    @media (max-width: 760px) {
+        .kpis {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 600px) {
+        main {
+            padding: 20px 16px 32px;
+        }
+
+        h1 {
+            font-size: 22px;
+        }
+
+        .card {
+            padding: 14px 12px 12px;
+        }
+
+        .chart,
+        .state {
+            min-height: 260px;
+        }
+
+        .tile {
+            padding: 14px;
+        }
+
+        .tile-value {
+            font-size: 26px;
+        }
+
+        .tile-hero .tile-value {
+            font-size: 40px;
+        }
+    }
+</style>
+</head>
+<body>
+<main>
+    <header class="header">
+        <h1>Active simulators <span class="badge" id="demo-badge" hidden>Demo data</span></h1>
+        <p class="subtitle">Running ALIEN instances counted by the server, recorded at every full hour.</p>
+    </header>
+
+    <div class="toolbar">
+        <div class="segmented" id="ranges" role="group" aria-label="Time range"></div>
+        <div class="actions">
+            <button class="button" id="reload" type="button">Reload</button>
+            <button class="button" id="download" type="button" disabled>Download CSV</button>
+        </div>
+    </div>
+
+    <section class="kpis" aria-label="Key figures">
+        <div class="tile tile-hero">
+            <div class="tile-label">Latest</div>
+            <div class="tile-value" id="latest-value">–</div>
+            <div class="tile-note" id="latest-note">&nbsp;</div>
+        </div>
+        <div class="tile">
+            <div class="tile-label">Peak</div>
+            <div class="tile-value" id="peak-value">–</div>
+            <div class="tile-note" id="peak-note">&nbsp;</div>
+        </div>
+        <div class="tile">
+            <div class="tile-label">Average</div>
+            <div class="tile-value" id="average-value">–</div>
+            <div class="tile-note" id="average-note">&nbsp;</div>
+        </div>
+        <div class="tile">
+            <div class="tile-label">Coverage</div>
+            <div class="tile-value" id="coverage-value">–</div>
+            <div class="tile-note" id="coverage-note">&nbsp;</div>
+        </div>
+    </section>
+
+    <figure class="card">
+        <div class="card-head">
+            <div class="legend" id="legend">
+                <button type="button" data-series="hourly" aria-pressed="true"><span class="key key-hourly" id="hourly-key"></span><span id="hourly-label">Hourly count</span></button>
+                <button type="button" data-series="average" aria-pressed="true"><span class="key key-average"></span>24-hour average</button>
+            </div>
+            <div class="card-meta">
+                <span id="period"></span>
+                <button class="text-button" id="table-toggle" type="button" aria-expanded="false" aria-controls="table-wrap">Show table</button>
+            </div>
+        </div>
+        <div class="chart" id="chart" tabindex="0" aria-describedby="chart-help">
+            <div class="chart-canvas" id="chart-canvas"></div>
+            <div class="tooltip" id="tooltip" aria-hidden="true">
+                <div class="tooltip-time" id="tooltip-time"></div>
+                <div class="tooltip-row" id="tooltip-hourly-row"><span class="key key-hourly"></span><strong id="tooltip-hourly"></strong><span>Hourly count</span></div>
+                <div class="tooltip-row" id="tooltip-range-row"><span class="key key-band"></span><strong id="tooltip-range"></strong><span>Daily range</span></div>
+                <div class="tooltip-row" id="tooltip-average-row"><span class="key key-average"></span><strong id="tooltip-average"></strong><span>24-hour average</span></div>
+            </div>
+            <div class="state" id="state" hidden>
+                <div class="state-title" id="state-title"></div>
+                <div class="state-text" id="state-text"></div>
+                <code id="state-code"></code>
+                <div class="state-actions" id="state-actions"></div>
+            </div>
+        </div>
+        <p class="sr-only" id="chart-help">Arrow keys step through the hours, Shift with an arrow key jumps a day, Home and End go to the first and the last value.</p>
+        <div class="sr-only" id="live" aria-live="polite"></div>
+        <div class="table-wrap" id="table-wrap" hidden>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Time</th>
+                        <th scope="col" class="num">Hourly count</th>
+                        <th scope="col" class="num">24-hour average</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+        <figcaption class="caption">
+            <span id="time-zone"></span>
+            <span id="source"></span>
+        </figcaption>
+    </figure>
+
+    <input type="file" id="file-input" accept=".json,application/json" hidden>
+    <noscript><p>This page needs JavaScript to show the history.</p></noscript>
+</main>
+
+<script>
+"use strict";
+
+const DEFAULT_SOURCE = "https://api.alien-project.org/getactivesimulatorhistory";
+const LOCALE = "en-GB";
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+const MAX_SAMPLE_GAP = 1.5 * HOUR;
+const BAND_MIN_SPAN = 10 * DAY;
+const AVERAGE_WINDOW = DAY;
+const AVERAGE_MIN_SAMPLES = 18;
+const STALE_AFTER = 2 * HOUR;
+const REFRESH_AFTER_FULL_HOUR = 90 * 1000;
+const RETRY_DELAY = 10 * 60 * 1000;
+const RANGE_STORAGE_KEY = "alien.activeSimulatorHistory.range";
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
+const RANGES = [
+    { id: "24h", label: "24 h", period: "24 hours", duration: DAY },
+    { id: "7d", label: "7 d", period: "7 days", duration: 7 * DAY },
+    { id: "30d", label: "30 d", period: "30 days", duration: 30 * DAY },
+    { id: "90d", label: "90 d", period: "90 days", duration: 90 * DAY },
+    { id: "all", label: "All", period: null, duration: Infinity },
+];
+const DEFAULT_RANGE = "30d";
+
+const TICK_STEPS = [
+    { unit: "hour", count: 1 },
+    { unit: "hour", count: 3 },
+    { unit: "hour", count: 6 },
+    { unit: "hour", count: 12 },
+    { unit: "day", count: 1 },
+    { unit: "day", count: 2 },
+    { unit: "week", count: 1 },
+    { unit: "week", count: 2 },
+    { unit: "month", count: 1 },
+    { unit: "month", count: 3 },
+    { unit: "month", count: 6 },
+    { unit: "year", count: 1 },
+];
+const UNIT_LENGTHS = { hour: HOUR, day: DAY, week: 7 * DAY, month: 30.44 * DAY, year: 365.25 * DAY };
+
+const integerFormat = new Intl.NumberFormat(LOCALE);
+const decimalFormat = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const coverageFormat = new Intl.NumberFormat(LOCALE, { style: "percent", maximumFractionDigits: 1 });
+const changeFormat = new Intl.NumberFormat(LOCALE, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" });
+const fullTimeFormat = new Intl.DateTimeFormat(LOCALE, { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const shortTimeFormat = new Intl.DateTimeFormat(LOCALE, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const clockFormat = new Intl.DateTimeFormat(LOCALE, { hour: "2-digit", minute: "2-digit" });
+const weekdayFormat = new Intl.DateTimeFormat(LOCALE, { weekday: "short", day: "numeric" });
+const dayFormat = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short" });
+const monthFormat = new Intl.DateTimeFormat(LOCALE, { month: "short" });
+const yearFormat = new Intl.DateTimeFormat(LOCALE, { year: "numeric" });
+const periodFormat = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short", year: "numeric" });
+const shortPeriodFormat = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+const els = {
+    demoBadge: document.getElementById("demo-badge"),
+    ranges: document.getElementById("ranges"),
+    reload: document.getElementById("reload"),
+    download: document.getElementById("download"),
+    latestValue: document.getElementById("latest-value"),
+    latestNote: document.getElementById("latest-note"),
+    peakValue: document.getElementById("peak-value"),
+    peakNote: document.getElementById("peak-note"),
+    averageValue: document.getElementById("average-value"),
+    averageNote: document.getElementById("average-note"),
+    coverageValue: document.getElementById("coverage-value"),
+    coverageNote: document.getElementById("coverage-note"),
+    legend: document.getElementById("legend"),
+    hourlyKey: document.getElementById("hourly-key"),
+    hourlyLabel: document.getElementById("hourly-label"),
+    period: document.getElementById("period"),
+    tableToggle: document.getElementById("table-toggle"),
+    chart: document.getElementById("chart"),
+    chartCanvas: document.getElementById("chart-canvas"),
+    tooltip: document.getElementById("tooltip"),
+    tooltipTime: document.getElementById("tooltip-time"),
+    tooltipHourlyRow: document.getElementById("tooltip-hourly-row"),
+    tooltipHourly: document.getElementById("tooltip-hourly"),
+    tooltipRangeRow: document.getElementById("tooltip-range-row"),
+    tooltipRange: document.getElementById("tooltip-range"),
+    tooltipAverageRow: document.getElementById("tooltip-average-row"),
+    tooltipAverage: document.getElementById("tooltip-average"),
+    state: document.getElementById("state"),
+    stateTitle: document.getElementById("state-title"),
+    stateText: document.getElementById("state-text"),
+    stateCode: document.getElementById("state-code"),
+    stateActions: document.getElementById("state-actions"),
+    live: document.getElementById("live"),
+    tableWrap: document.getElementById("table-wrap"),
+    tableBody: document.getElementById("table-body"),
+    timeZone: document.getElementById("time-zone"),
+    source: document.getElementById("source"),
+    fileInput: document.getElementById("file-input"),
+};
+
+const state = {
+    sourceUrl: DEFAULT_SOURCE,
+    samples: [],
+    averages: [],
+    origin: null,
+    loadedAt: null,
+    refreshFailedAt: null,
+    refreshTimer: null,
+    range: readStoredRange(),
+    visible: { hourly: true, average: true },
+    geometry: null,
+    hoverIndex: null,
+    renderedWidth: 0,
+};
+
+class HttpError extends Error {
+    constructor(status) {
+        super(`HTTP ${status}`);
+        this.status = status;
+    }
+}
+
+function readStoredRange() {
+    try {
+        const stored = localStorage.getItem(RANGE_STORAGE_KEY);
+        return RANGES.some(range => range.id === stored) ? stored : DEFAULT_RANGE;
+    } catch {
+        return DEFAULT_RANGE;
+    }
+}
+
+function storeRange(id) {
+    try {
+        localStorage.setItem(RANGE_STORAGE_KEY, id);
+    } catch {
+    }
+}
+
+function parseHistory(json) {
+    if (!Array.isArray(json)) {
+        throw new SyntaxError("Expected a list of values.");
+    }
+    const samples = [];
+    for (const entry of json) {
+        const t = Date.parse(entry?.timestamp);
+        const v = entry?.activeSimulators;
+        if (Number.isFinite(t) && typeof v === "number" && Number.isFinite(v)) {
+            samples.push({ t, v });
+        }
+    }
+    if (json.length > 0 && samples.length === 0) {
+        throw new SyntaxError("The list contains no entries with a timestamp and an active simulator count.");
+    }
+    samples.sort((a, b) => a.t - b.t);
+    return samples.filter((sample, index) => index === samples.length - 1 || samples[index + 1].t !== sample.t);
+}
+
+function computeAverages(samples) {
+    const averages = new Array(samples.length);
+    let sum = 0;
+    let first = 0;
+    for (const [index, sample] of samples.entries()) {
+        sum += sample.v;
+        while (samples[first].t <= sample.t - AVERAGE_WINDOW) {
+            sum -= samples[first].v;
+            first++;
+        }
+        const count = index - first + 1;
+        averages[index] = count >= AVERAGE_MIN_SAMPLES ? sum / count : null;
+    }
+    return averages;
+}
+
+function createRandom(seed) {
+    return () => {
+        seed = (seed + 0x6d2b79f5) | 0;
+        let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function poisson(mean, random) {
+    const limit = Math.exp(-mean);
+    let count = 0;
+    for (let product = random(); product > limit; product *= random()) {
+        count++;
+    }
+    return count;
+}
+
+function createDemoSamples() {
+    const random = createRandom(866);
+    const hours = 120 * 24;
+    const releaseHoursAgo = 40 * 24;
+    const missingHoursAgo = new Set([7, 190, 611, 1500, 1501, 1502, 1503, 1504, 1505, 2210]);
+    const end = Math.floor(Date.now() / HOUR) * HOUR;
+    const samples = [];
+    for (let hoursAgo = hours - 1; hoursAgo >= 0; hoursAgo--) {
+        if (missingHoursAgo.has(hoursAgo)) {
+            continue;
+        }
+        const t = end - hoursAgo * HOUR;
+        const date = new Date(t);
+        const growth = 5 + 6 * (1 - hoursAgo / hours);
+        const release = hoursAgo <= releaseHoursAgo ? 5 * Math.exp(-(releaseHoursAgo - hoursAgo) / (6 * 24)) : 0;
+        const daily = 1 + 0.55 * Math.cos((2 * Math.PI * (date.getUTCHours() - 19)) / 24);
+        const weekly = date.getUTCDay() === 0 || date.getUTCDay() === 6 ? 1.2 : 1;
+        samples.push({ t, v: poisson((growth + release) * daily * weekly, random) });
+    }
+    return samples;
+}
+
+function lowerBound(samples, t) {
+    let low = 0;
+    let high = samples.length;
+    while (low < high) {
+        const middle = (low + high) >> 1;
+        if (samples[middle].t < t) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+    return low;
+}
+
+function currentWindow() {
+    const samples = state.samples;
+    if (samples.length === 0) {
+        return null;
+    }
+    const range = RANGES.find(candidate => candidate.id === state.range);
+    const first = samples[0].t;
+    const end = samples[samples.length - 1].t;
+    const start = Math.max(first, end - range.duration);
+    return { range, start, end, from: lowerBound(samples, start), to: samples.length - 1, complete: end - range.duration >= first };
+}
+
+function meanOf(from, to) {
+    let sum = 0;
+    for (let index = from; index <= to; index++) {
+        sum += state.samples[index].v;
+    }
+    return sum / (to - from + 1);
+}
+
+function previousAverage(view) {
+    if (!view.complete || !Number.isFinite(view.range.duration)) {
+        return null;
+    }
+    const from = lowerBound(state.samples, view.start - view.range.duration);
+    const to = view.from - 1;
+    if (to - from + 1 < (0.5 * view.range.duration) / HOUR) {
+        return null;
+    }
+    return meanOf(from, to);
+}
+
+function formatTime(t) {
+    return new Date(t).getFullYear() === new Date().getFullYear() ? shortTimeFormat.format(t) : fullTimeFormat.format(t);
+}
+
+function formatAge(milliseconds) {
+    const minutes = Math.round(milliseconds / 60000);
+    if (minutes < 1) {
+        return "just now";
+    }
+    if (minutes < 60) {
+        return `${minutes} min ago`;
+    }
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) {
+        return `${hours} h ago`;
+    }
+    return `${Math.round(hours / 24)} days ago`;
+}
+
+function renderKpis() {
+    const view = currentWindow();
+    if (!view) {
+        for (const value of [els.latestValue, els.peakValue, els.averageValue, els.coverageValue]) {
+            value.textContent = "–";
+        }
+        for (const note of [els.latestNote, els.peakNote, els.averageNote, els.coverageNote]) {
+            note.textContent = " ";
+        }
+        return;
+    }
+    const samples = state.samples;
+
+    const latest = samples[samples.length - 1];
+    const age = Date.now() - latest.t;
+    els.latestValue.textContent = integerFormat.format(latest.v);
+    if (state.origin.kind === "url" && age > STALE_AFTER) {
+        const icon = document.createElement("span");
+        icon.className = "warning-icon";
+        icon.textContent = "⚠";
+        els.latestNote.replaceChildren(icon, ` No new value since ${formatTime(latest.t)}`);
+    } else {
+        els.latestNote.textContent = `${formatTime(latest.t)} · ${formatAge(age)}`;
+    }
+
+    let peakIndex = view.from;
+    for (let index = view.from; index <= view.to; index++) {
+        if (samples[index].v >= samples[peakIndex].v) {
+            peakIndex = index;
+        }
+    }
+    els.peakValue.textContent = integerFormat.format(samples[peakIndex].v);
+    els.peakNote.textContent = formatTime(samples[peakIndex].t);
+
+    const count = view.to - view.from + 1;
+    const average = meanOf(view.from, view.to);
+    const previous = previousAverage(view);
+    els.averageValue.textContent = decimalFormat.format(average);
+    if (previous !== null && previous > 0) {
+        const change = average / previous - 1;
+        const delta = document.createElement("span");
+        delta.className = change > 0 ? "delta up" : change < 0 ? "delta down" : "delta";
+        delta.textContent = `${change > 0 ? "▲" : change < 0 ? "▼" : "■"} ${changeFormat.format(change)}`;
+        els.averageNote.replaceChildren(delta, ` vs previous ${view.range.period}`);
+    } else {
+        els.averageNote.textContent = `Mean of ${integerFormat.format(count)} hourly values`;
+    }
+
+    const expected = Math.round((view.end - view.start) / HOUR) + 1;
+    const coverage = Math.min(1, count / expected);
+    els.coverageValue.textContent = coverageFormat.format(Math.floor(coverage * 1000) / 1000);
+    els.coverageNote.textContent = `${integerFormat.format(count)} of ${integerFormat.format(expected)} hours recorded`;
+}
+
+function svgElement(tag, attributes, parent) {
+    const node = document.createElementNS(SVG_NAMESPACE, tag);
+    for (const [name, value] of Object.entries(attributes)) {
+        node.setAttribute(name, value);
+    }
+    parent?.appendChild(node);
+    return node;
+}
+
+function valueTicks(maxValue) {
+    const target = Math.max(maxValue, 1) * 1.08;
+    const rough = target / 4;
+    const magnitude = 10 ** Math.floor(Math.log10(rough));
+    const step = Math.max(1, [1, 2, 5, 10].map(factor => factor * magnitude).find(candidate => candidate >= rough));
+    const count = Math.ceil(target / step);
+    return Array.from({ length: count + 1 }, (_, index) => index * step);
+}
+
+function alignToStep(t, step) {
+    const date = new Date(t);
+    date.setMinutes(0, 0, 0);
+    if (step.unit === "hour") {
+        date.setHours(date.getHours() - (date.getHours() % step.count));
+        return date;
+    }
+    date.setHours(0);
+    if (step.unit === "week") {
+        date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+    } else if (step.unit === "month") {
+        date.setDate(1);
+        date.setMonth(date.getMonth() - (date.getMonth() % step.count));
+    } else if (step.unit === "year") {
+        date.setMonth(0, 1);
+    }
+    return date;
+}
+
+function advanceByStep(date, step) {
+    if (step.unit === "hour") {
+        date.setHours(date.getHours() + step.count);
+    } else if (step.unit === "day") {
+        date.setDate(date.getDate() + step.count);
+    } else if (step.unit === "week") {
+        date.setDate(date.getDate() + 7 * step.count);
+    } else if (step.unit === "month") {
+        date.setMonth(date.getMonth() + step.count);
+    } else {
+        date.setFullYear(date.getFullYear() + step.count);
+    }
+}
+
+function tickLabel(date, step) {
+    if (step.unit === "hour") {
+        return date.getHours() === 0 ? dayFormat.format(date) : clockFormat.format(date);
+    }
+    if (step.unit === "day") {
+        return step.count === 1 ? weekdayFormat.format(date) : dayFormat.format(date);
+    }
+    if (step.unit === "week") {
+        return dayFormat.format(date);
+    }
+    if (step.unit === "month") {
+        return date.getMonth() === 0 ? yearFormat.format(date) : monthFormat.format(date);
+    }
+    return yearFormat.format(date);
+}
+
+function timeTicks(start, end, plotWidth) {
+    const maxTicks = Math.max(4, Math.floor(plotWidth / 80));
+    const step = TICK_STEPS.find(candidate => (end - start) / (UNIT_LENGTHS[candidate.unit] * candidate.count) <= maxTicks) ?? TICK_STEPS[TICK_STEPS.length - 1];
+    const ticks = [];
+    for (const date = alignToStep(start, step); date.getTime() <= end; advanceByStep(date, step)) {
+        if (date.getTime() >= start) {
+            ticks.push({ t: date.getTime(), label: tickLabel(date, step) });
+        }
+    }
+    return ticks;
+}
+
+function segmentsOf(view, include) {
+    const samples = state.samples;
+    const segments = [];
+    let segment = [];
+    for (let index = Math.max(0, view.from - 1); index <= view.to; index++) {
+        const previous = segment[segment.length - 1];
+        if (segment.length > 0 && (!include(index) || samples[index].t - samples[previous].t > MAX_SAMPLE_GAP)) {
+            segments.push(segment);
+            segment = [];
+        }
+        if (include(index)) {
+            segment.push(index);
+        }
+    }
+    if (segment.length > 0) {
+        segments.push(segment);
+    }
+    return segments;
+}
+
+function startOfDay(t) {
+    return new Date(t).setHours(0, 0, 0, 0);
+}
+
+function dailyRanges(view) {
+    const ranges = [];
+    for (let index = lowerBound(state.samples, startOfDay(view.start)); index <= view.to; index++) {
+        const sample = state.samples[index];
+        const day = startOfDay(sample.t);
+        const range = ranges[ranges.length - 1];
+        if (range?.day === day) {
+            range.min = Math.min(range.min, sample.v);
+            range.max = Math.max(range.max, sample.v);
+            range.last = sample.t;
+        } else {
+            ranges.push({ day, min: sample.v, max: sample.v, first: sample.t, last: sample.t });
+        }
+    }
+    return ranges;
+}
+
+function bandsOf(ranges) {
+    const bands = [];
+    let band = [];
+    const finish = () => {
+        if (band.length > 0) {
+            const head = band[0];
+            const tail = band[band.length - 1];
+            bands.push([{ ...head, t: head.first }, ...band, { ...tail, t: tail.last }]);
+        }
+        band = [];
+    };
+    for (const range of ranges) {
+        const t = (range.first + range.last) / 2;
+        if (band.length > 0 && t - band[band.length - 1].t > 1.5 * DAY) {
+            finish();
+        }
+        band.push({ ...range, t });
+    }
+    finish();
+    return bands;
+}
+
+function linePath(points) {
+    return points.map(([x, y], index) => `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join("");
+}
+
+function areaPath(points, baseY) {
+    return `${linePath(points)}L${points[points.length - 1][0].toFixed(1)},${baseY}L${points[0][0].toFixed(1)},${baseY}Z`;
+}
+
+function bandPath(points) {
+    const upper = points.map(([x, top], index) => `${index === 0 ? "M" : "L"}${x.toFixed(1)},${top.toFixed(1)}`).join("");
+    const lower = points.map(([x, , bottom]) => `L${x.toFixed(1)},${bottom.toFixed(1)}`).reverse().join("");
+    return `${upper}${lower}Z`;
+}
+
+function chartHeight() {
+    return window.matchMedia("(max-width: 600px)").matches ? 260 : 320;
+}
+
+function renderPeriod(view) {
+    if (!view) {
+        els.period.textContent = "";
+        return;
+    }
+    const format = view.end - view.start <= 2 * DAY ? shortPeriodFormat : periodFormat;
+    els.period.textContent = format.formatRange(view.start, view.end);
+}
+
+function renderChart() {
+    hideHover();
+    const view = currentWindow();
+    renderPeriod(view);
+    state.renderedWidth = els.chart.clientWidth;
+    if (!view) {
+        state.geometry = null;
+        els.chartCanvas.replaceChildren();
+        return;
+    }
+    const { samples, averages, visible } = state;
+    const width = Math.max(240, els.chart.clientWidth);
+    const height = chartHeight();
+    const bandMode = view.end - view.start > BAND_MIN_SPAN;
+    const ranges = bandMode ? dailyRanges(view) : [];
+    els.hourlyLabel.textContent = bandMode ? "Daily range" : "Hourly count";
+    els.hourlyKey.className = bandMode ? "key key-band" : "key key-hourly";
+
+    let maxValue = 0;
+    for (let index = view.from; index <= view.to; index++) {
+        if (visible.hourly) {
+            maxValue = Math.max(maxValue, samples[index].v);
+        }
+        if (visible.average && averages[index] !== null) {
+            maxValue = Math.max(maxValue, averages[index]);
+        }
+    }
+    if (visible.hourly) {
+        maxValue = Math.max(maxValue, ...ranges.map(range => range.max));
+    }
+    const yTicks = valueTicks(maxValue);
+    const yMax = yTicks[yTicks.length - 1];
+    const labelWidth = Math.max(...yTicks.map(tick => integerFormat.format(tick).length)) * 7 + 14;
+    const margin = { top: 12, right: 44, bottom: 30, left: labelWidth };
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const baseY = margin.top + plotHeight;
+    let start = view.start;
+    let end = view.end;
+    if (end - start < 2 * HOUR) {
+        start -= HOUR;
+        end += HOUR;
+    }
+    const x = t => margin.left + ((t - start) / (end - start)) * plotWidth;
+    const y = v => margin.top + plotHeight - (v / yMax) * plotHeight;
+
+    const root = svgElement("svg", {
+        width,
+        height,
+        viewBox: `0 0 ${width} ${height}`,
+        role: "img",
+        "aria-label": `Chart of the active simulator count from ${fullTimeFormat.format(view.start)} to ${fullTimeFormat.format(view.end)}`,
+    });
+    const clip = svgElement("clipPath", { id: "plot-clip" }, svgElement("defs", {}, root));
+    svgElement("rect", { x: margin.left, y: 0, width: plotWidth, height: baseY + 1 }, clip);
+
+    for (const tick of yTicks) {
+        const tickY = Math.round(y(tick)) + 0.5;
+        svgElement("line", { class: tick === 0 ? "baseline" : "grid-line", x1: margin.left, x2: margin.left + plotWidth, y1: tickY, y2: tickY }, root);
+        svgElement("text", { class: "axis-label", x: margin.left - 10, y: tickY, dy: "0.32em", "text-anchor": "end" }, root).textContent = integerFormat.format(tick);
+    }
+    for (const tick of timeTicks(start, end, plotWidth)) {
+        const tickX = Math.round(x(tick.t)) + 0.5;
+        svgElement("line", { class: "tick", x1: tickX, x2: tickX, y1: baseY, y2: baseY + 5 }, root);
+        if (tickX >= 22 && tickX <= width - 22) {
+            svgElement("text", { class: "axis-label", x: tickX, y: baseY + 21, "text-anchor": "middle" }, root).textContent = tick.label;
+        }
+    }
+
+    const plot = svgElement("g", { "clip-path": "url(#plot-clip)" }, root);
+    if (visible.hourly && bandMode) {
+        for (const band of bandsOf(ranges)) {
+            const points = band.map(entry => [x(entry.t), y(entry.max), y(entry.min)]);
+            if (points[points.length - 1][0] - points[0][0] < 3) {
+                const top = Math.min(...points.map(point => point[1]));
+                const bottom = Math.max(...points.map(point => point[2]));
+                svgElement("rect", { class: "band-hourly", x: points[0][0] - 1.5, y: top, width: 3, height: Math.max(1, bottom - top) }, plot);
+            } else {
+                svgElement("path", { class: "band-hourly", d: bandPath(points) }, plot);
+            }
+        }
+    } else if (visible.hourly) {
+        const dense = (view.to - view.from + 1) / plotWidth > 0.5;
+        for (const segment of segmentsOf(view, () => true)) {
+            const points = segment.map(index => [x(samples[index].t), y(samples[index].v)]);
+            if (points.length === 1) {
+                svgElement("circle", { class: "point-hourly", cx: points[0][0], cy: points[0][1], r: 3 }, plot);
+                continue;
+            }
+            svgElement("path", { class: "area-hourly", d: areaPath(points, baseY) }, plot);
+            svgElement("path", { class: dense ? "line-hourly dense" : "line-hourly", d: linePath(points) }, plot);
+        }
+    }
+    if (visible.average) {
+        for (const segment of segmentsOf(view, index => averages[index] !== null)) {
+            if (segment.length > 1) {
+                svgElement("path", { class: "line-average", d: linePath(segment.map(index => [x(samples[index].t), y(averages[index])])) }, plot);
+            }
+        }
+    }
+
+    const last = view.to;
+    const endX = x(samples[last].t);
+    const endMarks = [];
+    if (visible.hourly) {
+        endMarks.push({ y: y(samples[last].v), text: integerFormat.format(samples[last].v), className: "dot dot-hourly" });
+    }
+    if (visible.average && averages[last] !== null) {
+        endMarks.push({ y: y(averages[last]), text: decimalFormat.format(averages[last]), className: "dot dot-average" });
+    }
+    const labelsFit = endMarks.length < 2 || Math.abs(endMarks[0].y - endMarks[1].y) >= 14;
+    for (const mark of endMarks) {
+        svgElement("circle", { class: mark.className, cx: endX, cy: mark.y, r: 4 }, root);
+        if (labelsFit) {
+            svgElement("text", { class: "end-label", x: endX + 9, y: mark.y, dy: "0.32em" }, root).textContent = mark.text;
+        }
+    }
+
+    const hover = svgElement("g", { visibility: "hidden" }, root);
+    const crosshair = svgElement("line", { class: "crosshair", y1: margin.top, y2: baseY }, hover);
+    const hourlyDot = svgElement("circle", { class: "dot dot-hourly", r: 4 }, hover);
+    const averageDot = svgElement("circle", { class: "dot dot-average", r: 4 }, hover);
+
+    els.chartCanvas.replaceChildren(root);
+    const rangeByDay = new Map(ranges.map(range => [range.day, range]));
+    state.geometry = { view, x, y, start, end, margin, plotWidth, width, rangeByDay, hover, crosshair, hourlyDot, averageDot };
+}
+
+function placeDot(dot, shown, cx, cy) {
+    dot.setAttribute("visibility", shown ? "visible" : "hidden");
+    dot.setAttribute("cx", cx);
+    dot.setAttribute("cy", cy);
+}
+
+function showHover(index, announce) {
+    const geometry = state.geometry;
+    if (!geometry) {
+        return;
+    }
+    const { samples, averages, visible } = state;
+    const sample = samples[index];
+    const average = averages[index];
+    const hoverX = Math.round(geometry.x(sample.t)) + 0.5;
+    geometry.crosshair.setAttribute("x1", hoverX);
+    geometry.crosshair.setAttribute("x2", hoverX);
+    placeDot(geometry.hourlyDot, visible.hourly, hoverX, geometry.y(sample.v));
+    placeDot(geometry.averageDot, visible.average && average !== null, hoverX, average === null ? 0 : geometry.y(average));
+    geometry.hover.setAttribute("visibility", "visible");
+
+    els.tooltipTime.textContent = fullTimeFormat.format(sample.t);
+    els.tooltipHourly.textContent = integerFormat.format(sample.v);
+    els.tooltipAverage.textContent = average === null ? "–" : decimalFormat.format(average);
+    const range = geometry.rangeByDay.get(startOfDay(sample.t));
+    els.tooltipRange.textContent = range ? `${integerFormat.format(range.min)}–${integerFormat.format(range.max)}` : "";
+    els.tooltipRangeRow.hidden = !visible.hourly || !range;
+    els.tooltipHourlyRow.hidden = !visible.hourly;
+    els.tooltipAverageRow.hidden = !visible.average;
+    els.tooltip.classList.add("visible");
+    const tooltipWidth = els.tooltip.offsetWidth;
+    let left = hoverX + 14;
+    if (left + tooltipWidth > geometry.width) {
+        left = hoverX - 14 - tooltipWidth;
+    }
+    els.tooltip.style.transform = `translate(${Math.max(0, left)}px, ${geometry.margin.top}px)`;
+    state.hoverIndex = index;
+
+    if (announce) {
+        const averageText = average === null ? "" : `, 24-hour average ${decimalFormat.format(average)}`;
+        els.live.textContent = `${fullTimeFormat.format(sample.t)}: ${integerFormat.format(sample.v)} active simulators${averageText}`;
+    }
+}
+
+function hideHover() {
+    state.geometry?.hover.setAttribute("visibility", "hidden");
+    els.tooltip.classList.remove("visible");
+    state.hoverIndex = null;
+}
+
+function indexAt(clientX) {
+    const geometry = state.geometry;
+    const hoverX = clientX - els.chart.getBoundingClientRect().left;
+    if (hoverX < geometry.margin.left - 12 || hoverX > geometry.margin.left + geometry.plotWidth + 12) {
+        return null;
+    }
+    const t = geometry.start + ((hoverX - geometry.margin.left) / geometry.plotWidth) * (geometry.end - geometry.start);
+    const { from, to } = geometry.view;
+    let index = Math.min(to, Math.max(from, lowerBound(state.samples, t)));
+    if (index > from && t - state.samples[index - 1].t < state.samples[index].t - t) {
+        index--;
+    }
+    return index;
+}
+
+function renderTable() {
+    if (els.tableWrap.hidden) {
+        return;
+    }
+    const view = currentWindow();
+    const rows = document.createDocumentFragment();
+    if (view) {
+        for (let index = view.to; index >= view.from; index--) {
+            const row = document.createElement("tr");
+            const average = state.averages[index];
+            for (const [text, className] of [
+                [fullTimeFormat.format(state.samples[index].t), ""],
+                [integerFormat.format(state.samples[index].v), "num"],
+                [average === null ? "–" : decimalFormat.format(average), "num"],
+            ]) {
+                const cell = document.createElement("td");
+                cell.className = className;
+                cell.textContent = text;
+                row.appendChild(cell);
+            }
+            rows.appendChild(row);
+        }
+    }
+    els.tableBody.replaceChildren(rows);
+}
+
+function renderCaption() {
+    els.timeZone.textContent = `Times in ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+    if (state.origin?.kind === "demo") {
+        els.source.textContent = "Demo data generated in the browser";
+        return;
+    }
+    if (state.origin?.kind === "file") {
+        els.source.textContent = `Source: ${state.origin.name}`;
+        return;
+    }
+    const link = document.createElement("a");
+    link.href = state.sourceUrl;
+    link.textContent = state.sourceUrl.replace(/^https?:\/\//, "");
+    els.source.replaceChildren("Source: ", link);
+    if (state.origin?.kind === "url") {
+        els.source.append(` · loaded ${clockFormat.format(state.loadedAt)}`);
+    }
+    if (state.refreshFailedAt !== null) {
+        els.source.append(` · refresh at ${clockFormat.format(state.refreshFailedAt)} failed`);
+    }
+}
+
+function updateRangeButtons() {
+    for (const button of els.ranges.children) {
+        button.setAttribute("aria-pressed", String(button.dataset.range === state.range));
+    }
+}
+
+function setTableOpen(open) {
+    els.tableWrap.hidden = !open;
+    els.tableToggle.textContent = open ? "Hide table" : "Show table";
+    els.tableToggle.setAttribute("aria-expanded", String(open));
+    renderTable();
+}
+
+function renderAll() {
+    const hasData = state.samples.length > 0;
+    if (!hasData) {
+        setTableOpen(false);
+    }
+    els.tableToggle.hidden = !hasData;
+    els.download.disabled = !hasData;
+    updateRangeButtons();
+    renderKpis();
+    renderChart();
+    renderTable();
+    renderCaption();
+}
+
+function showState({ title, text = "", code = "", actions = [] }) {
+    els.stateTitle.textContent = title;
+    els.stateText.textContent = text;
+    els.stateText.hidden = !text;
+    els.stateCode.textContent = code;
+    els.stateCode.hidden = !code;
+    els.stateActions.replaceChildren(...actions.map(action => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = action.primary ? "button primary" : "button";
+        button.textContent = action.label;
+        button.addEventListener("click", action.run);
+        return button;
+    }));
+    els.state.hidden = false;
+    els.chartCanvas.hidden = true;
+    hideHover();
+}
+
+function hideState() {
+    els.state.hidden = true;
+    els.chartCanvas.hidden = false;
+}
+
+function setData(samples, origin) {
+    state.samples = samples;
+    state.averages = computeAverages(samples);
+    state.origin = origin;
+    state.loadedAt = Date.now();
+    state.refreshFailedAt = null;
+    els.demoBadge.hidden = origin.kind !== "demo";
+    if (samples.length === 0) {
+        showState({
+            title: "No values recorded yet",
+            text: "The server stores the active simulator count at every full hour once it has been running for 25 minutes.",
+            actions: [{ label: "Show demo data", run: showDemo }],
+        });
+    } else {
+        hideState();
+    }
+    renderAll();
+}
+
+function clearData() {
+    state.samples = [];
+    state.averages = [];
+    state.origin = null;
+    els.demoBadge.hidden = true;
+    renderAll();
+}
+
+function describeLoadError(error) {
+    if (error instanceof HttpError) {
+        const text = error.status === 404 ? "It does not provide the active simulator history." : "Try again later or open a saved copy.";
+        return { title: `The server answered with HTTP ${error.status}`, text, code: "" };
+    }
+    if (error instanceof SyntaxError) {
+        return { title: "The answer is not an active simulator history", text: error.message, code: "" };
+    }
+    const reason = location.protocol === "file:"
+        ? "Browsers block requests from a local file to another server unless the server allows them (CORS)."
+        : "The server is unreachable or does not allow requests from this page (CORS).";
+    return {
+        title: "The history could not be loaded",
+        text: `${reason} Save the history with curl and open the file here:`,
+        code: `curl -s ${new URL(state.sourceUrl, location.href).href} -o history.json`,
+    };
+}
+
+function showLoadError(error) {
+    const { title, text, code } = describeLoadError(error);
+    showState({
+        title,
+        text,
+        code,
+        actions: [
+            { label: "Open JSON file…", run: () => els.fileInput.click(), primary: true },
+            { label: "Show demo data", run: showDemo },
+            { label: "Try again", run: () => loadFromSource(false) },
+        ],
+    });
+}
+
+function scheduleRefresh(delay) {
+    clearTimeout(state.refreshTimer);
+    state.refreshTimer = setTimeout(() => loadFromSource(state.origin?.kind === "url" && state.samples.length > 0), delay);
+}
+
+async function loadFromSource(quiet) {
+    clearTimeout(state.refreshTimer);
+    if (quiet) {
+        els.chart.classList.add("refreshing");
+    } else {
+        clearData();
+        showState({ title: "Loading the history…" });
+    }
+    try {
+        const response = await fetch(state.sourceUrl, { cache: "no-store" });
+        if (!response.ok) {
+            throw new HttpError(response.status);
+        }
+        setData(parseHistory(await response.json()), { kind: "url" });
+        scheduleRefresh(HOUR - (Date.now() % HOUR) + REFRESH_AFTER_FULL_HOUR);
+    } catch (error) {
+        if (quiet) {
+            state.refreshFailedAt = Date.now();
+            renderCaption();
+        } else {
+            showLoadError(error);
+        }
+        scheduleRefresh(RETRY_DELAY);
+    } finally {
+        els.chart.classList.remove("refreshing");
+    }
+}
+
+async function openFile(file) {
+    clearTimeout(state.refreshTimer);
+    try {
+        setData(parseHistory(JSON.parse(await file.text())), { kind: "file", name: file.name });
+    } catch (error) {
+        clearData();
+        showState({
+            title: `${file.name} is not an active simulator history`,
+            text: error.message,
+            actions: [
+                { label: "Open another file…", run: () => els.fileInput.click(), primary: true },
+                { label: "Load from the server", run: () => loadFromSource(false) },
+            ],
+        });
+    }
+}
+
+function showDemo() {
+    clearTimeout(state.refreshTimer);
+    setData(createDemoSamples(), { kind: "demo" });
+}
+
+function downloadCsv() {
+    const lines = ["timestamp,active_simulators", ...state.samples.map(sample => `${new Date(sample.t).toISOString().replace(".000Z", "Z")},${sample.v}`)];
+    const url = URL.createObjectURL(new Blob([`${lines.join("\n")}\n`], { type: "text/csv" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `active-simulators-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function selectRange(id) {
+    state.range = id;
+    storeRange(id);
+    renderAll();
+}
+
+function hasFiles(event) {
+    return [...(event.dataTransfer?.types ?? [])].includes("Files");
+}
+
+function initialize() {
+    const params = new URLSearchParams(location.search);
+    const theme = params.get("theme");
+    if (theme === "light" || theme === "dark") {
+        document.documentElement.dataset.theme = theme;
+    }
+    state.sourceUrl = params.get("source") || DEFAULT_SOURCE;
+
+    for (const range of RANGES) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.range = range.id;
+        button.textContent = range.label;
+        button.title = range.period ? `Last ${range.period}` : "Everything recorded";
+        button.addEventListener("click", () => selectRange(range.id));
+        els.ranges.appendChild(button);
+    }
+    updateRangeButtons();
+
+    for (const button of els.legend.querySelectorAll("button")) {
+        button.addEventListener("click", () => {
+            const series = button.dataset.series;
+            const other = series === "hourly" ? "average" : "hourly";
+            if (state.visible[series] && !state.visible[other]) {
+                return;
+            }
+            state.visible[series] = !state.visible[series];
+            button.setAttribute("aria-pressed", String(state.visible[series]));
+            renderChart();
+        });
+    }
+
+    els.tableToggle.addEventListener("click", () => setTableOpen(els.tableWrap.hidden));
+
+    els.reload.addEventListener("click", () => loadFromSource(state.origin?.kind === "url" && state.samples.length > 0));
+    els.download.addEventListener("click", downloadCsv);
+    els.fileInput.addEventListener("change", () => {
+        const file = els.fileInput.files[0];
+        els.fileInput.value = "";
+        if (file) {
+            openFile(file);
+        }
+    });
+
+    els.chart.addEventListener("pointermove", event => {
+        if (!state.geometry || !els.state.hidden) {
+            return;
+        }
+        const index = indexAt(event.clientX);
+        if (index === null) {
+            hideHover();
+        } else if (index !== state.hoverIndex) {
+            showHover(index, false);
+        }
+    });
+    els.chart.addEventListener("pointerleave", hideHover);
+    els.chart.addEventListener("focus", () => {
+        if (state.geometry && els.state.hidden && els.chart.matches(":focus-visible")) {
+            showHover(state.geometry.view.to, true);
+        }
+    });
+    els.chart.addEventListener("blur", hideHover);
+    els.chart.addEventListener("keydown", event => {
+        const geometry = state.geometry;
+        if (!geometry || !els.state.hidden) {
+            return;
+        }
+        const { from, to } = geometry.view;
+        const step = event.shiftKey ? 24 : 1;
+        let index = state.hoverIndex ?? to;
+        if (event.key === "ArrowLeft") {
+            index = state.hoverIndex === null ? to : index - step;
+        } else if (event.key === "ArrowRight") {
+            index = state.hoverIndex === null ? to : index + step;
+        } else if (event.key === "Home") {
+            index = from;
+        } else if (event.key === "End") {
+            index = to;
+        } else if (event.key === "Escape") {
+            hideHover();
+            return;
+        } else {
+            return;
+        }
+        event.preventDefault();
+        showHover(Math.min(to, Math.max(from, index)), true);
+    });
+
+    let dragDepth = 0;
+    document.addEventListener("dragenter", event => {
+        if (hasFiles(event)) {
+            dragDepth++;
+            document.body.classList.add("dragging");
+        }
+    });
+    document.addEventListener("dragleave", () => {
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) {
+            document.body.classList.remove("dragging");
+        }
+    });
+    document.addEventListener("dragover", event => {
+        if (hasFiles(event)) {
+            event.preventDefault();
+        }
+    });
+    document.addEventListener("drop", event => {
+        event.preventDefault();
+        dragDepth = 0;
+        document.body.classList.remove("dragging");
+        const file = event.dataTransfer?.files?.[0];
+        if (file) {
+            openFile(file);
+        }
+    });
+
+    new ResizeObserver(() => {
+        if (els.chart.clientWidth !== state.renderedWidth) {
+            renderChart();
+        }
+    }).observe(els.chart);
+    setInterval(() => {
+        if (state.samples.length > 0) {
+            renderKpis();
+        }
+    }, 60 * 1000);
+
+    renderCaption();
+    if (params.has("demo")) {
+        showDemo();
+    } else {
+        loadFromSource(false);
+    }
+}
+
+initialize();
+</script>
+</body>
+</html>
