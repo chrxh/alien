@@ -11,6 +11,7 @@ import time
 import urllib.request
 import urllib.error
 
+from datetime import datetime, timezone
 from email.message import EmailMessage
 
 from fastapi import FastAPI, Form, HTTPException, Request, Response
@@ -158,6 +159,16 @@ class UserLike(Base):
     type: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
+class ActiveSimulatorCount(Base):
+    __tablename__ = "active_simulator_counts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    timestamp: Mapped[object] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    count: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
 # --- FastAPI app ---
 app = FastAPI()
 
@@ -261,11 +272,75 @@ def _record_active_simulator(request: Request):
             _active_simulators[caller_hash] = now
 
 
-@app.get("/getactivesimulatorcount")
-def get_active_simulator_count():
+def _count_active_simulators() -> int:
     with _active_simulators_lock:
         _remove_inactive_simulators(time.monotonic())
-        return {"activeSimulators": len(_active_simulators)}
+        return len(_active_simulators)
+
+
+@app.get("/getactivesimulatorcount")
+def get_active_simulator_count():
+    return {"activeSimulators": _count_active_simulators()}
+
+
+# --- Active simulator history ---
+# The active simulator count is stored in ``active_simulator_counts`` at every
+# full hour (UTC). It only covers the callers since the server start, so the
+# snapshots of the first ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are skipped
+# instead of storing a count that is too low.
+ACTIVE_SIMULATOR_HISTORY_INTERVAL_SECONDS = 60 * 60
+
+_server_start_time = time.monotonic()
+_active_simulator_history_stop = threading.Event()
+_active_simulator_history_logger = logging.getLogger("alien-server.activesimulators")
+
+
+def _store_active_simulator_count(timestamp: datetime):
+    if time.monotonic() - _server_start_time < ACTIVE_SIMULATOR_TIMEOUT_SECONDS:
+        return
+    count = _count_active_simulators()
+    with Session(engine) as session:
+        with session.begin():
+            session.add(ActiveSimulatorCount(timestamp=timestamp, count=count))
+
+
+def _store_active_simulator_counts_hourly():
+    interval = ACTIVE_SIMULATOR_HISTORY_INTERVAL_SECONDS
+    while True:
+        snapshot_time = (time.time() // interval + 1) * interval
+        while (remaining := snapshot_time - time.time()) > 0:
+            if _active_simulator_history_stop.wait(remaining):
+                return
+        try:
+            _store_active_simulator_count(datetime.fromtimestamp(snapshot_time, timezone.utc))
+        except Exception:
+            _active_simulator_history_logger.exception("Failed to store the active simulator count")
+
+
+@app.on_event("startup")
+def start_active_simulator_history():
+    threading.Thread(target=_store_active_simulator_counts_hourly, daemon=True).start()
+
+
+@app.on_event("shutdown")
+def stop_active_simulator_history():
+    _active_simulator_history_stop.set()
+
+
+def _as_utc(timestamp: datetime) -> datetime:
+    # SQLite returns naive datetimes even for ``DateTime(timezone=True)`` columns.
+    if timestamp.tzinfo is None:
+        return timestamp.replace(tzinfo=timezone.utc)
+    return timestamp.astimezone(timezone.utc)
+
+
+@app.get("/getactivesimulatorhistory")
+def get_active_simulator_history():
+    with Session(engine) as session:
+        rows = session.execute(
+            select(ActiveSimulatorCount.timestamp, ActiveSimulatorCount.count).order_by(ActiveSimulatorCount.timestamp)
+        ).all()
+    return [{"timestamp": _as_utc(timestamp).isoformat(), "activeSimulators": count} for timestamp, count in rows]
 
 
 # --- Helpers ---
