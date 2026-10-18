@@ -22,7 +22,7 @@
 #include <Data/DescValidationService.h>
 #include <Data/GenomeDescEditService.h>
 
-#include "SerializerService.h"
+#include <Persister/Interface/SerializerService.h>
 
 namespace
 {

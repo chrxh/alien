@@ -21,13 +21,13 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
-#include <Persister/Interface/GenomeMassEditService.h>
 #include <Persister/Interface/SerializerService.h>
 
 #include <Network/McpArguments.h>
 #include <Network/McpJson.h>
 #include <Network/McpSchema.h>
 
+#include "GenomeMassEditService.h"
 #include "McpGenomeTools.h"
 
 namespace

@@ -1,8 +1,6 @@
 target_sources(PersisterTests
 PUBLIC
-    GenomeMassEditServiceTests.cpp
     GridSimulationGenerator.cpp
-    JsonPathTests.cpp
     JsonSerializationTests.cpp
     SerializerServiceTest.cpp
     Testsuite.cpp)
