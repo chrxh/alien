@@ -5,6 +5,8 @@ add_library(McpToolsImpl
     McpDocumentationTools.h
     McpEditTools.cpp
     McpEditTools.h
+    McpGenomeEditTools.cpp
+    McpGenomeEditTools.h
     McpGenomeTools.cpp
     McpGenomeTools.h
     McpInspectionTools.cpp
