@@ -835,6 +835,49 @@ def test_discord_notification_attaches_picture(app_client, helpers, monkeypatch)
     assert b"attachment://preview.jpg" in request.data
 
 
+def test_discord_notification_attaches_genome_picture(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    assert helpers.upload_simulation(app_client, "alice", "pw", sim_type=1, picture=picture).json()["result"] is True
+
+    assert len(requests) == 1
+    request = requests[0]
+    assert request.get_header("Content-type").startswith("multipart/form-data; boundary=")
+    assert b"New genome added to the database" in request.data
+    assert picture in request.data
+    assert b"attachment://preview.jpg" in request.data
+
+
+def test_discord_notification_attaches_stored_picture_when_genome_becomes_public(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    picture = b"\xff\xd8\xff\xe0jpg-bytes\x00\xff\xd9"
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw", sim_type=1, workspace=2, picture=picture).json()["simId"]
+    assert requests == []
+
+    resp = app_client.post(
+        "/movesimulation",
+        data={
+            "userName": "alice", "password": "pw",
+            "simId": sim_id, "targetWorkspace": "0",
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    assert len(requests) == 1
+    request = requests[0]
+    assert b"New genome added to the database" in request.data
+    assert picture in request.data
+    assert b"attachment://preview.jpg" in request.data
+
+
 def test_discord_notification_without_picture_stays_json(app_client, helpers, monkeypatch):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
 

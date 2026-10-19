@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <optional>
 #include <string>
 
@@ -28,7 +29,7 @@ private:
     void onUpload(WorkspaceType workspaceType);
 
     std::string _folder;
-    std::unordered_map<std::string, std::string> _resourceDescriptionByFolder;
+    std::map<std::pair<NetworkResourceType, std::string>, std::string> _resourceDescriptionByTypeAndFolder;
 
     std::string _resourceName;
     std::string _resourceDescription;

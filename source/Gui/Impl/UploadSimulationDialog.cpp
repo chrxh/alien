@@ -43,20 +43,26 @@ namespace
 
 namespace
 {
-    std::string getSuggestedResourceName(NetworkResourceType resourceType, std::string const& folder)
+    std::string getSuggestedNameWithoutFolder(NetworkResourceType resourceType)
     {
         if (resourceType == NetworkResourceType_Genome) {
             return GenomeEditorWindow::get().getCurrentGenome()._name;
         }
         auto projectName = std::string(_SimulationFacade::get()->getSimulationParameters().projectName.value);
         if (projectName == SimulationParameters().projectName.value) {
-            projectName.clear();
+            return {};
         }
+        return projectName;
+    }
+
+    std::string getSuggestedResourceName(NetworkResourceType resourceType, std::string const& folder)
+    {
+        auto name = getSuggestedNameWithoutFolder(resourceType);
         auto userName = NetworkService::get().getLoggedInUserName();
         if (!folder.empty() || !userName.has_value()) {
-            return projectName;
+            return name;
         }
-        return *userName + "/" + projectName;
+        return *userName + "/" + name;
     }
 }
 
@@ -67,7 +73,7 @@ void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string 
         _resourceType = resourceType;
         _folder = folder;
         _resourceName = resourceName.empty() ? getSuggestedResourceName(resourceType, folder) : resourceName;
-        _resourceDescription = _resourceDescriptionByFolder[_folder];
+        _resourceDescription = _resourceDescriptionByTypeAndFolder[{_resourceType, _folder}];
         if (_resourceType == NetworkResourceType_Simulation) {
             _preview.createForSimulation();
         } else {
@@ -168,7 +174,7 @@ void UploadSimulationDialog::processIntern()
 
 void UploadSimulationDialog::onUpload(WorkspaceType workspaceType)
 {
-    _resourceDescriptionByFolder[_folder] = _resourceDescription;
+    _resourceDescriptionByTypeAndFolder[{_resourceType, _folder}] = _resourceDescription;
     if (!NetworkValidationService::get().isStringValidForDatabase(_resourceName)
         || !NetworkValidationService::get().isStringValidForDatabase(_resourceDescription)) {
         showMessage("Error", Const::NotAllowedCharacters);

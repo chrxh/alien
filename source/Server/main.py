@@ -584,39 +584,30 @@ def _discord_notify_resource(
                 {"name": "Objects", "value": particles_str, "inline": True},
             ],
         }
-        if picture:
-            embed["image"] = {"url": f"attachment://{_DISCORD_PICTURE_FILENAME}"}
-        _send_discord_message(
-            {
-                "username": "alien-project",
-                "avatar_url": _DISCORD_AVATAR_URL,
-                "content": "",
-                "embeds": [embed],
-            },
-            picture,
-        )
     else:
-        _send_discord_message(
-            {
-                "username": "alien-project",
-                "avatar_url": _DISCORD_AVATAR_URL,
-                "content": "",
-                "embeds": [
-                    {
-                        "author": {
-                            "name": title,
-                            "icon_url": _DISCORD_GENOME_ICON,
-                        },
-                        "title": sim_name,
-                        "description": description,
-                        "fields": [
-                            {"name": "User", "value": user_name, "inline": True},
-                            {"name": "Cells", "value": str(particles), "inline": True},
-                        ],
-                    }
-                ],
-            }
-        )
+        embed = {
+            "author": {
+                "name": title,
+                "icon_url": _DISCORD_GENOME_ICON,
+            },
+            "title": sim_name,
+            "description": description,
+            "fields": [
+                {"name": "User", "value": user_name, "inline": True},
+                {"name": "Cells", "value": str(particles), "inline": True},
+            ],
+        }
+    if picture:
+        embed["image"] = {"url": f"attachment://{_DISCORD_PICTURE_FILENAME}"}
+    _send_discord_message(
+        {
+            "username": "alien-project",
+            "avatar_url": _DISCORD_AVATAR_URL,
+            "content": "",
+            "embeds": [embed],
+        },
+        picture,
+    )
 
 
 def _is_activated(user: "User") -> bool:
@@ -1057,16 +1048,18 @@ def get_versioned_simulation_list(
     userName: str | None = Form(None),
     password: str | None = Form(None),
     version: str | None = Form(None),
-    countAsActive: bool = Form(True),
+    countAsActive: str = Form("true"),
 ):
     """Return all visible simulations (the C++ getNetworkResources endpoint).
 
     Private (workspace=2) entries are only returned to their owner. The
     ``version`` parameter is accepted for client compatibility and currently
-    not used to filter results.
+    not used to filter results. ``countAsActive`` is a string because FastAPI
+    reads a missing bool form field as false, but clients that do not send it
+    still count as active.
     """
     _ = version
-    if countAsActive:
+    if countAsActive.lower() != "false":
         _record_active_simulator(request)
 
     with Session(engine) as session:
@@ -1442,7 +1435,7 @@ async def replace_simulation(request: Request):
             sim.height = height
             sim.size = len(content_bytes)
 
-            # Genomes and older clients send no picture: keep the stored one.
+            # Older clients send no picture: keep the stored one.
             if picture_bytes:
                 sim.picture = picture_bytes
             notify_picture = bytes(sim.picture or b"")
