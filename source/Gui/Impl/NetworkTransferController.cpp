@@ -1,5 +1,7 @@
 #include "NetworkTransferController.h"
 
+#include <Fonts/IconsFontAwesome5.h>
+
 #include <Base/VersionParserService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
@@ -59,18 +61,34 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
+namespace
+{
+    void showUploadConfirmation(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& resourceName, std::string const& resourceId)
+    {
+        auto isShared = workspaceType == WorkspaceType_Public;
+        auto message = isShared ? "\"" + resourceName + "\" is now visible in the Community workspace. It has also been posted on the ALIEN Discord."
+                                : "\"" + resourceName + "\" is now in your Private workspace. Only you can see it.";
+        GenericMessageDialog::get().informationWithAction(isShared ? "Shared" : "Uploaded", message, ICON_FA_EYE "  Show in browser", [=] {
+            BrowserWindow::get().showResource(resourceType, workspaceType, resourceId);
+        });
+    }
+}
+
 void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const& requestData)
 {
     printOverlayMessage("Uploading ...");
 
+    auto resourceType = std::holds_alternative<UploadNetworkResourceRequestData::SimulationData>(requestData.data) ? NetworkResourceType_Simulation
+                                                                                                                   : NetworkResourceType_Genome;
     _uploadProcessor->executeTask(
         [&](auto const& senderId) {
             return _PersisterFacade::get()->scheduleUploadNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
-        [&](auto const& requestId) {
-            _PersisterFacade::get()->fetchUploadNetworkResourcesData(requestId);
+        [resourceType, workspaceType = requestData.workspaceType, resourceName = requestData.resourceWithoutFolderName](auto const& requestId) {
+            auto data = _PersisterFacade::get()->fetchUploadNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
+            showUploadConfirmation(resourceType, workspaceType, resourceName, data.resourceId);
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }

@@ -124,6 +124,15 @@ void BrowserWindow::onPreviewPictureChanged(std::string const& resourceId)
     _galleryWidget->invalidatePicture(resourceId);
 }
 
+void BrowserWindow::showResource(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& resourceId)
+{
+    _data->currentWorkspace = WorkspaceId{.resourceType = resourceType, .workspaceType = workspaceType};
+    _data->selectedTreeTO = nullptr;
+    _galleryWidget->resetPage();
+    _resourceIdToShow = resourceId;
+    setOn(true);
+}
+
 WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
 {
     return _data->currentWorkspace.workspaceType;
@@ -136,6 +145,11 @@ DownloadCache& BrowserWindow::getSimulationCache()
 
 void BrowserWindow::processIntern()
 {
+    if (_resourceIdToShow.has_value() && !BrowserController::get().isRefreshing()) {
+        revealResource(*_resourceIdToShow);
+        _resourceIdToShow.reset();
+    }
+
     processToolbar();
     _loginBannerWidget->process();
 
@@ -157,6 +171,8 @@ void BrowserWindow::processIntern()
     processRefreshingScreen({startPos.x, startPos.y});
 
     processEmojiWindow();
+
+    _data->scrollToSelection = false;
 }
 
 void BrowserWindow::processBackground()
@@ -630,4 +646,23 @@ void BrowserWindow::onCollapseFolders()
     auto& workspace = _data->getCurrentWorkspace();
     workspace.collapsedFolderNames = NetworkResourceService::get().getFolderNames(workspace.rawTOs, 1);
     _data->createTreeTOs(workspace);
+}
+
+void BrowserWindow::revealResource(std::string const& resourceId)
+{
+    auto& workspace = _data->getCurrentWorkspace();
+    auto findResult = std::ranges::find_if(workspace.rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->id == resourceId; });
+    if (findResult == workspace.rawTOs.end()) {
+        return;
+    }
+    auto rawTO = *findResult;
+
+    auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
+    for (auto depth : std::views::iota(1, toInt(folderNames.size()) + 1)) {
+        workspace.collapsedFolderNames.erase(std::vector(folderNames.begin(), folderNames.begin() + depth));
+    }
+    _data->createTreeTOs(workspace);
+
+    _data->selectedTreeTO = BrowserHelper::createLeafTreeTO(rawTO);
+    _data->scrollToSelection = true;
 }

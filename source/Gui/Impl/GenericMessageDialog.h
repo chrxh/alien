@@ -22,6 +22,7 @@ public:
     void information(std::string const& title, std::string const& message);
     void information(std::string const& title, std::vector<PersisterErrorInfo> const& errors);
     void markdownInformation(std::string const& title, std::string const& markdownMessage);
+    void informationWithAction(std::string const& title, std::string const& message, std::string const& actionText, std::function<void()> const& action);
     void yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction);
 
 private:
@@ -44,6 +45,7 @@ private:
     std::string _message;
     std::optional<MarkdownDocument> _markdownMessage;
     MarkdownRenderer _markdownRenderer;
+    std::optional<std::string> _actionText;
     std::function<void()> _execFunction;
 };
 

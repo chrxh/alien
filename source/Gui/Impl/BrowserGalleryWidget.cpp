@@ -112,6 +112,12 @@ void _BrowserGalleryWidget::process()
     _numEntries = toInt(entries.size());
 
     _numPages = std::max(1, (_numEntries + TilesPerPage - 1) / TilesPerPage);
+    if (_data->scrollToSelection) {
+        auto findResult = std::ranges::find_if(entries, [&](NetworkResourceRawTO const& rawTO) { return _data->isSelected(rawTO); });
+        if (findResult != entries.end()) {
+            _page = toInt(std::distance(entries.begin(), findResult)) / TilesPerPage;
+        }
+    }
     _page = std::clamp(_page, 0, _numPages - 1);
 
     auto firstIndex = _page * TilesPerPage;
@@ -260,15 +266,6 @@ namespace
             Const::BrowserResourceNewTextColor,
             "NEW");
     }
-
-    NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO)
-    {
-        auto result = std::make_shared<_NetworkResourceTreeTO>();
-        result->type = rawTO->resourceType;
-        result->folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
-        result->node = BrowserLeaf{.leafName = NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), .rawTO = rawTO};
-        return result;
-    }
 }
 
 _BrowserGalleryWidget::TileLayout _BrowserGalleryWidget::calcTileLayout() const
@@ -347,6 +344,10 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
     }
     ImGui::EndChild();
     ImGui::PopStyleColor();
+
+    if (_data->scrollToSelection && _data->isSelected(rawTO)) {
+        ImGui::SetScrollHereY(0.5f);
+    }
 
     auto tileMin = ImGui::GetItemRectMin();
     auto tileMax = ImGui::GetItemRectMax();
@@ -521,7 +522,7 @@ void _BrowserGalleryWidget::processReactionButton(NetworkResourceRawTO const& ra
     }
     if (isAddReaction) {
         _data->activateEmojiPopup = true;
-        _data->emojiPopupTO = createLeafTreeTO(rawTO);
+        _data->emojiPopupTO = BrowserHelper::createLeafTreeTO(rawTO);
     }
 }
 
@@ -620,5 +621,5 @@ void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRa
 
 void _BrowserGalleryWidget::onSelectEntry(NetworkResourceRawTO const& rawTO)
 {
-    _data->selectedTreeTO = createLeafTreeTO(rawTO);
+    _data->selectedTreeTO = BrowserHelper::createLeafTreeTO(rawTO);
 }

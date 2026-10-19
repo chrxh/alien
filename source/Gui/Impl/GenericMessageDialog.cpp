@@ -30,6 +30,7 @@ void GenericMessageDialog::information(std::string const& title, std::string con
     _title = title;
     _message = message;
     _markdownMessage.reset();
+    _actionText.reset();
     _dialogType = DialogType::Information;
     log(Priority::Important, "message dialog showing: '" + message + "'");
 
@@ -52,11 +53,23 @@ void GenericMessageDialog::markdownInformation(std::string const& title, std::st
     _markdownMessage = MarkdownParser::parse(markdownMessage);
 }
 
+void GenericMessageDialog::informationWithAction(
+    std::string const& title,
+    std::string const& message,
+    std::string const& actionText,
+    std::function<void()> const& action)
+{
+    information(title, message);
+    _actionText = actionText;
+    _execFunction = action;
+}
+
 void GenericMessageDialog::yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction)
 {
     _title = title;
     _message = message;
     _markdownMessage.reset();
+    _actionText.reset();
     _dialogType = DialogType::YesNo;
     _execFunction = yesFunction;
 
@@ -73,6 +86,13 @@ void GenericMessageDialog::processInformation()
     processMessageText();
     AlienGui::Separator();
 
+    if (_actionText.has_value()) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(*_actionText).transparentBackground(false))) {
+            close();
+            _execFunction();
+        }
+        ImGui::SameLine();
+    }
     if (AlienGui::Button("OK")) {
         close();
     }
