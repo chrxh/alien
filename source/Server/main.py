@@ -1048,16 +1048,18 @@ def get_versioned_simulation_list(
     userName: str | None = Form(None),
     password: str | None = Form(None),
     version: str | None = Form(None),
-    countAsActive: bool = Form(True),
+    countAsActive: str = Form("true"),
 ):
     """Return all visible simulations (the C++ getNetworkResources endpoint).
 
     Private (workspace=2) entries are only returned to their owner. The
     ``version`` parameter is accepted for client compatibility and currently
-    not used to filter results.
+    not used to filter results. ``countAsActive`` is a string because FastAPI
+    reads a missing bool form field as false, but clients that do not send it
+    still count as active.
     """
     _ = version
-    if countAsActive:
+    if countAsActive.lower() != "false":
         _record_active_simulator(request)
 
     with Session(engine) as session:
