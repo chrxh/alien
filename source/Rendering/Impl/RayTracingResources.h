@@ -16,10 +16,6 @@ enum class RayTracingResource
     SphereAabbs,
     CapsuleAabbs,
     TriangleAabbs,
-    CellCounts,
-    CellCursors,
-    CellEntries,
-    Allocation,
     GasAccumulation,
     GasIntermediate,
     GasLightClusters,
@@ -92,17 +88,6 @@ public:
     // Anti-aliased image of the current frame
     VulkanImage& getOutput();
 
-    // Uniform grid in world coordinates whose cells list the glowing objects inside
-    struct LightGrid
-    {
-        RealVector2D origin;
-        float cellSize = 1.0f;
-        IntVector2D size;
-
-        uint64_t getNumCells() const;
-    };
-    LightGrid const& getLightGrid() const;
-
     // Grid in world coordinates whose nodes hold the density of the gas. The nodes are aligned to the world and their distance is a power of
     // two multiple of a base distance, so that moving or zooming the view keeps the gas stable.
     struct GasGrid
@@ -138,7 +123,6 @@ private:
         VulkanBuffer sphereAabbs;
         VulkanBuffer capsuleAabbs;
         VulkanBuffer triangleAabbs;
-        VulkanBuffer lightEntries;
         VulkanBuffer bottomLevelBuffer;
         VulkanBuffer topLevelBuffer;
         VulkanBuffer scratchBuffer;
@@ -162,7 +146,6 @@ private:
     static void destroyViewResources(ViewResources& resources, bool immediately);
 
     void createFrameResources();
-    void updateLightGrid(RealRect const& visibleWorldRect);
     void updateGasGrid(RenderView const& view);
 
     void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters, IntVector2D const& worldSize);
@@ -182,12 +165,6 @@ private:
     SceneResources _scene;
     ViewResources _view;
     int _current = 0;
-
-    LightGrid _lightGrid;
-    uint64_t _cellCapacity = 0;
-    VulkanBuffer _cellCounts;
-    VulkanBuffer _cellCursors;
-    VulkanBuffer _allocation;
 
     GasGrid _gasGrid;
     VulkanBuffer _gasAccumulation;

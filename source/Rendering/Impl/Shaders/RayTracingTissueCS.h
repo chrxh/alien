@@ -8,8 +8,9 @@ namespace Shaders
     // range covers it: each cell alone, each connection with its two cells and each triangle with its corners. The contributions within a
     // group add up to a density. The tissue takes a smooth maximum of the groups, so that objects without a connection stay apart while
     // the transitions between overlapping groups remain invisible. The threshold of the density is the outline of the bodies. Inside, the
-    // cells show wavy walls towards their neighbors and light organs that shine with their signals. On a dark background the tissue is
-    // visible by its glow as in a fluorescence microscope, on a bright background by its absorption as in a brightfield microscope.
+    // cells show wavy walls towards their neighbors and small organelles. The membrane of a cell glows with the activity of its neuron and
+    // flashes when the activity changes. On a dark background the tissue is visible by its glow as in a fluorescence microscope, on a bright
+    // background by its absorption as in a brightfield microscope.
     std::string_view const RayTracingTissueCS = R"(
 // Ranges of densities in which the groups blend into each other. Adjacent triangles differ by their third corner, a wider range hides the
 // change of the material along their common edge.
@@ -29,26 +30,26 @@ const float OutlineGlow = 1.0;
 const float HaloGlow = 0.15;
 const float HaloWidth = 0.08;
 const float WallGlow = 0.6;
-const float LightOrganRimGlow = 0.45;
-const float LightOrganGlow = 1.4;
-const float LightOrganHaloGlow = 0.55;
-const float CoreGlow = 0.5;
-const float TissueScattering = 0.4;
-const float MediumScattering = 0.05;
 
 // Zoomed out, the rasterized view adds its objects brighter, so that they glow despite their small size
 const float FarGlowGain = 1.3;
 
+// Zoomed out, the cells show their own colors instead of the blended material, so that they stay apart without their walls and inner
+// details
+const float CellColorSharpness = 0.7;
+
 // Sizes relative to the radius of the cells
 const float CytoplasmGrain = 1.8;
 
-// Each cell carries a light organ for each of the first signal channels, one in the middle and the others around it. An organ shines in
-// the color of its channel while the signal is positive, see Cell::lightOrganIntensities in Engine/Impl/Kernels/Entities.cuh. Its dark disk
-// absorbs light like a pigment, so that the organs remain visible on bright backgrounds. Sizes and distance are relative to the cell radius.
-const vec3 LightOrganColors[LightOrgansPerCell] = vec3[](vec3(0.3, 1.0, 0.72), vec3(0.42, 0.62, 1.0), vec3(1.0, 0.42, 0.85));
-const float CentralLightOrganSize = 0.19;
-const float OuterLightOrganSize = 0.13;
-const float OuterLightOrganDistance = 0.53;
+// Each cell contains a few small organelles. They do not glow, so they appear as dark spots in the fluorescent cytoplasm and absorb light
+// like a pigment on bright backgrounds. Sizes and distances are relative to the cell radius.
+const int OrganellesPerCell = 4;
+const float MinOrganelleSize = 0.09;
+const float MaxOrganelleSize = 0.18;
+const float MaxOrganelleDistance = 0.9;
+const float OrganelleEdge = 0.45;
+const float OrganelleShade = 0.4;
+const float OrganelleDensity = 0.4;
 
 // The walls between cells are slightly wavy, the amplitude and the frequency are given in world units
 const float WallWaveAmplitude = 0.09;
@@ -69,21 +70,20 @@ struct Tissue
     // and the relief inside the bodies.
     float totalDensity;
     vec2 totalGradient;
-    float bulge;
     vec3 hue;
     float weight;
-    vec3 emission;
     float brightness;
     float solid;
 };
 
 Tissue createTissue()
 {
-    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), 0.0, vec3(0.0), 0.0, vec3(0.0), 0.0, 0.0);
+    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), vec3(0.0), 0.0, 0.0, 0.0);
 }
 
 // Smooth maximum of the group densities as the logarithm of a sum of exponentials. The gradient of the density is averaged with the same
-// weights, the materials with weights of the wider range. All weights are relative to the highest density found so far, which keeps the
+// weights, the materials with weights of the wider range. A group fades out of the material with its density, so that the material does not
+// change abruptly where the range of the group ends. All weights are relative to the highest density found so far, which keeps the
 // exponentials in range.
 struct TissueBlend
 {
@@ -100,9 +100,7 @@ TissueBlend createTissueBlend()
 
 void scaleMaterial(inout Tissue sum, float factor)
 {
-    sum.bulge *= factor;
     sum.hue *= factor;
-    sum.emission *= factor;
     sum.brightness *= factor;
     sum.solid *= factor;
 }
@@ -124,14 +122,12 @@ void addGroup(inout TissueBlend blend, Tissue group)
     }
     float densityDifference = group.density - blend.maxDensity;
     float weight = exp(densityDifference / GroupBlending);
-    float materialWeight = exp(densityDifference / MaterialBlending);
+    float materialWeight = exp(densityDifference / MaterialBlending) * clamp(group.density / DensityThreshold, 0.0, 1.0);
     blend.weightSum += weight;
     blend.weightedSum.gradient += weight * group.gradient;
     blend.materialWeightSum += materialWeight;
-    blend.weightedSum.bulge += materialWeight * group.bulge;
     materialWeight /= group.weight;
     blend.weightedSum.hue += materialWeight * group.hue;
-    blend.weightedSum.emission += materialWeight * group.emission;
     blend.weightedSum.brightness += materialWeight * group.brightness;
     blend.weightedSum.solid += materialWeight * group.solid;
 }
@@ -143,26 +139,33 @@ Tissue getBlendedTissue(TissueBlend blend)
         return createTissue();
     }
     Tissue result = blend.weightedSum;
-    scaleMaterial(result, 1.0 / blend.materialWeightSum);
+    scaleMaterial(result, 1.0 / max(blend.materialWeightSum, 1e-30));
     result.gradient /= blend.weightSum;
     result.density = blend.maxDensity + GroupBlending * log(blend.weightSum);
     result.weight = 1.0;
     return result;
 }
 
-// The two cells nearest to a position, the walls lie where both are equally far away. Connections and polygons contribute their cells
-// wherever they reach, so that cells far apart still show walls.
+// The cells nearest to a position in the order of their distance. The walls lie where the nearest and another cell are equally far away,
+// three cells meet where the walls join. A cell counts within the largest range of its kernel, independent of the variation of its outline,
+// so that the nearest cells do not change at the edges of the kernels. Connections and polygons contribute their cells wherever they reach,
+// so that cells far apart still show walls.
+const int NeighborhoodSize = 3;
+
 struct Neighborhood
 {
-    uint nearestSphere;
-    float nearestDistanceSquared;
-    uint secondNearestSphere;
-    float secondNearestDistanceSquared;
+    uint spheres[NeighborhoodSize];
+    float distancesSquared[NeighborhoodSize];
 };
 
 Neighborhood createNeighborhood()
 {
-    return Neighborhood(NoEntry, 1e20, NoEntry, 1e20);
+    Neighborhood result;
+    for (int i = 0; i < NeighborhoodSize; ++i) {
+        result.spheres[i] = NoEntry;
+        result.distancesSquared[i] = 1e20;
+    }
+    return result;
 }
 
 float square(float value)
@@ -182,7 +185,6 @@ void addMaterial(inout Tissue tissue, Sphere sphere, float weight)
 {
     tissue.hue += sphere.hueMaterial.rgb * weight;
     tissue.weight += weight;
-    tissue.emission += sphere.emission.rgb * weight;
     tissue.brightness += sphere.emission.w * weight;
     tissue.solid += sphere.hueMaterial.w == Material_Solid ? weight : 0.0;
 }
@@ -215,25 +217,28 @@ void addCell(inout Tissue tissue, Sphere sphere, vec2 position, float share)
     float weight = share * CellWeight * getKernel(distanceSquared / kernelRadiusSquared, derivative);
     tissue.density += weight;
     tissue.gradient += share * CellWeight * derivative * 2.0 * offset / kernelRadiusSquared;
-    tissue.bulge += weight;
     addMaterial(tissue, sphere, weight);
 }
 
+// A cell that is closer than an entry takes its place, the displaced entry moves on to the following places
 void addToNeighborhood(inout Neighborhood neighborhood, uint index, Sphere sphere, vec2 position)
 {
-    if (index == neighborhood.nearestSphere || index == neighborhood.secondNearestSphere) {
-        return;
+    for (int i = 0; i < NeighborhoodSize; ++i) {
+        if (neighborhood.spheres[i] == index) {
+            return;
+        }
     }
     vec2 offset = position - sphere.centerRadius.xy;
     float distanceSquared = dot(offset, offset);
-    if (distanceSquared < neighborhood.nearestDistanceSquared) {
-        neighborhood.secondNearestSphere = neighborhood.nearestSphere;
-        neighborhood.secondNearestDistanceSquared = neighborhood.nearestDistanceSquared;
-        neighborhood.nearestSphere = index;
-        neighborhood.nearestDistanceSquared = distanceSquared;
-    } else if (distanceSquared < neighborhood.secondNearestDistanceSquared) {
-        neighborhood.secondNearestSphere = index;
-        neighborhood.secondNearestDistanceSquared = distanceSquared;
+    for (int i = 0; i < NeighborhoodSize; ++i) {
+        if (distanceSquared < neighborhood.distancesSquared[i]) {
+            uint displacedSphere = neighborhood.spheres[i];
+            float displacedDistanceSquared = neighborhood.distancesSquared[i];
+            neighborhood.spheres[i] = index;
+            neighborhood.distancesSquared[i] = distanceSquared;
+            index = displacedSphere;
+            distanceSquared = displacedDistanceSquared;
+        }
     }
 }
 
@@ -343,7 +348,8 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood)
             addCell(group, sphere, position, 1.0);
             totalDensity += group.density;
             totalGradient += group.gradient;
-            if (group.weight > 0.0) {
+            vec2 offset = position - sphere.centerRadius.xy;
+            if (dot(offset, offset) < square(getMaxCellKernelRadius(sphere))) {
                 addToNeighborhood(neighborhood, primitive, sphere, position);
             }
         } else if (kind == Kind_Capsule) {
@@ -397,18 +403,20 @@ float getCoverage(Tissue tissue)
 struct CellDetails
 {
     float wall;
-    float lightOrgan;
-    float lightOrganRim;
-    vec3 lightOrganEmission;
     float grain;
+    float organelle;
+    vec3 cellColor;
+    float cellColorWeight;
+    vec3 wallLight;
+    vec3 outlineLight;
 };
 
 // The distance is measured from the side of the nearest cell. The waves stay with the cells, since they derive from the seeds of both.
-float getWallDistance(Sphere cell, Sphere neighbor, Neighborhood neighborhood, vec2 position)
+float getWallDistance(Sphere cell, Sphere neighbor, float cellDistanceSquared, float neighborDistanceSquared, vec2 position)
 {
     vec2 axis = neighbor.centerRadius.xy - cell.centerRadius.xy;
     float centerDistance = max(length(axis), 1e-4);
-    float wallDistance = (neighborhood.secondNearestDistanceSquared - neighborhood.nearestDistanceSquared) / (2.0 * centerDistance);
+    float wallDistance = (neighborDistanceSquared - cellDistanceSquared) / (2.0 * centerDistance);
 
     // Both cells have to see the same wall, hence the waves are defined in an orientation that does not depend on which one is nearer
     float orientation = cell.details.y < neighbor.details.y ? 1.0 : -1.0;
@@ -419,66 +427,60 @@ float getWallDistance(Sphere cell, Sphere neighbor, Neighborhood neighborhood, v
     return abs(wallDistance * orientation - wave);
 }
 
-// See packLightOrganIntensities in Shaders/RayTracingPrepareCS.h
-bool hasLightOrgans(Sphere cell)
-{
-    return cell.details.x >= 0.0;
-}
-
-float getLightOrganIntensity(Sphere cell, int index)
-{
-    return float((uint(cell.details.x) >> (8 * index)) & 255u) / 255.0;
-}
-
-// The arrangement of the organs turns with the seed of the cell. Their light grows faster than linear with the signals, so that weak signals
-// remain dim.
-void addLightOrgans(inout CellDetails details, Sphere cell, vec2 local, float visibility)
+// The arrangement of the organelles derives from the seed of the cell and therefore stays with the cell
+void addOrganelles(inout CellDetails details, Sphere cell, vec2 local, float visibility)
 {
     float radius = cell.centerRadius.w;
     float seed = cell.details.y;
     float pixelSize = getPixelSize();
-    float edge = max(0.05 * radius, pixelSize);
-    for (int i = 0; i < LightOrgansPerCell; ++i) {
-        float size = radius * (i == 0 ? CentralLightOrganSize : OuterLightOrganSize);
-        float angle = 6.2831853 * (seed + float(i - 1) / float(max(LightOrgansPerCell - 1, 1)));
-        float distanceToCenter = i == 0 ? 0.0 : radius * (OuterLightOrganDistance + 0.1 * hash(vec2(seed, float(i))));
+    for (int i = 0; i < OrganellesPerCell; ++i) {
+        float angle = 6.2831853 * (seed + (float(i) + 0.6 * hash(vec2(seed, float(i) + 0.5))) / float(OrganellesPerCell));
+        float distanceToCenter = radius * MaxOrganelleDistance * sqrt(hash(vec2(seed, float(i) + 1.5)));
+        float size = radius * mix(MinOrganelleSize, MaxOrganelleSize, hash(vec2(seed, float(i) + 2.5)));
         float distance = length(local - distanceToCenter * vec2(cos(angle), sin(angle)));
 
-        // Organs smaller than a pixel would only appear as single bright pixels
-        float organVisibility = smoothstep(0.8, 2.0, size / pixelSize) * visibility;
-        details.lightOrgan = max(details.lightOrgan, (1.0 - smoothstep(size - edge, size, distance)) * organVisibility);
-        details.lightOrganRim += exp(-square((distance - size) / max(0.02, 0.7 * pixelSize))) * organVisibility;
-
-        float intensity = pow(getLightOrganIntensity(cell, i), 1.5);
-        float core = 1.0 - smoothstep(0.5 * size - edge, 0.5 * size, distance);
-        float halo = exp(-square(distance / (2.0 * size)));
-        details.lightOrganEmission += LightOrganColors[i] * intensity * (LightOrganGlow * core + LightOrganHaloGlow * halo) * organVisibility;
+        // Organelles of few pixels would only appear as speckles
+        float organelleVisibility = smoothstep(1.5, 3.5, size / pixelSize) * visibility;
+        float edge = max(OrganelleEdge * size, pixelSize);
+        details.organelle = max(details.organelle, (1.0 - smoothstep(size - edge, size, distance)) * organelleVisibility);
     }
 }
 
-// The cell at a position is the nearest one, the walls lie where the nearest and the second nearest cell are equally far away
+// The cell at a position is the nearest one, the walls lie where the nearest and the second nearest cell are equally far away. The walls of
+// the cells appear with the tissue, those of the solids and the inner details only when they span several pixels. The membrane of a cell
+// shines with its activity at its walls and at the outline of the body. A wall belongs to both of its cells and shines over its whole width.
 CellDetails getCellDetails(Neighborhood neighborhood, vec2 position)
 {
-    CellDetails result = CellDetails(0.0, 0.0, 0.0, vec3(0.0), 0.0);
-    float visibility = frame.tissue.y;
-    if (visibility <= 0.0 || neighborhood.nearestSphere == NoEntry) {
+    CellDetails result = CellDetails(0.0, 0.0, 0.0, vec3(0.0), 0.0, vec3(0.0), vec3(0.0));
+    if (neighborhood.spheres[0] == NoEntry) {
         return result;
     }
-    float pixelSize = getPixelSize();
-    Sphere cell = spheres[neighborhood.nearestSphere];
-    if (neighborhood.secondNearestSphere != NoEntry) {
-        float wallDistance = getWallDistance(cell, spheres[neighborhood.secondNearestSphere], neighborhood, position);
-        result.wall = exp(-square(wallDistance / max(0.035, 0.7 * pixelSize))) * visibility;
+    Sphere cell = spheres[neighborhood.spheres[0]];
+    bool solid = cell.hueMaterial.w == Material_Solid;
+    float wallWidth = max(0.035, 0.7 * getPixelSize());
+    float wallVisibility = solid ? getSolidDetailVisibility() : frame.tissue.w;
+    for (int i = 1; i < NeighborhoodSize; ++i) {
+        if (neighborhood.spheres[i] != NoEntry) {
+            Sphere neighbor = spheres[neighborhood.spheres[i]];
+            float wallDistance = getWallDistance(cell, neighbor, neighborhood.distancesSquared[0], neighborhood.distancesSquared[i], position);
+            float wall = exp(-square(wallDistance / wallWidth)) * wallVisibility;
+            result.wall = max(result.wall, wall);
+            result.wallLight = max(result.wallLight, max(cell.emission.rgb, neighbor.emission.rgb) * wall);
+        }
     }
-    if (cell.hueMaterial.w == Material_Solid) {
-        result.wall *= getSolidDetailVisibility();
+    if (solid) {
+        return result;
+    }
+    float visibility = frame.tissue.y;
+    result.cellColor = getSaturatedHue(cell.hueMaterial.rgb);
+    result.cellColorWeight = CellColorSharpness * (1.0 - visibility);
+    result.outlineLight = cell.emission.rgb;
+    if (visibility <= 0.0) {
         return result;
     }
     vec2 local = position - cell.centerRadius.xy;
     result.grain = (valueNoise(local / cell.centerRadius.w * CytoplasmGrain + cell.details.y * 29.0) - 0.5) * visibility;
-    if (hasLightOrgans(cell)) {
-        addLightOrgans(result, cell, local, visibility);
-    }
+    addOrganelles(result, cell, local, visibility);
     return result;
 }
 
@@ -500,7 +502,7 @@ const float TissueSourceLight = 1.6;
 const float SolidSourceLight = 1.2;
 
 // Zoomed out, the structures are only a few pixels wide and appear as dense lines without outline
-vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 medium, vec3 scattered, vec3 sourceLight)
+vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 medium, vec3 sourceLight)
 {
     float closeUpWeight = getCloseUpWeight();
     float excess = max(tissue.density - DensityThreshold, 0.0);
@@ -512,16 +514,14 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, vec2 position, vec3 m
     float thickness = mix(1.0, 1.0 - exp(-totalExcess * thicknessGain), closeUpWeight);
     vec2 thicknessGradient = closeUpWeight * thicknessGain * exp(-totalExcess * thicknessGain) * tissue.totalGradient;
 
-    vec3 color = getTissueColor(tissue);
     CellDetails details = getCellDetails(neighborhood, position);
-    float cytoplasm = thickness * (1.0 + 0.35 * details.grain) * (1.0 - 0.55 * details.lightOrgan);
+    vec3 color = mix(getTissueColor(tissue), details.cellColor, details.cellColorWeight);
+    float cytoplasm = thickness * (1.0 + 0.35 * details.grain) * (1.0 - OrganelleShade * details.organelle);
 
-    float opticalDensity = cytoplasm + outline * 0.8 + details.wall * 0.6 + details.lightOrgan * 0.5;
+    float opticalDensity = cytoplasm + outline * 0.8 + details.wall * 0.6 + details.organelle * OrganelleDensity;
     vec3 transmittance = exp(-Absorption * opticalDensity * getAbsorbedShare(color));
-    vec3 fluorescence = color * tissue.brightness
-        * (CytoplasmGlow * cytoplasm + OutlineGlow * outline + WallGlow * details.wall + LightOrganRimGlow * details.lightOrganRim);
-    vec3 glow = tissue.emission * CoreGlow * min(tissue.bulge, 1.0) + details.lightOrganEmission
-        + (scattered * TissueScattering + sourceLight * TissueSourceLight) * thickness * color;
+    vec3 fluorescence = color * tissue.brightness * (CytoplasmGlow * cytoplasm + OutlineGlow * outline + WallGlow * details.wall);
+    vec3 glow = details.wallLight + details.outlineLight * outline + sourceLight * TissueSourceLight * thickness * color;
     float relief = 1.0 + MaxRelief * tanh(ReliefStrength * dot(thicknessGradient, ReliefDirection) / MaxRelief);
     vec3 result = (medium * transmittance + (fluorescence + glow) * mix(FarGlowGain, 1.0, closeUpWeight)) * relief;
 
@@ -552,21 +552,18 @@ void main()
     }
     vec2 position = pixelToWorld(vec2(pixel) + 0.5 + frame.rect.zw);
 
-    // Zoomed out, the rasterized objects replace the tissue, whose scene and lights are not built then
+    // Zoomed out, the rasterized objects replace the tissue, whose scene is not built then
     float tissueVisibility = frame.tissue.w;
-    vec3 scattered = tissueVisibility > 0.0 ? getScatteredLight(position) : vec3(0.0);
     vec3 background = getBackgroundRadiance(position);
     vec3 sourceLight = isSourceLightActive() ? getSourceLight(position) : vec3(0.0);
     vec3 medium = shadeGas(position, background, sourceLight) + getEnergyParticleRadiance(position);
     vec3 color = medium;
     if (tissueVisibility > 0.0) {
-        vec3 lightedMedium = medium + scattered * MediumScattering;
-        color = lightedMedium;
         Neighborhood neighborhood;
         Tissue tissue = gatherTissue(position, neighborhood);
         if (tissue.weight > 0.0) {
             float coverage = getCoverage(tissue);
-            color = mix(lightedMedium + getHalo(tissue), shadeTissue(tissue, neighborhood, position, medium, scattered, sourceLight), coverage);
+            color = mix(medium + getHalo(tissue), shadeTissue(tissue, neighborhood, position, medium, sourceLight), coverage);
         }
         color = mix(medium, color, tissueVisibility);
     }

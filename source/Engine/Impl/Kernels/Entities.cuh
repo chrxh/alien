@@ -563,8 +563,8 @@ struct Cell
     CellEvent event;
     uint8_t eventCounter;
     uint8_t highlightIntensity;
-    uint8_t lightOrganIntensities[LIGHT_ORGANS_PER_CELL];  // Rendering data in the padding before eventPos, see updateLightOrgans in GeometryKernels.cu
-    uint16_t lightOrganTimestep;                           // Lower bits of the timestep of the last update of the light organs
+    uint8_t renderedActivity;           // Rendering data in the padding before eventPos, see updateRenderedActivity in GeometryKernels.cu
+    uint16_t renderedActivityTimestep;  // Lower bits of the timestep of the last update of the rendered activity
     float2 eventPos;
 
     // Cell type data
@@ -585,14 +585,16 @@ struct Cell
         return result;
     }
 
-    __device__ __inline__ static uint8_t getLightOrganTarget(float signal) { return static_cast<uint8_t>(min(max(signal, 0.0f), 1.0f) * 255.0f + 0.5f); }
-
-    __device__ __inline__ void initLightOrgans()
+    // The positive part of signal #0, whose range is [-2, 2], in 8 bit
+    __device__ __inline__ uint8_t getRenderedActivityTarget() const
     {
-        for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
-            lightOrganIntensities[i] = getLightOrganTarget(neuralActivity.signals[i]);
-        }
-        lightOrganTimestep = 0;
+        return static_cast<uint8_t>(min(max(neuralActivity.signals[0] / 2.0f, 0.0f), 1.0f) * 255.0f + 0.5f);
+    }
+
+    __device__ __inline__ void initRenderedActivity()
+    {
+        renderedActivity = getRenderedActivityTarget();
+        renderedActivityTimestep = 0;
     }
 };
 

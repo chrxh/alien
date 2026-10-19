@@ -4,21 +4,12 @@
 
 namespace Shaders
 {
-    // Derives the objects from the geometry buffers, counts the lights per cell of the light grid and creates the bounding boxes of the
-    // groups that form the tissue: each cell alone, each connection together with its two cells and each triangle together with its corners
+    // Derives the objects from the geometry buffers and creates the bounding boxes of the groups that form the tissue: each cell alone, each
+    // connection together with its two cells and each triangle together with its corners
     std::string_view const RayTracingPrepareCS = R"(
-// The highlight intensity reflects the activity of the neuron of a cell, which makes the cell glow and light up its surroundings
-const float ActivityGlow = 1.5;
-
-// The 8 bit intensities fit exactly into the mantissa of a float, see getLightOrganIntensity in Shaders/RayTracingTissueCS.h
-float packLightOrganIntensities(ObjectVertex object)
-{
-    uint result = 0u;
-    for (int i = 0; i < LightOrgansPerCell; ++i) {
-        result |= uint(round(clamp(object.lightOrganIntensities[i], 0.0, 1.0) * 255.0)) << (8 * i);
-    }
-    return float(result);
-}
+// The membrane of a cell glows with the activity of its neuron and flashes when the activity changes, see Shaders/RayTracingTissueCS.h
+const float MembraneActivityGlow = 0.15;
+const float MembraneFlashGlow = 0.3;
 
 Sphere createSphere(uint index)
 {
@@ -38,11 +29,10 @@ Sphere createSphere(uint index)
         material = Material_Inactive;
     }
 
+    // The highlight intensity reflects the changes of the activity
     vec3 emission = vec3(0.0);
-    float lightOrgans = -1.0;
     if (objectType == ObjectType_Cell) {
-        emission = hue * ActivityGlow * object.highlightIntensity;
-        lightOrgans = packLightOrganIntensities(object);
+        emission = hue * (MembraneActivityGlow * object.activity + MembraneFlashGlow * object.highlightIntensity);
     }
 
     // The height of an object derives from its id and the id of its creature and therefore stays the same over time
@@ -52,7 +42,7 @@ Sphere createSphere(uint index)
     result.centerRadius = vec4(object.pos[0], object.pos[1], 0.0, radius);
     result.hueMaterial = vec4(hue, material);
     result.emission = vec4(emission, getBrightness(color));
-    result.details = vec4(lightOrgans, seed, float((object.state >> 16) & 1), 0.0);
+    result.details = vec4(0.0, seed, float((object.state >> 16) & 1), 0.0);
     return result;
 }
 
@@ -102,12 +92,6 @@ void main()
         float extent = getCellExtent(sphere);
         bool enabled = sphere.hueMaterial.w != Material_Inactive;
         sphereAabbs[index] = createAabb(center - extent, center + extent, enabled);
-        if (enabled && isLight(sphere)) {
-            uint cellIndex = getLightCellIndex(getLightCell(center));
-            if (cellIndex != NoEntry) {
-                atomicAdd(cellCounts[cellIndex], 1u);
-            }
-        }
     }
     if (index < frame.counts.y) {
         uint sphereA;

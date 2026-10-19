@@ -9,9 +9,9 @@ namespace
     // The radiation center shows the light color of its source darkened, so that it stays in the background
     __device__ float constexpr RadiationCenterBrightness = 0.45f;
 
-    // The light organs approach the signals with this time constant, so that signals changing with every cell function pass do not let them
+    // The rendered activity approaches signal #0 with this time constant, so that signals changing with every cell function pass do not let it
     // flicker
-    __device__ float constexpr LightOrganResponseTimesteps = 30.0f;
+    __device__ float constexpr ActivityResponseTimesteps = 30.0f;
 
     // The outlines of solids follow the lattice of their particles in steps. Where an outline changes between bending outwards and inwards, its
     // particles are rendered closer to the middle of their neighbors on the outline. Outlines that bend in one direction only, such as those of
@@ -119,27 +119,24 @@ namespace
             && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
     }
 
-    // Only visible cells are updated, hence the elapsed simulation time is measured per cell. Paused simulations keep their light organs.
-    __device__ __inline__ void updateLightOrgans(Cell& cell, uint64_t timestep)
+    // Only visible cells are updated, hence the elapsed simulation time is measured per cell. Paused simulations keep their rendered activity.
+    __device__ __inline__ void updateRenderedActivity(Cell& cell, uint64_t timestep)
     {
         auto timestepBits = static_cast<uint16_t>(timestep);
-        auto elapsedTimesteps = static_cast<uint16_t>(timestepBits - cell.lightOrganTimestep);
+        auto elapsedTimesteps = static_cast<uint16_t>(timestepBits - cell.renderedActivityTimestep);
         if (elapsedTimesteps == 0) {
             return;
         }
-        cell.lightOrganTimestep = timestepBits;
-        auto remainingDifference = expf(-toFloat(elapsedTimesteps) / LightOrganResponseTimesteps);
-        for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
-            auto intensity = toInt(cell.lightOrganIntensities[i]);
-            auto target = toInt(Cell::getLightOrganTarget(cell.neuralActivity.signals[i]));
-            auto newIntensity = target + toInt(roundf(toFloat(intensity - target) * remainingDifference));
+        cell.renderedActivityTimestep = timestepBits;
+        auto activity = toInt(cell.renderedActivity);
+        auto target = toInt(cell.getRenderedActivityTarget());
+        auto newActivity = target + toInt(roundf(toFloat(activity - target) * expf(-toFloat(elapsedTimesteps) / ActivityResponseTimesteps)));
 
-            // Differences below one step of the 8 bit intensities would otherwise remain forever
-            if (newIntensity == intensity && intensity != target) {
-                newIntensity += intensity < target ? 1 : -1;
-            }
-            cell.lightOrganIntensities[i] = static_cast<uint8_t>(newIntensity);
+        // Differences below one step of the 8 bit activity would otherwise remain forever
+        if (newActivity == activity && activity != target) {
+            newActivity += activity < target ? 1 : -1;
         }
+        cell.renderedActivity = static_cast<uint8_t>(newActivity);
     }
 }
 
@@ -204,24 +201,20 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             objectData[idx].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
             objectData[idx].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-            // Compute highlight intensity and light organs from cell
+            // Compute highlight intensity and activity from cell
             float highlightIntensity = 0.0f;
-            float lightOrganIntensities[LIGHT_ORGANS_PER_CELL] = {};
+            float activity = 0.0f;
             if (object->type == ObjectType_Cell) {
                 auto& cell = object->typeData.cell;
                 highlightIntensity = toFloat(cell.highlightIntensity) / 255.0f;
-                updateLightOrgans(cell, *data.timestep);
-                for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
-                    lightOrganIntensities[i] = toFloat(cell.lightOrganIntensities[i]) / 255.0f;
-                }
+                updateRenderedActivity(cell, *data.timestep);
+                activity = toFloat(cell.renderedActivity) / 255.0f;
             }
 
             // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolatedOrTail (bit 16) into state field
             objectData[idx].state = cellType | (object->type << 8) | (isIsolatedOrTail << 16);
             objectData[idx].highlightIntensity = highlightIntensity;
-            for (int i = 0; i < LIGHT_ORGANS_PER_CELL; ++i) {
-                objectData[idx].lightOrganIntensities[i] = lightOrganIntensities[i];
-            }
+            objectData[idx].activity = activity;
 
             object->tempValue1.as_uint64 = idx;
         }

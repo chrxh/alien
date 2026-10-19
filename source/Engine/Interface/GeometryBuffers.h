@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <vector>
 
-#include <Data/EngineConstants.h>
-
 #include "Definitions.h"
 
 struct NumRenderObjects
@@ -24,13 +22,13 @@ struct NumRenderObjects
 
 struct ObjectVertexData
 {
-    float pos[3];                                        // x, y, z position (z used for lighting)
-    float color[3];                                      // r, g, b color
-    int state;                                           // Bit 0..7 = cell type
-                                                         // Bit 8..15 = object type (ObjectType_Solid, ObjectType_FreeCell, ObjectType_Cell)
-                                                         // Bit 16 = is isolated (zero connections)
-    float highlightIntensity;                            // Highlight intensity in [0, 1]
-    float lightOrganIntensities[LIGHT_ORGANS_PER_CELL];  // Intensities in [0, 1] of the light organs for the first signal channels
+    float pos[3];              // x, y, z position (z used for lighting)
+    float color[3];            // r, g, b color
+    int state;                 // Bit 0..7 = cell type
+                               // Bit 8..15 = object type (ObjectType_Solid, ObjectType_FreeCell, ObjectType_Cell)
+                               // Bit 16 = is isolated (zero connections)
+    float highlightIntensity;  // Highlight intensity in [0, 1]
+    float activity;            // Positive part of signal #0 in [0, 1], smoothed over time
 };
 
 struct FluidParticleVertexData
