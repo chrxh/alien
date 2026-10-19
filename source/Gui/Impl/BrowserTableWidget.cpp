@@ -178,6 +178,9 @@ void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::v
             _data->selectedTreeTO = selected ? treeTO : nullptr;
         }
     }
+    if (_data->scrollToSelection && selected) {
+        ImGui::SetScrollHereY(0.5f);
+    }
     ImGui::SameLine();
 
     pushTextColor(treeTO);

@@ -469,7 +469,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         requestData.downloadCache->insertOrAssign(resourceId, deserializedSim);
     }
 
-    return std::make_shared<_UploadNetworkResourceRequestResult>(request->getRequestId(), UploadNetworkResourceResultData{});
+    return std::make_shared<_UploadNetworkResourceRequestResult>(request->getRequestId(), UploadNetworkResourceResultData{.resourceId = resourceId});
 }
 
 _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
