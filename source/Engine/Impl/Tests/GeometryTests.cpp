@@ -423,6 +423,24 @@ TEST_F(GeometryTests, copyBuffers_activityShowsPositivePartOfFirstSignal)
     EXPECT_FLOAT_EQ(0.0f, getVertexNextTo(cellData, {200.0f, 100.0f}).activity);
 }
 
+TEST_F(GeometryTests, copyBuffers_activityIsFullWhileCellIsAttacked)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().event(CellEvent_Attacked).eventCounter(10)),
+        ObjectDesc().id(2).pos({200.0f, 100.0f}).type(CellDesc().event(CellEvent_Attacked).eventCounter(0)),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(2u, cellData.size());
+    EXPECT_FLOAT_EQ(1.0f, getVertexNextTo(cellData, {100.0f, 100.0f}).activity);
+    EXPECT_FLOAT_EQ(0.0f, getVertexNextTo(cellData, {200.0f, 100.0f}).activity);
+}
+
 TEST_F(GeometryTests, copyBuffers_activitySmoothsAlternatingSignals)
 {
     // By default, connected cells swap their signals with every cell function pass
