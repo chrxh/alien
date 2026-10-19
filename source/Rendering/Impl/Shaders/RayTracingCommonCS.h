@@ -63,8 +63,8 @@ struct Sphere
 {
     vec4 centerRadius;  // xy: center, w: radius
     vec4 hueMaterial;   // rgb: hue, w: material
-    vec4 emission;      // rgb: light of the membrane, w: brightness of the color
-    vec4 details;       // y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
+    vec4 details;       // x: brightness of the color, y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
+    vec4 neuron;        // x: 1 for a cell with a neuron, y: activity of the neuron
 };
 
 struct Aabb

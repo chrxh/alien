@@ -585,9 +585,13 @@ struct Cell
         return result;
     }
 
-    // The positive part of signal #0, whose range is [-2, 2], in 8 bit
+    // The positive part of signal #0, whose range is [-2, 2], in 8 bit. A cell is fully active while it is attacked, which its telemetry
+    // input reports, see NeuronProcessor::calcTelemetryInput.
     __device__ __inline__ uint8_t getRenderedActivityTarget() const
     {
+        if (event == CellEvent_Attacked && eventCounter > 0) {
+            return 255;
+        }
         return static_cast<uint8_t>(min(max(neuralActivity.signals[0] / 2.0f, 0.0f), 1.0f) * 255.0f + 0.5f);
     }
 
