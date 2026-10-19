@@ -19,6 +19,10 @@ const float TwoPi = 6.2831853;
 const float GroupBlending = 0.03;
 const float MaterialBlending = 0.25;
 
+// The polygons of the tissue dominate the material and the cells at a position over the other groups, so that a strand lying on a body
+// without a connection to it hides below the body instead of replacing a part of it
+const float PolygonDominance = 1.5;
+
 const float ThicknessGain = 1.6;
 
 // The polygons, connections and particles of a solid add up to a density that varies with its structure. Unless the structure is visible, the
@@ -84,12 +88,13 @@ Tissue createTissue()
 }
 
 // Smooth maximum of the group densities as the logarithm of a sum of exponentials. The gradient of the density is averaged with the same
-// weights, the materials with weights of the wider range. A group fades out of the material with its density, so that the material does not
-// change abruptly where the range of the group ends. All weights are relative to the highest density found so far, which keeps the
-// exponentials in range.
+// weights, the materials with weights of the wider range applied to the dominance of the groups, i.e. their density raised for polygons. A
+// group fades out of the material with its density, so that the material does not change abruptly where the range of the group ends. All
+// weights are relative to the highest density or dominance found so far, which keeps the exponentials in range.
 struct TissueBlend
 {
     float maxDensity;
+    float maxDominance;
     float weightSum;
     float materialWeightSum;
     Tissue weightedSum;
@@ -97,7 +102,7 @@ struct TissueBlend
 
 TissueBlend createTissueBlend()
 {
-    return TissueBlend(0.0, 0.0, 0.0, createTissue());
+    return TissueBlend(0.0, 0.0, 0.0, 0.0, createTissue());
 }
 
 void scaleMaterial(inout Tissue sum, float factor)
@@ -107,24 +112,25 @@ void scaleMaterial(inout Tissue sum, float factor)
     sum.solid *= factor;
 }
 
-void addGroup(inout TissueBlend blend, Tissue group)
+void addGroup(inout TissueBlend blend, Tissue group, float dominance)
 {
     if (group.weight <= 0.0) {
         return;
     }
     if (group.density > blend.maxDensity) {
-        float densityDifference = blend.maxDensity - group.density;
-        float factor = exp(densityDifference / GroupBlending);
-        float materialFactor = exp(densityDifference / MaterialBlending);
+        float factor = exp((blend.maxDensity - group.density) / GroupBlending);
         blend.weightSum *= factor;
         blend.weightedSum.gradient *= factor;
-        blend.materialWeightSum *= materialFactor;
-        scaleMaterial(blend.weightedSum, materialFactor);
         blend.maxDensity = group.density;
     }
-    float densityDifference = group.density - blend.maxDensity;
-    float weight = exp(densityDifference / GroupBlending);
-    float materialWeight = exp(densityDifference / MaterialBlending) * clamp(group.density / DensityThreshold, 0.0, 1.0);
+    if (dominance > blend.maxDominance) {
+        float materialFactor = exp((blend.maxDominance - dominance) / MaterialBlending);
+        blend.materialWeightSum *= materialFactor;
+        scaleMaterial(blend.weightedSum, materialFactor);
+        blend.maxDominance = dominance;
+    }
+    float weight = exp((group.density - blend.maxDensity) / GroupBlending);
+    float materialWeight = exp((dominance - blend.maxDominance) / MaterialBlending) * clamp(group.density / DensityThreshold, 0.0, 1.0);
     blend.weightSum += weight;
     blend.weightedSum.gradient += weight * group.gradient;
     blend.materialWeightSum += materialWeight;
@@ -148,12 +154,12 @@ Tissue getBlendedTissue(TissueBlend blend)
     return result;
 }
 
-// The cells nearest to a position in the order of their rank, i.e. their squared distance reduced by the density of their strongest group
-// at the position. The walls lie where the nearest and another cell have the same rank, three cells meet where the walls join. A cell of a
-// body passing over another one thus does not draw walls into it, while the cells of a body share their groups and keep their walls in
-// the middle. A cell counts within the largest range of its kernel, independent of the variation of its outline, so that the nearest
-// cells do not change at the edges of the kernels. Connections and polygons contribute their cells wherever they reach, so that cells far
-// apart still show walls.
+// The cells nearest to a position in the order of their rank, i.e. their squared distance reduced by the dominance of their strongest group
+// at the position, see PolygonDominance. The walls lie where the nearest and another cell have the same rank, three cells meet where the
+// walls join. A cell of a body passing over another one thus does not draw walls into it, while the cells of a body share their groups and
+// keep their walls in the middle. A cell counts within the largest range of its kernel, independent of the variation of its outline, so
+// that the nearest cells do not change at the edges of the kernels. Connections and polygons contribute their cells wherever they reach, so
+// that cells far apart still show walls.
 const int NeighborhoodSize = 3;
 const float GroupAffinity = 2.0;
 
@@ -227,10 +233,10 @@ void addCell(inout Tissue tissue, Sphere sphere, vec2 position, float share)
 
 // A cell that ranks before an entry takes its place, the displaced entry moves on to the following places. A cell found again with a
 // stronger group moves up.
-void addToNeighborhood(inout Neighborhood neighborhood, uint index, Sphere sphere, vec2 position, float groupDensity)
+void addToNeighborhood(inout Neighborhood neighborhood, uint index, Sphere sphere, vec2 position, float groupDominance)
 {
     vec2 offset = position - sphere.centerRadius.xy;
-    float rank = dot(offset, offset) - GroupAffinity * groupDensity;
+    float rank = dot(offset, offset) - GroupAffinity * groupDominance;
     for (int i = 0; i < NeighborhoodSize; ++i) {
         if (neighborhood.spheres[i] == index) {
             if (rank >= neighborhood.ranks[i]) {
@@ -361,15 +367,61 @@ const float DendriteActivityGlow = 0.18;
 const float NeuronClearing = 0.3;
 const float NeuronDensity = 0.3;
 
+// The dendrites at a position are kept for each of their cells. Only those of the cells in the neighborhood are shown, so that a cell hidden
+// below a body hides its dendrites as well, see PolygonDominance.
+const int MaxDendriteCells = 4;
+
 struct Dendrites
 {
-    float coverage;
-    vec3 light;
+    uint cells[MaxDendriteCells];
+    float coverages[MaxDendriteCells];
+    vec3 lights[MaxDendriteCells];
 };
 
 Dendrites createDendrites()
 {
-    return Dendrites(0.0, vec3(0.0));
+    Dendrites result;
+    for (int i = 0; i < MaxDendriteCells; ++i) {
+        result.cells[i] = NoEntry;
+        result.coverages[i] = 0.0;
+        result.lights[i] = vec3(0.0);
+    }
+    return result;
+}
+
+// The dendrites of a cell overlap at its body, where their light does not add up. A further cell takes the place of the weakest one.
+void addDendriteOfCell(inout Dendrites dendrites, uint cell, float coverage, vec3 light)
+{
+    int weakest = 0;
+    for (int i = 0; i < MaxDendriteCells; ++i) {
+        if (dendrites.cells[i] == cell) {
+            dendrites.coverages[i] = max(dendrites.coverages[i], coverage);
+            dendrites.lights[i] = max(dendrites.lights[i], light);
+            return;
+        }
+        if (dendrites.coverages[i] < dendrites.coverages[weakest]) {
+            weakest = i;
+        }
+    }
+    if (coverage > dendrites.coverages[weakest]) {
+        dendrites.cells[weakest] = cell;
+        dendrites.coverages[weakest] = coverage;
+        dendrites.lights[weakest] = light;
+    }
+}
+
+void getVisibleDendrites(Dendrites dendrites, Neighborhood neighborhood, out float coverage, out vec3 light)
+{
+    coverage = 0.0;
+    light = vec3(0.0);
+    for (int i = 0; i < MaxDendriteCells; ++i) {
+        for (int j = 0; j < NeighborhoodSize; ++j) {
+            if (dendrites.cells[i] != NoEntry && dendrites.cells[i] == neighborhood.spheres[j]) {
+                coverage = max(coverage, dendrites.coverages[i]);
+                light = max(light, dendrites.lights[i]);
+            }
+        }
+    }
 }
 
 // Lines thinner than a pixel keep their brightness spread over a pixel
@@ -401,7 +453,7 @@ void addBranch(inout float coverage, vec2 position, vec2 start, vec2 end, float 
 
 // The dendrite bends once, forks at its tip and sends a twig to the side. Its shape derives from the seeds of both cells and therefore
 // stays the same over time, its branches taper towards their tips.
-void addDendrite(inout Dendrites dendrites, Sphere cell, Sphere neighbor, vec2 position)
+void addDendrite(inout Dendrites dendrites, uint cellIndex, Sphere cell, Sphere neighbor, vec2 position)
 {
     vec2 axis = neighbor.centerRadius.xy - cell.centerRadius.xy;
     float distance = length(axis);
@@ -431,9 +483,9 @@ void addDendrite(inout Dendrites dendrites, Sphere cell, Sphere neighbor, vec2 p
     coverage *= frame.tissue.y;
     vec3 light = getNeuronColor(cell) * coverage * (DendriteGlow + DendriteActivityGlow * cell.neuron.y);
 
-    // The dendrites of a cell overlap at its body, where their light does not add up
-    dendrites.coverage = max(dendrites.coverage, coverage);
-    dendrites.light = max(dendrites.light, light);
+    if (coverage > 0.0) {
+        addDendriteOfCell(dendrites, cellIndex, coverage, light);
+    }
 }
 )"
                                                 R"(
@@ -454,6 +506,7 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood, out Dendrites 
 
         // Each group starts with its own contribution, which enters the total, the cells of connections and triangles follow
         Tissue group = createTissue();
+        float polygonBonus = 0.0;
         if (kind == Kind_Sphere) {
             Sphere sphere = spheres[primitive];
             addCell(group, sphere, position, 1.0);
@@ -480,8 +533,8 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood, out Dendrites 
                 addToNeighborhood(neighborhood, indexB, b, position, group.density);
             }
             if (isNeuron(a) && isNeuron(b) && frame.tissue.y > 0.0) {
-                addDendrite(dendrites, a, b, position);
-                addDendrite(dendrites, b, a, position);
+                addDendrite(dendrites, indexA, a, b, position);
+                addDendrite(dendrites, indexB, b, a, position);
             }
         } else if (kind == Kind_Triangle) {
             uint indexA;
@@ -495,16 +548,18 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood, out Dendrites 
             totalDensity += group.density;
             totalGradient += group.gradient;
             bool onFill = group.density > 0.0;
+            bool isTissue = max(a.hueMaterial.w, max(b.hueMaterial.w, c.hueMaterial.w)) == Material_Tissue;
+            polygonBonus = isTissue ? PolygonDominance * group.density / FillWeight : 0.0;
             addCell(group, a, position, 1.0 - getSolidSmoothing(a));
             addCell(group, b, position, 1.0 - getSolidSmoothing(b));
             addCell(group, c, position, 1.0 - getSolidSmoothing(c));
             if (onFill) {
-                addToNeighborhood(neighborhood, indexA, a, position, group.density);
-                addToNeighborhood(neighborhood, indexB, b, position, group.density);
-                addToNeighborhood(neighborhood, indexC, c, position, group.density);
+                addToNeighborhood(neighborhood, indexA, a, position, group.density + polygonBonus);
+                addToNeighborhood(neighborhood, indexB, b, position, group.density + polygonBonus);
+                addToNeighborhood(neighborhood, indexC, c, position, group.density + polygonBonus);
             }
         }
-        addGroup(blend, group);
+        addGroup(blend, group, group.density + polygonBonus);
     }
     Tissue result = getBlendedTissue(blend);
     result.totalDensity = totalDensity;
@@ -528,21 +583,24 @@ struct CellDetails
     vec3 somaLight;
 };
 
-// The distance is measured from the side of the nearest cell, see Neighborhood for the ranks. The waves stay with the cells, since they
-// derive from the seeds of both.
+// The distance is measured from the side of the nearest cell, see Neighborhood for the ranks. A wall only appears where it lies in the
+// middle between both cells as well. The ranks of a cell lying on another body change quickly at the edge of its group, where the wall
+// would otherwise enclose the cell like a bubble. The waves stay with the cells, since they derive from the seeds of both.
 float getWallDistance(Sphere cell, Sphere neighbor, float cellRank, float neighborRank, vec2 position)
 {
     vec2 axis = neighbor.centerRadius.xy - cell.centerRadius.xy;
     float centerDistance = max(length(axis), 1e-4);
+    vec2 middle = (cell.centerRadius.xy + neighbor.centerRadius.xy) * 0.5;
     float wallDistance = (neighborRank - cellRank) / (2.0 * centerDistance);
+    float middleDistance = dot(middle - position, axis / centerDistance);
 
     // Both cells have to see the same wall, hence the waves are defined in an orientation that does not depend on which one is nearer
     float orientation = cell.details.y < neighbor.details.y ? 1.0 : -1.0;
     vec2 direction = axis / centerDistance * orientation;
-    float along = dot(position - (cell.centerRadius.xy + neighbor.centerRadius.xy) * 0.5, vec2(-direction.y, direction.x));
+    float along = dot(position - middle, vec2(-direction.y, direction.x));
     float pairSeed = cell.details.y + neighbor.details.y;
     float wave = (valueNoise(vec2(along * WallWaveFrequency + pairSeed * 53.0, pairSeed * 31.0)) - 0.5) * WallWaveAmplitude;
-    return abs(wallDistance * orientation - wave);
+    return max(abs(wallDistance * orientation - wave), abs(middleDistance * orientation - wave));
 }
 
 // The arrangement of the organelles derives from the seed of the cell and therefore stays with the cell
@@ -645,13 +703,16 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, Dendrites dendrites, 
 
     CellDetails details = getCellDetails(neighborhood, position);
     vec3 color = mix(getTissueColor(tissue), details.cellColor, details.cellColorWeight);
-    float neuron = max(details.soma, dendrites.coverage);
+    float dendriteCoverage;
+    vec3 dendriteLight;
+    getVisibleDendrites(dendrites, neighborhood, dendriteCoverage, dendriteLight);
+    float neuron = max(details.soma, dendriteCoverage);
     float cytoplasm = thickness * (1.0 + 0.35 * details.grain) * (1.0 - OrganelleShade * details.organelle) * (1.0 - NeuronClearing * neuron);
 
     float opticalDensity = cytoplasm + outline * 0.8 + details.wall * 0.6 + details.organelle * OrganelleDensity + NeuronDensity * neuron;
     vec3 transmittance = exp(-Absorption * opticalDensity * getAbsorbedShare(color));
     vec3 fluorescence = color * tissue.brightness * (CytoplasmGlow * cytoplasm + OutlineGlow * outline + WallGlow * details.wall);
-    vec3 glow = max(details.somaLight, dendrites.light) + sourceLight * TissueSourceLight * thickness * color;
+    vec3 glow = max(details.somaLight, dendriteLight) + sourceLight * TissueSourceLight * thickness * color;
     float relief = 1.0 + MaxRelief * tanh(ReliefStrength * dot(thicknessGradient, ReliefDirection) / MaxRelief);
     vec3 result = (medium * transmittance + (fluorescence + glow) * mix(FarGlowGain, 1.0, closeUpWeight)) * relief;
 
