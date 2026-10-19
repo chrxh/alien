@@ -18,8 +18,6 @@
 namespace
 {
     auto constexpr MinCapacity = uint64_t(4096);
-    auto constexpr LightRange = 3.0f;
-    auto constexpr MaxLightGridCellsPerDimension = 512.0f;
     auto constexpr NumJitterPositions = 16u;
 
     // Between these screen zoom factors, the tissue fades in over the rasterized objects
@@ -30,7 +28,7 @@ namespace
     auto constexpr CloseUpZoomStart = 3.0f;
     auto constexpr CloseUpZoomEnd = 12.0f;
 
-    // Cell details such as walls and light organs appear between these screen zoom factors
+    // The inner details of the cells appear between these screen zoom factors, the walls already with the tissue
     auto constexpr DetailZoomStart = 8.0f;
     auto constexpr DetailZoomEnd = 20.0f;
 
@@ -79,10 +77,6 @@ namespace
         Binding_SphereAabbs,
         Binding_CapsuleAabbs,
         Binding_TriangleAabbs,
-        Binding_CellCounts,
-        Binding_CellCursors,
-        Binding_CellEntries,
-        Binding_Allocation,
         Binding_SceneColor,
         Binding_AntiAliased,
         Binding_PreviousAntiAliased,
@@ -137,8 +131,6 @@ namespace
         float view[4];
         float rect[4];
         uint32_t counts[4];
-        float lightGrid[4];
-        int32_t gridSize[4];
         float tissue[4];
         float parameters[4];
         float gasGrid[4];
@@ -165,7 +157,7 @@ _RayTracingResources::~_RayTracingResources()
     }
     destroySceneResources(_scene, false);
     destroyViewResources(_view, false);
-    for (auto buffer : {&_cellCounts, &_cellCursors, &_allocation, &_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+    for (auto buffer : {&_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
         context.destroyBufferLater(*buffer);
     }
     context.destroyImageLater(_gasImage);
@@ -195,7 +187,6 @@ void _RayTracingResources::prepare(RenderView const& view, NumRenderObjects cons
         _scene = scene;
     }
 
-    updateLightGrid(view.visibleWorldRect);
     updateGasGrid(view);
 
     if (_view.size != view.viewSize) {
@@ -228,13 +219,11 @@ void _RayTracingResources::resetImageStates()
 // The sizes shared with the shaders and the work group size are declared here, so that they cannot diverge
 RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const& source, IntVector2D const& workGroupSize) const
 {
-    static_assert(LIGHT_ORGANS_PER_CELL <= 3, "The 8 bit intensities of the light organs have to fit exactly into the mantissa of a float");
     auto declarations = std::format(
         "#version 460\n"
         "#extension GL_EXT_ray_query : require\n"
         "#extension GL_KHR_shader_subgroup_clustered : require\n"
         "layout(local_size_x = {}, local_size_y = {}, local_size_z = 1) in;\n"
-        "const int LightOrgansPerCell = {};\n"
         "const int MaxSourceLights = {};\n"
         "const int GasImageSize = {};\n"
         "const int GasLayers = {};\n"
@@ -244,7 +233,6 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
         "const float LightFalloffDistance = {:.6f};\n",
         workGroupSize.x,
         workGroupSize.y,
-        LIGHT_ORGANS_PER_CELL,
         MAX_SOURCES,
         MaxGasNodes,
         GasLayers,
@@ -316,11 +304,6 @@ void _RayTracingResources::access(VkCommandBuffer commandBuffer, RayTracingAcces
 VulkanImage& _RayTracingResources::getOutput()
 {
     return _view.antiAliased.at(_current);
-}
-
-_RayTracingResources::LightGrid const& _RayTracingResources::getLightGrid() const
-{
-    return _lightGrid;
 }
 
 _RayTracingResources::GasGrid const& _RayTracingResources::getGasGrid() const
@@ -455,7 +438,6 @@ _RayTracingResources::SceneResources _RayTracingResources::createSceneResources(
         result.sphereAabbs = context.createBuffer(objectCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
         result.capsuleAabbs = context.createBuffer(capsuleCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
         result.triangleAabbs = context.createBuffer(triangleCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
-        result.lightEntries = context.createBuffer(objectCapacity * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
 
         auto bottomLevelGeometries = createBottomLevelGeometries(result.sphereAabbs, result.capsuleAabbs, result.triangleAabbs);
         auto bottomLevelBuildInfo = createBuildInfo(VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, bottomLevelGeometries);
@@ -529,7 +511,6 @@ void _RayTracingResources::destroySceneResources(SceneResources& resources, bool
              &resources.sphereAabbs,
              &resources.capsuleAabbs,
              &resources.triangleAabbs,
-             &resources.lightEntries,
              &resources.bottomLevelBuffer,
              &resources.topLevelBuffer,
              &resources.scratchBuffer,
@@ -577,20 +558,14 @@ void _RayTracingResources::destroyViewResources(ViewResources& resources, bool i
     resources = ViewResources();
 }
 
-uint64_t _RayTracingResources::LightGrid::getNumCells() const
-{
-    return static_cast<uint64_t>(size.x) * size.y;
-}
-
 void _RayTracingResources::createFrameResources()
 {
     auto& context = VulkanContext::get();
-    for (auto buffer : {&_allocation, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+    for (auto buffer : {&_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
         context.destroyBufferLater(*buffer);
     }
     context.destroyImageLater(_gasImage);
     context.destroyImageLater(_gasIrradiance);
-    _allocation = context.createBuffer(sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::DeviceLocal);
     auto numNodes = static_cast<VkDeviceSize>(MaxGasNodes) * MaxGasNodes;
     auto clearableUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     _gasAccumulation = context.createBuffer(numNodes * GasAccumulationStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
@@ -602,42 +577,6 @@ void _RayTracingResources::createFrameResources()
 
     // Created last since it marks the resources as complete
     _frameConstants = context.createBuffer(sizeof(FrameConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VulkanMemory::HostVisible);
-}
-
-// Extreme zoom levels enlarge the cells and thus the range of the lights. A margin of one cell covers the lights next to the view.
-void _RayTracingResources::updateLightGrid(RealRect const& visibleWorldRect)
-{
-    auto extent = visibleWorldRect.bottomRight - visibleWorldRect.topLeft;
-    auto cellSize = std::max(LightRange, std::max(extent.x, extent.y) / MaxLightGridCellsPerDimension);
-    LightGrid grid{
-        .origin = visibleWorldRect.topLeft - RealVector2D{cellSize, cellSize},
-        .cellSize = cellSize,
-        .size = {toInt(std::ceil(extent.x / cellSize)) + 2, toInt(std::ceil(extent.y / cellSize)) + 2},
-    };
-    auto numCells = grid.getNumCells();
-    if (numCells > _cellCapacity) {
-        auto& context = VulkanContext::get();
-        auto capacity = numCells * 3 / 2;
-        std::array<VulkanBuffer, 2> buffers;
-        try {
-            for (auto& buffer : buffers) {
-                buffer = context.createBuffer(
-                    capacity * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::DeviceLocal);
-            }
-        } catch (...) {
-            for (auto& buffer : buffers) {
-                context.destroyBuffer(buffer);
-            }
-            throw;
-        }
-        std::array cellBuffers{&_cellCounts, &_cellCursors};
-        for (auto const& [buffer, newBuffer] : std::views::zip(cellBuffers, buffers)) {
-            context.destroyBufferLater(*buffer);
-            *buffer = newBuffer;
-        }
-        _cellCapacity = capacity;
-    }
-    _lightGrid = grid;
 }
 
 void _RayTracingResources::updateGasGrid(RenderView const& view)
@@ -813,9 +752,7 @@ void _RayTracingResources::updateFrameConstants(
             {static_cast<uint32_t>(numObjects.objects),
              static_cast<uint32_t>(numObjects.lineIndices / 2),
              static_cast<uint32_t>(numObjects.triangleIndices / 3),
-             static_cast<uint32_t>(_lightGrid.getNumCells())},
-        .lightGrid = {_lightGrid.origin.x, _lightGrid.origin.y, _lightGrid.cellSize, 0.0f},
-        .gridSize = {_lightGrid.size.x, _lightGrid.size.y, 0, 0},
+             0},
         .tissue = {closeUpWeight, detailVisibility, 1.0f / view.zoomFactor, getTissueVisibility(view)},
         .parameters =
             {getBackgroundScale(), _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1), SimulationRenderer::getSolidDetailVisibility(view)},
@@ -857,10 +794,6 @@ void _RayTracingResources::writeDescriptorSet(VulkanGeometryBuffers const& geome
         .storageBuffer(Binding_SphereAabbs, _scene.sphereAabbs.buffer)
         .storageBuffer(Binding_CapsuleAabbs, _scene.capsuleAabbs.buffer)
         .storageBuffer(Binding_TriangleAabbs, _scene.triangleAabbs.buffer)
-        .storageBuffer(Binding_CellCounts, _cellCounts.buffer)
-        .storageBuffer(Binding_CellCursors, _cellCursors.buffer)
-        .storageBuffer(Binding_CellEntries, _scene.lightEntries.buffer)
-        .storageBuffer(Binding_Allocation, _allocation.buffer)
         .storageImage(Binding_SceneColor, _view.sceneColor.view)
         .storageImage(Binding_AntiAliased, _view.antiAliased.at(_current).view)
         .sampledImage(Binding_PreviousAntiAliased, _view.antiAliased.at(getPrevious()).view, General)
@@ -924,14 +857,6 @@ VulkanBuffer& _RayTracingResources::getBuffer(RayTracingResource resource)
         return _scene.capsuleAabbs;
     case RayTracingResource::TriangleAabbs:
         return _scene.triangleAabbs;
-    case RayTracingResource::CellCounts:
-        return _cellCounts;
-    case RayTracingResource::CellCursors:
-        return _cellCursors;
-    case RayTracingResource::CellEntries:
-        return _scene.lightEntries;
-    case RayTracingResource::Allocation:
-        return _allocation;
     case RayTracingResource::GasAccumulation:
         return _gasAccumulation;
     case RayTracingResource::GasIntermediate:
@@ -964,10 +889,6 @@ VulkanImage* _RayTracingResources::getImage(RayTracingResource resource)
 VkDeviceSize _RayTracingResources::getUsedSize(RayTracingResource resource) const
 {
     switch (resource) {
-    case RayTracingResource::CellCounts:
-        return _lightGrid.getNumCells() * sizeof(uint32_t);
-    case RayTracingResource::Allocation:
-        return sizeof(uint32_t);
     case RayTracingResource::GasAccumulation:
         return static_cast<VkDeviceSize>(_gasGrid.size.x) * _gasGrid.size.y * GasAccumulationStride * sizeof(uint32_t);
     case RayTracingResource::GasLightClusters:

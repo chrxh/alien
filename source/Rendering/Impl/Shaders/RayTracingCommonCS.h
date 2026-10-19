@@ -11,8 +11,6 @@ namespace Shaders
     // version, the work group size and the sizes shared with Rendering/Impl/RayTracingResources.cpp are declared before, see createPipeline.
     std::string_view const RayTracingCommonCS = R"(
 const float CameraHeight = 20.0;
-const float EmissionToRadiance = 0.6;
-const float MinLightRadiance = 0.06;
 
 // Visible sizes of the tissue close up in world units
 const float CellRadius = 0.34;
@@ -58,16 +56,15 @@ struct ObjectVertex
     float color[3];
     int state;
     float highlightIntensity;
-    float lightOrganIntensities[LightOrgansPerCell];
+    float activity;
 };
 
 struct Sphere
 {
     vec4 centerRadius;  // xy: center, w: radius
     vec4 hueMaterial;   // rgb: hue, w: material
-    vec4 emission;      // rgb: glow, w: brightness of the color
-    vec4 details;       // x: 8 bit intensities of the light organs packed into an integer, negative without light organs, y: random seed
-                        // that stays with the object, z: 1 if isolated or at the end of a chain
+    vec4 details;       // x: brightness of the color, y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
+    vec4 neuron;        // x: 1 for a cell with a neuron, y: activity of the neuron
 };
 
 struct Aabb
@@ -101,9 +98,7 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
 {
     vec4 view;        // xy: size in pixels, z: pixels per world unit, w: screen pixels per world unit
     vec4 rect;        // xy: world position of the upper left corner, zw: jitter of the rays in pixels
-    uvec4 counts;     // x: number of objects, y: number of connections, z: number of triangles, w: number of light grid cells
-    vec4 lightGrid;   // xy: world position of the light grid, z: size of a grid cell, which is also the range of the lights
-    ivec4 gridSize;   // xy: number of cells of the light grid
+    uvec4 counts;     // x: number of objects, y: number of connections, z: number of triangles
     vec4 tissue;      // x: 1 close up, 0 zoomed out, y: visibility of the cell details, z: world size of a pixel, w: visibility of the tissue
     vec4 parameters;  // x: scale of the background color, y: 1 for anti-aliasing within the frame, z: weight of the frame in the average with
                       // the previous frames, 1 if there is no average, w: visibility of the structure of the solids
@@ -126,24 +121,20 @@ layout(set = 0, binding = 5, std430) buffer SphereBuffer { Sphere spheres[]; };
 layout(set = 0, binding = 6, std430) buffer SphereAabbBuffer { Aabb sphereAabbs[]; };
 layout(set = 0, binding = 7, std430) buffer CapsuleAabbBuffer { Aabb capsuleAabbs[]; };
 layout(set = 0, binding = 8, std430) buffer TriangleAabbBuffer { Aabb triangleAabbs[]; };
-layout(set = 0, binding = 9, std430) buffer CellCountBuffer { uint cellCounts[]; };
-layout(set = 0, binding = 10, std430) buffer CellCursorBuffer { uint cellCursors[]; };
-layout(set = 0, binding = 11, std430) buffer CellEntryBuffer { uint cellEntries[]; };
-layout(set = 0, binding = 12, std430) buffer AllocationBuffer { uint allocatedEntries; };
-layout(set = 0, binding = 13, rgba16f) uniform image2D sceneColor;
-layout(set = 0, binding = 14, rgba16f) uniform image2D antiAliased;
-layout(set = 0, binding = 15) uniform sampler2D previousAntiAliased;
-layout(set = 0, binding = 16) uniform sampler2D groundTexture;
-layout(set = 0, binding = 17) uniform sampler2D gasSampler;
-layout(set = 0, binding = 18) uniform sampler2D sceneColorSampler;
-layout(set = 0, binding = 19, std430) readonly buffer FluidParticleBuffer { FluidParticle fluidParticles[]; };
-layout(set = 0, binding = 20, std430) buffer GasAccumulationBuffer { uint gasAccumulation[]; };
-layout(set = 0, binding = 21, std430) buffer GasIntermediateBuffer { vec4 gasIntermediate[]; };
-layout(set = 0, binding = 22, rgba16f) uniform image2D gasImage;
-layout(set = 0, binding = 23) uniform sampler2D energyParticleTexture;
-layout(set = 0, binding = 24, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
-layout(set = 0, binding = 25, rgba16f) uniform image2D gasIrradianceImage;
-layout(set = 0, binding = 26) uniform sampler2D gasIrradianceSampler;
+layout(set = 0, binding = 9, rgba16f) uniform image2D sceneColor;
+layout(set = 0, binding = 10, rgba16f) uniform image2D antiAliased;
+layout(set = 0, binding = 11) uniform sampler2D previousAntiAliased;
+layout(set = 0, binding = 12) uniform sampler2D groundTexture;
+layout(set = 0, binding = 13) uniform sampler2D gasSampler;
+layout(set = 0, binding = 14) uniform sampler2D sceneColorSampler;
+layout(set = 0, binding = 15, std430) readonly buffer FluidParticleBuffer { FluidParticle fluidParticles[]; };
+layout(set = 0, binding = 16, std430) buffer GasAccumulationBuffer { uint gasAccumulation[]; };
+layout(set = 0, binding = 17, std430) buffer GasIntermediateBuffer { vec4 gasIntermediate[]; };
+layout(set = 0, binding = 18, rgba16f) uniform image2D gasImage;
+layout(set = 0, binding = 19) uniform sampler2D energyParticleTexture;
+layout(set = 0, binding = 20, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
+layout(set = 0, binding = 21, rgba16f) uniform image2D gasIrradianceImage;
+layout(set = 0, binding = 22) uniform sampler2D gasIrradianceSampler;
 
 //*******************
 //* General helpers
@@ -328,53 +319,6 @@ void getTriangleSpheres(uint triangle, out uint sphereA, out uint sphereB, out u
     sphereA = triangleIndices[3u * triangle];
     sphereB = triangleIndices[3u * triangle + 1u];
     sphereC = triangleIndices[3u * triangle + 2u];
-}
-
-//*******************************
-//* Light of glowing objects
-//*******************************
-
-ivec2 getLightCell(vec2 position)
-{
-    return ivec2(floor((position - frame.lightGrid.xy) / frame.lightGrid.z));
-}
-
-uint getLightCellIndex(ivec2 cell)
-{
-    bool inGrid = cell.x >= 0 && cell.y >= 0 && cell.x < frame.gridSize.x && cell.y < frame.gridSize.y;
-    return inGrid ? uint(cell.y * frame.gridSize.x + cell.x) : NoEntry;
-}
-
-bool isLight(Sphere sphere)
-{
-    return maxComponent(sphere.emission.rgb) * EmissionToRadiance > MinLightRadiance;
-}
-
-// The light of every glowing object in range spreads through the tissue and the surrounding medium and fades with the distance
-vec3 getScatteredLight(vec2 position)
-{
-    vec3 result = vec3(0.0);
-    float range = frame.lightGrid.z;
-    ivec2 center = getLightCell(position);
-    for (int i = 0; i < 9; ++i) {
-        uint cellIndex = getLightCellIndex(center + ivec2(i % 3 - 1, i / 3 - 1));
-        if (cellIndex == NoEntry) {
-            continue;
-        }
-
-        // The scatter pass has advanced the cursor from the start of the entries of the cell to their end
-        uint count = cellCounts[cellIndex];
-        uint offset = cellCursors[cellIndex] - count;
-        for (uint j = 0u; j < count; ++j) {
-            Sphere light = spheres[cellEntries[offset + j]];
-            vec2 toLight = light.centerRadius.xy - position;
-            float distanceSquared = dot(toLight, toLight);
-            float radiusSquared = light.centerRadius.w * light.centerRadius.w;
-            float window = 1.0 - smoothstep(range * 0.5, range, sqrt(distanceSquared));
-            result += light.emission.rgb * EmissionToRadiance * radiusSquared / (radiusSquared + distanceSquared) * window;
-        }
-    }
-    return result;
 }
 
 //*************************
