@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include <Network/NetworkResourceRawTO.h>
 #include <Network/NetworkResourceTreeTO.h>
 
 #include "Definitions.h"
@@ -13,4 +14,5 @@ public:
     static float calcFooterHeight();
     static bool ActionButton(std::string const& text);
     static void DownloadButton(BrowserData const& data, BrowserLeaf const& leaf);
+    static NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO);
 };

@@ -51,6 +51,7 @@ public:
     std::map<WorkspaceId, Workspace> workspaces;
     WorkspaceId currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     NetworkResourceTreeTO selectedTreeTO;
+    bool scrollToSelection = false;
     std::string filter;
     std::vector<UserTO> userTOs;
     std::optional<int> numActiveSimulators;
