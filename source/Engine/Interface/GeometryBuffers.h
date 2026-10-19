@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <Base/MathTypes.h>
+
 #include "Definitions.h"
 
 struct NumRenderObjects
@@ -18,6 +20,7 @@ struct NumRenderObjects
     uint64_t connectionArrowVertices;
     uint64_t attackEventVertices;
     uint64_t detonationEventVertices;
+    uint64_t shadowGridNodes;
 };
 
 struct ObjectVertexData
@@ -80,6 +83,38 @@ struct DetonationEventVertexData
     float radius;  // Detonator radius
 };
 
+// Visible sizes of the objects close up in the ray traced view. The shadow grid measures the area of the objects outside the extracted region with
+// them.
+struct RayTracedObjectSizes
+{
+    static constexpr float CellRadius = 0.34f;
+    static constexpr float FreeCellRadius = 0.29f;
+    static constexpr float SolidRadius = 0.4f;
+    static constexpr float StrandHalfWidth = 0.165f;
+};
+
+// Grid that collects the objects outside the extracted region, so that they can shade the light of the radiation sources inside it
+struct ShadowGridLayout
+{
+    RealVector2D origin;
+    float nodeDistance = 1.0f;
+    IntVector2D size;
+
+    uint64_t getNumNodes() const;
+};
+
+// Fixed point sums of the objects around a node of the shadow grid, each object is distributed bilinearly over the four nodes around it. The
+// areas include the shares of the objects in their strands and polygons.
+struct ShadowGridNodeData
+{
+    static constexpr float FixedPointScale = 1024.0f;
+
+    uint32_t numFluids;
+    uint32_t tissueArea;        // Area of the cells and free cells
+    uint32_t tissueHueArea[3];  // Area of the cells and free cells weighted with their r, g, b hue
+    uint32_t solidArea;
+};
+
 using GeometryBufferType = int;
 enum GeometryBufferType_
 {
@@ -92,6 +127,7 @@ enum GeometryBufferType_
     GeometryBufferType_SelectedConnections,
     GeometryBufferType_AttackEvents,
     GeometryBufferType_DetonationEvents,
+    GeometryBufferType_ShadowGrid,
     GeometryBufferType_Count
 };
 
@@ -108,9 +144,10 @@ public:
         sizeof(ConnectionArrowVertexData),
         sizeof(AttackEventVertexData),
         sizeof(DetonationEventVertexData),
+        sizeof(ShadowGridNodeData),
     };
 
-    static constexpr std::array<uint64_t, GeometryBufferType_Count> MinCapacities = {100000, 100000, 1000, 10000, 100000, 100000, 100000, 10000, 10000};
+    static constexpr std::array<uint64_t, GeometryBufferType_Count> MinCapacities = {100000, 100000, 1000, 10000, 100000, 100000, 100000, 10000, 10000, 10000};
 
     static uint64_t getNumElements(NumRenderObjects const& numObjects, GeometryBufferType type);
 };
@@ -130,10 +167,11 @@ class _GeometryBuffers
 public:
     virtual ~_GeometryBuffers() = default;
 
-    // Enlarges the buffers if necessary
-    void updateNumObjects(NumRenderObjects const& numRenderObjects);
+    // Enlarges the buffers if necessary. The layout of the shadow grid determines the number of its nodes.
+    void updateNumObjects(NumRenderObjects numRenderObjects, ShadowGridLayout const& shadowGridLayout = ShadowGridLayout());
 
     NumRenderObjects getNumObjects() const;
+    ShadowGridLayout const& getShadowGridLayout() const;
 
     // Changes whenever the buffer gets new memory
     uint64_t getAllocationId(GeometryBufferType type) const;
@@ -155,6 +193,7 @@ public:
     std::vector<ConnectionArrowVertexData> getSelectedConnectionData() const;
     std::vector<AttackEventVertexData> getAttackEventData() const;
     std::vector<DetonationEventVertexData> getDetonationEventData() const;
+    std::vector<ShadowGridNodeData> getShadowGridData() const;
 
 protected:
     virtual void reallocate(GeometryBufferType type, uint64_t sizeInBytes) = 0;
@@ -164,6 +203,7 @@ private:
     std::vector<T> downloadElements(GeometryBufferType type) const;
 
     NumRenderObjects _numObjects = {};
+    ShadowGridLayout _shadowGridLayout;
     std::array<uint64_t, GeometryBufferType_Count> _allocationIds = {};
     std::array<uint64_t, GeometryBufferType_Count> _capacities = {};
 };

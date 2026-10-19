@@ -69,9 +69,12 @@ bool _SimulationFacadeImpl::isRenderingInteropWorking(GeometryBuffers const& geo
     return _worker.isRenderingInteropWorking(geometryBuffers);
 }
 
-void _SimulationFacadeImpl::tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+void _SimulationFacadeImpl::tryCopyBuffersFromCudaToRenderer(
+    GeometryBuffers const& geometryBuffers,
+    RealRect const& visibleWorldRect,
+    ShadowGridLayout const& shadowGridLayout)
 {
-    _worker.tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _worker.tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
 }
 
 bool _SimulationFacadeImpl::isSyncSimulationWithRendering() const

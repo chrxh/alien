@@ -57,6 +57,7 @@
 #include "RayTracingPrepareCS.h"
 #include "RayTracingPresentFS.h"
 #include "RayTracingPresentVS.h"
+#include "RayTracingShadowGridCS.h"
 #include "RayTracingTissueCS.h"
 #include "SelectedConnectionFS.h"
 #include "SelectedConnectionGS.h"

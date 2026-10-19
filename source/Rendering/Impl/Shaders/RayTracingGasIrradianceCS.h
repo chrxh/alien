@@ -12,22 +12,13 @@ namespace Shaders
     // samples, see SimulationRenderer.cpp.
     std::string_view const RayTracingGasIrradianceCS = R"(
 const int ShadowSteps = 8;
-const float GasExtinction = 0.2;
 const float CellExtinction = 1.0;
-
-// Light passing through tissue takes on its color, solids block it
-const float TissueExtinction = 6.0;
-const float SolidExtinction = 8.0;
 
 // The light of a radiation source is limited, so that it approaches the brightness of the source at its area, while weak light stays
 // visible. Each source is limited by itself, so a brighter source never darkens the light of another one. The shadows keep their share of
 // the light, so that the columns of light remain at every strength.
 const float SourceLightStrength = 4.0;
 const float SourceLightKnee = 1.0;
-
-// The light reaches a position from the part of the area of a source next to it. Its half width grows with this factor times the distance
-// to the area, so that the shadows become softer the farther they fall.
-const float SourceLightSpread = 0.25;
 
 // Wider shining parts trace more rays, so that the beams do not exceed their maximum width at the area, up to this number of rays
 const int MaxSourceRays = 16;
@@ -83,25 +74,60 @@ void clipSlab(float start, float rate, float lower, float upper, inout float ent
     exit = min(exit, max(t0, t1));
 }
 
-// The gas is only known within the gas grid. The part of the path inside it is sampled about every second node, so that long paths do not
-// skip clouds.
+// Part of a path inside the rectangle from the first to the last node of a grid
+bool clipToGrid(vec2 origin, vec2 direction, float pathLength, vec2 firstNode, vec2 lastNode, out float enter, out float exit)
+{
+    enter = 0.0;
+    exit = pathLength;
+    clipSlab(origin.x, direction.x, firstNode.x, lastNode.x, enter, exit);
+    clipSlab(origin.y, direction.y, firstNode.y, lastNode.y, enter, exit);
+    return exit > enter;
+}
+
+vec4 sampleShadowGrid(vec2 world)
+{
+    vec2 texel = (world - frame.shadowGrid.xy) / frame.shadowGrid.z + 0.5;
+    return sampleRegionLinear(shadowGridSampler, texel, vec2(0.0), vec2(frame.shadowGridSize.xy), vec2(ShadowGridImageSize));
+}
+
+// The objects outside the extracted region are only known by their extinction in the shadow grid, rgb for the tissue and the solids and a for
+// the gas, see Shaders/RayTracingShadowGridCS.h. The part of the path inside the grid is sampled about every node, the threads of a node may
+// share the samples.
+vec4 getShadowGridOpticalDepth(vec2 origin, vec2 direction, float pathLength, int firstSample, int sampleStride)
+{
+    vec2 lastNode = frame.shadowGrid.xy + vec2(frame.shadowGridSize.xy - 1) * frame.shadowGrid.z;
+    float enter;
+    float exit;
+    if (any(lessThan(frame.shadowGridSize.xy, ivec2(2))) || !clipToGrid(origin, direction, pathLength, frame.shadowGrid.xy, lastNode, enter, exit)) {
+        return vec4(0.0);
+    }
+    int numSamples = max(int(ceil((exit - enter) / frame.shadowGrid.z)), 1);
+    float stepLength = (exit - enter) / float(numSamples);
+    vec4 extinction = vec4(0.0);
+    for (int i = firstSample; i < numSamples; i += sampleStride) {
+        extinction += sampleShadowGrid(origin + direction * (enter + stepLength * (float(i) + 0.5)));
+    }
+    return extinction * stepLength;
+}
+
+// The gas is known within the gas grid, which is sampled about every second node, so that long paths do not skip clouds, and outside the
+// extracted region in the shadow grid
 float getGasTransmittance(vec2 position, vec2 direction, float pathLength)
 {
-    vec2 gridEnd = frame.gasGrid.xy + vec2(frame.gasSize.xy - 1) * frame.gasGrid.z;
-    float enter = 0.0;
-    float exit = pathLength;
-    clipSlab(position.x, direction.x, frame.gasGrid.x, gridEnd.x, enter, exit);
-    clipSlab(position.y, direction.y, frame.gasGrid.y, gridEnd.y, enter, exit);
-    if (exit <= enter) {
-        return 1.0;
+    float opticalDepth = getShadowGridOpticalDepth(position, direction, pathLength, int(getNodeThread()), int(NodeThreads)).a;
+    vec2 lastNode = frame.gasGrid.xy + vec2(frame.gasSize.xy - 1) * frame.gasGrid.z;
+    float enter;
+    float exit;
+    if (clipToGrid(position, direction, pathLength, frame.gasGrid.xy, lastNode, enter, exit)) {
+        int numSteps = clamp(int(ceil((exit - enter) / (GasStepInNodes * frame.gasGrid.z))), 1, MaxGasSteps);
+        float stepLength = (exit - enter) / float(numSteps);
+        float density = 0.0;
+        for (int i = int(getNodeThread()); i < numSteps; i += int(NodeThreads)) {
+            density += sampleGasLayer(position + direction * (enter + stepLength * (float(i) + 0.5)), GasLayer_Clouds).a;
+        }
+        opticalDepth += GasExtinction * density * stepLength;
     }
-    int numSteps = clamp(int(ceil((exit - enter) / (GasStepInNodes * frame.gasGrid.z))), 1, MaxGasSteps);
-    float stepLength = (exit - enter) / float(numSteps);
-    float opticalDepth = 0.0;
-    for (int i = int(getNodeThread()); i < numSteps; i += int(NodeThreads)) {
-        opticalDepth += sampleGasLayer(position + direction * (enter + stepLength * (float(i) + 0.5)), GasLayer_Clouds).a;
-    }
-    return exp(-GasExtinction * subgroupClusteredAdd(opticalDepth, NodeThreads) * stepLength);
+    return exp(-subgroupClusteredAdd(opticalDepth, NodeThreads));
 }
 
 float getDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 center, float radius)
@@ -225,13 +251,16 @@ float getAverageTriangleChord(vec2 origin, vec2 direction, float pathLength, vec
 
 // The ray stands for a beam with the given widths at its start and its end and collects the average length of its path inside every cell,
 // strand and filled triangle on its way. Objects narrower than the beam therefore cast fainter shadows instead of being hit or missed, which
-// would cut thin shadows into dashes.
+// would cut thin shadows into dashes. The objects outside the extracted region add their extinction in the shadow grid.
 vec3 getObjectTransmittance(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec3 lightColor)
 {
+    vec3 maxOpticalDepth = mix(vec3(MaxOpticalDepth), vec3(0.0), equal(lightColor, vec3(0.0)));
+    vec3 opticalDepth = getShadowGridOpticalDepth(origin, direction, pathLength, 0, 1).rgb;
+    if (all(greaterThanEqual(opticalDepth, maxOpticalDepth))) {
+        return exp(-opticalDepth);
+    }
     rayQueryEXT query;
     rayQueryInitializeEXT(query, scene, gl_RayFlagsNoneEXT, 0xffu, vec3(origin, 0.5), 0.0, vec3(direction, 0.0), pathLength);
-    vec3 maxOpticalDepth = mix(vec3(MaxOpticalDepth), vec3(0.0), equal(lightColor, vec3(0.0)));
-    vec3 opticalDepth = vec3(0.0);
     while (rayQueryProceedEXT(query)) {
         uint kind = uint(rayQueryGetIntersectionGeometryIndexEXT(query, false)) + 1u;
         uint primitive = uint(rayQueryGetIntersectionPrimitiveIndexEXT(query, false));

@@ -123,7 +123,8 @@ void GeometryKernelsService::extractObjectData(
     SettingsForSimulation const& settings,
     SimulationData data,
     CudaGeometryBuffers const& renderingData,
-    RealRect const& visibleWorldRect)
+    RealRect const& visibleWorldRect,
+    ShadowGridLayout const& shadowGridLayout)
 {
     auto const& launchSettings = settings.kernelLaunchSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
@@ -193,4 +194,12 @@ void GeometryKernelsService::extractObjectData(
         renderingData.getBuffer<DetonationEventVertexData>(GeometryBufferType_DetonationEvents),
         &_counters->detonationEventVertices,
         context);
+
+    if (auto numNodes = shadowGridLayout.getNumNodes(); numNodes > 0) {
+        auto shadowGrid = renderingData.getBuffer<ShadowGridNodeData>(GeometryBufferType_ShadowGrid);
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(shadowGrid, 0, numNodes * sizeof(ShadowGridNodeData)));
+        ShadowGridContext shadowGridContext{
+            {shadowGridLayout.origin.x, shadowGridLayout.origin.y}, shadowGridLayout.nodeDistance, {shadowGridLayout.size.x, shadowGridLayout.size.y}};
+        launchKernelOnDefaultStream(KERNEL(cudaExtractShadowGrid), LaunchConfig{launchSettings.numBlocks, 8}, data, shadowGrid, context, shadowGridContext);
+    }
 }
