@@ -61,12 +61,11 @@ TEST_F(ConnectionMutationTests, connectionWeightMutation_weightsActuallyChange)
     }
     EXPECT_TRUE(anyWeightChanged);
 
-    // All connection weights must be within [-2, 2]
     for (auto const& gene : actualGenome._genes) {
         for (auto const& node : gene._nodes) {
             for (auto const& w : node._neuralNetwork._connectionWeights) {
-                EXPECT_GE(w, -2.0f - 0.1f);
-                EXPECT_LE(w, 2.0f + 0.1f);
+                EXPECT_GE(w, Const::ConnectionWeight_Min);
+                EXPECT_LE(w, Const::ConnectionWeight_Max);
             }
         }
     }

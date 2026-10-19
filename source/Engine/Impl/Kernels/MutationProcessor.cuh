@@ -217,7 +217,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
                         auto delta = generateGaussian(data) * rate.valueChangeSigma;
                         float newValue = weight + delta;
-                        newValue = max(-2.0f, min(2.0f, newValue));
+                        newValue = max(Const::ConnectionWeight_Min, min(Const::ConnectionWeight_Max, newValue));
                         weight = newValue;
                         atomicAdd_block(&accumulatedMutations, abs(delta) / MAX_OBJECT_CONNECTIONS);
                     }
