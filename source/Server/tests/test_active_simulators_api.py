@@ -37,6 +37,12 @@ def test_list_fetches_are_counted_per_address(app_client):
     assert _active_simulators(app_client) == 2
 
 
+def test_opted_in_clients_are_counted(app_client):
+    _fetch_list(_client_from(app_client, "10.0.0.1"), countAsActive="true")
+
+    assert _active_simulators(app_client) == 1
+
+
 def test_opted_out_clients_are_not_counted(app_client):
     _fetch_list(_client_from(app_client, "10.0.0.1"), countAsActive="false")
 
