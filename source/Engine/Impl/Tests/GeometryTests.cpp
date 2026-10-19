@@ -405,10 +405,11 @@ TEST_F(GeometryTests, copyBuffers_marksFluids)
     }
 }
 
-TEST_F(GeometryTests, copyBuffers_lightOrgansShowPositiveSignals)
+TEST_F(GeometryTests, copyBuffers_activityShowsPositivePartOfFirstSignal)
 {
     auto data = ContentDesc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({0.5f, -1.0f, 2.0f, 1.0f, 0, 0, 0, 0}))),
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+        ObjectDesc().id(2).pos({200.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({-2.0f, 2.0f, 0, 0, 0, 0, 0, 0}))),
     });
     _simulationFacade->setSimulationData(data);
     auto geometryBuffers = _HostGeometryBuffers::create();
@@ -417,18 +418,17 @@ TEST_F(GeometryTests, copyBuffers_lightOrgansShowPositiveSignals)
     _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
 
     auto cellData = geometryBuffers->getCellData();
-    ASSERT_EQ(1u, cellData.size());
-    EXPECT_NEAR(0.5f, cellData.at(0).lightOrganIntensities[0], 1.0f / 255);
-    EXPECT_FLOAT_EQ(0.0f, cellData.at(0).lightOrganIntensities[1]);
-    EXPECT_FLOAT_EQ(1.0f, cellData.at(0).lightOrganIntensities[2]);
+    ASSERT_EQ(2u, cellData.size());
+    EXPECT_NEAR(0.5f, getVertexNextTo(cellData, {100.0f, 100.0f}).activity, 1.0f / 255);
+    EXPECT_FLOAT_EQ(0.0f, getVertexNextTo(cellData, {200.0f, 100.0f}).activity);
 }
 
-TEST_F(GeometryTests, copyBuffers_lightOrgansSmoothAlternatingSignals)
+TEST_F(GeometryTests, copyBuffers_activitySmoothsAlternatingSignals)
 {
     // By default, connected cells swap their signals with every cell function pass
     auto data = ContentDesc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+                        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({2.0f, 0, 0, 0, 0, 0, 0, 0}))),
                         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({0, 0, 0, 0, 0, 0, 0, 0}))),
                     })
                     .addConnection(1, 2);
@@ -444,8 +444,8 @@ TEST_F(GeometryTests, copyBuffers_lightOrgansSmoothAlternatingSignals)
     auto cellData = geometryBuffers->getCellData();
     ASSERT_EQ(2u, cellData.size());
     for (auto const& cell : cellData) {
-        EXPECT_GT(cell.lightOrganIntensities[0], 0.3f);
-        EXPECT_LT(cell.lightOrganIntensities[0], 0.7f);
+        EXPECT_GT(cell.activity, 0.3f);
+        EXPECT_LT(cell.activity, 0.7f);
     }
 }
 

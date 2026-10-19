@@ -590,8 +590,7 @@ namespace
         return resources.getViewSize();
     }
 
-    // The ray tracing steps compute into the shared resources, see RayTracingSteps.h. The lights are sorted into the light grid while the
-    // acceleration structures are built.
+    // The ray tracing steps compute into the shared resources, see RayTracingSteps.h
     RenderSequence createRayTracingSequence(RayTracingResources const& resources)
     {
         using enum RayTracingResource;
@@ -607,26 +606,9 @@ namespace
                     .dispatchSize([](auto const&, NumRenderObjects const& numObjects) {
                         return IntVector2D{toInt(std::max({numObjects.objects, numObjects.lineIndices / 2, numObjects.triangleIndices / 3})), 1};
                     })
-                    .accesses({{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}, {CellCounts, Clear}})
+                    .accesses({{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}})
                     .requiresScene(true)),
             _RayTracingSceneStep::create(resources),
-            _RayTracingComputeStep::create(
-                resources,
-                ComputeStepParameters()
-                    .shader(std::string(Shaders::RayTracingAllocateCS))
-                    .workGroupSize({256, 1})
-                    .dispatchSize(
-                        [](_RayTracingResources const& resources, auto const&) { return IntVector2D{toInt(resources.getLightGrid().getNumCells()), 1}; })
-                    .accesses({{CellCounts, Read}, {CellCursors, ReadWrite}, {Allocation, Clear}})
-                    .requiresScene(true)),
-            _RayTracingComputeStep::create(
-                resources,
-                ComputeStepParameters()
-                    .shader(std::string(Shaders::RayTracingScatterCS))
-                    .workGroupSize({64, 1})
-                    .dispatchSize(perObject)
-                    .accesses({{Spheres, Read}, {CellCursors, ReadWrite}, {CellEntries, ReadWrite}})
-                    .requiresScene(true)),
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()
@@ -674,15 +656,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasShadingCS) + std::string(Shaders::RayTracingTissueCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perPixel)
-                    .accesses(
-                        {{Scene, Read},
-                         {Spheres, Read},
-                         {CellCounts, Read},
-                         {CellCursors, Read},
-                         {CellEntries, Read},
-                         {GasImage, Read},
-                         {GasIrradiance, Read},
-                         {SceneColor, ReadWrite}})),
+                    .accesses({{Scene, Read}, {Spheres, Read}, {GasImage, Read}, {GasIrradiance, Read}, {SceneColor, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()
