@@ -95,7 +95,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 bias = std::clamp(bias, -2.0f, 2.0f);
             }
             for (auto& weight : node._neuralNetwork._connectionWeights) {
-                weight = std::clamp(weight, -1.0f, 1.0f);
+                weight = std::clamp(weight, Const::ConnectionWeight_Min, Const::ConnectionWeight_Max);
             }
 
             // Validate cell-specific attributes based on type
@@ -338,7 +338,7 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
             bias = std::clamp(bias, -2.0f, 2.0f);
         }
         for (auto& weight : cell._neuralNetwork._connectionWeights) {
-            weight = std::clamp(weight, -1.0f, 1.0f);
+            weight = std::clamp(weight, Const::ConnectionWeight_Min, Const::ConnectionWeight_Max);
         }
 
         // Validate cell-specific attributes based on type

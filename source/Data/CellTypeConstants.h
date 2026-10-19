@@ -103,6 +103,9 @@ enum ActivationFunction_
 namespace Const
 {
     std::vector<std::string> const ActivationFunctionStrings = {"Tanh", "Binary step", "Identity", "Absolute value", "Gaussian", "Mod"};
+
+    auto constexpr ConnectionWeight_Min = -1.0f;
+    auto constexpr ConnectionWeight_Max = 1.0f;
 }
 
 using CellEvent = uint8_t;
