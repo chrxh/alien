@@ -540,7 +540,9 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
         ImGui::SetCursorScreenPos({cellPos.x + indexWidth, cellPos.y});
         auto originalGrabMinSize = style.GrabMinSize;
         style.GrabMinSize = scale(8.0f);
-        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(Const::ConnectionWeight_Min).max(Const::ConnectionWeight_Max),
+            &connectionWeights.at(i));
         style.GrabMinSize = originalGrabMinSize;
         if (resetButton()) {
             connectionWeights.at(i) = 0.0f;
