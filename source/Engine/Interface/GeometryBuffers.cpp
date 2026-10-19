@@ -4,6 +4,11 @@
 #include <cstring>
 #include <stdexcept>
 
+uint64_t ShadowGridLayout::getNumNodes() const
+{
+    return static_cast<uint64_t>(std::max(size.x, 0)) * static_cast<uint64_t>(std::max(size.y, 0));
+}
+
 uint64_t GeometryBufferLayout::getNumElements(NumRenderObjects const& numObjects, GeometryBufferType type)
 {
     switch (type) {
@@ -25,13 +30,16 @@ uint64_t GeometryBufferLayout::getNumElements(NumRenderObjects const& numObjects
         return numObjects.attackEventVertices;
     case GeometryBufferType_DetonationEvents:
         return numObjects.detonationEventVertices;
+    case GeometryBufferType_ShadowGrid:
+        return numObjects.shadowGridNodes;
     default:
         throw std::runtime_error("Invalid geometry buffer type.");
     }
 }
 
-void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
+void _GeometryBuffers::updateNumObjects(NumRenderObjects numRenderObjects, ShadowGridLayout const& shadowGridLayout)
 {
+    numRenderObjects.shadowGridNodes = shadowGridLayout.getNumNodes();
     for (GeometryBufferType type = 0; type < GeometryBufferType_Count; ++type) {
         auto numElements = GeometryBufferLayout::getNumElements(numRenderObjects, type);
         auto& capacity = _capacities.at(type);
@@ -43,11 +51,17 @@ void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects
         }
     }
     _numObjects = numRenderObjects;
+    _shadowGridLayout = shadowGridLayout;
 }
 
 NumRenderObjects _GeometryBuffers::getNumObjects() const
 {
     return _numObjects;
+}
+
+ShadowGridLayout const& _GeometryBuffers::getShadowGridLayout() const
+{
+    return _shadowGridLayout;
 }
 
 uint64_t _GeometryBuffers::getAllocationId(GeometryBufferType type) const
@@ -113,6 +127,11 @@ std::vector<AttackEventVertexData> _GeometryBuffers::getAttackEventData() const
 std::vector<DetonationEventVertexData> _GeometryBuffers::getDetonationEventData() const
 {
     return downloadElements<DetonationEventVertexData>(GeometryBufferType_DetonationEvents);
+}
+
+std::vector<ShadowGridNodeData> _GeometryBuffers::getShadowGridData() const
+{
+    return downloadElements<ShadowGridNodeData>(GeometryBufferType_ShadowGrid);
 }
 
 GeometryBuffers _HostGeometryBuffers::create()

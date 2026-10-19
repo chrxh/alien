@@ -32,6 +32,16 @@ protected:
             return dx * dx + dy * dy;
         });
     }
+
+    template <typename Getter>
+    float sumShadowGrid(std::vector<ShadowGridNodeData> const& nodes, Getter getter) const
+    {
+        auto result = 0.0f;
+        for (auto const& node : nodes) {
+            result += static_cast<float>(getter(node));
+        }
+        return result / ShadowGridNodeData::FixedPointScale;
+    }
 };
 
 TEST_F(GeometryTests, copyBuffers_emptySim)
@@ -495,4 +505,106 @@ TEST_F(GeometryTests, copyBuffers_creature)
 
     auto lines = geometryBuffers->getLineIndices();
     EXPECT_EQ(4u, lines.size());
+}
+
+TEST_F(GeometryTests, copyBuffers_shadowGridCollectsFluidsOutsideVisibleRect)
+{
+    auto data = ContentDesc().objects({
+        ObjectDesc().id(1).pos({5.0f, 5.0f}).type(FluidDesc()),
+        ObjectDesc().id(2).pos({50.5f, 20.25f}).type(FluidDesc()),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+    ShadowGridLayout shadowGridLayout{.origin = {0, 0}, .nodeDistance = 1.0f, .size = {100, 100}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+
+    EXPECT_EQ(10000u, geometryBuffers->getNumObjects().shadowGridNodes);
+    auto nodes = geometryBuffers->getShadowGridData();
+    ASSERT_EQ(10000u, nodes.size());
+    EXPECT_NEAR(1.0f, sumShadowGrid(nodes, [](auto const& node) { return node.numFluids; }), 0.01f);
+
+    // The fluid at (50.5, 20.25) is distributed bilinearly over the four nodes around it
+    auto getFluids = [&](int x, int y) { return static_cast<float>(nodes.at(y * 100 + x).numFluids) / ShadowGridNodeData::FixedPointScale; };
+    EXPECT_NEAR(0.375f, getFluids(50, 20), 0.01f);
+    EXPECT_NEAR(0.375f, getFluids(51, 20), 0.01f);
+    EXPECT_NEAR(0.125f, getFluids(50, 21), 0.01f);
+    EXPECT_NEAR(0.125f, getFluids(51, 21), 0.01f);
+}
+
+TEST_F(GeometryTests, copyBuffers_shadowGridCoversCellsWithTheirStrands)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({50.0f, 50.0f}),
+        ObjectDesc().id(2).pos({51.0f, 50.0f}),
+    });
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+    ShadowGridLayout shadowGridLayout{.origin = {0, 0}, .nodeDistance = 1.0f, .size = {100, 100}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+
+    // Each cell covers its disk and half of the strand of length 1
+    auto nodes = geometryBuffers->getShadowGridData();
+    auto tissueArea = sumShadowGrid(nodes, [](auto const& node) { return node.tissueArea; });
+    auto cellRadius = RayTracedObjectSizes::CellRadius;
+    EXPECT_NEAR(2.0f * (Const::Pi * cellRadius * cellRadius + RayTracedObjectSizes::StrandHalfWidth), tissueArea, 0.01f);
+    EXPECT_FLOAT_EQ(0.0f, sumShadowGrid(nodes, [](auto const& node) { return node.numFluids; }));
+    EXPECT_FLOAT_EQ(0.0f, sumShadowGrid(nodes, [](auto const& node) { return node.solidArea; }));
+
+    // The strongest component of the hue is 1
+    auto maxHueArea = std::max({
+        sumShadowGrid(nodes, [](auto const& node) { return node.tissueHueArea[0]; }),
+        sumShadowGrid(nodes, [](auto const& node) { return node.tissueHueArea[1]; }),
+        sumShadowGrid(nodes, [](auto const& node) { return node.tissueHueArea[2]; }),
+    });
+    EXPECT_NEAR(tissueArea, maxHueArea, 0.01f);
+}
+
+TEST_F(GeometryTests, copyBuffers_shadowGridCollectsPeriodicCopies)
+{
+    auto data = ContentDesc().objects({ObjectDesc().id(1).pos({995.5f, 100.25f}).type(FluidDesc())});
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{100, 100}, {110, 110}};
+    ShadowGridLayout shadowGridLayout{.origin = {-20, 90}, .nodeDistance = 1.0f, .size = {60, 30}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+
+    // The fluid at the right border of the world is collected left of the world at (-4.5, 100.25)
+    auto nodes = geometryBuffers->getShadowGridData();
+    EXPECT_NEAR(1.0f, sumShadowGrid(nodes, [](auto const& node) { return node.numFluids; }), 0.01f);
+    EXPECT_NEAR(0.375f, static_cast<float>(nodes.at(10 * 60 + 15).numFluids) / ShadowGridNodeData::FixedPointScale, 0.01f);
+}
+
+TEST_F(GeometryTests, copyBuffers_shadowGridCoversSolids)
+{
+    auto data = ContentDesc().objects({ObjectDesc().id(1).pos({50.0f, 50.0f}).type(SolidDesc())});
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+    ShadowGridLayout shadowGridLayout{.origin = {0, 0}, .nodeDistance = 1.0f, .size = {100, 100}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+
+    auto nodes = geometryBuffers->getShadowGridData();
+    auto solidRadius = RayTracedObjectSizes::SolidRadius;
+    EXPECT_NEAR(Const::Pi * solidRadius * solidRadius, sumShadowGrid(nodes, [](auto const& node) { return node.solidArea; }), 0.01f);
+    EXPECT_FLOAT_EQ(0.0f, sumShadowGrid(nodes, [](auto const& node) { return node.tissueArea; }));
+}
+
+TEST_F(GeometryTests, copyBuffers_shadowGridWithoutNodes)
+{
+    auto data = ContentDesc().objects({ObjectDesc().id(1).pos({50.0f, 50.0f}).type(FluidDesc())});
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+
+    EXPECT_EQ(0u, geometryBuffers->getNumObjects().shadowGridNodes);
+    EXPECT_TRUE(geometryBuffers->getShadowGridData().empty());
 }

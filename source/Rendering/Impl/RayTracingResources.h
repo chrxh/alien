@@ -7,6 +7,7 @@
 #include <Engine/Interface/GeometryBuffers.h>
 
 #include "RayTracingComputePipeline.h"
+#include "RayTracingLayout.h"
 #include "RenderSteps.h"
 
 // Resources of the ray tracing steps, see RayTracingSteps.h, which the steps access by these names
@@ -25,6 +26,7 @@ enum class RayTracingResource
 
     GasImage,
     GasIrradiance,
+    ShadowGridImage,
     SceneColor,
     AntiAliased,
     PreviousAntiAliased,
@@ -61,9 +63,9 @@ public:
     // The objects form a scene for the tissue and for the shadows of the light of the radiation sources
     static bool isSceneNeeded(RenderView const& view, SimulationParameters const& parameters);
 
-    // Allocates the resources for the view and the visible objects, before the commands of the frames with this view and these parameters
-    // are recorded. A lack of memory thus surfaces without leaving a partially recorded frame behind.
-    void prepare(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters);
+    // Allocates the resources for the view, its layout and the visible objects, before the commands of the frames with this view and these
+    // parameters are recorded. A lack of memory thus surfaces without leaving a partially recorded frame behind.
+    void prepare(RenderView const& view, RayTracingLayout const& layout, NumRenderObjects const& numObjects, SimulationParameters const& parameters);
 
     // Successive frames of a still picture are averaged with rays jittered within the pixels, each change starts a new average
     void setStillPicture(bool value);
@@ -88,25 +90,10 @@ public:
     // Anti-aliased image of the current frame
     VulkanImage& getOutput();
 
-    // Grid in world coordinates whose nodes hold the density of the gas. The nodes are aligned to the world and their distance is a power of
-    // two multiple of a base distance, so that moving or zooming the view keeps the gas stable.
-    struct GasGrid
-    {
-        RealVector2D origin;
-        float nodeDistance = 1.0f;
-        IntVector2D size;
-        int blurRadius = 0;
-        float cloudSpreadInNodes = 1.0f;
+    RayTracingLayout::GasGrid const& getGasGrid() const;
 
-        // The light of the cells is collected in clusters and reaches the nodes of the irradiance grid
-        float lightFalloffDistance = 1.0f;
-        RealVector2D lightClusterOrigin;
-        float lightClusterSize = 1.0f;
-        IntVector2D numLightClusters;
-        float irradianceNodeDistance = 1.0f;
-        IntVector2D irradianceSize;
-    };
-    GasGrid const& getGasGrid() const;
+    // Layout of the shadow grid in the geometry buffers of the current frame
+    ShadowGridLayout const& getShadowGrid() const;
 
     IntVector2D const& getViewSize() const;
 
@@ -146,7 +133,6 @@ private:
     static void destroyViewResources(ViewResources& resources, bool immediately);
 
     void createFrameResources();
-    void updateGasGrid(RenderView const& view);
 
     void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters, IntVector2D const& worldSize);
     void writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures);
@@ -166,12 +152,15 @@ private:
     ViewResources _view;
     int _current = 0;
 
-    GasGrid _gasGrid;
+    RayTracingLayout _layout;
     VulkanBuffer _gasAccumulation;
     VulkanBuffer _gasIntermediate;
     VulkanBuffer _gasLightClusters;
     VulkanImage _gasImage;
     VulkanImage _gasIrradiance;
+
+    ShadowGridLayout _shadowGrid;
+    VulkanImage _shadowGridImage;
 
     bool _stillPicture = false;
     uint32_t _numAveragedFrames = 0;

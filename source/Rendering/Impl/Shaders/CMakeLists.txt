@@ -56,6 +56,7 @@ add_library(Shaders INTERFACE
     RayTracingPrepareCS.h
     RayTracingPresentFS.h
     RayTracingPresentVS.h
+    RayTracingShadowGridCS.h
     RayTracingTissueCS.h
     SelectedConnectionFS.h
     SelectedConnectionGS.h

@@ -6,8 +6,6 @@
 #include <ranges>
 #include <format>
 
-#include <Base/Math.h>
-
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Rendering/Impl/Shaders/ShaderSources.h>
@@ -32,33 +30,16 @@ namespace
     auto constexpr DetailZoomStart = 8.0f;
     auto constexpr DetailZoomEnd = 20.0f;
 
-    // The gas grid covers the view and a margin for the spread of the particles and the range of the lights. The sizes here and below are
-    // declared for the shaders as well, see createPipeline.
-    auto constexpr MinGasNodeDistance = 0.25f;
-    auto constexpr MaxGasNodes = 512;
+    // Layouts of the sums at the nodes of the gas grid and in the light clusters, the sizes here and of the grids are declared for the shaders as
+    // well, see createPipeline
     auto constexpr GasAccumulationStride = 5;
     auto constexpr GasLayers = 2;
-    auto constexpr MaxGasBlurRadius = 32;
-
-    // Standard deviation of the spread of the particles, like the soft disks of radius 7.5 in the rasterized view. Zoomed out, the spread
-    // covers a minimum number of pixels.
-    auto constexpr CloudSpread = 2.6f;
-    auto constexpr MinCloudSpreadInPixels = 2.0f;
-
-    // The light of the cells falls off beyond a distance. Zoomed out, the falloff distance grows continuously, so that it covers a minimum
-    // number of nodes of the irradiance grid and moving cells do not flicker. The range of the lights and the size of the clusters, which
-    // collect the light, grow with it. The irradiance grid has twice the node distance of the gas grid as long as it resolves the falloff,
-    // otherwise the node distance of the gas grid.
-    auto constexpr LightFalloffDistance = 5.0f;
-    auto constexpr MinLightFalloffInIrradianceNodes = 1.5f;
-    auto constexpr LightRangeInFalloffDistances = 4.0f;
-    auto constexpr LightClusterSizeInFalloffDistances = 0.8f;
-    auto constexpr MaxLightClusters = 256;
     auto constexpr GasLightClusterStride = 6;
-    auto constexpr GasIrradianceImageSize = MaxGasNodes;
 
     // Factor of the cell light in the gas at the highest fluid illumination
     auto constexpr MaxFluidIllumination = 4.0f;
+
+    auto constexpr MaxShadowGridBlurRadius = 16;
 
     auto constexpr SphereSize = VkDeviceSize(64);
     auto constexpr AabbBufferUsage =
@@ -91,6 +72,9 @@ namespace
         Binding_GasLightClusters,
         Binding_GasIrradiance,
         Binding_GasIrradianceSampler,
+        Binding_ShadowGridNodes,
+        Binding_ShadowGridImage,
+        Binding_ShadowGridSampler,
         Binding_Count
     };
 
@@ -105,6 +89,7 @@ namespace
         case Binding_AntiAliased:
         case Binding_GasImage:
         case Binding_GasIrradiance:
+        case Binding_ShadowGridImage:
             return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         case Binding_PreviousAntiAliased:
         case Binding_GroundTexture:
@@ -112,14 +97,15 @@ namespace
         case Binding_SceneColorSampler:
         case Binding_EnergyParticleTexture:
         case Binding_GasIrradianceSampler:
+        case Binding_ShadowGridSampler:
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         default:
             return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         }
     }
 
-    // Layouts of the uniform block FrameConstants and the struct SourceLight in Shaders/RayTracingCommonCS.h
-    struct SourceLight
+    // Layouts of the uniform block FrameConstants and its struct SourceLight in Shaders/RayTracingCommonCS.h
+    struct SourceLightConstants
     {
         float centerRangeShape[4];
         float color[4];
@@ -139,8 +125,10 @@ namespace
         int32_t gasLightGrid[4];
         float gasLighting[4];
         float world[4];
+        float shadowGrid[4];
+        int32_t shadowGridSize[4];
         int32_t numSourceLights[4];
-        SourceLight sourceLights[MAX_SOURCES];
+        SourceLightConstants sourceLights[MAX_SOURCES];
     };
 }
 
@@ -162,14 +150,20 @@ _RayTracingResources::~_RayTracingResources()
     }
     context.destroyImageLater(_gasImage);
     context.destroyImageLater(_gasIrradiance);
+    context.destroyImageLater(_shadowGridImage);
     context.destroyLater([device = context.getDevice(), pipelineLayout = _pipelineLayout, descriptorSetLayout = _descriptorSetLayout] {
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
     });
 }
 
-void _RayTracingResources::prepare(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters)
+void _RayTracingResources::prepare(
+    RenderView const& view,
+    RayTracingLayout const& layout,
+    NumRenderObjects const& numObjects,
+    SimulationParameters const& parameters)
 {
+    CHECK(!layout.isEmpty());
     if (_frameConstants.buffer == VK_NULL_HANDLE) {
         createFrameResources();
     }
@@ -187,7 +181,7 @@ void _RayTracingResources::prepare(RenderView const& view, NumRenderObjects cons
         _scene = scene;
     }
 
-    updateGasGrid(view);
+    _layout = layout;
 
     if (_view.size != view.viewSize) {
         destroyViewResources(_view, false);
@@ -208,6 +202,7 @@ void _RayTracingResources::resetImageStates()
     auto images = _view.getImages();
     images.emplace_back(&_gasImage);
     images.emplace_back(&_gasIrradiance);
+    images.emplace_back(&_shadowGridImage);
     for (auto image : images) {
         image->layout = VK_IMAGE_LAYOUT_UNDEFINED;
         image->lastStages = VK_PIPELINE_STAGE_2_NONE;
@@ -219,27 +214,42 @@ void _RayTracingResources::resetImageStates()
 // The sizes shared with the shaders and the work group size are declared here, so that they cannot diverge
 RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const& source, IntVector2D const& workGroupSize) const
 {
+    static_assert(sizeof(ShadowGridNodeData) == 6 * sizeof(uint32_t), "The struct ShadowGridNode in Shaders/RayTracingCommonCS.h mirrors ShadowGridNodeData");
     auto declarations = std::format(
         "#version 460\n"
         "#extension GL_EXT_ray_query : require\n"
         "#extension GL_KHR_shader_subgroup_clustered : require\n"
         "layout(local_size_x = {}, local_size_y = {}, local_size_z = 1) in;\n"
         "const int MaxSourceLights = {};\n"
+        "const float CellRadius = {:.6f};\n"
+        "const float FreeCellRadius = {:.6f};\n"
+        "const float SolidRadius = {:.6f};\n"
+        "const float StrandHalfWidth = {:.6f};\n"
         "const int GasImageSize = {};\n"
         "const int GasLayers = {};\n"
         "const uint GasAccumulationStride = {}u;\n"
         "const uint GasLightClusterStride = {}u;\n"
         "const int GasIrradianceImageSize = {};\n"
-        "const float LightFalloffDistance = {:.6f};\n",
+        "const float LightFalloffDistance = {:.6f};\n"
+        "const float SourceLightSpread = {:.6f};\n"
+        "const int ShadowGridImageSize = {};\n"
+        "const float ShadowGridFixedPointScale = {:.6f};\n",
         workGroupSize.x,
         workGroupSize.y,
         MAX_SOURCES,
-        MaxGasNodes,
+        RayTracedObjectSizes::CellRadius,
+        RayTracedObjectSizes::FreeCellRadius,
+        RayTracedObjectSizes::SolidRadius,
+        RayTracedObjectSizes::StrandHalfWidth,
+        RayTracingLayout::MaxGasNodes,
         GasLayers,
         GasAccumulationStride,
         GasLightClusterStride,
-        GasIrradianceImageSize,
-        LightFalloffDistance);
+        RayTracingLayout::GasIrradianceImageSize,
+        RayTracingLayout::LightFalloffDistance,
+        RayTracingLayout::SourceLightSpread,
+        RayTracingLayout::MaxShadowGridNodes,
+        ShadowGridNodeData::FixedPointScale);
     return _RayTracingComputePipeline::create(declarations + std::string(Shaders::RayTracingCommonCS) + source, _pipelineLayout, workGroupSize);
 }
 
@@ -256,6 +266,7 @@ void _RayTracingResources::beginFrame(ExecutionParameters const& parameters)
         .record(parameters._renderInfo.commandBuffer);
 
     auto const& geometryBuffers = parameters._geometryBuffers;
+    _shadowGrid = geometryBuffers->getShadowGridLayout();
     updateFrameConstants(view, geometryBuffers->getNumObjects(), *parameters._simulationParameters, parameters._simulationFacade->getWorldSize());
     writeDescriptorSet(geometryBuffers, textures);
 }
@@ -306,9 +317,14 @@ VulkanImage& _RayTracingResources::getOutput()
     return _view.antiAliased.at(_current);
 }
 
-_RayTracingResources::GasGrid const& _RayTracingResources::getGasGrid() const
+RayTracingLayout::GasGrid const& _RayTracingResources::getGasGrid() const
 {
-    return _gasGrid;
+    return _layout.gasGrid;
+}
+
+ShadowGridLayout const& _RayTracingResources::getShadowGrid() const
+{
+    return _shadowGrid;
 }
 
 IntVector2D const& _RayTracingResources::getViewSize() const
@@ -566,72 +582,28 @@ void _RayTracingResources::createFrameResources()
     }
     context.destroyImageLater(_gasImage);
     context.destroyImageLater(_gasIrradiance);
-    auto numNodes = static_cast<VkDeviceSize>(MaxGasNodes) * MaxGasNodes;
+    context.destroyImageLater(_shadowGridImage);
+    auto maxGasNodes = RayTracingLayout::MaxGasNodes;
+    auto numNodes = static_cast<VkDeviceSize>(maxGasNodes) * maxGasNodes;
     auto clearableUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     _gasAccumulation = context.createBuffer(numNodes * GasAccumulationStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
-    _gasIntermediate = context.createBuffer(numNodes * GasLayers * 4 * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
-    auto numClusters = static_cast<VkDeviceSize>(MaxLightClusters) * MaxLightClusters;
+
+    // The blurs of the gas grid and of the shadow grid pass their intermediate results through the same buffer
+    auto maxShadowGridNodes = RayTracingLayout::MaxShadowGridNodes;
+    auto numShadowGridNodes = static_cast<VkDeviceSize>(maxShadowGridNodes) * maxShadowGridNodes;
+    auto numIntermediateEntries = std::max(numNodes * GasLayers, numShadowGridNodes);
+    _gasIntermediate = context.createBuffer(numIntermediateEntries * 4 * sizeof(float), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VulkanMemory::DeviceLocal);
+
+    auto maxLightClusters = RayTracingLayout::MaxLightClusters;
+    auto numClusters = static_cast<VkDeviceSize>(maxLightClusters) * maxLightClusters;
     _gasLightClusters = context.createBuffer(numClusters * GasLightClusterStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
-    _gasImage = context.createImage({GasLayers * MaxGasNodes, MaxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
-    _gasIrradiance = context.createImage({2 * GasIrradianceImageSize, GasIrradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _gasImage = context.createImage({GasLayers * maxGasNodes, maxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    auto irradianceImageSize = RayTracingLayout::GasIrradianceImageSize;
+    _gasIrradiance = context.createImage({2 * irradianceImageSize, irradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _shadowGridImage = context.createImage({maxShadowGridNodes, maxShadowGridNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
 
     // Created last since it marks the resources as complete
     _frameConstants = context.createBuffer(sizeof(FrameConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VulkanMemory::HostVisible);
-}
-
-void _RayTracingResources::updateGasGrid(RenderView const& view)
-{
-    auto pixelSize = 1.0f / view.zoomFactor;
-    auto cloudSpread = std::max(CloudSpread, MinCloudSpreadInPixels * pixelSize);
-    auto const& visibleRect = view.visibleWorldRect;
-    auto visibleExtent = std::max(visibleRect.bottomRight.x - visibleRect.topLeft.x, visibleRect.bottomRight.y - visibleRect.topLeft.y);
-    CHECK(std::isfinite(visibleExtent) && std::isfinite(cloudSpread));
-
-    // The node distance of the gas grid is less than twice the extent of the view with the margins divided by the number of nodes. The falloff
-    // distance covers the minimum number of irradiance nodes at any such node distance, so it does not change in steps with the node distance.
-    auto maxNodes = toFloat(MaxGasNodes - 2);
-    auto falloffPerNodeDistance = 2.0f * MinLightFalloffInIrradianceNodes;
-    auto lightFalloffDistance = std::max(
-        {LightFalloffDistance,
-         falloffPerNodeDistance * visibleExtent / (maxNodes - 2.0f * LightRangeInFalloffDistances * falloffPerNodeDistance),
-         falloffPerNodeDistance * (visibleExtent + 6.0f * cloudSpread) / maxNodes});
-    auto margin = std::max(3.0f * cloudSpread, LightRangeInFalloffDistances * lightFalloffDistance);
-    auto nodeDistance = MinGasNodeDistance;
-    while ((visibleExtent + 2.0f * margin) / nodeDistance > maxNodes) {
-        nodeDistance *= 2.0f;
-    }
-    auto irradianceNodeDistance = MinLightFalloffInIrradianceNodes * 2.0f * nodeDistance <= lightFalloffDistance ? 2.0f * nodeDistance : nodeDistance;
-
-    auto topLeft = visibleRect.topLeft - RealVector2D{margin, margin};
-    auto bottomRight = visibleRect.bottomRight + RealVector2D{margin, margin};
-    RealVector2D origin{std::floor(topLeft.x / nodeDistance) * nodeDistance, std::floor(topLeft.y / nodeDistance) * nodeDistance};
-    IntVector2D size{
-        std::min(toInt(std::ceil((bottomRight.x - origin.x) / nodeDistance)) + 1, MaxGasNodes),
-        std::min(toInt(std::ceil((bottomRight.y - origin.y) / nodeDistance)) + 1, MaxGasNodes)};
-
-    // The light clusters are aligned to the world, so that moving the view does not change how the light of the cells is collected
-    auto lightClusterSize = LightClusterSizeInFalloffDistances * lightFalloffDistance;
-    RealVector2D lightClusterOrigin{std::floor(origin.x / lightClusterSize) * lightClusterSize, std::floor(origin.y / lightClusterSize) * lightClusterSize};
-    auto getNumLightClusters = [&](float gridOrigin, int numNodes, float clusterOrigin) {
-        auto gridEnd = gridOrigin + toFloat(numNodes - 1) * nodeDistance;
-        return std::min(toInt(std::ceil((gridEnd - clusterOrigin) / lightClusterSize)) + 1, MaxLightClusters);
-    };
-    auto getNumIrradianceNodes = [&](int numNodes) {
-        return std::min(toInt(std::ceil(toFloat(numNodes - 1) * nodeDistance / irradianceNodeDistance)) + 1, GasIrradianceImageSize);
-    };
-    _gasGrid = GasGrid{
-        .origin = origin,
-        .nodeDistance = nodeDistance,
-        .size = size,
-        .blurRadius = std::min(toInt(std::ceil(3.0f * cloudSpread / nodeDistance)), MaxGasBlurRadius),
-        .cloudSpreadInNodes = cloudSpread / nodeDistance,
-        .lightFalloffDistance = lightFalloffDistance,
-        .lightClusterOrigin = lightClusterOrigin,
-        .lightClusterSize = lightClusterSize,
-        .numLightClusters = {getNumLightClusters(origin.x, size.x, lightClusterOrigin.x), getNumLightClusters(origin.y, size.y, lightClusterOrigin.y)},
-        .irradianceNodeDistance = irradianceNodeDistance,
-        .irradianceSize = {getNumIrradianceNodes(size.x), getNumIrradianceNodes(size.y)},
-    };
 }
 
 namespace
@@ -680,55 +652,6 @@ bool _RayTracingResources::isSceneNeeded(RenderView const& view, SimulationParam
     return getTissueVisibility(view) > 0.0f || isSourceLightActive(parameters);
 }
 
-namespace
-{
-    // A radiation source counts if the light of one of its periodic copies reaches the region. Sources with the same area and range shine as
-    // one, so that their light is traced only once.
-    int getSourceLights(SimulationParameters const& parameters, IntVector2D const& worldSize, RealRect const& region, SourceLight (&result)[MAX_SOURCES])
-    {
-        auto world = toRealVector2D(worldSize);
-        auto numLights = 0;
-        for (auto index : std::views::iota(0, parameters.numSources)) {
-            auto brightness = parameters.sourceLightBrightness.sourceValues[index];
-            auto range = parameters.sourceLightRange.sourceValues[index];
-            if (brightness <= 0.0f || range <= 0.0f) {
-                continue;
-            }
-            auto circular = parameters.sourceShapeType.sourceValues[index] == SourceShapeType_Circular;
-            auto radius = parameters.sourceCircularRadius.sourceValues[index];
-            auto halfExtent = circular ? RealVector2D{radius, radius} : parameters.sourceRectangularRect.sourceValues[index] / 2.0f;
-            auto position = parameters.sourcePosition.sourceValues[index];
-            auto reach = halfExtent + RealVector2D{range, range};
-            auto reachesRegion = [&](float regionStart, float regionEnd, float center, float reach, float period) {
-                auto offset = Math::modulo(center - regionStart, period);
-                return offset - reach <= regionEnd - regionStart || offset + reach >= period;
-            };
-            if (!reachesRegion(region.topLeft.x, region.bottomRight.x, position.x, reach.x, world.x)
-                || !reachesRegion(region.topLeft.y, region.bottomRight.y, position.y, reach.y, world.y)) {
-                continue;
-            }
-            auto const& color = parameters.sourceLightColor.sourceValues[index];
-            SourceLight light{
-                .centerRangeShape = {position.x, position.y, range, circular ? 0.0f : 1.0f},
-                .color = {color.r * brightness, color.g * brightness, color.b * brightness, 0.0f},
-                .extent = {halfExtent.x, halfExtent.y, 0.0f, 0.0f},
-            };
-            auto lightsEnd = result + numLights;
-            auto sameArea = std::ranges::find_if(result, lightsEnd, [&](SourceLight const& other) {
-                return std::ranges::equal(other.centerRangeShape, light.centerRangeShape) && std::ranges::equal(other.extent, light.extent);
-            });
-            if (sameArea == lightsEnd) {
-                result[numLights++] = light;
-            } else {
-                for (auto&& [sum, value] : std::views::zip(sameArea->color, light.color)) {
-                    sum += value;
-                }
-            }
-        }
-        return numLights;
-    }
-}
-
 void _RayTracingResources::updateFrameConstants(
     RenderView const& view,
     NumRenderObjects const& numObjects,
@@ -745,6 +668,10 @@ void _RayTracingResources::updateFrameConstants(
     auto closeUpWeight = getSmoothTransition(screenZoom, CloseUpZoomStart, CloseUpZoomEnd);
     auto detailVisibility = getSmoothTransition(screenZoom, DetailZoomStart, DetailZoomEnd);
 
+    auto const& gasGrid = _layout.gasGrid;
+    auto shadowGridBlur = gasGrid.cloudSpreadInNodes * gasGrid.nodeDistance / _shadowGrid.nodeDistance;
+    auto shadowGridBlurRadius = std::min(toInt(std::ceil(3.0f * shadowGridBlur)), MaxShadowGridBlurRadius);
+
     FrameConstants constants{
         .view = {toFloat(view.viewSize.x), toFloat(view.viewSize.y), view.zoomFactor, screenZoom},
         .rect = {topLeft.x, topLeft.y, jitter.x, jitter.y},
@@ -756,26 +683,23 @@ void _RayTracingResources::updateFrameConstants(
         .tissue = {closeUpWeight, detailVisibility, 1.0f / view.zoomFactor, getTissueVisibility(view)},
         .parameters =
             {getBackgroundScale(), _stillPicture ? 0.0f : 1.0f, 1.0f / toFloat(_numAveragedFrames + 1), SimulationRenderer::getSolidDetailVisibility(view)},
-        .gasGrid = {_gasGrid.origin.x, _gasGrid.origin.y, _gasGrid.nodeDistance, _gasGrid.cloudSpreadInNodes},
-        .gasSize = {_gasGrid.size.x, _gasGrid.size.y, _gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
-        .gasLight =
-            {_gasGrid.lightClusterSize,
-             LightRangeInFalloffDistances * _gasGrid.lightFalloffDistance,
-             _gasGrid.irradianceNodeDistance,
-             _gasGrid.lightFalloffDistance},
-        .gasLightGrid = {_gasGrid.numLightClusters.x, _gasGrid.numLightClusters.y, _gasGrid.irradianceSize.x, _gasGrid.irradianceSize.y},
-        .gasLighting = {_gasGrid.lightClusterOrigin.x, _gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
+        .gasGrid = {gasGrid.origin.x, gasGrid.origin.y, gasGrid.nodeDistance, gasGrid.cloudSpreadInNodes},
+        .gasSize = {gasGrid.size.x, gasGrid.size.y, gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
+        .gasLight = {gasGrid.lightClusterSize, gasGrid.lightRange, gasGrid.irradianceNodeDistance, gasGrid.lightFalloffDistance},
+        .gasLightGrid = {gasGrid.numLightClusters.x, gasGrid.numLightClusters.y, gasGrid.irradianceSize.x, gasGrid.irradianceSize.y},
+        .gasLighting = {gasGrid.lightClusterOrigin.x, gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
         .world = {toFloat(worldSize.x), toFloat(worldSize.y), parameters.borderlessRendering.value ? 1.0f : 0.0f, 0.0f},
+        .shadowGrid = {_shadowGrid.origin.x, _shadowGrid.origin.y, _shadowGrid.nodeDistance, shadowGridBlur},
+        .shadowGridSize = {_shadowGrid.size.x, _shadowGrid.size.y, shadowGridBlurRadius, 0},
+        .numSourceLights = {static_cast<int32_t>(_layout.sourceLights.size()), 0, 0, 0},
     };
-
-    // Without borderless rendering, only the world is lit
-    auto gasGridExtent = RealVector2D{toFloat(_gasGrid.size.x - 1), toFloat(_gasGrid.size.y - 1)} * _gasGrid.nodeDistance;
-    RealRect litRegion{_gasGrid.origin, _gasGrid.origin + gasGridExtent};
-    if (!parameters.borderlessRendering.value) {
-        litRegion.topLeft = {std::max(litRegion.topLeft.x, 0.0f), std::max(litRegion.topLeft.y, 0.0f)};
-        litRegion.bottomRight = {std::min(litRegion.bottomRight.x, toFloat(worldSize.x)), std::min(litRegion.bottomRight.y, toFloat(worldSize.y))};
+    for (auto&& [light, lightConstants] : std::views::zip(_layout.sourceLights, constants.sourceLights)) {
+        lightConstants = SourceLightConstants{
+            .centerRangeShape = {light.center.x, light.center.y, light.range, light.circular ? 0.0f : 1.0f},
+            .color = {light.color.r, light.color.g, light.color.b, 0.0f},
+            .extent = {light.halfExtent.x, light.halfExtent.y, 0.0f, 0.0f},
+        };
     }
-    constants.numSourceLights[0] = getSourceLights(parameters, worldSize, litRegion, constants.sourceLights);
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 }
 
@@ -808,6 +732,9 @@ void _RayTracingResources::writeDescriptorSet(VulkanGeometryBuffers const& geome
         .storageBuffer(Binding_GasLightClusters, _gasLightClusters.buffer)
         .storageImage(Binding_GasIrradiance, _gasIrradiance.view)
         .sampledImage(Binding_GasIrradianceSampler, _gasIrradiance.view, General)
+        .storageBuffer(Binding_ShadowGridNodes, geometryBuffers->getBuffer(GeometryBufferType_ShadowGrid))
+        .storageImage(Binding_ShadowGridImage, _shadowGridImage.view)
+        .sampledImage(Binding_ShadowGridSampler, _shadowGridImage.view, General)
         .write(_descriptorSet);
 }
 
@@ -875,6 +802,8 @@ VulkanImage* _RayTracingResources::getImage(RayTracingResource resource)
         return &_gasImage;
     case RayTracingResource::GasIrradiance:
         return &_gasIrradiance;
+    case RayTracingResource::ShadowGridImage:
+        return &_shadowGridImage;
     case RayTracingResource::SceneColor:
         return &_view.sceneColor;
     case RayTracingResource::AntiAliased:
@@ -890,9 +819,9 @@ VkDeviceSize _RayTracingResources::getUsedSize(RayTracingResource resource) cons
 {
     switch (resource) {
     case RayTracingResource::GasAccumulation:
-        return static_cast<VkDeviceSize>(_gasGrid.size.x) * _gasGrid.size.y * GasAccumulationStride * sizeof(uint32_t);
+        return static_cast<VkDeviceSize>(_layout.gasGrid.size.x) * _layout.gasGrid.size.y * GasAccumulationStride * sizeof(uint32_t);
     case RayTracingResource::GasLightClusters:
-        return static_cast<VkDeviceSize>(_gasGrid.numLightClusters.x) * _gasGrid.numLightClusters.y * GasLightClusterStride * sizeof(uint32_t);
+        return static_cast<VkDeviceSize>(_layout.gasGrid.numLightClusters.x) * _layout.gasGrid.numLightClusters.y * GasLightClusterStride * sizeof(uint32_t);
     default:
         THROW_NOT_IMPLEMENTED();
     }
