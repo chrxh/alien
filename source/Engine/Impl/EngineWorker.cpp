@@ -57,15 +57,12 @@ bool EngineWorker::isRenderingInteropWorking(GeometryBuffers const& geometryBuff
     return _SimulationCudaFacade::isRenderingInteropWorking(geometryBuffers);
 }
 
-void EngineWorker::tryCopyBuffersFromCudaToRenderer(
-    GeometryBuffers const& geometryBuffers,
-    RealRect const& visibleWorldRect,
-    ShadowGridLayout const& shadowGridLayout)
+void EngineWorker::tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, GeometryRequest const& request)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        _simulationCudaFacade->copyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+        _simulationCudaFacade->copyBuffersFromCudaToRenderer(geometryBuffers, request);
         syncSimulationWithRenderingIfDesired();
     }
 }

@@ -103,6 +103,12 @@ struct ShadowGridLayout
     uint64_t getNumNodes() const;
 };
 
+struct GeometryRequest
+{
+    RealRect visibleWorldRect;
+    ShadowGridLayout shadowGrid;
+};
+
 // Fixed point sums of the objects around a node of the shadow grid, each object is distributed bilinearly over the four nodes around it. The
 // areas include the shares of the objects in their strands and polygons.
 struct ShadowGridNodeData

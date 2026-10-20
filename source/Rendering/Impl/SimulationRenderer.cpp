@@ -174,7 +174,8 @@ void SimulationRenderer::updateGeometry(RenderView const& view)
     if (_rayTracingGraph) {
         _rayTracingLayout = RayTracingLayout::calc(view, simulationFacade->getSimulationParameters(), simulationFacade->getWorldSize());
     }
-    simulationFacade->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, view.visibleWorldRect, _rayTracingLayout.shadowGrid);
+    simulationFacade->tryCopyBuffersFromCudaToRenderer(
+        _geometryBuffers, {.visibleWorldRect = view.visibleWorldRect, .shadowGrid = _rayTracingLayout.shadowGrid});
 }
 
 RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, SimulationParameters const& parameters, bool forPicture)

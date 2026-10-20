@@ -146,28 +146,25 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
     log(Priority::Important, "simulation closed");
 }
 
-void _SimulationCudaFacade::copyBuffersFromCudaToRenderer(
-    GeometryBuffers const& geometryBuffers,
-    RealRect const& visibleWorldRect,
-    ShadowGridLayout const& shadowGridLayout)
+void _SimulationCudaFacade::copyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, GeometryRequest const& request)
 {
     checkAndProcessSimulationParameterChanges();
 
     KernelProfiler::CategoryScope profilerScope(KernelCategory::Rendering);
     auto simulationData = getSimulationDataPtrCopy();
 
-    GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
+    GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, request.visibleWorldRect);
     try {
-        auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
-        geometryBuffers->updateNumObjects(numRenderObjects, shadowGridLayout);
+        auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, request.visibleWorldRect);
+        geometryBuffers->updateNumObjects(numRenderObjects, request.shadowGrid);
 
         if (geometryBuffers->isMemoryShareable()) {
             CHECK_FOR_DEVICE_ERRORS(_cudaGeometryBuffers->importSharedMemory(geometryBuffers));
-            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, shadowGridLayout);
+            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, request);
             syncAndCheck();
         } else {
             _cudaGeometryBuffers->allocateDeviceBuffers(geometryBuffers);
-            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, shadowGridLayout);
+            GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, request);
             syncAndCheck();
             _cudaGeometryBuffers->copyDeviceBuffersTo(geometryBuffers, geometryBuffers->getNumObjects());
         }
