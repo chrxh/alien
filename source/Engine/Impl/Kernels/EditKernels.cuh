@@ -31,9 +31,10 @@ __global__ void cudaPropagateSelectionAnchorKeys(SimulationData data, int* resul
 __global__ void cudaPlaceSelectionAnchors(SimulationData data, float2 refPos);
 __global__ void cudaPropagateFlattenedSelectionPositions(SimulationData data, int* result);
 __global__ void cudaCalcFlattenedSelectionCenter(SimulationData data, float2 refPos, float2* center, int* numEntities, bool includeClusters);
-__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 refPos, float2 center);
+__global__ void cudaRotateSelection(SimulationData data, float2 refPos, float2 center, float angleDelta, bool includeClusters);
+__global__ void cudaSetAngularVelForSelection(SimulationData data, float2 center, float angularVel, bool includeClusters);
 __global__ void cudaCalcAccumulatedVel(SimulationData data, float2* velocity, int* numEntities, bool includeClusters);
-__global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);
+__global__ void cudaIncrementPosForSelection(SimulationData data, float2 posDelta, bool includeClusters);
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters);
 __global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters);

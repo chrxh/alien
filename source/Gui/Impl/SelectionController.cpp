@@ -98,6 +98,7 @@ void SelectionController::fixateSelectedObjects(RealVector2D const& viewPos, Rea
         updateData.considerClusters = true;
         updateData.posDeltaX = selectionCorrectionDelta.x;
         updateData.posDeltaY = selectionCorrectionDelta.y;
+        updateData.velocity = RealVector2D{};
         _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
     }
 }
@@ -108,8 +109,7 @@ void SelectionController::accelerateSelectedObjects(RealVector2D const& viewPos,
 
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = true;
-    updateData.velX = delta.x / 10;
-    updateData.velY = delta.y / 10;
+    updateData.velocity = delta / 10;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
 }
 

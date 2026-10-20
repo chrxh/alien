@@ -48,10 +48,23 @@ void EditKernelsService::shallowUpdateSelectedObjects(
     auto tearingRequired = !updateData.considerClusters && positionsChanged;
     auto gluingRequired = updateData.glueOnContact && positionsChanged;
 
-    if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velX != 0 || updateData.velY != 0) {
-        launchKernelOnDefaultStream(KERNEL(cudaIncrementPosAndVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data);
+    if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0) {
+        launchKernelOnDefaultStream(
+            KERNEL(cudaIncrementPosForSelection),
+            LaunchConfig{launchSettings.numBlocks, 8},
+            data,
+            float2{updateData.posDeltaX, updateData.posDeltaY},
+            updateData.considerClusters);
     }
-    if (updateData.angleDelta != 0 || updateData.angularVel != 0) {
+    if (updateData.velocity) {
+        launchKernelOnDefaultStream(
+            KERNEL(cudaSetVelocityForSelection),
+            LaunchConfig{launchSettings.numBlocks, 8},
+            data,
+            float2{updateData.velocity->x, updateData.velocity->y},
+            updateData.considerClusters);
+    }
+    if (updateData.angleDelta != 0 || updateData.angularVel) {
         auto refPos = flattenSelection(launchSettings, data);
 
         setValueToDevice(_cudaCenter, float2{0, 0});
@@ -71,8 +84,25 @@ void EditKernelsService::shallowUpdateSelectedObjects(
         if (numEntities != 0) {
             center = center / numEntities;
         }
-        launchKernelOnDefaultStream(
-            KERNEL(cudaUpdateAngleAndAngularVelForSelection), LaunchConfig{launchSettings.numBlocks, 8}, updateData, data, refPos, center);
+        if (updateData.angleDelta != 0) {
+            launchKernelOnDefaultStream(
+                KERNEL(cudaRotateSelection),
+                LaunchConfig{launchSettings.numBlocks, 8},
+                data,
+                refPos,
+                center,
+                updateData.angleDelta,
+                updateData.considerClusters);
+        }
+        if (updateData.angularVel) {
+            launchKernelOnDefaultStream(
+                KERNEL(cudaSetAngularVelForSelection),
+                LaunchConfig{launchSettings.numBlocks, 8},
+                data,
+                center,
+                *updateData.angularVel,
+                updateData.considerClusters);
+        }
     }
 
     if (tearingRequired) {

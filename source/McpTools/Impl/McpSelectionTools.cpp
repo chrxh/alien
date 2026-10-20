@@ -206,15 +206,13 @@ McpToolResult McpSelectionTools::moveSelection(boost::json::object const& argume
     auto dx = McpArguments::getFloat(arguments, "dx");
     auto dy = McpArguments::getFloat(arguments, "dy");
     auto includeClusters = getIncludeClusters(arguments);
-    auto selection = getNonEmptySelection();
+    getNonEmptySelection();
 
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = includeClusters;
     updateData.glueOnContact = McpArguments::getOptionalBool(arguments, "glue_on_contact").value_or(false);
     updateData.posDeltaX = dx;
     updateData.posDeltaY = dy;
-    updateData.velX = includeClusters ? selection.clusterCenterVelX : selection.centerVelX;
-    updateData.velY = includeClusters ? selection.clusterCenterVelY : selection.centerVelY;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
     _context->onSelectionChanged();
     return {.text = std::format("Moved the selection by ({}, {}).", StringHelper::format(dx, 1), StringHelper::format(dy, 1))};

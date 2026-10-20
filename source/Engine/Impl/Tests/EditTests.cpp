@@ -455,6 +455,60 @@ TEST_F(EditTests, shallowUpdateSelectedObjects_entireNetworks_connectionsRemain)
     EXPECT_FALSE(actualData.hasConnection(2, 3));
 }
 
+namespace
+{
+    ContentDesc createTwoMovingObjects()
+    {
+        return ContentDesc().addObjects({
+            ObjectDesc().id(1).pos({49, 50}).vel({0.2f, 0.5f}).type(SolidDesc()),
+            ObjectDesc().id(2).pos({51, 50}).vel({0.2f, 0.5f}).type(SolidDesc()),
+        });
+    }
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_setVelocityToZero)
+{
+    _simulationFacade->setSimulationData(createTwoMovingObjects());
+    _simulationFacade->setSelection({48, 49}, {52, 51});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.velocity = RealVector2D{0, 0};
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(RealVector2D{0, 0}, actualData.getObjectRef(1)._vel));
+    EXPECT_TRUE(approxCompare(RealVector2D{0, 0}, actualData.getObjectRef(2)._vel));
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_moveKeepsVelocity)
+{
+    _simulationFacade->setSimulationData(createTwoMovingObjects());
+    _simulationFacade->setSelection({48, 49}, {52, 51});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.posDeltaX = 3.0f;
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(52.0f, actualData.getObjectRef(1)._pos.x));
+    EXPECT_TRUE(approxCompare(RealVector2D{0.2f, 0.5f}, actualData.getObjectRef(1)._vel));
+    EXPECT_TRUE(approxCompare(RealVector2D{0.2f, 0.5f}, actualData.getObjectRef(2)._vel));
+}
+
+TEST_F(EditTests, shallowUpdateSelectedObjects_setAngularVelocityToZero)
+{
+    _simulationFacade->setSimulationData(createTwoMovingObjects());
+    _simulationFacade->setSelection({48, 49}, {52, 51});
+
+    ShallowUpdateSelectionData updateData;
+    updateData.angularVel = 0.0f;
+    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(RealVector2D{0, 0}, actualData.getObjectRef(1)._vel));
+    EXPECT_TRUE(approxCompare(RealVector2D{0, 0}, actualData.getObjectRef(2)._vel));
+}
+
 TEST_F(EditTests, glueSelectedObjects_onlyWithinSelection)
 {
     auto data = ContentDesc().addObjects({
