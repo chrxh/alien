@@ -50,7 +50,7 @@ TEST_F(GeometryTests, copyBuffers_emptySim)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(0u, numObjects.objects);
@@ -70,7 +70,7 @@ TEST_F(GeometryTests, copyBuffers_objects)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
@@ -91,7 +91,7 @@ TEST_F(GeometryTests, copyBuffers_cullsObjectsOutsideVisibleRect)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(1u, numObjects.objects);
@@ -114,7 +114,7 @@ TEST_F(GeometryTests, copyBuffers_fluidParticles)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(4u, numObjects.fluidParticles);
@@ -134,7 +134,7 @@ TEST_F(GeometryTests, copyBuffers_cullsFluidParticlesOutsideVisibleRect)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(1u, numObjects.fluidParticles);
@@ -154,7 +154,7 @@ TEST_F(GeometryTests, copyBuffers_energyParticleVelocity)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto particleData = geometryBuffers->getFluidParticleData();
     ASSERT_EQ(1u, particleData.size());
@@ -174,7 +174,7 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
@@ -200,7 +200,7 @@ TEST_F(GeometryTests, copyBuffers_cullsConnectionsOutsideVisibleRect)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
@@ -224,7 +224,7 @@ TEST_F(GeometryTests, copyBuffers_triangle)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
@@ -255,7 +255,7 @@ TEST_F(GeometryTests, copyBuffers_quad)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(4u, numObjects.objects);
@@ -294,7 +294,7 @@ TEST_F(GeometryTests, copyBuffers_smoothsStepInSolidOutline)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto vertices = geometryBuffers->getCellData();
     ASSERT_EQ(10u, vertices.size());
@@ -331,7 +331,7 @@ TEST_F(GeometryTests, copyBuffers_keepsDistantSolidCloseToItsPosition)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto vertices = geometryBuffers->getCellData();
     ASSERT_EQ(10u, vertices.size());
@@ -355,7 +355,7 @@ TEST_F(GeometryTests, copyBuffers_keepsOutlineOfRoundSolid)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto vertices = geometryBuffers->getCellData();
     ASSERT_EQ(7u, vertices.size());
@@ -382,7 +382,7 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
@@ -404,7 +404,7 @@ TEST_F(GeometryTests, copyBuffers_marksFluids)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     // The z coordinate is 1 for fluids and 0 for energy particles
     auto particleData = geometryBuffers->getFluidParticleData();
@@ -425,7 +425,7 @@ TEST_F(GeometryTests, copyBuffers_activityShowsPositivePartOfFirstSignal)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto cellData = geometryBuffers->getCellData();
     ASSERT_EQ(2u, cellData.size());
@@ -443,7 +443,7 @@ TEST_F(GeometryTests, copyBuffers_activityIsFullWhileCellIsAttacked)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto cellData = geometryBuffers->getCellData();
     ASSERT_EQ(2u, cellData.size());
@@ -466,7 +466,7 @@ TEST_F(GeometryTests, copyBuffers_activitySmoothsAlternatingSignals)
 
     for (int i = 0; i < 30; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-        _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+        _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
     }
 
     auto cellData = geometryBuffers->getCellData();
@@ -492,7 +492,7 @@ TEST_F(GeometryTests, copyBuffers_creature)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
@@ -518,7 +518,7 @@ TEST_F(GeometryTests, copyBuffers_shadowGridCollectsFluidsOutsideVisibleRect)
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
     ShadowGridLayout shadowGridLayout{.origin = {0, 0}, .nodeDistance = 1.0f, .size = {100, 100}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect, .shadowGrid = shadowGridLayout});
 
     EXPECT_EQ(10000u, geometryBuffers->getNumObjects().shadowGridNodes);
     auto nodes = geometryBuffers->getShadowGridData();
@@ -545,7 +545,7 @@ TEST_F(GeometryTests, copyBuffers_shadowGridCoversCellsWithTheirStrands)
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
     ShadowGridLayout shadowGridLayout{.origin = {0, 0}, .nodeDistance = 1.0f, .size = {100, 100}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect, .shadowGrid = shadowGridLayout});
 
     // Each cell covers its disk and half of the strand of length 1
     auto nodes = geometryBuffers->getShadowGridData();
@@ -572,7 +572,7 @@ TEST_F(GeometryTests, copyBuffers_shadowGridCollectsPeriodicCopies)
     RealRect visibleWorldRect{{100, 100}, {110, 110}};
     ShadowGridLayout shadowGridLayout{.origin = {-20, 90}, .nodeDistance = 1.0f, .size = {60, 30}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect, .shadowGrid = shadowGridLayout});
 
     // The fluid at the right border of the world is collected left of the world at (-4.5, 100.25)
     auto nodes = geometryBuffers->getShadowGridData();
@@ -588,7 +588,7 @@ TEST_F(GeometryTests, copyBuffers_shadowGridCoversSolids)
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
     ShadowGridLayout shadowGridLayout{.origin = {0, 0}, .nodeDistance = 1.0f, .size = {100, 100}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect, shadowGridLayout);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect, .shadowGrid = shadowGridLayout});
 
     auto nodes = geometryBuffers->getShadowGridData();
     auto solidRadius = RayTracedObjectSizes::SolidRadius;
@@ -603,7 +603,7 @@ TEST_F(GeometryTests, copyBuffers_shadowGridWithoutNodes)
     auto geometryBuffers = _HostGeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {10, 10}};
 
-    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, visibleWorldRect);
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
 
     EXPECT_EQ(0u, geometryBuffers->getNumObjects().shadowGridNodes);
     EXPECT_TRUE(geometryBuffers->getShadowGridData().empty());

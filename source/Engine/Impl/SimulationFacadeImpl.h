@@ -28,8 +28,7 @@ public:
     GpuUuid getGpuUuid() const override;
 
     bool isRenderingInteropWorking(GeometryBuffers const& geometryBuffers) const override;
-    void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect, ShadowGridLayout const& shadowGridLayout)
-        override;
+    void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, GeometryRequest const& request) override;
 
     bool isSyncSimulationWithRendering() const override;
     void setSyncSimulationWithRendering(bool value) override;
