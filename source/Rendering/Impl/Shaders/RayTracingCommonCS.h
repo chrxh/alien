@@ -12,11 +12,7 @@ namespace Shaders
     std::string_view const RayTracingCommonCS = R"(
 const float CameraHeight = 20.0;
 
-// Visible sizes of the tissue close up in world units
-const float CellRadius = 0.34;
-const float FreeCellRadius = 0.29;
-const float SolidRadius = 0.4;
-const float StrandHalfWidth = 0.165;
+// Visible size of the fills close up in world units, the sizes of the cells and the strands are declared before
 const float FillOffset = 0.105;
 
 // Zoomed out, the tissue approaches the thin lines and dots of the rasterized view, but stays at least as large as a pixel
@@ -85,6 +81,15 @@ struct FluidParticle
     float vel[2];
 };
 
+// Fixed point sums of the objects outside the extracted region, see ShadowGridNodeData in Engine/Interface/GeometryBuffers.h
+struct ShadowGridNode
+{
+    uint numFluids;
+    uint tissueArea;
+    uint tissueHueArea[3];
+    uint solidArea;
+};
+
 // A radiation source that shines from its circular or rectangular area
 struct SourceLight
 {
@@ -109,6 +114,9 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
     vec4 gasLighting;  // xy: world position of the first light cluster, z: strength of the light of the cells in the gas
     vec4 world;        // xy: size of the world, z: 1 for borderless rendering
+    vec4 shadowGrid;  // xy: world position of the first node of the shadow grid, z: distance of the nodes, w: standard deviation of the blur in
+                      // nodes
+    ivec4 shadowGridSize;  // xy: number of nodes of the shadow grid, z: blur radius in nodes
     ivec4 numSourceLights;  // x: number of source lights
     SourceLight sourceLights[MaxSourceLights];
 } frame;
@@ -135,6 +143,9 @@ layout(set = 0, binding = 19) uniform sampler2D energyParticleTexture;
 layout(set = 0, binding = 20, std430) buffer GasLightClusterBuffer { uint gasLightClusters[]; };
 layout(set = 0, binding = 21, rgba16f) uniform image2D gasIrradianceImage;
 layout(set = 0, binding = 22) uniform sampler2D gasIrradianceSampler;
+layout(set = 0, binding = 23, std430) readonly buffer ShadowGridNodeBuffer { ShadowGridNode shadowGridNodes[]; };
+layout(set = 0, binding = 24, rgba16f) uniform image2D shadowGridImage;
+layout(set = 0, binding = 25) uniform sampler2D shadowGridSampler;
 
 //*******************
 //* General helpers
@@ -450,6 +461,12 @@ vec3 sampleGasIrradiance(vec2 world)
 //*******************************
 //* Light of the radiation sources
 //*******************************
+
+const float GasExtinction = 0.2;
+
+// Light passing through tissue takes on its color, solids block it
+const float TissueExtinction = 6.0;
+const float SolidExtinction = 8.0;
 
 // The shadow rays to the radiation sources stand for beams that lead from the parts of a node of the irradiance grid to the parts of the
 // shining area side by side, see Shaders/RayTracingGasIrradianceCS.h. At least this many rays start from a node.

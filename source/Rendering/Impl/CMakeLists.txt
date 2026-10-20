@@ -5,6 +5,8 @@ add_library(RenderingImpl
     GlslCompiler.h
     RayTracingComputePipeline.cpp
     RayTracingComputePipeline.h
+    RayTracingLayout.cpp
+    RayTracingLayout.h
     RayTracingResources.cpp
     RayTracingResources.h
     RayTracingSteps.cpp

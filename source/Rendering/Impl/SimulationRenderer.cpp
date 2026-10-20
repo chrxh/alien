@@ -67,7 +67,7 @@ void SimulationRenderer::shutdown()
 void SimulationRenderer::draw(RenderView const& view)
 {
     VulkanFrameRenderer::get().drawScene(
-        [this, view] { updateGeometry(view.visibleWorldRect); },
+        [this, view] { updateGeometry(view); },
         [this, view](VkCommandBuffer commandBuffer) -> VulkanImage& {
             auto parameters = _SimulationFacade::get()->getSimulationParameters();
             return selectGraph(view, parameters, false)->execute(commandBuffer, view, parameters);
@@ -117,7 +117,7 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
 
     target->resize(resolution, VK_FORMAT_R8G8B8A8_UNORM);
 
-    updateGeometry(view.visibleWorldRect);
+    updateGeometry(view);
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto const& graph = selectGraph(view, parameters, true);
     auto rayTraced = graph == _rayTracingGraph;
@@ -168,9 +168,14 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
     return result;
 }
 
-void SimulationRenderer::updateGeometry(RealRect const& visibleWorldRect)
+void SimulationRenderer::updateGeometry(RenderView const& view)
 {
-    _SimulationFacade::get()->tryCopyBuffersFromCudaToRenderer(_geometryBuffers, visibleWorldRect);
+    auto simulationFacade = _SimulationFacade::get();
+    if (_rayTracingGraph) {
+        _rayTracingLayout = RayTracingLayout::calc(view, simulationFacade->getSimulationParameters(), simulationFacade->getWorldSize());
+    }
+    simulationFacade->tryCopyBuffersFromCudaToRenderer(
+        _geometryBuffers, {.visibleWorldRect = view.visibleWorldRect, .shadowGrid = _rayTracingLayout.shadowGrid});
 }
 
 RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, SimulationParameters const& parameters, bool forPicture)
@@ -188,7 +193,7 @@ RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, Simul
         return _rasterGraph;
     }
     try {
-        _rayTracingResources->prepare(view, numObjects, parameters);
+        _rayTracingResources->prepare(view, _rayTracingLayout, numObjects, parameters);
         if (!forPicture) {
             _failedRayTracingDemand.reset();
         }
@@ -585,6 +590,11 @@ namespace
         return resources.getGasGrid().size;
     }
 
+    IntVector2D perShadowGridNode(_RayTracingResources const& resources, NumRenderObjects const&)
+    {
+        return resources.getShadowGrid().size;
+    }
+
     IntVector2D perPixel(_RayTracingResources const& resources, NumRenderObjects const&)
     {
         return resources.getViewSize();
@@ -637,6 +647,20 @@ namespace
                     .workGroupSize({8, 8})
                     .dispatchSize(perGasNode)
                     .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::string(Shaders::RayTracingShadowGridCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize(perShadowGridNode)
+                    .accesses({{GasIntermediate, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::format("#define VERTICAL\n{}", Shaders::RayTracingShadowGridCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize(perShadowGridNode)
+                    .accesses({{GasIntermediate, Read}, {ShadowGridImage, ReadWrite}})),
 
             // The light of the cells and of the radiation sources reaches the gas through the gas and the objects. The threads of a work group
             // row share a node, so that the many rays of the nodes close to large sources spread over the GPU.
@@ -649,7 +673,8 @@ namespace
                         auto const& size = resources.getGasGrid().irradianceSize;
                         return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                     })
-                    .accesses({{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
+                    .accesses(
+                        {{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {ShadowGridImage, Read}, {GasIrradiance, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()

@@ -37,9 +37,10 @@ public:
 
     // Transfers the simulation data from CUDA to the provided buffer.
     // Resizes buffers if necessary and fills it with data for rendering.
+    // The objects that are not extracted are collected in the shadow grid if its layout has nodes.
     // If the GPU is busy for a specified duration, the buffers will not be updated.
     //
-    virtual void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
+    virtual void tryCopyBuffersFromCudaToRenderer(GeometryBuffers const& geometryBuffers, GeometryRequest const& request) = 0;
     virtual bool isSyncSimulationWithRendering() const = 0;
     virtual void setSyncSimulationWithRendering(bool value) = 0;
     virtual int getSyncSimulationWithRenderingRatio() const = 0;
