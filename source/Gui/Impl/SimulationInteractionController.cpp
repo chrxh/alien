@@ -370,6 +370,9 @@ void SimulationInteractionController::middleMouseButtonPressed(IntVector2D const
 
 void SimulationInteractionController::middleMouseButtonHold(IntVector2D const& mousePos)
 {
+    if (!_worldPosForPanning) {
+        return;
+    }
     Viewport::get().moveCenter(*_worldPosForPanning, mousePos);
 }
 
