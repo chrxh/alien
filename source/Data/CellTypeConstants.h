@@ -17,6 +17,11 @@ namespace Channels
     auto constexpr CellTypeActivation = 0;
 }
 
+namespace Const
+{
+    auto constexpr DistanceAtHalfSignal = 128.0f;
+}
+
 namespace TelemetryInputs
 {
     auto constexpr Energy = 0;
@@ -499,6 +504,7 @@ enum SignalRecorderState_
 namespace Channels
 {
     auto constexpr CommunicatorAngle = 1;
+    auto constexpr CommunicatorDistance = 3;
 }
 namespace Const
 {
@@ -506,6 +512,7 @@ namespace Const
     auto constexpr CommunicatorRange_Max = 20;
     auto constexpr CommunicatorRange_Default = 15;
     auto constexpr CommunicatorOneway_Default = true;
+    auto constexpr CommunicatorOnewayMinAngle = 100.0f;
 }
 
 using CommunicatorMode = int;

@@ -84,11 +84,13 @@ namespace
     std::vector<CellFunctionChannel> getCommunicatorChannels(CellProperties const& properties)
     {
         if (properties.communicatorMode == CommunicatorMode_Sender) {
-            return {readChannel(Channels::CellTypeActivation, "trigger"), readChannel(Channels::CommunicatorAngle, "angle")};
+            return {
+                readChannel(Channels::CellTypeActivation, "trigger"),
+                readChannel(Channels::CommunicatorAngle, "angle"),
+                readChannel(Channels::CommunicatorDistance, "distance")};
         }
 
-        // The angle is written by the sending cell into the signal of this cell
-        return {writeChannel(Channels::CommunicatorAngle, "angle")};
+        return {writeChannel(Channels::CommunicatorAngle, "angle"), writeChannel(Channels::CommunicatorDistance, "distance")};
     }
 
     std::vector<CellFunctionChannel> getCellTypeChannels(CellProperties const& properties)
