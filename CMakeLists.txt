@@ -391,7 +391,8 @@ add_custom_command(
 # binaries.
 if(WIN32 AND NOT USE_HIP)
     get_filename_component(CUDA_BIN_DIR ${CMAKE_CUDA_COMPILER} DIRECTORY)
-    file(GLOB CUDA_RUNTIME_DLL "${CUDA_BIN_DIR}/cudart64_*.dll")
+    # CUDA 13 moved the runtime DLLs into bin/x64
+    file(GLOB CUDA_RUNTIME_DLL "${CUDA_BIN_DIR}/cudart64_*.dll" "${CUDA_BIN_DIR}/x64/cudart64_*.dll")
     if(NOT CUDA_RUNTIME_DLL)
         message(FATAL_ERROR "Could not find cudart64_*.dll in ${CUDA_BIN_DIR}")
     endif()
