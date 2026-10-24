@@ -31,6 +31,7 @@ private:
     McpToolResult pasteSelection(boost::json::object const& arguments) const;
     McpToolResult applyForce(boost::json::object const& arguments) const;
 
+    // Throws if nothing is selected, so tools also call it just as a guard
     SelectionShallowData getNonEmptySelection() const;
 
     McpToolContext* _context = nullptr;

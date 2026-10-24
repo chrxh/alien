@@ -385,11 +385,11 @@ __global__ void cudaCalcFlattenedSelectionCenter(SimulationData data, float2 ref
     }
 }
 
-__global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 refPos, float2 center)
+__global__ void cudaRotateSelection(SimulationData data, float2 refPos, float2 center, float angleDelta, bool includeClusters)
 {
     __shared__ Math::Matrix rotationMatrix;
     if (0 == threadIdx.x) {
-        Math::rotationMatrix(updateData.angleDelta, rotationMatrix);
+        Math::rotationMatrix(angleDelta, rotationMatrix);
     }
     __syncthreads();
 
@@ -397,20 +397,10 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
         auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
-            if (isSelected(object, updateData.considerClusters)) {
+            if (isSelected(object, includeClusters)) {
                 auto relPos = object->tempValue2.as_float2 - center;
-
-                if (updateData.angleDelta != 0) {
-                    object->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
-                    data.world.correctPosition(object->pos);
-                }
-
-                if (updateData.angularVel != 0) {
-                    auto newVel = relPos;
-                    Math::rotateQuarterClockwise(newVel);
-                    newVel = newVel * updateData.angularVel * Const::DEG_TO_RAD;
-                    object->vel = newVel;
-                }
+                object->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
+                data.world.correctPosition(object->pos);
             }
         }
     }
@@ -425,6 +415,19 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
                 particle->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
                 data.world.correctPosition(particle->pos);
             }
+        }
+    }
+}
+
+__global__ void cudaSetAngularVelForSelection(SimulationData data, float2 center, float angularVel, bool includeClusters)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& object = data.entities.objects.at(index);
+        if (isSelected(object, includeClusters)) {
+            auto newVel = object->tempValue2.as_float2 - center;
+            Math::rotateQuarterClockwise(newVel);
+            object->vel = newVel * angularVel * Const::DEG_TO_RAD;
         }
     }
 }
@@ -457,15 +460,14 @@ __global__ void cudaCalcAccumulatedVel(SimulationData data, float2* velocity, in
     }
 }
 
-__global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
+__global__ void cudaIncrementPosForSelection(SimulationData data, float2 posDelta, bool includeClusters)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (isSelected(object, updateData.considerClusters)) {
-            object->pos = object->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
+        if (isSelected(object, includeClusters)) {
+            object->pos = object->pos + posDelta;
             data.world.correctPosition(object->pos);
-            object->vel = float2{updateData.velX, updateData.velY};
         }
     }
 
@@ -473,9 +475,8 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
     for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
-            particle->pos = particle->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
+            particle->pos = particle->pos + posDelta;
             data.world.correctPosition(particle->pos);
-            particle->vel = float2{updateData.velX, updateData.velY};
         }
     }
 }

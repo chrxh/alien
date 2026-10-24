@@ -206,8 +206,7 @@ void EditorController::onSetVelocityOfSelectedObjects(RealVector2D const& veloci
 {
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = EditorModel::get().isApplyToNetworks();
-    updateData.velX = velocity.x;
-    updateData.velY = velocity.y;
+    updateData.velocity = velocity;
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
     EditorModel::get().update();
 }

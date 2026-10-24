@@ -208,8 +208,7 @@ McpToolResult McpEditTools::setSelectionVelocity(boost::json::object const& argu
 
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = getIncludeClusters(arguments);
-    updateData.velX = vx;
-    updateData.velY = vy;
+    updateData.velocity = RealVector2D{vx, vy};
     _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
     _context->onSelectionChanged();
     return {.text = std::format("Set the velocity of the selection to ({}, {}).", vx, vy)};
