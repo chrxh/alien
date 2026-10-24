@@ -15,6 +15,7 @@ add_library(Data
     Descs.h
     DescValidationService.cpp
     DescValidationService.h
+    DistanceSignal.h
     EngineConstants.h
     ExtinctLineageAccumulator.cpp
     ExtinctLineageAccumulator.h

@@ -77,7 +77,7 @@ A sensor scans the surroundings and reports the closest match. It is the eye of 
 | #0 (output) | 1 if something was found, otherwise 0. |
 | #1 (output) | Direction of the match relative to the front direction, between -1 and 1. |
 | #2 (output) | Mass of the match: the density of energy particles or free cells between 0 and 1, or for creatures a value that grows with their size (0.5 for 30 cells, 0.75 for 60 cells, 1 for 120 cells or more). |
-| #3 (output) | Distance of the match: 1 means very close, 0 means 256 units or farther. |
+| #3 (output) | Distance d of the match, encoded as 1 / (1 + d / 128): 1 means very close, 0.5 means 128 units, and the value approaches 0 for far matches. |
 
 Channels #1 to #3 are only written when something is found.
 
@@ -371,16 +371,19 @@ A communicator exchanges signals between different creatures. It allows swarms, 
 | --- | --- |
 | #0 (input, sender) | Triggers a transmission if the absolute value is at least 0.1. |
 | all (sender) | All eight channels of the sender are transmitted. |
-| #1 | Interpreted as a direction. It is converted into the frame of reference of the receiver, so that it points in the same absolute direction. |
-| all (output, receiver) | The receiver takes over the channels of the sender. Its neighbors read them in the next cycle. |
+| #1 | The direction of the information source. It is converted into the frame of reference of the receiver. |
+| #3 | The distance of the information source, encoded like a sensor distance. The receiver gets the direction from its own position to the source, and its distance is the distance of the sender plus the distance between sender and receiver. It is thus the length of the path the information has traveled and never smaller than the true distance. A value of 0 or less means infinitely far, then the receiver gets the same absolute direction. |
+| all (output, receiver) | The receiver takes over the channels of the sender, but only if the information source is at least as close as the one already described by its own channel #3, for example by its neural network or by an earlier sender in the same cycle. The closest source thus wins. Its neighbors read the channels in the next cycle. |
 
 Communication only takes place between different creatures, and both sides need a valid front direction.
+
+**Example:** A sensor detects prey, and its angle and distance reach a sender via the neural network. The receivers of other swarm members get direction and distance of the prey from their own position and pass them on with one-way senders. The whole swarm hunts the prey.
 
 ### Modes
 
 | Mode | Properties |
 | --- | --- |
-| Send | **Range**: the radius in which receivers are addressed, at most 20. **One-way**: only receivers on the side opposite to the direction encoded in channel #1 are addressed. |
+| Send | **Range**: the radius in which receivers are addressed, at most 20. **One-way**: only receivers whose direction deviates by more than 100 degrees from the direction encoded in channel #1 are addressed, that is away from the information source. Every receiver is clearly farther away from the source than its sender, so relayed information always moves away from its source. |
 | Receive | **Restrict to colors** and **Restrict to lineage** select which senders are accepted. |
 
 ## Void
