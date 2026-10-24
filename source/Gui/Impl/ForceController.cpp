@@ -12,7 +12,7 @@ namespace
 
 void ForceController::onLeftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (ImGui::GetIO().KeyAlt || !_SimulationFacade::get()->isSimulationRunning()) {
+    if (!_SimulationFacade::get()->isSimulationRunning()) {
         return;
     }
     auto start = Viewport::get().mapViewToWorldPosition(prevViewPos);

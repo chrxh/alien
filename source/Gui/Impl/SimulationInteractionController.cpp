@@ -254,20 +254,17 @@ namespace
 
 void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& mousePos)
 {
-    _modesAtLeftClick.reset();
-
     if (_modes.interactionMode == InteractionMode_PositionSelection) {
         _modes.interactionMode = InteractionMode_Normal;
+        _modesAtLeftClick.reset();
         return;
     }
 
+    _modesAtLeftClick = _modes;
     if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
-        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() * 2);
-        _modesAtLeftClick = _modes;
-    } else if (!ImGui::GetIO().KeyAlt) {
+    } else {
         getEditInteractionController(_modes.tool).onLeftMouseButtonPressed(toRealVector2D(mousePos));
-        _modesAtLeftClick = _modes;
     }
 }
 
@@ -292,13 +289,7 @@ void SimulationInteractionController::mouseWheelUp(IntVector2D const& mousePos, 
 
 void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
-    if (!_modesAtLeftClick) {
-        return;
-    }
-
-    if (!_modesAtLeftClick->editMode) {
-        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
-    } else {
+    if (_modesAtLeftClick && _modesAtLeftClick->editMode) {
         getEditInteractionController(_modesAtLeftClick->tool).onLeftMouseButtonReleased(toRealVector2D(mousePos), toRealVector2D(prevMousePos));
     }
     _modesAtLeftClick.reset();
@@ -306,20 +297,17 @@ void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const&
 
 void SimulationInteractionController::rightMouseButtonPressed(IntVector2D const& mousePos)
 {
-    _modesAtRightClick.reset();
-
     if (_modes.interactionMode == InteractionMode_PositionSelection) {
         _modes.interactionMode = InteractionMode_Normal;
+        _modesAtRightClick.reset();
         return;
     }
 
+    _modesAtRightClick = _modes;
     if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
-        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() * 2);
-        _modesAtRightClick = _modes;
-    } else if (!ImGui::GetIO().KeyAlt) {
+    } else {
         getEditInteractionController(_modes.tool).onRightMouseButtonPressed(toRealVector2D(mousePos));
-        _modesAtRightClick = _modes;
     }
 }
 
@@ -344,13 +332,7 @@ void SimulationInteractionController::mouseWheelDown(IntVector2D const& mousePos
 
 void SimulationInteractionController::rightMouseButtonReleased()
 {
-    if (!_modesAtRightClick) {
-        return;
-    }
-
-    if (!_modesAtRightClick->editMode) {
-        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
-    } else {
+    if (_modesAtRightClick && _modesAtRightClick->editMode) {
         getEditInteractionController(_modesAtRightClick->tool).onRightMouseButtonReleased();
     }
     _modesAtRightClick.reset();

@@ -25,7 +25,6 @@ void SimulationView::setup()
     _cellDetailOverlayActive = GlobalSettings::get().getValue("settings.simulation view.overlay", _cellDetailOverlayActive);
     _brightness = GlobalSettings::get().getValue("windows.simulation view.brightness", _brightness);
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
-    _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
     _RenderingFacade::get()->setupSimulationRendering(StyleService::get().getDefaultFont());
 
@@ -37,7 +36,6 @@ void SimulationView::shutdown()
     GlobalSettings::get().setValue("settings.simulation view.overlay", _cellDetailOverlayActive);
     GlobalSettings::get().setValue("windows.simulation view.brightness", _brightness);
     GlobalSettings::get().setValue("windows.simulation view.contrast", _contrast);
-    GlobalSettings::get().setValue("windows.simulation view.motion blur factor", _motionBlur);
 }
 
 void SimulationView::resize(IntVector2D const& size)
@@ -146,16 +144,6 @@ float SimulationView::getContrast() const
 void SimulationView::setContrast(float value)
 {
     _contrast = value;
-}
-
-float SimulationView::getMotionBlur() const
-{
-    return _motionBlur;
-}
-
-void SimulationView::setMotionBlur(float value)
-{
-    _motionBlur = value;
 }
 
 PictureData SimulationView::savePicture(IntVector2D const& resolution)

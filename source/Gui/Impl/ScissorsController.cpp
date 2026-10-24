@@ -38,7 +38,7 @@ void ScissorsController::onLeftMouseButtonPressed(RealVector2D const& viewPos)
 
 void ScissorsController::onLeftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (ImGui::GetIO().KeyAlt || viewPos == prevViewPos) {
+    if (viewPos == prevViewPos) {
         return;
     }
     auto worldPos = Viewport::get().mapViewToWorldPosition(viewPos);

@@ -48,7 +48,7 @@ void SelectionController::onRightMouseButtonPressed(RealVector2D const& viewPos)
 
 void SelectionController::onRightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (!ImGui::GetIO().KeyAlt && _selectionRect.has_value()) {
+    if (_selectionRect.has_value()) {
         _selectionRect->bottomRight = viewPos;
         updateSelectionRect(*_selectionRect);
     }
