@@ -29,6 +29,7 @@ private:
     McpToolResult rotateSelection(boost::json::object const& arguments) const;
     McpToolResult relaxSelection(boost::json::object const& arguments) const;
 
+    // Throws if nothing is selected, so tools also call it just as a guard
     SelectionShallowData getNonEmptySelection() const;
     std::string describeSelection(SelectionShallowData const& selection) const;
 
