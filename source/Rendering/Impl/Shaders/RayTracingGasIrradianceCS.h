@@ -8,8 +8,8 @@ namespace Shaders
     // from the center of its light, which fades with the distance and is weakened by the gas and the cells in the gas grid on the way, so that
     // dense gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while
     // it stays the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so
-    // that it forms columns of light and shadow. The threads of a work group row share a node and split its light clusters, rays and gas
-    // samples, see SimulationRenderer.cpp.
+    // that it forms columns of light and shadow. The threads of a work group row share a node and split its light clusters and gas samples,
+    // see SimulationRenderer.cpp, while all threads of the work group trace the rays of its nodes together, see traceBatchRays.
     std::string_view const RayTracingGasIrradianceCS = R"(
 const int ShadowSteps = 8;
 const float CellExtinction = 1.0;
@@ -387,7 +387,7 @@ SourceRay getSourceRay(SourceLight light, vec2 position, vec2 closestPoint, floa
     return SourceRay(start, toTarget / targetDistance, targetDistance, closeness * closeness);
 }
 
-// The threads of the node trace the rays of a source together, for the sources beyond the batch of the node, see main
+// The threads of the node trace the rays of a source together, for the sources beyond the batch of the node, see collectBatchSources
 vec3 getSourceTransmittance(SourceLight light, vec2 position, vec2 closestPoint, float distance)
 {
     SourceBeams beams = getSourceBeams(light, position, closestPoint, distance);
@@ -415,12 +415,14 @@ const uint NodesPerGroup = gl_WorkGroupSize.y;
 const uint MaxBatchSources = 8u;
 const uint RaysPerNode = MaxBatchSources * uint(MaxSourceRays);
 
+// The beams are kept, so that the rays of a source are traced in the same arrangement in which their weights and shadow grid depths were
+// collected
 struct BatchSource
 {
     vec4 centerClosestPoint;  // xy: center of the copy of the source, zw: closest point of its area to the node
     vec4 extentShape;         // xy: extent, z: shape, w: distance of the closest point
-    vec3 lightPerWeight;      // Light of the source per weight of its rays
-    uint numRays;
+    vec3 lightPerWeight;      // Light of the source through the gas per weight of its rays
+    SourceBeams beams;
 };
 
 shared BatchSource batchSources[NodesPerGroup][MaxBatchSources];
@@ -450,8 +452,9 @@ vec2 getNodePosition(ivec2 node)
     return frame.gasGrid.xy + vec2(node) * frame.gasLight.z;
 }
 
-// The pixels sample the nodes within a few nodes around them. Borderless rendering repeats the part of the view of the size of the world, see
-// Shaders/ModuloCopyFS.h. Without borderless rendering, the space outside the world only shows the gas next to its border.
+// The pixels sample the nodes within a few nodes around them, and the anti-aliasing within a frame reads pixels up to four pixels away, see
+// Shaders/RayTracingAntiAliasingCS.h. Borderless rendering repeats the part of the view of the size of the world, see Shaders/ModuloCopyFS.h.
+// Without borderless rendering, the space outside the world only shows the gas next to its border.
 bool isSampled(ivec2 node)
 {
     if (node.y >= frame.gasLightGrid.w) {
@@ -466,7 +469,7 @@ bool isSampled(ivec2 node)
         lower = max(lower, vec2(-gasReach));
         upper = min(upper, frame.world.xy + gasReach);
     }
-    float samplingReach = 3.0 * frame.gasLight.z + 1.0 / frame.view.z;
+    float samplingReach = 3.0 * frame.gasLight.z + 5.0 / frame.view.z;
     vec2 position = getNodePosition(node);
     return all(greaterThanEqual(position, lower - samplingReach)) && all(lessThanEqual(position, upper + samplingReach));
 }
@@ -489,7 +492,7 @@ void addBatchSource(uint nodeInGroup, uint source, SourceLight light, vec2 posit
             vec4(light.centerRangeShape.xy, closestPoint),
             vec4(light.extent.xy, light.centerRangeShape.w, distance),
             sourceLight * gasTransmittance / weightSum,
-            uint(beams.numRays));
+            beams);
     }
 }
 
@@ -556,20 +559,19 @@ void traceBatchRays()
                 continue;
             }
             BatchSource batchSource = batchSources[nodeInGroup][source];
-            if (index >= batchSource.numRays) {
+            SourceBeams beams = batchSource.beams;
+            if (int(index) >= beams.numRays) {
                 continue;
             }
             SourceLight light =
                 SourceLight(vec4(batchSource.centerClosestPoint.xy, 0.0, batchSource.extentShape.z), vec4(0.0), vec4(batchSource.extentShape.xy, 0.0, 0.0));
             vec2 position = getNodePosition(ivec2(gl_WorkGroupID.x, gl_WorkGroupID.y * NodesPerGroup + nodeInGroup));
             vec2 closestPoint = batchSource.centerClosestPoint.zw;
-            float distance = batchSource.extentShape.w;
-            SourceBeams beams = getSourceBeams(light, position, closestPoint, distance);
-            ray = getSourceRay(light, position, closestPoint, distance, beams, int(index));
+            ray = getSourceRay(light, position, closestPoint, batchSource.extentShape.w, beams, int(index));
             beamWidths = beams.beamWidths;
             opticalDepth = getRayValue(slot);
 
-            // A ray stops once the light is blocked in all of its colors, the light per weight vanishes in the same colors as the light
+            // A ray stops once the light is blocked in all of its colors, the light per weight vanishes in the colors without light
             maxOpticalDepth = mix(vec3(MaxOpticalDepth), vec3(0.0), equal(batchSource.lightPerWeight, vec3(0.0)));
             if (ray.pathLength <= 1e-3) {
                 setRayValue(slot, vec3(ray.weight));
@@ -605,8 +607,8 @@ vec3 getBatchLight(uint nodeInGroup)
     }
     BatchSource batchSource = batchSources[nodeInGroup][source];
     vec3 weightedTransmittance = vec3(0.0);
-    for (uint index = 0u; index < batchSource.numRays; ++index) {
-        weightedTransmittance += getRayValue(getRaySlot(nodeInGroup, source, index));
+    for (int index = 0; index < batchSource.beams.numRays; ++index) {
+        weightedTransmittance += getRayValue(getRaySlot(nodeInGroup, source, uint(index)));
     }
     return batchSource.lightPerWeight * weightedTransmittance;
 }
