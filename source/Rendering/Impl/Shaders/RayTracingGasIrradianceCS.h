@@ -445,6 +445,27 @@ vec2 getNodePosition(ivec2 node)
     return frame.gasGrid.xy + vec2(node) * frame.gasLight.z;
 }
 
+// The pixels sample the nodes within a few nodes around them. Borderless rendering repeats the part of the view of the size of the world, see
+// Shaders/ModuloCopyFS.h. Without borderless rendering, the space outside the world only shows the gas next to its border.
+bool isSampled(ivec2 node)
+{
+    if (node.y >= frame.gasLightGrid.w) {
+        return false;
+    }
+    vec2 lower = frame.rect.xy;
+    vec2 upper = frame.rect.xy + frame.view.xy / frame.view.z;
+    if (frame.world.z > 0.5) {
+        upper = min(upper, lower + frame.world.xy);
+    } else {
+        float gasReach = float(frame.gasSize.z + 3) * frame.gasGrid.z;
+        lower = max(lower, vec2(-gasReach));
+        upper = min(upper, frame.world.xy + gasReach);
+    }
+    float samplingReach = 3.0 * frame.gasLight.z + 1.0 / frame.view.z;
+    vec2 position = getNodePosition(node);
+    return all(greaterThanEqual(position, lower - samplingReach)) && all(lessThanEqual(position, upper + samplingReach));
+}
+
 void addBatchSource(uint nodeInGroup, uint source, SourceLight light, vec2 position, vec2 closestPoint, float distance, vec3 sourceLight)
 {
     SourceBeams beams = getSourceBeams(light, position, closestPoint, distance);
@@ -597,19 +618,31 @@ void getClusterBounds(vec2 position, float range, out ivec2 lowerCluster, out iv
 
 void main()
 {
-    // The barriers require that work groups return as a whole, the nodes of a work group outside the grid trace rays of the others
-    if (gl_WorkGroupID.x >= uint(frame.gasLightGrid.z) || gl_WorkGroupID.y * NodesPerGroup >= uint(frame.gasLightGrid.w)) {
-        return;
-    }
     ivec2 node = ivec2(gl_WorkGroupID.x, gl_GlobalInvocationID.y);
     uint nodeInGroup = gl_LocalInvocationID.y;
-    bool inGrid = node.y < frame.gasLightGrid.w;
+    if (node.x >= frame.gasLightGrid.z) {
+        return;
+    }
+    bool sampled = isSampled(node);
+    if (!sampled && node.y < frame.gasLightGrid.w && getNodeThread() == 0u) {
+        imageStore(gasIrradianceImage, node, vec4(0.0));
+        imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), vec4(0.0));
+    }
+
+    // The barriers require that work groups return as a whole, the nodes of a work group that are not sampled trace rays of the others
+    bool groupSampled = false;
+    for (uint other = 0u; other < NodesPerGroup; ++other) {
+        groupSampled = groupSampled || isSampled(ivec2(node.x, gl_WorkGroupID.y * NodesPerGroup + other));
+    }
+    if (!groupSampled) {
+        return;
+    }
     vec2 position = getNodePosition(node);
 
     // The light of a cluster comes from the objects within one cluster around it
     vec3 irradiance = vec3(0.0);
     vec3 sourceIrradiance = vec3(0.0);
-    if (inGrid) {
+    if (sampled) {
         ivec2 lowerCluster;
         ivec2 upperCluster;
         getClusterBounds(position, frame.gasLight.y, lowerCluster, upperCluster);
@@ -631,7 +664,7 @@ void main()
     traceBatchRays();
     memoryBarrierShared();
     barrier();
-    if (inGrid) {
+    if (sampled) {
         sourceIrradiance += subgroupClusteredAdd(getBatchLight(nodeInGroup), NodeThreads);
         if (getNodeThread() == 0u) {
             imageStore(gasIrradianceImage, node, vec4(irradiance, 1.0));
