@@ -17,6 +17,7 @@ enum class RayTracingResource
     SphereAabbs,
     CapsuleAabbs,
     TriangleAabbs,
+    ShadowCasters,
     GasAccumulation,
     GasIntermediate,
     GasLightClusters,
@@ -110,6 +111,7 @@ private:
         VulkanBuffer sphereAabbs;
         VulkanBuffer capsuleAabbs;
         VulkanBuffer triangleAabbs;
+        VulkanBuffer shadowCasters;
         VulkanBuffer bottomLevelBuffer;
         VulkanBuffer topLevelBuffer;
         VulkanBuffer scratchBuffer;

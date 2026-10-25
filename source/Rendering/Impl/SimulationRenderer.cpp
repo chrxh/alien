@@ -616,7 +616,8 @@ namespace
                     .dispatchSize([](auto const&, NumRenderObjects const& numObjects) {
                         return IntVector2D{toInt(std::max({numObjects.objects, numObjects.lineIndices / 2, numObjects.triangleIndices / 3})), 1};
                     })
-                    .accesses({{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}})
+                    .accesses(
+                        {{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}, {ShadowCasters, ReadWrite}})
                     .requiresScene(true)),
             _RayTracingSceneStep::create(resources),
             _RayTracingComputeStep::create(
@@ -673,8 +674,15 @@ namespace
                         auto const& size = resources.getGasGrid().irradianceSize;
                         return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                     })
-                    .accesses(
-                        {{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {ShadowGridImage, Read}, {GasIrradiance, ReadWrite}})),
+                    .accesses({
+                        {Scene, Read},
+                        {Spheres, Read},
+                        {ShadowCasters, Read},
+                        {GasLightClusters, Read},
+                        {GasImage, Read},
+                        {ShadowGridImage, Read},
+                        {GasIrradiance, ReadWrite},
+                    })),
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()

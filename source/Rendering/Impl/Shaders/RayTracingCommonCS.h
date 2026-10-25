@@ -146,6 +146,7 @@ layout(set = 0, binding = 22) uniform sampler2D gasIrradianceSampler;
 layout(set = 0, binding = 23, std430) readonly buffer ShadowGridNodeBuffer { ShadowGridNode shadowGridNodes[]; };
 layout(set = 0, binding = 24, rgba16f) uniform image2D shadowGridImage;
 layout(set = 0, binding = 25) uniform sampler2D shadowGridSampler;
+layout(set = 0, binding = 26, std430) buffer ShadowCasterBuffer { vec4 shadowCasters[]; };
 
 //*******************
 //* General helpers
@@ -467,6 +468,26 @@ const float GasExtinction = 0.2;
 // Light passing through tissue takes on its color, solids block it
 const float TissueExtinction = 6.0;
 const float SolidExtinction = 8.0;
+
+vec3 getAbsorption(Sphere sphere)
+{
+    if (sphere.hueMaterial.w == Material_Solid) {
+        return vec3(SolidExtinction);
+    }
+    return TissueExtinction * getAbsorbedShare(getSaturatedHue(sphere.hueMaterial.rgb));
+}
+
+// The capsules and the triangles cast their shadows with the positions of their spheres and the sum of their absorptions, which are kept
+// together in the buffer of the shadow casters: two entries per capsule followed by three per triangle
+uint getCapsuleShadowEntry(uint capsule)
+{
+    return 2u * capsule;
+}
+
+uint getTriangleShadowEntry(uint triangle)
+{
+    return 2u * frame.counts.y + 3u * triangle;
+}
 
 // The shadow rays to the radiation sources stand for beams that lead from the parts of a node of the irradiance grid to the parts of the
 // shining area side by side, see Shaders/RayTracingGasIrradianceCS.h. At least this many rays start from a node.

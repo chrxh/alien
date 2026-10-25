@@ -169,14 +169,6 @@ void clipTriangleSideSamples(
     clipSlabSamples(dot(origin - corner, inward), dot(across, inward), dot(direction, inward), 0.0, 1e20, offsets, enter, exit);
 }
 
-vec3 getAbsorption(Sphere sphere)
-{
-    if (sphere.hueMaterial.w == Material_Solid) {
-        return vec3(SolidExtinction);
-    }
-    return TissueExtinction * getAbsorbedShare(getSaturatedHue(sphere.hueMaterial.rgb));
-}
-
 // Integral of the chord lengths of a disk around the origin over the distances of the chords from the center up to the given one. The
 // clamping keeps rounding errors at the edge of the disk away from the square root and the arc sine.
 float getDiskChordIntegral(float distance, float radius)
@@ -277,24 +269,17 @@ vec3 getCandidateOpticalDepth(uint kind, uint primitive, vec2 origin, vec2 direc
         return getAverageDiskChord(origin, direction, pathLength, beamWidths, sphere.centerRadius.xy, sphere.centerRadius.w) * getAbsorption(sphere);
     }
     if (kind == Kind_Capsule) {
-        uint indexA;
-        uint indexB;
-        getCapsuleSpheres(primitive, indexA, indexB);
-        Sphere a = spheres[indexA];
-        Sphere b = spheres[indexB];
-        float chord = getAverageStrandChord(origin, direction, pathLength, beamWidths, a.centerRadius.xy, b.centerRadius.xy);
-        return chord * 0.5 * (getAbsorption(a) + getAbsorption(b));
+        uint entry = getCapsuleShadowEntry(primitive);
+        vec4 ends = shadowCasters[entry];
+        float chord = getAverageStrandChord(origin, direction, pathLength, beamWidths, ends.xy, ends.zw);
+        return chord * 0.5 * shadowCasters[entry + 1u].rgb;
     }
     if (kind == Kind_Triangle) {
-        uint indexA;
-        uint indexB;
-        uint indexC;
-        getTriangleSpheres(primitive, indexA, indexB, indexC);
-        Sphere a = spheres[indexA];
-        Sphere b = spheres[indexB];
-        Sphere c = spheres[indexC];
-        float chord = getAverageTriangleChord(origin, direction, pathLength, beamWidths, a.centerRadius.xy, b.centerRadius.xy, c.centerRadius.xy);
-        return chord * (getAbsorption(a) + getAbsorption(b) + getAbsorption(c)) / 3.0;
+        uint entry = getTriangleShadowEntry(primitive);
+        vec4 cornersAB = shadowCasters[entry];
+        vec4 cornerC = shadowCasters[entry + 1u];
+        float chord = getAverageTriangleChord(origin, direction, pathLength, beamWidths, cornersAB.xy, cornersAB.zw, cornerC.xy);
+        return chord * shadowCasters[entry + 2u].rgb / 3.0;
     }
     return vec3(0.0);
 }

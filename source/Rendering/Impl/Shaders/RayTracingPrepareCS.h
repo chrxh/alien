@@ -95,6 +95,11 @@ void main()
         bool enabled = a.hueMaterial.w != Material_Inactive && b.hueMaterial.w != Material_Inactive;
         capsuleAabbs[index] =
             createAabb(min(a.centerRadius.xy, b.centerRadius.xy) - extent, max(a.centerRadius.xy, b.centerRadius.xy) + extent, enabled);
+        if (isSourceLightActive()) {
+            uint entry = getCapsuleShadowEntry(index);
+            shadowCasters[entry] = vec4(a.centerRadius.xy, b.centerRadius.xy);
+            shadowCasters[entry + 1u] = vec4(getAbsorption(a) + getAbsorption(b), 0.0);
+        }
     }
     if (index < frame.counts.z) {
         uint sphereA;
@@ -110,6 +115,12 @@ void main()
         vec2 lower = min(min(a.centerRadius.xy, b.centerRadius.xy), c.centerRadius.xy);
         vec2 upper = max(max(a.centerRadius.xy, b.centerRadius.xy), c.centerRadius.xy);
         triangleAabbs[index] = createAabb(lower - extent, upper + extent, enabled);
+        if (isSourceLightActive()) {
+            uint entry = getTriangleShadowEntry(index);
+            shadowCasters[entry] = vec4(a.centerRadius.xy, b.centerRadius.xy);
+            shadowCasters[entry + 1u] = vec4(c.centerRadius.xy, 0.0, 0.0);
+            shadowCasters[entry + 2u] = vec4(getAbsorption(a) + getAbsorption(b) + getAbsorption(c), 0.0);
+        }
     }
 }
 )";
