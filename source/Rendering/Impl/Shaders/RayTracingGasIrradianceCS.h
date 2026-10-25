@@ -23,8 +23,9 @@ const float SourceLightKnee = 1.0;
 // Wider shining parts trace more rays, so that the beams do not exceed their maximum width at the area, up to this number of rays
 const int MaxSourceRays = 16;
 
-// Strands and triangles are sampled at points across a beam
+// Strands and triangles are sampled at points across a beam, see getBeamSampleOffsets
 const int BeamSamples = 4;
+const float Pi = 3.14159265;
 
 // A ray stops once the light of the source is blocked in all of its colors
 const float MaxOpticalDepth = 5.0;
@@ -142,37 +143,30 @@ float getDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 center, f
     return max(min(along + halfChord, pathLength) - max(along - halfChord, 0.0), 0.0);
 }
 
-float getStrandChord(vec2 origin, vec2 direction, float pathLength, vec2 a, vec2 b)
+// The samples across a beam start their paths at the given offsets across it, see getAverageStrandChord. The coordinate of the start of a
+// path changes linearly with its offset, while all paths change the coordinate at the same rate. Narrows the parts of the paths inside the
+// slab, see clipSlab.
+void clipSlabSamples(float start, float shift, float rate, float lower, float upper, vec4 offsets, inout vec4 enter, inout vec4 exit)
 {
-    vec2 axis = b - a;
-    float axisLength = length(axis);
-    if (axisLength < 1e-4) {
-        return 0.0;
+    vec4 starts = start + offsets * shift;
+    if (abs(rate) < 1e-6) {
+        exit = mix(exit, vec4(-1.0), notEqual(clamp(starts, vec4(lower), vec4(upper)), starts));
+        return;
     }
-    vec2 along = axis / axisLength;
-    vec2 across = vec2(-along.y, along.x);
-    float enter = 0.0;
-    float exit = pathLength;
-    clipSlab(dot(origin - a, along), dot(direction, along), 0.0, axisLength, enter, exit);
-    clipSlab(dot(origin - a, across), dot(direction, across), -StrandHalfWidth, StrandHalfWidth, enter, exit);
-    return max(exit - enter, 0.0);
+    float inverseRate = 1.0 / rate;
+    vec4 t0 = (lower - starts) * inverseRate;
+    vec4 t1 = (upper - starts) * inverseRate;
+    enter = max(enter, min(t0, t1));
+    exit = min(exit, max(t0, t1));
 }
 
-float getTriangleChord(vec2 origin, vec2 direction, float pathLength, vec2 a, vec2 b, vec2 c)
+// The side of a triangle from the corner to the next one bounds the slab towards the inside of the triangle
+void clipTriangleSideSamples(
+    vec2 origin, vec2 direction, vec2 across, vec2 corner, vec2 nextCorner, float orientation, vec4 offsets, inout vec4 enter, inout vec4 exit)
 {
-    vec2 corners[3] = vec2[3](a, b, c);
-    vec2 ab = b - a;
-    vec2 ac = c - a;
-    float orientation = ab.x * ac.y - ab.y * ac.x < 0.0 ? -1.0 : 1.0;
-    float enter = 0.0;
-    float exit = pathLength;
-    for (int i = 0; i < 3; ++i) {
-        vec2 corner = corners[i];
-        vec2 edge = corners[(i + 1) % 3] - corner;
-        vec2 inward = orientation * vec2(-edge.y, edge.x);
-        clipSlab(dot(origin - corner, inward), dot(direction, inward), 0.0, 1e20, enter, exit);
-    }
-    return max(exit - enter, 0.0);
+    vec2 side = nextCorner - corner;
+    vec2 inward = orientation * vec2(-side.y, side.x);
+    clipSlabSamples(dot(origin - corner, inward), dot(across, inward), dot(direction, inward), 0.0, 1e20, offsets, enter, exit);
 }
 
 vec3 getAbsorption(Sphere sphere)
@@ -198,7 +192,8 @@ float getBeamWidth(vec2 beamWidths, float along, float pathLength)
     return min(mix(beamWidths.x, beamWidths.y, clamp(along / pathLength, 0.0, 1.0)), getMaxBeamWidth());
 }
 
-// Disks at the ends of the path are cut by it, there the chord along the ray counts
+// Disks at the ends of the path are cut by it, there the chord along the ray counts. The integral is odd in the distance and reaches half
+// the area of the disk at its edge, so that a beam covering the whole disk needs no arc sine.
 float getAverageDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 center, float radius)
 {
     vec2 toCenter = center - origin;
@@ -211,7 +206,17 @@ float getAverageDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 be
     if (along < radius || along > pathLength - radius || width < 1e-3) {
         return getDiskChord(origin, direction, pathLength, center, radius);
     }
-    return (getDiskChordIntegral(distance + 0.5 * width, radius) - getDiskChordIntegral(distance - 0.5 * width, radius)) / width;
+    float halfArea = 0.5 * Pi * radius * radius;
+    float outerEdge = abs(distance) + 0.5 * width;
+    float innerEdge = 0.5 * width - abs(distance);
+    float outer = outerEdge < radius ? getDiskChordIntegral(outerEdge, radius) : halfArea;
+    float inner = innerEdge < radius ? getDiskChordIntegral(innerEdge, radius) : halfArea;
+    return (outer + inner) / width;
+}
+
+vec4 getBeamSampleOffsets(float width)
+{
+    return ((vec4(0.0, 1.0, 2.0, 3.0) + 0.5) / float(BeamSamples) - 0.5) * width;
 }
 
 // Strands and triangles are sampled at points across the beam where it passes their middle
@@ -224,12 +229,22 @@ float getAverageStrandChord(vec2 origin, vec2 direction, float pathLength, vec2 
     if (min(distances.x, distances.y) >= reach || max(distances.x, distances.y) <= -reach) {
         return 0.0;
     }
-    float sum = 0.0;
-    for (int i = 0; i < BeamSamples; ++i) {
-        float offset = ((float(i) + 0.5) / float(BeamSamples) - 0.5) * width;
-        sum += getStrandChord(origin + across * offset, direction, pathLength, a, b);
+    vec2 axis = b - a;
+    float axisLength = length(axis);
+    if (axisLength < 1e-4) {
+        return 0.0;
     }
-    return sum / float(BeamSamples);
+    vec2 along = axis / axisLength;
+    vec2 strandAcross = vec2(-along.y, along.x);
+    vec2 toOrigin = origin - a;
+    vec4 offsets = getBeamSampleOffsets(width);
+    vec4 enter = vec4(0.0);
+    vec4 exit = vec4(pathLength);
+    clipSlabSamples(dot(toOrigin, along), dot(across, along), dot(direction, along), 0.0, axisLength, offsets, enter, exit);
+    clipSlabSamples(
+        dot(toOrigin, strandAcross), dot(across, strandAcross), dot(direction, strandAcross), -StrandHalfWidth, StrandHalfWidth, offsets, enter, exit);
+    vec4 chords = max(exit - enter, vec4(0.0));
+    return (chords.x + chords.y + chords.z + chords.w) / float(BeamSamples);
 }
 
 float getAverageTriangleChord(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 a, vec2 b, vec2 c)
@@ -241,12 +256,17 @@ float getAverageTriangleChord(vec2 origin, vec2 direction, float pathLength, vec
     if (minComponent(distances) >= reach || maxComponent(distances) <= -reach) {
         return 0.0;
     }
-    float sum = 0.0;
-    for (int i = 0; i < BeamSamples; ++i) {
-        float offset = ((float(i) + 0.5) / float(BeamSamples) - 0.5) * width;
-        sum += getTriangleChord(origin + across * offset, direction, pathLength, a, b, c);
-    }
-    return sum / float(BeamSamples);
+    vec2 ab = b - a;
+    vec2 ac = c - a;
+    float orientation = ab.x * ac.y - ab.y * ac.x < 0.0 ? -1.0 : 1.0;
+    vec4 offsets = getBeamSampleOffsets(width);
+    vec4 enter = vec4(0.0);
+    vec4 exit = vec4(pathLength);
+    clipTriangleSideSamples(origin, direction, across, a, b, orientation, offsets, enter, exit);
+    clipTriangleSideSamples(origin, direction, across, b, c, orientation, offsets, enter, exit);
+    clipTriangleSideSamples(origin, direction, across, c, a, orientation, offsets, enter, exit);
+    vec4 chords = max(exit - enter, vec4(0.0));
+    return (chords.x + chords.y + chords.z + chords.w) / float(BeamSamples);
 }
 
 // Optical depth that an object found by the ray query adds along the beam, see getObjectTransmittance
