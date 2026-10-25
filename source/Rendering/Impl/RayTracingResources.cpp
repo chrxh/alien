@@ -203,6 +203,11 @@ void _RayTracingResources::setStillPicture(bool value)
     _numAveragedFrames = 0;
 }
 
+bool _RayTracingResources::isRepeatedStillPictureFrame() const
+{
+    return _stillPicture && _numAveragedFrames > 0;
+}
+
 void _RayTracingResources::resetImageStates()
 {
     auto images = _view.getImages();

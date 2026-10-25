@@ -616,6 +616,7 @@ namespace
                     .dispatchSize([](auto const&, NumRenderObjects const& numObjects) {
                         return IntVector2D{toInt(std::max({numObjects.objects, numObjects.lineIndices / 2, numObjects.triangleIndices / 3})), 1};
                     })
+                    .reusedInStillPicture(true)
                     .accesses(
                         {{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}, {ShadowCasters, ReadWrite}})
                     .requiresScene(true)),
@@ -626,6 +627,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasSplatCS))
                     .workGroupSize({64, 1})
                     .dispatchSize([](auto const&, NumRenderObjects const& numObjects) { return IntVector2D{toInt(numObjects.fluidParticles), 1}; })
+                    .reusedInStillPicture(true)
                     .accesses({{GasAccumulation, Clear}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -633,6 +635,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasLightsCS))
                     .workGroupSize({64, 1})
                     .dispatchSize(perObject)
+                    .reusedInStillPicture(true)
                     .accesses({{GasAccumulation, ReadWrite}, {GasLightClusters, Clear}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -640,6 +643,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasBlurCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perGasNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasAccumulation, Read}, {GasIntermediate, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -647,6 +651,7 @@ namespace
                     .shader(std::format("#define VERTICAL\n{}", Shaders::RayTracingGasBlurCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perGasNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -654,6 +659,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingShadowGridCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perShadowGridNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -661,6 +667,7 @@ namespace
                     .shader(std::format("#define VERTICAL\n{}", Shaders::RayTracingShadowGridCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perShadowGridNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, Read}, {ShadowGridImage, ReadWrite}})),
 
             // The light of the cells and of the radiation sources reaches the gas through the gas and the objects. The threads of a work group
@@ -674,6 +681,7 @@ namespace
                         auto const& size = resources.getGasGrid().irradianceSize;
                         return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                     })
+                    .reusedInStillPicture(true)
                     .accesses({
                         {Scene, Read},
                         {Spheres, Read},

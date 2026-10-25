@@ -4,14 +4,18 @@
 
 #include "VulkanContext.h"
 
-_RayTracingStep::_RayTracingStep(RayTracingResources const& resources, bool requiresScene)
+_RayTracingStep::_RayTracingStep(RayTracingResources const& resources, bool requiresScene, bool reusedInStillPicture)
     : _RenderStep(StepParameters())
     , _resources(resources)
     , _requiresScene(requiresScene)
+    , _reusedInStillPicture(reusedInStillPicture)
 {}
 
 bool _RayTracingStep::isSkipped(ExecutionParameters const& parameters) const
 {
+    if (_reusedInStillPicture && _resources->isRepeatedStillPictureFrame()) {
+        return true;
+    }
     return _requiresScene && !_RayTracingResources::isSceneNeeded(parameters._view, *parameters._simulationParameters);
 }
 
@@ -26,7 +30,7 @@ void _RayTracingFrameStep::execute(ExecutionParameters parameters)
 }
 
 _RayTracingFrameStep::_RayTracingFrameStep(RayTracingResources const& resources)
-    : _RayTracingStep(resources, false)
+    : _RayTracingStep(resources, false, false)
 {}
 
 RayTracingComputeStep _RayTracingComputeStep::create(RayTracingResources const& resources, ComputeStepParameters const& parameters)
@@ -46,7 +50,7 @@ void _RayTracingComputeStep::execute(ExecutionParameters parameters)
 }
 
 _RayTracingComputeStep::_RayTracingComputeStep(RayTracingResources const& resources, ComputeStepParameters const& parameters)
-    : _RayTracingStep(resources, parameters._requiresScene)
+    : _RayTracingStep(resources, parameters._requiresScene, parameters._reusedInStillPicture)
     , _pipeline(resources->createPipeline(parameters._shader, parameters._workGroupSize))
     , _dispatchSize(parameters._dispatchSize)
     , _accesses(parameters._accesses)
@@ -66,7 +70,7 @@ void _RayTracingSceneStep::execute(ExecutionParameters parameters)
 }
 
 _RayTracingSceneStep::_RayTracingSceneStep(RayTracingResources const& resources)
-    : _RayTracingStep(resources, true)
+    : _RayTracingStep(resources, true, true)
 {}
 
 RayTracingPresentStep _RayTracingPresentStep::create(RayTracingResources const& resources)
