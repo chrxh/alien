@@ -43,11 +43,11 @@ bool isSceneForShadowsOnly()
     return frame.tissue.w <= 0.0;
 }
 
-// The rays to a radiation source start at most about one node of the irradiance grid beyond its range around the area of the source
+// The rays to a radiation source start at most about one node of the source light grid beyond its range around the area of the source
 bool isInSourceLightRange(vec2 lower, vec2 upper)
 {
     vec2 center = 0.5 * (lower + upper);
-    float radius = 0.5 * length(upper - lower) + frame.gasLight.z;
+    float radius = 0.5 * length(upper - lower) + getSourceLightNodeDistance();
     for (int i = 0; i < frame.numSourceLights.x; ++i) {
         SourceLight light = frame.sourceLights[i];
         light.centerRangeShape.xy = getNearestSourceCenter(light, center);

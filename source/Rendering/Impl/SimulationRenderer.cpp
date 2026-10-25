@@ -42,8 +42,8 @@ namespace
     auto constexpr SolidDetailZoomStart = 15.0f;
     auto constexpr SolidDetailZoomEnd = 40.0f;
 
-    // Threads that share the work of a node of the irradiance grid, so that its rays to the radiation sources run in parallel, see
-    // Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
+    // Threads that share the work of a node of the irradiance grids, so that its light clusters and its rays to the radiation sources are
+    // handled in parallel, see Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
     auto constexpr ThreadsPerIrradianceNode = 16;
 }
 
@@ -670,8 +670,8 @@ namespace
                     .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, Read}, {ShadowGridImage, ReadWrite}})),
 
-            // The light of the cells and of the radiation sources reaches the gas through the gas and the objects. The threads of a work group
-            // row share a node, so that the many rays of the nodes close to large sources spread over the GPU.
+            // The light of the cells reaches the gas through the gas and the cells in it, the light of the radiation sources through the gas and
+            // the objects. Both are computed on grids of their own, the threads of a work group row share a node.
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()
@@ -682,11 +682,21 @@ namespace
                         return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                     })
                     .reusedInStillPicture(true)
+                    .accesses({{GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::format("#define SOURCE_LIGHT\n{}", Shaders::RayTracingGasIrradianceCS))
+                    .workGroupSize({ThreadsPerIrradianceNode, 4})
+                    .dispatchSize([](_RayTracingResources const& resources, auto const&) {
+                        auto const& size = resources.getGasGrid().sourceLightSize;
+                        return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
+                    })
+                    .reusedInStillPicture(true)
                     .accesses({
                         {Scene, Read},
                         {Spheres, Read},
                         {ShadowCasters, Read},
-                        {GasLightClusters, Read},
                         {GasImage, Read},
                         {ShadowGridImage, Read},
                         {GasIrradiance, ReadWrite},

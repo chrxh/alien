@@ -4,12 +4,13 @@
 
 namespace Shaders
 {
-    // Computes the light of the cells and the light of the radiation sources at the nodes of the irradiance grid. Each light cluster shines
-    // from the center of its light, which fades with the distance and is weakened by the gas and the cells in the gas grid on the way, so that
-    // dense gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while
-    // it stays the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so
-    // that it forms columns of light and shadow. The threads of a work group row share a node and split its light clusters and gas samples,
-    // see SimulationRenderer.cpp, while all threads of the work group trace the rays of its nodes together, see traceBatchRays.
+    // Computes the light of the cells at the nodes of the irradiance grid, or with SOURCE_LIGHT defined in front of the source the light of the
+    // radiation sources at the nodes of the source light grid, see Rendering/Impl/RayTracingLayout.cpp. Each light cluster shines from the
+    // center of its light, which fades with the distance and is weakened by the gas and the cells in the gas grid on the way, so that dense
+    // gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while it stays
+    // the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so that it
+    // forms columns of light and shadow. The threads of a work group row share a node and split its light clusters and gas samples, see
+    // SimulationRenderer.cpp, while all threads of the work group trace the rays of its nodes together, see traceBatchRays.
     std::string_view const RayTracingGasIrradianceCS = R"(
 const int ShadowSteps = 8;
 const float CellExtinction = 1.0;
@@ -361,7 +362,7 @@ SourceBeams getSourceBeams(SourceLight light, vec2 position, vec2 closestPoint, 
 {
     vec2 direction = (closestPoint - position) / distance;
     vec2 across = vec2(-direction.y, direction.x);
-    float nodeWidth = frame.gasLight.z * (abs(across.x) + abs(across.y));
+    float nodeWidth = getSourceLightNodeDistance() * (abs(across.x) + abs(across.y));
     float areaHalfWidth = isCircular(light) ? light.extent.x : dot(abs(across), light.extent.xy);
     float shiningWidth = 2.0 * min(SourceLightSpread * distance, areaHalfWidth);
     int numRays = clamp(int(ceil(shiningWidth / getMaxBeamWidth())), NodeRayStarts, MaxSourceRays);
@@ -447,9 +448,31 @@ void setRayValue(uint slot, vec3 value)
     rayValues[3u * slot + 2u] = value.z;
 }
 
+#ifdef SOURCE_LIGHT
+float getGridNodeDistance()
+{
+    return getSourceLightNodeDistance();
+}
+
+ivec2 getGridSize()
+{
+    return frame.numSourceLights.zw;
+}
+#else
+float getGridNodeDistance()
+{
+    return frame.gasLight.z;
+}
+
+ivec2 getGridSize()
+{
+    return frame.gasLightGrid.zw;
+}
+#endif
+
 vec2 getNodePosition(ivec2 node)
 {
-    return frame.gasGrid.xy + vec2(node) * frame.gasLight.z;
+    return frame.gasGrid.xy + vec2(node) * getGridNodeDistance();
 }
 
 // The pixels sample the nodes within a few nodes around them, and the anti-aliasing within a frame reads pixels up to four pixels away, see
@@ -457,7 +480,7 @@ vec2 getNodePosition(ivec2 node)
 // Without borderless rendering, the space outside the world only shows the gas next to its border.
 bool isSampled(ivec2 node)
 {
-    if (node.y >= frame.gasLightGrid.w) {
+    if (node.y >= getGridSize().y) {
         return false;
     }
     vec2 lower = frame.rect.xy;
@@ -469,7 +492,7 @@ bool isSampled(ivec2 node)
         lower = max(lower, vec2(-gasReach));
         upper = min(upper, frame.world.xy + gasReach);
     }
-    float samplingReach = 3.0 * frame.gasLight.z + 5.0 / frame.view.z;
+    float samplingReach = 3.0 * getGridNodeDistance() + 5.0 / frame.view.z;
     vec2 position = getNodePosition(node);
     return all(greaterThanEqual(position, lower - samplingReach)) && all(lessThanEqual(position, upper + samplingReach));
 }
@@ -623,17 +646,18 @@ void getClusterBounds(vec2 position, float range, out ivec2 lowerCluster, out iv
     upperCluster = min(center + clusterRange, frame.gasLightGrid.xy - 1);
 }
 
+#ifdef SOURCE_LIGHT
 void main()
 {
     ivec2 node = ivec2(gl_WorkGroupID.x, gl_GlobalInvocationID.y);
     uint nodeInGroup = gl_LocalInvocationID.y;
-    if (node.x >= frame.gasLightGrid.z) {
+    if (node.x >= getGridSize().x) {
         return;
     }
+    ivec2 pixel = node + ivec2(GasIrradianceImageSize, 0);
     bool sampled = isSampled(node);
-    if (!sampled && node.y < frame.gasLightGrid.w && getNodeThread() == 0u) {
-        imageStore(gasIrradianceImage, node, vec4(0.0));
-        imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), vec4(0.0));
+    if (!sampled && node.y < getGridSize().y && getNodeThread() == 0u) {
+        imageStore(gasIrradianceImage, pixel, vec4(0.0));
     }
 
     // The barriers require that work groups return as a whole, the nodes of a work group that are not sampled trace rays of the others
@@ -644,22 +668,9 @@ void main()
     if (!groupSampled) {
         return;
     }
-    vec2 position = getNodePosition(node);
-
-    // The light of a cluster comes from the objects within one cluster around it
-    vec3 irradiance = vec3(0.0);
     vec3 sourceIrradiance = vec3(0.0);
     if (sampled) {
-        ivec2 lowerCluster;
-        ivec2 upperCluster;
-        getClusterBounds(position, frame.gasLight.y, lowerCluster, upperCluster);
-        ivec2 numClusters = upperCluster - lowerCluster + 1;
-        int clusterCount = all(greaterThan(numClusters, ivec2(0))) ? numClusters.x * numClusters.y : 0;
-        for (int index = int(getNodeThread()); index < clusterCount; index += int(NodeThreads)) {
-            irradiance += getCellLight(position, lowerCluster + ivec2(index % numClusters.x, index / numClusters.x));
-        }
-        irradiance = subgroupClusteredAdd(irradiance, NodeThreads);
-        sourceIrradiance = collectBatchSources(nodeInGroup, position);
+        sourceIrradiance = collectBatchSources(nodeInGroup, getNodePosition(node));
     } else if (getNodeThread() == 0u) {
         numBatchSources[nodeInGroup] = 0u;
     }
@@ -674,10 +685,36 @@ void main()
     if (sampled) {
         sourceIrradiance += subgroupClusteredAdd(getBatchLight(nodeInGroup), NodeThreads);
         if (getNodeThread() == 0u) {
-            imageStore(gasIrradianceImage, node, vec4(irradiance, 1.0));
-            imageStore(gasIrradianceImage, node + ivec2(GasIrradianceImageSize, 0), vec4(sourceIrradiance, 1.0));
+            imageStore(gasIrradianceImage, pixel, vec4(sourceIrradiance, 1.0));
         }
     }
 }
+#else
+// The light of a cluster comes from the objects within one cluster around it
+void main()
+{
+    ivec2 node = ivec2(gl_WorkGroupID.x, gl_GlobalInvocationID.y);
+    if (any(greaterThanEqual(node, getGridSize()))) {
+        return;
+    }
+    bool sampled = isSampled(node);
+    vec3 irradiance = vec3(0.0);
+    if (sampled) {
+        vec2 position = getNodePosition(node);
+        ivec2 lowerCluster;
+        ivec2 upperCluster;
+        getClusterBounds(position, frame.gasLight.y, lowerCluster, upperCluster);
+        ivec2 numClusters = upperCluster - lowerCluster + 1;
+        int clusterCount = all(greaterThan(numClusters, ivec2(0))) ? numClusters.x * numClusters.y : 0;
+        for (int index = int(getNodeThread()); index < clusterCount; index += int(NodeThreads)) {
+            irradiance += getCellLight(position, lowerCluster + ivec2(index % numClusters.x, index / numClusters.x));
+        }
+        irradiance = subgroupClusteredAdd(irradiance, NodeThreads);
+    }
+    if (getNodeThread() == 0u) {
+        imageStore(gasIrradianceImage, node, sampled ? vec4(irradiance, 1.0) : vec4(0.0));
+    }
+}
+#endif
 )";
 }

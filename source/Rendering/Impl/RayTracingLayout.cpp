@@ -24,7 +24,8 @@ namespace
     // Zoomed out, the falloff distance of the light of the cells grows continuously, so that it covers a minimum number of nodes of the
     // irradiance grid and moving cells do not flicker. The range of the lights and the size of the clusters, which collect the light, grow
     // with it. The irradiance grid has twice the node distance of the gas grid as long as it resolves the falloff, otherwise the node distance
-    // of the gas grid.
+    // of the gas grid. The light of the radiation sources, whose rays cost far more than the light of the cells, keeps twice the node distance
+    // of the gas grid, so that zoomed out it is not traced at four times the number of nodes.
     auto constexpr MinLightFalloffInIrradianceNodes = 1.5f;
     auto constexpr LightRangeInFalloffDistances = 4.0f;
     auto constexpr LightClusterSizeInFalloffDistances = 0.8f;
@@ -76,8 +77,9 @@ namespace
             auto gridEnd = gridOrigin + toFloat(numNodes - 1) * nodeDistance;
             return std::min(toInt(std::ceil((gridEnd - clusterOrigin) / lightClusterSize)) + 1, RayTracingLayout::MaxLightClusters);
         };
-        auto getNumIrradianceNodes = [&](int numNodes) {
-            return std::min(toInt(std::ceil(toFloat(numNodes - 1) * nodeDistance / irradianceNodeDistance)) + 1, RayTracingLayout::GasIrradianceImageSize);
+        auto sourceLightNodeDistance = 2.0f * nodeDistance;
+        auto getNumGridNodes = [&](int numNodes, float gridNodeDistance) {
+            return std::min(toInt(std::ceil(toFloat(numNodes - 1) * nodeDistance / gridNodeDistance)) + 1, RayTracingLayout::GasIrradianceImageSize);
         };
         return RayTracingLayout::GasGrid{
             .origin = origin,
@@ -91,7 +93,9 @@ namespace
             .lightClusterSize = lightClusterSize,
             .numLightClusters = {getNumLightClusters(origin.x, size.x, lightClusterOrigin.x), getNumLightClusters(origin.y, size.y, lightClusterOrigin.y)},
             .irradianceNodeDistance = irradianceNodeDistance,
-            .irradianceSize = {getNumIrradianceNodes(size.x), getNumIrradianceNodes(size.y)},
+            .irradianceSize = {getNumGridNodes(size.x, irradianceNodeDistance), getNumGridNodes(size.y, irradianceNodeDistance)},
+            .sourceLightNodeDistance = sourceLightNodeDistance,
+            .sourceLightSize = {getNumGridNodes(size.x, sourceLightNodeDistance), getNumGridNodes(size.y, sourceLightNodeDistance)},
         };
     }
 
@@ -216,7 +220,7 @@ RayTracingLayout RayTracingLayout::calc(RenderView const& view, SimulationParame
     }
     auto litRegion = getLitRegion(result.gasGrid, parameters, worldSize);
     result.sourceLights = getSourceLights(parameters, worldSize, litRegion);
-    auto rayStarts = getEnlargedRect(litRegion, IrradianceSamplingReach * result.gasGrid.irradianceNodeDistance);
+    auto rayStarts = getEnlargedRect(litRegion, IrradianceSamplingReach * result.gasGrid.sourceLightNodeDistance);
     result.shadowGrid = calcShadowGrid(rayStarts, result.sourceLights, worldSize);
     return result;
 }

@@ -703,11 +703,12 @@ void _RayTracingResources::updateFrameConstants(
         .gasSize = {gasGrid.size.x, gasGrid.size.y, gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
         .gasLight = {gasGrid.lightClusterSize, gasGrid.lightRange, gasGrid.irradianceNodeDistance, gasGrid.lightFalloffDistance},
         .gasLightGrid = {gasGrid.numLightClusters.x, gasGrid.numLightClusters.y, gasGrid.irradianceSize.x, gasGrid.irradianceSize.y},
-        .gasLighting = {gasGrid.lightClusterOrigin.x, gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
+        .gasLighting =
+            {gasGrid.lightClusterOrigin.x, gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, gasGrid.sourceLightNodeDistance},
         .world = {toFloat(worldSize.x), toFloat(worldSize.y), parameters.borderlessRendering.value ? 1.0f : 0.0f, 0.0f},
         .shadowGrid = {_shadowGrid.origin.x, _shadowGrid.origin.y, _shadowGrid.nodeDistance, shadowGridBlur},
         .shadowGridSize = {_shadowGrid.size.x, _shadowGrid.size.y, shadowGridBlurRadius, 0},
-        .numSourceLights = {static_cast<int32_t>(_layout.sourceLights.size()), 0, 0, 0},
+        .numSourceLights = {static_cast<int32_t>(_layout.sourceLights.size()), 0, gasGrid.sourceLightSize.x, gasGrid.sourceLightSize.y},
     };
     for (auto&& [light, lightConstants] : std::views::zip(_layout.sourceLights, constants.sourceLights)) {
         lightConstants = SourceLightConstants{
