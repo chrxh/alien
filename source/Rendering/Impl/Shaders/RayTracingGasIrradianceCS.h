@@ -419,13 +419,10 @@ void main()
     ivec2 upperCluster;
     getClusterBounds(position, frame.gasLight.y, lowerCluster, upperCluster);
     vec3 irradiance = vec3(0.0);
-    uint clusterIndex = 0u;
-    for (int y = lowerCluster.y; y <= upperCluster.y; ++y) {
-        for (int x = lowerCluster.x; x <= upperCluster.x; ++x) {
-            if (clusterIndex++ % NodeThreads == getNodeThread()) {
-                irradiance += getCellLight(position, ivec2(x, y));
-            }
-        }
+    ivec2 numClusters = upperCluster - lowerCluster + 1;
+    int clusterCount = all(greaterThan(numClusters, ivec2(0))) ? numClusters.x * numClusters.y : 0;
+    for (int index = int(getNodeThread()); index < clusterCount; index += int(NodeThreads)) {
+        irradiance += getCellLight(position, lowerCluster + ivec2(index % numClusters.x, index / numClusters.x));
     }
     irradiance = subgroupClusteredAdd(irradiance, NodeThreads);
 
