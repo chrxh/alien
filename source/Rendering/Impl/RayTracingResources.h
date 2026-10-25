@@ -17,6 +17,7 @@ enum class RayTracingResource
     SphereAabbs,
     CapsuleAabbs,
     TriangleAabbs,
+    ShadowCasters,
     GasAccumulation,
     GasIntermediate,
     GasLightClusters,
@@ -70,6 +71,9 @@ public:
     // Successive frames of a still picture are averaged with rays jittered within the pixels, each change starts a new average
     void setStillPicture(bool value);
 
+    // The frames of a still picture after the first one reuse the results that do not depend on the jittered rays
+    bool isRepeatedStillPictureFrame() const;
+
     void resetImageStates();
 
     // The pipelines share the layout of the descriptor set
@@ -110,6 +114,7 @@ private:
         VulkanBuffer sphereAabbs;
         VulkanBuffer capsuleAabbs;
         VulkanBuffer triangleAabbs;
+        VulkanBuffer shadowCasters;
         VulkanBuffer bottomLevelBuffer;
         VulkanBuffer topLevelBuffer;
         VulkanBuffer scratchBuffer;

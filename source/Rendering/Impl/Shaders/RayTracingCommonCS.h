@@ -112,12 +112,13 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     vec4 gasLight;    // x: size of the light clusters in world units, y: range of the lights, z: distance of the nodes of the irradiance grid,
                       // w: falloff distance of the lights
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
-    vec4 gasLighting;  // xy: world position of the first light cluster, z: strength of the light of the cells in the gas
+    vec4 gasLighting;  // xy: world position of the first light cluster, z: strength of the light of the cells in the gas, w: distance of the
+                       // nodes of the source light grid
     vec4 world;        // xy: size of the world, z: 1 for borderless rendering
     vec4 shadowGrid;  // xy: world position of the first node of the shadow grid, z: distance of the nodes, w: standard deviation of the blur in
                       // nodes
     ivec4 shadowGridSize;  // xy: number of nodes of the shadow grid, z: blur radius in nodes
-    ivec4 numSourceLights;  // x: number of source lights
+    ivec4 numSourceLights;  // x: number of source lights, zw: number of nodes of the source light grid
     SourceLight sourceLights[MaxSourceLights];
 } frame;
 
@@ -146,6 +147,7 @@ layout(set = 0, binding = 22) uniform sampler2D gasIrradianceSampler;
 layout(set = 0, binding = 23, std430) readonly buffer ShadowGridNodeBuffer { ShadowGridNode shadowGridNodes[]; };
 layout(set = 0, binding = 24, rgba16f) uniform image2D shadowGridImage;
 layout(set = 0, binding = 25) uniform sampler2D shadowGridSampler;
+layout(set = 0, binding = 26, std430) buffer ShadowCasterBuffer { vec4 shadowCasters[]; };
 
 //*******************
 //* General helpers
@@ -444,17 +446,18 @@ vec4 sampleGasLayerSmooth(vec2 world, int layer)
     return sampleRegionCubic(gasSampler, getGasTexel(world), getGasLayerStart(layer), vec2(frame.gasSize.xy), getGasImageSize());
 }
 
-vec4 sampleIrradiance(vec2 world, float regionStart)
+// The light of the cells and the light of the radiation sources lie in the irradiance image side by side, each on its own grid
+vec4 sampleIrradiance(vec2 world, float regionStart, float nodeDistance, ivec2 numNodes)
 {
-    vec2 texel = (world - frame.gasGrid.xy) / frame.gasLight.z + 0.5;
+    vec2 texel = (world - frame.gasGrid.xy) / nodeDistance + 0.5;
     vec2 imageSize = vec2(2 * GasIrradianceImageSize, GasIrradianceImageSize);
-    return sampleRegionCubic(gasIrradianceSampler, texel, vec2(regionStart, 0.0), vec2(frame.gasLightGrid.zw), imageSize);
+    return sampleRegionCubic(gasIrradianceSampler, texel, vec2(regionStart, 0.0), vec2(numNodes), imageSize);
 }
 
 // Light of the cells that reaches a position in the gas
 vec3 sampleGasIrradiance(vec2 world)
 {
-    return sampleIrradiance(world, 0.0).rgb;
+    return sampleIrradiance(world, 0.0, frame.gasLight.z, frame.gasLightGrid.zw).rgb;
 }
 )"
                                                 R"(
@@ -468,16 +471,41 @@ const float GasExtinction = 0.2;
 const float TissueExtinction = 6.0;
 const float SolidExtinction = 8.0;
 
-// The shadow rays to the radiation sources stand for beams that lead from the parts of a node of the irradiance grid to the parts of the
+vec3 getAbsorption(Sphere sphere)
+{
+    if (sphere.hueMaterial.w == Material_Solid) {
+        return vec3(SolidExtinction);
+    }
+    return TissueExtinction * getAbsorbedShare(getSaturatedHue(sphere.hueMaterial.rgb));
+}
+
+// The capsules and the triangles cast their shadows with the positions of their spheres and the sum of their absorptions, which are kept
+// together in the buffer of the shadow casters: two entries per capsule followed by three per triangle
+uint getCapsuleShadowEntry(uint capsule)
+{
+    return 2u * capsule;
+}
+
+uint getTriangleShadowEntry(uint triangle)
+{
+    return 2u * frame.counts.y + 3u * triangle;
+}
+
+// The shadow rays to the radiation sources stand for beams that lead from the parts of a node of the source light grid to the parts of the
 // shining area side by side, see Shaders/RayTracingGasIrradianceCS.h. At least this many rays start from a node.
 const int NodeRayStarts = 4;
 
 // The beams may be as wide as the parts of a node, but at least half a world unit, so that large areas need not too many rays when zoomed in
 const float MinBeamWidthLimit = 0.5;
 
+float getSourceLightNodeDistance()
+{
+    return frame.gasLighting.w;
+}
+
 float getMaxBeamWidth()
 {
-    return max(sqrt(2.0) * frame.gasLight.z / float(NodeRayStarts), MinBeamWidthLimit);
+    return max(sqrt(2.0) * getSourceLightNodeDistance() / float(NodeRayStarts), MinBeamWidthLimit);
 }
 
 bool isSourceLightActive()
@@ -517,7 +545,7 @@ float getShadowBeamMargin()
 // The light of each source approaches its brightness close to it, see Shaders/RayTracingGasIrradianceCS.h
 vec3 getSourceLight(vec2 world)
 {
-    return max(sampleIrradiance(world, float(GasIrradianceImageSize)).rgb, vec3(0.0));
+    return max(sampleIrradiance(world, float(GasIrradianceImageSize), getSourceLightNodeDistance(), frame.numSourceLights.zw).rgb, vec3(0.0));
 }
 
 // Without borderless rendering, the space outside the world stays dark

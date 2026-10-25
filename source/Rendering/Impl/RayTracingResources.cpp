@@ -46,6 +46,11 @@ namespace
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     auto constexpr ViewImageUsage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
+    // Entries per capsule and per triangle in the buffer of the shadow casters, see Shaders/RayTracingCommonCS.h
+    auto constexpr ShadowCasterEntrySize = VkDeviceSize(16);
+    auto constexpr CapsuleShadowEntries = VkDeviceSize(2);
+    auto constexpr TriangleShadowEntries = VkDeviceSize(3);
+
     // Bindings declared in Shaders/RayTracingCommonCS.h
     enum Binding_ : uint32_t
     {
@@ -75,6 +80,7 @@ namespace
         Binding_ShadowGridNodes,
         Binding_ShadowGridImage,
         Binding_ShadowGridSampler,
+        Binding_ShadowCasters,
         Binding_Count
     };
 
@@ -195,6 +201,11 @@ void _RayTracingResources::setStillPicture(bool value)
 {
     _stillPicture = value;
     _numAveragedFrames = 0;
+}
+
+bool _RayTracingResources::isRepeatedStillPictureFrame() const
+{
+    return _stillPicture && _numAveragedFrames > 0;
 }
 
 void _RayTracingResources::resetImageStates()
@@ -454,6 +465,10 @@ _RayTracingResources::SceneResources _RayTracingResources::createSceneResources(
         result.sphereAabbs = context.createBuffer(objectCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
         result.capsuleAabbs = context.createBuffer(capsuleCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
         result.triangleAabbs = context.createBuffer(triangleCapacity * sizeof(VkAabbPositionsKHR), AabbBufferUsage, VulkanMemory::DeviceLocal);
+        result.shadowCasters = context.createBuffer(
+            (capsuleCapacity * CapsuleShadowEntries + triangleCapacity * TriangleShadowEntries) * ShadowCasterEntrySize,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            VulkanMemory::DeviceLocal);
 
         auto bottomLevelGeometries = createBottomLevelGeometries(result.sphereAabbs, result.capsuleAabbs, result.triangleAabbs);
         auto bottomLevelBuildInfo = createBuildInfo(VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, bottomLevelGeometries);
@@ -527,6 +542,7 @@ void _RayTracingResources::destroySceneResources(SceneResources& resources, bool
              &resources.sphereAabbs,
              &resources.capsuleAabbs,
              &resources.triangleAabbs,
+             &resources.shadowCasters,
              &resources.bottomLevelBuffer,
              &resources.topLevelBuffer,
              &resources.scratchBuffer,
@@ -687,11 +703,12 @@ void _RayTracingResources::updateFrameConstants(
         .gasSize = {gasGrid.size.x, gasGrid.size.y, gasGrid.blurRadius, static_cast<int32_t>(numObjects.fluidParticles)},
         .gasLight = {gasGrid.lightClusterSize, gasGrid.lightRange, gasGrid.irradianceNodeDistance, gasGrid.lightFalloffDistance},
         .gasLightGrid = {gasGrid.numLightClusters.x, gasGrid.numLightClusters.y, gasGrid.irradianceSize.x, gasGrid.irradianceSize.y},
-        .gasLighting = {gasGrid.lightClusterOrigin.x, gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, 0.0f},
+        .gasLighting =
+            {gasGrid.lightClusterOrigin.x, gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, gasGrid.sourceLightNodeDistance},
         .world = {toFloat(worldSize.x), toFloat(worldSize.y), parameters.borderlessRendering.value ? 1.0f : 0.0f, 0.0f},
         .shadowGrid = {_shadowGrid.origin.x, _shadowGrid.origin.y, _shadowGrid.nodeDistance, shadowGridBlur},
         .shadowGridSize = {_shadowGrid.size.x, _shadowGrid.size.y, shadowGridBlurRadius, 0},
-        .numSourceLights = {static_cast<int32_t>(_layout.sourceLights.size()), 0, 0, 0},
+        .numSourceLights = {static_cast<int32_t>(_layout.sourceLights.size()), 0, gasGrid.sourceLightSize.x, gasGrid.sourceLightSize.y},
     };
     for (auto&& [light, lightConstants] : std::views::zip(_layout.sourceLights, constants.sourceLights)) {
         lightConstants = SourceLightConstants{
@@ -735,6 +752,7 @@ void _RayTracingResources::writeDescriptorSet(VulkanGeometryBuffers const& geome
         .storageBuffer(Binding_ShadowGridNodes, geometryBuffers->getBuffer(GeometryBufferType_ShadowGrid))
         .storageImage(Binding_ShadowGridImage, _shadowGridImage.view)
         .sampledImage(Binding_ShadowGridSampler, _shadowGridImage.view, General)
+        .storageBuffer(Binding_ShadowCasters, _scene.shadowCasters.buffer)
         .write(_descriptorSet);
 }
 
@@ -784,6 +802,8 @@ VulkanBuffer& _RayTracingResources::getBuffer(RayTracingResource resource)
         return _scene.capsuleAabbs;
     case RayTracingResource::TriangleAabbs:
         return _scene.triangleAabbs;
+    case RayTracingResource::ShadowCasters:
+        return _scene.shadowCasters;
     case RayTracingResource::GasAccumulation:
         return _gasAccumulation;
     case RayTracingResource::GasIntermediate:

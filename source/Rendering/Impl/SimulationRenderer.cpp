@@ -42,8 +42,8 @@ namespace
     auto constexpr SolidDetailZoomStart = 15.0f;
     auto constexpr SolidDetailZoomEnd = 40.0f;
 
-    // Threads that share the work of a node of the irradiance grid, so that its rays to the radiation sources run in parallel, see
-    // Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
+    // Threads that share the work of a node of the irradiance grids, so that its light clusters and its rays to the radiation sources are
+    // handled in parallel, see Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
     auto constexpr ThreadsPerIrradianceNode = 16;
 }
 
@@ -616,7 +616,9 @@ namespace
                     .dispatchSize([](auto const&, NumRenderObjects const& numObjects) {
                         return IntVector2D{toInt(std::max({numObjects.objects, numObjects.lineIndices / 2, numObjects.triangleIndices / 3})), 1};
                     })
-                    .accesses({{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}})
+                    .reusedInStillPicture(true)
+                    .accesses(
+                        {{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}, {ShadowCasters, ReadWrite}})
                     .requiresScene(true)),
             _RayTracingSceneStep::create(resources),
             _RayTracingComputeStep::create(
@@ -625,6 +627,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasSplatCS))
                     .workGroupSize({64, 1})
                     .dispatchSize([](auto const&, NumRenderObjects const& numObjects) { return IntVector2D{toInt(numObjects.fluidParticles), 1}; })
+                    .reusedInStillPicture(true)
                     .accesses({{GasAccumulation, Clear}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -632,6 +635,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasLightsCS))
                     .workGroupSize({64, 1})
                     .dispatchSize(perObject)
+                    .reusedInStillPicture(true)
                     .accesses({{GasAccumulation, ReadWrite}, {GasLightClusters, Clear}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -639,6 +643,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingGasBlurCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perGasNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasAccumulation, Read}, {GasIntermediate, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -646,6 +651,7 @@ namespace
                     .shader(std::format("#define VERTICAL\n{}", Shaders::RayTracingGasBlurCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perGasNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, Read}, {GasImage, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -653,6 +659,7 @@ namespace
                     .shader(std::string(Shaders::RayTracingShadowGridCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perShadowGridNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -660,10 +667,11 @@ namespace
                     .shader(std::format("#define VERTICAL\n{}", Shaders::RayTracingShadowGridCS))
                     .workGroupSize({8, 8})
                     .dispatchSize(perShadowGridNode)
+                    .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, Read}, {ShadowGridImage, ReadWrite}})),
 
-            // The light of the cells and of the radiation sources reaches the gas through the gas and the objects. The threads of a work group
-            // row share a node, so that the many rays of the nodes close to large sources spread over the GPU.
+            // The light of the cells reaches the gas through the gas and the cells in it, the light of the radiation sources through the gas and
+            // the objects. Both are computed on grids of their own, the threads of a work group row share a node.
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()
@@ -673,8 +681,26 @@ namespace
                         auto const& size = resources.getGasGrid().irradianceSize;
                         return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                     })
-                    .accesses(
-                        {{Scene, Read}, {Spheres, Read}, {GasLightClusters, Read}, {GasImage, Read}, {ShadowGridImage, Read}, {GasIrradiance, ReadWrite}})),
+                    .reusedInStillPicture(true)
+                    .accesses({{GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
+            _RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::format("#define SOURCE_LIGHT\n{}", Shaders::RayTracingGasIrradianceCS))
+                    .workGroupSize({ThreadsPerIrradianceNode, 4})
+                    .dispatchSize([](_RayTracingResources const& resources, auto const&) {
+                        auto const& size = resources.getGasGrid().sourceLightSize;
+                        return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
+                    })
+                    .reusedInStillPicture(true)
+                    .accesses({
+                        {Scene, Read},
+                        {Spheres, Read},
+                        {ShadowCasters, Read},
+                        {GasImage, Read},
+                        {ShadowGridImage, Read},
+                        {GasIrradiance, ReadWrite},
+                    })),
             _RayTracingComputeStep::create(
                 resources,
                 ComputeStepParameters()

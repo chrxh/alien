@@ -45,6 +45,10 @@ struct RayTracingLayout
         IntVector2D numLightClusters;
         float irradianceNodeDistance = 1.0f;
         IntVector2D irradianceSize;
+
+        // The light of the radiation sources reaches the nodes of a grid of its own
+        float sourceLightNodeDistance = 1.0f;
+        IntVector2D sourceLightSize;
     };
 
     // A radiation source that shines from its circular or rectangular area
