@@ -21,6 +21,7 @@ enum class RayTracingResource
     GasAccumulation,
     GasIntermediate,
     GasLightClusters,
+    OcclusionAccumulation,
 
     // Top level acceleration structure
     Scene,
@@ -28,6 +29,7 @@ enum class RayTracingResource
     GasImage,
     GasIrradiance,
     ShadowGridImage,
+    OcclusionImage,
     SceneColor,
     AntiAliased,
     PreviousAntiAliased,
@@ -166,6 +168,10 @@ private:
 
     ShadowGridLayout _shadowGrid;
     VulkanImage _shadowGridImage;
+
+    // Occlusion of the extracted objects at the nodes of the gas grid and the levels of the pyramid derived from it
+    VulkanBuffer _occlusionAccumulation;
+    VulkanImage _occlusionImage;
 
     bool _stillPicture = false;
     uint32_t _numAveragedFrames = 0;

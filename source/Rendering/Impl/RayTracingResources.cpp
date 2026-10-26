@@ -31,10 +31,12 @@ namespace
     auto constexpr DetailZoomEnd = 20.0f;
 
     // Layouts of the sums at the nodes of the gas grid and in the light clusters, the sizes here and of the grids are declared for the shaders as
-    // well, see createPipeline
+    // well, see createPipeline. The occlusion of the extracted objects has sums of its own at the nodes of the gas grid, see
+    // Shaders/RayTracingCommonCS.h.
     auto constexpr GasAccumulationStride = 5;
     auto constexpr GasLayers = 2;
     auto constexpr GasLightClusterStride = 6;
+    auto constexpr OcclusionStride = 3;
 
     // Factor of the cell light in the gas at the highest fluid illumination
     auto constexpr MaxFluidIllumination = 4.0f;
@@ -50,6 +52,15 @@ namespace
     auto constexpr ShadowCasterEntrySize = VkDeviceSize(16);
     auto constexpr CapsuleShadowEntries = VkDeviceSize(2);
     auto constexpr TriangleShadowEntries = VkDeviceSize(3);
+
+    // The levels of an occlusion pyramid lie side by side in the image of its grid, see Shaders/RayTracingCommonCS.h. Each level has exactly
+    // half the size of the level before.
+    IntVector2D getPyramidImageSize(int gridImageSize)
+    {
+        return {gridImageSize + gridImageSize / 2, gridImageSize};
+    }
+    auto constexpr CoarsestPyramidLevelScale = 1 << (RayTracingLayout::OcclusionLevels - 1);
+    static_assert(RayTracingLayout::MaxGasNodes % CoarsestPyramidLevelScale == 0 && RayTracingLayout::MaxShadowGridNodes % CoarsestPyramidLevelScale == 0);
 
     // Bindings declared in Shaders/RayTracingCommonCS.h
     enum Binding_ : uint32_t
@@ -81,6 +92,9 @@ namespace
         Binding_ShadowGridImage,
         Binding_ShadowGridSampler,
         Binding_ShadowCasters,
+        Binding_OcclusionAccumulation,
+        Binding_OcclusionImage,
+        Binding_OcclusionSampler,
         Binding_Count
     };
 
@@ -96,6 +110,7 @@ namespace
         case Binding_GasImage:
         case Binding_GasIrradiance:
         case Binding_ShadowGridImage:
+        case Binding_OcclusionImage:
             return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         case Binding_PreviousAntiAliased:
         case Binding_GroundTexture:
@@ -104,6 +119,7 @@ namespace
         case Binding_EnergyParticleTexture:
         case Binding_GasIrradianceSampler:
         case Binding_ShadowGridSampler:
+        case Binding_OcclusionSampler:
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         default:
             return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -151,12 +167,13 @@ _RayTracingResources::~_RayTracingResources()
     }
     destroySceneResources(_scene, false);
     destroyViewResources(_view, false);
-    for (auto buffer : {&_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+    for (auto buffer : {&_frameConstants, &_gasAccumulation, &_gasIntermediate, &_gasLightClusters, &_occlusionAccumulation}) {
         context.destroyBufferLater(*buffer);
     }
     context.destroyImageLater(_gasImage);
     context.destroyImageLater(_gasIrradiance);
     context.destroyImageLater(_shadowGridImage);
+    context.destroyImageLater(_occlusionImage);
     context.destroyLater([device = context.getDevice(), pipelineLayout = _pipelineLayout, descriptorSetLayout = _descriptorSetLayout] {
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
@@ -214,6 +231,7 @@ void _RayTracingResources::resetImageStates()
     images.emplace_back(&_gasImage);
     images.emplace_back(&_gasIrradiance);
     images.emplace_back(&_shadowGridImage);
+    images.emplace_back(&_occlusionImage);
     for (auto image : images) {
         image->layout = VK_IMAGE_LAYOUT_UNDEFINED;
         image->lastStages = VK_PIPELINE_STAGE_2_NONE;
@@ -240,6 +258,8 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
         "const int GasLayers = {};\n"
         "const uint GasAccumulationStride = {}u;\n"
         "const uint GasLightClusterStride = {}u;\n"
+        "const uint OcclusionStride = {}u;\n"
+        "const int OcclusionLevels = {};\n"
         "const int GasIrradianceImageSize = {};\n"
         "const float LightFalloffDistance = {:.6f};\n"
         "const float SourceLightSpread = {:.6f};\n"
@@ -256,6 +276,8 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
         GasLayers,
         GasAccumulationStride,
         GasLightClusterStride,
+        OcclusionStride,
+        RayTracingLayout::OcclusionLevels,
         RayTracingLayout::GasIrradianceImageSize,
         RayTracingLayout::LightFalloffDistance,
         RayTracingLayout::SourceLightSpread,
@@ -593,12 +615,13 @@ void _RayTracingResources::destroyViewResources(ViewResources& resources, bool i
 void _RayTracingResources::createFrameResources()
 {
     auto& context = VulkanContext::get();
-    for (auto buffer : {&_gasAccumulation, &_gasIntermediate, &_gasLightClusters}) {
+    for (auto buffer : {&_gasAccumulation, &_gasIntermediate, &_gasLightClusters, &_occlusionAccumulation}) {
         context.destroyBufferLater(*buffer);
     }
     context.destroyImageLater(_gasImage);
     context.destroyImageLater(_gasIrradiance);
     context.destroyImageLater(_shadowGridImage);
+    context.destroyImageLater(_occlusionImage);
     auto maxGasNodes = RayTracingLayout::MaxGasNodes;
     auto numNodes = static_cast<VkDeviceSize>(maxGasNodes) * maxGasNodes;
     auto clearableUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
@@ -616,7 +639,9 @@ void _RayTracingResources::createFrameResources()
     _gasImage = context.createImage({GasLayers * maxGasNodes, maxGasNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
     auto irradianceImageSize = RayTracingLayout::GasIrradianceImageSize;
     _gasIrradiance = context.createImage({2 * irradianceImageSize, irradianceImageSize}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
-    _shadowGridImage = context.createImage({maxShadowGridNodes, maxShadowGridNodes}, VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _shadowGridImage = context.createImage(getPyramidImageSize(maxShadowGridNodes), VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _occlusionAccumulation = context.createBuffer(numNodes * OcclusionStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
+    _occlusionImage = context.createImage(getPyramidImageSize(maxGasNodes), VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
 
     // Created last since it marks the resources as complete
     _frameConstants = context.createBuffer(sizeof(FrameConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VulkanMemory::HostVisible);
@@ -753,6 +778,9 @@ void _RayTracingResources::writeDescriptorSet(VulkanGeometryBuffers const& geome
         .storageImage(Binding_ShadowGridImage, _shadowGridImage.view)
         .sampledImage(Binding_ShadowGridSampler, _shadowGridImage.view, General)
         .storageBuffer(Binding_ShadowCasters, _scene.shadowCasters.buffer)
+        .storageBuffer(Binding_OcclusionAccumulation, _occlusionAccumulation.buffer)
+        .storageImage(Binding_OcclusionImage, _occlusionImage.view)
+        .sampledImage(Binding_OcclusionSampler, _occlusionImage.view, General)
         .write(_descriptorSet);
 }
 
@@ -810,6 +838,8 @@ VulkanBuffer& _RayTracingResources::getBuffer(RayTracingResource resource)
         return _gasIntermediate;
     case RayTracingResource::GasLightClusters:
         return _gasLightClusters;
+    case RayTracingResource::OcclusionAccumulation:
+        return _occlusionAccumulation;
     default:
         THROW_NOT_IMPLEMENTED();
     }
@@ -824,6 +854,8 @@ VulkanImage* _RayTracingResources::getImage(RayTracingResource resource)
         return &_gasIrradiance;
     case RayTracingResource::ShadowGridImage:
         return &_shadowGridImage;
+    case RayTracingResource::OcclusionImage:
+        return &_occlusionImage;
     case RayTracingResource::SceneColor:
         return &_view.sceneColor;
     case RayTracingResource::AntiAliased:
@@ -842,6 +874,8 @@ VkDeviceSize _RayTracingResources::getUsedSize(RayTracingResource resource) cons
         return static_cast<VkDeviceSize>(_layout.gasGrid.size.x) * _layout.gasGrid.size.y * GasAccumulationStride * sizeof(uint32_t);
     case RayTracingResource::GasLightClusters:
         return static_cast<VkDeviceSize>(_layout.gasGrid.numLightClusters.x) * _layout.gasGrid.numLightClusters.y * GasLightClusterStride * sizeof(uint32_t);
+    case RayTracingResource::OcclusionAccumulation:
+        return static_cast<VkDeviceSize>(_layout.gasGrid.size.x) * _layout.gasGrid.size.y * OcclusionStride * sizeof(uint32_t);
     default:
         THROW_NOT_IMPLEMENTED();
     }

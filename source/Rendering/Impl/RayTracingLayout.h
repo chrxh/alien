@@ -20,6 +20,10 @@ struct RayTracingLayout
     static constexpr int GasIrradianceImageSize = MaxGasNodes;
     static constexpr int MaxShadowGridNodes = 512;
 
+    // The occlusion pyramids of the gas grid and of the shadow grid have the nodes of their grid at their first level, each further level
+    // halves their number along both axes
+    static constexpr int OcclusionLevels = 7;
+
     // The light of the cells falls off beyond this distance close up, see the gas grid
     static constexpr float LightFalloffDistance = 5.0f;
 

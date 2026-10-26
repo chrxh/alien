@@ -5,7 +5,8 @@
 namespace Shaders
 {
     // Derives the objects from the geometry buffers and creates the bounding boxes of the groups that form the tissue: each cell alone, each
-    // connection together with its two cells and each triangle together with its corners
+    // connection together with its two cells and each triangle together with its corners. With radiation sources, the objects also add their
+    // occlusion to the gas grid, see Shaders/RayTracingOcclusionCS.h.
     std::string_view const RayTracingPrepareCS = R"(
 Sphere createSphere(uint index)
 {
@@ -72,6 +73,26 @@ float getCellExtent(Sphere sphere)
     return isSceneForShadowsOnly() ? shadowExtent : max(getMaxCellKernelRadius(sphere), shadowExtent);
 }
 
+// Each object is distributed bilinearly over the four nodes of the gas grid around its center
+void addOcclusion(vec2 position, vec3 occlusion)
+{
+    vec2 node = (position - frame.gasGrid.xy) / frame.gasGrid.z;
+    ivec2 base = ivec2(floor(node));
+    vec2 fraction = node - vec2(base);
+    for (int i = 0; i < 4; ++i) {
+        ivec2 offset = ivec2(i & 1, i >> 1);
+        ivec2 target = base + offset;
+        if (any(lessThan(target, ivec2(0))) || any(greaterThanEqual(target, frame.gasSize.xy))) {
+            continue;
+        }
+        vec3 value = occlusion * (getBilinearWeight(fraction, offset) * OcclusionFixedPointScale);
+        uint entry = getGasNodeIndex(target) * OcclusionStride;
+        atomicAdd(occlusionAccumulation[entry], uint(value.r + 0.5));
+        atomicAdd(occlusionAccumulation[entry + 1u], uint(value.g + 0.5));
+        atomicAdd(occlusionAccumulation[entry + 2u], uint(value.b + 0.5));
+    }
+}
+
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
@@ -82,6 +103,10 @@ void main()
         float extent = getCellExtent(sphere);
         bool enabled = sphere.hueMaterial.w != Material_Inactive;
         sphereAabbs[index] = createAabb(center - extent, center + extent, enabled);
+        if (isSourceLightActive() && enabled) {
+            float radius = sphere.centerRadius.w;
+            addOcclusion(center, getOcclusion(2.0 * Pi * radius, Pi * radius * radius, getAbsorption(sphere)));
+        }
     }
     if (index < frame.counts.y) {
         uint sphereA;
@@ -99,6 +124,12 @@ void main()
             uint entry = getCapsuleShadowEntry(index);
             shadowCasters[entry] = vec4(a.centerRadius.xy, b.centerRadius.xy);
             shadowCasters[entry + 1u] = vec4(getAbsorption(a) + getAbsorption(b), 0.0);
+            if (enabled) {
+                float strandLength = length(b.centerRadius.xy - a.centerRadius.xy);
+                vec3 occlusion = getOcclusion(
+                    2.0 * strandLength + 4.0 * StrandHalfWidth, 2.0 * StrandHalfWidth * strandLength, 0.5 * (getAbsorption(a) + getAbsorption(b)));
+                addOcclusion(0.5 * (a.centerRadius.xy + b.centerRadius.xy), occlusion);
+            }
         }
     }
     if (index < frame.counts.z) {
@@ -120,6 +151,14 @@ void main()
             shadowCasters[entry] = vec4(a.centerRadius.xy, b.centerRadius.xy);
             shadowCasters[entry + 1u] = vec4(c.centerRadius.xy, 0.0, 0.0);
             shadowCasters[entry + 2u] = vec4(getAbsorption(a) + getAbsorption(b) + getAbsorption(c), 0.0);
+            if (enabled) {
+                vec2 ab = b.centerRadius.xy - a.centerRadius.xy;
+                vec2 ac = c.centerRadius.xy - a.centerRadius.xy;
+                float perimeter = length(ab) + length(ac) + length(c.centerRadius.xy - b.centerRadius.xy);
+                float area = 0.5 * abs(ab.x * ac.y - ab.y * ac.x);
+                vec3 occlusion = getOcclusion(perimeter, area, (getAbsorption(a) + getAbsorption(b) + getAbsorption(c)) / 3.0);
+                addOcclusion((a.centerRadius.xy + b.centerRadius.xy + c.centerRadius.xy) / 3.0, occlusion);
+            }
         }
     }
 }

@@ -600,13 +600,43 @@ namespace
         return resources.getViewSize();
     }
 
+    // The levels of an occlusion pyramid are computed one after the other, each from the level before. The pyramid of the gas grid starts with
+    // the occlusion of the extracted objects, the pyramid of the shadow grid with the shadow grid itself.
+    std::vector<RenderStep> createOcclusionPyramidSteps(RayTracingResources const& resources, bool shadowGrid)
+    {
+        using enum RayTracingResource;
+        using enum RayTracingAccess;
+
+        std::vector<RenderStep> result;
+        for (auto level : std::views::iota(shadowGrid ? 1 : 0, RayTracingLayout::OcclusionLevels)) {
+            RayTracingAccesses accesses{{shadowGrid ? ShadowGridImage : OcclusionImage, ReadWrite}};
+            if (level == 0) {
+                accesses.emplace_back(OcclusionAccumulation, Read);
+            }
+            result.emplace_back(_RayTracingComputeStep::create(
+                resources,
+                ComputeStepParameters()
+                    .shader(std::format("{}#define OCCLUSION_LEVEL {}\n{}", shadowGrid ? "#define SHADOW_GRID\n" : "", level, Shaders::RayTracingOcclusionCS))
+                    .workGroupSize({8, 8})
+                    .dispatchSize([level, shadowGrid](_RayTracingResources const& resources, NumRenderObjects const&) {
+                        auto const& size = shadowGrid ? resources.getShadowGrid().size : resources.getGasGrid().size;
+                        auto scale = 1 << level;
+                        return IntVector2D{(size.x + scale - 1) / scale, (size.y + scale - 1) / scale};
+                    })
+                    .reusedInStillPicture(true)
+                    .accesses(accesses)
+                    .requiresScene(!shadowGrid)));
+        }
+        return result;
+    }
+
     // The ray tracing steps compute into the shared resources, see RayTracingSteps.h
     RenderSequence createRayTracingSequence(RayTracingResources const& resources)
     {
         using enum RayTracingResource;
         using enum RayTracingAccess;
 
-        return RenderSequence().steps({
+        std::vector<RenderStep> steps{
             _RayTracingFrameStep::create(resources),
             _RayTracingComputeStep::create(
                 resources,
@@ -617,8 +647,14 @@ namespace
                         return IntVector2D{toInt(std::max({numObjects.objects, numObjects.lineIndices / 2, numObjects.triangleIndices / 3})), 1};
                     })
                     .reusedInStillPicture(true)
-                    .accesses(
-                        {{Spheres, ReadWrite}, {SphereAabbs, ReadWrite}, {CapsuleAabbs, ReadWrite}, {TriangleAabbs, ReadWrite}, {ShadowCasters, ReadWrite}})
+                    .accesses({
+                        {Spheres, ReadWrite},
+                        {SphereAabbs, ReadWrite},
+                        {CapsuleAabbs, ReadWrite},
+                        {TriangleAabbs, ReadWrite},
+                        {ShadowCasters, ReadWrite},
+                        {OcclusionAccumulation, Clear},
+                    })
                     .requiresScene(true)),
             _RayTracingSceneStep::create(resources),
             _RayTracingComputeStep::create(
@@ -669,55 +705,62 @@ namespace
                     .dispatchSize(perShadowGridNode)
                     .reusedInStillPicture(true)
                     .accesses({{GasIntermediate, Read}, {ShadowGridImage, ReadWrite}})),
-
-            // The light of the cells reaches the gas through the gas and the cells in it, the light of the radiation sources through the gas and
-            // the objects. Both are computed on grids of their own, the threads of a work group row share a node.
-            _RayTracingComputeStep::create(
-                resources,
-                ComputeStepParameters()
-                    .shader(std::string(Shaders::RayTracingGasIrradianceCS))
-                    .workGroupSize({ThreadsPerIrradianceNode, 4})
-                    .dispatchSize([](_RayTracingResources const& resources, auto const&) {
-                        auto const& size = resources.getGasGrid().irradianceSize;
-                        return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
-                    })
-                    .reusedInStillPicture(true)
-                    .accesses({{GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
-            _RayTracingComputeStep::create(
-                resources,
-                ComputeStepParameters()
-                    .shader(std::format("#define SOURCE_LIGHT\n{}", Shaders::RayTracingGasIrradianceCS))
-                    .workGroupSize({ThreadsPerIrradianceNode, 4})
-                    .dispatchSize([](_RayTracingResources const& resources, auto const&) {
-                        auto const& size = resources.getGasGrid().sourceLightSize;
-                        return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
-                    })
-                    .reusedInStillPicture(true)
-                    .accesses({
-                        {Scene, Read},
-                        {Spheres, Read},
-                        {ShadowCasters, Read},
-                        {GasImage, Read},
-                        {ShadowGridImage, Read},
-                        {GasIrradiance, ReadWrite},
-                    })),
-            _RayTracingComputeStep::create(
-                resources,
-                ComputeStepParameters()
-                    .shader(std::string(Shaders::RayTracingGasShadingCS) + std::string(Shaders::RayTracingTissueCS))
-                    .workGroupSize({8, 8})
-                    .dispatchSize(perPixel)
-                    .accesses({{Scene, Read}, {Spheres, Read}, {GasImage, Read}, {GasIrradiance, Read}, {SceneColor, ReadWrite}})),
-            _RayTracingComputeStep::create(
-                resources,
-                ComputeStepParameters()
-                    .shader(std::string(Shaders::RayTracingAntiAliasingCS))
-                    .workGroupSize({8, 8})
-                    .dispatchSize(perPixel)
-                    .accesses({{SceneColor, Read}, {PreviousAntiAliased, Read}, {AntiAliased, ReadWrite}})),
-            _RayTracingPresentStep::create(resources),
-            _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
-        });
+        };
+        std::ranges::move(createOcclusionPyramidSteps(resources, true), std::back_inserter(steps));
+        std::ranges::move(createOcclusionPyramidSteps(resources, false), std::back_inserter(steps));
+        steps.insert(
+            steps.end(),
+            {
+                // The light of the cells reaches the gas through the gas and the cells in it, the light of the radiation sources through the gas
+                // and the objects. Both are computed on grids of their own, the threads of a work group row share a node.
+                _RayTracingComputeStep::create(
+                    resources,
+                    ComputeStepParameters()
+                        .shader(std::string(Shaders::RayTracingGasIrradianceCS))
+                        .workGroupSize({ThreadsPerIrradianceNode, 4})
+                        .dispatchSize([](_RayTracingResources const& resources, auto const&) {
+                            auto const& size = resources.getGasGrid().irradianceSize;
+                            return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
+                        })
+                        .reusedInStillPicture(true)
+                        .accesses({{GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
+                _RayTracingComputeStep::create(
+                    resources,
+                    ComputeStepParameters()
+                        .shader(std::format("#define SOURCE_LIGHT\n{}", Shaders::RayTracingGasIrradianceCS))
+                        .workGroupSize({ThreadsPerIrradianceNode, 4})
+                        .dispatchSize([](_RayTracingResources const& resources, auto const&) {
+                            auto const& size = resources.getGasGrid().sourceLightSize;
+                            return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
+                        })
+                        .reusedInStillPicture(true)
+                        .accesses({
+                            {Scene, Read},
+                            {Spheres, Read},
+                            {ShadowCasters, Read},
+                            {GasImage, Read},
+                            {ShadowGridImage, Read},
+                            {OcclusionImage, Read},
+                            {GasIrradiance, ReadWrite},
+                        })),
+                _RayTracingComputeStep::create(
+                    resources,
+                    ComputeStepParameters()
+                        .shader(std::string(Shaders::RayTracingGasShadingCS) + std::string(Shaders::RayTracingTissueCS))
+                        .workGroupSize({8, 8})
+                        .dispatchSize(perPixel)
+                        .accesses({{Scene, Read}, {Spheres, Read}, {GasImage, Read}, {GasIrradiance, Read}, {SceneColor, ReadWrite}})),
+                _RayTracingComputeStep::create(
+                    resources,
+                    ComputeStepParameters()
+                        .shader(std::string(Shaders::RayTracingAntiAliasingCS))
+                        .workGroupSize({8, 8})
+                        .dispatchSize(perPixel)
+                        .accesses({{SceneColor, Read}, {PreviousAntiAliased, Read}, {AntiAliased, ReadWrite}})),
+                _RayTracingPresentStep::create(resources),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
+            });
+        return RenderSequence().steps(steps);
     }
 }
 
