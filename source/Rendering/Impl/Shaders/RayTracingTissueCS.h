@@ -749,6 +749,7 @@ void main()
     vec3 sourceLight = isSourceLightActive() ? getSourceLight(position) : vec3(0.0);
     vec3 medium = shadeGas(position, background, sourceLight) + getEnergyParticleRadiance(position);
     vec3 color = medium;
+#ifndef WITHOUT_TISSUE
     if (tissueVisibility > 0.0) {
         Neighborhood neighborhood;
         Dendrites dendrites;
@@ -759,6 +760,7 @@ void main()
         }
         color = mix(medium, color, tissueVisibility);
     }
+#endif
 
     // The rasterized objects scatter the light of the radiation sources as well, its strength is passed on to them in the alpha channel,
     // see Shaders/RayTracingMergeFS.h

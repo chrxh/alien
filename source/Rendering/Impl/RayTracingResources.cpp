@@ -18,9 +18,14 @@ namespace
     auto constexpr MinCapacity = uint64_t(4096);
     auto constexpr NumJitterPositions = 16u;
 
-    // Between these screen zoom factors, the tissue fades in over the rasterized objects
+    // Between these screen zoom factors, the tissue fades in over the rasterized objects. It starts from this visibility of the transition,
+    // below which it would hardly show and is not traced.
     auto constexpr TissueZoomStart = 4.0f;
     auto constexpr TissueZoomEnd = 10.0f;
+    auto constexpr TissueVisibilityStart = 0.05f;
+
+    // The light in the gas is only reused while it lags behind the objects by at most this number of time steps
+    auto constexpr MaxLightDelay = uint64_t(4);
 
     // Between these screen zoom factors, the thin lines of the zoomed out view grow into the tissue
     auto constexpr CloseUpZoomStart = 3.0f;
@@ -218,11 +223,27 @@ void _RayTracingResources::setStillPicture(bool value)
 {
     _stillPicture = value;
     _numAveragedFrames = 0;
+    _lightComputed = false;
 }
 
 bool _RayTracingResources::isRepeatedStillPictureFrame() const
 {
     return _stillPicture && _numAveragedFrames > 0;
+}
+
+bool _RayTracingResources::isLightReused() const
+{
+    return _lightReused;
+}
+
+bool _RayTracingResources::isTissueTraced() const
+{
+    return _tissueTraced;
+}
+
+bool _RayTracingResources::isAntiAliasingNeeded() const
+{
+    return _tissueTraced || _stillPicture;
 }
 
 void _RayTracingResources::resetImageStates()
@@ -238,6 +259,7 @@ void _RayTracingResources::resetImageStates()
         image->lastAccesses = VK_ACCESS_2_NONE;
     }
     _numAveragedFrames = 0;
+    _lightComputed = false;
 }
 
 // The sizes shared with the shaders and the work group size are declared here, so that they cannot diverge
@@ -300,7 +322,8 @@ void _RayTracingResources::beginFrame(ExecutionParameters const& parameters)
 
     auto const& geometryBuffers = parameters._geometryBuffers;
     _shadowGrid = geometryBuffers->getShadowGridLayout();
-    updateFrameConstants(view, geometryBuffers->getNumObjects(), *parameters._simulationParameters, parameters._simulationFacade->getWorldSize());
+    _tissueTraced = getTissueVisibility(view) > 0.0f;
+    updateFrameConstants(view, geometryBuffers->getNumObjects(), *parameters._simulationParameters, parameters._simulationFacade);
     writeDescriptorSet(geometryBuffers, textures);
 }
 
@@ -347,7 +370,7 @@ void _RayTracingResources::access(VkCommandBuffer commandBuffer, RayTracingAcces
 
 VulkanImage& _RayTracingResources::getOutput()
 {
-    return _view.antiAliased.at(_current);
+    return isAntiAliasingNeeded() ? _view.antiAliased.at(_current) : _view.sceneColor;
 }
 
 RayTracingLayout::GasGrid const& _RayTracingResources::getGasGrid() const
@@ -642,6 +665,7 @@ void _RayTracingResources::createFrameResources()
     _shadowGridImage = context.createImage(getPyramidImageSize(maxShadowGridNodes), VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
     _occlusionAccumulation = context.createBuffer(numNodes * OcclusionStride * sizeof(uint32_t), clearableUsage, VulkanMemory::DeviceLocal);
     _occlusionImage = context.createImage(getPyramidImageSize(maxGasNodes), VK_FORMAT_R16G16B16A16_SFLOAT, ViewImageUsage);
+    _lightComputed = false;
 
     // Created last since it marks the resources as complete
     _frameConstants = context.createBuffer(sizeof(FrameConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VulkanMemory::HostVisible);
@@ -670,7 +694,8 @@ namespace
 
 float _RayTracingResources::getTissueVisibility(RenderView const& view)
 {
-    return getSmoothTransition(view.getScreenZoomFactor(), TissueZoomStart, TissueZoomEnd);
+    auto transition = getSmoothTransition(view.getScreenZoomFactor(), TissueZoomStart, TissueZoomEnd);
+    return std::max(0.0f, (transition - TissueVisibilityStart) / (1.0f - TissueVisibilityStart));
 }
 
 float _RayTracingResources::getBackgroundScale()
@@ -697,8 +722,9 @@ void _RayTracingResources::updateFrameConstants(
     RenderView const& view,
     NumRenderObjects const& numObjects,
     SimulationParameters const& parameters,
-    IntVector2D const& worldSize)
+    SimulationFacade const& simulationFacade)
 {
+    auto worldSize = simulationFacade->getWorldSize();
     auto const& topLeft = view.visibleWorldRect.topLeft;
     RealVector2D jitter;
     if (_stillPicture) {
@@ -743,6 +769,24 @@ void _RayTracingResources::updateFrameConstants(
         };
     }
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
+
+    // Apart from the objects, the light in the gas depends on the constants without the numbers of the objects
+    auto lightConstants = constants;
+    std::ranges::fill(lightConstants.counts, 0u);
+    lightConstants.gasSize[3] = 0;
+    updateLightReuse(std::as_bytes(std::span(&lightConstants, 1)), simulationFacade);
+}
+
+void _RayTracingResources::updateLightReuse(std::span<std::byte const> lightConstants, SimulationFacade const& simulationFacade)
+{
+    auto timestep = simulationFacade->getCurrentTimestep();
+    _lightReused = _lightComputed && !_lightReused && !_stillPicture && simulationFacade->isSimulationRunning() && timestep >= _lightTimestep
+        && timestep - _lightTimestep <= MaxLightDelay && std::ranges::equal(lightConstants, _lightConstants);
+    if (!_lightReused) {
+        _lightComputed = true;
+        _lightTimestep = timestep;
+        _lightConstants.assign(lightConstants.begin(), lightConstants.end());
+    }
 }
 
 void _RayTracingResources::writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures)

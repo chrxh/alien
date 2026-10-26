@@ -62,10 +62,12 @@ private:
     void applyViewSize(bool withScreenTarget);
     void resizeTarget(TextureTarget const& target);
 
-    // Steps without target get no render target
+    // Steps without target get no render target, steps that pass their input through are not executed
     void forEachStep(
+        SimulationParameters const& parameters,
         std::function<TextureTarget()> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target)> const& executeStep);
+        std::function<void(RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target, int repetition)> const&
+            executeStep);
 
     struct TargetInfo
     {

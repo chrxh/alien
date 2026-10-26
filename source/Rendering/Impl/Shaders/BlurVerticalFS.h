@@ -28,17 +28,20 @@ void main()
         FragColor = texture(inputTexture1, texCoord);
     } else {
         int radius = max(1, int(ceil(blurRadius)));
+        float exponentFactor = -0.5 / (blurRadius * blurRadius);
+        result = texture(inputTexture1, texCoord);
+        totalWeight = 1.0;
 
-        // Apply vertical Gaussian blur
-        for (int y = -radius; y <= radius; y++) {
-            float distance = float(y);
-            // Gaussian weight calculation
-            float weight = exp(-0.5 * (distance * distance) / (blurRadius * blurRadius));
-            vec2 offset = vec2(0.0, distance * texelSize.y);
-            result += texture(inputTexture1, texCoord + offset) * weight;
-            totalWeight += weight;
+        // Neighboring texels are fetched in pairs by a linear lookup between them that weights them like the Gaussian
+        for (int distance = 1; distance <= radius; distance += 2) {
+            float weight1 = exp(exponentFactor * float(distance * distance));
+            float weight2 = distance < radius ? exp(exponentFactor * float((distance + 1) * (distance + 1))) : 0.0;
+            float weight = weight1 + weight2;
+            vec2 offset = vec2(0.0, (float(distance) + weight2 / weight) * texelSize.y);
+            result += (texture(inputTexture1, texCoord + offset) + texture(inputTexture1, texCoord - offset)) * weight;
+            totalWeight += 2.0 * weight;
         }
-        
+
         // Normalize by total weight
         FragColor = result / totalWeight;
     }

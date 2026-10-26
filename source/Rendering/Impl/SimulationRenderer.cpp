@@ -209,9 +209,12 @@ RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, Simul
 
 namespace
 {
+    // The levels of the glow are blurred little while they are magnified again
+    auto constexpr GlowUpscaleBlurStrength = 0.12f / 8;
+
     // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality.
     // The screen zoom factor is used so that a picture rendered at a higher resolution keeps the same appearance.
-    UniformValueMap getBlurStrength(SimulationParameters const&, RenderView const& view)
+    float getGlowBlurStrength(RenderView const& view)
     {
         auto zoom = view.getScreenZoomFactor();
         float strength = 0.035f;
@@ -230,7 +233,12 @@ namespace
         if (zoom < 6.0f) {
             strength *= 2.5f;
         }
-        return UniformValueMap{{"strength", strength}};
+        return strength;
+    }
+
+    UniformValueMap getBlurStrength(SimulationParameters const&, RenderView const& view)
+    {
+        return UniformValueMap{{"strength", getGlowBlurStrength(view)}};
     }
 
     int getBlurRepetitions(RenderView const& view)
@@ -255,6 +263,92 @@ namespace
         return result;
     }
 
+    // The steps pass their input through in these cases, see the shaders
+    float getBlurRadius(UniformValueMap const& uniforms, RenderView const& view)
+    {
+        auto strength = std::get<float>(uniforms.at("strength"));
+        return std::get<int>(uniforms.at("zoomDependent")) != 0 ? view.zoomFactor * strength : strength * view.renderScale;
+    }
+
+    bool isBlurPassThrough(UniformValueMap const& uniforms, RenderView const& view)
+    {
+        return getBlurRadius(uniforms, view) < 1.0f;
+    }
+
+    bool isModuloCopyPassThrough(UniformValueMap const& uniforms, RenderView const&)
+    {
+        return std::get<int>(uniforms.at("borderlessRendering")) == 0;
+    }
+
+    bool isGridLinesPassThrough(UniformValueMap const& uniforms, RenderView const&)
+    {
+        return std::get<int>(uniforms.at("gridLines")) == 0;
+    }
+
+    bool isZoomBrightnessCorrectionPassThrough(UniformValueMap const& uniforms, RenderView const& view)
+    {
+        return view.zoomFactor / view.renderScale * std::get<float>(uniforms.at("strength")) >= 1.0f;
+    }
+
+    bool isOrganicSurfacePassThrough(UniformValueMap const& uniforms, RenderView const&)
+    {
+        return std::get<float>(uniforms.at("effectStrength")) <= 0.0f;
+    }
+
+    // The levels of the glow lie around the center of their targets, each downsampling halves their extent, see Shaders/DownSamplerFS.h,
+    // each upsampling doubles it. The blurs widen them by their radius, see Shaders/BlurHorizontalFS.h. Outside of the extent of a level plus
+    // the margin, the targets are black, as the sampled texels are.
+    VkRect2D getGlowRect(RenderView const& view, float levelScale, float margin)
+    {
+        auto const& size = view.viewSize;
+        auto getRange = [&](int extent) {
+            auto halfExtent = toFloat(extent) * levelScale / 2 + margin;
+            auto begin = std::max(0, toInt(std::floor(toFloat(extent) / 2 - halfExtent)));
+            auto end = std::min(extent, toInt(std::ceil(toFloat(extent) / 2 + halfExtent)));
+            return std::pair(begin, end);
+        };
+        auto [beginX, endX] = getRange(size.x);
+        auto [beginY, endY] = getRange(size.y);
+        return VkRect2D{{beginX, beginY}, {toUInt32(endX - beginX), toUInt32(endY - beginY)}};
+    }
+
+    float getGlowBlurRadius(RenderView const& view, float strength)
+    {
+        return std::ceil(view.zoomFactor * strength);
+    }
+
+    float getLevelScale(int level)
+    {
+        return 1.0f / toFloat(1 << level);
+    }
+
+    std::optional<VkRect2D> getGlowFirstDownsamplingRect(UniformValueMap const&, RenderView const& view, int)
+    {
+        return getGlowRect(view, getLevelScale(1), 2.0f);
+    }
+
+    // The repetition k of the downscaling blurs the level k + 1 and downsamples it
+    std::optional<VkRect2D> getGlowDownsamplingRect(UniformValueMap const&, RenderView const& view, int repetition)
+    {
+        return getGlowRect(view, getLevelScale(repetition + 2), getGlowBlurRadius(view, getGlowBlurStrength(view)) + 4.0f);
+    }
+
+    std::optional<VkRect2D> getGlowBlurRect(UniformValueMap const&, RenderView const& view, int repetition)
+    {
+        return getGlowRect(view, getLevelScale(repetition + 1), 2.0f * getGlowBlurRadius(view, getGlowBlurStrength(view)) + 4.0f);
+    }
+
+    // The repetition j of the upscaling magnifies the level n - j into the level n - j - 1, where n is the number of levels below the original
+    std::optional<VkRect2D> getGlowUpsamplingRect(UniformValueMap const&, RenderView const& view, int repetition)
+    {
+        auto numLevels = getBlurRepetitions(view);
+        auto margin = getGlowBlurRadius(view, getGlowBlurStrength(view)) + 4.0f;
+        for ([[maybe_unused]] auto previousRepetition : std::views::iota(0, repetition + 1)) {
+            margin = 2.0f * margin + 2.0f + getGlowBlurRadius(view, GlowUpscaleBlurStrength);
+        }
+        return getGlowRect(view, getLevelScale(numLevels - repetition - 1), margin);
+    }
+
     UniformValueMap getBackgroundUniforms(SimulationParameters const& parameters, RenderView const&)
     {
         return UniformValueMap{
@@ -273,6 +367,17 @@ namespace
     UniformValueMap getModuloUniforms(SimulationParameters const& parameters, RenderView const&)
     {
         return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
+    }
+
+    RenderStep createBlurStep(ShaderSources::ShaderSource const& shader, StepParameters parameters)
+    {
+        return _PostProcessingRenderStep::create(parameters.shader(shader).addUniform("zoomDependent", true).passThroughFunc(isBlurPassThrough));
+    }
+
+    RenderStep createModuloCopyStep()
+    {
+        return _PostProcessingRenderStep::create(
+            StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms).passThroughFunc(isModuloCopyPassThrough));
     }
 
     // Inputs: glow, scene and its bright regions
@@ -342,11 +447,9 @@ namespace
                                                   .addUniform("solidBrightness", solidBrightness)
                                                   .previousTargetSelection(0)),
             _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
-            _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
-            _PostProcessingRenderStep::create(
-                StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-            _PostProcessingRenderStep::create(
-                StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+            createModuloCopyStep(),
+            createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
+            createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
             _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
             _PostProcessingRenderStep::create(StepParameters()
                                                   .shader(ShaderSources::OrganicSurface)
@@ -363,7 +466,8 @@ namespace
                                                   .addUniform("specularStrength", 0.08f)
                                                   .addUniform("cavityStrength", 0.5f)
                                                   .addUniform("grainStrength", 0.0f)
-                                                  .addUniform("grainFrequency", 25.0f)),
+                                                  .addUniform("grainFrequency", 25.0f)
+                                                  .passThroughFunc(isOrganicSurfacePassThrough)),
             //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Fresnel)),
             //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
         });
@@ -386,17 +490,15 @@ namespace
                                                          .shader(ShaderSources::FluidParticle)
                                                          .addUniform("onBackground", true)
                                                          .addUniform("energyParticlesOnly", energyParticlesOnly)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
+                    createModuloCopyStep(),
                 }),
             },
 
             // Render block: Downscale blur for fluid particles
             RenderBlock{
                 RenderSequence().repetitions(1).steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                    createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
+                    createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
                 }),
                 RenderSequence().steps({
@@ -411,10 +513,8 @@ namespace
             RenderBlock{
                 RenderSequence().repetitions(1).steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                    createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
+                    createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
                 RenderSequence().steps({
@@ -426,7 +526,10 @@ namespace
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeMax).addUniform("colorFactor1", 0.8f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 8.0f)),
+                    _PostProcessingRenderStep::create(StepParameters()
+                                                          .shader(ShaderSources::ZoomBrightnessCorrection)
+                                                          .addUniform("strength", 8.0f)
+                                                          .passThroughFunc(isZoomBrightnessCorrectionPassThrough)),
                 }),
             },
         };
@@ -465,23 +568,12 @@ namespace
                 }),
             },
 
-            // Render block: Three outputs: downscale blur, original and threshold
+            // Render block: Three outputs: threshold at half the resolution, original and threshold
             RenderBlock{
-                RenderSequence()
-                    .repetitions(getBlurRepetitions)
-                    .steps({
-                        _PostProcessingRenderStep::create(StepParameters()
-                                                              .shader(ShaderSources::BlurHorizontal)
-                                                              .uniformFunc(getBlurStrength)
-                                                              //.addUniform("strength", 0.12f / 8)
-                                                              .addUniform("zoomDependent", true)),
-                        _PostProcessingRenderStep::create(StepParameters()
-                                                              .shader(ShaderSources::BlurVertical)
-                                                              .uniformFunc(getBlurStrength)
-                                                              //.addUniform("strength", 0.12f / 8)
-                                                              .addUniform("zoomDependent", true)),
-                        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f)),
-                    }),
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f).renderAreaFunc(getGlowFirstDownsamplingRect)),
+                }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 }),
@@ -489,16 +581,37 @@ namespace
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 })},
 
+            // Render block: Three outputs: downscale blur, original and threshold. The threshold is not blurred before its first downsampling,
+            // since the blurs of the smaller levels widen the glow far more.
+            RenderBlock{
+                RenderSequence()
+                    .repetitions([](RenderView const& view) { return getBlurRepetitions(view) - 1; })
+                    .steps({
+                        createBlurStep(ShaderSources::BlurHorizontal, StepParameters().uniformFunc(getBlurStrength).renderAreaFunc(getGlowBlurRect)),
+                        createBlurStep(ShaderSources::BlurVertical, StepParameters().uniformFunc(getBlurStrength).renderAreaFunc(getGlowBlurRect)),
+                        _PostProcessingRenderStep::create(
+                            StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f).renderAreaFunc(getGlowDownsamplingRect)),
+                    }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(2)),
+                })},
+
             // Render block: Three outputs: upscale blur, original and threshold
             RenderBlock{
                 RenderSequence()
                     .repetitions(getBlurRepetitions)
                     .steps({
-                        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
                         _PostProcessingRenderStep::create(
-                            StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                        _PostProcessingRenderStep::create(
-                            StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
+                            StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f).renderAreaFunc(getGlowUpsamplingRect)),
+                        createBlurStep(
+                            ShaderSources::BlurHorizontal,
+                            StepParameters().addUniform("strength", GlowUpscaleBlurStrength).renderAreaFunc(getGlowUpsamplingRect)),
+                        createBlurStep(
+                            ShaderSources::BlurVertical,
+                            StepParameters().addUniform("strength", GlowUpscaleBlurStrength).renderAreaFunc(getGlowUpsamplingRect)),
                     }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -527,9 +640,10 @@ namespace
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(getBackgroundUniforms)),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::GridLines).uniformFunc(getGridLinesUniforms)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(ShaderSources::GridLines).uniformFunc(getGridLinesUniforms).passThroughFunc(isGridLinesPassThrough)),
                     _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
+                    createModuloCopyStep(),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
@@ -624,6 +738,7 @@ namespace
                         return IntVector2D{(size.x + scale - 1) / scale, (size.y + scale - 1) / scale};
                     })
                     .reusedInStillPicture(true)
+                    .reusedInNextFrame(true)
                     .accesses(accesses)
                     .requiresScene(!shadowGrid)));
         }
@@ -696,6 +811,7 @@ namespace
                     .workGroupSize({8, 8})
                     .dispatchSize(perShadowGridNode)
                     .reusedInStillPicture(true)
+                    .reusedInNextFrame(true)
                     .accesses({{GasIntermediate, ReadWrite}})),
             _RayTracingComputeStep::create(
                 resources,
@@ -704,6 +820,7 @@ namespace
                     .workGroupSize({8, 8})
                     .dispatchSize(perShadowGridNode)
                     .reusedInStillPicture(true)
+                    .reusedInNextFrame(true)
                     .accesses({{GasIntermediate, Read}, {ShadowGridImage, ReadWrite}})),
         };
         std::ranges::move(createOcclusionPyramidSteps(resources, true), std::back_inserter(steps));
@@ -723,6 +840,7 @@ namespace
                             return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                         })
                         .reusedInStillPicture(true)
+                        .reusedInNextFrame(true)
                         .accesses({{GasLightClusters, Read}, {GasImage, Read}, {GasIrradiance, ReadWrite}})),
                 _RayTracingComputeStep::create(
                     resources,
@@ -734,6 +852,7 @@ namespace
                             return IntVector2D{size.x * ThreadsPerIrradianceNode, size.y};
                         })
                         .reusedInStillPicture(true)
+                        .reusedInNextFrame(true)
                         .accesses({
                             {Scene, Read},
                             {Spheres, Read},
@@ -747,6 +866,7 @@ namespace
                     resources,
                     ComputeStepParameters()
                         .shader(std::string(Shaders::RayTracingGasShadingCS) + std::string(Shaders::RayTracingTissueCS))
+                        .shaderWithoutTissue(std::format("#define WITHOUT_TISSUE\n{}{}", Shaders::RayTracingGasShadingCS, Shaders::RayTracingTissueCS))
                         .workGroupSize({8, 8})
                         .dispatchSize(perPixel)
                         .accesses({{Scene, Read}, {Spheres, Read}, {GasImage, Read}, {GasIrradiance, Read}, {SceneColor, ReadWrite}})),
@@ -756,9 +876,10 @@ namespace
                         .shader(std::string(Shaders::RayTracingAntiAliasingCS))
                         .workGroupSize({8, 8})
                         .dispatchSize(perPixel)
+                        .antiAliasing(true)
                         .accesses({{SceneColor, Read}, {PreviousAntiAliased, Read}, {AntiAliased, ReadWrite}})),
                 _RayTracingPresentStep::create(resources),
-                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
+                createModuloCopyStep(),
             });
         return RenderSequence().steps(steps);
     }
@@ -779,7 +900,8 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(getBackgroundUniforms)),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::GridLines).uniformFunc(getGridLinesUniforms)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(ShaderSources::GridLines).uniformFunc(getGridLinesUniforms).passThroughFunc(isGridLinesPassThrough)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
@@ -792,11 +914,9 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                 createRayTracingSequence(_rayTracingResources),
                 RenderSequence().steps({
                     _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(getModuloUniforms)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                    createModuloCopyStep(),
+                    createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
+                    createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
                 createObjectSequence(RayTracedSolidBrightness),

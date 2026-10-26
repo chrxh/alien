@@ -10,8 +10,9 @@
 // shadow behind the objects on its way, see Shaders/RayTracingGasIrradianceCS.h. The inputs are the background and the energy particles, the
 // output is the light in front of the background in high dynamic range, to which the background is added after the tone mapping as in the
 // rasterized view, and in the alpha channel the strength of the light of the radiation sources for the rasterized objects. Each frame is
-// computed completely, only still pictures average several frames with jittered rays for the anti-aliasing, which reuse the results that do
-// not depend on the rays.
+// computed completely, except for the light in the gas, which a running simulation reuses in every second frame, see
+// _RayTracingResources::isLightReused. Still pictures average several frames with jittered rays for the anti-aliasing, which reuse the
+// results that do not depend on the rays.
 //
 // All steps but the last compute into the shared resources and have no target. The first step prepares the frame, the last step renders the
 // result into its target and finishes the frame.
@@ -52,6 +53,9 @@ struct ComputeStepParameters
     // Appended to Shaders/RayTracingCommonCS.h
     MEMBER(ComputeStepParameters, std::string, shader, std::string());
 
+    // Used instead while the tissue is not traced, so that its code does not take up registers
+    MEMBER(ComputeStepParameters, std::string, shaderWithoutTissue, std::string());
+
     MEMBER(ComputeStepParameters, IntVector2D, workGroupSize, IntVector2D());
 
     // At least one invocation per element
@@ -64,6 +68,12 @@ struct ComputeStepParameters
 
     // The result does not depend on the jittered rays of the pixels
     MEMBER(ComputeStepParameters, bool, reusedInStillPicture, false);
+
+    // The result is part of the light in the gas
+    MEMBER(ComputeStepParameters, bool, reusedInNextFrame, false);
+
+    // The step smooths the edges of the tissue and averages the frames of still pictures, it is skipped while neither is needed
+    MEMBER(ComputeStepParameters, bool, antiAliasing, false);
 };
 
 class _RayTracingComputeStep : public _RayTracingStep
@@ -78,8 +88,11 @@ private:
     _RayTracingComputeStep(RayTracingResources const& resources, ComputeStepParameters const& parameters);
 
     RayTracingComputePipeline _pipeline;
+    RayTracingComputePipeline _pipelineWithoutTissue;
     DispatchSizeFunc _dispatchSize;
     RayTracingAccesses _accesses;
+    bool _reusedInNextFrame = false;
+    bool _antiAliasing = false;
 };
 
 // Builds the acceleration structures from the boxes of the objects

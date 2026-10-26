@@ -55,6 +55,7 @@ VulkanImage& _RenderGraph::execute(
     auto simParameters = std::make_shared<SimulationParameters>(parameters);
     int currentTextureTargetIndex = 0;
     forEachStep(
+        parameters,
         [this, &currentTextureTargetIndex] {
             if (currentTextureTargetIndex < _textureTargets.size()) {
                 return _textureTargets.at(currentTextureTargetIndex++);
@@ -66,7 +67,8 @@ VulkanImage& _RenderGraph::execute(
                 return result;
             }
         },
-        [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target) {
+        [this, &generalRenderInfo, &simParameters](
+            RenderStep& step, std::vector<TextureTarget> const& textures, std::optional<RenderTarget> const& target, int repetition) {
             TextureTarget textureTarget;
             if (target.has_value()) {
                 textureTarget = std::holds_alternative<ScreenTarget>(*target) ? _screenTarget : std::get<TextureTarget>(*target);
@@ -75,6 +77,7 @@ VulkanImage& _RenderGraph::execute(
                               .view(_view)
                               .geometryBuffers(_geometryBuffers)
                               .textures(textures)
+                              .repetition(repetition)
                               .target(textureTarget)
                               .renderInfo(generalRenderInfo)
                               .simulationFacade(_SimulationFacade::get())
@@ -114,9 +117,39 @@ void _RenderGraph::resizeTarget(TextureTarget const& target)
     target->resize(*_textureSize, IntermediateFormat);
 }
 
+namespace
+{
+    bool subsequentStepsHaveTarget(RenderSequence const& sequence, size_t stepIndex)
+    {
+        for (auto const& step : sequence._steps | std::views::drop(stepIndex + 1)) {
+            if (step->hasTarget() && !step->getPreviousTargetSelection().has_value()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Steps without target behind it do not change the output of the sequence
+    bool isLastStepWithTarget(RenderSequence const& sequence, size_t stepIndex)
+    {
+        return std::ranges::none_of(sequence._steps | std::views::drop(stepIndex + 1), [](auto const& step) { return step->hasTarget(); });
+    }
+
+    bool isNextStepWithTargetSelecting(RenderSequence const& sequence, size_t stepIndex)
+    {
+        for (auto const& step : sequence._steps | std::views::drop(stepIndex + 1)) {
+            if (step->hasTarget()) {
+                return step->getPreviousTargetSelection().has_value();
+            }
+        }
+        return false;
+    }
+}
+
 void _RenderGraph::forEachStep(
+    SimulationParameters const& parameters,
     std::function<TextureTarget()> const& getTextureTarget,
-    std::function<void(RenderStep&, std::vector<TextureTarget> const&, std::optional<RenderTarget> const&)> const& executeStep)
+    std::function<void(RenderStep&, std::vector<TextureTarget> const&, std::optional<RenderTarget> const&, int)> const& executeStep)
 {
     std::map<RenderTarget, TargetInfo> usedTargets;
 
@@ -135,7 +168,22 @@ void _RenderGraph::forEachStep(
                 for (size_t l = 0; l < sequence._steps.size(); ++l) {
                     auto& step = sequence._steps.at(l);
                     if (!step->hasTarget()) {
-                        executeStep(step, getTextures(previousTargets), std::nullopt);
+                        executeStep(step, getTextures(previousTargets), std::nullopt, k);
+                        continue;
+                    }
+
+                    // The first input of a step that passes it through is its output. As the output of its sequence, it is kept for the next
+                    // block, otherwise the input keeps the use it had.
+                    if (step->isPassThrough(parameters, _view)) {
+                        auto target = previousTargets.at(0);
+
+                        // A following step must not draw onto an output of the previous block, which other sequences read
+                        CHECK(!isLastBlock);
+                        CHECK(std::ranges::find(previousBlockTargets, target) == previousBlockTargets.end() || !isNextStepWithTargetSelecting(sequence, l));
+                        if (isLastStepWithTarget(sequence, l) && k == repetitions - 1 && usedTargets.contains(target)) {
+                            usedTargets.at(target) = TargetInfo{.block = i, .lastStepInSequence = true};
+                        }
+                        previousTargets = {target};
                         continue;
                     }
 
@@ -143,7 +191,7 @@ void _RenderGraph::forEachStep(
                     auto target = determineRenderTarget(step, sequence, block, i, j, k, l, isLastBlock, getTextureTarget, previousTargets, usedTargets);
 
                     // Execute render step
-                    executeStep(step, getTextures(previousTargets), target);
+                    executeStep(step, getTextures(previousTargets), target, k);
 
                     // Current output is input for next step
                     previousTargets = {target};
@@ -153,25 +201,6 @@ void _RenderGraph::forEachStep(
             blockTargets.emplace_back(previousTargets.front());
         }
         previousBlockTargets = blockTargets;
-    }
-}
-
-namespace
-{
-    bool subsequentStepsHaveTarget(RenderSequence const& sequence, size_t stepIndex)
-    {
-        for (auto const& step : sequence._steps | std::views::drop(stepIndex + 1)) {
-            if (step->hasTarget() && !step->getPreviousTargetSelection().has_value()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Steps without target behind it do not change the output of the sequence
-    bool isLastStepWithTarget(RenderSequence const& sequence, size_t stepIndex)
-    {
-        return std::ranges::none_of(sequence._steps | std::views::drop(stepIndex + 1), [](auto const& step) { return step->hasTarget(); });
     }
 }
 
