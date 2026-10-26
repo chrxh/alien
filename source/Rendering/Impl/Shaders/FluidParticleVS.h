@@ -23,8 +23,13 @@ uniform vec2 viewportSize;
 uniform bool onBackground;
 uniform float renderScale;
 
-// The ray tracing renders the fluids itself as gas, only the cores of glowing fluids stay. The z coordinate of fluids is 1.
-uniform bool energyParticlesOnly;
+// The particles of the layer, see FluidParticleSelection in SimulationRenderer.cpp. The rasterized view renders the fluids and the energy
+// particles in layers of their own. The ray tracing renders the fluids itself as gas, only the cores of glowing fluids stay beside the
+// energy particles. The z coordinate of fluids is 1.
+const int Selection_Fluids = 0;
+const int Selection_EnergyParticles = 1;
+const int Selection_EnergyParticlesAndGlowCores = 2;
+uniform int particleSelection;
 
 const float CoreHiddenZoom = 2.0;
 const float CoreDetailZoom = 7.0;
@@ -51,7 +56,11 @@ void main()
     float screenZoom = zoom / renderScale;
     float glow = clamp(aGlow, 0.0, 1.0);
     float glowCoreVisibility = smoothstep(GlowCoreHiddenZoomGlow, GlowCoreHiddenZoomGlow * GlowCoreFadeZoomFactor, screenZoom * glow);
-    if (energyParticlesOnly && aPos.z >= 0.5 && (onBackground || glowCoreVisibility <= 0.0)) {
+    bool energyParticle = aPos.z < 0.5;
+    bool hidden = particleSelection == Selection_Fluids ? energyParticle
+        : particleSelection == Selection_EnergyParticles ? !energyParticle
+        : !energyParticle && (onBackground || glowCoreVisibility <= 0.0);
+    if (hidden) {
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
         gl_PointSize = 0.0;
         vColor = vec3(0.0);
@@ -65,7 +74,6 @@ void main()
     ndc.y = -ndc.y; // Flip Y coordinate
     gl_Position = vec4(ndc, 0.0, 1.0);
 
-    bool energyParticle = aPos.z < 0.5;
     float ballSize;
     float coreVisibility = 1.0;
     if (onBackground) {
@@ -83,7 +91,7 @@ void main()
         vColor = aColor * mix(coreVisibility, 20.0, coreGlow);
 
         // The ray tracing shows no raster cores of fluids without glow, hence the whole core fades out with the glow
-        if (energyParticlesOnly && !energyParticle) {
+        if (particleSelection == Selection_EnergyParticlesAndGlowCores && !energyParticle) {
             vColor *= glowCoreVisibility;
         }
     }

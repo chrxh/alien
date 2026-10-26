@@ -482,49 +482,73 @@ namespace
         std::ranges::move(otherBlocks, std::back_inserter(blocks));
     }
 
-    // Blurred and merged into a glowing fluid layer
-    RenderBlocks createFluidParticleBlocks(bool energyParticlesOnly)
+    // The particles of a glowing fluid layer, see Shaders/FluidParticleVS.h
+    enum class FluidParticleSelection
     {
-        return RenderBlocks{
+        Fluids,
+        EnergyParticles,
+        EnergyParticlesAndGlowCores,
+    };
 
-            // Render block: Render fluid particles
-            RenderBlock{
-                RenderSequence().steps({
-                    _FluidParticleRenderStep::create(StepParameters()
-                                                         .shader(ShaderSources::FluidParticle)
-                                                         .addUniform("onBackground", true)
-                                                         .addUniform("energyParticlesOnly", energyParticlesOnly)),
-                    createModuloCopyStep(),
-                }),
-            },
+    RenderStep createFluidParticleStep(FluidParticleSelection selection, bool onBackground)
+    {
+        return _FluidParticleRenderStep::create(StepParameters()
+                                                    .shader(ShaderSources::FluidParticle)
+                                                    .addUniform("onBackground", onBackground)
+                                                    .addUniform("particleSelection", static_cast<int>(selection)));
+    }
 
-            // Render block: Downscale blur for fluid particles
-            RenderBlock{
-                RenderSequence().repetitions(1).steps({
+    // The first step of a sequence reads the first output of the previous block, another output is selected beforehand
+    std::vector<RenderStep> readOutput(int outputIndex, std::vector<RenderStep> steps)
+    {
+        if (outputIndex > 0) {
+            steps.insert(steps.begin(), _ForwardRenderStep::create(StepParameters().previousTargetSelection(outputIndex)));
+        }
+        return steps;
+    }
+
+    // Each selection of fluid particles is blurred into a glowing layer of its own, so that the clouds of one selection do not lift those of
+    // another above the threshold of the metaballs. The layers are rendered side by side and add up in the merge, which takes two at most.
+    RenderBlocks createFluidParticleBlocks(std::vector<FluidParticleSelection> const& selections)
+    {
+        CHECK(selections.size() <= 2);
+
+        RenderBlock particleBlock;
+        RenderBlock downscaleBlock;
+        RenderBlock upscaleBlock;
+        for (auto const& [index, selection] : std::views::enumerate(selections)) {
+            auto layer = toInt(index);
+            particleBlock.emplace_back(RenderSequence().steps({createFluidParticleStep(selection, true), createModuloCopyStep()}));
+            downscaleBlock.emplace_back(RenderSequence().repetitions(1).steps(readOutput(
+                layer,
+                {
                     createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
                     createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
-                }),
-                RenderSequence().steps({
-                    _FluidParticleRenderStep::create(StepParameters()
-                                                         .shader(ShaderSources::FluidParticle)
-                                                         .addUniform("onBackground", false)
-                                                         .addUniform("energyParticlesOnly", energyParticlesOnly)),
-                }),
-            },
-
-            // Render block: Upscale blur for fluid particles
-            RenderBlock{
-                RenderSequence().repetitions(1).steps({
+                })));
+            downscaleBlock.emplace_back(RenderSequence().steps({createFluidParticleStep(selection, false)}));
+            upscaleBlock.emplace_back(RenderSequence().repetitions(1).steps(readOutput(
+                2 * layer,
+                {
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
                     createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
                     createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
-                }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                }),
-            },
+                })));
+            upscaleBlock.emplace_back(RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(2 * layer + 1)),
+            }));
+        }
+        return RenderBlocks{
+
+            // Render block: Render fluid particles of each layer
+            particleBlock,
+
+            // Render block: Two outputs for each layer: Downscale blur for fluid particles and their cores
+            downscaleBlock,
+
+            // Render block: Two outputs for each layer: Upscale blur for fluid particles and their cores
+            upscaleBlock,
 
             // Render block: Merge fluid particles for bloom
             RenderBlock{
@@ -670,7 +694,8 @@ namespace
 
 void SimulationRenderer::createRasterGraph(ImFont* labelFont)
 {
-    auto blocks = createFluidParticleBlocks(false);
+    // The energy particles form the same clouds as in the ray tracing, where the fluids do not lift them above the threshold of the metaballs
+    auto blocks = createFluidParticleBlocks({FluidParticleSelection::Fluids, FluidParticleSelection::EnergyParticles});
     append(
         blocks,
         RenderBlocks{
@@ -894,7 +919,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
     _rayTracingResources = _RayTracingResources::create();
 
     // The ray tracing renders the fluids itself as gas, the energy particles and the cores of glowing fluids keep the look of the rasterized view
-    auto blocks = createFluidParticleBlocks(true);
+    auto blocks = createFluidParticleBlocks({FluidParticleSelection::EnergyParticlesAndGlowCores});
     append(
         blocks,
         RenderBlocks{
