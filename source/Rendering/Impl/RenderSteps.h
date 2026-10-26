@@ -63,6 +63,12 @@ using UniformValueType = std::variant<int, float, FloatColorRGB>;
 using UniformValueMap = std::map<std::string, UniformValueType>;
 using UniformFunc = std::function<UniformValueMap(SimulationParameters const&, RenderView const&)>;
 
+// Determines from the uniforms of a step whether its output equals its first input in a frame
+using PassThroughFunc = std::function<bool(UniformValueMap const&, RenderView const&)>;
+
+// Region within the target outside of which the output of a step is black, depending on the repetition of its sequence
+using RenderAreaFunc = std::function<std::optional<VkRect2D>(UniformValueMap const&, RenderView const&, int repetition)>;
+
 struct StepParameters
 {
     MEMBER(StepParameters, ShaderSources::ShaderSource, shader, ShaderSources::ShaderSource());
@@ -70,6 +76,12 @@ struct StepParameters
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
     MEMBER(StepParameters, UniformFunc, uniformFunc, {});
+
+    // A step that passes its input through is skipped and hands it on to the next step
+    MEMBER(StepParameters, PassThroughFunc, passThroughFunc, {});
+
+    // A step with a render area only renders inside of it and clears the rest of the target to black
+    MEMBER(StepParameters, RenderAreaFunc, renderAreaFunc, {});
 
     StepParameters& addUniform(std::string const& key, UniformValueType const& value);
 };
@@ -81,6 +93,7 @@ struct ExecutionParameters
     MEMBER(ExecutionParameters, VulkanGeometryBuffers, geometryBuffers, VulkanGeometryBuffers());
     MEMBER(ExecutionParameters, std::vector<TextureTarget>, textures, {});
     MEMBER(ExecutionParameters, bool, clearBackground, false);
+    MEMBER(ExecutionParameters, int, repetition, 0);
 
     // Output
     MEMBER(ExecutionParameters, TextureTarget, target, TextureTarget());
@@ -104,8 +117,12 @@ public:
 
     std::optional<int> const& getPreviousTargetSelection() const;
 
+    bool isPassThrough(SimulationParameters const& parameters, RenderView const& view) const;
+
 protected:
     _RenderStep(StepParameters const& parameters, DepthTest depthTest = DepthTest::None);
+
+    UniformValueMap getUniforms(SimulationParameters const& parameters, RenderView const& view) const;
 
     // Starts rendering into the target, the sampled textures must not be the target
     void prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures = {});
@@ -119,6 +136,8 @@ protected:
     float _textureScale = 1.0f;
     UniformValueMap _uniforms;
     UniformFunc _uniformFunc;
+    PassThroughFunc _passThroughFunc;
+    RenderAreaFunc _renderAreaFunc;
     DepthTest _depthTest = DepthTest::None;
 };
 

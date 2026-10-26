@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -21,6 +23,7 @@ enum class RayTracingResource
     GasAccumulation,
     GasIntermediate,
     GasLightClusters,
+    OcclusionAccumulation,
 
     // Top level acceleration structure
     Scene,
@@ -28,6 +31,7 @@ enum class RayTracingResource
     GasImage,
     GasIrradiance,
     ShadowGridImage,
+    OcclusionImage,
     SceneColor,
     AntiAliased,
     PreviousAntiAliased,
@@ -74,6 +78,16 @@ public:
     // The frames of a still picture after the first one reuse the results that do not depend on the jittered rays
     bool isRepeatedStillPictureFrame() const;
 
+    // While the simulation runs, every second frame reuses the light in the gas of the frame before, which thus follows the moving objects
+    // with a delay of a few time steps at most. The light is computed anew whenever anything else that it depends on changes.
+    bool isLightReused() const;
+
+    // The tissue is traced while it is visible
+    bool isTissueTraced() const;
+
+    // The anti-aliasing smooths the edges of the tissue and averages the frames of still pictures
+    bool isAntiAliasingNeeded() const;
+
     void resetImageStates();
 
     // The pipelines share the layout of the descriptor set
@@ -91,7 +105,7 @@ public:
     // Builds the acceleration structures from the boxes of the objects
     void buildScene(VkCommandBuffer commandBuffer, NumRenderObjects const& numObjects);
 
-    // Anti-aliased image of the current frame
+    // Anti-aliased image of the current frame, or its scene color without anti-aliasing
     VulkanImage& getOutput();
 
     RayTracingLayout::GasGrid const& getGasGrid() const;
@@ -139,7 +153,12 @@ private:
 
     void createFrameResources();
 
-    void updateFrameConstants(RenderView const& view, NumRenderObjects const& numObjects, SimulationParameters const& parameters, IntVector2D const& worldSize);
+    void updateFrameConstants(
+        RenderView const& view,
+        NumRenderObjects const& numObjects,
+        SimulationParameters const& parameters,
+        SimulationFacade const& simulationFacade);
+    void updateLightReuse(std::span<std::byte const> lightConstants, SimulationFacade const& simulationFacade);
     void writeDescriptorSet(VulkanGeometryBuffers const& geometryBuffers, std::vector<TextureTarget> const& textures);
 
     VulkanBuffer& getBuffer(RayTracingResource resource);
@@ -167,6 +186,17 @@ private:
     ShadowGridLayout _shadowGrid;
     VulkanImage _shadowGridImage;
 
+    // Occlusion of the extracted objects at the nodes of the gas grid and the levels of the pyramid derived from it
+    VulkanBuffer _occlusionAccumulation;
+    VulkanImage _occlusionImage;
+
     bool _stillPicture = false;
     uint32_t _numAveragedFrames = 0;
+    bool _tissueTraced = true;
+
+    // State of the frame that computed the light in the gas last
+    bool _lightComputed = false;
+    bool _lightReused = false;
+    uint64_t _lightTimestep = 0;
+    std::vector<std::byte> _lightConstants;
 };

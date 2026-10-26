@@ -40,20 +40,25 @@ RayTracingComputeStep _RayTracingComputeStep::create(RayTracingResources const& 
 
 void _RayTracingComputeStep::execute(ExecutionParameters parameters)
 {
-    if (isSkipped(parameters)) {
+    if (isSkipped(parameters) || (_reusedInNextFrame && _resources->isLightReused()) || (_antiAliasing && !_resources->isAntiAliasingNeeded())) {
         return;
     }
     auto commandBuffer = parameters._renderInfo.commandBuffer;
     _resources->access(commandBuffer, _accesses);
     _resources->bindDescriptorSet(commandBuffer);
-    _pipeline->dispatch(commandBuffer, _dispatchSize(*_resources, parameters._geometryBuffers->getNumObjects()));
+    auto const& pipeline = _pipelineWithoutTissue && !_resources->isTissueTraced() ? _pipelineWithoutTissue : _pipeline;
+    pipeline->dispatch(commandBuffer, _dispatchSize(*_resources, parameters._geometryBuffers->getNumObjects()));
 }
 
 _RayTracingComputeStep::_RayTracingComputeStep(RayTracingResources const& resources, ComputeStepParameters const& parameters)
     : _RayTracingStep(resources, parameters._requiresScene, parameters._reusedInStillPicture)
     , _pipeline(resources->createPipeline(parameters._shader, parameters._workGroupSize))
+    , _pipelineWithoutTissue(
+          parameters._shaderWithoutTissue.empty() ? nullptr : resources->createPipeline(parameters._shaderWithoutTissue, parameters._workGroupSize))
     , _dispatchSize(parameters._dispatchSize)
     , _accesses(parameters._accesses)
+    , _reusedInNextFrame(parameters._reusedInNextFrame)
+    , _antiAliasing(parameters._antiAliasing)
 {}
 
 RayTracingSceneStep _RayTracingSceneStep::create(RayTracingResources const& resources)

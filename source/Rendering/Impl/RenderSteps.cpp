@@ -73,6 +73,8 @@ _RenderStep::_RenderStep(StepParameters const& parameters, DepthTest depthTest)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
     , _uniformFunc(parameters._uniformFunc)
+    , _passThroughFunc(parameters._passThroughFunc)
+    , _renderAreaFunc(parameters._renderAreaFunc)
     , _depthTest(depthTest)
 {
     if (!parameters._shader.vertex.empty()) {
@@ -89,6 +91,21 @@ StepParameters& StepParameters::addUniform(std::string const& key, UniformValueT
 std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
 {
     return _previousTargetSelection;
+}
+
+bool _RenderStep::isPassThrough(SimulationParameters const& parameters, RenderView const& view) const
+{
+    return _passThroughFunc && _passThroughFunc(getUniforms(parameters, view), view);
+}
+
+UniformValueMap _RenderStep::getUniforms(SimulationParameters const& parameters, RenderView const& view) const
+{
+    auto result = _uniforms;
+    if (_uniformFunc) {
+        auto uniformFunc = _uniformFunc(parameters, view);
+        result.insert(uniformFunc.begin(), uniformFunc.end());
+    }
+    return result;
 }
 
 void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::vector<TextureTarget> const& sampledTextures)
@@ -108,11 +125,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     _shader->setVec2("rectLowerRight", worldRect.bottomRight);
     _shader->setVec2("viewportSize", toRealVector2D(viewSize));
 
-    auto uniforms = _uniforms;
-    if (_uniformFunc) {
-        auto uniformFunc = _uniformFunc(*parameters._simulationParameters, view);
-        uniforms.insert(uniformFunc.begin(), uniformFunc.end());
-    }
+    auto uniforms = getUniforms(*parameters._simulationParameters, view);
     for (auto const& [key, value] : uniforms) {
         if (std::holds_alternative<int>(value)) {
             _shader->setInt(key, std::get<int>(value));
@@ -139,7 +152,15 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     }
     barriers.record(commandBuffer);
 
-    auto loadOp = parameters._clearBackground ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+    auto targetExtent = VkExtent2D{static_cast<uint32_t>(target->color.size.x), static_cast<uint32_t>(target->color.size.y)};
+    VkRect2D scissor{{0, 0}, targetExtent};
+    auto clearBackground = parameters._clearBackground;
+    if (auto renderArea = _renderAreaFunc ? _renderAreaFunc(uniforms, view, parameters._repetition) : std::nullopt) {
+        scissor = *renderArea;
+        clearBackground = true;
+    }
+
+    auto loadOp = clearBackground ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
     VkRenderingAttachmentInfo colorAttachment{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .imageView = target->color.view,
@@ -156,7 +177,6 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
         .clearValue = {.depthStencil = {1.0f, 0}},
     };
-    auto targetExtent = VkExtent2D{static_cast<uint32_t>(target->color.size.x), static_cast<uint32_t>(target->color.size.y)};
     VkRenderingInfo renderingInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
         .renderArea = {{0, 0}, targetExtent},
@@ -168,7 +188,6 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     VkViewport viewport{0, 0, toFloat(viewSize.x) * _textureScale, toFloat(viewSize.y) * _textureScale, 0.0f, 1.0f};
-    VkRect2D scissor{{0, 0}, targetExtent};
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }

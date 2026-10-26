@@ -54,6 +54,7 @@
 #include "RayTracingGasShadingCS.h"
 #include "RayTracingGasSplatCS.h"
 #include "RayTracingMergeFS.h"
+#include "RayTracingOcclusionCS.h"
 #include "RayTracingPrepareCS.h"
 #include "RayTracingPresentFS.h"
 #include "RayTracingPresentVS.h"

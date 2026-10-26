@@ -10,6 +10,7 @@ namespace Shaders
     // Pixel coordinates of the internal images start at the upper left corner of the view, i.e. their rows run along the world y axis. The
     // version, the work group size and the sizes shared with Rendering/Impl/RayTracingResources.cpp are declared before, see createPipeline.
     std::string_view const RayTracingCommonCS = R"(
+const float Pi = 3.14159265;
 const float CameraHeight = 20.0;
 
 // Visible size of the fills close up in world units, the sizes of the cells and the strands are declared before
@@ -148,6 +149,9 @@ layout(set = 0, binding = 23, std430) readonly buffer ShadowGridNodeBuffer { Sha
 layout(set = 0, binding = 24, rgba16f) uniform image2D shadowGridImage;
 layout(set = 0, binding = 25) uniform sampler2D shadowGridSampler;
 layout(set = 0, binding = 26, std430) buffer ShadowCasterBuffer { vec4 shadowCasters[]; };
+layout(set = 0, binding = 27, std430) buffer OcclusionAccumulationBuffer { uint occlusionAccumulation[]; };
+layout(set = 0, binding = 28, rgba16f) uniform image2D occlusionImage;
+layout(set = 0, binding = 29) uniform sampler2D occlusionSampler;
 
 //*******************
 //* General helpers
@@ -495,7 +499,8 @@ uint getTriangleShadowEntry(uint triangle)
 // shining area side by side, see Shaders/RayTracingGasIrradianceCS.h. At least this many rays start from a node.
 const int NodeRayStarts = 4;
 
-// The beams may be as wide as the parts of a node, but at least half a world unit, so that large areas need not too many rays when zoomed in
+// In their near part, the beams may be as wide as the parts of a node, but at least half a world unit, so that large areas need not too many
+// rays when zoomed in
 const float MinBeamWidthLimit = 0.5;
 
 float getSourceLightNodeDistance()
@@ -536,10 +541,90 @@ vec2 getNearestSourceCenter(SourceLight light, vec2 position)
     return light.centerRangeShape.xy + world * round((position - light.centerRangeShape.xy) / world);
 }
 
-// The bounding boxes of the objects are enlarged by half the width of the widest beam, so that the beams meet the objects next to them
+// The bounding boxes of the objects are enlarged by half the maximum width of the beams in their near part, so that the beams meet the
+// objects next to them, see getNearFade in Shaders/RayTracingGasIrradianceCS.h
 float getShadowBeamMargin()
 {
     return isSourceLightActive() ? 0.5 * getMaxBeamWidth() : 0.0;
+}
+
+// The objects shade the light by their occlusion: the width of a shadow that blocks the light completely and takes as much of it as the
+// object, i.e. the average width of the object over all directions times the share of the light that it absorbs on its average path. Unlike
+// the absorption of its area, it does not depend on the width of the beam that passes the object. The shadows treat the objects as convex
+// shapes, see Shaders/RayTracingGasIrradianceCS.h. The average width of a convex shape over all directions is its perimeter divided by pi, the
+// average length of the paths through it is pi times its area divided by its perimeter.
+vec3 getOcclusion(float perimeter, float area, vec3 absorption)
+{
+    if (perimeter < 1e-4) {
+        return vec3(0.0);
+    }
+    return perimeter / Pi * (1.0 - exp(-absorption * Pi * area / perimeter));
+}
+
+// The extracted objects add their occlusion to the nodes of the gas grid, see Shaders/RayTracingPrepareCS.h. The OcclusionStride sums at a
+// node are fixed point numbers of the three colors.
+const float OcclusionFixedPointScale = 1024.0;
+
+// The occlusion per area at the nodes of the gas grid and of the shadow grid is blurred and downsampled into a pyramid each, see
+// Shaders/RayTracingOcclusionCS.h, so that a beam finds the occlusion across its width at the level whose node distance matches it. The
+// OcclusionLevels levels of a pyramid lie side by side in the image of its grid: the first level has the nodes of the grid, each following
+// level half as many nodes along both axes, stacked to the right of the first level.
+vec2 getPyramidImageSize(int gridImageSize)
+{
+    return vec2(gridImageSize + gridImageSize / 2, gridImageSize);
+}
+
+ivec2 getPyramidLevelStart(int gridImageSize, int level)
+{
+    return level == 0 ? ivec2(0) : ivec2(gridImageSize, gridImageSize - 2 * (gridImageSize >> level));
+}
+
+ivec2 getPyramidLevelSize(ivec2 gridSize, int level)
+{
+    return (gridSize + (1 << level) - 1) >> level;
+}
+
+struct OcclusionPyramid
+{
+    vec2 gridOrigin;
+    float nodeDistance;
+    ivec2 gridSize;
+    int gridImageSize;
+};
+
+OcclusionPyramid getGasGridPyramid()
+{
+    return OcclusionPyramid(frame.gasGrid.xy, frame.gasGrid.z, frame.gasSize.xy, GasImageSize);
+}
+
+OcclusionPyramid getShadowGridPyramid()
+{
+    return OcclusionPyramid(frame.shadowGrid.xy, frame.shadowGrid.z, frame.shadowGridSize.xy, ShadowGridImageSize);
+}
+
+// Linear map from world positions to the texels of a level and the texels within the level that linear sampling may use. A node of a level
+// lies in the middle of the nodes of the first level that it covers.
+struct PyramidLevel
+{
+    vec2 texelOffset;
+    float texelsPerWorldUnit;
+    vec2 lowerTexel;
+    vec2 upperTexel;
+};
+
+PyramidLevel getPyramidLevel(OcclusionPyramid pyramid, int level)
+{
+    float nodesPerTexel = float(1 << level);
+    vec2 start = vec2(getPyramidLevelStart(pyramid.gridImageSize, level));
+    vec2 size = vec2(getPyramidLevelSize(pyramid.gridSize, level));
+    float texelsPerWorldUnit = 1.0 / (pyramid.nodeDistance * nodesPerTexel);
+    return PyramidLevel(start - pyramid.gridOrigin * texelsPerWorldUnit + 0.5 / nodesPerTexel, texelsPerWorldUnit, start + 0.5, start + size - 0.5);
+}
+
+vec4 samplePyramidLevel(sampler2D image, OcclusionPyramid pyramid, PyramidLevel level, vec2 world)
+{
+    vec2 texel = clamp(world * level.texelsPerWorldUnit + level.texelOffset, level.lowerTexel, level.upperTexel);
+    return texture(image, texel / getPyramidImageSize(pyramid.gridImageSize));
 }
 
 // The light of each source approaches its brightness close to it, see Shaders/RayTracingGasIrradianceCS.h

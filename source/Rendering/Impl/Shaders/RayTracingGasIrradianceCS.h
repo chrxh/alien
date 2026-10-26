@@ -8,9 +8,10 @@ namespace Shaders
     // radiation sources at the nodes of the source light grid, see Rendering/Impl/RayTracingLayout.cpp. Each light cluster shines from the
     // center of its light, which fades with the distance and is weakened by the gas and the cells in the gas grid on the way, so that dense
     // gas and creatures cast shadows. Zoomed out, the light of the cells spreads over a larger falloff distance near its source, while it stays
-    // the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays, so that it
-    // forms columns of light and shadow. The threads of a work group row share a node and split its light clusters and gas samples, see
-    // SimulationRenderer.cpp, while all threads of the work group trace the rays of its nodes together, see traceBatchRays.
+    // the same farther away. The radiation sources shine from their areas, and their light passes the exact objects along rays close to the
+    // nodes and the occlusion pyramid of the objects farther away, so that it forms columns of light and soft shadows. The threads of a work
+    // group row share a node and split its light clusters and gas samples, see SimulationRenderer.cpp, while all threads of the work group trace
+    // the rays of its nodes together, see traceBatchRays.
     std::string_view const RayTracingGasIrradianceCS = R"(
 const int ShadowSteps = 8;
 const float CellExtinction = 1.0;
@@ -21,15 +22,17 @@ const float CellExtinction = 1.0;
 const float SourceLightStrength = 4.0;
 const float SourceLightKnee = 1.0;
 
-// Wider shining parts trace more rays, so that the beams do not exceed their maximum width at the area, up to this number of rays
+// Wider shining parts trace more rays, so that their beams stay narrow, up to this number of rays
 const int MaxSourceRays = 16;
 
 // Strands and triangles are sampled at points across a beam, see getBeamSampleOffsets
 const int BeamSamples = 4;
-const float Pi = 3.14159265;
 
 // A ray stops once the light of the source is blocked in all of its colors
 const float MaxOpticalDepth = 5.0;
+
+// A single object lets at least this share of the light of a beam pass, which keeps its optical depth finite
+const float MinBeamTransmittance = 1e-4;
 
 const float GasStepInNodes = 2.0;
 const int MaxGasSteps = 64;
@@ -86,28 +89,23 @@ bool clipToGrid(vec2 origin, vec2 direction, float pathLength, vec2 firstNode, v
     return exit > enter;
 }
 
-vec4 sampleShadowGrid(vec2 world)
-{
-    vec2 texel = (world - frame.shadowGrid.xy) / frame.shadowGrid.z + 0.5;
-    return sampleRegionLinear(shadowGridSampler, texel, vec2(0.0), vec2(frame.shadowGridSize.xy), vec2(ShadowGridImageSize));
-}
-
-// The objects outside the extracted region are only known by their extinction in the shadow grid, rgb for the tissue and the solids and a for
-// the gas, see Shaders/RayTracingShadowGridCS.h. The part of the path inside the grid is sampled about every node, the threads of a node may
-// share the samples.
-vec4 getShadowGridOpticalDepth(vec2 origin, vec2 direction, float pathLength, int firstSample, int sampleStride)
+// The gas outside the extracted region is only known by its extinction in the alpha channel of the shadow grid, see
+// Shaders/RayTracingShadowGridCS.h. The part of the path inside the grid is sampled about every node, the threads of a node share the samples.
+float getShadowGridGasOpticalDepth(vec2 origin, vec2 direction, float pathLength)
 {
     vec2 lastNode = frame.shadowGrid.xy + vec2(frame.shadowGridSize.xy - 1) * frame.shadowGrid.z;
     float enter;
     float exit;
     if (any(lessThan(frame.shadowGridSize.xy, ivec2(2))) || !clipToGrid(origin, direction, pathLength, frame.shadowGrid.xy, lastNode, enter, exit)) {
-        return vec4(0.0);
+        return 0.0;
     }
     int numSamples = max(int(ceil((exit - enter) / frame.shadowGrid.z)), 1);
     float stepLength = (exit - enter) / float(numSamples);
-    vec4 extinction = vec4(0.0);
-    for (int i = firstSample; i < numSamples; i += sampleStride) {
-        extinction += sampleShadowGrid(origin + direction * (enter + stepLength * (float(i) + 0.5)));
+    OcclusionPyramid pyramid = getShadowGridPyramid();
+    PyramidLevel grid = getPyramidLevel(pyramid, 0);
+    float extinction = 0.0;
+    for (int i = int(getNodeThread()); i < numSamples; i += int(NodeThreads)) {
+        extinction += samplePyramidLevel(shadowGridSampler, pyramid, grid, origin + direction * (enter + stepLength * (float(i) + 0.5))).a;
     }
     return extinction * stepLength;
 }
@@ -116,7 +114,7 @@ vec4 getShadowGridOpticalDepth(vec2 origin, vec2 direction, float pathLength, in
 // extracted region in the shadow grid
 float getGasTransmittance(vec2 position, vec2 direction, float pathLength)
 {
-    float opticalDepth = getShadowGridOpticalDepth(position, direction, pathLength, int(getNodeThread()), int(NodeThreads)).a;
+    float opticalDepth = getShadowGridGasOpticalDepth(position, direction, pathLength);
     vec2 lastNode = frame.gasGrid.xy + vec2(frame.gasSize.xy - 1) * frame.gasGrid.z;
     float enter;
     float exit;
@@ -144,7 +142,7 @@ float getDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 center, f
     return max(min(along + halfChord, pathLength) - max(along - halfChord, 0.0), 0.0);
 }
 
-// The samples across a beam start their paths at the given offsets across it, see getAverageStrandChord. The coordinate of the start of a
+// The samples across a beam start their paths at the given offsets across it, see getStrandChords. The coordinate of the start of a
 // path changes linearly with its offset, while all paths change the coordinate at the same rate. Narrows the parts of the paths inside the
 // slab, see clipSlab.
 void clipSlabSamples(float start, float shift, float rate, float lower, float upper, vec4 offsets, inout vec4 enter, inout vec4 exit)
@@ -178,33 +176,45 @@ float getDiskChordIntegral(float distance, float radius)
     return x * sqrt(max(radius * radius - x * x, 0.0)) + radius * radius * asin(clamp(x / radius, -1.0, 1.0));
 }
 
-// A beam has the given widths at the start and at the end of the path and changes its width linearly in between. It is not wider than the
-// enlargement of the bounding boxes allows.
+// A beam has the given widths at the start and at the end of the path and changes its width linearly in between. In its near part, which the
+// ray query covers, it is not wider than the enlargement of the bounding boxes allows, see getNearFade.
 float getBeamWidth(vec2 beamWidths, float along, float pathLength)
 {
     return min(mix(beamWidths.x, beamWidths.y, clamp(along / pathLength, 0.0, 1.0)), getMaxBeamWidth());
 }
 
+// An object that covers the given share of the width of a beam absorbs the given optical depth where it covers the beam, while the light
+// beside it passes. The light that the beam keeps is converted into an optical depth, so that the objects on its way add up as if they lay
+// independently of each other across the beam.
+vec3 getCoveringOpticalDepth(float coverage, vec3 coveredOpticalDepth)
+{
+    return -log(max(1.0 - coverage * (1.0 - exp(-coveredOpticalDepth)), MinBeamTransmittance));
+}
+
 // Disks at the ends of the path are cut by it, there the chord along the ray counts. The integral is odd in the distance and reaches half
 // the area of the disk at its edge, so that a beam covering the whole disk needs no arc sine.
-float getAverageDiskChord(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 center, float radius)
+vec3 getDiskOpticalDepth(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 center, float radius, vec3 absorption)
 {
     vec2 toCenter = center - origin;
     float along = dot(toCenter, direction);
     float width = getBeamWidth(beamWidths, along, pathLength);
-    float distance = dot(toCenter, vec2(-direction.y, direction.x));
-    if (abs(distance) >= radius + 0.5 * width) {
-        return 0.0;
+    float distance = abs(dot(toCenter, vec2(-direction.y, direction.x)));
+    if (distance >= radius + 0.5 * width) {
+        return vec3(0.0);
     }
     if (along < radius || along > pathLength - radius || width < 1e-3) {
-        return getDiskChord(origin, direction, pathLength, center, radius);
+        return getDiskChord(origin, direction, pathLength, center, radius) * absorption;
     }
     float halfArea = 0.5 * Pi * radius * radius;
-    float outerEdge = abs(distance) + 0.5 * width;
-    float innerEdge = 0.5 * width - abs(distance);
+    float outerEdge = distance + 0.5 * width;
+    float innerEdge = 0.5 * width - distance;
     float outer = outerEdge < radius ? getDiskChordIntegral(outerEdge, radius) : halfArea;
     float inner = innerEdge < radius ? getDiskChordIntegral(innerEdge, radius) : halfArea;
-    return (outer + inner) / width;
+    float overlap = min(outerEdge, radius) + min(innerEdge, radius);
+    if (overlap < 1e-5) {
+        return vec3(0.0);
+    }
+    return getCoveringOpticalDepth(overlap / width, (outer + inner) / overlap * absorption);
 }
 
 vec4 getBeamSampleOffsets(float width)
@@ -212,20 +222,30 @@ vec4 getBeamSampleOffsets(float width)
     return ((vec4(0.0, 1.0, 2.0, 3.0) + 0.5) / float(BeamSamples) - 0.5) * width;
 }
 
-// Strands and triangles are sampled at points across the beam where it passes their middle
-float getAverageStrandChord(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 a, vec2 b)
+// Strands and triangles are sampled at points across the beam where it passes their middle. The beam keeps the average of the light that
+// passes the samples.
+vec3 getSampledOpticalDepth(vec4 chords, vec3 absorption)
+{
+    if (chords == vec4(0.0)) {
+        return vec3(0.0);
+    }
+    vec3 transmittance = exp(-chords.x * absorption) + exp(-chords.y * absorption) + exp(-chords.z * absorption) + exp(-chords.w * absorption);
+    return -log(max(transmittance / float(BeamSamples), MinBeamTransmittance));
+}
+
+vec4 getStrandChords(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 a, vec2 b)
 {
     vec2 across = vec2(-direction.y, direction.x);
     float width = getBeamWidth(beamWidths, dot(0.5 * (a + b) - origin, direction), pathLength);
     vec2 distances = vec2(dot(a - origin, across), dot(b - origin, across));
     float reach = 0.5 * width + StrandHalfWidth;
     if (min(distances.x, distances.y) >= reach || max(distances.x, distances.y) <= -reach) {
-        return 0.0;
+        return vec4(0.0);
     }
     vec2 axis = b - a;
     float axisLength = length(axis);
     if (axisLength < 1e-4) {
-        return 0.0;
+        return vec4(0.0);
     }
     vec2 along = axis / axisLength;
     vec2 strandAcross = vec2(-along.y, along.x);
@@ -236,18 +256,17 @@ float getAverageStrandChord(vec2 origin, vec2 direction, float pathLength, vec2 
     clipSlabSamples(dot(toOrigin, along), dot(across, along), dot(direction, along), 0.0, axisLength, offsets, enter, exit);
     clipSlabSamples(
         dot(toOrigin, strandAcross), dot(across, strandAcross), dot(direction, strandAcross), -StrandHalfWidth, StrandHalfWidth, offsets, enter, exit);
-    vec4 chords = max(exit - enter, vec4(0.0));
-    return (chords.x + chords.y + chords.z + chords.w) / float(BeamSamples);
+    return max(exit - enter, vec4(0.0));
 }
 
-float getAverageTriangleChord(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 a, vec2 b, vec2 c)
+vec4 getTriangleChords(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 a, vec2 b, vec2 c)
 {
     vec2 across = vec2(-direction.y, direction.x);
     float width = getBeamWidth(beamWidths, dot((a + b + c) / 3.0 - origin, direction), pathLength);
     vec3 distances = vec3(dot(a - origin, across), dot(b - origin, across), dot(c - origin, across));
     float reach = 0.5 * width;
     if (minComponent(distances) >= reach || maxComponent(distances) <= -reach) {
-        return 0.0;
+        return vec4(0.0);
     }
     vec2 ab = b - a;
     vec2 ac = c - a;
@@ -258,49 +277,180 @@ float getAverageTriangleChord(vec2 origin, vec2 direction, float pathLength, vec
     clipTriangleSideSamples(origin, direction, across, a, b, orientation, offsets, enter, exit);
     clipTriangleSideSamples(origin, direction, across, b, c, orientation, offsets, enter, exit);
     clipTriangleSideSamples(origin, direction, across, c, a, orientation, offsets, enter, exit);
-    vec4 chords = max(exit - enter, vec4(0.0));
-    return (chords.x + chords.y + chords.z + chords.w) / float(BeamSamples);
+    return max(exit - enter, vec4(0.0));
+}
+)"
+                                                       R"(
+// The near part of a beam is not wider than the enlargement of the bounding boxes allows, so that the ray query finds the objects across its
+// width. Farther away, the beams of wide shining parts become wider and take the occlusion of the extracted objects from the occlusion
+// pyramid, see getGridOpticalDepth, so that they cover the shining part without gaps between them. Over the end of the near part, the objects
+// found by the ray query fade out and the occlusion pyramid fades in. Returns the distances along the path where the fade starts and ends.
+const float NearFadeStartWidth = 0.6;  // Relative to the maximum width of the beams
+
+vec2 getNearFade(vec2 beamWidths, float pathLength)
+{
+    float maxWidth = getMaxBeamWidth();
+    if (beamWidths.y <= maxWidth) {
+        return vec2(2.0, 3.0) * pathLength;
+    }
+    float widthRange = beamWidths.y - beamWidths.x;
+    float fadeEnd = max((maxWidth - beamWidths.x) / widthRange, 1e-3);
+    float fadeStart = clamp((NearFadeStartWidth * maxWidth - beamWidths.x) / widthRange, 0.0, fadeEnd);
+    return vec2(fadeStart, fadeEnd) * pathLength;
 }
 
-// Optical depth that an object found by the ray query adds along the beam, see getObjectTransmittance
-vec3 getCandidateOpticalDepth(uint kind, uint primitive, vec2 origin, vec2 direction, float pathLength, vec2 beamWidths)
+// Share of an object at the given distance along the path that the ray query adds
+float getNearWeight(vec2 nearFade, float along)
+{
+    return 1.0 - smoothstep(nearFade.x, nearFade.y, along);
+}
+
+// Optical depth that an object found by the ray query adds along the near part of the beam, see getObjectTransmittance
+vec3 getCandidateOpticalDepth(uint kind, uint primitive, vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 nearFade)
 {
     if (kind == Kind_Sphere) {
         Sphere sphere = spheres[primitive];
-        return getAverageDiskChord(origin, direction, pathLength, beamWidths, sphere.centerRadius.xy, sphere.centerRadius.w) * getAbsorption(sphere);
+        float weight = getNearWeight(nearFade, dot(sphere.centerRadius.xy - origin, direction));
+        if (weight <= 0.0) {
+            return vec3(0.0);
+        }
+        return weight * getDiskOpticalDepth(origin, direction, pathLength, beamWidths, sphere.centerRadius.xy, sphere.centerRadius.w, getAbsorption(sphere));
     }
     if (kind == Kind_Capsule) {
         uint entry = getCapsuleShadowEntry(primitive);
         vec4 ends = shadowCasters[entry];
-        float chord = getAverageStrandChord(origin, direction, pathLength, beamWidths, ends.xy, ends.zw);
-        return chord * 0.5 * shadowCasters[entry + 1u].rgb;
+        float weight = getNearWeight(nearFade, dot(0.5 * (ends.xy + ends.zw) - origin, direction));
+        if (weight <= 0.0) {
+            return vec3(0.0);
+        }
+        vec4 chords = getStrandChords(origin, direction, pathLength, beamWidths, ends.xy, ends.zw);
+        return weight * getSampledOpticalDepth(chords, 0.5 * shadowCasters[entry + 1u].rgb);
     }
     if (kind == Kind_Triangle) {
         uint entry = getTriangleShadowEntry(primitive);
         vec4 cornersAB = shadowCasters[entry];
         vec4 cornerC = shadowCasters[entry + 1u];
-        float chord = getAverageTriangleChord(origin, direction, pathLength, beamWidths, cornersAB.xy, cornersAB.zw, cornerC.xy);
-        return chord * shadowCasters[entry + 2u].rgb / 3.0;
+        float weight = getNearWeight(nearFade, dot((cornersAB.xy + cornersAB.zw + cornerC.xy) / 3.0 - origin, direction));
+        if (weight <= 0.0) {
+            return vec3(0.0);
+        }
+        vec4 chords = getTriangleChords(origin, direction, pathLength, beamWidths, cornersAB.xy, cornersAB.zw, cornerC.xy);
+        return weight * getSampledOpticalDepth(chords, shadowCasters[entry + 2u].rgb / 3.0);
     }
     return vec3(0.0);
 }
 
-// The ray stands for a beam with the given widths at its start and its end and collects the average length of its path inside every cell,
-// strand and filled triangle on its way. Objects narrower than the beam therefore cast fainter shadows instead of being hit or missed, which
-// would cut thin shadows into dashes. The objects outside the extracted region add their extinction in the shadow grid.
+// A beam samples an occlusion pyramid within its grid, see Shaders/RayTracingOcclusionCS.h. While the beam is not wider than the nodes of
+// the first level, it samples the first level once per node. A wider beam samples the finest level whose nodes are not narrower than the
+// beam, every one and a half widths. The first level is blurred with the weights 1, 2, 1 and the following levels with 1, 3, 3, 1, so that
+// the samples along a beam and the samples of the neighboring beams take up every object about evenly. The occlusion across the beam divided
+// by its width is the share of the light that the objects take, which adds up to an optical depth along the path. The samples are weighted
+// with a fade in along the path.
+const float OcclusionStepInWidths = 1.5;
+const int MaxOcclusionSteps = 1024;
+
+// Map from the distance along a path to the texture coordinates of a level of a pyramid
+struct PathCoords
+{
+    vec2 start;
+    vec2 perLength;
+    vec2 lower;
+    vec2 upper;
+};
+
+PathCoords getPathCoords(OcclusionPyramid pyramid, int levelIndex, vec2 origin, vec2 direction)
+{
+    PyramidLevel level = getPyramidLevel(pyramid, levelIndex);
+    vec2 inverseImageSize = 1.0 / getPyramidImageSize(pyramid.gridImageSize);
+    return PathCoords(
+        (origin * level.texelsPerWorldUnit + level.texelOffset) * inverseImageSize,
+        direction * level.texelsPerWorldUnit * inverseImageSize,
+        level.lowerTexel * inverseImageSize,
+        level.upperTexel * inverseImageSize);
+}
+
+vec3 samplePath(sampler2D image, PathCoords coords, float along)
+{
+    return texture(image, clamp(coords.start + coords.perLength * along, coords.lower, coords.upper)).rgb;
+}
+
+float getFadeWeight(vec2 fade, float along)
+{
+    return along < fade.y ? smoothstep(fade.x, fade.y, along) : 1.0;
+}
+
+vec3 getPyramidOpticalDepth(sampler2D image, OcclusionPyramid pyramid, vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec2 fade)
+{
+    vec2 lastNode = pyramid.gridOrigin + vec2(pyramid.gridSize - 1) * pyramid.nodeDistance;
+    float enter;
+    float exit;
+    if (fade.x >= pathLength || any(lessThan(pyramid.gridSize, ivec2(2)))
+        || !clipToGrid(origin, direction, pathLength, pyramid.gridOrigin, lastNode, enter, exit)) {
+        return vec3(0.0);
+    }
+    float along = max(enter, fade.x);
+    float widthGrowth = (beamWidths.y - beamWidths.x) / pathLength;
+    vec3 result = vec3(0.0);
+
+    float width = beamWidths.x + widthGrowth * along;
+    if (width <= pyramid.nodeDistance) {
+        float firstLevelEnd = widthGrowth > 0.0 ? min(exit, along + (pyramid.nodeDistance - width) / widthGrowth) : exit;
+        int numSteps = clamp(int(ceil((firstLevelEnd - along) / pyramid.nodeDistance)), 1, MaxOcclusionSteps);
+        float stepLength = (firstLevelEnd - along) / float(numSteps);
+        PathCoords coords = getPathCoords(pyramid, 0, origin, direction);
+        for (int i = 0; i < numSteps; ++i) {
+            float middle = along + (float(i) + 0.5) * stepLength;
+            result += getFadeWeight(fade, middle) * samplePath(image, coords, middle);
+        }
+        result *= stepLength;
+        along = firstLevelEnd;
+    }
+
+    float minStepLength = (exit - along) / float(MaxOcclusionSteps);
+    int levelIndex = -1;
+    PathCoords coords;
+    for (int i = 0; i <= MaxOcclusionSteps && along < exit; ++i) {
+        width = beamWidths.x + widthGrowth * along;
+        int stepLevelIndex = clamp(int(ceil(log2(width / pyramid.nodeDistance))), 0, OcclusionLevels - 1);
+        float levelNodeDistance = float(1 << stepLevelIndex) * pyramid.nodeDistance;
+        float stepLength = min(max(OcclusionStepInWidths * min(width, levelNodeDistance), minStepLength), exit - along);
+        if (stepLevelIndex != levelIndex) {
+            levelIndex = stepLevelIndex;
+            coords = getPathCoords(pyramid, levelIndex, origin, direction);
+        }
+        float middle = along + 0.5 * stepLength;
+        result += getFadeWeight(fade, middle) * stepLength * samplePath(image, coords, middle);
+        along += stepLength;
+    }
+    return result;
+}
+
+// Optical depth that does not depend on the ray query: the extracted objects in the far part of the beam, which the pyramid of the gas grid
+// holds, and the objects outside the extracted region along the whole path, which the pyramid of the shadow grid holds
+vec3 getGridOpticalDepth(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths)
+{
+    vec2 nearFade = getNearFade(beamWidths, pathLength);
+    return getPyramidOpticalDepth(occlusionSampler, getGasGridPyramid(), origin, direction, pathLength, beamWidths, nearFade)
+        + getPyramidOpticalDepth(shadowGridSampler, getShadowGridPyramid(), origin, direction, pathLength, beamWidths, vec2(-2.0, -1.0));
+}
+
+// The ray stands for a beam with the given widths at its start and its end. In its near part, every cell, strand and filled triangle on its
+// way absorbs light in the part of the width of the beam that it covers, while the light beside it passes. Objects narrower than the beam
+// therefore cast fainter shadows instead of being hit or missed, which would cut thin shadows into dashes.
 vec3 getObjectTransmittance(vec2 origin, vec2 direction, float pathLength, vec2 beamWidths, vec3 lightColor)
 {
     vec3 maxOpticalDepth = mix(vec3(MaxOpticalDepth), vec3(0.0), equal(lightColor, vec3(0.0)));
-    vec3 opticalDepth = getShadowGridOpticalDepth(origin, direction, pathLength, 0, 1).rgb;
+    vec3 opticalDepth = getGridOpticalDepth(origin, direction, pathLength, beamWidths);
     if (all(greaterThanEqual(opticalDepth, maxOpticalDepth))) {
         return exp(-opticalDepth);
     }
+    vec2 nearFade = getNearFade(beamWidths, pathLength);
     rayQueryEXT query;
-    rayQueryInitializeEXT(query, scene, gl_RayFlagsNoneEXT, 0xffu, vec3(origin, 0.5), 0.0, vec3(direction, 0.0), pathLength);
+    rayQueryInitializeEXT(query, scene, gl_RayFlagsNoneEXT, 0xffu, vec3(origin, 0.5), 0.0, vec3(direction, 0.0), min(pathLength, nearFade.y));
     while (rayQueryProceedEXT(query)) {
         uint kind = uint(rayQueryGetIntersectionGeometryIndexEXT(query, false)) + 1u;
         uint primitive = uint(rayQueryGetIntersectionPrimitiveIndexEXT(query, false));
-        opticalDepth += getCandidateOpticalDepth(kind, primitive, origin, direction, pathLength, beamWidths);
+        opticalDepth += getCandidateOpticalDepth(kind, primitive, origin, direction, pathLength, beamWidths, nearFade);
         if (all(greaterThanEqual(opticalDepth, maxOpticalDepth))) {
             rayQueryTerminateEXT(query);
         }
@@ -410,14 +560,14 @@ vec3 getSourceTransmittance(SourceLight light, vec2 position, vec2 closestPoint,
 // The rays of the sources differ greatly in their cost, so the threads of a node would wait for the slowest ray of each source. Hence the
 // nodes of a work group first collect a batch of their sources in lockstep, then all threads of the work group trace the rays of the batches,
 // each taking the next ray as soon as its previous one is finished, and finally each node sums the light of its batch in a fixed order. A
-// batch holds up to MaxBatchSources sources, which does not exceed NodeThreads. Each ray keeps a value: the optical depth of the shadow
-// grid, which is sampled in lockstep, and then its weighted transmittance.
+// batch holds up to MaxBatchSources sources, which does not exceed NodeThreads. Each ray keeps a value: the optical depth that does not
+// depend on the ray query, which is sampled in lockstep, and then its weighted transmittance.
 const uint NodesPerGroup = gl_WorkGroupSize.y;
 const uint MaxBatchSources = 8u;
 const uint RaysPerNode = MaxBatchSources * uint(MaxSourceRays);
 
-// The beams are kept, so that the rays of a source are traced in the same arrangement in which their weights and shadow grid depths were
-// collected
+// The beams are kept, so that the rays of a source are traced in the same arrangement in which their weights and the optical depths of the
+// occlusion pyramids were collected
 struct BatchSource
 {
     vec4 centerClosestPoint;  // xy: center of the copy of the source, zw: closest point of its area to the node
@@ -505,7 +655,7 @@ void addBatchSource(uint nodeInGroup, uint source, SourceLight light, vec2 posit
     if (index < beams.numRays) {
         SourceRay ray = getSourceRay(light, position, closestPoint, distance, beams, index);
         weight = ray.weight;
-        vec3 opticalDepth = ray.pathLength > 1e-3 ? getShadowGridOpticalDepth(ray.start, ray.direction, ray.pathLength, 0, 1).rgb : vec3(0.0);
+        vec3 opticalDepth = ray.pathLength > 1e-3 ? getGridOpticalDepth(ray.start, ray.direction, ray.pathLength, beams.beamWidths) : vec3(0.0);
         setRayValue(getRaySlot(nodeInGroup, source, uint(index)), opticalDepth);
     }
     float weightSum = subgroupClusteredAdd(weight, NodeThreads);
@@ -567,6 +717,7 @@ void traceBatchRays()
     uint slot = 0u;
     SourceRay ray;
     vec2 beamWidths;
+    vec2 nearFade;
     vec3 opticalDepth;
     vec3 maxOpticalDepth;
     for (;;) {
@@ -604,13 +755,15 @@ void traceBatchRays()
                 setRayValue(slot, ray.weight * exp(-opticalDepth));
                 continue;
             }
-            rayQueryInitializeEXT(query, scene, gl_RayFlagsNoneEXT, 0xffu, vec3(ray.start, 0.5), 0.0, vec3(ray.direction, 0.0), ray.pathLength);
+            nearFade = getNearFade(beamWidths, ray.pathLength);
+            rayQueryInitializeEXT(
+                query, scene, gl_RayFlagsNoneEXT, 0xffu, vec3(ray.start, 0.5), 0.0, vec3(ray.direction, 0.0), min(ray.pathLength, nearFade.y));
             tracing = true;
         }
         if (rayQueryProceedEXT(query)) {
             uint kind = uint(rayQueryGetIntersectionGeometryIndexEXT(query, false)) + 1u;
             uint primitive = uint(rayQueryGetIntersectionPrimitiveIndexEXT(query, false));
-            opticalDepth += getCandidateOpticalDepth(kind, primitive, ray.start, ray.direction, ray.pathLength, beamWidths);
+            opticalDepth += getCandidateOpticalDepth(kind, primitive, ray.start, ray.direction, ray.pathLength, beamWidths, nearFade);
             if (!all(greaterThanEqual(opticalDepth, maxOpticalDepth))) {
                 continue;
             }
