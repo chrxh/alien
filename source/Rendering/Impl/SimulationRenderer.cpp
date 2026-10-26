@@ -171,16 +171,20 @@ PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
 void SimulationRenderer::updateGeometry(RenderView const& view)
 {
     auto simulationFacade = _SimulationFacade::get();
-    if (_rayTracingGraph) {
-        _rayTracingLayout = RayTracingLayout::calc(view, simulationFacade->getSimulationParameters(), simulationFacade->getWorldSize());
-    }
+    auto parameters = simulationFacade->getSimulationParameters();
+    _rayTracingLayout = isRayTracingActive(parameters) ? RayTracingLayout::calc(view, parameters, simulationFacade->getWorldSize()) : RayTracingLayout();
     simulationFacade->tryCopyBuffersFromCudaToRenderer(
         _geometryBuffers, {.visibleWorldRect = view.visibleWorldRect, .shadowGrid = _rayTracingLayout.shadowGrid});
 }
 
+bool SimulationRenderer::isRayTracingActive(SimulationParameters const& parameters) const
+{
+    return _rayTracingGraph && parameters.hardwareRayTracing.value;
+}
+
 RenderGraph const& SimulationRenderer::selectGraph(RenderView const& view, SimulationParameters const& parameters, bool forPicture)
 {
-    if (!_rayTracingGraph) {
+    if (!isRayTracingActive(parameters)) {
         return _rasterGraph;
     }
     auto numObjects = _geometryBuffers->getNumObjects();
