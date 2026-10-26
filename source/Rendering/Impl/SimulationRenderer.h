@@ -46,6 +46,8 @@ private:
     // The layout of the ray tracing is calculated first, since the engine collects the objects for the shadow grid while extracting them
     void updateGeometry(RenderView const& view);
 
+    bool isRayTracingActive(SimulationParameters const& parameters) const;
+
     // Ray tracing falls back to rasterization if its resources cannot be allocated. Frames only retry once the view size has changed or the
     // scene has clearly fewer objects, so that a lack of memory does not stall every frame.
     // Selecting the ray tracing prepares its resources for the view and the parameters with which the graph is executed.

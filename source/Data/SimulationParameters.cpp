@@ -113,6 +113,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(FloatSpec().member(&SimulationParameters::glow).min(0.0f).max(1.0f))
                         .description("Controls the bloom effect intensity. At 0, no glow is applied. At 1, maximum glow is applied."),
                     ParameterSpec()
+                        .name("Hardware ray tracing")
+                        .reference(BoolSpec().member(&SimulationParameters::hardwareRayTracing))
+                        .description("If activated and supported by the GPU, the simulation is rendered with hardware ray tracing. The cells and the "
+                                     "radiation sources then light the fluids and cast shadows. If deactivated, the simulation is rasterized, which "
+                                     "requires less GPU time."),
+                    ParameterSpec()
                         .name("Fluid illumination")
                         .reference(FloatSpec().member(&SimulationParameters::fluidIllumination).min(0.0f).max(1.0f))
                         .description("With hardware ray tracing, the cells light the surrounding fluids in their colors. This parameter controls the "
