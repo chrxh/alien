@@ -21,8 +21,8 @@
 
 namespace
 {
-    auto constexpr RightColumnWidth = 230.0f;
-    auto constexpr DefaultSettingsHeight = 140.0f;
+    auto constexpr RightColumnWidth = 255.0f;
+    auto constexpr DefaultSettingsHeight = 170.0f;
     auto constexpr RowHeight = 23.0f;
     auto constexpr DefaultDuration = 5.0f;
 
@@ -39,7 +39,7 @@ namespace
 }
 
 CameraPathWindow::CameraPathWindow()
-    : AlienWindow("Camera path", "windows.camera path", false, true, {60.0f, 80.0f}, {640.0f, 460.0f})
+    : AlienWindow("Camera path", "windows.camera path", false, true, {60.0f, 80.0f}, {700.0f, 520.0f})
 {}
 
 void CameraPathWindow::initIntern()
