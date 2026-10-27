@@ -19,9 +19,11 @@
 #include <mfreadwrite.h>
 #include <wrl/client.h>
 #else
+#include <cerrno>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #endif
 
 namespace
@@ -44,6 +46,20 @@ namespace
         if (FAILED(result)) {
             throw AlienException(std::format("{} failed with error {:#010x}.", operation, static_cast<uint32_t>(result)));
         }
+    }
+
+    std::string describeFileCreationError(std::filesystem::path const& filename, HRESULT result)
+    {
+        if (result == E_ACCESSDENIED) {
+            return std::format(
+                "Windows denied access to {}. The folder might be protected or another program might use the file. Please choose another folder or "
+                "file name.",
+                filename.string());
+        }
+        if (result == HRESULT_FROM_WIN32(ERROR_SHARING_VIOLATION)) {
+            return std::format("{} is used by another program, e.g. a video player. Please close it there or choose another file name.", filename.string());
+        }
+        return std::format("{} could not be created (error {:#010x}). Please choose another folder or file name.", filename.string(), static_cast<uint32_t>(result));
     }
 
     // Windows N editions lack Media Foundation unless the Media Feature Pack is installed. Its functions are therefore looked up at run time
@@ -172,7 +188,10 @@ namespace
             Microsoft::WRL::ComPtr<IMFAttributes> attributes;
             checkResult(api.createAttributes(&attributes, 1), "Configuring the video file");
             checkResult(attributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, hardwareEncoding ? TRUE : FALSE), "Configuring the video file");
-            checkResult(api.createSinkWriterFromUrl(filename.wstring().c_str(), nullptr, attributes.Get(), &_sinkWriter), "Creating the video file");
+            auto result = api.createSinkWriterFromUrl(filename.wstring().c_str(), nullptr, attributes.Get(), &_sinkWriter);
+            if (FAILED(result)) {
+                throw AlienException(describeFileCreationError(filename, result));
+            }
 
             Microsoft::WRL::ComPtr<IMFMediaType> outputType;
             checkResult(api.createMediaType(&outputType), "Configuring the H.264 encoding");
@@ -238,6 +257,15 @@ namespace
             if (std::system("ffmpeg -version > /dev/null 2>&1") != 0) {
                 throw AlienException("Recording videos requires ffmpeg, which could not be found.");
             }
+
+            // ffmpeg would only report a file that cannot be created when the recording ends
+            if (auto file = std::fopen(filename.c_str(), "wb")) {
+                std::fclose(file);
+            } else {
+                throw AlienException(
+                    std::format("{} could not be created ({}). Please choose another folder or file name.", filename.string(), std::strerror(errno)));
+            }
+
             auto command = std::format(
                 "ffmpeg -loglevel error -y -f rawvideo -pix_fmt rgb24 -video_size {}x{} -framerate {} -i - -pix_fmt yuv420p -b:v {} {}",
                 resolution.x,
