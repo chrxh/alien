@@ -64,7 +64,7 @@ The chapter [Sandbox and editing](sandbox.md) explains these tools in depth.
 | **Windows** | Temporal control (Alt+1), Spatial control (Alt+2), Evolution dashboard (Alt+3), Simulation parameters (Alt+4), Autosave (Alt+5), MCP server (Alt+6), Log (Alt+7) |
 | **Editor** | Genome editor (Alt+W), Allow object editing (Alt+E), Inspect objects (Alt+N), Inspect genomes (Alt+F), Inspect creatures (Alt+P), Close inspections and Deselect (Esc), Copy (Ctrl+C), Paste (Ctrl+V), Delete |
 | **View** | Cell info overlay (Alt+O), Message overlay (Alt+X), Render UI (Alt+U), Render simulation (Alt+I), Console mode (Alt+C) |
-| **Tools** | Mass operations (Alt+H), Image converter (Alt+Y) |
+| **Tools** | Mass operations (Alt+H), Image converter (Alt+Y), Camera path (Alt+K) |
 | **Settings** | Save on exit, Dark mode, Display settings, Network settings, Debug mode |
 | **Help** | About, Documentation (F1) |
 
@@ -111,6 +111,12 @@ In edit mode, select objects and press **Alt+N** to open an inspection window fo
 ### Browser
 
 Lists the simulations and genomes on the ALIEN server. The tabs switch between **Simulations** and **Genomes**. **Featured** contains the simulations of the ALIEN project, **Community** those shared by users and **Private** your own uploads. Switch between the gallery view with preview pictures and the table view with folders. Double-click an entry to open it. After logging in, you can upload your own work and react to the work of others. See [Files and command line](files.md#sharing-in-the-browser).
+
+### Camera path
+
+Flies the camera along waypoints and records the flight as a video. **Add waypoint** takes over the current view, i.e. its center and zoom, behind the selected waypoint. In the table, the **Duration** of a waypoint is the time in seconds that the camera needs from the previous waypoint. The path between the waypoints is smoothed, **Smoothing** sets how much it cuts the corners, while the first and the last waypoint are always reached. **Play** flies the path in real time.
+
+**Record video** writes an MP4 file at the chosen frame rate. It shows the simulation without the user interface in the size of the view, so full screen mode (F7) gives a large video. On Linux, ffmpeg needs to be installed. The **Time-lapse** of a waypoint speeds up the simulation in the video while the camera moves as fast as without time-lapse. At 1x, the video shows the **Time steps per second at 1x** from the settings, at 10x ten times as many. The time-lapse changes smoothly on the way to the next waypoint, so a video can start at normal speed and become faster and faster. ALIEN calculates the time steps for each frame itself, which is why the video runs smoothly even if the recording takes longer than the video. A paused simulation stays still in the video. **Stop** ends a recording early and keeps the frames recorded so far.
 
 ## Dialogs
 

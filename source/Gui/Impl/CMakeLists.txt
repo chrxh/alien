@@ -31,6 +31,10 @@ add_library(GuiImpl
     BrowserUserListWidget.h
     BrowserWindow.cpp
     BrowserWindow.h
+    CameraPathController.cpp
+    CameraPathController.h
+    CameraPathWindow.cpp
+    CameraPathWindow.h
     CellFunctionChannels.cpp
     CellFunctionChannels.h
     ChangeColorDialog.cpp
@@ -238,6 +242,7 @@ target_link_libraries(GuiImpl McpToolsInterface)
 target_link_libraries(GuiImpl Network)
 target_link_libraries(GuiImpl PersisterInterface)
 target_link_libraries(GuiImpl RenderingInterface)
+target_link_libraries(GuiImpl Video)
 
 target_include_directories(GuiImpl
     PRIVATE
