@@ -2,6 +2,7 @@ target_sources(McpToolsTests
 PUBLIC
     GenomeMassEditServiceTests.cpp
     JsonPathTests.cpp
+    McpInspectionToolsTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(McpToolsTests Base)

@@ -16,6 +16,9 @@ class McpInspectionTools
 public:
     std::vector<McpTool> getTools(McpToolContext& context);
 
+    boost::json::object createInspectionResult(ContentDesc const& inspectedData, std::vector<uint64_t> const& ids, bool includeGenomes, bool omitDefaultValues)
+        const;
+
 private:
     McpToolResult findObjects(boost::json::object const& arguments) const;
     McpToolResult inspectObjects(boost::json::object const& arguments) const;
