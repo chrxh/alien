@@ -475,45 +475,6 @@ TEST_F(DescEditServiceTests, getObjects_cellsOfCreatures_carryCreatureAndGenome)
     EXPECT_FALSE(solid.genome.has_value());
 }
 
-TEST_F(DescEditServiceTests, getObjects_withIds_onlyRequestedEntitiesInOrderOfIds)
-{
-    auto desc = ContentDesc().addCreature(
-        {ObjectDesc().id(1).pos({10.0f, 10.0f}), ObjectDesc().id(2).pos({11.0f, 10.0f}), ObjectDesc().id(3).pos({12.0f, 10.0f})},
-        CreatureDesc().id(10),
-        GenomeDesc().id(100));
-    desc.addConnection(1, 2);
-    desc.addConnection(2, 3);
-    desc._energies.emplace_back(EnergyDesc().id(4));
-
-    auto entities = _service.getObjects(desc, {3, 99, 4, 1, 3});
-
-    ASSERT_EQ(3, entities.size());
-    EXPECT_EQ(3, _service.getId(entities.at(0)));
-    EXPECT_EQ(4, _service.getId(entities.at(1)));
-    EXPECT_EQ(1, _service.getId(entities.at(2)));
-
-    auto const& cell = std::get<ExtendedObjectDesc>(entities.at(0));
-    ASSERT_TRUE(cell.creature.has_value());
-    EXPECT_EQ(10, cell.creature->_id);
-    ASSERT_TRUE(cell.genome.has_value());
-    EXPECT_EQ(100, cell.genome->_id);
-}
-
-TEST_F(DescEditServiceTests, getObjects_withIdOfConnectedCell_connectionsToOtherCellsKept)
-{
-    auto desc =
-        ContentDesc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}), ObjectDesc().id(2).pos({11.0f, 10.0f}), ObjectDesc().id(3).pos({12.0f, 10.0f})});
-    desc.addConnection(1, 2);
-    desc.addConnection(2, 3);
-
-    auto entities = _service.getObjects(desc, {2});
-
-    ASSERT_EQ(1, entities.size());
-    auto const& connections = std::get<ExtendedObjectDesc>(entities.front()).object._connections;
-    ASSERT_EQ(2, connections.size());
-    EXPECT_EQ(desc.getObjectRef(2)._connections, connections);
-}
-
 TEST_F(DescEditServiceTests, scaleContent_allObjectsInsideNewWorld)
 {
     auto desc = ContentDesc().objects({

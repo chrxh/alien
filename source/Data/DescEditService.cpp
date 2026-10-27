@@ -567,20 +567,3 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(ContentDesc 
     }
     return result;
 }
-
-std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(ContentDesc const& description, std::vector<uint64_t> const& ids) const
-{
-    std::unordered_map<uint64_t, ExtendedObjectOrEnergyDesc> entityById;
-    for (auto& entity : getObjects(description)) {
-        auto id = getId(entity);
-        entityById.emplace(id, std::move(entity));
-    }
-
-    std::vector<ExtendedObjectOrEnergyDesc> result;
-    for (auto const& id : ids) {
-        if (auto node = entityById.extract(id)) {
-            result.emplace_back(std::move(node.mapped()));
-        }
-    }
-    return result;
-}

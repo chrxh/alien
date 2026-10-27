@@ -5,6 +5,7 @@
 #include <set>
 #include <stdexcept>
 #include <format>
+#include <unordered_map>
 
 #include <boost/json.hpp>
 
@@ -156,17 +157,40 @@ McpToolResult McpInspectionTools::inspectObjects(boost::json::object const& argu
     }
     auto includeGenomes = McpArguments::getOptionalBool(arguments, "include_genomes").value_or(false);
     auto omitDefaultValues = !McpArguments::getOptionalBool(arguments, "complete").value_or(false);
+    auto inspectedData = _SimulationFacade::get()->getInspectedSimulationData(ids);
+    return {.text = McpJson::serialize(createInspectionResult(inspectedData, ids, includeGenomes, omitDefaultValues))};
+}
+
+boost::json::object McpInspectionTools::createInspectionResult(
+    ContentDesc const& inspectedData,
+    std::vector<uint64_t> const& ids,
+    bool includeGenomes,
+    bool omitDefaultValues) const
+{
     auto const& serializer = SerializerService::get();
 
     // The inspected data also contains the connected objects so that the connections can be resolved, but they are not returned
-    auto entities = DescEditService::get().getObjects(_SimulationFacade::get()->getInspectedSimulationData(ids), ids);
+    std::unordered_map<uint64_t, ExtendedObjectOrEnergyDesc> entityById;
+    for (auto& entity : DescEditService::get().getObjects(inspectedData)) {
+        auto id = DescEditService::get().getId(entity);
+        entityById.emplace(id, std::move(entity));
+    }
 
     boost::json::array objects;
     boost::json::array energyParticles;
     boost::json::object genomes;
-    std::set<uint64_t> foundIds;
-    for (auto const& entity : entities) {
-        foundIds.insert(DescEditService::get().getId(entity));
+    boost::json::array missingIds;
+    std::set<uint64_t> processedIds;
+    for (auto const& id : ids) {
+        if (!processedIds.insert(id).second) {
+            continue;
+        }
+        auto findResult = entityById.find(id);
+        if (findResult == entityById.end()) {
+            missingIds.emplace_back(std::to_string(id));
+            continue;
+        }
+        auto const& entity = findResult->second;
         if (std::holds_alternative<EnergyDesc>(entity)) {
             energyParticles.emplace_back(serializer.serializeToJson(std::get<EnergyDesc>(entity), omitDefaultValues));
             continue;
@@ -186,16 +210,10 @@ McpToolResult McpInspectionTools::inspectObjects(boost::json::object const& argu
     if (includeGenomes) {
         result["genomes_by_id"] = std::move(genomes);
     }
-    boost::json::array missingIds;
-    for (auto const& id : ids) {
-        if (!foundIds.contains(id)) {
-            missingIds.emplace_back(std::to_string(id));
-        }
-    }
     if (!missingIds.empty()) {
         result["not_found_ids"] = std::move(missingIds);
     }
-    return {.text = McpJson::serialize(result)};
+    return result;
 }
 
 McpToolResult McpInspectionTools::changeObject(boost::json::object const& arguments) const
