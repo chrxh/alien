@@ -304,6 +304,54 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
+TEST_F(AttackerTests, noAttackOnSibling)
+{
+    auto data = createAttacker({100.0f, 100.0f});
+    data._creatures.at(0)._ancestorId = 3;
+
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(101).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+        },
+        CreatureDesc().id(2).ancestorId(3));
+    data.addConnection(100, 101);
+
+    auto origCell = data.getObjectRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(100);
+
+    // Sibling cells should NOT be attacked although the sensor detected them
+    EXPECT_EQ(std::optional(2), getLastMatchedCreatureIdPart(actualData, 2));
+    EXPECT_TRUE(approxCompare(origCell.getCellRef()._usableEnergy, actualCell.getCellRef()._usableEnergy));
+}
+
+TEST_F(AttackerTests, attackOnNonSiblingWithoutAncestor)
+{
+    auto data = createAttacker({100.0f, 100.0f});
+
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(101).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+        },
+        CreatureDesc().id(2));
+    data.addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Creatures without an ancestor are not siblings of each other
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
 TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
 {
     auto data = createAttacker({100.0f, 100.0f});
