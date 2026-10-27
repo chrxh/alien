@@ -158,7 +158,8 @@ McpToolResult McpInspectionTools::inspectObjects(boost::json::object const& argu
     auto omitDefaultValues = !McpArguments::getOptionalBool(arguments, "complete").value_or(false);
     auto const& serializer = SerializerService::get();
 
-    auto entities = DescEditService::get().getObjects(_SimulationFacade::get()->getInspectedSimulationData(ids));
+    // The inspected data also contains the connected objects so that the connections can be resolved, but they are not returned
+    auto entities = DescEditService::get().getObjects(_SimulationFacade::get()->getInspectedSimulationData(ids), ids);
 
     boost::json::array objects;
     boost::json::array energyParticles;

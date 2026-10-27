@@ -23,6 +23,7 @@ public:
     uint64_t getId(ExtendedObjectOrEnergyDesc const& entity) const;
     RealVector2D getPos(ExtendedObjectOrEnergyDesc const& entity) const;
     std::vector<ExtendedObjectOrEnergyDesc> getObjects(ContentDesc const& description) const;
+    std::vector<ExtendedObjectOrEnergyDesc> getObjects(ContentDesc const& description, std::vector<uint64_t> const& ids) const;  // In the order of the ids
 
     void setCenter(ContentDesc& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(ContentDesc const& collection) const;
