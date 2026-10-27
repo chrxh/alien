@@ -60,4 +60,18 @@ TEST_F(VideoWriterTests, writesMp4File)
 
     std::filesystem::remove(filename);
 }
+
+TEST_F(VideoWriterTests, cancel_removesFile)
+{
+    auto filename = createFilename("alien-video-writer-test-cancelled.mp4");
+    IntVector2D resolution{64, 48};
+    {
+        _VideoWriter writer(filename, resolution, 30, 1000000);
+        writer.addFrame(createImage(resolution, 0));
+        writer.cancel();
+        EXPECT_FALSE(writer.getError().has_value());
+    }
+
+    EXPECT_FALSE(std::filesystem::exists(filename));
+}
 #endif

@@ -296,6 +296,7 @@ namespace
 }
 
 _VideoWriter::_VideoWriter(std::filesystem::path const& filename, IntVector2D const& resolution, int fps, int bitRate)
+    : _filename(filename)
 {
     std::promise<void> encoderCreated;
     auto encoderCreation = encoderCreated.get_future();
@@ -319,7 +320,7 @@ _VideoWriter::_VideoWriter(std::filesystem::path const& filename, IntVector2D co
                 }
             }
         }
-        if (!getError()) {
+        if (!getError() && !isCancelled()) {
             try {
                 encoder->finish();
             } catch (std::exception const& exception) {
@@ -362,6 +363,20 @@ void _VideoWriter::finish()
     }
 }
 
+void _VideoWriter::cancel()
+{
+    {
+        std::lock_guard lock(_mutex);
+        _cancelled = true;
+        _frames.clear();
+    }
+    stopEncoding();
+
+    // The encoder has released the file when its thread ends
+    std::error_code errorCode;
+    std::filesystem::remove(_filename, errorCode);
+}
+
 std::optional<std::string> _VideoWriter::getError() const
 {
     std::lock_guard lock(_mutex);
@@ -382,6 +397,12 @@ std::optional<RgbImage> _VideoWriter::waitForFrame()
     }
     _condition.notify_all();
     return result;
+}
+
+bool _VideoWriter::isCancelled() const
+{
+    std::lock_guard lock(_mutex);
+    return _cancelled;
 }
 
 void _VideoWriter::setError(std::string const& error)

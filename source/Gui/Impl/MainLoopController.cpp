@@ -614,7 +614,11 @@ void MainLoopController::processMenubar()
         [&] { SimulationView::get().setRenderSimulation(!SimulationView::get().isRenderSimulation()); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Console mode").keyAlt(true).key(ImGuiKey_C).disabled(_programState != ProgramState::OperatingMode),
+        AlienGui::MenuItemParameters()
+            .name("Console mode")
+            .keyAlt(true)
+            .key(ImGuiKey_C)
+            .disabled(_programState != ProgramState::OperatingMode || CameraPathController::get().isRecording()),
         [&] { ConsoleModeController::get().activate(); });
     AlienGui::EndMenu();
 
