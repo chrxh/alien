@@ -28,17 +28,23 @@ public:
     // Writes the remaining frames and closes the file. Throws an AlienException if the video could not be written.
     void finish();
 
+    // Discards the video including its file, e.g. if it has no frames
+    void cancel();
+
     std::optional<std::string> getError() const;
 
 private:
     std::optional<RgbImage> waitForFrame();
+    bool isCancelled() const;
     void setError(std::string const& error);
     void stopEncoding();
 
+    std::filesystem::path _filename;
     std::thread _thread;
     mutable std::mutex _mutex;
     std::condition_variable _condition;
     std::deque<RgbImage> _frames;
     bool _finishing = false;
+    bool _cancelled = false;
     std::optional<std::string> _error;
 };

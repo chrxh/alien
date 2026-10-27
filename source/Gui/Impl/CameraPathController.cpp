@@ -64,6 +64,12 @@ void CameraPathController::setWaypoints(std::vector<CameraWaypoint> const& waypo
         waypoint.duration = std::clamp(waypoint.duration, CameraPath::MinDuration, MaxDuration);
         waypoint.timeLapse = std::clamp(waypoint.timeLapse, MinTimeLapse, MaxTimeLapse);
     }
+
+    // The playback needs a path, while the recording works with its own copy of it
+    if (_waypoints.size() < 2) {
+        _playbackStart.reset();
+        _playbackTime.reset();
+    }
 }
 
 float CameraPathController::getSmoothing() const
@@ -203,10 +209,10 @@ void CameraPathController::processCamera()
 void CameraPathController::init()
 {
     auto& settings = GlobalSettings::get();
-    _smoothing = settings.getValue("controllers.camera path.smoothing", _smoothing);
-    _fps = settings.getValue("controllers.camera path.fps", _fps);
-    _bitRate = settings.getValue("controllers.camera path.bit rate", _bitRate);
-    _timestepsPerSecond = settings.getValue("controllers.camera path.time steps per second", _timestepsPerSecond);
+    setSmoothing(settings.getValue("controllers.camera path.smoothing", _smoothing));
+    setFps(settings.getValue("controllers.camera path.fps", _fps));
+    setBitRate(settings.getValue("controllers.camera path.bit rate", _bitRate));
+    setTimestepsPerSecond(settings.getValue("controllers.camera path.time steps per second", _timestepsPerSecond));
 
     std::vector<CameraWaypoint> waypoints;
     auto numWaypoints = settings.getValue("controllers.camera path.number of waypoints", 0);
@@ -343,6 +349,11 @@ void CameraPathController::finishRecording(bool reportResult)
     simulationFacade->setSyncSimulationWithRendering(recording.syncSimulationWithRendering);
     simulationFacade->setSyncSimulationWithRenderingRatio(recording.syncSimulationWithRenderingRatio);
 
+    if (recording.frame == 0) {
+        recording.videoWriter->cancel();
+        log(Priority::Important, "recording of video " + recording.filename.string() + " stopped before its first frame");
+        return;
+    }
     try {
         recording.videoWriter->finish();
         log(Priority::Important, "video " + recording.filename.string() + " recorded with " + std::to_string(recording.frame) + " frames");

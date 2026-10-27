@@ -356,7 +356,9 @@ void CameraPathWindow::updateVideoInfo()
     auto& controller = CameraPathController::get();
     auto isUpToDate = _videoInfo && _videoInfo->waypoints == controller.getWaypoints() && _videoInfo->smoothing == controller.getSmoothing()
         && _videoInfo->fps == controller.getFps() && _videoInfo->timestepsPerSecond == controller.getTimestepsPerSecond();
-    if (isUpToDate) {
+
+    // While a value is edited, the previous key figures are kept, so that typing or dragging does not recalculate a long schedule each frame
+    if (isUpToDate || (_videoInfo && ImGui::IsAnyItemActive())) {
         return;
     }
     auto schedule = controller.createRecordingSchedule();
