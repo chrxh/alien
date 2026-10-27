@@ -20,6 +20,9 @@ public:
     void clearScreen(FloatColorRGB const& color) override;
     void render(ImDrawData* drawData) override;
 
+    void captureSimulationFrame() override;
+    std::optional<PictureData> fetchCapturedSimulationFrame() override;
+
     PictureData renderSimulationPicture(RenderView const& view) override;
     PictureData renderDrawList(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor, int supersampling) override;
 

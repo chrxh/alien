@@ -94,6 +94,9 @@ enum class VulkanMemory
     DeviceLocal,
     DeviceLocalShareable,
     HostVisible,
+
+    // Host visible memory that is cached on the host if possible, so that reading results back is fast
+    HostReadback,
 };
 
 void checkVkResult(VkResult result, char const* operation);
@@ -170,6 +173,7 @@ private:
 
     void exportSharedHandle(VulkanBuffer& buffer);
     uint32_t findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
+    std::optional<uint32_t> tryFindMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
     void runPendingDestructions(std::optional<uint64_t> completedFrameNumber);
 
     bool _active = false;
