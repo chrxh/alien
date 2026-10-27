@@ -12,6 +12,9 @@ class Viewport
     MAKE_SINGLETON(Viewport);
 
 public:
+    static auto constexpr MinZoomFactor = 0.02f;
+    static auto constexpr MaxZoomFactor = 200.0f;
+
     void setup();
 
     // Rendered pixels per world unit

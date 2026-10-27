@@ -26,6 +26,8 @@
 #include "AlienGui.h"
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
+#include "CameraPathController.h"
+#include "CameraPathWindow.h"
 #include "ConsoleModeController.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
@@ -300,6 +302,7 @@ void MainLoopController::processFadeInUI()
 
 void MainLoopController::processOperatingMode()
 {
+    CameraPathController::get().processCamera();
     SimulationView::get().draw();
 
     pushGlobalStyle();
@@ -618,6 +621,9 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassEditDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters().name("Camera path").keyAlt(true).key(ImGuiKey_K).selected(CameraPathWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { CameraPathWindow::get().setOn(!CameraPathWindow::get().isOn()); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);

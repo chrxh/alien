@@ -32,6 +32,8 @@
 #include "AutosaveWindow.h"
 #include "BrowserController.h"
 #include "BrowserWindow.h"
+#include "CameraPathController.h"
+#include "CameraPathWindow.h"
 #include "CreateUserDialog.h"
 #include "DelayedExecutionController.h"
 #include "DeleteUserDialog.h"
@@ -137,6 +139,8 @@ _MainWindow::_MainWindow()
     UploadSimulationDialog::get().setup();
     ReplaceSimulationDialog::get().setup();
     ImageToPatternDialog::get().setup();
+    CameraPathController::get().setup();
+    CameraPathWindow::get().setup();
     AutosaveController::get().setup();
     AutosaveWindow::get().setup();
     OverlayController::get().setup();

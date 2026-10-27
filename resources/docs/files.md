@@ -10,6 +10,7 @@ This chapter describes the files ALIEN works with, how simulations are saved aut
 | *.genome* | A single genome, as created in the genome editor. |
 | *.settings.json* | A set of simulation parameters including layers and radiation sources. It can be loaded into any simulation. |
 | *.png* | A picture created with **Simulation > Save picture**. |
+| *.mp4* | A video recorded with **Tools > Camera path**. |
 
 ## Opening and saving
 
