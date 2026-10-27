@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+#include <boost/algorithm/string.hpp>
+
 #include <imgui.h>
 
 #include <Fonts/AlienIconFont.h>
@@ -338,9 +340,10 @@ void CameraPathWindow::onDeleteWaypoint()
 void CameraPathWindow::onRecordVideo()
 {
     GenericFileDialog::get().showSaveFileDialog("Record video", "Video (*.mp4){.mp4},.*", _videoDirectory, [this](std::filesystem::path const& path) {
+        // Videos are always written as MP4 files, so that a file selected by mistake, e.g. a program, is not overwritten
         auto filename = path;
-        if (filename.extension().empty()) {
-            filename.replace_extension(".mp4");
+        if (!boost::iequals(filename.extension().string(), ".mp4")) {
+            filename += ".mp4";
         }
         _videoDirectory = std::filesystem::path(filename).remove_filename().string();
         try {

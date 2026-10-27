@@ -47,6 +47,21 @@ TEST_F(VideoWriterTests, oddResolution_isRejected)
     EXPECT_THROW(_VideoWriter(createFilename("alien-video-writer-test-odd.mp4"), {63, 48}, 30, 1000000), AlienException);
 }
 
+TEST_F(VideoWriterTests, fileThatCannotBeCreated_isReportedWithItsName)
+{
+    if (!isEncoderAvailable()) {
+        GTEST_SKIP() << "ffmpeg is not installed";
+    }
+
+    auto filename = std::filesystem::temp_directory_path() / "alien-video-writer-non-existent-folder" / "video.mp4";
+    try {
+        _VideoWriter writer(filename, {64, 48}, 30, 1000000);
+        ADD_FAILURE() << "The video should not be created in a folder that does not exist.";
+    } catch (AlienException const& exception) {
+        EXPECT_NE(std::string::npos, std::string(exception.what()).find(filename.string()));
+    }
+}
+
 TEST_F(VideoWriterTests, writesMp4File)
 {
     if (!isEncoderAvailable()) {
