@@ -59,7 +59,8 @@ namespace
         if (result == HRESULT_FROM_WIN32(ERROR_SHARING_VIOLATION)) {
             return std::format("{} is used by another program, e.g. a video player. Please close it there or choose another file name.", filename.string());
         }
-        return std::format("{} could not be created (error {:#010x}). Please choose another folder or file name.", filename.string(), static_cast<uint32_t>(result));
+        return std::format(
+            "{} could not be created (error {:#010x}). Please choose another folder or file name.", filename.string(), static_cast<uint32_t>(result));
     }
 
     // Windows N editions lack Media Foundation unless the Media Feature Pack is installed. Its functions are therefore looked up at run time
