@@ -78,6 +78,7 @@ EngineInterfaceTests.exe   (<1s)
 McpToolsTests.exe          (<1s)
 NetworkTests.exe           (<1s)
 PersisterTests.exe         (~1.4s)
+VideoTests.exe             (~1s)
 EngineTests.exe            (~150s — needs the GPU; do not cancel)
 ```
 
@@ -95,7 +96,7 @@ the executables land directly in it:
 ```
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 cmake --build build -j32
-cd build && ./BaseTests && ./DataTests && ./EngineInterfaceTests && ./McpToolsTests && ./NetworkTests && ./PersisterTests && ./EngineTests
+cd build && ./BaseTests && ./DataTests && ./EngineInterfaceTests && ./McpToolsTests && ./NetworkTests && ./PersisterTests && ./VideoTests && ./EngineTests
 ```
 
 The setup workflow already runs the configure step. The GUI (`./alien`) needs an X11
@@ -156,6 +157,8 @@ source/Rendering/Impl/            Vulkan rendering of the simulation and the use
 source/Rendering/Impl/Shaders/    GLSL shader sources
 source/Rendering/Interface/       Abstract rendering APIs, free of graphics API code
 source/Server/                    Python (FastAPI) server behind the cloud features
+source/Video/                     Camera paths and their recording as videos
+source/Video/Tests/               Video unit tests
 external/                         Third-party dependencies incl. the pinned vcpkg submodule
 resources/                        Runtime assets
 ```

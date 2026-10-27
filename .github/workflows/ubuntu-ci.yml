@@ -75,6 +75,7 @@ jobs:
         ./McpToolsTests
         ./NetworkTests
         ./PersisterTests
+        ./VideoTests
 
     - name: Check for engine source changes
       id: engine_changes
