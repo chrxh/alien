@@ -13,6 +13,7 @@
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
+#include "PictureGuiService.h"
 
 // Flies the camera along a path through waypoints and records the flight as a video. During the recording, the controller calculates the
 // time steps of the simulation itself, so that each frame of the video shows the simulation as many time steps later as the time-lapse
@@ -30,6 +31,7 @@ public:
     static auto constexpr DefaultFps = 30;
     static auto constexpr DefaultBitRate = 30;
     static auto constexpr DefaultTimestepsPerSecond = 60;
+    static auto constexpr DefaultTimeLapseShown = true;
 
     std::vector<CameraWaypoint> const& getWaypoints() const;
     void setWaypoints(std::vector<CameraWaypoint> const& waypoints);
@@ -48,6 +50,10 @@ public:
     // Speed of the simulation in the video at a time-lapse of 1
     int getTimestepsPerSecond() const;
     void setTimestepsPerSecond(int value);
+
+    // The current time-lapse is shown in the lower right corner of the view and the video
+    bool isTimeLapseShown() const;
+    void setTimeLapseShown(bool value);
 
     CameraWaypoint createWaypointFromView() const;
     void moveViewToWaypoint(CameraWaypoint const& waypoint) const;
@@ -93,12 +99,15 @@ private:
     void finishRecording(bool reportResult);
 
     void applyCameraState(CameraState const& state) const;
+    void drawTimeLapse(float timeLapse) const;
+    void drawTimeLapse(PictureData& frame);
 
     std::vector<CameraWaypoint> _waypoints;
     float _smoothing = DefaultSmoothing;
     int _fps = DefaultFps;
     int _bitRate = DefaultBitRate;
     int _timestepsPerSecond = DefaultTimestepsPerSecond;
+    bool _timeLapseShown = DefaultTimeLapseShown;
 
     std::optional<std::chrono::steady_clock::time_point> _playbackStart;
     std::optional<float> _playbackTime;
@@ -115,6 +124,10 @@ private:
         int numViewRenderings = 0;
         bool captureRequested = false;
         uint64_t maxTimestepsPerFrame = 1;
+
+        // The label of the time-lapse is only rendered again when its text changes
+        std::string timeLapseText;
+        std::optional<PictureGuiService::OverlayText> timeLapseLabel;
 
         // Settings of the simulation that the recording overrides
         bool syncSimulationWithRendering = false;

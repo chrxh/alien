@@ -1,6 +1,7 @@
 #include "CameraPathController.h"
 
 #include <algorithm>
+#include <format>
 
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
@@ -26,8 +27,18 @@ namespace
     // video is therefore only captured once its view has been rendered before, at the start several times.
     auto constexpr NumViewRenderingsAtStart = 10;
 
+    // Like the overlay messages, the time-lapse is shown in the monospace font, here in the lower right corner of the view and the video. Its
+    // size is relative to their height.
+    auto constexpr TimeLapseFontSize = 0.045f;
+    auto constexpr TimeLapseMargin = 0.025f;
+
+    std::string formatTimeLapse(float timeLapse)
+    {
+        return timeLapse < 10.0f ? std::format("{:.1f}x", timeLapse) : std::format("{:.0f}x", timeLapse);
+    }
+
     // The resolution of the video is fixed when the recording starts, while the view might have changed since then
-    RgbImage toVideoFrame(PictureData&& picture, IntVector2D const& resolution)
+    PictureData fitToResolution(PictureData&& picture, IntVector2D const& resolution)
     {
         auto isCroppable = picture.resolution.x >= resolution.x && picture.resolution.y >= resolution.y && picture.resolution.x <= resolution.x + 1
             && picture.resolution.y <= resolution.y + 1;
@@ -35,11 +46,11 @@ namespace
             picture = PictureGuiService::get().scale(picture, resolution);
         }
         if (picture.resolution == resolution) {
-            return RgbImage{.width = resolution.x, .height = resolution.y, .pixels = std::move(picture.pixels)};
+            return std::move(picture);
         }
 
         // An odd view size loses its last column or row since the video needs an even width and height
-        RgbImage result{.width = resolution.x, .height = resolution.y};
+        PictureData result{.resolution = resolution};
         auto rowSize = static_cast<size_t>(resolution.x) * PictureData::NumChannels;
         auto pictureRowSize = static_cast<size_t>(picture.resolution.x) * PictureData::NumChannels;
         result.pixels.reserve(rowSize * resolution.y);
@@ -110,6 +121,16 @@ int CameraPathController::getTimestepsPerSecond() const
 void CameraPathController::setTimestepsPerSecond(int value)
 {
     _timestepsPerSecond = std::clamp(value, 1, 100000);
+}
+
+bool CameraPathController::isTimeLapseShown() const
+{
+    return _timeLapseShown;
+}
+
+void CameraPathController::setTimeLapseShown(bool value)
+{
+    _timeLapseShown = value;
 }
 
 CameraWaypoint CameraPathController::createWaypointFromView() const
@@ -204,6 +225,14 @@ void CameraPathController::processCamera()
     } else if (_playbackStart) {
         processPlayback();
     }
+
+    if (_timeLapseShown) {
+        if (_recording) {
+            drawTimeLapse(_recording->schedule.getCameraState(_recording->frame).timeLapse);
+        } else if (_playbackTime) {
+            drawTimeLapse(createPath().getState(*_playbackTime).timeLapse);
+        }
+    }
 }
 
 void CameraPathController::init()
@@ -213,6 +242,7 @@ void CameraPathController::init()
     setFps(settings.getValue("controllers.camera path.fps", _fps));
     setBitRate(settings.getValue("controllers.camera path.bit rate", _bitRate));
     setTimestepsPerSecond(settings.getValue("controllers.camera path.time steps per second", _timestepsPerSecond));
+    setTimeLapseShown(settings.getValue("controllers.camera path.show time-lapse", _timeLapseShown));
 
     std::vector<CameraWaypoint> waypoints;
     auto numWaypoints = settings.getValue("controllers.camera path.number of waypoints", 0);
@@ -240,6 +270,7 @@ void CameraPathController::shutdown()
     settings.setValue("controllers.camera path.fps", _fps);
     settings.setValue("controllers.camera path.bit rate", _bitRate);
     settings.setValue("controllers.camera path.time steps per second", _timestepsPerSecond);
+    settings.setValue("controllers.camera path.show time-lapse", _timeLapseShown);
 
     settings.setValue("controllers.camera path.number of waypoints", toInt(_waypoints.size()));
     for (int index = 0; index < toInt(_waypoints.size()); ++index) {
@@ -283,7 +314,11 @@ void CameraPathController::processRecording()
 
         // A frame that has not been shown, e.g. due to a minimized window, is captured again
         if (auto picture = _RenderingFacade::get()->fetchCapturedSimulationFrame()) {
-            recording.videoWriter->addFrame(toVideoFrame(std::move(*picture), recording.resolution));
+            auto frame = fitToResolution(std::move(*picture), recording.resolution);
+            if (_timeLapseShown) {
+                drawTimeLapse(frame);
+            }
+            recording.videoWriter->addFrame(RgbImage{.width = frame.resolution.x, .height = frame.resolution.y, .pixels = std::move(frame.pixels)});
             recording.pendingTimesteps = recording.schedule.getTimestepsAfterFrame(recording.frame);
             recording.numViewRenderings = 0;
             ++recording.frame;
@@ -372,4 +407,28 @@ void CameraPathController::applyCameraState(CameraState const& state) const
 {
     Viewport::get().setCenterInWorldPos(state.center);
     Viewport::get().setZoomFactor(state.zoom);
+}
+
+void CameraPathController::drawTimeLapse(float timeLapse) const
+{
+    auto viewport = ImGui::GetMainViewport();
+    auto margin = viewport->Size.y * TimeLapseMargin;
+    PictureGuiService::get().drawOverlayText(
+        ImGui::GetBackgroundDrawList(),
+        formatTimeLapse(timeLapse),
+        viewport->Size.y * TimeLapseFontSize,
+        {viewport->Pos.x + viewport->Size.x - margin, viewport->Pos.y + viewport->Size.y - margin});
+}
+
+void CameraPathController::drawTimeLapse(PictureData& frame)
+{
+    auto& recording = *_recording;
+    auto text = formatTimeLapse(recording.schedule.getCameraState(recording.frame).timeLapse);
+    auto height = toFloat(frame.resolution.y);
+    if (!recording.timeLapseLabel || recording.timeLapseText != text) {
+        recording.timeLapseLabel = PictureGuiService::get().renderOverlayText(text, height * TimeLapseFontSize);
+        recording.timeLapseText = text;
+    }
+    auto margin = toInt(height * TimeLapseMargin);
+    PictureGuiService::get().drawOverlayText(frame, *recording.timeLapseLabel, {frame.resolution.x - margin, frame.resolution.y - margin});
 }

@@ -24,7 +24,7 @@
 namespace
 {
     auto constexpr RightColumnWidth = 255.0f;
-    auto constexpr DefaultSettingsHeight = 170.0f;
+    auto constexpr DefaultSettingsHeight = 196.0f;
     auto constexpr RowHeight = 23.0f;
     auto constexpr DefaultDuration = 5.0f;
 
@@ -41,7 +41,7 @@ namespace
 }
 
 CameraPathWindow::CameraPathWindow()
-    : AlienWindow("Camera path", "windows.camera path", false, true, {60.0f, 80.0f}, {700.0f, 520.0f})
+    : AlienWindow("Camera path", "windows.camera path", false, true, {60.0f, 80.0f}, {700.0f, 546.0f})
 {}
 
 void CameraPathWindow::initIntern()
@@ -271,6 +271,17 @@ void CameraPathWindow::processSettings()
                                  "smoothly on the way to the next one."),
                     timestepsPerSecond)) {
                 controller.setTimestepsPerSecond(timestepsPerSecond);
+            }
+
+            auto timeLapseShown = controller.isTimeLapseShown();
+            if (AlienGui::Checkbox(
+                    AlienGui::CheckboxParameters()
+                        .name("Show time-lapse")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(&CameraPathController::DefaultTimeLapseShown)
+                        .tooltip("Shows the current time-lapse factor, e.g. 2.5x, in the lower right corner of the view and the video."),
+                    &timeLapseShown)) {
+                controller.setTimeLapseShown(timeLapseShown);
             }
 
             ImGui::EndDisabled();
