@@ -495,6 +495,8 @@ TEST_F(DescEditServiceTests, getObjects_withIds_onlyRequestedEntitiesInOrderOfId
     auto const& cell = std::get<ExtendedObjectDesc>(entities.at(0));
     ASSERT_TRUE(cell.creature.has_value());
     EXPECT_EQ(10, cell.creature->_id);
+    ASSERT_TRUE(cell.genome.has_value());
+    EXPECT_EQ(100, cell.genome->_id);
 }
 
 TEST_F(DescEditServiceTests, getObjects_withIdOfConnectedCell_connectionsToOtherCellsKept)

@@ -381,6 +381,39 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     EXPECT_EQ(genome, *genomeIt);
 }
 
+TEST_F(DataTransferTests, getInspectedSimulationData_filteredByIds_requestedObjectsKeepAllConnections)
+{
+    ContentDesc data;
+    data.addCreature(
+        {ObjectDesc().id(1).pos({10.0f, 10.0f}), ObjectDesc().id(2).pos({11.0f, 10.0f}), ObjectDesc().id(3).pos({12.0f, 10.0f})}, CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->testOnly_zeroTransferData();
+    auto inspectedData = _simulationFacade->getInspectedSimulationData({1});
+    ASSERT_EQ(2, inspectedData._objects.size());
+    EXPECT_EQ(1, inspectedData.getObjectRef(2)._connections.size());
+
+    auto entitiesForId1 = DescEditService::get().getObjects(inspectedData, {1});
+    ASSERT_EQ(1, entitiesForId1.size());
+    auto const& object1 = std::get<ExtendedObjectDesc>(entitiesForId1.front()).object;
+    EXPECT_EQ(1, object1._id);
+    ASSERT_EQ(1, object1._connections.size());
+    EXPECT_EQ(2, object1._connections.front()._objectId);
+
+    auto entitiesForId2 = DescEditService::get().getObjects(_simulationFacade->getInspectedSimulationData({2}), {2});
+    ASSERT_EQ(1, entitiesForId2.size());
+    auto const& object2 = std::get<ExtendedObjectDesc>(entitiesForId2.front()).object;
+    EXPECT_EQ(2, object2._id);
+    std::vector<uint64_t> connectedIds;
+    for (auto const& connection : object2._connections) {
+        connectedIds.emplace_back(connection._objectId);
+    }
+    std::ranges::sort(connectedIds);
+    EXPECT_EQ((std::vector<uint64_t>{1, 3}), connectedIds);
+}
+
 TEST_F(DataTransferTests, adaptIdGenerator_objects)
 {
     auto constexpr HighId = 1000000;
