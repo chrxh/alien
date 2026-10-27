@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
 
 #include <imgui.h>
@@ -50,6 +51,11 @@ public:
     virtual void clearScreen(FloatColorRGB const& color) = 0;
 
     virtual void render(ImDrawData* drawData) = 0;
+
+    // The simulation of the current frame is copied without the user interface, e.g. for videos. The copy can be fetched once the frame is
+    // rendered. Frames that are not shown, e.g. while the window is minimized, provide no copy.
+    virtual void captureSimulationFrame() = 0;
+    virtual std::optional<PictureData> fetchCapturedSimulationFrame() = 0;
 
     //***********
     //* Pictures
