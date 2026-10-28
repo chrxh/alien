@@ -91,9 +91,8 @@ answer `{"result": false}` beyond it.
 Every running instance of the graphical program fetches
 `/getversionedsimulationlist` on startup and then every 20 minutes. The
 command-line interface does not need that list and calls
-`/reportactivesimulator` instead, after one minute of simulation and then every
-20 minutes. The server remembers a keyed hash of each caller's IP address
-for 25 minutes and `/getactivesimulatorcount` answers with the number of these
+`/reportactivesimulator` instead, every 5 minutes after its start. The server
+remembers a keyed hash of each caller's IP address for 25 minutes and `/getactivesimulatorcount` answers with the number of these
 hashes. The key is random per server start, and the hashes live only in memory,
 never in the database. Clients whose user disabled the option send
 `countAsActive=false` or do not report and are not recorded.

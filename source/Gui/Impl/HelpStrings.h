@@ -50,7 +50,7 @@ namespace Const
 
     std::string const BrowserActiveSimulatorsTooltip =
         "Number of ALIEN instances that reported to the server in the last 25 minutes, including the command-line interface and instances without a login. "
-        "The program reports on startup, the command-line interface after one minute of simulation, and both then every 20 minutes.\n\nInstances are told "
+        "The program reports on startup and then every 20 minutes, the command-line interface every 5 minutes.\n\nInstances are told "
         "apart by a hash of their IP address that the server keeps only in memory for 25 minutes and never stores. Instances sharing one IP address count "
         "once. Instances where 'Count me as active' is disabled in the network settings are not included.";
 

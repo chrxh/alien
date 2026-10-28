@@ -1,17 +1,15 @@
 target_sources(alien-cli
 PUBLIC
-    ActiveSimulatorReporter.cpp
-    ActiveSimulatorReporter.h
     CommandLineArguments.h
     CommandLineParser.cpp
     CommandLineParser.h
     ConsoleOutput.cpp
     ConsoleOutput.h
-    LoginSession.cpp
-    LoginSession.h
     Main.cpp
     PeriodicUploader.cpp
     PeriodicUploader.h
+    ServerSession.cpp
+    ServerSession.h
     SimulationRunner.cpp
     SimulationRunner.h)
 

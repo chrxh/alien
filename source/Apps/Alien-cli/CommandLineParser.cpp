@@ -41,8 +41,8 @@ std::optional<int> CommandLineParser::parse(CommandLineArguments& arguments, int
     app.add_flag(
         "--no-count-as-active",
         arguments.noCountAsActive,
-        "Excludes this run from the number of active simulators shown in the browser of the graphical program. Otherwise it is counted after one minute "
-        "of simulation, also without a login, unless 'Count me as active' is disabled in the network settings of the graphical program.");
+        "Excludes this run from the number of active simulators shown in the browser of the graphical program. Otherwise it reports to the alien server "
+        "every 5 minutes, also without a login, unless 'Count me as active' is disabled in the network settings of the graphical program.");
 
     try {
         app.parse(argc, argv);
