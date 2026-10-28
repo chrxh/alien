@@ -312,7 +312,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     UnlockGuard unlockGuard(lock);
 
     NetworkService::get().refreshLogin();
-    NetworkService::get().reportActiveSimulator();
 
     GetNetworkResourcesResultData data;
 

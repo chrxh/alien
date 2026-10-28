@@ -236,17 +236,17 @@ def health():
 
 
 # --- Active simulator count ---
-# Every running instance of the graphical program calls
-# ``/reportactivesimulator`` on startup and then every 20 minutes, the
-# command-line interface every 5 minutes after its start. Older versions of the
-# graphical program are counted by their fetch of ``/getversionedsimulationlist``
-# instead, which happens at the same times. The server remembers the callers of
-# the last ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` to count the running simulators.
-# Callers are told apart by a keyed hash of their IP address. The key is
-# random, created at server start and never stored, and the hashes are kept in
-# memory only. Clients that opt out do not report and send
-# ``countAsActive=false`` with the list fetch, so they are not recorded. This
-# requires a single server process, which is how the server is deployed.
+# Every running instance of the graphical program fetches
+# ``/getversionedsimulationlist`` on startup and then every 20 minutes. The
+# command-line interface does not need that list and calls
+# ``/reportactivesimulator`` instead, every 5 minutes after its start. The
+# server remembers the callers of the last ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS``
+# to count the running simulators. Callers are told apart by a keyed hash of
+# their IP address. The key is random,
+# created at server start and never stored, and the hashes are kept in memory
+# only. Clients that opt out send ``countAsActive=false`` or do not report and
+# are not recorded. This requires a single server process, which is how the
+# server is deployed.
 ACTIVE_SIMULATOR_TIMEOUT_SECONDS = 25 * 60
 MAX_ACTIVE_SIMULATORS = 100_000
 
