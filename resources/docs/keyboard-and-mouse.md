@@ -64,7 +64,7 @@ A compact list of all mouse actions and keyboard shortcuts. Shortcuts do not wor
 | Alt+C | Console mode. In the console, Esc returns and Q quits. |
 | Alt+H | Mass operations |
 | Alt+Y | Image converter |
-| Alt+R | Recorder |
+| Alt+V | Recorder |
 
 ## Network
 

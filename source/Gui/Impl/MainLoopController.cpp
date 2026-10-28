@@ -626,7 +626,7 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassEditDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Recorder").keyAlt(true).key(ImGuiKey_R).selected(RecorderWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("Recorder").keyAlt(true).key(ImGuiKey_V).selected(RecorderWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { RecorderWindow::get().setOn(!RecorderWindow::get().isOn()); });
     AlienGui::EndMenu();
 

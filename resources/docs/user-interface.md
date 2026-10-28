@@ -64,7 +64,7 @@ The chapter [Sandbox and editing](sandbox.md) explains these tools in depth.
 | **Windows** | Temporal control (Alt+1), Spatial control (Alt+2), Evolution dashboard (Alt+3), Simulation parameters (Alt+4), Autosave (Alt+5), MCP server (Alt+6), Log (Alt+7) |
 | **Editor** | Genome editor (Alt+W), Allow object editing (Alt+E), Inspect objects (Alt+N), Inspect genomes (Alt+F), Inspect creatures (Alt+P), Close inspections and Deselect (Esc), Copy (Ctrl+C), Paste (Ctrl+V), Delete |
 | **View** | Cell info overlay (Alt+O), Message overlay (Alt+X), Render UI (Alt+U), Render simulation (Alt+I), Console mode (Alt+C) |
-| **Tools** | Mass operations (Alt+H), Image converter (Alt+Y), Recorder (Alt+R) |
+| **Tools** | Mass operations (Alt+H), Image converter (Alt+Y), Recorder (Alt+V) |
 | **Settings** | Save on exit, Dark mode, Display settings, Network settings, Debug mode |
 | **Help** | About, Documentation (F1) |
 
