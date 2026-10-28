@@ -83,8 +83,8 @@ struct DetonationEventVertexData
     float radius;  // Detonator radius
 };
 
-// Visible sizes of the objects close up in the ray traced view. The shadow grid measures the area of the objects outside the extracted region with
-// them.
+// Visible sizes of the objects close up in the ray traced view. The shadow grid measures the area of the objects outside the extracted region
+// with their radii.
 struct RayTracedObjectSizes
 {
     static constexpr float CellRadius = 0.34f;
@@ -110,7 +110,7 @@ struct GeometryRequest
 };
 
 // Fixed point sums of the objects around a node of the shadow grid, each object is distributed bilinearly over the four nodes around it. The
-// areas include the shares of the objects in their strands and polygons.
+// areas are those of the disks of the objects, whose strands and polygons overlap the disks.
 struct ShadowGridNodeData
 {
     static constexpr float FixedPointScale = 1024.0f;
