@@ -533,7 +533,7 @@ TEST_F(GeometryTests, copyBuffers_shadowGridCollectsFluidsOutsideVisibleRect)
     EXPECT_NEAR(0.125f, getFluids(51, 21), 0.01f);
 }
 
-TEST_F(GeometryTests, copyBuffers_shadowGridCoversCellsWithTheirStrands)
+TEST_F(GeometryTests, copyBuffers_shadowGridCoversConnectedCellsWithTheirDisks)
 {
     auto data = ContentDesc().addCreature({
         ObjectDesc().id(1).pos({50.0f, 50.0f}),
@@ -547,11 +547,11 @@ TEST_F(GeometryTests, copyBuffers_shadowGridCoversCellsWithTheirStrands)
 
     _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect, .shadowGrid = shadowGridLayout});
 
-    // Each cell covers its disk and half of the strand of length 1
+    // Only the disks count, not the strand between them, like the spheres in the occlusion of the extracted objects
     auto nodes = geometryBuffers->getShadowGridData();
     auto tissueArea = sumShadowGrid(nodes, [](auto const& node) { return node.tissueArea; });
     auto cellRadius = RayTracedObjectSizes::CellRadius;
-    EXPECT_NEAR(2.0f * (Const::Pi * cellRadius * cellRadius + RayTracedObjectSizes::StrandHalfWidth), tissueArea, 0.01f);
+    EXPECT_NEAR(2.0f * Const::Pi * cellRadius * cellRadius, tissueArea, 0.01f);
     EXPECT_FLOAT_EQ(0.0f, sumShadowGrid(nodes, [](auto const& node) { return node.numFluids; }));
     EXPECT_FLOAT_EQ(0.0f, sumShadowGrid(nodes, [](auto const& node) { return node.solidArea; }));
 

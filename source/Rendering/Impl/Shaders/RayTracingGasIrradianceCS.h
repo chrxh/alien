@@ -176,8 +176,8 @@ float getDiskChordIntegral(float distance, float radius)
     return x * sqrt(max(radius * radius - x * x, 0.0)) + radius * radius * asin(clamp(x / radius, -1.0, 1.0));
 }
 
-// A beam has the given widths at the start and at the end of the path and changes its width linearly in between. In its near part, which the
-// ray query covers, it is not wider than the enlargement of the bounding boxes allows, see getNearFade.
+// A beam has the given widths at the start and at the end of the path and changes its width linearly in between. For the ray query, it is not
+// wider than the enlargement of the bounding boxes allows, see getNearFade.
 float getBeamWidth(vec2 beamWidths, float along, float pathLength)
 {
     return min(mix(beamWidths.x, beamWidths.y, clamp(along / pathLength, 0.0, 1.0)), getMaxBeamWidth());
@@ -281,11 +281,17 @@ vec4 getTriangleChords(vec2 origin, vec2 direction, float pathLength, vec2 beamW
 }
 )"
                                                        R"(
-// The near part of a beam is not wider than the enlargement of the bounding boxes allows, so that the ray query finds the objects across its
-// width. Farther away, the beams of wide shining parts become wider and take the occlusion of the extracted objects from the occlusion
-// pyramid, see getGridOpticalDepth, so that they cover the shining part without gaps between them. Over the end of the near part, the objects
-// found by the ray query fade out and the occlusion pyramid fades in. Returns the distances along the path where the fade starts and ends.
-const float NearFadeStartWidth = 0.6;  // Relative to the maximum width of the beams
+// The ray query finds the objects across the width of a beam as long as it is not wider than the enlargement of the bounding boxes allows.
+// Farther away, the beams of wide shining parts become wider and take the occlusion of the extracted objects from the occlusion pyramid, see
+// getGridOpticalDepth, so that they cover the shining part without gaps between them. Over the end of the near part, the objects found by the
+// ray query fade out and the occlusion pyramid fades in. Where the beams at the end of the path just become wider than the maximum width, the
+// fade is shifted towards wider beams by its own length, and the shift vanishes until their width at the end reaches UnshiftedNearFadeWidth.
+// The fade thus enters the paths from their ends as the distance to the source grows, instead of appearing in their middle at a certain
+// distance and drawing a circle around the source. The ray query takes beams wider than the maximum width as wide as the maximum width, see
+// getBeamWidth, so that the objects beside them only count with the share of the occlusion pyramid. Returns the distances along the path
+// where the fade starts and ends.
+const float NearFadeStartWidth = 0.6;      // Relative to the maximum width of the beams
+const float UnshiftedNearFadeWidth = 2.0;  // Width of the beams at the end of the path relative to the maximum width above which the fade is not shifted
 
 vec2 getNearFade(vec2 beamWidths, float pathLength)
 {
@@ -293,16 +299,18 @@ vec2 getNearFade(vec2 beamWidths, float pathLength)
     if (beamWidths.y <= maxWidth) {
         return vec2(2.0, 3.0) * pathLength;
     }
+    float shift = (1.0 - NearFadeStartWidth) * maxWidth * (1.0 - smoothstep(maxWidth, UnshiftedNearFadeWidth * maxWidth, beamWidths.y));
     float widthRange = beamWidths.y - beamWidths.x;
-    float fadeEnd = max((maxWidth - beamWidths.x) / widthRange, 1e-3);
-    float fadeStart = clamp((NearFadeStartWidth * maxWidth - beamWidths.x) / widthRange, 0.0, fadeEnd);
+    float fadeEnd = max((maxWidth + shift - beamWidths.x) / widthRange, 1e-3);
+    float fadeStart = clamp((NearFadeStartWidth * maxWidth + shift - beamWidths.x) / widthRange, 0.0, fadeEnd);
     return vec2(fadeStart, fadeEnd) * pathLength;
 }
 
-// Share of an object at the given distance along the path that the ray query adds
-float getNearWeight(vec2 nearFade, float along)
+// Share of an object at the given distance along the path that the ray query adds. Objects that reach beyond the end of the path count as at
+// its end.
+float getNearWeight(vec2 nearFade, float along, float pathLength)
 {
-    return 1.0 - smoothstep(nearFade.x, nearFade.y, along);
+    return 1.0 - smoothstep(nearFade.x, nearFade.y, min(along, pathLength));
 }
 
 // Optical depth that an object found by the ray query adds along the near part of the beam, see getObjectTransmittance
@@ -310,7 +318,7 @@ vec3 getCandidateOpticalDepth(uint kind, uint primitive, vec2 origin, vec2 direc
 {
     if (kind == Kind_Sphere) {
         Sphere sphere = spheres[primitive];
-        float weight = getNearWeight(nearFade, dot(sphere.centerRadius.xy - origin, direction));
+        float weight = getNearWeight(nearFade, dot(sphere.centerRadius.xy - origin, direction), pathLength);
         if (weight <= 0.0) {
             return vec3(0.0);
         }
@@ -319,7 +327,7 @@ vec3 getCandidateOpticalDepth(uint kind, uint primitive, vec2 origin, vec2 direc
     if (kind == Kind_Capsule) {
         uint entry = getCapsuleShadowEntry(primitive);
         vec4 ends = shadowCasters[entry];
-        float weight = getNearWeight(nearFade, dot(0.5 * (ends.xy + ends.zw) - origin, direction));
+        float weight = getNearWeight(nearFade, dot(0.5 * (ends.xy + ends.zw) - origin, direction), pathLength);
         if (weight <= 0.0) {
             return vec3(0.0);
         }
@@ -330,7 +338,7 @@ vec3 getCandidateOpticalDepth(uint kind, uint primitive, vec2 origin, vec2 direc
         uint entry = getTriangleShadowEntry(primitive);
         vec4 cornersAB = shadowCasters[entry];
         vec4 cornerC = shadowCasters[entry + 1u];
-        float weight = getNearWeight(nearFade, dot((cornersAB.xy + cornersAB.zw + cornerC.xy) / 3.0 - origin, direction));
+        float weight = getNearWeight(nearFade, dot((cornersAB.xy + cornersAB.zw + cornerC.xy) / 3.0 - origin, direction), pathLength);
         if (weight <= 0.0) {
             return vec3(0.0);
         }

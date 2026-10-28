@@ -897,9 +897,9 @@ namespace
         float solidArea = 0.0f;
     };
 
-    // An object covers its disk, half of each strand to its connected objects and an equal share of each polygon at its corners, like in the
-    // shadows of the ray traced view
-    __device__ __inline__ float getShadowArea(SimulationData const& data, Object* object)
+    // An object covers its disk, like the spheres in the occlusion of the extracted objects in the ray traced view. Its strands and polygons
+    // overlap the disks of the connected objects and each other, see Rendering/Impl/Shaders/RayTracingPrepareCS.h.
+    __device__ __inline__ float getShadowArea(Object* object)
     {
         auto radius = RayTracedObjectSizes::CellRadius;
         if (object->type == ObjectType_Solid) {
@@ -907,37 +907,18 @@ namespace
         } else if (object->type == ObjectType_FreeCell) {
             radius = RayTracedObjectSizes::FreeCellRadius;
         }
-        auto result = Const::PI * radius * radius;
-
-        int numConnections = object->numConnections;
-        float2 directions[MAX_OBJECT_CONNECTIONS];
-        for (int i = 0; i < numConnections; ++i) {
-            directions[i] = data.world.getCorrectedDirection(object->connections[i].object->pos - object->pos);
-            result += RayTracedObjectSizes::StrandHalfWidth * Math::length(directions[i]);
-        }
-        if (numConnections <= 1) {
-            return result;
-        }
-        forEachSector(object, [&](int i, int prevIndex, Sector const& sector) {
-            if (sector.isTriangle) {
-                result += abs(Math::cross(directions[prevIndex], directions[i]).z) / 6.0f;
-            } else if (sector.quadCorner != nullptr) {
-                auto toQuadCorner = data.world.getCorrectedDirection(sector.quadCorner->pos - object->pos);
-                result += (abs(Math::cross(directions[i], toQuadCorner).z) + abs(Math::cross(toQuadCorner, directions[prevIndex]).z)) / 8.0f;
-            }
-        });
-        return result;
+        return Const::PI * radius * radius;
     }
 
     // The hue is derived as in getHue of Rendering/Impl/Shaders/RayTracingCommonCS.h
-    __device__ __inline__ ShadowContribution getShadowContribution(SimulationData const& data, Object* object)
+    __device__ __inline__ ShadowContribution getShadowContribution(Object* object)
     {
         ShadowContribution result;
         if (object->type == ObjectType_Fluid) {
             result.numFluids = 1.0f;
             return result;
         }
-        auto area = getShadowArea(data, object);
+        auto area = getShadowArea(object);
         if (object->type == ObjectType_Solid) {
             result.solidArea = area;
             return result;
@@ -1022,7 +1003,7 @@ cudaExtractShadowGrid(SimulationData data, ShadowGridNodeData* shadowGrid, Geome
         if (extracted && copiesX.isOriginalOnly() && copiesY.isOriginalOnly()) {
             continue;
         }
-        auto contribution = getShadowContribution(data, object);
+        auto contribution = getShadowContribution(object);
         for (int copyY = copiesY.first; copyY <= copiesY.last; ++copyY) {
             for (int copyX = copiesX.first; copyX <= copiesX.last; ++copyX) {
                 if (extracted && copyX == 0 && copyY == 0) {

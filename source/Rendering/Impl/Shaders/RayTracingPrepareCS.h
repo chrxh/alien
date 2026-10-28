@@ -5,8 +5,10 @@
 namespace Shaders
 {
     // Derives the objects from the geometry buffers and creates the bounding boxes of the groups that form the tissue: each cell alone, each
-    // connection together with its two cells and each triangle together with its corners. With radiation sources, the objects also add their
-    // occlusion to the gas grid, see Shaders/RayTracingOcclusionCS.h.
+    // connection together with its two cells and each triangle together with its corners. With radiation sources, the spheres also add their
+    // occlusion to the gas grid, see Shaders/RayTracingOcclusionCS.h. The strands and the triangles do not: they overlap the spheres and each
+    // other, while the occlusion of the gas grid adds up as if the objects lay independently of each other. With them, the creatures would
+    // shade the far part of the beams several times as much as the ray query sees them shade the near part. The spheres alone come close to it.
     std::string_view const RayTracingPrepareCS = R"(
 Sphere createSphere(uint index)
 {
@@ -124,12 +126,6 @@ void main()
             uint entry = getCapsuleShadowEntry(index);
             shadowCasters[entry] = vec4(a.centerRadius.xy, b.centerRadius.xy);
             shadowCasters[entry + 1u] = vec4(getAbsorption(a) + getAbsorption(b), 0.0);
-            if (enabled) {
-                float strandLength = length(b.centerRadius.xy - a.centerRadius.xy);
-                vec3 occlusion = getOcclusion(
-                    2.0 * strandLength + 4.0 * StrandHalfWidth, 2.0 * StrandHalfWidth * strandLength, 0.5 * (getAbsorption(a) + getAbsorption(b)));
-                addOcclusion(0.5 * (a.centerRadius.xy + b.centerRadius.xy), occlusion);
-            }
         }
     }
     if (index < frame.counts.z) {
@@ -151,14 +147,6 @@ void main()
             shadowCasters[entry] = vec4(a.centerRadius.xy, b.centerRadius.xy);
             shadowCasters[entry + 1u] = vec4(c.centerRadius.xy, 0.0, 0.0);
             shadowCasters[entry + 2u] = vec4(getAbsorption(a) + getAbsorption(b) + getAbsorption(c), 0.0);
-            if (enabled) {
-                vec2 ab = b.centerRadius.xy - a.centerRadius.xy;
-                vec2 ac = c.centerRadius.xy - a.centerRadius.xy;
-                float perimeter = length(ab) + length(ac) + length(c.centerRadius.xy - b.centerRadius.xy);
-                float area = 0.5 * abs(ab.x * ac.y - ab.y * ac.x);
-                vec3 occlusion = getOcclusion(perimeter, area, (getAbsorption(a) + getAbsorption(b) + getAbsorption(c)) / 3.0);
-                addOcclusion((a.centerRadius.xy + b.centerRadius.xy + c.centerRadius.xy) / 3.0, occlusion);
-            }
         }
     }
 }

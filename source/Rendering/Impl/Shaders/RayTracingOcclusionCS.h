@@ -5,7 +5,7 @@
 namespace Shaders
 {
     // Computes a level of an occlusion pyramid, which is defined in front of the source together with the grid of the pyramid. The pyramid of
-    // the gas grid holds the extracted objects. Its first level is the occlusion per area that they add to the nodes of the gas grid, see
+    // the gas grid holds the extracted objects. Its first level is the occlusion per area that their spheres add to the nodes of the gas grid, see
     // Shaders/RayTracingPrepareCS.h. The pyramid of the shadow grid holds the objects outside the extracted region, its first level is the
     // shadow grid image, see Shaders/RayTracingShadowGridCS.h. Each following level is blurred and downsampled from the level before, so that
     // a beam of the light of the radiation sources finds the occlusion across its width at the level whose node distance matches it, see
