@@ -23,7 +23,7 @@
 
 namespace
 {
-    auto constexpr RightColumnWidth = 255.0f;
+    auto constexpr RightColumnWidth = 280.0f;
     auto constexpr DefaultSettingsHeight = 222.0f;
     auto constexpr RowHeight = 23.0f;
     auto constexpr DefaultDuration = 5.0f;
