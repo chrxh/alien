@@ -26,8 +26,6 @@
 #include "AlienGui.h"
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
-#include "CameraPathController.h"
-#include "CameraPathWindow.h"
 #include "ConsoleModeController.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
@@ -48,6 +46,8 @@
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
+#include "RecorderController.h"
+#include "RecorderWindow.h"
 #include "SavePictureDialog.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
@@ -302,7 +302,7 @@ void MainLoopController::processFadeInUI()
 
 void MainLoopController::processOperatingMode()
 {
-    CameraPathController::get().processCamera();
+    RecorderController::get().processCamera();
     SimulationView::get().draw();
 
     pushGlobalStyle();
@@ -618,7 +618,7 @@ void MainLoopController::processMenubar()
             .name("Console mode")
             .keyAlt(true)
             .key(ImGuiKey_C)
-            .disabled(_programState != ProgramState::OperatingMode || CameraPathController::get().isRecording()),
+            .disabled(_programState != ProgramState::OperatingMode || RecorderController::get().isRecording()),
         [&] { ConsoleModeController::get().activate(); });
     AlienGui::EndMenu();
 
@@ -626,8 +626,8 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassEditDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_Y), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Camera path").keyAlt(true).key(ImGuiKey_K).selected(CameraPathWindow::get().isOn()).closeMenuWhenItemClicked(false),
-        [&] { CameraPathWindow::get().setOn(!CameraPathWindow::get().isOn()); });
+        AlienGui::MenuItemParameters().name("Recorder").keyAlt(true).key(ImGuiKey_R).selected(RecorderWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { RecorderWindow::get().setOn(!RecorderWindow::get().isOn()); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);

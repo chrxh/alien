@@ -31,10 +31,6 @@ add_library(GuiImpl
     BrowserUserListWidget.h
     BrowserWindow.cpp
     BrowserWindow.h
-    CameraPathController.cpp
-    CameraPathController.h
-    CameraPathWindow.cpp
-    CameraPathWindow.h
     CellFunctionChannels.cpp
     CellFunctionChannels.h
     ChangeColorDialog.cpp
@@ -182,6 +178,10 @@ add_library(GuiImpl
     PreviewViewport.h
     PreviewWidget.cpp
     PreviewWidget.h
+    RecorderController.cpp
+    RecorderController.h
+    RecorderWindow.cpp
+    RecorderWindow.h
     ReplaceSimulationDialog.cpp
     ReplaceSimulationDialog.h
     ResetPasswordDialog.cpp

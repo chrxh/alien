@@ -1,4 +1,4 @@
-#include "CameraPathWindow.h"
+#include "RecorderWindow.h"
 
 #include <filesystem>
 
@@ -15,7 +15,7 @@
 #include <Engine/Interface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "CameraPathController.h"
+#include "RecorderController.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "SimulationView.h"
@@ -24,7 +24,7 @@
 namespace
 {
     auto constexpr RightColumnWidth = 255.0f;
-    auto constexpr DefaultSettingsHeight = 196.0f;
+    auto constexpr DefaultSettingsHeight = 222.0f;
     auto constexpr RowHeight = 23.0f;
     auto constexpr DefaultDuration = 5.0f;
 
@@ -40,28 +40,28 @@ namespace
     }
 }
 
-CameraPathWindow::CameraPathWindow()
-    : AlienWindow("Camera path", "windows.camera path", false, true, {60.0f, 80.0f}, {700.0f, 546.0f})
+RecorderWindow::RecorderWindow()
+    : AlienWindow("Recorder", "windows.recorder", false, true, {60.0f, 80.0f}, {700.0f, 572.0f})
 {}
 
-void CameraPathWindow::initIntern()
+void RecorderWindow::initIntern()
 {
-    _settingsOpen = GlobalSettings::get().getValue("windows.camera path.settings.open", _settingsOpen);
-    _settingsHeight = GlobalSettings::get().getValue("windows.camera path.settings.height", scale(DefaultSettingsHeight))
+    _settingsOpen = GlobalSettings::get().getValue("windows.recorder.settings.open", _settingsOpen);
+    _settingsHeight = GlobalSettings::get().getValue("windows.recorder.settings.height", scale(DefaultSettingsHeight))
         * WindowController::get().getContentScaleCorrection();
-    _videoDirectory = GlobalSettings::get().getValue("windows.camera path.video directory", std::filesystem::current_path().string());
+    _videoDirectory = GlobalSettings::get().getValue("windows.recorder.video directory", std::filesystem::current_path().string());
 }
 
-void CameraPathWindow::shutdownIntern()
+void RecorderWindow::shutdownIntern()
 {
-    GlobalSettings::get().setValue("windows.camera path.settings.open", _settingsOpen);
-    GlobalSettings::get().setValue("windows.camera path.settings.height", _settingsHeight);
-    GlobalSettings::get().setValue("windows.camera path.video directory", _videoDirectory);
+    GlobalSettings::get().setValue("windows.recorder.settings.open", _settingsOpen);
+    GlobalSettings::get().setValue("windows.recorder.settings.height", _settingsHeight);
+    GlobalSettings::get().setValue("windows.recorder.video directory", _videoDirectory);
 }
 
-void CameraPathWindow::processIntern()
+void RecorderWindow::processIntern()
 {
-    auto numWaypoints = toInt(CameraPathController::get().getWaypoints().size());
+    auto numWaypoints = toInt(RecorderController::get().getWaypoints().size());
     if (_selectedWaypoint && *_selectedWaypoint >= numWaypoints) {
         _selectedWaypoint.reset();
     }
@@ -81,14 +81,14 @@ void CameraPathWindow::processIntern()
     processStatusBar();
 }
 
-void CameraPathWindow::processToolbar()
+void RecorderWindow::processToolbar()
 {
-    auto& controller = CameraPathController::get();
+    auto& controller = RecorderController::get();
     auto busy = controller.isPlaying() || controller.isRecording();
     auto hasPath = controller.getWaypoints().size() >= 2;
 
     AlienGui::Toolbar(
-        AlienGui::ToolbarParameters().id("CameraPath"),
+        AlienGui::ToolbarParameters().id("Recorder"),
         {AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_PLUS)
                                                  .name("Add waypoint")
@@ -106,7 +106,7 @@ void CameraPathWindow::processToolbar()
                                                  .disabled(controller.isRecording() || controller.getWaypoints().empty())
                                                  .action([&] {
                                                      GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all waypoints?", [&] {
-                                                         CameraPathController::get().setWaypoints({});
+                                                         RecorderController::get().setWaypoints({});
                                                          _selectedWaypoint.reset();
                                                      });
                                                  })),
@@ -116,7 +116,7 @@ void CameraPathWindow::processToolbar()
                                                  .name("Play")
                                                  .tooltip("Flies the camera along the path in real time. The time-lapse only applies to the video.")
                                                  .disabled(busy || !hasPath)
-                                                 .action([&] { CameraPathController::get().startPlayback(); })),
+                                                 .action([&] { RecorderController::get().startPlayback(); })),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_VIDEO)
                                                  .name("Record video")
@@ -129,12 +129,12 @@ void CameraPathWindow::processToolbar()
                                                  .name("Stop")
                                                  .tooltip("Stops the camera flight. A recorded video keeps the frames up to this point.")
                                                  .disabled(!busy)
-                                                 .action([&] { CameraPathController::get().stop(); }))});
+                                                 .action([&] { RecorderController::get().stop(); }))});
 }
 
-void CameraPathWindow::processWaypointTable()
+void RecorderWindow::processWaypointTable()
 {
-    auto& controller = CameraPathController::get();
+    auto& controller = RecorderController::get();
     auto waypoints = controller.getWaypoints();
     auto changed = false;
 
@@ -213,7 +213,7 @@ void CameraPathWindow::processWaypointTable()
     }
 }
 
-void CameraPathWindow::processSettings()
+void RecorderWindow::processSettings()
 {
     ImGui::Spacing();
     ImGui::Spacing();
@@ -223,8 +223,8 @@ void CameraPathWindow::processSettings()
 
     _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
-        if (ImGui::BeginChild("##cameraPathSettings", {scale(0), 0})) {
-            auto& controller = CameraPathController::get();
+        if (ImGui::BeginChild("##recorderSettings", {scale(0), 0})) {
+            auto& controller = RecorderController::get();
             ImGui::BeginDisabled(controller.isRecording());
 
             auto smoothing = controller.getSmoothing();
@@ -235,7 +235,7 @@ void CameraPathWindow::processSettings()
                         .min(0)
                         .max(10.0f)
                         .format("%.2f s")
-                        .defaultValue(&CameraPathController::DefaultSmoothing)
+                        .defaultValue(&RecorderController::DefaultSmoothing)
                         .tooltip("The path through the waypoints is smoothed with a Gaussian kernel. Its width is given in seconds. The larger it is, "
                                  "the more the path cuts the corners at the waypoints. The first and the last waypoint are always reached."),
                     &smoothing)) {
@@ -244,7 +244,7 @@ void CameraPathWindow::processSettings()
 
             auto fps = controller.getFps();
             if (AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Frames per second").textWidth(RightColumnWidth).defaultValue(CameraPathController::DefaultFps),
+                    AlienGui::InputIntParameters().name("Frames per second").textWidth(RightColumnWidth).defaultValue(RecorderController::DefaultFps),
                     fps)) {
                 controller.setFps(fps);
             }
@@ -254,7 +254,7 @@ void CameraPathWindow::processSettings()
                     AlienGui::InputIntParameters()
                         .name("Bit rate (MBit/s)")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(CameraPathController::DefaultBitRate)
+                        .defaultValue(RecorderController::DefaultBitRate)
                         .tooltip("Higher bit rates keep more details of the simulation in the video but produce larger files."),
                     bitRate)) {
                 controller.setBitRate(bitRate);
@@ -265,7 +265,7 @@ void CameraPathWindow::processSettings()
                     AlienGui::InputIntParameters()
                         .name("Time steps per second at 1x")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(CameraPathController::DefaultTimestepsPerSecond)
+                        .defaultValue(RecorderController::DefaultTimestepsPerSecond)
                         .tooltip("Speed of the simulation in the video at a time-lapse of 1x. A time-lapse of 10x shows ten times as many time steps per "
                                  "second while the camera moves as fast as without time-lapse. The time-lapse is set per waypoint and changes "
                                  "smoothly on the way to the next one."),
@@ -278,10 +278,22 @@ void CameraPathWindow::processSettings()
                     AlienGui::CheckboxParameters()
                         .name("Show time-lapse")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(&CameraPathController::DefaultTimeLapseShown)
-                        .tooltip("Shows the current time-lapse factor, e.g. 2.5x, in the lower right corner of the view and the video."),
+                        .defaultValue(&RecorderController::DefaultTimeLapseShown)
+                        .tooltip("Shows the current time-lapse, e.g. Temporal: 2.5x, in the lower right corner of the view and the video."),
                     &timeLapseShown)) {
                 controller.setTimeLapseShown(timeLapseShown);
+            }
+
+            auto simulationStarted = controller.isSimulationStartedOnRecording();
+            if (AlienGui::Checkbox(
+                    AlienGui::CheckboxParameters()
+                        .name("Run simulation when recording")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(&RecorderController::DefaultSimulationStartedOnRecording)
+                        .tooltip("A paused simulation is started with the recording and paused again when the recording ends. Otherwise, a paused "
+                                 "simulation stays still in the video."),
+                    &simulationStarted)) {
+                controller.setSimulationStartedOnRecording(simulationStarted);
             }
 
             ImGui::EndDisabled();
@@ -291,9 +303,9 @@ void CameraPathWindow::processSettings()
     AlienGui::EndTreeNode();
 }
 
-void CameraPathWindow::processStatusBar()
+void RecorderWindow::processStatusBar()
 {
-    auto& controller = CameraPathController::get();
+    auto& controller = RecorderController::get();
 
     std::vector<std::string> statusItems;
     std::optional<std::string> warningItem;
@@ -320,9 +332,9 @@ void CameraPathWindow::processStatusBar()
     AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems).warningItem(warningItem));
 }
 
-void CameraPathWindow::onAddWaypoint()
+void RecorderWindow::onAddWaypoint()
 {
-    auto& controller = CameraPathController::get();
+    auto& controller = RecorderController::get();
     auto waypoints = controller.getWaypoints();
     auto index = _selectedWaypoint ? *_selectedWaypoint + 1 : toInt(waypoints.size());
 
@@ -337,9 +349,9 @@ void CameraPathWindow::onAddWaypoint()
     _selectedWaypoint = index;
 }
 
-void CameraPathWindow::onDeleteWaypoint()
+void RecorderWindow::onDeleteWaypoint()
 {
-    auto& controller = CameraPathController::get();
+    auto& controller = RecorderController::get();
     auto waypoints = controller.getWaypoints();
     waypoints.erase(waypoints.begin() + *_selectedWaypoint);
     controller.setWaypoints(waypoints);
@@ -348,7 +360,7 @@ void CameraPathWindow::onDeleteWaypoint()
     }
 }
 
-void CameraPathWindow::onRecordVideo()
+void RecorderWindow::onRecordVideo()
 {
     GenericFileDialog::get().showSaveFileDialog("Record video", "Video (*.mp4){.mp4},.*", _videoDirectory, [this](std::filesystem::path const& path) {
         // Videos are always written as MP4 files, so that a file selected by mistake, e.g. a program, is not overwritten
@@ -358,16 +370,16 @@ void CameraPathWindow::onRecordVideo()
         }
         _videoDirectory = std::filesystem::path(filename).remove_filename().string();
         try {
-            CameraPathController::get().startRecording(filename);
+            RecorderController::get().startRecording(filename);
         } catch (AlienException const& exception) {
             GenericMessageDialog::get().information("Record video", std::string("The video could not be recorded.\n\n") + exception.what());
         }
     });
 }
 
-void CameraPathWindow::updateVideoInfo()
+void RecorderWindow::updateVideoInfo()
 {
-    auto& controller = CameraPathController::get();
+    auto& controller = RecorderController::get();
     auto isUpToDate = _videoInfo && _videoInfo->waypoints == controller.getWaypoints() && _videoInfo->smoothing == controller.getSmoothing()
         && _videoInfo->fps == controller.getFps() && _videoInfo->timestepsPerSecond == controller.getTimestepsPerSecond();
 

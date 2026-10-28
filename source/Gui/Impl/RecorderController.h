@@ -18,9 +18,9 @@
 // Flies the camera along a path through waypoints and records the flight as a video. During the recording, the controller calculates the
 // time steps of the simulation itself, so that each frame of the video shows the simulation as many time steps later as the time-lapse
 // prescribes, independent of how fast the frames are rendered.
-class CameraPathController : public MainLoopEntity
+class RecorderController : public MainLoopEntity
 {
-    MAKE_SINGLETON(CameraPathController);
+    MAKE_SINGLETON(RecorderController);
 
 public:
     static auto constexpr MaxDuration = 3600.0f;
@@ -32,6 +32,7 @@ public:
     static auto constexpr DefaultBitRate = 30;
     static auto constexpr DefaultTimestepsPerSecond = 60;
     static auto constexpr DefaultTimeLapseShown = true;
+    static auto constexpr DefaultSimulationStartedOnRecording = true;
 
     std::vector<CameraWaypoint> const& getWaypoints() const;
     void setWaypoints(std::vector<CameraWaypoint> const& waypoints);
@@ -54,6 +55,10 @@ public:
     // The current time-lapse is shown in the lower right corner of the view and the video
     bool isTimeLapseShown() const;
     void setTimeLapseShown(bool value);
+
+    // A paused simulation runs during the recording and is paused again afterwards
+    bool isSimulationStartedOnRecording() const;
+    void setSimulationStartedOnRecording(bool value);
 
     CameraWaypoint createWaypointFromView() const;
     void moveViewToWaypoint(CameraWaypoint const& waypoint) const;
@@ -108,6 +113,7 @@ private:
     int _bitRate = DefaultBitRate;
     int _timestepsPerSecond = DefaultTimestepsPerSecond;
     bool _timeLapseShown = DefaultTimeLapseShown;
+    bool _simulationStartedOnRecording = DefaultSimulationStartedOnRecording;
 
     std::optional<std::chrono::steady_clock::time_point> _playbackStart;
     std::optional<float> _playbackTime;
@@ -132,6 +138,7 @@ private:
         // Settings of the simulation that the recording overrides
         bool syncSimulationWithRendering = false;
         int syncSimulationWithRenderingRatio = 0;
+        bool simulationStarted = false;
     };
     std::optional<Recording> _recording;
 };
