@@ -388,9 +388,4 @@ GlobalSettings::GlobalSettings()
 #endif
 }
 
-GlobalSettings::~GlobalSettings()
-{
-#ifndef _WIN32
-    saveLinuxSettings(_impl->_tree);
-#endif
-}
+GlobalSettings::~GlobalSettings() = default;
