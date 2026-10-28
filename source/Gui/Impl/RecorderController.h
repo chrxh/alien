@@ -32,7 +32,7 @@ public:
     static auto constexpr DefaultBitRate = 30;
     static auto constexpr DefaultTimestepsPerSecond = 60;
     static auto constexpr DefaultTimeLapseShown = true;
-    static auto constexpr DefaultSimulationStartedOnRecording = true;
+    static auto constexpr DefaultSimulationStartedWithFlight = true;
 
     std::vector<CameraWaypoint> const& getWaypoints() const;
     void setWaypoints(std::vector<CameraWaypoint> const& waypoints);
@@ -56,9 +56,9 @@ public:
     bool isTimeLapseShown() const;
     void setTimeLapseShown(bool value);
 
-    // A paused simulation runs during the recording and is paused again afterwards
-    bool isSimulationStartedOnRecording() const;
-    void setSimulationStartedOnRecording(bool value);
+    // A paused simulation runs during the playback and the recording and is paused again afterwards
+    bool isSimulationStartedWithFlight() const;
+    void setSimulationStartedWithFlight(bool value);
 
     CameraWaypoint createWaypointFromView() const;
     void moveViewToWaypoint(CameraWaypoint const& waypoint) const;
@@ -99,6 +99,7 @@ private:
     void shutdown() override;
 
     void processPlayback();
+    void finishPlayback();
     void processRecording();
     void calcTimestepsForRecording();
     void finishRecording(bool reportResult);
@@ -113,10 +114,15 @@ private:
     int _bitRate = DefaultBitRate;
     int _timestepsPerSecond = DefaultTimestepsPerSecond;
     bool _timeLapseShown = DefaultTimeLapseShown;
-    bool _simulationStartedOnRecording = DefaultSimulationStartedOnRecording;
+    bool _simulationStartedWithFlight = DefaultSimulationStartedWithFlight;
 
-    std::optional<std::chrono::steady_clock::time_point> _playbackStart;
-    std::optional<float> _playbackTime;
+    struct Playback
+    {
+        std::chrono::steady_clock::time_point start;
+        float time = 0;
+        bool simulationStarted = false;
+    };
+    std::optional<Playback> _playback;
 
     struct Recording
     {

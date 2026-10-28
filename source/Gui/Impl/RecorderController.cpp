@@ -85,9 +85,8 @@ void RecorderController::setWaypoints(std::vector<CameraWaypoint> const& waypoin
     }
 
     // The playback needs a path, while the recording works with its own copy of it
-    if (_waypoints.size() < 2) {
-        _playbackStart.reset();
-        _playbackTime.reset();
+    if (_waypoints.size() < 2 && _playback) {
+        finishPlayback();
     }
 }
 
@@ -141,14 +140,14 @@ void RecorderController::setTimeLapseShown(bool value)
     _timeLapseShown = value;
 }
 
-bool RecorderController::isSimulationStartedOnRecording() const
+bool RecorderController::isSimulationStartedWithFlight() const
 {
-    return _simulationStartedOnRecording;
+    return _simulationStartedWithFlight;
 }
 
-void RecorderController::setSimulationStartedOnRecording(bool value)
+void RecorderController::setSimulationStartedWithFlight(bool value)
 {
-    _simulationStartedOnRecording = value;
+    _simulationStartedWithFlight = value;
 }
 
 CameraWaypoint RecorderController::createWaypointFromView() const
@@ -173,7 +172,7 @@ RecordingSchedule RecorderController::createRecordingSchedule() const
 
 bool RecorderController::isPlaying() const
 {
-    return _playbackStart.has_value();
+    return _playback.has_value();
 }
 
 bool RecorderController::isRecording() const
@@ -187,7 +186,15 @@ void RecorderController::startPlayback()
     if (_waypoints.size() < 2) {
         return;
     }
-    _playbackStart = std::chrono::steady_clock::now();
+
+    auto simulationFacade = _SimulationFacade::get();
+    _playback = Playback{
+        .start = std::chrono::steady_clock::now(),
+        .simulationStarted = _simulationStartedWithFlight && !simulationFacade->isSimulationRunning(),
+    };
+    if (_playback->simulationStarted) {
+        simulationFacade->runSimulation();
+    }
 }
 
 void RecorderController::startRecording(std::filesystem::path const& filename)
@@ -210,7 +217,7 @@ void RecorderController::startRecording(std::filesystem::path const& filename)
         .resolution = resolution,
         .syncSimulationWithRendering = simulationFacade->isSyncSimulationWithRendering(),
         .syncSimulationWithRenderingRatio = simulationFacade->getSyncSimulationWithRenderingRatio(),
-        .simulationStarted = _simulationStartedOnRecording && !simulationFacade->isSimulationRunning(),
+        .simulationStarted = _simulationStartedWithFlight && !simulationFacade->isSimulationRunning(),
     };
 
     // The simulation only advances by the time steps between the frames of the video
@@ -225,8 +232,9 @@ void RecorderController::startRecording(std::filesystem::path const& filename)
 
 void RecorderController::stop()
 {
-    _playbackStart.reset();
-    _playbackTime.reset();
+    if (_playback) {
+        finishPlayback();
+    }
     if (_recording) {
         finishRecording(true);
     }
@@ -234,7 +242,10 @@ void RecorderController::stop()
 
 std::optional<float> RecorderController::getPlaybackTime() const
 {
-    return _playbackTime;
+    if (!_playback) {
+        return std::nullopt;
+    }
+    return _playback->time;
 }
 
 std::optional<RecorderController::RecordingProgress> RecorderController::getRecordingProgress() const
@@ -249,15 +260,15 @@ void RecorderController::processCamera()
 {
     if (_recording) {
         processRecording();
-    } else if (_playbackStart) {
+    } else if (_playback) {
         processPlayback();
     }
 
     if (_timeLapseShown) {
         if (_recording) {
             drawTimeLapse(_recording->schedule.getCameraState(_recording->frame).timeLapse);
-        } else if (_playbackTime) {
-            drawTimeLapse(createPath().getState(*_playbackTime).timeLapse);
+        } else if (_playback) {
+            drawTimeLapse(createPath().getState(_playback->time).timeLapse);
         }
     }
 }
@@ -270,7 +281,7 @@ void RecorderController::init()
     setBitRate(settings.getValue("controllers.recorder.bit rate", _bitRate));
     setTimestepsPerSecond(settings.getValue("controllers.recorder.time steps per second", _timestepsPerSecond));
     setTimeLapseShown(settings.getValue("controllers.recorder.show time-lapse", _timeLapseShown));
-    setSimulationStartedOnRecording(settings.getValue("controllers.recorder.start simulation", _simulationStartedOnRecording));
+    setSimulationStartedWithFlight(settings.getValue("controllers.recorder.start simulation", _simulationStartedWithFlight));
 
     std::vector<CameraWaypoint> waypoints;
     auto numWaypoints = settings.getValue("controllers.recorder.number of waypoints", 0);
@@ -289,6 +300,9 @@ void RecorderController::init()
 
 void RecorderController::shutdown()
 {
+    if (_playback) {
+        finishPlayback();
+    }
     if (_recording) {
         finishRecording(false);
     }
@@ -299,7 +313,7 @@ void RecorderController::shutdown()
     settings.setValue("controllers.recorder.bit rate", _bitRate);
     settings.setValue("controllers.recorder.time steps per second", _timestepsPerSecond);
     settings.setValue("controllers.recorder.show time-lapse", _timeLapseShown);
-    settings.setValue("controllers.recorder.start simulation", _simulationStartedOnRecording);
+    settings.setValue("controllers.recorder.start simulation", _simulationStartedWithFlight);
 
     settings.setValue("controllers.recorder.number of waypoints", toInt(_waypoints.size()));
     for (int index = 0; index < toInt(_waypoints.size()); ++index) {
@@ -320,14 +334,22 @@ void RecorderController::processPlayback()
         return;
     }
     auto path = createPath();
-    auto time = std::chrono::duration<float>(std::chrono::steady_clock::now() - *_playbackStart).count();
+    auto time = std::chrono::duration<float>(std::chrono::steady_clock::now() - _playback->start).count();
     if (time >= path.getDuration()) {
         applyCameraState(path.getState(path.getDuration()));
         stop();
         return;
     }
-    _playbackTime = time;
+    _playback->time = time;
     applyCameraState(path.getState(time));
+}
+
+void RecorderController::finishPlayback()
+{
+    if (_playback->simulationStarted) {
+        _SimulationFacade::get()->pauseSimulation();
+    }
+    _playback.reset();
 }
 
 void RecorderController::processRecording()

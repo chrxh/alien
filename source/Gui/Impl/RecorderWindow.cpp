@@ -285,16 +285,16 @@ void RecorderWindow::processSettings()
                 controller.setTimeLapseShown(timeLapseShown);
             }
 
-            auto simulationStarted = controller.isSimulationStartedOnRecording();
+            auto simulationStarted = controller.isSimulationStartedWithFlight();
             if (AlienGui::Checkbox(
                     AlienGui::CheckboxParameters()
-                        .name("Run simulation when recording")
+                        .name("Run simulation during flight")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(&RecorderController::DefaultSimulationStartedOnRecording)
-                        .tooltip("A paused simulation is started with the recording and paused again when the recording ends. Otherwise, a paused "
-                                 "simulation stays still in the video."),
+                        .defaultValue(&RecorderController::DefaultSimulationStartedWithFlight)
+                        .tooltip("A paused simulation is started with Play or Record video and paused again when the camera flight ends. Otherwise, "
+                                 "a paused simulation stays still."),
                     &simulationStarted)) {
-                controller.setSimulationStartedOnRecording(simulationStarted);
+                controller.setSimulationStartedWithFlight(simulationStarted);
             }
 
             ImGui::EndDisabled();
