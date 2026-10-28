@@ -5,11 +5,11 @@ PUBLIC
     CommandLineParser.h
     ConsoleOutput.cpp
     ConsoleOutput.h
-    LoginSession.cpp
-    LoginSession.h
     Main.cpp
     PeriodicUploader.cpp
     PeriodicUploader.h
+    ServerSession.cpp
+    ServerSession.h
     SimulationRunner.cpp
     SimulationRunner.h)
 

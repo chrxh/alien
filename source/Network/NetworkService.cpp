@@ -14,6 +14,8 @@
 
 namespace
 {
+    auto constexpr CountAsActiveSettingsKey = "settings.count as active";
+
     void configureClient(httplib::Client& client)
     {
         client.set_ca_cert_path("./resources/ca-bundle.crt");
@@ -88,13 +90,13 @@ namespace
 void NetworkService::setup()
 {
     _serverAddress = GlobalSettings::get().getValue("settings.server url", std::string(Const::AlienServerURL));
-    _countAsActive = GlobalSettings::get().getValue("settings.count as active", true);
+    _countAsActive = GlobalSettings::get().getValue(CountAsActiveSettingsKey, true);
 }
 
 void NetworkService::shutdown()
 {
     GlobalSettings::get().setValue("settings.server url", _serverAddress);
-    GlobalSettings::get().setValue("settings.count as active", _countAsActive.load());
+    GlobalSettings::get().setValue(CountAsActiveSettingsKey, _countAsActive.load());
     logout();
 }
 
@@ -117,6 +119,7 @@ bool NetworkService::isCountAsActive()
 void NetworkService::setCountAsActive(bool value)
 {
     _countAsActive = value;
+    GlobalSettings::get().setValue(CountAsActiveSettingsKey, value);
 }
 
 bool NetworkService::isLoggedIn()
@@ -478,6 +481,20 @@ std::optional<int> NetworkService::getNumActiveSimulators()
         return parseValueFromKey<int>(result->body, "activeSimulators");
     } catch (...) {
         return std::nullopt;
+    }
+}
+
+void NetworkService::reportActiveSimulator()
+{
+    if (!_countAsActive) {
+        return;
+    }
+    log(Priority::Important, "network: report active simulator");
+
+    try {
+        auto client = createClient(_serverAddress);
+        executeRequest([&] { return client.Post("/reportactivesimulator"); }, false);
+    } catch (...) {
     }
 }
 

@@ -236,13 +236,17 @@ def health():
 
 
 # --- Active simulator count ---
-# Every running client fetches ``/getversionedsimulationlist`` on startup and
-# then every 20 minutes. The server remembers the callers of the last
-# ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` to count the running simulators. Callers
-# are told apart by a keyed hash of their IP address. The key is random,
+# Every running instance of the graphical program fetches
+# ``/getversionedsimulationlist`` on startup and then every 20 minutes. The
+# command-line interface does not need that list and calls
+# ``/reportactivesimulator`` instead, every 5 minutes after its start. The
+# server remembers the callers of the last ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS``
+# to count the running simulators. Callers are told apart by a keyed hash of
+# their IP address. The key is random,
 # created at server start and never stored, and the hashes are kept in memory
-# only. Clients that opt out send ``countAsActive=false`` and are not recorded.
-# This requires a single server process, which is how the server is deployed.
+# only. Clients that opt out send ``countAsActive=false`` or do not report and
+# are not recorded. This requires a single server process, which is how the
+# server is deployed.
 ACTIVE_SIMULATOR_TIMEOUT_SECONDS = 25 * 60
 MAX_ACTIVE_SIMULATORS = 100_000
 
@@ -281,6 +285,12 @@ def _count_active_simulators() -> int:
 @app.get("/getactivesimulatorcount")
 def get_active_simulator_count():
     return {"activeSimulators": _count_active_simulators()}
+
+
+@app.post("/reportactivesimulator")
+def report_active_simulator(request: Request):
+    _record_active_simulator(request)
+    return {"result": True}
 
 
 # --- Active simulator history ---

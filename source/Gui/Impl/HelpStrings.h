@@ -49,14 +49,14 @@ namespace Const
     std::string const LoginShareGpuInfoTooltip2 = "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
     std::string const BrowserActiveSimulatorsTooltip =
-        "Number of ALIEN instances that fetched the browser list in the last 25 minutes, including those without a login. Every running instance "
-        "does this on startup and then every 20 minutes.\n\nInstances are told apart by a hash of their IP address that the server keeps only in "
-        "memory for 25 minutes and never stores. Instances sharing one IP address count once. Instances where 'Count me as active' is disabled in the "
-        "network settings are not included.";
+        "Number of ALIEN instances that reported to the server in the last 25 minutes, including the command-line interface and instances without a login. "
+        "The program reports on startup and then every 20 minutes, the command-line interface every 5 minutes.\n\nInstances are told "
+        "apart by a hash of their IP address that the server keeps only in memory for 25 minutes and never stores. Instances sharing one IP address count "
+        "once. Instances where 'Count me as active' is disabled in the network settings are not included.";
 
     std::string const NetworkCountAsActiveTooltip =
-        "If this option is enabled, this instance is included in the number of active simulators shown in the browser window. The server tells the "
-        "instances apart by a hash of their IP address that it keeps only in memory for 25 minutes and never stores.";
+        "If this option is enabled, this program and the command-line interface are included in the number of active simulators shown in the browser window. "
+        "The server tells the instances apart by a hash of their IP address that it keeps only in memory for 25 minutes and never stores.";
 
     std::string const BrowserFeaturedWorkspaceTooltip =
         "This workspace is curated by the alien-project and contains the simulations that come along with the released versions. They cover a wide range and "
