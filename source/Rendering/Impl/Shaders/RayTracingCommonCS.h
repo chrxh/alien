@@ -561,8 +561,8 @@ vec3 getOcclusion(float perimeter, float area, vec3 absorption)
     return perimeter / Pi * (1.0 - exp(-absorption * Pi * area / perimeter));
 }
 
-// The extracted objects add their occlusion to the nodes of the gas grid, see Shaders/RayTracingPrepareCS.h. The OcclusionStride sums at a
-// node are fixed point numbers of the three colors.
+// The spheres of the extracted objects add their occlusion to the nodes of the gas grid, see Shaders/RayTracingPrepareCS.h. The
+// OcclusionStride sums at a node are fixed point numbers of the three colors.
 const float OcclusionFixedPointScale = 1024.0;
 
 // The occlusion per area at the nodes of the gas grid and of the shadow grid is blurred and downsampled into a pyramid each, see
