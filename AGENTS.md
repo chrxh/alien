@@ -67,6 +67,12 @@ subdirectory of the respective tree — not the older `build\Release\`.
 A struct / constant-memory / kernel `.cuh` change needs a clean rebuild, otherwise
 stale kernels linger and weak tests can pass against old code.
 
+## Installer (Windows)
+
+`installer\build-installer.bat agent` packages the Release build of the agent tree, plus
+the AMD build in `build-agent-hip` if it exists, into `installer\build\alien-setup.exe`.
+It needs Inno Setup 6.3 or newer.
+
 ## Tests
 
 Executables under `build-agent\Release\` (`build-ninja\Release\` for a manual build):
@@ -157,5 +163,6 @@ source/Rendering/Impl/Shaders/    GLSL shader sources
 source/Rendering/Interface/       Abstract rendering APIs, free of graphics API code
 source/Server/                    Python (FastAPI) server behind the cloud features
 external/                         Third-party dependencies incl. the pinned vcpkg submodule
+installer/                        Inno Setup script and build script of the Windows installer
 resources/                        Runtime assets
 ```
