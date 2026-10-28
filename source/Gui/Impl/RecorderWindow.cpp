@@ -279,7 +279,7 @@ void RecorderWindow::processSettings()
                         .name("Show time-lapse")
                         .textWidth(RightColumnWidth)
                         .defaultValue(&RecorderController::DefaultTimeLapseShown)
-                        .tooltip("Shows the current time-lapse, e.g. Temporal: 2.5x, in the lower right corner of the view and the video."),
+                        .tooltip("Shows the current time-lapse, e.g. 2.5x with a forward icon, in the lower right corner of the view and the video."),
                     &timeLapseShown)) {
                 controller.setTimeLapseShown(timeLapseShown);
             }

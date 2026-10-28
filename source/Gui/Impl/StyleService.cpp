@@ -24,6 +24,9 @@
 namespace
 {
     auto constexpr DarkModeSettingsKey = "settings.dark mode";
+
+    // Code point of ICON_FA_FORWARD
+    auto constexpr ForwardIconCodepoint = ImWchar{0xf04e};
 }
 
 namespace Const
@@ -288,8 +291,13 @@ void StyleService::setup()
     // Monospace medium font
     _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * scaleFactor);
 
-    // Monospace large font
+    // Monospace large font with the forward icon for the time-lapse in recorded videos
     _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * scaleFactor);
+    {
+        static const ImWchar rangesIcons[] = {ForwardIconCodepoint, ForwardIconCodepoint, 0};
+        io.Fonts->AddFontFromMemoryCompressedTTF(
+            FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 128.0f * scaleFactor, &configMerge, rangesIcons);
+    }
 
     _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * scaleFactor);
     _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * scaleFactor);
