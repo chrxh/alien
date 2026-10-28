@@ -1,4 +1,4 @@
-#include "CameraPathController.h"
+#include "RecorderController.h"
 
 #include <algorithm>
 #include <format>
@@ -34,7 +34,7 @@ namespace
 
     std::string formatTimeLapse(float timeLapse)
     {
-        return timeLapse < 10.0f ? std::format("{:.1f}x", timeLapse) : std::format("{:.0f}x", timeLapse);
+        return timeLapse < 10.0f ? std::format("Temporal: {:.1f}x", timeLapse) : std::format("Temporal: {:.0f}x", timeLapse);
     }
 
     // The resolution of the video is fixed when the recording starts, while the view might have changed since then
@@ -62,12 +62,12 @@ namespace
     }
 }
 
-std::vector<CameraWaypoint> const& CameraPathController::getWaypoints() const
+std::vector<CameraWaypoint> const& RecorderController::getWaypoints() const
 {
     return _waypoints;
 }
 
-void CameraPathController::setWaypoints(std::vector<CameraWaypoint> const& waypoints)
+void RecorderController::setWaypoints(std::vector<CameraWaypoint> const& waypoints)
 {
     _waypoints = waypoints;
     for (auto& waypoint : _waypoints) {
@@ -83,87 +83,97 @@ void CameraPathController::setWaypoints(std::vector<CameraWaypoint> const& waypo
     }
 }
 
-float CameraPathController::getSmoothing() const
+float RecorderController::getSmoothing() const
 {
     return _smoothing;
 }
 
-void CameraPathController::setSmoothing(float value)
+void RecorderController::setSmoothing(float value)
 {
     _smoothing = std::max(0.0f, value);
 }
 
-int CameraPathController::getFps() const
+int RecorderController::getFps() const
 {
     return _fps;
 }
 
-void CameraPathController::setFps(int value)
+void RecorderController::setFps(int value)
 {
     _fps = std::clamp(value, 1, 240);
 }
 
-int CameraPathController::getBitRate() const
+int RecorderController::getBitRate() const
 {
     return _bitRate;
 }
 
-void CameraPathController::setBitRate(int value)
+void RecorderController::setBitRate(int value)
 {
     _bitRate = std::clamp(value, 1, 1000);
 }
 
-int CameraPathController::getTimestepsPerSecond() const
+int RecorderController::getTimestepsPerSecond() const
 {
     return _timestepsPerSecond;
 }
 
-void CameraPathController::setTimestepsPerSecond(int value)
+void RecorderController::setTimestepsPerSecond(int value)
 {
     _timestepsPerSecond = std::clamp(value, 1, 100000);
 }
 
-bool CameraPathController::isTimeLapseShown() const
+bool RecorderController::isTimeLapseShown() const
 {
     return _timeLapseShown;
 }
 
-void CameraPathController::setTimeLapseShown(bool value)
+void RecorderController::setTimeLapseShown(bool value)
 {
     _timeLapseShown = value;
 }
 
-CameraWaypoint CameraPathController::createWaypointFromView() const
+bool RecorderController::isSimulationStartedOnRecording() const
+{
+    return _simulationStartedOnRecording;
+}
+
+void RecorderController::setSimulationStartedOnRecording(bool value)
+{
+    _simulationStartedOnRecording = value;
+}
+
+CameraWaypoint RecorderController::createWaypointFromView() const
 {
     return CameraWaypoint{.center = Viewport::get().getCenterInWorldPos(), .zoom = Viewport::get().getZoomFactor()};
 }
 
-void CameraPathController::moveViewToWaypoint(CameraWaypoint const& waypoint) const
+void RecorderController::moveViewToWaypoint(CameraWaypoint const& waypoint) const
 {
     applyCameraState(CameraState{.center = waypoint.center, .zoom = waypoint.zoom});
 }
 
-CameraPath CameraPathController::createPath() const
+CameraPath RecorderController::createPath() const
 {
     return CameraPath(_waypoints, _smoothing);
 }
 
-RecordingSchedule CameraPathController::createRecordingSchedule() const
+RecordingSchedule RecorderController::createRecordingSchedule() const
 {
     return RecordingSchedule(createPath(), _fps, toDouble(_timestepsPerSecond));
 }
 
-bool CameraPathController::isPlaying() const
+bool RecorderController::isPlaying() const
 {
     return _playbackStart.has_value();
 }
 
-bool CameraPathController::isRecording() const
+bool RecorderController::isRecording() const
 {
     return _recording.has_value();
 }
 
-void CameraPathController::startPlayback()
+void RecorderController::startPlayback()
 {
     stop();
     if (_waypoints.size() < 2) {
@@ -172,7 +182,7 @@ void CameraPathController::startPlayback()
     _playbackStart = std::chrono::steady_clock::now();
 }
 
-void CameraPathController::startRecording(std::filesystem::path const& filename)
+void RecorderController::startRecording(std::filesystem::path const& filename)
 {
     stop();
     if (_waypoints.size() < 2) {
@@ -192,11 +202,19 @@ void CameraPathController::startRecording(std::filesystem::path const& filename)
         .resolution = resolution,
         .syncSimulationWithRendering = simulationFacade->isSyncSimulationWithRendering(),
         .syncSimulationWithRenderingRatio = simulationFacade->getSyncSimulationWithRenderingRatio(),
+        .simulationStarted = _simulationStartedOnRecording && !simulationFacade->isSimulationRunning(),
     };
+
+    // The simulation only advances by the time steps between the frames of the video
+    simulationFacade->setSyncSimulationWithRendering(true);
+    simulationFacade->setSyncSimulationWithRenderingRatio(0);
+    if (_recording->simulationStarted) {
+        simulationFacade->runSimulation();
+    }
     log(Priority::Important, "recording of video " + filename.string() + " started");
 }
 
-void CameraPathController::stop()
+void RecorderController::stop()
 {
     _playbackStart.reset();
     _playbackTime.reset();
@@ -205,12 +223,12 @@ void CameraPathController::stop()
     }
 }
 
-std::optional<float> CameraPathController::getPlaybackTime() const
+std::optional<float> RecorderController::getPlaybackTime() const
 {
     return _playbackTime;
 }
 
-std::optional<CameraPathController::RecordingProgress> CameraPathController::getRecordingProgress() const
+std::optional<RecorderController::RecordingProgress> RecorderController::getRecordingProgress() const
 {
     if (!_recording) {
         return std::nullopt;
@@ -218,7 +236,7 @@ std::optional<CameraPathController::RecordingProgress> CameraPathController::get
     return RecordingProgress{.frame = _recording->frame, .numFrames = _recording->schedule.getNumFrames(), .resolution = _recording->resolution};
 }
 
-void CameraPathController::processCamera()
+void RecorderController::processCamera()
 {
     if (_recording) {
         processRecording();
@@ -235,19 +253,20 @@ void CameraPathController::processCamera()
     }
 }
 
-void CameraPathController::init()
+void RecorderController::init()
 {
     auto& settings = GlobalSettings::get();
-    setSmoothing(settings.getValue("controllers.camera path.smoothing", _smoothing));
-    setFps(settings.getValue("controllers.camera path.fps", _fps));
-    setBitRate(settings.getValue("controllers.camera path.bit rate", _bitRate));
-    setTimestepsPerSecond(settings.getValue("controllers.camera path.time steps per second", _timestepsPerSecond));
-    setTimeLapseShown(settings.getValue("controllers.camera path.show time-lapse", _timeLapseShown));
+    setSmoothing(settings.getValue("controllers.recorder.smoothing", _smoothing));
+    setFps(settings.getValue("controllers.recorder.fps", _fps));
+    setBitRate(settings.getValue("controllers.recorder.bit rate", _bitRate));
+    setTimestepsPerSecond(settings.getValue("controllers.recorder.time steps per second", _timestepsPerSecond));
+    setTimeLapseShown(settings.getValue("controllers.recorder.show time-lapse", _timeLapseShown));
+    setSimulationStartedOnRecording(settings.getValue("controllers.recorder.start simulation", _simulationStartedOnRecording));
 
     std::vector<CameraWaypoint> waypoints;
-    auto numWaypoints = settings.getValue("controllers.camera path.number of waypoints", 0);
+    auto numWaypoints = settings.getValue("controllers.recorder.number of waypoints", 0);
     for (int index = 0; index < numWaypoints; ++index) {
-        auto key = "controllers.camera path.waypoint " + std::to_string(index);
+        auto key = "controllers.recorder.waypoint " + std::to_string(index);
         CameraWaypoint waypoint;
         waypoint.center.x = settings.getValue(key + ".center x", waypoint.center.x);
         waypoint.center.y = settings.getValue(key + ".center y", waypoint.center.y);
@@ -259,22 +278,23 @@ void CameraPathController::init()
     setWaypoints(waypoints);
 }
 
-void CameraPathController::shutdown()
+void RecorderController::shutdown()
 {
     if (_recording) {
         finishRecording(false);
     }
 
     auto& settings = GlobalSettings::get();
-    settings.setValue("controllers.camera path.smoothing", _smoothing);
-    settings.setValue("controllers.camera path.fps", _fps);
-    settings.setValue("controllers.camera path.bit rate", _bitRate);
-    settings.setValue("controllers.camera path.time steps per second", _timestepsPerSecond);
-    settings.setValue("controllers.camera path.show time-lapse", _timeLapseShown);
+    settings.setValue("controllers.recorder.smoothing", _smoothing);
+    settings.setValue("controllers.recorder.fps", _fps);
+    settings.setValue("controllers.recorder.bit rate", _bitRate);
+    settings.setValue("controllers.recorder.time steps per second", _timestepsPerSecond);
+    settings.setValue("controllers.recorder.show time-lapse", _timeLapseShown);
+    settings.setValue("controllers.recorder.start simulation", _simulationStartedOnRecording);
 
-    settings.setValue("controllers.camera path.number of waypoints", toInt(_waypoints.size()));
+    settings.setValue("controllers.recorder.number of waypoints", toInt(_waypoints.size()));
     for (int index = 0; index < toInt(_waypoints.size()); ++index) {
-        auto key = "controllers.camera path.waypoint " + std::to_string(index);
+        auto key = "controllers.recorder.waypoint " + std::to_string(index);
         auto const& waypoint = _waypoints.at(index);
         settings.setValue(key + ".center x", waypoint.center.x);
         settings.setValue(key + ".center y", waypoint.center.y);
@@ -284,7 +304,7 @@ void CameraPathController::shutdown()
     }
 }
 
-void CameraPathController::processPlayback()
+void RecorderController::processPlayback()
 {
     if (_waypoints.size() < 2) {
         stop();
@@ -301,7 +321,7 @@ void CameraPathController::processPlayback()
     applyCameraState(path.getState(time));
 }
 
-void CameraPathController::processRecording()
+void RecorderController::processRecording()
 {
     auto& recording = *_recording;
     if (recording.videoWriter->getError()) {
@@ -348,7 +368,7 @@ void CameraPathController::processRecording()
     ++recording.numViewRenderings;
 }
 
-void CameraPathController::calcTimestepsForRecording()
+void RecorderController::calcTimestepsForRecording()
 {
     auto& recording = *_recording;
     if (recording.pendingTimesteps == 0) {
@@ -375,12 +395,16 @@ void CameraPathController::calcTimestepsForRecording()
     }
 }
 
-void CameraPathController::finishRecording(bool reportResult)
+void RecorderController::finishRecording(bool reportResult)
 {
     auto recording = std::move(*_recording);
     _recording.reset();
 
+    // The simulation is paused before the synchronization is restored, so that it does not advance beyond the last frame
     auto simulationFacade = _SimulationFacade::get();
+    if (recording.simulationStarted) {
+        simulationFacade->pauseSimulation();
+    }
     simulationFacade->setSyncSimulationWithRendering(recording.syncSimulationWithRendering);
     simulationFacade->setSyncSimulationWithRenderingRatio(recording.syncSimulationWithRenderingRatio);
 
@@ -403,13 +427,13 @@ void CameraPathController::finishRecording(bool reportResult)
     }
 }
 
-void CameraPathController::applyCameraState(CameraState const& state) const
+void RecorderController::applyCameraState(CameraState const& state) const
 {
     Viewport::get().setCenterInWorldPos(state.center);
     Viewport::get().setZoomFactor(state.zoom);
 }
 
-void CameraPathController::drawTimeLapse(float timeLapse) const
+void RecorderController::drawTimeLapse(float timeLapse) const
 {
     auto viewport = ImGui::GetMainViewport();
     auto margin = viewport->Size.y * TimeLapseMargin;
@@ -420,7 +444,7 @@ void CameraPathController::drawTimeLapse(float timeLapse) const
         {viewport->Pos.x + viewport->Size.x - margin, viewport->Pos.y + viewport->Size.y - margin});
 }
 
-void CameraPathController::drawTimeLapse(PictureData& frame)
+void RecorderController::drawTimeLapse(PictureData& frame)
 {
     auto& recording = *_recording;
     auto text = formatTimeLapse(recording.schedule.getCameraState(recording.frame).timeLapse);

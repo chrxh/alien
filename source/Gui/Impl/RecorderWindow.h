@@ -11,12 +11,12 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class CameraPathWindow : public AlienWindow
+class RecorderWindow : public AlienWindow
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CameraPathWindow);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(RecorderWindow);
 
 private:
-    CameraPathWindow();
+    RecorderWindow();
 
     void initIntern() override;
     void shutdownIntern() override;
