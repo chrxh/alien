@@ -1,4 +1,4 @@
-"""Tests for the active simulator count fed by ``/getversionedsimulationlist`` and its hourly history."""
+"""Tests for the active simulator count fed by ``/getversionedsimulationlist`` and ``/reportactivesimulator`` and its hourly history."""
 
 from __future__ import annotations
 
@@ -14,6 +14,12 @@ def _client_from(app_client, host):
 def _fetch_list(client, **data):
     resp = client.post("/getversionedsimulationlist", data=data)
     assert resp.status_code == 200
+
+
+def _report(client):
+    resp = client.post("/reportactivesimulator")
+    assert resp.status_code == 200
+    assert resp.json() == {"result": True}
 
 
 def _active_simulators(client):
@@ -47,6 +53,26 @@ def test_opted_out_clients_are_not_counted(app_client):
     _fetch_list(_client_from(app_client, "10.0.0.1"), countAsActive="false")
 
     assert _active_simulators(app_client) == 0
+
+
+def test_reports_are_counted_per_address(app_client):
+    first = _client_from(app_client, "10.0.0.1")
+    second = _client_from(app_client, "10.0.0.2")
+
+    _report(first)
+    _report(first)
+    _report(second)
+
+    assert _active_simulators(app_client) == 2
+
+
+def test_report_and_list_fetch_from_one_address_count_once(app_client):
+    client = _client_from(app_client, "10.0.0.1")
+
+    _report(client)
+    _fetch_list(client)
+
+    assert _active_simulators(app_client) == 1
 
 
 def test_inactive_simulators_expire(app_client, monkeypatch):

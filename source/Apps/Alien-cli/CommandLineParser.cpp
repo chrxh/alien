@@ -38,6 +38,11 @@ std::optional<int> CommandLineParser::parse(CommandLineArguments& arguments, int
         arguments.plainOutput,
         "Disables colors, the banner and the live status panel and prints plain lines instead. This is switched on automatically when the output is "
         "redirected. Together with -t the time steps are then calculated in a single run, which makes this the most accurate mode for measuring the TPS.");
+    app.add_flag(
+        "--no-count-as-active",
+        arguments.noCountAsActive,
+        "Excludes this run from the number of active simulators shown in the browser of the graphical program. Otherwise it is counted after one minute "
+        "of simulation, also without a login, unless 'Count me as active' is disabled in the network settings of the graphical program.");
 
     try {
         app.parse(argc, argv);

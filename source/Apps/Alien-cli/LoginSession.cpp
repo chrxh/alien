@@ -24,8 +24,6 @@ namespace
 
 LoginSession::LoginSession(std::string const& userName, std::string const& password, std::string const& gpuName)
 {
-    NetworkService::get().setup();
-
     LoginErrorCode errorCode = LoginErrorCode_Other;
     if (!NetworkService::get().login(errorCode, userName, password, createUserInfo(gpuName))) {
         _errorMessage =

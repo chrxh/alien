@@ -55,6 +55,9 @@ alien-cli -i input.sim -o output.sim -t 100000
 | --upload-name, --upload-interval | Upload the running simulation periodically to your private workspace, under the given name followed by a number, every given number of minutes. |
 | -d | Debug mode, which runs slower but writes detailed timing and trace files. |
 | --plain | Plain text output without colors and status panel. |
+| --no-count-as-active | Do not count this run as an active simulator, see below. |
+
+While a simulation runs, *alien-cli* counts as an active simulator in the **Browser** of the graphical program, also without a login. It reports to the server after one minute and then every 20 minutes, unless --no-count-as-active is given or **Count me as active** is disabled in **Settings > Network settings** of the graphical program for the same user account.
 
 A Docker image with the command line interface is published as *chrxh/alien:nightly*, see the README of the project for details.
 

@@ -55,6 +55,7 @@ public:
     bool getResourcePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds);
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
     std::optional<int> getNumActiveSimulators();
+    void reportActiveSimulator();
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     bool toggleReactionForResource(std::string const& simId, int likeType);

@@ -15,4 +15,5 @@ struct CommandLineArguments
     std::optional<int> uploadInterval;
     bool debugMode = false;
     bool plainOutput = false;
+    bool noCountAsActive = false;
 };

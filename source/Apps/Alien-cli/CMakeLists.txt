@@ -1,5 +1,7 @@
 target_sources(alien-cli
 PUBLIC
+    ActiveSimulatorReporter.cpp
+    ActiveSimulatorReporter.h
     CommandLineArguments.h
     CommandLineParser.cpp
     CommandLineParser.h

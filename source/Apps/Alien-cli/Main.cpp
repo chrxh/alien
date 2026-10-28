@@ -29,6 +29,7 @@
 
 #include <Persister/Impl/PersisterFacadeImpl.h>
 
+#include "ActiveSimulatorReporter.h"
 #include "CommandLineParser.h"
 #include "ConsoleOutput.h"
 #include "LoginSession.h"
@@ -214,6 +215,7 @@ int main(int argc, char** argv)
         ExitScopeGuard closeSimulation([] { _SimulationFacade::get()->closeSimulation(); });
         auto simulationFacade = _SimulationFacade::get();
 
+        NetworkService::get().setup();
         std::optional<LoginSession> loginSession;
         if (!logIn(loginSession, arguments, simulationFacade->getGpuName())) {
             return 1;
@@ -228,6 +230,11 @@ int main(int argc, char** argv)
         }
         initSimulation(simulationFacade, simData, arguments.timesteps);
 
+        // Lives until the output is written, so that a pending report cannot delay writing it
+        std::optional<ActiveSimulatorReporter> activeSimulatorReporter;
+        if (!arguments.noCountAsActive) {
+            activeSimulatorReporter.emplace();
+        }
         auto elapsed = runSimulation(simulationFacade, arguments);
         simulationFacade->setRealTime(simData._realTime + elapsed);
         if (arguments.debugMode) {
