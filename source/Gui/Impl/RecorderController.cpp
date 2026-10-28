@@ -29,14 +29,20 @@ namespace
     // video is therefore only captured once its view has been rendered before, at the start several times.
     auto constexpr NumViewRenderingsAtStart = 10;
 
-    // Like the overlay messages, the time-lapse is shown in the monospace font, here with a forward icon in the lower right corner of the view
-    // and the video. Its size is relative to their height.
+    // Like the overlay messages, the time-lapse is shown in the monospace font, here in the lower right corner of the view and the video. Its
+    // size is relative to their height.
     auto constexpr TimeLapseFontSize = 0.045f;
     auto constexpr TimeLapseMargin = 0.025f;
 
     std::string formatTimeLapse(float timeLapse)
     {
-        return timeLapse < 10.0f ? std::format(ICON_FA_FORWARD " {:.1f}x", timeLapse) : std::format(ICON_FA_FORWARD " {:.0f}x", timeLapse);
+        auto result = timeLapse < 10.0f ? std::format("{:.1f}x", timeLapse) : std::format("{:.0f}x", timeLapse);
+
+        // Only a simulation that runs faster than normal gets the forward icon
+        if (timeLapse > 1.0f && result != "1.0x") {
+            result = ICON_FA_FORWARD " " + result;
+        }
+        return result;
     }
 
     // The resolution of the video is fixed when the recording starts, while the view might have changed since then
