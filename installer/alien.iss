@@ -82,7 +82,7 @@ Name: "{app}\resources\autosave"
 [Files]
 Source: "{#NvidiaDir}\alien.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#NvidiaDir}\alien-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#NvidiaDir}\*.dll"; Excludes: "gtest*.dll,gmock*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#NvidiaDir}\*.dll"; Excludes: "gtest*.dll,gmock*.dll,amdhip64*.dll"; DestDir: "{app}"; Flags: ignoreversion
 #ifdef WithAmd
 Source: "{#AmdDir}\alien.exe"; DestDir: "{app}"; DestName: "alien-amd.exe"; Flags: ignoreversion
 Source: "{#AmdDir}\amdhip64*.dll"; DestDir: "{app}"; Flags: ignoreversion

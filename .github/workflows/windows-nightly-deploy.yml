@@ -104,3 +104,27 @@ jobs:
           --upload-file "deploy/alien-develop.zip" `
           $url
         if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }
+
+    # Built after the zip upload, so that the zip is still published on a runner
+    # without Inno Setup. It packages build-ninja and build-ninja-hip.
+    - name: Build installer (Inno Setup)
+      shell: cmd
+      run: installer\build-installer.bat
+
+    - name: Upload installer to FTP (overwrite alien-setup.exe)
+      shell: pwsh
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
+      run: |
+        # FTP_REMOTE_PATH names the zip or the folder holding it; the installer
+        # goes into the same folder.
+        $remoteDir = $env:FTP_REMOTE_PATH.Substring(0, $env:FTP_REMOTE_PATH.LastIndexOf('/') + 1)
+        $url = "ftp://$($env:FTP_HOST):21/$($remoteDir)alien-setup.exe"
+        curl.exe --fail-with-body --silent --show-error `
+          --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}" `
+          --upload-file "installer/build/alien-setup.exe" `
+          $url
+        if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }
