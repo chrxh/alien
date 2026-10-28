@@ -37,10 +37,11 @@ void OverlayController::process()
     }
     processProgressAnimation();
 
-    if (!_messageStartTimepoint.has_value()) {
-        return;
+    if (_messageStartTimepoint.has_value()) {
+        processMessage();
+    } else if (_status.has_value()) {
+        drawMessage(*_status, 1.0f);
     }
-    processMessage();
 }
 
 void OverlayController::showMessage(std::string const& message, bool withLightning /*= false*/)
@@ -49,6 +50,11 @@ void OverlayController::showMessage(std::string const& message, bool withLightni
     _messageStartTimepoint = std::chrono::steady_clock::now();
     _withLightning = withLightning;
     _counter = 0;
+}
+
+void OverlayController::setStatus(std::optional<std::string> const& status)
+{
+    _status = status;
 }
 
 bool OverlayController::isOn() const
@@ -201,38 +207,44 @@ void OverlayController::processMessage()
     if (duration.count() > ShowDuration) {
         textAlpha = std::max(0.0f, 1.0f - static_cast<float>(duration.count() - ShowDuration) / FadeoutTextDuration);
     }
-    ImDrawList* drawList = ImGui::GetForegroundDrawList();
-
-    auto& styleRep = StyleService::get();
-    auto center = ImGui::GetMainViewport()->Size;
-    center.x /= 2;
-    auto textColorFront = ImColor::HSV(0.5f, 0.0f, 1.0f, textAlpha);
-    auto textColorBack = ImColor::HSV(0.5f, 0.0f, 0.0f, textAlpha);
-
-    ImGui::PushFont(styleRep.getMonospaceLargeFont());
-    auto fontScaling = MessageFontSize / styleRep.getMonospaceLargeFont()->FontSize;
-    auto fontSize = ImGui::CalcTextSize(_message.c_str());
-    fontSize.x *= fontScaling;
-    fontSize.y *= fontScaling;
-    ImGui::PopFont();
 
     if (_withLightning && ++_counter > 2) {
         auto durationAfterSomeTicks = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_ticksLaterTimepoint);
         float lightningAlpha = std::max(0.0f, 0.7f - static_cast<float>(durationAfterSomeTicks.count()) / FadeoutLightningDuration);
         auto viewSize = toRealVector2D(Viewport::get().getViewSize());
-        drawList->AddRectFilled({0, 0}, {viewSize.x, viewSize.y}, ImColor::HSV(0.0f, 0.0f, 1.0f, lightningAlpha));
+        ImGui::GetForegroundDrawList()->AddRectFilled({0, 0}, {viewSize.x, viewSize.y}, ImColor::HSV(0.0f, 0.0f, 1.0f, lightningAlpha));
     }
+    drawMessage(_message, textAlpha);
+}
+
+void OverlayController::drawMessage(std::string const& message, float alpha)
+{
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+
+    auto& styleRep = StyleService::get();
+    auto center = ImGui::GetMainViewport()->Size;
+    center.x /= 2;
+    auto textColorFront = ImColor::HSV(0.5f, 0.0f, 1.0f, alpha);
+    auto textColorBack = ImColor::HSV(0.5f, 0.0f, 0.0f, alpha);
+
+    ImGui::PushFont(styleRep.getMonospaceLargeFont());
+    auto fontScaling = MessageFontSize / styleRep.getMonospaceLargeFont()->FontSize;
+    auto fontSize = ImGui::CalcTextSize(message.c_str());
+    fontSize.x *= fontScaling;
+    fontSize.y *= fontScaling;
+    ImGui::PopFont();
+
     drawList->AddText(
         styleRep.getMonospaceLargeFont(),
         styleRep.scale(MessageFontSize),
         {center.x - fontSize.x / 2 - 2, center.y - styleRep.scale(100.0f) - fontSize.y - 2},
         textColorBack,
-        _message.c_str());
+        message.c_str());
 
     drawList->AddText(
         styleRep.getMonospaceLargeFont(),
         styleRep.scale(MessageFontSize),
         {center.x - fontSize.x / 2, center.y - styleRep.scale(100.0f) - fontSize.y},
         textColorFront,
-        _message.c_str());
+        message.c_str());
 }

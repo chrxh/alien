@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <format>
 
+#include <Fonts/IconsFontAwesome5.h>
+
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 
@@ -27,14 +29,14 @@ namespace
     // video is therefore only captured once its view has been rendered before, at the start several times.
     auto constexpr NumViewRenderingsAtStart = 10;
 
-    // Like the overlay messages, the time-lapse is shown in the monospace font, here in the lower right corner of the view and the video. Its
-    // size is relative to their height.
+    // Like the overlay messages, the time-lapse is shown in the monospace font, here with a forward icon in the lower right corner of the view
+    // and the video. Its size is relative to their height.
     auto constexpr TimeLapseFontSize = 0.045f;
     auto constexpr TimeLapseMargin = 0.025f;
 
     std::string formatTimeLapse(float timeLapse)
     {
-        return timeLapse < 10.0f ? std::format("Temporal: {:.1f}x", timeLapse) : std::format("Temporal: {:.0f}x", timeLapse);
+        return timeLapse < 10.0f ? std::format(ICON_FA_FORWARD " {:.1f}x", timeLapse) : std::format(ICON_FA_FORWARD " {:.0f}x", timeLapse);
     }
 
     // The resolution of the video is fixed when the recording starts, while the view might have changed since then
@@ -211,6 +213,7 @@ void RecorderController::startRecording(std::filesystem::path const& filename)
     if (_recording->simulationStarted) {
         simulationFacade->runSimulation();
     }
+    OverlayController::get().setStatus("Recording...");
     log(Priority::Important, "recording of video " + filename.string() + " started");
 }
 
@@ -399,6 +402,7 @@ void RecorderController::finishRecording(bool reportResult)
 {
     auto recording = std::move(*_recording);
     _recording.reset();
+    OverlayController::get().setStatus(std::nullopt);
 
     // The simulation is paused before the synchronization is restored, so that it does not advance beyond the last frame
     auto simulationFacade = _SimulationFacade::get();
