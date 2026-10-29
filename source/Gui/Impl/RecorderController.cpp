@@ -3,8 +3,12 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <fstream>
+
+#include <boost/property_tree/json_parser.hpp>
 
 #include <Base/GlobalSettings.h>
+#include <Base/JsonParser.h>
 #include <Base/LoggingService.h>
 
 #include <Engine/Interface/SimulationFacade.h>
@@ -74,6 +78,57 @@ namespace
             result.pixels.insert(result.pixels.end(), rowStart, rowStart + rowSize);
         }
         return result;
+    }
+
+    // Content of a camera flight file
+    struct CameraFlight
+    {
+        std::vector<CameraWaypoint> waypoints;
+        float smoothing = RecorderController::DefaultSmoothing;
+        int fps = RecorderController::DefaultFps;
+        int bitRate = RecorderController::DefaultBitRate;
+        int timestepsPerSecond = RecorderController::DefaultTimestepsPerSecond;
+        bool timeLapseAndZoomShown = RecorderController::DefaultTimeLapseAndZoomShown;
+        bool simulationStartedWithFlight = RecorderController::DefaultSimulationStartedWithFlight;
+    };
+
+    void encodeDecode(boost::property_tree::ptree& tree, CameraWaypoint& waypoint, ParserTask task)
+    {
+        CameraWaypoint defaultWaypoint;
+        JsonParser::encodeDecode(tree, waypoint.center.x, defaultWaypoint.center.x, "center x", task);
+        JsonParser::encodeDecode(tree, waypoint.center.y, defaultWaypoint.center.y, "center y", task);
+        JsonParser::encodeDecode(tree, waypoint.zoom, defaultWaypoint.zoom, "zoom", task);
+        JsonParser::encodeDecode(tree, waypoint.duration, defaultWaypoint.duration, "duration", task);
+        JsonParser::encodeDecode(tree, waypoint.timeLapse, defaultWaypoint.timeLapse, "time-lapse", task);
+    }
+
+    // The waypoints are stored as array. Decoding a file without them throws, since it is not a camera flight.
+    void encodeDecode(boost::property_tree::ptree& tree, CameraFlight& flight, ParserTask task)
+    {
+        CameraFlight defaultFlight;
+        JsonParser::encodeDecode(tree, flight.smoothing, defaultFlight.smoothing, "smoothing", task);
+        JsonParser::encodeDecode(tree, flight.fps, defaultFlight.fps, "frames per second", task);
+        JsonParser::encodeDecode(tree, flight.bitRate, defaultFlight.bitRate, "bit rate", task);
+        JsonParser::encodeDecode(tree, flight.timestepsPerSecond, defaultFlight.timestepsPerSecond, "time steps per second at 1x", task);
+        JsonParser::encodeDecode(tree, flight.timeLapseAndZoomShown, defaultFlight.timeLapseAndZoomShown, "show time-lapse and zoom", task);
+        JsonParser::encodeDecode(tree, flight.simulationStartedWithFlight, defaultFlight.simulationStartedWithFlight, "run simulation during flight", task);
+
+        if (task == ParserTask::Encode) {
+            boost::property_tree::ptree waypointsTree;
+            for (auto& waypoint : flight.waypoints) {
+                boost::property_tree::ptree waypointTree;
+                encodeDecode(waypointTree, waypoint, task);
+                waypointsTree.push_back(std::make_pair(std::string(), waypointTree));
+            }
+            tree.push_back(std::make_pair("waypoints", waypointsTree));
+        } else {
+            flight.waypoints.clear();
+            for (auto& [key, waypointTree] : tree.get_child("waypoints")) {
+                CameraWaypoint waypoint;
+                encodeDecode(waypointTree, waypoint, task);
+                flight.waypoints.emplace_back(waypoint);
+            }
+        }
     }
 }
 
@@ -155,6 +210,58 @@ bool RecorderController::isSimulationStartedWithFlight() const
 void RecorderController::setSimulationStartedWithFlight(bool value)
 {
     _simulationStartedWithFlight = value;
+}
+
+bool RecorderController::saveFlight(std::filesystem::path const& filename) const
+{
+    CameraFlight flight{
+        .waypoints = _waypoints,
+        .smoothing = _smoothing,
+        .fps = _fps,
+        .bitRate = _bitRate,
+        .timestepsPerSecond = _timestepsPerSecond,
+        .timeLapseAndZoomShown = _timeLapseAndZoomShown,
+        .simulationStartedWithFlight = _simulationStartedWithFlight,
+    };
+    try {
+        boost::property_tree::ptree tree;
+        encodeDecode(tree, flight, ParserTask::Encode);
+        std::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        boost::property_tree::json_parser::write_json(stream, tree);
+    } catch (...) {
+        return false;
+    }
+    log(Priority::Important, "camera flight saved to " + filename.string());
+    return true;
+}
+
+bool RecorderController::loadFlight(std::filesystem::path const& filename)
+{
+    CameraFlight flight;
+    try {
+        std::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        encodeDecode(tree, flight, ParserTask::Decode);
+    } catch (...) {
+        return false;
+    }
+    log(Priority::Important, "camera flight loaded from " + filename.string());
+
+    setWaypoints(flight.waypoints);
+    setSmoothing(flight.smoothing);
+    setFps(flight.fps);
+    setBitRate(flight.bitRate);
+    setTimestepsPerSecond(flight.timestepsPerSecond);
+    setTimeLapseAndZoomShown(flight.timeLapseAndZoomShown);
+    setSimulationStartedWithFlight(flight.simulationStartedWithFlight);
+    return true;
 }
 
 CameraWaypoint RecorderController::createWaypointFromView() const
