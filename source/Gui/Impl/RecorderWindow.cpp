@@ -273,16 +273,16 @@ void RecorderWindow::processSettings()
                 controller.setTimestepsPerSecond(timestepsPerSecond);
             }
 
-            auto timeLapseShown = controller.isTimeLapseShown();
+            auto timeLapseAndZoomShown = controller.isTimeLapseAndZoomShown();
             if (AlienGui::Checkbox(
                     AlienGui::CheckboxParameters()
-                        .name("Show time-lapse")
+                        .name("Show time-lapse and zoom")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(&RecorderController::DefaultTimeLapseShown)
-                        .tooltip("Shows the current time-lapse, e.g. 2.5x, in the lower right corner of the view and the video. A forward icon "
-                                 "marks a sped up simulation."),
-                    &timeLapseShown)) {
-                controller.setTimeLapseShown(timeLapseShown);
+                        .defaultValue(&RecorderController::DefaultTimeLapseAndZoomShown)
+                        .tooltip("Shows the current time-lapse as temporal factor and the zoom as spatial factor in the lower right corner of the "
+                                 "view and the video."),
+                    &timeLapseAndZoomShown)) {
+                controller.setTimeLapseAndZoomShown(timeLapseAndZoomShown);
             }
 
             auto simulationStarted = controller.isSimulationStartedWithFlight();
