@@ -1,9 +1,8 @@
 #include "RecorderController.h"
 
 #include <algorithm>
+#include <cmath>
 #include <format>
-
-#include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
@@ -29,20 +28,28 @@ namespace
     // video is therefore only captured once its view has been rendered before, at the start several times.
     auto constexpr NumViewRenderingsAtStart = 10;
 
-    // Like the overlay messages, the time-lapse is shown in the monospace font, here in the lower right corner of the view and the video. Its
-    // size is relative to their height.
-    auto constexpr TimeLapseFontSize = 0.045f;
-    auto constexpr TimeLapseMargin = 0.025f;
+    // Like the overlay messages, the time-lapse and the zoom are shown in the monospace font, here in the lower right corner of the view and the
+    // video. The size is relative to their height.
+    auto constexpr LabelFontSize = 0.0225f;
+    auto constexpr LabelMargin = 0.025f;
 
-    std::string formatTimeLapse(float timeLapse)
+    // Small factors get more decimals, e.g. 0.25x, 2.5x and 25x. The decision uses the rounded factor, so that 0.999 is shown as 1.0x.
+    std::string formatFactor(float factor)
     {
-        auto result = timeLapse < 10.0f ? std::format("{:.1f}x", timeLapse) : std::format("{:.0f}x", timeLapse);
-
-        // Only a simulation that runs faster than normal gets the forward icon
-        if (timeLapse > 1.0f && result != "1.0x") {
-            result = ICON_FA_FORWARD " " + result;
+        if (std::round(factor * 100.0f) < 100.0f) {
+            return std::format("{:.2f}x", factor);
         }
-        return result;
+        if (std::round(factor * 10.0f) < 100.0f) {
+            return std::format("{:.1f}x", factor);
+        }
+        return std::format("{:.0f}x", factor);
+    }
+
+    // In the monospace font, the values of both lines start at the same position. They are padded to the width of a factor below 1, so that
+    // the label keeps its position while they change.
+    std::string formatLabel(CameraState const& state)
+    {
+        return std::format("temporal: {:<5}\nspatial:  {:<5}", formatFactor(state.timeLapse), formatFactor(state.zoom));
     }
 
     // The resolution of the video is fixed when the recording starts, while the view might have changed since then
@@ -130,14 +137,14 @@ void RecorderController::setTimestepsPerSecond(int value)
     _timestepsPerSecond = std::clamp(value, 1, 100000);
 }
 
-bool RecorderController::isTimeLapseShown() const
+bool RecorderController::isTimeLapseAndZoomShown() const
 {
-    return _timeLapseShown;
+    return _timeLapseAndZoomShown;
 }
 
-void RecorderController::setTimeLapseShown(bool value)
+void RecorderController::setTimeLapseAndZoomShown(bool value)
 {
-    _timeLapseShown = value;
+    _timeLapseAndZoomShown = value;
 }
 
 bool RecorderController::isSimulationStartedWithFlight() const
@@ -264,11 +271,11 @@ void RecorderController::processCamera()
         processPlayback();
     }
 
-    if (_timeLapseShown) {
+    if (_timeLapseAndZoomShown) {
         if (_recording) {
-            drawTimeLapse(_recording->schedule.getCameraState(_recording->frame).timeLapse);
+            drawTimeLapseAndZoom(_recording->schedule.getCameraState(_recording->frame));
         } else if (_playback) {
-            drawTimeLapse(createPath().getState(_playback->time).timeLapse);
+            drawTimeLapseAndZoom(createPath().getState(_playback->time));
         }
     }
 }
@@ -280,7 +287,7 @@ void RecorderController::init()
     setFps(settings.getValue("controllers.recorder.fps", _fps));
     setBitRate(settings.getValue("controllers.recorder.bit rate", _bitRate));
     setTimestepsPerSecond(settings.getValue("controllers.recorder.time steps per second", _timestepsPerSecond));
-    setTimeLapseShown(settings.getValue("controllers.recorder.show time-lapse", _timeLapseShown));
+    setTimeLapseAndZoomShown(settings.getValue("controllers.recorder.show time-lapse and zoom", _timeLapseAndZoomShown));
     setSimulationStartedWithFlight(settings.getValue("controllers.recorder.start simulation", _simulationStartedWithFlight));
 
     std::vector<CameraWaypoint> waypoints;
@@ -312,7 +319,7 @@ void RecorderController::shutdown()
     settings.setValue("controllers.recorder.fps", _fps);
     settings.setValue("controllers.recorder.bit rate", _bitRate);
     settings.setValue("controllers.recorder.time steps per second", _timestepsPerSecond);
-    settings.setValue("controllers.recorder.show time-lapse", _timeLapseShown);
+    settings.setValue("controllers.recorder.show time-lapse and zoom", _timeLapseAndZoomShown);
     settings.setValue("controllers.recorder.start simulation", _simulationStartedWithFlight);
 
     settings.setValue("controllers.recorder.number of waypoints", toInt(_waypoints.size()));
@@ -366,8 +373,8 @@ void RecorderController::processRecording()
         // A frame that has not been shown, e.g. due to a minimized window, is captured again
         if (auto picture = _RenderingFacade::get()->fetchCapturedSimulationFrame()) {
             auto frame = fitToResolution(std::move(*picture), recording.resolution);
-            if (_timeLapseShown) {
-                drawTimeLapse(frame);
+            if (_timeLapseAndZoomShown) {
+                drawTimeLapseAndZoom(frame);
             }
             recording.videoWriter->addFrame(RgbImage{.width = frame.resolution.x, .height = frame.resolution.y, .pixels = std::move(frame.pixels)});
             recording.pendingTimesteps = recording.schedule.getTimestepsAfterFrame(recording.frame);
@@ -465,26 +472,26 @@ void RecorderController::applyCameraState(CameraState const& state) const
     Viewport::get().setZoomFactor(state.zoom);
 }
 
-void RecorderController::drawTimeLapse(float timeLapse) const
+void RecorderController::drawTimeLapseAndZoom(CameraState const& state) const
 {
     auto viewport = ImGui::GetMainViewport();
-    auto margin = viewport->Size.y * TimeLapseMargin;
+    auto margin = viewport->Size.y * LabelMargin;
     PictureGuiService::get().drawOverlayText(
         ImGui::GetBackgroundDrawList(),
-        formatTimeLapse(timeLapse),
-        viewport->Size.y * TimeLapseFontSize,
+        formatLabel(state),
+        viewport->Size.y * LabelFontSize,
         {viewport->Pos.x + viewport->Size.x - margin, viewport->Pos.y + viewport->Size.y - margin});
 }
 
-void RecorderController::drawTimeLapse(PictureData& frame)
+void RecorderController::drawTimeLapseAndZoom(PictureData& frame)
 {
     auto& recording = *_recording;
-    auto text = formatTimeLapse(recording.schedule.getCameraState(recording.frame).timeLapse);
+    auto text = formatLabel(recording.schedule.getCameraState(recording.frame));
     auto height = toFloat(frame.resolution.y);
-    if (!recording.timeLapseLabel || recording.timeLapseText != text) {
-        recording.timeLapseLabel = PictureGuiService::get().renderOverlayText(text, height * TimeLapseFontSize);
-        recording.timeLapseText = text;
+    if (!recording.label || recording.labelText != text) {
+        recording.label = PictureGuiService::get().renderOverlayText(text, height * LabelFontSize);
+        recording.labelText = text;
     }
-    auto margin = toInt(height * TimeLapseMargin);
-    PictureGuiService::get().drawOverlayText(frame, *recording.timeLapseLabel, {frame.resolution.x - margin, frame.resolution.y - margin});
+    auto margin = toInt(height * LabelMargin);
+    PictureGuiService::get().drawOverlayText(frame, *recording.label, {frame.resolution.x - margin, frame.resolution.y - margin});
 }

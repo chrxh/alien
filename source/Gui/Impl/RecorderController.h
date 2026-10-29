@@ -31,7 +31,7 @@ public:
     static auto constexpr DefaultFps = 30;
     static auto constexpr DefaultBitRate = 30;
     static auto constexpr DefaultTimestepsPerSecond = 60;
-    static auto constexpr DefaultTimeLapseShown = true;
+    static auto constexpr DefaultTimeLapseAndZoomShown = true;
     static auto constexpr DefaultSimulationStartedWithFlight = true;
 
     std::vector<CameraWaypoint> const& getWaypoints() const;
@@ -52,9 +52,9 @@ public:
     int getTimestepsPerSecond() const;
     void setTimestepsPerSecond(int value);
 
-    // The current time-lapse is shown in the lower right corner of the view and the video
-    bool isTimeLapseShown() const;
-    void setTimeLapseShown(bool value);
+    // The current time-lapse and zoom are shown in the lower right corner of the view and the video
+    bool isTimeLapseAndZoomShown() const;
+    void setTimeLapseAndZoomShown(bool value);
 
     // A paused simulation runs during the playback and the recording and is paused again afterwards
     bool isSimulationStartedWithFlight() const;
@@ -105,15 +105,15 @@ private:
     void finishRecording(bool reportResult);
 
     void applyCameraState(CameraState const& state) const;
-    void drawTimeLapse(float timeLapse) const;
-    void drawTimeLapse(PictureData& frame);
+    void drawTimeLapseAndZoom(CameraState const& state) const;
+    void drawTimeLapseAndZoom(PictureData& frame);
 
     std::vector<CameraWaypoint> _waypoints;
     float _smoothing = DefaultSmoothing;
     int _fps = DefaultFps;
     int _bitRate = DefaultBitRate;
     int _timestepsPerSecond = DefaultTimestepsPerSecond;
-    bool _timeLapseShown = DefaultTimeLapseShown;
+    bool _timeLapseAndZoomShown = DefaultTimeLapseAndZoomShown;
     bool _simulationStartedWithFlight = DefaultSimulationStartedWithFlight;
 
     struct Playback
@@ -137,9 +137,9 @@ private:
         bool captureRequested = false;
         uint64_t maxTimestepsPerFrame = 1;
 
-        // The label of the time-lapse is only rendered again when its text changes
-        std::string timeLapseText;
-        std::optional<PictureGuiService::OverlayText> timeLapseLabel;
+        // The label with the time-lapse and the zoom is only rendered again when its text changes
+        std::string labelText;
+        std::optional<PictureGuiService::OverlayText> label;
 
         // Settings of the simulation that the recording overrides
         bool syncSimulationWithRendering = false;
