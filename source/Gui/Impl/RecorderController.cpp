@@ -458,7 +458,7 @@ void RecorderController::finishRecording(bool reportResult)
         recording.videoWriter->finish();
         log(Priority::Important, "video " + recording.filename.string() + " recorded with " + std::to_string(recording.frame) + " frames");
         if (reportResult) {
-            printOverlayMessage(recording.filename.filename().string());
+            printOverlayMessage("Video saved as " + recording.filename.filename().string());
         }
     } catch (AlienException const& exception) {
         log(Priority::Important, std::string("video could not be recorded: ") + exception.what());
