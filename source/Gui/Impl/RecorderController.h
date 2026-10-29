@@ -60,6 +60,12 @@ public:
     bool isSimulationStartedWithFlight() const;
     void setSimulationStartedWithFlight(bool value);
 
+    // A camera flight file contains the waypoints and the settings in JSON format
+    bool saveFlight(std::filesystem::path const& filename) const;
+
+    // The current waypoints and settings are kept if the file cannot be read
+    bool loadFlight(std::filesystem::path const& filename);
+
     CameraWaypoint createWaypointFromView() const;
     void moveViewToWaypoint(CameraWaypoint const& waypoint) const;
 

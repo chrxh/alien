@@ -27,6 +27,8 @@ private:
     void processSettings();
     void processStatusBar();
 
+    void onOpenFlight();
+    void onSaveFlight();
     void onAddWaypoint();
     void onDeleteWaypoint();
     void onRecordVideo();
@@ -36,6 +38,7 @@ private:
     std::optional<int> _selectedWaypoint;
     bool _settingsOpen = true;
     float _settingsHeight = 0;
+    std::string _flightDirectory;
     std::string _videoDirectory;
 
     // The schedule of a long video takes a while to calculate, so its key figures are only updated when the camera path changes

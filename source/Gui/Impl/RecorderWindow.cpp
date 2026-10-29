@@ -18,6 +18,7 @@
 #include "RecorderController.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "OverlayController.h"
 #include "SimulationView.h"
 #include "StyleService.h"
 
@@ -27,6 +28,7 @@ namespace
     auto constexpr DefaultSettingsHeight = 222.0f;
     auto constexpr RowHeight = 23.0f;
     auto constexpr DefaultDuration = 5.0f;
+    auto constexpr FlightFileFilter = "Camera flight (*.flight.json){.flight.json,.json},.*";
 
     bool inputCell(std::string const& id, float& value, char const* format)
     {
@@ -49,6 +51,7 @@ void RecorderWindow::initIntern()
     _settingsOpen = GlobalSettings::get().getValue("windows.recorder.settings.open", _settingsOpen);
     _settingsHeight = GlobalSettings::get().getValue("windows.recorder.settings.height", scale(DefaultSettingsHeight))
         * WindowController::get().getContentScaleCorrection();
+    _flightDirectory = GlobalSettings::get().getValue("windows.recorder.flight directory", std::filesystem::current_path().string());
     _videoDirectory = GlobalSettings::get().getValue("windows.recorder.video directory", std::filesystem::current_path().string());
 }
 
@@ -56,6 +59,7 @@ void RecorderWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("windows.recorder.settings.open", _settingsOpen);
     GlobalSettings::get().setValue("windows.recorder.settings.height", _settingsHeight);
+    GlobalSettings::get().setValue("windows.recorder.flight directory", _flightDirectory);
     GlobalSettings::get().setValue("windows.recorder.video directory", _videoDirectory);
 }
 
@@ -90,6 +94,19 @@ void RecorderWindow::processToolbar()
     AlienGui::Toolbar(
         AlienGui::ToolbarParameters().id("Recorder"),
         {AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_FOLDER_OPEN)
+                                                 .name("Open camera flight")
+                                                 .tooltip("Loads the waypoints and the settings from a file.")
+                                                 .disabled(controller.isRecording())
+                                                 .action([&] { onOpenFlight(); })),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
+                                                 .icon(ICON_FA_SAVE)
+                                                 .name("Save camera flight")
+                                                 .tooltip("Saves the waypoints and the settings to a file.")
+                                                 .disabled(controller.getWaypoints().empty())
+                                                 .action([&] { onSaveFlight(); })),
+         AlienGui::ToolbarItem::createSeparator(),
+         AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
                                                  .icon(ICON_FA_PLUS)
                                                  .name("Add waypoint")
                                                  .tooltip("Adds the current view as waypoint behind the selected one or at the end.")
@@ -331,6 +348,36 @@ void RecorderWindow::processStatusBar()
     }
 
     AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems).warningItem(warningItem));
+}
+
+void RecorderWindow::onOpenFlight()
+{
+    GenericFileDialog::get().showOpenFileDialog("Open camera flight", FlightFileFilter, _flightDirectory, [this](std::filesystem::path const& path) {
+        _flightDirectory = std::filesystem::path(path).remove_filename().string();
+        if (!RecorderController::get().loadFlight(path)) {
+            GenericMessageDialog::get().information("Open camera flight", "The selected file could not be opened.");
+            return;
+        }
+        _selectedWaypoint.reset();
+        printOverlayMessage("Camera flight loaded from " + path.filename().string());
+    });
+}
+
+void RecorderWindow::onSaveFlight()
+{
+    GenericFileDialog::get().showSaveFileDialog("Save camera flight", FlightFileFilter, _flightDirectory, [this](std::filesystem::path const& path) {
+        // Camera flights are always written as JSON files, so that a file selected by mistake, e.g. a simulation, is not overwritten
+        auto filename = path;
+        if (!boost::iequals(filename.extension().string(), ".json")) {
+            filename += ".flight.json";
+        }
+        _flightDirectory = std::filesystem::path(filename).remove_filename().string();
+        if (!RecorderController::get().saveFlight(filename)) {
+            GenericMessageDialog::get().information("Save camera flight", "The camera flight could not be saved.");
+            return;
+        }
+        printOverlayMessage("Camera flight saved as " + filename.filename().string());
+    });
 }
 
 void RecorderWindow::onAddWaypoint()
