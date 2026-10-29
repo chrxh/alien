@@ -202,6 +202,7 @@ void RecorderController::startPlayback()
     if (_playback->simulationStarted) {
         simulationFacade->runSimulation();
     }
+    OverlayController::get().setStatus("Playing...");
 }
 
 void RecorderController::startRecording(std::filesystem::path const& filename)
@@ -357,6 +358,7 @@ void RecorderController::finishPlayback()
         _SimulationFacade::get()->pauseSimulation();
     }
     _playback.reset();
+    OverlayController::get().setStatus(std::nullopt);
 }
 
 void RecorderController::processRecording()
