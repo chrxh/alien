@@ -102,6 +102,69 @@ TEST_F(GeometryTests, copyBuffers_cullsObjectsOutsideVisibleRect)
     EXPECT_FLOAT_EQ(5.0f, cellData.at(0).pos[1]);
 }
 
+TEST_F(GeometryTests, copyBuffers_borderlessRenderingKeepsObjectsOnAllSidesOfVisibleRect)
+{
+    _parameters.borderlessRendering.value = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({99.5f, 105.0f}),
+        ObjectDesc().id(2).pos({105.0f, 99.5f}),
+        ObjectDesc().id(3).pos({110.5f, 105.0f}),
+        ObjectDesc().id(4).pos({105.0f, 110.5f}),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{100, 100}, {110, 110}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(4u, cellData.size());
+    for (auto const& object : data._objects) {
+        auto vertex = getVertexNextTo(cellData, object._pos);
+        EXPECT_FLOAT_EQ(object._pos.x, vertex.pos[0]);
+        EXPECT_FLOAT_EQ(object._pos.y, vertex.pos[1]);
+    }
+}
+
+TEST_F(GeometryTests, copyBuffers_borderlessRenderingKeepsConnectionsAcrossEdgeOfVisibleRect)
+{
+    _parameters.borderlessRendering.value = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({99.5f, 105.0f}),
+        ObjectDesc().id(2).pos({100.5f, 105.0f}),
+    });
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{100, 100}, {110, 110}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
+
+    auto numObjects = geometryBuffers->getNumObjects();
+    EXPECT_EQ(2u, numObjects.objects);
+    EXPECT_EQ(2u, numObjects.lineIndices);
+}
+
+TEST_F(GeometryTests, copyBuffers_borderlessRenderingRepeatsWorldFromTopLeftOfLargerVisibleRect)
+{
+    _parameters.borderlessRendering.value = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+    auto data = ContentDesc().addCreature({ObjectDesc().id(1).pos({950.0f, 950.0f})});
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{-500, -500}, {1700, 1700}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
+
+    // A view larger than the world repeats the part of the size of the world at its top left, see Rendering/Impl/Shaders/ModuloCopyFS.h
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(1u, cellData.size());
+    EXPECT_FLOAT_EQ(-50.0f, cellData.at(0).pos[0]);
+    EXPECT_FLOAT_EQ(-50.0f, cellData.at(0).pos[1]);
+}
+
 TEST_F(GeometryTests, copyBuffers_fluidParticles)
 {
     auto data = ContentDesc().energies({

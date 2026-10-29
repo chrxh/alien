@@ -26,6 +26,20 @@ namespace
         }
         return result;
     }
+
+    // Borderless rendering places the objects of the periodic world in a part of the size of the world that is centered on the view, so that
+    // they leave the view on all sides alike. A view larger than the world repeats the part that starts at its top left, see
+    // Rendering/Impl/Shaders/ModuloCopyFS.h.
+    float2 getRenderedWorldTopLeft(SimulationData const& data, RealRect const& visibleWorldRect)
+    {
+        auto getStart = [](float visibleStart, float visibleEnd, int period) {
+            return visibleStart - std::max(0.0f, (toFloat(period) - (visibleEnd - visibleStart)) / 2);
+        };
+        auto worldSize = data.world.getSize();
+        return {
+            getStart(visibleWorldRect.topLeft.x, visibleWorldRect.bottomRight.x, worldSize.x),
+            getStart(visibleWorldRect.topLeft.y, visibleWorldRect.bottomRight.y, worldSize.y)};
+    }
 }
 
 void GeometryKernelsService::init()
@@ -77,9 +91,9 @@ bool GeometryKernelsService::isSharedMemoryWorking(GeometryBuffers const& geomet
 void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
 {
     auto const& launchSettings = settings.kernelLaunchSettings;
-    float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    launchKernelOnDefaultStream(KERNEL(cudaCorrectPositionsForRendering), LaunchConfig{launchSettings.numBlocks, 8}, data, visibleTopLeft);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaCorrectPositionsForRendering), LaunchConfig{launchSettings.numBlocks, 8}, data, getRenderedWorldTopLeft(data, visibleWorldRect));
 }
 
 void GeometryKernelsService::restorePositions(SettingsForSimulation const& settings, SimulationData data)
@@ -112,7 +126,8 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
         KERNEL(cudaExtractAttackEventData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, &_counters->attackEventVertices, context);
     launchKernelOnDefaultStream(
         KERNEL(cudaExtractDetonationEventData), LaunchConfig{launchSettings.numBlocks, 8}, data, nullptr, &_counters->detonationEventVertices, context);
-    launchKernelOnDefaultStream(KERNEL(cudaExtractLocationData), LaunchConfig{1, 1}, data, nullptr, &_counters->locations, visibleTopLeft);
+    launchKernelOnDefaultStream(
+        KERNEL(cudaExtractLocationData), LaunchConfig{1, 1}, data, nullptr, &_counters->locations, getRenderedWorldTopLeft(data, visibleWorldRect));
 
     NumRenderObjects result;
     copyToHost(&result, _counters);
@@ -151,7 +166,7 @@ void GeometryKernelsService::extractObjectData(
         data,
         renderingData.getBuffer<LocationVertexData>(GeometryBufferType_Locations),
         &_counters->locations,
-        visibleTopLeft);
+        getRenderedWorldTopLeft(data, visibleWorldRect));
     launchKernelOnDefaultStream(
         KERNEL(cudaExtractSelectedObjectData),
         LaunchConfig{launchSettings.numBlocks, 8},

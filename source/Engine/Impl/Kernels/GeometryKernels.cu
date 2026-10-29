@@ -27,15 +27,15 @@ namespace
     // Small worlds repeat within the shadow grid, which collects the periodic copies of an object up to this number of world sizes away
     __device__ int constexpr MaxShadowCopyDistance = 2;
 
-    __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
+    __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& renderedWorldTopLeft, int2 const& worldSize)
     {
         if (cudaSimulationParameters.borderlessRendering.value) {
-            pos.x -= visibleUpperLeft.x;
-            pos.y -= visibleUpperLeft.y;
+            pos.x -= renderedWorldTopLeft.x;
+            pos.y -= renderedWorldTopLeft.y;
             pos.x = Math::modulo(pos.x, toFloat(worldSize.x));
             pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
-            pos.x += visibleUpperLeft.x;
-            pos.y += visibleUpperLeft.y;
+            pos.x += renderedWorldTopLeft.x;
+            pos.y += renderedWorldTopLeft.y;
         } else {
             pos.x = Math::modulo(pos.x, toFloat(worldSize.x));
             pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
@@ -43,20 +43,20 @@ namespace
     }
 }
 
-__global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft)
+__global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 renderedWorldTopLeft)
 {
     {
         auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
-            correctPositionForRendering(object->pos, visibleTopLeft, data.world.getSize());
+            correctPositionForRendering(object->pos, renderedWorldTopLeft, data.world.getSize());
         }
     }
     {
         auto const& partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.entities.energies.at(index);
-            correctPositionForRendering(particle->pos, visibleTopLeft, data.world.getSize());
+            correctPositionForRendering(particle->pos, renderedWorldTopLeft, data.world.getSize());
         }
     }
 }
@@ -544,7 +544,7 @@ cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluid
     }
 }
 
-__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft)
+__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 renderedWorldTopLeft)
 {
     // Extract location data for layers and sources
     // Each location is rendered 5 times (normal + 4 world offsets for periodic boundaries)
@@ -554,7 +554,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         auto const& pos_asRealVector2D = cudaSimulationParameters.layerPosition.layerValues[i];
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
-        correctPositionForRendering(pos, visibleTopLeft, data.world.getSize());
+        correctPositionForRendering(pos, renderedWorldTopLeft, data.world.getSize());
         auto color = cudaSimulationParameters.backgroundColor.layerValues[i].value;
         auto shapeType = cudaSimulationParameters.layerShape.layerValues[i];
         auto radius = cudaSimulationParameters.layerCoreRadius.layerValues[i];
@@ -636,7 +636,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         }
         auto const& pos_asRealVector2D = cudaSimulationParameters.sourcePosition.sourceValues[i];
         float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
-        correctPositionForRendering(pos, visibleTopLeft, data.world.getSize());
+        correctPositionForRendering(pos, renderedWorldTopLeft, data.world.getSize());
 
         auto const& lightColor = cudaSimulationParameters.sourceLightColor.sourceValues[i];
         float3 color = {lightColor.r * RadiationCenterBrightness, lightColor.g * RadiationCenterBrightness, lightColor.b * RadiationCenterBrightness};

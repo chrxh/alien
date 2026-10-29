@@ -11,7 +11,8 @@ const float CellLight = 1.5;
 
 // The cells are provided up to at least this distance outside the view, see Engine/Impl/GeometryKernelsService.cu. Their light fades out
 // towards it, so that it does not appear suddenly when cells approach the view. This does not cover lights whose range exceeds the margin
-// when zoomed out, and cells to the left of and above the view in borderless worlds, which are not provided at all.
+// when zoomed out, and borderless worlds hardly larger than the view, which provide the cells on each side only up to half of the remaining
+// world.
 const float CellCullingMargin = 10.0;
 
 float getVisibility(vec2 position)

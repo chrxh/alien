@@ -21,12 +21,12 @@ struct ShadowGridContext
     int2 size;
 };
 
-__global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft);
+__global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 renderedWorldTopLeft);
 __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects, GeometryExtractionContext context);
 __global__ void cudaSmoothSolidOutlines(SimulationData data, ObjectVertexData* objectData, GeometryExtractionContext context, bool fromTemporaryPositions);
 __global__ void
 cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles, GeometryExtractionContext context);
-__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft);
+__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 renderedWorldTopLeft);
 __global__ void cudaExtractSelectedObjectData(
     SimulationData data,
     SelectedObjectVertexData* selectedObjectData,
