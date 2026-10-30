@@ -22,6 +22,7 @@ public:
 
     void captureSimulationFrame() override;
     std::optional<PictureData> fetchCapturedSimulationFrame() override;
+    void renderSimulationFrameEvenIfNotShown() override;
 
     PictureData renderSimulationPicture(RenderView const& view) override;
     PictureData renderDrawList(ImDrawList* drawList, IntVector2D const& resolution, ImColor const& backgroundColor, int supersampling) override;

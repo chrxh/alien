@@ -138,7 +138,7 @@ void RecorderWindow::processToolbar()
                                                  .icon(ICON_FA_VIDEO)
                                                  .name("Record video")
                                                  .tooltip("Flies the camera along the path and records the simulation without the user interface as MP4 video. "
-                                                          "The video has the size of the view.")
+                                                          "The video has the size of the view. The recording continues while ALIEN is minimized.")
                                                  .disabled(busy || !hasPath)
                                                  .action([&] { onRecordVideo(); })),
          AlienGui::ToolbarItem::createButton(AlienGui::ToolbarItemParameters()
