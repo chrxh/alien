@@ -152,11 +152,19 @@ std::optional<PictureData> VulkanFrameRenderer::fetchCapturedScene()
     return std::exchange(_capturedScene, std::nullopt);
 }
 
+void VulkanFrameRenderer::renderSceneEvenIfNotShown()
+{
+    _sceneRenderedEvenIfNotShown = true;
+}
+
 void VulkanFrameRenderer::render(ImDrawData* drawData)
 {
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
-    ExitScopeGuard resetSceneCaptureRequest([this] { _sceneCaptureRequested = false; });
+    ExitScopeGuard resetSceneRequests([this] {
+        _sceneRenderedEvenIfNotShown = false;
+        _sceneCaptureRequested = false;
+    });
     _capturedScene.reset();
 
     // The scene rendering overwrites resources of the previous frame, e.g. the geometry buffers
@@ -168,17 +176,9 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
         context.onFrameCompleted(context.getFrameNumber() - 1);
     }
 
-    // Frames that are not shown still update the scene since the simulation can be synchronized with the rendering
-    auto skipFrame = [&] {
-        if (_scene) {
-            _scene->updateFunc();
-        }
-        context.advanceFrameNumber();
-    };
-
     auto framebufferSize = getFramebufferSize();
     if (framebufferSize.x <= 0 || framebufferSize.y <= 0) {
-        skipFrame();
+        renderFrameWithoutScreen();
         return;
     }
     if (_swapchainOutdated || static_cast<uint32_t>(framebufferSize.x) != _extent.width || static_cast<uint32_t>(framebufferSize.y) != _extent.height) {
@@ -190,7 +190,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     auto acquireResult = vkAcquireNextImageKHR(device, _swapchain, UINT64_MAX, _imageAcquiredSemaphore, VK_NULL_HANDLE, &imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR) {
         _swapchainOutdated = true;
-        skipFrame();
+        renderFrameWithoutScreen();
         return;
     }
     if (acquireResult == VK_SUBOPTIMAL_KHR) {
@@ -333,6 +333,38 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
 VkFormat VulkanFrameRenderer::getScreenFormat() const
 {
     return _surfaceFormat.format;
+}
+
+void VulkanFrameRenderer::renderFrameWithoutScreen()
+{
+    auto& context = VulkanContext::get();
+    auto device = context.getDevice();
+
+    // Frames that are not shown still update the scene since the simulation can be synchronized with the rendering
+    if (_scene) {
+        _scene->updateFunc();
+    }
+    if (_scene && (_sceneRenderedEvenIfNotShown || _sceneCaptureRequested)) {
+        checkVkResult(vkResetCommandBuffer(_commandBuffer, 0), "vkResetCommandBuffer");
+        VkCommandBufferBeginInfo beginInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT};
+        checkVkResult(vkBeginCommandBuffer(_commandBuffer, &beginInfo), "vkBeginCommandBuffer");
+        auto& sceneImage = _scene->renderFunc(_commandBuffer);
+        if (_sceneCaptureRequested) {
+            copySceneToCaptureBuffer(sceneImage);
+        }
+        checkVkResult(vkEndCommandBuffer(_commandBuffer), "vkEndCommandBuffer");
+
+        VkCommandBufferSubmitInfo commandBufferInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO, .commandBuffer = _commandBuffer};
+        VkSubmitInfo2 submitInfo{.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2, .commandBufferInfoCount = 1, .pCommandBufferInfos = &commandBufferInfo};
+        checkVkResult(vkResetFences(device, 1, &_frameFence), "vkResetFences");
+        checkVkResult(vkQueueSubmit2(context.getQueue(), 1, &submitInfo, _frameFence), "vkQueueSubmit2");
+        _frameSubmitted = true;
+        if (_sceneCaptureRequested) {
+            checkVkResult(vkWaitForFences(device, 1, &_frameFence, VK_TRUE, UINT64_MAX), "vkWaitForFences");
+            _capturedScene = readCaptureBuffer();
+        }
+    }
+    context.advanceFrameNumber();
 }
 
 void VulkanFrameRenderer::copySceneToCaptureBuffer(VulkanImage& sceneImage)

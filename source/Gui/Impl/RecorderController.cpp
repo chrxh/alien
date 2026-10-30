@@ -476,10 +476,13 @@ void RecorderController::processRecording()
         return;
     }
 
+    // Since the rendering lags behind changes of the view, the frames between the captures are rendered also while the window is minimized
+    _RenderingFacade::get()->renderSimulationFrameEvenIfNotShown();
+
     if (recording.captureRequested) {
         recording.captureRequested = false;
 
-        // A frame that has not been shown, e.g. due to a minimized window, is captured again
+        // A frame without the simulation, e.g. while its rendering is switched off, is captured again
         if (auto picture = _RenderingFacade::get()->fetchCapturedSimulationFrame()) {
             auto frame = fitToResolution(std::move(*picture), recording.resolution);
             if (_timeLapseAndZoomShown) {

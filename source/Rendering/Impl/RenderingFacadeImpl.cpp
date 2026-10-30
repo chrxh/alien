@@ -119,6 +119,11 @@ std::optional<PictureData> _RenderingFacadeImpl::fetchCapturedSimulationFrame()
     return VulkanFrameRenderer::get().fetchCapturedScene();
 }
 
+void _RenderingFacadeImpl::renderSimulationFrameEvenIfNotShown()
+{
+    VulkanFrameRenderer::get().renderSceneEvenIfNotShown();
+}
+
 PictureData _RenderingFacadeImpl::renderSimulationPicture(RenderView const& view)
 {
     return SimulationRenderer::get().renderPicture(view);
