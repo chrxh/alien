@@ -139,7 +139,6 @@ private:
 
         int frame = 0;
         uint64_t pendingTimesteps = 0;
-        int numViewRenderings = 0;
         bool captureRequested = false;
         uint64_t maxTimestepsPerFrame = 1;
 

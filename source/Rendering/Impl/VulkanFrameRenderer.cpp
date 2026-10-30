@@ -10,7 +10,6 @@
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 
-#include <Base/ExitScopeGuard.h>
 #include <Base/LoggingService.h>
 
 #include "Shader.h"
@@ -142,9 +141,9 @@ void VulkanFrameRenderer::drawScene(SceneUpdateFunc const& updateFunc, SceneRend
     _scene = Scene{.updateFunc = updateFunc, .renderFunc = renderFunc};
 }
 
-void VulkanFrameRenderer::captureScene()
+void VulkanFrameRenderer::captureScene(int numPrecedingRenderings)
 {
-    _sceneCaptureRequested = true;
+    _numRenderingsBeforeCapture = numPrecedingRenderings;
 }
 
 std::optional<PictureData> VulkanFrameRenderer::fetchCapturedScene()
@@ -152,19 +151,10 @@ std::optional<PictureData> VulkanFrameRenderer::fetchCapturedScene()
     return std::exchange(_capturedScene, std::nullopt);
 }
 
-void VulkanFrameRenderer::renderSceneEvenIfNotShown()
-{
-    _sceneRenderedEvenIfNotShown = true;
-}
-
 void VulkanFrameRenderer::render(ImDrawData* drawData)
 {
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
-    ExitScopeGuard resetSceneRequests([this] {
-        _sceneRenderedEvenIfNotShown = false;
-        _sceneCaptureRequested = false;
-    });
     _capturedScene.reset();
 
     // The scene rendering overwrites resources of the previous frame, e.g. the geometry buffers
@@ -208,10 +198,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     if (_scene) {
         _scene->updateFunc();
         sceneImage = &_scene->renderFunc(_commandBuffer);
-        if (_sceneCaptureRequested) {
-            copySceneToCaptureBuffer(*sceneImage);
-            sceneCopied = true;
-        }
+        sceneCopied = copySceneIfCaptureDue(*sceneImage);
         VulkanContext::useImage(_commandBuffer, *sceneImage, ImageUsage::ShaderRead);
     }
 
@@ -344,14 +331,11 @@ void VulkanFrameRenderer::renderFrameWithoutScreen()
     if (_scene) {
         _scene->updateFunc();
     }
-    if (_scene && (_sceneRenderedEvenIfNotShown || _sceneCaptureRequested)) {
+    if (_scene && _numRenderingsBeforeCapture) {
         checkVkResult(vkResetCommandBuffer(_commandBuffer, 0), "vkResetCommandBuffer");
         VkCommandBufferBeginInfo beginInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT};
         checkVkResult(vkBeginCommandBuffer(_commandBuffer, &beginInfo), "vkBeginCommandBuffer");
-        auto& sceneImage = _scene->renderFunc(_commandBuffer);
-        if (_sceneCaptureRequested) {
-            copySceneToCaptureBuffer(sceneImage);
-        }
+        auto sceneCopied = copySceneIfCaptureDue(_scene->renderFunc(_commandBuffer));
         checkVkResult(vkEndCommandBuffer(_commandBuffer), "vkEndCommandBuffer");
 
         VkCommandBufferSubmitInfo commandBufferInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO, .commandBuffer = _commandBuffer};
@@ -359,12 +343,26 @@ void VulkanFrameRenderer::renderFrameWithoutScreen()
         checkVkResult(vkResetFences(device, 1, &_frameFence), "vkResetFences");
         checkVkResult(vkQueueSubmit2(context.getQueue(), 1, &submitInfo, _frameFence), "vkQueueSubmit2");
         _frameSubmitted = true;
-        if (_sceneCaptureRequested) {
+        if (sceneCopied) {
             checkVkResult(vkWaitForFences(device, 1, &_frameFence, VK_TRUE, UINT64_MAX), "vkWaitForFences");
             _capturedScene = readCaptureBuffer();
         }
     }
     context.advanceFrameNumber();
+}
+
+bool VulkanFrameRenderer::copySceneIfCaptureDue(VulkanImage& sceneImage)
+{
+    if (!_numRenderingsBeforeCapture) {
+        return false;
+    }
+    if (_numRenderingsBeforeCapture.value() > 0) {
+        --_numRenderingsBeforeCapture.value();
+        return false;
+    }
+    _numRenderingsBeforeCapture.reset();
+    copySceneToCaptureBuffer(sceneImage);
+    return true;
 }
 
 void VulkanFrameRenderer::copySceneToCaptureBuffer(VulkanImage& sceneImage)
