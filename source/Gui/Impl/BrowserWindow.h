@@ -22,7 +22,7 @@ public:
     void showResource(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& resourceId);
     WorkspaceType getCurrentWorkspaceType() const;
 
-    DownloadCache& getSimulationCache();
+    DownloadCache const& getSimulationCache() const;
 
 private:
     BrowserWindow();

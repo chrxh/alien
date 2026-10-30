@@ -1,6 +1,7 @@
 #include "BrowserController.h"
 
 #include <optional>
+#include <ranges>
 
 #include <Network/NetworkService.h>
 
@@ -69,21 +70,20 @@ void BrowserController::refresh(bool withRetry)
         },
         [&](auto const& requestId) {
             auto data = _PersisterFacade::get()->fetchGetNetworkResourcesData(requestId);
-            _data->userTOs = data.userTOs;
-            _data->ownEmojiTypeBySimId = data.emojiTypeByResourceId;
-            _data->numActiveSimulators = data.numActiveSimulators;
+            _data->setUserTOs(data.userTOs);
+            _data->setOwnEmojiTypeBySimId(data.emojiTypeByResourceId);
+            _data->setNumActiveSimulators(data.numActiveSimulators);
 
             auto userName = NetworkService::get().getLoggedInUserName();
-            for (auto& [workspaceId, workspace] : _data->workspaces) {
-                workspace.rawTOs.clear();
+            for (auto const& workspaceId : _data->getWorkspaces() | std::views::keys) {
+                std::vector<NetworkResourceRawTO> rawTOs;
                 for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType && isVisibleInWorkspace(rawTO, workspaceId.workspaceType, userName)) {
-                        workspace.rawTOs.emplace_back(rawTO);
+                        rawTOs.emplace_back(rawTO);
                     }
                 }
-                _data->createTreeTOs(workspace);
+                _data->setRawTOs(workspaceId, rawTOs);
             }
-            _data->sortUserList();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }

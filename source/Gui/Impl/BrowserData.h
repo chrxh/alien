@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -48,47 +49,81 @@ public:
 
     static BrowserData create();
 
-    std::map<WorkspaceId, Workspace> workspaces;
-    WorkspaceId currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
-    NetworkResourceTreeTO selectedTreeTO;
-    bool scrollToSelection = false;
-    std::string filter;
-    std::vector<UserTO> userTOs;
-    std::optional<int> numActiveSimulators;
-    LastSessionBrowserData lastSessionData;
-    DownloadCache downloadCache;
+    std::map<WorkspaceId, Workspace> const& getWorkspaces() const;
+    Workspace const& getWorkspace(WorkspaceId const& workspaceId) const;
+    Workspace const& getCurrentWorkspace() const;
+    WorkspaceId getCurrentWorkspaceId() const;
+    void setCurrentWorkspaceId(WorkspaceId const& workspaceId);
+    void setRawTOs(WorkspaceId const& workspaceId, std::vector<NetworkResourceRawTO> const& rawTOs);
+    void removeRawTOs(std::vector<NetworkResourceRawTO> const& rawTOs);
+    std::vector<NetworkResourceRawTO> changeVisibility(std::vector<NetworkResourceRawTO> const& rawTOs);
+    void setSortSpecs(NetworkResourceType resourceType, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs);
+    void setCollapsedFolderNames(WorkspaceId const& workspaceId, std::set<std::vector<std::string>> const& collapsedFolderNames);
 
-    std::vector<TextureData> emojis;
-    std::unordered_map<std::string, int> ownEmojiTypeBySimId;
-    bool activateEmojiPopup = false;
-    NetworkResourceTreeTO emojiPopupTO;
+    std::string const& getFilter() const;
+    void setFilter(std::string const& filter);
 
-    Workspace& getCurrentWorkspace();
-    void createTreeTOs(Workspace& workspace);
-    void deselectIfNotInTree(Workspace const& workspace);
-    void createTreeTOsForAllWorkspaces();
-    void createTreeTOsForCurrentResourceType();
-    std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
-    bool isOwner(NetworkResourceTreeTO const& treeTO) const;
-    bool isOwner(NetworkResourceRawTO const& rawTO) const;
+    NetworkResourceTreeTO const& getSelectedTreeTO() const;
+    void setSelectedTreeTO(NetworkResourceTreeTO const& treeTO);
+    bool isScrollToSelection() const;
+    void setScrollToSelection(bool value);
 
     // The gallery and the table build their own tree objects, so the selection is compared by resource and not by object identity
     bool isSelected(NetworkResourceRawTO const& rawTO) const;
     bool isSelected(NetworkResourceTreeTO const& treeTO) const;
 
-    void sortUserList();
+    bool isOwner(NetworkResourceTreeTO const& treeTO) const;
+    bool isOwner(NetworkResourceRawTO const& rawTO) const;
 
-    std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
+    void loadLastSessionData();
+    void saveLastSessionData();
+    void registrateAsSeen(NetworkResourceRawTO const& rawTO);
+    bool isNew(NetworkResourceRawTO const& rawTO) const;
 
+    std::vector<UserTO> const& getUserTOs() const;
+    void setUserTOs(std::vector<UserTO> const& userTOs);
+    std::optional<int> getNumActiveSimulators() const;
+    void setNumActiveSimulators(std::optional<int> const& numActiveSimulators);
+
+    DownloadCache const& getDownloadCache() const;
     void onDownloadResource(BrowserLeaf const& leaf);
+
+    std::vector<TextureData> const& getEmojis() const;
+    void setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> const& ownEmojiTypeBySimId);
+    bool isOwnReaction(std::string const& resourceId, int emojiType) const;
+    std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
     void onToggleLike(NetworkResourceTreeTO const& treeTO, int emojiType);
+
+    bool isActivateEmojiPopup() const;
+    void setActivateEmojiPopup(bool value);
+    NetworkResourceTreeTO const& getEmojiPopupTO() const;
+    void setEmojiPopupTO(NetworkResourceTreeTO const& treeTO);
 
     void processPendingRequests();
 
 private:
     _BrowserData();
 
+    void createTreeTOs(WorkspaceId const& workspaceId);
+    void createTreeTOsForAllWorkspaces();
     void updateSelection(Workspace const& workspace, std::vector<NetworkResourceRawTO> const& filteredRawTOs);
+    void deselectIfNotInTree(Workspace const& workspace);
+    std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
+
+    std::map<WorkspaceId, Workspace> _workspaces;
+    WorkspaceId _currentWorkspaceId = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
+    std::string _filter;
+    NetworkResourceTreeTO _selectedTreeTO;
+    bool _scrollToSelection = false;
+    LastSessionBrowserData _lastSessionData;
+    std::vector<UserTO> _userTOs;
+    std::optional<int> _numActiveSimulators;
+    DownloadCache _downloadCache;
+
+    std::vector<TextureData> _emojis;
+    std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
+    bool _activateEmojiPopup = false;
+    NetworkResourceTreeTO _emojiPopupTO;
 
     TaskProcessor _reactionProcessor;
     TaskProcessor _emojiUserNameProcessor;
