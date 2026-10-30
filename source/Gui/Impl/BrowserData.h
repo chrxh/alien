@@ -65,6 +65,7 @@ public:
 
     Workspace& getCurrentWorkspace();
     void createTreeTOs(Workspace& workspace);
+    void deselectIfNotInTree(Workspace const& workspace);
     void createTreeTOsForAllWorkspaces();
     void createTreeTOsForCurrentResourceType();
     std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
@@ -86,6 +87,8 @@ public:
 
 private:
     _BrowserData();
+
+    void updateSelection(Workspace const& workspace, std::vector<NetworkResourceRawTO> const& filteredRawTOs);
 
     TaskProcessor _reactionProcessor;
     TaskProcessor _emojiUserNameProcessor;

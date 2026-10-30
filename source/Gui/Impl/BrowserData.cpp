@@ -15,6 +15,7 @@
 
 #include <Rendering/Interface/RenderingFacade.h>
 
+#include "BrowserHelper.h"
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
 #include "LoginDialog.h"
@@ -72,7 +73,17 @@ void _BrowserData::createTreeTOs(Workspace& workspace)
 
     // Create treeTOs
     workspace.treeTOs = NetworkResourceService::get().createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
-    selectedTreeTO = nullptr;
+
+    if (&workspace == &getCurrentWorkspace()) {
+        updateSelection(workspace, filteredRawTOs);
+    }
+}
+
+void _BrowserData::deselectIfNotInTree(Workspace const& workspace)
+{
+    if (std::ranges::none_of(workspace.treeTOs, [this](NetworkResourceTreeTO const& treeTO) { return isSelected(treeTO); })) {
+        selectedTreeTO = nullptr;
+    }
 }
 
 void _BrowserData::createTreeTOsForAllWorkspaces()
@@ -226,4 +237,22 @@ void _BrowserData::processPendingRequests()
 {
     _reactionProcessor->process();
     _emojiUserNameProcessor->process();
+}
+
+void _BrowserData::updateSelection(Workspace const& workspace, std::vector<NetworkResourceRawTO> const& filteredRawTOs)
+{
+    if (selectedTreeTO == nullptr) {
+        return;
+    }
+
+    // The tree objects are rebuilt and a refresh also replaces the raw objects, so the selection is pointed to the new ones
+    if (selectedTreeTO->isLeaf()) {
+
+        // Searched in the raw objects since the tree omits the resources of collapsed folders, which the gallery still shows
+        auto findResult = std::ranges::find_if(filteredRawTOs, [this](NetworkResourceRawTO const& rawTO) { return isSelected(rawTO); });
+        selectedTreeTO = findResult != filteredRawTOs.end() ? BrowserHelper::createLeafTreeTO(*findResult) : nullptr;
+    } else {
+        auto findResult = std::ranges::find_if(workspace.treeTOs, [this](NetworkResourceTreeTO const& treeTO) { return isSelected(treeTO); });
+        selectedTreeTO = findResult != workspace.treeTOs.end() ? *findResult : nullptr;
+    }
 }

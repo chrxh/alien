@@ -69,6 +69,7 @@ void _BrowserTableWidget::process()
 
         if (_recreateTreeTOs) {
             _data->createTreeTOs(workspace);
+            _data->deselectIfNotInTree(workspace);
         }
     }
     ImGui::PopID();

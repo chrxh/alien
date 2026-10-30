@@ -646,6 +646,7 @@ void BrowserWindow::onCollapseFolders()
     auto& workspace = _data->getCurrentWorkspace();
     workspace.collapsedFolderNames = NetworkResourceService::get().getFolderNames(workspace.rawTOs, 1);
     _data->createTreeTOs(workspace);
+    _data->deselectIfNotInTree(workspace);
 }
 
 void BrowserWindow::revealResource(std::string const& resourceId)
