@@ -755,7 +755,9 @@ __inline__ __device__ bool ConstructorProcessor::hasEnergyForConstructionOrReque
     auto& hostCell = hostObject->typeData.cell;
     auto& constructor = hostCell.constructor;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
-    auto availableEnergyForConstruction = max(0.0f, hostCell.usableEnergy + constructor.reservedEnergy - normalCellEnergy);
+
+    // The reserve is earmarked for the construction, so a host slightly below normal energy must not block it
+    auto availableEnergyForConstruction = constructor.reservedEnergy + max(0.0f, hostCell.usableEnergy - normalCellEnergy);
     if (availableEnergyForConstruction < requiredEnergy) {
 
         // ... if not = > requesting external energy if possible
