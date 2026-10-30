@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -10,8 +11,6 @@
 #include <Network/NetworkResourceTreeTO.h>
 
 #include "Definitions.h"
-
-struct Workspace;
 
 class _BrowserTableWidget
 {
@@ -31,13 +30,13 @@ private:
         int sortId = 0;
         std::function<void(NetworkResourceTreeTO const&)> processField;
     };
-    std::vector<Column> getColumns(Workspace& workspace);
+    std::vector<Column> getColumns();
 
     void processSortSpecs();
     void processRow(NetworkResourceTreeTO const& treeTO, std::vector<Column> const& columns);
 
-    void processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
-    void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    void processResourceNameField(NetworkResourceTreeTO const& treeTO);
+    void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO);
     void processDescriptionField(NetworkResourceTreeTO const& treeTO);
     void processReactionList(NetworkResourceTreeTO const& treeTO);
     void processTimestampField(NetworkResourceTreeTO const& treeTO);
@@ -50,5 +49,5 @@ private:
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
     BrowserData _data;
-    bool _recreateTreeTOs = false;
+    std::optional<std::set<std::vector<std::string>>> _pendingCollapsedFolderNames;
 };

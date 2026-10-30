@@ -221,7 +221,7 @@ void _BrowserUserListWidget::process()
     auto selectedTabIndex = 0;
     AlienGui::TabBar(
         AlienGui::TabBarParameters().id("##Simulators").style(AlienGui::TabBarStyle::Group),
-        {getSimulatorsTabParameters(_data->numActiveSimulators)},
+        {getSimulatorsTabParameters(_data->getNumActiveSimulators())},
         selectedTabIndex);
 
     if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
@@ -242,13 +242,13 @@ void _BrowserUserListWidget::process()
         }
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
-        auto numRows = toInt(_data->userTOs.size());
+        auto numRows = toInt(_data->getUserTOs().size());
         std::optional<GpuHintPlacement> gpuHintPlacement;
         ImGuiListClipper clipper;
         clipper.Begin(numRows);
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto const& user = _data->userTOs.at(row);
+                auto const& user = _data->getUserTOs().at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(BrowserHelper::RowHeight));
