@@ -52,11 +52,11 @@ public:
 
     virtual void render(ImDrawData* drawData) = 0;
 
-    // The simulation of the current frame is copied without the user interface, e.g. for videos. The copy can be fetched once the frame is
-    // rendered, also if the frame is not shown, e.g. while the window is minimized.
-    virtual void captureSimulationFrame() = 0;
+    // The simulation is copied without the user interface, e.g. for videos. Since the rendering can lag behind a change of the view, it is
+    // rendered the given number of times before, also in frames that are not shown, e.g. while the window is minimized. The copy can be fetched
+    // once its frame is rendered.
+    virtual void captureSimulationFrame(int numPrecedingRenderings) = 0;
     virtual std::optional<PictureData> fetchCapturedSimulationFrame() = 0;
-    virtual void renderSimulationFrameEvenIfNotShown() = 0;
 
     //***********
     //* Pictures

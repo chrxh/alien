@@ -476,21 +476,15 @@ void RecorderController::processRecording()
         return;
     }
 
-    // Since the rendering lags behind changes of the view, the frames between the captures are rendered also while the window is minimized
-    _RenderingFacade::get()->renderSimulationFrameEvenIfNotShown();
-
     if (recording.captureRequested) {
-        recording.captureRequested = false;
-
-        // A frame without the simulation, e.g. while its rendering is switched off, is captured again
         if (auto picture = _RenderingFacade::get()->fetchCapturedSimulationFrame()) {
+            recording.captureRequested = false;
             auto frame = fitToResolution(std::move(*picture), recording.resolution);
             if (_timeLapseAndZoomShown) {
                 drawTimeLapseAndZoom(frame);
             }
             recording.videoWriter->addFrame(RgbImage{.width = frame.resolution.x, .height = frame.resolution.y, .pixels = std::move(frame.pixels)});
             recording.pendingTimesteps = recording.schedule.getTimestepsAfterFrame(recording.frame);
-            recording.numViewRenderings = 0;
             ++recording.frame;
             if (recording.frame == recording.schedule.getNumFrames()) {
                 finishRecording(true);
@@ -510,12 +504,10 @@ void RecorderController::processRecording()
     }
 
     applyCameraState(recording.schedule.getCameraState(recording.frame));
-    auto requiredViewRenderings = recording.frame == 0 ? NumViewRenderingsAtStart : 1;
-    if (recording.numViewRenderings >= requiredViewRenderings) {
-        _RenderingFacade::get()->captureSimulationFrame();
+    if (!recording.captureRequested) {
+        _RenderingFacade::get()->captureSimulationFrame(recording.frame == 0 ? NumViewRenderingsAtStart : 1);
         recording.captureRequested = true;
     }
-    ++recording.numViewRenderings;
 }
 
 void RecorderController::calcTimestepsForRecording()

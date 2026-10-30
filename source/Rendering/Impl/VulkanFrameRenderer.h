@@ -37,12 +37,10 @@ public:
     using SceneRenderFunc = std::function<VulkanImage&(VkCommandBuffer)>;
     void drawScene(SceneUpdateFunc const& updateFunc, SceneRenderFunc const& renderFunc);
 
-    // The scene of the current frame is copied without the user interface, also if the frame is not shown, e.g. while the window is minimized.
-    // Rendering the frame then waits for the GPU, so that the copy can be fetched right afterwards.
-    void captureScene();
+    // The scene is rendered the given number of times before it is copied without the user interface, also in frames that are not shown, e.g.
+    // while the window is minimized. Rendering the frame of the copy then waits for the GPU, so that the copy can be fetched right afterwards.
+    void captureScene(int numPrecedingRenderings);
     std::optional<PictureData> fetchCapturedScene();
-
-    void renderSceneEvenIfNotShown();
 
     void render(ImDrawData* drawData);
 
@@ -54,6 +52,7 @@ private:
     void createPresentationShader();
 
     void renderFrameWithoutScreen();
+    bool copySceneIfCaptureDue(VulkanImage& sceneImage);
     void copySceneToCaptureBuffer(VulkanImage& sceneImage);
     PictureData readCaptureBuffer() const;
 
@@ -85,9 +84,8 @@ private:
         SceneRenderFunc renderFunc;
     };
     std::optional<Scene> _scene;
-    bool _sceneRenderedEvenIfNotShown = false;
 
-    bool _sceneCaptureRequested = false;
+    std::optional<int> _numRenderingsBeforeCapture;
     VulkanBuffer _captureBuffer;
     IntVector2D _captureSize;
     VkFormat _captureFormat = VK_FORMAT_UNDEFINED;
