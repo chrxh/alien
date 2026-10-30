@@ -9,6 +9,8 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
+#include <Rendering/Interface/PictureData.h>
+
 #include "Definitions.h"
 #include "VulkanContext.h"
 
@@ -35,6 +37,11 @@ public:
     using SceneRenderFunc = std::function<VulkanImage&(VkCommandBuffer)>;
     void drawScene(SceneUpdateFunc const& updateFunc, SceneRenderFunc const& renderFunc);
 
+    // The scene is rendered the given number of times before it is copied without the user interface, also in frames that are not shown, e.g.
+    // while the window is minimized. Rendering the frame of the copy then waits for the GPU, so that the copy can be fetched right afterwards.
+    void captureScene(int numPrecedingRenderings);
+    std::optional<PictureData> fetchCapturedScene();
+
     void render(ImDrawData* drawData);
 
     VkFormat getScreenFormat() const;
@@ -43,6 +50,11 @@ private:
     void createSwapchain();
     void destroySwapchainImageResources();
     void createPresentationShader();
+
+    void renderFrameWithoutScreen();
+    bool copySceneIfCaptureDue(VulkanImage& sceneImage);
+    void copySceneToCaptureBuffer(VulkanImage& sceneImage);
+    PictureData readCaptureBuffer() const;
 
     IntVector2D getFramebufferSize() const;
 
@@ -72,4 +84,10 @@ private:
         SceneRenderFunc renderFunc;
     };
     std::optional<Scene> _scene;
+
+    std::optional<int> _numRenderingsBeforeCapture;
+    VulkanBuffer _captureBuffer;
+    IntVector2D _captureSize;
+    VkFormat _captureFormat = VK_FORMAT_UNDEFINED;
+    std::optional<PictureData> _capturedScene;
 };

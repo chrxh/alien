@@ -21,6 +21,9 @@ public:
     void onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc);
     void onSaveGenomeDialog(GenomeDesc const& genome, std::function<void()> const& afterSaveFunc = nullptr);
 
+    void onOpenCameraFlightDialog(std::function<void()> const& afterOpenFunc);
+    void onSaveCameraFlightDialog();
+
 private:
     void init() override;
     void process() override;

@@ -109,6 +109,16 @@ void _RenderingFacadeImpl::render(ImDrawData* drawData)
     VulkanFrameRenderer::get().render(drawData);
 }
 
+void _RenderingFacadeImpl::captureSimulationFrame(int numPrecedingRenderings)
+{
+    VulkanFrameRenderer::get().captureScene(numPrecedingRenderings);
+}
+
+std::optional<PictureData> _RenderingFacadeImpl::fetchCapturedSimulationFrame()
+{
+    return VulkanFrameRenderer::get().fetchCapturedScene();
+}
+
 PictureData _RenderingFacadeImpl::renderSimulationPicture(RenderView const& view)
 {
     return SimulationRenderer::get().renderPicture(view);

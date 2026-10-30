@@ -234,6 +234,7 @@ void EngineWorker::calcTimesteps(uint64_t timesteps)
     EngineWorkerGuard access(this);
 
     _simulationCudaFacade->calcTimesteps(timesteps, true);
+    measureTPS(timesteps);
 }
 
 void EngineWorker::applyCataclysm(int power)
@@ -616,7 +617,6 @@ void EngineWorker::syncSimulationWithRenderingIfDesired()
     if (_syncSimulationWithRendering && _isSimulationRunning) {
         for (int i = 0; i < _syncSimulationWithRenderingRatio; ++i) {
             calcTimesteps(1);
-            measureTPS();
             slowdownTPS();
         }
     }
@@ -632,7 +632,7 @@ void EngineWorker::waitAndAllowAccess(std::chrono::microseconds const& duration)
     }
 }
 
-void EngineWorker::measureTPS()
+void EngineWorker::measureTPS(uint64_t numTimesteps)
 {
     if (_isSimulationRunning.load()) {
         auto timepoint = std::chrono::steady_clock::now();
@@ -642,15 +642,11 @@ void EngineWorker::measureTPS()
             int duration = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_measureTimepoint).count());
             if (duration > 199) {
                 _measureTimepoint = timepoint;
-                if (duration < 350) {
-                    _tps.store(toFloat(_timestepsSinceMeasurement) * 5 * 200 / duration);
-                } else {
-                    _tps.store(1000.0f / duration);
-                }
+                _tps.store(toFloat(_timestepsSinceMeasurement) * 1000 / toFloat(duration));
                 _timestepsSinceMeasurement = 0;
             }
         }
-        ++_timestepsSinceMeasurement;
+        _timestepsSinceMeasurement += numTimesteps;
     } else {
         _tps.store(0);
     }

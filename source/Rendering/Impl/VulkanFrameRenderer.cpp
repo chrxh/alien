@@ -1,7 +1,9 @@
 #include "VulkanFrameRenderer.h"
 
 #include <algorithm>
+#include <span>
 #include <stdexcept>
+#include <utility>
 
 #include <GLFW/glfw3.h>
 
@@ -111,6 +113,7 @@ void VulkanFrameRenderer::shutdown()
     ImGui_ImplVulkan_Shutdown();
     _presentationShader.reset();
     _scene.reset();
+    context.destroyBuffer(_captureBuffer);
     destroySwapchainImageResources();
     vkDestroySwapchainKHR(device, _swapchain, nullptr);
     _swapchain = VK_NULL_HANDLE;
@@ -138,10 +141,21 @@ void VulkanFrameRenderer::drawScene(SceneUpdateFunc const& updateFunc, SceneRend
     _scene = Scene{.updateFunc = updateFunc, .renderFunc = renderFunc};
 }
 
+void VulkanFrameRenderer::captureScene(int numPrecedingRenderings)
+{
+    _numRenderingsBeforeCapture = numPrecedingRenderings;
+}
+
+std::optional<PictureData> VulkanFrameRenderer::fetchCapturedScene()
+{
+    return std::exchange(_capturedScene, std::nullopt);
+}
+
 void VulkanFrameRenderer::render(ImDrawData* drawData)
 {
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
+    _capturedScene.reset();
 
     // The scene rendering overwrites resources of the previous frame, e.g. the geometry buffers
     if (_frameSubmitted) {
@@ -152,17 +166,9 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
         context.onFrameCompleted(context.getFrameNumber() - 1);
     }
 
-    // Frames that are not shown still update the scene since the simulation can be synchronized with the rendering
-    auto skipFrame = [&] {
-        if (_scene) {
-            _scene->updateFunc();
-        }
-        context.advanceFrameNumber();
-    };
-
     auto framebufferSize = getFramebufferSize();
     if (framebufferSize.x <= 0 || framebufferSize.y <= 0) {
-        skipFrame();
+        renderFrameWithoutScreen();
         return;
     }
     if (_swapchainOutdated || static_cast<uint32_t>(framebufferSize.x) != _extent.width || static_cast<uint32_t>(framebufferSize.y) != _extent.height) {
@@ -174,7 +180,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     auto acquireResult = vkAcquireNextImageKHR(device, _swapchain, UINT64_MAX, _imageAcquiredSemaphore, VK_NULL_HANDLE, &imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR) {
         _swapchainOutdated = true;
-        skipFrame();
+        renderFrameWithoutScreen();
         return;
     }
     if (acquireResult == VK_SUBOPTIMAL_KHR) {
@@ -188,9 +194,11 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     checkVkResult(vkBeginCommandBuffer(_commandBuffer, &beginInfo), "vkBeginCommandBuffer");
 
     VulkanImage* sceneImage = nullptr;
+    auto sceneCopied = false;
     if (_scene) {
         _scene->updateFunc();
         sceneImage = &_scene->renderFunc(_commandBuffer);
+        sceneCopied = copySceneIfCaptureDue(*sceneImage);
         VulkanContext::useImage(_commandBuffer, *sceneImage, ImageUsage::ShaderRead);
     }
 
@@ -302,12 +310,117 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
     } else {
         checkVkResult(presentResult, "vkQueuePresentKHR");
     }
+    if (sceneCopied) {
+        checkVkResult(vkWaitForFences(device, 1, &_frameFence, VK_TRUE, UINT64_MAX), "vkWaitForFences");
+        _capturedScene = readCaptureBuffer();
+    }
     context.advanceFrameNumber();
 }
 
 VkFormat VulkanFrameRenderer::getScreenFormat() const
 {
     return _surfaceFormat.format;
+}
+
+void VulkanFrameRenderer::renderFrameWithoutScreen()
+{
+    auto& context = VulkanContext::get();
+    auto device = context.getDevice();
+
+    // Frames that are not shown still update the scene since the simulation can be synchronized with the rendering
+    if (_scene) {
+        _scene->updateFunc();
+    }
+    if (_scene && _numRenderingsBeforeCapture) {
+        checkVkResult(vkResetCommandBuffer(_commandBuffer, 0), "vkResetCommandBuffer");
+        VkCommandBufferBeginInfo beginInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT};
+        checkVkResult(vkBeginCommandBuffer(_commandBuffer, &beginInfo), "vkBeginCommandBuffer");
+        auto sceneCopied = copySceneIfCaptureDue(_scene->renderFunc(_commandBuffer));
+        checkVkResult(vkEndCommandBuffer(_commandBuffer), "vkEndCommandBuffer");
+
+        VkCommandBufferSubmitInfo commandBufferInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO, .commandBuffer = _commandBuffer};
+        VkSubmitInfo2 submitInfo{.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2, .commandBufferInfoCount = 1, .pCommandBufferInfos = &commandBufferInfo};
+        checkVkResult(vkResetFences(device, 1, &_frameFence), "vkResetFences");
+        checkVkResult(vkQueueSubmit2(context.getQueue(), 1, &submitInfo, _frameFence), "vkQueueSubmit2");
+        _frameSubmitted = true;
+        if (sceneCopied) {
+            checkVkResult(vkWaitForFences(device, 1, &_frameFence, VK_TRUE, UINT64_MAX), "vkWaitForFences");
+            _capturedScene = readCaptureBuffer();
+        }
+    }
+    context.advanceFrameNumber();
+}
+
+bool VulkanFrameRenderer::copySceneIfCaptureDue(VulkanImage& sceneImage)
+{
+    if (!_numRenderingsBeforeCapture) {
+        return false;
+    }
+    if (_numRenderingsBeforeCapture.value() > 0) {
+        --_numRenderingsBeforeCapture.value();
+        return false;
+    }
+    _numRenderingsBeforeCapture.reset();
+    copySceneToCaptureBuffer(sceneImage);
+    return true;
+}
+
+void VulkanFrameRenderer::copySceneToCaptureBuffer(VulkanImage& sceneImage)
+{
+    // The buffer is no longer in use since the previous frame is completed at this point
+    auto& context = VulkanContext::get();
+    auto size = static_cast<VkDeviceSize>(sceneImage.size.x) * sceneImage.size.y * 4;
+    if (_captureBuffer.size != size) {
+        context.destroyBuffer(_captureBuffer);
+        _captureBuffer = context.createBuffer(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VulkanMemory::HostReadback);
+    }
+    _captureSize = sceneImage.size;
+    _captureFormat = sceneImage.format;
+
+    VulkanContext::useImage(_commandBuffer, sceneImage, ImageUsage::TransferSource);
+    VkBufferImageCopy region{
+        .imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
+        .imageExtent = {toUInt32(sceneImage.size.x), toUInt32(sceneImage.size.y), 1},
+    };
+    vkCmdCopyImageToBuffer(_commandBuffer, sceneImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _captureBuffer.buffer, 1, &region);
+
+    VkBufferMemoryBarrier2 barrier{
+        .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
+        .srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        .srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_HOST_BIT,
+        .dstAccessMask = VK_ACCESS_2_HOST_READ_BIT,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .buffer = _captureBuffer.buffer,
+        .size = VK_WHOLE_SIZE,
+    };
+    VkDependencyInfo dependencyInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier};
+    vkCmdPipelineBarrier2(_commandBuffer, &dependencyInfo);
+}
+
+PictureData VulkanFrameRenderer::readCaptureBuffer() const
+{
+    auto width = static_cast<size_t>(_captureSize.x);
+    auto height = static_cast<size_t>(_captureSize.y);
+    auto isBgra = _captureFormat == VK_FORMAT_B8G8R8A8_UNORM || _captureFormat == VK_FORMAT_B8G8R8A8_SRGB;
+    auto source = std::span(static_cast<uint8_t const*>(_captureBuffer.mapped), width * height * 4);
+
+    // The rows of the scene are ordered from bottom to top
+    PictureData result{.resolution = _captureSize, .pixels = std::vector<uint8_t>(width * height * PictureData::NumChannels)};
+    auto destination = std::span(result.pixels);
+    for (size_t row = 0; row < height; ++row) {
+        auto sourceRow = source.subspan((height - 1 - row) * width * 4, width * 4);
+        auto destinationRow = destination.subspan(row * width * PictureData::NumChannels, width * PictureData::NumChannels);
+        for (size_t column = 0; column < width; ++column) {
+            auto destinationPixel = destinationRow.subspan(column * PictureData::NumChannels, PictureData::NumChannels);
+            auto sourcePixel = sourceRow.subspan(column * 4, 4);
+            destinationPixel[0] = sourcePixel[isBgra ? 2 : 0];
+            destinationPixel[1] = sourcePixel[1];
+            destinationPixel[2] = sourcePixel[isBgra ? 0 : 2];
+        }
+    }
+    return result;
 }
 
 void VulkanFrameRenderer::createSwapchain()

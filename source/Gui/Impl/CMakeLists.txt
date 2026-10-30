@@ -178,6 +178,10 @@ add_library(GuiImpl
     PreviewViewport.h
     PreviewWidget.cpp
     PreviewWidget.h
+    RecorderController.cpp
+    RecorderController.h
+    RecorderWindow.cpp
+    RecorderWindow.h
     ReplaceSimulationDialog.cpp
     ReplaceSimulationDialog.h
     ResetPasswordDialog.cpp
@@ -238,6 +242,7 @@ target_link_libraries(GuiImpl McpToolsInterface)
 target_link_libraries(GuiImpl Network)
 target_link_libraries(GuiImpl PersisterInterface)
 target_link_libraries(GuiImpl RenderingInterface)
+target_link_libraries(GuiImpl Video)
 
 target_include_directories(GuiImpl
     PRIVATE

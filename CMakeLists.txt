@@ -300,6 +300,7 @@ add_executable(EngineInterfaceTests)
 add_executable(McpToolsTests)
 add_executable(NetworkTests)
 add_executable(PersisterTests)
+add_executable(VideoTests)
 
 # find_package(CUDAToolkit REQUIRED) is too slow
 find_package(Boost REQUIRED)
@@ -360,6 +361,8 @@ add_subdirectory(source/Persister/Interface/Tests)
 add_subdirectory(source/Rendering/Impl)
 add_subdirectory(source/Rendering/Impl/Shaders)
 add_subdirectory(source/Rendering/Interface)
+add_subdirectory(source/Video)
+add_subdirectory(source/Video/Tests)
 
 # Executables linking the HIP relocatable-device-code engine libraries must run
 # the device link themselves (see alien_link_hip_rdc).

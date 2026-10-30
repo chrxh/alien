@@ -10,6 +10,8 @@ This chapter describes the files ALIEN works with, how simulations are saved aut
 | *.genome* | A single genome, as created in the genome editor. |
 | *.settings.json* | A set of simulation parameters including layers and radiation sources. It can be loaded into any simulation. |
 | *.png* | A picture created with **Simulation > Save picture**. |
+| *.mp4* | A video recorded with **Tools > Recorder**. |
+| *.flight.json* | The waypoints and settings of a camera flight, as created in **Tools > Recorder**. |
 
 ## Opening and saving
 
@@ -17,6 +19,7 @@ This chapter describes the files ALIEN works with, how simulations are saved aut
 - **Simulation > New** (Ctrl+N) creates an empty world.
 - Genomes are opened and saved in the tool bar of the genome editor.
 - Parameter sets are opened and saved in the tool bar of the window **Simulation parameters**.
+- Camera flights are opened and saved in the tool bar of the window **Recorder**.
 - If **Settings > Save on exit** is enabled, ALIEN saves the current simulation when it closes and opens it again at the next start.
 
 ## Autosave and save points

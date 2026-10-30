@@ -64,6 +64,8 @@
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
 #include "PreviewSettingsDialog.h"
+#include "RecorderController.h"
+#include "RecorderWindow.h"
 #include "ReplaceSimulationDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SavePictureDialog.h"
@@ -137,6 +139,8 @@ _MainWindow::_MainWindow()
     UploadSimulationDialog::get().setup();
     ReplaceSimulationDialog::get().setup();
     ImageToPatternDialog::get().setup();
+    RecorderController::get().setup();
+    RecorderWindow::get().setup();
     AutosaveController::get().setup();
     AutosaveWindow::get().setup();
     OverlayController::get().setup();

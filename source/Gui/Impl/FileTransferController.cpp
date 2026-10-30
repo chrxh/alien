@@ -1,5 +1,7 @@
 #include "FileTransferController.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <Base/GlobalSettings.h>
 
 #include <Engine/Interface/SimulationFacade.h>
@@ -10,6 +12,7 @@
 #include "GenericMessageDialog.h"
 #include "NewSimulationService.h"
 #include "OverlayController.h"
+#include "RecorderController.h"
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
@@ -97,6 +100,41 @@ void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome, std::f
             } else if (afterSaveFunc) {
                 afterSaveFunc();
             }
+        });
+}
+
+void FileTransferController::onOpenCameraFlightDialog(std::function<void()> const& afterOpenFunc)
+{
+    GenericFileDialog::get().showOpenFileDialog(
+        "Open camera flight",
+        "Camera flight (*.flight.json){.flight.json,.json},.*",
+        _referencePath,
+        [&, afterOpenFunc = afterOpenFunc](std::filesystem::path const& path) {
+            _referencePath = std::filesystem::path(path).remove_filename().string();
+            if (!RecorderController::get().loadFlight(path)) {
+                GenericMessageDialog::get().information("Open camera flight", "The selected file could not be opened.");
+                return;
+            }
+            afterOpenFunc();
+            printOverlayMessage("Camera flight loaded from " + path.filename().string());
+        });
+}
+
+void FileTransferController::onSaveCameraFlightDialog()
+{
+    GenericFileDialog::get().showSaveFileDialog(
+        "Save camera flight", "Camera flight (*.flight.json){.flight.json,.json},.*", _referencePath, [&](std::filesystem::path const& path) {
+            // Camera flights are always written as JSON files, so that a file selected by mistake, e.g. a simulation, is not overwritten
+            auto filename = path;
+            if (!boost::iequals(filename.extension().string(), ".json")) {
+                filename += ".flight.json";
+            }
+            _referencePath = std::filesystem::path(filename).remove_filename().string();
+            if (!RecorderController::get().saveFlight(filename)) {
+                GenericMessageDialog::get().information("Save camera flight", "The camera flight could not be saved.");
+                return;
+            }
+            printOverlayMessage("Camera flight saved as " + filename.filename().string());
         });
 }
 
