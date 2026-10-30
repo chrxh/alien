@@ -127,11 +127,9 @@ NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([
 
 ### Windows: nightly build
 
-Download and unpack https://alien-project.org/files/alien-develop.zip, which is built every night from the `develop` branch. It contains two executables:
-- `alien.exe` for NVIDIA GPUs
-- `alien-amd.exe` for AMD GPUs (RDNA2, RDNA3 and RDNA4)
+Download and run https://alien-project.org/files/alien-setup.exe, which is built every night from the `develop` branch. It installs ALIEN for the current user without administrator rights, asks for the graphics card (NVIDIA, or AMD as an experimental option) and creates a Start menu entry and, if desired, a desktop shortcut. ALIEN is uninstalled under *Settings > Apps* or with *Uninstall ALIEN* in the Start menu.
 
-Start it directly from the unpacked folder, otherwise it will not find the resource folder. If the program crashes for an unknown reason, please refer to the [troubleshooting](#-troubleshooting) section below.
+If the program crashes for an unknown reason, please refer to the [troubleshooting](#-troubleshooting) section below.
 
 ### Cloud and Docker
 
