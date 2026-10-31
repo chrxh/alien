@@ -119,11 +119,11 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
             return _PersisterFacade::get()->scheduleDeleteNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
-        [&](auto const& requestId) {
-            _PersisterFacade::get()->fetchDeleteNetworkResourcesData(requestId);
+        [&](auto const& requestId) { _PersisterFacade::get()->fetchDeleteNetworkResourcesData(requestId); },
+        [](auto const& errors) {
             BrowserWindow::get().onRefresh();
-        },
-        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+            GenericMessageDialog::get().information("Error", errors);
+        });
 }
 
 void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& requestData)
