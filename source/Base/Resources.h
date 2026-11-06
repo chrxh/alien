@@ -23,6 +23,7 @@ namespace Const
     extern std::filesystem::path const AutosaveFile;
     extern std::filesystem::path const SavepointTableFilename;
 
-    extern std::filesystem::path const LogoFilename;
+    extern std::filesystem::path const LogoCoreFilename;
+    extern std::filesystem::path const LogoGlowFilename;
     extern std::vector<std::filesystem::path> const WindowIconFilenames;
 }

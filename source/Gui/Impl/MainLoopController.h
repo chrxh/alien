@@ -75,7 +75,8 @@ private:
     PersisterRequestId _saveSimRequestId;
     std::string _loadedSimulationName;
 
-    TextureData _logo;
+    TextureData _logoCore;
+    TextureData _logoGlow;
     std::optional<std::chrono::steady_clock::time_point> _simulationLoadedTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _fadedOutTimepoint;
 

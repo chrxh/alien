@@ -1,7 +1,10 @@
 #include "MainLoopController.h"
 
+#include <algorithm>
+#include <cmath>
 #include <ranges>
 #include <thread>
+#include <numbers>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -65,6 +68,11 @@ namespace
 {
     std::chrono::milliseconds::rep const FadeOutDuration = 500;
     std::chrono::milliseconds::rep const FadeInDuration = 500;
+    float constexpr LogoScale = 0.6f;
+    float constexpr LogoRelativeDownShift = 0.09f;
+    double constexpr LogoGlowPeriodInSeconds = 4.0;
+    float constexpr LogoGlowMinAlpha = 0.35f;
+    float constexpr LogoGlowMaxEnlargement = 1.06f;
 
     auto const StartupSenderId = "Startup";
 }
@@ -73,7 +81,8 @@ void MainLoopController::setup()
 {
     GlobalSettings::get().loadImGuiSettings();
 
-    _logo = _RenderingFacade::get()->loadTexture(Const::LogoFilename);
+    _logoCore = _RenderingFacade::get()->loadTexture(Const::LogoCoreFilename);
+    _logoGlow = _RenderingFacade::get()->loadTexture(Const::LogoGlowFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
 
     _autosaveProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
@@ -356,29 +365,48 @@ void MainLoopController::processExiting()
     }
 }
 
+namespace
+{
+    void drawCenteredImage(ImDrawList* drawList, TextureData const& texture, ImVec2 const& center, float imageScale, float alpha)
+    {
+        auto halfWidth = toFloat(texture.width) * imageScale / 2;
+        auto halfHeight = toFloat(texture.height) * imageScale / 2;
+        drawList->AddImage(
+            texture.textureId,
+            {center.x - halfWidth, center.y - halfHeight},
+            {center.x + halfWidth, center.y + halfHeight},
+            {0.0f, 0.0f},
+            {1.0f, 1.0f},
+            ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, alpha)));
+    }
+}
+
 void MainLoopController::drawLoadingScreen()
 {
     // Background color
     _RenderingFacade::get()->clearScreen({0, 0, 0.1f});
 
     auto& styleRep = StyleService::get();
-    auto center = ImGui::GetMainViewport()->GetCenter();
-    auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    auto imageScale = scale(1.0f);
-    ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 10.0f, _logo.height * imageScale + 10.0f));
-
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
-    ImGui::Begin("##startup", NULL, windowFlags);
-    ImGui::Image(_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
-    ImGui::End();
-
+    auto viewport = ImGui::GetMainViewport();
+    auto center = viewport->GetCenter();
+    auto bottom = viewport->Pos.y + viewport->Size.y;
+    auto titleTop = bottom - scale(200);
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+    auto logoWidth = toFloat(_logoCore.width);
+    auto logoHeight = toFloat(_logoCore.height);
+    auto logoScale = std::min({scale(LogoScale), viewport->Size.x / logoWidth, std::max(0.0f, titleTop - viewport->Pos.y) / logoHeight});
+    ImVec2 logoCenter(center.x, std::min(center.y + viewport->Size.y * LogoRelativeDownShift, titleTop - logoHeight * logoScale / 2));
+
+    auto glowPulse = 0.5f + 0.5f * toFloat(std::sin(2.0 * std::numbers::pi * ImGui::GetTime() / LogoGlowPeriodInSeconds));
+    drawCenteredImage(
+        drawList, _logoGlow, logoCenter, logoScale * std::lerp(1.0f, LogoGlowMaxEnlargement, glowPulse), std::lerp(LogoGlowMinAlpha, 1.0f, glowPulse));
+    drawCenteredImage(drawList, _logoCore, logoCenter, logoScale, 1.0f);
+
     ImColor textColor = Const::ProgramVersionTextColor;
     textColor.Value.w *= ImGui::GetStyle().Alpha;
 
-    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(175), bottom - scale(200)}, textColor, "Artificial Life Environment");
+    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(175), titleTop}, textColor, "Artificial Life Environment");
 
     auto versionString = "Version " + Const::ProgramVersion;
     drawList->AddText(
