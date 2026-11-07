@@ -1,5 +1,49 @@
 # Release notes
 
+## [5.0.0-beta.0] - 2026-11-07
+### Added
+- mcp: built-in MCP server that lets AI agents build worlds, design genomes and run experiments
+- rendering: optional hardware ray tracing with living tissue, glowing fluids and shafts of light and shadow
+- engine: experimental support for AMD GPUs via HIP or SCALE
+- engine: cell types Digestor, Memory, Communicator and Void
+- gui: built-in documentation with tutorials and reference (F1), replaces the getting started window
+- gui: evolution dashboard with overview cards and a lineage table, replaces the statistics window
+- engine: meta-mutations that let mutation rates evolve
+- gui/browser: gallery view with preview pictures
+- gui: recorder that flies the camera along waypoints and records MP4 videos with time-lapse (needs ffmpeg on Linux)
+- gui/genome editor: genome validation with a gene network view and automatic fixes
+- cli: runs without time limit, periodic uploads to the server and a Docker image for cloud GPUs
+- engine: Perlin noise force field for a turbulent flow that changes over time
+- gui: console mode that continues the simulation without user interface and rendering
+- gui: switchable light mode and picture export with adjustable resolution
+
+### Changed
+- engine: new genome model with genes and nodes instead of nested sub-genomes, constructors are an optional part of a cell instead of a cell type
+- engine: neural network in every cell with memory and telemetry neurons, connection weights replace execution order numbers
+- engine: new energy model in which particles and attacks yield raw energy that digestors convert into usable energy
+- engine: creatures as separate entities with a head cell that defines the front direction and keeps the creature together
+- persister: simulation and genome files of version 4 can no longer be loaded
+- engine: minimum for NVIDIA GPUs raised from compute capability 6.0 to 7.5 (for example GeForce RTX 20 series)
+- engine: mutations revised with rates stored per genome and new mutation types
+- engine: cell types revised with new sensor and muscle modes, Base, Depot and Generator replace Neuron, Transmitter and Nerve
+- gui: editor windows replaced by a tool bar in edit mode and a selection HUD, tree-based inspection windows
+- gui/genome editor: rewritten with a preview that simulates the construction and a new neural network editor
+- engine: solids, fluids, free cells and cells as separate object types
+- engine: simulation kernels optimized, especially for Blackwell GPUs
+- rendering: shader-based rendering on Vulkan 1.3 instead of OpenGL
+- engine: ten instead of seven colors and parameter zones renamed to layers
+- persister: a simulation is a single zstd-compressed .sim file, .settings.json and .statistics.csv are no longer written next to it
+- installer: per-user Windows installer with NVIDIA and experimental AMD builds instead of the MSI package
+- server: new backend
+
+### Deleted
+- engine, gui/autosave: genome complexity calculation and the peak detection based on it
+- gui: shader window, GPU settings dialog and opening and saving of patterns as files
+
+## [4.12.3] - 2025-09-06
+### Fixed
+- engine: fix crash in "Sync with rendering" mode
+
 ## [4.12.2] - 2025-05-26
 ### Fixed
 - engine: Nvidia Blackwell support (compatibility with CUDA Toolkit v12.8)
