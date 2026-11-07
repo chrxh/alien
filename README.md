@@ -295,6 +295,7 @@ The following external libraries are used:
 - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
+- [Inno Setup](https://jrsoftware.org/isinfo.php)
 - [WinReg](https://github.com/GiovanniDicanio/WinReg)
 - [CLI11](https://github.com/CLIUtils/CLI11)
 - [MD4C](https://github.com/mity/md4c)
