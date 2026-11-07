@@ -99,6 +99,10 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 
 <img width="2048" height="1152" alt="radiation_source" src="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31" />
 
+****Close-up of evolved digital organisms****
+
+<img width="1920" height="1080" alt="alien-closeup-d-frost" src="https://github.com/user-attachments/assets/490c740a-02f1-4682-ba10-b63cf89d1fda" />
+
 **Swarms attacking an ecosystem**
 
 ![Swarms attacking an ecosystem](https://user-images.githubusercontent.com/73127001/229311606-2f590bfb-71a8-4f71-8ff7-7013de9d7496.jpg)
