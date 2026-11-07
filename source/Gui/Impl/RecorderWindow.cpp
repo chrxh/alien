@@ -29,10 +29,12 @@ namespace
     auto constexpr RowHeight = 23.0f;
     auto constexpr DefaultDuration = 5.0f;
 
-    bool inputCell(std::string const& id, float& value, char const* format)
+    bool inputCell(std::string const& id, float& value, char const* format, bool& activated)
     {
         ImGui::SetNextItemWidth(-1);
-        return ImGui::InputFloat(id.c_str(), &value, 0, 0, format);
+        auto result = ImGui::InputFloat(id.c_str(), &value, 0, 0, format);
+        activated |= ImGui::IsItemActivated();
+        return result;
     }
 
     std::string formatCount(int value)
@@ -182,25 +184,27 @@ void RecorderWindow::processWaypointTable()
             ImGui::SameLine();
             AlienGui::Text(std::to_string(row + 1));
 
-            ImGui::TableNextColumn();
-            changed |= inputCell("##centerX", waypoint.center.x, "%.1f");
+            auto selectRow = false;
 
             ImGui::TableNextColumn();
-            changed |= inputCell("##centerY", waypoint.center.y, "%.1f");
+            changed |= inputCell("##centerX", waypoint.center.x, "%.1f", selectRow);
 
             ImGui::TableNextColumn();
-            changed |= inputCell("##zoom", waypoint.zoom, "%.2f");
+            changed |= inputCell("##centerY", waypoint.center.y, "%.1f", selectRow);
+
+            ImGui::TableNextColumn();
+            changed |= inputCell("##zoom", waypoint.zoom, "%.2f", selectRow);
 
             // The duration leads from the previous waypoint to this one
             ImGui::TableNextColumn();
             if (row > 0) {
-                changed |= inputCell("##duration", waypoint.duration, "%.1f s");
+                changed |= inputCell("##duration", waypoint.duration, "%.1f s", selectRow);
             } else {
                 AlienGui::Text(AlienGui::TextParameters().text("Start").style(AlienGui::TextStyle::Decent));
             }
 
             ImGui::TableNextColumn();
-            changed |= inputCell("##timeLapse", waypoint.timeLapse, "%.2fx");
+            changed |= inputCell("##timeLapse", waypoint.timeLapse, "%.2fx", selectRow);
 
             ImGui::TableNextColumn();
             if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_EYE))) {
@@ -213,8 +217,13 @@ void RecorderWindow::processWaypointTable()
                 waypoint.center = view.center;
                 waypoint.zoom = view.zoom;
                 changed = true;
+                selectRow = true;
             }
             AlienGui::Tooltip(AlienGui::TooltipParameters().text("Takes over the current view").delay(false));
+
+            if (selectRow) {
+                _selectedWaypoint = row;
+            }
 
             ImGui::PopID();
         }
