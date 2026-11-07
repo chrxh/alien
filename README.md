@@ -95,15 +95,9 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 
 ## 🌌 Gallery
 
-**Close-up of digital organisms attacking each other**
+**Various populations around a radiation source**
 
-<img width="1920" height="1080" alt="2_womb_50x" src="https://github.com/user-attachments/assets/7a655aac-8d4b-4b29-89c2-e70355d568a7" />
-
-<p></p>
-
-**Plant-like populations around a radiation source**
-
-![Plant-like populations around a radiation source](https://user-images.githubusercontent.com/73127001/229311601-839649a6-c60c-4723-99b3-26086e3e4340.jpg)
+<img width="2048" height="1152" alt="radiation_source" src="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31" />
 
 **Swarms attacking an ecosystem**
 
