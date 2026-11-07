@@ -55,7 +55,7 @@ https://github.com/user-attachments/assets/27f244b2-2792-4854-9042-6c8b179638c0
 - Evolution dashboard with lineages, population statistics and long-term plots
 - Autosave with save points and flashbacks to return to interesting moments
 
-https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-a977-5f12c1b6277b.mp4
+https://github.com/user-attachments/assets/77e4ac57-8d3f-4a51-9f69-65cb8e31d097
 
 ### AI agents
 - Built-in MCP server: connect an AI agent and describe in plain language what you want
