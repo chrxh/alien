@@ -92,7 +92,7 @@ void Viewport::zoom(IntVector2D const& viewPos, float factor)
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
 
     auto newZoomFactor = _zoomFactor * std::pow(factor, calcDampingExponent(_zoomFactor, factor));
-    newZoomFactor = std::clamp(newZoomFactor, 0.02f, 200.0f);
+    newZoomFactor = std::clamp(newZoomFactor, MinZoomFactor, MaxZoomFactor);
     _zoomFactor = newZoomFactor;
 
     moveCenter(worldPos, viewPos);

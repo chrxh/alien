@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <imgui.h>
+
 #include <Base/Singleton.h>
 
 #include <Data/PreviewDesc.h>
@@ -26,6 +28,17 @@ public:
 
     PictureData scale(PictureData const& picture, IntVector2D const& resolution);
     PictureData brighten(PictureData const& picture, float factor);
+
+    // Text in the style of the overlay messages. It is rendered on black and on white, so that its transparency can be recovered when it is
+    // drawn over a picture.
+    struct OverlayText
+    {
+        PictureData onBlack;
+        PictureData onWhite;
+    };
+    OverlayText renderOverlayText(std::string const& text, float fontSize);
+    void drawOverlayText(PictureData& picture, OverlayText const& text, IntVector2D const& lowerRightCorner);
+    void drawOverlayText(ImDrawList* drawList, std::string const& text, float fontSize, RealVector2D const& lowerRightCorner);
 
     std::string encodeJpg(PictureData const& picture);
     std::string encodePng(PictureData const& picture);

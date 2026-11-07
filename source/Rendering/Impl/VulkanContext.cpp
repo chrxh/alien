@@ -196,8 +196,11 @@ VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags u
         VkMemoryRequirements requirements;
         vkGetBufferMemoryRequirements(_device, result.buffer, &requirements);
 
-        auto properties = memory == VulkanMemory::HostVisible ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-                                                              : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        auto hostVisible = memory == VulkanMemory::HostVisible || memory == VulkanMemory::HostReadback;
+        auto properties = hostVisible ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        auto cachedMemoryType = memory == VulkanMemory::HostReadback
+            ? tryFindMemoryType(requirements.memoryTypeBits, properties | VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
+            : std::nullopt;
 
         VkExportMemoryAllocateInfo exportInfo{
             .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO,
@@ -232,13 +235,13 @@ VulkanBuffer VulkanContext::createBuffer(VkDeviceSize size, VkBufferUsageFlags u
             .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
             .pNext = withDeviceAddress ? &flagsInfo : sharingInfo,
             .allocationSize = requirements.size,
-            .memoryTypeIndex = findMemoryType(requirements.memoryTypeBits, properties),
+            .memoryTypeIndex = cachedMemoryType ? *cachedMemoryType : findMemoryType(requirements.memoryTypeBits, properties),
         };
         checkVkResult(vkAllocateMemory(_device, &allocateInfo, nullptr, &result.memory), "vkAllocateMemory");
         result.allocationSize = requirements.size;
         checkVkResult(vkBindBufferMemory(_device, result.buffer, result.memory, 0), "vkBindBufferMemory");
 
-        if (memory == VulkanMemory::HostVisible) {
+        if (hostVisible) {
             checkVkResult(vkMapMemory(_device, result.memory, 0, VK_WHOLE_SIZE, 0, &result.mapped), "vkMapMemory");
         }
         if (shareable) {
@@ -971,6 +974,14 @@ void VulkanContext::exportSharedHandle(VulkanBuffer& buffer)
 
 uint32_t VulkanContext::findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const
 {
+    if (auto result = tryFindMemoryType(typeBits, properties)) {
+        return *result;
+    }
+    throw std::runtime_error("No suitable Vulkan memory type found.");
+}
+
+std::optional<uint32_t> VulkanContext::tryFindMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const
+{
     // Host visible memory should not come from the small device local heap that is mapped into the address space
     auto undesiredProperties = (properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0 ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : 0u;
     std::optional<uint32_t> fallback;
@@ -986,10 +997,7 @@ uint32_t VulkanContext::findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags 
             fallback = index;
         }
     }
-    if (fallback) {
-        return *fallback;
-    }
-    throw std::runtime_error("No suitable Vulkan memory type found.");
+    return fallback;
 }
 
 void VulkanContext::runPendingDestructions(std::optional<uint64_t> completedFrameNumber)

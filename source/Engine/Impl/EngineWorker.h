@@ -143,7 +143,7 @@ private:
 
     void syncSimulationWithRenderingIfDesired();
     void waitAndAllowAccess(std::chrono::microseconds const& duration);
-    void measureTPS();
+    void measureTPS(uint64_t numTimesteps = 1);
     void slowdownTPS();
 
     CudaSimulationFacade _simulationCudaFacade;
@@ -176,7 +176,7 @@ private:
     // Time step measurements
     std::atomic<int> _tpsRestriction{0};  // 0 = no restriction
     std::atomic<float> _tps;
-    int _timestepsSinceMeasurement = 0;
+    uint64_t _timestepsSinceMeasurement = 0;
     std::optional<std::chrono::steady_clock::time_point> _measureTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
 
 #include <imgui.h>
@@ -50,6 +51,10 @@ public:
     virtual void clearScreen(FloatColorRGB const& color) = 0;
 
     virtual void render(ImDrawData* drawData) = 0;
+
+    // Copies the simulation without the user interface after rendering it numPrecedingRenderings times, also in frames that are not shown
+    virtual void captureSimulationFrame(int numPrecedingRenderings) = 0;
+    virtual std::optional<PictureData> fetchCapturedSimulationFrame() = 0;
 
     //***********
     //* Pictures
