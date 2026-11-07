@@ -121,7 +121,7 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 | ------------------ | ----------------------------------- | ----------------------------------- |
 | **Windows**        | nightly build or build from sources | nightly build or build from sources |
 | **Linux**          | build from sources                  | build from sources                  |
-| **Cloud instance** | Docker image, headless              | not available                       |
+| **Cloud instance** | Docker image, CLI only              | not available                       |
 
 NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer.
 
@@ -133,7 +133,7 @@ If the program crashes for an unknown reason, please refer to the [troubleshooti
 
 ### Cloud and Docker
 
-For long runs without local hardware, a nightly image containing the headless [command-line interface](#command-line-interface) is published on Docker Hub as `chrxh/alien:nightly`. It holds `alien-cli` and its resource folder. There is no GUI in the image.
+For long runs without local hardware, a nightly image containing the [command-line interface](#command-line-interface) is published on Docker Hub as `chrxh/alien:nightly`. It holds `alien-cli` and its resource folder. There is no GUI in the image.
 
 On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for a GeForce RTX 20 to 50 series GPU. Upload your simulation file to the instance with `scp`, then connect via SSH and start it by hand:
 ```
