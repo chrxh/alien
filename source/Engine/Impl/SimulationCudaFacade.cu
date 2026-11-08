@@ -4,6 +4,8 @@
 #include <functional>
 #include <iostream>
 #include <list>
+#include <mutex>
+#include <tuple>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
@@ -730,7 +732,10 @@ void _SimulationCudaFacade::initCuda()
 
 auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 {
+    static std::mutex mutex;
     static std::optional<GpuInfo> cachedResult;
+
+    std::lock_guard lock(mutex);
     if (cachedResult) {
         return *cachedResult;
     }
@@ -751,19 +756,24 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
         log(Priority::Important, stream.str());
     }
 
-    int highestComputeCapability = 0;
+    std::optional<std::tuple<bool, int, size_t, int>> selectedRank;
+    int selectedComputeCapability = 0;
     for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
         cudaDeviceProp prop;
         CHECK_FOR_DEVICE_ERRORS(cudaGetDeviceProperties(&prop, deviceNumber));
 
+        auto discrete = prop.integrated == 0;
         std::stringstream stream;
-        stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor;
+        stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor << ", "
+               << (discrete ? "discrete" : "integrated") << ", " << prop.totalGlobalMem / (1024 * 1024) << " MB";
         log(Priority::Important, stream.str());
 
-        int computeCapability = prop.major * 100 + prop.minor;
-        if (computeCapability > highestComputeCapability) {
+        auto computeCapability = prop.major * 100 + prop.minor;
+        auto rank = std::make_tuple(discrete, computeCapability, prop.totalGlobalMem, prop.multiProcessorCount);
+        if (!selectedRank || rank > *selectedRank) {
+            selectedRank = rank;
+            selectedComputeCapability = computeCapability;
             result.deviceNumber = deviceNumber;
-            highestComputeCapability = computeCapability;
             result.gpuModelName = prop.name;
             std::memcpy(result.gpuUuid.data(), &prop.uuid, result.gpuUuid.size());
         }
@@ -772,7 +782,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     // The CUDA compute-capability heuristic (major*100+minor, gated at >= 705)
     // is meaningless for AMD GPUs, where prop.major/minor encode the gfx arch.
     // On HIP accept the selected device unconditionally.
-    if (highestComputeCapability < 705) {
+    if (selectedComputeCapability < 705) {
         throw std::runtime_error("No CUDA device with compute capability of 7.5 or higher found.");
     }
 #endif
