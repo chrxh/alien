@@ -47,6 +47,9 @@ namespace
     auto constexpr ReadOnlyCellPadding = 1.0f;
     auto constexpr MaxFilterWidth = 400.0f;
     auto constexpr FilterClearButtonWidth = 28.0f;
+    auto constexpr SegmentedControlRounding = 8.0f;
+    auto constexpr SegmentedControlInset = 2.0f;
+    auto constexpr SegmentedControlMinLabelMargin = 8.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -150,10 +153,7 @@ void AlienGui::WebLink(std::string const& text, std::string const& url, std::opt
 
 void AlienGui::PrivacyPolicyLink(std::string const& tooltip)
 {
-    auto text = std::string("Privacy policy");
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text.c_str()).x));
-    WebLink(text, Const::PrivacyPolicyURL, tooltip);
+    WebLink("Privacy policy", Const::PrivacyPolicyURL, tooltip);
 }
 
 bool AlienGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled, bool* pinned)
@@ -649,7 +649,7 @@ bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string&
     return result;
 }
 
-void AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text)
+bool AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text)
 {
     static char buffer[1024 * 16];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
@@ -657,7 +657,7 @@ void AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters
     auto textWidth = StyleService::get().scale(parameters._textWidth);
     auto height = parameters._height == 0 ? ImGui::GetContentRegionAvail().y : StyleService::get().scale(parameters._height);
 
-    ImGui::InputTextEx(
+    auto result = ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
         parameters._hint.c_str(),
         buffer,
@@ -668,6 +668,7 @@ void AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters
     AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     text = std::string(buffer);
+    return result;
 }
 
 namespace
@@ -1409,6 +1410,62 @@ namespace
     }
 }
 
+bool AlienGui::SegmentedControl(SegmentedControlParameters const& parameters, int& value)
+{
+    auto drawList = ImGui::GetWindowDrawList();
+    auto pos = ImGui::GetCursorScreenPos();
+    auto width = ImGui::GetContentRegionAvail().x;
+    auto height = scale(parameters._height);
+    auto rounding = scale(SegmentedControlRounding);
+    auto inset = scale(SegmentedControlInset);
+    drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, ImGui::GetColorU32(ImGuiCol_FrameBg), rounding);
+
+    // The segments are equally wide. If a label does not fit, each segment gets the width of its label and an equal share of the rest.
+    auto numSegments = toFloat(std::max(size_t(1), parameters._values.size()));
+    auto equalWidth = width / numSegments;
+    auto totalLabelWidth = 0.0f;
+    auto maxLabelWidth = 0.0f;
+    for (auto const& label : parameters._values) {
+        auto labelWidth = ImGui::CalcTextSize(label.c_str()).x;
+        totalLabelWidth += labelWidth;
+        maxLabelWidth = std::max(maxLabelWidth, labelWidth);
+    }
+    auto followsLabels = maxLabelWidth + scale(SegmentedControlMinLabelMargin) * 2 > equalWidth && totalLabelWidth < width;
+    auto labelMargin = (width - totalLabelWidth) / numSegments;
+
+    auto result = false;
+    for (auto const& [index, label] : parameters._values | std::views::enumerate) {
+        if (index != 0) {
+            ImGui::SameLine(0, 0);
+        }
+        auto textSize = ImGui::CalcTextSize(label.c_str());
+        auto segmentWidth = followsLabels ? textSize.x + labelMargin : equalWidth;
+        auto segmentPos = ImGui::GetCursorScreenPos();
+        ImGui::PushID(toInt(index));
+        if (ImGui::InvisibleButton("##segment", {segmentWidth, height}) && value != toInt(index)) {
+            value = toInt(index);
+            result = true;
+        }
+        auto hovered = ImGui::IsItemHovered();
+        ImGui::PopID();
+
+        auto selected = value == toInt(index);
+        auto segmentMin = ImVec2{segmentPos.x + inset, segmentPos.y + inset};
+        auto segmentMax = ImVec2{segmentPos.x + segmentWidth - inset, segmentPos.y + height - inset};
+        if (selected) {
+            drawList->AddRectFilled(segmentMin, segmentMax, Const::AccentDeepColor, rounding - inset);
+            drawList->AddRect(segmentMin, segmentMax, Const::AccentLineColor, rounding - inset);
+        } else if (hovered) {
+            drawList->AddRectFilled(segmentMin, segmentMax, ImGui::GetColorU32(ImGuiCol_FrameBgHovered), rounding - inset);
+        }
+        drawList->AddText(
+            {segmentPos.x + (segmentWidth - textSize.x) / 2, segmentPos.y + (height - textSize.y) / 2},
+            selected ? Const::TextStrongColor : Const::TextDimColor,
+            label.c_str());
+    }
+    return result;
+}
+
 void AlienGui::Text(TextParameters const& parameters)
 {
     // Apply style
@@ -1603,7 +1660,7 @@ void AlienGui::BeginMenu(std::string const& text, bool& toggled, float focus)
 
 void AlienGui::MenuItem(MenuItemParameters const& parameters, std::function<void()> const& action)
 {
-    if (_menuBarVisible) {
+    if (_menuBarVisible && !parameters._shortcutOnly) {
         std::vector<std::string> keyStringParts;
         if (parameters._keyCtrl) {
             keyStringParts.emplace_back("CTRL");

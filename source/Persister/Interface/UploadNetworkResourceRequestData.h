@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -22,6 +23,7 @@ struct UploadNetworkResourceRequestData
         float zoom = 1.0f;
         RealVector2D center;
         std::string jpg;
+        std::optional<std::filesystem::path> filename;  // Uploads this file instead of the running simulation
     };
     struct CreatureData
     {

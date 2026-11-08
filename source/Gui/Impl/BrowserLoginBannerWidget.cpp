@@ -22,7 +22,7 @@ namespace
 
     auto const Icon = std::string(ICON_FA_USER_PLUS);
     auto const Headline = std::string("Join the ALIEN community");
-    auto const SubText = std::string("Upload your own simulations and get a private workspace. It's free.");
+    auto const SubText = std::string("Upload your own simulations, for everyone or only for you. It's free.");
     auto const ButtonText = std::string("Log in or register");
 }
 

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -230,7 +231,7 @@ namespace zstd
         template <typename FStream>
         struct FStreamHolder
         {
-            FStreamHolder(std::string const& filename, std::ios_base::openmode mode)
+            FStreamHolder(std::filesystem::path const& filename, std::ios_base::openmode mode)
                 : _fs(filename, mode)
             {}
             FStream _fs;
@@ -242,7 +243,11 @@ namespace zstd
         , public std::ostream
     {
     public:
-        explicit ofstream(std::string const& filename, std::ios_base::openmode mode = std::ios_base::out, int level = DefaultCompressionLevel, int workers = 0)
+        explicit ofstream(
+            std::filesystem::path const& filename,
+            std::ios_base::openmode mode = std::ios_base::out,
+            int level = DefaultCompressionLevel,
+            int workers = 0)
             : detail::FStreamHolder<std::ofstream>(filename, mode | std::ios_base::binary)
             , std::ostream(new ostreambuf(_fs.rdbuf(), level, workers))
         {
@@ -269,7 +274,7 @@ namespace zstd
         , public std::istream
     {
     public:
-        explicit ifstream(std::string const& filename, std::ios_base::openmode mode = std::ios_base::in)
+        explicit ifstream(std::filesystem::path const& filename, std::ios_base::openmode mode = std::ios_base::in)
             : detail::FStreamHolder<std::ifstream>(filename, mode | std::ios_base::binary)
             , std::istream(new istreambuf(_fs.rdbuf()))
         {

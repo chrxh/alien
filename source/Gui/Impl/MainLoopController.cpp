@@ -28,7 +28,6 @@
 
 #include "AboutDialog.h"
 #include "AlienGui.h"
-#include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "ConsoleModeController.h"
 #include "DeleteUserDialog.h"
@@ -55,14 +54,15 @@
 #include "RecorderController.h"
 #include "RecorderWindow.h"
 #include "SavePictureDialog.h"
+#include "SaveSimulationDialog.h"
 #include "SimulationInteractionController.h"
+#include "SimulationLibraryController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
 #include "StyleService.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
-#include "UploadSimulationDialog.h"
 #include "Viewport.h"
 
 #include <Engine/Interface/SimulationFacade.h>
@@ -340,6 +340,7 @@ void MainLoopController::processOperatingMode()
 
 void MainLoopController::processScheduleExit()
 {
+    _saveSimRequestId.reset();
     if (_saveOnExit) {
         printOverlayMessage("Saving on exit ...");
         NewSimulationService::get().storeAutosaveOrigin();
@@ -347,10 +348,8 @@ void MainLoopController::processScheduleExit()
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
         _saveSimRequestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
-        _programState = ProgramState::Exiting;
-    } else {
-        _programState = ProgramState::Finished;
     }
+    _programState = ProgramState::Exiting;
 }
 
 void MainLoopController::processExiting()
@@ -366,13 +365,20 @@ void MainLoopController::processExiting()
 
     FpsController::get().processForceFps(WindowController::get().getFps());
 
-    if (auto requestedSimState = _PersisterFacade::get()->getRequestState(_saveSimRequestId)) {
-        if (requestedSimState.value() == PersisterRequestState::Finished) {
-            _PersisterFacade::get()->fetchSaveSimulationData(_saveSimRequestId);
-            _programState = ProgramState::Finished;
-        } else if (requestedSimState.value() == PersisterRequestState::Error) {
-            _programState = ProgramState::Finished;
+    if (_saveSimRequestId.has_value()) {
+        if (auto requestedSimState = _PersisterFacade::get()->getRequestState(*_saveSimRequestId)) {
+            if (requestedSimState.value() == PersisterRequestState::Finished) {
+                _PersisterFacade::get()->fetchSaveSimulationData(*_saveSimRequestId);
+                _saveSimRequestId.reset();
+            } else if (requestedSimState.value() == PersisterRequestState::Error) {
+                _saveSimRequestId.reset();
+            }
         }
+    }
+
+    // Simulations that are still being saved get their pictures afterwards
+    if (!_saveSimRequestId.has_value() && !SimulationLibraryController::get().isSaving()) {
+        _programState = ProgramState::Finished;
     }
 }
 
@@ -462,8 +468,9 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("New").keyCtrl(true).key(ImGuiKey_N), [&] { NewSimulationDialog::get().open(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Open").keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulationDialog(); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { FileTransferController::get().onSaveSimulationDialog(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] {
+        SaveSimulationDialog::get().open(NetworkResourceType_Simulation, SaveTarget::ThisComputer);
+    });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Save picture"), [&] { SavePictureDialog::get().open(); });
     AlienGui::MenuSeparator();
     auto running = _SimulationFacade::get()->isSimulationRunning();
@@ -489,12 +496,13 @@ void MainLoopController::processMenubar()
         NetworkService::get().logout();
         BrowserWindow::get().onRefresh();
     });
+    // Uploading a simulation or a genome is saving it with the community as its target, which keeps its shortcut
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Upload simulation").keyAlt(true).key(ImGuiKey_D).disabled(!NetworkService::get().isLoggedIn()),
-        [&] { UploadSimulationDialog::get().open(NetworkResourceType_Simulation); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Upload genome").keyAlt(true).key(ImGuiKey_Q).disabled(!NetworkService::get().isLoggedIn()), [&] {
-        UploadSimulationDialog::get().open(NetworkResourceType_Genome);
-    });
+        AlienGui::MenuItemParameters().name("Upload simulation").keyAlt(true).key(ImGuiKey_D).disabled(!NetworkService::get().isLoggedIn()).shortcutOnly(true),
+        [&] { SaveSimulationDialog::get().open(NetworkResourceType_Simulation, SaveTarget::Community); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters().name("Upload genome").keyAlt(true).key(ImGuiKey_Q).disabled(!NetworkService::get().isLoggedIn()).shortcutOnly(true),
+        [&] { SaveSimulationDialog::get().open(NetworkResourceType_Genome, SaveTarget::Community); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Delete user").disabled(!NetworkService::get().isLoggedIn()), [&] { DeleteUserDialog::get().open(); });
@@ -533,9 +541,6 @@ void MainLoopController::processMenubar()
             .selected(SimulationParametersMainWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationParametersMainWindow::get().setOn(!SimulationParametersMainWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Autosave").keyAlt(true).key(ImGuiKey_5).selected(AutosaveWindow::get().isOn()).closeMenuWhenItemClicked(false),
-        [&] { AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("MCP server").keyAlt(true).key(ImGuiKey_6).selected(McpWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { McpWindow::get().setOn(!McpWindow::get().isOn()); });

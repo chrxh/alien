@@ -195,6 +195,36 @@ TEST_F(SerializerServiceTests, simulationFiles)
     EXPECT_FALSE(std::filesystem::exists(filename));
 }
 
+TEST_F(SerializerServiceTests, simulationInfoFromFile)
+{
+    auto filename = _testDirectory / "simulation.sim";
+
+    SimulationDesc simulation;
+    simulation._mainData._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+    simulation._timestep = 171204388;
+    simulation._worldSize = {3000, 2000};
+    ASSERT_TRUE(_serializerService->serializeSimulationToFiles(filename, simulation));
+
+    SimulationFileInfo info;
+    EXPECT_TRUE(_serializerService->deserializeSimulationInfoFromFile(info, filename));
+    EXPECT_EQ(Const::ProgramVersion, info.version);
+    EXPECT_EQ(171204388ull, info.timestep);
+    EXPECT_EQ(IntVector2D(3000, 2000), info.worldSize);
+}
+
+TEST_F(SerializerServiceTests, simulationInfoFromFile_noSimulation)
+{
+    auto filename = _testDirectory / "other.sim";
+    {
+        std::ofstream stream(filename, std::ios::binary);
+        stream << "not a simulation";
+    }
+
+    SimulationFileInfo info;
+    EXPECT_FALSE(_serializerService->deserializeSimulationInfoFromFile(info, filename));
+    EXPECT_FALSE(_serializerService->deserializeSimulationInfoFromFile(info, _testDirectory / "missing.sim"));
+}
+
 TEST_F(SerializerServiceTests, simulationParametersFile)
 {
     auto filename = _testDirectory / "parameters.settings.json";

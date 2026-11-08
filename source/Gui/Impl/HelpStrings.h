@@ -58,6 +58,17 @@ namespace Const
         "If this option is enabled, this program and the command-line interface are included in the numbers of active simulators shown in the browser "
         "window. The server tells the instances apart by a hash of their IP address that it keeps only in memory for 24 hours and never stores.";
 
+    std::string const BrowserLocalWorkspaceTooltip =
+        "The simulations in one folder of this computer. Save (Ctrl+S) stores the current simulation there. Nobody else can see them until you share "
+        "them.";
+
+    std::string const BrowserLocalGenomesWorkspaceTooltip =
+        "The genomes in one folder of this computer. Save genome stores the genome of the genome editor there. Nobody else can see them until you "
+        "share them.";
+
+    std::string const BrowserAutosaveWorkspaceTooltip =
+        "The current simulation is saved here automatically. With limited save files, the oldest autosaves of the current subfolder are deleted.";
+
     std::string const BrowserFeaturedWorkspaceTooltip =
         "This workspace is curated by the alien-project and contains the simulations that come along with the released versions. They cover a wide range and "
         "exploit different features.";
@@ -65,12 +76,12 @@ namespace Const
     std::string const BrowserCommunityWorkspaceTooltip =
         "All logged-in users can share their simulations and genomes here. The files stored in this workspace are visible to all users.";
 
-    std::string const BrowserPrivateWorkspaceTooltip =
-        "Each user account has its own private space. The simulations and genomes are only visible to the logged-in user.";
+    std::string const BrowserPrivateWorkspaceTooltip = "Everything you have uploaded. Uploads that are not shared with the community are only visible to you.";
 
     std::string const BrowserLoginChipTooltip = "Log in or create a new account to upload your own simulations and genomes.";
 
-    std::string const BrowserLikedFilterTooltip = "Show only the entries you gave a heart or another reaction.";
+    std::string const BrowserLikedWorkspaceTooltip =
+        "Everything on the server that you gave a heart or another reaction, whether it is featured, shared by the community or your own.";
 
     std::string const BrowserGpuHiddenLoggedOutTooltip = "The GPU models are only visible to logged-in users who share their own GPU model.";
     std::string const BrowserGpuHiddenNotSharedTooltip = "The GPU models are only visible if you share your own GPU model.";

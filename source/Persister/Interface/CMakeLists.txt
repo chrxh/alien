@@ -32,9 +32,6 @@ add_library(PersisterInterface
     ReadSimulationResultData.h
     ReplaceNetworkResourceRequestData.h
     ReplaceNetworkResourceResultData.h
-    SavepointTable.h
-    SavepointTableService.cpp
-    SavepointTableService.h
     SaveDeserializedSimulationRequestData.h
     SaveDeserializedSimulationResultData.h
     SaveSimulationRequestData.h
@@ -49,6 +46,9 @@ add_library(PersisterInterface
     SettingsParserService.cpp
     SettingsParserService.h
     SharedDeserializedSimulation.h
+    SimulationLibrary.h
+    SimulationLibraryService.cpp
+    SimulationLibraryService.h
     TaskProcessor.cpp
     TaskProcessor.h
     ToggleReactionNetworkResourceRequestData.h

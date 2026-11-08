@@ -48,6 +48,13 @@ void AlienWindow::process()
     auto const& windowMinSize = ImGui::GetStyle().WindowMinSize;
     _savedWindowMinSize = {windowMinSize.x, windowMinSize.y};
 
+    if (_bringToFront) {
+        _bringToFront = false;
+        if (_state == WindowState::Collapsed) {
+            _state = WindowState::Normal;
+        }
+        ImGui::SetNextWindowFocus();
+    }
     auto flags = returnFlagsAndConfigureNextWindow();
 
     if (ImGui::Begin(_title.c_str(), nullptr, flags)) {
@@ -86,6 +93,11 @@ void AlienWindow::setOn(bool value)
     if (value) {
         processActivated();
     }
+}
+
+void AlienWindow::bringToFront()
+{
+    _bringToFront = true;
 }
 
 void AlienWindow::shutdown()

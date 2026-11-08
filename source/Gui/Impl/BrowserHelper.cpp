@@ -1,5 +1,7 @@
 #include "BrowserHelper.h"
 
+#include <cfloat>
+
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -9,7 +11,19 @@
 
 #include "AlienGui.h"
 #include "BrowserData.h"
+#include "PictureGuiService.h"
 #include "StyleService.h"
+
+namespace
+{
+    auto constexpr PictureHeartMargin = 6.0f;
+    auto constexpr PictureHeartPaddingX = 7.0f;
+    auto constexpr PictureHeartPaddingY = 2.0f;
+    auto constexpr PictureBadgePaddingX = 5.0f;
+    auto constexpr PictureBadgeHeight = 15.0f;
+    auto constexpr PictureBadgeRounding = 4.0f;
+    auto constexpr PictureBadgeFontScale = 0.72f;
+}
 
 float BrowserHelper::calcFooterHeight()
 {
@@ -26,12 +40,13 @@ bool BrowserHelper::ActionButton(std::string const& text)
     return result;
 }
 
-void BrowserHelper::DownloadButton(BrowserData const& data, BrowserLeaf const& leaf)
+void BrowserHelper::OpenButton(BrowserData const& data, BrowserLeaf const& leaf)
 {
-    auto isDownload = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Download").delay(false));
-    if (isDownload) {
-        data->onDownloadResource(leaf);
+    auto isLocal = isLocalWorkspace(leaf.rawTO->workspaceType);
+    auto clicked = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(isLocal ? ICON_FA_FOLDER_OPEN : ICON_FA_DOWNLOAD));
+    AlienGui::Tooltip(AlienGui::TooltipParameters().text(isLocal ? "Open" : "Download").delay(false));
+    if (clicked) {
+        data->onOpenResource(leaf);
     }
 }
 
@@ -98,4 +113,107 @@ NetworkResourceTreeTO BrowserHelper::createLeafTreeTO(NetworkResourceRawTO const
     result->folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
     result->node = BrowserLeaf{.leafName = NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), .rawTO = rawTO};
     return result;
+}
+
+float BrowserHelper::calcPictureHeight(float width)
+{
+    return width * toFloat(PictureGuiService::PreviewPictureResolution.y) / toFloat(PictureGuiService::PreviewPictureResolution.x);
+}
+
+void BrowserHelper::Picture(std::optional<TextureData> const* picture, float width)
+{
+    auto height = calcPictureHeight(width);
+    auto pos = ImGui::GetCursorScreenPos();
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
+
+    if (picture != nullptr && picture->has_value()) {
+
+        // Pictures from earlier versions can have a different aspect ratio and are fitted into the area
+        auto const& texture = picture->value();
+        auto pictureWidth = width;
+        auto pictureHeight = width * toFloat(texture.height) / toFloat(texture.width);
+        if (pictureHeight > height) {
+            pictureWidth = height * toFloat(texture.width) / toFloat(texture.height);
+            pictureHeight = height;
+        }
+        auto picturePos = ImVec2{pos.x + (width - pictureWidth) / 2, pos.y + (height - pictureHeight) / 2};
+        drawList->AddImage(texture.textureId, picturePos, {picturePos.x + pictureWidth, picturePos.y + pictureHeight});
+    } else {
+        auto text = picture == nullptr ? std::string("loading...") : std::string("no preview");
+        auto textSize = ImGui::CalcTextSize(text.c_str());
+        drawList->AddText({pos.x + (width - textSize.x) / 2, pos.y + (height - textSize.y) / 2}, (ImU32)Const::TextDecentColor, text.c_str());
+    }
+    ImGui::Dummy({width, height});
+}
+
+void BrowserHelper::TileSelectionBorder(ImVec2 const& tileSize)
+{
+    auto thickness = scale(2.0f);
+    auto tileMin = ImGui::GetWindowPos();
+    auto tileMax = ImVec2{tileMin.x + tileSize.x, tileMin.y + tileSize.y};
+
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->PushClipRect(tileMin, tileMax, false);
+    drawList->AddRect(
+        {tileMin.x + thickness / 2, tileMin.y + thickness / 2},
+        {tileMax.x - thickness / 2, tileMax.y - thickness / 2},
+        (ImU32)Const::AccentColor,
+        ImGui::GetStyle().ChildRounding,
+        0,
+        thickness);
+    drawList->PopClipRect();
+}
+
+void BrowserHelper::PictureBadge(ImVec2 const& pos, std::string const& text, ImColor const& textColor, ImColor const& borderColor)
+{
+    auto font = StyleService::get().getSmallBoldFont();
+    auto fontSize = font->FontSize * PictureBadgeFontScale;
+    auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text.c_str());
+
+    auto badgeMax = ImVec2{pos.x + textSize.x + scale(PictureBadgePaddingX) * 2, pos.y + scale(PictureBadgeHeight)};
+
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(pos, badgeMax, Const::BrowserNewBadgeColor, scale(PictureBadgeRounding));
+    drawList->AddRect(pos, badgeMax, borderColor, scale(PictureBadgeRounding));
+    drawList->AddText(font, fontSize, {pos.x + scale(PictureBadgePaddingX), pos.y + (badgeMax.y - pos.y - textSize.y) / 2}, textColor, text.c_str());
+}
+
+bool BrowserHelper::PictureHeart(BrowserData const& data, NetworkResourceRawTO const& rawTO, ImVec2 const& pictureMax)
+{
+    auto icon = std::string(ICON_FA_HEART);
+    auto count = " " + std::to_string(rawTO->getTotalLikes());
+    auto iconSize = ImGui::CalcTextSize(icon.c_str());
+    auto countSize = ImGui::CalcTextSize(count.c_str());
+    auto padding = ImVec2{scale(PictureHeartPaddingX), scale(PictureHeartPaddingY)};
+    auto size = ImVec2{iconSize.x + countSize.x + padding.x * 2, iconSize.y + padding.y * 2};
+    auto pos = ImVec2{pictureMax.x - scale(PictureHeartMargin) - size.x, pictureMax.y - scale(PictureHeartMargin) - size.y};
+
+    // Placed over the picture, after which the layout continues below the picture
+    auto nextItemPos = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos(pos);
+    auto clicked = ImGui::InvisibleButton("##pictureHeart", size);
+    auto hovered = ImGui::IsItemHovered();
+    auto rightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
+    ImGui::SetCursorScreenPos(nextItemPos);
+
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(
+        pos, {pos.x + size.x, pos.y + size.y}, hovered ? Const::BrowserPictureChipHoveredColor : Const::BrowserPictureChipColor, size.y / 2);
+    auto isOwnReaction = data->getOwnEmojiType(rawTO->id).has_value();
+    drawList->AddText(
+        {pos.x + padding.x, pos.y + padding.y}, isOwnReaction ? Const::BrowserPictureChipOwnReactionColor : Const::BrowserPictureChipIconColor, icon.c_str());
+    drawList->AddText({pos.x + padding.x + iconSize.x, pos.y + padding.y}, Const::BrowserPictureChipTextColor, count.c_str());
+
+    if (hovered) {
+        processHeartTooltip(data, rawTO, true);
+    }
+    if (clicked) {
+        data->onToggleHeart(rawTO);
+    }
+    if (rightClicked) {
+        data->setActivateEmojiPopup(true);
+        data->setEmojiPopupTO(createLeafTreeTO(rawTO));
+    }
+    return hovered;
 }

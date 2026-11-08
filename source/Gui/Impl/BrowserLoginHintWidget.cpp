@@ -26,7 +26,7 @@ namespace
     auto constexpr ButtonOffsetY = 162.0f;
 
     auto const Icon = std::string(ICON_FA_LOCK);
-    auto const Headline = std::string("Your private workspace");
+    auto const Headline = std::string("Your uploads");
     auto const SubText = std::string("Log in to see the simulations and genomes you uploaded.");
     auto const ButtonText = std::string("Login or register");
 }

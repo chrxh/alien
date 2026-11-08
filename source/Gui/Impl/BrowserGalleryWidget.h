@@ -1,15 +1,11 @@
 #pragma once
 
-#include <optional>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
+#include <imgui.h>
+
 #include <Network/NetworkResourceRawTO.h>
-
-#include <Persister/Interface/Definitions.h>
-
-#include <Rendering/Interface/TextureData.h>
 
 #include "Definitions.h"
 
@@ -20,10 +16,17 @@ enum GallerySorting
     GallerySorting_MostDownloads
 };
 
+enum LocalGallerySorting
+{
+    LocalGallerySorting_Newest,
+    LocalGallerySorting_Name
+};
+
+// Shows the resources of the current workspace as tiles with preview pictures. A click selects a tile, a double click opens its resource.
 class _BrowserGalleryWidget
 {
 public:
-    static BrowserGalleryWidget create(BrowserData const& data);
+    static BrowserGalleryWidget create(BrowserData const& data, BrowserPictureCache const& pictureCache);
 
     void shutdown();
 
@@ -32,19 +35,17 @@ public:
     void processPlaceholderTiles();
     void processPaging();
 
-    void processPendingRequests();
-
+    float getSortingWidth() const;
     float getPagerWidth() const;
     void resetPage();
-    void invalidatePicture(std::string const& resourceId);
 
 private:
-    _BrowserGalleryWidget(BrowserData const& data);
+    _BrowserGalleryWidget(BrowserData const& data, BrowserPictureCache const& pictureCache);
 
     struct TileLayout
     {
         float tileWidth = 0;
-        float horizontalSpacing = 0;
+        std::vector<float> columnOffsets;  // Relative to the left border of a row
         int numColumns = 1;
     };
     TileLayout calcTileLayout() const;
@@ -52,25 +53,22 @@ private:
 
     void processTile(NetworkResourceRawTO const& rawTO, float tileWidth);
     void processPlaceholderTile(float tileWidth);
-    void processTileTooltip(NetworkResourceRawTO const& rawTO);
-    void processPicture(NetworkResourceRawTO const& rawTO, float width);
+    void processBadges(NetworkResourceRawTO const& rawTO, ImVec2 const& picturePos);
+    void processEmptyHint();
+    void processKeyboardNavigation(std::vector<NetworkResourceRawTO> const& pageEntries);
 
     std::string getPageText() const;
     std::vector<NetworkResourceRawTO> getSortedEntries() const;
-    void requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries);
 
     void onSelectEntry(NetworkResourceRawTO const& rawTO);
 
     BrowserData _data;
-    TaskProcessor _pictureProcessor;
-
-    std::string _hoveredTileId;
-    float _hoveredTileTime = 0;
+    BrowserPictureCache _pictureCache;
 
     int _sorting = GallerySorting_MostReactions;
-    int _cardSizePercent = 100;
+    int _localSorting = LocalGallerySorting_Newest;
     int _page = 0;
     int _numEntries = 0;
     int _numPages = 1;
-    std::unordered_map<std::string, std::optional<TextureData>> _pictureBySimId;
+    int _numColumns = 1;
 };

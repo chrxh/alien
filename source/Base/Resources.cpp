@@ -27,7 +27,7 @@ namespace
 
 namespace Const
 {
-    std::string const ProgramVersion = "5.0.0-beta.1";
+    std::string const ProgramVersion = "5.0.0-beta.2";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const PrivacyPolicyURL = "https://alien-project.org/privacy.html";
     std::string const AlienServerURL = "api.alien-project.org";
@@ -35,6 +35,7 @@ namespace Const
 
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
+    std::filesystem::path const SimulationLibraryPath = "simulations";
     std::filesystem::path const ImagesPath = ResourcePath / "images";
     std::filesystem::path const DocsPath = ResourcePath / "docs";
 
@@ -43,7 +44,6 @@ namespace Const
     std::filesystem::path const TraceFilename = "trace.txt";
     std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
     std::filesystem::path const AutosaveFile = AutosavePath / AutosaveFileWithoutPath;
-    std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const LogoCoreFilename = ImagesPath / "logoCore.png";
     std::filesystem::path const LogoGlowFilename = ImagesPath / "logoGlow.png";

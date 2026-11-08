@@ -263,7 +263,7 @@ public:
         MEMBER(InputTextMultilineParameters, float, textWidth, 100);
         MEMBER(InputTextMultilineParameters, float, height, 100.0f);
     };
-    static void InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text);
+    static bool InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text);
 
     struct ComboParameters
     {
@@ -361,6 +361,13 @@ public:
     };
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
+    struct SegmentedControlParameters
+    {
+        MEMBER(SegmentedControlParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER(SegmentedControlParameters, float, height, 30.0f);
+    };
+    static bool SegmentedControl(SegmentedControlParameters const& parameters, int& value);  // Spans the available width
+
     struct SelectableButtonParameters
     {
         MEMBER(SelectableButtonParameters, std::string, name, "");
@@ -416,6 +423,7 @@ public:
         MEMBER(MenuItemParameters, bool, disabled, false);
         MEMBER(MenuItemParameters, bool, selected, false);
         MEMBER(MenuItemParameters, bool, closeMenuWhenItemClicked, true);
+        MEMBER(MenuItemParameters, bool, shortcutOnly, false);  // Not shown in the menu
     };
     static void MenuItem(MenuItemParameters const& parameters, std::function<void()> const& action);
     static void MenuSeparator();

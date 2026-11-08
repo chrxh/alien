@@ -68,7 +68,7 @@ You can phrase your requests as you would to a knowledgeable assistant. The foll
 - **Work in steps.** Large tasks succeed more reliably when you split them into steps and check the result in between. Screenshots help the agent see what happened.
 - **Let it read the documentation.** Through the MCP server, the agent can read this documentation, including a detailed reference of all cell types and parameters. If the agent seems unsure, ask it to read the relevant chapter first.
 - **Avoid overloading ALIEN.** Every command runs inside ALIEN. Many requests in quick succession on a large world can make ALIEN respond slowly. If that happens, ask the agent to slow down or to work on a smaller world.
-- **Stay in control.** Through ALIEN, an agent can save and load files, and download from the ALIEN server. If you are logged in, it can also upload the current simulation to your **Private** workspace on the server. Use the command log to check what it does, and stop the MCP server when you do not need it.
+- **Stay in control.** Through ALIEN, an agent can save and load files, and download from the ALIEN server. If you are logged in, it can also upload the current simulation to **My uploads** on the server, visible only to you. Use the command log to check what it does, and stop the MCP server when you do not need it.
 
 ## Available tools
 

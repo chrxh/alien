@@ -25,6 +25,7 @@ public:
 
     bool isOn() const;
     void setOn(bool value);
+    void bringToFront();
 
 protected:
     virtual void initIntern() {}
@@ -58,6 +59,7 @@ private:
     RealVector2D _defaultSize;
     RealVector2D _minSize;
     bool _isFocused = false;
+    bool _bringToFront = false;
     RealVector2D _savedPos;
     RealVector2D _savedSize;
     RealVector2D _savedWindowMinSize;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 
 #include <Base/Singleton.h>
 
@@ -72,7 +73,7 @@ private:
     TaskProcessor _autosaveProcessor;
     TaskProcessor _searchProcessor;
     TaskProcessor _downloadProcessor;
-    PersisterRequestId _saveSimRequestId;
+    std::optional<PersisterRequestId> _saveSimRequestId;
     std::string _loadedSimulationName;
 
     MenuBarInfoWidget _menuBarInfoWidget;

@@ -62,6 +62,9 @@ void LoginDialog::processIntern()
         shareGpuInfo);
     loginController.setShareGpuInfo(shareGpuInfo);
 
+    ImGui::Spacing();
+    AlienGui::PrivacyPolicyLink(Const::LoginSecurityInformationTooltip);
+
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
@@ -99,6 +102,4 @@ void LoginDialog::processIntern()
     if (AlienGui::Button("Cancel")) {
         close();
     }
-
-    AlienGui::PrivacyPolicyLink(Const::LoginSecurityInformationTooltip);
 }
