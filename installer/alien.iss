@@ -70,7 +70,7 @@ WizardStyle=modern
 [Tasks]
 #ifdef WithAmd
 Name: nvidia; Description: "NVIDIA, GeForce RTX 20 series or newer"; GroupDescription: "Graphics card:"; Flags: exclusive
-Name: amd; Description: "AMD, Radeon RX 6000 series or newer (experimental)"; GroupDescription: "Graphics card:"; Flags: exclusive unchecked
+Name: amd; Description: "AMD, Radeon RX 6000 series or newer (experimental, may be slow or crash)"; GroupDescription: "Graphics card:"; Flags: exclusive unchecked
 #endif
 Name: startmenuicon; Description: "Create a &Start menu entry"; GroupDescription: "Shortcuts:"
 Name: desktopicon; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "Shortcuts:"; Flags: unchecked
@@ -85,6 +85,7 @@ Source: "{#NvidiaDir}\alien-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#NvidiaDir}\*.dll"; Excludes: "gtest*.dll,gmock*.dll,amdhip64*.dll"; DestDir: "{app}"; Flags: ignoreversion
 #ifdef WithAmd
 Source: "{#AmdDir}\alien.exe"; DestDir: "{app}"; DestName: "alien-amd.exe"; Flags: ignoreversion
+Source: "{#AmdDir}\alien-cli.exe"; DestDir: "{app}"; DestName: "alien-cli-amd.exe"; Flags: ignoreversion
 Source: "{#AmdDir}\amdhip64*.dll"; DestDir: "{app}"; Flags: ignoreversion
 #endif
 Source: "{#RootDir}\resources\*"; Excludes: "\autosave"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs

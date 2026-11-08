@@ -3,7 +3,7 @@ rem Build the Windows installer of ALIEN with Inno Setup 6.3 or newer
 rem (https://jrsoftware.org/isdl.php).
 rem
 rem The installer packages the Release build of build-windows-ninja.bat, so build
-rem ALIEN first. The AMD executable joins the installer if the HIP build exists:
+rem ALIEN first. The AMD executables join the installer if the HIP build exists:
 rem
 rem     build-windows-ninja.bat
 rem     build-windows-ninja.bat HIP          (optional)

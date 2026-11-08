@@ -71,16 +71,17 @@ jobs:
         $payload = "build-ninja/${{ env.BUILD_TYPE }}"
         $amdPayload = "build-ninja-hip/${{ env.BUILD_TYPE }}"
 
-        # The AMD build produces the same executable from the same sources, only
-        # compiled for AMD GPUs, so it joins the payload under a distinct name and
-        # shares the resources and the vcpkg runtime DLLs. Its GPU runtime
+        # The AMD build produces the same executables from the same sources, only
+        # compiled for AMD GPUs, so they join the payload under distinct names and
+        # share the resources and the vcpkg runtime DLLs. Their GPU runtime
         # (amdhip64_*.dll) is the counterpart of the CUDA one and has to come along.
         Copy-Item "$amdPayload/alien.exe" "$payload/alien-amd.exe" -Force
+        Copy-Item "$amdPayload/alien-cli.exe" "$payload/alien-cli-amd.exe" -Force
         Copy-Item "$amdPayload/amdhip64*.dll" $payload -Force
 
         # Guard against shipping an archive that only runs on a machine which has
         # the CUDA toolkit or the Visual C++ redistributable installed.
-        $required = @("alien.exe", "alien-amd.exe", "cudart64_*.dll", "amdhip64*.dll", "msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll", "resources")
+        $required = @("alien.exe", "alien-cli.exe", "alien-amd.exe", "alien-cli-amd.exe", "cudart64_*.dll", "amdhip64*.dll", "msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll", "resources")
         $missing = $required | Where-Object { -not (Get-ChildItem -Path "$payload/$_" -ErrorAction SilentlyContinue) }
         if ($missing) { throw "Deployment payload is incomplete, missing: $($missing -join ', ')" }
 

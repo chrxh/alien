@@ -121,7 +121,7 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 | **Linux**          | build from sources                  | build from sources                  |
 | **Cloud instance** | Docker image, CLI only              | not available                       |
 
-NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer.
+NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer. Support for AMD GPUs is experimental, so ALIEN may run slowly or crash.
 
 ### Windows: nightly build
 
@@ -196,7 +196,7 @@ cmake --build --preset ninja-release
 
 ### Command-line interface
 
-Besides the graphical program, ALIEN includes `alien-cli` (`alien-cli.exe` on Windows), which runs simulations without a window. It is useful for long experiments, performance measurements and the automated evaluation of simulations with different parameters. For example,
+Besides the graphical program, ALIEN includes `alien-cli` (on Windows `alien-cli.exe` for NVIDIA and `alien-cli-amd.exe` for AMD), which runs simulations without a window. It is useful for long experiments, performance measurements and the automated evaluation of simulations with different parameters. For example,
 ```
 alien-cli -i example.sim -o output.sim -t 1000
 ```

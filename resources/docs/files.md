@@ -43,7 +43,7 @@ The browser (Alt+B) connects ALIEN with the ALIEN server, where users share simu
 
 ## Command line interface
 
-ALIEN includes a second program, *alien-cli* (*alien-cli.exe* on Windows), which runs a simulation without any window. It is useful for long experiments, for automation and on computers without a monitor, such as rented cloud GPUs.
+ALIEN includes a second program, *alien-cli* (on Windows *alien-cli.exe* for NVIDIA and *alien-cli-amd.exe* for AMD), which runs a simulation without any window. It is useful for long experiments, for automation and on computers without a monitor, such as rented cloud GPUs.
 
 ```
 alien-cli -i input.sim -o output.sim -t 100000
