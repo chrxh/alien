@@ -679,7 +679,8 @@ void addBatchSource(uint nodeInGroup, uint source, SourceLight light, vec2 posit
 
 // The light is strongest at the area of a source and fades smoothly to its range beyond it. In the periodic world, the copies of a source
 // around the position shine as well. Along an axis that the area of the source spans completely, its copies adjoin and form one light,
-// which shines only from the copy next to the position. Returns the light that does not depend on the rays of the batch.
+// which shines only from the copy next to the position. The share of the light beyond the shadow strength of the source penetrates the
+// objects and the gas unshaded. Returns the light that does not depend on the rays of the batch.
 vec3 collectBatchSources(uint nodeInGroup, vec2 position)
 {
     vec3 result = vec3(0.0);
@@ -702,12 +703,17 @@ vec3 collectBatchSources(uint nodeInGroup, vec2 position)
                 float strength = SourceLightStrength * fade * fade;
                 float limitedStrength = strength / (SourceLightKnee + strength);
                 vec3 sourceLight = light.color.rgb * limitedStrength;
-                if (distance < 1e-3) {
+                float shadowStrength = light.color.w;
+                if (distance < 1e-3 || shadowStrength <= 0.0) {
                     result += sourceLight;
-                } else if (numSources == MaxBatchSources) {
-                    result += sourceLight * getSourceTransmittance(light, position, closestPoint, distance);
+                    continue;
+                }
+                result += (1.0 - shadowStrength) * sourceLight;
+                vec3 shadedLight = shadowStrength * sourceLight;
+                if (numSources == MaxBatchSources) {
+                    result += shadedLight * getSourceTransmittance(light, position, closestPoint, distance);
                 } else {
-                    addBatchSource(nodeInGroup, numSources++, light, position, closestPoint, distance, sourceLight);
+                    addBatchSource(nodeInGroup, numSources++, light, position, closestPoint, distance, shadedLight);
                 }
             }
         }

@@ -55,7 +55,8 @@ struct RayTracingLayout
         IntVector2D sourceLightSize;
     };
 
-    // A radiation source that shines from its circular or rectangular area
+    // A radiation source that shines from its circular or rectangular area. The shadow strength is the share of its light that the objects
+    // and the gas on the way can block.
     struct SourceLight
     {
         RealVector2D center;
@@ -63,6 +64,7 @@ struct RayTracingLayout
         float range = 0.0f;
         bool circular = true;
         FloatColorRGB color;
+        float shadowStrength = 1.0f;
     };
 
     GasGrid gasGrid;

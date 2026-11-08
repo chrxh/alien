@@ -96,7 +96,7 @@ struct SourceLight
 {
     vec4 centerRangeShape;  // xy: world position of the center, z: range of the light beyond the area, w: 0 for a circular, 1 for a
                             // rectangular area
-    vec4 color;             // rgb: color times brightness
+    vec4 color;             // rgb: color times brightness, w: share of the light that the objects and the gas on the way can block
     vec4 extent;            // xy: radius of a circular area in both components or half the size of a rectangular area
 };
 

@@ -45,6 +45,7 @@ struct SimulationParameters
     SourceParameter<FloatColorRGB> sourceLightColor = {{{1.0f, 1.0f, 1.0f}}};
     SourceParameter<float> sourceLightBrightness = {{0.25f}};
     SourceParameter<float> sourceLightRange = {{150.0f}};
+    SourceParameter<float> sourceShadowStrength = {{1.0f}};
     LayerParameter<bool> layerShowForceField = {{true}};
 
     // External energy control

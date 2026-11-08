@@ -764,7 +764,7 @@ void _RayTracingResources::updateFrameConstants(
     for (auto&& [light, lightConstants] : std::views::zip(_layout.sourceLights, constants.sourceLights)) {
         lightConstants = SourceLightConstants{
             .centerRangeShape = {light.center.x, light.center.y, light.range, light.circular ? 0.0f : 1.0f},
-            .color = {light.color.r, light.color.g, light.color.b, 0.0f},
+            .color = {light.color.r, light.color.g, light.color.b, light.shadowStrength},
             .extent = {light.halfExtent.x, light.halfExtent.y, 0.0f, 0.0f},
         };
     }

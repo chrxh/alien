@@ -59,7 +59,7 @@ A source receives energy in two ways:
 
 Radiation sources create fertile places where plant-like creatures can live from the particles. Combined with radiation of the cells, they keep energy circulating.
 
-With hardware ray tracing, a source also shines from its area. Its **Light color**, **Light brightness** and **Light range** set in which color, how bright and how far it shines. The objects around it cast shadows, which appear as columns of light and shadow. See [Generative art](generative-art.md#ray-tracing).
+With hardware ray tracing, a source also shines from its area. Its **Light color**, **Light brightness** and **Light range** set in which color, how bright and how far it shines. The objects around it cast shadows, which appear as columns of light and shadow. Its **Shadow strength** sets how much of the light they block. See [Generative art](generative-art.md#ray-tracing).
 
 ## The external energy pool
 

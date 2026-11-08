@@ -111,8 +111,8 @@ namespace
         return result;
     }
 
-    // A radiation source counts if the light of one of its periodic copies reaches the region. Sources with the same area and range shine as
-    // one, so that their light is traced only once.
+    // A radiation source counts if the light of one of its periodic copies reaches the region. Sources with the same area, range and shadow
+    // strength shine as one, so that their light is traced only once.
     std::vector<RayTracingLayout::SourceLight> getSourceLights(SimulationParameters const& parameters, IntVector2D const& worldSize, RealRect const& region)
     {
         auto world = toRealVector2D(worldSize);
@@ -143,9 +143,11 @@ namespace
                 .range = range,
                 .circular = circular,
                 .color = {color.r * brightness, color.g * brightness, color.b * brightness},
+                .shadowStrength = std::clamp(parameters.sourceShadowStrength.sourceValues[index], 0.0f, 1.0f),
             };
             auto sameArea = std::ranges::find_if(result, [&](RayTracingLayout::SourceLight const& other) {
-                return other.center == light.center && other.halfExtent == light.halfExtent && other.range == light.range && other.circular == light.circular;
+                return other.center == light.center && other.halfExtent == light.halfExtent && other.range == light.range && other.circular == light.circular
+                    && other.shadowStrength == light.shadowStrength;
             });
             if (sameArea == result.end()) {
                 result.emplace_back(light);
@@ -174,15 +176,17 @@ namespace
         return std::pair{std::max(center + firstCopy * period - halfWidth, lowerBound), std::min(center + lastCopy * period + halfWidth, upperBound)};
     }
 
-    // The rays to the radiation sources start in the given region and end on the parts of the areas of the sources within their reach
+    // The rays to the radiation sources start in the given region and end on the parts of the areas of the sources within their reach. Sources
+    // without shadows trace no rays.
     ShadowGridLayout calcShadowGrid(RealRect const& rayStarts, std::vector<RayTracingLayout::SourceLight> const& lights, IntVector2D const& worldSize)
     {
-        if (lights.empty()) {
+        auto castsShadows = [](RayTracingLayout::SourceLight const& light) { return light.shadowStrength > 0.0f; };
+        if (std::ranges::none_of(lights, castsShadows)) {
             return {};
         }
         auto region = rayStarts;
         auto maxRayLengthPerRange = std::sqrt(1.0f + RayTracingLayout::SourceLightSpread * RayTracingLayout::SourceLightSpread);
-        for (auto const& light : lights) {
+        for (auto const& light : lights | std::views::filter(castsShadows)) {
             auto reachedRegion = getEnlargedRect(rayStarts, maxRayLengthPerRange * light.range);
             auto shiningPartX = getCoveredPart(light.center.x, light.halfExtent.x, reachedRegion.topLeft.x, reachedRegion.bottomRight.x, toFloat(worldSize.x));
             auto shiningPartY = getCoveredPart(light.center.y, light.halfExtent.y, reachedRegion.topLeft.y, reachedRegion.bottomRight.y, toFloat(worldSize.y));

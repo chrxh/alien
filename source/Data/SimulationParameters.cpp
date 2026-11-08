@@ -157,6 +157,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("Distance from the area of the radiation source up to which its light reaches. The light fades out smoothly "
                                      "towards this distance."),
                     ParameterSpec()
+                        .name("Shadow strength")
+                        .reference(FloatSpec().member(&SimulationParameters::sourceShadowStrength).min(0.0f).max(1.0f))
+                        .description("With hardware ray tracing, this parameter sets how much of the light of the radiation source is blocked by the "
+                                     "objects and fluids on its way. At 1, the light does not penetrate them and they cast full shadows. At 0, the "
+                                     "light penetrates them completely and they cast no shadows. In between, the corresponding share of the light "
+                                     "passes through unshaded."),
+                    ParameterSpec()
                         .name("Show force field")
                         .reference(BoolSpec().member(&SimulationParameters::layerShowForceField))
                         .description("If activated, the background color of the layer is darkened according to the height map of its force field. The "
