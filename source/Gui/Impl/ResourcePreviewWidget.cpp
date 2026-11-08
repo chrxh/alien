@@ -13,9 +13,14 @@
 
 void ResourcePreviewWidget::createForSimulation()
 {
+    createForPicture(PictureGuiService::get().createSimulationPreviewJpg().value_or(std::string()));
+}
+
+void ResourcePreviewWidget::createForPicture(std::string const& jpg)
+{
     clear();
 
-    _jpg = PictureGuiService::get().createSimulationPreviewJpg().value_or(std::string());
+    _jpg = jpg;
     if (_jpg.empty()) {
         return;
     }

@@ -44,8 +44,13 @@ void _BrowserTableWidget::process()
     auto const& workspace = _data->getCurrentWorkspace();
     auto columns = getColumns();
 
-    ImGui::PushID(resourceType == NetworkResourceType_Simulation ? "SimulationList" : "GenomeList");
-    if (ImGui::BeginTable("Browser", toInt(columns.size()), getTableFlags(resourceType), ImVec2(-1, -BrowserHelper::calcFooterHeight()), 0.0f)) {
+    // The tables of this computer and of the server have different columns and keep their own layout
+    if (isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType)) {
+        ImGui::PushID(resourceType == NetworkResourceType_Simulation ? "LocalSimulationList" : "LocalGenomeList");
+    } else {
+        ImGui::PushID(resourceType == NetworkResourceType_Simulation ? "SimulationList" : "GenomeList");
+    }
+    if (ImGui::BeginTable("Browser", toInt(columns.size()), getTableFlags(resourceType), ImVec2(-1, 0), 0.0f)) {
         for (auto const& column : columns) {
             ImGui::TableSetupColumn(column.name.c_str(), column.flags, scale(column.width), column.sortId);
         }
@@ -77,6 +82,7 @@ void _BrowserTableWidget::process()
 std::vector<_BrowserTableWidget::Column> _BrowserTableWidget::getColumns()
 {
     auto isSimulation = _data->getCurrentWorkspaceId().resourceType == NetworkResourceType_Simulation;
+    auto isLocal = isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType);
 
     std::vector<Column> result;
     result.emplace_back(Column{.name = "Name", .width = 210.0f, .sortId = NetworkResourceColumnId_SimulationName, .processField = [this](auto const& treeTO) {
@@ -85,15 +91,25 @@ std::vector<_BrowserTableWidget::Column> _BrowserTableWidget::getColumns()
     result.emplace_back(Column{.name = "Description", .width = 200.0f, .sortId = NetworkResourceColumnId_Desc, .processField = [this](auto const& treeTO) {
                                    processDescriptionField(treeTO);
                                }});
-    result.emplace_back(Column{.name = "Reactions", .width = 140.0f, .sortId = NetworkResourceColumnId_Likes, .processField = [this](auto const& treeTO) {
-                                   processReactionList(treeTO);
-                               }});
+    if (!isLocal) {
+        result.emplace_back(Column{.name = "Reactions", .width = 140.0f, .sortId = NetworkResourceColumnId_Likes, .processField = [this](auto const& treeTO) {
+                                       processReactionList(treeTO);
+                                   }});
+    }
     result.emplace_back(Column{
         .name = "Timestamp",
         .flags = ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
         .width = 135.0f,
         .sortId = NetworkResourceColumnId_Timestamp,
         .processField = [this](auto const& treeTO) { processTimestampField(treeTO); }});
+
+    // The files of this computer tell neither their world size nor their content without being read
+    if (isLocal) {
+        result.emplace_back(Column{.name = "File size", .sortId = NetworkResourceColumnId_FileSize, .processField = [=, this](auto const& treeTO) {
+                                       processSizeField(treeTO, isSimulation);
+                                   }});
+        return result;
+    }
     result.emplace_back(Column{.name = "User name", .width = 120.0f, .sortId = NetworkResourceColumnId_UserName, .processField = [this](auto const& treeTO) {
                                    processUserNameField(treeTO);
                                }});
@@ -123,7 +139,7 @@ void _BrowserTableWidget::processSortSpecs()
     if (sortSpecs == nullptr || !sortSpecs->SpecsDirty) {
         return;
     }
-    _data->setSortSpecs(_data->getCurrentWorkspaceId().resourceType, std::vector(sortSpecs->Specs, sortSpecs->Specs + sortSpecs->SpecsCount));
+    _data->setSortSpecs(_data->getCurrentWorkspaceId(), std::vector(sortSpecs->Specs, sortSpecs->Specs + sortSpecs->SpecsCount));
     sortSpecs->SpecsDirty = false;
 }
 
@@ -153,7 +169,7 @@ namespace
 
 void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::vector<Column> const& columns)
 {
-    if (treeTO->isLeaf()) {
+    if (treeTO->isLeaf() && !isLocalWorkspace(treeTO->getLeaf().rawTO->workspaceType)) {
         _data->registrateAsSeen(treeTO->getLeaf().rawTO);
     }
 
@@ -165,7 +181,7 @@ void _BrowserTableWidget::processRow(NetworkResourceTreeTO const& treeTO, std::v
             "", &selected, ImGuiSelectableFlags_AllowDoubleClick, RealVector2D(0, scale(BrowserHelper::RowHeight) - ImGui::GetStyle().FramePadding.y))) {
         if (treeTO->isLeaf() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
             _data->setSelectedTreeTO(treeTO);
-            _data->onDownloadResource(treeTO->getLeaf());
+            _data->onOpenResource(treeTO->getLeaf());
         } else {
             _data->setSelectedTreeTO(selected ? treeTO : nullptr);
         }
@@ -192,7 +208,7 @@ void _BrowserTableWidget::processResourceNameField(NetworkResourceTreeTO const& 
         auto& leaf = treeTO->getLeaf();
 
         processFolderTreeSymbols(treeTO);
-        BrowserHelper::DownloadButton(_data, leaf);
+        BrowserHelper::OpenButton(_data, leaf);
         ImGui::SameLine();
         if (_data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);

@@ -57,7 +57,7 @@ https://github.com/user-attachments/assets/27f244b2-2792-4854-9042-6c8b179638c0
 - Selection arises naturally from limited energy, predation and competition for space
 - Layers and radiation sources let the simulation parameters vary across the world and create diverse habitats
 - Evolution dashboard with lineages, population statistics and long-term plots
-- Autosave with save points and flashbacks to return to interesting moments
+- Saved simulations with pictures, autosaves and flashbacks to return to interesting moments
 
 https://github.com/user-attachments/assets/77e4ac57-8d3f-4a51-9f69-65cb8e31d097
 

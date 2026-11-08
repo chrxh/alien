@@ -9,14 +9,12 @@ add_library(GuiImpl
     AlienGui.h
     AlienWindow.cpp
     AlienWindow.h
-    AutosaveController.cpp
-    AutosaveController.h
-    AutosaveWindow.cpp
-    AutosaveWindow.h
     BrowserController.cpp
     BrowserController.h
     BrowserData.cpp
     BrowserData.h
+    BrowserDetailsWidget.cpp
+    BrowserDetailsWidget.h
     BrowserGalleryWidget.cpp
     BrowserGalleryWidget.h
     BrowserHelper.cpp
@@ -25,6 +23,8 @@ add_library(GuiImpl
     BrowserLoginBannerWidget.h
     BrowserLoginHintWidget.cpp
     BrowserLoginHintWidget.h
+    BrowserPictureCache.cpp
+    BrowserPictureCache.h
     BrowserTableWidget.cpp
     BrowserTableWidget.h
     BrowserUserListWidget.cpp
@@ -184,8 +184,6 @@ add_library(GuiImpl
     RecorderController.h
     RecorderWindow.cpp
     RecorderWindow.h
-    ReplaceSimulationDialog.cpp
-    ReplaceSimulationDialog.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
@@ -194,6 +192,8 @@ add_library(GuiImpl
     ResourcePreviewWidget.h
     SavePictureDialog.cpp
     SavePictureDialog.h
+    SaveSimulationDialog.cpp
+    SaveSimulationDialog.h
     ScissorsController.cpp
     ScissorsController.h
     SelectionController.cpp
@@ -204,6 +204,8 @@ add_library(GuiImpl
     SignalsBufferDialog.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
+    SimulationLibraryController.cpp
+    SimulationLibraryController.h
     SimulationParametersBaseWidget.cpp
     SimulationParametersBaseWidget.h
     SimulationParametersMainWindow.cpp
@@ -228,8 +230,6 @@ add_library(GuiImpl
     TemporalControlWindow.h
     UiController.cpp
     UiController.h
-    UploadSimulationDialog.cpp
-    UploadSimulationDialog.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp

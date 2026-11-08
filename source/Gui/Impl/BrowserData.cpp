@@ -6,11 +6,13 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
+#include <Persister/Interface/SerializerService.h>
 #include <Persister/Interface/TaskProcessor.h>
 
 #include <Rendering/Interface/RenderingFacade.h>
@@ -18,7 +20,9 @@
 #include "BrowserHelper.h"
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
+#include "GenomeEditorWindow.h"
 #include "NetworkTransferController.h"
+#include "SimulationLibraryController.h"
 
 BrowserData _BrowserData::create()
 {
@@ -42,7 +46,7 @@ _BrowserData::_BrowserData()
     }
 
     for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
-        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_CountInBrowser; ++workspaceType) {
             _workspaces.emplace(WorkspaceId{resourceType, workspaceType}, Workspace());
         }
     }
@@ -81,6 +85,9 @@ void _BrowserData::setRawTOs(WorkspaceId const& workspaceId, std::vector<Network
     _workspaces.at(workspaceId).rawTOs = rawTOs;
     _userNamesByEmojiTypeBySimIdCache.clear();
     createTreeTOs(workspaceId);
+    if (isServerWorkspace(workspaceId.workspaceType)) {
+        _likedWorkspacesOutdated = true;
+    }
 }
 
 void _BrowserData::removeRawTOs(std::vector<NetworkResourceRawTO> const& rawTOs)
@@ -96,45 +103,48 @@ void _BrowserData::removeRawTOs(std::vector<NetworkResourceRawTO> const& rawTOs)
         }
         createTreeTOs(workspaceId);
     }
+    _likedWorkspacesOutdated = true;
 }
 
-std::vector<NetworkResourceRawTO> _BrowserData::changeVisibility(std::vector<NetworkResourceRawTO> const& rawTOs)
+std::vector<NetworkResourceRawTO> _BrowserData::changeVisibility(std::vector<NetworkResourceRawTO> const& rawTOs, bool includeFeatured)
 {
     WorkspaceId publicWorkspaceId{_currentWorkspaceId.resourceType, WorkspaceType_Public};
+    WorkspaceId featuredWorkspaceId{_currentWorkspaceId.resourceType, WorkspaceType_AlienProject};
     auto& publicRawTOs = _workspaces.at(publicWorkspaceId).rawTOs;
+    auto& featuredRawTOs = _workspaces.at(featuredWorkspaceId).rawTOs;
 
     std::vector<NetworkResourceRawTO> result;
     for (auto const& rawTO : rawTOs) {
-        switch (rawTO->workspaceType) {
-        case WorkspaceType_Private: {
+        auto isShared = rawTO->workspaceType == WorkspaceType_Public || (rawTO->workspaceType == WorkspaceType_AlienProject && includeFeatured);
+        if (rawTO->workspaceType == WorkspaceType_Private) {
             rawTO->workspaceType = WorkspaceType_Public;
             publicRawTOs.emplace_back(rawTO);
             result.emplace_back(rawTO);
-        } break;
-        case WorkspaceType_Public: {
+        } else if (isShared) {
             rawTO->workspaceType = WorkspaceType_Private;
-            auto findResult = std::ranges::find_if(publicRawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
-            if (findResult != publicRawTOs.end()) {
-                publicRawTOs.erase(findResult);
-            }
+            auto hasSameId = [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; };
+            std::erase_if(publicRawTOs, hasSameId);
+            std::erase_if(featuredRawTOs, hasSameId);
             result.emplace_back(rawTO);
-        } break;
-        default:
-            break;
         }
     }
     if (!result.empty()) {
         createTreeTOs(publicWorkspaceId);
+        createTreeTOs(featuredWorkspaceId);
+        _likedWorkspacesOutdated = true;
     }
     return result;
 }
 
-void _BrowserData::setSortSpecs(NetworkResourceType resourceType, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs)
+void _BrowserData::setSortSpecs(WorkspaceId const& workspaceId, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs)
 {
-    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-        WorkspaceId workspaceId{resourceType, workspaceType};
-        _workspaces.at(workspaceId).sortSpecs = sortSpecs;
-        createTreeTOs(workspaceId);
+    // The tables of this computer and of the server have different columns and are sorted on their own
+    auto isLocal = isLocalWorkspace(workspaceId.workspaceType);
+    for (auto& [otherWorkspaceId, workspace] : _workspaces) {
+        if (otherWorkspaceId.resourceType == workspaceId.resourceType && isLocalWorkspace(otherWorkspaceId.workspaceType) == isLocal) {
+            workspace.sortSpecs = sortSpecs;
+            createTreeTOs(otherWorkspaceId);
+        }
     }
 }
 
@@ -160,29 +170,9 @@ void _BrowserData::setFilter(std::string const& filter)
     createTreeTOsForAllWorkspaces();
 }
 
-bool _BrowserData::isShowLikedOnly() const
+bool _BrowserData::matchesFilter(NetworkResourceRawTO const& rawTO) const
 {
-    return _showLikedOnly;
-}
-
-void _BrowserData::setShowLikedOnly(bool value)
-{
-    _showLikedOnly = value;
-    createTreeTOsForAllWorkspaces();
-}
-
-bool _BrowserData::matchesFilters(NetworkResourceRawTO const& rawTO) const
-{
-    if (_showLikedOnly && !getOwnEmojiType(rawTO->id).has_value()) {
-        return false;
-    }
     return _filter.empty() || rawTO->matchWithFilter(_filter);
-}
-
-int _BrowserData::getNumLikedInCurrentWorkspace() const
-{
-    return toInt(
-        std::ranges::count_if(getCurrentWorkspace().rawTOs, [this](NetworkResourceRawTO const& rawTO) { return getOwnEmojiType(rawTO->id).has_value(); }));
 }
 
 NetworkResourceRawTO _BrowserData::findRawTO(std::string const& resourceId) const
@@ -237,6 +227,9 @@ bool _BrowserData::isOwner(NetworkResourceTreeTO const& treeTO) const
     if (treeTO == nullptr) {
         return false;
     }
+    if (isLocalWorkspace(_currentWorkspaceId.workspaceType)) {
+        return true;
+    }
     auto const& workspace = getCurrentWorkspace();
 
     auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, workspace.rawTOs);
@@ -246,7 +239,23 @@ bool _BrowserData::isOwner(NetworkResourceTreeTO const& treeTO) const
 
 bool _BrowserData::isOwner(NetworkResourceRawTO const& rawTO) const
 {
-    return rawTO->userName == NetworkService::get().getLoggedInUserName().value_or("");
+    return isLocalWorkspace(rawTO->workspaceType) || rawTO->userName == NetworkService::get().getLoggedInUserName().value_or("");
+}
+
+NetworkResourceRawTO _BrowserData::findUpload(NetworkResourceRawTO const& localRawTO) const
+{
+    auto userName = NetworkService::get().getLoggedInUserName();
+    if (localRawTO->workspaceType != WorkspaceType_Local || !userName.has_value()) {
+        return nullptr;
+    }
+
+    // The private workspace lists all uploads of the user, whoever can see them
+    auto const& uploads = _workspaces.at(WorkspaceId{localRawTO->resourceType, WorkspaceType_Private}).rawTOs;
+    auto nameInUserFolder = *userName + "/" + localRawTO->resourceName;
+    auto findResult = std::ranges::find_if(uploads, [&](NetworkResourceRawTO const& upload) {
+        return upload->userName == *userName && (upload->resourceName == localRawTO->resourceName || upload->resourceName == nameInUserFolder);
+    });
+    return findResult != uploads.end() ? *findResult : nullptr;
 }
 
 void _BrowserData::loadLastSessionData()
@@ -295,8 +304,22 @@ DownloadCache const& _BrowserData::getDownloadCache() const
     return _downloadCache;
 }
 
-void _BrowserData::onDownloadResource(BrowserLeaf const& leaf)
+void _BrowserData::onOpenResource(BrowserLeaf const& leaf)
 {
+    if (isLocalWorkspace(leaf.rawTO->workspaceType)) {
+        auto path = StringHelper::toPath(leaf.rawTO->id);
+        if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
+            SimulationLibraryController::get().onLoad(path);
+            return;
+        }
+        GenomeDesc genome;
+        if (SerializerService::get().deserializeGenomeFromFile(genome, path)) {
+            GenomeEditorWindow::get().openTab(genome, false);
+        } else {
+            GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
+        }
+        return;
+    }
     ++leaf.rawTO->numDownloads;
 
     NetworkTransferController::get().onDownload(DownloadNetworkResourceRequestData{
@@ -316,6 +339,7 @@ void _BrowserData::setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> c
 {
     _ownEmojiTypeBySimId = ownEmojiTypeBySimId;
     _ownReactionsUserName = NetworkService::get().getLoggedInUserName();
+    _likedWorkspacesOutdated = true;
 }
 
 std::optional<int> _BrowserData::getOwnEmojiType(std::string const& resourceId) const
@@ -407,9 +431,7 @@ void _BrowserData::onToggleLike(NetworkResourceTreeTO const& treeTO, int emojiTy
     }
 
     _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  // Invalidate cache entry
-    if (_showLikedOnly) {
-        _treeTOsOutdated = true;
-    }
+    _likedWorkspacesOutdated = true;
 
     _reactionProcessor->executeTask(
         [&](auto const& senderId) {
@@ -453,9 +475,9 @@ void _BrowserData::processPendingRequests()
 {
     _reactionProcessor->process();
     _emojiUserNameProcessor->process();
-    if (_treeTOsOutdated) {
-        _treeTOsOutdated = false;
-        createTreeTOsForAllWorkspaces();
+    if (_likedWorkspacesOutdated) {
+        _likedWorkspacesOutdated = false;
+        updateLikedWorkspaces();
     }
 }
 
@@ -473,7 +495,7 @@ void _BrowserData::createTreeTOs(WorkspaceId const& workspaceId)
     // Filtering
     std::vector<NetworkResourceRawTO> filteredRawTOs;
     for (auto const& rawTO : workspace.rawTOs) {
-        if (matchesFilters(rawTO)) {
+        if (matchesFilter(rawTO)) {
             filteredRawTOs.emplace_back(rawTO);
         }
     }
@@ -490,6 +512,26 @@ void _BrowserData::createTreeTOsForAllWorkspaces()
 {
     for (auto const& workspaceId : _workspaces | std::views::keys) {
         createTreeTOs(workspaceId);
+    }
+}
+
+void _BrowserData::updateLikedWorkspaces()
+{
+    for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
+
+        // The workspaces of the server overlap, for instance the featured resources also belong to the community
+        std::vector<NetworkResourceRawTO> likedRawTOs;
+        std::unordered_set<std::string> likedIds;
+        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+            for (auto const& rawTO : _workspaces.at(WorkspaceId{resourceType, workspaceType}).rawTOs) {
+                if (getOwnEmojiType(rawTO->id).has_value() && likedIds.insert(rawTO->id).second) {
+                    likedRawTOs.emplace_back(rawTO);
+                }
+            }
+        }
+        WorkspaceId likedWorkspaceId{resourceType, WorkspaceType_Liked};
+        _workspaces.at(likedWorkspaceId).rawTOs = likedRawTOs;
+        createTreeTOs(likedWorkspaceId);
     }
 }
 
@@ -526,8 +568,10 @@ bool _BrowserData::areOwnReactionsCurrent() const
 std::unordered_set<NetworkResourceRawTO> _BrowserData::getAllRawTOs() const
 {
     std::unordered_set<NetworkResourceRawTO> result;
-    for (auto const& workspace : _workspaces | std::views::values) {
-        result.insert(workspace.rawTOs.begin(), workspace.rawTOs.end());
+    for (auto const& [workspaceId, workspace] : _workspaces) {
+        if (!isLocalWorkspace(workspaceId.workspaceType)) {
+            result.insert(workspace.rawTOs.begin(), workspace.rawTOs.end());
+        }
     }
     return result;
 }

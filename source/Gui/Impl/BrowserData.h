@@ -25,6 +25,26 @@
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 
+// The workspaces that only the browser knows continue the workspace types of the server
+enum BrowserWorkspaceType_
+{
+    WorkspaceType_Local = WorkspaceType_Count,  // Simulations and genomes of this computer saved by hand
+    WorkspaceType_Autosave,
+    WorkspaceType_Liked,  // Everything in the workspaces of the server that the user has reacted to
+    WorkspaceType_CountInBrowser
+};
+
+inline bool isLocalWorkspace(WorkspaceType workspaceType)
+{
+    return workspaceType == WorkspaceType_Local || workspaceType == WorkspaceType_Autosave;
+}
+
+// The workspaces whose resources the server delivers
+inline bool isServerWorkspace(WorkspaceType workspaceType)
+{
+    return workspaceType >= 0 && workspaceType < WorkspaceType_Count;
+}
+
 struct WorkspaceId
 {
     NetworkResourceType resourceType;
@@ -58,16 +78,14 @@ public:
     void setCurrentWorkspaceId(WorkspaceId const& workspaceId);
     void setRawTOs(WorkspaceId const& workspaceId, std::vector<NetworkResourceRawTO> const& rawTOs);
     void removeRawTOs(std::vector<NetworkResourceRawTO> const& rawTOs);
-    std::vector<NetworkResourceRawTO> changeVisibility(std::vector<NetworkResourceRawTO> const& rawTOs);
-    void setSortSpecs(NetworkResourceType resourceType, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs);
+    // A featured resource that becomes private leaves the featured workspace for good, so featured resources are only included on request
+    std::vector<NetworkResourceRawTO> changeVisibility(std::vector<NetworkResourceRawTO> const& rawTOs, bool includeFeatured);
+    void setSortSpecs(WorkspaceId const& workspaceId, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs);
     void setCollapsedFolderNames(WorkspaceId const& workspaceId, std::set<std::vector<std::string>> const& collapsedFolderNames);
 
     std::string const& getFilter() const;
     void setFilter(std::string const& filter);
-    bool isShowLikedOnly() const;
-    void setShowLikedOnly(bool value);
-    bool matchesFilters(NetworkResourceRawTO const& rawTO) const;
-    int getNumLikedInCurrentWorkspace() const;
+    bool matchesFilter(NetworkResourceRawTO const& rawTO) const;
     NetworkResourceRawTO findRawTO(std::string const& resourceId) const;
 
     NetworkResourceTreeTO const& getSelectedTreeTO() const;
@@ -82,6 +100,9 @@ public:
     bool isOwner(NetworkResourceTreeTO const& treeTO) const;
     bool isOwner(NetworkResourceRawTO const& rawTO) const;
 
+    // The upload of the user that carries the name of a simulation of this computer, with or without the folder of the user in front
+    NetworkResourceRawTO findUpload(NetworkResourceRawTO const& localRawTO) const;
+
     void loadLastSessionData();
     void saveLastSessionData();
     void registrateAsSeen(NetworkResourceRawTO const& rawTO);
@@ -93,7 +114,7 @@ public:
     void setActiveSimulatorCounts(std::optional<ActiveSimulatorCountsTO> const& activeSimulatorCounts);
 
     DownloadCache const& getDownloadCache() const;
-    void onDownloadResource(BrowserLeaf const& leaf);
+    void onOpenResource(BrowserLeaf const& leaf);  // Downloads a resource of the server and loads a simulation of this computer
 
     std::vector<TextureData> const& getEmojis() const;
     void setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> const& ownEmojiTypeBySimId);
@@ -115,6 +136,7 @@ private:
 
     void createTreeTOs(WorkspaceId const& workspaceId);
     void createTreeTOsForAllWorkspaces();
+    void updateLikedWorkspaces();
     void updateSelection(Workspace const& workspace, std::vector<NetworkResourceRawTO> const& filteredRawTOs);
     void deselectIfNotInTree(Workspace const& workspace);
     bool areOwnReactionsCurrent() const;
@@ -123,8 +145,7 @@ private:
     std::map<WorkspaceId, Workspace> _workspaces;
     WorkspaceId _currentWorkspaceId = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     std::string _filter;
-    bool _showLikedOnly = false;
-    bool _treeTOsOutdated = false;
+    bool _likedWorkspacesOutdated = false;
     NetworkResourceTreeTO _selectedTreeTO;
     bool _scrollToSelection = false;
     LastSessionBrowserData _lastSessionData;

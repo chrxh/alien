@@ -12,96 +12,66 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
-#include <Base/LoggingService.h>
 #include <Base/StringHelper.h>
 
 #include <Network/NetworkResourceService.h>
 
-#include <Persister/Interface/PersisterFacade.h>
-#include <Persister/Interface/TaskProcessor.h>
-
-#include <Rendering/Interface/RenderingFacade.h>
-
 #include "AlienGui.h"
 #include "BrowserData.h"
 #include "BrowserHelper.h"
-#include "PictureGuiService.h"
+#include "BrowserPictureCache.h"
 #include "StyleService.h"
 
 namespace
 {
     auto constexpr TilesPerPage = 100;
-    auto constexpr MaxPicturesPerRequest = 32;
-    auto constexpr BaseTileWidth = 190.0f;
-    auto constexpr MinCardSizePercent = 60;
-    auto constexpr MaxCardSizePercent = 200;
+    auto constexpr PreferredTileWidth = 190.0f;
     auto constexpr TileSpacing = 8.0f;
-    auto constexpr NumTileTextLines = 3;  // Path, name and the user with the date
-    auto const PictureAspectRatio = toFloat(PictureGuiService::PreviewPictureResolution.y) / toFloat(PictureGuiService::PreviewPictureResolution.x);
+    auto constexpr NumTileTextLines = 3;  // Path, name and a line of facts
 
-    auto constexpr NewBadgeMargin = 6.0f;
-    auto constexpr NewBadgePaddingX = 5.0f;
-    auto constexpr NewBadgeHeight = 15.0f;
-    auto constexpr NewBadgeRounding = 4.0f;
-    auto constexpr NewBadgeFontScale = 0.72f;
+    auto constexpr BadgeMargin = 6.0f;
 
     auto constexpr PlaceholderBarHeight = 5.0f;
     auto const PlaceholderBarWidthFactors = std::array{0.55f, 0.80f, 0.65f};
 
     auto constexpr SortingSwitcherWidth = 230.0f;
-    auto constexpr CardSizeSliderWidth = 230.0f;
-    auto constexpr MinCardSizeSliderWidth = 130.0f;
+    auto constexpr SortingTextWidth = 55.0f;
 
-    auto constexpr TooltipDelay = 0.5f;  // In seconds
-    auto constexpr TooltipValueWidth = 170.0f;
-    auto constexpr TooltipWrapChars = 35.0f;
+    auto constexpr TimestampLengthWithoutSeconds = 16;  // e.g. 2026-11-13 14:02
+    auto constexpr DateLength = 10;
 }
 
-BrowserGalleryWidget _BrowserGalleryWidget::create(BrowserData const& data)
+BrowserGalleryWidget _BrowserGalleryWidget::create(BrowserData const& data, BrowserPictureCache const& pictureCache)
 {
-    return BrowserGalleryWidget(new _BrowserGalleryWidget(data));
+    return BrowserGalleryWidget(new _BrowserGalleryWidget(data, pictureCache));
 }
 
-_BrowserGalleryWidget::_BrowserGalleryWidget(BrowserData const& data)
+_BrowserGalleryWidget::_BrowserGalleryWidget(BrowserData const& data, BrowserPictureCache const& pictureCache)
     : _data(data)
+    , _pictureCache(pictureCache)
 {
-    _pictureProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
-    _sorting = GlobalSettings::get().getValue("windows.browser.gallery sorting", _sorting);
-    _cardSizePercent = GlobalSettings::get().getValue("windows.browser.gallery card size", _cardSizePercent);
+    auto& settings = GlobalSettings::get();
+    _sorting = settings.getValue("windows.browser.gallery sorting", _sorting);
+    _localSorting = settings.getValue("windows.browser.gallery local sorting", _localSorting);
 }
 
 void _BrowserGalleryWidget::shutdown()
 {
-    GlobalSettings::get().setValue("windows.browser.gallery sorting", _sorting);
-    GlobalSettings::get().setValue("windows.browser.gallery card size", _cardSizePercent);
+    auto& settings = GlobalSettings::get();
+    settings.setValue("windows.browser.gallery sorting", _sorting);
+    settings.setValue("windows.browser.gallery local sorting", _localSorting);
 }
 
 void _BrowserGalleryWidget::processSorting()
 {
+    auto isLocal = isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType);
+    auto values = isLocal ? std::vector{std::string("Newest"), std::string("Name")}
+                          : std::vector{std::string("Most reactions"), std::string("Newest"), std::string("Most downloads")};
     if (AlienGui::Switcher(
-            AlienGui::SwitcherParameters()
-                .name("Sort by")
-                .width(SortingSwitcherWidth)
-                .textWidth(55.0f)
-                .values({std::string("Most reactions"), std::string("Newest"), std::string("Most downloads")}),
-            &_sorting)) {
+            AlienGui::SwitcherParameters().name("Sort by").width(SortingSwitcherWidth).textWidth(SortingTextWidth).values(values),
+            isLocal ? &_localSorting : &_sorting)) {
         _page = 0;
     }
-
-    ImGui::SameLine();
-    AlienGui::VerticalSeparator();
-    ImGui::SameLine();
-
-    auto cardSizeSliderWidth = std::clamp(scaleInverse(ImGui::GetContentRegionAvail().x), MinCardSizeSliderWidth, CardSizeSliderWidth);
-    AlienGui::SliderInt(
-        AlienGui::SliderIntParameters()
-            .name("Card size")
-            .width(cardSizeSliderWidth)
-            .textWidth(75.0f)
-            .min(MinCardSizePercent)
-            .max(MaxCardSizePercent)
-            .format("%d %%"),
-        &_cardSizePercent);
 }
 
 void _BrowserGalleryWidget::process()
@@ -124,20 +94,32 @@ void _BrowserGalleryWidget::process()
     auto lastIndex = std::min(_numEntries, firstIndex + TilesPerPage);
     auto pageEntries = std::vector<NetworkResourceRawTO>(entries.begin() + firstIndex, entries.begin() + lastIndex);
 
-    requestMissingPictures(pageEntries);
+    _pictureCache->request(pageEntries);
 
     // The tile height follows the tile width, so an appearing scrollbar must not change the available width
     if (ImGui::BeginChild(
             "##tiles", {0, ImGui::GetContentRegionAvail().y - BrowserHelper::calcFooterHeight()}, false, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
-        auto layout = calcTileLayout();
+        processKeyboardNavigation(pageEntries);
 
+        auto layout = calcTileLayout();
+        _numColumns = layout.numColumns;
+        if (pageEntries.empty()) {
+            processEmptyHint();
+        }
+        auto rowPosX = ImGui::GetCursorPosX();
         for (auto const& [index, rawTO] : pageEntries | boost::adaptors::indexed(0)) {
-            if (index % layout.numColumns != 0) {
-                ImGui::SameLine(0, layout.horizontalSpacing);
+            if (auto column = toInt(index) % layout.numColumns; column != 0) {
+                ImGui::SameLine(rowPosX + layout.columnOffsets.at(column));
             }
             ImGui::PushID(toInt(index));
             processTile(rawTO, layout.tileWidth);
             ImGui::PopID();
+        }
+
+        // A click beside the tiles removes the selection, which shows the workspace instead of a resource
+        auto scrollbarPosX = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - ImGui::GetStyle().ScrollbarSize;
+        if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::GetMousePos().x < scrollbarPosX) {
+            _data->setSelectedTreeTO(nullptr);
         }
     }
     ImGui::EndChild();
@@ -155,9 +137,10 @@ void _BrowserGalleryWidget::processPlaceholderTiles()
         auto tileHeight = calcTileHeight(layout.tileWidth);
         auto numRows = std::max(1, toInt(std::ceil(ImGui::GetContentRegionAvail().y / (tileHeight + ImGui::GetStyle().ItemSpacing.y))));
 
+        auto rowPosX = ImGui::GetCursorPosX();
         for (auto const& index : std::views::iota(0, layout.numColumns * numRows)) {
-            if (index % layout.numColumns != 0) {
-                ImGui::SameLine(0, layout.horizontalSpacing);
+            if (auto column = index % layout.numColumns; column != 0) {
+                ImGui::SameLine(rowPosX + layout.columnOffsets.at(column));
             }
             ImGui::PushID(index);
             processPlaceholderTile(layout.tileWidth);
@@ -196,9 +179,9 @@ void _BrowserGalleryWidget::processPaging()
     ImGui::EndDisabled();
 }
 
-void _BrowserGalleryWidget::processPendingRequests()
+float _BrowserGalleryWidget::getSortingWidth() const
 {
-    _pictureProcessor->process();
+    return scale(SortingSwitcherWidth);
 }
 
 float _BrowserGalleryWidget::getPagerWidth() const
@@ -214,94 +197,59 @@ void _BrowserGalleryWidget::resetPage()
     _page = 0;
 }
 
-void _BrowserGalleryWidget::invalidatePicture(std::string const& resourceId)
-{
-    auto findResult = _pictureBySimId.find(resourceId);
-    if (findResult == _pictureBySimId.end()) {
-        return;
-    }
-    if (findResult->second.has_value()) {
-        _RenderingFacade::get()->deleteTexture(*findResult->second);
-    }
-    _pictureBySimId.erase(findResult);
-}
-
-namespace
-{
-    // Drawn inside the tile: child windows are rendered after their parent and would cover a border drawn around them
-    void processSelectionBorder(ImVec2 const& tileSize)
-    {
-        auto thickness = scale(2.0f);
-        auto tileMin = ImGui::GetWindowPos();
-        auto tileMax = ImVec2{tileMin.x + tileSize.x, tileMin.y + tileSize.y};
-
-        auto drawList = ImGui::GetWindowDrawList();
-        drawList->PushClipRect(tileMin, tileMax, false);
-        drawList->AddRect(
-            {tileMin.x + thickness / 2, tileMin.y + thickness / 2},
-            {tileMax.x - thickness / 2, tileMax.y - thickness / 2},
-            (ImU32)Const::AccentColor,
-            ImGui::GetStyle().ChildRounding,
-            0,
-            thickness);
-        drawList->PopClipRect();
-    }
-
-    void processNewBadge(ImVec2 const& picturePos)
-    {
-        auto font = StyleService::get().getSmallBoldFont();
-        auto fontSize = font->FontSize * NewBadgeFontScale;
-        auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, "NEW");
-
-        auto badgeMin = ImVec2{picturePos.x + scale(NewBadgeMargin), picturePos.y + scale(NewBadgeMargin)};
-        auto badgeMax = ImVec2{badgeMin.x + textSize.x + scale(NewBadgePaddingX) * 2, badgeMin.y + scale(NewBadgeHeight)};
-
-        auto drawList = ImGui::GetWindowDrawList();
-        drawList->AddRectFilled(badgeMin, badgeMax, Const::BrowserNewBadgeColor, scale(NewBadgeRounding));
-        drawList->AddRect(badgeMin, badgeMax, Const::BrowserNewBadgeBorderColor, scale(NewBadgeRounding));
-        drawList->AddText(
-            font,
-            fontSize,
-            {badgeMin.x + scale(NewBadgePaddingX), badgeMin.y + (badgeMax.y - badgeMin.y - textSize.y) / 2},
-            Const::BrowserResourceNewTextColor,
-            "NEW");
-    }
-}
-
+// The tiles fill their row. The number of columns is the one that brings their width closest to the preferred one.
 _BrowserGalleryWidget::TileLayout _BrowserGalleryWidget::calcTileLayout() const
 {
-    auto horizontalSpacing = scale(TileSpacing);
+    auto minSpacing = scale(TileSpacing);
+    auto preferredTileWidth = scale(PreferredTileWidth);
     auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto tileWidth = std::floor(std::min(availableWidth, scale(BaseTileWidth) * toFloat(_cardSizePercent) / 100.0f));
-    return {
-        .tileWidth = tileWidth,
-        .horizontalSpacing = horizontalSpacing,
-        .numColumns = std::max(1, toInt((availableWidth + horizontalSpacing) / (tileWidth + horizontalSpacing)))};
+    auto calcTileWidth = [&](int numColumns) {
+        return std::max(1.0f, std::floor((availableWidth - minSpacing * toFloat(numColumns - 1)) / toFloat(numColumns)));
+    };
+
+    auto numColumns = std::max(1, toInt((availableWidth + minSpacing) / (preferredTileWidth + minSpacing)));
+    if (std::abs(calcTileWidth(numColumns + 1) - preferredTileWidth) < std::abs(calcTileWidth(numColumns) - preferredTileWidth)) {
+        ++numColumns;
+    }
+    auto tileWidth = calcTileWidth(numColumns);
+
+    // The pixels that the whole tile widths leave over widen the gaps, so that the last column ends at the right border
+    auto columnDistance = numColumns > 1 ? (availableWidth - tileWidth) / toFloat(numColumns - 1) : 0.0f;
+    std::vector<float> columnOffsets;
+    for (auto const& column : std::views::iota(0, numColumns)) {
+        columnOffsets.emplace_back(std::round(toFloat(column) * columnDistance));
+    }
+    return {.tileWidth = tileWidth, .columnOffsets = columnOffsets, .numColumns = numColumns};
 }
 
 float _BrowserGalleryWidget::calcTileHeight(float tileWidth) const
 {
     auto const& style = ImGui::GetStyle();
-    auto pictureHeight = (tileWidth - style.WindowPadding.x * 2) * PictureAspectRatio;
-    return std::floor(
-        pictureHeight + NumTileTextLines * ImGui::GetTextLineHeight() + ImGui::GetFrameHeight()  // Button row
-        + (NumTileTextLines + 1) * style.ItemSpacing.y + style.WindowPadding.y * 2);
+    auto pictureHeight = BrowserHelper::calcPictureHeight(tileWidth - style.WindowPadding.x * 2);
+    return std::floor(pictureHeight + NumTileTextLines * (ImGui::GetTextLineHeight() + style.ItemSpacing.y) + style.WindowPadding.y * 2);
 }
 
 void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float tileWidth)
 {
-    _data->registrateAsSeen(rawTO);
+    auto isLocal = isLocalWorkspace(rawTO->workspaceType);
+    if (!isLocal) {
+        _data->registrateAsSeen(rawTO);
+    }
 
     auto tileHeight = calcTileHeight(tileWidth);
 
-    auto buttonHovered = false;
+    auto heartHovered = false;
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::PanelColor);
     if (ImGui::BeginChild("##tile", {tileWidth, tileHeight}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-        auto textWidth = ImGui::GetContentRegionAvail().x;
+        auto contentWidth = ImGui::GetContentRegionAvail().x;
         auto picturePos = ImGui::GetCursorScreenPos();
-        processPicture(rawTO, textWidth);
-        if (_data->isNew(rawTO)) {
-            processNewBadge(picturePos);
+        BrowserHelper::Picture(_pictureCache->find(rawTO), contentWidth);
+        processBadges(rawTO, picturePos);
+
+        // A simulation of this computer shows the reactions to its upload
+        if (auto reactedRawTO = isLocal ? _data->findUpload(rawTO) : rawTO) {
+            heartHovered =
+                BrowserHelper::PictureHeart(_data, reactedRawTO, {picturePos.x + contentWidth, picturePos.y + BrowserHelper::calcPictureHeight(contentWidth)});
         }
 
         auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
@@ -309,12 +257,6 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
         AlienGui::Text(AlienGui::TextParameters().text(NetworkResourceService::get().concatenateFolderName(folderNames, true)).truncate(true));
         ImGui::PopStyleColor();
 
-        if (_data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Private && rawTO->workspaceType != WorkspaceType_Private) {
-            AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip(
-                AlienGui::TooltipParameters().text(rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community"));
-            ImGui::SameLine();
-        }
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceTextColor);
         AlienGui::Text(AlienGui::TextParameters()
                            .text(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName))
@@ -323,69 +265,39 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
         ImGui::PopStyleColor();
 
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-        AlienGui::Text(rawTO->userName);
-        ImGui::SameLine();
-        AlienGui::Text(AlienGui::TextParameters().text(rawTO->timestamp.substr(0, 10)).rightAligned(true));
+        if (rawTO->workspaceType == WorkspaceType_Autosave) {
+            AlienGui::Text(AlienGui::TextParameters().text(rawTO->timestamp.substr(0, TimestampLengthWithoutSeconds)).truncate(true));
+        } else {
+            AlienGui::Text(isLocal ? StringHelper::formatFileSize(rawTO->contentSize) : rawTO->userName);
+            ImGui::SameLine();
+            AlienGui::Text(AlienGui::TextParameters().text(rawTO->timestamp.substr(0, DateLength)).rightAligned(true));
+        }
         ImGui::PopStyleColor();
-
-        BrowserHelper::DownloadButton(_data, BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
-        ImGui::SameLine();
-        BrowserHelper::HeartButton(_data, rawTO, true);
-        ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-        AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_DOWNLOAD " " + std::to_string(rawTO->numDownloads)).rightAligned(true));
-        ImGui::PopStyleColor();
-
-        buttonHovered = ImGui::IsAnyItemHovered();
 
         if (_data->isSelected(rawTO)) {
-            processSelectionBorder({tileWidth, tileHeight});
+            BrowserHelper::TileSelectionBorder({tileWidth, tileHeight});
         }
     }
     ImGui::EndChild();
     ImGui::PopStyleColor();
 
-    if (_data->isScrollToSelection() && _data->isSelected(rawTO)) {
-        ImGui::SetScrollHereY(0.5f);
-    }
-
     auto tileMin = ImGui::GetItemRectMin();
     auto tileMax = ImGui::GetItemRectMax();
+    if (_data->isScrollToSelection() && _data->isSelected(rawTO)) {
+        auto viewMin = ImGui::GetWindowPos().y;
+        auto viewMax = viewMin + ImGui::GetWindowHeight();
+        if (tileMin.y < viewMin || tileMax.y > viewMax) {
+            ImGui::SetScrollHereY(0.5f);
+        }
+    }
+
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseHoveringRect(tileMin, tileMax)) {
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             onSelectEntry(rawTO);
         }
-        if (!buttonHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            _data->onDownloadResource(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
+        if (!heartHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            _data->onOpenResource(BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
         }
-
-        // The buttons of the tile have tooltips of their own
-        if (!buttonHovered) {
-            if (_hoveredTileId != rawTO->id) {
-                _hoveredTileId = rawTO->id;
-                _hoveredTileTime = 0;
-            } else {
-                _hoveredTileTime += ImGui::GetIO().DeltaTime;
-            }
-            if (_hoveredTileTime > TooltipDelay) {
-                processTileTooltip(rawTO);
-            }
-        }
-    }
-}
-
-namespace
-{
-    void processTooltipLabel(std::string const& label)
-    {
-        ImGui::SameLine(scale(TooltipValueWidth));
-        AlienGui::Text(AlienGui::TextParameters().text(label).style(AlienGui::TextStyle::Decent));
-    }
-
-    void processTooltipRow(std::string const& label, std::string const& value)
-    {
-        AlienGui::Text(value);
-        processTooltipLabel(label);
     }
 }
 
@@ -398,7 +310,7 @@ void _BrowserGalleryWidget::processPlaceholderTile(float tileWidth)
         auto drawList = ImGui::GetWindowDrawList();
 
         auto picturePos = ImGui::GetCursorScreenPos();
-        auto pictureHeight = contentWidth * PictureAspectRatio;
+        auto pictureHeight = BrowserHelper::calcPictureHeight(contentWidth);
         drawList->AddRectFilled(picturePos, {picturePos.x + contentWidth, picturePos.y + pictureHeight}, Const::BrowserPlaceholderTilePictureColor);
         ImGui::Dummy({contentWidth, pictureHeight});
 
@@ -417,98 +329,83 @@ void _BrowserGalleryWidget::processPlaceholderTile(float tileWidth)
     ImGui::PopStyleColor();
 }
 
-void _BrowserGalleryWidget::processTileTooltip(NetworkResourceRawTO const& rawTO)
+void _BrowserGalleryWidget::processBadges(NetworkResourceRawTO const& rawTO, ImVec2 const& picturePos)
 {
-    ImGui::BeginTooltip();
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
-
-    auto findResult = _pictureBySimId.find(rawTO->id);
-    if (findResult != _pictureBySimId.end() && findResult->second.has_value()) {
-        auto const& picture = *findResult->second;
-        ImGui::Image(picture.textureId, {scale(toFloat(picture.width)), scale(toFloat(picture.height))});
+    if (_data->isNew(rawTO)) {
+        BrowserHelper::PictureBadge(
+            {picturePos.x + scale(BadgeMargin), picturePos.y + scale(BadgeMargin)},
+            "NEW",
+            Const::BrowserResourceNewTextColor,
+            Const::BrowserNewBadgeBorderColor);
     }
-
-    auto folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
-    if (!folderNames.empty()) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);
-        AlienGui::Text(NetworkResourceService::get().concatenateFolderName(folderNames, true));
-        ImGui::PopStyleColor();
-    }
-    AlienGui::Text(AlienGui::TextParameters().text(NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName)).style(AlienGui::TextStyle::Bold));
-
-    if (!rawTO->description.empty()) {
-        AlienGui::Separator();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * TooltipWrapChars);
-        ImGui::TextUnformatted(rawTO->description.c_str());
-        ImGui::PopTextWrapPos();
-    }
-
-    AlienGui::Separator();
-
-    auto isSimulation = rawTO->resourceType == NetworkResourceType_Simulation;
-    processTooltipRow("User", rawTO->userName);
-    processTooltipRow("Timestamp", rawTO->timestamp);
-
-    if (rawTO->numLikesByEmojiType.empty()) {
-        AlienGui::Text("-");
-    } else {
-        for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
-            if (emojiType < toInt(_data->getEmojis().size())) {
-                auto const& emoji = _data->getEmojis().at(emojiType);
-                ImGui::Image(emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
-                ImGui::SameLine();
-            }
-            AlienGui::Text(std::to_string(numLikes));
-            ImGui::SameLine();
-        }
-    }
-    processTooltipLabel("Reactions");
-
-    processTooltipRow("Downloads", std::to_string(rawTO->numDownloads));
-    if (isSimulation) {
-        processTooltipRow("World size", std::to_string(rawTO->width) + " x " + std::to_string(rawTO->height));
-        processTooltipRow("Objects", StringHelper::format(rawTO->particles / 1000) + " K");
-        processTooltipRow("File size", StringHelper::format(rawTO->contentSize / 1024) + " KB");
-    } else {
-        processTooltipRow("Cells", StringHelper::format(rawTO->particles));
-        processTooltipRow("File size", StringHelper::format(rawTO->contentSize) + " Bytes");
-    }
-    processTooltipRow("Version", rawTO->version);
-
-    ImGui::PopStyleColor();
-    ImGui::EndTooltip();
 }
 
-void _BrowserGalleryWidget::processPicture(NetworkResourceRawTO const& rawTO, float width)
+void _BrowserGalleryWidget::processEmptyHint()
 {
-    auto height = width * PictureAspectRatio;
-    auto pos = ImGui::GetCursorScreenPos();
-
-    auto findResult = _pictureBySimId.find(rawTO->id);
-    if (findResult != _pictureBySimId.end() && findResult->second.has_value()) {
-        auto const& picture = *findResult->second;
-
-        // Pictures from earlier versions can have a different aspect ratio and are fitted into the tile
-        auto pictureWidth = width;
-        auto pictureHeight = width * toFloat(picture.height) / toFloat(picture.width);
-        if (pictureHeight > height) {
-            pictureWidth = height * toFloat(picture.width) / toFloat(picture.height);
-            pictureHeight = height;
+    auto text = [&]() -> std::string {
+        if (!_data->getFilter().empty()) {
+            return "Nothing matches the filter";
         }
-        auto picturePos = ImVec2{pos.x + (width - pictureWidth) / 2, pos.y + (height - pictureHeight) / 2};
+        switch (_data->getCurrentWorkspaceId().workspaceType) {
+        case WorkspaceType_Local:
+            return _data->getCurrentWorkspaceId().resourceType == NetworkResourceType_Simulation
+                ? "No simulations in this folder yet. Save (Ctrl+S) stores the current simulation here."
+                : "No genomes in this folder yet. Save genome in the tool bar stores the genome of the genome editor here.";
+        case WorkspaceType_Autosave:
+            return "No autosaves yet";
+        case WorkspaceType_Liked:
+            return "Nothing liked yet. Click the heart of an entry to collect it here.";
+        default:
+            return "Nothing here yet";
+        }
+    }();
 
-        auto drawList = ImGui::GetWindowDrawList();
-        drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
-        drawList->AddImage(picture.textureId, picturePos, {picturePos.x + pictureWidth, picturePos.y + pictureHeight});
-        ImGui::Dummy({width, height});
+    auto pos = ImGui::GetCursorScreenPos();
+    auto size = ImGui::GetContentRegionAvail();
+    auto textSize = ImGui::CalcTextSize(text.c_str());
+    ImGui::GetWindowDrawList()->AddText(
+        {pos.x + std::max(0.0f, (size.x - textSize.x) / 2), pos.y + std::max(0.0f, (size.y - textSize.y) / 2)}, (ImU32)Const::TextDecentColor, text.c_str());
+}
+
+void _BrowserGalleryWidget::processKeyboardNavigation(std::vector<NetworkResourceRawTO> const& pageEntries)
+{
+    // Only the tiles react to the keys, since Enter opens a resource and replaces the running simulation
+    if (pageEntries.empty() || !ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows) || ImGui::GetIO().WantTextInput) {
         return;
     }
+    auto offset = [&]() -> int {
+        if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)) {
+            return -1;
+        }
+        if (ImGui::IsKeyPressed(ImGuiKey_RightArrow)) {
+            return 1;
+        }
+        if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)) {
+            return -_numColumns;
+        }
+        if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)) {
+            return _numColumns;
+        }
+        return 0;
+    }();
 
-    ImGui::GetWindowDrawList()->AddRectFilled(pos, {pos.x + width, pos.y + height}, (ImU32)Const::BackgroundColor);
-    auto text = findResult == _pictureBySimId.end() ? std::string("loading...") : std::string("no preview");
-    auto textSize = ImGui::CalcTextSize(text.c_str());
-    ImGui::GetWindowDrawList()->AddText({pos.x + (width - textSize.x) / 2, pos.y + (height - textSize.y) / 2}, (ImU32)Const::TextDecentColor, text.c_str());
-    ImGui::Dummy({width, height});
+    auto findResult = std::ranges::find_if(pageEntries, [&](NetworkResourceRawTO const& rawTO) { return _data->isSelected(rawTO); });
+    if (findResult == pageEntries.end()) {
+        if (offset != 0) {
+            onSelectEntry(pageEntries.front());
+            _data->setScrollToSelection(true);
+        }
+        return;
+    }
+    if (offset != 0) {
+        auto newIndex = toInt(std::distance(pageEntries.begin(), findResult)) + offset;
+        if (newIndex >= 0 && newIndex < toInt(pageEntries.size())) {
+            onSelectEntry(pageEntries.at(newIndex));
+            _data->setScrollToSelection(true);
+        }
+    } else if (ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false)) {
+        _data->onOpenResource(BrowserLeaf{.leafName = (*findResult)->resourceName, .rawTO = *findResult});
+    }
 }
 
 std::string _BrowserGalleryWidget::getPageText() const
@@ -524,12 +421,19 @@ std::vector<NetworkResourceRawTO> _BrowserGalleryWidget::getSortedEntries() cons
 
     std::vector<NetworkResourceRawTO> result;
     for (auto const& rawTO : workspace.rawTOs) {
-        if (_data->matchesFilters(rawTO)) {
+        if (_data->matchesFilter(rawTO)) {
             result.emplace_back(rawTO);
         }
     }
 
-    std::ranges::sort(result, [this](NetworkResourceRawTO const& left, NetworkResourceRawTO const& right) {
+    auto isLocal = isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType);
+    std::ranges::stable_sort(result, [&](NetworkResourceRawTO const& left, NetworkResourceRawTO const& right) {
+        if (isLocal) {
+            if (_localSorting == LocalGallerySorting_Name) {
+                return StringHelper::naturalLess(left->resourceName, right->resourceName);
+            }
+            return left->timestamp > right->timestamp;
+        }
         if (_sorting == GallerySorting_Newest) {
             return left->timestamp > right->timestamp;
         }
@@ -539,49 +443,6 @@ std::vector<NetworkResourceRawTO> _BrowserGalleryWidget::getSortedEntries() cons
         return left->getTotalLikes() > right->getTotalLikes();
     });
     return result;
-}
-
-void _BrowserGalleryWidget::requestMissingPictures(std::vector<NetworkResourceRawTO> const& pageEntries)
-{
-    if (_pictureProcessor->pendingTasks()) {
-        return;
-    }
-
-    std::vector<std::string> simIds;
-    for (auto const& rawTO : pageEntries) {
-        if (!_pictureBySimId.contains(rawTO->id) && toInt(simIds.size()) < MaxPicturesPerRequest) {
-            simIds.emplace_back(rawTO->id);
-        }
-    }
-    if (simIds.empty()) {
-        return;
-    }
-
-    _pictureProcessor->executeTask(
-        [&](auto const& senderId) {
-            return _PersisterFacade::get()->scheduleGetSimulationPictures(
-                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, GetSimulationPicturesRequestData{.simIds = simIds});
-        },
-        [&, simIds](auto const& requestId) {
-            auto data = _PersisterFacade::get()->fetchGetSimulationPicturesData(requestId);
-            for (auto const& simId : simIds) {
-                auto findResult = data.jpgBySimId.find(simId);
-                std::optional<TextureData> picture;
-                if (findResult != data.jpgBySimId.end() && !findResult->second.empty()) {
-                    try {
-                        picture = _RenderingFacade::get()->loadTextureFromMemory(findResult->second);
-                    } catch (std::exception const&) {
-                        log(Priority::Important, "browser: preview picture of simulation " + simId + " could not be decoded");
-                    }
-                }
-                _pictureBySimId.insert_or_assign(simId, picture);
-            }
-        },
-        [&, simIds](auto const&) {
-            for (auto const& simId : simIds) {
-                _pictureBySimId.insert_or_assign(simId, std::nullopt);
-            }
-        });
 }
 
 void _BrowserGalleryWidget::onSelectEntry(NetworkResourceRawTO const& rawTO)

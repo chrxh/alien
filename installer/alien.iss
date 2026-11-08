@@ -186,10 +186,15 @@ end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   AutosaveDir: String;
+  SimulationsDir: String;
 begin
   AutosaveDir := ExpandConstant('{app}\resources\autosave');
+  SimulationsDir := ExpandConstant('{app}\simulations');
   // RemoveDir fails if the folder is not empty.
   if (CurUninstallStep = usUninstall) and not UninstallSilent and DirExists(AutosaveDir) and not RemoveDir(AutosaveDir) then
-    if MsgBox('Also delete the autosaves in ' + AutosaveDir + '?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+    if MsgBox('Also delete the autosaves and saved simulations in ' + AutosaveDir + '?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
       DelTree(AutosaveDir, True, True, True);
+  if (CurUninstallStep = usUninstall) and not UninstallSilent and DirExists(SimulationsDir) and not RemoveDir(SimulationsDir) then
+    if MsgBox('Also delete the saved simulations in ' + SimulationsDir + '?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+      DelTree(SimulationsDir, True, True, True);
 end;

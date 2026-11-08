@@ -76,6 +76,11 @@ void BrowserController::refresh(bool withRetry)
 
             auto userName = NetworkService::get().getLoggedInUserName();
             for (auto const& workspaceId : _data->getWorkspaces() | std::views::keys) {
+
+                // The other workspaces are filled by the browser itself
+                if (!isServerWorkspace(workspaceId.workspaceType)) {
+                    continue;
+                }
                 std::vector<NetworkResourceRawTO> rawTOs;
                 for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType && isVisibleInWorkspace(rawTO, workspaceId.workspaceType, userName)) {

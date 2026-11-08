@@ -18,7 +18,7 @@ This chapter lists the keyboard shortcuts and the main mouse actions. Shortcuts 
 Some windows have mouse actions of their own, for example:
 
 - Hold **Ctrl** and click a slider to type in a precise value.
-- Double-click an entry in the **Browser** to download and open it.
+- Double-click an entry in the **Browser** to open it. An entry of the server is downloaded first.
 - Hold **Ctrl** and click rows in the lineage table of the **Evolution dashboard** to select several lineages.
 - In the preview of the genome editor, turn the mouse wheel to zoom and drag with the middle mouse button to move the view.
 
@@ -41,7 +41,6 @@ Some windows have mouse actions of their own, for example:
 | Alt+2 | Spatial control |
 | Alt+3 | Evolution dashboard |
 | Alt+4 | Simulation parameters |
-| Alt+5 | Autosave |
 | Alt+6 | MCP server |
 | Alt+7 | Log |
 | Alt+W | Genome editor |
@@ -84,5 +83,5 @@ Apart from **Alt+E**, these shortcuts work only in edit mode.
 | Shortcut | Function |
 | --- | --- |
 | Alt+L | Log in |
-| Alt+D | Upload simulation |
-| Alt+Q | Upload genome |
+| Alt+D | Save simulation with the community as its target |
+| Alt+Q | Save genome with the community as its target |

@@ -104,7 +104,7 @@ The environment determines which creatures succeed. Some possibilities:
 
 ## Tips
 
-- Save your experiment regularly, or open the **Autosave** window (Alt+5) and tick the checkbox in front of **Autosave interval (min)** in its **Settings** section. ALIEN then creates a save point at this interval and keeps a series of them.
+- Save your experiment regularly, or click **Autosaves** in the left column of the browser and tick **Enable autosave** in the right column. ALIEN then saves the simulation at the interval set there and keeps a series of autosaves.
 - Use **flashbacks** in the **Temporal control** window to try out changes and to return to an earlier state of the world. Loading a flashback restores the world, the **External energy amount** and the positions of moving layers and radiation sources, but keeps all other simulation parameters. If you changed other parameters, set them back yourself.
 - Running experiments for days is easier with the [command line interface](files.md#command-line-interface), which runs a simulation file without any window.
 - Ask an [AI agent](ai-agents.md) to monitor the experiment, analyze the lineages and suggest parameter changes.

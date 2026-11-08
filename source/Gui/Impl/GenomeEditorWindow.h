@@ -19,6 +19,7 @@ class GenomeEditorWindow : public AlienWindow
 public:
     void openTab(GenomeDesc const& genome, bool forceNewTab = false, bool openEditorIfClosed = true, std::optional<int> lineageId = std::nullopt);
     GenomeDesc getCurrentGenome() const;
+    void markCurrentGenomeAsSaved();  // It counts as unchanged from now on
 
     // Previews of the sub-genomes of the currently selected genome, e.g. for upload dialogs
     std::vector<PreviewDesc> getCurrentPreviewDescs() const;

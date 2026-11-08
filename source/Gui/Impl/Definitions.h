@@ -67,9 +67,7 @@ class BrowserWindow;
 
 class LoginDialog;
 
-class UploadSimulationDialog;
-
-class ReplaceSimulationDialog;
+class SaveSimulationDialog;
 
 class EditSimulationDialog;
 
@@ -90,10 +88,6 @@ class ImageToPatternDialog;
 class RadiationSourcesWindow;
 
 class ChangeColorDialog;
-
-class AutosaveController;
-
-class AutosaveWindow;
 
 class GenomeEditorWindow;
 
@@ -147,6 +141,12 @@ using BrowserData = std::shared_ptr<_BrowserData>;
 
 class _BrowserGalleryWidget;
 using BrowserGalleryWidget = std::shared_ptr<_BrowserGalleryWidget>;
+
+class _BrowserPictureCache;
+using BrowserPictureCache = std::shared_ptr<_BrowserPictureCache>;
+
+class _BrowserDetailsWidget;
+using BrowserDetailsWidget = std::shared_ptr<_BrowserDetailsWidget>;
 
 class _BrowserTableWidget;
 using BrowserTableWidget = std::shared_ptr<_BrowserTableWidget>;

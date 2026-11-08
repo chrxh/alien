@@ -215,6 +215,15 @@ namespace Const
     extern ImColor BrowserLastDayOnlineSymbolColor;
     extern ImColor BrowserActiveSimulatorsColor;
     extern ImColor BrowserLastDaySimulatorsColor;
+
+    extern ImColor BrowserPaneColor;
+
+    // Drawn on preview pictures, which are dark in both themes
+    extern ImColor const BrowserPictureChipColor;
+    extern ImColor const BrowserPictureChipHoveredColor;
+    extern ImColor const BrowserPictureChipTextColor;
+    extern ImColor const BrowserPictureChipIconColor;
+    extern ImColor const BrowserPictureChipOwnReactionColor;
 }
 
 class StyleService

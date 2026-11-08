@@ -24,7 +24,7 @@ private:
     void quit();
     void leaveConsoleMode();
     void deactivate();
-    void printPersistedSavepoint();
+    void printSavedSimulation();
     void printStatusLine();
 
     struct StateBeforeActivation

@@ -17,6 +17,7 @@
 
 #include <Persister/Interface/PersisterRequestResult.h>
 #include <Persister/Interface/SerializerService.h>
+#include <Persister/Interface/SimulationLibrary.h>
 
 _PersisterWorker::_PersisterWorker() {}
 
@@ -190,13 +191,13 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
 
 namespace
 {
-    std::filesystem::path generateFilename(std::filesystem::path const& directory, uint64_t timestep)
+    std::filesystem::path generateFilename(std::filesystem::path const& directory, std::string const& prefix, uint64_t timestep)
     {
         std::filesystem::path result;
         int i = 0;
         do {
             auto postfix = i == 0 ? std::string() : "-" + std::to_string(i);
-            result = directory / ("save_" + StringHelper::format(timestep, '_') + postfix + ".sim");
+            result = directory / (prefix + StringHelper::format(timestep, '_') + postfix + ".sim");
             ++i;
         } while (std::filesystem::exists(result) && i < 100);
         return result;
@@ -232,7 +233,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     try {
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
-            filename = generateFilename(filename, deserializedData._timestep);
+            filename = generateFilename(filename, requestData.generatedNamePrefix, deserializedData._timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             return std::make_shared<_PersisterRequestError>(
@@ -410,21 +411,28 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                                                                                                                    : NetworkResourceType_Genome;
     SimulationDesc deserializedSim;
     if (resourceType == NetworkResourceType_Simulation) {
-        try {
-            auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.timestep(_SimulationFacade::get()->getCurrentTimestep())
-                .realTime(_SimulationFacade::get()->getRealTime())
-                .zoom(simulationData.zoom)
-                .center(simulationData.center)
-                .worldSize(_SimulationFacade::get()->getWorldSize())
-                .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
-                .statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
-                .mainData(_SimulationFacade::get()->getSimulationData());
-        } catch (...) {
-            return std::make_shared<_PersisterRequestError>(
-                request->getRequestId(),
-                request->getSenderInfo().senderId,
-                PersisterErrorInfo{"The simulation could not be uploaded because no valid data could be obtained from the GPU."});
+        auto const& simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
+        if (simulationData.filename.has_value()) {
+            if (!SerializerService::get().deserializeSimulationFromFiles(deserializedSim, *simulationData.filename)) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation file could not be read for uploading."});
+            }
+        } else {
+            try {
+                deserializedSim.timestep(_SimulationFacade::get()->getCurrentTimestep())
+                    .realTime(_SimulationFacade::get()->getRealTime())
+                    .zoom(simulationData.zoom)
+                    .center(simulationData.center)
+                    .worldSize(_SimulationFacade::get()->getWorldSize())
+                    .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
+                    .statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
+                    .mainData(_SimulationFacade::get()->getSimulationData());
+            } catch (...) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(),
+                    request->getSenderInfo().senderId,
+                    PersisterErrorInfo{"The simulation could not be uploaded because no valid data could be obtained from the GPU."});
+            }
         }
 
         if (!SerializerService::get().serializeSimulationToString(mainData, deserializedSim)) {
@@ -433,7 +441,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         size = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
-        pictureJpg = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
+        pictureJpg = simulationData.jpg;
     } else {
         auto const& creatureData = std::get<UploadNetworkResourceRequestData::CreatureData>(requestData.data);
         auto const& genome = creatureData.description;
@@ -676,7 +684,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
-            filename = generateFilename(filename, deserializedData._timestep);
+            filename = generateFilename(filename, Const::SavePointPrefix, deserializedData._timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             return std::make_shared<_PersisterRequestError>(

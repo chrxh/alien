@@ -61,8 +61,8 @@ The [Sandbox and editing](sandbox.md) chapter explains these tools in detail.
 | Menu | Contents |
 | --- | --- |
 | **Simulation** | New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S), Save picture, Run and Pause (Space) |
-| **Network** | Browser (Alt+B), Login (Alt+L), Logout, Upload simulation (Alt+D), Upload genome (Alt+Q), Delete user |
-| **Windows** | Temporal control (Alt+1), Spatial control (Alt+2), Evolution dashboard (Alt+3), Simulation parameters (Alt+4), Autosave (Alt+5), MCP server (Alt+6), Log (Alt+7) |
+| **Network** | Browser (Alt+B), Login (Alt+L), Logout, Delete user |
+| **Windows** | Temporal control (Alt+1), Spatial control (Alt+2), Evolution dashboard (Alt+3), Simulation parameters (Alt+4), MCP server (Alt+6), Log (Alt+7) |
 | **Editor** | Genome editor (Alt+W), Allow object editing (Alt+E), Inspect objects (Alt+N), Inspect genomes (Alt+F), Inspect creatures (Alt+P), Close inspections and Deselect (Esc), Copy (Ctrl+C), Paste (Ctrl+V), Delete (Del) |
 | **View** | Cell info overlay (Alt+O), Message overlay (Alt+X), Render UI (Alt+U), Render simulation (Alt+I), Console mode (Alt+C) |
 | **Tools** | Mass operations (Alt+H), Image converter (Alt+Y), Recorder (Alt+V) |
@@ -91,12 +91,6 @@ At the bottom of the window, plots show how the number of creatures, the average
 
 All rules of the world, such as friction, the energy of cells or the strength of attacks, are simulation parameters. The window shows the **base parameters**, which apply everywhere, plus up to 20 **layers** and up to 40 **radiation sources**. A layer overrides parameters in a part of the world and can exert a force field. A radiation source emits energy particles. The filter field finds parameters by name. See [Simulation parameters](simulation-parameters.md).
 
-### Autosave
-
-Lists the save points stored in the chosen directory. The download button in a row loads that save point. You can also create and delete save points by hand.
-
-Automatic save points are off by default. To switch them on, tick the checkbox in front of **Autosave interval (min)** in the **Settings** section. ALIEN then creates a save point at this interval. The interval counts minutes of real time, so save points are also created while the simulation is paused. **Directory** sets where the save points are stored. In the default *Limited save files* mode, **Number of files** sets how many save points are kept. Each new save point, including one created by hand, deletes the oldest ones beyond this number. In *Unlimited save files* mode, all save points are kept.
-
 ### MCP server
 
 Starts and stops the built-in server for AI agents, shows the address to connect to and logs every command an agent sends. See [AI agents](ai-agents.md).
@@ -115,7 +109,7 @@ In edit mode, select objects and press **Alt+N** to open an inspection window fo
 
 ### Browser
 
-Lists the simulations and genomes on the ALIEN server. The tabs switch between **Simulations** and **Genomes**. The **Featured** workspace contains the simulations of the ALIEN project, **Community** those shared by users and **Private** your own uploads. You can switch between a gallery view with preview pictures and a table view with folders. Double-click an entry to open it. Anyone can give an entry a heart. After logging in, you can also upload your own work. See [Files and command line](files.md#sharing-in-the-browser).
+Shows the simulations of this computer and the simulations and genomes on the ALIEN server. The tabs switch between **Simulations** and **Genomes**. The left column lists the workspaces. **My simulations** and **Autosaves** are on this computer, as is **My genomes** on the **Genomes** tab. On the server, **Featured** contains the simulations of the ALIEN project, **Community** those shared by users and **My uploads** your own uploads. **Liked** collects the entries you reacted to. The middle shows the entries of the selected workspace, either as a gallery with preview pictures or as a table with folders. The right column shows the selected entry with its picture, its description and its data and offers everything that can be done with it. Without a selection it describes the workspace, and for **Autosaves** it contains the autosave settings. **Open simulation** in the tool bar loads a simulation file from any folder. Double-click an entry to open it. Anyone can give an entry a heart. After logging in, you can also upload your own work. The list at the right edge shows the users of ALIEN. See [Opening and saving](files.md#opening-and-saving), [Autosave](files.md#autosave) and [Sharing in the browser](files.md#sharing-in-the-browser).
 
 ### Recorder
 

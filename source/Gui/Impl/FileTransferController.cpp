@@ -6,14 +6,11 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
-#include <Persister/Interface/TaskProcessor.h>
-
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
-#include "NewSimulationService.h"
 #include "OverlayController.h"
 #include "RecorderController.h"
-#include "Viewport.h"
+#include "SimulationLibraryController.h"
 
 #include <ImFileDialog.h>
 #include <Engine/Interface/SimulationFacade.h>
@@ -27,46 +24,18 @@ void FileTransferController::onOpenSimulationDialog()
         "Open simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& filename) {
             auto filenameCopy = filename;
             _referencePath = filenameCopy.remove_filename().string();
-            onOpenSimulation(filename);
+            SimulationLibraryController::get().onLoad(filename);
         });
-}
-
-void FileTransferController::onOpenSimulation(std::filesystem::path const& filename)
-{
-    printOverlayMessage("Loading ...");
-
-    _openSimulationProcessor->executeTask(
-        [&](auto const& senderId) {
-            auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
-            auto readData = ReadSimulationRequestData{.filename = filename.string(), .initSimulation = false};
-            return _PersisterFacade::get()->scheduleReadSimulation(senderInfo, readData);
-        },
-        [&](auto const& requestId) {
-            auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
-            if (auto errorMessage = NewSimulationService::get().loadSimulation(data.simulationDesc)) {
-                showMessage("Error", *errorMessage);
-            }
-            printOverlayMessage(data.filename.string());
-        },
-        [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
 }
 
 void FileTransferController::onSaveSimulationDialog()
 {
-    GenericFileDialog::get().showSaveFileDialog("Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
-        auto firstFilename = ifd::FileDialog::Instance().GetResult();
-        auto firstFilenameCopy = firstFilename;
-        _referencePath = firstFilenameCopy.remove_filename().string();
-        printOverlayMessage("Saving ...");
-        _saveSimulationProcessor->executeTask(
-            [&, firstFilename = firstFilename](auto const& senderId) {
-                auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};
-                auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-                return _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, readData);
-            },
-            [](auto const&) {},
-            [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
-    });
+    GenericFileDialog::get().showSaveFileDialog(
+        "Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& filename) {
+            auto filenameCopy = filename;
+            _referencePath = filenameCopy.remove_filename().string();
+            SimulationLibraryController::get().onSaveToFile(filename);
+        });
 }
 
 void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc)
@@ -95,9 +64,14 @@ void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome, std::f
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _referencePath = firstFilenameCopy.remove_filename().string();
-            if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
+            if (!SerializerService::get().serializeGenomeToFile(firstFilename, genome)) {
                 GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
-            } else if (afterSaveFunc) {
+                return;
+            }
+
+            // The file may lie in the folder of the genomes of this computer
+            SimulationLibraryController::get().refresh();
+            if (afterSaveFunc) {
                 afterSaveFunc();
             }
         });
@@ -140,18 +114,10 @@ void FileTransferController::onSaveCameraFlightDialog()
 
 void FileTransferController::init()
 {
-
-    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
-    _saveSimulationProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
-
     _referencePath = GlobalSettings::get().getValue("dialogs.directory.reference path", _referencePath);
 }
 
-void FileTransferController::process()
-{
-    _openSimulationProcessor->process();
-    _saveSimulationProcessor->process();
-}
+void FileTransferController::process() {}
 
 void FileTransferController::shutdown()
 {

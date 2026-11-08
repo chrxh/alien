@@ -168,6 +168,49 @@ std::string StringHelper::formatInThousands(double value)
     return result + "K";
 }
 
+std::string StringHelper::formatCompact(uint64_t value)
+{
+    if (value < 1000) {
+        return std::to_string(value);
+    }
+    auto scaledValue = static_cast<double>(value);
+    for (std::string_view symbol : {"K", "M", "B"}) {
+        scaledValue /= 1000;
+        if (std::round(scaledValue) < 1000 || symbol == "B") {
+            auto result = format(scaledValue, scaledValue < 99.95 ? 1 : 0);
+            if (result.ends_with(".0")) {
+                result.resize(result.size() - 2);
+            }
+            return result + std::string(symbol);
+        }
+    }
+    return {};
+}
+
+std::string StringHelper::formatFileSize(uint64_t bytes)
+{
+    if (bytes < 1024) {
+        return std::to_string(bytes) + " B";
+    }
+    auto scaledValue = static_cast<double>(bytes);
+    for (std::string_view unit : {"KB", "MB", "GB", "TB"}) {
+        scaledValue /= 1024;
+        if (std::round(scaledValue) < 1024 || unit == "TB") {
+            auto result = format(scaledValue, scaledValue < 9.95 ? 1 : 0);
+            if (result.ends_with(".0")) {
+                result.resize(result.size() - 2);
+            }
+            return result + " " + std::string(unit);
+        }
+    }
+    return {};
+}
+
+std::string StringHelper::formatCount(uint64_t count, std::string const& singularNoun)
+{
+    return format(count) + " " + singularNoun + (count == 1 ? "" : "s");
+}
+
 namespace
 {
     std::string joinStrings(std::vector<std::string> const& strings, std::string const& separator)
@@ -248,6 +291,64 @@ bool StringHelper::containsCaseInsensitive(std::string const& str, std::string c
     return strLower.find(toMatchLower) != std::string::npos;
 }
 
+namespace
+{
+    bool isDigit(char ch)
+    {
+        return ch >= '0' && ch <= '9';
+    }
+
+    char toAsciiLower(char ch)
+    {
+        return ch >= 'A' && ch <= 'Z' ? static_cast<char>(ch - 'A' + 'a') : ch;
+    }
+
+    // Returns the digits of the number that starts at the given position without leading zeros and moves the position behind the number
+    std::string_view readNumber(std::string const& str, size_t& pos)
+    {
+        while (pos + 1 < str.size() && str.at(pos) == '0' && isDigit(str.at(pos + 1))) {
+            ++pos;
+        }
+        auto start = pos;
+        while (pos < str.size() && isDigit(str.at(pos))) {
+            ++pos;
+        }
+        return std::string_view(str).substr(start, pos - start);
+    }
+}
+
+bool StringHelper::naturalLess(std::string const& left, std::string const& right)
+{
+    size_t leftPos = 0;
+    size_t rightPos = 0;
+    while (leftPos < left.size() && rightPos < right.size()) {
+        if (isDigit(left.at(leftPos)) && isDigit(right.at(rightPos))) {
+            auto leftNumber = readNumber(left, leftPos);
+            auto rightNumber = readNumber(right, rightPos);
+            if (leftNumber.size() != rightNumber.size()) {
+                return leftNumber.size() < rightNumber.size();
+            }
+            if (leftNumber != rightNumber) {
+                return leftNumber < rightNumber;
+            }
+        } else {
+            auto leftChar = static_cast<unsigned char>(toAsciiLower(left.at(leftPos)));
+            auto rightChar = static_cast<unsigned char>(toAsciiLower(right.at(rightPos)));
+            if (leftChar != rightChar) {
+                return leftChar < rightChar;
+            }
+            ++leftPos;
+            ++rightPos;
+        }
+    }
+    if (leftPos < left.size() || rightPos < right.size()) {
+        return rightPos < right.size();
+    }
+
+    // Strings that only differ in case or in leading zeros still need a fixed order
+    return left < right;
+}
+
 std::string StringHelper::toUpper(std::string const& str)
 {
     std::string result = str;
@@ -286,4 +387,15 @@ StringHelper::Decomposition StringHelper::decomposeCaseInsensitiveMatch(std::str
     }
 
     return {.beforeMatch = str.substr(0, findResult), .match = str.substr(findResult, toMatch.size())};
+}
+
+std::filesystem::path StringHelper::toPath(std::string const& utf8)
+{
+    return std::filesystem::path(std::u8string(utf8.begin(), utf8.end()));
+}
+
+std::string StringHelper::toUtf8(std::filesystem::path const& path)
+{
+    auto result = path.u8string();
+    return std::string(result.begin(), result.end());
 }

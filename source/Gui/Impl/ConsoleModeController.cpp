@@ -16,9 +16,9 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
-#include "AutosaveController.h"
 #include "BrowserController.h"
 #include "MainLoopController.h"
+#include "SimulationLibraryController.h"
 #include "WindowController.h"
 
 namespace
@@ -82,9 +82,9 @@ void ConsoleModeController::process()
     if (!_active) {
         return;
     }
-    AutosaveController::get().process();
+    SimulationLibraryController::get().process();
     BrowserController::get().process();
-    printPersistedSavepoint();
+    printSavedSimulation();
     printStatusLine();
 
     auto pressedCharacter = ConsoleInput::readPressedCharacter();
@@ -130,15 +130,14 @@ void ConsoleModeController::deactivate()
     WindowController::get().showWindow();
 }
 
-void ConsoleModeController::printPersistedSavepoint()
+void ConsoleModeController::printSavedSimulation()
 {
-    auto savepoint = AutosaveController::get().getPersistedSavepoint();
-    if (!savepoint.has_value()) {
+    auto filename = SimulationLibraryController::get().fetchSavedFilename();
+    if (!filename.has_value()) {
         return;
     }
     _liveOutput.printMessage(
-        "  " + ConsoleWidgets::createText("Save point created: ", ConsolePalette::Success)
-        + ConsoleWidgets::createText(savepoint.value()->filename.string(), ConsolePalette::Value));
+        "  " + ConsoleWidgets::createText("Simulation saved: ", ConsolePalette::Success) + ConsoleWidgets::createText(*filename, ConsolePalette::Value));
     _lastPrintTimepoint.reset();
 }
 
