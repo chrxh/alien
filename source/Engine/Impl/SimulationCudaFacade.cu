@@ -730,7 +730,10 @@ void _SimulationCudaFacade::initCuda()
 
 auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 {
+    static std::mutex mutex;
     static std::optional<GpuInfo> cachedResult;
+
+    std::lock_guard lock(mutex);
     if (cachedResult) {
         return *cachedResult;
     }
@@ -784,7 +787,13 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 
 void _SimulationCudaFacade::selectDeviceForCurrentThread()
 {
-    CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(checkAndReturnGpuInfo().deviceNumber));
+    auto result = cudaSetDevice(checkAndReturnGpuInfo().deviceNumber);
+    if (result != cudaSuccess) {
+        cudaGetLastError();
+        auto text = "CUDA device could not be selected. Error code: " + std::to_string(result);
+        log(Priority::Important, text);
+        throw AlienException(text);
+    }
 }
 
 bool _SimulationCudaFacade::isRenderingInteropWorking(GeometryBuffers const& geometryBuffers)
