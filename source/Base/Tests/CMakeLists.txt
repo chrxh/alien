@@ -1,5 +1,6 @@
 target_sources(BaseTests
 PUBLIC
+    CallstackTests.cpp
     DocumentationReaderTests.cpp
     MarkdownParserTests.cpp
     StringHelperTests.cpp

@@ -3,8 +3,12 @@ add_library(Base
     AlienExceptions.cpp
     AlienExceptions.h
     Cache.h
+    Callstack.cpp
+    Callstack.h
     Console.cpp
     Console.h
+    CrashLogger.cpp
+    CrashLogger.h
     Definitions.cpp
     Definitions.h
     DocumentationReader.cpp

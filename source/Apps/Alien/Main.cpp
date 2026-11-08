@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <Base/AlienExceptions.h>
+#include <Base/CrashLogger.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/KernelProfiler.h>
@@ -45,6 +46,7 @@ int main(int argc, char** argv)
     GlobalSettings::get().setInterop(useInterop);
 
     FileLogger fileLogger = std::make_shared<_FileLogger>();
+    CrashLogger crashLogger = std::make_shared<_CrashLogger>();
 
     auto error = false;
     try {

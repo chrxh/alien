@@ -36,7 +36,6 @@ void checkAndThrowError(T result)
 {
     if (result) {
         CudaContextState::get().setInvalid();
-        DEVICE_RESET
         std::stringstream stream;
         switch (result) {
         case cudaError::cudaErrorInsufficientDriver:
@@ -69,6 +68,7 @@ void checkAndThrowError(T result)
         stream << " Error code: " << result;
         auto text = stream.str();
         log(Priority::Important, text);
+        DEVICE_RESET
 
         if (cudaError::cudaErrorMemoryAllocation == result) {
             throw CudaMemoryAllocationException(text);

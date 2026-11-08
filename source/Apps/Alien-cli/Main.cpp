@@ -5,6 +5,7 @@
 
 #include <Base/AlienExceptions.h>
 #include <Base/Console.h>
+#include <Base/CrashLogger.h>
 #include <Base/ExitScopeGuard.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
@@ -192,10 +193,11 @@ namespace
 
 int main(int argc, char** argv)
 {
+    FileLogger fileLogger = std::make_shared<_FileLogger>();
+    CrashLogger crashLogger = std::make_shared<_CrashLogger>();
+
     auto error = false;
     try {
-        FileLogger fileLogger = std::make_shared<_FileLogger>();
-
         CommandLineArguments arguments;
         if (auto const& exitCode = CommandLineParser::parse(arguments, argc, argv)) {
             return *exitCode;
