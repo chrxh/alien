@@ -102,10 +102,9 @@ jobs:
 
     - name: Bootstrap vcpkg
       if: steps.recent_changes.outputs.should_run == 'true'
-      run: |
-        pushd external/vcpkg
-        ./bootstrap-vcpkg.sh -disableMetrics
-        popd
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: .github/scripts/bootstrap-vcpkg.sh
 
     - name: Configure CMake
       if: steps.recent_changes.outputs.should_run == 'true'

@@ -50,10 +50,7 @@ jobs:
 
     - name: Bootstrap vcpkg
       shell: pwsh
-      run: |
-        Push-Location external/vcpkg
-        .\bootstrap-vcpkg.bat -disableMetrics
-        Pop-Location
+      run: .github/scripts/bootstrap-vcpkg.ps1
 
     - name: Build for NVIDIA GPUs (Ninja, CUDA)
       shell: cmd

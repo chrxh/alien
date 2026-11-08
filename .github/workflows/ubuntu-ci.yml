@@ -51,10 +51,7 @@ jobs:
         echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         
     - name: Bootstrap vcpkg
-      run: |
-        pushd external/vcpkg
-        ./bootstrap-vcpkg.sh -disableMetrics
-        popd
+      run: .github/scripts/bootstrap-vcpkg.sh
 
     - name: Configure CMake
       run: >
