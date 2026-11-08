@@ -38,6 +38,7 @@ public:
         GpuUuid gpuUuid = {};
     };
     static GpuInfo checkAndReturnGpuInfo();
+    static void selectDeviceForCurrentThread();
     static bool isRenderingInteropWorking(GeometryBuffers const& geometryBuffers);
 
     _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);

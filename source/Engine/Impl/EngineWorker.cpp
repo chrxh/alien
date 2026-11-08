@@ -390,6 +390,8 @@ void EngineWorker::setDetached(bool value)
 void EngineWorker::runThreadLoop()
 {
     try {
+        _SimulationCudaFacade::selectDeviceForCurrentThread();
+
         std::mutex mutexForLoop;
         std::unique_lock<std::mutex> lockForLoop(mutexForLoop);
 
@@ -496,6 +498,7 @@ uint64_t EngineWorker::getCurrentTimestepForPreview()
 
 void EngineWorker::setCurrentTimestepForPreview(uint64_t timestep)
 {
+    EngineWorkerGuard access(this);
     _simulationCudaFacade->setCurrentTimestepForPreview(timestep);
 }
 
@@ -675,6 +678,8 @@ void EngineWorker::slowdownTPS()
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
     : _worker(worker)
 {
+    _SimulationCudaFacade::selectDeviceForCurrentThread();
+
     _worker->_mutexForEngineWorkerGuard.lock();
     checkForException(worker->_exceptionData);
 

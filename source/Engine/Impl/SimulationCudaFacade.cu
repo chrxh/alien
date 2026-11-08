@@ -116,6 +116,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
         log(Priority::Unimportant, "skip CUDA shutdown because the CUDA context is invalid");
     } else {
         try {
+            selectDeviceForCurrentThread();
             _cudaGeometryBuffers->release();
             _cudaSimulationData->free();
             _cudaPreviewData->free();
@@ -779,6 +780,11 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     // Only a successful check is cached, so that each call reports a failure
     cachedResult = result;
     return result;
+}
+
+void _SimulationCudaFacade::selectDeviceForCurrentThread()
+{
+    CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(checkAndReturnGpuInfo().deviceNumber));
 }
 
 bool _SimulationCudaFacade::isRenderingInteropWorking(GeometryBuffers const& geometryBuffers)
