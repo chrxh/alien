@@ -25,6 +25,9 @@ using std::uint64_t;
 class _FileLogger;
 using FileLogger = std::shared_ptr<_FileLogger>;
 
+class _CrashLogger;
+using CrashLogger = std::shared_ptr<_CrashLogger>;
+
 inline constexpr float NEAR_ZERO = 1.0e-4f;
 
 template <typename T>
