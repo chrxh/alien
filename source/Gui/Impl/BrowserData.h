@@ -12,6 +12,7 @@
 
 #include <Base/Hashes.h>
 
+#include <Network/ActiveSimulatorCountsTO.h>
 #include <Network/NetworkResourceRawTO.h>
 #include <Network/NetworkResourceTreeTO.h>
 #include <Network/UserTO.h>
@@ -82,8 +83,8 @@ public:
 
     std::vector<UserTO> const& getUserTOs() const;
     void setUserTOs(std::vector<UserTO> const& userTOs);
-    std::optional<int> getNumActiveSimulators() const;
-    void setNumActiveSimulators(std::optional<int> const& numActiveSimulators);
+    std::optional<ActiveSimulatorCountsTO> const& getActiveSimulatorCounts() const;
+    void setActiveSimulatorCounts(std::optional<ActiveSimulatorCountsTO> const& activeSimulatorCounts);
 
     DownloadCache const& getDownloadCache() const;
     void onDownloadResource(BrowserLeaf const& leaf);
@@ -117,7 +118,7 @@ private:
     bool _scrollToSelection = false;
     LastSessionBrowserData _lastSessionData;
     std::vector<UserTO> _userTOs;
-    std::optional<int> _numActiveSimulators;
+    std::optional<ActiveSimulatorCountsTO> _activeSimulatorCounts;
     DownloadCache _downloadCache;
 
     std::vector<TextureData> _emojis;

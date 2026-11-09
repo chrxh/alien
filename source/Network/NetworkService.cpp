@@ -472,13 +472,16 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
     }
 }
 
-std::optional<int> NetworkService::getNumActiveSimulators()
+std::optional<ActiveSimulatorCountsTO> NetworkService::getActiveSimulatorCounts()
 {
     auto client = createClient(_serverAddress);
 
     try {
         auto result = executeRequest([&] { return client.Get("/getactivesimulatorcount"); }, false);
-        return parseValueFromKey<int>(result->body, "activeSimulators");
+        std::stringstream stream(result->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        return ActiveSimulatorCountsTO{.numActive = tree.get<int>("activeSimulators"), .numLastDay = tree.get<int>("lastDaySimulators", 0)};
     } catch (...) {
         return std::nullopt;
     }

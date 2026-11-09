@@ -20,6 +20,7 @@
         --wash: rgba(11, 11, 11, 0.05);
         --series-hourly: #2a78d6;
         --series-average: #eb6834;
+        --series-last-day: #1baf7a;
         --area-opacity: 0.10;
         --band-opacity: 0.22;
         --good: #006300;
@@ -45,6 +46,7 @@
             --wash: rgba(255, 255, 255, 0.06);
             --series-hourly: #3987e5;
             --series-average: #d95926;
+            --series-last-day: #199e70;
             --area-opacity: 0.16;
             --band-opacity: 0.30;
             --good: #0ca30c;
@@ -70,6 +72,7 @@
         --wash: rgba(255, 255, 255, 0.06);
         --series-hourly: #3987e5;
         --series-average: #d95926;
+        --series-last-day: #199e70;
         --area-opacity: 0.16;
         --band-opacity: 0.30;
         --good: #0ca30c;
@@ -220,7 +223,7 @@
 
     .kpis {
         display: grid;
-        grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(0, 1fr));
         gap: 12px;
         margin-bottom: 16px;
     }
@@ -335,6 +338,10 @@
         border-color: var(--series-average);
     }
 
+    .key-last-day {
+        border-color: var(--series-last-day);
+    }
+
     .key-band {
         height: 10px;
         border: 0;
@@ -415,7 +422,8 @@
     }
 
     .line-hourly,
-    .line-average {
+    .line-average,
+    .line-last-day {
         fill: none;
         stroke-width: 2;
         stroke-linejoin: round;
@@ -441,6 +449,30 @@
 
     .point-hourly {
         fill: var(--series-hourly);
+    }
+
+    .area-last-day {
+        fill: var(--series-last-day);
+        fill-opacity: var(--area-opacity);
+    }
+
+    .line-last-day {
+        stroke: var(--series-last-day);
+    }
+
+    .line-last-day.dense {
+        stroke-width: 1.25;
+    }
+
+    .point-last-day,
+    .dot-last-day {
+        fill: var(--series-last-day);
+    }
+
+    .panel-title {
+        fill: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 550;
     }
 
     .dot {
@@ -633,6 +665,16 @@
         pointer-events: none;
     }
 
+    @media (max-width: 960px) {
+        .kpis {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .tile-hero {
+            grid-column: span 2;
+        }
+    }
+
     @media (max-width: 760px) {
         .kpis {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -675,7 +717,7 @@
 <main>
     <header class="header">
         <h1>Active simulators <span class="badge" id="demo-badge" hidden>Demo data</span></h1>
-        <p class="subtitle">Running ALIEN instances counted by the server, recorded at every full hour.</p>
+        <p class="subtitle">Running ALIEN instances and the different IP addresses of the last 24 hours, counted by the server and recorded at every full hour.</p>
     </header>
 
     <div class="toolbar">
@@ -691,6 +733,11 @@
             <div class="tile-label">Latest</div>
             <div class="tile-value" id="latest-value">–</div>
             <div class="tile-note" id="latest-note">&nbsp;</div>
+        </div>
+        <div class="tile">
+            <div class="tile-label">Last 24 hours</div>
+            <div class="tile-value" id="last-day-value">–</div>
+            <div class="tile-note" id="last-day-note">&nbsp;</div>
         </div>
         <div class="tile">
             <div class="tile-label">Peak</div>
@@ -727,6 +774,7 @@
                 <div class="tooltip-row" id="tooltip-hourly-row"><span class="key key-hourly"></span><strong id="tooltip-hourly"></strong><span>Hourly count</span></div>
                 <div class="tooltip-row" id="tooltip-range-row"><span class="key key-band"></span><strong id="tooltip-range"></strong><span>Daily range</span></div>
                 <div class="tooltip-row" id="tooltip-average-row"><span class="key key-average"></span><strong id="tooltip-average"></strong><span>24-hour average</span></div>
+                <div class="tooltip-row" id="tooltip-last-day-row"><span class="key key-last-day"></span><strong id="tooltip-last-day"></strong><span>IP addresses, last 24 h</span></div>
             </div>
             <div class="state" id="state" hidden>
                 <div class="state-title" id="state-title"></div>
@@ -744,6 +792,7 @@
                         <th scope="col">Time</th>
                         <th scope="col" class="num">Hourly count</th>
                         <th scope="col" class="num">24-hour average</th>
+                        <th scope="col" class="num" id="last-day-column">IP addresses, last 24 h</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -768,6 +817,7 @@ const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 const MAX_SAMPLE_GAP = 1.5 * HOUR;
 const BAND_MIN_SPAN = 10 * DAY;
+const LAST_DAY_TITLE_HEIGHT = 22;
 const AVERAGE_WINDOW = DAY;
 const AVERAGE_MIN_SAMPLES = 18;
 const STALE_AFTER = 2 * HOUR;
@@ -822,6 +872,8 @@ const els = {
     download: document.getElementById("download"),
     latestValue: document.getElementById("latest-value"),
     latestNote: document.getElementById("latest-note"),
+    lastDayValue: document.getElementById("last-day-value"),
+    lastDayNote: document.getElementById("last-day-note"),
     peakValue: document.getElementById("peak-value"),
     peakNote: document.getElementById("peak-note"),
     averageValue: document.getElementById("average-value"),
@@ -843,6 +895,8 @@ const els = {
     tooltipRange: document.getElementById("tooltip-range"),
     tooltipAverageRow: document.getElementById("tooltip-average-row"),
     tooltipAverage: document.getElementById("tooltip-average"),
+    tooltipLastDayRow: document.getElementById("tooltip-last-day-row"),
+    tooltipLastDay: document.getElementById("tooltip-last-day"),
     state: document.getElementById("state"),
     stateTitle: document.getElementById("state-title"),
     stateText: document.getElementById("state-text"),
@@ -850,6 +904,7 @@ const els = {
     stateActions: document.getElementById("state-actions"),
     live: document.getElementById("live"),
     tableWrap: document.getElementById("table-wrap"),
+    lastDayColumn: document.getElementById("last-day-column"),
     tableBody: document.getElementById("table-body"),
     timeZone: document.getElementById("time-zone"),
     source: document.getElementById("source"),
@@ -860,6 +915,7 @@ const state = {
     sourceUrl: DEFAULT_SOURCE,
     samples: [],
     averages: [],
+    hasLastDay: false,
     origin: null,
     loadedAt: null,
     refreshFailedAt: null,
@@ -902,8 +958,9 @@ function parseHistory(json) {
     for (const entry of json) {
         const t = Date.parse(entry?.timestamp);
         const v = entry?.activeSimulators;
+        const d = entry?.lastDaySimulators;
         if (Number.isFinite(t) && typeof v === "number" && Number.isFinite(v)) {
-            samples.push({ t, v });
+            samples.push({ t, v, d: typeof d === "number" && Number.isFinite(d) ? d : null });
         }
     }
     if (json.length > 0 && samples.length === 0) {
@@ -964,9 +1021,20 @@ function createDemoSamples() {
         const release = hoursAgo <= releaseHoursAgo ? 5 * Math.exp(-(releaseHoursAgo - hoursAgo) / (6 * 24)) : 0;
         const daily = 1 + 0.55 * Math.cos((2 * Math.PI * (date.getUTCHours() - 19)) / 24);
         const weekly = date.getUTCDay() === 0 || date.getUTCDay() === 6 ? 1.2 : 1;
-        samples.push({ t, v: poisson((growth + release) * daily * weekly, random) });
+        samples.push({ t, v: poisson((growth + release) * daily * weekly, random), d: null });
+    }
+    const lastDayHours = 50 * 24;
+    for (const [index, sample] of samples.entries()) {
+        if (end - sample.t < lastDayHours * HOUR) {
+            const day = samples.slice(Math.max(0, index - 23), index + 1);
+            sample.d = Math.round(3.5 * meanOfValues(day) + random());
+        }
     }
     return samples;
+}
+
+function meanOfValues(samples) {
+    return samples.reduce((sum, sample) => sum + sample.v, 0) / samples.length;
 }
 
 function lowerBound(samples, t) {
@@ -1037,10 +1105,10 @@ function formatAge(milliseconds) {
 function renderKpis() {
     const view = currentWindow();
     if (!view) {
-        for (const value of [els.latestValue, els.peakValue, els.averageValue, els.coverageValue]) {
+        for (const value of [els.latestValue, els.lastDayValue, els.peakValue, els.averageValue, els.coverageValue]) {
             value.textContent = "–";
         }
-        for (const note of [els.latestNote, els.peakNote, els.averageNote, els.coverageNote]) {
+        for (const note of [els.latestNote, els.lastDayNote, els.peakNote, els.averageNote, els.coverageNote]) {
             note.textContent = " ";
         }
         return;
@@ -1057,6 +1125,15 @@ function renderKpis() {
         els.latestNote.replaceChildren(icon, ` No new value since ${formatTime(latest.t)}`);
     } else {
         els.latestNote.textContent = `${formatTime(latest.t)} · ${formatAge(age)}`;
+    }
+
+    const latestLastDay = samples.findLast(sample => sample.d !== null);
+    if (latestLastDay) {
+        els.lastDayValue.textContent = integerFormat.format(latestLastDay.d);
+        els.lastDayNote.textContent = latestLastDay === latest ? "Different IP addresses" : `Different IP addresses · ${formatTime(latestLastDay.t)}`;
+    } else {
+        els.lastDayValue.textContent = "–";
+        els.lastDayNote.textContent = "Not recorded yet";
     }
 
     let peakIndex = view.from;
@@ -1248,6 +1325,10 @@ function chartHeight() {
     return window.matchMedia("(max-width: 600px)").matches ? 260 : 320;
 }
 
+function lastDayPanelHeight() {
+    return window.matchMedia("(max-width: 600px)").matches ? 170 : 200;
+}
+
 function renderPeriod(view) {
     if (!view) {
         els.period.textContent = "";
@@ -1267,15 +1348,17 @@ function renderChart() {
         els.chartCanvas.replaceChildren();
         return;
     }
-    const { samples, averages, visible } = state;
+    const { samples, averages, visible, hasLastDay } = state;
     const width = Math.max(240, els.chart.clientWidth);
-    const height = chartHeight();
+    const topHeight = chartHeight();
+    const height = topHeight + (hasLastDay ? lastDayPanelHeight() : 0);
     const bandMode = view.end - view.start > BAND_MIN_SPAN;
     const ranges = bandMode ? dailyRanges(view) : [];
     els.hourlyLabel.textContent = bandMode ? "Daily range" : "Hourly count";
     els.hourlyKey.className = bandMode ? "key key-band" : "key key-hourly";
 
     let maxValue = 0;
+    let maxLastDay = 0;
     for (let index = view.from; index <= view.to; index++) {
         if (visible.hourly) {
             maxValue = Math.max(maxValue, samples[index].v);
@@ -1283,17 +1366,30 @@ function renderChart() {
         if (visible.average && averages[index] !== null) {
             maxValue = Math.max(maxValue, averages[index]);
         }
+        if (samples[index].d !== null) {
+            maxLastDay = Math.max(maxLastDay, samples[index].d);
+        }
     }
     if (visible.hourly) {
         maxValue = Math.max(maxValue, ...ranges.map(range => range.max));
     }
     const yTicks = valueTicks(maxValue);
     const yMax = yTicks[yTicks.length - 1];
-    const labelWidth = Math.max(...yTicks.map(tick => integerFormat.format(tick).length)) * 7 + 14;
-    const margin = { top: 12, right: 44, bottom: 30, left: labelWidth };
+    const lastDayTicks = hasLastDay ? valueTicks(maxLastDay) : [];
+    const lastDayMax = lastDayTicks[lastDayTicks.length - 1];
+    const labelWidth = Math.max(...[...yTicks, ...lastDayTicks].map(tick => integerFormat.format(tick).length)) * 7 + 14;
+    const endLabels = [
+        integerFormat.format(samples[view.to].v),
+        averages[view.to] === null ? "" : decimalFormat.format(averages[view.to]),
+        samples[view.to].d === null ? "" : integerFormat.format(samples[view.to].d),
+    ];
+    const endLabelWidth = Math.max(...endLabels.map(label => label.length)) * 7 + 16;
+    const margin = { top: 12, right: Math.max(44, endLabelWidth), bottom: 30, left: labelWidth };
     const plotWidth = width - margin.left - margin.right;
-    const plotHeight = height - margin.top - margin.bottom;
+    const plotHeight = topHeight - margin.top - margin.bottom;
     const baseY = margin.top + plotHeight;
+    const lastDayTop = topHeight + LAST_DAY_TITLE_HEIGHT;
+    const lastDayBaseY = height - margin.bottom;
     let start = view.start;
     let end = view.end;
     if (end - start < 2 * HOUR) {
@@ -1302,30 +1398,49 @@ function renderChart() {
     }
     const x = t => margin.left + ((t - start) / (end - start)) * plotWidth;
     const y = v => margin.top + plotHeight - (v / yMax) * plotHeight;
+    const yLastDay = v => lastDayBaseY - (v / lastDayMax) * (lastDayBaseY - lastDayTop);
+    const subject = hasLastDay ? "the active simulator count and the different IP addresses of the last 24 hours" : "the active simulator count";
 
     const root = svgElement("svg", {
         width,
         height,
         viewBox: `0 0 ${width} ${height}`,
         role: "img",
-        "aria-label": `Chart of the active simulator count from ${fullTimeFormat.format(view.start)} to ${fullTimeFormat.format(view.end)}`,
+        "aria-label": `Chart of ${subject} from ${fullTimeFormat.format(view.start)} to ${fullTimeFormat.format(view.end)}`,
     });
-    const clip = svgElement("clipPath", { id: "plot-clip" }, svgElement("defs", {}, root));
+    const defs = svgElement("defs", {}, root);
+    const clip = svgElement("clipPath", { id: "plot-clip" }, defs);
     svgElement("rect", { x: margin.left, y: 0, width: plotWidth, height: baseY + 1 }, clip);
-
-    for (const tick of yTicks) {
-        const tickY = Math.round(y(tick)) + 0.5;
-        svgElement("line", { class: tick === 0 ? "baseline" : "grid-line", x1: margin.left, x2: margin.left + plotWidth, y1: tickY, y2: tickY }, root);
-        svgElement("text", { class: "axis-label", x: margin.left - 10, y: tickY, dy: "0.32em", "text-anchor": "end" }, root).textContent = integerFormat.format(tick);
+    if (hasLastDay) {
+        const lastDayClip = svgElement("clipPath", { id: "last-day-clip" }, defs);
+        svgElement("rect", { x: margin.left, y: lastDayTop - 2, width: plotWidth, height: lastDayBaseY - lastDayTop + 3 }, lastDayClip);
     }
+
+    const drawValueAxis = (ticks, toY) => {
+        for (const tick of ticks) {
+            const tickY = Math.round(toY(tick)) + 0.5;
+            svgElement("line", { class: tick === 0 ? "baseline" : "grid-line", x1: margin.left, x2: margin.left + plotWidth, y1: tickY, y2: tickY }, root);
+            svgElement("text", { class: "axis-label", x: margin.left - 10, y: tickY, dy: "0.32em", "text-anchor": "end" }, root).textContent = integerFormat.format(tick);
+        }
+    };
+    drawValueAxis(yTicks, y);
+    if (hasLastDay) {
+        svgElement("text", { class: "panel-title", x: margin.left, y: lastDayTop - 16 }, root).textContent = "Different IP addresses in the last 24 hours";
+        drawValueAxis(lastDayTicks, yLastDay);
+    }
+    const timeBaselines = hasLastDay ? [baseY, lastDayBaseY] : [baseY];
+    const labelBaseY = timeBaselines[timeBaselines.length - 1];
     for (const tick of timeTicks(start, end, plotWidth)) {
         const tickX = Math.round(x(tick.t)) + 0.5;
-        svgElement("line", { class: "tick", x1: tickX, x2: tickX, y1: baseY, y2: baseY + 5 }, root);
+        for (const timeBaseY of timeBaselines) {
+            svgElement("line", { class: "tick", x1: tickX, x2: tickX, y1: timeBaseY, y2: timeBaseY + 5 }, root);
+        }
         if (tickX >= 22 && tickX <= width - 22) {
-            svgElement("text", { class: "axis-label", x: tickX, y: baseY + 21, "text-anchor": "middle" }, root).textContent = tick.label;
+            svgElement("text", { class: "axis-label", x: tickX, y: labelBaseY + 21, "text-anchor": "middle" }, root).textContent = tick.label;
         }
     }
 
+    const dense = (view.to - view.from + 1) / plotWidth > 0.5;
     const plot = svgElement("g", { "clip-path": "url(#plot-clip)" }, root);
     if (visible.hourly && bandMode) {
         for (const band of bandsOf(ranges)) {
@@ -1339,7 +1454,6 @@ function renderChart() {
             }
         }
     } else if (visible.hourly) {
-        const dense = (view.to - view.from + 1) / plotWidth > 0.5;
         for (const segment of segmentsOf(view, () => true)) {
             const points = segment.map(index => [x(samples[index].t), y(samples[index].v)]);
             if (points.length === 1) {
@@ -1355,6 +1469,18 @@ function renderChart() {
             if (segment.length > 1) {
                 svgElement("path", { class: "line-average", d: linePath(segment.map(index => [x(samples[index].t), y(averages[index])])) }, plot);
             }
+        }
+    }
+    if (hasLastDay) {
+        const lastDayPlot = svgElement("g", { "clip-path": "url(#last-day-clip)" }, root);
+        for (const segment of segmentsOf(view, index => samples[index].d !== null)) {
+            const points = segment.map(index => [x(samples[index].t), yLastDay(samples[index].d)]);
+            if (points.length === 1) {
+                svgElement("circle", { class: "point-last-day", cx: points[0][0], cy: points[0][1], r: 3 }, lastDayPlot);
+                continue;
+            }
+            svgElement("path", { class: "area-last-day", d: areaPath(points, lastDayBaseY) }, lastDayPlot);
+            svgElement("path", { class: dense ? "line-last-day dense" : "line-last-day", d: linePath(points) }, lastDayPlot);
         }
     }
 
@@ -1374,19 +1500,28 @@ function renderChart() {
             svgElement("text", { class: "end-label", x: endX + 9, y: mark.y, dy: "0.32em" }, root).textContent = mark.text;
         }
     }
+    if (hasLastDay && samples[last].d !== null) {
+        const lastDayY = yLastDay(samples[last].d);
+        svgElement("circle", { class: "dot dot-last-day", cx: endX, cy: lastDayY, r: 4 }, root);
+        svgElement("text", { class: "end-label", x: endX + 9, y: lastDayY, dy: "0.32em" }, root).textContent = integerFormat.format(samples[last].d);
+    }
 
     const hover = svgElement("g", { visibility: "hidden" }, root);
-    const crosshair = svgElement("line", { class: "crosshair", y1: margin.top, y2: baseY }, hover);
+    const crosshairs = [svgElement("line", { class: "crosshair", y1: margin.top, y2: baseY }, hover)];
+    if (hasLastDay) {
+        crosshairs.push(svgElement("line", { class: "crosshair", y1: lastDayTop, y2: lastDayBaseY }, hover));
+    }
     const hourlyDot = svgElement("circle", { class: "dot dot-hourly", r: 4 }, hover);
     const averageDot = svgElement("circle", { class: "dot dot-average", r: 4 }, hover);
+    const lastDayDot = svgElement("circle", { class: "dot dot-last-day", r: 4 }, hover);
 
     els.chartCanvas.replaceChildren(root);
     const rangeByDay = new Map(ranges.map(range => [range.day, range]));
-    state.geometry = { view, x, y, start, end, margin, plotWidth, width, rangeByDay, hover, crosshair, hourlyDot, averageDot };
+    state.geometry = { view, x, y, yLastDay, start, end, margin, plotWidth, width, rangeByDay, hover, crosshairs, hourlyDot, averageDot, lastDayDot };
 }
 
 function placeDot(dot, shown, cx, cy) {
-    dot.setAttribute("visibility", shown ? "visible" : "hidden");
+    dot.setAttribute("visibility", shown ? "inherit" : "hidden");
     dot.setAttribute("cx", cx);
     dot.setAttribute("cy", cy);
 }
@@ -1400,15 +1535,20 @@ function showHover(index, announce) {
     const sample = samples[index];
     const average = averages[index];
     const hoverX = Math.round(geometry.x(sample.t)) + 0.5;
-    geometry.crosshair.setAttribute("x1", hoverX);
-    geometry.crosshair.setAttribute("x2", hoverX);
+    for (const crosshair of geometry.crosshairs) {
+        crosshair.setAttribute("x1", hoverX);
+        crosshair.setAttribute("x2", hoverX);
+    }
     placeDot(geometry.hourlyDot, visible.hourly, hoverX, geometry.y(sample.v));
     placeDot(geometry.averageDot, visible.average && average !== null, hoverX, average === null ? 0 : geometry.y(average));
+    placeDot(geometry.lastDayDot, state.hasLastDay && sample.d !== null, hoverX, sample.d === null ? 0 : geometry.yLastDay(sample.d));
     geometry.hover.setAttribute("visibility", "visible");
 
     els.tooltipTime.textContent = fullTimeFormat.format(sample.t);
     els.tooltipHourly.textContent = integerFormat.format(sample.v);
     els.tooltipAverage.textContent = average === null ? "–" : decimalFormat.format(average);
+    els.tooltipLastDay.textContent = sample.d === null ? "–" : integerFormat.format(sample.d);
+    els.tooltipLastDayRow.hidden = !state.hasLastDay;
     const range = geometry.rangeByDay.get(startOfDay(sample.t));
     els.tooltipRange.textContent = range ? `${integerFormat.format(range.min)}–${integerFormat.format(range.max)}` : "";
     els.tooltipRangeRow.hidden = !visible.hourly || !range;
@@ -1425,7 +1565,8 @@ function showHover(index, announce) {
 
     if (announce) {
         const averageText = average === null ? "" : `, 24-hour average ${decimalFormat.format(average)}`;
-        els.live.textContent = `${fullTimeFormat.format(sample.t)}: ${integerFormat.format(sample.v)} active simulators${averageText}`;
+        const lastDayText = sample.d === null ? "" : `, ${integerFormat.format(sample.d)} different IP addresses in the last 24 hours`;
+        els.live.textContent = `${fullTimeFormat.format(sample.t)}: ${integerFormat.format(sample.v)} active simulators${averageText}${lastDayText}`;
     }
 }
 
@@ -1456,15 +1597,21 @@ function renderTable() {
     }
     const view = currentWindow();
     const rows = document.createDocumentFragment();
+    els.lastDayColumn.hidden = !state.hasLastDay;
     if (view) {
         for (let index = view.to; index >= view.from; index--) {
             const row = document.createElement("tr");
+            const sample = state.samples[index];
             const average = state.averages[index];
-            for (const [text, className] of [
-                [fullTimeFormat.format(state.samples[index].t), ""],
-                [integerFormat.format(state.samples[index].v), "num"],
+            const cells = [
+                [fullTimeFormat.format(sample.t), ""],
+                [integerFormat.format(sample.v), "num"],
                 [average === null ? "–" : decimalFormat.format(average), "num"],
-            ]) {
+            ];
+            if (state.hasLastDay) {
+                cells.push([sample.d === null ? "–" : integerFormat.format(sample.d), "num"]);
+            }
+            for (const [text, className] of cells) {
                 const cell = document.createElement("td");
                 cell.className = className;
                 cell.textContent = text;
@@ -1552,6 +1699,7 @@ function hideState() {
 function setData(samples, origin) {
     state.samples = samples;
     state.averages = computeAverages(samples);
+    state.hasLastDay = samples.some(sample => sample.d !== null);
     state.origin = origin;
     state.loadedAt = Date.now();
     state.refreshFailedAt = null;
@@ -1571,6 +1719,7 @@ function setData(samples, origin) {
 function clearData() {
     state.samples = [];
     state.averages = [];
+    state.hasLastDay = false;
     state.origin = null;
     els.demoBadge.hidden = true;
     renderAll();
@@ -1664,7 +1813,10 @@ function showDemo() {
 }
 
 function downloadCsv() {
-    const lines = ["timestamp,active_simulators", ...state.samples.map(sample => `${new Date(sample.t).toISOString().replace(".000Z", "Z")},${sample.v}`)];
+    const lines = [
+        "timestamp,active_simulators,last_day_simulators",
+        ...state.samples.map(sample => `${new Date(sample.t).toISOString().replace(".000Z", "Z")},${sample.v},${sample.d ?? ""}`),
+    ];
     const url = URL.createObjectURL(new Blob([`${lines.join("\n")}\n`], { type: "text/csv" }));
     const link = document.createElement("a");
     link.href = url;

@@ -324,7 +324,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         success &= NetworkService::get().getEmojiTypeByResourceId(data.emojiTypeByResourceId);
     }
     if (success) {
-        data.numActiveSimulators = NetworkService::get().getNumActiveSimulators();
+        data.activeSimulatorCounts = NetworkService::get().getActiveSimulatorCounts();
     }
 
     if (!success) {

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <functional>
 #include <optional>
+#include <vector>
 
 #include <imgui.h>
 
@@ -32,6 +33,7 @@ namespace
     auto constexpr HiddenGpuBarLengthVariation = 87;
     auto constexpr HiddenGpuBarOffsetY = 4.0f;
     auto constexpr HiddenGpuBarHeight = 8.0f;
+    auto constexpr SimulatorCountBadgeSpacing = 16.0f;
 }
 
 BrowserUserListWidget _BrowserUserListWidget::create(BrowserData const& data)
@@ -68,21 +70,32 @@ namespace
         ImGui::PopStyleColor();
     }
 
-    AlienGui::TabItemParameters getSimulatorsTabParameters(std::optional<int> const& numActiveSimulators)
+    AlienGui::TabBadgeParameters getSimulatorCountBadge(std::string const& text, ImColor const& color, ImColor const& symbolColor)
+    {
+        return AlienGui::TabBadgeParameters().text(text).color(color).icon(ICON_FA_GENDERLESS).iconColor(symbolColor).smallIcon(false);
+    }
+
+    AlienGui::TabItemParameters getSimulatorsTabParameters(std::optional<ActiveSimulatorCountsTO> const& counts)
     {
         auto result = AlienGui::TabItemParameters().name("Simulators");
-        if (numActiveSimulators) {
-            result.badge("  " + std::to_string(*numActiveSimulators) + " active")
-                .badgeColor(ImColor::HSV(0.0f, 0.4f, 0.9f))
-                .tooltip(Const::BrowserActiveSimulatorsTooltip);
+        if (!counts) {
+            return result;
         }
-        return result;
+        std::vector badges{
+            getSimulatorCountBadge(std::to_string(counts->numActive) + " active", Const::BrowserActiveSimulatorsColor, Const::BrowserOnlineSymbolColor)};
+        auto hasLastDay = counts->numLastDay > 0;
+        if (hasLastDay) {
+            badges.emplace_back(getSimulatorCountBadge(
+                std::to_string(counts->numLastDay) + " last 24h", Const::BrowserLastDaySimulatorsColor, Const::BrowserLastDayOnlineSymbolColor));
+        }
+        return result.badges(badges)
+            .badgeSpacing(SimulatorCountBadgeSpacing)
+            .tooltip(hasLastDay ? Const::BrowserSimulatorCountsTooltip : Const::BrowserActiveSimulatorsTooltip);
     }
 
     void drawLastDayOnlineSymbol()
     {
-        auto color = ImColor::HSV(0.16f, 0.5f, 0.66f);
-        ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserLastDayOnlineSymbolColor.Value);
         ImGui::Text(ICON_FA_GENDERLESS);
         ImGui::PopStyleColor();
     }
@@ -221,7 +234,7 @@ void _BrowserUserListWidget::process()
     auto selectedTabIndex = 0;
     AlienGui::TabBar(
         AlienGui::TabBarParameters().id("##Simulators").style(AlienGui::TabBarStyle::Group),
-        {getSimulatorsTabParameters(_data->getNumActiveSimulators())},
+        {getSimulatorsTabParameters(_data->getActiveSimulatorCounts())},
         selectedTabIndex);
 
     if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {

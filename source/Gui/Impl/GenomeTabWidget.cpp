@@ -237,12 +237,14 @@ namespace
 void _GenomeTabWidget::processRightField()
 {
     auto numWarnings = countWarningsWithoutFollowUps(_editData->genomeIssues);
-    auto geneNetworkBadge = numWarnings > 0 ? std::to_string(numWarnings) : std::string();
+    std::vector<AlienGui::TabBadgeParameters> geneNetworkBadges;
+    if (numWarnings > 0) {
+        geneNetworkBadges.emplace_back(AlienGui::TabBadgeParameters().text(std::to_string(numWarnings)).icon(ICON_FA_EXCLAMATION_TRIANGLE));
+    }
     auto selectedTabIndex = toInt(_selectedGenomeView);
     AlienGui::TabBar(
         AlienGui::TabBarParameters().id("##GenomeView").style(AlienGui::TabBarStyle::Group),
-        {AlienGui::TabItemParameters().name("Phenotype"),
-         AlienGui::TabItemParameters().name("Gene network").badge(geneNetworkBadge).badgeIcon(ICON_FA_EXCLAMATION_TRIANGLE)},
+        {AlienGui::TabItemParameters().name("Phenotype"), AlienGui::TabItemParameters().name("Gene network").badges(geneNetworkBadges)},
         selectedTabIndex);
     _selectedGenomeView = static_cast<GenomeView>(selectedTabIndex);
 

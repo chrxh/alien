@@ -8,6 +8,7 @@
 #include <Base/Cache.h>
 #include <Base/Singleton.h>
 
+#include "ActiveSimulatorCountsTO.h"
 #include "Definitions.h"
 #include "NetworkResourceRawTO.h"
 #include "UserTO.h"
@@ -54,7 +55,7 @@ public:
     bool getNetworkResourceList(std::vector<NetworkResourceRawTO>& result, bool withRetry);
     bool getResourcePictures(std::unordered_map<std::string, std::string>& jpgBySimId, std::vector<std::string> const& simIds);
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
-    std::optional<int> getNumActiveSimulators();
+    std::optional<ActiveSimulatorCountsTO> getActiveSimulatorCounts();
     void reportActiveSimulator();
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);

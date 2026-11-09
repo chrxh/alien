@@ -230,6 +230,11 @@ namespace Const
     ImColor BrowserPlaceholderTileBarColor;
     ImColor BrowserHiddenGpuBarColor;
     ImColor BrowserLoginHintFrameColor;
+
+    ImColor BrowserOnlineSymbolColor;
+    ImColor BrowserLastDayOnlineSymbolColor;
+    ImColor BrowserActiveSimulatorsColor;
+    ImColor BrowserLastDaySimulatorsColor;
 }
 
 void StyleService::setup()
@@ -489,6 +494,11 @@ void StyleService::setupPalette() const
     BrowserPlaceholderTileBarColor = LineSoftColor;
     BrowserHiddenGpuBarColor = themed(ImColor::HSV(0.570f, 0.222f, 0.459f, 0.420f), ImColor::HSV(0.570f, 0.120f, 0.560f, 0.420f));
     BrowserLoginHintFrameColor = themed(ImColor::HSV(0.0f, 0.0f, 0.0f), ImColor::HSV(0.574f, 0.120f, 0.740f));
+
+    BrowserOnlineSymbolColor = themed(ImColor::HSV(0.0f, 0.8f, 1.0f), ImColor::HSV(0.0f, 0.85f, 0.8f));
+    BrowserLastDayOnlineSymbolColor = themed(ImColor::HSV(0.16f, 0.5f, 0.66f), ImColor::HSV(0.12f, 0.9f, 0.62f));
+    BrowserActiveSimulatorsColor = themed(ImColor::HSV(0.0f, 0.4f, 0.9f), ImColor::HSV(0.0f, 0.7f, 0.7f));
+    BrowserLastDaySimulatorsColor = themed(ImColor::HSV(0.16f, 0.45f, 0.9f), ImColor::HSV(0.12f, 0.9f, 0.6f));
 }
 
 void StyleService::setupColors(ImGuiStyle& style) const

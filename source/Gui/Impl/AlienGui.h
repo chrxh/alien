@@ -562,6 +562,14 @@ public:
     static bool BeginTabBar(TabBarParameters const& parameters);
     static void EndTabBar();
 
+    struct TabBadgeParameters
+    {
+        MEMBER(TabBadgeParameters, std::string, text, std::string());
+        MEMBER(TabBadgeParameters, ImColor, color, Const::WarningColor);
+        MEMBER(TabBadgeParameters, std::string, icon, std::string());
+        MEMBER(TabBadgeParameters, std::optional<ImColor>, iconColor, std::nullopt);
+        MEMBER(TabBadgeParameters, bool, smallIcon, true);
+    };
     struct TabItemParameters
     {
         MEMBER(TabItemParameters, std::string, name, std::string());
@@ -569,9 +577,8 @@ public:
         MEMBER(TabItemParameters, bool, selected, false);
         MEMBER(TabItemParameters, bool*, open, nullptr);
         MEMBER(TabItemParameters, std::optional<ImColor>, markerColor, std::nullopt);
-        MEMBER(TabItemParameters, std::string, badge, std::string());
-        MEMBER(TabItemParameters, std::string, badgeIcon, std::string());
-        MEMBER(TabItemParameters, ImColor, badgeColor, Const::WarningColor);
+        MEMBER(TabItemParameters, std::vector<TabBadgeParameters>, badges, {});
+        MEMBER(TabItemParameters, std::optional<float>, badgeSpacing, std::nullopt);
         MEMBER(TabItemParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool BeginTabItem(TabItemParameters const& parameters);

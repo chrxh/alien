@@ -2699,14 +2699,45 @@ namespace
         return parameters._markerColor.has_value() ? scale(TabMarkerSize) + ImGui::GetStyle().ItemInnerSpacing.x : 0.0f;
     }
 
-    float calcTabBadgeWidth(AlienGui::TabItemParameters const& parameters)
+    float calcTabBadgeSpacing(AlienGui::TabItemParameters const& parameters)
     {
-        if (parameters._badge.empty()) {
+        return parameters._badgeSpacing.has_value() ? scale(*parameters._badgeSpacing) : ImGui::GetStyle().ItemInnerSpacing.x;
+    }
+
+    float calcTabBadgeIconWidth(AlienGui::TabBadgeParameters const& badge)
+    {
+        if (badge._icon.empty()) {
             return 0.0f;
         }
-        auto innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x;
-        auto iconWidth = parameters._badgeIcon.empty() ? 0.0f : calcSmallIconWidth(parameters._badgeIcon) + innerSpacing;
-        return innerSpacing + iconWidth + ImGui::CalcTextSize(parameters._badge.c_str()).x;
+        auto iconWidth = badge._smallIcon ? calcSmallIconWidth(badge._icon) : ImGui::CalcTextSize(badge._icon.c_str()).x;
+        return iconWidth + ImGui::GetStyle().ItemInnerSpacing.x;
+    }
+
+    float calcTabBadgesWidth(AlienGui::TabItemParameters const& parameters)
+    {
+        auto result = 0.0f;
+        for (auto const& badge : parameters._badges) {
+            result += calcTabBadgeSpacing(parameters) + calcTabBadgeIconWidth(badge) + ImGui::CalcTextSize(badge._text.c_str()).x;
+        }
+        return result;
+    }
+
+    void drawTabBadges(ImDrawList* drawList, AlienGui::TabItemParameters const& parameters, float posX, float textPosY)
+    {
+        for (auto const& badge : parameters._badges) {
+            posX += calcTabBadgeSpacing(parameters);
+            if (!badge._icon.empty()) {
+                auto iconColor = badge._iconColor.value_or(badge._color);
+                if (badge._smallIcon) {
+                    AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(badge._icon).pos({posX, textPosY}).color(iconColor));
+                } else {
+                    drawList->AddText(ImVec2(posX, textPosY), iconColor, badge._icon.c_str());
+                }
+                posX += calcTabBadgeIconWidth(badge);
+            }
+            drawList->AddText(ImVec2(posX, textPosY), badge._color, badge._text.c_str());
+            posX += ImGui::CalcTextSize(badge._text.c_str()).x;
+        }
     }
 
     void drawTabItem(AlienGui::TabItemParameters const& parameters, AlienGui::TabBarStyle style, TabItemPadding const& padding, bool selected)
@@ -2735,7 +2766,7 @@ namespace
         }
 
         auto nameSize = ImGui::CalcTextSize(parameters._name.c_str());
-        auto nameMaxX = std::max(posX, contentMaxX - calcTabBadgeWidth(parameters));
+        auto nameMaxX = std::max(posX, contentMaxX - calcTabBadgesWidth(parameters));
         if (isGroupStyle) {
             ImGui::PushStyleColor(ImGuiCol_Text, selected ? Const::GroupHighTextColor.Value : Const::GroupTextColor.Value);
         }
@@ -2745,14 +2776,7 @@ namespace
             ImGui::PopStyleColor();
         }
 
-        if (!parameters._badge.empty()) {
-            auto badgePosX = std::min(posX + nameSize.x, nameMaxX) + ImGui::GetStyle().ItemInnerSpacing.x;
-            if (!parameters._badgeIcon.empty()) {
-                AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(parameters._badgeIcon).pos({badgePosX, textPosY}).color(parameters._badgeColor));
-                badgePosX += calcSmallIconWidth(parameters._badgeIcon) + ImGui::GetStyle().ItemInnerSpacing.x;
-            }
-            drawList->AddText(ImVec2(badgePosX, textPosY), parameters._badgeColor, parameters._badge.c_str());
-        }
+        drawTabBadges(drawList, parameters, std::min(posX + nameSize.x, nameMaxX), textPosY);
         drawList->PopClipRect();
 
         if (parameters._tooltip.has_value()) {
@@ -2769,7 +2793,7 @@ bool AlienGui::BeginTabItem(TabItemParameters const& parameters)
     auto isGroupStyle = style == TabBarStyle::Group;
     auto padding = calcTabItemPadding(style, parameters._open != nullptr);
     auto width =
-        padding.left + calcTabMarkerWidth(parameters) + ImGui::CalcTextSize(parameters._name.c_str()).x + calcTabBadgeWidth(parameters) + padding.right;
+        padding.left + calcTabMarkerWidth(parameters) + ImGui::CalcTextSize(parameters._name.c_str()).x + calcTabBadgesWidth(parameters) + padding.right;
     ImGui::SetNextItemWidth(std::min(width, ImGui::GetFontSize() * MaxTabWidthInFontSizes));
 
     if (isGroupStyle) {

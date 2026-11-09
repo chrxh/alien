@@ -92,25 +92,37 @@ Every running instance of the graphical program fetches
 `/getversionedsimulationlist` on startup and then every 20 minutes. The
 command-line interface does not need that list and calls
 `/reportactivesimulator` instead, every 5 minutes after its start. The server
-remembers a keyed hash of each caller's IP address for 25 minutes and `/getactivesimulatorcount` answers with the number of these
-hashes. The key is random per server start, and the hashes live only in memory,
-never in the database. Clients whose user disabled the option send
-`countAsActive=false` or do not report and are not recorded.
+remembers a keyed hash of each caller's IP address for 24 hours after its last
+call. IPv6 addresses are reduced to their /64 prefix before hashing, so a host
+that changes its interface identifier counts once. The key is random per server
+start, and the hashes live only in memory, never in the database. Clients whose
+user disabled the option send `countAsActive=false` or do not report and are
+not recorded.
+
+`/getactivesimulatorcount` answers with the number of hashes seen in the last
+25 minutes (`activeSimulators`) and in the last 24 hours (`lastDaySimulators`).
+The second count needs 24 hours after a server start to cover all callers, so
+the key is missing during that time:
+
+```json
+{"activeSimulators": 3, "lastDaySimulators": 41}
+```
 
 This requires a single uvicorn process (no `--workers`). Behind a reverse proxy,
 uvicorn has to take the client address from `X-Forwarded-For` (its default for
 a proxy on 127.0.0.1), otherwise all clients share one address and count as one.
 
-At every full hour (UTC) the server stores the current count with its
-timestamp in the `active_simulator_counts` table. The count needs 25 minutes
-after a server start to cover all running clients, so no value is stored
-during that time. `/getactivesimulatorhistory` returns all stored values in
-chronological order. It allows requests from any origin
-(`Access-Control-Allow-Origin: *`), so web pages elsewhere and local HTML files
-can read it:
+At every full hour (UTC) the server stores both counts with their timestamp in
+the `active_simulator_counts` table. The active count needs 25 minutes after a
+server start to cover all running clients, so no value is stored during that
+time. Until the last day count is available, it is stored as `NULL`.
+`/getactivesimulatorhistory` returns all stored values in chronological order
+and leaves out `lastDaySimulators` where it is missing. It allows requests from
+any origin (`Access-Control-Allow-Origin: *`), so web pages elsewhere and local
+HTML files can read it:
 
 ```json
-[{"timestamp": "2026-10-18T14:00:00+00:00", "activeSimulators": 12}, ...]
+[{"timestamp": "2026-10-18T14:00:00+00:00", "activeSimulators": 12, "lastDaySimulators": 87}, ...]
 ```
 
 ## Tests

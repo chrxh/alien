@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import ipaddress
 import json
 import logging
 import os
@@ -11,8 +12,10 @@ import time
 import urllib.request
 import urllib.error
 
+from collections import OrderedDict
 from datetime import datetime, timezone
 from email.message import EmailMessage
+from itertools import takewhile
 
 from fastapi import FastAPI, Form, HTTPException, Request, Response
 from sqlalchemy import (
@@ -168,6 +171,8 @@ class ActiveSimulatorCount(Base):
 
     count: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    last_day_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
 
 # --- FastAPI app ---
 app = FastAPI()
@@ -185,43 +190,53 @@ app = FastAPI()
 TIME_SPENT_MAX_GAP_SECONDS = 30 * 60
 
 
-# Columns of ``users`` that were introduced after the initial release, mapped
-# to the SQL type used by the ``ALTER TABLE`` fallback in
-# ``_ensure_users_schema``. All of them are nullable so that existing rows stay
-# valid without a backfill.
+# Columns that were introduced after their table, mapped to the SQL type used
+# by the ``ALTER TABLE`` fallback in ``_add_missing_columns``. All of them are
+# nullable so that existing rows stay valid without a backfill.
 USERS_ADDED_COLUMNS = {
     "last_time_spent_update": "TIMESTAMP WITH TIME ZONE",
     "version": "VARCHAR(64)",
 }
+ACTIVE_SIMULATOR_COUNTS_ADDED_COLUMNS = {
+    "last_day_count": "INTEGER",
+}
 
 
-def _ensure_users_schema():
+def _add_missing_columns(table: str, added_columns: dict[str, str]):
     """Add columns introduced after the initial release.
 
     ``Base.metadata.create_all`` only creates *missing tables*; it does not
     migrate existing tables. For deployments upgrading from an earlier
-    revision we add the columns listed in ``USERS_ADDED_COLUMNS`` on startup
-    if they are not present yet. Production runs on PostgreSQL (see
-    ``README.md``); the test suite uses SQLite but always starts from a fresh
-    database, so the freshly-created schema already contains the columns and
-    these ALTERs are never executed there.
+    revision we add the columns listed in ``added_columns`` on startup if they
+    are not present yet. Production runs on PostgreSQL (see ``README.md``);
+    the test suite uses SQLite but always starts from a fresh database, so the
+    freshly-created schema already contains the columns and these ALTERs are
+    never executed there.
     """
     from sqlalchemy import inspect, text
 
     inspector = inspect(engine)
-    if not inspector.has_table("users"):
+    if not inspector.has_table(table):
         return
-    existing_cols = {col["name"] for col in inspector.get_columns("users")}
+    existing_cols = {col["name"] for col in inspector.get_columns(table)}
     missing = {
         name: sql_type
-        for name, sql_type in USERS_ADDED_COLUMNS.items()
+        for name, sql_type in added_columns.items()
         if name not in existing_cols
     }
     if not missing:
         return
     with engine.begin() as conn:
         for name, sql_type in missing.items():
-            conn.execute(text(f"ALTER TABLE users ADD COLUMN {name} {sql_type}"))
+            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}"))
+
+
+def _ensure_users_schema():
+    _add_missing_columns("users", USERS_ADDED_COLUMNS)
+
+
+def _ensure_active_simulator_counts_schema():
+    _add_missing_columns("active_simulator_counts", ACTIVE_SIMULATOR_COUNTS_ADDED_COLUMNS)
 
 
 @app.on_event("startup")
@@ -229,6 +244,7 @@ def startup():
     # creates tables only if they don't exist
     Base.metadata.create_all(bind=engine)
     _ensure_users_schema()
+    _ensure_active_simulator_counts_schema()
 
 @app.get("/health")
 def health():
@@ -240,51 +256,81 @@ def health():
 # ``/getversionedsimulationlist`` on startup and then every 20 minutes. The
 # command-line interface does not need that list and calls
 # ``/reportactivesimulator`` instead, every 5 minutes after its start. The
-# server remembers the callers of the last ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS``
-# to count the running simulators. Callers are told apart by a keyed hash of
-# their IP address. The key is random,
-# created at server start and never stored, and the hashes are kept in memory
-# only. Clients that opt out send ``countAsActive=false`` or do not report and
-# are not recorded. This requires a single server process, which is how the
-# server is deployed.
+# server remembers the callers of the last ``LAST_DAY_SECONDS``. The callers of
+# the last ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are the running simulators, all
+# of them are the simulators of the last day. Callers are told apart by a keyed
+# hash of their IP address, IPv6 addresses reduced to their /64 prefix because
+# hosts change their interface identifier. The key is random, created at
+# server start and never stored, and the hashes are kept in memory only.
+# Clients that opt out send ``countAsActive=false`` or do not report and are
+# not recorded. This requires a single server process, which is how the server
+# is deployed. The last day count only covers the callers since the server
+# start, so it is withheld during the first ``LAST_DAY_SECONDS``. Beyond
+# ``MAX_ACTIVE_SIMULATORS`` callers the one with the oldest call is dropped, so
+# a flood of addresses cannot block new callers for a whole day.
 ACTIVE_SIMULATOR_TIMEOUT_SECONDS = 25 * 60
+LAST_DAY_SECONDS = 24 * 60 * 60
 MAX_ACTIVE_SIMULATORS = 100_000
 
+_server_start_time = time.monotonic()
 _active_simulator_key = secrets.token_bytes(32)
-_active_simulators: dict[str, float] = {}
+_active_simulators: OrderedDict[str, float] = OrderedDict()
 _active_simulators_lock = threading.Lock()
 
 
-def _remove_inactive_simulators(now: float):
-    inactive = [
-        caller_hash
-        for caller_hash, last_seen in _active_simulators.items()
-        if now - last_seen > ACTIVE_SIMULATOR_TIMEOUT_SECONDS
-    ]
-    for caller_hash in inactive:
-        del _active_simulators[caller_hash]
+def _remove_expired_simulators(now: float):
+    while _active_simulators and now - next(iter(_active_simulators.values())) > LAST_DAY_SECONDS:
+        _active_simulators.popitem(last=False)
+
+
+def _caller_address(host: str) -> str:
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        return host
+    if isinstance(address, ipaddress.IPv6Address):
+        if address.ipv4_mapped is not None:
+            return str(address.ipv4_mapped)
+        return str(ipaddress.IPv6Network((address, 64), strict=False))
+    return str(address)
 
 
 def _record_active_simulator(request: Request):
     if request.client is None:
         return
-    caller_hash = hmac.new(_active_simulator_key, request.client.host.encode("utf-8"), hashlib.sha256).hexdigest()
+    caller_hash = hmac.new(_active_simulator_key, _caller_address(request.client.host).encode("utf-8"), hashlib.sha256).hexdigest()
     now = time.monotonic()
     with _active_simulators_lock:
-        _remove_inactive_simulators(now)
-        if caller_hash in _active_simulators or len(_active_simulators) < MAX_ACTIVE_SIMULATORS:
-            _active_simulators[caller_hash] = now
+        _remove_expired_simulators(now)
+        _active_simulators[caller_hash] = now
+        _active_simulators.move_to_end(caller_hash)
+        if len(_active_simulators) > MAX_ACTIVE_SIMULATORS:
+            _active_simulators.popitem(last=False)
 
 
 def _count_active_simulators() -> int:
+    now = time.monotonic()
     with _active_simulators_lock:
-        _remove_inactive_simulators(time.monotonic())
+        _remove_expired_simulators(now)
+        return sum(1 for _ in takewhile(lambda last_seen: now - last_seen <= ACTIVE_SIMULATOR_TIMEOUT_SECONDS, reversed(_active_simulators.values())))
+
+
+def _count_last_day_simulators() -> int | None:
+    now = time.monotonic()
+    if now - _server_start_time < LAST_DAY_SECONDS:
+        return None
+    with _active_simulators_lock:
+        _remove_expired_simulators(now)
         return len(_active_simulators)
 
 
 @app.get("/getactivesimulatorcount")
 def get_active_simulator_count():
-    return {"activeSimulators": _count_active_simulators()}
+    result = {"activeSimulators": _count_active_simulators()}
+    last_day_count = _count_last_day_simulators()
+    if last_day_count is not None:
+        result["lastDaySimulators"] = last_day_count
+    return result
 
 
 @app.post("/reportactivesimulator")
@@ -295,12 +341,12 @@ def report_active_simulator(request: Request):
 
 # --- Active simulator history ---
 # The active simulator count is stored in ``active_simulator_counts`` at every
-# full hour (UTC). It only covers the callers since the server start, so the
-# snapshots of the first ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are skipped
-# instead of storing a count that is too low.
+# full hour (UTC), together with the last day count once it is available. It
+# only covers the callers since the server start, so the snapshots of the first
+# ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are skipped instead of storing a count
+# that is too low.
 ACTIVE_SIMULATOR_HISTORY_INTERVAL_SECONDS = 60 * 60
 
-_server_start_time = time.monotonic()
 _active_simulator_history_stop = threading.Event()
 _active_simulator_history_logger = logging.getLogger("alien-server.activesimulators")
 
@@ -309,9 +355,10 @@ def _store_active_simulator_count(timestamp: datetime):
     if time.monotonic() - _server_start_time < ACTIVE_SIMULATOR_TIMEOUT_SECONDS:
         return
     count = _count_active_simulators()
+    last_day_count = _count_last_day_simulators()
     with Session(engine) as session:
         with session.begin():
-            session.add(ActiveSimulatorCount(timestamp=timestamp, count=count))
+            session.add(ActiveSimulatorCount(timestamp=timestamp, count=count, last_day_count=last_day_count))
 
 
 def _store_active_simulator_counts_hourly():
@@ -344,14 +391,23 @@ def _as_utc(timestamp: datetime) -> datetime:
     return timestamp.astimezone(timezone.utc)
 
 
+def _history_entry(timestamp: datetime, count: int, last_day_count: int | None) -> dict:
+    entry = {"timestamp": _as_utc(timestamp).isoformat(), "activeSimulators": count}
+    if last_day_count is not None:
+        entry["lastDaySimulators"] = last_day_count
+    return entry
+
+
 @app.get("/getactivesimulatorhistory")
 def get_active_simulator_history(response: Response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     with Session(engine) as session:
         rows = session.execute(
-            select(ActiveSimulatorCount.timestamp, ActiveSimulatorCount.count).order_by(ActiveSimulatorCount.timestamp)
+            select(ActiveSimulatorCount.timestamp, ActiveSimulatorCount.count, ActiveSimulatorCount.last_day_count).order_by(
+                ActiveSimulatorCount.timestamp
+            )
         ).all()
-    return [{"timestamp": _as_utc(timestamp).isoformat(), "activeSimulators": count} for timestamp, count in rows]
+    return [_history_entry(timestamp, count, last_day_count) for timestamp, count, last_day_count in rows]
 
 
 # --- Helpers ---

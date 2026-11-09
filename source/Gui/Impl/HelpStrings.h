@@ -50,11 +50,17 @@ namespace Const
 
     std::string const BrowserActiveSimulatorsTooltip =
         "Number of ALIEN instances running in the last 25 minutes, including the command-line interface. The server tells them apart by a hash of their IP "
-        "address and deletes the hash 25 minutes after the last report. Instances sharing one IP address count once.";
+        "address that it keeps only in memory. Instances sharing one IP address count once.";
+
+    std::string const BrowserSimulatorCountsTooltip =
+        "Active: ALIEN instances running in the last 25 minutes.\n"
+        "Last 24h: different IP addresses that ran ALIEN in the last 24 hours.\n\n"
+        "Both include the command-line interface and instances without login. The server keeps only a hash of each IP address in memory and deletes it "
+        "24 hours after the last report. Instances sharing one IP address count once. Disable 'Count me as active' in the network settings to be left out.";
 
     std::string const NetworkCountAsActiveTooltip =
-        "If this option is enabled, this program and the command-line interface are included in the number of active simulators shown in the browser window. "
-        "The server tells the instances apart by a hash of their IP address that it keeps only in memory for 25 minutes and never stores.";
+        "If this option is enabled, this program and the command-line interface are included in the numbers of active simulators shown in the browser "
+        "window. The server tells the instances apart by a hash of their IP address that it keeps only in memory for 24 hours and never stores.";
 
     std::string const BrowserFeaturedWorkspaceTooltip =
         "This workspace is curated by the alien-project and contains the simulations that come along with the released versions. They cover a wide range and "

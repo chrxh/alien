@@ -244,14 +244,14 @@ void _BrowserData::setUserTOs(std::vector<UserTO> const& userTOs)
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-std::optional<int> _BrowserData::getNumActiveSimulators() const
+std::optional<ActiveSimulatorCountsTO> const& _BrowserData::getActiveSimulatorCounts() const
 {
-    return _numActiveSimulators;
+    return _activeSimulatorCounts;
 }
 
-void _BrowserData::setNumActiveSimulators(std::optional<int> const& numActiveSimulators)
+void _BrowserData::setActiveSimulatorCounts(std::optional<ActiveSimulatorCountsTO> const& activeSimulatorCounts)
 {
-    _numActiveSimulators = numActiveSimulators;
+    _activeSimulatorCounts = activeSimulatorCounts;
 }
 
 DownloadCache const& _BrowserData::getDownloadCache() const

@@ -72,7 +72,7 @@ void BrowserController::refresh(bool withRetry)
             auto data = _PersisterFacade::get()->fetchGetNetworkResourcesData(requestId);
             _data->setUserTOs(data.userTOs);
             _data->setOwnEmojiTypeBySimId(data.emojiTypeByResourceId);
-            _data->setNumActiveSimulators(data.numActiveSimulators);
+            _data->setActiveSimulatorCounts(data.activeSimulatorCounts);
 
             auto userName = NetworkService::get().getLoggedInUserName();
             for (auto const& workspaceId : _data->getWorkspaces() | std::views::keys) {
