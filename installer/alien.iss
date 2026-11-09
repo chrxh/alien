@@ -69,7 +69,7 @@ WizardStyle=modern
 
 [Tasks]
 #ifdef WithAmd
-Name: nvidia; Description: "NVIDIA, GeForce RTX 20 series or newer"; GroupDescription: "Graphics card:"; Flags: exclusive
+Name: nvidia; Description: "NVIDIA, GeForce GTX 16 series, RTX 20 series or newer"; GroupDescription: "Graphics card:"; Flags: exclusive
 Name: amd; Description: "AMD, Radeon RX 6000 series or newer (experimental, may be slow or crash)"; GroupDescription: "Graphics card:"; Flags: exclusive unchecked
 #endif
 Name: startmenuicon; Description: "Create a &Start menu entry"; GroupDescription: "Shortcuts:"

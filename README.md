@@ -121,7 +121,7 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 | **Linux**          | build from sources                  | build from sources                  |
 | **Cloud instance** | Docker image, CLI only              | not available                       |
 
-NVIDIA: compute capability 7.5 or higher, i.e. GeForce RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer. Support for AMD GPUs is experimental, so ALIEN may run slowly or crash.
+NVIDIA: compute capability 7.5 or higher, i.e. GeForce GTX 16 series, RTX 20 series or newer ([list of supported GPUs](https://en.wikipedia.org/wiki/CUDA#GPUs_supported)). AMD: RDNA2 or newer. Support for AMD GPUs is experimental, so ALIEN may run slowly or crash.
 
 ### Windows: nightly build
 
@@ -215,7 +215,7 @@ The same chapters can also be read here on GitHub in [resources/docs](resources/
 ## 🔎 Troubleshooting
 
 If ALIEN does not start or crashes, please make sure that:
-1) You have a supported graphics card: an NVIDIA GPU with compute capability 7.5 or higher (for example GeForce RTX 20 series) or an AMD GPU of the RDNA2 generation or newer.
+1) You have a supported graphics card: an NVIDIA GPU with compute capability 7.5 or higher (for example GeForce GTX 16 or RTX 20 series) or an AMD GPU of the RDNA2 generation or newer.
 2) You have the latest graphics driver installed. It has to support Vulkan 1.3.
 3) The name of the installation directory (including the parent directories) contains no non-English characters. On Windows, the user name should not contain such characters either.
 4) ALIEN has write access to its own directory.
