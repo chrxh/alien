@@ -26,4 +26,5 @@ namespace Const
     extern std::filesystem::path const LogoCoreFilename;
     extern std::filesystem::path const LogoGlowFilename;
     extern std::vector<std::filesystem::path> const WindowIconFilenames;
+    extern std::filesystem::path const CaBundleFilename;
 }

@@ -18,7 +18,8 @@ namespace
 
     void configureClient(httplib::Client& client)
     {
-        client.set_ca_cert_path("./resources/ca-bundle.crt");
+        auto caBundleFilename = Const::CaBundleFilename.u8string();
+        client.set_ca_cert_path(reinterpret_cast<char const*>(caBundleFilename.c_str()));
         client.enable_server_certificate_verification(true);
 
         // Transparently follow 301/302 redirects so that an nginx vhost

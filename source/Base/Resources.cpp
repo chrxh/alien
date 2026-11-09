@@ -1,5 +1,30 @@
 #include "Resources.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
+namespace
+{
+    std::filesystem::path getProgramDirectory()
+    {
+#ifdef _WIN32
+        auto constexpr MaxPathLength = 32768;
+        std::wstring programFilename(MaxPathLength, L'\0');
+        auto length = GetModuleFileNameW(nullptr, programFilename.data(), MaxPathLength);
+        if (length == 0) {
+            return {};
+        }
+        programFilename.resize(length);
+        return std::filesystem::path(programFilename).parent_path();
+#else
+        std::error_code errorCode;
+        auto programFilename = std::filesystem::read_symlink("/proc/self/exe", errorCode);
+        return errorCode ? std::filesystem::path() : programFilename.parent_path();
+#endif
+    }
+}
+
 namespace Const
 {
     std::string const ProgramVersion = "5.0.0-alpha.42";
@@ -23,4 +48,5 @@ namespace Const
     std::filesystem::path const LogoGlowFilename = ImagesPath / "logoGlow.png";
     std::vector<std::filesystem::path> const WindowIconFilenames =
         {ImagesPath / "alien16.png", ImagesPath / "alien32.png", ImagesPath / "alien48.png", ImagesPath / "alien256.png"};
+    std::filesystem::path const CaBundleFilename = getProgramDirectory() / ResourcePath / "ca-bundle.crt";
 }
