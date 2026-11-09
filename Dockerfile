@@ -33,18 +33,14 @@ RUN apt-get update \
         libxi6 \
  && rm -rf /var/lib/apt/lists/*
 
-# vast.ai starts Jupyter with --preferred-dir /workspace, but the base image does
-# not carry that directory, which makes the server abort during initialization.
-# It is unrelated to ALIEN and only affects the Jupyter launch mode.
-RUN mkdir -p /workspace
-
 COPY alien-cli /opt/alien/alien-cli
 COPY resources /opt/alien/resources
-
-# NetworkService reads ./resources/ca-bundle.crt through a relative path, so the
-# working directory has to be the one that holds resources/.
-WORKDIR /opt/alien
 ENV PATH="/opt/alien:${PATH}"
+
+# SSH logins start in /workspace, so the simulation files belong there. The base
+# image does not carry that directory, and vast.ai's Jupyter launch mode aborts
+# when it starts Jupyter with --preferred-dir /workspace.
+WORKDIR /workspace
 
 # Deliberately no ENTRYPOINT and no CMD: the base image starts SSH, Jupyter and
 # the instance portal from its own entrypoint, and overriding it would take those

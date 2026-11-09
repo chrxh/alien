@@ -133,9 +133,9 @@ If the program crashes for an unknown reason, please refer to the [troubleshooti
 
 For long runs without local hardware, a nightly image containing the [command-line interface](#command-line-interface) is published on Docker Hub as `chrxh/alien:nightly`. It holds `alien-cli` and its resource folder. There is no GUI in the image.
 
-On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for a GeForce RTX 20 to 50 series GPU. Upload your simulation file to the instance with `scp`, then connect via SSH and start it by hand:
+On a rented GPU instance (for example [vast.ai](https://vast.ai)), enter `chrxh/alien:nightly` as the instance image and filter the offers for a GeForce RTX 20 to 50 series GPU. Upload your simulation file to `/workspace` on the instance with `scp`, then connect via SSH and start it by hand:
 ```
-cd /opt/alien
+cd /workspace
 alien-cli -i example.sim -o output.sim
 ```
 
