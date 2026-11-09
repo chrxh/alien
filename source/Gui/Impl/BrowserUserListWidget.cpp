@@ -83,14 +83,11 @@ namespace
         }
         std::vector badges{
             getSimulatorCountBadge(std::to_string(counts->numActive) + " active", Const::BrowserActiveSimulatorsColor, Const::BrowserOnlineSymbolColor)};
-        auto hasLastDay = counts->numLastDay > 0;
-        if (hasLastDay) {
+        if (counts->numLastDay > 0) {
             badges.emplace_back(getSimulatorCountBadge(
                 std::to_string(counts->numLastDay) + " last 24h", Const::BrowserLastDaySimulatorsColor, Const::BrowserLastDayOnlineSymbolColor));
         }
-        return result.badges(badges)
-            .badgeSpacing(SimulatorCountBadgeSpacing)
-            .tooltip(hasLastDay ? Const::BrowserSimulatorCountsTooltip : Const::BrowserActiveSimulatorsTooltip);
+        return result.badges(badges).badgeSpacing(SimulatorCountBadgeSpacing).tooltip(Const::BrowserSimulatorCountsTooltip);
     }
 
     void drawLastDayOnlineSymbol()

@@ -48,10 +48,6 @@ namespace Const
         "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
     std::string const LoginShareGpuInfoTooltip2 = "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
-    std::string const BrowserActiveSimulatorsTooltip =
-        "Number of ALIEN instances running in the last 25 minutes, including the command-line interface. The server tells them apart by a hash of their IP "
-        "address that it keeps only in memory. Instances sharing one IP address count once.";
-
     std::string const BrowserSimulatorCountsTooltip =
         "Active: ALIEN instances running in the last 25 minutes.\n"
         "Last 24h: different IP addresses that ran ALIEN in the last 24 hours.\n\n"
