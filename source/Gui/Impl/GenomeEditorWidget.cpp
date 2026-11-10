@@ -52,15 +52,18 @@ void _GenomeEditorWidget::process()
     if (ImGui::BeginChild("GenomeEditor", ImVec2(_layoutData->genomeEditorWidth, 0))) {
         auto availableHeight = ImGui::GetContentRegionAvail().y;
         auto headerHeight = processHeaderData();
-        if (!_layoutData->headerFittedToContent) {
+        if (!_layoutData->headerResizedByUser) {
             auto structureHeightBelowFittedHeader = availableHeight - headerHeight;
             if (structureHeightBelowFittedHeader >= headerHeight) {
                 _layoutData->structureHeight = structureHeightBelowFittedHeader;
             }
-            _layoutData->headerFittedToContent = true;
         }
 
+        auto structureHeightBeforeSeparator = _layoutData->structureHeight;
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->structureHeight);
+        if (_layoutData->structureHeight != structureHeightBeforeSeparator) {
+            _layoutData->headerResizedByUser = true;
+        }
 
         processStructureTree();
         processStructureButtons();
