@@ -1,10 +1,10 @@
 # How life works
 
-This chapter explains the ideas behind the living part of ALIEN: what cells and creatures are, how they get energy, how they sense and act, and how they reproduce and evolve. It gives you the big picture. The details follow in the [reference chapters](cell-types.md).
+This chapter explains the ideas behind the living part of ALIEN: what cells and creatures are, how they get energy, how they sense and act, and how they reproduce and evolve. It gives an overview. The details are in the [reference chapters](cell-types.md).
 
 ## Cells and creatures
 
-A **creature** is a network of **cells**. The cells are round particles like all other objects, but they are alive: each cell carries energy, has a **cell type** that determines its special ability and runs a tiny **neural network** that decides what the cell does. Cells are linked by **connections**, which hold the creature together like elastic bonds. Energy and information flow along these connections.
+A **creature** is a network of **cells**. Like all objects in ALIEN, cells are round particles, but they are alive. Each cell carries energy and has a **cell type** that determines its special ability. It also runs a small **neural network** that decides what the cell does. Cells are linked by **connections**, which hold the creature together like elastic bonds. Energy and information flow along these connections.
 
 All cells of a creature share the same **genome**, the blueprint from which the creature was built.
 
@@ -12,23 +12,23 @@ All cells of a creature share the same **genome**, the blueprint from which the 
 
 ## Energy keeps cells alive
 
-Every cell needs energy, and there are two kinds of it:
+Every cell needs energy. Cells hold two kinds of energy:
 
-- **Usable energy** keeps the cell alive and pays for its actions. If it falls below the **minimum energy** (50 by default), the cell starts to die. The **normal energy** (100 by default) is the typical amount a cell has. Building a new cell costs this amount.
-- **Raw energy** is unprocessed food. Cells collect raw energy when they absorb energy particles or attack other cells. Only **digestor** cells can turn raw energy into usable energy.
+- **Usable energy** keeps the cell alive and pays for its actions. If the usable energy falls below the **minimum energy** (50 by default), the cell starts to die. The **normal energy** (100 by default) is the typical amount a cell has. Building a new cell costs this amount.
+- **Raw energy** is energy that has not been processed yet. Cells collect raw energy when they absorb energy particles or attack other cells. Only **digestor** cells can turn raw energy into usable energy.
 
-Usable energy flows along the connections between cells, so well supplied cells feed their neighbors. Energy never appears out of nothing. When a cell pays for an action or dies, its energy is released as energy particles, which other cells can collect again. The only exception is the optional external energy pool, which you control in the simulation parameters. See [Energy](energy.md) for the complete picture.
+Usable energy flows along the connections between cells, so well-supplied cells feed their neighbors. The energy that a cell pays for an attack, an injection or a muscle movement is released as energy particles. When a cell dies, all of its energy is released in the same way. Other cells can collect these particles again. The energy for building a new cell is not released but goes into the new cell. Energy never appears out of nothing. The main exception is the optional external energy pool, which you control in the simulation parameters. See [Energy](energy.md) for the complete picture.
 
 ## Sense, think, act
 
 Cells act in **cycles**. Every 6 time steps, each cell does two things:
 
-1. **Think.** The neural network of the cell calculates eight output values, the **signal**. Its inputs are the signals of the connected cells, a few memory values and some information about the cell itself, such as its energy and age.
+1. **Think.** The neural network of the cell calculates eight values for the **signal** and four memory values that the cell keeps for the next cycle. The inputs of the network are the signals of the connected cells, the memory values from the previous cycle and some information about the cell itself, such as its energy and age.
 2. **Act.** The cell type uses the signal. A muscle cell moves when its signal tells it to, a sensor cell writes what it has found into the signal, an attacker cell attacks when it is triggered, and so on.
 
 The connected cells read this signal in the next cycle. In this way information travels through the creature from cell to cell. A sensor at one end of a creature can steer the muscles at the other end.
 
-By default, the neural network of a cell simply copies the signal of its first connection, which points to the cell of the next node. Signals therefore flow from the last node of a gene towards node 0, against the order in which the cells were built, without any further setup. This makes it easy to build working creatures: put a sensor at the end of a gene and muscles in front of it.
+The cells of a creature are built from the nodes of its genome, as explained [below](#the-genome-is-the-blueprint). By default, the neural network of a cell simply copies the signal of its first connection, which points to the cell of the next node. Signals therefore flow from the last node of a gene towards node 0, against the order in which the cells were built, without any further setup. This makes it easy to build working creatures: put a sensor at the end of a gene and muscles closer to node 0.
 
 ![Signals travel from cell to cell. Each cell reads the signal of its neighbor in the next cycle.](images/signal-flow.png)
 
@@ -39,22 +39,22 @@ The signal consists of eight **channels**, numbered #0 to #7. Most cell types us
 A genome is organized in three levels:
 
 - The **genome** holds a list of **genes** and some general settings, such as the mutation rates.
-- A **gene** describes a group of cells and its geometric **shape**, for example a straight segment, a triangle or a hexagon.
-- A **node** describes a single cell of a gene: its cell type, its color, its neural network and an angle.
+- A **gene** describes a group of cells and their geometric **shape**, for example a straight segment, a triangle or a hexagon.
+- A **node** describes a single cell of a gene: its cell type, its color, its neural network and its angle.
 
-The first gene is the **root gene**. It describes the body of the creature. A node can additionally carry a **constructor**. A cell with a constructor builds the cells of another gene, cell by cell. This is how creatures grow arms, organs or flowers, and how they build offspring.
+The first gene is the **root gene**. It describes the body of the creature. A node can additionally carry a **constructor**. A cell with a constructor builds the cells of a gene, one after another. This is how creatures grow arms, organs or flowers, and how they build offspring.
 
 ![A genome consists of genes, and genes consist of nodes. Constructors refer to the genes they build.](images/genome-structure.png)
 
-New creatures start as a **seed**: a single cell whose constructor builds the root gene. Once the body is complete, the constructors inside it start to work.
+A creature that you create from a genome grows from a **seed**: a single cell whose constructor builds the root gene. When the body is complete, it detaches from the seed and the constructors inside it start to work. Offspring need no seed, because a constructor of the parent builds them directly.
 
 ## Reproduction and evolution
 
 A creature reproduces when one of its constructors builds the root gene again and **separates** the result. The new cells then form an independent creature, the **offspring**, which receives a copy of the genome.
 
-When the genome is passed on, it can **mutate**. Each genome contains its own mutation rates, which determine how likely changes are: a different weight in a neural network, a new node, a lost gene, a different cell type and many more. Most mutations are harmful, some are neutral and a few are beneficial. Creatures with beneficial mutations collect more energy, build more offspring and spread. This is evolution.
+The genome of a creature can **mutate** when the creature starts to build its first offspring. From then on, the creature uses the mutated genome itself and passes it on to all of its offspring. A seed passes on its genome unchanged. Each genome contains its own mutation rates, which determine how likely each kind of change is, for example a different weight in a neural network, a new node, a lost gene or a different cell type. Most mutations are harmful, some are neutral and a few are beneficial. Creatures with beneficial mutations collect more energy, build more offspring and spread. Over many generations, this leads to evolution.
 
-Related creatures form a **lineage**. When the mutations of a creature have added up beyond a threshold, it founds a new lineage. The [Evolution dashboard](user-interface.md#evolution-dashboard) shows how lineages grow and shrink.
+Related creatures form a **lineage**. When the mutations that a creature has accumulated within its current lineage exceed a threshold, it founds a new lineage. The [Evolution dashboard](user-interface.md#evolution-dashboard) shows how lineages grow and shrink.
 
 ## Death
 
@@ -62,15 +62,16 @@ A cell starts to die when:
 
 - its usable energy falls below the minimum energy, for example because it was attacked,
 - it reaches the maximum age, if one is set,
-- it has lost the connection to the **head cell** of its creature, for example because the creature was torn apart.
+- it has lost the connection to the first cell of its creature, the **head cell**, for example because the creature was torn apart,
+- it belongs to an offspring that is still under construction and has lost the connection to its constructor, for example because the constructor cell died.
 
-Dying cells disintegrate over time and release their energy as energy particles. In this way the energy returns to the world and can feed others.
+Dying cells disintegrate over time and release their energy as energy particles.
 
 ## The cell types at a glance
 
 | Cell type | Ability |
 | --- | --- |
-| [Base](cell-types.md#base) | No special ability. Only the neural network runs. Good for relaying signals and for structure. |
+| [Base](cell-types.md#base) | No special ability. Only the neural network runs. Used for relaying signals and for the structure of a body. |
 | [Depot](cell-types.md#depot) | Stores usable energy and releases it again on demand. |
 | [Sensor](cell-types.md#sensor) | Scans the surroundings for energy, solids, free cells or other creatures. |
 | [Generator](cell-types.md#generator) | Produces a periodic signal, like a heartbeat. |
@@ -82,7 +83,7 @@ Dying cells disintegrate over time and release their energy as energy particles.
 | [Detonator](cell-types.md#detonator) | Explodes after a countdown. |
 | [Digestor](cell-types.md#digestor) | Converts raw energy into usable energy. |
 | [Memory](cell-types.md#memory) | Delays, records, stores or smooths signals. |
-| [Communicator](cell-types.md#communicator) | Sends signals to other creatures. |
+| [Communicator](cell-types.md#communicator) | Exchanges signals with other creatures. |
 | [Void](cell-types.md#void) | A temporary placeholder that disappears after construction. |
 
-The ability to construct other cells is not a cell type of its own. Any cell can additionally carry a [constructor](cell-types.md#constructor).
+The ability to construct other cells is not a cell type of its own. Any cell except a void cell can additionally carry a [constructor](cell-types.md#constructor).
