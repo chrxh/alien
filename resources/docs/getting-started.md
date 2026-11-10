@@ -6,7 +6,7 @@
 
 This documentation is organized into three parts. **Start here** covers the first steps, the user interface and how to control ALIEN with AI agents. **Explore** introduces the central concepts step by step, from the physics sandbox to creature design, evolution and generative art. **Reference** documents every cell type, the genome format, the neural networks, all simulation parameters and the controls in detail. The search field above the table of contents finds any term across all chapters.
 
-> **Tip:** Press **F1** to open or close this documentation.
+> **Tip:** In the ALIEN program, press **F1** to open or close this documentation at any time.
 
 ## What you can do with ALIEN
 
