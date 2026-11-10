@@ -24,8 +24,12 @@ void AlienWindow::init()
     _on = GlobalSettings::get().getValue(_settingsNode + ".active", _defaultOn);
     _state = static_cast<WindowState>(GlobalSettings::get().getValue(_settingsNode + ".state", toInt(_state)));
     _isFocused = GlobalSettings::get().getValue(_settingsNode + ".is focused", _isFocused);
-    _savedPos.x = GlobalSettings::get().getValue(_settingsNode + ".saved pos.x", _defaultPos.x);
-    _savedPos.y = GlobalSettings::get().getValue(_settingsNode + ".saved pos.y", _defaultPos.y);
+    auto viewSize = Viewport::get().getViewSize();
+    auto defaultPos = RealVector2D{
+        std::max(0.0f, std::min(_defaultPos.x, toFloat(viewSize.x) - _defaultSize.x)),
+        std::max(0.0f, std::min(_defaultPos.y, toFloat(viewSize.y) - _defaultSize.y))};
+    _savedPos.x = GlobalSettings::get().getValue(_settingsNode + ".saved pos.x", defaultPos.x);
+    _savedPos.y = GlobalSettings::get().getValue(_settingsNode + ".saved pos.y", defaultPos.y);
     auto correction = WindowController::get().getContentScaleCorrection();
     _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _defaultSize.x) * correction;
     _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _defaultSize.y) * correction;
