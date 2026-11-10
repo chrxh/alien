@@ -32,7 +32,7 @@ namespace
 }
 
 DocumentationWindow::DocumentationWindow()
-    : AlienWindow("Documentation", "windows.documentation", true, true, {420.0f, 120.0f}, {1040.0f, 720.0f})
+    : AlienWindow("Documentation", "windows.documentation", true, true, {500.0f, 250.0f}, {1000.0f, 700.0f})
 {}
 
 void DocumentationWindow::initIntern()
