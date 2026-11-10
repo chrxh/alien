@@ -313,7 +313,7 @@ namespace
 }
 
 EvolutionDashboardWindow::EvolutionDashboardWindow()
-    : AlienWindow("Evolution dashboard", "windows.evolution dashboard", false, true, {60.0f, 60.0f}, {700.0f, 500.0f}, {700.0f, 500.0f})
+    : AlienWindow("Evolution dashboard", "windows.evolution dashboard", false, true, {60.0f, 60.0f}, {700.0f, 910.0f}, {700.0f, 500.0f})
 {}
 
 void EvolutionDashboardWindow::initIntern()

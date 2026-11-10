@@ -89,7 +89,7 @@ std::vector<PreviewDesc> GenomeEditorWindow::getCurrentPreviewDescs() const
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
-    : AlienWindow("Genome editor", "windows.genome editor", false, true, {345.0f, 192.0f}, {1100.0f, 732.0f}, {500.0f, 300.0f})
+    : AlienWindow("Genome editor", "windows.genome editor", false, true, {345.0f, 80.0f}, {1320.0f, 900.0f}, {500.0f, 300.0f})
 {}
 
 void GenomeEditorWindow::initIntern()

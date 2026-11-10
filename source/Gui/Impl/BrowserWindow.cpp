@@ -35,7 +35,7 @@
 
 namespace
 {
-    auto constexpr UserTableWidth = 300.0f;
+    auto constexpr UserTableWidth = 340.0f;
     auto constexpr BrowserBottomSpace = 41.0f;
 
     auto constexpr FilterWidth = 230.0f;
