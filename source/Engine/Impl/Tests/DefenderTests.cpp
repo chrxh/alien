@@ -227,3 +227,57 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     auto actualTargetGenome = actualData.getGenomeRef(actualTargetCreature._genomeId);
     EXPECT_EQ(targetGenome._genes, actualTargetGenome._genes);
 }
+
+/**
+ * Test: injectorVsAntiInjectorWithoutStrength
+ * With an anti-injector strength of 0, the defender cell does not raise the injection cost and the injection succeeds.
+ */
+TEST_F(DefenderTests, injectorVsAntiInjectorWithoutStrength)
+{
+    _parameters.defenderAntiInjectorStrength.value = ColorVector<float>::uniform(0.0f);
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto injectorGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().color(1)}),
+    });
+
+    auto data =
+        ContentDesc()
+            .addCreature(
+                {
+                    ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                    ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                },
+                CreatureDesc().id(1),
+                injectorGenome)
+            .addConnection(1, 2);
+
+    auto targetGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().color(2)}),
+    });
+    data.addCreature(
+            {
+                ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc().geneIndex(0))),
+                ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector))),
+            },
+            CreatureDesc().id(2),
+            targetGenome)
+        .addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualInjector = actualData.getObjectRef(1);
+    auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
+
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._neuralActivity._signals[Channels::InjectorSuccess]));
+    EXPECT_EQ(2, actualTargetConstructor._geneIndex);
+
+    auto actualTargetCreatureId = actualData.getObjectRef(100).getCellRef()._creatureId;
+    auto actualTargetCreature = actualData.getCreatureRef(actualTargetCreatureId);
+    auto actualTargetGenome = actualData.getGenomeRef(actualTargetCreature._genomeId);
+    EXPECT_EQ(injectorGenome._genes, actualTargetGenome._genes);
+}

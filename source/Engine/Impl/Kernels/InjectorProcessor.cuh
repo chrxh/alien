@@ -62,7 +62,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             });
 
         if (injectedCell) {
-            injectorEnergyCost *= (1.0f + toFloat(numDefenders) * 0.5f);
+            injectorEnergyCost *= (1.0f + toFloat(numDefenders) * cudaSimulationParameters.defenderAntiInjectorStrength.value[object->color]);
             if (object->typeData.cell.usableEnergy - injectorEnergyCost < cellMinEnergy) {
                 object->typeData.cell.neuralActivity.signals[Channels::InjectorSuccess] = 0;
                 return;
