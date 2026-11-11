@@ -22,6 +22,10 @@ and the conditions for open-ended evolution
 
 ![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
 
+<p align="center">
+<sub>All pictures and videos on this page are captured in ALIEN, not created with an AI image generator.</sub>
+</p>
+
 ## 🧬 About
 
 **ALIEN** (**A**rtificial **LI**fe **EN**vironment) is an artificial life simulator built on a specialized 2D particle engine for soft bodies and fluids. Every object in a simulated world consists of particles. They can be bonded into elastic solids, flow as fluids or act as **cells** with specialized functions such as sensors, muscles, weapons and constructors. Each cell is controlled by its own small neural network. Networks of cells form **creatures**, digital organisms that perceive their environment, move, feed, compete and build offspring according to their **genome**. Once mutations are switched on, the simulation needs no further intervention. Populations can adapt, lineages diverge and entire ecosystems emerge.
