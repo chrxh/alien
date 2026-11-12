@@ -884,6 +884,24 @@ def test_toggle_like_anonymously_limits_installs_per_caller(app_client, helpers,
     assert _toggle_anonymously(app_client, sim_id, install_id=install_ids[0]) == {"result": True}
 
 
+def test_anonymous_callers_are_forgotten_a_day_after_their_last_request(app_client, helpers, monkeypatch):
+    main = app_client.app_module
+    now = [1_000_000.0]
+    monkeypatch.setattr(main.time, "monotonic", lambda: now[0])
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _toggle_anonymously(app_client, sim_id)
+    assert len(main._anonymous_callers) == 1
+
+    now[0] += main.LAST_DAY_SECONDS
+    app_client.post("/getversionedsimulationlist", data={"countAsActive": "false"})
+    assert len(main._anonymous_callers) == 1
+
+    now[0] += 1
+    app_client.post("/getversionedsimulationlist", data={"countAsActive": "false"})
+    assert len(main._anonymous_callers) == 0
+
+
 # --- /getversionedsimulationlist --------------------------------------------
 def test_get_versioned_simulation_list_returns_public_entries(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")

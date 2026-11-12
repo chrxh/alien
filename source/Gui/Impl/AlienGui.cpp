@@ -16,6 +16,7 @@
 
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
+#include <Base/WebLinkHelper.h>
 
 #include <Data/Colors.h>
 #include <Data/EngineConstants.h>
@@ -136,6 +137,14 @@ void AlienGui::HelpMarker(std::string const& text)
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+
+void AlienGui::WebLink(std::string const& text, std::string const& url)
+{
+    if (ImGui::TextLink(text.c_str())) {
+        WebLinkHelper::openInBrowser(url);
+    }
+    Tooltip(TooltipParameters().text("Open " + url + " in the browser."));
 }
 
 bool AlienGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled, bool* pinned)

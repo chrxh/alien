@@ -8,6 +8,7 @@ namespace Const
 {
     extern std::string const ProgramVersion;
     extern std::string const DiscordURL;
+    extern std::string const PrivacyPolicyURL;
     extern std::string const AlienServerURL;
     extern std::string const StartupSimulationResourceName;
 

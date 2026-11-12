@@ -75,6 +75,8 @@ private:
     PersisterRequestId _saveSimRequestId;
     std::string _loadedSimulationName;
 
+    MenuBarInfoWidget _menuBarInfoWidget;
+
     TextureData _logoCore;
     TextureData _logoGlow;
     std::optional<std::chrono::steady_clock::time_point> _simulationLoadedTimepoint;

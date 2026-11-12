@@ -160,8 +160,8 @@ using BrowserLoginHintWidget = std::shared_ptr<_BrowserLoginHintWidget>;
 class _BrowserLoginBannerWidget;
 using BrowserLoginBannerWidget = std::shared_ptr<_BrowserLoginBannerWidget>;
 
-class _BrowserCreditsWidget;
-using BrowserCreditsWidget = std::shared_ptr<_BrowserCreditsWidget>;
+class _MenuBarInfoWidget;
+using MenuBarInfoWidget = std::shared_ptr<_MenuBarInfoWidget>;
 
 struct UserInfo;
 

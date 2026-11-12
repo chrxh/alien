@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <Base/Resources.h>
+
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "NewPasswordDialog.h"
@@ -23,7 +25,7 @@ void ResetPasswordDialog::processIntern()
     AlienGui::Text("Security information");
     AlienGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
                          "as a SHA-256 hash value in the database.");
-    AlienGui::Text("Data privacy policy");
+    AlienGui::WebLink("Data privacy policy", Const::PrivacyPolicyURL);
     AlienGui::HelpMarker(
         "The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send the confirmation code. "
         "2) Its SHA-256 hash value is compared with the one stored for your account on the server.");

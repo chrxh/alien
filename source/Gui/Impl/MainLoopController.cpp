@@ -15,6 +15,7 @@
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
+#include <Base/WebLinkHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
@@ -48,6 +49,7 @@
 #include "LoginDialog.h"
 #include "MassEditDialog.h"
 #include "McpWindow.h"
+#include "MenuBarInfoWidget.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
 #include "NewSimulationService.h"
@@ -95,6 +97,8 @@ void MainLoopController::setup()
     _autosaveProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _searchProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
+
+    _menuBarInfoWidget = _MenuBarInfoWidget::create();
 }
 
 void MainLoopController::process()
@@ -690,8 +694,10 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Documentation").key(ImGuiKey_F1).selected(DocumentationWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { DocumentationWindow::get().setOn(!DocumentationWindow::get().isOn()); });
+    AlienGui::MenuSeparator();
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Privacy policy"), [&] { WebLinkHelper::openInBrowser(Const::PrivacyPolicyURL); });
     AlienGui::EndMenu();
-    BrowserWindow::get().processCredits();
+    _menuBarInfoWidget->process();
     AlienGui::EndMenuBar();
 
     // Further hotkeys

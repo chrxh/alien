@@ -1,4 +1,4 @@
-#include "BrowserCreditsWidget.h"
+#include "MenuBarInfoWidget.h"
 
 #include <imgui.h>
 
@@ -12,6 +12,7 @@
 #include <Network/NetworkService.h>
 
 #include "AlienGui.h"
+#include "BrowserController.h"
 #include "BrowserData.h"
 #include "BrowserWindow.h"
 #include "NewSimulationService.h"
@@ -24,14 +25,10 @@ namespace
     auto constexpr TooltipValueWidth = 120.0f;
 }
 
-BrowserCreditsWidget _BrowserCreditsWidget::create(BrowserData const& data)
+MenuBarInfoWidget _MenuBarInfoWidget::create()
 {
-    return BrowserCreditsWidget(new _BrowserCreditsWidget(data));
+    return MenuBarInfoWidget(new _MenuBarInfoWidget());
 }
-
-_BrowserCreditsWidget::_BrowserCreditsWidget(BrowserData const& data)
-    : _data(data)
-{}
 
 namespace
 {
@@ -86,16 +83,21 @@ namespace
     }
 }
 
-void _BrowserCreditsWidget::process()
+void _MenuBarInfoWidget::process()
 {
     if (!AlienGui::IsMenuBarVisible()) {
         return;
     }
+    processCurrentSimulation();
+}
+
+void _MenuBarInfoWidget::processCurrentSimulation()
+{
     auto const& originResourceId = NewSimulationService::get().getOriginResourceId();
     if (!originResourceId.has_value()) {
         return;
     }
-    auto rawTO = _data->findRawTO(*originResourceId);
+    auto rawTO = BrowserController::get().getData()->findRawTO(*originResourceId);
     if (rawTO == nullptr) {
         return;
     }
@@ -128,11 +130,11 @@ namespace
     }
 }
 
-void _BrowserCreditsWidget::processNameButton(NetworkResourceRawTO const& rawTO, std::string const& displayName, float width)
+void _MenuBarInfoWidget::processNameButton(NetworkResourceRawTO const& rawTO, std::string const& displayName, float width)
 {
     auto pos = ImGui::GetCursorScreenPos();
     pushMenuButtonStyle();
-    auto clicked = ImGui::Button("##creditsName", {width, 0});
+    auto clicked = ImGui::Button("##currentSimulationName", {width, 0});
     popMenuButtonStyle();
 
     auto const& style = ImGui::GetStyle();
@@ -156,7 +158,7 @@ void _BrowserCreditsWidget::processNameButton(NetworkResourceRawTO const& rawTO,
         processTooltipRow("Reactions", std::to_string(rawTO->getTotalLikes()));
         processTooltipRow("Downloads", std::to_string(rawTO->numDownloads));
         AlienGui::Separator();
-        AlienGui::Text(AlienGui::TextParameters().text("Click to show it in the browser.").style(AlienGui::TextStyle::Decent));
+        AlienGui::Text("Click to show it in the browser.");
         ImGui::PopStyleColor();
         ImGui::EndTooltip();
     }
@@ -165,12 +167,13 @@ void _BrowserCreditsWidget::processNameButton(NetworkResourceRawTO const& rawTO,
     }
 }
 
-void _BrowserCreditsWidget::processHeartButton(NetworkResourceRawTO const& rawTO, std::string const& displayName)
+void _MenuBarInfoWidget::processHeartButton(NetworkResourceRawTO const& rawTO, std::string const& displayName)
 {
-    auto isOwnReaction = _data->getOwnEmojiType(rawTO->id).has_value();
+    auto const& data = BrowserController::get().getData();
+    auto isOwnReaction = data->getOwnEmojiType(rawTO->id).has_value();
     pushMenuButtonStyle();
     ImGui::PushStyleColor(ImGuiCol_Text, isOwnReaction ? Const::BrowserOwnReactionButtonTextColor.Value : Const::TextDimColor.Value);
-    auto clicked = ImGui::Button((getHeartText(rawTO) + "###creditsHeart").c_str());
+    auto clicked = ImGui::Button((getHeartText(rawTO) + "###currentSimulationHeart").c_str());
     ImGui::PopStyleColor();
     popMenuButtonStyle();
 
@@ -179,18 +182,18 @@ void _BrowserCreditsWidget::processHeartButton(NetworkResourceRawTO const& rawTO
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
         if (isOwnReaction) {
             AlienGui::Text(AlienGui::TextParameters().text("You reacted to " + displayName).style(AlienGui::TextStyle::Bold));
-            AlienGui::Text(AlienGui::TextParameters().text("Click to take your reaction back.").style(AlienGui::TextStyle::Decent));
+            AlienGui::Text("Click to take your reaction back.");
         } else {
             AlienGui::Text(AlienGui::TextParameters().text("Give " + rawTO->userName + " a heart").style(AlienGui::TextStyle::Bold));
             if (!NetworkService::get().isLoggedIn()) {
-                AlienGui::Text(AlienGui::TextParameters().text("No account needed.").style(AlienGui::TextStyle::Decent));
+                AlienGui::Text("No account needed.");
             }
-            AlienGui::Text(AlienGui::TextParameters().text("It is also kept in the Liked list of the browser.").style(AlienGui::TextStyle::Decent));
+            AlienGui::Text("It is also kept in the Liked list of the browser.");
         }
         ImGui::PopStyleColor();
         ImGui::EndTooltip();
     }
     if (clicked) {
-        _data->onToggleHeart(rawTO);
+        data->onToggleHeart(rawTO);
     }
 }

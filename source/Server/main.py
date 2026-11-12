@@ -1152,6 +1152,7 @@ def get_versioned_simulation_list(
     _ = version
     if countAsActive.lower() != "false":
         _record_active_simulator(request)
+    _forget_expired_anonymous_callers()
 
     with Session(engine) as session:
         # Aggregate likes by (simulation_id, type).
@@ -1324,6 +1325,7 @@ MAX_ANONYMOUS_CALLERS = 100_000
 
 class _AnonymousCaller:
     def __init__(self):
+        self.last_request_time = 0.0
         self.toggle_times: deque[float] = deque()
         self.install_times: dict[str, float] = {}
         self.like_times_by_simulation: dict[int, deque[float]] = {}
@@ -1353,8 +1355,20 @@ def _get_anonymous_caller_hash(request: Request) -> str | None:
     return hmac.new(_anonymous_caller_key, address.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
+def _remove_expired_anonymous_callers(now: float):
+    while _anonymous_callers and now - next(iter(_anonymous_callers.values())).last_request_time > LAST_DAY_SECONDS:
+        _anonymous_callers.popitem(last=False)
+
+
+def _forget_expired_anonymous_callers():
+    with _anonymous_callers_lock:
+        _remove_expired_anonymous_callers(time.monotonic())
+
+
 def _touch_anonymous_caller(caller_hash: str, now: float) -> _AnonymousCaller:
+    _remove_expired_anonymous_callers(now)
     caller = _anonymous_callers.pop(caller_hash, None) or _AnonymousCaller()
+    caller.last_request_time = now
     _anonymous_callers[caller_hash] = caller
     if len(_anonymous_callers) > MAX_ANONYMOUS_CALLERS:
         _anonymous_callers.popitem(last=False)

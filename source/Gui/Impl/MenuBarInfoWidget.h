@@ -6,18 +6,17 @@
 
 #include "Definitions.h"
 
-class _BrowserCreditsWidget
+class _MenuBarInfoWidget
 {
 public:
-    static BrowserCreditsWidget create(BrowserData const& data);
+    static MenuBarInfoWidget create();
 
     void process();
 
 private:
-    _BrowserCreditsWidget(BrowserData const& data);
+    _MenuBarInfoWidget() = default;
 
+    void processCurrentSimulation();
     void processNameButton(NetworkResourceRawTO const& rawTO, std::string const& displayName, float width);
     void processHeartButton(NetworkResourceRawTO const& rawTO, std::string const& displayName);
-
-    BrowserData _data;
 };

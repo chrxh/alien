@@ -63,8 +63,8 @@ namespace
             }
             return NetworkService::get().isLoggedIn() ? std::string("Click: give a heart") : std::string("Click: give a heart, no account needed");
         }();
-        AlienGui::Text(AlienGui::TextParameters().text(clickHint).style(AlienGui::TextStyle::Decent));
-        AlienGui::Text(AlienGui::TextParameters().text("Right click: choose another reaction").style(AlienGui::TextStyle::Decent));
+        AlienGui::Text(clickHint);
+        AlienGui::Text("Right click: choose another reaction");
         ImGui::PopStyleColor();
         ImGui::EndTooltip();
     }

@@ -21,7 +21,6 @@ public:
     void onPreviewPictureChanged(std::string const& resourceId);
     void showResource(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& resourceId);
     WorkspaceType getCurrentWorkspaceType() const;
-    void processCredits();
 
     DownloadCache const& getSimulationCache() const;
 
@@ -66,7 +65,6 @@ private:
     BrowserUserListWidget _userListWidget;
     BrowserLoginHintWidget _loginHintWidget;
     BrowserLoginBannerWidget _loginBannerWidget;
-    BrowserCreditsWidget _creditsWidget;
 
     bool _galleryView = true;
     bool _showAllEmojis = false;

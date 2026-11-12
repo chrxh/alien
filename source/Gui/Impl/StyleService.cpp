@@ -529,6 +529,7 @@ void StyleService::setupColors(ImGuiStyle& style) const
     style.Colors[ImGuiCol_ScrollbarGrabActive] = Const::AccentLineColor.Value;
 
     style.Colors[ImGuiCol_CheckMark] = Const::AccentColor.Value;
+    style.Colors[ImGuiCol_TextLink] = Const::AccentColor.Value;
     style.Colors[ImGuiCol_SliderGrab] = Const::AccentLineColor.Value;
     style.Colors[ImGuiCol_SliderGrabActive] = Const::AccentColor.Value;
 

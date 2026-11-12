@@ -37,6 +37,7 @@ public:
     static auto constexpr GroupTextIndent = 8.0f;
 
     static void HelpMarker(std::string const& text);
+    static void WebLink(std::string const& text, std::string const& url);
 
     struct SliderFloatParameters
     {

@@ -15,8 +15,6 @@ add_library(GuiImpl
     AutosaveWindow.h
     BrowserController.cpp
     BrowserController.h
-    BrowserCreditsWidget.cpp
-    BrowserCreditsWidget.h
     BrowserData.cpp
     BrowserData.h
     BrowserGalleryWidget.cpp
@@ -146,6 +144,8 @@ add_library(GuiImpl
     McpSettingsDialog.h
     McpWindow.cpp
     McpWindow.h
+    MenuBarInfoWidget.cpp
+    MenuBarInfoWidget.h
     ModalWindow.cpp
     ModalWindow.h
     MultiplierWidget.cpp

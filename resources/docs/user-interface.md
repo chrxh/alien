@@ -67,7 +67,7 @@ The [Sandbox and editing](sandbox.md) chapter explains these tools in detail.
 | **View** | Cell info overlay (Alt+O), Message overlay (Alt+X), Render UI (Alt+U), Render simulation (Alt+I), Console mode (Alt+C) |
 | **Tools** | Mass operations (Alt+H), Image converter (Alt+Y), Recorder (Alt+V) |
 | **Settings** | Save on exit, Dark mode, Display settings, Network settings, Debug mode |
-| **Help** | About, Documentation (F1) |
+| **Help** | About, Documentation (F1), Privacy policy |
 
 Press **F7** to switch between window mode and full screen at the desktop resolution. All shortcuts are listed in [Keyboard and mouse](keyboard-and-mouse.md).
 
