@@ -12,7 +12,7 @@ import time
 import urllib.request
 import urllib.error
 
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from datetime import datetime, timezone
 from email.message import EmailMessage
 from itertools import takewhile
@@ -34,7 +34,9 @@ from sqlalchemy import (
     select,
     update,
     CheckConstraint,
+    UniqueConstraint,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 # --- DB connection ---
@@ -162,6 +164,26 @@ class UserLike(Base):
     type: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
+class AnonymousLike(Base):
+    __tablename__ = "anonymouslikes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    install_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    simulation_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("resources.id"), nullable=False
+    )
+    type: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+
+    timestamp: Mapped[object] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        UniqueConstraint("install_hash", "simulation_id", name="uq_anonymouslikes_install_simulation"),
+    )
+
+
 class ActiveSimulatorCount(Base):
     __tablename__ = "active_simulator_counts"
 
@@ -283,7 +305,7 @@ def _remove_expired_simulators(now: float):
         _active_simulators.popitem(last=False)
 
 
-def _caller_address(host: str) -> str:
+def _caller_address(host: str, ipv6_prefix: int = 64) -> str:
     try:
         address = ipaddress.ip_address(host)
     except ValueError:
@@ -291,7 +313,7 @@ def _caller_address(host: str) -> str:
     if isinstance(address, ipaddress.IPv6Address):
         if address.ipv4_mapped is not None:
             return str(address.ipv4_mapped)
-        return str(ipaddress.IPv6Network((address, 64), strict=False))
+        return str(ipaddress.IPv6Network((address, ipv6_prefix), strict=False))
     return str(address)
 
 
@@ -1049,6 +1071,9 @@ def delete_user(
                 session.execute(
                     delete(UserLike).where(UserLike.simulation_id.in_(user_sim_ids))
                 )
+                session.execute(
+                    delete(AnonymousLike).where(AnonymousLike.simulation_id.in_(user_sim_ids))
+                )
             session.execute(delete(Resource).where(Resource.user_id == user_id))
             session.execute(delete(User).where(User.id == user_id))
     return {"result": True}
@@ -1127,18 +1152,20 @@ def get_versioned_simulation_list(
     _ = version
     if countAsActive.lower() != "false":
         _record_active_simulator(request)
+    _forget_expired_anonymous_callers()
 
     with Session(engine) as session:
         # Aggregate likes by (simulation_id, type).
-        likes_rows = session.execute(
-            select(UserLike.simulation_id, UserLike.type, func.count())
-            .group_by(UserLike.simulation_id, UserLike.type)
-        ).all()
         likes_by_sim: dict[int, dict[int, int]] = {}
-        for sim_id, like_type, num in likes_rows:
-            normalized_type = 0 if like_type is None else int(like_type)
-            bucket = likes_by_sim.setdefault(sim_id, {})
-            bucket[normalized_type] = bucket.get(normalized_type, 0) + int(num)
+        for like_table in (UserLike, AnonymousLike):
+            likes_rows = session.execute(
+                select(like_table.simulation_id, like_table.type, func.count())
+                .group_by(like_table.simulation_id, like_table.type)
+            ).all()
+            for sim_id, like_type, num in likes_rows:
+                normalized_type = 0 if like_type is None else int(like_type)
+                bucket = likes_by_sim.setdefault(sim_id, {})
+                bucket[normalized_type] = bucket.get(normalized_type, 0) + int(num)
 
         # Determine whether the caller is authenticated (for private filter).
         caller_name: str | None = None
@@ -1217,15 +1244,18 @@ def get_versioned_simulation_list(
 @app.post("/getuserlist")
 def get_user_list():
     with Session(engine) as session:
-        # Stars received: total userlikes on resources owned by each user.
-        stars_received_rows = session.execute(
-            select(User.id, func.count())
-            .select_from(User)
-            .join(Resource, Resource.user_id == User.id)
-            .join(UserLike, UserLike.simulation_id == Resource.id)
-            .group_by(User.id)
-        ).all()
-        stars_received_by_user = {uid: int(n) for uid, n in stars_received_rows}
+        # Stars received: total likes on resources owned by each user.
+        stars_received_by_user: dict[int, int] = {}
+        for like_table in (UserLike, AnonymousLike):
+            stars_received_rows = session.execute(
+                select(User.id, func.count())
+                .select_from(User)
+                .join(Resource, Resource.user_id == User.id)
+                .join(like_table, like_table.simulation_id == Resource.id)
+                .group_by(User.id)
+            ).all()
+            for uid, n in stars_received_rows:
+                stars_received_by_user[uid] = stars_received_by_user.get(uid, 0) + int(n)
 
         # Stars given: userlikes authored by each user.
         likes_given_rows = session.execute(
@@ -1285,22 +1315,126 @@ def get_user_list():
         return result
 
 
+NUM_REACTION_TYPES = 49
+ANONYMOUS_TOGGLES_PER_HOUR = 120
+ANONYMOUS_INSTALLS_PER_DAY = 20
+ANONYMOUS_LIKES_PER_SIMULATION_AND_DAY = 3
+ANONYMOUS_CALLER_IPV6_PREFIX = 48
+MAX_ANONYMOUS_CALLERS = 100_000
+
+
+class _AnonymousCaller:
+    def __init__(self):
+        self.last_request_time = 0.0
+        self.toggle_times: deque[float] = deque()
+        self.install_times: dict[str, float] = {}
+        self.like_times_by_simulation: dict[int, deque[float]] = {}
+
+
+_anonymous_caller_key = secrets.token_bytes(32)
+_anonymous_callers: OrderedDict[str, _AnonymousCaller] = OrderedDict()
+_anonymous_callers_lock = threading.Lock()
+
+
+def _is_valid_like_type(like_type: int) -> bool:
+    return 0 <= like_type < NUM_REACTION_TYPES
+
+
+def _is_valid_install_id(install_id: str | None) -> bool:
+    return install_id is not None and 16 <= len(install_id) <= 64 and all(c in "0123456789abcdef" for c in install_id)
+
+
+def _hash_install_id(install_id: str) -> str:
+    return hashlib.sha256(install_id.encode("utf-8")).hexdigest()
+
+
+def _get_anonymous_caller_hash(request: Request) -> str | None:
+    if request.client is None:
+        return None
+    address = _caller_address(request.client.host, ANONYMOUS_CALLER_IPV6_PREFIX)
+    return hmac.new(_anonymous_caller_key, address.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def _remove_expired_anonymous_callers(now: float):
+    while _anonymous_callers and now - next(iter(_anonymous_callers.values())).last_request_time > LAST_DAY_SECONDS:
+        _anonymous_callers.popitem(last=False)
+
+
+def _forget_expired_anonymous_callers():
+    with _anonymous_callers_lock:
+        _remove_expired_anonymous_callers(time.monotonic())
+
+
+def _touch_anonymous_caller(caller_hash: str, now: float) -> _AnonymousCaller:
+    _remove_expired_anonymous_callers(now)
+    caller = _anonymous_callers.pop(caller_hash, None) or _AnonymousCaller()
+    caller.last_request_time = now
+    _anonymous_callers[caller_hash] = caller
+    if len(_anonymous_callers) > MAX_ANONYMOUS_CALLERS:
+        _anonymous_callers.popitem(last=False)
+
+    while caller.toggle_times and now - caller.toggle_times[0] > 60 * 60:
+        caller.toggle_times.popleft()
+    for install_hash, last_time in list(caller.install_times.items()):
+        if now - last_time > LAST_DAY_SECONDS:
+            del caller.install_times[install_hash]
+    for sim_id, like_times in list(caller.like_times_by_simulation.items()):
+        while like_times and now - like_times[0] > LAST_DAY_SECONDS:
+            like_times.popleft()
+        if not like_times:
+            del caller.like_times_by_simulation[sim_id]
+    return caller
+
+
+def _allow_anonymous_toggle(caller_hash: str, install_hash: str) -> bool:
+    now = time.monotonic()
+    with _anonymous_callers_lock:
+        caller = _touch_anonymous_caller(caller_hash, now)
+        if len(caller.toggle_times) >= ANONYMOUS_TOGGLES_PER_HOUR:
+            return False
+        if install_hash not in caller.install_times and len(caller.install_times) >= ANONYMOUS_INSTALLS_PER_DAY:
+            return False
+        caller.toggle_times.append(now)
+        caller.install_times[install_hash] = now
+        return True
+
+
+def _allow_new_anonymous_like(caller_hash: str, sim_id: int) -> bool:
+    now = time.monotonic()
+    with _anonymous_callers_lock:
+        caller = _touch_anonymous_caller(caller_hash, now)
+        like_times = caller.like_times_by_simulation.setdefault(sim_id, deque())
+        if len(like_times) >= ANONYMOUS_LIKES_PER_SIMULATION_AND_DAY:
+            return False
+        like_times.append(now)
+        return True
+
+
 @app.post("/getlikedsimulations")
 def get_liked_simulations(
     userName: str = Form(...),
     password: str = Form(...),
+    installId: str | None = Form(None),
 ):
     with Session(engine) as session:
         user = _checked_user(session, userName, password)
         if user is None:
             return {"result": False}
+        like_type_by_sim: dict[int, int] = {}
+        if _is_valid_install_id(installId):
+            anonymous_rows = session.execute(
+                select(AnonymousLike.simulation_id, AnonymousLike.type).where(
+                    AnonymousLike.install_hash == _hash_install_id(installId)
+                )
+            ).all()
+            for sim_id, t in anonymous_rows:
+                like_type_by_sim[int(sim_id)] = int(t)
         rows = session.execute(
             select(UserLike.simulation_id, UserLike.type).where(UserLike.user_id == user.id)
         ).all()
-        return [
-            {"id": int(sim_id), "likeType": 0 if t is None else int(t)}
-            for sim_id, t in rows
-        ]
+        for sim_id, t in rows:
+            like_type_by_sim[int(sim_id)] = 0 if t is None else int(t)
+        return [{"id": sim_id, "likeType": like_type} for sim_id, like_type in like_type_by_sim.items()]
 
 
 @app.post("/getuserlikes")
@@ -1333,9 +1467,12 @@ def toggle_like_simulation(
     password: str = Form(...),
     simId: str = Form(...),
     likeType: str | None = Form(None),
+    installId: str | None = Form(None),
 ):
     sim_id = _parse_int(simId)
     new_like_type = _parse_int(likeType) if likeType is not None else 0
+    if not _is_valid_like_type(new_like_type):
+        return {"result": False}
 
     with Session(engine) as session:
         with session.begin():
@@ -1343,22 +1480,25 @@ def toggle_like_simulation(
             if user is None:
                 return {"result": False}
 
-            existing = session.execute(
-                select(UserLike).where(
-                    and_(
-                        UserLike.user_id == user.id,
-                        UserLike.simulation_id == sim_id,
-                    )
+            account_like_condition = and_(UserLike.user_id == user.id, UserLike.simulation_id == sim_id)
+            orig_types = [
+                0 if t is None else int(t)
+                for (t,) in session.execute(select(UserLike.type).where(account_like_condition)).all()
+            ]
+            session.execute(delete(UserLike).where(account_like_condition))
+
+            if _is_valid_install_id(installId):
+                anonymous_like_condition = and_(
+                    AnonymousLike.install_hash == _hash_install_id(installId),
+                    AnonymousLike.simulation_id == sim_id,
                 )
-            ).scalar_one_or_none()
+                if not orig_types:
+                    orig_types = [
+                        int(t) for (t,) in session.execute(select(AnonymousLike.type).where(anonymous_like_condition)).all()
+                    ]
+                session.execute(delete(AnonymousLike).where(anonymous_like_condition))
 
-            only_remove = False
-            if existing is not None:
-                orig_type = 0 if existing.type is None else int(existing.type)
-                if orig_type == new_like_type:
-                    only_remove = True
-                session.execute(delete(UserLike).where(UserLike.id == existing.id))
-
+            only_remove = bool(orig_types) and orig_types[0] == new_like_type
             if not only_remove:
                 session.add(
                     UserLike(
@@ -1368,6 +1508,63 @@ def toggle_like_simulation(
                     )
                 )
         return {"result": True}
+
+
+@app.post("/togglelikesimulationanonymously")
+def toggle_like_simulation_anonymously(
+    request: Request,
+    installId: str = Form(...),
+    simId: str = Form(...),
+    likeType: str | None = Form(None),
+):
+    sim_id = _parse_int(simId)
+    new_like_type = _parse_int(likeType) if likeType is not None else 0
+    caller_hash = _get_anonymous_caller_hash(request)
+    if caller_hash is None or not _is_valid_install_id(installId) or not _is_valid_like_type(new_like_type):
+        return {"result": False}
+    install_hash = _hash_install_id(installId)
+    if not _allow_anonymous_toggle(caller_hash, install_hash):
+        return {"result": False}
+
+    try:
+        with Session(engine) as session:
+            with session.begin():
+                workspace = session.execute(select(Resource.workspace).where(Resource.id == sim_id)).scalar_one_or_none()
+                if workspace is None or int(workspace) == _WORKSPACE_PRIVATE:
+                    return {"result": False}
+
+                existing = session.execute(
+                    select(AnonymousLike).where(
+                        and_(
+                            AnonymousLike.install_hash == install_hash,
+                            AnonymousLike.simulation_id == sim_id,
+                        )
+                    )
+                ).scalar_one_or_none()
+                if existing is None and not _allow_new_anonymous_like(caller_hash, sim_id):
+                    return {"result": False}
+
+                only_remove = existing is not None and int(existing.type) == new_like_type
+                if existing is not None:
+                    session.execute(delete(AnonymousLike).where(AnonymousLike.id == existing.id))
+                if not only_remove:
+                    session.add(AnonymousLike(install_hash=install_hash, simulation_id=sim_id, type=new_like_type))
+    except IntegrityError:
+        return {"result": False}
+    return {"result": True}
+
+
+@app.post("/getlikedsimulationsanonymously")
+def get_liked_simulations_anonymously(installId: str = Form(...)):
+    if not _is_valid_install_id(installId):
+        return {"result": False}
+    with Session(engine) as session:
+        rows = session.execute(
+            select(AnonymousLike.simulation_id, AnonymousLike.type).where(
+                AnonymousLike.install_hash == _hash_install_id(installId)
+            )
+        ).all()
+        return [{"id": int(sim_id), "likeType": int(like_type)} for sim_id, like_type in rows]
 
 
 def _is_owner_of_simulation(session: Session, sim_id: int, user_name: str) -> bool:
@@ -1689,5 +1886,6 @@ def delete_simulation(
                 return {"result": False}
 
             session.execute(delete(UserLike).where(UserLike.simulation_id == sim_id))
+            session.execute(delete(AnonymousLike).where(AnonymousLike.simulation_id == sim_id))
             session.execute(delete(Resource).where(Resource.id == sim_id))
     return {"result": True}

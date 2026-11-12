@@ -15,6 +15,7 @@
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
+#include <Base/WebLinkHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
@@ -46,8 +47,10 @@
 #include "LoginDialog.h"
 #include "MassEditDialog.h"
 #include "McpWindow.h"
+#include "MenuBarInfoWidget.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
+#include "NewSimulationService.h"
 #include "OverlayController.h"
 #include "RecorderController.h"
 #include "RecorderWindow.h"
@@ -90,6 +93,8 @@ void MainLoopController::setup()
     _autosaveProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _searchProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
+
+    _menuBarInfoWidget = _MenuBarInfoWidget::create();
 }
 
 void MainLoopController::process()
@@ -198,6 +203,7 @@ void MainLoopController::scheduleReadingAutosave()
         [this](auto const& requestId) {
             auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
             _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
+            NewSimulationService::get().restoreAutosaveOrigin();
             finishSimulationLoading(data.simulationDesc);
         },
         [this](auto const&) { scheduleSearchingStartupSimulation(); });
@@ -242,6 +248,7 @@ void MainLoopController::scheduleDownloadingStartupSimulation(NetworkResourceRaw
             auto const& deserializedSim = std::get<SimulationDesc>(data.resourceData);
             _loadedSimulationName = data.resourceName;
             setupSimulation(deserializedSim);
+            NewSimulationService::get().setOriginResourceId(data.resourceId);
             finishSimulationLoading(deserializedSim);
         },
         [this](auto const&) { setupEmptySimulation(); });
@@ -335,6 +342,7 @@ void MainLoopController::processScheduleExit()
 {
     if (_saveOnExit) {
         printOverlayMessage("Saving on exit ...");
+        NewSimulationService::get().storeAutosaveOrigin();
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
@@ -677,7 +685,10 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Documentation").key(ImGuiKey_F1).selected(DocumentationWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { DocumentationWindow::get().setOn(!DocumentationWindow::get().isOn()); });
+    AlienGui::MenuSeparator();
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Privacy policy"), [&] { WebLinkHelper::openInBrowser(Const::PrivacyPolicyURL); });
     AlienGui::EndMenu();
+    _menuBarInfoWidget->process();
     AlienGui::EndMenuBar();
 
     // Further hotkeys

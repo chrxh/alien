@@ -144,6 +144,8 @@ add_library(GuiImpl
     McpSettingsDialog.h
     McpWindow.cpp
     McpWindow.h
+    MenuBarInfoWidget.cpp
+    MenuBarInfoWidget.h
     ModalWindow.cpp
     ModalWindow.h
     MultiplierWidget.cpp

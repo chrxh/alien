@@ -410,6 +410,17 @@ void BrowserWindow::processFooter()
         _data->setFilter(filter);
     }
 
+    ImGui::SameLine();
+    auto showLikedOnly = _data->isShowLikedOnly();
+    if (AlienGui::SelectableButton(
+            AlienGui::SelectableButtonParameters()
+                .name(ICON_FA_HEART "  Liked (" + std::to_string(_data->getNumLikedInCurrentWorkspace()) + ")###likedFilter")
+                .tooltip(Const::BrowserLikedFilterTooltip),
+            showLikedOnly)) {
+        _galleryWidget->resetPage();
+        _data->setShowLikedOnly(showLikedOnly);
+    }
+
     if (_galleryView) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - _galleryWidget->getPagerWidth());
@@ -454,7 +465,7 @@ void BrowserWindow::processStatusBar()
     statusItems.emplace_back(std::to_string(_data->getUserTOs().size()) + " simulators found");
 
     if (!NetworkService::get().getLoggedInUserName()) {
-        statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
+        statusItems.emplace_back("In order to share simulations you need to log in.");
     }
 
     AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems));

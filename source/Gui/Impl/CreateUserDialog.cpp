@@ -9,9 +9,10 @@
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
+#include "StyleService.h"
 
 CreateUserDialog::CreateUserDialog()
-    : AlienDialog("Create user")
+    : AlienDialog("Create user", {450.0f, 180.0f})
 {}
 
 void CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
@@ -25,18 +26,11 @@ void CreateUserDialog::open(std::string const& userName, std::string const& pass
 
 void CreateUserDialog::processIntern()
 {
-    AlienGui::Text("Security information");
-    AlienGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
-                         "as a SHA-256 hash value in the database.");
-    AlienGui::Text("Data privacy policy");
-    AlienGui::HelpMarker("The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send "
-                         "the confirmation code. "
-                         "2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
-    AlienGui::Separator();
     AlienGui::Text("Please enter your email address to receive the\nconfirmation code for the new user.");
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Email").textWidth(0), _email);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_email.empty());
@@ -52,6 +46,11 @@ void CreateUserDialog::processIntern()
     if (AlienGui::Button("Cancel")) {
         close();
     }
+
+    AlienGui::PrivacyPolicyLink(
+        "The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but as a SHA-256 hash "
+        "value in the database.\n\nThe entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To "
+        "send the confirmation code. 2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
 }
 
 void CreateUserDialog::onCreateUser()

@@ -208,7 +208,7 @@ namespace Const
     ImColor DashboardCardBorderColor;
     ImColor DashboardSummaryRowColor;
 
-    ImColor BrowserAddReactionButtonTextColor;
+    ImColor BrowserOwnReactionButtonTextColor;
     ImColor BrowserDownloadButtonTextColor;
     ImColor BrowserDeleteButtonTextColor;
     ImColor BrowserLeafTextColor;
@@ -473,7 +473,7 @@ void StyleService::setupPalette() const
     DashboardCardBorderColor = themed(ImColor::HSV(0.617f, 0.389f, 0.270f), ImColor::HSV(0.600f, 0.100f, 0.820f));
     DashboardSummaryRowColor = themed(ImColor::HSV(0.617f, 0.435f, 0.230f), ImColor::HSV(0.600f, 0.100f, 0.900f));
 
-    BrowserAddReactionButtonTextColor = themed(ImColor::HSV(0.375f, 0.6f, 0.7f), ImColor::HSV(0.375f, 0.8f, 0.5f));
+    BrowserOwnReactionButtonTextColor = themed(ImColor::HSV(0.375f, 0.6f, 0.7f), ImColor::HSV(0.375f, 0.8f, 0.5f));
     BrowserDownloadButtonTextColor = themed(ImColor::HSV(0.55f, 0.6f, 1.0f), ImColor::HSV(0.55f, 0.85f, 0.65f));
     BrowserDeleteButtonTextColor = themed(ImColor::HSV(0.0f, 0.6f, 0.8f), ImColor::HSV(0.0f, 0.75f, 0.7f));
     BrowserLeafTextColor = themed(ImColor::HSV(0.58f, 0.2f, 1.0f), ImColor::HSV(0.58f, 0.6f, 0.45f));
@@ -529,6 +529,7 @@ void StyleService::setupColors(ImGuiStyle& style) const
     style.Colors[ImGuiCol_ScrollbarGrabActive] = Const::AccentLineColor.Value;
 
     style.Colors[ImGuiCol_CheckMark] = Const::AccentColor.Value;
+    style.Colors[ImGuiCol_TextLink] = Const::AccentColor.Value;
     style.Colors[ImGuiCol_SliderGrab] = Const::AccentLineColor.Value;
     style.Colors[ImGuiCol_SliderGrabActive] = Const::AccentColor.Value;
 

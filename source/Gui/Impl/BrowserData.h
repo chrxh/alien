@@ -47,6 +47,7 @@ public:
     static auto constexpr NumEmojiBlocks = 4;
     static constexpr int NumEmojisPerBlock[NumEmojiBlocks] = {19, 14, 10, 6};
     static auto constexpr NumEmojisPerRow = 5;
+    static auto constexpr HeartEmojiType = 1;
 
     static BrowserData create();
 
@@ -63,6 +64,11 @@ public:
 
     std::string const& getFilter() const;
     void setFilter(std::string const& filter);
+    bool isShowLikedOnly() const;
+    void setShowLikedOnly(bool value);
+    bool matchesFilters(NetworkResourceRawTO const& rawTO) const;
+    int getNumLikedInCurrentWorkspace() const;
+    NetworkResourceRawTO findRawTO(std::string const& resourceId) const;
 
     NetworkResourceTreeTO const& getSelectedTreeTO() const;
     void setSelectedTreeTO(NetworkResourceTreeTO const& treeTO);
@@ -91,9 +97,11 @@ public:
 
     std::vector<TextureData> const& getEmojis() const;
     void setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> const& ownEmojiTypeBySimId);
+    std::optional<int> getOwnEmojiType(std::string const& resourceId) const;
     bool isOwnReaction(std::string const& resourceId, int emojiType) const;
-    std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
+    std::string getUserNamesToEmojiType(NetworkResourceRawTO const& rawTO, int emojiType);
     void onToggleLike(NetworkResourceTreeTO const& treeTO, int emojiType);
+    void onToggleHeart(NetworkResourceRawTO const& rawTO);
 
     bool isActivateEmojiPopup() const;
     void setActivateEmojiPopup(bool value);
@@ -109,11 +117,14 @@ private:
     void createTreeTOsForAllWorkspaces();
     void updateSelection(Workspace const& workspace, std::vector<NetworkResourceRawTO> const& filteredRawTOs);
     void deselectIfNotInTree(Workspace const& workspace);
+    bool areOwnReactionsCurrent() const;
     std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
 
     std::map<WorkspaceId, Workspace> _workspaces;
     WorkspaceId _currentWorkspaceId = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     std::string _filter;
+    bool _showLikedOnly = false;
+    bool _treeTOsOutdated = false;
     NetworkResourceTreeTO _selectedTreeTO;
     bool _scrollToSelection = false;
     LastSessionBrowserData _lastSessionData;
@@ -123,6 +134,7 @@ private:
 
     std::vector<TextureData> _emojis;
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
+    std::optional<std::string> _ownReactionsUserName;
     bool _activateEmojiPopup = false;
     NetworkResourceTreeTO _emojiPopupTO;
 

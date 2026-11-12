@@ -320,8 +320,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (success) {
         success &= NetworkService::get().getUserList(data.userTOs, withRetry);
     }
-    if (success && NetworkService::get().getLoggedInUserName()) {
-        success &= NetworkService::get().getEmojiTypeByResourceId(data.emojiTypeByResourceId);
+    if (success) {
+        auto ownReactionsReceived = NetworkService::get().getEmojiTypeByResourceId(data.emojiTypeByResourceId);
+        if (NetworkService::get().getLoggedInUserName()) {
+            success &= ownReactionsReceived;
+        }
     }
     if (success) {
         data.activeSimulatorCounts = NetworkService::get().getActiveSimulatorCounts();
@@ -343,6 +346,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     auto const& requestData = request->getData();
     DownloadNetworkResourceResultData resultData;
+    resultData.resourceId = requestData.resourceId;
     resultData.resourceName = requestData.resourceName;
     resultData.resourceVersion = requestData.resourceVersion;
     resultData.resourceType = requestData.resourceType;

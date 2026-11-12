@@ -36,9 +36,6 @@ void LoginDialog::processIntern()
     AlienGui::Text("Forgot your password?");
     AlienGui::HelpMarker(Const::LoginForgotYourPasswordTooltip);
 
-    AlienGui::Text("Security information");
-    AlienGui::HelpMarker(Const::LoginSecurityInformationTooltip);
-
     AlienGui::Separator();
 
     auto& loginController = LoginController::get();
@@ -102,4 +99,6 @@ void LoginDialog::processIntern()
     if (AlienGui::Button("Cancel")) {
         close();
     }
+
+    AlienGui::PrivacyPolicyLink(Const::LoginSecurityInformationTooltip);
 }

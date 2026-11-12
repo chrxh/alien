@@ -36,7 +36,9 @@ std::vector<NetworkResourceRawTO> NetworkResourceParserService::decodeRemoteSimu
                 isArray = true;
             }
             auto likeType = isArray ? counter : std::stoi(likeTypeString);
-            entry->numLikesByEmojiType[likeType] = likes;
+            if (likeType >= 0) {
+                entry->numLikesByEmojiType[likeType] = likes;
+            }
             ++counter;
         }
         entry->numDownloads = subTree.get<int>("numDownloads");

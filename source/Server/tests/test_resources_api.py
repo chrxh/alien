@@ -691,6 +691,217 @@ def test_get_user_likes_no_reaction_filter_returns_all(app_client, helpers):
     assert user_names == {"bob", "carol"}
 
 
+# --- /togglelikesimulationanonymously, /getlikedsimulationsanonymously ------
+INSTALL_ID = "0123456789abcdef0123456789abcdef"
+OTHER_INSTALL_ID = "fedcba9876543210fedcba9876543210"
+
+
+def _toggle_anonymously(client, sim_id, like_type="1", install_id=INSTALL_ID):
+    return client.post(
+        "/togglelikesimulationanonymously",
+        data={"installId": install_id, "simId": str(sim_id), "likeType": like_type},
+    ).json()
+
+
+def _liked_anonymously(client, install_id=INSTALL_ID):
+    return client.post("/getlikedsimulationsanonymously", data={"installId": install_id}).json()
+
+
+def test_toggle_like_anonymously_lifecycle(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+
+    assert _toggle_anonymously(app_client, sim_id, "1") == {"result": True}
+    assert _liked_anonymously(app_client) == [{"id": sim_id, "likeType": 1}]
+    assert _liked_anonymously(app_client, OTHER_INSTALL_ID) == []
+
+    assert _toggle_anonymously(app_client, sim_id, "2") == {"result": True}
+    assert _liked_anonymously(app_client) == [{"id": sim_id, "likeType": 2}]
+
+    assert _toggle_anonymously(app_client, sim_id, "2") == {"result": True}
+    assert _liked_anonymously(app_client) == []
+
+
+def test_toggle_like_anonymously_rejects_invalid_install_id(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+
+    for install_id in ("short", "0123456789ABCDEF0123456789ABCDEF", "0123456789abcdef0123456789abcdeg", "0" * 65):
+        assert _toggle_anonymously(app_client, sim_id, install_id=install_id) == {"result": False}
+    assert _liked_anonymously(app_client, "short") == {"result": False}
+
+    main = app_client.app_module
+    from sqlalchemy import select
+    with main.Session(main.engine) as session:
+        assert session.execute(select(main.AnonymousLike)).first() is None
+
+
+def test_toggle_like_anonymously_rejects_private_and_unknown_resources(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    private_id = int(helpers.upload_simulation(app_client, "alice", "pw", workspace=2).json()["simId"])
+
+    assert _toggle_anonymously(app_client, private_id) == {"result": False}
+    assert _toggle_anonymously(app_client, private_id + 1000) == {"result": False}
+    assert _liked_anonymously(app_client) == []
+
+
+def test_anonymous_likes_are_counted_with_account_likes(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    app_client.post(
+        "/togglelikesimulation",
+        data={"userName": "bob", "password": "pw2", "simId": str(sim_id), "likeType": "1"},
+    )
+    _toggle_anonymously(app_client, sim_id, "1")
+    _toggle_anonymously(app_client, sim_id, "0", OTHER_INSTALL_ID)
+
+    entry = app_client.post("/getversionedsimulationlist", data={}).json()[0]
+    assert entry["likes"] == 3
+    assert entry["likesByType"] == {"0": 1, "1": 2}
+
+    by_name = {row["userName"]: row for row in app_client.post("/getuserlist", data={}).json()}
+    assert by_name["alice"]["starsReceived"] == 3
+    assert by_name["bob"]["starsGiven"] == 1
+
+    names = app_client.post("/getuserlikes", data={"simId": str(sim_id), "likeType": "1"}).json()
+    assert names == [{"userName": "bob"}]
+
+
+def test_delete_simulation_removes_anonymous_likes(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _toggle_anonymously(app_client, sim_id)
+
+    resp = app_client.post(
+        "/deletesimulation",
+        data={"userName": "alice", "password": "pw", "simId": str(sim_id)},
+    )
+    assert resp.json() == {"result": True}
+    assert _liked_anonymously(app_client) == []
+
+
+def test_delete_user_removes_anonymous_likes_on_own_resources(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _toggle_anonymously(app_client, sim_id)
+
+    resp = app_client.post("/deleteuser", data={"userName": "alice", "password": "pw"})
+    assert resp.json() == {"result": True}
+    assert _liked_anonymously(app_client) == []
+
+
+def test_toggle_like_anonymously_limits_toggles_per_caller(app_client, helpers, monkeypatch):
+    monkeypatch.setattr(app_client.app_module, "ANONYMOUS_TOGGLES_PER_HOUR", 3)
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+
+    results = [_toggle_anonymously(app_client, sim_id)["result"] for _ in range(4)]
+    assert results == [True, True, True, False]
+
+
+def test_toggle_like_rejects_invalid_like_types(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+
+    for like_type in ("-1", "49"):
+        assert _toggle_anonymously(app_client, sim_id, like_type) == {"result": False}
+        assert app_client.post(
+            "/togglelikesimulation",
+            data={"userName": "alice", "password": "pw", "simId": str(sim_id), "likeType": like_type},
+        ).json() == {"result": False}
+    assert app_client.post("/getversionedsimulationlist", data={}).json()[0]["likesByType"] == {}
+
+
+def test_toggle_like_anonymously_limits_new_likes_per_simulation(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    other_sim_id = int(helpers.upload_simulation(app_client, "alice", "pw", sim_name="other").json()["simId"])
+    install_ids = [format(i, "032x") for i in range(1, 5)]
+
+    results = [_toggle_anonymously(app_client, sim_id, install_id=install_id)["result"] for install_id in install_ids]
+    assert results == [True, True, True, False]
+    assert _toggle_anonymously(app_client, other_sim_id, install_id=install_ids[3]) == {"result": True}
+    assert app_client.post("/getversionedsimulationlist", data={}).json()[0]["likes"] == 3
+
+
+def test_anonymous_callers_are_grouped_by_ipv6_prefix(app_client):
+    main = app_client.app_module
+    assert main._caller_address("2001:db8:1:2::1", 48) == main._caller_address("2001:db8:1:ffff::2", 48)
+    assert main._caller_address("2001:db8:1:2::1", 48) != main._caller_address("2001:db8:2:2::1", 48)
+    assert main._caller_address("203.0.113.7", 48) == "203.0.113.7"
+
+
+def test_account_toggle_takes_over_anonymous_like_of_same_install(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _toggle_anonymously(app_client, sim_id, "1")
+
+    liked = app_client.post(
+        "/getlikedsimulations", data={"userName": "bob", "password": "pw2", "installId": INSTALL_ID}
+    ).json()
+    assert liked == [{"id": sim_id, "likeType": 1}]
+
+    assert app_client.post(
+        "/togglelikesimulation",
+        data={"userName": "bob", "password": "pw2", "simId": str(sim_id), "likeType": "2", "installId": INSTALL_ID},
+    ).json() == {"result": True}
+    entry = app_client.post("/getversionedsimulationlist", data={}).json()[0]
+    assert entry["likes"] == 1
+    assert entry["likesByType"] == {"2": 1}
+    assert _liked_anonymously(app_client) == []
+
+    assert app_client.post(
+        "/togglelikesimulation",
+        data={"userName": "bob", "password": "pw2", "simId": str(sim_id), "likeType": "2", "installId": INSTALL_ID},
+    ).json() == {"result": True}
+    assert app_client.post("/getversionedsimulationlist", data={}).json()[0]["likes"] == 0
+
+
+def test_account_toggle_removes_anonymous_like_of_same_type(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _toggle_anonymously(app_client, sim_id, "1")
+
+    assert app_client.post(
+        "/togglelikesimulation",
+        data={"userName": "bob", "password": "pw2", "simId": str(sim_id), "likeType": "1", "installId": INSTALL_ID},
+    ).json() == {"result": True}
+    assert app_client.post("/getversionedsimulationlist", data={}).json()[0]["likes"] == 0
+    assert app_client.post("/getlikedsimulations", data={"userName": "bob", "password": "pw2"}).json() == []
+
+
+def test_toggle_like_anonymously_limits_installs_per_caller(app_client, helpers, monkeypatch):
+    monkeypatch.setattr(app_client.app_module, "ANONYMOUS_INSTALLS_PER_DAY", 2)
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    install_ids = [format(i, "032x") for i in range(1, 4)]
+
+    results = [_toggle_anonymously(app_client, sim_id, install_id=install_id)["result"] for install_id in install_ids]
+    assert results == [True, True, False]
+    assert _toggle_anonymously(app_client, sim_id, install_id=install_ids[0]) == {"result": True}
+
+
+def test_anonymous_callers_are_forgotten_a_day_after_their_last_request(app_client, helpers, monkeypatch):
+    main = app_client.app_module
+    now = [1_000_000.0]
+    monkeypatch.setattr(main.time, "monotonic", lambda: now[0])
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(helpers.upload_simulation(app_client, "alice", "pw").json()["simId"])
+    _toggle_anonymously(app_client, sim_id)
+    assert len(main._anonymous_callers) == 1
+
+    now[0] += main.LAST_DAY_SECONDS
+    app_client.post("/getversionedsimulationlist", data={"countAsActive": "false"})
+    assert len(main._anonymous_callers) == 1
+
+    now[0] += 1
+    app_client.post("/getversionedsimulationlist", data={"countAsActive": "false"})
+    assert len(main._anonymous_callers) == 0
+
+
 # --- /getversionedsimulationlist --------------------------------------------
 def test_get_versioned_simulation_list_returns_public_entries(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")

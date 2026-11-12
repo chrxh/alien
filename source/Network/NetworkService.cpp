@@ -1,5 +1,9 @@
 #include "NetworkService.h"
 
+#include <algorithm>
+#include <iterator>
+#include <random>
+
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
@@ -15,6 +19,10 @@
 namespace
 {
     auto constexpr CountAsActiveSettingsKey = "settings.count as active";
+    auto constexpr InstallIdSettingsKey = "settings.install id";
+    auto constexpr ReactedWithoutAccountSettingsKey = "settings.reacted without account";
+    auto constexpr InstallIdLength = 32;
+    auto constexpr HexDigits = std::string_view("0123456789abcdef");
 
     void configureClient(httplib::Client& client)
     {
@@ -88,10 +96,33 @@ namespace
     }
 }
 
+namespace
+{
+    bool isValidInstallId(std::string const& installId)
+    {
+        return installId.size() == InstallIdLength && std::ranges::all_of(installId, [](char digit) { return HexDigits.contains(digit); });
+    }
+
+    std::string createInstallId()
+    {
+        std::random_device device;
+        std::uniform_int_distribution<size_t> distribution(0, HexDigits.size() - 1);
+        std::string result;
+        std::generate_n(std::back_inserter(result), InstallIdLength, [&] { return HexDigits.at(distribution(device)); });
+        return result;
+    }
+}
+
 void NetworkService::setup()
 {
     _serverAddress = GlobalSettings::get().getValue("settings.server url", std::string(Const::AlienServerURL));
     _countAsActive = GlobalSettings::get().getValue(CountAsActiveSettingsKey, true);
+    _installId = GlobalSettings::get().getValue(InstallIdSettingsKey, std::string());
+    if (!isValidInstallId(_installId)) {
+        _installId = createInstallId();
+        GlobalSettings::get().setValue(InstallIdSettingsKey, _installId);
+    }
+    _reactedWithoutAccount = GlobalSettings::get().getValue(ReactedWithoutAccountSettingsKey, false);
 }
 
 void NetworkService::shutdown()
@@ -502,18 +533,52 @@ void NetworkService::reportActiveSimulator()
     }
 }
 
+namespace
+{
+    std::string addReactorParams(
+        httplib::Params& params,
+        std::optional<std::string> const& userName,
+        std::optional<std::string> const& password,
+        std::optional<std::string> const& installId,
+        std::string const& accountEndpoint,
+        std::string const& anonymousEndpoint)
+    {
+        if (installId) {
+            params.emplace("installId", *installId);
+        }
+        if (userName && password) {
+            params.emplace("userName", *userName);
+            params.emplace("password", *password);
+            return accountEndpoint;
+        }
+        return anonymousEndpoint;
+    }
+}
+
+void NetworkService::markReactedWithoutAccount()
+{
+    if (!_reactedWithoutAccount.exchange(true)) {
+        GlobalSettings::get().setValue(ReactedWithoutAccountSettingsKey, true);
+    }
+}
+
 bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result)
 {
+    if (!_loggedInUserName && !_reactedWithoutAccount) {
+        result.clear();
+        return true;
+    }
+
     log(Priority::Important, "network: get liked resources");
 
     auto client = createClient(_serverAddress);
 
     httplib::Params params;
-    params.emplace("userName", *_loggedInUserName);
-    params.emplace("password", *_password);
+    auto installId = _reactedWithoutAccount ? std::make_optional(_installId) : std::nullopt;
+    auto endpoint = addReactorParams(params, _loggedInUserName, _password, installId, "/getlikedsimulations", "/getlikedsimulationsanonymously");
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/getlikedsimulations", params); });
+        auto postResult = executeRequest([&] { return client.Post(endpoint.c_str(), params); });
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -565,14 +630,13 @@ bool NetworkService::toggleReactionForResource(std::string const& simId, int lik
     auto client = createClient(_serverAddress);
 
     httplib::Params params;
-    params.emplace("userName", *_loggedInUserName);
-    params.emplace("password", *_password);
+    auto installId = _reactedWithoutAccount || !_loggedInUserName ? std::make_optional(_installId) : std::nullopt;
+    auto endpoint = addReactorParams(params, _loggedInUserName, _password, installId, "/togglelikesimulation", "/togglelikesimulationanonymously");
     params.emplace("simId", simId);
     params.emplace("likeType", std::to_string(likeType));
 
-
     try {
-        auto result = executeRequest([&] { return client.Post("/togglelikesimulation", params); });
+        auto result = executeRequest([&] { return client.Post(endpoint.c_str(), params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
