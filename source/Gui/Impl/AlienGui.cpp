@@ -15,6 +15,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/Math.h>
+#include <Base/Resources.h>
 #include <Base/StringHelper.h>
 #include <Base/WebLinkHelper.h>
 
@@ -139,12 +140,20 @@ void AlienGui::HelpMarker(std::string const& text)
     }
 }
 
-void AlienGui::WebLink(std::string const& text, std::string const& url)
+void AlienGui::WebLink(std::string const& text, std::string const& url, std::optional<std::string> const& tooltip)
 {
     if (ImGui::TextLink(text.c_str())) {
         WebLinkHelper::openInBrowser(url);
     }
-    Tooltip(TooltipParameters().text("Open " + url + " in the browser."));
+    Tooltip(TooltipParameters().text(tooltip.value_or("Open " + url + " in the browser.")));
+}
+
+void AlienGui::PrivacyPolicyLink(std::string const& tooltip)
+{
+    auto text = std::string("Privacy policy");
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text.c_str()).x));
+    WebLink(text, Const::PrivacyPolicyURL, tooltip);
 }
 
 bool AlienGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled, bool* pinned)

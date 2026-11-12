@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <functional>
+#include <optional>
 
 #include <imgui.h>
 
@@ -37,7 +38,8 @@ public:
     static auto constexpr GroupTextIndent = 8.0f;
 
     static void HelpMarker(std::string const& text);
-    static void WebLink(std::string const& text, std::string const& url);
+    static void WebLink(std::string const& text, std::string const& url, std::optional<std::string> const& tooltip = std::nullopt);
+    static void PrivacyPolicyLink(std::string const& tooltip);
 
     struct SliderFloatParameters
     {

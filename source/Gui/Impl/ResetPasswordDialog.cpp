@@ -2,15 +2,13 @@
 
 #include <imgui.h>
 
-#include <Base/Resources.h>
-
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "NewPasswordDialog.h"
 #include "StyleService.h"
 
 ResetPasswordDialog::ResetPasswordDialog()
-    : AlienDialog("Reset password", {450.0f, 240.0f})
+    : AlienDialog("Reset password", {450.0f, 180.0f})
 {}
 
 void ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
@@ -23,14 +21,6 @@ void ResetPasswordDialog::open(std::string const& userName, UserInfo const& user
 
 void ResetPasswordDialog::processIntern()
 {
-    AlienGui::Text("Security information");
-    AlienGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
-                         "as a SHA-256 hash value in the database.");
-    AlienGui::WebLink("Data privacy policy", Const::PrivacyPolicyURL);
-    AlienGui::HelpMarker(
-        "The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send the confirmation code. "
-        "2) Its SHA-256 hash value is compared with the one stored for your account on the server.");
-    AlienGui::Separator();
     AlienGui::Text("Please enter your email address to receive the\nconfirmation code to reset the password.");
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Email").textWidth(0), _email);
@@ -51,6 +41,11 @@ void ResetPasswordDialog::processIntern()
     if (AlienGui::Button("Cancel")) {
         close();
     }
+
+    AlienGui::PrivacyPolicyLink(
+        "The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but as a SHA-256 hash "
+        "value in the database.\n\nThe entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To "
+        "send the confirmation code. 2) Its SHA-256 hash value is compared with the one stored for your account on the server.");
 }
 
 void ResetPasswordDialog::onResetPassword()

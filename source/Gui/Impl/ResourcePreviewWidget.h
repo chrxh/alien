@@ -19,12 +19,13 @@ public:
     void createForSimulation();
     void createForGenome(std::vector<PreviewDesc> const& previews);
     void process();
+    void process(float width, std::optional<std::string> const& label = std::nullopt);
 
     std::string const& getJpg() const;
 
 private:
-    void processSimulationPreview();
-    void processGenomePreview();
+    void processSimulationPreview(float availableWidth, std::optional<std::string> const& label);
+    void processGenomePreview(float width, std::optional<std::string> const& label);
     void clear();
 
     std::string _jpg;

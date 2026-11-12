@@ -9,6 +9,7 @@
 #include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
+#include "StyleService.h"
 
 void NewPasswordDialog::initIntern()
 {
@@ -25,23 +26,17 @@ void NewPasswordDialog::open(std::string const& userName, UserInfo const& userIn
 }
 
 NewPasswordDialog::NewPasswordDialog()
-    : AlienDialog("New password")
+    : AlienDialog("New password", {450.0f, 200.0f})
 {}
 
 void NewPasswordDialog::processIntern()
 {
-    AlienGui::Text("Security information");
-    AlienGui::HelpMarker(
-        "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
-        "value in the database.");
-
-    AlienGui::Separator();
-
     AlienGui::Text("Please enter a new password and the confirmation code\nsent to your email address.");
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("New password").password(true).textWidth(0), _newPassword);
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_confirmationCode.empty());
@@ -56,6 +51,10 @@ void NewPasswordDialog::processIntern()
     if (AlienGui::Button("Cancel")) {
         close();
     }
+
+    AlienGui::PrivacyPolicyLink(
+        "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
+        "value in the database.");
 }
 
 void NewPasswordDialog::onNewPassword()

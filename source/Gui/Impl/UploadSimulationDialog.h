@@ -25,6 +25,10 @@ private:
     UploadSimulationDialog();
 
     void processIntern() override;
+    void processForm();
+    void processNameInput();
+    void processVisibilitySelection();
+    void processFooter();
 
     void onUpload(WorkspaceType workspaceType);
 
@@ -35,6 +39,7 @@ private:
     std::string _resourceDescription;
 
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
+    WorkspaceType _workspaceType = WorkspaceType_Public;
 
     ResourcePreviewWidget _preview;
 };
