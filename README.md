@@ -20,7 +20,7 @@ and the conditions for open-ended evolution
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-BSD%203--Clause-blue?style=flat-square" alt="License: BSD 3-Clause"></a>
 </p>
 
-![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
+[![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
 
 <p align="center">
 <sub>All pictures and videos on this page are captured in ALIEN, not created with an AI image generator.</sub>
@@ -101,11 +101,11 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 
 **Various populations around a radiation source**
 
-<img width="2048" height="1152" alt="radiation_source" src="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31" />
+<a href="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31"><img width="2048" height="1152" alt="radiation_source" src="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31" /></a>
 
 ****Close-up of evolved digital organisms****
 
-<img width="1920" height="1080" alt="alien-closeup-d-frost" src="https://github.com/user-attachments/assets/490c740a-02f1-4682-ba10-b63cf89d1fda" />
+<a href="https://github.com/user-attachments/assets/490c740a-02f1-4682-ba10-b63cf89d1fda"><img width="1920" height="1080" alt="alien-closeup-d-frost" src="https://github.com/user-attachments/assets/490c740a-02f1-4682-ba10-b63cf89d1fda" /></a>
 
 **Swarms attacking an ecosystem**
 
@@ -113,7 +113,7 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 
 **Genome editor**
 
-<img width="1920" height="1080" alt="Genome editor" src="https://github.com/user-attachments/assets/0b5c8328-31c7-46bb-816c-d4c0e0315f50" />
+<a href="https://github.com/user-attachments/assets/0b5c8328-31c7-46bb-816c-d4c0e0315f50"><img width="1920" height="1080" alt="Genome editor" src="https://github.com/user-attachments/assets/0b5c8328-31c7-46bb-816c-d4c0e0315f50" /></a>
 
 ## 💻 Installation
 
