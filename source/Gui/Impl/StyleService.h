@@ -188,7 +188,7 @@ namespace Const
     extern ImColor DashboardCardBorderColor;
     extern ImColor DashboardSummaryRowColor;
 
-    extern ImColor BrowserAddReactionButtonTextColor;
+    extern ImColor BrowserOwnReactionButtonTextColor;
     extern ImColor BrowserDownloadButtonTextColor;
     extern ImColor BrowserDeleteButtonTextColor;
     extern ImColor BrowserLeafTextColor;

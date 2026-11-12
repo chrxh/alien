@@ -8,7 +8,7 @@ This chapter describes the screen of ALIEN. The first sections cover everything 
 
 The screen consists of a few main parts:
 
-- **Menu bar.** It runs along the top edge and gives access to most functions. The power button at its left end closes ALIEN.
+- **Menu bar.** It runs along the top edge and gives access to most functions. The power button at its left end closes ALIEN. While a simulation from the browser is open, its name, its author and a heart appear at the right end.
 - **Simulation view.** The world fills the whole screen behind all windows. Scrollbars at the right and bottom edges show which part of the world is visible.
 - **Edit mode button.** The round button in the lower left corner switches between navigation mode and edit mode. In edit mode, a tool bar with editing tools appears next to the button.
 - **Windows.** Windows float above the simulation view. You can move them by their title bar, resize them at their edges and collapse or close them with the buttons in the title bar. All windows can be opened again from the menus. The only exceptions are the separate parameter windows created with **Open in new window**, which are opened again from the **Simulation parameters** window.
@@ -115,7 +115,7 @@ In edit mode, select objects and press **Alt+N** to open an inspection window fo
 
 ### Browser
 
-Lists the simulations and genomes on the ALIEN server. The tabs switch between **Simulations** and **Genomes**. The **Featured** workspace contains the simulations of the ALIEN project, **Community** those shared by users and **Private** your own uploads. You can switch between a gallery view with preview pictures and a table view with folders. Double-click an entry to open it. After logging in, you can upload your own work and react to the work of others. See [Files and command line](files.md#sharing-in-the-browser).
+Lists the simulations and genomes on the ALIEN server. The tabs switch between **Simulations** and **Genomes**. The **Featured** workspace contains the simulations of the ALIEN project, **Community** those shared by users and **Private** your own uploads. You can switch between a gallery view with preview pictures and a table view with folders. Double-click an entry to open it. Anyone can give an entry a heart. After logging in, you can also upload your own work. See [Files and command line](files.md#sharing-in-the-browser).
 
 ### Recorder
 

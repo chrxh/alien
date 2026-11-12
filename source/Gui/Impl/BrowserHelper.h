@@ -14,5 +14,6 @@ public:
     static float calcFooterHeight();
     static bool ActionButton(std::string const& text);
     static void DownloadButton(BrowserData const& data, BrowserLeaf const& leaf);
+    static void HeartButton(BrowserData const& data, NetworkResourceRawTO const& rawTO, bool withReactionSummary);
     static NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO);
 };

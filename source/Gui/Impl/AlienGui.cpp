@@ -1682,6 +1682,11 @@ void AlienGui::EndMenuBar()
     }
 }
 
+bool AlienGui::IsMenuBarVisible()
+{
+    return _menuBarVisible;
+}
+
 void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRGB& color, bool* enabled)
 {
     static FloatColorRGB backupColor;

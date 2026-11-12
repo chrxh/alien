@@ -36,11 +36,12 @@ The **Autosave** window (Alt+5) protects long runs. It can create save points of
 The browser (Alt+B) connects ALIEN with the ALIEN server, where users share simulations and genomes.
 
 - **Browsing** works without an account. The **Featured** workspace contains simulations of the ALIEN project, and the **Community** workspace contains everything users have shared.
-- **Logging in.** Choose **Network > Login** (Alt+L) or click the account chip in the browser. The login dialog also lets you create a new account. With an account you get a **Private** workspace, and you can upload your own work and react to the work of others.
+- **Logging in.** Choose **Network > Login** (Alt+L) or click the account chip in the browser. The login dialog also lets you create a new account. With an account you get a **Private** workspace and can upload your own work.
 - **Uploading.** **Network > Upload simulation** (Alt+D) uploads the current simulation, and **Network > Upload genome** (Alt+Q) uploads the genome of the genome editor. The name is prefilled with your user name as a folder, followed by the project name of the simulation or the name of the genome, for example *UserName/Ocean*. A slash in the name creates folders, for example *My worlds/Ocean*. You can add a description.
 - **Visibility.** **Share with the community** makes the upload visible to everyone in the **Community** workspace and also posts it on the ALIEN Discord server. **Keep private** shows it only in your **Private** workspace. After the upload, **Show in browser** selects the new entry in the browser.
 - **Managing.** The browser tool bar lets you rename your uploads, replace them with a newer version, switch them between private and community and delete them.
-- **Reacting.** Click the reaction field of a simulation to choose a reaction. The gallery view can sort by reactions, date or downloads.
+- **Reacting.** No account is needed. Click the heart of an entry to give it a heart and click it again to take it back. A right click chooses another reaction. **Liked** below the entries shows only the entries you reacted to. The gallery view can sort by reactions, date or downloads.
+- **Credits.** While a simulation from the browser is open, the right end of the menu bar shows its name, its author and a heart. Click the name to show the entry in the browser or the heart to give it a heart.
 
 ## Command line interface
 

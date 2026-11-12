@@ -317,12 +317,7 @@ void _BrowserTableWidget::processReactionList(NetworkResourceTreeTO const& treeT
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
 
-        auto isAddReaction = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
-        AlienGui::Tooltip(AlienGui::TooltipParameters().text("Add a reaction").delay(false));
-        if (isAddReaction) {
-            _data->setActivateEmojiPopup(true);
-            _data->setEmojiPopupTO(treeTO);
-        }
+        BrowserHelper::HeartButton(_data, leaf.rawTO, false);
 
         // Calc remap which allows to show most frequent like type first
         std::map<int, int> remap;
@@ -377,7 +372,7 @@ void _BrowserTableWidget::processReactionList(NetworkResourceTreeTO const& treeT
                 ImGui::PopStyleColor(2);
                 ImGui::PopID();
                 AlienGui::Tooltip(
-                    AlienGui::TooltipParameters().textFunc([=, this] { return _data->getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }).delay(false));
+                    AlienGui::TooltipParameters().textFunc([=, this] { return _data->getUserNamesToEmojiType(leaf.rawTO, emojiType); }).delay(false));
             }
 
             // Separator except for last element

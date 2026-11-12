@@ -57,6 +57,7 @@ public:
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
     std::optional<ActiveSimulatorCountsTO> getActiveSimulatorCounts();
     void reportActiveSimulator();
+    void markReactedWithoutAccount();
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     bool toggleReactionForResource(std::string const& simId, int likeType);
@@ -83,6 +84,8 @@ private:
     std::atomic<bool> _countAsActive = true;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
+    std::string _installId;
+    std::atomic<bool> _reactedWithoutAccount = false;
     std::mutex _userInfoMutex;
     UserInfo _userInfo;
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;

@@ -330,7 +330,7 @@ void _BrowserGalleryWidget::processTile(NetworkResourceRawTO const& rawTO, float
 
         BrowserHelper::DownloadButton(_data, BrowserLeaf{.leafName = rawTO->resourceName, .rawTO = rawTO});
         ImGui::SameLine();
-        processReactionButton(rawTO);
+        BrowserHelper::HeartButton(_data, rawTO, true);
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_DOWNLOAD " " + std::to_string(rawTO->numDownloads)).rightAligned(true));
@@ -511,41 +511,6 @@ void _BrowserGalleryWidget::processPicture(NetworkResourceRawTO const& rawTO, fl
     ImGui::Dummy({width, height});
 }
 
-void _BrowserGalleryWidget::processReactionButton(NetworkResourceRawTO const& rawTO)
-{
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
-    auto isAddReaction = BrowserHelper::ActionButton(ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()));
-    ImGui::PopStyleColor();
-
-    if (ImGui::IsItemHovered()) {
-        processReactionTooltip(rawTO);
-    }
-    if (isAddReaction) {
-        _data->setActivateEmojiPopup(true);
-        _data->setEmojiPopupTO(BrowserHelper::createLeafTreeTO(rawTO));
-    }
-}
-
-void _BrowserGalleryWidget::processReactionTooltip(NetworkResourceRawTO const& rawTO)
-{
-    ImGui::BeginTooltip();
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
-    if (rawTO->numLikesByEmojiType.empty()) {
-        AlienGui::Text("Add a reaction");
-    } else {
-        for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
-            if (emojiType < toInt(_data->getEmojis().size())) {
-                auto const& emoji = _data->getEmojis().at(emojiType);
-                ImGui::Image(emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
-                ImGui::SameLine();
-            }
-            AlienGui::Text(std::to_string(numLikes) + "   " + _data->getUserNamesToEmojiType(rawTO->id, emojiType));
-        }
-    }
-    ImGui::PopStyleColor();
-    ImGui::EndTooltip();
-}
-
 std::string _BrowserGalleryWidget::getPageText() const
 {
     auto firstEntry = _numEntries > 0 ? _page * TilesPerPage + 1 : 0;
@@ -559,7 +524,7 @@ std::vector<NetworkResourceRawTO> _BrowserGalleryWidget::getSortedEntries() cons
 
     std::vector<NetworkResourceRawTO> result;
     for (auto const& rawTO : workspace.rawTOs) {
-        if (_data->getFilter().empty() || rawTO->matchWithFilter(_data->getFilter())) {
+        if (_data->matchesFilters(rawTO)) {
             result.emplace_back(rawTO);
         }
     }

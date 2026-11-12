@@ -419,6 +419,7 @@ public:
     static void EndMenu();
     static void MenuShutdownButton(std::function<void()> const& action);
     static void EndMenuBar();
+    static bool IsMenuBarVisible();
 
     struct ColorButtonParameters
     {

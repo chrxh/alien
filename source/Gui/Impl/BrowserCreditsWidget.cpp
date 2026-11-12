@@ -1,0 +1,196 @@
+#include "BrowserCreditsWidget.h"
+
+#include <imgui.h>
+
+#include <Fonts/IconsFontAwesome5.h>
+
+#include <Data/SimulationParameters.h>
+
+#include <Engine/Interface/SimulationFacade.h>
+
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkService.h>
+
+#include "AlienGui.h"
+#include "BrowserData.h"
+#include "BrowserWindow.h"
+#include "NewSimulationService.h"
+#include "StyleService.h"
+
+namespace
+{
+    auto constexpr MenuButtonRounding = 7.0f;
+    auto constexpr MenuButtonBorderSize = 2.0f;
+    auto constexpr TooltipValueWidth = 120.0f;
+}
+
+BrowserCreditsWidget _BrowserCreditsWidget::create(BrowserData const& data)
+{
+    return BrowserCreditsWidget(new _BrowserCreditsWidget(data));
+}
+
+_BrowserCreditsWidget::_BrowserCreditsWidget(BrowserData const& data)
+    : _data(data)
+{}
+
+namespace
+{
+    std::string getDisplayName(NetworkResourceRawTO const& rawTO)
+    {
+        auto projectName = std::string(_SimulationFacade::get()->getSimulationParameters().projectName.value);
+        if (!projectName.empty() && projectName != SimulationParameters().projectName.value) {
+            return projectName;
+        }
+        return NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName);
+    }
+
+    std::string getWorkspaceIcon(WorkspaceType workspaceType)
+    {
+        if (workspaceType == WorkspaceType_AlienProject) {
+            return ICON_FA_STAR;
+        }
+        if (workspaceType == WorkspaceType_Private) {
+            return ICON_FA_LOCK;
+        }
+        return ICON_FA_GLOBE;
+    }
+
+    std::string getNameText(NetworkResourceRawTO const& rawTO, std::string const& displayName)
+    {
+        return " " + getWorkspaceIcon(rawTO->workspaceType) + "  " + displayName;
+    }
+
+    std::string getUserText(NetworkResourceRawTO const& rawTO)
+    {
+        return "  by " + rawTO->userName + " ";
+    }
+
+    std::string getHeartText(NetworkResourceRawTO const& rawTO)
+    {
+        return " " ICON_FA_HEART " " + std::to_string(rawTO->getTotalLikes()) + " ";
+    }
+
+    void pushMenuButtonStyle()
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, MenuButtonRounding);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, MenuButtonBorderSize);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButtonActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::MenuButtonHoveredColor);
+    }
+
+    void popMenuButtonStyle()
+    {
+        ImGui::PopStyleColor(3);
+        ImGui::PopStyleVar(2);
+    }
+}
+
+void _BrowserCreditsWidget::process()
+{
+    if (!AlienGui::IsMenuBarVisible()) {
+        return;
+    }
+    auto const& originResourceId = NewSimulationService::get().getOriginResourceId();
+    if (!originResourceId.has_value()) {
+        return;
+    }
+    auto rawTO = _data->findRawTO(*originResourceId);
+    if (rawTO == nullptr) {
+        return;
+    }
+
+    auto displayName = getDisplayName(rawTO);
+    auto const& style = ImGui::GetStyle();
+    auto nameWidth =
+        ImGui::CalcTextSize(getNameText(rawTO, displayName).c_str()).x + ImGui::CalcTextSize(getUserText(rawTO).c_str()).x + style.FramePadding.x * 2;
+    auto heartWidth = ImGui::CalcTextSize(getHeartText(rawTO).c_str()).x + style.FramePadding.x * 2;
+    auto totalWidth = nameWidth + style.ItemSpacing.x + heartWidth;
+
+    auto cursorX = ImGui::GetCursorPosX();
+    auto startX = cursorX + ImGui::GetContentRegionAvail().x - totalWidth;
+    if (startX < cursorX) {
+        return;
+    }
+    ImGui::SetCursorPosX(startX);
+
+    processNameButton(rawTO, displayName, nameWidth);
+    processHeartButton(rawTO, displayName);
+}
+
+namespace
+{
+    void processTooltipRow(std::string const& label, std::string const& value)
+    {
+        AlienGui::Text(value);
+        ImGui::SameLine(scale(TooltipValueWidth));
+        AlienGui::Text(AlienGui::TextParameters().text(label).style(AlienGui::TextStyle::Decent));
+    }
+}
+
+void _BrowserCreditsWidget::processNameButton(NetworkResourceRawTO const& rawTO, std::string const& displayName, float width)
+{
+    auto pos = ImGui::GetCursorScreenPos();
+    pushMenuButtonStyle();
+    auto clicked = ImGui::Button("##creditsName", {width, 0});
+    popMenuButtonStyle();
+
+    auto const& style = ImGui::GetStyle();
+    auto nameText = getNameText(rawTO, displayName);
+    auto textPos = ImVec2{pos.x + style.FramePadding.x, pos.y + style.FramePadding.y};
+    auto drawList = ImGui::GetWindowDrawList();
+    drawList->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), nameText.c_str());
+    drawList->AddText(
+        {textPos.x + ImGui::CalcTextSize(nameText.c_str()).x, textPos.y}, ImGui::GetColorU32(Const::TextDimColor.Value), getUserText(rawTO).c_str());
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
+        AlienGui::Text(AlienGui::TextParameters().text(displayName).style(AlienGui::TextStyle::Bold));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserLeafTextColor);
+        AlienGui::Text(rawTO->resourceName);
+        ImGui::PopStyleColor();
+        AlienGui::Separator();
+        processTooltipRow("User", rawTO->userName);
+        processTooltipRow("Uploaded", rawTO->timestamp.substr(0, 10));
+        processTooltipRow("Reactions", std::to_string(rawTO->getTotalLikes()));
+        processTooltipRow("Downloads", std::to_string(rawTO->numDownloads));
+        AlienGui::Separator();
+        AlienGui::Text(AlienGui::TextParameters().text("Click to show it in the browser.").style(AlienGui::TextStyle::Decent));
+        ImGui::PopStyleColor();
+        ImGui::EndTooltip();
+    }
+    if (clicked) {
+        BrowserWindow::get().showResource(rawTO->resourceType, rawTO->workspaceType, rawTO->id);
+    }
+}
+
+void _BrowserCreditsWidget::processHeartButton(NetworkResourceRawTO const& rawTO, std::string const& displayName)
+{
+    auto isOwnReaction = _data->getOwnEmojiType(rawTO->id).has_value();
+    pushMenuButtonStyle();
+    ImGui::PushStyleColor(ImGuiCol_Text, isOwnReaction ? Const::BrowserOwnReactionButtonTextColor.Value : Const::TextDimColor.Value);
+    auto clicked = ImGui::Button((getHeartText(rawTO) + "###creditsHeart").c_str());
+    ImGui::PopStyleColor();
+    popMenuButtonStyle();
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
+        if (isOwnReaction) {
+            AlienGui::Text(AlienGui::TextParameters().text("You reacted to " + displayName).style(AlienGui::TextStyle::Bold));
+            AlienGui::Text(AlienGui::TextParameters().text("Click to take your reaction back.").style(AlienGui::TextStyle::Decent));
+        } else {
+            AlienGui::Text(AlienGui::TextParameters().text("Give " + rawTO->userName + " a heart").style(AlienGui::TextStyle::Bold));
+            if (!NetworkService::get().isLoggedIn()) {
+                AlienGui::Text(AlienGui::TextParameters().text("No account needed.").style(AlienGui::TextStyle::Decent));
+            }
+            AlienGui::Text(AlienGui::TextParameters().text("It is also kept in the Liked list of the browser.").style(AlienGui::TextStyle::Decent));
+        }
+        ImGui::PopStyleColor();
+        ImGui::EndTooltip();
+    }
+    if (clicked) {
+        _data->onToggleHeart(rawTO);
+    }
+}

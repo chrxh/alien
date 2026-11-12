@@ -54,8 +54,6 @@ private:
     void processPlaceholderTile(float tileWidth);
     void processTileTooltip(NetworkResourceRawTO const& rawTO);
     void processPicture(NetworkResourceRawTO const& rawTO, float width);
-    void processReactionButton(NetworkResourceRawTO const& rawTO);
-    void processReactionTooltip(NetworkResourceRawTO const& rawTO);
 
     std::string getPageText() const;
     std::vector<NetworkResourceRawTO> getSortedEntries() const;

@@ -9,6 +9,7 @@
 
 struct DownloadNetworkResourceResultData
 {
+    std::string resourceId;
     std::string resourceName;
     std::string resourceVersion;
     NetworkResourceType resourceType = NetworkResourceType_Simulation;

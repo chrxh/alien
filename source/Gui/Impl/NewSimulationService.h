@@ -23,5 +23,11 @@ public:
     };
     void createSimulation(Parameters const& parameters);
 
-    std::optional<std::string> loadSimulation(SimulationDesc const& simulation);
+    std::optional<std::string> loadSimulation(SimulationDesc const& simulation, std::optional<std::string> const& originResourceId = std::nullopt);
+
+    std::optional<std::string> const& getOriginResourceId() const;
+    void setOriginResourceId(std::optional<std::string> const& value);
+
+private:
+    std::optional<std::string> _originResourceId;
 };

@@ -18,6 +18,7 @@
 
 #include "AlienGui.h"
 #include "BrowserController.h"
+#include "BrowserCreditsWidget.h"
 #include "BrowserGalleryWidget.h"
 #include "BrowserHelper.h"
 #include "BrowserLoginBannerWidget.h"
@@ -70,6 +71,7 @@ void BrowserWindow::initIntern()
     _userListWidget = _BrowserUserListWidget::create(_data);
     _loginHintWidget = _BrowserLoginHintWidget::create();
     _loginBannerWidget = _BrowserLoginBannerWidget::create();
+    _creditsWidget = _BrowserCreditsWidget::create(_data);
 
     auto& settings = GlobalSettings::get();
     _galleryView = settings.getValue("windows.browser.gallery view", _galleryView);
@@ -137,6 +139,11 @@ void BrowserWindow::showResource(NetworkResourceType resourceType, WorkspaceType
 WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
 {
     return _data->getCurrentWorkspaceId().workspaceType;
+}
+
+void BrowserWindow::processCredits()
+{
+    _creditsWidget->process();
 }
 
 DownloadCache const& BrowserWindow::getSimulationCache() const
@@ -410,6 +417,17 @@ void BrowserWindow::processFooter()
         _data->setFilter(filter);
     }
 
+    ImGui::SameLine();
+    auto showLikedOnly = _data->isShowLikedOnly();
+    if (AlienGui::SelectableButton(
+            AlienGui::SelectableButtonParameters()
+                .name(ICON_FA_HEART "  Liked (" + std::to_string(_data->getNumLikedInCurrentWorkspace()) + ")###likedFilter")
+                .tooltip(Const::BrowserLikedFilterTooltip),
+            showLikedOnly)) {
+        _galleryWidget->resetPage();
+        _data->setShowLikedOnly(showLikedOnly);
+    }
+
     if (_galleryView) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - _galleryWidget->getPagerWidth());
@@ -454,7 +472,7 @@ void BrowserWindow::processStatusBar()
     statusItems.emplace_back(std::to_string(_data->getUserTOs().size()) + " simulators found");
 
     if (!NetworkService::get().getLoggedInUserName()) {
-        statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
+        statusItems.emplace_back("In order to share simulations you need to log in.");
     }
 
     AlienGui::StatusBar(AlienGui::StatusBarParameters().infoItems(statusItems));

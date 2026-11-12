@@ -7,6 +7,7 @@
 #include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "HelpStrings.h"
+#include "NewSimulationService.h"
 #include "StyleService.h"
 
 namespace
@@ -49,6 +50,9 @@ void NetworkSettingsDialog::openIntern()
 
 void NetworkSettingsDialog::onChangeSettings()
 {
+    if (_serverAddress != _origServerAddress) {
+        NewSimulationService::get().setOriginResourceId(std::nullopt);
+    }
     NetworkService::get().setServerAddress(_serverAddress);
     NetworkService::get().setCountAsActive(_countAsActive);
     BrowserWindow::get().onRefresh();

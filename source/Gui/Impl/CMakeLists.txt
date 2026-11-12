@@ -15,6 +15,8 @@ add_library(GuiImpl
     AutosaveWindow.h
     BrowserController.cpp
     BrowserController.h
+    BrowserCreditsWidget.cpp
+    BrowserCreditsWidget.h
     BrowserData.cpp
     BrowserData.h
     BrowserGalleryWidget.cpp

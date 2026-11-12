@@ -31,9 +31,10 @@ void NewSimulationService::createSimulation(Parameters const& parameters)
     Viewport::get().setCenterInWorldPos({toFloat(parameters._worldSize.x) / 2, toFloat(parameters._worldSize.y) / 2});
     Viewport::get().setZoomFactor(InitialZoomFactor);
     TemporalControlService::get().createFlashback();
+    _originResourceId.reset();
 }
 
-std::optional<std::string> NewSimulationService::loadSimulation(SimulationDesc const& simulation)
+std::optional<std::string> NewSimulationService::loadSimulation(SimulationDesc const& simulation, std::optional<std::string> const& originResourceId)
 {
     _PersisterFacade::get()->shutdown();
     _SimulationFacade::get()->closeSimulation();
@@ -59,5 +60,16 @@ std::optional<std::string> NewSimulationService::loadSimulation(SimulationDesc c
     Viewport::get().setCenterInWorldPos(simulation._center);
     Viewport::get().setZoomFactor(simulation._zoom);
     TemporalControlService::get().createFlashback();
+    _originResourceId = errorMessage ? std::nullopt : originResourceId;
     return errorMessage;
+}
+
+std::optional<std::string> const& NewSimulationService::getOriginResourceId() const
+{
+    return _originResourceId;
+}
+
+void NewSimulationService::setOriginResourceId(std::optional<std::string> const& value)
+{
+    _originResourceId = value;
 }

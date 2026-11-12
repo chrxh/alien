@@ -18,7 +18,6 @@
 #include "BrowserHelper.h"
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
-#include "LoginDialog.h"
 #include "NetworkTransferController.h"
 
 BrowserData _BrowserData::create()
@@ -80,6 +79,7 @@ void _BrowserData::setCurrentWorkspaceId(WorkspaceId const& workspaceId)
 void _BrowserData::setRawTOs(WorkspaceId const& workspaceId, std::vector<NetworkResourceRawTO> const& rawTOs)
 {
     _workspaces.at(workspaceId).rawTOs = rawTOs;
+    _userNamesByEmojiTypeBySimIdCache.clear();
     createTreeTOs(workspaceId);
 }
 
@@ -158,6 +158,42 @@ void _BrowserData::setFilter(std::string const& filter)
 {
     _filter = filter;
     createTreeTOsForAllWorkspaces();
+}
+
+bool _BrowserData::isShowLikedOnly() const
+{
+    return _showLikedOnly;
+}
+
+void _BrowserData::setShowLikedOnly(bool value)
+{
+    _showLikedOnly = value;
+    createTreeTOsForAllWorkspaces();
+}
+
+bool _BrowserData::matchesFilters(NetworkResourceRawTO const& rawTO) const
+{
+    if (_showLikedOnly && !getOwnEmojiType(rawTO->id).has_value()) {
+        return false;
+    }
+    return _filter.empty() || rawTO->matchWithFilter(_filter);
+}
+
+int _BrowserData::getNumLikedInCurrentWorkspace() const
+{
+    return toInt(
+        std::ranges::count_if(getCurrentWorkspace().rawTOs, [this](NetworkResourceRawTO const& rawTO) { return getOwnEmojiType(rawTO->id).has_value(); }));
+}
+
+NetworkResourceRawTO _BrowserData::findRawTO(std::string const& resourceId) const
+{
+    for (auto const& workspace : _workspaces | std::views::values) {
+        auto findResult = std::ranges::find_if(workspace.rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->id == resourceId; });
+        if (findResult != workspace.rawTOs.end()) {
+            return *findResult;
+        }
+    }
+    return nullptr;
 }
 
 NetworkResourceTreeTO const& _BrowserData::getSelectedTreeTO() const
@@ -279,28 +315,36 @@ std::vector<TextureData> const& _BrowserData::getEmojis() const
 void _BrowserData::setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> const& ownEmojiTypeBySimId)
 {
     _ownEmojiTypeBySimId = ownEmojiTypeBySimId;
+    _ownReactionsUserName = NetworkService::get().getLoggedInUserName();
+}
+
+std::optional<int> _BrowserData::getOwnEmojiType(std::string const& resourceId) const
+{
+    if (!areOwnReactionsCurrent()) {
+        return std::nullopt;
+    }
+    auto findResult = _ownEmojiTypeBySimId.find(resourceId);
+    if (findResult == _ownEmojiTypeBySimId.end()) {
+        return std::nullopt;
+    }
+    return findResult->second;
 }
 
 bool _BrowserData::isOwnReaction(std::string const& resourceId, int emojiType) const
 {
-    auto findResult = _ownEmojiTypeBySimId.find(resourceId);
-    return findResult != _ownEmojiTypeBySimId.end() && findResult->second == emojiType;
+    return getOwnEmojiType(resourceId) == emojiType;
 }
 
-std::string _BrowserData::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)
+std::string _BrowserData::getUserNamesToEmojiType(NetworkResourceRawTO const& rawTO, int emojiType)
 {
-    std::set<std::string> userNames;
-
-    auto findResult = _userNamesByEmojiTypeBySimIdCache.find(std::make_pair(resourceId, emojiType));
-    if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
-        userNames = findResult->second;
-    } else {
+    auto findResult = _userNamesByEmojiTypeBySimIdCache.find(std::make_pair(rawTO->id, emojiType));
+    if (findResult == _userNamesByEmojiTypeBySimIdCache.end()) {
         if (!_emojiUserNameProcessor->pendingTasks()) {
             _emojiUserNameProcessor->executeTask(
                 [&](auto const& senderId) {
                     return _PersisterFacade::get()->scheduleGetUserNamesForReaction(
                         SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},
-                        GetUserNamesForReactionRequestData{.resourceId = resourceId, .emojiType = emojiType});
+                        GetUserNamesForReactionRequestData{.resourceId = rawTO->id, .emojiType = emojiType});
                 },
                 [&](auto const& requestId) {
                     auto data = _PersisterFacade::get()->fetchGetUserNamesForReactionData(requestId);
@@ -311,54 +355,78 @@ std::string _BrowserData::getUserNamesToEmojiType(std::string const& resourceId,
         return "Loading...";
     }
 
-    return boost::algorithm::join(userNames, ", ");
+    auto const& userNames = findResult->second;
+    auto numLikesResult = rawTO->numLikesByEmojiType.find(emojiType);
+    auto numLikes = numLikesResult != rawTO->numLikesByEmojiType.end() ? numLikesResult->second : 0;
+    auto numWithoutAccount = std::max(0, numLikes - toInt(userNames.size()));
+
+    auto result = boost::algorithm::join(userNames, ", ");
+    if (numWithoutAccount > 0) {
+        result += (userNames.empty() ? "" : " and ") + std::to_string(numWithoutAccount) + " without account";
+    }
+    return result;
 }
 
 void _BrowserData::onToggleLike(NetworkResourceTreeTO const& treeTO, int emojiType)
 {
     CHECK(treeTO->isLeaf());
-    auto& leaf = treeTO->getLeaf();
-    if (NetworkService::get().getLoggedInUserName()) {
-
-        // Remove existing like
-        auto findResult = _ownEmojiTypeBySimId.find(leaf.rawTO->id);
-        auto onlyRemoveLike = false;
-        if (findResult != _ownEmojiTypeBySimId.end()) {
-            auto origEmojiType = findResult->second;
-            if (--leaf.rawTO->numLikesByEmojiType[origEmojiType] == 0) {
-                leaf.rawTO->numLikesByEmojiType.erase(origEmojiType);
-            }
-            _ownEmojiTypeBySimId.erase(findResult);
-            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, origEmojiType));  // Invalidate cache entry
-            onlyRemoveLike = origEmojiType == emojiType;                                             // Remove like if same like icon has been clicked
-        }
-
-        // Create new like
-        if (!onlyRemoveLike) {
-            _ownEmojiTypeBySimId[leaf.rawTO->id] = emojiType;
-            if (leaf.rawTO->numLikesByEmojiType.contains(emojiType)) {
-                ++leaf.rawTO->numLikesByEmojiType[emojiType];
-            } else {
-                leaf.rawTO->numLikesByEmojiType[emojiType] = 1;
-            }
-        }
-
-        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  // Invalidate cache entry
-
-        _reactionProcessor->executeTask(
-            [&](auto const& senderId) {
-                return _PersisterFacade::get()->scheduleToggleReactionNetworkResource(
-                    SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = false},
-                    ToggleReactionNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
-            },
-            [](auto const&) {},
-            [](auto const& errors) {
-                BrowserWindow::get().onRefresh();
-                GenericMessageDialog::get().information("Error", errors);
-            });
-    } else {
-        LoginDialog::get().open();
+    if (_reactionProcessor->pendingTasks()) {
+        return;
     }
+    if (!areOwnReactionsCurrent()) {
+        _ownEmojiTypeBySimId.clear();
+        _ownReactionsUserName = NetworkService::get().getLoggedInUserName();
+    }
+    if (!NetworkService::get().isLoggedIn()) {
+        NetworkService::get().markReactedWithoutAccount();
+    }
+    auto& leaf = treeTO->getLeaf();
+
+    // Remove existing like
+    auto findResult = _ownEmojiTypeBySimId.find(leaf.rawTO->id);
+    auto onlyRemoveLike = false;
+    if (findResult != _ownEmojiTypeBySimId.end()) {
+        auto origEmojiType = findResult->second;
+        auto numLikesIter = leaf.rawTO->numLikesByEmojiType.find(origEmojiType);
+        if (numLikesIter != leaf.rawTO->numLikesByEmojiType.end() && --numLikesIter->second <= 0) {
+            leaf.rawTO->numLikesByEmojiType.erase(numLikesIter);
+        }
+        _ownEmojiTypeBySimId.erase(findResult);
+        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, origEmojiType));  // Invalidate cache entry
+        onlyRemoveLike = origEmojiType == emojiType;                                             // Remove like if same like icon has been clicked
+    }
+
+    // Create new like
+    if (!onlyRemoveLike) {
+        _ownEmojiTypeBySimId[leaf.rawTO->id] = emojiType;
+        if (leaf.rawTO->numLikesByEmojiType.contains(emojiType)) {
+            ++leaf.rawTO->numLikesByEmojiType[emojiType];
+        } else {
+            leaf.rawTO->numLikesByEmojiType[emojiType] = 1;
+        }
+    }
+
+    _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  // Invalidate cache entry
+    if (_showLikedOnly) {
+        _treeTOsOutdated = true;
+    }
+
+    _reactionProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _PersisterFacade::get()->scheduleToggleReactionNetworkResource(
+                SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true},
+                ToggleReactionNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
+        },
+        [](auto const&) {},
+        [](auto const& errors) {
+            BrowserWindow::get().onRefresh();
+            GenericMessageDialog::get().information("Error", errors);
+        });
+}
+
+void _BrowserData::onToggleHeart(NetworkResourceRawTO const& rawTO)
+{
+    onToggleLike(BrowserHelper::createLeafTreeTO(rawTO), getOwnEmojiType(rawTO->id).value_or(HeartEmojiType));
 }
 
 bool _BrowserData::isActivateEmojiPopup() const
@@ -385,6 +453,10 @@ void _BrowserData::processPendingRequests()
 {
     _reactionProcessor->process();
     _emojiUserNameProcessor->process();
+    if (_treeTOsOutdated) {
+        _treeTOsOutdated = false;
+        createTreeTOsForAllWorkspaces();
+    }
 }
 
 void _BrowserData::createTreeTOs(WorkspaceId const& workspaceId)
@@ -401,7 +473,7 @@ void _BrowserData::createTreeTOs(WorkspaceId const& workspaceId)
     // Filtering
     std::vector<NetworkResourceRawTO> filteredRawTOs;
     for (auto const& rawTO : workspace.rawTOs) {
-        if (rawTO->matchWithFilter(_filter)) {
+        if (matchesFilters(rawTO)) {
             filteredRawTOs.emplace_back(rawTO);
         }
     }
@@ -444,6 +516,11 @@ void _BrowserData::deselectIfNotInTree(Workspace const& workspace)
     if (std::ranges::none_of(workspace.treeTOs, [this](NetworkResourceTreeTO const& treeTO) { return isSelected(treeTO); })) {
         _selectedTreeTO = nullptr;
     }
+}
+
+bool _BrowserData::areOwnReactionsCurrent() const
+{
+    return _ownReactionsUserName == NetworkService::get().getLoggedInUserName();
 }
 
 std::unordered_set<NetworkResourceRawTO> _BrowserData::getAllRawTOs() const
