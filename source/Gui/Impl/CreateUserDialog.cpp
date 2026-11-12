@@ -11,9 +11,10 @@
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
+#include "StyleService.h"
 
 CreateUserDialog::CreateUserDialog()
-    : AlienDialog("Create user")
+    : AlienDialog("Create user", {450.0f, 240.0f})
 {}
 
 void CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
@@ -39,6 +40,7 @@ void CreateUserDialog::processIntern()
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Email").textWidth(0), _email);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_email.empty());

@@ -7,9 +7,10 @@
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "NewPasswordDialog.h"
+#include "StyleService.h"
 
 ResetPasswordDialog::ResetPasswordDialog()
-    : AlienDialog("Reset password")
+    : AlienDialog("Reset password", {450.0f, 240.0f})
 {}
 
 void ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
@@ -34,6 +35,7 @@ void ResetPasswordDialog::processIntern()
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Email").textWidth(0), _email);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_email.empty());
