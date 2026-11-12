@@ -28,6 +28,9 @@ public:
     std::optional<std::string> const& getOriginResourceId() const;
     void setOriginResourceId(std::optional<std::string> const& value);
 
+    void storeAutosaveOrigin() const;
+    void restoreAutosaveOrigin();
+
 private:
     std::optional<std::string> _originResourceId;
 };

@@ -20,8 +20,6 @@
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
 
-#include <Network/NetworkService.h>
-
 #include <Persister/Interface/PersisterFacade.h>
 #include <Persister/Interface/SerializerService.h>
 #include <Persister/Interface/TaskProcessor.h>
@@ -82,8 +80,6 @@ namespace
     float constexpr LogoGlowMaxEnlargement = 1.06f;
 
     auto const StartupSenderId = "Startup";
-    auto const AutosaveOriginSettingsKey = "controllers.main loop.autosave origin";
-    auto const AutosaveOriginServerSettingsKey = "controllers.main loop.autosave origin server";
 }
 
 void MainLoopController::setup()
@@ -207,11 +203,7 @@ void MainLoopController::scheduleReadingAutosave()
         [this](auto const& requestId) {
             auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
             _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
-            auto originResourceId = GlobalSettings::get().getValue(AutosaveOriginSettingsKey, std::string());
-            auto originServer = GlobalSettings::get().getValue(AutosaveOriginServerSettingsKey, std::string());
-            if (!originResourceId.empty() && originServer == NetworkService::get().getServerAddress()) {
-                NewSimulationService::get().setOriginResourceId(originResourceId);
-            }
+            NewSimulationService::get().restoreAutosaveOrigin();
             finishSimulationLoading(data.simulationDesc);
         },
         [this](auto const&) { scheduleSearchingStartupSimulation(); });
@@ -350,8 +342,7 @@ void MainLoopController::processScheduleExit()
 {
     if (_saveOnExit) {
         printOverlayMessage("Saving on exit ...");
-        GlobalSettings::get().setValue(AutosaveOriginSettingsKey, NewSimulationService::get().getOriginResourceId().value_or(std::string()));
-        GlobalSettings::get().setValue(AutosaveOriginServerSettingsKey, NetworkService::get().getServerAddress());
+        NewSimulationService::get().storeAutosaveOrigin();
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};

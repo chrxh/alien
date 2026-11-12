@@ -1,11 +1,14 @@
 #include "NewSimulationService.h"
 
+#include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
 #include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
+
+#include <Network/NetworkService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 
@@ -15,6 +18,8 @@ namespace
 {
     auto constexpr ProjectNameSize = sizeof(Char64) / sizeof(char);
     auto constexpr InitialZoomFactor = 4.0f;
+    auto constexpr AutosaveOriginSettingsKey = "services.new simulation.autosave origin";
+    auto constexpr AutosaveOriginServerSettingsKey = "services.new simulation.autosave origin server";
 }
 
 void NewSimulationService::createSimulation(Parameters const& parameters)
@@ -72,4 +77,19 @@ std::optional<std::string> const& NewSimulationService::getOriginResourceId() co
 void NewSimulationService::setOriginResourceId(std::optional<std::string> const& value)
 {
     _originResourceId = value;
+}
+
+void NewSimulationService::storeAutosaveOrigin() const
+{
+    GlobalSettings::get().setValue(AutosaveOriginSettingsKey, _originResourceId.value_or(std::string()));
+    GlobalSettings::get().setValue(AutosaveOriginServerSettingsKey, NetworkService::get().getServerAddress());
+}
+
+void NewSimulationService::restoreAutosaveOrigin()
+{
+    auto originResourceId = GlobalSettings::get().getValue(AutosaveOriginSettingsKey, std::string());
+    auto originServer = GlobalSettings::get().getValue(AutosaveOriginServerSettingsKey, std::string());
+    if (!originResourceId.empty() && originServer == NetworkService::get().getServerAddress()) {
+        _originResourceId = originResourceId;
+    }
 }
