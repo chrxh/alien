@@ -452,6 +452,11 @@ bool LocalLibraryService::isValidFolderName(std::string const& name) const
     return isValidName(name, MaxFolderDepth - 1, false);
 }
 
+bool LocalLibraryService::isAutosaveName(std::string const& name) const
+{
+    return parseTimestep(name, Const::AutosavePrefix).has_value();
+}
+
 std::filesystem::path LocalLibraryService::normalize(std::filesystem::path const& folder) const
 {
     return normalizePath(folder);

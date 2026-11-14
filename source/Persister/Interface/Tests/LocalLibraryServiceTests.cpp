@@ -248,6 +248,18 @@ TEST_F(LocalLibraryServiceTests, validFolderNames)
     EXPECT_FALSE(_service->isValidFolderName("1/2/3/4/5/6/7/8/9"));
 }
 
+TEST_F(LocalLibraryServiceTests, autosaveNames)
+{
+    EXPECT_TRUE(_service->isAutosaveName("autosave_12400000"));
+    EXPECT_TRUE(_service->isAutosaveName("autosave_12_400_000"));
+    EXPECT_TRUE(_service->isAutosaveName("autosave_12400000-2"));
+
+    EXPECT_FALSE(_service->isAutosaveName("save_165_536_949"));
+    EXPECT_FALSE(_service->isAutosaveName("autosave"));
+    EXPECT_FALSE(_service->isAutosaveName("autosave_"));
+    EXPECT_FALSE(_service->isAutosaveName("autosave_notes"));
+}
+
 TEST_F(LocalLibraryServiceTests, normalizeAndRelations)
 {
     auto folder = _library / "Hanging Garden";

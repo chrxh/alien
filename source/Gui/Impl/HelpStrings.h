@@ -59,8 +59,8 @@ namespace Const
         "window. The server tells the instances apart by a hash of their IP address that it keeps only in memory for 24 hours and never stores.";
 
     std::string const BrowserLocalWorkspaceTooltip =
-        "The simulations in one folder of this computer. Save (Ctrl+S) stores the current simulation there. Nobody else can see them until you share "
-        "them.";
+        "The simulations in one folder of this computer, including the autosaves in it. Save (Ctrl+S) stores the current simulation there. Nobody else can "
+        "see them until you share them.";
 
     std::string const BrowserLocalGenomesWorkspaceTooltip =
         "The genomes in one folder of this computer. Save genome stores the genome of the genome editor there. Nobody else can see them until you "

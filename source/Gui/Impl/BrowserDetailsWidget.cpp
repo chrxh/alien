@@ -5,7 +5,6 @@
 #include <numeric>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <imgui.h>
 
@@ -19,6 +18,7 @@
 #include <Network/NetworkService.h>
 
 #include <Persister/Interface/LocalLibrary.h>
+#include <Persister/Interface/LocalLibraryService.h>
 
 #include "AlienGui.h"
 #include "BrowserData.h"
@@ -78,11 +78,9 @@ namespace
         processWrappedText(text);
     }
 
-    // An autosave is shown by its time step, which a file that is only named in a similar way is not
     bool isCreatedByAutosave(NetworkResourceRawTO const& rawTO)
     {
-        auto stem = StringHelper::toUtf8(StringHelper::toPath(rawTO->id).stem());
-        return stem.starts_with(Const::AutosavePrefix) && NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName) != stem;
+        return LocalLibraryService::get().isAutosaveName(StringHelper::toUtf8(StringHelper::toPath(rawTO->id).stem()));
     }
 
     // The simulation that ALIEN saves when it is closed and loads when it is started
@@ -221,27 +219,36 @@ void _BrowserDetailsWidget::processResource(NetworkResourceTreeTO const& treeTO)
             addSectionSpacing();
             processReactions(treeTO);
             processVisibility(treeTO);
-        } else if (rawTO->workspaceType == WorkspaceType_Local) {
-            addSectionSpacing();
-            if (auto upload = _data->findUpload(rawTO)) {
-                if (upload->workspaceType == WorkspaceType_Private) {
-                    processStatus(ICON_FA_LOCK, "Uploaded only for you as " + upload->resourceName);
-                } else {
-                    processStatus(ICON_FA_GLOBE, "Shared with the community as " + upload->resourceName);
-                }
-            } else {
-                processStatus(ICON_FA_DESKTOP, "Only on this computer");
-            }
         } else {
-            auto& controller = LocalLibraryController::get();
-            if (isSavedOnExit(rawTO)) {
+            auto hasUploadStatus = rawTO->workspaceType == WorkspaceType_Local;
+            if (hasUploadStatus) {
                 addSectionSpacing();
-                processStatus(ICON_FA_HISTORY, "Saved again whenever ALIEN is closed");
+                if (auto upload = _data->findUpload(rawTO)) {
+                    if (upload->workspaceType == WorkspaceType_Private) {
+                        processStatus(ICON_FA_LOCK, "Uploaded only for you as " + upload->resourceName);
+                    } else {
+                        processStatus(ICON_FA_GLOBE, "Shared with the community as " + upload->resourceName);
+                    }
+                } else {
+                    processStatus(ICON_FA_DESKTOP, "Only on this computer");
+                }
+            }
+
+            // An autosave tells in My simulations as well when it is replaced or deleted
+            auto& controller = LocalLibraryController::get();
+            std::optional<std::string> autosaveStatus;
+            if (isSavedOnExit(rawTO)) {
+                autosaveStatus = "Saved again whenever ALIEN is closed";
             } else if (
                 isCreatedByAutosave(rawTO) && controller.getSaveMode() == LocalLibraryController::SaveMode_Limited
                 && controller.isAutosaveFolder(StringHelper::toPath(rawTO->id).parent_path())) {
-                addSectionSpacing();
-                processStatus(ICON_FA_HISTORY, "Deleted when " + std::to_string(controller.getNumberOfFiles()) + " newer autosaves exist in its folder");
+                autosaveStatus = "Deleted when " + std::to_string(controller.getNumberOfFiles()) + " newer autosaves exist in its folder";
+            }
+            if (autosaveStatus.has_value()) {
+                if (!hasUploadStatus) {
+                    addSectionSpacing();
+                }
+                processStatus(ICON_FA_HISTORY, *autosaveStatus);
             }
         }
     }
@@ -539,10 +546,6 @@ void _BrowserDetailsWidget::processFolders()
     ImGui::SameLine();
     AlienGui::Text("Folder");
 
-    if (isAutosave) {
-        processAutosaveFolder();
-    }
-
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_EXTERNAL_LINK_ALT "  Show in file manager"))) {
         std::error_code error;
         std::filesystem::create_directories(folder, error);
@@ -558,21 +561,22 @@ void _BrowserDetailsWidget::processAutosaveFolder()
     auto frameCount = ImGui::GetFrameCount();
     if (frameCount != _lastAutosaveFolderFrame + 1) {
         _autosaveFolderName = controller.getAutosaveFolderName();
+        _autosaveFolderNameValid = true;
     }
     _lastAutosaveFolderFrame = frameCount;
 
     ImGui::BeginGroup();
     if (AlienGui::InputText(AlienGui::InputTextParameters().name("Subfolder").textWidth(SettingsTextWidth), _autosaveFolderName)) {
-        controller.setAutosaveFolderName(_autosaveFolderName);
+        _autosaveFolderNameValid = controller.setAutosaveFolderName(_autosaveFolderName);
     }
     ImGui::EndGroup();
     AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-        "The subfolder in which the autosaves are stored, for instance one for each simulation run. Use / for nested subfolders. Without a "
-        "subfolder, the autosaves are stored in the folder itself."));
+        "The subfolder in which new autosaves are stored, for instance one for each simulation run. Use / or \\ for nested subfolders. Without a "
+        "subfolder, they are stored in the folder itself."));
 
-    if (boost::algorithm::trim_copy(_autosaveFolderName) != controller.getAutosaveFolderName()) {
+    if (!_autosaveFolderNameValid) {
         ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
-        processWrappedText("The subfolder is not valid. A name must not contain < > : \" \\ | ? * and must not begin or end with a dot.");
+        processWrappedText("The subfolder is not valid. A name must not contain < > : \" | ? * and must not begin or end with a dot.");
         ImGui::PopStyleColor();
     }
 }
@@ -597,6 +601,8 @@ void _BrowserDetailsWidget::processAutosaveSettings()
         controller.setAutosaveInterval(autosaveInterval);
     }
     ImGui::EndDisabled();
+
+    processAutosaveFolder();
 
     auto saveMode = controller.getSaveMode();
     if (AlienGui::Switcher(

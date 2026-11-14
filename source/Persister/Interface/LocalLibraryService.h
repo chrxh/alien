@@ -19,7 +19,8 @@ public:
 
     bool isValidSimulationName(std::string const& name) const;  // Names that autosave uses are refused, because their files are deleted or replaced
     bool isValidFolderName(std::string const& name) const;
-    std::filesystem::path normalize(std::filesystem::path const& folder) const;                            // Absolute and without a trailing separator
+    bool isAutosaveName(std::string const& name) const;                          // The name without folders of a file that autosave writes and removes again
+    std::filesystem::path normalize(std::filesystem::path const& folder) const;  // Absolute and without a trailing separator
     bool isInside(std::filesystem::path const& folder, std::filesystem::path const& libraryFolder) const;  // Also true for the library folder itself
 
     std::filesystem::path getSimulationPath(std::filesystem::path const& libraryFolder, std::string const& name) const;

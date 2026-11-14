@@ -93,7 +93,10 @@ void EditSimulationDialog::processForLeaf()
     auto& service = LocalLibraryService::get();
     auto isGenome = _treeTO->type == NetworkResourceType_Genome;
     auto isValidLocalName = isGenome ? service.isValidGenomeName(newName) : service.isValidSimulationName(newName);
-    auto valid = isLocal() ? isValidLocalName : !_newName.empty();
+
+    // An autosave keeps its name, which no other simulation may get, while only its description is changed
+    auto isUnchangedAutosaveName = !isGenome && newName == _treeTO->getLeaf().rawTO->resourceName && service.isValidFolderName(newName);
+    auto valid = isLocal() ? isValidLocalName || isUnchangedAutosaveName : !_newName.empty();
     if (isLocal() && !valid && !newName.empty() && !_errorMessage.has_value()) {
         _errorMessage = !isGenome && service.isValidFolderName(newName) ? "Names of this form are reserved for autosaves" : getLocalNameHint(newName);
     }
@@ -206,7 +209,7 @@ void EditSimulationDialog::onApplyToFolder()
         auto const& controller = LocalLibraryController::get();
         auto newFolderName = boost::algorithm::trim_copy(_newName);
 
-        // The files keep their names, which differ from the names shown for autosaves
+        // The files keep their names
         std::vector<LocalLibraryController::Renaming> renamings;
         for (auto const& rawTO : _rawTOs) {
             auto simulationPath = StringHelper::toPath(rawTO->id);

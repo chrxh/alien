@@ -25,7 +25,7 @@ void LoginDialog::initIntern()
 }
 
 LoginDialog::LoginDialog()
-    : AlienDialog("Login or register", {450.0f, 450.0f})
+    : AlienDialog("Login or register", {450.0f, 304.0f})
 {}
 
 void LoginDialog::processIntern()

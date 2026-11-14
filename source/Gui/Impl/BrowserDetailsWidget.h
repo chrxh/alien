@@ -54,5 +54,6 @@ private:
     std::optional<int> _libraryRevision;
 
     std::string _autosaveFolderName;
+    bool _autosaveFolderNameValid = true;
     int _lastAutosaveFolderFrame = -1;
 };

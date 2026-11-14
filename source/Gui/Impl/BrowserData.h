@@ -28,7 +28,7 @@
 // The workspaces that only the browser knows continue the workspace types of the server
 enum BrowserWorkspaceType_
 {
-    WorkspaceType_Local = WorkspaceType_Count,  // Simulations and genomes of this computer saved by hand
+    WorkspaceType_Local = WorkspaceType_Count,  // Simulations and genomes in the library folder of this computer
     WorkspaceType_Autosave,
     WorkspaceType_Liked,  // Everything in the workspaces of the server that the user has reacted to
     WorkspaceType_CountInBrowser
