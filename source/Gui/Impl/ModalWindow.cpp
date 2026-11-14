@@ -35,6 +35,11 @@ void ModalWindow::setTitle(std::string const& title)
     _title = title;
 }
 
+void ModalWindow::setDefaultSize(RealVector2D const& size)
+{
+    _defaultSize = {scale(size.x), scale(size.y)};
+}
+
 void ModalWindow::process(std::function<void()> const& contentFunc)
 {
     if (_state == State::Closed) {

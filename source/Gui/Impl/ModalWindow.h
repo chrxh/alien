@@ -22,6 +22,7 @@ public:
 
     bool isOpen() const;
     void setTitle(std::string const& title);
+    void setDefaultSize(RealVector2D const& size);  // Applies to a title that is opened for the first time
 
     void process(std::function<void()> const& contentFunc);
 

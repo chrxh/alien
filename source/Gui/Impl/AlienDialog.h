@@ -30,6 +30,7 @@ protected:
     virtual void openIntern() {}
 
     void changeTitle(std::string const& title);
+    void changeDefaultSize(RealVector2D const& size);
     virtual void close();
 
 private:
