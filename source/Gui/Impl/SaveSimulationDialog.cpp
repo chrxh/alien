@@ -48,7 +48,6 @@ namespace
     auto constexpr SectionSpacing = 10.0f;
     auto constexpr TargetSectionHeight = 164.0f;
     auto constexpr ReplaceSectionHeight = 90.0f;
-    auto constexpr MinMessageWidth = 60.0f;
     auto constexpr TimestampLengthWithoutSeconds = 16;  // e.g. 2026-11-13 14:02
     auto constexpr DateLength = 10;
 
@@ -280,6 +279,9 @@ SaveSimulationDialog::SaveSimulationDialog()
 
 void SaveSimulationDialog::processIntern()
 {
+    auto outcome = evaluate();
+    updateDescription(outcome);
+
     auto columnHeight = std::max(scale(MinColumnHeight), ImGui::GetContentRegionAvail().y - scale(FooterHeight));
     if (ImGui::BeginChild("##picture", {scale(PreviewWidth), columnHeight}, 0, ImGuiWindowFlags_NoScrollbar)) {
         auto pictureLabel = [&]() -> std::string {
@@ -294,17 +296,15 @@ void SaveSimulationDialog::processIntern()
 
     ImGui::SameLine(0, scale(ColumnSpacing));
     if (ImGui::BeginChild("##form", {0, columnHeight})) {
-        processForm();
+        processForm(outcome);
     }
     ImGui::EndChild();
 
     AlienGui::Separator();
-    auto outcome = evaluate();
-    updateDescription(outcome);
     processFooter(outcome);
 }
 
-void SaveSimulationDialog::processForm()
+void SaveSimulationDialog::processForm(Outcome const& outcome)
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
 
@@ -322,6 +322,13 @@ void SaveSimulationDialog::processForm()
         "Use the `/`-notation to put the " + resourceTypeString
         + " into a folder. Missing folders are created automatically.\nFor instance, the name `Biome/Water world/Initial/Variant 1` creates the nested "
           "folders `Biome`, `Water world` and `Initial`."));
+    if (auto const& message = _errorMessage.has_value() ? _errorMessage : outcome.message) {
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
+        ImGui::PushTextWrapPos(0.0f);
+        AlienGui::Text(*message);
+        ImGui::PopTextWrapPos();
+        ImGui::PopStyleColor();
+    }
 
     addSectionSpacing();
     processLabel("Description", "optional");
@@ -412,21 +419,6 @@ void SaveSimulationDialog::processFooter(Outcome const& outcome)
     ImGui::SameLine();
     if (AlienGui::Button("Cancel")) {
         close();
-    }
-
-    if (auto const& message = _errorMessage.has_value() ? _errorMessage : outcome.message) {
-        ImGui::SameLine();
-        auto messageWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
-        if (messageWidth >= scale(MinMessageWidth)) {
-            if (ImGui::BeginChild("##message", {messageWidth, ImGui::GetFrameHeight()}, 0, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-                ImGui::AlignTextToFramePadding();
-                ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
-                AlienGui::Text(AlienGui::TextParameters().text(*message).truncate(true));
-                ImGui::PopStyleColor();
-            }
-            ImGui::EndChild();
-            AlienGui::Tooltip(AlienGui::TooltipParameters().text(*message));
-        }
     }
 }
 

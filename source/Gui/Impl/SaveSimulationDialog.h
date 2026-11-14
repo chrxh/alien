@@ -75,7 +75,7 @@ private:
     };
 
     void processIntern() override;
-    void processForm();
+    void processForm(Outcome const& outcome);
     void processFooter(Outcome const& outcome);
 
     Outcome evaluate() const;
