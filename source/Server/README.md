@@ -46,6 +46,16 @@ cd /opt/alien-server
 .venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
+The systemd unit also needs a runtime directory that survives restarts, so that
+`systemctl restart` keeps the active simulator counts (see below):
+
+```ini
+[Service]
+EnvironmentFile=/etc/alien-server.env
+RuntimeDirectory=alien-server
+RuntimeDirectoryPreserve=restart
+```
+
 If you see `FATAL: password authentication failed for user "alien"` on
 startup, the password in `DATABASE_URL` does not match the one configured
 in PostgreSQL for the `alien` role. Verify with:
@@ -94,27 +104,34 @@ command-line interface does not need that list and calls
 `/reportactivesimulator` instead, every 5 minutes after its start. The server
 remembers a keyed hash of each caller's IP address for 24 hours after its last
 call. IPv6 addresses are reduced to their /64 prefix before hashing, so a host
-that changes its interface identifier counts once. The key is random per server
-start, and the hashes live only in memory, never in the database. Clients whose
-user disabled the option send `countAsActive=false` or do not report and are
-not recorded.
+that changes its interface identifier counts once. The key is random, and key
+and hashes live only in memory, never in the database. Clients whose user
+disabled the option send `countAsActive=false` or do not report and are not
+recorded.
 
 `/getactivesimulatorcount` answers with the number of hashes seen in the last
 25 minutes (`activeSimulators`) and in the last 24 hours (`lastDaySimulators`).
-The second count needs 24 hours after a server start to cover all callers, so
-the key is missing during that time:
+The second count needs 24 hours of recording to cover all callers, so the key
+is missing during that time:
 
 ```json
 {"activeSimulators": 3, "lastDaySimulators": 41}
 ```
+
+A restart of the service keeps the recording. On shutdown the server writes
+key, hashes and recording start to `active-simulators.json` in its runtime
+directory, which systemd keeps in RAM and passes as `RUNTIME_DIRECTORY`. The
+next process takes them over and deletes the file. Without a runtime
+directory, after a downtime of more than 60 seconds, a crash, a reboot or a
+`systemctl stop`, the recording starts anew.
 
 This requires a single uvicorn process (no `--workers`). Behind a reverse proxy,
 uvicorn has to take the client address from `X-Forwarded-For` (its default for
 a proxy on 127.0.0.1), otherwise all clients share one address and count as one.
 
 At every full hour (UTC) the server stores both counts with their timestamp in
-the `active_simulator_counts` table. The active count needs 25 minutes after a
-server start to cover all running clients, so no value is stored during that
+the `active_simulator_counts` table. The active count needs 25 minutes of
+recording to cover all running clients, so no value is stored during that
 time. Until the last day count is available, it is stored as `NULL`.
 `/getactivesimulatorhistory` returns all stored values in chronological order
 and leaves out `lastDaySimulators` where it is missing. It allows requests from

@@ -35,6 +35,8 @@ def app_client(tmp_path, monkeypatch):
     """Return a TestClient bound to a fresh SQLite-backed app instance."""
     db_path = tmp_path / "test.db"
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
+    # Keeps the startup and shutdown hooks away from a real systemd runtime directory.
+    monkeypatch.delenv("RUNTIME_DIRECTORY", raising=False)
 
     # Force a fresh import so ``create_engine`` picks up the test DATABASE_URL.
     sys.modules.pop("main", None)

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import importlib
+import secrets
+import sys
 from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
@@ -37,7 +40,7 @@ def _active_simulators(client):
 def _fake_clock(main, monkeypatch, uptime):
     now = [1_000_000.0]
     monkeypatch.setattr(main.time, "monotonic", lambda: now[0])
-    monkeypatch.setattr(main, "_server_start_time", now[0] - uptime)
+    monkeypatch.setattr(main, "_recording_start_time", now[0] - uptime)
     return now
 
 
@@ -178,7 +181,7 @@ def _utc(hour, minute=0):
 
 
 def _end_warm_up(main, monkeypatch):
-    monkeypatch.setattr(main, "_server_start_time", main.time.monotonic() - main.ACTIVE_SIMULATOR_TIMEOUT_SECONDS)
+    monkeypatch.setattr(main, "_recording_start_time", main.time.monotonic() - main.ACTIVE_SIMULATOR_TIMEOUT_SECONDS)
 
 
 def test_history_is_empty_without_snapshots(app_client):
@@ -276,3 +279,146 @@ def test_snapshots_are_taken_at_full_hours(app_client, monkeypatch):
         "2026-10-18T14:00:00+00:00",
         "2026-10-18T15:00:00+00:00",
     ]
+
+
+def _use_runtime_directory(monkeypatch, tmp_path):
+    runtime_directory = tmp_path / "runtime"
+    runtime_directory.mkdir()
+    monkeypatch.setenv("RUNTIME_DIRECTORY", str(runtime_directory))
+    return runtime_directory
+
+
+def _restart(main, monkeypatch, now, downtime):
+    wall_clock = [1_800_000_000.0]
+    with monkeypatch.context() as patch:
+        patch.setattr(main.time, "time", lambda: wall_clock[0])
+        main.hand_over_active_simulators()
+        wall_clock[0] += downtime
+        now[0] += downtime
+        main._active_simulators.clear()
+        main._active_simulator_key = secrets.token_bytes(32)
+        main._recording_start_time = now[0]
+        main.take_over_active_simulators()
+
+
+def test_restart_keeps_the_counts(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    _use_runtime_directory(monkeypatch, tmp_path)
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    now[0] += 2 * 60 * 60
+    _report(_client_from(app_client, "10.0.0.2"))
+    _restart(main, monkeypatch, now, 5)
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 1, "lastDaySimulators": 2}
+
+
+def test_restarted_server_takes_over_the_counts(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    _use_runtime_directory(monkeypatch, tmp_path)
+    monkeypatch.setattr(main, "_recording_start_time", main.time.monotonic() - main.LAST_DAY_SECONDS)
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+
+    with TestClient(main.app):
+        pass
+    sys.modules.pop("main")
+    restarted = importlib.import_module("main")
+    try:
+        with TestClient(restarted.app) as client:
+            assert _simulator_counts(client) == {"activeSimulators": 1, "lastDaySimulators": 1}
+    finally:
+        restarted.engine.dispose()
+
+
+def test_restart_recognizes_known_callers(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    _use_runtime_directory(monkeypatch, tmp_path)
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    _restart(main, monkeypatch, now, 5)
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 1, "lastDaySimulators": 1}
+
+
+def test_downtime_adds_to_the_age_of_callers(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    _use_runtime_directory(monkeypatch, tmp_path)
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    now[0] += main.ACTIVE_SIMULATOR_TIMEOUT_SECONDS - 10
+    _restart(main, monkeypatch, now, 20)
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 0, "lastDaySimulators": 1}
+
+
+def test_snapshots_continue_after_a_restart(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    _use_runtime_directory(monkeypatch, tmp_path)
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    _restart(main, monkeypatch, now, 5)
+    main._store_active_simulator_count(_utc(14))
+
+    assert _history(app_client) == [{"timestamp": "2026-10-18T14:00:00+00:00", "activeSimulators": 1, "lastDaySimulators": 1}]
+
+
+def test_handover_is_deleted_after_the_take_over(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    runtime_directory = _use_runtime_directory(monkeypatch, tmp_path)
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    _restart(main, monkeypatch, now, 5)
+
+    assert list(runtime_directory.iterdir()) == []
+
+
+def test_restart_after_a_long_downtime_starts_anew(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    runtime_directory = _use_runtime_directory(monkeypatch, tmp_path)
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    _restart(main, monkeypatch, now, main.ACTIVE_SIMULATOR_HANDOVER_MAX_DOWNTIME_SECONDS + 1)
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 0}
+    assert list(runtime_directory.iterdir()) == []
+
+
+def test_handover_of_another_version_is_discarded(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    _use_runtime_directory(monkeypatch, tmp_path)
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+
+    main.hand_over_active_simulators()
+    monkeypatch.setattr(main, "ACTIVE_SIMULATOR_HANDOVER_VERSION", main.ACTIVE_SIMULATOR_HANDOVER_VERSION + 1)
+    main._active_simulators.clear()
+    main.take_over_active_simulators()
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 0}
+
+
+def test_restart_without_runtime_directory_starts_anew(app_client, monkeypatch):
+    main = app_client.app_module
+    now = _fake_clock(main, monkeypatch, main.LAST_DAY_SECONDS)
+
+    _fetch_list(_client_from(app_client, "10.0.0.1"))
+    _restart(main, monkeypatch, now, 5)
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 0}
+
+
+def test_unreadable_handover_is_discarded(app_client, monkeypatch, tmp_path):
+    main = app_client.app_module
+    runtime_directory = _use_runtime_directory(monkeypatch, tmp_path)
+    (runtime_directory / main.ACTIVE_SIMULATOR_HANDOVER_FILE_NAME).write_text("{", encoding="utf-8")
+
+    main.take_over_active_simulators()
+
+    assert _simulator_counts(app_client) == {"activeSimulators": 0}
+    assert list(runtime_directory.iterdir()) == []
