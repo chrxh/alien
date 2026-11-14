@@ -41,20 +41,9 @@ namespace
         return NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName);
     }
 
-    std::string getWorkspaceIcon(WorkspaceType workspaceType)
+    std::string getNameText(std::string const& displayName)
     {
-        if (workspaceType == WorkspaceType_AlienProject) {
-            return ICON_FA_STAR;
-        }
-        if (workspaceType == WorkspaceType_Private) {
-            return ICON_FA_LOCK;
-        }
-        return ICON_FA_GLOBE;
-    }
-
-    std::string getNameText(NetworkResourceRawTO const& rawTO, std::string const& displayName)
-    {
-        return " " + getWorkspaceIcon(rawTO->workspaceType) + "  " + displayName;
+        return " " + displayName;
     }
 
     std::string getUserText(NetworkResourceRawTO const& rawTO)
@@ -104,8 +93,7 @@ void _MenuBarInfoWidget::processCurrentSimulation()
 
     auto displayName = getDisplayName(rawTO);
     auto const& style = ImGui::GetStyle();
-    auto nameWidth =
-        ImGui::CalcTextSize(getNameText(rawTO, displayName).c_str()).x + ImGui::CalcTextSize(getUserText(rawTO).c_str()).x + style.FramePadding.x * 2;
+    auto nameWidth = ImGui::CalcTextSize(getNameText(displayName).c_str()).x + ImGui::CalcTextSize(getUserText(rawTO).c_str()).x + style.FramePadding.x * 2;
     auto heartWidth = ImGui::CalcTextSize(getHeartText(rawTO).c_str()).x + style.FramePadding.x * 2;
     auto totalWidth = nameWidth + style.ItemSpacing.x + heartWidth;
 
@@ -138,7 +126,7 @@ void _MenuBarInfoWidget::processNameButton(NetworkResourceRawTO const& rawTO, st
     popMenuButtonStyle();
 
     auto const& style = ImGui::GetStyle();
-    auto nameText = getNameText(rawTO, displayName);
+    auto nameText = getNameText(displayName);
     auto textPos = ImVec2{pos.x + style.FramePadding.x, pos.y + style.FramePadding.y};
     auto drawList = ImGui::GetWindowDrawList();
     drawList->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), nameText.c_str());
