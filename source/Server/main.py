@@ -16,6 +16,7 @@ from collections import OrderedDict, deque
 from datetime import datetime, timezone
 from email.message import EmailMessage
 from itertools import takewhile
+from pathlib import Path
 
 from fastapi import FastAPI, Form, HTTPException, Request, Response
 from sqlalchemy import (
@@ -282,22 +283,35 @@ def health():
 # the last ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are the running simulators, all
 # of them are the simulators of the last day. Callers are told apart by a keyed
 # hash of their IP address, IPv6 addresses reduced to their /64 prefix because
-# hosts change their interface identifier. The key is random, created at
-# server start and never stored, and the hashes are kept in memory only.
+# hosts change their interface identifier. The key is random and, like the
+# hashes, kept in memory only, never in the database.
 # Clients that opt out send ``countAsActive=false`` or do not report and are
 # not recorded. This requires a single server process, which is how the server
-# is deployed. The last day count only covers the callers since the server
+# is deployed. The last day count only covers the callers since the recording
 # start, so it is withheld during the first ``LAST_DAY_SECONDS``. Beyond
 # ``MAX_ACTIVE_SIMULATORS`` callers the one with the oldest call is dropped, so
 # a flood of addresses cannot block new callers for a whole day.
+#
+# A restart of the service keeps the recording: on shutdown the server writes
+# key, hashes and recording start to ``ACTIVE_SIMULATOR_HANDOVER_FILE_NAME`` in
+# the runtime directory that systemd keeps in RAM and passes as
+# ``RUNTIME_DIRECTORY``, and the next process takes them over and deletes the
+# file. A handover older than ``ACTIVE_SIMULATOR_HANDOVER_MAX_DOWNTIME_SECONDS``
+# is discarded, because the callers of a longer downtime are missing, and so is
+# one of another ``ACTIVE_SIMULATOR_HANDOVER_VERSION``, which changes with the
+# hashing or the file format.
 ACTIVE_SIMULATOR_TIMEOUT_SECONDS = 25 * 60
 LAST_DAY_SECONDS = 24 * 60 * 60
 MAX_ACTIVE_SIMULATORS = 100_000
+ACTIVE_SIMULATOR_HANDOVER_FILE_NAME = "active-simulators.json"
+ACTIVE_SIMULATOR_HANDOVER_VERSION = 1
+ACTIVE_SIMULATOR_HANDOVER_MAX_DOWNTIME_SECONDS = 60
 
-_server_start_time = time.monotonic()
+_recording_start_time = time.monotonic()
 _active_simulator_key = secrets.token_bytes(32)
 _active_simulators: OrderedDict[str, float] = OrderedDict()
 _active_simulators_lock = threading.Lock()
+_active_simulator_logger = logging.getLogger("alien-server.activesimulators")
 
 
 def _remove_expired_simulators(now: float):
@@ -339,7 +353,7 @@ def _count_active_simulators() -> int:
 
 def _count_last_day_simulators() -> int | None:
     now = time.monotonic()
-    if now - _server_start_time < LAST_DAY_SECONDS:
+    if now - _recording_start_time < LAST_DAY_SECONDS:
         return None
     with _active_simulators_lock:
         _remove_expired_simulators(now)
@@ -361,20 +375,86 @@ def report_active_simulator(request: Request):
     return {"result": True}
 
 
+def _active_simulator_handover_path() -> Path | None:
+    runtime_directory = os.environ.get("RUNTIME_DIRECTORY")
+    return Path(runtime_directory) / ACTIVE_SIMULATOR_HANDOVER_FILE_NAME if runtime_directory else None
+
+
+@app.on_event("shutdown")
+def hand_over_active_simulators():
+    path = _active_simulator_handover_path()
+    if path is None:
+        return
+    now = time.monotonic()
+    with _active_simulators_lock:
+        _remove_expired_simulators(now)
+        handover = {
+            "version": ACTIVE_SIMULATOR_HANDOVER_VERSION,
+            "savedAt": time.time(),
+            "recordingSeconds": now - _recording_start_time,
+            "key": _active_simulator_key.hex(),
+            "simulators": [[caller_hash, now - last_seen] for caller_hash, last_seen in _active_simulators.items()],
+        }
+    try:
+        with open(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w", encoding="utf-8") as file:
+            json.dump(handover, file)
+    except OSError:
+        _active_simulator_logger.exception("Failed to hand over the active simulators")
+
+
+def _read_active_simulator_handover(path: Path) -> dict | None:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return None
+    finally:
+        path.unlink(missing_ok=True)
+
+
+@app.on_event("startup")
+def take_over_active_simulators():
+    global _recording_start_time, _active_simulator_key
+    path = _active_simulator_handover_path()
+    if path is None:
+        return
+    try:
+        handover = _read_active_simulator_handover(path)
+        if handover is None:
+            return
+        if handover.get("version") != ACTIVE_SIMULATOR_HANDOVER_VERSION:
+            _active_simulator_logger.warning("Discarded the active simulators handed over in another format")
+            return
+        downtime = max(0.0, time.time() - handover["savedAt"])
+        if downtime > ACTIVE_SIMULATOR_HANDOVER_MAX_DOWNTIME_SECONDS:
+            _active_simulator_logger.warning("Discarded the active simulators handed over %.0f seconds ago", downtime)
+            return
+        handover_time = time.monotonic() - downtime
+        key = bytes.fromhex(handover["key"])
+        recording_start_time = handover_time - handover["recordingSeconds"]
+        simulators = OrderedDict((caller_hash, handover_time - age) for caller_hash, age in handover["simulators"])
+    except Exception:
+        _active_simulator_logger.exception("Failed to take over the active simulators")
+        return
+    with _active_simulators_lock:
+        _active_simulator_key = key
+        _recording_start_time = recording_start_time
+        _active_simulators.clear()
+        _active_simulators.update(simulators)
+
+
 # --- Active simulator history ---
 # The active simulator count is stored in ``active_simulator_counts`` at every
 # full hour (UTC), together with the last day count once it is available. It
-# only covers the callers since the server start, so the snapshots of the first
-# ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are skipped instead of storing a count
-# that is too low.
+# only covers the callers since the recording start, so the snapshots of the
+# first ``ACTIVE_SIMULATOR_TIMEOUT_SECONDS`` are skipped instead of storing a
+# count that is too low.
 ACTIVE_SIMULATOR_HISTORY_INTERVAL_SECONDS = 60 * 60
 
 _active_simulator_history_stop = threading.Event()
-_active_simulator_history_logger = logging.getLogger("alien-server.activesimulators")
 
 
 def _store_active_simulator_count(timestamp: datetime):
-    if time.monotonic() - _server_start_time < ACTIVE_SIMULATOR_TIMEOUT_SECONDS:
+    if time.monotonic() - _recording_start_time < ACTIVE_SIMULATOR_TIMEOUT_SECONDS:
         return
     count = _count_active_simulators()
     last_day_count = _count_last_day_simulators()
@@ -393,7 +473,7 @@ def _store_active_simulator_counts_hourly():
         try:
             _store_active_simulator_count(datetime.fromtimestamp(snapshot_time, timezone.utc))
         except Exception:
-            _active_simulator_history_logger.exception("Failed to store the active simulator count")
+            _active_simulator_logger.exception("Failed to store the active simulator count")
 
 
 @app.on_event("startup")
