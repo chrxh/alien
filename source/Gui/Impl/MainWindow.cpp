@@ -46,6 +46,7 @@
 #include "GuiLogger.h"
 #include "ImFileDialog.h"
 #include "ImageToPatternDialog.h"
+#include "LocalLibraryController.h"
 #include "LocationController.h"
 #include "LogWindow.h"
 #include "LoginController.h"
@@ -69,7 +70,6 @@
 #include "SaveSimulationDialog.h"
 #include "SignalsBufferDialog.h"
 #include "SimulationInteractionController.h"
-#include "SimulationLibraryController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
@@ -130,7 +130,7 @@ _MainWindow::_MainWindow()
     DocumentationWindow::get().setup();
     NewSimulationDialog::get().setup();
     BrowserController::get().setup();
-    SimulationLibraryController::get().setup();
+    LocalLibraryController::get().setup();
     BrowserWindow::get().setup();
     ActivateUserDialog::get().setup();
     NewPasswordDialog::get().setup();

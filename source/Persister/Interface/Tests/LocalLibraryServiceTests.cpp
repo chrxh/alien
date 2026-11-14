@@ -8,21 +8,21 @@
 
 #include <Base/StringHelper.h>
 
-#include <Persister/Interface/SimulationLibraryService.h>
+#include <Persister/Interface/LocalLibraryService.h>
 
-class SimulationLibraryServiceTests : public ::testing::Test
+class LocalLibraryServiceTests : public ::testing::Test
 {
 public:
-    SimulationLibraryServiceTests()
+    LocalLibraryServiceTests()
     {
-        _service = &SimulationLibraryService::get();
+        _service = &LocalLibraryService::get();
         auto testDirectory = std::filesystem::temp_directory_path() / "alien-simulation-library-service-tests";
         std::filesystem::remove_all(testDirectory);
         std::filesystem::create_directories(testDirectory);
         _library = _service->normalize(testDirectory);
     }
 
-    ~SimulationLibraryServiceTests() override { std::filesystem::remove_all(_library); }
+    ~LocalLibraryServiceTests() override { std::filesystem::remove_all(_library); }
 
 protected:
     void createFile(std::filesystem::path const& filename, std::string const& content = "content")
@@ -49,7 +49,7 @@ protected:
         return std::string(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
     }
 
-    std::vector<std::string> getNames(SimulationLibraryContent const& content)
+    std::vector<std::string> getNames(LocalLibraryContent const& content)
     {
         std::vector<std::string> result;
         for (auto const& simulation : content.simulations) {
@@ -58,7 +58,7 @@ protected:
         return result;
     }
 
-    SimulationFile findSimulation(std::string const& name)
+    LibraryFile findSimulation(std::string const& name)
     {
         for (auto const& simulation : _service->loadContent(_library).simulations) {
             if (simulation.name == name) {
@@ -69,11 +69,11 @@ protected:
         return {};
     }
 
-    SimulationLibraryService* _service = nullptr;
+    LocalLibraryService* _service = nullptr;
     std::filesystem::path _library;
 };
 
-TEST_F(SimulationLibraryServiceTests, content)
+TEST_F(LocalLibraryServiceTests, content)
 {
     createFile(_library / "Aurora.sim");
     createFile(_library / "Hanging Garden" / "After 13 hours.sim");
@@ -92,7 +92,7 @@ TEST_F(SimulationLibraryServiceTests, content)
 
     auto const& simulation = content.simulations.at(1);
     EXPECT_EQ(_library / "Hanging Garden" / "After 13 hours.sim", simulation.path);
-    EXPECT_EQ(SimulationFileKind::Named, simulation.kind);
+    EXPECT_EQ(LibraryFileKind::Named, simulation.kind);
     EXPECT_EQ(7ull, simulation.fileSize);
     EXPECT_FALSE(simulation.timestamp.empty());
     EXPECT_FALSE(simulation.timestep.has_value());
@@ -101,7 +101,7 @@ TEST_F(SimulationLibraryServiceTests, content)
     EXPECT_TRUE(simulation.descriptionComplete);
 }
 
-TEST_F(SimulationLibraryServiceTests, content_missingLibraryFolder)
+TEST_F(LocalLibraryServiceTests, content_missingLibraryFolder)
 {
     auto content = _service->loadContent(_library / "missing");
 
@@ -109,7 +109,7 @@ TEST_F(SimulationLibraryServiceTests, content_missingLibraryFolder)
     EXPECT_FALSE(content.truncated);
 }
 
-TEST_F(SimulationLibraryServiceTests, content_trailingSeparator)
+TEST_F(LocalLibraryServiceTests, content_trailingSeparator)
 {
     createFile(_library / "Runs" / "Start.sim");
 
@@ -118,7 +118,7 @@ TEST_F(SimulationLibraryServiceTests, content_trailingSeparator)
     EXPECT_EQ(std::vector<std::string>{"Start"}, getNames(content));
 }
 
-TEST_F(SimulationLibraryServiceTests, content_kindFromName)
+TEST_F(LocalLibraryServiceTests, content_kindFromName)
 {
     createFile(_library / "Run" / "autosave_12400000.sim");
     createFile(_library / "Run" / "autosave_12400000-2.sim");
@@ -127,36 +127,36 @@ TEST_F(SimulationLibraryServiceTests, content_kindFromName)
     createFile(_library / "Run" / "autosave_.sim");
 
     auto autosave = findSimulation("Run/autosave_12400000");
-    EXPECT_EQ(SimulationFileKind::Autosave, autosave.kind);
+    EXPECT_EQ(LibraryFileKind::Autosave, autosave.kind);
     EXPECT_EQ(12400000ull, autosave.timestep);
 
     auto secondAutosave = findSimulation("Run/autosave_12400000-2");
-    EXPECT_EQ(SimulationFileKind::Autosave, secondAutosave.kind);
+    EXPECT_EQ(LibraryFileKind::Autosave, secondAutosave.kind);
     EXPECT_EQ(12400000ull, secondAutosave.timestep);
 
     auto savePoint = findSimulation("Run/save_165_536_949");
-    EXPECT_EQ(SimulationFileKind::SavePoint, savePoint.kind);
+    EXPECT_EQ(LibraryFileKind::SavePoint, savePoint.kind);
     EXPECT_EQ(165536949ull, savePoint.timestep);
 
-    EXPECT_EQ(SimulationFileKind::Named, findSimulation("Run/save_the_world").kind);
-    EXPECT_EQ(SimulationFileKind::Named, findSimulation("Run/autosave_").kind);
+    EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/save_the_world").kind);
+    EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/autosave_").kind);
 }
 
-TEST_F(SimulationLibraryServiceTests, content_simulationSavedOnExit)
+TEST_F(LocalLibraryServiceTests, content_simulationSavedOnExit)
 {
     createFile(_library / "autosave.sim");
     createFile(_library / "Run" / "Autosave.sim");
     createFile(_library / "Run" / "autosaved.sim");
 
     auto savedOnExit = findSimulation("autosave");
-    EXPECT_EQ(SimulationFileKind::Autosave, savedOnExit.kind);
+    EXPECT_EQ(LibraryFileKind::Autosave, savedOnExit.kind);
     EXPECT_FALSE(savedOnExit.timestep.has_value());
 
-    EXPECT_EQ(SimulationFileKind::Autosave, findSimulation("Run/Autosave").kind);
-    EXPECT_EQ(SimulationFileKind::Named, findSimulation("Run/autosaved").kind);
+    EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run/Autosave").kind);
+    EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/autosaved").kind);
 }
 
-TEST_F(SimulationLibraryServiceTests, content_pictureAndDescription)
+TEST_F(LocalLibraryServiceTests, content_pictureAndDescription)
 {
     createFile(_library / "Aurora.sim");
     createFile(_library / "Aurora.JPG", "picture");
@@ -174,7 +174,7 @@ TEST_F(SimulationLibraryServiceTests, content_pictureAndDescription)
     EXPECT_TRUE(dawn.description.empty());
 }
 
-TEST_F(SimulationLibraryServiceTests, content_descriptionWrittenByAnEditor)
+TEST_F(LocalLibraryServiceTests, content_descriptionWrittenByAnEditor)
 {
     createFile(_library / "Aurora.sim");
     createFile(_library / "Aurora.txt", "\xef\xbb\xbf  First line\r\nSecond\tline\r\n\r\n");
@@ -182,14 +182,14 @@ TEST_F(SimulationLibraryServiceTests, content_descriptionWrittenByAnEditor)
     EXPECT_EQ("First line\nSecond line", findSimulation("Aurora").description);
 }
 
-TEST_F(SimulationLibraryServiceTests, content_descriptionLongerThanTheLimit)
+TEST_F(LocalLibraryServiceTests, content_descriptionLongerThanTheLimit)
 {
     createFile(_library / "Aurora.sim");
-    createFile(_library / "Aurora.txt", std::string(Const::MaxSimulationDescriptionLength + 100, 'x'));
+    createFile(_library / "Aurora.txt", std::string(Const::MaxFileDescriptionLength + 100, 'x'));
 
     auto aurora = findSimulation("Aurora");
 
-    EXPECT_EQ(static_cast<size_t>(Const::MaxSimulationDescriptionLength), aurora.description.size());
+    EXPECT_EQ(static_cast<size_t>(Const::MaxFileDescriptionLength), aurora.description.size());
     EXPECT_FALSE(aurora.descriptionComplete);
 
     auto description = _service->loadDescription(_library / "Aurora.sim");
@@ -197,7 +197,7 @@ TEST_F(SimulationLibraryServiceTests, content_descriptionLongerThanTheLimit)
     EXPECT_FALSE(description.complete);
 }
 
-TEST_F(SimulationLibraryServiceTests, validSimulationNames)
+TEST_F(LocalLibraryServiceTests, validSimulationNames)
 {
     EXPECT_TRUE(_service->isValidSimulationName("Aurora"));
     EXPECT_TRUE(_service->isValidSimulationName("Hanging Garden/Run 15/After 13 hours"));
@@ -233,7 +233,7 @@ TEST_F(SimulationLibraryServiceTests, validSimulationNames)
     EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/Autosave"));
 }
 
-TEST_F(SimulationLibraryServiceTests, validFolderNames)
+TEST_F(LocalLibraryServiceTests, validFolderNames)
 {
     EXPECT_TRUE(_service->isValidFolderName("Hanging Garden"));
     EXPECT_TRUE(_service->isValidFolderName("Hanging Garden/Run 15"));
@@ -248,7 +248,7 @@ TEST_F(SimulationLibraryServiceTests, validFolderNames)
     EXPECT_FALSE(_service->isValidFolderName("1/2/3/4/5/6/7/8/9"));
 }
 
-TEST_F(SimulationLibraryServiceTests, normalizeAndRelations)
+TEST_F(LocalLibraryServiceTests, normalizeAndRelations)
 {
     auto folder = _library / "Hanging Garden";
     std::filesystem::create_directories(folder);
@@ -263,7 +263,7 @@ TEST_F(SimulationLibraryServiceTests, normalizeAndRelations)
     EXPECT_FALSE(_service->isInside(_library.parent_path() / "other", _library));
 }
 
-TEST_F(SimulationLibraryServiceTests, simulationPathAndName)
+TEST_F(LocalLibraryServiceTests, simulationPathAndName)
 {
     auto path = _service->getSimulationPath(_library, "Hanging Garden/Run 15/After 13 hours");
 
@@ -281,7 +281,7 @@ TEST_F(SimulationLibraryServiceTests, simulationPathAndName)
     EXPECT_FALSE(_service->getFolderName(_library, _library.parent_path()).has_value());
 }
 
-TEST_F(SimulationLibraryServiceTests, folderSpelling)
+TEST_F(LocalLibraryServiceTests, folderSpelling)
 {
     createFile(_library / "Hanging Garden" / "Run 15" / "Start.sim");
     createFile(_library / "Other" / "Start.sim");
@@ -300,7 +300,7 @@ TEST_F(SimulationLibraryServiceTests, folderSpelling)
     }
 }
 
-TEST_F(SimulationLibraryServiceTests, takenSimulationNames)
+TEST_F(LocalLibraryServiceTests, takenSimulationNames)
 {
     createFile(_library / "Runs" / "Aurora.sim");
     createFile(_library / "Runs" / "Aurora.jpg");
@@ -317,7 +317,7 @@ TEST_F(SimulationLibraryServiceTests, takenSimulationNames)
     EXPECT_TRUE(_service->isSimulationNameTaken(_library, "Runs/Dawn", _library / "Runs" / "Aurora.sim"));
 }
 
-TEST_F(SimulationLibraryServiceTests, moveSimulation)
+TEST_F(LocalLibraryServiceTests, moveSimulation)
 {
     auto source = _library / "Drafts" / "Aurora.sim";
     createFile(source, "simulation");
@@ -335,7 +335,7 @@ TEST_F(SimulationLibraryServiceTests, moveSimulation)
     EXPECT_TRUE(std::filesystem::exists(_library));
 }
 
-TEST_F(SimulationLibraryServiceTests, moveSimulation_refusesTakenAndInvalidNames)
+TEST_F(LocalLibraryServiceTests, moveSimulation_refusesTakenAndInvalidNames)
 {
     auto source = _library / "Aurora.sim";
     createFile(source);
@@ -351,7 +351,7 @@ TEST_F(SimulationLibraryServiceTests, moveSimulation_refusesTakenAndInvalidNames
     EXPECT_FALSE(std::filesystem::exists(_library / "Runs"));
 }
 
-TEST_F(SimulationLibraryServiceTests, moveSimulation_keepsFoldersWithOtherContent)
+TEST_F(LocalLibraryServiceTests, moveSimulation_keepsFoldersWithOtherContent)
 {
     auto source = _library / "Drafts" / "Aurora.sim";
     createFile(source);
@@ -362,7 +362,7 @@ TEST_F(SimulationLibraryServiceTests, moveSimulation_keepsFoldersWithOtherConten
     EXPECT_TRUE(std::filesystem::exists(_library / "Drafts" / "notes.md"));
 }
 
-TEST_F(SimulationLibraryServiceTests, moveSimulation_autosaveIntoRenamedFolder)
+TEST_F(LocalLibraryServiceTests, moveSimulation_autosaveIntoRenamedFolder)
 {
     auto source = _library / "Run 15" / "autosave_12400000.sim";
     createFile(source);
@@ -370,11 +370,11 @@ TEST_F(SimulationLibraryServiceTests, moveSimulation_autosaveIntoRenamedFolder)
     auto target = _service->moveSimulation(_library, source, "Run 16/autosave_12400000");
 
     ASSERT_TRUE(target.has_value());
-    EXPECT_EQ(SimulationFileKind::Autosave, findSimulation("Run 16/autosave_12400000").kind);
+    EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run 16/autosave_12400000").kind);
     EXPECT_FALSE(_service->moveSimulation(_library, *target, "Run 16/autosave_5").has_value());
 }
 
-TEST_F(SimulationLibraryServiceTests, moveSimulation_changesSpellingOfFolder)
+TEST_F(LocalLibraryServiceTests, moveSimulation_changesSpellingOfFolder)
 {
     auto source = _library / "Runs" / "Aurora.sim";
     createFile(source);
@@ -390,7 +390,7 @@ TEST_F(SimulationLibraryServiceTests, moveSimulation_changesSpellingOfFolder)
     EXPECT_EQ((std::vector<std::string>{"RUNS/Aurora", "RUNS/Dawn"}), getNames(_service->loadContent(_library)));
 }
 
-TEST_F(SimulationLibraryServiceTests, moveSimulation_keepsOwnNameThatCouldNotBeGiven)
+TEST_F(LocalLibraryServiceTests, moveSimulation_keepsOwnNameThatCouldNotBeGiven)
 {
     auto ownName = std::string(120, 'x');
     auto source = _library / "Drafts" / (ownName + ".sim");
@@ -403,7 +403,7 @@ TEST_F(SimulationLibraryServiceTests, moveSimulation_keepsOwnNameThatCouldNotBeG
     EXPECT_FALSE(_service->moveSimulation(_library, *target, "Finished/" + ownName + "y").has_value());
 }
 
-TEST_F(SimulationLibraryServiceTests, deleteSimulation)
+TEST_F(LocalLibraryServiceTests, deleteSimulation)
 {
     auto simulationPath = _library / "Hanging Garden" / "Run 15" / "Aurora.sim";
     createFile(simulationPath);
@@ -418,7 +418,7 @@ TEST_F(SimulationLibraryServiceTests, deleteSimulation)
     EXPECT_TRUE(std::filesystem::exists(_library / "Hanging Garden" / "Dawn.sim"));
 }
 
-TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsWhatDoesNotBelongToIt)
+TEST_F(LocalLibraryServiceTests, deleteSimulation_keepsWhatDoesNotBelongToIt)
 {
     auto folder = _library / "Run 15";
     createFile(folder / "Aurora.sim");
@@ -434,7 +434,7 @@ TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsWhatDoesNotBelongToI
     EXPECT_TRUE(std::filesystem::exists(folder / "notes.md"));
 }
 
-TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsSavePointTableOfRemainingFolder)
+TEST_F(LocalLibraryServiceTests, deleteSimulation_keepsSavePointTableOfRemainingFolder)
 {
     auto folder = _library / "Run 15";
     createFile(folder / "save_100.sim");
@@ -447,7 +447,7 @@ TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsSavePointTableOfRema
     EXPECT_TRUE(std::filesystem::exists(folder / "Later" / "save_200.sim"));
 }
 
-TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsLibraryFolder)
+TEST_F(LocalLibraryServiceTests, deleteSimulation_keepsLibraryFolder)
 {
     createFile(_library / "Aurora.sim");
 
@@ -457,7 +457,7 @@ TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsLibraryFolder)
     EXPECT_TRUE(std::filesystem::is_empty(_library));
 }
 
-TEST_F(SimulationLibraryServiceTests, pictures)
+TEST_F(LocalLibraryServiceTests, pictures)
 {
     auto simulationPath = _library / "Aurora.sim";
     createFile(simulationPath);
@@ -471,7 +471,7 @@ TEST_F(SimulationLibraryServiceTests, pictures)
     EXPECT_TRUE(findSimulation("Aurora").hasPicture);
 }
 
-TEST_F(SimulationLibraryServiceTests, descriptions)
+TEST_F(LocalLibraryServiceTests, descriptions)
 {
     auto simulationPath = _library / "Aurora.sim";
     createFile(simulationPath);
@@ -492,7 +492,7 @@ TEST_F(SimulationLibraryServiceTests, descriptions)
     EXPECT_TRUE(_service->saveDescription(simulationPath, ""));
 }
 
-TEST_F(SimulationLibraryServiceTests, content_genomes)
+TEST_F(LocalLibraryServiceTests, content_genomes)
 {
     createFile(_library / "Swimmers" / "Eel.genome");
     createFile(_library / "Swimmers" / "Eel.genome.jpg");
@@ -516,7 +516,7 @@ TEST_F(SimulationLibraryServiceTests, content_genomes)
     EXPECT_EQ("A pond", content.simulations.front().description);
 }
 
-TEST_F(SimulationLibraryServiceTests, genomeNames)
+TEST_F(LocalLibraryServiceTests, genomeNames)
 {
     createFile(_library / "Eel.genome");
     createFile(_library / "Orphan.genome.txt");
@@ -540,7 +540,7 @@ TEST_F(SimulationLibraryServiceTests, genomeNames)
     EXPECT_FALSE(_service->isSimulationNameTaken(_library, "Eel"));
 }
 
-TEST_F(SimulationLibraryServiceTests, moveGenome)
+TEST_F(LocalLibraryServiceTests, moveGenome)
 {
     auto genomePath = _library / "Eel.genome";
     createFile(genomePath, "genome");
@@ -564,7 +564,7 @@ TEST_F(SimulationLibraryServiceTests, moveGenome)
     EXPECT_FALSE(_service->moveGenome(_library, *target, "Swimmers/Eel?").has_value());
 }
 
-TEST_F(SimulationLibraryServiceTests, deleteGenome)
+TEST_F(LocalLibraryServiceTests, deleteGenome)
 {
     auto genomePath = _library / "Swimmers" / "Eel.genome";
     createFile(genomePath);
@@ -585,7 +585,7 @@ TEST_F(SimulationLibraryServiceTests, deleteGenome)
     EXPECT_FALSE(std::filesystem::exists(_library / "Crawlers"));
 }
 
-TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsFolderWithGenomes)
+TEST_F(LocalLibraryServiceTests, deleteSimulation_keepsFolderWithGenomes)
 {
     auto simulationPath = _library / "Swimmers" / "Pond.sim";
     createFile(simulationPath);
@@ -596,7 +596,7 @@ TEST_F(SimulationLibraryServiceTests, deleteSimulation_keepsFolderWithGenomes)
     EXPECT_TRUE(std::filesystem::exists(_library / "Swimmers" / "Eel.genome"));
 }
 
-TEST_F(SimulationLibraryServiceTests, removeExcessAutosaves)
+TEST_F(LocalLibraryServiceTests, removeExcessAutosaves)
 {
     auto folder = _library / "Run 15";
     createFiles(

@@ -115,6 +115,8 @@ add_library(GuiImpl
     LiveStatisticsHistory.h
     LiveStatisticsService.cpp
     LiveStatisticsService.h
+    LocalLibraryController.cpp
+    LocalLibraryController.h
     LocationController.cpp
     LocationController.h
     LocationWidget.h
@@ -204,8 +206,6 @@ add_library(GuiImpl
     SignalsBufferDialog.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
-    SimulationLibraryController.cpp
-    SimulationLibraryController.h
     SimulationParametersBaseWidget.cpp
     SimulationParametersBaseWidget.h
     SimulationParametersMainWindow.cpp

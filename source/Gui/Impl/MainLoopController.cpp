@@ -42,6 +42,7 @@
 #include "GenomeEditorWindow.h"
 #include "ImageToPatternDialog.h"
 #include "InspectionController.h"
+#include "LocalLibraryController.h"
 #include "LogWindow.h"
 #include "LoginDialog.h"
 #include "MassEditDialog.h"
@@ -56,7 +57,6 @@
 #include "SavePictureDialog.h"
 #include "SaveSimulationDialog.h"
 #include "SimulationInteractionController.h"
-#include "SimulationLibraryController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
@@ -377,7 +377,7 @@ void MainLoopController::processExiting()
     }
 
     // Simulations that are still being saved get their pictures afterwards
-    if (!_saveSimRequestId.has_value() && !SimulationLibraryController::get().isSaving()) {
+    if (!_saveSimRequestId.has_value() && !LocalLibraryController::get().isSaving()) {
         _programState = ProgramState::Finished;
     }
 }

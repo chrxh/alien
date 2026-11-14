@@ -10,17 +10,17 @@
 
 #include <Data/GenomeDesc.h>
 
+#include <Persister/Interface/LocalLibrary.h>
 #include <Persister/Interface/PersisterFacade.h>
-#include <Persister/Interface/SimulationLibrary.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
 // Keeps the simulations and genomes of this computer: saves the running simulation by hand and automatically, loads simulations, saves
 // genomes and manages the saved files
-class SimulationLibraryController : public MainLoopEntity
+class LocalLibraryController : public MainLoopEntity
 {
-    MAKE_SINGLETON(SimulationLibraryController);
+    MAKE_SINGLETON(LocalLibraryController);
 
 public:
     using SaveMode = int;
@@ -48,7 +48,7 @@ public:
     // The library folder or the folder of the autosaves, which the name of the simulation is relative to
     std::filesystem::path const& getMainFolder(std::filesystem::path const& simulationPath) const;
 
-    SimulationLibraryContent const& getContent() const;
+    LocalLibraryContent const& getContent() const;
     int getRevision() const;  // Changes with every change of the content
     void refresh();           // Reads the content again, for instance after other programs may have changed it
 
@@ -123,7 +123,7 @@ private:
 
     std::filesystem::path _libraryFolder;
     std::optional<std::filesystem::path> _autosaveMainFolder;
-    SimulationLibraryContent _content;
+    LocalLibraryContent _content;
     bool _contentOutdated = true;
     int _revision = 0;
 

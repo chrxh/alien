@@ -14,7 +14,7 @@
 
 #include <Engine/Interface/Definitions.h>
 
-#include <Persister/Interface/SimulationLibrary.h>
+#include <Persister/Interface/LocalLibrary.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -81,7 +81,7 @@ private:
     Outcome evaluate() const;
     void resetDescription(std::string const& description);
     void updateDescription(Outcome const& outcome);
-    std::optional<SimulationDescription> findReplacedDescription(Outcome const& outcome) const;
+    std::optional<FileDescription> findReplacedDescription(Outcome const& outcome) const;
     void onConfirm(Outcome const& outcome);
     void onUpload();
     void onReplaceUpload(std::string const& resourceId, WorkspaceType workspaceType);

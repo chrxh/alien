@@ -21,8 +21,8 @@
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
+#include "LocalLibraryController.h"
 #include "NetworkTransferController.h"
-#include "SimulationLibraryController.h"
 
 BrowserData _BrowserData::create()
 {
@@ -309,7 +309,7 @@ void _BrowserData::onOpenResource(BrowserLeaf const& leaf)
     if (isLocalWorkspace(leaf.rawTO->workspaceType)) {
         auto path = StringHelper::toPath(leaf.rawTO->id);
         if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
-            SimulationLibraryController::get().onLoad(path);
+            LocalLibraryController::get().onLoad(path);
             return;
         }
         GenomeDesc genome;

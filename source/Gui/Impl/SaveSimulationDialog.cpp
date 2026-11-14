@@ -19,8 +19,8 @@
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
 
+#include <Persister/Interface/LocalLibraryService.h>
 #include <Persister/Interface/SerializerService.h>
-#include <Persister/Interface/SimulationLibraryService.h>
 
 #include "AlienGui.h"
 #include "BrowserController.h"
@@ -31,10 +31,10 @@
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
+#include "LocalLibraryController.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
 #include "NewSimulationService.h"
-#include "SimulationLibraryController.h"
 #include "StyleService.h"
 #include "Viewport.h"
 
@@ -131,11 +131,11 @@ namespace
         }
     }
 
-    SimulationFile const* findLibraryFile(NetworkResourceType resourceType, std::string const& name)
+    LibraryFile const* findLibraryFile(NetworkResourceType resourceType, std::string const& name)
     {
-        auto const& content = SimulationLibraryController::get().getContent();
+        auto const& content = LocalLibraryController::get().getContent();
         auto const& files = resourceType == NetworkResourceType_Simulation ? content.simulations : content.genomes;
-        auto findResult = std::ranges::find_if(files, [&](SimulationFile const& file) { return file.name == name; });
+        auto findResult = std::ranges::find_if(files, [&](LibraryFile const& file) { return file.name == name; });
         return findResult != files.end() ? &*findResult : nullptr;
     }
 
@@ -245,7 +245,7 @@ void SaveSimulationDialog::openForSharing(
     resetDescription(description);
 
     changeTitle(std::string(resourceType == NetworkResourceType_Simulation ? "Share simulation" : "Share genome") + WindowId);
-    _preview.createForPicture(SimulationLibraryService::get().loadPicture(file).value_or(std::string()));
+    _preview.createForPicture(LocalLibraryService::get().loadPicture(file).value_or(std::string()));
     AlienDialog::open();
 }
 
@@ -440,7 +440,7 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
         return result;
     }
     if (_target == SaveTarget::ThisComputer) {
-        auto& service = SimulationLibraryService::get();
+        auto& service = LocalLibraryService::get();
         if (name.empty() || name.ends_with('/')) {
             return result;
         }
@@ -451,7 +451,7 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
                 : "A name must not contain < > : \" \\ | ? * and must not begin or end with a dot or a space";
             return result;
         }
-        auto const& libraryFolder = SimulationLibraryController::get().getLibraryFolder();
+        auto const& libraryFolder = LocalLibraryController::get().getLibraryFolder();
         result.replacesFile = isGenome ? service.isGenomeNameTaken(libraryFolder, name) : service.isSimulationNameTaken(libraryFolder, name);
         if (result.replacesFile) {
             auto file = findLibraryFile(_resourceType, name);
@@ -515,20 +515,20 @@ void SaveSimulationDialog::updateDescription(Outcome const& outcome)
     }
 }
 
-std::optional<SimulationDescription> SaveSimulationDialog::findReplacedDescription(Outcome const& outcome) const
+std::optional<FileDescription> SaveSimulationDialog::findReplacedDescription(Outcome const& outcome) const
 {
     auto name = boost::algorithm::trim_copy(_name);
     if (outcome.replacesFile) {
 
         // Read from the file, since the name may be spelled differently than the simulation it replaces
-        auto& service = SimulationLibraryService::get();
-        auto const& libraryFolder = SimulationLibraryController::get().getLibraryFolder();
+        auto& service = LocalLibraryService::get();
+        auto const& libraryFolder = LocalLibraryController::get().getLibraryFolder();
         return service.loadDescription(
             _resourceType == NetworkResourceType_Simulation ? service.getSimulationPath(libraryFolder, name) : service.getGenomePath(libraryFolder, name));
     }
     if (outcome.replacedResourceId.has_value()) {
         if (auto rawTO = findOwnUpload(_resourceType, _target, name)) {
-            return SimulationDescription{.text = rawTO->description};
+            return FileDescription{.text = rawTO->description};
         }
     }
     return std::nullopt;
@@ -563,7 +563,7 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
         return;
     }
     if (_target == SaveTarget::ThisComputer) {
-        auto& controller = SimulationLibraryController::get();
+        auto& controller = LocalLibraryController::get();
 
         // What is replaced keeps its description unless another one has been written here
         auto keepsDescription = outcome.replacesFile && (!_descriptionEdited || !_descriptionEditable);

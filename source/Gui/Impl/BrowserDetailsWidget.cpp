@@ -18,7 +18,7 @@
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
 
-#include <Persister/Interface/SimulationLibrary.h>
+#include <Persister/Interface/LocalLibrary.h>
 
 #include "AlienGui.h"
 #include "BrowserData.h"
@@ -26,7 +26,7 @@
 #include "BrowserPictureCache.h"
 #include "GenericFileDialog.h"
 #include "HelpStrings.h"
-#include "SimulationLibraryController.h"
+#include "LocalLibraryController.h"
 #include "StyleService.h"
 
 namespace
@@ -233,12 +233,12 @@ void _BrowserDetailsWidget::processResource(NetworkResourceTreeTO const& treeTO)
                 processStatus(ICON_FA_DESKTOP, "Only on this computer");
             }
         } else {
-            auto& controller = SimulationLibraryController::get();
+            auto& controller = LocalLibraryController::get();
             if (isSavedOnExit(rawTO)) {
                 addSectionSpacing();
                 processStatus(ICON_FA_HISTORY, "Saved again whenever ALIEN is closed");
             } else if (
-                isCreatedByAutosave(rawTO) && controller.getSaveMode() == SimulationLibraryController::SaveMode_Limited
+                isCreatedByAutosave(rawTO) && controller.getSaveMode() == LocalLibraryController::SaveMode_Limited
                 && controller.isAutosaveFolder(StringHelper::toPath(rawTO->id).parent_path())) {
                 addSectionSpacing();
                 processStatus(ICON_FA_HISTORY, "Deleted when " + std::to_string(controller.getNumberOfFiles()) + " newer autosaves exist in its folder");
@@ -501,7 +501,7 @@ void _BrowserDetailsWidget::processWorkspace()
 
 void _BrowserDetailsWidget::processFolders()
 {
-    auto& controller = SimulationLibraryController::get();
+    auto& controller = LocalLibraryController::get();
     auto const& style = ImGui::GetStyle();
     auto isAutosave = _data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Autosave;
     auto folder = isAutosave ? controller.getAutosaveMainFolder() : controller.getLibraryFolder();
@@ -527,9 +527,9 @@ void _BrowserDetailsWidget::processFolders()
     if (AlienGui::Button(ICON_FA_FOLDER_OPEN, FolderButtonWidth)) {
         GenericFileDialog::get().showOpenFileDialog("Select directory", "", folderText, [isAutosave](std::filesystem::path const& path) {
             if (isAutosave) {
-                SimulationLibraryController::get().setAutosaveMainFolder(path);
+                LocalLibraryController::get().setAutosaveMainFolder(path);
             } else {
-                SimulationLibraryController::get().setLibraryFolder(path);
+                LocalLibraryController::get().setLibraryFolder(path);
             }
         });
     }
@@ -552,7 +552,7 @@ void _BrowserDetailsWidget::processFolders()
 
 void _BrowserDetailsWidget::processAutosaveFolder()
 {
-    auto& controller = SimulationLibraryController::get();
+    auto& controller = LocalLibraryController::get();
 
     // What is typed is kept here, because only valid folders reach the controller. It is read again whenever the field appears.
     auto frameCount = ImGui::GetFrameCount();
@@ -579,7 +579,7 @@ void _BrowserDetailsWidget::processAutosaveFolder()
 
 void _BrowserDetailsWidget::processAutosaveSettings()
 {
-    auto& controller = SimulationLibraryController::get();
+    auto& controller = LocalLibraryController::get();
 
     ImGui::BeginGroup();
     auto autosaveEnabled = controller.isAutosaveEnabled();
@@ -604,7 +604,7 @@ void _BrowserDetailsWidget::processAutosaveSettings()
         controller.setSaveMode(saveMode);
     }
 
-    ImGui::BeginDisabled(saveMode == SimulationLibraryController::SaveMode_Unlimited);
+    ImGui::BeginDisabled(saveMode == LocalLibraryController::SaveMode_Unlimited);
     auto numberOfFiles = controller.getNumberOfFiles();
     if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of files").textWidth(SettingsTextWidth), numberOfFiles)
         || numberOfFiles != controller.getNumberOfFiles()) {
@@ -624,7 +624,7 @@ void _BrowserDetailsWidget::processAutosaveSettings()
 std::optional<SimulationFileInfo> const& _BrowserDetailsWidget::getFileInfo(NetworkResourceRawTO const& rawTO)
 {
     // A file may have changed whenever the library has been read again
-    if (auto libraryRevision = SimulationLibraryController::get().getRevision(); libraryRevision != _libraryRevision) {
+    if (auto libraryRevision = LocalLibraryController::get().getRevision(); libraryRevision != _libraryRevision) {
         _libraryRevision = libraryRevision;
         _fileInfoByKey.clear();
     }

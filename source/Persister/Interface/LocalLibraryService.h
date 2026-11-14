@@ -6,16 +6,16 @@
 
 #include <Base/Singleton.h>
 
-#include "SimulationLibrary.h"
+#include "LocalLibrary.h"
 
-// The simulation library is a folder with nested folders, which contain simulation files. A simulation is named by its path inside the
-// library. A picture and a text file with the name of a simulation file hold its preview and its description.
-class SimulationLibraryService
+// The library is a folder of this computer with nested folders, which contain simulation and genome files. A simulation is named by its
+// path inside the library. A picture and a text file with the name of a simulation file hold its preview and its description.
+class LocalLibraryService
 {
-    MAKE_SINGLETON(SimulationLibraryService);
+    MAKE_SINGLETON(LocalLibraryService);
 
 public:
-    SimulationLibraryContent loadContent(std::filesystem::path const& libraryFolder) const;
+    LocalLibraryContent loadContent(std::filesystem::path const& libraryFolder) const;
 
     bool isValidSimulationName(std::string const& name) const;  // Names that autosave uses are refused, because their files are deleted or replaced
     bool isValidFolderName(std::string const& name) const;
@@ -48,7 +48,7 @@ public:
     bool savePicture(std::filesystem::path const& simulationPath, std::string const& jpg) const;
     std::optional<std::string> loadPicture(std::filesystem::path const& simulationPath) const;
     bool saveDescription(std::filesystem::path const& simulationPath, std::string const& description) const;
-    SimulationDescription loadDescription(std::filesystem::path const& simulationPath) const;
+    FileDescription loadDescription(std::filesystem::path const& simulationPath) const;
 
     // The library holds genome files as well. A genome is named, moved and deleted like a simulation, except that every valid name is free
     // for it. Its picture and its description carry its whole file name, so that a genome and a simulation can have the same name. The

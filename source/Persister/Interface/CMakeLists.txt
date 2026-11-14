@@ -16,6 +16,9 @@ add_library(PersisterInterface
     GetSimulationPicturesResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
+    LocalLibrary.h
+    LocalLibraryService.cpp
+    LocalLibraryService.h
     LoginRequestData.h
     JsonSerializationScope.h
     LoginResultData.h
@@ -46,9 +49,6 @@ add_library(PersisterInterface
     SettingsParserService.cpp
     SettingsParserService.h
     SharedDeserializedSimulation.h
-    SimulationLibrary.h
-    SimulationLibraryService.cpp
-    SimulationLibraryService.h
     TaskProcessor.cpp
     TaskProcessor.h
     ToggleReactionNetworkResourceRequestData.h

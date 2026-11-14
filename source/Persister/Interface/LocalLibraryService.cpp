@@ -1,4 +1,4 @@
-#include "SimulationLibraryService.h"
+#include "LocalLibraryService.h"
 
 #include <algorithm>
 #include <chrono>
@@ -230,15 +230,15 @@ namespace
         return (libraryFolder / StringHelper::toPath(name + extension)).make_preferred();
     }
 
-    SimulationDescription readDescription(std::filesystem::path const& descriptionPath)
+    FileDescription readDescription(std::filesystem::path const& descriptionPath)
     {
         try {
             std::ifstream stream(descriptionPath, std::ios::binary);
             if (!stream) {
                 return {};
             }
-            SimulationDescription result;
-            auto maxLength = static_cast<size_t>(Const::MaxSimulationDescriptionLength);
+            FileDescription result;
+            auto maxLength = static_cast<size_t>(Const::MaxFileDescriptionLength);
             auto& text = result.text;
             text.resize(maxLength + 1);
             stream.read(text.data(), static_cast<std::streamsize>(text.size()));
@@ -274,11 +274,10 @@ namespace
         bool truncated = false;
     };
 
-    SimulationFile
-    createLibraryFile(std::filesystem::directory_entry const& entry, std::string const& namePrefix, std::set<std::string> const& companionFilenames)
+    LibraryFile createLibraryFile(std::filesystem::directory_entry const& entry, std::string const& namePrefix, std::set<std::string> const& companionFilenames)
     {
         auto const& path = entry.path();
-        SimulationFile result{.name = namePrefix + StringHelper::toUtf8(path.stem()), .path = path};
+        LibraryFile result{.name = namePrefix + StringHelper::toUtf8(path.stem()), .path = path};
 
         std::error_code error;
         auto lastChange = entry.last_write_time(error);
@@ -300,7 +299,7 @@ namespace
         return result;
     }
 
-    void scanFolder(SimulationLibraryContent& content, std::filesystem::path const& folder, std::string const& namePrefix, int depth, ScanState& state)
+    void scanFolder(LocalLibraryContent& content, std::filesystem::path const& folder, std::string const& namePrefix, int depth, ScanState& state)
     {
         std::vector<std::filesystem::directory_entry> simulationEntries;
         std::vector<std::filesystem::directory_entry> genomeEntries;
@@ -328,13 +327,13 @@ namespace
             auto file = createLibraryFile(entry, namePrefix, companionFilenames);
             auto stem = StringHelper::toUtf8(entry.path().stem());
             if (auto autosaveTimestep = parseTimestep(stem, Const::AutosavePrefix)) {
-                file.kind = SimulationFileKind::Autosave;
+                file.kind = LibraryFileKind::Autosave;
                 file.timestep = autosaveTimestep;
             } else if (auto savePointTimestep = parseTimestep(stem, Const::SavePointPrefix)) {
-                file.kind = SimulationFileKind::SavePoint;
+                file.kind = LibraryFileKind::SavePoint;
                 file.timestep = savePointTimestep;
             } else if (isNamedLikeExitSave(stem)) {
-                file.kind = SimulationFileKind::Autosave;
+                file.kind = LibraryFileKind::Autosave;
             }
             content.simulations.emplace_back(file);
         }
@@ -430,47 +429,46 @@ namespace
     }
 }
 
-SimulationLibraryContent SimulationLibraryService::loadContent(std::filesystem::path const& libraryFolder) const
+LocalLibraryContent LocalLibraryService::loadContent(std::filesystem::path const& libraryFolder) const
 {
-    SimulationLibraryContent result;
+    LocalLibraryContent result;
     ScanState state;
     scanFolder(result, normalize(libraryFolder), std::string(), 0, state);
     result.truncated = state.truncated;
 
-    auto hasLowerName = [](SimulationFile const& left, SimulationFile const& right) { return StringHelper::naturalLess(left.name, right.name); };
+    auto hasLowerName = [](LibraryFile const& left, LibraryFile const& right) { return StringHelper::naturalLess(left.name, right.name); };
     std::ranges::stable_sort(result.simulations, hasLowerName);
     std::ranges::stable_sort(result.genomes, hasLowerName);
     return result;
 }
 
-bool SimulationLibraryService::isValidSimulationName(std::string const& name) const
+bool LocalLibraryService::isValidSimulationName(std::string const& name) const
 {
     return isValidName(name, MaxFolderDepth, true);
 }
 
-bool SimulationLibraryService::isValidFolderName(std::string const& name) const
+bool LocalLibraryService::isValidFolderName(std::string const& name) const
 {
     return isValidName(name, MaxFolderDepth - 1, false);
 }
 
-std::filesystem::path SimulationLibraryService::normalize(std::filesystem::path const& folder) const
+std::filesystem::path LocalLibraryService::normalize(std::filesystem::path const& folder) const
 {
     return normalizePath(folder);
 }
 
-bool SimulationLibraryService::isInside(std::filesystem::path const& folder, std::filesystem::path const& libraryFolder) const
+bool LocalLibraryService::isInside(std::filesystem::path const& folder, std::filesystem::path const& libraryFolder) const
 {
     auto relativePath = normalize(folder).lexically_relative(normalize(libraryFolder));
     return !relativePath.empty() && *relativePath.begin() != "..";
 }
 
-std::filesystem::path SimulationLibraryService::getSimulationPath(std::filesystem::path const& libraryFolder, std::string const& name) const
+std::filesystem::path LocalLibraryService::getSimulationPath(std::filesystem::path const& libraryFolder, std::string const& name) const
 {
     return getFilePath(libraryFolder, name, SimulationExtension);
 }
 
-std::optional<std::string> SimulationLibraryService::getSimulationName(std::filesystem::path const& libraryFolder, std::filesystem::path const& simulationPath)
-    const
+std::optional<std::string> LocalLibraryService::getSimulationName(std::filesystem::path const& libraryFolder, std::filesystem::path const& simulationPath) const
 {
     auto folderName = getFolderName(libraryFolder, simulationPath.parent_path());
     if (!folderName.has_value()) {
@@ -480,7 +478,7 @@ std::optional<std::string> SimulationLibraryService::getSimulationName(std::file
     return folderName->empty() ? name : *folderName + NameSeparator + name;
 }
 
-std::optional<std::string> SimulationLibraryService::getFolderName(std::filesystem::path const& libraryFolder, std::filesystem::path const& folder) const
+std::optional<std::string> LocalLibraryService::getFolderName(std::filesystem::path const& libraryFolder, std::filesystem::path const& folder) const
 {
     auto relativeFolder = normalize(folder).lexically_relative(normalize(libraryFolder));
     if (relativeFolder.empty() || *relativeFolder.begin() == "..") {
@@ -495,7 +493,7 @@ std::optional<std::string> SimulationLibraryService::getFolderName(std::filesyst
     return result;
 }
 
-bool SimulationLibraryService::isSameFolder(std::filesystem::path const& libraryFolder, std::string const& folderName, std::string const& otherFolderName) const
+bool LocalLibraryService::isSameFolder(std::filesystem::path const& libraryFolder, std::string const& folderName, std::string const& otherFolderName) const
 {
     // Other names of a folder, like a short name on Windows, are no spellings of its name
     auto parts = splitName(folderName);
@@ -513,7 +511,7 @@ bool SimulationLibraryService::isSameFolder(std::filesystem::path const& library
         && !error;
 }
 
-bool SimulationLibraryService::changeFolderSpelling(std::filesystem::path const& libraryFolder, std::string const& folderName, std::string const& newFolderName)
+bool LocalLibraryService::changeFolderSpelling(std::filesystem::path const& libraryFolder, std::string const& folderName, std::string const& newFolderName)
     const
 {
     if (!isValidFolderName(newFolderName) || !isSameFolder(libraryFolder, folderName, newFolderName)) {
@@ -536,17 +534,17 @@ bool SimulationLibraryService::changeFolderSpelling(std::filesystem::path const&
     return true;
 }
 
-std::filesystem::path SimulationLibraryService::getPicturePath(std::filesystem::path const& simulationPath) const
+std::filesystem::path LocalLibraryService::getPicturePath(std::filesystem::path const& simulationPath) const
 {
     return getCompanionPath(simulationPath, PictureExtension);
 }
 
-std::filesystem::path SimulationLibraryService::getDescriptionPath(std::filesystem::path const& simulationPath) const
+std::filesystem::path LocalLibraryService::getDescriptionPath(std::filesystem::path const& simulationPath) const
 {
     return getCompanionPath(simulationPath, DescriptionExtension);
 }
 
-bool SimulationLibraryService::isSimulationNameTaken(
+bool LocalLibraryService::isSimulationNameTaken(
     std::filesystem::path const& libraryFolder,
     std::string const& name,
     std::optional<std::filesystem::path> const& exceptSimulationPath) const
@@ -554,36 +552,34 @@ bool SimulationLibraryService::isSimulationNameTaken(
     return isNameTaken(libraryFolder, name, SimulationExtension, exceptSimulationPath);
 }
 
-std::optional<std::filesystem::path> SimulationLibraryService::moveSimulation(
-    std::filesystem::path const& libraryFolder,
-    std::filesystem::path const& simulationPath,
-    std::string const& newName) const
+std::optional<std::filesystem::path>
+LocalLibraryService::moveSimulation(std::filesystem::path const& libraryFolder, std::filesystem::path const& simulationPath, std::string const& newName) const
 {
     return moveFile(libraryFolder, simulationPath, newName, SimulationExtension, true);
 }
 
-void SimulationLibraryService::deleteSimulation(std::filesystem::path const& libraryFolder, std::filesystem::path const& simulationPath) const
+void LocalLibraryService::deleteSimulation(std::filesystem::path const& libraryFolder, std::filesystem::path const& simulationPath) const
 {
     removeLibraryFiles(simulationPath);
     removeEmptyFolders(simulationPath.parent_path(), libraryFolder);
 }
 
-bool SimulationLibraryService::isValidGenomeName(std::string const& name) const
+bool LocalLibraryService::isValidGenomeName(std::string const& name) const
 {
     return isValidName(name, MaxFolderDepth, false);
 }
 
-bool SimulationLibraryService::isGenomePath(std::filesystem::path const& path) const
+bool LocalLibraryService::isGenomePath(std::filesystem::path const& path) const
 {
     return hasExtension(path, GenomeExtension);
 }
 
-std::filesystem::path SimulationLibraryService::getGenomePath(std::filesystem::path const& libraryFolder, std::string const& name) const
+std::filesystem::path LocalLibraryService::getGenomePath(std::filesystem::path const& libraryFolder, std::string const& name) const
 {
     return getFilePath(libraryFolder, name, GenomeExtension);
 }
 
-bool SimulationLibraryService::isGenomeNameTaken(
+bool LocalLibraryService::isGenomeNameTaken(
     std::filesystem::path const& libraryFolder,
     std::string const& name,
     std::optional<std::filesystem::path> const& exceptGenomePath) const
@@ -592,18 +588,18 @@ bool SimulationLibraryService::isGenomeNameTaken(
 }
 
 std::optional<std::filesystem::path>
-SimulationLibraryService::moveGenome(std::filesystem::path const& libraryFolder, std::filesystem::path const& genomePath, std::string const& newName) const
+LocalLibraryService::moveGenome(std::filesystem::path const& libraryFolder, std::filesystem::path const& genomePath, std::string const& newName) const
 {
     return moveFile(libraryFolder, genomePath, newName, GenomeExtension, false);
 }
 
-void SimulationLibraryService::deleteGenome(std::filesystem::path const& libraryFolder, std::filesystem::path const& genomePath) const
+void LocalLibraryService::deleteGenome(std::filesystem::path const& libraryFolder, std::filesystem::path const& genomePath) const
 {
     removeLibraryFiles(genomePath);
     removeEmptyFolders(genomePath.parent_path(), libraryFolder);
 }
 
-bool SimulationLibraryService::isNameTaken(
+bool LocalLibraryService::isNameTaken(
     std::filesystem::path const& libraryFolder,
     std::string const& name,
     std::string const& extension,
@@ -634,7 +630,7 @@ bool SimulationLibraryService::isNameTaken(
     return false;
 }
 
-std::optional<std::filesystem::path> SimulationLibraryService::moveFile(
+std::optional<std::filesystem::path> LocalLibraryService::moveFile(
     std::filesystem::path const& libraryFolder,
     std::filesystem::path const& simulationPath,
     std::string const& newName,
@@ -680,7 +676,7 @@ std::optional<std::filesystem::path> SimulationLibraryService::moveFile(
     return result;
 }
 
-bool SimulationLibraryService::savePicture(std::filesystem::path const& simulationPath, std::string const& jpg) const
+bool LocalLibraryService::savePicture(std::filesystem::path const& simulationPath, std::string const& jpg) const
 {
     try {
         std::ofstream stream(getPicturePath(simulationPath), std::ios::binary);
@@ -691,7 +687,7 @@ bool SimulationLibraryService::savePicture(std::filesystem::path const& simulati
     }
 }
 
-std::optional<std::string> SimulationLibraryService::loadPicture(std::filesystem::path const& simulationPath) const
+std::optional<std::string> LocalLibraryService::loadPicture(std::filesystem::path const& simulationPath) const
 {
     try {
         std::ifstream stream(getPicturePath(simulationPath), std::ios::binary);
@@ -704,7 +700,7 @@ std::optional<std::string> SimulationLibraryService::loadPicture(std::filesystem
     }
 }
 
-bool SimulationLibraryService::saveDescription(std::filesystem::path const& simulationPath, std::string const& description) const
+bool LocalLibraryService::saveDescription(std::filesystem::path const& simulationPath, std::string const& description) const
 {
     try {
         auto descriptionPath = getDescriptionPath(simulationPath);
@@ -731,12 +727,12 @@ bool SimulationLibraryService::saveDescription(std::filesystem::path const& simu
     }
 }
 
-SimulationDescription SimulationLibraryService::loadDescription(std::filesystem::path const& simulationPath) const
+FileDescription LocalLibraryService::loadDescription(std::filesystem::path const& simulationPath) const
 {
     return readDescription(getDescriptionPath(simulationPath));
 }
 
-void SimulationLibraryService::removeExcessAutosaves(std::filesystem::path const& folder, int maxNumAutosaves) const
+void LocalLibraryService::removeExcessAutosaves(std::filesystem::path const& folder, int maxNumAutosaves) const
 {
     struct Autosave
     {

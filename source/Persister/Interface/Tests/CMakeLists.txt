@@ -2,8 +2,8 @@ target_sources(PersisterTests
 PUBLIC
     GridSimulationGenerator.cpp
     JsonSerializationTests.cpp
+    LocalLibraryServiceTests.cpp
     SerializerServiceTest.cpp
-    SimulationLibraryServiceTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(PersisterTests Base)

@@ -17,8 +17,8 @@
 #include <Engine/Interface/SimulationFacade.h>
 
 #include "BrowserController.h"
+#include "LocalLibraryController.h"
 #include "MainLoopController.h"
-#include "SimulationLibraryController.h"
 #include "WindowController.h"
 
 namespace
@@ -82,7 +82,7 @@ void ConsoleModeController::process()
     if (!_active) {
         return;
     }
-    SimulationLibraryController::get().process();
+    LocalLibraryController::get().process();
     BrowserController::get().process();
     printSavedSimulation();
     printStatusLine();
@@ -132,7 +132,7 @@ void ConsoleModeController::deactivate()
 
 void ConsoleModeController::printSavedSimulation()
 {
-    auto filename = SimulationLibraryController::get().fetchSavedFilename();
+    auto filename = LocalLibraryController::get().fetchSavedFilename();
     if (!filename.has_value()) {
         return;
     }

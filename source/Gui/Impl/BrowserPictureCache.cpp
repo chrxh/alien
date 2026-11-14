@@ -3,8 +3,8 @@
 #include <Base/LoggingService.h>
 #include <Base/StringHelper.h>
 
+#include <Persister/Interface/LocalLibraryService.h>
 #include <Persister/Interface/PersisterFacade.h>
-#include <Persister/Interface/SimulationLibraryService.h>
 #include <Persister/Interface/TaskProcessor.h>
 
 #include <Rendering/Interface/RenderingFacade.h>
@@ -119,7 +119,7 @@ void _BrowserPictureCache::processPendingRequests()
         _pendingLocalKeys.erase(request.key);
 
         // The time is read before the picture, so that a picture that is replaced meanwhile is read again later
-        auto& service = SimulationLibraryService::get();
+        auto& service = LocalLibraryService::get();
         auto picturePath = service.getPicturePath(request.simulationPath);
         std::error_code error;
         auto lastChange = std::filesystem::last_write_time(picturePath, error);

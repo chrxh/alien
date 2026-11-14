@@ -12,7 +12,7 @@
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
 
-#include <Persister/Interface/SimulationLibraryService.h>
+#include <Persister/Interface/LocalLibraryService.h>
 
 #include "AlienGui.h"
 #include "BrowserData.h"
@@ -20,9 +20,9 @@
 #include "DelayedExecutionController.h"
 #include "GenericMessageDialog.h"
 #include "HelpStrings.h"
+#include "LocalLibraryController.h"
 #include "NetworkTransferController.h"
 #include "OverlayController.h"
-#include "SimulationLibraryController.h"
 #include "StyleService.h"
 
 namespace
@@ -52,10 +52,9 @@ void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
     // A description of this computer that is longer than the dialog can show must not be cut by saving it
     _descriptionEditable = true;
     if (isLocal()) {
-        auto const& content = SimulationLibraryController::get().getContent();
+        auto const& content = LocalLibraryController::get().getContent();
         auto const& simulations = rawTO->resourceType == NetworkResourceType_Genome ? content.genomes : content.simulations;
-        auto findResult =
-            std::ranges::find_if(simulations, [&](SimulationFile const& simulation) { return StringHelper::toUtf8(simulation.path) == rawTO->id; });
+        auto findResult = std::ranges::find_if(simulations, [&](LibraryFile const& simulation) { return StringHelper::toUtf8(simulation.path) == rawTO->id; });
         _descriptionEditable = findResult == simulations.end() || findResult->descriptionComplete;
     }
 }
@@ -91,7 +90,7 @@ void EditSimulationDialog::processForLeaf()
         _errorMessage.reset();
     }
     auto newName = boost::algorithm::trim_copy(_newName);
-    auto& service = SimulationLibraryService::get();
+    auto& service = LocalLibraryService::get();
     auto isGenome = _treeTO->type == NetworkResourceType_Genome;
     auto isValidLocalName = isGenome ? service.isValidGenomeName(newName) : service.isValidSimulationName(newName);
     auto valid = isLocal() ? isValidLocalName : !_newName.empty();
@@ -128,7 +127,7 @@ void EditSimulationDialog::processForFolder()
             _errorMessage.reset();
         }
         auto newName = boost::algorithm::trim_copy(_newName);
-        valid = isLocal() ? SimulationLibraryService::get().isValidFolderName(newName) : !_newName.empty();
+        valid = isLocal() ? LocalLibraryService::get().isValidFolderName(newName) : !_newName.empty();
         if (isLocal() && !valid && !newName.empty() && !_errorMessage.has_value()) {
             _errorMessage = getLocalNameHint(newName);
         }
@@ -181,7 +180,7 @@ void EditSimulationDialog::onApplyToLeaf()
 {
     auto& rawTO = _treeTO->getLeaf().rawTO;
     if (isLocal()) {
-        auto errorMessage = SimulationLibraryController::get().onEdit(
+        auto errorMessage = LocalLibraryController::get().onEdit(
             StringHelper::toPath(rawTO->id), boost::algorithm::trim_copy(_newName), _descriptionEditable ? std::make_optional(_newDescription) : std::nullopt);
         if (errorMessage.has_value()) {
             _errorMessage = errorMessage;
@@ -203,12 +202,12 @@ void EditSimulationDialog::onApplyToLeaf()
 void EditSimulationDialog::onApplyToFolder()
 {
     if (isLocal()) {
-        auto& service = SimulationLibraryService::get();
-        auto const& controller = SimulationLibraryController::get();
+        auto& service = LocalLibraryService::get();
+        auto const& controller = LocalLibraryController::get();
         auto newFolderName = boost::algorithm::trim_copy(_newName);
 
         // The files keep their names, which differ from the names shown for autosaves
-        std::vector<SimulationLibraryController::Renaming> renamings;
+        std::vector<LocalLibraryController::Renaming> renamings;
         for (auto const& rawTO : _rawTOs) {
             auto simulationPath = StringHelper::toPath(rawTO->id);
             auto name = service.getSimulationName(controller.getMainFolder(simulationPath), simulationPath);
@@ -216,7 +215,7 @@ void EditSimulationDialog::onApplyToFolder()
                 renamings.emplace_back(simulationPath, newFolderName + name->substr(_origFolderName.size()));
             }
         }
-        if (auto errorMessage = SimulationLibraryController::get().onRename(renamings)) {
+        if (auto errorMessage = LocalLibraryController::get().onRename(renamings)) {
             _errorMessage = errorMessage;
             return;
         }

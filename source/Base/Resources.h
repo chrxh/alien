@@ -14,7 +14,7 @@ namespace Const
 
     extern std::filesystem::path const ResourcePath;
     extern std::filesystem::path const AutosavePath;
-    extern std::filesystem::path const SimulationLibraryPath;
+    extern std::filesystem::path const LocalLibraryPath;
     extern std::filesystem::path const ImagesPath;
     extern std::filesystem::path const DocsPath;
 

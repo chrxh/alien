@@ -10,7 +10,7 @@
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 #include "RecorderController.h"
-#include "SimulationLibraryController.h"
+#include "LocalLibraryController.h"
 
 #include <ImFileDialog.h>
 #include <Engine/Interface/SimulationFacade.h>
@@ -24,7 +24,7 @@ void FileTransferController::onOpenSimulationDialog()
         "Open simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& filename) {
             auto filenameCopy = filename;
             _referencePath = filenameCopy.remove_filename().string();
-            SimulationLibraryController::get().onLoad(filename);
+            LocalLibraryController::get().onLoad(filename);
         });
 }
 
@@ -34,7 +34,7 @@ void FileTransferController::onSaveSimulationDialog()
         "Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& filename) {
             auto filenameCopy = filename;
             _referencePath = filenameCopy.remove_filename().string();
-            SimulationLibraryController::get().onSaveToFile(filename);
+            LocalLibraryController::get().onSaveToFile(filename);
         });
 }
 
@@ -70,7 +70,7 @@ void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome, std::f
             }
 
             // The file may lie in the folder of the genomes of this computer
-            SimulationLibraryController::get().refresh();
+            LocalLibraryController::get().refresh();
             if (afterSaveFunc) {
                 afterSaveFunc();
             }

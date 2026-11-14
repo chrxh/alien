@@ -35,7 +35,7 @@ namespace Const
 
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
-    std::filesystem::path const SimulationLibraryPath = "simulations";
+    std::filesystem::path const LocalLibraryPath = "simulations";
     std::filesystem::path const ImagesPath = ResourcePath / "images";
     std::filesystem::path const DocsPath = ResourcePath / "docs";
 

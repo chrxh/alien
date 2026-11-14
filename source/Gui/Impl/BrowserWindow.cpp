@@ -33,10 +33,10 @@
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
+#include "LocalLibraryController.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
 #include "SaveSimulationDialog.h"
-#include "SimulationLibraryController.h"
 #include "StyleService.h"
 
 namespace
@@ -236,7 +236,7 @@ void BrowserWindow::processBackground()
 void BrowserWindow::processActivated()
 {
     onRefresh();
-    SimulationLibraryController::get().refresh();
+    LocalLibraryController::get().refresh();
 }
 
 namespace
@@ -276,7 +276,7 @@ void BrowserWindow::processToolbar()
         AlienGui::ToolbarItem::createButton(
             AlienGui::ToolbarItemParameters().icon(ICON_FA_SYNC).name("Refresh").disabled(BrowserController::get().isRefreshing()).action([&] {
                 onRefresh();
-                SimulationLibraryController::get().refresh();
+                LocalLibraryController::get().refresh();
             })),
         AlienGui::ToolbarItem::createSeparator(),
         AlienGui::ToolbarItem::createButton(openParameters),
@@ -530,7 +530,7 @@ void BrowserWindow::processStatusBar()
         simulations.insert(simWorkspace.rawTOs.begin(), simWorkspace.rawTOs.end());
         genomes.insert(genomeWorkspace.rawTOs.begin(), genomeWorkspace.rawTOs.end());
     }
-    auto const& controller = SimulationLibraryController::get();
+    auto const& controller = LocalLibraryController::get();
     auto resourceType = _data->getCurrentWorkspaceId().resourceType;
     auto numLocalResources = _data->getWorkspace(WorkspaceId{resourceType, WorkspaceType_Local}).rawTOs.size();
 
@@ -656,7 +656,7 @@ void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 
 namespace
 {
-    NetworkResourceRawTO createLocalRawTO(SimulationFile const& simulation, NetworkResourceType resourceType)
+    NetworkResourceRawTO createLocalRawTO(LibraryFile const& simulation, NetworkResourceType resourceType)
     {
         auto result = std::make_shared<_NetworkResourceRawTO>();
         result->id = StringHelper::toUtf8(simulation.path);
@@ -665,11 +665,11 @@ namespace
         result->contentSize = simulation.fileSize;
         result->description = simulation.description;
         result->version = Const::ProgramVersion;
-        result->workspaceType = simulation.kind == SimulationFileKind::Named ? WorkspaceType_Local : WorkspaceType_Autosave;
+        result->workspaceType = simulation.kind == LibraryFileKind::Named ? WorkspaceType_Local : WorkspaceType_Autosave;
         result->resourceType = resourceType;
 
         // An autosave is shown by its time step instead of its file name
-        if (simulation.kind != SimulationFileKind::Named && simulation.timestep.has_value()) {
+        if (simulation.kind != LibraryFileKind::Named && simulation.timestep.has_value()) {
             auto folderNames = NetworkResourceService::get().getFolderNames(simulation.name);
             result->resourceName = NetworkResourceService::get().concatenateFolderName(folderNames, true) + StringHelper::format(*simulation.timestep);
         }
@@ -688,7 +688,7 @@ namespace
 
 void BrowserWindow::updateLocalWorkspaces()
 {
-    auto const& controller = SimulationLibraryController::get();
+    auto const& controller = LocalLibraryController::get();
     if (_libraryRevision == controller.getRevision()) {
         return;
     }
@@ -697,7 +697,7 @@ void BrowserWindow::updateLocalWorkspaces()
     std::vector<NetworkResourceRawTO> simulations;
     std::vector<NetworkResourceRawTO> autosaves;
     for (auto const& simulation : controller.getContent().simulations) {
-        auto& rawTOs = simulation.kind == SimulationFileKind::Named ? simulations : autosaves;
+        auto& rawTOs = simulation.kind == LibraryFileKind::Named ? simulations : autosaves;
         rawTOs.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation));
     }
     std::vector<NetworkResourceRawTO> genomes;
@@ -819,7 +819,7 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
         GenericMessageDialog::get().yesNo("Delete", message, [simulationPaths = getSimulationPaths(rawTOs)]() {
             // The message dialog closes after this function, which would also close a message about a failure
             delayedExecution([simulationPaths] {
-                if (auto errorMessage = SimulationLibraryController::get().onDelete(simulationPaths)) {
+                if (auto errorMessage = LocalLibraryController::get().onDelete(simulationPaths)) {
                     GenericMessageDialog::get().information("Delete", *errorMessage);
                 }
             });
