@@ -165,6 +165,8 @@ namespace
         auto drawList = ImGui::GetWindowDrawList();
         auto visibleTop = std::max(drawList->GetClipRectMin().y, rowsTop);
         auto visibleBottom = std::min(drawList->GetClipRectMax().y, rowsBottom);
+        auto visibleLeft = std::max(drawList->GetClipRectMin().x, cellPos.x);
+        auto visibleRight = std::min(drawList->GetClipRectMax().x, cellPos.x + ImGui::GetContentRegionAvail().x);
 
         auto textSize = ImGui::CalcTextSize(getGpuHintText(isLoggedIn).c_str());
         auto width = textSize.x + style.FramePadding.x * 2;
@@ -173,7 +175,7 @@ namespace
 
         return GpuHintPlacement{
             .row = std::clamp(toInt(std::ceil((bottom - rowsTop) / rowHeight)) - 1, 0, numRows - 1),
-            .pos = {cellPos.x + std::max(0.0f, (ImGui::GetContentRegionAvail().x - width) / 2), bottom - height},
+            .pos = {visibleLeft + std::max(0.0f, (visibleRight - visibleLeft - width) / 2), bottom - height},
         };
     }
 

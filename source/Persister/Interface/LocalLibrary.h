@@ -8,9 +8,8 @@
 
 namespace Const
 {
-    // Autosaves and the save points of earlier versions are named by their prefix followed by their time step
-    auto constexpr SavePointPrefix = "save_";
-    auto constexpr AutosavePrefix = "autosave_";
+    // An autosave is named by this prefix followed by its time step
+    auto constexpr AutosavePrefix = "save_";
 
     auto constexpr MaxFileDescriptionLength = 4000;
 }
@@ -18,8 +17,8 @@ namespace Const
 enum class LibraryFileKind
 {
     Named,
-    SavePoint,  // Written by the Autosave window of earlier versions
-    Autosave    // Written by autosave, or the simulation that ALIEN saves when it is closed
+    Autosave,
+    ExitSave  // The simulation that ALIEN saves when it is closed
 };
 
 struct LibraryFile
@@ -29,7 +28,7 @@ struct LibraryFile
     LibraryFileKind kind = LibraryFileKind::Named;
     std::string timestamp;  // Time of the last change
     uint64_t fileSize = 0;
-    std::optional<uint64_t> timestep;  // Known from the names of autosaves and save points
+    std::optional<uint64_t> timestep;  // Known from the name of an autosave
     bool hasPicture = false;
     std::string description;
     bool descriptionComplete = true;  // False if the stored description is longer than the text, in which case it must not be replaced by the text

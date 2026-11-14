@@ -120,26 +120,28 @@ TEST_F(LocalLibraryServiceTests, content_trailingSeparator)
 
 TEST_F(LocalLibraryServiceTests, content_kindFromName)
 {
-    createFile(_library / "Run" / "autosave_12400000.sim");
-    createFile(_library / "Run" / "autosave_12400000-2.sim");
+    createFile(_library / "Run" / "save_12400000.sim");
+    createFile(_library / "Run" / "save_12400000-2.sim");
     createFile(_library / "Run" / "save_165_536_949.sim");
     createFile(_library / "Run" / "save_the_world.sim");
-    createFile(_library / "Run" / "autosave_.sim");
+    createFile(_library / "Run" / "save_.sim");
+    createFile(_library / "Run" / "autosave_12400000.sim");
 
-    auto autosave = findSimulation("Run/autosave_12400000");
+    auto autosave = findSimulation("Run/save_12400000");
     EXPECT_EQ(LibraryFileKind::Autosave, autosave.kind);
     EXPECT_EQ(12400000ull, autosave.timestep);
 
-    auto secondAutosave = findSimulation("Run/autosave_12400000-2");
+    auto secondAutosave = findSimulation("Run/save_12400000-2");
     EXPECT_EQ(LibraryFileKind::Autosave, secondAutosave.kind);
     EXPECT_EQ(12400000ull, secondAutosave.timestep);
 
-    auto savePoint = findSimulation("Run/save_165_536_949");
-    EXPECT_EQ(LibraryFileKind::SavePoint, savePoint.kind);
-    EXPECT_EQ(165536949ull, savePoint.timestep);
+    auto autosaveWithSeparators = findSimulation("Run/save_165_536_949");
+    EXPECT_EQ(LibraryFileKind::Autosave, autosaveWithSeparators.kind);
+    EXPECT_EQ(165536949ull, autosaveWithSeparators.timestep);
 
     EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/save_the_world").kind);
-    EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/autosave_").kind);
+    EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/save_").kind);
+    EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/autosave_12400000").kind);
 }
 
 TEST_F(LocalLibraryServiceTests, content_simulationSavedOnExit)
@@ -149,10 +151,10 @@ TEST_F(LocalLibraryServiceTests, content_simulationSavedOnExit)
     createFile(_library / "Run" / "autosaved.sim");
 
     auto savedOnExit = findSimulation("autosave");
-    EXPECT_EQ(LibraryFileKind::Autosave, savedOnExit.kind);
+    EXPECT_EQ(LibraryFileKind::ExitSave, savedOnExit.kind);
     EXPECT_FALSE(savedOnExit.timestep.has_value());
 
-    EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run/Autosave").kind);
+    EXPECT_EQ(LibraryFileKind::ExitSave, findSimulation("Run/Autosave").kind);
     EXPECT_EQ(LibraryFileKind::Named, findSimulation("Run/autosaved").kind);
 }
 
@@ -224,8 +226,8 @@ TEST_F(LocalLibraryServiceTests, validSimulationNames)
     EXPECT_FALSE(_service->isValidSimulationName("1/2/3/4/5/6/7/8/9/Aurora"));
 
     // Autosaves are deleted automatically, which must not happen to a simulation saved by hand
-    EXPECT_FALSE(_service->isValidSimulationName("autosave_12400000"));
-    EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/autosave_12400000-2"));
+    EXPECT_FALSE(_service->isValidSimulationName("save_12400000"));
+    EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/save_12400000-2"));
     EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/save_165_536_949"));
 
     // The simulation that is saved on exit is replaced automatically
@@ -246,6 +248,17 @@ TEST_F(LocalLibraryServiceTests, validFolderNames)
     EXPECT_FALSE(_service->isValidFolderName("Hanging Garden/"));
     EXPECT_FALSE(_service->isValidFolderName("Hanging: Garden"));
     EXPECT_FALSE(_service->isValidFolderName("1/2/3/4/5/6/7/8/9"));
+}
+
+TEST_F(LocalLibraryServiceTests, autosaveNames)
+{
+    EXPECT_TRUE(_service->isAutosaveName("save_165_536_949"));
+    EXPECT_TRUE(_service->isAutosaveName("save_12400000-2"));
+
+    EXPECT_FALSE(_service->isAutosaveName("save_the_world"));
+    EXPECT_FALSE(_service->isAutosaveName("save_"));
+    EXPECT_FALSE(_service->isAutosaveName("autosave"));
+    EXPECT_FALSE(_service->isAutosaveName("autosave_12400000"));
 }
 
 TEST_F(LocalLibraryServiceTests, normalizeAndRelations)
@@ -344,7 +357,7 @@ TEST_F(LocalLibraryServiceTests, moveSimulation_refusesTakenAndInvalidNames)
 
     EXPECT_FALSE(_service->moveSimulation(_library, source, "Dawn").has_value());
     EXPECT_FALSE(_service->moveSimulation(_library, source, "Night").has_value());
-    EXPECT_FALSE(_service->moveSimulation(_library, source, "Runs/autosave_5").has_value());
+    EXPECT_FALSE(_service->moveSimulation(_library, source, "Runs/save_5").has_value());
     EXPECT_FALSE(_service->moveSimulation(_library, source, "Runs/Aurora?").has_value());
 
     EXPECT_TRUE(std::filesystem::exists(source));
@@ -364,14 +377,14 @@ TEST_F(LocalLibraryServiceTests, moveSimulation_keepsFoldersWithOtherContent)
 
 TEST_F(LocalLibraryServiceTests, moveSimulation_autosaveIntoRenamedFolder)
 {
-    auto source = _library / "Run 15" / "autosave_12400000.sim";
+    auto source = _library / "Run 15" / "save_12400000.sim";
     createFile(source);
 
-    auto target = _service->moveSimulation(_library, source, "Run 16/autosave_12400000");
+    auto target = _service->moveSimulation(_library, source, "Run 16/save_12400000");
 
     ASSERT_TRUE(target.has_value());
-    EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run 16/autosave_12400000").kind);
-    EXPECT_FALSE(_service->moveSimulation(_library, *target, "Run 16/autosave_5").has_value());
+    EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run 16/save_12400000").kind);
+    EXPECT_FALSE(_service->moveSimulation(_library, *target, "Run 16/save_5").has_value());
 }
 
 TEST_F(LocalLibraryServiceTests, moveSimulation_changesSpellingOfFolder)
@@ -602,27 +615,29 @@ TEST_F(LocalLibraryServiceTests, removeExcessAutosaves)
     createFiles(
         folder,
         {"autosave.sim",
-         "autosave_100.sim",
-         "autosave_200.sim",
-         "save_150.sim",
-         "autosave_300.sim",
+         "save_100.sim",
+         "save_200.sim",
+         "autosave_150.sim",
+         "save_300.sim",
          "Named.sim",
-         "autosave_400.sim",
-         "autosave_200.jpg",
-         "autosave_400.jpg"});
+         "save_the_world.sim",
+         "save_400.sim",
+         "save_200.jpg",
+         "save_400.jpg"});
 
     _service->removeExcessAutosaves(folder, 2);
 
     EXPECT_TRUE(std::filesystem::exists(folder / "autosave.sim"));
-    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_100.sim"));
-    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_200.sim"));
-    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_200.jpg"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_300.sim"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_400.sim"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_400.jpg"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "save_150.sim"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "save_100.sim"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "save_200.sim"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "save_200.jpg"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_150.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_300.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_400.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_400.jpg"));
     EXPECT_TRUE(std::filesystem::exists(folder / "Named.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_the_world.sim"));
 
     _service->removeExcessAutosaves(folder, 5);
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_300.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_300.sim"));
 }

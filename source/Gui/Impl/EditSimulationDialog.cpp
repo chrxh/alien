@@ -28,6 +28,8 @@
 namespace
 {
     auto constexpr FooterHeight = 50.0f;
+    auto constexpr LeafDialogSize = RealVector2D{450.0f, 300.0f};
+    auto constexpr FolderDialogSize = RealVector2D{450.0f, 150.0f};
     auto constexpr LocalNameHint = "A name must not contain < > : \" \\ | ? * and must not begin or end with a dot or a space";
     auto constexpr EmptyFolderHint = "A name must not begin or end with a slash or contain two in a row";
 
@@ -40,6 +42,7 @@ namespace
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {
     changeTitle("Change name or description");
+    changeDefaultSize(LeafDialogSize);
     AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs.clear();
@@ -62,6 +65,7 @@ void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 void EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
 {
     changeTitle("Change folder name");
+    changeDefaultSize(FolderDialogSize);
     AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs = rawTOs;
@@ -93,7 +97,10 @@ void EditSimulationDialog::processForLeaf()
     auto& service = LocalLibraryService::get();
     auto isGenome = _treeTO->type == NetworkResourceType_Genome;
     auto isValidLocalName = isGenome ? service.isValidGenomeName(newName) : service.isValidSimulationName(newName);
-    auto valid = isLocal() ? isValidLocalName : !_newName.empty();
+
+    // An autosave keeps its name, which no other simulation may get, while only its description is changed
+    auto isUnchangedAutosaveName = !isGenome && newName == _treeTO->getLeaf().rawTO->resourceName && service.isValidFolderName(newName);
+    auto valid = isLocal() ? isValidLocalName || isUnchangedAutosaveName : !_newName.empty();
     if (isLocal() && !valid && !newName.empty() && !_errorMessage.has_value()) {
         _errorMessage = !isGenome && service.isValidFolderName(newName) ? "Names of this form are reserved for autosaves" : getLocalNameHint(newName);
     }
@@ -105,7 +112,7 @@ void EditSimulationDialog::processForLeaf()
     ImGui::BeginGroup();
     ImGui::BeginDisabled(!_descriptionEditable);
     AlienGui::InputTextMultiline(
-        AlienGui::InputTextMultilineParameters().hint("Desc (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(FooterHeight)),
+        AlienGui::InputTextMultilineParameters().hint("Description (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(FooterHeight)),
         _newDescription);
     ImGui::EndDisabled();
     ImGui::EndGroup();
@@ -206,7 +213,7 @@ void EditSimulationDialog::onApplyToFolder()
         auto const& controller = LocalLibraryController::get();
         auto newFolderName = boost::algorithm::trim_copy(_newName);
 
-        // The files keep their names, which differ from the names shown for autosaves
+        // The files keep their names
         std::vector<LocalLibraryController::Renaming> renamings;
         for (auto const& rawTO : _rawTOs) {
             auto simulationPath = StringHelper::toPath(rawTO->id);

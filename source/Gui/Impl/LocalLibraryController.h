@@ -41,7 +41,7 @@ public:
     std::filesystem::path const& getLibraryFolder() const;
     void setLibraryFolder(std::filesystem::path const& value);
 
-    // The autosaves lie in the library folder until they get a folder of their own
+    // The autosaves lie in the library folder until one of the two folders is changed
     std::filesystem::path const& getAutosaveMainFolder() const;
     void setAutosaveMainFolder(std::filesystem::path const& value);
 

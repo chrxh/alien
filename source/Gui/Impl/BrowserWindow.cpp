@@ -15,6 +15,7 @@
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
 
+#include <Persister/Interface/LocalLibraryService.h>
 #include <Persister/Interface/PersisterFacade.h>
 
 #include "AlienGui.h"
@@ -656,7 +657,7 @@ void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 
 namespace
 {
-    NetworkResourceRawTO createLocalRawTO(LibraryFile const& simulation, NetworkResourceType resourceType)
+    NetworkResourceRawTO createLocalRawTO(LibraryFile const& simulation, NetworkResourceType resourceType, WorkspaceType workspaceType)
     {
         auto result = std::make_shared<_NetworkResourceRawTO>();
         result->id = StringHelper::toUtf8(simulation.path);
@@ -665,14 +666,8 @@ namespace
         result->contentSize = simulation.fileSize;
         result->description = simulation.description;
         result->version = Const::ProgramVersion;
-        result->workspaceType = simulation.kind == LibraryFileKind::Named ? WorkspaceType_Local : WorkspaceType_Autosave;
+        result->workspaceType = workspaceType;
         result->resourceType = resourceType;
-
-        // An autosave is shown by its time step instead of its file name
-        if (simulation.kind != LibraryFileKind::Named && simulation.timestep.has_value()) {
-            auto folderNames = NetworkResourceService::get().getFolderNames(simulation.name);
-            result->resourceName = NetworkResourceService::get().concatenateFolderName(folderNames, true) + StringHelper::format(*simulation.timestep);
-        }
         return result;
     }
 
@@ -684,6 +679,13 @@ namespace
         }
         return result;
     }
+
+    // The paths are compared as they are written, which is enough for the files that the library has found in its folders
+    bool isInFolder(std::filesystem::path const& path, std::filesystem::path const& folder)
+    {
+        auto relativePath = path.lexically_relative(folder);
+        return !relativePath.empty() && *relativePath.begin() != "..";
+    }
 }
 
 void BrowserWindow::updateLocalWorkspaces()
@@ -693,16 +695,24 @@ void BrowserWindow::updateLocalWorkspaces()
         return;
     }
     _libraryRevision = controller.getRevision();
+    auto libraryFolder = LocalLibraryService::get().normalize(controller.getLibraryFolder());
 
     std::vector<NetworkResourceRawTO> simulations;
     std::vector<NetworkResourceRawTO> autosaves;
     for (auto const& simulation : controller.getContent().simulations) {
-        auto& rawTOs = simulation.kind == LibraryFileKind::Named ? simulations : autosaves;
-        rawTOs.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation));
+        auto isAutosave = simulation.kind != LibraryFileKind::Named;
+        if (isAutosave) {
+            autosaves.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation, WorkspaceType_Autosave));
+        }
+
+        // My simulations shows every simulation of its folder like one saved by hand, the autosaves of another folder are not part of it
+        if (!isAutosave || isInFolder(simulation.path, libraryFolder)) {
+            simulations.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation, WorkspaceType_Local));
+        }
     }
     std::vector<NetworkResourceRawTO> genomes;
     for (auto const& genome : controller.getContent().genomes) {
-        genomes.emplace_back(createLocalRawTO(genome, NetworkResourceType_Genome));
+        genomes.emplace_back(createLocalRawTO(genome, NetworkResourceType_Genome, WorkspaceType_Local));
     }
     _data->setRawTOs(WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_Local}, simulations);
     _data->setRawTOs(WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_Autosave}, autosaves);
@@ -747,13 +757,19 @@ void BrowserWindow::onSave()
         }
     }();
 
-    // A selected resource suggests its name, which replaces it if it is an own one, and a selected folder suggests itself
+    // A selected resource suggests its name, which replaces it if it is an own one, and a selected folder suggests itself. An autosave in My
+    // simulations suggests its folder, because nothing can be saved under its name.
     std::string suggestedName;
     auto suggestsName = workspaceId.workspaceType == WorkspaceType_Liked ? selectedTreeTO != nullptr && selectedTreeTO->isLeaf()
                                                                          : selectedTreeTO != nullptr && workspaceId.workspaceType != WorkspaceType_Autosave;
     if (suggestsName) {
-        suggestedName = selectedTreeTO->isLeaf() ? selectedTreeTO->getLeaf().rawTO->resourceName
-                                                 : NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
+        auto isAutosave = selectedTreeTO->isLeaf() && workspaceId == WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_Local}
+            && !LocalLibraryService::get().isValidSimulationName(selectedTreeTO->getLeaf().rawTO->resourceName);
+        if (selectedTreeTO->isLeaf() && !isAutosave) {
+            suggestedName = selectedTreeTO->getLeaf().rawTO->resourceName;
+        } else if (!selectedTreeTO->folderNames.empty()) {
+            suggestedName = NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
+        }
     }
     SaveSimulationDialog::get().open(workspaceId.resourceType, target, suggestedName);
 }

@@ -88,9 +88,15 @@ std::vector<_BrowserTableWidget::Column> _BrowserTableWidget::getColumns()
     result.emplace_back(Column{.name = "Name", .width = 210.0f, .sortId = NetworkResourceColumnId_SimulationName, .processField = [this](auto const& treeTO) {
                                    processResourceNameField(treeTO);
                                }});
-    result.emplace_back(Column{.name = "Description", .width = 200.0f, .sortId = NetworkResourceColumnId_Desc, .processField = [this](auto const& treeTO) {
-                                   processDescriptionField(treeTO);
-                               }});
+
+    // The autosaves share the table of My simulations and hide the description, which they do not get by themselves
+    auto isAutosave = _data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Autosave;
+    result.emplace_back(Column{
+        .name = "Description",
+        .flags = ImGuiTableColumnFlags_WidthFixed | (isAutosave ? ImGuiTableColumnFlags_Disabled : ImGuiTableColumnFlags_None),
+        .width = 200.0f,
+        .sortId = NetworkResourceColumnId_Desc,
+        .processField = [this](auto const& treeTO) { processDescriptionField(treeTO); }});
     if (!isLocal) {
         result.emplace_back(Column{.name = "Reactions", .width = 140.0f, .sortId = NetworkResourceColumnId_Likes, .processField = [this](auto const& treeTO) {
                                        processReactionList(treeTO);

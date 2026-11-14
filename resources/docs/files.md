@@ -32,13 +32,13 @@ The browser (Alt+B) shows the simulations of this computer next to those of the 
 
 Autosave protects long runs. It saves the current simulation at regular intervals into the **Autosaves** workspace in the left column of the browser. Autosave is switched off by default. Its settings are in the right column as long as no autosave is selected. To switch it on, tick **Enable autosave**.
 
-- **Folder** is the folder of **My simulations** until you choose another one for the autosaves here.
-- **Subfolder** names the folder inside **Folder** in which the autosaves are stored, for example one subfolder for each simulation run. A slash creates nested subfolders.
+- **Folder** is at first the folder of **My simulations**. Choosing another folder here or in **My simulations** changes only that one of the two.
 - **Interval (min)** sets the time between two autosaves, 40 minutes by default. The interval counts minutes of real time, so autosaves are also created while the simulation is paused.
+- **Subfolder** names the folder inside **Folder** in which new autosaves are stored, for example one subfolder for each simulation run. A slash or a backslash creates nested subfolders. The autosaves that already exist stay where they are.
 - **Mode** is *Limited save files* by default. In this mode, **Number of files** limits how many autosaves are kept in a folder, 20 by default. Each new autosave deletes the oldest ones of its folder beyond this number. In *Unlimited save files* mode, all autosaves are kept.
 - **Autosave now** creates an autosave right away.
-- An autosave is named by its time step. Select it to open or delete it in the right column. To keep an autosave for good, open it and save it with **Save** (Ctrl+S) under a name of its own. A click on **Autosaves** in the left column shows the settings again.
-- **Earlier versions.** At the first start of this version, the folder in which the Autosave window of an earlier version has created save points becomes the folder of the simulations of this computer. These save points appear in **Autosaves** and are never deleted automatically. Save points that an earlier version has stored directly in the *resources* folder are loaded with **Open simulation** in the tool bar of the browser.
+- The file name of an autosave is *save_* followed by its time step. Autosaves that lie in the folder of **My simulations** are also listed there like any other simulation. In **Autosaves**, select an autosave to open or delete it in the right column. To keep an autosave for good, open it and save it with **Save** (Ctrl+S) under a name of its own. A click on **Autosaves** in the left column shows the settings again.
+- **Earlier versions.** At the first start of this version, the folder in which the Autosave window of an earlier version has created save points becomes the folder of the simulations of this computer. These save points appear in **Autosaves** and in **My simulations**. They count as autosaves, so in *Limited save files* mode the oldest ones of the current subfolder are deleted as well. Save points that an earlier version has stored directly in the *resources* folder are loaded with **Open simulation** in the tool bar of the browser.
 
 ## Sharing in the browser
 

@@ -49,6 +49,7 @@ namespace
     auto constexpr TakenNameMessage = "A file, a picture or a description with this name already exists.";
     auto constexpr RenamingFailedMessage = "The renaming failed. The new name may not be valid, or one of the files may be in use.";
     auto constexpr BusyMessage = "A simulation cannot be changed while it is being saved or loaded.";
+    auto constexpr MissingFileMessage = "The file no longer exists.";
 
     std::vector<std::filesystem::path> getEarlierAutosaveFolders()
     {
@@ -65,7 +66,7 @@ namespace
     {
         auto content = LocalLibraryService::get().loadContent(folder);
         return std::ranges::any_of(content.simulations, [](LibraryFile const& simulation) {
-            return simulation.kind == LibraryFileKind::SavePoint && simulation.name.find('/') == std::string::npos;
+            return simulation.kind == LibraryFileKind::Autosave && simulation.name.find('/') == std::string::npos;
         });
     }
 
@@ -176,7 +177,11 @@ void LocalLibraryController::setLibraryFolder(std::filesystem::path const& value
     if (libraryFolder == _libraryFolder) {
         return;
     }
+
+    // The autosaves stay in their folder
+    auto autosaveMainFolder = getAutosaveMainFolder();
     _libraryFolder = libraryFolder;
+    setAutosaveMainFolder(autosaveMainFolder);
 
     // The name of the running simulation belongs to the previous library
     NewSimulationService::get().setNameInLibrary(std::nullopt);
@@ -276,7 +281,10 @@ std::string const& LocalLibraryController::getAutosaveFolderName() const
 
 bool LocalLibraryController::setAutosaveFolderName(std::string const& value)
 {
+    // Nested folders are separated by a slash or a backslash, and a separator at the end is still being typed
     auto folderName = boost::algorithm::trim_copy(value);
+    std::ranges::replace(folderName, '\\', '/');
+    boost::algorithm::trim_right_if(folderName, [](char character) { return character == '/' || character == ' '; });
     if (!folderName.empty() && !LocalLibraryService::get().isValidFolderName(folderName)) {
         return false;
     }
@@ -372,6 +380,13 @@ LocalLibraryController::onEdit(std::filesystem::path const& simulationPath, std:
     auto& service = LocalLibraryService::get();
     if (isTransferring(simulationPath)) {
         return std::string(BusyMessage);
+    }
+
+    // An autosave may have been removed while it was edited
+    std::error_code error;
+    if (!std::filesystem::exists(simulationPath, error)) {
+        _contentOutdated = true;
+        return std::string(MissingFileMessage);
     }
     auto newSimulationPath = simulationPath;
     if (service.getSimulationName(getMainFolder(simulationPath), simulationPath) != newName) {

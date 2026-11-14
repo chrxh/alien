@@ -684,7 +684,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
-            filename = generateFilename(filename, Const::SavePointPrefix, deserializedData._timestep);
+            filename = generateFilename(filename, Const::AutosavePrefix, deserializedData._timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             return std::make_shared<_PersisterRequestError>(

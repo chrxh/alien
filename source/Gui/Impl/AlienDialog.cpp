@@ -30,6 +30,11 @@ void AlienDialog::changeTitle(std::string const& title)
     _modalWindow.setTitle(title);
 }
 
+void AlienDialog::changeDefaultSize(RealVector2D const& size)
+{
+    _modalWindow.setDefaultSize(size);
+}
+
 void AlienDialog::process()
 {
     _modalWindow.process([this] { processIntern(); });

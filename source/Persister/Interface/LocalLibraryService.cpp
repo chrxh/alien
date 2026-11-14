@@ -175,7 +175,7 @@ namespace
 
     bool isNamedLikeAutosave(std::string const& name)
     {
-        return parseTimestep(name, Const::AutosavePrefix).has_value() || parseTimestep(name, Const::SavePointPrefix).has_value() || isNamedLikeExitSave(name);
+        return parseTimestep(name, Const::AutosavePrefix).has_value() || isNamedLikeExitSave(name);
     }
 
     std::string formatFileTime(std::filesystem::file_time_type const& fileTime)
@@ -326,14 +326,11 @@ namespace
             }
             auto file = createLibraryFile(entry, namePrefix, companionFilenames);
             auto stem = StringHelper::toUtf8(entry.path().stem());
-            if (auto autosaveTimestep = parseTimestep(stem, Const::AutosavePrefix)) {
+            if (auto timestep = parseTimestep(stem, Const::AutosavePrefix)) {
                 file.kind = LibraryFileKind::Autosave;
-                file.timestep = autosaveTimestep;
-            } else if (auto savePointTimestep = parseTimestep(stem, Const::SavePointPrefix)) {
-                file.kind = LibraryFileKind::SavePoint;
-                file.timestep = savePointTimestep;
+                file.timestep = timestep;
             } else if (isNamedLikeExitSave(stem)) {
-                file.kind = LibraryFileKind::Autosave;
+                file.kind = LibraryFileKind::ExitSave;
             }
             content.simulations.emplace_back(file);
         }
@@ -450,6 +447,11 @@ bool LocalLibraryService::isValidSimulationName(std::string const& name) const
 bool LocalLibraryService::isValidFolderName(std::string const& name) const
 {
     return isValidName(name, MaxFolderDepth - 1, false);
+}
+
+bool LocalLibraryService::isAutosaveName(std::string const& name) const
+{
+    return parseTimestep(name, Const::AutosavePrefix).has_value();
 }
 
 std::filesystem::path LocalLibraryService::normalize(std::filesystem::path const& folder) const
@@ -741,7 +743,7 @@ void LocalLibraryService::removeExcessAutosaves(std::filesystem::path const& fol
     };
     std::vector<Autosave> autosaves;
     forEachEntry(folder, [&](std::filesystem::directory_entry const& entry) {
-        if (!isSimulationFile(entry) || !parseTimestep(StringHelper::toUtf8(entry.path().stem()), Const::AutosavePrefix).has_value()) {
+        if (!isSimulationFile(entry) || !isAutosaveName(StringHelper::toUtf8(entry.path().stem()))) {
             return;
         }
         std::error_code error;
