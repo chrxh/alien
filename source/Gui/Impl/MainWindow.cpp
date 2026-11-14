@@ -28,8 +28,6 @@
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
-#include "AutosaveController.h"
-#include "AutosaveWindow.h"
 #include "BrowserController.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
@@ -48,6 +46,7 @@
 #include "GuiLogger.h"
 #include "ImFileDialog.h"
 #include "ImageToPatternDialog.h"
+#include "LocalLibraryController.h"
 #include "LocationController.h"
 #include "LogWindow.h"
 #include "LoginController.h"
@@ -66,9 +65,9 @@
 #include "PreviewSettingsDialog.h"
 #include "RecorderController.h"
 #include "RecorderWindow.h"
-#include "ReplaceSimulationDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SavePictureDialog.h"
+#include "SaveSimulationDialog.h"
 #include "SignalsBufferDialog.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
@@ -78,7 +77,6 @@
 #include "StyleService.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
-#include "UploadSimulationDialog.h"
 #include "Viewport.h"
 #include "WindowController.h"
 #include "implot.h"
@@ -132,17 +130,15 @@ _MainWindow::_MainWindow()
     DocumentationWindow::get().setup();
     NewSimulationDialog::get().setup();
     BrowserController::get().setup();
+    LocalLibraryController::get().setup();
     BrowserWindow::get().setup();
     ActivateUserDialog::get().setup();
     NewPasswordDialog::get().setup();
     LoginDialog::get().setup();
-    UploadSimulationDialog::get().setup();
-    ReplaceSimulationDialog::get().setup();
+    SaveSimulationDialog::get().setup();
     ImageToPatternDialog::get().setup();
     RecorderController::get().setup();
     RecorderWindow::get().setup();
-    AutosaveController::get().setup();
-    AutosaveWindow::get().setup();
     OverlayController::get().setup();
     FileTransferController::get().setup();
     NetworkTransferController::get().setup();

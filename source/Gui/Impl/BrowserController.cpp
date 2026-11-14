@@ -51,10 +51,10 @@ namespace
         switch (workspaceType) {
         case WorkspaceType_Private:
             return userName.has_value() && rawTO->userName == userName.value();
-        case WorkspaceType_Public:
-            return rawTO->workspaceType == WorkspaceType_Public || rawTO->workspaceType == WorkspaceType_AlienProject;
-        case WorkspaceType_AlienProject:
-            return rawTO->workspaceType == WorkspaceType_AlienProject;
+        case WorkspaceType_Community:
+            return rawTO->workspaceType == WorkspaceType_Community || rawTO->workspaceType == WorkspaceType_Featured;
+        case WorkspaceType_Featured:
+            return rawTO->workspaceType == WorkspaceType_Featured;
         default:
             return false;
         }
@@ -76,6 +76,11 @@ void BrowserController::refresh(bool withRetry)
 
             auto userName = NetworkService::get().getLoggedInUserName();
             for (auto const& workspaceId : _data->getWorkspaces() | std::views::keys) {
+
+                // The other workspaces are filled by the browser itself
+                if (!isServerWorkspace(workspaceId.workspaceType)) {
+                    continue;
+                }
                 std::vector<NetworkResourceRawTO> rawTOs;
                 for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType && isVisibleInWorkspace(rawTO, workspaceId.workspaceType, userName)) {

@@ -33,7 +33,7 @@
 #include "GenomeTabWidget.h"
 #include "GenomeWindowEditData.h"
 #include "OverlayController.h"
-#include "UploadSimulationDialog.h"
+#include "SaveSimulationDialog.h"
 
 namespace
 {
@@ -81,6 +81,11 @@ void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, boo
 GenomeDesc GenomeEditorWindow::getCurrentGenome() const
 {
     return _tabs.at(_selectedTabIndex)->getGenomeDesc();
+}
+
+void GenomeEditorWindow::markCurrentGenomeAsSaved()
+{
+    _tabs.at(_selectedTabIndex)->resetOriginal();
 }
 
 std::vector<PreviewDesc> GenomeEditorWindow::getCurrentPreviewDescs() const
@@ -293,7 +298,7 @@ void GenomeEditorWindow::onSaveGenome()
 
 void GenomeEditorWindow::onShareGenome()
 {
-    UploadSimulationDialog::get().open(NetworkResourceType_Genome);
+    SaveSimulationDialog::get().open(NetworkResourceType_Genome, SaveTarget::Community);
 }
 
 void GenomeEditorWindow::onCloneGenome()

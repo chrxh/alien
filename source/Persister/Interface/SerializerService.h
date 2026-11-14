@@ -13,6 +13,13 @@
 
 #include "Definitions.h"
 
+struct SimulationFileInfo
+{
+    std::string version;
+    uint64_t timestep = 0;
+    IntVector2D worldSize;
+};
+
 class SerializerService
 {
     MAKE_SINGLETON(SerializerService);
@@ -20,6 +27,7 @@ class SerializerService
 public:
     bool serializeSimulationToFiles(std::filesystem::path const& filename, SimulationDesc const& data) const;
     bool deserializeSimulationFromFiles(SimulationDesc& data, std::filesystem::path const& filename) const;
+    bool deserializeSimulationInfoFromFile(SimulationFileInfo& info, std::filesystem::path const& filename) const;  // Reads only the beginning of the file
     bool deleteSimulation(std::filesystem::path const& filename) const;
 
     bool serializeSimulationToString(std::string& output, SimulationDesc const& input) const;

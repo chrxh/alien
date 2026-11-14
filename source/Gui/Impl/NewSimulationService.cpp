@@ -20,6 +20,7 @@ namespace
     auto constexpr InitialZoomFactor = 4.0f;
     auto constexpr AutosaveOriginSettingsKey = "services.new simulation.autosave origin";
     auto constexpr AutosaveOriginServerSettingsKey = "services.new simulation.autosave origin server";
+    auto constexpr AutosaveNameInLibrarySettingsKey = "services.new simulation.autosave name in library";
 }
 
 void NewSimulationService::createSimulation(Parameters const& parameters)
@@ -37,9 +38,13 @@ void NewSimulationService::createSimulation(Parameters const& parameters)
     Viewport::get().setZoomFactor(InitialZoomFactor);
     TemporalControlService::get().createFlashback();
     _originResourceId.reset();
+    _nameInLibrary.reset();
 }
 
-std::optional<std::string> NewSimulationService::loadSimulation(SimulationDesc const& simulation, std::optional<std::string> const& originResourceId)
+std::optional<std::string> NewSimulationService::loadSimulation(
+    SimulationDesc const& simulation,
+    std::optional<std::string> const& originResourceId,
+    std::optional<std::string> const& nameInLibrary)
 {
     _PersisterFacade::get()->shutdown();
     _SimulationFacade::get()->closeSimulation();
@@ -66,6 +71,7 @@ std::optional<std::string> NewSimulationService::loadSimulation(SimulationDesc c
     Viewport::get().setZoomFactor(simulation._zoom);
     TemporalControlService::get().createFlashback();
     _originResourceId = errorMessage ? std::nullopt : originResourceId;
+    _nameInLibrary = errorMessage ? std::nullopt : nameInLibrary;
     return errorMessage;
 }
 
@@ -79,10 +85,21 @@ void NewSimulationService::setOriginResourceId(std::optional<std::string> const&
     _originResourceId = value;
 }
 
+std::optional<std::string> const& NewSimulationService::getNameInLibrary() const
+{
+    return _nameInLibrary;
+}
+
+void NewSimulationService::setNameInLibrary(std::optional<std::string> const& value)
+{
+    _nameInLibrary = value;
+}
+
 void NewSimulationService::storeAutosaveOrigin() const
 {
     GlobalSettings::get().setValue(AutosaveOriginSettingsKey, _originResourceId.value_or(std::string()));
     GlobalSettings::get().setValue(AutosaveOriginServerSettingsKey, NetworkService::get().getServerAddress());
+    GlobalSettings::get().setValue(AutosaveNameInLibrarySettingsKey, _nameInLibrary.value_or(std::string()));
 }
 
 void NewSimulationService::restoreAutosaveOrigin()
@@ -91,5 +108,9 @@ void NewSimulationService::restoreAutosaveOrigin()
     auto originServer = GlobalSettings::get().getValue(AutosaveOriginServerSettingsKey, std::string());
     if (!originResourceId.empty() && originServer == NetworkService::get().getServerAddress()) {
         _originResourceId = originResourceId;
+    }
+    auto nameInLibrary = GlobalSettings::get().getValue(AutosaveNameInLibrarySettingsKey, std::string());
+    if (!nameInLibrary.empty()) {
+        _nameInLibrary = nameInLibrary;
     }
 }

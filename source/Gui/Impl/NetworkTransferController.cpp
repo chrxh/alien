@@ -65,9 +65,9 @@ namespace
 {
     void showUploadConfirmation(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& resourceName, std::string const& resourceId)
     {
-        auto isShared = workspaceType == WorkspaceType_Public;
+        auto isShared = workspaceType == WorkspaceType_Community;
         auto message = isShared ? "\"" + resourceName + "\" is now visible in the Community workspace. It has also been posted on the ALIEN Discord."
-                                : "\"" + resourceName + "\" is now in your Private workspace. Only you can see it.";
+                                : "\"" + resourceName + "\" is now in My uploads. Only you can see it.";
         GenericMessageDialog::get().informationWithAction(isShared ? "Shared" : "Uploaded", message, ICON_FA_EYE "  Show in browser", [=] {
             BrowserWindow::get().showResource(resourceType, workspaceType, resourceId);
         });

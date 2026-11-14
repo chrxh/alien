@@ -2,6 +2,7 @@ target_sources(PersisterTests
 PUBLIC
     GridSimulationGenerator.cpp
     JsonSerializationTests.cpp
+    LocalLibraryServiceTests.cpp
     SerializerServiceTest.cpp
     Testsuite.cpp)
 

@@ -23,6 +23,7 @@
 
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
+#include <Base/StringHelper.h>
 #include <Base/VersionParserService.h>
 
 #include <Data/Descs.h>
@@ -1841,13 +1842,13 @@ namespace cereal
 bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, SimulationDesc const& data) const
 {
     try {
-        log(Priority::Important, "save simulation to " + filename.string());
+        log(Priority::Important, "save simulation to " + StringHelper::toUtf8(filename));
 
         if (filename.has_parent_path()) {
             std::filesystem::create_directories(filename.parent_path());
         }
 
-        zstd::ofstream stream(filename.string(), std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
+        zstd::ofstream stream(filename, std::ios::binary, zstd::DefaultCompressionLevel, zstd::recommendedWorkerCount());
         if (!stream) {
             return false;
         }
@@ -1861,9 +1862,9 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
 bool SerializerService::deserializeSimulationFromFiles(SimulationDesc& data, std::filesystem::path const& filename) const
 {
     try {
-        log(Priority::Important, "load simulation from " + filename.string());
+        log(Priority::Important, "load simulation from " + StringHelper::toUtf8(filename));
 
-        zstd::ifstream stream(filename.string(), std::ios::binary);
+        zstd::ifstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
         }
@@ -1879,7 +1880,7 @@ bool SerializerService::deserializeSimulationFromFiles(SimulationDesc& data, std
 bool SerializerService::deleteSimulation(std::filesystem::path const& filename) const
 {
     try {
-        log(Priority::Important, "delete simulation " + filename.string());
+        log(Priority::Important, "delete simulation " + StringHelper::toUtf8(filename));
         return std::filesystem::remove(filename);
     } catch (...) {
         return false;
@@ -1923,14 +1924,14 @@ bool SerializerService::deserializeSimulationFromString(SimulationDesc& output, 
 bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filename, GenomeDesc const& genome) const
 {
     try {
-        log(Priority::Important, "save genome to " + filename.string());
+        log(Priority::Important, "save genome to " + StringHelper::toUtf8(filename));
         // Wrap constructor cell around genome
         ContentDesc description;
         if (!wrapGenome(description, genome)) {
             return false;
         }
 
-        zstd::ofstream stream(filename.string(), std::ios::binary);
+        zstd::ofstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
         }
@@ -1945,7 +1946,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
 bool SerializerService::deserializeGenomeFromFile(GenomeDesc& genome, std::filesystem::path const& filename) const
 {
     try {
-        log(Priority::Important, "load genome from " + filename.string());
+        log(Priority::Important, "load genome from " + StringHelper::toUtf8(filename));
         ContentDesc description;
         if (!deserializeDescription(description, filename)) {
             return false;
@@ -2158,7 +2159,7 @@ void SerializerService::serializeDescription(ContentDesc const& description, std
 
 bool SerializerService::deserializeDescription(ContentDesc& description, std::filesystem::path const& filename) const
 {
-    zstd::ifstream stream(filename.string(), std::ios::binary);
+    zstd::ifstream stream(filename, std::ios::binary);
     if (!stream) {
         return false;
     }
@@ -2743,6 +2744,40 @@ void SerializerService::deserializeSimulation(SimulationDesc& data, std::istream
     DeserializationContext context;
     archive(data);
     context.throwOnFailure();
+}
+
+bool SerializerService::deserializeSimulationInfoFromFile(SimulationFileInfo& info, std::filesystem::path const& filename) const
+{
+    try {
+        zstd::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        cereal::PortableBinaryInputArchive archive(stream);
+        std::string version;
+        archive(version);
+        if (!VersionParserService::get().isVersionValid(version) || VersionParserService::get().isVersionOutdated(version)) {
+            return false;
+        }
+
+        // The attributes of a simulation precede its parameters and its content
+        cereal::AttributeMap attributes;
+        archive(attributes);
+        auto readAttribute = [&](int id, auto& value, auto const& defaultValue) {
+            auto findResult = attributes.find(id);
+            if (findResult == attributes.end() || !cereal::convertVariantData(findResult->second, value)) {
+                value = defaultValue;
+            }
+        };
+        SimulationDesc defaultData;
+        SimulationFileInfo result{.version = version};
+        readAttribute(Id_Simulation_Timestep, result.timestep, defaultData._timestep);
+        readAttribute(Id_Simulation_WorldSize, result.worldSize, defaultData._worldSize);
+        info = result;
+        return true;
+    } catch (...) {
+        return false;
+    }
 }
 
 bool SerializerService::wrapGenome(ContentDesc& output, GenomeDesc const& input) const

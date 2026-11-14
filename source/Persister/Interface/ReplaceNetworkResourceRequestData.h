@@ -12,7 +12,7 @@
 struct ReplaceNetworkResourceRequestData
 {
     std::string resourceId;
-    WorkspaceType workspaceType = WorkspaceType_Public;
+    WorkspaceType workspaceType = WorkspaceType_Community;
     DownloadCache downloadCache;
 
     struct SimulationData

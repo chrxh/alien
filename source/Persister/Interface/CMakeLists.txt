@@ -16,6 +16,9 @@ add_library(PersisterInterface
     GetSimulationPicturesResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
+    LocalLibrary.h
+    LocalLibraryService.cpp
+    LocalLibraryService.h
     LoginRequestData.h
     JsonSerializationScope.h
     LoginResultData.h
@@ -32,9 +35,6 @@ add_library(PersisterInterface
     ReadSimulationResultData.h
     ReplaceNetworkResourceRequestData.h
     ReplaceNetworkResourceResultData.h
-    SavepointTable.h
-    SavepointTableService.cpp
-    SavepointTableService.h
     SaveDeserializedSimulationRequestData.h
     SaveDeserializedSimulationResultData.h
     SaveSimulationRequestData.h

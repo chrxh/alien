@@ -23,3 +23,12 @@ void WebLinkHelper::openInBrowser(std::string const& url)
     }
 #endif
 }
+
+void WebLinkHelper::openInFileManager(std::filesystem::path const& folder)
+{
+#ifdef _WIN32
+    ShellExecuteW(nullptr, L"open", folder.wstring().c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+#else
+    openInBrowser(folder.string());
+#endif
+}

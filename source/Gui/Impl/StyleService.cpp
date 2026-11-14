@@ -235,6 +235,14 @@ namespace Const
     ImColor BrowserLastDayOnlineSymbolColor;
     ImColor BrowserActiveSimulatorsColor;
     ImColor BrowserLastDaySimulatorsColor;
+
+    ImColor BrowserPaneColor;
+
+    ImColor const BrowserPictureChipColor = ImColor::HSV(0.625f, 0.67f, 0.05f, 0.66f);
+    ImColor const BrowserPictureChipHoveredColor = ImColor::HSV(0.583f, 0.4f, 0.22f, 0.9f);
+    ImColor const BrowserPictureChipTextColor = ImColor::HSV(0.564f, 0.055f, 0.925f);
+    ImColor const BrowserPictureChipIconColor = ImColor::HSV(0.57f, 0.1f, 0.62f);
+    ImColor const BrowserPictureChipOwnReactionColor = ImColor::HSV(0.375f, 0.55f, 0.92f);
 }
 
 void StyleService::setup()
@@ -499,6 +507,8 @@ void StyleService::setupPalette() const
     BrowserLastDayOnlineSymbolColor = themed(ImColor::HSV(0.16f, 0.5f, 0.66f), ImColor::HSV(0.12f, 0.9f, 0.62f));
     BrowserActiveSimulatorsColor = themed(ImColor::HSV(0.0f, 0.4f, 0.9f), ImColor::HSV(0.0f, 0.7f, 0.7f));
     BrowserLastDaySimulatorsColor = themed(ImColor::HSV(0.16f, 0.45f, 0.9f), ImColor::HSV(0.12f, 0.9f, 0.6f));
+
+    BrowserPaneColor = themed(ImColor::HSV(0.593f, 0.39f, 0.09f), ImColor::HSV(0.583f, 0.03f, 0.955f));
 }
 
 void StyleService::setupColors(ImGuiStyle& style) const
