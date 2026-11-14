@@ -141,9 +141,9 @@ namespace
             return {ICON_FA_DESKTOP, "My simulations", Const::BrowserLocalWorkspaceTooltip};
         case WorkspaceType_Autosave:
             return {ICON_FA_HISTORY, "Autosaves", Const::BrowserAutosaveWorkspaceTooltip};
-        case WorkspaceType_AlienProject:
+        case WorkspaceType_Featured:
             return {ICON_FA_STAR, "Featured", Const::BrowserFeaturedWorkspaceTooltip};
-        case WorkspaceType_Public:
+        case WorkspaceType_Community:
             return {ICON_FA_GLOBE, "Community", Const::BrowserCommunityWorkspaceTooltip};
         case WorkspaceType_Liked:
             return {ICON_FA_HEART, "Liked", Const::BrowserLikedWorkspaceTooltip};
@@ -363,8 +363,8 @@ void _BrowserDetailsWidget::processVisibility(NetworkResourceTreeTO const& treeT
 
     // A featured upload is visible to the community as well
     auto visibility = rawTO->workspaceType == WorkspaceType_Private ? 1 : 0;
-    if (AlienGui::SegmentedControl(
-            AlienGui::SegmentedControlParameters().values({ICON_FA_GLOBE "  Community", ICON_FA_LOCK "  Only me"}).height(VisibilityHeight), visibility)) {
+    if (AlienGui::ChoiceBar(
+            AlienGui::ChoiceBarParameters().values({ICON_FA_GLOBE "  Community", ICON_FA_LOCK "  Only me"}).height(VisibilityHeight), visibility)) {
         _actions.changeVisibility(treeTO);
     }
 }
@@ -447,7 +447,7 @@ void _BrowserDetailsWidget::processFolder(NetworkResourceTreeTO const& treeTO)
     if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_EDIT "  Rename").transparentBackground(false))) {
         _actions.edit(treeTO);
     }
-    if (!isLocal && _data->getCurrentWorkspaceId().workspaceType != WorkspaceType_AlienProject) {
+    if (!isLocal && _data->getCurrentWorkspaceId().workspaceType != WorkspaceType_Featured) {
         if (processIconButton(
                 ICON_FA_SHARE_ALT,
                 "Change visibility: Community " ICON_FA_LONG_ARROW_ALT_RIGHT " Only me and Only me " ICON_FA_LONG_ARROW_ALT_RIGHT " Community")) {

@@ -40,6 +40,9 @@
 
 namespace
 {
+    // The dialog keeps one size under all its titles
+    auto constexpr WindowId = "###SaveSimulationDialog";
+
     auto constexpr PreviewWidth = 450.0f;
     auto constexpr ColumnSpacing = 24.0f;
     auto constexpr FooterHeight = 50.0f;
@@ -94,7 +97,7 @@ namespace
 
     WorkspaceType toWorkspaceType(SaveTarget target)
     {
-        return target == SaveTarget::Private ? WorkspaceType_Private : WorkspaceType_Public;
+        return target == SaveTarget::Private ? WorkspaceType_Private : WorkspaceType_Community;
     }
 
     // The uploads that only the user sees are a place to save to, and one of two visibilities of an upload
@@ -201,10 +204,10 @@ void SaveSimulationDialog::open(NetworkResourceType resourceType, SaveTarget tar
     }
 
     if (_resourceType == NetworkResourceType_Simulation) {
-        changeTitle("Save simulation");
+        changeTitle("Save simulation" + std::string(WindowId));
         _preview.createForSimulation();
     } else {
-        changeTitle("Save genome");
+        changeTitle("Save genome" + std::string(WindowId));
         _preview.createForGenome(GenomeEditorWindow::get().getCurrentPreviewDescs());
     }
     AlienDialog::open();
@@ -241,7 +244,7 @@ void SaveSimulationDialog::openForSharing(
     _name = name;
     resetDescription(description);
 
-    changeTitle(resourceType == NetworkResourceType_Simulation ? "Share simulation" : "Share genome");
+    changeTitle(std::string(resourceType == NetworkResourceType_Simulation ? "Share simulation" : "Share genome") + WindowId);
     _preview.createForPicture(SimulationLibraryService::get().loadPicture(file).value_or(std::string()));
     AlienDialog::open();
 }
@@ -264,10 +267,10 @@ void SaveSimulationDialog::openForReplacing(NetworkResourceRawTO const& upload)
     resetDescription(upload->description);
 
     if (_resourceType == NetworkResourceType_Simulation) {
-        changeTitle("Replace simulation");
+        changeTitle("Replace simulation" + std::string(WindowId));
         _preview.createForSimulation();
     } else {
-        changeTitle("Replace genome");
+        changeTitle("Replace genome" + std::string(WindowId));
         _preview.createForGenome(GenomeEditorWindow::get().getCurrentPreviewDescs());
     }
     AlienDialog::open();
@@ -378,7 +381,7 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
         targetLabels.emplace_back(getTargetLabel(target, _resourceType, choosesPlace));
     }
     auto targetIndex = toInt(std::distance(_targets.begin(), std::ranges::find(_targets, _target)));
-    if (AlienGui::SegmentedControl(AlienGui::SegmentedControlParameters().values(targetLabels), targetIndex)) {
+    if (AlienGui::ChoiceBar(AlienGui::ChoiceBarParameters().values(targetLabels), targetIndex)) {
         _target = _targets.at(targetIndex);
         _errorMessage.reset();
     }

@@ -35,9 +35,9 @@ namespace
     std::string getWorkspaceName(WorkspaceType type)
     {
         switch (type) {
-        case WorkspaceType_Public:
+        case WorkspaceType_Community:
             return "community";
-        case WorkspaceType_AlienProject:
+        case WorkspaceType_Featured:
             return "alien_project";
         default:
             return "private";

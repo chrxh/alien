@@ -143,7 +143,7 @@ private:
     std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
 
     std::map<WorkspaceId, Workspace> _workspaces;
-    WorkspaceId _currentWorkspaceId = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
+    WorkspaceId _currentWorkspaceId = {NetworkResourceType_Simulation, WorkspaceType_Featured};
     std::string _filter;
     bool _likedWorkspacesOutdated = false;
     NetworkResourceTreeTO _selectedTreeTO;

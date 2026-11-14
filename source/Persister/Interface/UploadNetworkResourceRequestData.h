@@ -15,7 +15,7 @@ struct UploadNetworkResourceRequestData
     std::string folderName;
     std::string resourceWithoutFolderName;
     std::string resourceDescription;
-    WorkspaceType workspaceType = WorkspaceType_Public;
+    WorkspaceType workspaceType = WorkspaceType_Community;
     DownloadCache downloadCache;
 
     struct SimulationData

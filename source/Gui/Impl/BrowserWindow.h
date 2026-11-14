@@ -81,6 +81,6 @@ private:
     float _userTableWidth = 0;
     std::optional<std::string> _resourceIdToShow;
 
-    WorkspaceType _lastServerWorkspaceType = WorkspaceType_AlienProject;
+    WorkspaceType _lastServerWorkspaceType = WorkspaceType_Featured;
     std::optional<int> _libraryRevision;
 };

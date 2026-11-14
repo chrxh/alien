@@ -47,9 +47,9 @@ namespace
     auto constexpr ReadOnlyCellPadding = 1.0f;
     auto constexpr MaxFilterWidth = 400.0f;
     auto constexpr FilterClearButtonWidth = 28.0f;
-    auto constexpr SegmentedControlRounding = 8.0f;
-    auto constexpr SegmentedControlInset = 2.0f;
-    auto constexpr SegmentedControlMinLabelMargin = 8.0f;
+    auto constexpr ChoiceBarRounding = 8.0f;
+    auto constexpr ChoiceBarInset = 2.0f;
+    auto constexpr ChoiceBarMinLabelMargin = 8.0f;
 
     bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
@@ -1410,14 +1410,14 @@ namespace
     }
 }
 
-bool AlienGui::SegmentedControl(SegmentedControlParameters const& parameters, int& value)
+bool AlienGui::ChoiceBar(ChoiceBarParameters const& parameters, int& value)
 {
     auto drawList = ImGui::GetWindowDrawList();
     auto pos = ImGui::GetCursorScreenPos();
     auto width = ImGui::GetContentRegionAvail().x;
     auto height = scale(parameters._height);
-    auto rounding = scale(SegmentedControlRounding);
-    auto inset = scale(SegmentedControlInset);
+    auto rounding = scale(ChoiceBarRounding);
+    auto inset = scale(ChoiceBarInset);
     drawList->AddRectFilled(pos, {pos.x + width, pos.y + height}, ImGui::GetColorU32(ImGuiCol_FrameBg), rounding);
 
     // The segments are equally wide. If a label does not fit, each segment gets the width of its label and an equal share of the rest.
@@ -1430,7 +1430,7 @@ bool AlienGui::SegmentedControl(SegmentedControlParameters const& parameters, in
         totalLabelWidth += labelWidth;
         maxLabelWidth = std::max(maxLabelWidth, labelWidth);
     }
-    auto followsLabels = maxLabelWidth + scale(SegmentedControlMinLabelMargin) * 2 > equalWidth && totalLabelWidth < width;
+    auto followsLabels = maxLabelWidth + scale(ChoiceBarMinLabelMargin) * 2 > equalWidth && totalLabelWidth < width;
     auto labelMargin = (width - totalLabelWidth) / numSegments;
 
     auto result = false;

@@ -213,7 +213,7 @@ void _BrowserTableWidget::processResourceNameField(NetworkResourceTreeTO const& 
         if (_data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType != WorkspaceType_Private) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
             AlienGui::Tooltip(
-                AlienGui::TooltipParameters().text(leaf.rawTO->workspaceType == WorkspaceType_AlienProject ? "Visible in Featured" : "Visible in Community"));
+                AlienGui::TooltipParameters().text(leaf.rawTO->workspaceType == WorkspaceType_Featured ? "Visible in Featured" : "Visible in Community"));
         }
         ImGui::SameLine();
 

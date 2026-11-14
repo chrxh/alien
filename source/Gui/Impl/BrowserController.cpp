@@ -51,10 +51,10 @@ namespace
         switch (workspaceType) {
         case WorkspaceType_Private:
             return userName.has_value() && rawTO->userName == userName.value();
-        case WorkspaceType_Public:
-            return rawTO->workspaceType == WorkspaceType_Public || rawTO->workspaceType == WorkspaceType_AlienProject;
-        case WorkspaceType_AlienProject:
-            return rawTO->workspaceType == WorkspaceType_AlienProject;
+        case WorkspaceType_Community:
+            return rawTO->workspaceType == WorkspaceType_Community || rawTO->workspaceType == WorkspaceType_Featured;
+        case WorkspaceType_Featured:
+            return rawTO->workspaceType == WorkspaceType_Featured;
         default:
             return false;
         }

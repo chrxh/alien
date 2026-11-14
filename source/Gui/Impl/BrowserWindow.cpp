@@ -74,8 +74,8 @@ namespace
         {NetworkResourceType_Simulation, std::string("simulations")},
         {NetworkResourceType_Genome, std::string("genomes")}};
     std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
-        {WorkspaceType_Public, std::string("public")},
-        {WorkspaceType_AlienProject, std::string("alien-project")},
+        {WorkspaceType_Community, std::string("public")},
+        {WorkspaceType_Featured, std::string("alien-project")},
         {WorkspaceType_Private, std::string("private")},
         {WorkspaceType_Local, std::string("local")},
         {WorkspaceType_Autosave, std::string("autosave")},
@@ -114,7 +114,7 @@ void BrowserWindow::initIntern()
     }
     currentWorkspaceId.workspaceType = settings.getValue("windows.browser.workspace", _lastServerWorkspaceType);
     if (!_data->getWorkspaces().contains(currentWorkspaceId)) {
-        currentWorkspaceId = WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_AlienProject};
+        currentWorkspaceId = WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_Featured};
     }
     _data->setCurrentWorkspaceId(currentWorkspaceId);
     _userTableWidth = settings.getValue("windows.browser.simulators width", scale(UserTableWidth)) * WindowController::get().getContentScaleCorrection();
@@ -365,8 +365,8 @@ void BrowserWindow::processWorkspaceSelection(float width, float height)
         }
         ImGui::Dummy({0, scale(WorkspaceGroupSpacing)});
         AlienGui::Group(AlienGui::GroupParameters().text("Server"));
-        processWorkspaceItem(WorkspaceType_AlienProject, ICON_FA_STAR, "Featured", Const::BrowserFeaturedWorkspaceTooltip);
-        processWorkspaceItem(WorkspaceType_Public, ICON_FA_GLOBE, "Community", Const::BrowserCommunityWorkspaceTooltip);
+        processWorkspaceItem(WorkspaceType_Featured, ICON_FA_STAR, "Featured", Const::BrowserFeaturedWorkspaceTooltip);
+        processWorkspaceItem(WorkspaceType_Community, ICON_FA_GLOBE, "Community", Const::BrowserCommunityWorkspaceTooltip);
         processWorkspaceItem(WorkspaceType_Private, ICON_FA_LOCK, "My uploads", Const::BrowserPrivateWorkspaceTooltip);
         processWorkspaceItem(WorkspaceType_Liked, ICON_FA_HEART, "Liked", Const::BrowserLikedWorkspaceTooltip);
     }
@@ -737,8 +737,8 @@ void BrowserWindow::onSave()
     }
     auto target = [&] {
         switch (targetWorkspaceType) {
-        case WorkspaceType_AlienProject:
-        case WorkspaceType_Public:
+        case WorkspaceType_Featured:
+        case WorkspaceType_Community:
             return SaveTarget::Community;
         case WorkspaceType_Private:
             return SaveTarget::Private;
@@ -779,7 +779,7 @@ void BrowserWindow::onChangeVisibility(NetworkResourceTreeTO const& treeTO)
         if (workspaceType == WorkspaceType_Private) {
             return "Do you really want to share the selected item with the community? Everyone will be able to see and download it.";
         }
-        if (workspaceType == WorkspaceType_AlienProject) {
+        if (workspaceType == WorkspaceType_Featured) {
             return "Do you really want to make the selected item private? It will no longer be visible to others and leaves Featured for good. Sharing "
                    "it again puts it into Community.";
         }

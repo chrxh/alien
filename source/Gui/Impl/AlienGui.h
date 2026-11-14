@@ -361,12 +361,12 @@ public:
     };
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
-    struct SegmentedControlParameters
+    struct ChoiceBarParameters
     {
-        MEMBER(SegmentedControlParameters, std::vector<std::string>, values, std::vector<std::string>());
-        MEMBER(SegmentedControlParameters, float, height, 30.0f);
+        MEMBER(ChoiceBarParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER(ChoiceBarParameters, float, height, 30.0f);
     };
-    static bool SegmentedControl(SegmentedControlParameters const& parameters, int& value);  // Spans the available width
+    static bool ChoiceBar(ChoiceBarParameters const& parameters, int& value);  // Spans the available width
 
     struct SelectableButtonParameters
     {

@@ -108,16 +108,16 @@ void _BrowserData::removeRawTOs(std::vector<NetworkResourceRawTO> const& rawTOs)
 
 std::vector<NetworkResourceRawTO> _BrowserData::changeVisibility(std::vector<NetworkResourceRawTO> const& rawTOs, bool includeFeatured)
 {
-    WorkspaceId publicWorkspaceId{_currentWorkspaceId.resourceType, WorkspaceType_Public};
-    WorkspaceId featuredWorkspaceId{_currentWorkspaceId.resourceType, WorkspaceType_AlienProject};
+    WorkspaceId publicWorkspaceId{_currentWorkspaceId.resourceType, WorkspaceType_Community};
+    WorkspaceId featuredWorkspaceId{_currentWorkspaceId.resourceType, WorkspaceType_Featured};
     auto& publicRawTOs = _workspaces.at(publicWorkspaceId).rawTOs;
     auto& featuredRawTOs = _workspaces.at(featuredWorkspaceId).rawTOs;
 
     std::vector<NetworkResourceRawTO> result;
     for (auto const& rawTO : rawTOs) {
-        auto isShared = rawTO->workspaceType == WorkspaceType_Public || (rawTO->workspaceType == WorkspaceType_AlienProject && includeFeatured);
+        auto isShared = rawTO->workspaceType == WorkspaceType_Community || (rawTO->workspaceType == WorkspaceType_Featured && includeFeatured);
         if (rawTO->workspaceType == WorkspaceType_Private) {
-            rawTO->workspaceType = WorkspaceType_Public;
+            rawTO->workspaceType = WorkspaceType_Community;
             publicRawTOs.emplace_back(rawTO);
             result.emplace_back(rawTO);
         } else if (isShared) {
