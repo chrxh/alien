@@ -66,7 +66,7 @@ namespace
     {
         auto content = LocalLibraryService::get().loadContent(folder);
         return std::ranges::any_of(content.simulations, [](LibraryFile const& simulation) {
-            return simulation.kind == LibraryFileKind::SavePoint && simulation.name.find('/') == std::string::npos;
+            return simulation.kind == LibraryFileKind::Autosave && simulation.name.find('/') == std::string::npos;
         });
     }
 
@@ -570,7 +570,7 @@ void LocalLibraryController::scheduleSave(PendingSave pendingSave)
         .zoom = Viewport::get().getZoomFactor(),
         .center = Viewport::get().getCenterInWorldPos(),
         .generateNameFromTimestep = pendingSave.automatic,
-        .generatedNamePrefix = Const::SavePointPrefix};
+        .generatedNamePrefix = Const::AutosavePrefix};
     pendingSave.requestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
     printOverlayMessage(pendingSave.automatic ? "Autosaving ..." : "Saving ...");
     _pendingSaves.emplace_back(std::move(pendingSave));
