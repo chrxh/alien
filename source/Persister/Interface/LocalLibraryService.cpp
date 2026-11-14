@@ -454,7 +454,7 @@ bool LocalLibraryService::isValidFolderName(std::string const& name) const
 
 bool LocalLibraryService::isAutosaveName(std::string const& name) const
 {
-    return parseTimestep(name, Const::AutosavePrefix).has_value();
+    return parseTimestep(name, Const::SavePointPrefix).has_value() || parseTimestep(name, Const::AutosavePrefix).has_value();
 }
 
 std::filesystem::path LocalLibraryService::normalize(std::filesystem::path const& folder) const
@@ -746,7 +746,7 @@ void LocalLibraryService::removeExcessAutosaves(std::filesystem::path const& fol
     };
     std::vector<Autosave> autosaves;
     forEachEntry(folder, [&](std::filesystem::directory_entry const& entry) {
-        if (!isSimulationFile(entry) || !parseTimestep(StringHelper::toUtf8(entry.path().stem()), Const::AutosavePrefix).has_value()) {
+        if (!isSimulationFile(entry) || !isAutosaveName(StringHelper::toUtf8(entry.path().stem()))) {
             return;
         }
         std::error_code error;

@@ -570,7 +570,7 @@ void LocalLibraryController::scheduleSave(PendingSave pendingSave)
         .zoom = Viewport::get().getZoomFactor(),
         .center = Viewport::get().getCenterInWorldPos(),
         .generateNameFromTimestep = pendingSave.automatic,
-        .generatedNamePrefix = Const::AutosavePrefix};
+        .generatedNamePrefix = Const::SavePointPrefix};
     pendingSave.requestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
     printOverlayMessage(pendingSave.automatic ? "Autosaving ..." : "Saving ...");
     _pendingSaves.emplace_back(std::move(pendingSave));

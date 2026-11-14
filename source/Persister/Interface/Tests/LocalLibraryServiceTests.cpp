@@ -250,11 +250,12 @@ TEST_F(LocalLibraryServiceTests, validFolderNames)
 
 TEST_F(LocalLibraryServiceTests, autosaveNames)
 {
+    EXPECT_TRUE(_service->isAutosaveName("save_165_536_949"));
+    EXPECT_TRUE(_service->isAutosaveName("save_12400000-2"));
     EXPECT_TRUE(_service->isAutosaveName("autosave_12400000"));
     EXPECT_TRUE(_service->isAutosaveName("autosave_12_400_000"));
-    EXPECT_TRUE(_service->isAutosaveName("autosave_12400000-2"));
 
-    EXPECT_FALSE(_service->isAutosaveName("save_165_536_949"));
+    EXPECT_FALSE(_service->isAutosaveName("save_the_world"));
     EXPECT_FALSE(_service->isAutosaveName("autosave"));
     EXPECT_FALSE(_service->isAutosaveName("autosave_"));
     EXPECT_FALSE(_service->isAutosaveName("autosave_notes"));
@@ -614,27 +615,29 @@ TEST_F(LocalLibraryServiceTests, removeExcessAutosaves)
     createFiles(
         folder,
         {"autosave.sim",
-         "autosave_100.sim",
-         "autosave_200.sim",
-         "save_150.sim",
-         "autosave_300.sim",
+         "save_100.sim",
+         "save_200.sim",
+         "autosave_150.sim",
+         "save_300.sim",
          "Named.sim",
-         "autosave_400.sim",
-         "autosave_200.jpg",
-         "autosave_400.jpg"});
+         "save_the_world.sim",
+         "save_400.sim",
+         "save_200.jpg",
+         "save_400.jpg"});
 
     _service->removeExcessAutosaves(folder, 2);
 
     EXPECT_TRUE(std::filesystem::exists(folder / "autosave.sim"));
-    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_100.sim"));
-    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_200.sim"));
-    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_200.jpg"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_300.sim"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_400.sim"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_400.jpg"));
-    EXPECT_TRUE(std::filesystem::exists(folder / "save_150.sim"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "save_100.sim"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "save_200.sim"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "save_200.jpg"));
+    EXPECT_FALSE(std::filesystem::exists(folder / "autosave_150.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_300.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_400.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_400.jpg"));
     EXPECT_TRUE(std::filesystem::exists(folder / "Named.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_the_world.sim"));
 
     _service->removeExcessAutosaves(folder, 5);
-    EXPECT_TRUE(std::filesystem::exists(folder / "autosave_300.sim"));
+    EXPECT_TRUE(std::filesystem::exists(folder / "save_300.sim"));
 }

@@ -8,9 +8,9 @@
 
 namespace Const
 {
-    // Autosaves and the save points of earlier versions are named by their prefix followed by their time step
+    // Autosaves are named by a prefix followed by their time step
     auto constexpr SavePointPrefix = "save_";
-    auto constexpr AutosavePrefix = "autosave_";
+    auto constexpr AutosavePrefix = "autosave_";  // Used by the beta versions of 5.0
 
     auto constexpr MaxFileDescriptionLength = 4000;
 }
@@ -18,8 +18,8 @@ namespace Const
 enum class LibraryFileKind
 {
     Named,
-    SavePoint,  // Written by the Autosave window of earlier versions
-    Autosave    // Written by autosave, or the simulation that ALIEN saves when it is closed
+    SavePoint,  // Written by autosave
+    Autosave    // Written by autosave of the beta versions of 5.0, or the simulation that ALIEN saves when it is closed
 };
 
 struct LibraryFile
