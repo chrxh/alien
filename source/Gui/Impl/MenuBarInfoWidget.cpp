@@ -82,6 +82,9 @@ void _MenuBarInfoWidget::process()
 
 void _MenuBarInfoWidget::processCurrentSimulation()
 {
+    if (BrowserWindow::get().isOn()) {
+        return;
+    }
     auto const& originResourceId = NewSimulationService::get().getOriginResourceId();
     if (!originResourceId.has_value()) {
         return;
