@@ -12,7 +12,6 @@
 
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
-#include <Base/WebLinkHelper.h>
 
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
@@ -24,7 +23,6 @@
 #include "BrowserData.h"
 #include "BrowserHelper.h"
 #include "BrowserPictureCache.h"
-#include "GenericFileDialog.h"
 #include "HelpStrings.h"
 #include "LocalLibraryController.h"
 #include "StyleService.h"
@@ -37,8 +35,6 @@ namespace
     auto constexpr ChipPaddingX = 7.0f;
     auto constexpr ChipSpacing = 6.0f;
     auto constexpr ChipEmojiSize = 18.0f;
-    auto constexpr FolderButtonWidth = 30.0f;
-    auto constexpr SettingsTextWidth = 108.0f;  // Fits the longest label of the settings
     auto constexpr VisibilityHeight = 26.0f;
     auto constexpr MaxNumFileInfos = 200;
     auto constexpr TimestampLengthWithoutSeconds = 16;  // e.g. 2026-11-13 14:02
@@ -494,137 +490,9 @@ void _BrowserDetailsWidget::processWorkspace()
                     return sum + rawTO->contentSize;
                 });
             processFact("Size", StringHelper::formatFileSize(totalSize));
-
-            addSectionSpacing();
-            processFolders();
-            if (workspaceId.workspaceType == WorkspaceType_Autosave) {
-                addSectionSpacing();
-                processAutosaveSettings();
-            }
         }
     }
     ImGui::EndChild();
-}
-
-void _BrowserDetailsWidget::processFolders()
-{
-    auto& controller = LocalLibraryController::get();
-    auto const& style = ImGui::GetStyle();
-    auto isAutosave = _data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Autosave;
-    auto folder = isAutosave ? controller.getAutosaveMainFolder() : controller.getLibraryFolder();
-    auto folderText = StringHelper::toUtf8(folder);
-
-    // The end of a long path is shown, because it tells the folders apart
-    auto pos = ImGui::GetCursorScreenPos();
-    auto fieldWidth = ImGui::GetContentRegionAvail().x - scale(SettingsTextWidth) - scale(FolderButtonWidth) - style.FramePadding.x;
-    auto size = ImVec2{std::max(1.0f, fieldWidth), ImGui::GetFrameHeight()};
-    ImGui::Dummy(size);
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text(folderText));
-    auto drawList = ImGui::GetWindowDrawList();
-    drawList->AddRectFilled(pos, {pos.x + size.x, pos.y + size.y}, ImGui::GetColorU32(ImGuiCol_FrameBg), style.FrameRounding);
-    auto textWidth = ImGui::CalcTextSize(folderText.c_str()).x;
-    auto innerWidth = size.x - style.FramePadding.x * 2;
-    drawList->PushClipRect({pos.x + style.FramePadding.x, pos.y}, {pos.x + size.x - style.FramePadding.x, pos.y + size.y}, true);
-    drawList->AddText(
-        {pos.x + style.FramePadding.x + std::min(0.0f, innerWidth - textWidth), pos.y + style.FramePadding.y}, Const::TextBaseColor, folderText.c_str());
-    drawList->PopClipRect();
-
-    ImGui::SameLine();
-    AlienGui::MoveTickLeft();
-    if (AlienGui::Button(ICON_FA_FOLDER_OPEN, FolderButtonWidth)) {
-        GenericFileDialog::get().showOpenFileDialog("Select directory", "", folderText, [isAutosave](std::filesystem::path const& path) {
-            if (isAutosave) {
-                LocalLibraryController::get().setAutosaveMainFolder(path);
-            } else {
-                LocalLibraryController::get().setLibraryFolder(path);
-            }
-        });
-    }
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-        isAutosave ? "Choose another folder for the autosaves. The files stay where they are."
-                   : "Choose another folder for My simulations and My genomes. The files stay where they are."));
-    ImGui::SameLine();
-    AlienGui::Text("Folder");
-
-    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_EXTERNAL_LINK_ALT "  Show in file manager"))) {
-        std::error_code error;
-        std::filesystem::create_directories(folder, error);
-        WebLinkHelper::openInFileManager(folder);
-    }
-}
-
-void _BrowserDetailsWidget::processAutosaveFolder()
-{
-    auto& controller = LocalLibraryController::get();
-
-    // What is typed is kept here, because only valid folders reach the controller. It is read again whenever the field appears.
-    auto frameCount = ImGui::GetFrameCount();
-    if (frameCount != _lastAutosaveFolderFrame + 1) {
-        _autosaveFolderName = controller.getAutosaveFolderName();
-        _autosaveFolderNameValid = true;
-    }
-    _lastAutosaveFolderFrame = frameCount;
-
-    ImGui::BeginGroup();
-    if (AlienGui::InputText(AlienGui::InputTextParameters().name("Subfolder").textWidth(SettingsTextWidth), _autosaveFolderName)) {
-        _autosaveFolderNameValid = controller.setAutosaveFolderName(_autosaveFolderName);
-    }
-    ImGui::EndGroup();
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-        "The subfolder in which new autosaves are stored, for instance one for each simulation run. Use / or \\ for nested subfolders. Without a "
-        "subfolder, they are stored in the folder itself."));
-
-    if (!_autosaveFolderNameValid) {
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
-        processWrappedText("The subfolder is not valid. A name must not contain < > : \" | ? * and must not begin or end with a dot.");
-        ImGui::PopStyleColor();
-    }
-}
-
-void _BrowserDetailsWidget::processAutosaveSettings()
-{
-    auto& controller = LocalLibraryController::get();
-
-    ImGui::BeginGroup();
-    auto autosaveEnabled = controller.isAutosaveEnabled();
-    if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Enable autosave").textWidth(SettingsTextWidth), &autosaveEnabled)) {
-        controller.setAutosaveEnabled(autosaveEnabled);
-    }
-    ImGui::EndGroup();
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text("Saves the simulation automatically at the interval below, also while it is paused."));
-
-    ImGui::BeginDisabled(!autosaveEnabled);
-    auto autosaveInterval = controller.getAutosaveInterval();
-    // A held plus or minus button changes the value without reporting it
-    if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Interval (min)").textWidth(SettingsTextWidth), autosaveInterval)
-        || autosaveInterval != controller.getAutosaveInterval()) {
-        controller.setAutosaveInterval(autosaveInterval);
-    }
-    ImGui::EndDisabled();
-
-    processAutosaveFolder();
-
-    auto saveMode = controller.getSaveMode();
-    if (AlienGui::Switcher(
-            AlienGui::SwitcherParameters().name("Mode").values({"Limited save files", "Unlimited save files"}).textWidth(SettingsTextWidth), &saveMode)) {
-        controller.setSaveMode(saveMode);
-    }
-
-    ImGui::BeginDisabled(saveMode == LocalLibraryController::SaveMode_Unlimited);
-    auto numberOfFiles = controller.getNumberOfFiles();
-    if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of files").textWidth(SettingsTextWidth), numberOfFiles)
-        || numberOfFiles != controller.getNumberOfFiles()) {
-        controller.setNumberOfFiles(numberOfFiles);
-    }
-    ImGui::EndDisabled();
-
-    ImGui::Spacing();
-    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
-                                   .buttonText(ICON_FA_PLUS "  Autosave now")
-                                   .transparentBackground(false)
-                                   .tooltip("Save the simulation as an autosave right now"))) {
-        controller.onAutosave();
-    }
 }
 
 std::optional<SimulationFileInfo> const& _BrowserDetailsWidget::getFileInfo(NetworkResourceRawTO const& rawTO)

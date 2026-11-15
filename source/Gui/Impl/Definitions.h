@@ -151,6 +151,9 @@ using BrowserDetailsWidget = std::shared_ptr<_BrowserDetailsWidget>;
 class _BrowserTableWidget;
 using BrowserTableWidget = std::shared_ptr<_BrowserTableWidget>;
 
+class _BrowserFolderBarWidget;
+using BrowserFolderBarWidget = std::shared_ptr<_BrowserFolderBarWidget>;
+
 class _BrowserUserListWidget;
 using BrowserUserListWidget = std::shared_ptr<_BrowserUserListWidget>;
 

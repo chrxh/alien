@@ -35,8 +35,10 @@ class SaveSimulationDialog : public AlienDialog
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SaveSimulationDialog);
 
 public:
-    // Saves the running simulation or the genome of the genome editor. A suggested name that ends with a slash names only the folder.
-    void open(NetworkResourceType resourceType, SaveTarget target, std::string const& suggestedName = "");
+    // Saves the running simulation or the genome of the genome editor. Without a target, the dialog starts with the one that the user has chosen
+    // for the last save, which is this computer at first. A suggested name is one of this computer, and one that ends with a slash names only
+    // the folder.
+    void open(NetworkResourceType resourceType, std::optional<SaveTarget> target = std::nullopt, std::string const& suggestedName = "");
 
     // Uploads a simulation or a genome of this computer
     void openForSharing(NetworkResourceType resourceType, std::filesystem::path const& file, std::string const& name, std::string const& description);
@@ -74,6 +76,8 @@ private:
         bool operator==(DescriptionSource const&) const = default;
     };
 
+    void initIntern() override;
+    void shutdownIntern() override;
     void processIntern() override;
     void processForm(Outcome const& outcome);
     void processFooter(Outcome const& outcome);
@@ -90,6 +94,9 @@ private:
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
     std::vector<SaveTarget> _targets;
     SaveTarget _target = SaveTarget::ThisComputer;
+    std::map<NetworkResourceType, SaveTarget> _lastTargetByType;
+    bool _remembersTarget = false;
+    bool _targetChosen = false;
 
     std::string _name;
     std::string _description;

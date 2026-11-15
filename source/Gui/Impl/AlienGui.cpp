@@ -2964,12 +2964,20 @@ bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
     ImGui::PushStyleColor(ImGuiCol_Button, !parameters._transparentBackground ? Const::ActionButtonBackgroundColor.Value : ImColor::HSV(0, 0, 0, 0).Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::ActionButtonActiveColor.Value);
-    auto size = ImGui::CalcTextSize(parameters._buttonText.c_str());
     auto padding = ImGui::GetStyle().FramePadding;
-    size.x += padding.x * 2;
-    size.y += padding.y * 2;
+    auto size = ImVec2{CalcActionButtonWidth(parameters), ImGui::CalcTextSize(parameters._buttonText.c_str()).y + padding.y * 2};
     auto cursorPos = ImGui::GetCursorScreenPos();
+
+    // The text leaves the room in front of it to the small icon
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{parameters._smallIcon.has_value() ? 1.0f : 0.5f, 0.5f});
     auto result = ImGui::Button(parameters._buttonText.c_str(), size);
+    ImGui::PopStyleVar();
+    if (parameters._smallIcon.has_value()) {
+        SmallIcon(SmallIconParameters()
+                      .icon(*parameters._smallIcon)
+                      .pos({cursorPos.x + padding.x, cursorPos.y + padding.y})
+                      .color(ImColor(ImGui::GetColorU32(ImGuiCol_Text))));
+    }
     if (parameters._frame) {
         ImGui::GetWindowDrawList()->AddRect(
             cursorPos, {cursorPos.x + size.x, cursorPos.y + size.y}, ImColor::HSV(0.54f, 0.43f, 0.5f), ImGui::GetStyle().FrameRounding);
@@ -2981,6 +2989,15 @@ bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
     }
 
     return result;
+}
+
+float AlienGui::CalcActionButtonWidth(ActionButtonParameters const& parameters)
+{
+    auto width = ImGui::CalcTextSize(parameters._buttonText.c_str()).x + ImGui::GetStyle().FramePadding.x * 2;
+    if (parameters._smallIcon.has_value()) {
+        width += calcSmallIconWidth(*parameters._smallIcon) + ImGui::CalcTextSize("  ").x;
+    }
+    return width;
 }
 
 void AlienGui::Spinner(SpinnerParameters const& parameters)

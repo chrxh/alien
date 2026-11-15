@@ -619,12 +619,14 @@ public:
     struct ActionButtonParameters
     {
         MEMBER(ActionButtonParameters, std::string, buttonText, "");
+        MEMBER(ActionButtonParameters, std::optional<std::string>, smallIcon, std::nullopt);  // In front of the text
         MEMBER(ActionButtonParameters, bool, highlighted, false);
         MEMBER(ActionButtonParameters, bool, frame, false);
         MEMBER(ActionButtonParameters, bool, transparentBackground, true);
         MEMBER(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ActionButton(ActionButtonParameters const& parameters);
+    static float CalcActionButtonWidth(ActionButtonParameters const& parameters);
 
     struct SpinnerParameters
     {
