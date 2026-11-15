@@ -179,11 +179,6 @@ void _BrowserGalleryWidget::processPaging()
     ImGui::EndDisabled();
 }
 
-float _BrowserGalleryWidget::getSortingWidth() const
-{
-    return scale(SortingSwitcherWidth);
-}
-
 float _BrowserGalleryWidget::getPagerWidth() const
 {
     auto const& style = ImGui::GetStyle();

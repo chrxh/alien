@@ -2,19 +2,20 @@
 
 #include "Definitions.h"
 
-// The row above the resources of a workspace of this computer: its folder and, for the autosaves, the switch of the autosave
+// What a workspace of this computer shows above its resources: its folder and, for the autosaves, the switch of the autosave
 class _BrowserFolderBarWidget
 {
 public:
     static BrowserFolderBarWidget create(BrowserData const& data);
 
-    void process();
+    // The folder with its buttons, which takes the given width at most and returns the width it has taken
+    float processFolder(float maxWidth);
+    float getMinFolderWidth() const;
+
+    void processAutosave();
 
 private:
     _BrowserFolderBarWidget(BrowserData const& data);
-
-    void processFolder(float fieldWidth);
-    void processAutosave(bool showInfo, bool showInterval);
 
     BrowserData _data;
 };

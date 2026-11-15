@@ -649,6 +649,13 @@ bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string&
     return result;
 }
 
+float AlienGui::CalcInputFilterWidth(InputFilterParameters const& parameters)
+{
+    auto const& style = ImGui::GetStyle();
+    auto width = std::min(parameters._width != 0.0f ? parameters._width : scaleInverse(ImGui::GetContentRegionAvail().x), MaxFilterWidth);
+    return scale(width - FilterClearButtonWidth) + style.ItemSpacing.x + ImGui::CalcTextSize(ICON_FA_TIMES).x + style.FramePadding.x * 2;
+}
+
 bool AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text)
 {
     static char buffer[1024 * 16];

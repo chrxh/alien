@@ -255,6 +255,7 @@ public:
         MEMBER(InputFilterParameters, std::string, hint, "Filter (case insensitive)");
     };
     static bool InputFilter(InputFilterParameters const& parameters, std::string& filter);
+    static float CalcInputFilterWidth(InputFilterParameters const& parameters);
 
     struct InputTextMultilineParameters
     {

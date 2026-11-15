@@ -61,6 +61,7 @@ namespace
 
     auto constexpr FilterWidth = 230.0f;
     auto constexpr MinFilterWidth = 100.0f;
+    auto constexpr HeaderSpacing = 20.0f;
 
     auto constexpr EmojiPopupScale = 0.66f;  // Relative to the resolution of the emoji images
     auto constexpr EmojiPopupWidth = 255.0f;
@@ -423,10 +424,10 @@ void BrowserWindow::processWorkspaceItem(WorkspaceType workspaceType, std::strin
 
 void BrowserWindow::processResourceView()
 {
-    if (isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType)) {
-        _folderBarWidget->process();
-    }
     processHeader();
+    if (_data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Autosave) {
+        _folderBarWidget->processAutosave();
+    }
 
     if (isLoginRequired()) {
         auto viewPos = ImGui::GetCursorScreenPos();
@@ -452,22 +453,27 @@ void BrowserWindow::processResourceView()
 
 void BrowserWindow::processHeader()
 {
-    auto sortingWidth = _galleryView ? _galleryWidget->getSortingWidth() + ImGui::GetStyle().ItemSpacing.x : 0.0f;
+    auto isLocal = isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType);
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto startPosX = ImGui::GetCursorPosX();
 
-    auto filterWidth = std::clamp(scaleInverse(ImGui::GetContentRegionAvail().x - sortingWidth), MinFilterWidth, FilterWidth);
-    auto filter = _data->getFilter();
-    if (AlienGui::InputFilter(AlienGui::InputFilterParameters().width(filterWidth), filter)) {
-        _galleryWidget->resetPage();
-        _data->setFilter(filter);
+    // The filter ends at the right border in every workspace. A workspace of this computer shows its folder in front of it, for which the
+    // filter gives way before the folder does.
+    auto minFolderWidth = isLocal ? _folderBarWidget->getMinFolderWidth() + scale(HeaderSpacing) : 0.0f;
+    auto filterParameters = AlienGui::InputFilterParameters().width(std::clamp(scaleInverse(availableWidth - minFolderWidth), MinFilterWidth, FilterWidth));
+    auto filterWidth = AlienGui::CalcInputFilterWidth(filterParameters);
+    auto filterPosX = startPosX + std::max(0.0f, availableWidth - filterWidth);
+    if (isLocal) {
+        auto folderWidth = _folderBarWidget->processFolder(availableWidth - filterWidth - scale(HeaderSpacing));
+        ImGui::SameLine(std::max(filterPosX, startPosX + folderWidth + scale(HeaderSpacing)));
+    } else {
+        ImGui::SetCursorPosX(filterPosX);
     }
 
-    if (_galleryView) {
-        ImGui::SameLine();
-        auto offset = ImGui::GetContentRegionAvail().x - _galleryWidget->getSortingWidth();
-        if (offset > 0) {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-        }
-        _galleryWidget->processSorting();
+    auto filter = _data->getFilter();
+    if (AlienGui::InputFilter(filterParameters, filter)) {
+        _galleryWidget->resetPage();
+        _data->setFilter(filter);
     }
 }
 
@@ -476,6 +482,9 @@ void BrowserWindow::processFooter()
     if (!_galleryView) {
         return;
     }
+    _galleryWidget->processSorting();
+
+    ImGui::SameLine();
     auto availableWidth = ImGui::GetContentRegionAvail().x;
     auto pagerWidth = _galleryWidget->getPagerWidth();
     if (availableWidth > pagerWidth) {
@@ -557,9 +566,6 @@ void BrowserWindow::processStatusBar()
     statusItems.emplace_back(
         std::to_string(numLocalResources) + (resourceType == NetworkResourceType_Simulation ? " simulations in My simulations" : " genomes in My genomes"));
     statusItems.emplace_back(std::to_string(_data->getUserTOs().size()) + " simulators found");
-    if (controller.isAutosaveEnabled()) {
-        statusItems.emplace_back("Next autosave in " + StringHelper::format(controller.getDurationUntilNextAutosave()));
-    }
 
     if (!NetworkService::get().getLoggedInUserName()) {
         statusItems.emplace_back("In order to share simulations you need to log in.");

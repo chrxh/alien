@@ -35,7 +35,6 @@ public:
     void processPlaceholderTiles();
     void processPaging();
 
-    float getSortingWidth() const;
     float getPagerWidth() const;
     void resetPage();
 
