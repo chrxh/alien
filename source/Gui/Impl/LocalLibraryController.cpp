@@ -32,7 +32,6 @@ namespace
     auto constexpr SaveModeSettingsKey = "controllers.simulation library.save mode";
     auto constexpr NumberOfFilesSettingsKey = "controllers.simulation library.number of files";
     auto constexpr AutosaveFolderSettingsKey = "controllers.simulation library.autosave folder";
-    auto constexpr AutosaveMainFolderSettingsKey = "controllers.simulation library.autosave main folder";
 
     // Settings of the Autosave window of earlier versions
     auto constexpr EarlierAutosaveIntervalSettingsKey = "windows.autosave.interval";
@@ -120,9 +119,6 @@ void LocalLibraryController::init()
 
     auto libraryFolder = settings.getValue(LibraryFolderSettingsKey, std::string());
     _libraryFolder = service.normalize(libraryFolder.empty() ? getInitialLibraryFolder() : StringHelper::toPath(libraryFolder));
-    if (auto autosaveMainFolder = settings.getValue(AutosaveMainFolderSettingsKey, std::string()); !autosaveMainFolder.empty()) {
-        setAutosaveMainFolder(StringHelper::toPath(autosaveMainFolder));
-    }
     _autosaveInterval = std::max(1, settings.getValue(AutosaveIntervalSettingsKey, settings.getValue(EarlierAutosaveIntervalSettingsKey, _autosaveInterval)));
     auto saveMode = settings.getValue(SaveModeSettingsKey, settings.getValue(EarlierSaveModeSettingsKey, _saveMode));
     _saveMode = saveMode == SaveMode_Unlimited ? SaveMode_Unlimited : SaveMode_Limited;
@@ -142,7 +138,6 @@ void LocalLibraryController::shutdown()
     settings.setValue(SaveModeSettingsKey, _saveMode);
     settings.setValue(NumberOfFilesSettingsKey, _numberOfFiles);
     settings.setValue(AutosaveFolderSettingsKey, _autosaveFolderName);
-    settings.setValue(AutosaveMainFolderSettingsKey, _autosaveMainFolder.has_value() ? StringHelper::toUtf8(*_autosaveMainFolder) : std::string());
 }
 
 void LocalLibraryController::process()
@@ -155,17 +150,6 @@ void LocalLibraryController::process()
     if (_contentOutdated) {
         auto& service = LocalLibraryService::get();
         _content = service.loadContent(_libraryFolder);
-
-        // A folder of the autosaves outside the library adds its autosaves
-        if (_autosaveMainFolder.has_value() && !service.isInside(*_autosaveMainFolder, _libraryFolder)) {
-            auto autosaveContent = service.loadContent(*_autosaveMainFolder);
-            for (auto const& simulation : autosaveContent.simulations) {
-                if (simulation.kind != LibraryFileKind::Named && !service.isInside(simulation.path.parent_path(), _libraryFolder)) {
-                    _content.simulations.emplace_back(simulation);
-                }
-            }
-            _content.truncated = _content.truncated || autosaveContent.truncated;
-        }
 
         // A folder may have been renamed to another spelling of its name, which the path of the running simulation follows
         if (auto const& localFile = NewSimulationService::get().getLocalFile()) {
@@ -190,39 +174,11 @@ void LocalLibraryController::setLibraryFolder(std::filesystem::path const& value
     if (libraryFolder == _libraryFolder) {
         return;
     }
-
-    // The autosaves stay in their folder
-    auto autosaveMainFolder = getAutosaveMainFolder();
     _libraryFolder = libraryFolder;
-    setAutosaveMainFolder(autosaveMainFolder);
 
     // The name of the running simulation belongs to the previous library
     NewSimulationService::get().setNameInLibrary(std::nullopt);
     _contentOutdated = true;
-}
-
-std::filesystem::path const& LocalLibraryController::getAutosaveMainFolder() const
-{
-    return _autosaveMainFolder.has_value() ? *_autosaveMainFolder : _libraryFolder;
-}
-
-void LocalLibraryController::setAutosaveMainFolder(std::filesystem::path const& value)
-{
-    if (value.empty()) {
-        return;
-    }
-    auto autosaveMainFolder = LocalLibraryService::get().normalize(value);
-    _autosaveMainFolder = autosaveMainFolder != _libraryFolder ? std::make_optional(autosaveMainFolder) : std::nullopt;
-    _contentOutdated = true;
-}
-
-std::filesystem::path const& LocalLibraryController::getMainFolder(std::filesystem::path const& simulationPath) const
-{
-    auto& service = LocalLibraryService::get();
-    auto folder = simulationPath.parent_path();
-    auto isInAutosaveMainFolder =
-        _autosaveMainFolder.has_value() && !service.isInside(folder, _libraryFolder) && service.isInside(folder, *_autosaveMainFolder);
-    return isInAutosaveMainFolder ? *_autosaveMainFolder : _libraryFolder;
 }
 
 LocalLibraryContent const& LocalLibraryController::getContent() const
@@ -314,8 +270,7 @@ std::optional<std::filesystem::path> LocalLibraryController::resolveAutosaveFold
     if (!normalizedFolderName.has_value()) {
         return std::nullopt;
     }
-    auto const& mainFolder = getAutosaveMainFolder();
-    return normalizedFolderName->empty() ? mainFolder : mainFolder / StringHelper::toPath(*normalizedFolderName);
+    return normalizedFolderName->empty() ? _libraryFolder : _libraryFolder / StringHelper::toPath(*normalizedFolderName);
 }
 
 std::chrono::seconds LocalLibraryController::getDurationUntilNextAutosave() const
@@ -345,7 +300,6 @@ void LocalLibraryController::onSave(std::string const& name, std::optional<std::
 
 void LocalLibraryController::onReplace(std::filesystem::path const& simulationPath, std::string const& jpg)
 {
-    // An autosave of a folder outside the library is replaced as well, but has no name in the library
     auto& service = LocalLibraryService::get();
     auto name = service.getSimulationName(_libraryFolder, simulationPath);
     scheduleSave(PendingSave{
@@ -420,7 +374,7 @@ LocalLibraryController::onEdit(std::filesystem::path const& simulationPath, std:
         return std::string(MissingFileMessage);
     }
     auto newSimulationPath = simulationPath;
-    if (service.getSimulationName(getMainFolder(simulationPath), simulationPath) != newName) {
+    if (service.getSimulationName(_libraryFolder, simulationPath) != newName) {
         if (auto errorMessage = rename(simulationPath, newName, newSimulationPath)) {
             return errorMessage;
         }
@@ -466,7 +420,7 @@ std::optional<std::string> LocalLibraryController::onDelete(std::vector<std::fil
         if (auto const& localFile = NewSimulationService::get().getLocalFile(); localFile.has_value() && *localFile == service.normalize(simulationPath)) {
             NewSimulationService::get().setLocalFile(std::nullopt);
         }
-        service.deleteSimulation(getMainFolder(simulationPath), simulationPath);
+        service.deleteSimulation(_libraryFolder, simulationPath);
     }
     _contentOutdated = true;
     return std::nullopt;
@@ -645,8 +599,7 @@ void LocalLibraryController::onSaveFinished(PendingSave const& pendingSave, Save
 
 std::filesystem::path LocalLibraryController::getAutosaveFolder() const
 {
-    auto const& mainFolder = getAutosaveMainFolder();
-    return _autosaveFolderName.empty() ? mainFolder : (mainFolder / StringHelper::toPath(_autosaveFolderName)).make_preferred();
+    return _autosaveFolderName.empty() ? _libraryFolder : (_libraryFolder / StringHelper::toPath(_autosaveFolderName)).make_preferred();
 }
 
 std::optional<std::string>
@@ -654,20 +607,16 @@ LocalLibraryController::rename(std::filesystem::path const& simulationPath, std:
 {
     auto& service = LocalLibraryService::get();
     auto isGenome = service.isGenomePath(simulationPath);
-
-    // Only the autosaves of a folder outside the library are listed, so a simulation there that gets a name of its own moves into the library
-    auto separatorPos = newName.rfind('/');
-    auto newNameWithoutFolders = separatorPos != std::string::npos ? newName.substr(separatorPos + 1) : newName;
-    auto const& mainFolder = service.isAutosaveName(newNameWithoutFolders) ? getMainFolder(simulationPath) : _libraryFolder;
     auto name = service.getSimulationName(_libraryFolder, simulationPath);
     auto const& localFile = NewSimulationService::get().getLocalFile();
     auto isLocalFile = localFile.has_value() && *localFile == service.normalize(simulationPath);
     auto isNameTaken =
-        isGenome ? service.isGenomeNameTaken(mainFolder, newName, simulationPath) : service.isSimulationNameTaken(mainFolder, newName, simulationPath);
+        isGenome ? service.isGenomeNameTaken(_libraryFolder, newName, simulationPath) : service.isSimulationNameTaken(_libraryFolder, newName, simulationPath);
     if (isNameTaken) {
         return std::string(TakenNameMessage);
     }
-    auto movedSimulationPath = isGenome ? service.moveGenome(mainFolder, simulationPath, newName) : service.moveSimulation(mainFolder, simulationPath, newName);
+    auto movedSimulationPath =
+        isGenome ? service.moveGenome(_libraryFolder, simulationPath, newName) : service.moveSimulation(_libraryFolder, simulationPath, newName);
     if (!movedSimulationPath.has_value()) {
         return std::string(RenamingFailedMessage);
     }

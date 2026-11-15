@@ -41,13 +41,6 @@ public:
     std::filesystem::path const& getLibraryFolder() const;
     void setLibraryFolder(std::filesystem::path const& value);
 
-    // The autosaves lie in the library folder until one of the two folders is changed
-    std::filesystem::path const& getAutosaveMainFolder() const;
-    void setAutosaveMainFolder(std::filesystem::path const& value);
-
-    // The library folder or the folder of the autosaves, which the name of the simulation is relative to
-    std::filesystem::path const& getMainFolder(std::filesystem::path const& simulationPath) const;
-
     LocalLibraryContent const& getContent() const;
     int getRevision() const;  // Changes with every change of the content
     void refresh();           // Reads the content again, for instance after other programs may have changed it
@@ -125,7 +118,6 @@ private:
     bool isTransferring(std::filesystem::path const& simulationPath) const;
 
     std::filesystem::path _libraryFolder;
-    std::optional<std::filesystem::path> _autosaveMainFolder;
     LocalLibraryContent _content;
     bool _contentOutdated = true;
     int _revision = 0;

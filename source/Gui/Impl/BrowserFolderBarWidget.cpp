@@ -15,7 +15,6 @@
 
 #include "AlienGui.h"
 #include "AutosaveDialog.h"
-#include "BrowserData.h"
 #include "GenericFileDialog.h"
 #include "LocalLibraryController.h"
 #include "StyleService.h"
@@ -81,21 +80,16 @@ namespace
     }
 }
 
-BrowserFolderBarWidget _BrowserFolderBarWidget::create(BrowserData const& data)
+BrowserFolderBarWidget _BrowserFolderBarWidget::create()
 {
-    return BrowserFolderBarWidget(new _BrowserFolderBarWidget(data));
+    return BrowserFolderBarWidget(new _BrowserFolderBarWidget());
 }
-
-_BrowserFolderBarWidget::_BrowserFolderBarWidget(BrowserData const& data)
-    : _data(data)
-{}
 
 float _BrowserFolderBarWidget::processFolder(float maxWidth)
 {
     auto& controller = LocalLibraryController::get();
     auto const& style = ImGui::GetStyle();
-    auto isAutosave = _data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Autosave;
-    auto folder = isAutosave ? controller.getAutosaveMainFolder() : controller.getLibraryFolder();
+    auto folder = controller.getLibraryFolder();
     auto folderText = StringHelper::toUtf8(folder);
     auto controlsWidth = calcFolderControlsWidth();
     auto fieldWidth = std::clamp(maxWidth - controlsWidth, scale(MinFolderFieldWidth), scale(FolderFieldWidth));
@@ -117,24 +111,18 @@ float _BrowserFolderBarWidget::processFolder(float maxWidth)
     drawList->PopClipRect();
 
     // The autosaves in progress keep their folder
-    auto isFolderFixed = isAutosave && controller.isAutosaveEnabled();
+    auto isFolderFixed = controller.isAutosaveEnabled();
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     ImGui::BeginDisabled(isFolderFixed);
     if (AlienGui::Button(ICON_FA_FOLDER_OPEN, FolderButtonWidth)) {
-        GenericFileDialog::get().showOpenFileDialog("Select directory", "", folderText, [isAutosave](std::filesystem::path const& path) {
-            if (isAutosave) {
-                LocalLibraryController::get().setAutosaveMainFolder(path);
-            } else {
-                LocalLibraryController::get().setLibraryFolder(path);
-            }
-        });
+        GenericFileDialog::get().showOpenFileDialog(
+            "Select directory", "", folderText, [](std::filesystem::path const& path) { LocalLibraryController::get().setLibraryFolder(path); });
     }
     ImGui::EndDisabled();
     AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-        isFolderFixed    ? "Deactivate autosave to choose another folder."
-            : isAutosave ? "Choose another folder for the autosaves. The files stay where they are."
-                         : "Choose another folder for My simulations and My genomes. The files stay where they are."));
+        isFolderFixed ? "Deactivate autosave in Autosaves to choose another folder."
+                      : "Choose another folder for My simulations, Autosaves and My genomes. The files stay where they are."));
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();

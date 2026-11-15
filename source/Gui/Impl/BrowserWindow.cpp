@@ -15,7 +15,6 @@
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
 
-#include <Persister/Interface/LocalLibraryService.h>
 #include <Persister/Interface/PersisterFacade.h>
 
 #include "AlienGui.h"
@@ -111,7 +110,7 @@ void BrowserWindow::initIntern()
             .remove = [this](NetworkResourceTreeTO const& treeTO) { onDeleteResource(treeTO); },
             .share = [this](NetworkResourceRawTO const& rawTO) { onShareSimulation(rawTO); },
             .replace = [](NetworkResourceRawTO const& rawTO) { SaveSimulationDialog::get().openForReplacing(rawTO); }});
-    _folderBarWidget = _BrowserFolderBarWidget::create(_data);
+    _folderBarWidget = _BrowserFolderBarWidget::create();
     _userListWidget = _BrowserUserListWidget::create(_data);
     _loginHintWidget = _BrowserLoginHintWidget::create();
     _loginBannerWidget = _BrowserLoginBannerWidget::create();
@@ -704,20 +703,6 @@ namespace
         }
         return result;
     }
-
-    // The paths are compared as they are written, which is enough for the files that the library has found in its folders
-    bool isInFolder(std::filesystem::path const& path, std::filesystem::path const& folder)
-    {
-        auto relativePath = path.lexically_relative(folder);
-        return !relativePath.empty() && *relativePath.begin() != "..";
-    }
-
-    // The name of an autosave in a folder outside the library is relative to that folder
-    bool hasNameInLibrary(NetworkResourceRawTO const& localRawTO)
-    {
-        auto const& controller = LocalLibraryController::get();
-        return controller.getMainFolder(StringHelper::toPath(localRawTO->id)) == controller.getLibraryFolder();
-    }
 }
 
 void BrowserWindow::updateLocalWorkspaces()
@@ -727,20 +712,15 @@ void BrowserWindow::updateLocalWorkspaces()
         return;
     }
     _libraryRevision = controller.getRevision();
-    auto libraryFolder = LocalLibraryService::get().normalize(controller.getLibraryFolder());
 
+    // My simulations shows every simulation of its folder like one saved by hand, the autosaves included
     std::vector<NetworkResourceRawTO> simulations;
     std::vector<NetworkResourceRawTO> autosaves;
     for (auto const& simulation : controller.getContent().simulations) {
-        auto isAutosave = simulation.kind != LibraryFileKind::Named;
-        if (isAutosave) {
+        if (simulation.kind != LibraryFileKind::Named) {
             autosaves.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation, WorkspaceType_Autosave));
         }
-
-        // My simulations shows every simulation of its folder like one saved by hand, the autosaves of another folder are not part of it
-        if (!isAutosave || isInFolder(simulation.path, libraryFolder)) {
-            simulations.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation, WorkspaceType_Local));
-        }
+        simulations.emplace_back(createLocalRawTO(simulation, NetworkResourceType_Simulation, WorkspaceType_Local));
     }
     std::vector<NetworkResourceRawTO> genomes;
     for (auto const& genome : controller.getContent().genomes) {
@@ -804,8 +784,7 @@ void BrowserWindow::onSave()
     SaveSimulationDialog::get().open(workspaceId.resourceType, std::nullopt, getNameSuggestedBySelection(), suggestedTarget);
 }
 
-// What is selected suggests its name, also an autosave, and a selected folder suggests itself. An autosave of a folder outside the library
-// suggests nothing, since its name would address another file.
+// What is selected suggests its name, also an autosave, and a selected folder suggests itself
 std::string BrowserWindow::getNameSuggestedBySelection() const
 {
     auto selectedTreeTO = _data->getSelectedTreeTO();
@@ -813,8 +792,7 @@ std::string BrowserWindow::getNameSuggestedBySelection() const
         return {};
     }
     if (selectedTreeTO->isLeaf()) {
-        auto const& rawTO = selectedTreeTO->getLeaf().rawTO;
-        return !isLocalWorkspace(rawTO->workspaceType) || hasNameInLibrary(rawTO) ? rawTO->resourceName : std::string();
+        return selectedTreeTO->getLeaf().rawTO->resourceName;
     }
     return selectedTreeTO->folderNames.empty() ? std::string() : NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
 }

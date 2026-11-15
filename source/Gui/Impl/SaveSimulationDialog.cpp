@@ -669,8 +669,7 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
     if (_mode == Mode::Replacing) {
         if (_target == SaveTarget::ThisComputer) {
 
-            // What is replaced keeps its name and its description. A simulation is replaced at its place, which may lie in the folder of the
-            // autosaves outside the library.
+            // What is replaced keeps its name and its description
             if (_resourceType == NetworkResourceType_Simulation) {
                 LocalLibraryController::get().onReplace(StringHelper::toPath(_replacedResource->id), _preview.getJpg());
             } else if (auto errorMessage = saveOnThisComputer(_replacedResource->resourceName, std::nullopt)) {
