@@ -26,6 +26,7 @@ public:
 
 private:
     void processProgressAnimation();
+    void advanceHelixRotation();
     void processMessage();
     void drawMessage(std::string const& message, float alpha);
 
@@ -36,7 +37,12 @@ private:
     std::optional<std::string> _status;
     int _counter = 0;
 
-    std::optional<std::chrono::steady_clock::time_point> _progressBarRefTimepoint;
+    float _helixPhase = 0.0f;
+    float _helixStartSpeedExponent = 0.0f;
+    float _helixTargetSpeedExponent = 0.0f;
+    float _helixSpeedChangeTime = 0.0f;
+    float _helixSpeedChangeDuration = 0.0f;
+
     std::optional<std::chrono::steady_clock::time_point> _messageStartTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _ticksLaterTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _busyTimepoint;

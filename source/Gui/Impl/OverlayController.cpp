@@ -11,6 +11,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/Math.h>
+#include <Base/NumberGenerator.h>
 
 #include <Persister/Interface/PersisterFacade.h>
 #include "AlienGui.h"
@@ -36,7 +37,10 @@ namespace
     auto constexpr HelixRadius = 21.0f;
     auto constexpr HelixPerspectiveFactor = 3.5f;
     auto constexpr HelixTilt = 0.32f;
-    auto constexpr HelixRadiansPerMillisecond = 1.0f / 620.0f;
+    auto constexpr HelixRadiansPerSecond = 1.6f;
+    auto constexpr HelixMaxSpeedExponent = 1.0f;
+    auto constexpr HelixMinSpeedChangeSeconds = 1.5f;
+    auto constexpr HelixSpeedChangeSecondsPerDoubling = 2.5f;
 
     struct ScrimRing
     {
@@ -156,12 +160,11 @@ namespace
         }
     }
 
-    void drawHelix(ImDrawList* drawList, ImVec2 const& center, float animationTime, float alpha)
+    void drawHelix(ImDrawList* drawList, ImVec2 const& center, float phase, float alpha)
     {
         auto width = scale(HelixWidth);
         auto radius = scale(HelixRadius);
         auto perspectiveDistance = sqrtf(width * width / 4 + radius * radius) * HelixPerspectiveFactor;
-        auto phase = animationTime * HelixRadiansPerMillisecond;
 
         auto project = [&](float x, float y, float z) {
             auto tiltedX = x * cosf(HelixTilt) + z * sinf(HelixTilt);
@@ -222,19 +225,16 @@ void OverlayController::processProgressAnimation()
     auto millisecSinceBusy = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_busyTimepoint).count();
 
     if (millisecSinceBusy < FadeoutProgressAnimationDuration) {
-        if (!_progressBarRefTimepoint.has_value()) {
-            _progressBarRefTimepoint = std::chrono::steady_clock::now();
-        }
-        auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_progressBarRefTimepoint).count());
+        advanceHelixRotation();
         auto alpha = 1.0f - toFloat(millisecSinceBusy) / FadeoutProgressAnimationDuration;
 
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        ImDrawList* drawList = ImGui::GetForegroundDrawList();
 
         auto viewSize = toRealVector2D(Viewport::get().getViewSize());
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(66.0f)};
 
         drawScrim(drawList, {center.x, center.y + scale(8.0f)}, alpha);
-        drawHelix(drawList, center, duration, alpha);
+        drawHelix(drawList, center, _helixPhase, alpha);
 
         auto font = StyleService::get().getReefMediumFont();
         auto fontSize = scale(16.0f);
@@ -242,9 +242,25 @@ void OverlayController::processProgressAnimation()
         auto textWidth = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text).x;
         drawList->AddText(font, fontSize, {center.x - textWidth / 2, center.y + scale(32.0f)}, ImColor::HSV(0, 0, 1, 0.82f * alpha), text);
     } else {
-        _progressBarRefTimepoint.reset();
         _busyTimepoint.reset();
     }
+}
+
+void OverlayController::advanceHelixRotation()
+{
+    auto deltaTime = ImGui::GetIO().DeltaTime;
+    _helixSpeedChangeTime += deltaTime;
+    if (_helixSpeedChangeTime >= _helixSpeedChangeDuration) {
+        _helixStartSpeedExponent = _helixTargetSpeedExponent;
+        _helixTargetSpeedExponent = NumberGenerator::get().getRandomFloat(-HelixMaxSpeedExponent, HelixMaxSpeedExponent);
+        _helixSpeedChangeDuration =
+            HelixMinSpeedChangeSeconds + std::abs(_helixTargetSpeedExponent - _helixStartSpeedExponent) * HelixSpeedChangeSecondsPerDoubling;
+        _helixSpeedChangeTime = 0.0f;
+    }
+    auto progress = _helixSpeedChangeTime / _helixSpeedChangeDuration;
+    auto easedProgress = progress * progress * (3.0f - 2.0f * progress);
+    auto speedExponent = std::lerp(_helixStartSpeedExponent, _helixTargetSpeedExponent, easedProgress);
+    _helixPhase = std::fmod(_helixPhase + HelixRadiansPerSecond * std::exp2(speedExponent) * deltaTime, 2.0f * Const::Pi);
 }
 
 void OverlayController::processMessage()
