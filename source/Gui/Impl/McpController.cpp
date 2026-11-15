@@ -303,12 +303,12 @@ McpToolResult McpController::executeOnMainThread(std::function<void(McpToolCompl
 
 void McpController::addCommandLogEntry(std::string const& toolName, boost::json::object const& arguments, McpToolResult const& result)
 {
-    auto command = arguments.empty() ? toolName : toolName + " " + boost::json::serialize(arguments);
     log(Priority::Important, result.isError ? std::format("mcp: {} -> error: {}", toolName, result.text) : "mcp: " + toolName);
 
     _commandLog.emplace_back(McpCommandLogEntry{
         .time = std::chrono::system_clock::now(),
-        .command = StringHelper::truncate(command, MaxLogTextLength, MaxLogTextLines),
+        .toolName = toolName,
+        .arguments = arguments.empty() ? std::string() : StringHelper::truncate(boost::json::serialize(arguments), MaxLogTextLength, MaxLogTextLines),
         .result = StringHelper::truncate(result.text, MaxLogTextLength, MaxLogTextLines),
         .isError = result.isError});
     if (_commandLog.size() > MaxCommandLogEntries) {

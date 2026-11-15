@@ -21,7 +21,8 @@
 struct McpCommandLogEntry
 {
     std::chrono::system_clock::time_point time;
-    std::string command;
+    std::string toolName;
+    std::string arguments;
     std::string result;
     bool isError = false;
 };

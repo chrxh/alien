@@ -11,8 +11,6 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/StringHelper.h>
-
 #include "AlienGui.h"
 #include "McpController.h"
 #include "McpSettingsDialog.h"
@@ -118,16 +116,18 @@ void McpWindow::processConnectionGuide()
 
     auto url = controller.getServerUrl();
     auto copyButtonWidth = ImGui::CalcTextSize(CopyButtonText).x + style.FramePadding.x * 2;
+    auto frameHeight = ImGui::GetFrameHeight();
     ImGui::SameLine();
     ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
     ImGui::PushStyleColor(ImGuiCol_FrameBg, Const::BackgroundColor.Value);
     ImGui::PushStyleColor(ImGuiCol_Border, Const::LineColor.Value);
     ImGui::PushStyleColor(ImGuiCol_Text, Const::AccentColor.Value);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {style.FramePadding.x, (frameHeight - ImGui::GetFontSize()) / 2});
     auto urlWidth = ImGui::CalcTextSize(url.c_str()).x + style.FramePadding.x * 2;
     ImGui::SetNextItemWidth(std::min(urlWidth, ImGui::GetContentRegionAvail().x - copyButtonWidth - style.ItemSpacing.x));
     ImGui::InputText("##url", url.data(), url.size() + 1, ImGuiInputTextFlags_ReadOnly);
-    ImGui::PopStyleVar();
+    ImGui::PopStyleVar(2);
     ImGui::PopStyleColor(3);
     ImGui::PopFont();
 
@@ -157,6 +157,36 @@ void McpWindow::processStepNumber(int number)
     ImGui::SameLine(0, scale(StepNumberSpacing));
 }
 
+namespace
+{
+    void processCommand(McpCommandLogEntry const& entry)
+    {
+        auto textAscent = ImGui::GetFont()->Ascent;
+        auto monospaceFont = StyleService::get().getMonospaceMediumFont();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + textAscent - monospaceFont->Ascent);
+        ImGui::PushFont(monospaceFont);
+
+        auto availableWidth = ImGui::GetContentRegionAvail().x;
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::AccentColor.Value);
+        AlienGui::Text(AlienGui::TextParameters().text(entry.toolName).truncate(true));
+        ImGui::PopStyleColor();
+
+        if (!entry.arguments.empty()) {
+            auto spaceWidth = ImGui::CalcTextSize(" ").x;
+            auto argumentsWidth = availableWidth - ImGui::CalcTextSize(entry.toolName.c_str()).x - spaceWidth;
+            if (argumentsWidth >= ImGui::CalcTextSize("...").x) {
+                ImGui::SameLine(0, spaceWidth);
+                ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDimColor.Value);
+                AlienGui::Text(AlienGui::TextParameters().text(entry.arguments).truncate(true));
+                ImGui::PopStyleColor();
+            } else {
+                AlienGui::Tooltip(AlienGui::TooltipParameters().text(entry.arguments).delay(false));
+            }
+        }
+        ImGui::PopFont();
+    }
+}
+
 void McpWindow::processCommandLog()
 {
     auto const& commandLog = McpController::get().getCommandLog();
@@ -183,15 +213,10 @@ void McpWindow::processCommandLog()
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                AlienGui::Text(StringHelper::format(entry.time));
+                AlienGui::Timestamp(entry.time);
 
                 ImGui::TableNextColumn();
-                ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
-                ImGui::PushStyleColor(ImGuiCol_Text, Const::AccentColor.Value);
-                AlienGui::Text(AlienGui::TextParameters().text(entry.command).truncate(true));
-                ImGui::PopStyleColor();
-                ImGui::PopFont();
-                AlienGui::Tooltip(AlienGui::TooltipParameters().text(entry.command));
+                processCommand(entry);
 
                 ImGui::TableNextColumn();
                 if (entry.isError) {

@@ -395,6 +395,7 @@ public:
     };
     static void Text(TextParameters const& parameters);
     static void Text(std::string const& text);
+    static void Timestamp(std::chrono::system_clock::time_point const& timePoint);
 
     struct SmallIconParameters
     {

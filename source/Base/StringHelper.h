@@ -18,6 +18,8 @@ public:
     static std::string format(std::chrono::seconds duration);
     static std::string format(std::chrono::milliseconds duration);
     static std::string format(std::chrono::system_clock::time_point const& timePoint);
+    static std::string formatDate(std::chrono::system_clock::time_point const& timePoint);
+    static std::string formatTimeOfDay(std::chrono::system_clock::time_point const& timePoint);
     static std::string formatUtc(std::chrono::system_clock::time_point const& timePoint);  // e.g. "2026-10-07 18:19:05", like the server timestamps
     static std::string formatInHex(uint64_t value);
     static std::string formatHexColor(FloatColorRGB const& color);
