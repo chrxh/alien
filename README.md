@@ -185,10 +185,10 @@ The HIP path builds the same sources for AMD GPUs in place of CUDA. On Windows: 
 
 On Linux:
 ```
-cmake --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES=gfx1100 -DCMAKE_PREFIX_PATH=/opt/rocm
+cmake --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES="gfx10-3-generic;gfx11-generic;gfx12-generic" -DCMAKE_PREFIX_PATH=/opt/rocm
 cmake --build --preset ninja-hip-release
 ```
-`CMAKE_HIP_ARCHITECTURES` selects the target architecture (`gfx1100` for RDNA3, `gfx90a` for CDNA2 / MI200). If omitted, it is auto-detected from the GPUs of the host. `CMAKE_PREFIX_PATH` lets `find_package(hip)` locate the ROCm installation when CMake uses the vcpkg toolchain. Adjust it if ROCm is installed elsewhere.
+`CMAKE_HIP_ARCHITECTURES` lists the target architectures and has to cover every AMD GPU that `rocminfo` shows, including integrated GPUs that ALIEN does not use. The list above covers RDNA2, RDNA3 and RDNA4 like the Windows build. Other GPUs need their own entry, for example `gfx90a` for CDNA2 / MI200 or `gfx90c` for the integrated Vega GPU of many Ryzen 4000 and 5000 processors. If the option is omitted, the architectures of the GPUs in the computer are detected, which shortens the build. `CMAKE_PREFIX_PATH` lets `find_package(hip)` locate the ROCm installation when CMake uses the vcpkg toolchain. Adjust it if ROCm is installed elsewhere.
 
 **AMD GPUs (SCALE)**
 
@@ -197,6 +197,7 @@ Alternatively, the unchanged CUDA sources can be compiled for AMD GPUs with [SCA
 cmake --preset ninja -DCMAKE_CUDA_COMPILER=/opt/scale/bin/nvcc -DCMAKE_CUDA_ARCHITECTURES=gfx1100
 cmake --build --preset ninja-release
 ```
+Replace `gfx1100` with the architecture of your GPU, which `rocminfo` shows.
 
 ### Command-line interface
 
