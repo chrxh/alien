@@ -211,8 +211,6 @@ namespace Const
     extern ImColor BrowserHiddenGpuBarColor;
     extern ImColor BrowserLoginHintFrameColor;
 
-    extern ImColor BrowserOnlineSymbolColor;
-    extern ImColor BrowserLastDayOnlineSymbolColor;
     extern ImColor BrowserActiveSimulatorsColor;
     extern ImColor BrowserLastDaySimulatorsColor;
 

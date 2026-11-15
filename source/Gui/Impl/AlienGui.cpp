@@ -2793,6 +2793,9 @@ namespace
 
     float calcTabBadgeIconWidth(AlienGui::TabBadgeParameters const& badge)
     {
+        if (badge._markerRadius.has_value()) {
+            return scale(*badge._markerRadius) * 2 + ImGui::GetStyle().ItemInnerSpacing.x;
+        }
         if (badge._icon.empty()) {
             return 0.0f;
         }
@@ -2813,15 +2816,18 @@ namespace
     {
         for (auto const& badge : parameters._badges) {
             posX += calcTabBadgeSpacing(parameters);
-            if (!badge._icon.empty()) {
-                auto iconColor = badge._iconColor.value_or(badge._color);
+            auto iconColor = badge._iconColor.value_or(badge._color);
+            if (badge._markerRadius.has_value()) {
+                auto radius = scale(*badge._markerRadius);
+                drawList->AddCircleFilled({posX + radius, textPosY + ImGui::GetTextLineHeight() / 2}, radius, iconColor);
+            } else if (!badge._icon.empty()) {
                 if (badge._smallIcon) {
                     AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(badge._icon).pos({posX, textPosY}).color(iconColor));
                 } else {
                     drawList->AddText(ImVec2(posX, textPosY), iconColor, badge._icon.c_str());
                 }
-                posX += calcTabBadgeIconWidth(badge);
             }
+            posX += calcTabBadgeIconWidth(badge);
             drawList->AddText(ImVec2(posX, textPosY), badge._color, badge._text.c_str());
             posX += ImGui::CalcTextSize(badge._text.c_str()).x;
         }

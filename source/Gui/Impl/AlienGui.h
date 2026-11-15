@@ -582,6 +582,7 @@ public:
         MEMBER(TabBadgeParameters, std::string, icon, std::string());
         MEMBER(TabBadgeParameters, std::optional<ImColor>, iconColor, std::nullopt);
         MEMBER(TabBadgeParameters, bool, smallIcon, true);
+        MEMBER(TabBadgeParameters, std::optional<float>, markerRadius, std::nullopt);  // Draws a filled circle in front of the text instead of the icon
     };
     struct TabItemParameters
     {

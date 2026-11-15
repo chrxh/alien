@@ -1,7 +1,6 @@
 #include "BrowserUserListWidget.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <functional>
 #include <optional>
@@ -34,6 +33,7 @@ namespace
     auto constexpr HiddenGpuBarOffsetY = 4.0f;
     auto constexpr HiddenGpuBarHeight = 8.0f;
     auto constexpr SimulatorCountBadgeSpacing = 16.0f;
+    auto constexpr OnlineMarkerRadius = 4.0f;
 }
 
 BrowserUserListWidget _BrowserUserListWidget::create(BrowserData const& data)
@@ -60,19 +60,18 @@ namespace
         return gpu;
     }
 
-    void drawOnlineSymbol()
+    void drawOnlineMarker(ImColor const& color)
     {
-        auto counter = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        counter = (((counter % 2000) + 2000) % 2000);
-        auto color = ImColor::HSV(0.0f, counter < 1000 ? toFloat(counter) / 1000.0f : 2.0f - toFloat(counter) / 1000.0f, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
-        ImGui::Text(ICON_FA_GENDERLESS);
-        ImGui::PopStyleColor();
+        auto radius = scale(OnlineMarkerRadius);
+        auto pos = ImGui::GetCursorScreenPos();
+        auto lineHeight = ImGui::GetTextLineHeight();
+        ImGui::GetWindowDrawList()->AddCircleFilled({pos.x + radius, pos.y + lineHeight / 2}, radius, color);
+        ImGui::Dummy({radius * 2, lineHeight});
     }
 
-    AlienGui::TabBadgeParameters getSimulatorCountBadge(std::string const& text, ImColor const& color, ImColor const& symbolColor)
+    AlienGui::TabBadgeParameters getSimulatorCountBadge(std::string const& text, ImColor const& color)
     {
-        return AlienGui::TabBadgeParameters().text(text).color(color).icon(ICON_FA_GENDERLESS).iconColor(symbolColor).smallIcon(false);
+        return AlienGui::TabBadgeParameters().text(text).color(color).markerRadius(OnlineMarkerRadius);
     }
 
     AlienGui::TabItemParameters getSimulatorsTabParameters(std::optional<ActiveSimulatorCountsTO> const& counts)
@@ -81,20 +80,11 @@ namespace
         if (!counts) {
             return result;
         }
-        std::vector badges{
-            getSimulatorCountBadge(std::to_string(counts->numActive) + " active", Const::BrowserActiveSimulatorsColor, Const::BrowserOnlineSymbolColor)};
+        std::vector badges{getSimulatorCountBadge(std::to_string(counts->numActive) + " active", Const::BrowserActiveSimulatorsColor)};
         if (counts->numLastDay > 0) {
-            badges.emplace_back(getSimulatorCountBadge(
-                std::to_string(counts->numLastDay) + " last day", Const::BrowserLastDaySimulatorsColor, Const::BrowserLastDayOnlineSymbolColor));
+            badges.emplace_back(getSimulatorCountBadge(std::to_string(counts->numLastDay) + " last day", Const::BrowserLastDaySimulatorsColor));
         }
         return result.badges(badges).badgeSpacing(SimulatorCountBadgeSpacing).tooltip(Const::BrowserSimulatorCountsTooltip);
-    }
-
-    void drawLastDayOnlineSymbol()
-    {
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserLastDayOnlineSymbolColor.Value);
-        ImGui::Text(ICON_FA_GENDERLESS);
-        ImGui::PopStyleColor();
     }
 
     void drawGpuHeaderHiddenIcon()
@@ -269,10 +259,10 @@ void _BrowserUserListWidget::process()
                 auto isOwnRow = isLoggedIn && *NetworkService::get().getLoggedInUserName() == user.userName;
 
                 if (user.online) {
-                    drawOnlineSymbol();
+                    drawOnlineMarker(Const::BrowserActiveSimulatorsColor);
                     ImGui::SameLine();
                 } else if (user.lastDayOnline) {
-                    drawLastDayOnlineSymbol();
+                    drawOnlineMarker(Const::BrowserLastDaySimulatorsColor);
                     ImGui::SameLine();
                 }
                 AlienGui::Text(AlienGui::TextParameters().text(user.userName).style(getTextStyle(isOwnRow)).truncate(true));
