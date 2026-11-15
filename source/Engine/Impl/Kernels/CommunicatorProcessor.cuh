@@ -34,9 +34,6 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).object);
-
-        // Thread 0 must not overwrite the shared data of this cell before every thread has read it, otherwise warps run out of step
-        __syncthreads();
     }
 }
 
@@ -48,15 +45,16 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
     }
     __syncthreads();
 
-    if (!shouldProcess) {
-        return;
+    if (shouldProcess) {
+        auto const& mode = object->typeData.cell.cellTypeData.communicator.mode;
+        if (mode == CommunicatorMode_Sender) {
+            processSender(data, statistics, object);
+        }
+        // Receiver mode: signals are set by senders, no additional processing needed
     }
 
-    auto const& mode = object->typeData.cell.cellTypeData.communicator.mode;
-    if (mode == CommunicatorMode_Sender) {
-        processSender(data, statistics, object);
-    }
-    // Receiver mode: signals are set by senders, no additional processing needed
+    // Thread 0 must not overwrite the shared data for the next cell before every thread has finished this one, otherwise warps run out of step
+    __syncthreads();
 }
 
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
