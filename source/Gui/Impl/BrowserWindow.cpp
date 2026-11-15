@@ -207,7 +207,8 @@ void BrowserWindow::processIntern()
         _lastServerWorkspaceType = workspaceType;
     }
 
-    if (_resourceIdToShow.has_value() && !BrowserController::get().isRefreshing()) {
+    // The entries of this computer do not wait for the server
+    if (_resourceIdToShow.has_value() && (isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType) || !BrowserController::get().isRefreshing())) {
         revealResource(*_resourceIdToShow);
         _resourceIdToShow.reset();
     }

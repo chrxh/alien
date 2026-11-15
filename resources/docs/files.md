@@ -52,7 +52,7 @@ The browser (Alt+B) connects ALIEN with the ALIEN server, where users share simu
 - **Visibility.** *Community* makes the upload visible to everyone in the **Community** workspace and also posts it on the ALIEN Discord server. *My uploads* keeps it visible only to you. Every upload of yours is listed in **My uploads**, where the right column switches its visibility between *Community* and *Only me*. After the upload, **Show in browser** selects the new entry in the browser.
 - **Managing.** Select one of your uploads to rename it, to change its description, to switch it between private and community or to delete it in the right column. To replace an upload with a newer version, save the current simulation under the same name with the same target.
 - **Reacting.** No account is needed. Click the heart on the picture of an entry to give it a heart and click it again to take it back. A right click chooses another reaction, and the right column shows all reactions to the selected entry. **Liked** in the left column collects all entries you reacted to. The gallery view can sort by reactions, date or downloads.
-- **Credits.** While a simulation from the browser is open, the right end of the menu bar shows its name, its author and a heart. Click the name to show the entry in the browser or the heart to give it a heart.
+- **Credits.** While a simulation from the server is open, the right end of the menu bar shows its name, its author and a heart. Click the name to show the entry in the browser or the heart to give it a heart. A simulation from **My simulations** or **Autosaves** shows only its name there.
 
 ## Command line interface
 

@@ -8,7 +8,7 @@ This chapter describes the screen of ALIEN. The first sections cover everything 
 
 The screen consists of a few main parts:
 
-- **Menu bar.** It runs along the top edge and gives access to most functions. The power button at its left end closes ALIEN. While a simulation from the browser is open, its name, its author and a heart appear at the right end.
+- **Menu bar.** It runs along the top edge and gives access to most functions. The power button at its left end closes ALIEN. While a simulation from the server is open, its name, its author and a heart appear at the right end. A simulation from **My simulations** or **Autosaves** shows only its name.
 - **Simulation view.** The world fills the whole screen behind all windows. Scrollbars at the right and bottom edges show which part of the world is visible.
 - **Edit mode button.** The round button in the lower left corner switches between navigation mode and edit mode. In edit mode, a tool bar with editing tools appears next to the button.
 - **Windows.** Windows float above the simulation view. You can move them by their title bar, resize them at their edges and collapse or close them with the buttons in the title bar. All windows can be opened again from the menus. The only exceptions are the separate parameter windows created with **Open in new window**, which are opened again from the **Simulation parameters** window.
