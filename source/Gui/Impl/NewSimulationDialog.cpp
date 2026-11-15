@@ -31,7 +31,7 @@ void NewSimulationDialog::shutdownIntern()
 }
 
 NewSimulationDialog::NewSimulationDialog()
-    : AlienDialog("New simulation")
+    : AlienDialog("New simulation", {450.0f, 232.0f})
 {}
 
 void NewSimulationDialog::processIntern()
