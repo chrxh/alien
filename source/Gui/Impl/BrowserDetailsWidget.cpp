@@ -391,7 +391,7 @@ void _BrowserDetailsWidget::processResourceButtons(NetworkResourceTreeTO const& 
             _actions.edit(treeTO);
         }
     }
-    if (rawTO->workspaceType == WorkspaceType_Local) {
+    if (isLocal) {
         auto resourceTypeString = std::string(rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome");
         ImGui::SameLine();
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
