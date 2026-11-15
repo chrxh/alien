@@ -34,6 +34,9 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).object);
+
+        // Thread 0 must not overwrite the shared data of this cell before every thread has read it, otherwise warps run out of step
+        __syncthreads();
     }
 }
 
