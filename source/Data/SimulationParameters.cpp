@@ -834,7 +834,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      "that its angle or distance limit allows."),
                     ParameterSpec()
                         .name("Movement acceleration")
-                        .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0.0f).max(10.0f).logarithmic(true))
+                        .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0.0f).max(20.0f).logarithmic(true))
                         .description("Strength of the acceleration of a muscle cell that moves itself directly. It scales with the activation. This "
                                      "parameter applies only to muscle cells in 'Direct movement' mode."),
                     ParameterSpec()
