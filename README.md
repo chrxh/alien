@@ -181,14 +181,12 @@ The executable is written to `build-ninja/Release/` (`alien.exe` on Windows, `al
 
 **AMD GPUs (HIP)**
 
-The HIP path builds the same sources for AMD GPUs in place of CUDA. On Windows: `build-windows-ninja.bat HIP`, which writes to `build-ninja-hip/Release/` and covers RDNA2, RDNA3 and RDNA4.
-
-On Linux:
+On Windows, run `build-windows-ninja.bat HIP`. On Linux:
 ```
 cmake --preset ninja-hip -DCMAKE_HIP_ARCHITECTURES="gfx10-3-generic;gfx11-generic;gfx12-generic" -DCMAKE_PREFIX_PATH=/opt/rocm
 cmake --build --preset ninja-hip-release
 ```
-`CMAKE_HIP_ARCHITECTURES` lists the target architectures and has to cover every AMD GPU that `rocminfo` shows, including integrated GPUs that ALIEN does not use. The list above covers RDNA2, RDNA3 and RDNA4 like the Windows build. Other GPUs need their own entry, for example `gfx90a` for CDNA2 / MI200 or `gfx90c` for the integrated Vega GPU of many Ryzen 4000 and 5000 processors. If the option is omitted, the architectures of the GPUs in the computer are detected, which shortens the build. `CMAKE_PREFIX_PATH` lets `find_package(hip)` locate the ROCm installation when CMake uses the vcpkg toolchain. Adjust it if ROCm is installed elsewhere.
+The executable is written to `build-ninja-hip/Release/`. The architecture list covers RDNA2, RDNA3 and RDNA4. If `rocminfo` also shows an older AMD GPU, for example the integrated Vega graphics of many Ryzen processors, add its gfx name to the list. Adjust `/opt/rocm` if ROCm is installed elsewhere.
 
 **AMD GPUs (SCALE)**
 
