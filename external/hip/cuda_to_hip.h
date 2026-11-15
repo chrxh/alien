@@ -42,12 +42,17 @@ using cudaError_t = hipError_t;
 #define cudaErrorMemoryAllocation         hipErrorOutOfMemory
 #define cudaErrorIllegalAddress           hipErrorIllegalAddress
 #define cudaErrorLaunchFailure            hipErrorLaunchFailure
+#define cudaErrorInvalidDeviceFunction    hipErrorInvalidDeviceFunction
+#define cudaErrorNoKernelImageForDevice   hipErrorNoBinaryForGpu
+#define cudaErrorInvalidPtx               hipErrorInvalidKernelFile
 
 // --- device management ---
 #define cudaDeviceProp                    hipDeviceProp_t
 #define cudaGetDeviceCount                hipGetDeviceCount
 #define cudaGetDeviceProperties           hipGetDeviceProperties
 #define cudaOccupancyMaxActiveBlocksPerMultiprocessor hipOccupancyMaxActiveBlocksPerMultiprocessor
+#define cudaFuncAttributes                hipFuncAttributes
+#define cudaFuncGetAttributes             hipFuncGetAttributes
 #define cudaMemGetInfo                    hipMemGetInfo
 #define cudaSetDevice                     hipSetDevice
 #define cudaDeviceSynchronize             hipDeviceSynchronize

@@ -730,6 +730,37 @@ void _SimulationCudaFacade::initCuda()
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
 }
 
+namespace
+{
+    std::string getArchitectureDescription(cudaDeviceProp const& prop)
+    {
+#if defined(USE_HIP)
+        return std::string("architecture ") + prop.gcnArchName;
+#else
+        return "compute capability " + std::to_string(prop.major) + "." + std::to_string(prop.minor);
+#endif
+    }
+
+#if defined(USE_HIP)
+    void checkGpuCodeForDevice(int deviceNumber)
+    {
+        cudaDeviceProp prop;
+        CHECK_FOR_DEVICE_ERRORS(cudaGetDeviceProperties(&prop, deviceNumber));
+        CHECK_FOR_DEVICE_ERRORS(cudaSetDevice(deviceNumber));
+
+        cudaFuncAttributes attributes;
+        auto result = cudaFuncGetAttributes(&attributes, reinterpret_cast<void const*>(cudaNextTimestep_physics_calcFluidForces));
+        if (result == cudaErrorNoKernelImageForDevice || result == cudaErrorInvalidDeviceFunction || result == cudaErrorInvalidPtx) {
+            throw std::runtime_error(
+                "The GPU code of this build could not be loaded for " + std::string(prop.name) + " (" + getArchitectureDescription(prop) + "). "
+                + "A build from the sources needs the architectures of all AMD GPUs of this computer in CMAKE_HIP_ARCHITECTURES, integrated ones included. "
+                + "Error code: " + std::to_string(result));
+        }
+        CHECK_FOR_DEVICE_ERRORS(result);
+    }
+#endif
+}
+
 auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 {
     static std::mutex mutex;
@@ -764,7 +795,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 
         auto discrete = prop.integrated == 0;
         std::stringstream stream;
-        stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor << ", "
+        stream << "device " << deviceNumber << ": " << prop.name << " with " << getArchitectureDescription(prop) << ", "
                << (discrete ? "discrete" : "integrated") << ", " << prop.totalGlobalMem / (1024 * 1024) << " MB";
         log(Priority::Important, stream.str());
 
@@ -778,10 +809,11 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
             std::memcpy(result.gpuUuid.data(), &prop.uuid, result.gpuUuid.size());
         }
     }
-#if !defined(USE_HIP)
+#if defined(USE_HIP)
+    checkGpuCodeForDevice(result.deviceNumber);
+#else
     // The CUDA compute-capability heuristic (major*100+minor, gated at >= 705)
     // is meaningless for AMD GPUs, where prop.major/minor encode the gfx arch.
-    // On HIP accept the selected device unconditionally.
     if (selectedComputeCapability < 705) {
         throw std::runtime_error("No CUDA device with compute capability of 7.5 or higher found.");
     }
