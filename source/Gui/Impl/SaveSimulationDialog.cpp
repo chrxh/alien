@@ -11,6 +11,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/GlobalSettings.h>
+
 #include <Data/SimulationParameters.h>
 
 #include <Engine/Interface/SimulationFacade.h>
@@ -61,6 +63,15 @@ namespace
         {NetworkResourceType_Simulation, "Simulation"},
         {NetworkResourceType_Genome, "Genome"}};
 
+    std::map<NetworkResourceType, std::string> const LastTargetSettingsKeyByType = {
+        {NetworkResourceType_Simulation, "dialogs.save simulation.target"},
+        {NetworkResourceType_Genome, "dialogs.save genome.target"}};
+    std::map<SaveTarget, std::string> const SettingsValueByTarget = {
+        {SaveTarget::ThisComputer, "this computer"},
+        {SaveTarget::Community, "community"},
+        {SaveTarget::Private, "private"},
+        {SaveTarget::OtherLocation, "other location"}};
+
     std::string getSuggestedNameWithoutFolder(NetworkResourceType resourceType)
     {
         if (resourceType == NetworkResourceType_Genome) {
@@ -73,11 +84,16 @@ namespace
         return projectName;
     }
 
+    bool isServerTarget(SaveTarget target)
+    {
+        return target == SaveTarget::Community || target == SaveTarget::Private;
+    }
+
     // A simulation of this computer keeps its name. Uploads are collected in a folder with the name of the user.
     std::string getSuggestedName(NetworkResourceType resourceType, SaveTarget target)
     {
         auto name = getSuggestedNameWithoutFolder(resourceType);
-        if (target == SaveTarget::ThisComputer) {
+        if (!isServerTarget(target)) {
             return resourceType == NetworkResourceType_Simulation ? NewSimulationService::get().getNameInLibrary().value_or(name) : name;
         }
         auto userName = NetworkService::get().getLoggedInUserName();
@@ -88,11 +104,6 @@ namespace
     {
         auto& resourceService = NetworkResourceService::get();
         return resourceService.concatenateFolderName(resourceService.getFolderNames(name), true);
-    }
-
-    bool isServerTarget(SaveTarget target)
-    {
-        return target == SaveTarget::Community || target == SaveTarget::Private;
     }
 
     WorkspaceType toWorkspaceType(SaveTarget target)
@@ -172,23 +183,35 @@ namespace
     }
 }
 
-void SaveSimulationDialog::open(NetworkResourceType resourceType, SaveTarget target, std::string const& suggestedName)
+void SaveSimulationDialog::open(NetworkResourceType resourceType, std::optional<SaveTarget> target, std::string const& suggestedName)
 {
-    if (isServerTarget(target) && !NetworkService::get().getLoggedInUserName()) {
+    auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
+
+    // A plain save never asks for a login, so a remembered upload falls back to this computer
+    auto remembersTarget = !target.has_value();
+    if (remembersTarget) {
+        target = _lastTargetByType.at(resourceType);
+        if (isServerTarget(*target) && !isLoggedIn) {
+            target = SaveTarget::ThisComputer;
+        }
+    }
+    if (isServerTarget(*target) && !isLoggedIn) {
         LoginDialog::get().open();
         return;
     }
     _mode = Mode::RunningResource;
     _resourceType = resourceType;
     _targets = {SaveTarget::ThisComputer, SaveTarget::Community, SaveTarget::Private, SaveTarget::OtherLocation};
-    _target = target;
+    _target = *target;
+    _remembersTarget = remembersTarget;
+    _targetChosen = false;
     _simulationFile.reset();
     _savedGenome.reset();
     _replacedUpload.reset();
     _errorMessage.reset();
 
-    if (suggestedName.empty()) {
-        _name = getSuggestedName(resourceType, target);
+    if (suggestedName.empty() || isServerTarget(_target)) {
+        _name = getSuggestedName(resourceType, _target);
     } else if (suggestedName.ends_with('/')) {
         _name = suggestedName + getSuggestedNameWithoutFolder(resourceType);
     } else {
@@ -279,6 +302,24 @@ void SaveSimulationDialog::openForReplacing(NetworkResourceRawTO const& upload)
 SaveSimulationDialog::SaveSimulationDialog()
     : AlienDialog("", {960.0f, 420.0f})
 {}
+
+void SaveSimulationDialog::initIntern()
+{
+    auto& settings = GlobalSettings::get();
+    for (auto const& [resourceType, key] : LastTargetSettingsKeyByType) {
+        auto value = settings.getValue(key, SettingsValueByTarget.at(SaveTarget::ThisComputer));
+        auto findResult = std::ranges::find_if(SettingsValueByTarget, [&](auto const& entry) { return entry.second == value; });
+        _lastTargetByType[resourceType] = findResult != SettingsValueByTarget.end() ? findResult->first : SaveTarget::ThisComputer;
+    }
+}
+
+void SaveSimulationDialog::shutdownIntern()
+{
+    auto& settings = GlobalSettings::get();
+    for (auto const& [resourceType, target] : _lastTargetByType) {
+        settings.setValue(LastTargetSettingsKeyByType.at(resourceType), SettingsValueByTarget.at(target));
+    }
+}
 
 void SaveSimulationDialog::processIntern()
 {
@@ -383,6 +424,7 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
     auto targetIndex = toInt(std::distance(_targets.begin(), std::ranges::find(_targets, _target)));
     if (AlienGui::ChoiceBar(AlienGui::ChoiceBarParameters().values(targetLabels), targetIndex)) {
         _target = _targets.at(targetIndex);
+        _targetChosen = true;
         _errorMessage.reset();
     }
 
@@ -547,6 +589,9 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
         close();
         onReplaceUpload(_replacedUpload->id, _replacedUpload->workspaceType);
         return;
+    }
+    if (_mode == Mode::RunningResource && _remembersTarget && _targetChosen) {
+        _lastTargetByType[_resourceType] = _target;
     }
     if (_target == SaveTarget::OtherLocation) {
         close();

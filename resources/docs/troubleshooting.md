@@ -65,7 +65,7 @@ See [Energy](energy.md#troubleshooting-energy) and [Evolution experiments](evolu
 ## I lost my simulation
 
 - If **Settings > Save on exit** is enabled, which is the default, ALIEN saves the simulation when you close the program normally and opens it again at the next start. After a crash there is no such save, so ALIEN opens the simulation of the last normal exit instead.
-- **Autosaves** in the left column of the browser shows the autosaves. Autosaves exist only if you created them with **Autosave now** or switched on automatic saving with **Enable autosave** in the right column. Automatic saving is off by default. Save points of earlier versions appear there as well if their folder lies in the folder of the simulations of this computer.
+- **Autosaves** in the left column of the browser shows the autosaves. Autosaves exist only if you switched on automatic saving with **Activate autosave** above the autosaves. Automatic saving is off after every start of ALIEN and after a simulation has been created or opened. Save points of earlier versions appear there as well if their folder lies in the folder of the simulations of this computer.
 - The flashback of the **Temporal control** window exists only in memory and is lost when ALIEN is closed.
 
 ## The documentation is missing

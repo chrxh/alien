@@ -9,12 +9,16 @@ add_library(GuiImpl
     AlienGui.h
     AlienWindow.cpp
     AlienWindow.h
+    AutosaveDialog.cpp
+    AutosaveDialog.h
     BrowserController.cpp
     BrowserController.h
     BrowserData.cpp
     BrowserData.h
     BrowserDetailsWidget.cpp
     BrowserDetailsWidget.h
+    BrowserFolderBarWidget.cpp
+    BrowserFolderBarWidget.h
     BrowserGalleryWidget.cpp
     BrowserGalleryWidget.h
     BrowserHelper.cpp

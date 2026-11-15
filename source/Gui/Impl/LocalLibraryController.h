@@ -63,6 +63,8 @@ public:
     std::string const& getAutosaveFolderName() const;                  // Folder inside the library, empty for the library folder itself
     bool setAutosaveFolderName(std::string const& value);              // Returns false for a name that is not valid
     bool isAutosaveFolder(std::filesystem::path const& folder) const;  // The folder in which autosave stores its files and limits their number
+    // The folder in which autosave would store its files for a folder inside the library, nothing for a name that is not valid
+    std::optional<std::filesystem::path> resolveAutosaveFolder(std::string const& folderName) const;
     std::chrono::seconds getDurationUntilNextAutosave() const;
 
     bool isSaving() const;
@@ -70,7 +72,6 @@ public:
     // Without a description, the description of a replaced simulation is kept
     void onSave(std::string const& name, std::optional<std::string> const& description, std::string const& jpg);
     void onSaveToFile(std::filesystem::path const& filename);  // A file at any place
-    void onAutosave();
     void onLoad(std::filesystem::path const& simulationPath);
 
     // These functions return an error message if they fail. Editing, renaming and deleting take simulations and genomes.
@@ -114,6 +115,7 @@ private:
     void processPendingLoads();
     void processPendingPicture();
     void processAutosave();
+    void onAutosave();
 
     void scheduleSave(PendingSave pendingSave);
     void onSaveFinished(PendingSave const& pendingSave, SaveSimulationResultData const& data);
@@ -140,4 +142,5 @@ private:
 
     std::chrono::steady_clock::time_point _lastAutosaveTimepoint;
     std::optional<int> _lastSessionId;
+    int _lastSimulationRevision = 0;
 };

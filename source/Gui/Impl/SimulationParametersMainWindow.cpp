@@ -228,9 +228,12 @@ void SimulationParametersMainWindow::processDetailWidget()
         if (_detailWidgetOpen = AlienGui::BeginTreeNode(
                 AlienGui::TreeNodeParameters().name((title + "###parameters").c_str()).rank(AlienGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
+            startFilterTypingIfNeeded();
+            AlienGui::InputFilter(AlienGui::InputFilterParameters(), _filter);
+            ImGui::Spacing();
+
             //AlienGui::SetFilterText(_filter);
-            if (ImGui::BeginChild(
-                    "##detail2", {0, -ImGui::GetStyle().FramePadding.y - scale(33.0f)}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
+            if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto type = _locations.at(_selectedOrderNumber).type;
                 ParametersFilter filter{.containedText = _filter};
                 if (type == LocationType::Base) {
@@ -245,10 +248,6 @@ void SimulationParametersMainWindow::processDetailWidget()
             }
             ImGui::EndChild();
             //AlienGui::ResetFilterText();
-
-            ImGui::Spacing();
-            startFilterTypingIfNeeded();
-            AlienGui::InputFilter(AlienGui::InputFilterParameters(), _filter);
         }
         AlienGui::EndTreeNode();
     }

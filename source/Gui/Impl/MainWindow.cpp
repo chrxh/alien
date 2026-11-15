@@ -28,6 +28,7 @@
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
+#include "AutosaveDialog.h"
 #include "BrowserController.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
@@ -136,6 +137,7 @@ _MainWindow::_MainWindow()
     NewPasswordDialog::get().setup();
     LoginDialog::get().setup();
     SaveSimulationDialog::get().setup();
+    AutosaveDialog::get().setup();
     ImageToPatternDialog::get().setup();
     RecorderController::get().setup();
     RecorderWindow::get().setup();

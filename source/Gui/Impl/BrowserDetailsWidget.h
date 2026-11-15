@@ -40,9 +40,6 @@ private:
 
     void processFolder(NetworkResourceTreeTO const& treeTO);
     void processWorkspace();
-    void processFolders();
-    void processAutosaveFolder();
-    void processAutosaveSettings();
 
     std::optional<SimulationFileInfo> const& getFileInfo(NetworkResourceRawTO const& rawTO);
 
@@ -52,8 +49,4 @@ private:
 
     std::unordered_map<std::string, std::optional<SimulationFileInfo>> _fileInfoByKey;
     std::optional<int> _libraryRevision;
-
-    std::string _autosaveFolderName;
-    bool _autosaveFolderNameValid = true;
-    int _lastAutosaveFolderFrame = -1;
 };

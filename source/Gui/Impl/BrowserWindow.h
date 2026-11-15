@@ -72,6 +72,7 @@ private:
     BrowserGalleryWidget _galleryWidget;
     BrowserTableWidget _tableWidget;
     BrowserDetailsWidget _detailsWidget;
+    BrowserFolderBarWidget _folderBarWidget;
     BrowserUserListWidget _userListWidget;
     BrowserLoginHintWidget _loginHintWidget;
     BrowserLoginBannerWidget _loginBannerWidget;

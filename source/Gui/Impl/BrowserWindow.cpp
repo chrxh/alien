@@ -21,6 +21,7 @@
 #include "AlienGui.h"
 #include "BrowserController.h"
 #include "BrowserDetailsWidget.h"
+#include "BrowserFolderBarWidget.h"
 #include "BrowserGalleryWidget.h"
 #include "BrowserHelper.h"
 #include "BrowserLoginBannerWidget.h"
@@ -55,9 +56,12 @@ namespace
     auto constexpr WorkspaceItemIconOffset = 10.0f;
     auto constexpr WorkspaceItemTextOffset = 36.0f;
     auto constexpr WorkspaceGroupSpacing = 12.0f;
+    auto constexpr AutosaveMarkerOffset = 10.0f;
+    auto constexpr AutosaveMarkerRadius = 4.0f;
 
     auto constexpr FilterWidth = 230.0f;
     auto constexpr MinFilterWidth = 100.0f;
+    auto constexpr HeaderSpacing = 20.0f;
 
     auto constexpr EmojiPopupScale = 0.66f;  // Relative to the resolution of the emoji images
     auto constexpr EmojiPopupWidth = 255.0f;
@@ -98,6 +102,7 @@ void BrowserWindow::initIntern()
             .remove = [this](NetworkResourceTreeTO const& treeTO) { onDeleteResource(treeTO); },
             .share = [this](NetworkResourceRawTO const& rawTO) { onShareSimulation(rawTO); },
             .replace = [](NetworkResourceRawTO const& rawTO) { SaveSimulationDialog::get().openForReplacing(rawTO); }});
+    _folderBarWidget = _BrowserFolderBarWidget::create(_data);
     _userListWidget = _BrowserUserListWidget::create(_data);
     _loginHintWidget = _BrowserLoginHintWidget::create();
     _loginBannerWidget = _BrowserLoginBannerWidget::create();
@@ -401,6 +406,10 @@ void BrowserWindow::processWorkspaceItem(WorkspaceType workspaceType, std::strin
     auto textPosY = pos.y + (size.y - ImGui::GetTextLineHeight()) / 2;
     drawList->AddText({pos.x + scale(WorkspaceItemIconOffset), textPosY}, isSelected ? Const::TextBaseColor : Const::TextDimColor, icon.c_str());
     drawList->AddText({pos.x + scale(WorkspaceItemTextOffset), textPosY}, isSelected ? Const::TextStrongColor : Const::TextBaseColor, name.c_str());
+    if (workspaceType == WorkspaceType_Autosave && LocalLibraryController::get().isAutosaveEnabled()) {
+        auto markerPosX = pos.x + scale(WorkspaceItemTextOffset) + ImGui::CalcTextSize(name.c_str()).x + scale(AutosaveMarkerOffset);
+        drawList->AddCircleFilled({markerPosX, pos.y + size.y / 2}, scale(AutosaveMarkerRadius), Const::AccentColor);
+    }
     if (workspaceType != WorkspaceType_Private || NetworkService::get().getLoggedInUserName()) {
         auto count = std::to_string(_data->getWorkspace(WorkspaceId{currentWorkspaceId.resourceType, workspaceType}).rawTOs.size());
         auto countWidth = ImGui::CalcTextSize(count.c_str()).x;
@@ -416,6 +425,9 @@ void BrowserWindow::processWorkspaceItem(WorkspaceType workspaceType, std::strin
 void BrowserWindow::processResourceView()
 {
     processHeader();
+    if (_data->getCurrentWorkspaceId().workspaceType == WorkspaceType_Autosave) {
+        _folderBarWidget->processAutosave();
+    }
 
     if (isLoginRequired()) {
         auto viewPos = ImGui::GetCursorScreenPos();
@@ -441,22 +453,27 @@ void BrowserWindow::processResourceView()
 
 void BrowserWindow::processHeader()
 {
-    auto sortingWidth = _galleryView ? _galleryWidget->getSortingWidth() + ImGui::GetStyle().ItemSpacing.x : 0.0f;
+    auto isLocal = isLocalWorkspace(_data->getCurrentWorkspaceId().workspaceType);
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto startPosX = ImGui::GetCursorPosX();
 
-    auto filterWidth = std::clamp(scaleInverse(ImGui::GetContentRegionAvail().x - sortingWidth), MinFilterWidth, FilterWidth);
-    auto filter = _data->getFilter();
-    if (AlienGui::InputFilter(AlienGui::InputFilterParameters().width(filterWidth), filter)) {
-        _galleryWidget->resetPage();
-        _data->setFilter(filter);
+    // The filter ends at the right border in every workspace. A workspace of this computer shows its folder in front of it, for which the
+    // filter gives way before the folder does.
+    auto minFolderWidth = isLocal ? _folderBarWidget->getMinFolderWidth() + scale(HeaderSpacing) : 0.0f;
+    auto filterParameters = AlienGui::InputFilterParameters().width(std::clamp(scaleInverse(availableWidth - minFolderWidth), MinFilterWidth, FilterWidth));
+    auto filterWidth = AlienGui::CalcInputFilterWidth(filterParameters);
+    auto filterPosX = startPosX + std::max(0.0f, availableWidth - filterWidth);
+    if (isLocal) {
+        auto folderWidth = _folderBarWidget->processFolder(availableWidth - filterWidth - scale(HeaderSpacing));
+        ImGui::SameLine(std::max(filterPosX, startPosX + folderWidth + scale(HeaderSpacing)));
+    } else {
+        ImGui::SetCursorPosX(filterPosX);
     }
 
-    if (_galleryView) {
-        ImGui::SameLine();
-        auto offset = ImGui::GetContentRegionAvail().x - _galleryWidget->getSortingWidth();
-        if (offset > 0) {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-        }
-        _galleryWidget->processSorting();
+    auto filter = _data->getFilter();
+    if (AlienGui::InputFilter(filterParameters, filter)) {
+        _galleryWidget->resetPage();
+        _data->setFilter(filter);
     }
 }
 
@@ -465,6 +482,9 @@ void BrowserWindow::processFooter()
     if (!_galleryView) {
         return;
     }
+    _galleryWidget->processSorting();
+
+    ImGui::SameLine();
     auto availableWidth = ImGui::GetContentRegionAvail().x;
     auto pagerWidth = _galleryWidget->getPagerWidth();
     if (availableWidth > pagerWidth) {
@@ -546,9 +566,6 @@ void BrowserWindow::processStatusBar()
     statusItems.emplace_back(
         std::to_string(numLocalResources) + (resourceType == NetworkResourceType_Simulation ? " simulations in My simulations" : " genomes in My genomes"));
     statusItems.emplace_back(std::to_string(_data->getUserTOs().size()) + " simulators found");
-    if (controller.isAutosaveEnabled()) {
-        statusItems.emplace_back("Next autosave in " + StringHelper::format(controller.getDurationUntilNextAutosave()));
-    }
 
     if (!NetworkService::get().getLoggedInUserName()) {
         statusItems.emplace_back("In order to share simulations you need to log in.");
@@ -740,29 +757,10 @@ void BrowserWindow::onSave()
     auto workspaceId = _data->getCurrentWorkspaceId();
     auto selectedTreeTO = _data->getSelectedTreeTO();
 
-    // The liked resources come from the workspaces of the server, which a selected one tells
-    auto targetWorkspaceType = workspaceId.workspaceType;
-    if (targetWorkspaceType == WorkspaceType_Liked && selectedTreeTO != nullptr && selectedTreeTO->isLeaf()) {
-        targetWorkspaceType = selectedTreeTO->getLeaf().rawTO->workspaceType;
-    }
-    auto target = [&] {
-        switch (targetWorkspaceType) {
-        case WorkspaceType_Featured:
-        case WorkspaceType_Community:
-            return SaveTarget::Community;
-        case WorkspaceType_Private:
-            return SaveTarget::Private;
-        default:
-            return SaveTarget::ThisComputer;
-        }
-    }();
-
-    // A selected resource suggests its name, which replaces it if it is an own one, and a selected folder suggests itself. An autosave in My
+    // What is selected on this computer suggests its name, which replaces it, and a selected folder suggests itself. An autosave in My
     // simulations suggests its folder, because nothing can be saved under its name.
     std::string suggestedName;
-    auto suggestsName = workspaceId.workspaceType == WorkspaceType_Liked ? selectedTreeTO != nullptr && selectedTreeTO->isLeaf()
-                                                                         : selectedTreeTO != nullptr && workspaceId.workspaceType != WorkspaceType_Autosave;
-    if (suggestsName) {
+    if (selectedTreeTO != nullptr && workspaceId.workspaceType == WorkspaceType_Local) {
         auto isAutosave = selectedTreeTO->isLeaf() && workspaceId == WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_Local}
             && !LocalLibraryService::get().isValidSimulationName(selectedTreeTO->getLeaf().rawTO->resourceName);
         if (selectedTreeTO->isLeaf() && !isAutosave) {
@@ -771,7 +769,7 @@ void BrowserWindow::onSave()
             suggestedName = NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
         }
     }
-    SaveSimulationDialog::get().open(workspaceId.resourceType, target, suggestedName);
+    SaveSimulationDialog::get().open(workspaceId.resourceType, std::nullopt, suggestedName);
 }
 
 void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)

@@ -28,7 +28,6 @@ namespace
     auto constexpr NumFramesBeforePicture = 3;
 
     auto constexpr LibraryFolderSettingsKey = "controllers.simulation library.main folder";
-    auto constexpr AutosaveEnabledSettingsKey = "controllers.simulation library.autosave enabled";
     auto constexpr AutosaveIntervalSettingsKey = "controllers.simulation library.autosave interval";
     auto constexpr SaveModeSettingsKey = "controllers.simulation library.save mode";
     auto constexpr NumberOfFilesSettingsKey = "controllers.simulation library.number of files";
@@ -36,7 +35,6 @@ namespace
     auto constexpr AutosaveMainFolderSettingsKey = "controllers.simulation library.autosave main folder";
 
     // Settings of the Autosave window of earlier versions
-    auto constexpr EarlierAutosaveEnabledSettingsKey = "windows.autosave.enabled";
     auto constexpr EarlierAutosaveIntervalSettingsKey = "windows.autosave.interval";
     auto constexpr EarlierSaveModeSettingsKey = "windows.autosave.mode";
     auto constexpr EarlierNumberOfFilesSettingsKey = "windows.autosave.number of files";
@@ -101,6 +99,18 @@ namespace
         }
         return DefaultAutosaveFolderName;
     }
+
+    // Nested folders are separated by a slash or a backslash, and a separator at the end is still being typed
+    std::optional<std::string> normalizeAutosaveFolderName(std::string const& value)
+    {
+        auto folderName = boost::algorithm::trim_copy(value);
+        std::ranges::replace(folderName, '\\', '/');
+        boost::algorithm::trim_right_if(folderName, [](char character) { return character == '/' || character == ' '; });
+        if (!folderName.empty() && !LocalLibraryService::get().isValidFolderName(folderName)) {
+            return std::nullopt;
+        }
+        return folderName;
+    }
 }
 
 void LocalLibraryController::init()
@@ -113,7 +123,6 @@ void LocalLibraryController::init()
     if (auto autosaveMainFolder = settings.getValue(AutosaveMainFolderSettingsKey, std::string()); !autosaveMainFolder.empty()) {
         setAutosaveMainFolder(StringHelper::toPath(autosaveMainFolder));
     }
-    _autosaveEnabled = settings.getValue(AutosaveEnabledSettingsKey, settings.getValue(EarlierAutosaveEnabledSettingsKey, _autosaveEnabled));
     _autosaveInterval = std::max(1, settings.getValue(AutosaveIntervalSettingsKey, settings.getValue(EarlierAutosaveIntervalSettingsKey, _autosaveInterval)));
     auto saveMode = settings.getValue(SaveModeSettingsKey, settings.getValue(EarlierSaveModeSettingsKey, _saveMode));
     _saveMode = saveMode == SaveMode_Unlimited ? SaveMode_Unlimited : SaveMode_Limited;
@@ -129,7 +138,6 @@ void LocalLibraryController::shutdown()
 {
     auto& settings = GlobalSettings::get();
     settings.setValue(LibraryFolderSettingsKey, StringHelper::toUtf8(_libraryFolder));
-    settings.setValue(AutosaveEnabledSettingsKey, _autosaveEnabled);
     settings.setValue(AutosaveIntervalSettingsKey, _autosaveInterval);
     settings.setValue(SaveModeSettingsKey, _saveMode);
     settings.setValue(NumberOfFilesSettingsKey, _numberOfFiles);
@@ -281,14 +289,11 @@ std::string const& LocalLibraryController::getAutosaveFolderName() const
 
 bool LocalLibraryController::setAutosaveFolderName(std::string const& value)
 {
-    // Nested folders are separated by a slash or a backslash, and a separator at the end is still being typed
-    auto folderName = boost::algorithm::trim_copy(value);
-    std::ranges::replace(folderName, '\\', '/');
-    boost::algorithm::trim_right_if(folderName, [](char character) { return character == '/' || character == ' '; });
-    if (!folderName.empty() && !LocalLibraryService::get().isValidFolderName(folderName)) {
+    auto folderName = normalizeAutosaveFolderName(value);
+    if (!folderName.has_value()) {
         return false;
     }
-    _autosaveFolderName = folderName;
+    _autosaveFolderName = *folderName;
     return true;
 }
 
@@ -296,6 +301,16 @@ bool LocalLibraryController::isAutosaveFolder(std::filesystem::path const& folde
 {
     std::error_code error;
     return std::filesystem::equivalent(folder, getAutosaveFolder(), error) && !error;
+}
+
+std::optional<std::filesystem::path> LocalLibraryController::resolveAutosaveFolder(std::string const& folderName) const
+{
+    auto normalizedFolderName = normalizeAutosaveFolderName(folderName);
+    if (!normalizedFolderName.has_value()) {
+        return std::nullopt;
+    }
+    auto const& mainFolder = getAutosaveMainFolder();
+    return normalizedFolderName->empty() ? mainFolder : mainFolder / StringHelper::toPath(*normalizedFolderName);
 }
 
 std::chrono::seconds LocalLibraryController::getDurationUntilNextAutosave() const
@@ -534,6 +549,12 @@ void LocalLibraryController::processPendingPicture()
 
 void LocalLibraryController::processAutosave()
 {
+    // Autosave belongs to one simulation, so a created or loaded one starts without it
+    auto simulationRevision = NewSimulationService::get().getSimulationRevision();
+    if (simulationRevision != _lastSimulationRevision) {
+        _lastSimulationRevision = simulationRevision;
+        _autosaveEnabled = false;
+    }
     if (!_autosaveEnabled) {
         return;
     }

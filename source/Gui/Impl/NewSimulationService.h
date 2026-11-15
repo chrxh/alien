@@ -35,10 +35,14 @@ public:
     std::optional<std::string> const& getNameInLibrary() const;
     void setNameInLibrary(std::optional<std::string> const& value);
 
+    // Changes with every simulation that is created or loaded
+    int getSimulationRevision() const;
+
     void storeAutosaveOrigin() const;
     void restoreAutosaveOrigin();
 
 private:
     std::optional<std::string> _originResourceId;
     std::optional<std::string> _nameInLibrary;
+    int _simulationRevision = 0;
 };

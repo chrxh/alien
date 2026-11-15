@@ -39,6 +39,7 @@ void NewSimulationService::createSimulation(Parameters const& parameters)
     TemporalControlService::get().createFlashback();
     _originResourceId.reset();
     _nameInLibrary.reset();
+    ++_simulationRevision;
 }
 
 std::optional<std::string> NewSimulationService::loadSimulation(
@@ -72,6 +73,7 @@ std::optional<std::string> NewSimulationService::loadSimulation(
     TemporalControlService::get().createFlashback();
     _originResourceId = errorMessage ? std::nullopt : originResourceId;
     _nameInLibrary = errorMessage ? std::nullopt : nameInLibrary;
+    ++_simulationRevision;
     return errorMessage;
 }
 
@@ -93,6 +95,11 @@ std::optional<std::string> const& NewSimulationService::getNameInLibrary() const
 void NewSimulationService::setNameInLibrary(std::optional<std::string> const& value)
 {
     _nameInLibrary = value;
+}
+
+int NewSimulationService::getSimulationRevision() const
+{
+    return _simulationRevision;
 }
 
 void NewSimulationService::storeAutosaveOrigin() const
