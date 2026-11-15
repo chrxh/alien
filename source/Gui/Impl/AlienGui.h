@@ -626,6 +626,7 @@ public:
         MEMBER(ActionButtonParameters, std::string, buttonText, "");
         MEMBER(ActionButtonParameters, std::optional<std::string>, smallIcon, std::nullopt);  // In front of the text
         MEMBER(ActionButtonParameters, bool, highlighted, false);
+        MEMBER(ActionButtonParameters, std::optional<ImColor>, textColor, std::nullopt);
         MEMBER(ActionButtonParameters, bool, frame, false);
         MEMBER(ActionButtonParameters, bool, transparentBackground, true);
         MEMBER(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);

@@ -3010,7 +3010,8 @@ bool AlienGui::Button(ButtonParameters const& parameters)
 
 bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, parameters._highlighted ? Const::ActionButtonHighlightedTextColor.Value : Const::ActionButtonTextColor.Value);
+    auto textColor = parameters._textColor.value_or(parameters._highlighted ? Const::ActionButtonHighlightedTextColor : Const::ActionButtonTextColor);
+    ImGui::PushStyleColor(ImGuiCol_Text, textColor.Value);
     ImGui::PushStyleColor(ImGuiCol_Button, !parameters._transparentBackground ? Const::ActionButtonBackgroundColor.Value : ImColor::HSV(0, 0, 0, 0).Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::ActionButtonActiveColor.Value);
