@@ -38,7 +38,8 @@ namespace
     auto constexpr HelixPerspectiveFactor = 3.5f;
     auto constexpr HelixTilt = 0.32f;
     auto constexpr HelixRadiansPerSecond = 1.6f;
-    auto constexpr HelixMaxSpeedExponent = 1.0f;
+    auto constexpr HelixMinSpeedExponent = -1.0f;
+    auto constexpr HelixMaxSpeedExponent = 2.0f;
     auto constexpr HelixMinSpeedChangeSeconds = 1.5f;
     auto constexpr HelixSpeedChangeSecondsPerDoubling = 2.5f;
 
@@ -252,7 +253,7 @@ void OverlayController::advanceHelixRotation()
     _helixSpeedChangeTime += deltaTime;
     if (_helixSpeedChangeTime >= _helixSpeedChangeDuration) {
         _helixStartSpeedExponent = _helixTargetSpeedExponent;
-        _helixTargetSpeedExponent = NumberGenerator::get().getRandomFloat(-HelixMaxSpeedExponent, HelixMaxSpeedExponent);
+        _helixTargetSpeedExponent = NumberGenerator::get().getRandomFloat(HelixMinSpeedExponent, HelixMaxSpeedExponent);
         _helixSpeedChangeDuration =
             HelixMinSpeedChangeSeconds + std::abs(_helixTargetSpeedExponent - _helixStartSpeedExponent) * HelixSpeedChangeSecondsPerDoubling;
         _helixSpeedChangeTime = 0.0f;
