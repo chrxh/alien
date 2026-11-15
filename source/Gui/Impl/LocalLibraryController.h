@@ -72,6 +72,7 @@ public:
     // Without a description, the description of a replaced simulation is kept
     void onSave(std::string const& name, std::optional<std::string> const& description, std::string const& jpg);
     void onSaveToFile(std::filesystem::path const& filename);  // A file at any place
+    void onAutosave();
     void onLoad(std::filesystem::path const& simulationPath);
 
     // These functions return an error message if they fail. Editing, renaming and deleting take simulations and genomes.
@@ -115,7 +116,6 @@ private:
     void processPendingLoads();
     void processPendingPicture();
     void processAutosave();
-    void onAutosave();
 
     void scheduleSave(PendingSave pendingSave);
     void onSaveFinished(PendingSave const& pendingSave, SaveSimulationResultData const& data);
