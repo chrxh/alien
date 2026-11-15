@@ -368,26 +368,25 @@ void _BrowserTableWidget::processReactionList(NetworkResourceTreeTO const& treeT
 
             ImGui::SameLine();
             AlienGui::Text(std::to_string(numLikes));
-            if (emojiType < _data->getEmojis().size()) {
+            if (_data->hasEmoji(emojiType)) {
                 ImGui::SameLine();
-                auto const& emoji = _data->getEmojis().at(emojiType);
+                auto emoji = _data->getEmojiImage(emojiType);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
                 ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
                 auto cursorPos = ImGui::GetCursorScreenPos();
-                auto emojiWidth = scale(toFloat(emoji.width) / 2.5f);
-                auto emojiHeight = scale(toFloat(emoji.height) / 2.5f);
+                auto emojiSize = scale(_BrowserData::EmojiSize / 2.5f);
                 ImGui::PushID(emojiType);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() - scale(3.0f));
-                if (ImGui::ImageButton("reaction_emoji", emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
+                if (ImGui::ImageButton("reaction_emoji", emoji.textureId, ImVec2(emojiSize, emojiSize), emoji.uvMin, emoji.uvMax)) {
                     toggleEmojiType = emojiType;
                 }
                 bool isLiked = _data->isOwnReaction(leaf.rawTO->id, emojiType);
                 if (isLiked) {
                     ImGui::GetWindowDrawList()->AddRect(
                         ImVec2(cursorPos.x, cursorPos.y),
-                        ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight),
+                        ImVec2(cursorPos.x + emojiSize, cursorPos.y + emojiSize),
                         (ImU32)Const::BrowserOwnReactionFrameColor,
                         1.0f);
                 }

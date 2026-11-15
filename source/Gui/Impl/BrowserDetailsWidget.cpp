@@ -302,7 +302,7 @@ void _BrowserDetailsWidget::processReactions(NetworkResourceTreeTO const& treeTO
 
     std::optional<int> toggledEmojiType;
     for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
-        auto hasEmoji = emojiType >= 0 && emojiType < toInt(_data->getEmojis().size());
+        auto hasEmoji = _data->hasEmoji(emojiType);
         auto count = std::to_string(numLikes);
         auto countSize = ImGui::CalcTextSize(count.c_str());
         auto width = paddingX * 2 + countSize.x + (hasEmoji ? emojiSize + paddingX / 2 : 0);
@@ -329,8 +329,9 @@ void _BrowserDetailsWidget::processReactions(NetworkResourceTreeTO const& treeTO
         }
         auto textPosX = pos.x + paddingX;
         if (hasEmoji) {
+            auto emoji = _data->getEmojiImage(emojiType);
             auto emojiPos = ImVec2{textPosX, pos.y + (height - emojiSize) / 2};
-            drawList->AddImage(_data->getEmojis().at(emojiType).textureId, emojiPos, {emojiPos.x + emojiSize, emojiPos.y + emojiSize});
+            drawList->AddImage(emoji.textureId, emojiPos, {emojiPos.x + emojiSize, emojiPos.y + emojiSize}, emoji.uvMin, emoji.uvMax);
             textPosX += emojiSize + paddingX / 2;
         }
         drawList->AddText({textPosX, pos.y + (height - countSize.y) / 2}, isOwnReaction ? Const::TextStrongColor : Const::TextBaseColor, count.c_str());

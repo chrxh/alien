@@ -24,6 +24,14 @@
 #include "LocalLibraryController.h"
 #include "NetworkTransferController.h"
 
+namespace
+{
+    auto constexpr EmojiAtlasFilename = "emojiAtlas.png";
+
+    // Each emoji is centered in its cell, the margin keeps the mipmaps free of the neighboring emojis
+    auto constexpr EmojiAtlasCellSize = 64;
+}
+
 BrowserData _BrowserData::create()
 {
     return BrowserData(new _BrowserData());
@@ -36,14 +44,7 @@ _BrowserData::_BrowserData()
     _reactionProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
 
-    auto numEmojis = 0;
-    for (auto numEmojisPerBlock : NumEmojisPerBlock) {
-        numEmojis += numEmojisPerBlock;
-    }
-    for (int i = 1; i <= numEmojis; ++i) {
-        auto reactionName = "emoji" + std::to_string(i) + ".png";
-        _emojis.emplace_back(_RenderingFacade::get()->loadTexture(Const::ImagesPath / std::filesystem::path(reactionName)));
-    }
+    _emojiAtlas = _RenderingFacade::get()->loadTexture(Const::ImagesPath / EmojiAtlasFilename);
 
     for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_CountInBrowser; ++workspaceType) {
@@ -330,9 +331,28 @@ void _BrowserData::onOpenResource(BrowserLeaf const& leaf)
         .downloadCache = _downloadCache});
 }
 
-std::vector<TextureData> const& _BrowserData::getEmojis() const
+bool _BrowserData::hasEmoji(int emojiType) const
 {
-    return _emojis;
+    auto numEmojis = _emojiAtlas.width / EmojiAtlasCellSize * (_emojiAtlas.height / EmojiAtlasCellSize);
+    return emojiType >= 0 && emojiType < numEmojis;
+}
+
+EmojiImage _BrowserData::getEmojiImage(int emojiType) const
+{
+    CHECK(hasEmoji(emojiType));
+
+    auto numColumns = _emojiAtlas.width / EmojiAtlasCellSize;
+    auto column = emojiType % numColumns;
+    auto row = emojiType / numColumns;
+    auto margin = (toFloat(EmojiAtlasCellSize) - EmojiSize) / 2;
+    auto left = toFloat(column * EmojiAtlasCellSize) + margin;
+    auto top = toFloat(row * EmojiAtlasCellSize) + margin;
+    auto atlasWidth = toFloat(_emojiAtlas.width);
+    auto atlasHeight = toFloat(_emojiAtlas.height);
+    return {
+        .textureId = _emojiAtlas.textureId,
+        .uvMin = {left / atlasWidth, top / atlasHeight},
+        .uvMax = {(left + EmojiSize) / atlasWidth, (top + EmojiSize) / atlasHeight}};
 }
 
 void _BrowserData::setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> const& ownEmojiTypeBySimId)

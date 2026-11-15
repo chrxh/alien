@@ -67,6 +67,15 @@ namespace
     auto constexpr EmojiPopupWidth = 255.0f;
     auto constexpr EmojiPopupHeight = 300.0f;
     auto constexpr EmojiPopupSingleRowHeight = 75.0f;
+    auto constexpr NumEmojisPerRow = 5;
+
+    // The popup shows the first row of the first block until it is expanded. The server accepts the types 0 to 48.
+    std::vector<std::vector<int>> const EmojiTypesByPopupBlock = {
+        {1, 33, 34, 0, 47, 44, 43, 46, 45, 48},                        // Hearts, star and other common symbols
+        {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18},  // Faces
+        {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32},      // Animals and microbes
+        {35, 36, 37, 38, 39, 40, 41, 42},                              // Creatures, energy, genome and evolution
+    };
 }
 
 BrowserWindow::BrowserWindow()
@@ -591,26 +600,24 @@ void BrowserWindow::processEmojiWindow()
         ImGui::Spacing();
         if (_showAllEmojis) {
             if (ImGui::BeginChild("##reactionchild", ImVec2(scale(EmojiPopupWidth), scale(EmojiPopupHeight)), false)) {
-                int offset = 0;
-                for (int i = 0; i < _BrowserData::NumEmojiBlocks; ++i) {
-                    for (int j = 0; j < _BrowserData::NumEmojisPerBlock[i]; ++j) {
-                        if (j % _BrowserData::NumEmojisPerRow != 0) {
+                for (auto const& emojiTypes : EmojiTypesByPopupBlock) {
+                    for (auto const& [index, emojiType] : emojiTypes | std::views::enumerate) {
+                        if (index % NumEmojisPerRow != 0) {
                             ImGui::SameLine();
                         }
-                        processEmojiButton(offset + j);
+                        processEmojiButton(emojiType);
                     }
                     AlienGui::Separator();
-                    offset += _BrowserData::NumEmojisPerBlock[i];
                 }
             }
             ImGui::EndChild();
         } else {
             if (ImGui::BeginChild("##reactionchild", ImVec2(scale(EmojiPopupWidth), scale(EmojiPopupSingleRowHeight)), false)) {
-                for (int i = 0; i < _BrowserData::NumEmojisPerRow; ++i) {
-                    if (i % _BrowserData::NumEmojisPerRow != 0) {
+                for (auto const& [index, emojiType] : EmojiTypesByPopupBlock.front() | std::views::take(NumEmojisPerRow) | std::views::enumerate) {
+                    if (index != 0) {
                         ImGui::SameLine();
                     }
-                    processEmojiButton(i);
+                    processEmojiButton(emojiType);
                 }
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
@@ -628,15 +635,14 @@ void BrowserWindow::processEmojiWindow()
 
 void BrowserWindow::processEmojiButton(int emojiType)
 {
-    auto const& emoji = _data->getEmojis().at(emojiType);
+    auto emoji = _data->getEmojiImage(emojiType);
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
     auto cursorPos = ImGui::GetCursorScreenPos();
-    auto emojiWidth = scale(toFloat(emoji.width) * EmojiPopupScale);
-    auto emojiHeight = scale(toFloat(emoji.height) * EmojiPopupScale);
+    auto emojiSize = scale(_BrowserData::EmojiSize * EmojiPopupScale);
     auto leaf = _data->getEmojiPopupTO()->getLeaf();
     ImGui::PushID(emojiType);
-    if (ImGui::ImageButton("emoji_popup", emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
+    if (ImGui::ImageButton("emoji_popup", emoji.textureId, ImVec2(emojiSize, emojiSize), emoji.uvMin, emoji.uvMax)) {
         _data->onToggleLike(_data->getEmojiPopupTO(), toInt(emojiType));
         ImGui::CloseCurrentPopup();
     }
@@ -649,7 +655,7 @@ void BrowserWindow::processEmojiButton(int emojiType)
         auto& style = ImGui::GetStyle();
         drawList->AddRect(
             ImVec2(cursorPos.x, cursorPos.y),
-            ImVec2(cursorPos.x + emojiWidth + style.FramePadding.x * 2, cursorPos.y + emojiHeight + style.FramePadding.y * 2),
+            ImVec2(cursorPos.x + emojiSize + style.FramePadding.x * 2, cursorPos.y + emojiSize + style.FramePadding.y * 2),
             (ImU32)Const::BrowserOwnReactionFrameColor,
             1.0f);
     }

@@ -60,13 +60,18 @@ struct Workspace
     std::set<std::vector<std::string>> collapsedFolderNames;
 };
 
+struct EmojiImage
+{
+    ImTextureID textureId;
+    ImVec2 uvMin;
+    ImVec2 uvMax;
+};
+
 // Browser state shared between the window and its widgets
 class _BrowserData
 {
 public:
-    static auto constexpr NumEmojiBlocks = 4;
-    static constexpr int NumEmojisPerBlock[NumEmojiBlocks] = {19, 14, 10, 6};
-    static auto constexpr NumEmojisPerRow = 5;
+    static auto constexpr EmojiSize = 48.0f;  // In pixels of the emoji atlas
     static auto constexpr HeartEmojiType = 1;
 
     static BrowserData create();
@@ -116,7 +121,9 @@ public:
     DownloadCache const& getDownloadCache() const;
     void onOpenResource(BrowserLeaf const& leaf);  // Downloads a resource of the server and loads a simulation of this computer
 
-    std::vector<TextureData> const& getEmojis() const;
+    // The emoji type is the index of the cell in the emoji atlas, counted row by row
+    bool hasEmoji(int emojiType) const;
+    EmojiImage getEmojiImage(int emojiType) const;
     void setOwnEmojiTypeBySimId(std::unordered_map<std::string, int> const& ownEmojiTypeBySimId);
     std::optional<int> getOwnEmojiType(std::string const& resourceId) const;
     bool isOwnReaction(std::string const& resourceId, int emojiType) const;
@@ -153,7 +160,7 @@ private:
     std::optional<ActiveSimulatorCountsTO> _activeSimulatorCounts;
     DownloadCache _downloadCache;
 
-    std::vector<TextureData> _emojis;
+    TextureData _emojiAtlas = {};
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::optional<std::string> _ownReactionsUserName;
     bool _activateEmojiPopup = false;

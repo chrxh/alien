@@ -55,9 +55,10 @@ namespace
     void processReactionSummary(BrowserData const& data, NetworkResourceRawTO const& rawTO)
     {
         for (auto const& [emojiType, numLikes] : rawTO->numLikesByEmojiType) {
-            if (emojiType < toInt(data->getEmojis().size())) {
-                auto const& emoji = data->getEmojis().at(emojiType);
-                ImGui::Image(emoji.textureId, {scale(toFloat(emoji.width) / 2.5f), scale(toFloat(emoji.height) / 2.5f)});
+            if (data->hasEmoji(emojiType)) {
+                auto emoji = data->getEmojiImage(emojiType);
+                auto emojiSize = scale(_BrowserData::EmojiSize / 2.5f);
+                ImGui::Image(emoji.textureId, {emojiSize, emojiSize}, emoji.uvMin, emoji.uvMax);
                 ImGui::SameLine();
             }
             AlienGui::Text(std::to_string(numLikes) + "   " + data->getUserNamesToEmojiType(rawTO, emojiType));
