@@ -53,6 +53,17 @@ namespace
         return AlienGui::ActionButtonParameters().buttonText("Deactivate autosave").smallIcon(ICON_FA_STOP).transparentBackground(false);
     }
 
+    AlienGui::ActionButtonParameters getAutosaveNowButton()
+    {
+        auto const& folderName = LocalLibraryController::get().getAutosaveFolderName();
+        auto place = folderName.empty() ? std::string("directly in the folder") : "in the subfolder " + folderName;
+        return AlienGui::ActionButtonParameters()
+            .buttonText("Autosave now")
+            .smallIcon(ICON_FA_PLUS)
+            .transparentBackground(false)
+            .tooltip("Save the simulation right now as an autosave " + place + ".");
+    }
+
     // Digits are measured as zeros, so a countdown does not change what fits into the row
     float calcStableTextWidth(std::string text)
     {
@@ -150,10 +161,20 @@ void _BrowserFolderBarWidget::processAutosave()
     auto& controller = LocalLibraryController::get();
     auto availableWidth = ImGui::GetContentRegionAvail().x;
 
-    if (!controller.isAutosaveEnabled()) {
-        if (AlienGui::ActionButton(getActivateButton())) {
+    auto isEnabled = controller.isAutosaveEnabled();
+    auto switchButton = isEnabled ? getDeactivateButton() : getActivateButton();
+    if (AlienGui::ActionButton(switchButton)) {
+        if (isEnabled) {
+            controller.setAutosaveEnabled(false);
+        } else {
             AutosaveDialog::get().open();
         }
+    }
+    ImGui::SameLine();
+    if (AlienGui::ActionButton(getAutosaveNowButton())) {
+        controller.onAutosave();
+    }
+    if (!isEnabled) {
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDimColor.Value);
         AlienGui::Text("Autosave is off");
@@ -161,14 +182,11 @@ void _BrowserFolderBarWidget::processAutosave()
         return;
     }
 
-    if (AlienGui::ActionButton(getDeactivateButton())) {
-        controller.setAutosaveEnabled(false);
-    }
-
     // The interval is left out where the row is too narrow for it
     auto frameHeight = ImGui::GetFrameHeight();
     auto markerRadius = scale(AutosaveMarkerRadius);
-    auto infoOffset = AlienGui::CalcActionButtonWidth(getDeactivateButton()) + ImGui::GetStyle().ItemSpacing.x * 2 + markerRadius * 2;
+    auto buttonsWidth = AlienGui::CalcActionButtonWidth(switchButton) + AlienGui::CalcActionButtonWidth(getAutosaveNowButton());
+    auto infoOffset = buttonsWidth + ImGui::GetStyle().ItemSpacing.x * 3 + markerRadius * 2;
     auto longestDuration = std::chrono::minutes(controller.getAutosaveInterval());
     auto showInterval = infoOffset + calcStableTextWidth(getAutosaveInfo(longestDuration, true)) <= availableWidth;
 
