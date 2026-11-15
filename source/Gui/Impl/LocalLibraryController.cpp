@@ -602,7 +602,7 @@ void LocalLibraryController::onSaveFinished(PendingSave const& pendingSave, Save
 std::filesystem::path LocalLibraryController::getAutosaveFolder() const
 {
     auto const& mainFolder = getAutosaveMainFolder();
-    return _autosaveFolderName.empty() ? mainFolder : mainFolder / StringHelper::toPath(_autosaveFolderName);
+    return _autosaveFolderName.empty() ? mainFolder : (mainFolder / StringHelper::toPath(_autosaveFolderName)).make_preferred();
 }
 
 std::optional<std::string>
