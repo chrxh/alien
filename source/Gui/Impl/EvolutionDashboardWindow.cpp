@@ -35,6 +35,7 @@ namespace
     auto constexpr LiveStatisticsDeltaTime = 50;  // In millisec
     auto constexpr RateAveragingTimesteps = LiveStatisticsService::RateAveragingTimesteps;
 
+    int constexpr AllColorsFilter = (1 << MAX_COLORS) - 1;
     auto constexpr FilterChipPadding = 8.0f;
     auto constexpr FilterChipSpacing = 6.0f;
     auto constexpr FilterChipSwatchTextSpacing = 6.0f;
@@ -231,18 +232,13 @@ namespace
         return getAggregatableMetricValue(sample.data, referenceSample ? &referenceSample->data : nullptr, deltaKSteps, metricIndex);
     }
 
-    bool passesColorFilter(int colorFilter, int colorBitset)
-    {
-        return colorFilter == 0 || (colorFilter & colorBitset) != 0;
-    }
-
-    // Sum of the per-color buckets that pass the filter; a lineage falls into exactly one
-    // bucket (its full colorBitset), so this matches the row filter without double counting
+    // Sum of the per-color buckets whose colorBitset intersects the filter; a lineage falls into exactly one
+    // bucket (its full colorBitset), so this matches the "colorBitset & filter" row filter without double counting
     ColorOverallDataPoint aggregateFilteredColors(std::unordered_map<uint32_t, ColorOverallDataPoint> const& data, int colorFilter)
     {
         ColorOverallDataPoint result;
         for (auto const& [colorBitset, dataPoint] : data) {
-            if (passesColorFilter(colorFilter, toInt(colorBitset))) {
+            if ((colorFilter & static_cast<int>(colorBitset)) != 0) {
                 result = result + dataPoint;
             }
         }
@@ -327,7 +323,7 @@ void EvolutionDashboardWindow::initIntern()
     _timelineMode = GlobalSettings::get().getValue("windows.evolution dashboard.timeline mode", _timelineMode);
     _lastSteps = GlobalSettings::get().getValue("windows.evolution dashboard.last steps", _lastSteps);
     _plotHeight = GlobalSettings::get().getValue("windows.evolution dashboard.plot height", _plotHeight);
-    _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.customization filter", _colorFilter);
+    _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.color filter", _colorFilter);
     _sortColumnIndex = GlobalSettings::get().getValue("windows.evolution dashboard.sort column", _sortColumnIndex);
     _sortAscending = GlobalSettings::get().getValue("windows.evolution dashboard.sort ascending", _sortAscending);
     validateAndCorrect();
@@ -339,7 +335,7 @@ void EvolutionDashboardWindow::shutdownIntern()
     GlobalSettings::get().setValue("windows.evolution dashboard.timeline mode", _timelineMode);
     GlobalSettings::get().setValue("windows.evolution dashboard.last steps", _lastSteps);
     GlobalSettings::get().setValue("windows.evolution dashboard.plot height", _plotHeight);
-    GlobalSettings::get().setValue("windows.evolution dashboard.customization filter", _colorFilter);
+    GlobalSettings::get().setValue("windows.evolution dashboard.color filter", _colorFilter);
     GlobalSettings::get().setValue("windows.evolution dashboard.sort column", _sortColumnIndex);
     GlobalSettings::get().setValue("windows.evolution dashboard.sort ascending", _sortAscending);
 }
@@ -467,7 +463,7 @@ void EvolutionDashboardWindow::updateTableData()
     // Union of colors over all lineages matching the current filter, shown as swatches on the summary row
     _allLineages.colorBitset = 0;
     for (auto const& lineage : _lineages) {
-        if (passesColorFilter(_colorFilter, lineage.colorBitset)) {
+        if ((_colorFilter & lineage.colorBitset) != 0) {
             _allLineages.colorBitset |= lineage.colorBitset;
         }
     }
@@ -810,15 +806,16 @@ void EvolutionDashboardWindow::processFilterBar()
     ImGui::SameLine(0, scale(12.0f));
 
     ImGui::PushID("all");
-    if (filterChip("All", _colorFilter == 0, 0, _cellColors)) {
-        _colorFilter = 0;
+    if (filterChip("All", _colorFilter == AllColorsFilter, 0, _cellColors)) {
+        _colorFilter = AllColorsFilter;
     }
     ImGui::PopID();
 
+    auto selectedColors = _colorFilter != AllColorsFilter ? _colorFilter : 0;
     std::vector<int> listedColors;
     auto widthWithCounts = 0.0f;
     for (auto const& [color, numLineages] : _numLineagesByColor | std::views::enumerate) {
-        if (numLineages > 0 || (_colorFilter & (1 << color)) != 0) {
+        if (numLineages > 0 || (selectedColors & (1 << color)) != 0) {
             listedColors.emplace_back(toInt(color));
             widthWithCounts += scale(FilterChipSpacing) + calcFilterChipWidth(StringHelper::format(numLineages), true);
         }
@@ -829,8 +826,8 @@ void EvolutionDashboardWindow::processFilterBar()
         auto numLineages = _numLineagesByColor.at(color);
         ImGui::SameLine(0, scale(FilterChipSpacing));
         ImGui::PushID(color);
-        if (filterChip(showCounts ? StringHelper::format(numLineages) : "", (_colorFilter & (1 << color)) != 0, 1 << color, _cellColors)) {
-            _colorFilter ^= 1 << color;
+        if (filterChip(showCounts ? StringHelper::format(numLineages) : "", (selectedColors & (1 << color)) != 0, 1 << color, _cellColors)) {
+            _colorFilter = selectedColors ^ (1 << color);
         }
         ImGui::PopID();
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(getNumLineagesTooltip(numLineages)));
@@ -915,8 +912,7 @@ void EvolutionDashboardWindow::processLineageTable()
             ICON_FA_THUMBTACK);
         auto iconWidth = ImGui::GetFont()->CalcTextSizeA(iconSize, FLT_MAX, 0.0f, ICON_FA_THUMBTACK).x;
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconWidth + scale(7.0f));
-        auto numFilteredLineages =
-            std::ranges::count_if(_lineages, [this](auto const& lineage) { return passesColorFilter(_colorFilter, lineage.colorBitset); });
+        auto numFilteredLineages = std::ranges::count_if(_lineages, [this](auto const& lineage) { return (_colorFilter & lineage.colorBitset) != 0; });
         AlienGui::Text("All filtered (" + std::to_string(numFilteredLineages) + ")");
         if (_allLineages.colorBitset != 0) {
             ImGui::TableSetColumnIndex(CustomizationsColumn);
@@ -931,7 +927,7 @@ void EvolutionDashboardWindow::processLineageTable()
 
         // Lineage rows
         for (auto const& lineage : _lineages) {
-            if (!passesColorFilter(_colorFilter, lineage.colorBitset)) {
+            if ((_colorFilter & lineage.colorBitset) == 0) {
                 continue;
             }
             ImGui::PushID(toInt(lineage.id));
@@ -1279,5 +1275,5 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _lastSteps = std::clamp(_lastSteps, 1000, LiveStatisticsService::MaxLiveSteps);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
     _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumColumns - 1);
-    _colorFilter &= (1 << MAX_COLORS) - 1;
+    _colorFilter &= AllColorsFilter;  // An empty filter is allowed and simply shows no lineages
 }

@@ -89,7 +89,7 @@ private:
     std::array<uint32_t, MAX_COLORS> _cellColors = {};
 
     std::set<int64_t> _selectedLineageIds;
-    int _colorFilter = 0;  // Bitset of the selected cell colors, 0 = no filter
+    int _colorFilter = 0x3ff;  // Bitset for MAX_COLORS cell colors
     std::array<uint64_t, MAX_COLORS> _numLineagesByColor = {};
 
     int _sortColumnIndex = 1;  // 0 = lineage column, 1..NumMetrics = metric columns
