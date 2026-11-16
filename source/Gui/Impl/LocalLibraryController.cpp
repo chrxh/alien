@@ -166,6 +166,11 @@ void LocalLibraryController::process()
             }
             _content.truncated = _content.truncated || autosaveContent.truncated;
         }
+
+        // A folder may have been renamed to another spelling of its name, which the path of the running simulation follows
+        if (auto const& localFile = NewSimulationService::get().getLocalFile()) {
+            NewSimulationService::get().setLocalFile(service.normalize(*localFile));
+        }
         _contentOutdated = false;
         ++_revision;
     }
@@ -447,6 +452,9 @@ std::optional<std::string> LocalLibraryController::onDelete(std::vector<std::fil
         if (nameOfRunningSimulation.has_value() && service.getSimulationName(_libraryFolder, simulationPath) == nameOfRunningSimulation) {
             NewSimulationService::get().setNameInLibrary(std::nullopt);
         }
+        if (auto const& localFile = NewSimulationService::get().getLocalFile(); localFile.has_value() && *localFile == service.normalize(simulationPath)) {
+            NewSimulationService::get().setLocalFile(std::nullopt);
+        }
         service.deleteSimulation(getMainFolder(simulationPath), simulationPath);
     }
     _contentOutdated = true;
@@ -506,7 +514,8 @@ void LocalLibraryController::processPendingLoads()
         auto name = service.getSimulationName(_libraryFolder, pendingLoad.simulationPath);
         auto nameInLibrary = name.has_value() && service.isValidSimulationName(*name) ? name : std::nullopt;
         auto data = _PersisterFacade::get()->fetchReadSimulationData(pendingLoad.requestId);
-        if (auto errorMessage = NewSimulationService::get().loadSimulation(data.simulationDesc, std::nullopt, nameInLibrary)) {
+        if (auto errorMessage =
+                NewSimulationService::get().loadSimulation(data.simulationDesc, std::nullopt, nameInLibrary, service.normalize(pendingLoad.simulationPath))) {
             GenericMessageDialog::get().information("Error", *errorMessage);
             continue;
         }
@@ -611,6 +620,7 @@ void LocalLibraryController::onSaveFinished(PendingSave const& pendingSave, Save
         // Another simulation may have been loaded or created in the meantime
         if (pendingSave.sessionId == _SimulationFacade::get()->getSessionId()) {
             NewSimulationService::get().setNameInLibrary(pendingSave.name);
+            NewSimulationService::get().setLocalFile(service.normalize(data.filename));
         }
     }
     if (pendingSave.automatic && _saveMode == SaveMode_Limited) {
@@ -633,6 +643,8 @@ LocalLibraryController::rename(std::filesystem::path const& simulationPath, std:
     auto isGenome = service.isGenomePath(simulationPath);
     auto const& mainFolder = getMainFolder(simulationPath);
     auto name = service.getSimulationName(_libraryFolder, simulationPath);
+    auto const& localFile = NewSimulationService::get().getLocalFile();
+    auto isLocalFile = localFile.has_value() && *localFile == service.normalize(simulationPath);
     auto isNameTaken =
         isGenome ? service.isGenomeNameTaken(mainFolder, newName, simulationPath) : service.isSimulationNameTaken(mainFolder, newName, simulationPath);
     if (isNameTaken) {
@@ -649,6 +661,9 @@ LocalLibraryController::rename(std::filesystem::path const& simulationPath, std:
 
     if (name.has_value() && name == NewSimulationService::get().getNameInLibrary()) {
         NewSimulationService::get().setNameInLibrary(service.isValidSimulationName(newName) ? std::make_optional(newName) : std::nullopt);
+    }
+    if (isLocalFile) {
+        NewSimulationService::get().setLocalFile(service.normalize(newSimulationPath));
     }
     if (_pendingPicture.has_value() && _pendingPicture->simulationPath == simulationPath) {
         _pendingPicture->simulationPath = newSimulationPath;

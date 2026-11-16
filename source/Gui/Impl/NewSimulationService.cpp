@@ -21,6 +21,7 @@ namespace
     auto constexpr AutosaveOriginSettingsKey = "services.new simulation.autosave origin";
     auto constexpr AutosaveOriginServerSettingsKey = "services.new simulation.autosave origin server";
     auto constexpr AutosaveNameInLibrarySettingsKey = "services.new simulation.autosave name in library";
+    auto constexpr AutosaveLocalFileSettingsKey = "services.new simulation.autosave local file";
 }
 
 void NewSimulationService::createSimulation(Parameters const& parameters)
@@ -39,13 +40,15 @@ void NewSimulationService::createSimulation(Parameters const& parameters)
     TemporalControlService::get().createFlashback();
     _originResourceId.reset();
     _nameInLibrary.reset();
+    _localFile.reset();
     ++_simulationRevision;
 }
 
 std::optional<std::string> NewSimulationService::loadSimulation(
     SimulationDesc const& simulation,
     std::optional<std::string> const& originResourceId,
-    std::optional<std::string> const& nameInLibrary)
+    std::optional<std::string> const& nameInLibrary,
+    std::optional<std::filesystem::path> const& localFile)
 {
     _PersisterFacade::get()->shutdown();
     _SimulationFacade::get()->closeSimulation();
@@ -73,6 +76,7 @@ std::optional<std::string> NewSimulationService::loadSimulation(
     TemporalControlService::get().createFlashback();
     _originResourceId = errorMessage ? std::nullopt : originResourceId;
     _nameInLibrary = errorMessage ? std::nullopt : nameInLibrary;
+    _localFile = errorMessage ? std::nullopt : localFile;
     ++_simulationRevision;
     return errorMessage;
 }
@@ -97,6 +101,16 @@ void NewSimulationService::setNameInLibrary(std::optional<std::string> const& va
     _nameInLibrary = value;
 }
 
+std::optional<std::filesystem::path> const& NewSimulationService::getLocalFile() const
+{
+    return _localFile;
+}
+
+void NewSimulationService::setLocalFile(std::optional<std::filesystem::path> const& value)
+{
+    _localFile = value;
+}
+
 int NewSimulationService::getSimulationRevision() const
 {
     return _simulationRevision;
@@ -107,6 +121,7 @@ void NewSimulationService::storeAutosaveOrigin() const
     GlobalSettings::get().setValue(AutosaveOriginSettingsKey, _originResourceId.value_or(std::string()));
     GlobalSettings::get().setValue(AutosaveOriginServerSettingsKey, NetworkService::get().getServerAddress());
     GlobalSettings::get().setValue(AutosaveNameInLibrarySettingsKey, _nameInLibrary.value_or(std::string()));
+    GlobalSettings::get().setValue(AutosaveLocalFileSettingsKey, _localFile.has_value() ? StringHelper::toUtf8(*_localFile) : std::string());
 }
 
 void NewSimulationService::restoreAutosaveOrigin()
@@ -119,5 +134,9 @@ void NewSimulationService::restoreAutosaveOrigin()
     auto nameInLibrary = GlobalSettings::get().getValue(AutosaveNameInLibrarySettingsKey, std::string());
     if (!nameInLibrary.empty()) {
         _nameInLibrary = nameInLibrary;
+    }
+    auto localFile = GlobalSettings::get().getValue(AutosaveLocalFileSettingsKey, std::string());
+    if (!localFile.empty()) {
+        _localFile = StringHelper::toPath(localFile);
     }
 }
