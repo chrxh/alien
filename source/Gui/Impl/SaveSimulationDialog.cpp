@@ -220,15 +220,12 @@ void SaveSimulationDialog::open(NetworkResourceType resourceType, std::optional<
     _replacedUpload.reset();
     _errorMessage.reset();
 
-    if (suggestedName.empty() || isServerTarget(_target)) {
+    if (suggestedName.empty()) {
         _name = getSuggestedName(resourceType, _target);
     } else if (suggestedName.ends_with('/')) {
         _name = suggestedName + getSuggestedNameWithoutFolder(resourceType);
     } else {
         _name = suggestedName;
-    }
-    if (resourceType == NetworkResourceType_Genome) {
-        _name = getNameInUserFolder(_name);
     }
 
     // A new name starts with the description of what is stored under the suggested name, or else with the last description of its folder
