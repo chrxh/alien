@@ -89,15 +89,25 @@ namespace
         return target == SaveTarget::Community || target == SaveTarget::Private;
     }
 
-    // A simulation of this computer keeps its name. Uploads are collected in a folder with the name of the user.
+    // Uploads are collected in a folder with the name of the user
+    std::string getNameInUserFolder(std::string const& name)
+    {
+        auto userName = NetworkService::get().getLoggedInUserName();
+        if (!userName.has_value()) {
+            return name;
+        }
+        auto userFolder = *userName + "/";
+        return name.starts_with(userFolder) ? name : userFolder + name;
+    }
+
+    // A simulation of this computer keeps its name
     std::string getSuggestedName(NetworkResourceType resourceType, SaveTarget target)
     {
         auto name = getSuggestedNameWithoutFolder(resourceType);
         if (!isServerTarget(target)) {
             return resourceType == NetworkResourceType_Simulation ? NewSimulationService::get().getNameInLibrary().value_or(name) : name;
         }
-        auto userName = NetworkService::get().getLoggedInUserName();
-        return userName.has_value() ? *userName + "/" + name : name;
+        return getNameInUserFolder(name);
     }
 
     std::string getFolder(std::string const& name)
@@ -239,7 +249,7 @@ void SaveSimulationDialog::open(NetworkResourceType resourceType, std::optional<
 void SaveSimulationDialog::openForSharing(
     NetworkResourceType resourceType,
     std::filesystem::path const& file,
-    std::string const& name,
+    std::string const& nameInLibrary,
     std::string const& description)
 {
     if (!NetworkService::get().getLoggedInUserName()) {
@@ -264,7 +274,7 @@ void SaveSimulationDialog::openForSharing(
     _targets = {SaveTarget::Community, SaveTarget::Private};
     _target = SaveTarget::Community;
     _errorMessage.reset();
-    _name = name;
+    _name = getNameInUserFolder(nameInLibrary);
     resetDescription(description);
 
     changeTitle(std::string(resourceType == NetworkResourceType_Simulation ? "Share simulation" : "Share genome") + WindowId);
