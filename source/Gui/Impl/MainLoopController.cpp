@@ -350,6 +350,7 @@ void MainLoopController::processScheduleExit()
         _saveSimRequestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
     }
     _programState = ProgramState::Exiting;
+    processExiting();
 }
 
 void MainLoopController::processExiting()

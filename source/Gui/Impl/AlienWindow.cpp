@@ -1,6 +1,16 @@
 #include "AlienWindow.h"
 
+#include <algorithm>
+#include <limits>
+
+#include <imgui_internal.h>
+
 #include "AlienGui.h"
+
+namespace
+{
+    auto constexpr TopmostStackingIndex = std::numeric_limits<int>::max();
+}
 
 AlienWindow::AlienWindow(
     std::string const& title,
@@ -33,6 +43,8 @@ void AlienWindow::init()
     auto correction = WindowController::get().getContentScaleCorrection();
     _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _defaultSize.x) * correction;
     _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _defaultSize.y) * correction;
+    _stackingIndex = GlobalSettings::get().getValue(_settingsNode + ".stacking index", TopmostStackingIndex);
+    _windows.emplace_back(this);
     initIntern();
 }
 
@@ -48,9 +60,13 @@ void AlienWindow::process()
     auto const& windowMinSize = ImGui::GetStyle().WindowMinSize;
     _savedWindowMinSize = {windowMinSize.x, windowMinSize.y};
 
+    if (!_stackingOrderRestored && wasShownInPreviousFrame()) {
+        restoreStackingOrder();
+    }
     if (_bringToFront) {
         _bringToFront = false;
         if (_state == WindowState::Collapsed) {
+            ImGui::SetWindowSize(_title.c_str(), {_savedSize.x, _savedSize.y});
             _state = WindowState::Normal;
         }
         ImGui::SetNextWindowFocus();
@@ -100,9 +116,20 @@ void AlienWindow::bringToFront()
     _bringToFront = true;
 }
 
+namespace
+{
+    bool isSubmitted(ImGuiWindow* imGuiWindow)
+    {
+        return imGuiWindow != nullptr && (imGuiWindow->Active || imGuiWindow->WasActive);
+    }
+}
+
 void AlienWindow::shutdown()
 {
     shutdownIntern();
+    auto imGuiWindow = ImGui::FindWindowByName(_title.c_str());
+    GlobalSettings::get().setValue(
+        _settingsNode + ".stacking index", isSubmitted(imGuiWindow) ? ImGui::FindWindowDisplayIndex(imGuiWindow) : TopmostStackingIndex);
     GlobalSettings::get().setValue(_settingsNode + ".active", _on);
     GlobalSettings::get().setValue(_settingsNode + ".state", toInt(_state));
     GlobalSettings::get().setValue(_settingsNode + ".is focused", _isFocused);
@@ -110,6 +137,29 @@ void AlienWindow::shutdown()
     GlobalSettings::get().setValue(_settingsNode + ".saved pos.y", _savedPos.y);
     GlobalSettings::get().setValue(_settingsNode + ".saved size.x", _savedSize.x);
     GlobalSettings::get().setValue(_settingsNode + ".saved size.y", _savedSize.y);
+}
+
+bool AlienWindow::wasShownInPreviousFrame() const
+{
+    auto imGuiWindow = ImGui::FindWindowByName(_title.c_str());
+    return imGuiWindow != nullptr && imGuiWindow->WasActive;
+}
+
+void AlienWindow::restoreStackingOrder()
+{
+    _stackingOrderRestored = true;
+
+    std::vector<AlienWindow*> shownWindows;
+    for (auto const& imGuiWindow : ImGui::GetCurrentContext()->Windows) {
+        auto findResult = std::ranges::find(_windows, std::string(imGuiWindow->Name), &AlienWindow::_title);
+        if (findResult != _windows.end() && isSubmitted(imGuiWindow)) {
+            shownWindows.emplace_back(*findResult);
+        }
+    }
+    std::ranges::stable_sort(shownWindows, {}, &AlienWindow::_stackingIndex);
+    for (auto const& window : shownWindows) {
+        ImGui::FocusWindow(ImGui::FindWindowByName(window->_title.c_str()), ImGuiFocusRequestFlags_UnlessBelowModal);
+    }
 }
 
 ImGuiWindowFlags AlienWindow::returnFlagsAndConfigureNextWindow()

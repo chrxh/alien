@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <imgui.h>
 
 #include <Base/GlobalSettings.h>
@@ -63,6 +65,13 @@ private:
     RealVector2D _savedPos;
     RealVector2D _savedSize;
     RealVector2D _savedWindowMinSize;
+    int _stackingIndex = 0;
+
+    static inline std::vector<AlienWindow*> _windows;
+    static inline bool _stackingOrderRestored = false;
+
+    bool wasShownInPreviousFrame() const;
+    static void restoreStackingOrder();
 
     ImGuiWindowFlags returnFlagsAndConfigureNextWindow();
 

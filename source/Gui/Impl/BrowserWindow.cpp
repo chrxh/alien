@@ -188,6 +188,7 @@ void BrowserWindow::showResource(NetworkResourceType resourceType, WorkspaceType
     _galleryWidget->resetPage();
     _resourceIdToShow = resourceId;
     setOn(true);
+    bringToFront();
 }
 
 WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
