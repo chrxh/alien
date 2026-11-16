@@ -53,6 +53,7 @@ void AlienWindow::process()
     if (_bringToFront) {
         _bringToFront = false;
         if (_state == WindowState::Collapsed) {
+            ImGui::SetWindowSize(_title.c_str(), {_savedSize.x, _savedSize.y});
             _state = WindowState::Normal;
         }
         ImGui::SetNextWindowFocus();
