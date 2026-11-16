@@ -89,7 +89,7 @@ namespace
         return target == SaveTarget::Community || target == SaveTarget::Private;
     }
 
-    // Uploads are collected in a folder with the name of the user
+    // Saved simulations and genomes are collected in a folder with the name of the user
     std::string getNameInUserFolder(std::string const& name)
     {
         auto userName = NetworkService::get().getLoggedInUserName();
@@ -103,11 +103,11 @@ namespace
     // A simulation of this computer keeps its name
     std::string getSuggestedName(NetworkResourceType resourceType, SaveTarget target)
     {
-        auto name = getSuggestedNameWithoutFolder(resourceType);
-        if (!isServerTarget(target)) {
-            return resourceType == NetworkResourceType_Simulation ? NewSimulationService::get().getNameInLibrary().value_or(name) : name;
+        auto name = getNameInUserFolder(getSuggestedNameWithoutFolder(resourceType));
+        if (!isServerTarget(target) && resourceType == NetworkResourceType_Simulation) {
+            return NewSimulationService::get().getNameInLibrary().value_or(name);
         }
-        return getNameInUserFolder(name);
+        return name;
     }
 
     std::string getFolder(std::string const& name)
