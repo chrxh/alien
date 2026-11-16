@@ -80,7 +80,6 @@
 #include "UiController.h"
 #include "Viewport.h"
 #include "WindowController.h"
-#include "WindowStackController.h"
 #include "implot.h"
 
 namespace
@@ -160,7 +159,6 @@ _MainWindow::_MainWindow()
     SignalsBufferDialog::get().setup();
     DelayedExecutionController::get().setup();
     UiController::get().setup();
-    WindowStackController::get().setup();
     McpController::get().setup();
     McpSettingsDialog::get().setup();
     McpWindow::get().setup();

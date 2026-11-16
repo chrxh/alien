@@ -237,9 +237,7 @@ add_library(GuiImpl
     Viewport.cpp
     Viewport.h
     WindowController.cpp
-    WindowController.h
-    WindowStackController.cpp
-    WindowStackController.h)
+    WindowController.h)
 
 target_link_libraries(GuiImpl Base)
 target_link_libraries(GuiImpl ConsoleUi)
