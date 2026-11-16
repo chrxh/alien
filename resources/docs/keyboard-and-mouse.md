@@ -41,8 +41,8 @@ Some windows have mouse actions of their own, for example:
 | Alt+2 | Spatial control |
 | Alt+3 | Evolution dashboard |
 | Alt+4 | Simulation parameters |
-| Alt+6 | MCP server |
-| Alt+7 | Log |
+| Alt+5 | MCP server |
+| Alt+6 | Log |
 | Alt+W | Genome editor |
 | Alt+B | Browser |
 

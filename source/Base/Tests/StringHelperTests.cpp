@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <ctime>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -13,6 +14,15 @@ TEST_F(StringHelperTests, join)
     EXPECT_EQ("", StringHelper::join({}));
     EXPECT_EQ("7", StringHelper::join({7}));
     EXPECT_EQ("1, 4, 0", StringHelper::join({1, 4, 0}));
+}
+
+TEST_F(StringHelperTests, formatTimePoint)
+{
+    std::tm localTime{.tm_sec = 5, .tm_min = 19, .tm_hour = 18, .tm_mday = 7, .tm_mon = 9, .tm_year = 126, .tm_isdst = -1};
+    auto timePoint = std::chrono::system_clock::from_time_t(std::mktime(&localTime));
+    EXPECT_EQ("2026-10-07 18:19:05", StringHelper::format(timePoint));
+    EXPECT_EQ("2026-10-07", StringHelper::formatDate(timePoint));
+    EXPECT_EQ("18:19:05", StringHelper::formatTimeOfDay(timePoint));
 }
 
 TEST_F(StringHelperTests, formatUtc)

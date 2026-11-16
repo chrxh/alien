@@ -1534,6 +1534,18 @@ void AlienGui::Text(std::string const& text)
     Text(TextParameters().text(text));
 }
 
+void AlienGui::Timestamp(std::chrono::system_clock::time_point const& timePoint)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextFaintColor.Value);
+    Text(StringHelper::formatDate(timePoint));
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine(0, ImGui::CalcTextSize(" ").x);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDimColor.Value);
+    Text(StringHelper::formatTimeOfDay(timePoint));
+    ImGui::PopStyleColor();
+}
+
 void AlienGui::AddTextWithSubpixelAccuracy(
     ImDrawList* drawList,
     ImFont* font,

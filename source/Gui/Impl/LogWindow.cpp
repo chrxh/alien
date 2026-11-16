@@ -5,7 +5,6 @@
 #include <imgui.h>
 
 #include <Base/GlobalSettings.h>
-#include <Base/StringHelper.h>
 
 #include "AlienGui.h"
 #include "GuiLogger.h"
@@ -54,14 +53,14 @@ void LogWindow::processIntern()
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                AlienGui::Text(StringHelper::format(message.time));
+                AlienGui::Timestamp(message.time);
 
                 ImGui::TableNextColumn();
                 auto firstLine = message.text.substr(0, message.text.find('\n'));
                 if (firstLine.size() < message.text.size()) {
                     firstLine += " ...";
                 }
-                auto textColor = message.priority == Priority::Important ? Const::AccentColor : Const::TextDimColor;
+                auto textColor = message.priority == Priority::Important ? Const::TextBaseColor : Const::TextDimColor;
                 ImGui::PushStyleColor(ImGuiCol_Text, textColor.Value);
                 AlienGui::Text(AlienGui::TextParameters().text(firstLine).truncate(true));
                 ImGui::PopStyleColor();

@@ -56,7 +56,7 @@ See [Energy](energy.md#troubleshooting-energy) and [Evolution experiments](evolu
 
 ## My AI agent cannot connect
 
-- In the **MCP server** window (Alt+6), check that the status is *Running*.
+- In the **MCP server** window (Alt+5), check that the status is *Running*.
 - The agent must connect to ALIEN from the same computer. Chat applications that connect through their provider's servers on the internet cannot reach ALIEN.
 - The URL configured in the agent must match the one shown in the **MCP server** window, including the port.
 - If another program uses the port, choose a different port with the **Settings** button of the **MCP server** window.

@@ -423,8 +423,8 @@ void StyleService::setupPalette() const
     UnsavedChangesColor = WarningColor;
     UnsavedChangesBackgroundColor = themed(ImColor::HSV(0.094f, 0.545f, 0.216f), ImColor::HSV(0.094f, 0.300f, 0.970f));
 
-    McpSuccessColor = themed(ImColor::HSV(0.43f, 0.40f, 0.68f), ImColor::HSV(0.43f, 0.75f, 0.50f));
-    McpRunningBadgeColor = themed(ImColor::HSV(0.43f, 0.45f, 0.20f), ImColor::HSV(0.43f, 0.25f, 0.88f));
+    McpSuccessColor = AccentColor;
+    McpRunningBadgeColor = AccentDeepColor;
 
     // Icon buttons keep a blue tint so they stand out against the neutral panels
     ToolbarButtonTextColor = themed(ImColor::HSV(0.530f, 0.320f, 0.950f), ImColor::HSV(0.560f, 0.650f, 0.500f));

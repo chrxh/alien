@@ -95,14 +95,32 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
     return formatIntern(duration);
 }
 
+namespace
+{
+    std::string formatLocalTime(std::chrono::system_clock::time_point const& timePoint, char const* pattern)
+    {
+        std::time_t time_t = std::chrono::system_clock::to_time_t(timePoint);
+
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&time_t), pattern);
+
+        return ss.str();
+    }
+}
+
 std::string StringHelper::format(std::chrono::system_clock::time_point const& timePoint)
 {
-    std::time_t time_t = std::chrono::system_clock::to_time_t(timePoint);
+    return formatLocalTime(timePoint, "%Y-%m-%d %H:%M:%S");
+}
 
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&time_t), "%Y-%m-%d %H:%M:%S");
+std::string StringHelper::formatDate(std::chrono::system_clock::time_point const& timePoint)
+{
+    return formatLocalTime(timePoint, "%Y-%m-%d");
+}
 
-    return ss.str();
+std::string StringHelper::formatTimeOfDay(std::chrono::system_clock::time_point const& timePoint)
+{
+    return formatLocalTime(timePoint, "%H:%M:%S");
 }
 
 std::string StringHelper::formatUtc(std::chrono::system_clock::time_point const& timePoint)

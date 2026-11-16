@@ -36,7 +36,7 @@ KernelLaunchSettings KernelLaunchSettingsService::deriveFromDevice(int deviceNum
     result.numBlocks = calcNumBlocks(prop.multiProcessorCount);
     result.fluidWarpsPerBlock = calcFluidWarpsPerBlock();
 
-    log(Priority::Important,
+    log(Priority::Unimportant,
         "kernel launch: " + std::to_string(result.numBlocks) + " blocks, " + std::to_string(result.fluidWarpsPerBlock) + " warps per fluid block ("
             + std::to_string(prop.multiProcessorCount) + " multiprocessors, "
             + std::to_string(getBlocksPerMultiProcessor(result.fluidWarpsPerBlock * WARP_SIZE) * result.fluidWarpsPerBlock) + " resident warps each)");
