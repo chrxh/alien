@@ -356,16 +356,18 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
     auto ignoresNameAndDescription = _target == SaveTarget::OtherLocation || _mode == Mode::Replacing;
 
     processLabel("Name");
+    if (!ignoresNameAndDescription) {
+        AlienGui::HelpMarker(
+            "Use the `/`-notation to put the " + resourceTypeString
+            + " into a folder. Missing folders are created automatically.\nFor instance, the name `Biome/Water world/Initial/Variant 1` creates the nested "
+              "folders `Biome`, `Water world` and `Initial`.");
+    }
     ImGui::BeginDisabled(ignoresNameAndDescription);
     if (AlienGui::InputText(
             AlienGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType) + " name, use / to create folders").textWidth(0), _name)) {
         _errorMessage.reset();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-        "Use the `/`-notation to put the " + resourceTypeString
-        + " into a folder. Missing folders are created automatically.\nFor instance, the name `Biome/Water world/Initial/Variant 1` creates the nested "
-          "folders `Biome`, `Water world` and `Initial`."));
     if (auto const& message = _errorMessage.has_value() ? _errorMessage : outcome.message) {
         ImGui::PushStyleColor(ImGuiCol_Text, Const::WarningColor.Value);
         ImGui::PushTextWrapPos(0.0f);
@@ -375,11 +377,17 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
     }
 
     addSectionSpacing();
-    processLabel("Description", "optional");
+    if (_descriptionEditable) {
+        processLabel("Description", "optional");
+    } else {
+        processLabel("Description");
+        AlienGui::HelpMarker(
+            "The description of the " + resourceTypeString
+            + " with this name is longer than this field can show. It is kept and can be changed in its text file.");
+    }
     auto hasTargetSelection = _targets.size() > 1;
     auto lowerSectionHeight = _mode == Mode::Replacing ? ReplaceSectionHeight : (hasTargetSelection ? TargetSectionHeight : 0.0f);
     ImGui::PushID("description");
-    ImGui::BeginGroup();
     ImGui::BeginDisabled(!_descriptionEditable || ignoresNameAndDescription);
     if (AlienGui::InputTextMultiline(
             AlienGui::InputTextMultilineParameters()
@@ -393,12 +401,7 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
         _ownDescription = _description;
     }
     ImGui::EndDisabled();
-    ImGui::EndGroup();
     ImGui::PopID();
-    if (!_descriptionEditable) {
-        AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-            "The description of the simulation with this name is longer than this field can show. It is kept and can be changed in its text file."));
-    }
     auto privacyTooltip =
         "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.";
     if (_mode == Mode::Replacing) {

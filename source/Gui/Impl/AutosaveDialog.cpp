@@ -75,12 +75,13 @@ void AutosaveDialog::processSettings(bool subfolderValid)
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Interval (min)").textWidth(SettingsTextWidth), _interval);
     _interval = std::max(1, _interval);
 
-    ImGui::BeginGroup();
-    AlienGui::InputText(AlienGui::InputTextParameters().name("Subfolder").textWidth(SettingsTextWidth), _folderName);
-    ImGui::EndGroup();
-    AlienGui::Tooltip(AlienGui::TooltipParameters().text(
-        "The subfolder in which the autosaves are stored, for instance one for each simulation run. Use / or \\ for nested subfolders. Without a "
-        "subfolder, they are stored in the folder itself."));
+    AlienGui::InputText(
+        AlienGui::InputTextParameters()
+            .name("Subfolder")
+            .textWidth(SettingsTextWidth)
+            .tooltip("The subfolder in which the autosaves are stored, for instance one for each simulation run. Use / or \\ for nested subfolders. Without a "
+                     "subfolder, they are stored in the folder itself."),
+        _folderName);
     if (!subfolderValid) {
         processWrappedText("The subfolder is not valid. A name must not contain < > : \" | ? * and must not begin or end with a dot.", Const::WarningColor);
     }

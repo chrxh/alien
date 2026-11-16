@@ -108,18 +108,20 @@ void EditSimulationDialog::processForLeaf()
 
     AlienGui::Separator();
 
-    ImGui::PushID("description");
-    ImGui::BeginGroup();
-    ImGui::BeginDisabled(!_descriptionEditable);
-    AlienGui::InputTextMultiline(
-        AlienGui::InputTextMultilineParameters().hint("Description (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(FooterHeight)),
-        _newDescription);
-    ImGui::EndDisabled();
-    ImGui::EndGroup();
-    ImGui::PopID();
+    std::optional<std::string> descriptionTooltip;
     if (!_descriptionEditable) {
-        AlienGui::Tooltip(AlienGui::TooltipParameters().text("The description is longer than this field can show. It can be changed in its text file."));
+        descriptionTooltip = "The description is longer than this field can show. It can be changed in its text file.";
     }
+    ImGui::PushID("description");
+    AlienGui::InputTextMultiline(
+        AlienGui::InputTextMultilineParameters()
+            .hint("Description (optional)")
+            .textWidth(0)
+            .height(ImGui::GetContentRegionAvail().y - scale(FooterHeight))
+            .readOnly(!_descriptionEditable)
+            .tooltip(descriptionTooltip),
+        _newDescription);
+    ImGui::PopID();
 
     AlienGui::Separator();
 

@@ -538,12 +538,24 @@ void AlienGui::InputFloatColorMatrix(
     BasicInputColorMatrix<float>(matrixParameters, value, dialog, enabled);
 }
 
+namespace
+{
+    float calcHelpMarkerWidthWithoutLabel(std::string const& name, std::optional<std::string> const& tooltip)
+    {
+        if (!name.empty() || !tooltip.has_value()) {
+            return 0.0f;
+        }
+        return ImGui::GetStyle().ItemSpacing.x + ImGui::CalcTextSize(ICON_FA_QUESTION_CIRCLE).x;
+    }
+}
+
 bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto embeddedButtonWidth = scale(30.0f) + ImGui::GetStyle().FramePadding.x;
     auto embeddedButtonsWidth = (parameters._folderButton ? embeddedButtonWidth : 0) + (parameters._generateValueFunc ? embeddedButtonWidth : 0);
-    ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - embeddedButtonsWidth);
+    auto labelWidth = scale(parameters._textWidth) + calcHelpMarkerWidthWithoutLabel(parameters._name, parameters._tooltip);
+    ImGui::SetNextItemWidth(width - labelWidth - embeddedButtonsWidth);
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleService::get().getMonospaceMediumFont());
     }
@@ -661,18 +673,31 @@ bool AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters
     static char buffer[1024 * 16];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    auto textWidth = StyleService::get().scale(parameters._textWidth);
+    auto labelWidth = StyleService::get().scale(parameters._textWidth) + calcHelpMarkerWidthWithoutLabel(parameters._name, parameters._tooltip);
     auto height = parameters._height == 0 ? ImGui::GetContentRegionAvail().y : StyleService::get().scale(parameters._height);
 
+    ImGuiInputTextFlags flags = ImGuiInputTextFlags_Multiline;
+    if (parameters._readOnly) {
+        flags |= ImGuiInputTextFlags_ReadOnly;
+        ImGui::BeginDisabled();
+    }
     auto result = ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
         parameters._hint.c_str(),
         buffer,
         IM_ARRAYSIZE(buffer),
-        {ImGui::GetContentRegionAvail().x - textWidth, height},
-        ImGuiInputTextFlags_Multiline);
-    ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+        {ImGui::GetContentRegionAvail().x - labelWidth, height},
+        flags);
+    if (parameters._readOnly) {
+        ImGui::EndDisabled();
+    }
+    if (!parameters._name.empty()) {
+        ImGui::SameLine();
+        AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    }
+    if (parameters._tooltip) {
+        AlienGui::HelpMarker(*parameters._tooltip);
+    }
 
     text = std::string(buffer);
     return result;

@@ -263,6 +263,8 @@ public:
         MEMBER(InputTextMultilineParameters, std::string, hint, "");
         MEMBER(InputTextMultilineParameters, float, textWidth, 100);
         MEMBER(InputTextMultilineParameters, float, height, 100.0f);
+        MEMBER(InputTextMultilineParameters, bool, readOnly, false);
+        MEMBER(InputTextMultilineParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text);
 
