@@ -41,7 +41,7 @@ public:
     void open(NetworkResourceType resourceType, std::optional<SaveTarget> target = std::nullopt, std::string const& suggestedName = "");
 
     // Uploads a simulation or a genome of this computer
-    void openForSharing(NetworkResourceType resourceType, std::filesystem::path const& file, std::string const& name, std::string const& description);
+    void openForSharing(NetworkResourceType resourceType, std::filesystem::path const& file, std::string const& nameInLibrary, std::string const& description);
 
     // Replaces the content and the picture of an own upload by the running simulation or the genome of the genome editor
     void openForReplacing(NetworkResourceRawTO const& upload);
