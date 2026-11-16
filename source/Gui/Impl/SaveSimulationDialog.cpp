@@ -227,6 +227,9 @@ void SaveSimulationDialog::open(NetworkResourceType resourceType, std::optional<
     } else {
         _name = suggestedName;
     }
+    if (resourceType == NetworkResourceType_Genome) {
+        _name = getNameInUserFolder(_name);
+    }
 
     // A new name starts with the description of what is stored under the suggested name, or else with the last description of its folder
     auto rememberedDescription = _descriptionByTypeAndFolder.find({_resourceType, getFolder(_name)});
