@@ -5,6 +5,7 @@
 #include <cmath>
 #include <ctime>
 #include <limits>
+#include <ranges>
 #include <utility>
 #include <cstdio>
 
@@ -34,7 +35,10 @@ namespace
     auto constexpr LiveStatisticsDeltaTime = 50;  // In millisec
     auto constexpr RateAveragingTimesteps = LiveStatisticsService::RateAveragingTimesteps;
 
-    auto constexpr ColorChipSize = 22.0f;
+    int constexpr AllColorsFilter = (1 << MAX_COLORS) - 1;
+    auto constexpr FilterChipPadding = 8.0f;
+    auto constexpr FilterChipSpacing = 6.0f;
+    auto constexpr FilterChipSwatchTextSpacing = 6.0f;
     auto constexpr LineageChipSize = 11.0f;
     auto constexpr LineageChipSpacing = 6.0f;
     auto constexpr LineageHueShift = 0.03f;    // Hue offset between consecutive plot rows of a lineage
@@ -81,13 +85,9 @@ namespace
         {"Avg muscles /1K", "Avg muscles /1K", 2, 2, 105.0f},
     };
 
-    ImColor toImColor(uint32_t rgb, float alpha = 1.0f, float brightness = 1.0f)
+    ImColor toImColor(uint32_t rgb)
     {
-        return ImColor(
-            toInt(toFloat((rgb >> 16) & 0xff) * brightness),
-            toInt(toFloat((rgb >> 8) & 0xff) * brightness),
-            toInt(toFloat(rgb & 0xff) * brightness),
-            toInt(alpha * 255.0f));
+        return ImColor(toInt((rgb >> 16) & 0xff), toInt((rgb >> 8) & 0xff), toInt(rgb & 0xff));
     }
 
     ImColor getLineageColor(int64_t lineageId, int hueShiftSteps = 0)
@@ -419,6 +419,7 @@ void EvolutionDashboardWindow::updateTableData()
 
     // Table rows from the latest live sample (rates per 1K time steps)
     _lineages.clear();
+    _numLineagesByColor.fill(0);
     if (liveHistory.empty()) {
         return;
     }
@@ -444,6 +445,14 @@ void EvolutionDashboardWindow::updateTableData()
         _lineages.emplace_back(std::move(lineage));
     }
     sortLineages();
+
+    for (auto const& lineage : _lineages) {
+        for (auto&& [color, numLineages] : _numLineagesByColor | std::views::enumerate) {
+            if ((lineage.colorBitset & (1 << color)) != 0) {
+                ++numLineages;
+            }
+        }
+    }
 
     // Current values for the table summary row
     DataPointCollection const* referenceDataPoints = liveHistory.size() >= 2 ? &liveHistory.at(referenceIndex) : nullptr;
@@ -735,37 +744,94 @@ void EvolutionDashboardWindow::processCard(
     ImGui::PopStyleVar();
 }
 
+namespace
+{
+    float calcFilterChipWidth(std::string const& text, bool hasSwatch)
+    {
+        auto width = scale(FilterChipPadding) * 2 + ImGui::CalcTextSize(text.c_str()).x;
+        if (hasSwatch) {
+            width += scale(SwatchSize);
+            if (!text.empty()) {
+                width += scale(FilterChipSwatchTextSpacing);
+            }
+        }
+        return width;
+    }
+
+    bool filterChip(std::string const& text, bool selected, int colorBitset, std::array<uint32_t, MAX_COLORS> const& cellColors)
+    {
+        auto const& style = ImGui::GetStyle();
+        auto pos = ImGui::GetCursorScreenPos();
+        auto size = ImVec2{calcFilterChipWidth(text, colorBitset != 0), ImGui::GetFrameHeight()};
+        auto clicked = ImGui::InvisibleButton("##chip", size);
+
+        auto drawList = ImGui::GetWindowDrawList();
+        auto maxPos = ImVec2{pos.x + size.x, pos.y + size.y};
+        if (selected) {
+            drawList->AddRectFilled(pos, maxPos, Const::AccentDeepColor, style.FrameRounding);
+            drawList->AddRect(pos, maxPos, Const::AccentLineColor, style.FrameRounding);
+        } else {
+            drawList->AddRectFilled(pos, maxPos, ImGui::GetColorU32(ImGui::IsItemHovered() ? ImGuiCol_ButtonHovered : ImGuiCol_Button), style.FrameRounding);
+        }
+
+        auto textPosX = pos.x + scale(FilterChipPadding);
+        if (colorBitset != 0) {
+            drawColorSwatches(drawList, {textPosX, pos.y}, colorBitset, size.y, cellColors);
+            textPosX += scale(SwatchSize + FilterChipSwatchTextSpacing);
+        }
+        drawList->AddText({textPosX, pos.y + style.FramePadding.y}, selected ? (ImU32)Const::TextStrongColor : ImGui::GetColorU32(ImGuiCol_Text), text.c_str());
+        return clicked;
+    }
+
+    std::string getNumLineagesTooltip(uint64_t numLineages)
+    {
+        if (numLineages == 0) {
+            return "No lineage has this customization";
+        }
+        return StringHelper::formatCount(numLineages, "lineage") + (numLineages == 1 ? " has" : " have") + " this customization";
+    }
+}
+
 void EvolutionDashboardWindow::processFilterBar()
 {
     ImGui::Spacing();
     AlienGui::Separator();
-    AlienGui::Text("Filter by customizations");
+
+    auto rightEdge = ImGui::GetCursorScreenPos().x + ImGui::GetContentRegionAvail().x;
+    ImGui::AlignTextToFramePadding();
+    AlienGui::Text("Filter by customization");
+    AlienGui::HelpMarker(
+        "Every cell has one of ten customization colors, and many simulation parameters can be set per color. Select colors to list only the lineages that "
+        "use at least one of them.");
     ImGui::SameLine(0, scale(12.0f));
 
-    auto drawList = ImGui::GetWindowDrawList();
-    auto chipSize = scale(ColorChipSize);
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        ImGui::PushID(i);
-        auto pos = ImGui::GetCursorScreenPos();
-        if (ImGui::InvisibleButton("##chip", {chipSize, chipSize})) {
-            _colorFilter ^= 1 << i;
+    ImGui::PushID("all");
+    if (filterChip("All", _colorFilter == AllColorsFilter, 0, _cellColors)) {
+        _colorFilter = AllColorsFilter;
+    }
+    ImGui::PopID();
+
+    auto selectedColors = _colorFilter != AllColorsFilter ? _colorFilter : 0;
+    std::vector<int> listedColors;
+    auto widthWithCounts = 0.0f;
+    for (auto const& [color, numLineages] : _numLineagesByColor | std::views::enumerate) {
+        if (numLineages > 0 || (selectedColors & (1 << color)) != 0) {
+            listedColors.emplace_back(toInt(color));
+            widthWithCounts += scale(FilterChipSpacing) + calcFilterChipWidth(StringHelper::format(numLineages), true);
         }
-        auto active = (_colorFilter & (1 << i)) != 0;
-        auto color = toImColor(_cellColors.at(i), active ? 1.0f : 0.2f, 0.75f);
-        drawList->AddRectFilled(pos, {pos.x + chipSize, pos.y + chipSize}, color, scale(5.0f));
-        if (active) {
-            drawList->AddRect(
-                {pos.x - scale(1.5f), pos.y - scale(1.5f)},
-                {pos.x + chipSize + scale(1.5f), pos.y + chipSize + scale(1.5f)},
-                Const::TextStrongColor,
-                scale(6.0f),
-                0,
-                scale(1.5f));
+    }
+    auto showCounts = widthWithCounts <= rightEdge - ImGui::GetItemRectMax().x;
+
+    for (auto const& color : listedColors) {
+        auto numLineages = _numLineagesByColor.at(color);
+        ImGui::SameLine(0, scale(FilterChipSpacing));
+        ImGui::PushID(color);
+        if (filterChip(showCounts ? StringHelper::format(numLineages) : "", (selectedColors & (1 << color)) != 0, 1 << color, _cellColors)) {
+            _colorFilter = selectedColors ^ (1 << color);
         }
         ImGui::PopID();
-        ImGui::SameLine(0, scale(5.0f));
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(getNumLineagesTooltip(numLineages)));
     }
-    ImGui::NewLine();
     ImGui::Spacing();
 }
 
@@ -1209,5 +1275,5 @@ void EvolutionDashboardWindow::validateAndCorrect()
     _lastSteps = std::clamp(_lastSteps, 1000, LiveStatisticsService::MaxLiveSteps);
     _plotHeight = std::clamp(_plotHeight, MinPlotHeight, MaxPlotHeight);
     _sortColumnIndex = std::clamp(_sortColumnIndex, 0, NumColumns - 1);
-    _colorFilter &= (1 << MAX_COLORS) - 1;  // An empty filter is allowed and simply shows no lineages
+    _colorFilter &= AllColorsFilter;  // An empty filter is allowed and simply shows no lineages
 }
