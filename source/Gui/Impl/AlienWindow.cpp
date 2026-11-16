@@ -1,6 +1,7 @@
 #include "AlienWindow.h"
 
 #include "AlienGui.h"
+#include "WindowStackController.h"
 
 AlienWindow::AlienWindow(
     std::string const& title,
@@ -33,6 +34,7 @@ void AlienWindow::init()
     auto correction = WindowController::get().getContentScaleCorrection();
     _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _defaultSize.x) * correction;
     _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _defaultSize.y) * correction;
+    WindowStackController::get().registerWindow(_title);
     initIntern();
 }
 
