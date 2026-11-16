@@ -541,10 +541,10 @@ void MainLoopController::processMenubar()
             .closeMenuWhenItemClicked(false),
         [&] { SimulationParametersMainWindow::get().setOn(!SimulationParametersMainWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("MCP server").keyAlt(true).key(ImGuiKey_6).selected(McpWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("MCP server").keyAlt(true).key(ImGuiKey_5).selected(McpWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { McpWindow::get().setOn(!McpWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_7).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_6).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
     AlienGui::EndMenu();
 

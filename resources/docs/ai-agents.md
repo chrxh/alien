@@ -6,7 +6,7 @@ This is an easy way to get started with ALIEN. You do not need to know where eac
 
 ## Connecting an agent
 
-1. Open **Windows > MCP server** (Alt+6). The button with the agent icon in the edit mode tool bar also opens this window.
+1. Open **Windows > MCP server** (Alt+5). The button with the agent icon in the edit mode tool bar also opens this window.
 2. Click **Start server**. The status changes to *Running*. ALIEN remembers this and starts the server automatically next time.
 3. In your AI agent, add an MCP server of type *HTTP*, which some agents call *Streamable HTTP*. Use the URL shown in the window. By default it is `http://127.0.0.1:8765/mcp`. The **Copy** button copies it to the clipboard.
 4. Ask the agent to do something in ALIEN.
