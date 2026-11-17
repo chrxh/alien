@@ -122,6 +122,14 @@ namespace
         return target == SaveTarget::Private ? WorkspaceType_Private : WorkspaceType_Community;
     }
 
+    SaveTarget toSaveTarget(WorkspaceType workspaceType)
+    {
+        if (isLocalWorkspace(workspaceType)) {
+            return SaveTarget::ThisComputer;
+        }
+        return workspaceType == WorkspaceType_Private ? SaveTarget::Private : SaveTarget::Community;
+    }
+
     // The uploads that only the user sees are a place to save to, and one of two visibilities of an upload
     std::string getTargetLabel(SaveTarget target, NetworkResourceType resourceType, bool asPlace)
     {
@@ -229,7 +237,7 @@ void SaveSimulationDialog::open(NetworkResourceType resourceType, std::optional<
     _targetChosen = false;
     _simulationFile.reset();
     _savedGenome.reset();
-    _replacedUpload.reset();
+    _replacedResource.reset();
     _errorMessage.reset();
 
     if (suggestedName.empty()) {
@@ -270,7 +278,7 @@ void SaveSimulationDialog::openForSharing(
     }
     _simulationFile.reset();
     _savedGenome.reset();
-    _replacedUpload.reset();
+    _replacedResource.reset();
     if (resourceType == NetworkResourceType_Simulation) {
         _simulationFile = file;
     } else {
@@ -294,22 +302,23 @@ void SaveSimulationDialog::openForSharing(
     AlienDialog::open();
 }
 
-void SaveSimulationDialog::openForReplacing(NetworkResourceRawTO const& upload)
+void SaveSimulationDialog::openForReplacing(NetworkResourceRawTO const& resource)
 {
-    if (!NetworkService::get().getLoggedInUserName()) {
+    auto target = toSaveTarget(resource->workspaceType);
+    if (isServerTarget(target) && !NetworkService::get().getLoggedInUserName()) {
         LoginDialog::get().open();
         return;
     }
     _mode = Mode::Replacing;
-    _resourceType = upload->resourceType;
-    _target = upload->workspaceType == WorkspaceType_Private ? SaveTarget::Private : SaveTarget::Community;
+    _resourceType = resource->resourceType;
+    _target = target;
     _targets = {_target};
     _simulationFile.reset();
     _savedGenome.reset();
-    _replacedUpload = upload;
+    _replacedResource = resource;
     _errorMessage.reset();
-    _name = upload->resourceName;
-    resetDescription(upload->description);
+    _name = resource->resourceName;
+    resetDescription(resource->description);
 
     if (_resourceType == NetworkResourceType_Simulation) {
         changeTitle("Replace simulation" + std::string(WindowId));
@@ -374,7 +383,7 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
 
-    // The file dialog asks for the name of a file in another location, which has no description. A replaced upload keeps both.
+    // The file dialog asks for the name of a file in another location, which has no description. What is replaced keeps both.
     auto ignoresNameAndDescription = _target == SaveTarget::OtherLocation || _mode == Mode::Replacing;
 
     processLabel("Name");
@@ -428,11 +437,16 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
         "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.";
     if (_mode == Mode::Replacing) {
         auto replacement = std::string(_resourceType == NetworkResourceType_Simulation ? "the current simulation" : "the genome of the genome editor");
+        auto explanation = isServerTarget(_target)
+            ? "The content and the picture of this upload are replaced by " + replacement + ". Its name, description and reactions are kept."
+            : "The content and the picture of this " + resourceTypeString + " are replaced by " + replacement + ". Its name and description are kept.";
         addSectionSpacing();
         ImGui::PushTextWrapPos(0.0f);
-        AlienGui::Text("The content and the picture of this upload are replaced by " + replacement + ". Its name, description and reactions are kept.");
+        AlienGui::Text(explanation);
         ImGui::PopTextWrapPos();
-        AlienGui::PrivacyPolicyLink(privacyTooltip);
+        if (isServerTarget(_target)) {
+            AlienGui::PrivacyPolicyLink(privacyTooltip);
+        }
         return;
     }
     if (!hasTargetSelection) {
@@ -471,11 +485,11 @@ void SaveSimulationDialog::processFooter(Outcome const& outcome)
         if (_target == SaveTarget::OtherLocation) {
             return ICON_FA_SAVE "  Save...";
         }
+        if (_mode == Mode::Replacing || outcome.replacedResourceId.has_value()) {
+            return ICON_FA_EXCHANGE_ALT "  Replace";
+        }
         if (_target == SaveTarget::ThisComputer) {
             return outcome.replacesFile ? ICON_FA_SAVE "  Replace" : ICON_FA_SAVE "  Save";
-        }
-        if (outcome.replacedResourceId.has_value()) {
-            return ICON_FA_EXCHANGE_ALT "  Replace";
         }
         return _target == SaveTarget::Community ? ICON_FA_UPLOAD "  Share with the community" : ICON_FA_LOCK "  Upload privately";
     }();
@@ -499,7 +513,11 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
 
     if (_mode == Mode::Replacing) {
         result.possible = true;
-        result.replacedResourceId = _replacedUpload->id;
+        if (isServerTarget(_target)) {
+            result.replacedResourceId = _replacedResource->id;
+        } else {
+            result.replacesFile = true;
+        }
         return result;
     }
     if (_target == SaveTarget::OtherLocation) {
@@ -611,8 +629,18 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
     }
 
     if (_mode == Mode::Replacing) {
+        if (_target == SaveTarget::ThisComputer) {
+
+            // What is replaced keeps its description
+            if (auto errorMessage = saveOnThisComputer(_replacedResource->resourceName, std::nullopt)) {
+                _errorMessage = errorMessage;
+                return;
+            }
+            close();
+            return;
+        }
         close();
-        onReplaceUpload(_replacedUpload->id, _replacedUpload->workspaceType);
+        onReplaceUpload(_replacedResource->id, _replacedResource->workspaceType);
         return;
     }
     if (_mode == Mode::RunningResource && _remembersTarget && _targetChosen) {
@@ -633,7 +661,6 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
         return;
     }
     if (_target == SaveTarget::ThisComputer) {
-        auto& controller = LocalLibraryController::get();
 
         // What is replaced keeps its description unless another one has been written here
         auto keepsDescription = outcome.replacesFile && (!_descriptionEdited || !_descriptionEditable);
@@ -641,14 +668,9 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
             _descriptionByTypeAndFolder[{_resourceType, getFolder(name)}] = _description;
         }
         auto description = keepsDescription ? std::nullopt : std::make_optional(_description);
-        if (_resourceType == NetworkResourceType_Simulation) {
-            controller.onSave(name, description, _preview.getJpg());
-        } else {
-            if (auto errorMessage = controller.onSaveGenome(name, GenomeEditorWindow::get().getCurrentGenome(), description, _preview.getJpg())) {
-                _errorMessage = errorMessage;
-                return;
-            }
-            GenomeEditorWindow::get().markCurrentGenomeAsSaved();
+        if (auto errorMessage = saveOnThisComputer(name, description)) {
+            _errorMessage = errorMessage;
+            return;
         }
         close();
         return;
@@ -667,6 +689,20 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
     } else {
         onUpload();
     }
+}
+
+std::optional<std::string> SaveSimulationDialog::saveOnThisComputer(std::string const& name, std::optional<std::string> const& description)
+{
+    auto& controller = LocalLibraryController::get();
+    if (_resourceType == NetworkResourceType_Simulation) {
+        controller.onSave(name, description, _preview.getJpg());
+        return std::nullopt;
+    }
+    if (auto errorMessage = controller.onSaveGenome(name, GenomeEditorWindow::get().getCurrentGenome(), description, _preview.getJpg())) {
+        return errorMessage;
+    }
+    GenomeEditorWindow::get().markCurrentGenomeAsSaved();
+    return std::nullopt;
 }
 
 void SaveSimulationDialog::onUpload()

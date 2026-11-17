@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <vector>
 #include <numeric>
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -112,10 +113,113 @@ namespace
         return AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(icon).transparentBackground(false).tooltip(tooltip));
     }
 
+    AlienGui::ActionButtonParameters createDeleteButtonParameters()
+    {
+        return AlienGui::ActionButtonParameters().buttonText(ICON_FA_TRASH "  Delete").transparentBackground(false);
+    }
+
     bool processDeleteButton()
     {
         ImGui::SameLine();
-        return AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_TRASH "  Delete").transparentBackground(false));
+        return AlienGui::ActionButton(createDeleteButtonParameters());
+    }
+
+    // Nothing can be saved under the name of an autosave or under a name that is not valid
+    bool isReplaceable(NetworkResourceRawTO const& rawTO)
+    {
+        if (rawTO->workspaceType == WorkspaceType_Autosave) {
+            return false;
+        }
+        if (rawTO->workspaceType != WorkspaceType_Local) {
+            return true;
+        }
+        auto& service = LocalLibraryService::get();
+        return rawTO->resourceType == NetworkResourceType_Simulation ? service.isValidSimulationName(rawTO->resourceName)
+                                                                     : service.isValidGenomeName(rawTO->resourceName);
+    }
+
+    struct ResourceButton
+    {
+        AlienGui::ActionButtonParameters parameters;
+        std::function<void()> action;
+        int rowIndex = 0;
+    };
+
+    // A button that does not fit into the current row starts the next one
+    void arrangeInRows(std::vector<ResourceButton>& buttons, float width)
+    {
+        auto spacing = ImGui::GetStyle().ItemSpacing.x;
+        auto rowIndex = 0;
+        std::optional<float> rowWidth;
+        for (auto& button : buttons) {
+            auto buttonWidth = AlienGui::CalcActionButtonWidth(button.parameters);
+            if (rowWidth.has_value() && *rowWidth + spacing + buttonWidth > width) {
+                ++rowIndex;
+                rowWidth.reset();
+            }
+            rowWidth = rowWidth.has_value() ? *rowWidth + spacing + buttonWidth : buttonWidth;
+            button.rowIndex = rowIndex;
+        }
+    }
+
+    std::vector<ResourceButton>
+    createResourceButtons(NetworkResourceTreeTO const& treeTO, BrowserData const& data, _BrowserDetailsWidget::Actions const& actions)
+    {
+        auto rawTO = treeTO->getLeaf().rawTO;
+        auto resourceTypeString = std::string(rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome");
+
+        std::vector<ResourceButton> result;
+        result.emplace_back(ResourceButton{
+            .parameters =
+                AlienGui::ActionButtonParameters().buttonText(ICON_FA_FOLDER_OPEN "  Open").highlighted(true).frame(true).transparentBackground(false),
+            .action = [data, treeTO] { data->onOpenResource(treeTO->getLeaf()); }});
+
+        auto isLocal = isLocalWorkspace(rawTO->workspaceType);
+        auto canChange = data->isOwner(rawTO) && (isLocal || NetworkService::get().isLoggedIn());
+        if (canChange && rawTO->workspaceType != WorkspaceType_Autosave) {
+            result.emplace_back(ResourceButton{
+                .parameters =
+                    AlienGui::ActionButtonParameters().buttonText(ICON_FA_EDIT "  Edit").transparentBackground(false).tooltip("Change name or description"),
+                .action = [edit = actions.edit, treeTO] { edit(treeTO); }});
+        }
+        if (isLocal) {
+            result.emplace_back(ResourceButton{
+                .parameters = AlienGui::ActionButtonParameters()
+                                  .buttonText(ICON_FA_UPLOAD "  Share")
+                                  .transparentBackground(false)
+                                  .tooltip("Upload this " + resourceTypeString + ". You choose who can see it."),
+                .action = [share = actions.share, rawTO] { share(rawTO); }});
+        }
+        if (!canChange) {
+            return result;
+        }
+        if (isReplaceable(rawTO)) {
+            auto replaced = isLocal ? "this " + resourceTypeString : std::string("this upload");
+            auto replacement =
+                std::string(rawTO->resourceType == NetworkResourceType_Simulation ? "the current simulation" : "the genome of the genome editor");
+            result.emplace_back(ResourceButton{
+                .parameters = AlienGui::ActionButtonParameters()
+                                  .buttonText(ICON_FA_EXCHANGE_ALT "  Replace")
+                                  .transparentBackground(false)
+                                  .tooltip("Replace the content of " + replaced + " with " + replacement + "."),
+                .action = [replace = actions.replace, rawTO] { replace(rawTO); }});
+        }
+        result.emplace_back(ResourceButton{.parameters = createDeleteButtonParameters(), .action = [remove = actions.remove, treeTO] { remove(treeTO); }});
+        return result;
+    }
+
+    void processResourceButtons(std::vector<ResourceButton> const& buttons)
+    {
+        std::optional<int> previousRowIndex;
+        for (auto const& button : buttons) {
+            if (previousRowIndex == button.rowIndex) {
+                ImGui::SameLine();
+            }
+            previousRowIndex = button.rowIndex;
+            if (AlienGui::ActionButton(button.parameters)) {
+                button.action();
+            }
+        }
     }
 
     struct WorkspaceInfo
@@ -184,9 +288,12 @@ void _BrowserDetailsWidget::processResource(NetworkResourceTreeTO const& treeTO)
 {
     auto rawTO = treeTO->getLeaf().rawTO;
     auto& resourceService = NetworkResourceService::get();
+    auto buttons = createResourceButtons(treeTO, _data, _actions);
+    arrangeInRows(buttons, ImGui::GetContentRegionAvail().x);
 
     // A scrollbar would change the width of the picture and with it the height of the content
-    if (ImGui::BeginChild("##content", {0, -ImGui::GetFrameHeightWithSpacing()}, 0, ImGuiWindowFlags_NoScrollbar)) {
+    auto buttonsHeight = ImGui::GetFrameHeightWithSpacing() * toFloat(buttons.back().rowIndex + 1);
+    if (ImGui::BeginChild("##content", {0, -buttonsHeight}, 0, ImGuiWindowFlags_NoScrollbar)) {
         _pictureCache->request({rawTO});
         BrowserHelper::Picture(_pictureCache->find(rawTO), ImGui::GetContentRegionAvail().x);
         ImGui::Spacing();
@@ -250,7 +357,7 @@ void _BrowserDetailsWidget::processResource(NetworkResourceTreeTO const& treeTO)
     }
     ImGui::EndChild();
 
-    processResourceButtons(treeTO);
+    processResourceButtons(buttons);
 }
 
 void _BrowserDetailsWidget::processFacts(NetworkResourceRawTO const& rawTO)
@@ -370,52 +477,6 @@ void _BrowserDetailsWidget::processVisibility(NetworkResourceTreeTO const& treeT
     if (AlienGui::ChoiceBar(
             AlienGui::ChoiceBarParameters().values({ICON_FA_GLOBE "  Community", ICON_FA_LOCK "  Only me"}).height(VisibilityHeight), visibility)) {
         _actions.changeVisibility(treeTO);
-    }
-}
-
-void _BrowserDetailsWidget::processResourceButtons(NetworkResourceTreeTO const& treeTO)
-{
-    auto rawTO = treeTO->getLeaf().rawTO;
-
-    if (AlienGui::ActionButton(
-            AlienGui::ActionButtonParameters().buttonText(ICON_FA_FOLDER_OPEN "  Open").highlighted(true).frame(true).transparentBackground(false))) {
-        _data->onOpenResource(treeTO->getLeaf());
-    }
-
-    auto isLocal = isLocalWorkspace(rawTO->workspaceType);
-    auto canChange = _data->isOwner(rawTO) && (isLocal || NetworkService::get().isLoggedIn());
-    if (canChange && rawTO->workspaceType != WorkspaceType_Autosave) {
-        ImGui::SameLine();
-        if (AlienGui::ActionButton(
-                AlienGui::ActionButtonParameters().buttonText(ICON_FA_EDIT "  Edit").transparentBackground(false).tooltip("Change name or description"))) {
-            _actions.edit(treeTO);
-        }
-    }
-    if (isLocal) {
-        auto resourceTypeString = std::string(rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome");
-        ImGui::SameLine();
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
-                                       .buttonText(ICON_FA_UPLOAD "  Share")
-                                       .transparentBackground(false)
-                                       .tooltip("Upload this " + resourceTypeString + ". You choose who can see it."))) {
-            _actions.share(rawTO);
-        }
-    }
-    if (!canChange) {
-        return;
-    }
-    if (!isLocal) {
-        auto replacement = std::string(rawTO->resourceType == NetworkResourceType_Simulation ? "the current simulation" : "the genome of the genome editor");
-        ImGui::SameLine();
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters()
-                                       .buttonText(ICON_FA_EXCHANGE_ALT "  Replace")
-                                       .transparentBackground(false)
-                                       .tooltip("Replace the content of this upload with " + replacement + "."))) {
-            _actions.replace(rawTO);
-        }
-    }
-    if (processDeleteButton()) {
-        _actions.remove(treeTO);
     }
 }
 

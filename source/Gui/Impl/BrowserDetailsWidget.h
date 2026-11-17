@@ -23,7 +23,7 @@ public:
         std::function<void(NetworkResourceTreeTO const&)> changeVisibility;
         std::function<void(NetworkResourceTreeTO const&)> remove;
         std::function<void(NetworkResourceRawTO const&)> share;    // Uploads a simulation or a genome of this computer
-        std::function<void(NetworkResourceRawTO const&)> replace;  // Replaces the content of an own upload
+        std::function<void(NetworkResourceRawTO const&)> replace;  // Replaces the content of an own upload or of a file of this computer
     };
     static BrowserDetailsWidget create(BrowserData const& data, BrowserPictureCache const& pictureCache, Actions const& actions);
 
@@ -36,7 +36,6 @@ private:
     void processFacts(NetworkResourceRawTO const& rawTO);
     void processReactions(NetworkResourceTreeTO const& treeTO);
     void processVisibility(NetworkResourceTreeTO const& treeTO);
-    void processResourceButtons(NetworkResourceTreeTO const& treeTO);
 
     void processFolder(NetworkResourceTreeTO const& treeTO);
     void processWorkspace();
