@@ -542,8 +542,8 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
         if (result.replacesFile) {
             auto file = findLibraryFile(_resourceType, name);
             result.message = file != nullptr
-                ? "Replaces the " + BrowserDataTypeToLowerString.at(_resourceType) + " saved on " + file->timestamp.substr(0, TimestampLengthWithoutSeconds)
-                : std::string("Replaces a file with this name");
+                ? "The file already exists (saved " + file->timestamp.substr(0, TimestampLengthWithoutSeconds) + ") and will be replaced."
+                : std::string("A file with this name already exists and will be replaced.");
         }
         result.possible = true;
         return result;
