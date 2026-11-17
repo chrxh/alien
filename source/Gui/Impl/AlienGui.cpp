@@ -1445,7 +1445,7 @@ bool AlienGui::ChoiceBar(ChoiceBarParameters const& parameters, int& value)
 {
     auto drawList = ImGui::GetWindowDrawList();
     auto pos = ImGui::GetCursorScreenPos();
-    auto width = ImGui::GetContentRegionAvail().x;
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto height = scale(parameters._height);
     auto rounding = scale(ChoiceBarRounding);
     auto inset = scale(ChoiceBarInset);
