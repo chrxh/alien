@@ -175,18 +175,7 @@ namespace
                     AlienGui::ActionButtonParameters().buttonText(ICON_FA_EDIT "  Edit").transparentBackground(false).tooltip("Change name or description"),
                 .action = [edit = actions.edit, treeTO] { edit(treeTO); }});
         }
-        if (isLocal) {
-            result.emplace_back(ResourceButton{
-                .parameters = AlienGui::ActionButtonParameters()
-                                  .buttonText(ICON_FA_UPLOAD "  Share")
-                                  .transparentBackground(false)
-                                  .tooltip("Upload this " + resourceTypeString + ". You choose who can see it."),
-                .action = [share = actions.share, rawTO] { share(rawTO); }});
-        }
-        if (!canChange) {
-            return result;
-        }
-        if (isReplaceable(rawTO)) {
+        if (canChange && isReplaceable(rawTO)) {
             auto replaced = isLocal ? "this " + resourceTypeString : std::string("this upload");
             auto replacement =
                 std::string(rawTO->resourceType == NetworkResourceType_Simulation ? "the current simulation" : "the genome of the genome editor");
@@ -197,7 +186,17 @@ namespace
                                   .tooltip("Replace the content of " + replaced + " with " + replacement + "."),
                 .action = [replace = actions.replace, rawTO] { replace(rawTO); }});
         }
-        result.emplace_back(ResourceButton{.parameters = createDeleteButtonParameters(), .action = [remove = actions.remove, treeTO] { remove(treeTO); }});
+        if (isLocal) {
+            result.emplace_back(ResourceButton{
+                .parameters = AlienGui::ActionButtonParameters()
+                                  .buttonText(ICON_FA_UPLOAD "  Share")
+                                  .transparentBackground(false)
+                                  .tooltip("Upload this " + resourceTypeString + ". You choose who can see it."),
+                .action = [share = actions.share, rawTO] { share(rawTO); }});
+        }
+        if (canChange) {
+            result.emplace_back(ResourceButton{.parameters = createDeleteButtonParameters(), .action = [remove = actions.remove, treeTO] { remove(treeTO); }});
+        }
         return result;
     }
 
