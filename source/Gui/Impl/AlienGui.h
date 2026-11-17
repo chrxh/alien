@@ -392,7 +392,6 @@ public:
         MEMBER(TextParameters, std::string, text, "");
         MEMBER(TextParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(TextParameters, TextStyle, style, TextStyle::Normal);
-        MEMBER(TextParameters, float, width, 0);
         MEMBER(TextParameters, bool, rightAligned, false);
         MEMBER(TextParameters, bool, truncate, false);
     };

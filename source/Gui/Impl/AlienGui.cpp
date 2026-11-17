@@ -1405,8 +1405,9 @@ namespace
 
 namespace
 {
-    std::string truncateToWidth(std::string const& text, float availableWidth)
+    std::string truncateToAvailableWidth(std::string const& text)
     {
+        auto availableWidth = ImGui::GetContentRegionAvail().x;
         auto firstLine = text.substr(0, text.find('\n'));
         if (firstLine.size() == text.size() && ImGui::CalcTextSize(firstLine.c_str()).x <= availableWidth) {
             return firstLine;
@@ -1523,11 +1524,10 @@ void AlienGui::Text(TextParameters const& parameters)
         break;
     }
 
-    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-    auto text = parameters._truncate ? truncateToWidth(parameters._text, width) : parameters._text;
+    auto text = parameters._truncate ? truncateToAvailableWidth(parameters._text) : parameters._text;
 
     if (parameters._rightAligned) {
-        auto offset = width - ImGui::CalcTextSize(text.c_str()).x;
+        auto offset = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text.c_str()).x;
         if (offset > 0.0f) {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
         }

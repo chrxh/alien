@@ -53,19 +53,11 @@ namespace
         ImGui::PopStyleColor();
     }
 
-    // As in the settings rows of ALIEN, the value comes first and its label follows on the right
-    float getValueWidth()
-    {
-        return ImGui::GetContentRegionAvail().x - scale(FactsLabelWidth) - ImGui::GetStyle().ItemSpacing.x;
-    }
-
     void processFact(std::string const& label, std::string const& value)
     {
-        auto valueWidth = getValueWidth();
-        auto labelPosX = ImGui::GetCursorPosX() + valueWidth + ImGui::GetStyle().ItemSpacing.x;
-        AlienGui::Text(AlienGui::TextParameters().text(value).width(scaleInverse(valueWidth)).truncate(true));
-        ImGui::SameLine(labelPosX);
         processLabel(label);
+        ImGui::SameLine(scale(FactsLabelWidth));
+        AlienGui::Text(AlienGui::TextParameters().text(value).truncate(true));
     }
 
     void processWrappedText(std::string const& text)
@@ -95,7 +87,7 @@ namespace
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, usedFraction < StorageWarningFraction ? Const::AccentColor.Value : Const::WarningColor.Value);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, height / 2);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-        ImGui::ProgressBar(usedFraction, {getValueWidth(), height}, "");
+        ImGui::ProgressBar(usedFraction, {ImGui::GetContentRegionAvail().x, height}, "");
         ImGui::PopStyleVar(2);
         ImGui::PopStyleColor(2);
     }
