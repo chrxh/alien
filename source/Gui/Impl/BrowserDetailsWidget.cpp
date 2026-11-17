@@ -68,13 +68,6 @@ namespace
         processLabel(label);
     }
 
-    // Next to a widget that is higher than a line of text, the label is centered on its first row
-    void processLabelBesideWidget(std::string const& label, ImVec2 const& widgetPos, float widgetWidth, float rowHeight)
-    {
-        auto labelPos = ImVec2{widgetPos.x + widgetWidth + ImGui::GetStyle().ItemSpacing.x, widgetPos.y + (rowHeight - ImGui::GetTextLineHeight()) / 2};
-        ImGui::GetWindowDrawList()->AddText(labelPos, Const::TextDimColor, label.c_str());
-    }
-
     void processWrappedText(std::string const& text)
     {
         ImGui::PushTextWrapPos(0.0f);
@@ -411,15 +404,13 @@ void _BrowserDetailsWidget::processFacts(NetworkResourceRawTO const& rawTO)
 void _BrowserDetailsWidget::processReactions(NetworkResourceTreeTO const& treeTO)
 {
     auto rawTO = treeTO->getLeaf().rawTO;
+    processLabel("Reactions");
 
     auto drawList = ImGui::GetWindowDrawList();
     auto height = scale(ChipHeight);
     auto paddingX = scale(ChipPaddingX);
     auto emojiSize = scale(ChipEmojiSize);
-    auto valueWidth = getValueWidth();
-    auto rowPos = ImGui::GetCursorScreenPos();
-    auto rightEdge = rowPos.x + valueWidth;
-    processLabelBesideWidget("Reactions", rowPos, valueWidth, height);
+    auto rightEdge = ImGui::GetCursorScreenPos().x + ImGui::GetContentRegionAvail().x;
 
     // Chips continue in the same line as long as they fit
     auto isFirstChip = true;
@@ -496,17 +487,12 @@ void _BrowserDetailsWidget::processVisibility(NetworkResourceTreeTO const& treeT
         return;
     }
     addSectionSpacing();
-    auto valueWidth = getValueWidth();
-    processLabelBesideWidget("Visibility", ImGui::GetCursorScreenPos(), valueWidth, scale(VisibilityHeight));
+    processLabel("Visibility");
 
     // A featured upload is visible to the community as well
     auto visibility = rawTO->workspaceType == WorkspaceType_Private ? 1 : 0;
     if (AlienGui::ChoiceBar(
-            AlienGui::ChoiceBarParameters()
-                .values({ICON_FA_GLOBE "  Community", ICON_FA_LOCK "  Only me"})
-                .width(scaleInverse(valueWidth))
-                .height(VisibilityHeight),
-            visibility)) {
+            AlienGui::ChoiceBarParameters().values({ICON_FA_GLOBE "  Community", ICON_FA_LOCK "  Only me"}).height(VisibilityHeight), visibility)) {
         _actions.changeVisibility(treeTO);
     }
 }

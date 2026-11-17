@@ -367,10 +367,9 @@ public:
     struct ChoiceBarParameters
     {
         MEMBER(ChoiceBarParameters, std::vector<std::string>, values, std::vector<std::string>());
-        MEMBER(ChoiceBarParameters, float, width, 0);
         MEMBER(ChoiceBarParameters, float, height, 30.0f);
     };
-    static bool ChoiceBar(ChoiceBarParameters const& parameters, int& value);  // Spans the available width if no width is given
+    static bool ChoiceBar(ChoiceBarParameters const& parameters, int& value);  // Spans the available width
 
     struct SelectableButtonParameters
     {
