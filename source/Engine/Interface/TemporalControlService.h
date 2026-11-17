@@ -23,6 +23,7 @@ public:
     void clearPreviousTimesteps();
 
     void createFlashback();
+    void createFlashback(ContentDesc&& simulationData);  // Spares reading back the data that has just been set
     bool hasFlashback() const;
     void restoreFlashback();
 
@@ -35,6 +36,7 @@ private:
         ContentDesc data;
     };
     Snapshot createSnapshot() const;
+    Snapshot createSnapshot(ContentDesc&& simulationData) const;
     void applySnapshot(Snapshot const& snapshot) const;
     void restorePosition(RealVector2D& position, RealVector2D const& velocity, RealVector2D const& origPosition, RealVector2D const& origVelocity) const;
 

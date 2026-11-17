@@ -41,7 +41,8 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
             auto data = _PersisterFacade::get()->fetchDownloadNetworkResourcesData(requestId);
 
             if (data.resourceType == NetworkResourceType_Simulation) {
-                if (auto errorMessage = NewSimulationService::get().loadSimulation(std::get<SimulationDesc>(data.resourceData), data.resourceId)) {
+                if (auto errorMessage =
+                        NewSimulationService::get().loadSimulation(std::move(std::get<SimulationDesc>(data.resourceData)), data.resourceId)) {
                     showMessage("Error", *errorMessage);
                 }
                 printOverlayMessage(data.resourceName);

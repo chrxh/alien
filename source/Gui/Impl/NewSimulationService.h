@@ -25,7 +25,7 @@ public:
     void createSimulation(Parameters const& parameters);
 
     std::optional<std::string> loadSimulation(
-        SimulationDesc const& simulation,
+        SimulationDesc simulation,
         std::optional<std::string> const& originResourceId = std::nullopt,
         std::optional<std::string> const& nameInLibrary = std::nullopt,
         std::optional<std::filesystem::path> const& localFile = std::nullopt);

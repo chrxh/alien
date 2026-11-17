@@ -37,6 +37,7 @@ class _ConcreteRequestResult : public _PersisterRequestResult
 {
 public:
     Data_t const& getData() const { return _data; }
+    Data_t releaseData() { return std::move(_data); }
 
     _ConcreteRequestResult(PersisterRequestId const& requestId, Data_t const& data)
         : _PersisterRequestResult(requestId)
