@@ -521,9 +521,11 @@ void LocalLibraryController::processPendingLoads()
             continue;
         }
 
-        // A file with a name that could not be given has no name under which it could be saved again
+        // An opened autosave is saved under a name of its own by default, since autosave deletes the files with its name. A file with a name
+        // that could not be given has no name under which it could be saved again.
         auto name = service.getSimulationName(_libraryFolder, pendingLoad.simulationPath);
-        auto nameInLibrary = name.has_value() && service.isValidSimulationName(*name) ? name : std::nullopt;
+        auto isAutosave = service.isAutosaveName(StringHelper::toUtf8(pendingLoad.simulationPath.stem()));
+        auto nameInLibrary = name.has_value() && service.isValidSimulationName(*name) && !isAutosave ? name : std::nullopt;
         auto data = _PersisterFacade::get()->fetchReadSimulationData(pendingLoad.requestId);
         if (auto errorMessage =
                 NewSimulationService::get().loadSimulation(data.simulationDesc, std::nullopt, nameInLibrary, service.normalize(pendingLoad.simulationPath))) {
@@ -652,7 +654,11 @@ LocalLibraryController::rename(std::filesystem::path const& simulationPath, std:
 {
     auto& service = LocalLibraryService::get();
     auto isGenome = service.isGenomePath(simulationPath);
-    auto const& mainFolder = getMainFolder(simulationPath);
+
+    // Only the autosaves of a folder outside the library are listed, so a simulation there that gets a name of its own moves into the library
+    auto separatorPos = newName.rfind('/');
+    auto newNameWithoutFolders = separatorPos != std::string::npos ? newName.substr(separatorPos + 1) : newName;
+    auto const& mainFolder = service.isAutosaveName(newNameWithoutFolders) ? getMainFolder(simulationPath) : _libraryFolder;
     auto name = service.getSimulationName(_libraryFolder, simulationPath);
     auto const& localFile = NewSimulationService::get().getLocalFile();
     auto isLocalFile = localFile.has_value() && *localFile == service.normalize(simulationPath);
