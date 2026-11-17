@@ -1,6 +1,8 @@
 #pragma once
 
 #include <bit>
+#include <map>
+#include <mutex>
 #include <vector>
 
 #include <cooperative_groups.h>
@@ -30,10 +32,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory(1, _ids);
 
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_currentRandomNumberIndex, 0, sizeof(uint32_t)));
-        std::vector<int> randomNumbers(size);
-        for (int i = 0; i < size; ++i) {
-            randomNumbers[i] = rand();
-        }
+        auto const& randomNumbers = getRandomNumbers_host(size);
         CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
 
         Ids hostIds;
@@ -112,6 +111,22 @@ public:
     }
 
 private:
+    __host__ __inline__ static std::vector<int> const& getRandomNumbers_host(int size)
+    {
+        static std::mutex mutex;
+        static std::map<int, std::vector<int>> randomNumbersBySize;
+
+        std::lock_guard lock(mutex);
+        auto& result = randomNumbersBySize[size];
+        if (result.empty()) {
+            result.resize(size);
+            for (auto& randomNumber : result) {
+                randomNumber = rand();
+            }
+        }
+        return result;
+    }
+
     __device__ __inline__ int getRandomNumber() { return _array[atomicAdd(_currentRandomNumberIndex, 1u) & _indexMask]; }
 
     uint32_t* _currentRandomNumberIndex = nullptr;

@@ -202,7 +202,6 @@ TEST_F(DataTransferTests, setSimulationData_reserveIds)
 {
     auto data = ContentDesc().objects({ObjectDesc().id(10).type(FreeCellDesc())}).energies({EnergyDesc().id(20)});
 
-    // A new simulation resets the ids after the data has been created
     NumberGenerator::get().setIds(Ids());
     _simulationFacade->setSimulationData(data);
 
