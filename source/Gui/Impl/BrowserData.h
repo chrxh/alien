@@ -58,6 +58,7 @@ struct Workspace
     std::vector<NetworkResourceRawTO> rawTOs;    // Unfiltered, sorted
     std::vector<NetworkResourceTreeTO> treeTOs;  // Filtered, sorted
     std::set<std::vector<std::string>> collapsedFolderNames;
+    uint64_t contentSize = 0;  // Of all rawTOs
 };
 
 struct EmojiImage
@@ -107,6 +108,7 @@ public:
 
     // The upload of the user that carries the name of a simulation of this computer, with or without the folder of the user in front
     NetworkResourceRawTO findUpload(NetworkResourceRawTO const& localRawTO) const;
+    uint64_t getTotalUploadSize() const;  // Simulations and genomes together, as the server counts them for the storage limit
 
     void loadLastSessionData();
     void saveLastSessionData();

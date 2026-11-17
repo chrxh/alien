@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <ranges>
+#include <numeric>
 
 #include <boost/algorithm/string/join.hpp>
 
@@ -259,6 +260,17 @@ NetworkResourceRawTO _BrowserData::findUpload(NetworkResourceRawTO const& localR
     return findResult != uploads.end() ? *findResult : nullptr;
 }
 
+uint64_t _BrowserData::getTotalUploadSize() const
+{
+    uint64_t result = 0;
+    for (auto const& [workspaceId, workspace] : _workspaces) {
+        if (workspaceId.workspaceType == WorkspaceType_Private) {
+            result += workspace.contentSize;
+        }
+    }
+    return result;
+}
+
 void _BrowserData::loadLastSessionData()
 {
     _lastSessionData.load();
@@ -504,6 +516,10 @@ void _BrowserData::processPendingRequests()
 void _BrowserData::createTreeTOs(WorkspaceId const& workspaceId)
 {
     auto& workspace = _workspaces.at(workspaceId);
+
+    workspace.contentSize = std::accumulate(workspace.rawTOs.begin(), workspace.rawTOs.end(), uint64_t(0), [](uint64_t sum, NetworkResourceRawTO const& rawTO) {
+        return sum + rawTO->contentSize;
+    });
 
     // Sorting
     if (workspace.rawTOs.size() > 1) {
