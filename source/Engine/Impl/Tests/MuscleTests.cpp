@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 
 #include <gtest/gtest.h>
@@ -1025,4 +1026,133 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
             EXPECT_TRUE(approxCompare(0.0f, Math::length(actualCell2._vel), 0.01f));
         }
     }
+}
+
+class MuscleTests_EnergyCost : public MuscleTests
+{
+public:
+    MuscleTests_EnergyCost()
+    {
+        _parameters.muscleEnergyCost.value = ColorVector<float>::uniform(EnergyCost);
+        _parameters.radiationAbsorption.baseValue = ColorVector<float>::uniform(0.0f);
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
+
+protected:
+    static auto constexpr EnergyCost = 0.3f;
+    static auto constexpr EnergyPerFullExecution = EnergyCost * TIMESTEPS_PER_CELL_FUNCTION / 3;
+
+    ContentDesc createCreatureWithMuscle(MuscleModeDesc const& mode, Channel0 channel0)
+    {
+        NeuralNetDesc nn;
+        nn._weights.clear();
+        nn._weights.resize(NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS, NeuralNetWeight(0));
+        nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
+        auto result = ContentDesc().addCreature(
+            {
+                ObjectDesc().id(1).pos({10.0f, 10.0f}),
+                ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().frontAngle(-90.0f).headCell(true).cellType(MuscleDesc().mode(mode)).neuralNetwork(nn)),
+                ObjectDesc().id(3).pos({12.0f, 10.0f}),
+                ObjectDesc().id(4).pos({13.0f, 10.0f}),
+            },
+            CreatureDesc().id(0),
+            GenomeDesc().frontAngle(-90.0f));
+        result.addConnection(3, 4);
+        result.addConnection(2, 3);
+        result.addConnection(1, 2);
+        return result;
+    }
+
+    float getEmittedEnergy(ContentDesc const& data) const
+    {
+        auto result = 0.0f;
+        for (auto const& energyParticle : data._energies) {
+            result += energyParticle._energy;
+        }
+        return result;
+    }
+};
+
+class MuscleTests_EnergyCost_AllModes
+    : public MuscleTests_EnergyCost
+    , public testing::WithParamInterface<std::tuple<MuscleModeDesc, Channel0>>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    MuscleTests_EnergyCost_AllModes,
+    MuscleTests_EnergyCost_AllModes,
+    ::testing::Combine(
+        ::testing::Values(
+            MuscleModeDesc(AutoBendingDesc()),
+            MuscleModeDesc(ManualBendingDesc()),
+            MuscleModeDesc(AngleBendingDesc()),
+            MuscleModeDesc(AutoCrawlingDesc()),
+            MuscleModeDesc(ManualCrawlingDesc()),
+            MuscleModeDesc(DirectMovementDesc())),
+        ::testing::Values(Channel0::Positive, Channel0::Negative, Channel0::Zero)));
+
+TEST_P(MuscleTests_EnergyCost_AllModes, scalesWithAbsoluteActivation)
+{
+    auto [mode, channel0] = GetParam();
+
+    _simulationFacade->setSimulationData(createCreatureWithMuscle(mode, channel0));
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(std::abs(getValue(channel0)) * EnergyPerFullExecution, getEmittedEnergy(actualData)));
+}
+
+class MuscleTests_EnergyCost_AtLimit
+    : public MuscleTests_EnergyCost
+    , public testing::WithParamInterface<std::tuple<MuscleModeDesc, Channel0>>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    MuscleTests_EnergyCost_AtLimit,
+    MuscleTests_EnergyCost_AtLimit,
+    ::testing::Combine(
+        ::testing::Values(
+            MuscleModeDesc(AutoBendingDesc().maxAngleDeviation(10.0f / 180.0f)),
+            MuscleModeDesc(ManualBendingDesc().maxAngleDeviation(10.0f / 180.0f)),
+            MuscleModeDesc(AngleBendingDesc().maxAngleDeviation(10.0f / 180.0f)),
+            MuscleModeDesc(AutoCrawlingDesc().maxDistanceDeviation(0.2f)),
+            MuscleModeDesc(ManualCrawlingDesc().maxDistanceDeviation(0.2f))),
+        ::testing::Values(Channel0::Positive, Channel0::Negative)));
+
+TEST_P(MuscleTests_EnergyCost_AtLimit, scalesWithExecutedMovement)
+{
+    auto constexpr NumExecutions = 40;
+
+    auto [mode, channel0] = GetParam();
+
+    auto isCrawling = std::holds_alternative<AutoCrawlingDesc>(mode) || std::holds_alternative<ManualCrawlingDesc>(mode);
+    auto getJointPosition = [isCrawling](ContentDesc const& data) {
+        return isCrawling ? data.getObjectRef(2)._connections.at(0)._distance : data.getObjectRef(3)._connections.at(0)._angleFromPrevious;
+    };
+
+    _simulationFacade->setSimulationData(createCreatureWithMuscle(mode, channel0));
+
+    std::vector<float> movements;
+    auto jointPosition = getJointPosition(_simulationFacade->getSimulationData());
+    for (int i = 0; i < NumExecutions; ++i) {
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        auto nextJointPosition = getJointPosition(_simulationFacade->getSimulationData());
+        movements.emplace_back(nextJointPosition - jointPosition);
+        jointPosition = nextJointPosition;
+    }
+
+    auto maxMovement = std::ranges::max(movements);
+    auto minMovement = std::ranges::min(movements);
+    auto numFullExecutions = 0.0f;
+    for (auto const& movement : movements) {
+        if (movement > NEAR_ZERO) {
+            numFullExecutions += movement / maxMovement;
+        } else if (movement < -NEAR_ZERO) {
+            numFullExecutions += movement / minMovement;
+        }
+    }
+
+    EXPECT_TRUE(minMovement < maxMovement - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(numFullExecutions * EnergyPerFullExecution, getEmittedEnergy(_simulationFacade->getSimulationData())));
 }

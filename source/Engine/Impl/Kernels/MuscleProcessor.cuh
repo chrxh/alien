@@ -26,7 +26,8 @@ private:
     __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleObject, Object* pivotObject);
 
-    __inline__ __device__ static void radiate(SimulationData& data, Object* object, float activation);
+    __inline__ __device__ static float calcExecutedFraction(float requestedDelta, float executedDelta);
+    __inline__ __device__ static void radiate(SimulationData& data, Object* object, float executedActivation);
 
     __inline__ __device__ static bool tryChangeConnectionDistance(Object* object, float distanceDelta);
 
@@ -215,6 +216,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     // Modify angle
     auto angleDelta = bending.forward ? -(0.05f + forwardBackwardRatio) : 1.05f - forwardBackwardRatio;
     angleDelta *= 0.5f * activation * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
+    auto requestedAngleDelta = angleDelta;
 
     if (angleFromPrevious + angleDelta > maxAngle) {
         angleDelta = maxAngle - angleFromPrevious;
@@ -222,6 +224,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (angleFromPrevious + angleDelta < minAngle) {
         angleDelta = minAngle - angleFromPrevious;
     }
+    auto executedFraction = calcExecutedFraction(requestedAngleDelta, angleDelta);
     atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
     atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
 
@@ -243,7 +246,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 10.0f;
     applyAcceleration(statistics, object, acceleration);
 
-    radiate(data, object, activation);
+    radiate(data, object, activation * executedFraction);
 }
 
 __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -303,6 +306,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (isLeftSide(object)) {
         angleDelta = -angleDelta;
     }
+    auto requestedAngleDelta = angleDelta;
 
     if (angleFromPrevious + angleDelta > maxAngle) {
         angleDelta = maxAngle - angleFromPrevious;
@@ -310,6 +314,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (angleFromPrevious + angleDelta < minAngle) {
         angleDelta = minAngle - angleFromPrevious;
     }
+    auto executedFraction = calcExecutedFraction(requestedAngleDelta, angleDelta);
     atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
     atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
 
@@ -335,7 +340,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 10.0f;
     applyAcceleration(statistics, object, acceleration);
 
-    radiate(data, object, activation);
+    radiate(data, object, activation * executedFraction);
 }
 
 __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -376,6 +381,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (targetAngleRelToConnection0 < 0) {
         angleDelta = -angleDelta;
     }
+    auto requestedAngleDelta = angleDelta;
 
     if (angleFromPrevious + angleDelta > maxAngle) {
         angleDelta = maxAngle - angleFromPrevious;
@@ -383,11 +389,12 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (angleFromPrevious + angleDelta < minAngle) {
         angleDelta = minAngle - angleFromPrevious;
     }
+    auto executedFraction = calcExecutedFraction(requestedAngleDelta, angleDelta);
     atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
     atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
     object->typeData.cell.frontAngle -= angleDelta;
 
-    radiate(data, object, activation);
+    radiate(data, object, activation * executedFraction);
 }
 
 __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -430,12 +437,14 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     // Calc and apply distance delta
     auto distanceDelta = crawling.forward ? -1.05f + crawling.forwardBackwardRatio : 0.05f + crawling.forwardBackwardRatio;
     distanceDelta *= 0.025f * activation * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
+    auto requestedDistanceDelta = distanceDelta;
     if (connectionDistance + distanceDelta > maxDistance) {
         distanceDelta = maxDistance - connectionDistance;
     }
     if (connectionDistance + distanceDelta < minDistance) {
         distanceDelta = minDistance - connectionDistance;
     }
+    auto executedFraction = calcExecutedFraction(requestedDistanceDelta, distanceDelta);
     if (!tryChangeConnectionDistance(object, distanceDelta)) {
         return;
     }
@@ -461,7 +470,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     applyAcceleration(statistics, object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
-    radiate(data, object, activation);
+    radiate(data, object, activation * executedFraction);
 }
 
 __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -497,12 +506,14 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     // Calc and apply distance delta
     auto distanceDelta = activation > 0 ? 1.05f - crawling.forwardBackwardRatio : 0.05f + crawling.forwardBackwardRatio;
     distanceDelta *= 0.025f * activation * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
+    auto requestedDistanceDelta = distanceDelta;
     if (connectionDistance + distanceDelta > maxDistance) {
         distanceDelta = maxDistance - connectionDistance;
     }
     if (connectionDistance + distanceDelta < minDistance) {
         distanceDelta = minDistance - connectionDistance;
     }
+    auto executedFraction = calcExecutedFraction(requestedDistanceDelta, distanceDelta);
     if (!tryChangeConnectionDistance(object, distanceDelta)) {
         return;
     }
@@ -530,7 +541,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     applyAcceleration(statistics, object, acceleration);
 
     crawling.lastActualDistance = actualDistance;
-    radiate(data, object, activation);
+    radiate(data, object, activation * executedFraction);
 }
 
 __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -577,10 +588,18 @@ __inline__ __device__ void MuscleProcessor::restoreInitialAngleFromPreviousInter
     initialAngle = VALUE_NOT_SET_FLOAT;
 }
 
-__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* object, float activation)
+__inline__ __device__ float MuscleProcessor::calcExecutedFraction(float requestedDelta, float executedDelta)
+{
+    if (requestedDelta == 0) {
+        return 0.0f;
+    }
+    return min(1.0f, abs(executedDelta / requestedDelta));
+}
+
+__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* object, float executedActivation)
 {
     auto cellTypeMuscleEnergyCost =
-        cudaSimulationParameters.muscleEnergyCost.value[object->color] * activation * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
+        cudaSimulationParameters.muscleEnergyCost.value[object->color] * abs(executedActivation) * TIMESTEPS_PER_CELL_FUNCTION / 3.0f;
     if (cellTypeMuscleEnergyCost > 0) {
         EnergyProcessor::radiate(data, object, cellTypeMuscleEnergyCost);
     }
