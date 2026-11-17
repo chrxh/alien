@@ -23,7 +23,7 @@ public:
     void clearPreviousTimesteps();
 
     void createFlashback();
-    void createFlashback(ContentDesc&& simulationData);  // Spares reading back the data that has just been set
+    void createFlashback(ContentDesc&& simulationData);
     bool hasFlashback() const;
     void restoreFlashback();
 
