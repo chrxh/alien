@@ -71,6 +71,9 @@ public:
     PersisterRequestId scheduleSaveDeserializedSimulation(SenderInfo const& senderInfo, SaveDeserializedSimulationRequestData const& data) override;
     SaveDeserializedSimulationResultData fetchSaveDeserializedSimulationData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleReadLocalLibrary(SenderInfo const& senderInfo, ReadLocalLibraryRequestData const& data) override;
+    ReadLocalLibraryResultData fetchReadLocalLibraryData(PersisterRequestId const& id) override;
+
 private:
     static auto constexpr MaxWorkerThreads = 4;
 

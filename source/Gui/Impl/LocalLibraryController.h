@@ -117,6 +117,7 @@ private:
     void processPendingLoads();
     void processPendingPicture();
     void processAutosave();
+    void processContent();
 
     void scheduleSave(PendingSave pendingSave);
     void onSaveFinished(PendingSave const& pendingSave, SaveSimulationResultData const& data);
@@ -128,6 +129,7 @@ private:
     std::optional<std::filesystem::path> _autosaveMainFolder;
     LocalLibraryContent _content;
     bool _contentOutdated = true;
+    std::optional<PersisterRequestId> _contentRequestId;
     int _revision = 0;
 
     bool _autosaveEnabled = false;
