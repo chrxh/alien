@@ -78,9 +78,8 @@ namespace
 
     void processStorage(uint64_t usedSize, uint64_t storageLimit)
     {
-        addSectionSpacing();
-        processLabel("Storage");
-        AlienGui::HelpMarker("Your simulations and genomes on the server share this storage.");
+        auto freeSize = storageLimit - std::min(usedSize, storageLimit);
+        processFact("Storage", StringHelper::formatFileSize(usedSize) + " used, " + StringHelper::formatFileSize(freeSize) + " free");
 
         auto usedFraction = static_cast<float>(static_cast<double>(usedSize) / static_cast<double>(storageLimit));
         auto height = scale(StorageBarHeight);
@@ -91,9 +90,6 @@ namespace
         ImGui::ProgressBar(usedFraction, {ImGui::GetContentRegionAvail().x, height}, "");
         ImGui::PopStyleVar(2);
         ImGui::PopStyleColor(2);
-
-        processFact("Used", StringHelper::formatFileSize(usedSize) + " of " + StringHelper::formatFileSize(storageLimit));
-        processFact("Free", StringHelper::formatFileSize(storageLimit - std::min(usedSize, storageLimit)));
     }
 
     bool isCreatedByAutosave(NetworkResourceRawTO const& rawTO)
@@ -559,11 +555,14 @@ void _BrowserDetailsWidget::processWorkspace()
             addSectionSpacing();
             processFact(isSimulation ? "Simulations" : "Genomes", StringHelper::format(static_cast<uint64_t>(workspace.rawTOs.size())));
 
-            auto storageLimit = NetworkService::get().getUploadStorageLimit();
-            if (workspaceId.workspaceType == WorkspaceType_Private && storageLimit.has_value()) {
-                processStorage(_data->getTotalUploadSize(), *storageLimit);
-            } else {
-                processFact("Size", StringHelper::formatFileSize(workspace.contentSize));
+            // The genomes on the server take up too little storage to be worth showing
+            if (isSimulation || isLocalWorkspace(workspaceId.workspaceType)) {
+                auto storageLimit = NetworkService::get().getUploadStorageLimit();
+                if (workspaceId.workspaceType == WorkspaceType_Private && storageLimit.has_value()) {
+                    processStorage(_data->getTotalUploadSize(), *storageLimit);
+                } else {
+                    processFact("Size", StringHelper::formatFileSize(workspace.contentSize));
+                }
             }
         }
     }
