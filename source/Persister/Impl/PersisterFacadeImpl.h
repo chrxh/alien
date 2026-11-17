@@ -107,5 +107,5 @@ template <typename RequestResult, typename ResultData>
 ResultData _PersisterFacadeImpl::fetchData(PersisterRequestId const& id)
 {
     auto requestResult = std::dynamic_pointer_cast<RequestResult>(_worker->fetchRequestResult(id));
-    return requestResult->getData();
+    return requestResult->releaseData();
 }

@@ -974,6 +974,7 @@ void DescConverterService::convertGenomeToTO(
 
     stringToChar64(genomeTO.name, genome._name);
     genomeTO.id = genome._id;
+    NumberGenerator::get().adaptMaxEntityId(genomeTO.id);
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.resistanceToInjection = genome._resistanceToInjection;
     genomeTO.applyMetaMutations = genome._applyMetaMutations;
@@ -1250,6 +1251,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTOIndexById.insert_or_assign(creatureDesc._id, creatureTOIndex);
 
     creatureTO.id = creatureDesc._id;
+    NumberGenerator::get().adaptMaxEntityId(creatureTO.id);
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.headUpdateId = creatureDesc._headUpdateId;
@@ -1257,6 +1259,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.numCells = creatureDesc._numCells;
     creatureTO.mutationState = creatureDesc._mutationState;
     creatureTO.lineageId = creatureDesc._lineageId;
+    NumberGenerator::get().adaptMaxLineageId(creatureTO.lineageId);
     creatureTO.accumulatedMutations = creatureDesc._accumulatedMutations;
     creatureTO.accumulatedMutationsInLineage = creatureDesc._accumulatedMutationsInLineage;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
@@ -1284,6 +1287,7 @@ void DescConverterService::convertObjectToTO(
 
     ObjectTO& objectTO = objectTOs.at(objectIndex);
     objectTO.id = objectDesc._id;
+    NumberGenerator::get().adaptMaxEntityId(objectTO.id);
     objectTOIndexById.insert_or_assign(objectTO.id, objectIndex);
 
     objectTO.pos = {objectDesc._pos.x, objectDesc._pos.y};
@@ -1580,6 +1584,7 @@ void DescConverterService::addParticle(std::vector<EnergyTO>& particleTOs, Energ
     auto& particleTO = particleTOs.emplace_back();
 
     particleTO.id = particleDesc._id;
+    NumberGenerator::get().adaptMaxEntityId(particleTO.id);
     particleTO.pos = {particleDesc._pos.x, particleDesc._pos.y};
     particleTO.vel = {particleDesc._vel.x, particleDesc._vel.y};
     particleTO.energy = particleDesc._energy;

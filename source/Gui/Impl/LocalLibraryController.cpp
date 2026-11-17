@@ -527,8 +527,8 @@ void LocalLibraryController::processPendingLoads()
         auto isAutosave = service.isAutosaveName(StringHelper::toUtf8(pendingLoad.simulationPath.stem()));
         auto nameInLibrary = name.has_value() && service.isValidSimulationName(*name) && !isAutosave ? name : std::nullopt;
         auto data = _PersisterFacade::get()->fetchReadSimulationData(pendingLoad.requestId);
-        if (auto errorMessage =
-                NewSimulationService::get().loadSimulation(data.simulationDesc, std::nullopt, nameInLibrary, service.normalize(pendingLoad.simulationPath))) {
+        if (auto errorMessage = NewSimulationService::get().loadSimulation(
+                std::move(data.simulationDesc), std::nullopt, nameInLibrary, service.normalize(pendingLoad.simulationPath))) {
             GenericMessageDialog::get().information("Error", *errorMessage);
             continue;
         }

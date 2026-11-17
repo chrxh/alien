@@ -45,7 +45,7 @@ void NewSimulationService::createSimulation(Parameters const& parameters)
 }
 
 std::optional<std::string> NewSimulationService::loadSimulation(
-    SimulationDesc const& simulation,
+    SimulationDesc simulation,
     std::optional<std::string> const& originResourceId,
     std::optional<std::string> const& nameInLibrary,
     std::optional<std::filesystem::path> const& localFile)
@@ -73,7 +73,11 @@ std::optional<std::string> NewSimulationService::loadSimulation(
 
     Viewport::get().setCenterInWorldPos(simulation._center);
     Viewport::get().setZoomFactor(simulation._zoom);
-    TemporalControlService::get().createFlashback();
+    if (errorMessage) {
+        TemporalControlService::get().createFlashback();
+    } else {
+        TemporalControlService::get().createFlashback(std::move(simulation._mainData));
+    }
     _originResourceId = errorMessage ? std::nullopt : originResourceId;
     _nameInLibrary = errorMessage ? std::nullopt : nameInLibrary;
     _localFile = errorMessage ? std::nullopt : localFile;

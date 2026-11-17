@@ -48,6 +48,11 @@ void TemporalControlService::createFlashback()
     _flashback = createSnapshot();
 }
 
+void TemporalControlService::createFlashback(ContentDesc&& simulationData)
+{
+    _flashback = createSnapshot(std::move(simulationData));
+}
+
 bool TemporalControlService::hasFlashback() const
 {
     return _flashback.has_value();
@@ -65,10 +70,15 @@ void TemporalControlService::restoreFlashback()
 
 TemporalControlService::Snapshot TemporalControlService::createSnapshot() const
 {
+    return createSnapshot(_SimulationFacade::get()->getSimulationData());
+}
+
+TemporalControlService::Snapshot TemporalControlService::createSnapshot(ContentDesc&& simulationData) const
+{
     Snapshot result;
     result.timestep = _SimulationFacade::get()->getCurrentTimestep();
     result.realTime = _SimulationFacade::get()->getRealTime();
-    result.data = _SimulationFacade::get()->getSimulationData();
+    result.data = std::move(simulationData);
     result.parameters = _SimulationFacade::get()->getSimulationParameters();
     return result;
 }
