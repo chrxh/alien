@@ -13,6 +13,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/GlobalSettings.h>
+#include <Base/StringHelper.h>
 
 #include <Data/SimulationParameters.h>
 
@@ -532,7 +533,7 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
         auto isGenome = _resourceType == NetworkResourceType_Genome;
         if (!(isGenome ? service.isValidGenomeName(name) : service.isValidSimulationName(name))) {
             result.message = !isGenome && service.isValidFolderName(name)
-                ? "Names of this form are reserved for autosaves"
+                ? "The name of a simulation must not end with .genome"
                 : "A name must not contain < > : \" \\ | ? * and must not begin or end with a dot or a space";
             return result;
         }
@@ -631,8 +632,11 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
     if (_mode == Mode::Replacing) {
         if (_target == SaveTarget::ThisComputer) {
 
-            // What is replaced keeps its description
-            if (auto errorMessage = saveOnThisComputer(_replacedResource->resourceName, std::nullopt)) {
+            // What is replaced keeps its name and its description. A simulation is replaced at its place, which may lie in the folder of the
+            // autosaves outside the library.
+            if (_resourceType == NetworkResourceType_Simulation) {
+                LocalLibraryController::get().onReplace(StringHelper::toPath(_replacedResource->id), _preview.getJpg());
+            } else if (auto errorMessage = saveOnThisComputer(_replacedResource->resourceName, std::nullopt)) {
                 _errorMessage = errorMessage;
                 return;
             }

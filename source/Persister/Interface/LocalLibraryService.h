@@ -17,7 +17,7 @@ class LocalLibraryService
 public:
     LocalLibraryContent loadContent(std::filesystem::path const& libraryFolder) const;
 
-    bool isValidSimulationName(std::string const& name) const;  // Names that autosave uses are refused, because their files are deleted or replaced
+    bool isValidSimulationName(std::string const& name) const;  // Also takes the names of autosaves, but no names of genome files
     bool isValidFolderName(std::string const& name) const;
     bool isAutosaveName(std::string const& name) const;                          // The name without folders of a file that autosave writes and removes again
     std::filesystem::path normalize(std::filesystem::path const& folder) const;  // Absolute and without a trailing separator

@@ -71,7 +71,8 @@ public:
 
     // Without a description, the description of a replaced simulation is kept
     void onSave(std::string const& name, std::optional<std::string> const& description, std::string const& jpg);
-    void onSaveToFile(std::filesystem::path const& filename);  // A file at any place
+    void onReplace(std::filesystem::path const& simulationPath, std::string const& jpg);  // Keeps the name and the description
+    void onSaveToFile(std::filesystem::path const& filename);                             // A file at any place
     void onAutosave();
     void onLoad(std::filesystem::path const& simulationPath);
 

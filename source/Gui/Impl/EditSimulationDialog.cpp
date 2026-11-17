@@ -98,11 +98,11 @@ void EditSimulationDialog::processForLeaf()
     auto isGenome = _treeTO->type == NetworkResourceType_Genome;
     auto isValidLocalName = isGenome ? service.isValidGenomeName(newName) : service.isValidSimulationName(newName);
 
-    // An autosave keeps its name, which no other simulation may get, while only its description is changed
-    auto isUnchangedAutosaveName = !isGenome && newName == _treeTO->getLeaf().rawTO->resourceName && service.isValidFolderName(newName);
-    auto valid = isLocal() ? isValidLocalName || isUnchangedAutosaveName : !_newName.empty();
+    // A simulation named like a genome file keeps its name, which no other simulation may get, while only its description is changed
+    auto keepsGenomeLikeName = !isGenome && newName == _treeTO->getLeaf().rawTO->resourceName && service.isValidFolderName(newName);
+    auto valid = isLocal() ? isValidLocalName || keepsGenomeLikeName : !_newName.empty();
     if (isLocal() && !valid && !newName.empty() && !_errorMessage.has_value()) {
-        _errorMessage = !isGenome && service.isValidFolderName(newName) ? "Names of this form are reserved for autosaves" : getLocalNameHint(newName);
+        _errorMessage = !isGenome && service.isValidFolderName(newName) ? "The name of a simulation must not end with .genome" : getLocalNameHint(newName);
     }
     processErrorMessage();
 

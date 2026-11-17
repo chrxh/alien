@@ -225,14 +225,12 @@ TEST_F(LocalLibraryServiceTests, validSimulationNames)
     EXPECT_FALSE(_service->isValidSimulationName(std::string(101, 'x')));
     EXPECT_FALSE(_service->isValidSimulationName("1/2/3/4/5/6/7/8/9/Aurora"));
 
-    // Autosaves are deleted automatically, which must not happen to a simulation saved by hand
-    EXPECT_FALSE(_service->isValidSimulationName("save_12400000"));
-    EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/save_12400000-2"));
-    EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/save_165_536_949"));
-
-    // The simulation that is saved on exit is replaced automatically
-    EXPECT_FALSE(_service->isValidSimulationName("autosave"));
-    EXPECT_FALSE(_service->isValidSimulationName("Hanging Garden/Autosave"));
+    // Saving under the name of an autosave replaces the autosave
+    EXPECT_TRUE(_service->isValidSimulationName("save_12400000"));
+    EXPECT_TRUE(_service->isValidSimulationName("Hanging Garden/save_12400000-2"));
+    EXPECT_TRUE(_service->isValidSimulationName("Hanging Garden/save_165_536_949"));
+    EXPECT_TRUE(_service->isValidSimulationName("autosave"));
+    EXPECT_TRUE(_service->isValidSimulationName("Hanging Garden/Autosave"));
 }
 
 TEST_F(LocalLibraryServiceTests, validFolderNames)
@@ -357,7 +355,6 @@ TEST_F(LocalLibraryServiceTests, moveSimulation_refusesTakenAndInvalidNames)
 
     EXPECT_FALSE(_service->moveSimulation(_library, source, "Dawn").has_value());
     EXPECT_FALSE(_service->moveSimulation(_library, source, "Night").has_value());
-    EXPECT_FALSE(_service->moveSimulation(_library, source, "Runs/save_5").has_value());
     EXPECT_FALSE(_service->moveSimulation(_library, source, "Runs/Aurora?").has_value());
 
     EXPECT_TRUE(std::filesystem::exists(source));
@@ -384,7 +381,17 @@ TEST_F(LocalLibraryServiceTests, moveSimulation_autosaveIntoRenamedFolder)
 
     ASSERT_TRUE(target.has_value());
     EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run 16/save_12400000").kind);
-    EXPECT_FALSE(_service->moveSimulation(_library, *target, "Run 16/save_5").has_value());
+}
+
+TEST_F(LocalLibraryServiceTests, moveSimulation_toNameOfAutosave)
+{
+    auto source = _library / "Run 16" / "Aurora.sim";
+    createFile(source);
+
+    auto target = _service->moveSimulation(_library, source, "Run 16/save_5");
+
+    ASSERT_TRUE(target.has_value());
+    EXPECT_EQ(LibraryFileKind::Autosave, findSimulation("Run 16/save_5").kind);
 }
 
 TEST_F(LocalLibraryServiceTests, moveSimulation_changesSpellingOfFolder)

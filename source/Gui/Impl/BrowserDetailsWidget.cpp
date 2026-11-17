@@ -124,18 +124,11 @@ namespace
         return AlienGui::ActionButton(createDeleteButtonParameters());
     }
 
-    // Nothing can be saved under the name of an autosave or under a name that is not valid
+    // A simulation of this computer is replaced at its place, a genome is saved again under its name, which must be valid then
     bool isReplaceable(NetworkResourceRawTO const& rawTO)
     {
-        if (rawTO->workspaceType == WorkspaceType_Autosave) {
-            return false;
-        }
-        if (rawTO->workspaceType != WorkspaceType_Local) {
-            return true;
-        }
-        auto& service = LocalLibraryService::get();
-        return rawTO->resourceType == NetworkResourceType_Simulation ? service.isValidSimulationName(rawTO->resourceName)
-                                                                     : service.isValidGenomeName(rawTO->resourceName);
+        return rawTO->resourceType == NetworkResourceType_Simulation || !isLocalWorkspace(rawTO->workspaceType)
+            || LocalLibraryService::get().isValidGenomeName(rawTO->resourceName);
     }
 
     struct ResourceButton
@@ -176,7 +169,7 @@ namespace
 
         auto isLocal = isLocalWorkspace(rawTO->workspaceType);
         auto canChange = data->isOwner(rawTO) && (isLocal || NetworkService::get().isLoggedIn());
-        if (canChange && rawTO->workspaceType != WorkspaceType_Autosave) {
+        if (canChange) {
             result.emplace_back(ResourceButton{
                 .parameters =
                     AlienGui::ActionButtonParameters().buttonText(ICON_FA_EDIT "  Edit").transparentBackground(false).tooltip("Change name or description"),

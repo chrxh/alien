@@ -765,13 +765,10 @@ void BrowserWindow::onSave()
     auto workspaceId = _data->getCurrentWorkspaceId();
     auto selectedTreeTO = _data->getSelectedTreeTO();
 
-    // What is selected suggests its name and a selected folder suggests itself. An autosave in Autosaves or My simulations suggests its folder,
-    // because nothing can be saved under its name.
+    // What is selected suggests its name, also an autosave, and a selected folder suggests itself
     std::string suggestedName;
     if (selectedTreeTO != nullptr) {
-        auto isAutosave = selectedTreeTO->isLeaf() && workspaceId.resourceType == NetworkResourceType_Simulation && isLocalWorkspace(workspaceId.workspaceType)
-            && !LocalLibraryService::get().isValidSimulationName(selectedTreeTO->getLeaf().rawTO->resourceName);
-        if (selectedTreeTO->isLeaf() && !isAutosave) {
+        if (selectedTreeTO->isLeaf()) {
             suggestedName = selectedTreeTO->getLeaf().rawTO->resourceName;
         } else if (!selectedTreeTO->folderNames.empty()) {
             suggestedName = NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
