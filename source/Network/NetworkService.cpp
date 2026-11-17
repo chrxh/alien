@@ -169,6 +169,12 @@ std::optional<std::string> NetworkService::getPassword()
     return _password;
 }
 
+std::optional<uint64_t> NetworkService::getUploadStorageLimit()
+{
+    auto result = _uploadStorageLimit.load();
+    return result > 0 ? std::make_optional(result) : std::nullopt;
+}
+
 bool NetworkService::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
     log(Priority::Important, "network: create user '" + userName + "'");
@@ -230,16 +236,17 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
         auto result = executeRequest([&] { return client.Post("/login", params); });
 
         auto boolResult = parseBoolResult(result->body);
-        if (boolResult) {
-            _loggedInUserName = userName;
-            _password = password;
-            setUserInfo(userInfo);
-        }
 
         errorCode = LoginErrorCode_UnknownUser;
         std::stringstream stream(result->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
+        if (boolResult) {
+            _uploadStorageLimit = tree.get<uint64_t>("storageLimit", 0);
+            _loggedInUserName = userName;
+            _password = password;
+            setUserInfo(userInfo);
+        }
         errorCode = tree.get<LoginErrorCode>("errorCode");
 
         return boolResult;
@@ -272,6 +279,7 @@ bool NetworkService::logout()
 
     _loggedInUserName = std::nullopt;
     _password = std::nullopt;
+    _uploadStorageLimit = 0;
     setUserInfo(UserInfo());
     return result;
 }

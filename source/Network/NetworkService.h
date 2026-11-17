@@ -40,6 +40,7 @@ public:
     bool isLoggedIn();
     std::optional<std::string> getLoggedInUserName();
     std::optional<std::string> getPassword();
+    std::optional<uint64_t> getUploadStorageLimit();
 
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
     bool activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode);
@@ -84,6 +85,7 @@ private:
     std::atomic<bool> _countAsActive = true;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
+    std::atomic<uint64_t> _uploadStorageLimit = 0;  // 0 if unknown
     std::string _installId;
     std::atomic<bool> _reactedWithoutAccount = false;
     std::mutex _userInfoMutex;

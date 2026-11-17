@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <vector>
-#include <numeric>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -37,6 +36,8 @@ namespace
     auto constexpr ChipSpacing = 6.0f;
     auto constexpr ChipEmojiSize = 18.0f;
     auto constexpr VisibilityHeight = 26.0f;
+    auto constexpr StorageBarHeight = 8.0f;
+    auto constexpr StorageWarningFraction = 0.9f;
     auto constexpr MaxNumFileInfos = 200;
     auto constexpr TimestampLengthWithoutSeconds = 16;  // e.g. 2026-11-13 14:02
 
@@ -73,6 +74,26 @@ namespace
         ImGui::PopStyleColor();
         ImGui::SameLine();
         processWrappedText(text);
+    }
+
+    void processStorage(uint64_t usedSize, uint64_t storageLimit)
+    {
+        addSectionSpacing();
+        processLabel("Storage");
+        AlienGui::HelpMarker("Your simulations and genomes on the server share this storage.");
+
+        auto usedFraction = static_cast<float>(static_cast<double>(usedSize) / static_cast<double>(storageLimit));
+        auto height = scale(StorageBarHeight);
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, Const::RaisedColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, usedFraction < StorageWarningFraction ? Const::AccentColor.Value : Const::WarningColor.Value);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, height / 2);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+        ImGui::ProgressBar(usedFraction, {ImGui::GetContentRegionAvail().x, height}, "");
+        ImGui::PopStyleVar(2);
+        ImGui::PopStyleColor(2);
+
+        processFact("Used", StringHelper::formatFileSize(usedSize) + " of " + StringHelper::formatFileSize(storageLimit));
+        processFact("Free", StringHelper::formatFileSize(storageLimit - std::min(usedSize, storageLimit)));
     }
 
     bool isCreatedByAutosave(NetworkResourceRawTO const& rawTO)
@@ -537,13 +558,13 @@ void _BrowserDetailsWidget::processWorkspace()
         if (workspaceId.workspaceType != WorkspaceType_Private || NetworkService::get().isLoggedIn()) {
             addSectionSpacing();
             processFact(isSimulation ? "Simulations" : "Genomes", StringHelper::format(static_cast<uint64_t>(workspace.rawTOs.size())));
-        }
-        if (isLocalWorkspace(workspaceId.workspaceType)) {
-            auto totalSize =
-                std::accumulate(workspace.rawTOs.begin(), workspace.rawTOs.end(), uint64_t(0), [](uint64_t sum, NetworkResourceRawTO const& rawTO) {
-                    return sum + rawTO->contentSize;
-                });
-            processFact("Size", StringHelper::formatFileSize(totalSize));
+
+            auto storageLimit = NetworkService::get().getUploadStorageLimit();
+            if (workspaceId.workspaceType == WorkspaceType_Private && storageLimit.has_value()) {
+                processStorage(_data->getTotalUploadSize(), *storageLimit);
+            } else {
+                processFact("Size", StringHelper::formatFileSize(workspace.contentSize));
+            }
         }
     }
     ImGui::EndChild();

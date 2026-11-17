@@ -94,7 +94,9 @@ The C++ client (`source/Base/Resources.h`, `AlienServerURL`) defaults to
 
 `_MAX_TOTAL_SIZE_PER_USER` in `main.py` caps the summed content size of a user's
 simulations and genomes at 1 GB. `/uploadsimulation` and `/replacesimulation`
-answer `{"result": false}` beyond it.
+answer `{"result": false}` beyond it. A successful `/login` reports the quota as
+`storageLimit`, the number of bytes as a string like `contentSize`, and the
+browser of the client shows with it how much storage is used and free.
 
 ## Active simulator count
 

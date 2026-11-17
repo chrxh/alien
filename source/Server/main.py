@@ -1042,7 +1042,12 @@ def login(
                 success = True
 
     # Discord notifications are intentionally not sent.
-    return {"result": success, "errorCode": error_code}
+    response = {"result": success, "errorCode": error_code}
+    if success:
+        # A string like ``contentSize`` of /getversionedsimulationlist. The
+        # client shows with it how much storage the account has left.
+        response["storageLimit"] = str(_MAX_TOTAL_SIZE_PER_USER)
+    return response
 
 
 @app.post("/logout")

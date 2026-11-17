@@ -176,6 +176,14 @@ def test_activate_user_accepts_optional_gpu(app_client, helpers):
 
 
 # --- /login -------------------------------------------------------------------
+def _login_success(app_client):
+    return {
+        "result": True,
+        "errorCode": 1,
+        "storageLimit": str(app_client.app_module._MAX_TOTAL_SIZE_PER_USER),
+    }
+
+
 def test_login_success_sets_flags_and_gpu(app_client, helpers):
     helpers.create_user(app_client, "alice", "pw", "a@b.c")
     helpers.activate_user(app_client, "alice", "pw")
@@ -185,7 +193,7 @@ def test_login_success_sets_flags_and_gpu(app_client, helpers):
         data={"userName": "alice", "password": "pw", "gpu": "RTX 4090"},
     )
     assert resp.status_code == 200
-    assert resp.json() == {"result": True, "errorCode": 1}
+    assert resp.json() == _login_success(app_client)
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
@@ -201,7 +209,7 @@ def test_login_stores_program_version(app_client, helpers):
         "/login",
         data={"userName": "alice", "password": "pw", "version": "5.0.0-alpha.26"},
     )
-    assert resp.json() == {"result": True, "errorCode": 1}
+    assert resp.json() == _login_success(app_client)
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
@@ -213,7 +221,7 @@ def test_login_without_version_succeeds(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
 
     resp = app_client.post("/login", data={"userName": "alice", "password": "pw"})
-    assert resp.json() == {"result": True, "errorCode": 1}
+    assert resp.json() == _login_success(app_client)
 
     main = app_client.app_module
     with main.Session(main.engine) as session:
@@ -463,7 +471,7 @@ def test_login_resets_clock_so_offline_time_is_not_counted(app_client, helpers):
     resp = app_client.post(
         "/login", data={"userName": "alice", "password": "pw"}
     )
-    assert resp.json() == {"result": True, "errorCode": 1}
+    assert resp.json() == _login_success(app_client)
 
     # Immediately refresh — the multi-hour offline gap must NOT be counted,
     # and even the per-call cap must not apply because /login reset the
@@ -648,7 +656,7 @@ def test_set_new_password_updates_credentials(app_client, helpers):
     good = app_client.post(
         "/login", data={"userName": "alice", "password": "newpw"}
     )
-    assert good.json() == {"result": True, "errorCode": 1}
+    assert good.json() == _login_success(app_client)
 
     with main.Session(main.engine) as session:
         user = main._get_user_by_name(session, "alice")
@@ -696,7 +704,7 @@ def test_full_user_lifecycle(app_client, helpers):
 
     assert app_client.post(
         "/login", data={"userName": "alice", "password": "pw"}
-    ).json() == {"result": True, "errorCode": 1}
+    ).json() == _login_success(app_client)
 
     assert app_client.post(
         "/refreshlogin", data={"userName": "alice", "password": "pw"}
@@ -724,7 +732,7 @@ def test_full_user_lifecycle(app_client, helpers):
 
     assert app_client.post(
         "/login", data={"userName": "alice", "password": "newpw"}
-    ).json() == {"result": True, "errorCode": 1}
+    ).json() == _login_success(app_client)
 
     assert app_client.post(
         "/deleteuser", data={"userName": "alice", "password": "newpw"}
@@ -827,6 +835,6 @@ def test_ensure_users_schema_adds_missing_columns(app_client, helpers):
     resp = app_client.post(
         "/login", data={"userName": "alice", "password": "pw", "version": "1.2.3"}
     )
-    assert resp.json() == {"result": True, "errorCode": 1}
+    assert resp.json() == _login_success(app_client)
     with main.Session(main.engine) as session:
         assert main._get_user_by_name(session, "alice").version == "1.2.3"
