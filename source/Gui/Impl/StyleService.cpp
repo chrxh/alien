@@ -204,9 +204,9 @@ namespace Const
     ImColor NeuronEditorNodeFillColor;
     ImColor NeuronEditorLabelColor;
 
-    ImColor DashboardCardBackgroundColor;
-    ImColor DashboardCardBorderColor;
-    ImColor DashboardSummaryRowColor;
+    ImColor StatisticsCardBackgroundColor;
+    ImColor StatisticsCardBorderColor;
+    ImColor StatisticsSummaryRowColor;
 
     ImColor BrowserOwnReactionButtonTextColor;
     ImColor BrowserDownloadButtonTextColor;
@@ -475,9 +475,9 @@ void StyleService::setupPalette() const
     NeuronEditorNodeFillColor = themed(ImColor::HSV(0.611f, 0.333f, 0.106f), ImColor::HSV(0.583f, 0.040f, 0.945f));
     NeuronEditorLabelColor = themed(ImColor::HSV(0.611f, 0.124f, 0.761f), ImColor::HSV(0.611f, 0.250f, 0.380f));
 
-    DashboardCardBackgroundColor = themed(ImColor::HSV(0.614f, 0.424f, 0.165f), ImColor::HSV(0.600f, 0.030f, 0.990f));
-    DashboardCardBorderColor = themed(ImColor::HSV(0.617f, 0.389f, 0.270f), ImColor::HSV(0.600f, 0.100f, 0.820f));
-    DashboardSummaryRowColor = themed(ImColor::HSV(0.617f, 0.435f, 0.230f), ImColor::HSV(0.600f, 0.100f, 0.900f));
+    StatisticsCardBackgroundColor = themed(ImColor::HSV(0.614f, 0.424f, 0.165f), ImColor::HSV(0.600f, 0.030f, 0.990f));
+    StatisticsCardBorderColor = themed(ImColor::HSV(0.617f, 0.389f, 0.270f), ImColor::HSV(0.600f, 0.100f, 0.820f));
+    StatisticsSummaryRowColor = themed(ImColor::HSV(0.617f, 0.435f, 0.230f), ImColor::HSV(0.600f, 0.100f, 0.900f));
 
     BrowserOwnReactionButtonTextColor = themed(ImColor::HSV(0.375f, 0.6f, 0.7f), ImColor::HSV(0.375f, 0.8f, 0.5f));
     BrowserDownloadButtonTextColor = themed(ImColor::HSV(0.55f, 0.6f, 1.0f), ImColor::HSV(0.55f, 0.85f, 0.65f));

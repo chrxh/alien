@@ -62,7 +62,7 @@ The [Sandbox and editing](sandbox.md) chapter explains these tools in detail.
 | --- | --- |
 | **Simulation** | New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S), Save picture, Run and Pause (Space) |
 | **Network** | Browser (Alt+B), Login (Alt+L), Logout, Delete user |
-| **Windows** | Temporal control (Alt+1), Spatial control (Alt+2), Evolution dashboard (Alt+3), Simulation parameters (Alt+4), MCP server (Alt+5), Log (Alt+6) |
+| **Windows** | Temporal control (Alt+1), Spatial control (Alt+2), Statistics (Alt+3), Simulation parameters (Alt+4), MCP server (Alt+5), Log (Alt+6) |
 | **Editor** | Genome editor (Alt+W), Allow object editing (Alt+E), Inspect objects (Alt+N), Inspect genomes (Alt+F), Inspect creatures (Alt+P), Close inspections and Deselect (Esc), Copy (Ctrl+C), Paste (Ctrl+V), Delete (Del) |
 | **View** | Cell info overlay (Alt+O), Message overlay (Alt+X), Render UI (Alt+U), Render simulation (Alt+I), Console mode (Alt+C) |
 | **Tools** | Mass operations (Alt+H), Image converter (Alt+Y), Recorder (Alt+V) |
@@ -81,11 +81,11 @@ Runs, pauses and steps the simulation, manages the flashback and shows the speed
 
 Shows the world size, the zoom factor and the view center, and offers zoom buttons, autotracking and the zoom sensitivity. The **Resize** button changes the size of the world. See [Navigating the world](#navigating-the-world).
 
-### Evolution dashboard
+### Statistics
 
 Shows the state of the world at a glance: cards with the numbers of solids, fluids, cells, free cells, energy particles, creatures and lineages as well as the internal and external energy. Below them, a table lists the lineages, which are groups of related creatures. It can be filtered by color. Each lineage has a button that opens the genome of a representative creature in the genome editor.
 
-At the bottom of the window, plots show how the number of creatures, the average numbers of cells and genome nodes, the average generation, the average mutation rate and the energy stored in the creatures develop over time. Four further plots show rates per 1,000 time steps: the number of created creatures, how much the genomes change through mutations, the energy gained by attacks and the muscle activity. The last two are averages per creature. The plots cover either the last time steps or the entire history. If no lineage is selected in the table, they show one curve for all lineages that pass the color filter. Otherwise, each selected lineage gets a curve of its own. The dashboard is the main tool for [evolution experiments](evolution.md).
+At the bottom of the window, plots show how the number of creatures, the average numbers of cells and genome nodes, the average generation, the average mutation rate and the energy stored in the creatures develop over time. Four further plots show rates per 1,000 time steps: the number of created creatures, how much the genomes change through mutations, the energy gained by attacks and the muscle activity. The last two are averages per creature. The plots cover either the last time steps or the entire history. If no lineage is selected in the table, they show one curve for all lineages that pass the color filter. Otherwise, each selected lineage gets a curve of its own. This window is the main tool for [evolution experiments](evolution.md).
 
 ### Simulation parameters
 

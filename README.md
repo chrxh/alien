@@ -56,7 +56,7 @@ https://github.com/user-attachments/assets/f17cd3aa-c7df-497d-bc8f-096450488e22
 - Mutations of neural networks, cell properties and the genome structure, with mutation rates that can evolve themselves (meta-mutations)
 - Selection arises naturally from limited energy, predation and competition for space
 - Layers and radiation sources let the simulation parameters vary across the world and create diverse habitats
-- Evolution dashboard with lineages, population statistics and long-term plots
+- Statistics window with lineages, population numbers and long-term plots
 - Saved simulations with pictures, autosaves and flashbacks to return to interesting moments
 
 https://github.com/user-attachments/assets/77e4ac57-8d3f-4a51-9f69-65cb8e31d097

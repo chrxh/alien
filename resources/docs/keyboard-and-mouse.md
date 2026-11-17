@@ -19,7 +19,7 @@ Some windows have mouse actions of their own, for example:
 
 - Hold **Ctrl** and click a slider to type in a precise value.
 - Double-click an entry in the **Browser** to open it. An entry of the server is downloaded first.
-- Hold **Ctrl** and click rows in the lineage table of the **Evolution dashboard** to select several lineages.
+- Hold **Ctrl** and click rows in the lineage table of the **Statistics** window to select several lineages.
 - In the preview of the genome editor, turn the mouse wheel to zoom and drag with the middle mouse button to move the view.
 
 ## General
@@ -39,7 +39,7 @@ Some windows have mouse actions of their own, for example:
 | --- | --- |
 | Alt+1 | Temporal control |
 | Alt+2 | Spatial control |
-| Alt+3 | Evolution dashboard |
+| Alt+3 | Statistics |
 | Alt+4 | Simulation parameters |
 | Alt+5 | MCP server |
 | Alt+6 | Log |

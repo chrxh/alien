@@ -75,7 +75,7 @@ A creature reproduces when one of its cells builds a copy of the root gene and r
 4. Optionally, delete the old creatures and the old seed. Otherwise the old seed keeps building creatures with the old genome. Choose the **Select and move** tool in the edit mode tool bar, click one of them, press **Del** and repeat this for the others.
 5. Click **Create seed with energy** again.
 
-Run the simulation. Building a cell costs energy, and the creatures get it from the external energy pool that you filled in step 1. Soon there are two creatures, then four, then many more. Not all of them come from reproduction, because the new seed keeps building creatures as well. When the pool is empty, the growth stops. The [Evolution dashboard](user-interface.md#evolution-dashboard) (Alt+3) shows the number of creatures and the remaining external energy.
+Run the simulation. Building a cell costs energy, and the creatures get it from the external energy pool that you filled in step 1. Soon there are two creatures, then four, then many more. Not all of them come from reproduction, because the new seed keeps building creatures as well. When the pool is empty, the growth stops. The [Statistics](user-interface.md#statistics) window (Alt+3) shows the number of creatures and the remaining external energy.
 
 ## What you have learned
 

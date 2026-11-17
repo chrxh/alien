@@ -16,7 +16,7 @@ Cells need energy to exist, to act and to build offspring. Understanding where e
 | Energy particles | Free energy that drifts through the world. |
 | External energy | In the external energy pool outside the world, if used. |
 
-The energy inside the world is conserved. It changes its form, but the simulation never creates or destroys it, with two exceptions. The external energy pool can supply energy to the world and take energy back. Seeds created with **Create seed with energy** build their first creature without energy cost, which adds new energy to the world. The amount of energy also changes when you edit the world, for example when you create or delete objects. The [Evolution dashboard](user-interface.md#evolution-dashboard) shows the internal and the external energy.
+The energy inside the world is conserved. It changes its form, but the simulation never creates or destroys it, with two exceptions. The external energy pool can supply energy to the world and take energy back. Seeds created with **Create seed with energy** build their first creature without energy cost, which adds new energy to the world. The amount of energy also changes when you edit the world, for example when you create or delete objects. The [Statistics](user-interface.md#statistics) window shows the internal and the external energy.
 
 ## How cells gain energy
 

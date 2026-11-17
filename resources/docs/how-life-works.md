@@ -54,7 +54,7 @@ A creature reproduces when one of its constructors builds the root gene again an
 
 The genome of a creature can **mutate** when the creature starts to build its first offspring. From then on, the creature uses the mutated genome itself and passes it on to all of its offspring. A seed passes on its genome unchanged. Each genome contains its own mutation rates, which determine how likely each kind of change is, for example a different weight in a neural network, a new node, a lost gene or a different cell type. Most mutations are harmful, some are neutral and a few are beneficial. Creatures with beneficial mutations collect more energy, build more offspring and spread. Over many generations, this leads to evolution.
 
-Related creatures form a **lineage**. When the mutations that a creature has accumulated within its current lineage exceed a threshold, it founds a new lineage. The [Evolution dashboard](user-interface.md#evolution-dashboard) shows how lineages grow and shrink.
+Related creatures form a **lineage**. When the mutations that a creature has accumulated within its current lineage exceed a threshold, it founds a new lineage. The [Statistics](user-interface.md#statistics) window shows how lineages grow and shrink.
 
 ## Death
 
