@@ -38,7 +38,6 @@
 #include "DocumentationWindow.h"
 #include "EditSimulationDialog.h"
 #include "EditorController.h"
-#include "EvolutionDashboardWindow.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
 #include "FpsController.h"
@@ -75,6 +74,7 @@
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
 #include "StartupCheckService.h"
+#include "StatisticsWindow.h"
 #include "StyleService.h"
 #include "TemporalControlWindow.h"
 #include "UiController.h"
@@ -120,7 +120,7 @@ _MainWindow::_MainWindow()
     EditorController::get().setup();
     SimulationView::get().setup();
     SimulationInteractionController::get().setup();
-    EvolutionDashboardWindow::get().setup();
+    StatisticsWindow::get().setup();
     TemporalControlWindow::get().setup();
     SpatialControlWindow::get().setup();
     SimulationParametersMainWindow::get().setup();

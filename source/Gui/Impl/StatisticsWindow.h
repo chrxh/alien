@@ -19,9 +19,9 @@
 #include "Definitions.h"
 #include "LiveStatisticsHistory.h"
 
-class EvolutionDashboardWindow : public AlienWindow
+class StatisticsWindow : public AlienWindow
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(EvolutionDashboardWindow);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
 
 public:
     static auto constexpr NumMetrics = 10;
@@ -29,7 +29,7 @@ public:
 private:
     struct LineageDisplayData;
 
-    EvolutionDashboardWindow();
+    StatisticsWindow();
 
     void initIntern() override;
     void shutdownIntern() override;

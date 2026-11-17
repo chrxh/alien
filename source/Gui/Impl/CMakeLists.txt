@@ -71,8 +71,6 @@ add_library(GuiImpl
     EditSimulationDialog.h
     EntityAttributeHelp.cpp
     EntityAttributeHelp.h
-    EvolutionDashboardWindow.cpp
-    EvolutionDashboardWindow.h
     ExitDialog.cpp
     ExitDialog.h
     FileTransferController.cpp
@@ -228,6 +226,8 @@ add_library(GuiImpl
     SpecificationGuiService.h
     StartupCheckService.cpp
     StartupCheckService.h
+    StatisticsWindow.cpp
+    StatisticsWindow.h
     StyleService.cpp
     StyleService.h
     TemporalControlWindow.cpp

@@ -1,4 +1,4 @@
-#include "EvolutionDashboardWindow.h"
+#include "StatisticsWindow.h"
 
 #include <algorithm>
 #include <bit>
@@ -50,7 +50,7 @@ namespace
     int constexpr LineageColumn = 0;
     int constexpr CustomizationsColumn = 1;
     int constexpr FirstMetricColumn = 2;
-    int constexpr NumColumns = FirstMetricColumn + EvolutionDashboardWindow::NumMetrics;
+    int constexpr NumColumns = FirstMetricColumn + StatisticsWindow::NumMetrics;
     int constexpr CreaturesMetric = 0;
     auto constexpr PlotLabelColumnWidth = 150.0f;
     auto constexpr MinPlotHeight = 40.0f;
@@ -72,7 +72,7 @@ namespace
 
     // The last four metrics are rates per 1K time steps, both in the table and in the timeline plots;
     // the attack and muscle rates are additionally averaged over the creatures
-    MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
+    MetricDef const Metrics[StatisticsWindow::NumMetrics] = {
         {"Creatures", "Creatures", 0, 0, 82.0f},
         {"Avg cells", "Avg cells", 1, 1, 82.0f},
         {"Avg nodes", "Avg nodes", 1, 1, 82.0f},
@@ -305,42 +305,42 @@ namespace
             auto const* reference = referenceIsOldEnough ? &referenceSample : nullptr;
             target.timePoints.emplace_back(sample.timestep);
             target.systemClockPoints.emplace_back(sample.systemClock);
-            for (int i = 0; i < EvolutionDashboardWindow::NumMetrics; ++i) {
+            for (int i = 0; i < StatisticsWindow::NumMetrics; ++i) {
                 appendMetricValue(target.series.at(i), evaluateMetric(sample, reference, i));
             }
         }
     }
 }
 
-EvolutionDashboardWindow::EvolutionDashboardWindow()
-    : AlienWindow("Evolution dashboard", "windows.evolution dashboard", false, true, {60.0f, 60.0f}, {700.0f, 910.0f}, {700.0f, 500.0f})
+StatisticsWindow::StatisticsWindow()
+    : AlienWindow("Statistics", "windows.statistics", false, true, {60.0f, 60.0f}, {700.0f, 910.0f}, {700.0f, 500.0f})
 {}
 
-void EvolutionDashboardWindow::initIntern()
+void StatisticsWindow::initIntern()
 {
-    _timelinesHeight = GlobalSettings::get().getValue("windows.evolution dashboard.timelines height", scale(DefaultTimelinesHeight))
+    _timelinesHeight = GlobalSettings::get().getValue("windows.statistics.timelines height", scale(DefaultTimelinesHeight))
         * WindowController::get().getContentScaleCorrection();
-    _timelineMode = GlobalSettings::get().getValue("windows.evolution dashboard.timeline mode", _timelineMode);
-    _lastSteps = GlobalSettings::get().getValue("windows.evolution dashboard.last steps", _lastSteps);
-    _plotHeight = GlobalSettings::get().getValue("windows.evolution dashboard.plot height", _plotHeight);
-    _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.color filter", _colorFilter);
-    _sortColumnIndex = GlobalSettings::get().getValue("windows.evolution dashboard.sort column", _sortColumnIndex);
-    _sortAscending = GlobalSettings::get().getValue("windows.evolution dashboard.sort ascending", _sortAscending);
+    _timelineMode = GlobalSettings::get().getValue("windows.statistics.timeline mode", _timelineMode);
+    _lastSteps = GlobalSettings::get().getValue("windows.statistics.last steps", _lastSteps);
+    _plotHeight = GlobalSettings::get().getValue("windows.statistics.plot height", _plotHeight);
+    _colorFilter = GlobalSettings::get().getValue("windows.statistics.color filter", _colorFilter);
+    _sortColumnIndex = GlobalSettings::get().getValue("windows.statistics.sort column", _sortColumnIndex);
+    _sortAscending = GlobalSettings::get().getValue("windows.statistics.sort ascending", _sortAscending);
     validateAndCorrect();
 }
 
-void EvolutionDashboardWindow::shutdownIntern()
+void StatisticsWindow::shutdownIntern()
 {
-    GlobalSettings::get().setValue("windows.evolution dashboard.timelines height", _timelinesHeight);
-    GlobalSettings::get().setValue("windows.evolution dashboard.timeline mode", _timelineMode);
-    GlobalSettings::get().setValue("windows.evolution dashboard.last steps", _lastSteps);
-    GlobalSettings::get().setValue("windows.evolution dashboard.plot height", _plotHeight);
-    GlobalSettings::get().setValue("windows.evolution dashboard.color filter", _colorFilter);
-    GlobalSettings::get().setValue("windows.evolution dashboard.sort column", _sortColumnIndex);
-    GlobalSettings::get().setValue("windows.evolution dashboard.sort ascending", _sortAscending);
+    GlobalSettings::get().setValue("windows.statistics.timelines height", _timelinesHeight);
+    GlobalSettings::get().setValue("windows.statistics.timeline mode", _timelineMode);
+    GlobalSettings::get().setValue("windows.statistics.last steps", _lastSteps);
+    GlobalSettings::get().setValue("windows.statistics.plot height", _plotHeight);
+    GlobalSettings::get().setValue("windows.statistics.color filter", _colorFilter);
+    GlobalSettings::get().setValue("windows.statistics.sort column", _sortColumnIndex);
+    GlobalSettings::get().setValue("windows.statistics.sort ascending", _sortAscending);
 }
 
-void EvolutionDashboardWindow::processBackground()
+void StatisticsWindow::processBackground()
 {
     auto timepoint = std::chrono::steady_clock::now();
     auto duration =
@@ -361,7 +361,7 @@ void EvolutionDashboardWindow::processBackground()
     LiveStatisticsService::get().addDataPoint(_liveHistory, statisticsEntry, _SimulationFacade::get()->getCurrentTimestep());
 }
 
-void EvolutionDashboardWindow::processIntern()
+void StatisticsWindow::processIntern()
 {
     // Scale the plot section proportionally when the window is resized
     auto windowHeight = ImGui::GetWindowSize().y;
@@ -393,7 +393,7 @@ void EvolutionDashboardWindow::processIntern()
     ImGui::EndChild();
 }
 
-void EvolutionDashboardWindow::updateCellColors()
+void StatisticsWindow::updateCellColors()
 {
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     for (int i = 0; i < MAX_COLORS; ++i) {
@@ -401,13 +401,13 @@ void EvolutionDashboardWindow::updateCellColors()
     }
 }
 
-void EvolutionDashboardWindow::updateDisplayData()
+void StatisticsWindow::updateDisplayData()
 {
     updateTableData();
     updatePlotData();
 }
 
-void EvolutionDashboardWindow::updateTableData()
+void StatisticsWindow::updateTableData()
 {
     auto const& liveHistory = _liveHistory.getDataRef();
     auto liveBackTimestep = !liveHistory.empty() ? liveHistory.back().timestep : -1.0;
@@ -469,7 +469,7 @@ void EvolutionDashboardWindow::updateTableData()
     }
 }
 
-void EvolutionDashboardWindow::sortLineages()
+void StatisticsWindow::sortLineages()
 {
     std::sort(_lineages.begin(), _lineages.end(), [column = _sortColumnIndex, ascending = _sortAscending](auto const& lhs, auto const& rhs) {
         if (column == LineageColumn) {
@@ -498,7 +498,7 @@ void EvolutionDashboardWindow::sortLineages()
     });
 }
 
-void EvolutionDashboardWindow::updatePlotData()
+void StatisticsWindow::updatePlotData()
 {
     // The long-term history carries per-lineage data and is therefore expensive to copy; process it under its mutex instead
     if (_timelineMode == TimelineMode_EntireHistory) {
@@ -510,7 +510,7 @@ void EvolutionDashboardWindow::updatePlotData()
     }
 }
 
-void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection> const& source)
+void StatisticsWindow::rebuildPlotSeries(std::vector<DataPointCollection> const& source)
 {
     // Rebuild only when the underlying data or view settings have changed
     auto sourceBackTimestep = !source.empty() ? source.back().timestep : -1.0;
@@ -587,7 +587,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(std::vector<DataPointCollection
     }
 }
 
-void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& source)
+void StatisticsWindow::rebuildPlotSeries(StatisticsHistoryData const& source)
 {
     // Rebuild only when the underlying data or view settings have changed; the lineage timelines are
     // sampled independently of the overall timeline and therefore contribute their own back times
@@ -630,7 +630,7 @@ void EvolutionDashboardWindow::rebuildPlotSeries(StatisticsHistoryData const& so
     }
 }
 
-void EvolutionDashboardWindow::processHeader()
+void StatisticsWindow::processHeader()
 {
     auto const& style = ImGui::GetStyle();
     auto cardWidth = (ImGui::GetContentRegionAvail().x - 3 * style.ItemSpacing.x) / 6;
@@ -696,7 +696,7 @@ void EvolutionDashboardWindow::processHeader()
         cardHeight);
 }
 
-void EvolutionDashboardWindow::processCard(
+void StatisticsWindow::processCard(
     std::string const& label,
     std::string const& value,
     std::vector<std::pair<std::string, std::string>> const& subValues,
@@ -704,8 +704,8 @@ void EvolutionDashboardWindow::processCard(
     float height)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::DashboardCardBackgroundColor);
-    ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)Const::DashboardCardBorderColor);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)Const::StatisticsCardBackgroundColor);
+    ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)Const::StatisticsCardBorderColor);
     if (ImGui::BeginChild(("##card" + label).c_str(), {width, height}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text(label);
@@ -792,7 +792,7 @@ namespace
     }
 }
 
-void EvolutionDashboardWindow::processFilterBar()
+void StatisticsWindow::processFilterBar()
 {
     ImGui::Spacing();
     AlienGui::Separator();
@@ -835,7 +835,7 @@ void EvolutionDashboardWindow::processFilterBar()
     ImGui::Spacing();
 }
 
-void EvolutionDashboardWindow::limitTimelinesHeight()
+void StatisticsWindow::limitTimelinesHeight()
 {
     // The separator can only be dragged as far as the sections can actually shrink. Without clamping here, the height would keep
     // accumulating invisibly and the separator would not react until the same distance has been dragged back.
@@ -844,7 +844,7 @@ void EvolutionDashboardWindow::limitTimelinesHeight()
     _timelinesHeight = std::clamp(_timelinesHeight, minHeight, maxHeight);
 }
 
-void EvolutionDashboardWindow::processLineageTable()
+void StatisticsWindow::processLineageTable()
 {
     auto flags = ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
     if (ImGui::BeginTable("##lineages", NumColumns, flags)) {
@@ -893,7 +893,7 @@ void EvolutionDashboardWindow::processLineageTable()
 
         // Summary row
         ImGui::TableNextRow();
-        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::DashboardSummaryRowColor);
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::StatisticsSummaryRowColor);
         ImGui::TableSetColumnIndex(LineageColumn);
         auto allSelected = _selectedLineageIds.empty();
         if (AlienGui::TableRowSelectable("##rowAll", allSelected)) {
@@ -986,7 +986,7 @@ void EvolutionDashboardWindow::processLineageTable()
     }
 }
 
-void EvolutionDashboardWindow::onOpenRepresentativeGenome(uint64_t cellId)
+void StatisticsWindow::onOpenRepresentativeGenome(uint64_t cellId)
 {
     auto inspectedData = _SimulationFacade::get()->getInspectedSimulationData({cellId});
     for (auto const& object : inspectedData._objects) {
@@ -999,7 +999,7 @@ void EvolutionDashboardWindow::onOpenRepresentativeGenome(uint64_t cellId)
     printOverlayMessage("The creature no longer exists");
 }
 
-void EvolutionDashboardWindow::processTimelineSection()
+void StatisticsWindow::processTimelineSection()
 {
     processTimelineHeader();
 
@@ -1031,7 +1031,7 @@ void EvolutionDashboardWindow::processTimelineSection()
     processTimeAxis(plottedLineages, scrollbarWidth);
 }
 
-void EvolutionDashboardWindow::processTimelineHeader()
+void StatisticsWindow::processTimelineHeader()
 {
     ImGui::Spacing();
 
@@ -1065,7 +1065,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
     ImGui::Spacing();
 }
 
-void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayData const*> const& plottedLineages)
+void StatisticsWindow::processTimelinePlots(std::vector<LineageDisplayData const*> const& plottedLineages)
 {
     // Labels and current values are placed to the right of the widgets, matching the general ALIEN layout
     if (ImGui::BeginTable("##plots", 2, ImGuiTableFlags_None)) {
@@ -1091,7 +1091,7 @@ void EvolutionDashboardWindow::processTimelinePlots(std::vector<LineageDisplayDa
     }
 }
 
-void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex)
+void StatisticsWindow::processTimelinePlot(std::vector<LineageDisplayData const*> const& plottedLineages, int metricIndex)
 {
     auto [minTime, maxTime] = computePlotTimeRange(plottedLineages);
     auto upperBound = 0.0;
@@ -1171,7 +1171,7 @@ void EvolutionDashboardWindow::processTimelinePlot(std::vector<LineageDisplayDat
     ImGui::PopID();
 }
 
-std::pair<double, double> EvolutionDashboardWindow::computePlotTimeRange(std::vector<LineageDisplayData const*> const& plottedLineages) const
+std::pair<double, double> StatisticsWindow::computePlotTimeRange(std::vector<LineageDisplayData const*> const& plottedLineages) const
 {
     auto minTime = std::numeric_limits<double>::max();
     auto maxTime = std::numeric_limits<double>::lowest();
@@ -1193,7 +1193,7 @@ std::pair<double, double> EvolutionDashboardWindow::computePlotTimeRange(std::ve
     return {minTime, maxTime};
 }
 
-void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin)
+void StatisticsWindow::processTimeAxis(std::vector<LineageDisplayData const*> const& plottedLineages, float rightMargin)
 {
     auto [minTime, maxTime] = computePlotTimeRange(plottedLineages);
 
@@ -1222,7 +1222,7 @@ void EvolutionDashboardWindow::processTimeAxis(std::vector<LineageDisplayData co
     }
 }
 
-void EvolutionDashboardWindow::drawValuesAtMouseCursor(
+void StatisticsWindow::drawValuesAtMouseCursor(
     std::vector<double> const& series,
     std::vector<double> const& timePoints,
     std::vector<double> const& systemClockPoints,
@@ -1268,7 +1268,7 @@ void EvolutionDashboardWindow::drawValuesAtMouseCursor(
     ImPlot::PlotText(label, mousePos.x, upperBound, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
-void EvolutionDashboardWindow::validateAndCorrect()
+void StatisticsWindow::validateAndCorrect()
 {
     _timelinesHeight = std::max(scale(MinTimelinesHeight), _timelinesHeight);
     _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_LastSteps), static_cast<TimelineMode>(TimelineMode_EntireHistory));

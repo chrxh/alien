@@ -184,9 +184,9 @@ namespace Const
     extern ImColor NeuronEditorNodeFillColor;
     extern ImColor NeuronEditorLabelColor;
 
-    extern ImColor DashboardCardBackgroundColor;
-    extern ImColor DashboardCardBorderColor;
-    extern ImColor DashboardSummaryRowColor;
+    extern ImColor StatisticsCardBackgroundColor;
+    extern ImColor StatisticsCardBorderColor;
+    extern ImColor StatisticsSummaryRowColor;
 
     extern ImColor BrowserOwnReactionButtonTextColor;
     extern ImColor BrowserDownloadButtonTextColor;

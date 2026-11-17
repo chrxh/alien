@@ -10,13 +10,13 @@ The quickest way to see evolution in action is a prepared experiment:
 
 1. In the **Browser** (Alt+B), choose the **Simulations** tab and the **Featured** workspace.
 2. Open a simulation from the **Evolution/Presets** folder, for example *Hanging Garden/Base*.
-3. Open the **Evolution dashboard** (Alt+3) and run the simulation.
+3. Open the **Statistics** window (Alt+3) and run the simulation.
 
 Evolution takes time. Interesting changes often appear only after hundreds of thousands or millions of time steps. Let the simulation run for a long time, if necessary in [console mode](user-interface.md#console-mode) (Alt+C), which leaves all computing power to the simulation. The **Evolution/Results** folder contains snapshots of the same experiments after long runs, so you can see what may emerge.
 
 ## Watching evolution
 
-The **Evolution dashboard** (Alt+3) shows how the population develops:
+The **Statistics** window (Alt+3) shows how the population develops:
 
 - The **cards** at the top show how many creatures, cells and lineages exist and how much energy is in the world and in the external energy pool.
 - The **plots** show the development over time: number of creatures, average number of cells per creature, average number of genome nodes, average generation, average mutation rate and the energy stored in the creatures. A rising number of genome nodes indicates that genomes become more complex. Four more plots show rates per 1,000 time steps. Two of them show the number of created creatures and how much the genomes change through mutations. The other two show the energy gained by attacks and the muscle activity, both per creature.
@@ -89,7 +89,7 @@ To keep evolution going, old creatures must make room for new ones. Setting a **
 3. Set mutation rates in the genome, for example a probability of 0.005 for neuron, connection weight and cell type property mutations and 0.001 for add node and delete node mutations. Alternatively, set all sigma parameters in the *Meta-mutations* groups to 0.0002 and let the rates evolve.
 4. In the simulation parameters, set **Maximum age** to about 50,000 time steps and **Backflow** to 0.8, so that the energy of dead cells mostly returns to the pool.
 5. Place a few seeds with **Create seed with energy** and run the simulation.
-6. Watch the **Evolution dashboard**. If the population explodes, reduce the external energy or the inflow. If it dies out, increase them or give the creatures more time to reproduce.
+6. Watch the **Statistics** window. If the population explodes, reduce the external energy or the inflow. If it dies out, increase them or give the creatures more time to reproduce.
 
 The preset *Hanging Garden* follows this pattern. It uses an external energy pool with 12 million energy units, a backflow of 0.8, maximum ages between 120,000 and 500,000 time steps and meta-mutations of 0.0002. It also adds layers with gravity and storms, which vary the conditions across the world.
 
