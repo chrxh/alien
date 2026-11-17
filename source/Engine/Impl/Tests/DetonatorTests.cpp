@@ -136,6 +136,9 @@ TEST_F(DetonatorTests, explosionAlsoIfDying)
             .type(CellDesc().cellState(CellState_Dying).activationTime(100).cellType(DetonatorDesc().state(DetonatorState_Activated).countdown(10))),
     });
 
+    _parameters.cellDeathProbability.baseValue = ColorVector<float>::uniform(0.0f);
+    _simulationFacade->setSimulationParameters(_parameters);
+
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11 * TIMESTEPS_PER_CELL_FUNCTION);
 
