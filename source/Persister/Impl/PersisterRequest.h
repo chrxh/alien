@@ -10,6 +10,7 @@
 #include <Persister/Interface/LoginRequestData.h>
 #include <Persister/Interface/MoveNetworkResourceRequestData.h>
 #include <Persister/Interface/PersisterRequestId.h>
+#include <Persister/Interface/ReadLocalLibraryRequestData.h>
 #include <Persister/Interface/ReadSimulationRequestData.h>
 #include <Persister/Interface/ReplaceNetworkResourceRequestData.h>
 #include <Persister/Interface/SaveDeserializedSimulationRequestData.h>
@@ -104,3 +105,6 @@ using GetPeakSimulationRequest = std::shared_ptr<_GetPeakSimulationRequest>;
 
 using _SaveDeserializedSimulationRequest = _ConcreteRequest<SaveDeserializedSimulationRequestData>;
 using SaveDeserializedSimulationRequest = std::shared_ptr<_SaveDeserializedSimulationRequest>;
+
+using _ReadLocalLibraryRequest = _ConcreteRequest<ReadLocalLibraryRequestData>;
+using ReadLocalLibraryRequest = std::shared_ptr<_ReadLocalLibraryRequest>;

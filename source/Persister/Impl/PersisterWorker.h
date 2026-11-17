@@ -49,6 +49,7 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ToggleReactionNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetPeakSimulationRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, SaveDeserializedSimulationRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ReadLocalLibraryRequest const& request);
 
     std::atomic<bool> _isShutdown{false};
 

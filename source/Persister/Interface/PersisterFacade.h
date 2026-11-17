@@ -28,6 +28,8 @@
 #include "PersisterRequestId.h"
 #include "PersisterRequestResult.h"
 #include "PersisterRequestState.h"
+#include "ReadLocalLibraryRequestData.h"
+#include "ReadLocalLibraryResultData.h"
 #include "ReadSimulationRequestData.h"
 #include "ReadSimulationResultData.h"
 #include "ReplaceNetworkResourceRequestData.h"
@@ -107,6 +109,9 @@ public:
 
     virtual PersisterRequestId scheduleSaveDeserializedSimulation(SenderInfo const& senderInfo, SaveDeserializedSimulationRequestData const& data) = 0;
     virtual SaveDeserializedSimulationResultData fetchSaveDeserializedSimulationData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleReadLocalLibrary(SenderInfo const& senderInfo, ReadLocalLibraryRequestData const& data) = 0;
+    virtual ReadLocalLibraryResultData fetchReadLocalLibraryData(PersisterRequestId const& id) = 0;
 
 protected:
     static PersisterFacade _instance;

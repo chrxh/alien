@@ -16,6 +16,7 @@
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Persister/Interface/LocalLibrary.h>
+#include <Persister/Interface/LocalLibraryService.h>
 #include <Persister/Interface/PersisterRequestResult.h>
 #include <Persister/Interface/SerializerService.h>
 
@@ -170,6 +171,8 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetPeakSimulationRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReadLocalLibraryRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
@@ -716,5 +719,18 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             request->getRequestId(),
             request->getSenderInfo().senderId,
             PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
+    }
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadLocalLibraryRequest const& request)
+{
+    try {
+        UnlockGuard unlockGuard(lock);
+
+        auto content = LocalLibraryService::get().loadContent(request->getData().libraryFolder);
+        return std::make_shared<_ReadLocalLibraryRequestResult>(request->getRequestId(), ReadLocalLibraryResultData{.content = std::move(content)});
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulations and genomes of this computer could not be read."});
     }
 }
