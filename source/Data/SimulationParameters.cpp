@@ -830,7 +830,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Energy cost")
                         .reference(FloatSpec().member(&SimulationParameters::muscleEnergyCost).min(0.0f).max(5.0f).format("%.5f").logarithmic(true))
                         .description("Determines how much energy a muscle cell loses in the form of emitted energy particles when it acts. The amount "
-                                     "scales with the activation."),
+                                     "scales with the absolute value of the activation. A bending or crawling muscle only pays for the part of the movement "
+                                     "that its angle or distance limit allows."),
                     ParameterSpec()
                         .name("Movement acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0.0f).max(10.0f).logarithmic(true))

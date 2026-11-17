@@ -216,7 +216,7 @@ The **Customization transition matrix** is not a sigma parameter. It decides whi
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
-| Energy cost | 0 | Energy a muscle emits when it acts, scaled by its activation. A muscle that acts with a negative activation emits nothing. Per color. |
+| Energy cost | 0 | Energy a muscle emits when it acts, scaled by the absolute value of its activation. A bending or crawling muscle only pays for the part of the movement that its angle or distance limit allows. Per color. |
 | Movement acceleration | 1 | Strength of muscles in *Direct movement* mode. Per color. |
 | Crawling acceleration | 1 | Strength of muscles in the crawling modes. Per color. |
 | Bending acceleration | 1 | Strength of muscles in *Auto bending* and *Manual bending* modes. It has no effect in *Angle bending* mode. Per color. |
