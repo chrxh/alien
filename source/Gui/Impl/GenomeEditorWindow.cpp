@@ -160,13 +160,9 @@ void GenomeEditorWindow::processToolbar()
         {AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_FOLDER_OPEN).name("Open genome").tooltip("Open genome from file").action([&] { onOpenGenome(); })),
          AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_FA_SAVE).name("Save genome").tooltip("Save genome to file").action([&] { onSaveGenome(); })),
-         AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters()
-                 .icon(ICON_FA_UPLOAD)
-                 .name("Share genome")
-                 .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.")
-                 .action([&] { onShareGenome(); })),
+             AlienGui::ToolbarItemParameters().icon(ICON_FA_SAVE).name("Save genome").tooltip("Save the genome on this computer or upload it.").action([&] {
+                 onSaveGenome();
+             })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
              AlienGui::ToolbarItemParameters().icon(ICON_FA_CLONE).name("Clone genome").tooltip("Open a copy of the current genome in a new tab").action([&] {
@@ -291,14 +287,7 @@ void GenomeEditorWindow::onOpenGenome()
 
 void GenomeEditorWindow::onSaveGenome()
 {
-    auto const& selectedTab = _tabs.at(_selectedTabIndex);
-    auto genome = selectedTab->getGenomeDesc();
-    FileTransferController::get().onSaveGenomeDialog(genome, [selectedTab]() { selectedTab->resetOriginal(); });
-}
-
-void GenomeEditorWindow::onShareGenome()
-{
-    SaveSimulationDialog::get().open(NetworkResourceType_Genome, SaveTarget::Community);
+    SaveSimulationDialog::get().open(NetworkResourceType_Genome);
 }
 
 void GenomeEditorWindow::onCloneGenome()

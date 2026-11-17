@@ -173,11 +173,6 @@ namespace
         return toAsciiUpper(name) == toAsciiUpper(StringHelper::toUtf8(Const::AutosaveFileWithoutPath.stem()));
     }
 
-    bool isNamedLikeAutosave(std::string const& name)
-    {
-        return parseTimestep(name, Const::AutosavePrefix).has_value() || isNamedLikeExitSave(name);
-    }
-
     std::string formatFileTime(std::filesystem::file_time_type const& fileTime)
     {
         // The clocks are related through their current times, which needs no time zone database
@@ -407,15 +402,15 @@ namespace
         }
     }
 
-    // A simulation must be named neither like an autosave, whose files are deleted or replaced, nor like a genome file, whose picture and
-    // description it would share
+    // A simulation must not be named like a genome file, whose picture and description it would share. The name of an autosave may be given
+    // by hand, which replaces the autosave.
     bool isValidName(std::string const& name, int maxNumFolders, bool isSimulation)
     {
         auto parts = splitName(name);
         if (toInt(parts.size()) > maxNumFolders + 1 || !std::ranges::all_of(parts, isValidNamePart)) {
             return false;
         }
-        return !isSimulation || (!isNamedLikeAutosave(parts.back()) && !hasExtension(StringHelper::toPath(parts.back()), GenomeExtension));
+        return !isSimulation || !hasExtension(StringHelper::toPath(parts.back()), GenomeExtension);
     }
 
     // The folders in front of the name of a simulation
@@ -639,8 +634,8 @@ std::optional<std::filesystem::path> LocalLibraryService::moveFile(
     std::string const& extension,
     bool isSimulation) const
 {
-    // A simulation that keeps its own name is only moved, for instance if its folder is renamed. Its name is not judged then, so that an
-    // autosave keeps its kind and a file with an unusual name stays with the other files of its folder.
+    // A simulation that keeps its own name is only moved, for instance if its folder is renamed. Its name is not judged then, so that a file
+    // with an unusual name stays with the other files of its folder.
     auto newNameParts = splitName(newName);
     auto keepsOwnName = newNameParts.back() == StringHelper::toUtf8(simulationPath.stem());
     auto isValid = keepsOwnName ? areValidFolders(newNameParts) : isValidName(newName, MaxFolderDepth, isSimulation);

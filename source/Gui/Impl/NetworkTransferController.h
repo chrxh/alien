@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <Base/Singleton.h>
 
 #include <Engine/Interface/Definitions.h>
@@ -22,8 +24,8 @@ class NetworkTransferController : public MainLoopEntity
 
 public:
     void onDownload(DownloadNetworkResourceRequestData const& requestData);
-    void onUpload(UploadNetworkResourceRequestData const& requestData);
-    void onReplace(ReplaceNetworkResourceRequestData const& requestData);
+    void onUpload(UploadNetworkResourceRequestData const& requestData, std::function<void()> const& afterUploadFunc = nullptr);
+    void onReplace(ReplaceNetworkResourceRequestData const& requestData, std::function<void()> const& afterReplaceFunc = nullptr);
     void onDelete(DeleteNetworkResourceRequestData const& requestData);
     void onEdit(EditNetworkResourceRequestData const& requestData);
     void onMove(MoveNetworkResourceRequestData const& requestData);

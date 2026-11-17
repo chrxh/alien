@@ -711,6 +711,13 @@ namespace
         auto relativePath = path.lexically_relative(folder);
         return !relativePath.empty() && *relativePath.begin() != "..";
     }
+
+    // The name of an autosave in a folder outside the library is relative to that folder
+    bool hasNameInLibrary(NetworkResourceRawTO const& localRawTO)
+    {
+        auto const& controller = LocalLibraryController::get();
+        return controller.getMainFolder(StringHelper::toPath(localRawTO->id)) == controller.getLibraryFolder();
+    }
 }
 
 void BrowserWindow::updateLocalWorkspaces()
@@ -765,14 +772,15 @@ void BrowserWindow::onSave()
     auto workspaceId = _data->getCurrentWorkspaceId();
     auto selectedTreeTO = _data->getSelectedTreeTO();
 
-    // What is selected suggests its name and a selected folder suggests itself. An autosave in My simulations suggests its folder, because
-    // nothing can be saved under its name.
+    // What is selected suggests its name, also an autosave, and a selected folder suggests itself. An autosave of a folder outside the library
+    // suggests nothing, since its name would address another file.
     std::string suggestedName;
     if (selectedTreeTO != nullptr) {
-        auto isAutosave = selectedTreeTO->isLeaf() && workspaceId == WorkspaceId{NetworkResourceType_Simulation, WorkspaceType_Local}
-            && !LocalLibraryService::get().isValidSimulationName(selectedTreeTO->getLeaf().rawTO->resourceName);
-        if (selectedTreeTO->isLeaf() && !isAutosave) {
-            suggestedName = selectedTreeTO->getLeaf().rawTO->resourceName;
+        if (selectedTreeTO->isLeaf()) {
+            auto const& rawTO = selectedTreeTO->getLeaf().rawTO;
+            if (!isLocalWorkspace(rawTO->workspaceType) || hasNameInLibrary(rawTO)) {
+                suggestedName = rawTO->resourceName;
+            }
         } else if (!selectedTreeTO->folderNames.empty()) {
             suggestedName = NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
         }

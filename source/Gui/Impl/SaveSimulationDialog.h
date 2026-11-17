@@ -43,8 +43,9 @@ public:
     // Uploads a simulation or a genome of this computer
     void openForSharing(NetworkResourceType resourceType, std::filesystem::path const& file, std::string const& nameInLibrary, std::string const& description);
 
-    // Replaces the content and the picture of an own upload by the running simulation or the genome of the genome editor
-    void openForReplacing(NetworkResourceRawTO const& upload);
+    // Replaces the content and the picture of an own upload or of a simulation or genome of this computer by the running simulation or the
+    // genome of the genome editor
+    void openForReplacing(NetworkResourceRawTO const& resource);
 
 private:
     SaveSimulationDialog();
@@ -87,6 +88,7 @@ private:
     void updateDescription(Outcome const& outcome);
     std::optional<FileDescription> findReplacedDescription(Outcome const& outcome) const;
     void onConfirm(Outcome const& outcome);
+    std::optional<std::string> saveOnThisComputer(std::string const& name, std::optional<std::string> const& description);  // Returns an error message
     void onUpload();
     void onReplaceUpload(std::string const& resourceId, WorkspaceType workspaceType);
 
@@ -109,6 +111,6 @@ private:
 
     std::optional<std::filesystem::path> _simulationFile;  // A saved simulation instead of the running one
     std::optional<GenomeDesc> _savedGenome;                // A saved genome instead of the one of the genome editor
-    NetworkResourceRawTO _replacedUpload;
+    NetworkResourceRawTO _replacedResource;
     ResourcePreviewWidget _preview;
 };
