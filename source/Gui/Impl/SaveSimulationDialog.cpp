@@ -1,6 +1,7 @@
 #include "SaveSimulationDialog.h"
 
 #include <algorithm>
+#include <functional>
 #include <optional>
 #include <ranges>
 #include <vector>
@@ -190,6 +191,17 @@ namespace
     void addSectionSpacing()
     {
         ImGui::Dummy({0, scale(SectionSpacing)});
+    }
+
+    // The genome of the genome editor counts as saved once the server has stored it, unless it has been changed in the meantime
+    std::function<void()> createMarkGenomeAsSavedFunc()
+    {
+        return [genome = GenomeEditorWindow::get().getCurrentGenome()] {
+            auto& genomeEditor = GenomeEditorWindow::get();
+            if (genomeEditor.getCurrentGenome() == genome) {
+                genomeEditor.markCurrentGenomeAsSaved();
+            }
+        };
     }
 }
 
@@ -671,12 +683,15 @@ void SaveSimulationDialog::onUpload()
                 .description = _savedGenome.has_value() ? *_savedGenome : GenomeEditorWindow::get().getCurrentGenome(), .jpg = _preview.getJpg()};
         }
     }();
-    NetworkTransferController::get().onUpload(UploadNetworkResourceRequestData{
-        .resourceWithoutFolderName = boost::algorithm::trim_copy(_name),
-        .resourceDescription = _description,
-        .workspaceType = toWorkspaceType(_target),
-        .downloadCache = BrowserWindow::get().getSimulationCache(),
-        .data = data});
+    auto isGenomeOfGenomeEditor = _resourceType == NetworkResourceType_Genome && !_savedGenome.has_value();
+    NetworkTransferController::get().onUpload(
+        UploadNetworkResourceRequestData{
+            .resourceWithoutFolderName = boost::algorithm::trim_copy(_name),
+            .resourceDescription = _description,
+            .workspaceType = toWorkspaceType(_target),
+            .downloadCache = BrowserWindow::get().getSimulationCache(),
+            .data = data},
+        isGenomeOfGenomeEditor ? createMarkGenomeAsSavedFunc() : std::function<void()>());
 }
 
 void SaveSimulationDialog::onReplaceUpload(std::string const& resourceId, WorkspaceType workspaceType)
@@ -689,8 +704,10 @@ void SaveSimulationDialog::onReplaceUpload(std::string const& resourceId, Worksp
             return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome(), .jpg = _preview.getJpg()};
         }
     }();
-    NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
-        .resourceId = resourceId, .workspaceType = workspaceType, .downloadCache = BrowserWindow::get().getSimulationCache(), .data = data});
+    NetworkTransferController::get().onReplace(
+        ReplaceNetworkResourceRequestData{
+            .resourceId = resourceId, .workspaceType = workspaceType, .downloadCache = BrowserWindow::get().getSimulationCache(), .data = data},
+        _resourceType == NetworkResourceType_Genome ? createMarkGenomeAsSavedFunc() : std::function<void()>());
 
     // Replacing keeps the name and the description, so a description written in this dialog is stored separately
     auto name = boost::algorithm::trim_copy(_name);

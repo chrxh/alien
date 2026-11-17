@@ -30,8 +30,8 @@ The tool bar at the top offers:
 
 | Button | Function |
 | --- | --- |
-| Open genome, Save genome | Load and save genome files (*.genome*). |
-| Share genome | Upload the genome to the server so that it appears in the browser. |
+| Open genome | Load a genome file (*.genome*) from any folder. |
+| Save genome | Save the genome in **My genomes** on this computer, upload it to the server or save it as a file in any folder. See [Opening and saving](files.md#opening-and-saving). |
 | Clone genome | Open a copy of the current genome in a new tab. |
 | Copy genome, Paste genome | Copy the genome to an internal clipboard of the genome editor and replace the genome of the current tab with the copied one. |
 | Close other tabs | Close all tabs except the current one. |

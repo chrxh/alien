@@ -74,7 +74,7 @@ namespace
     }
 }
 
-void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const& requestData)
+void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const& requestData, std::function<void()> const& afterUploadFunc)
 {
     printOverlayMessage("Uploading ...");
 
@@ -85,15 +85,19 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
             return _PersisterFacade::get()->scheduleUploadNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
-        [resourceType, workspaceType = requestData.workspaceType, resourceName = requestData.resourceWithoutFolderName](auto const& requestId) {
+        [resourceType, workspaceType = requestData.workspaceType, resourceName = requestData.resourceWithoutFolderName, afterUploadFunc](
+            auto const& requestId) {
             auto data = _PersisterFacade::get()->fetchUploadNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
+            if (afterUploadFunc) {
+                afterUploadFunc();
+            }
             showUploadConfirmation(resourceType, workspaceType, resourceName, data.resourceId);
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
-void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData const& requestData)
+void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData const& requestData, std::function<void()> const& afterReplaceFunc)
 {
     printOverlayMessage("Replacing ...");
 
@@ -102,10 +106,13 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
             return _PersisterFacade::get()->scheduleReplaceNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
-        [&, resourceId = requestData.resourceId](auto const& requestId) {
+        [&, resourceId = requestData.resourceId, afterReplaceFunc](auto const& requestId) {
             _PersisterFacade::get()->fetchReplaceNetworkResourcesData(requestId);
             BrowserWindow::get().onPreviewPictureChanged(resourceId);
             BrowserWindow::get().onRefresh();
+            if (afterReplaceFunc) {
+                afterReplaceFunc();
+            }
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
