@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Data/DistanceSignal.h>
+
 #include "SimulationData.cuh"
 
 class SensorProcessor
@@ -846,7 +848,7 @@ __inline__ __device__ void SensorProcessor::writeSignal(NeuralActivity& neuralAc
     neuralActivity.signals[Channels::SensorFoundResult] = 1;                              // Something found
     neuralActivity.signals[Channels::SensorAngle] = angle / 180.0f;                       // Angle: between -1.0 and 1.0
     neuralActivity.signals[Channels::SensorMass] = min(1.0f, density);                    // Normalized density (1.0 = 64 cells in 8x8 region)
-    neuralActivity.signals[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+    neuralActivity.signals[Channels::SensorDistance] = DistanceSignal::encode(distance);  // Distance: 1 = close, 0 = far away
 }
 
 __inline__ __device__ uint16_t SensorProcessor::convertAngleToUint16(float angle)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Data/CellTypeConstants.h>
+#include <Data/DistanceSignal.h>
 
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
@@ -14,7 +15,13 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing);
+    struct InformationSource
+    {
+        float2 direction;
+        bool infinitelyFar;
+        float distance;
+    };
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, InformationSource const& source);
 };
 
 /************************************************************************/
@@ -54,7 +61,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     __shared__ int range;
     __shared__ float2 senderPos;
     __shared__ bool senderFrontValid;
-    __shared__ float2 senderFacing;  // Absolute direction encoded by the signal angle relative to the front direction
+    __shared__ InformationSource source;
 
     if (threadIdx.x == 0) {
         auto& cell = object->typeData.cell;
@@ -63,8 +70,10 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         senderPos = object->pos;
         senderFrontValid = cell.frontAngle != VALUE_NOT_SET_FLOAT;
         if (senderFrontValid) {
-            auto encodedAngle = cell.neuralActivity.signals[Channels::CommunicatorAngle];
-            senderFacing = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, encodedAngle);
+            auto const& signals = cell.neuralActivity.signals;
+            source.direction = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, signals[Channels::CommunicatorAngle]);
+            source.infinitelyFar = DistanceSignal::isInfinite(signals[Channels::CommunicatorDistance]);
+            source.distance = source.infinitelyFar ? 0.0f : DistanceSignal::decode(signals[Channels::CommunicatorDistance]);
         }
     }
     __syncthreads();
@@ -138,7 +147,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
-                tryTransmitSignal(data, object, otherObject, senderFacing);
+                tryTransmitSignal(data, object, otherObject, source);
             }
             otherIndex = otherRecord.nextObjectIndex;
         }
@@ -146,13 +155,15 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 }
 
 __inline__ __device__ bool
-CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing)
+CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, InformationSource const& source)
 {
+    auto toReceiver = data.world.getCorrectedDirection(receiverObject->pos - senderObject->pos);
+
     auto const& sender = senderObject->typeData.cell.cellTypeData.communicator.modeData.sender;
     if (sender.oneway) {
-        // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
-        auto toReceiver = data.world.getCorrectedDirection(receiverObject->pos - senderObject->pos);
-        if (Math::dot(toReceiver, senderFacing) > 0) {
+        // Direction gating: only send if the receiver deviates by more than the one-way angle from the encoded facing direction
+        auto maxCosine = cosf(Const::CommunicatorOnewayMinAngle * Const::DEG_TO_RAD);
+        if (Math::dot(toReceiver, source.direction) >= maxCosine * Math::length(toReceiver)) {
             return false;
         }
     }
@@ -162,16 +173,29 @@ CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObj
         return false;
     }
 
+    auto sourceDirectionFromReceiver = source.direction;
+    auto sourceDistanceSignalOfReceiver = 0.0f;
+    if (!source.infinitelyFar) {
+        auto receiverToSource = source.direction * source.distance - toReceiver;
+        auto receiverToSourceLength = Math::length(receiverToSource);
+        if (receiverToSourceLength > NEAR_ZERO) {
+            sourceDirectionFromReceiver = receiverToSource / receiverToSourceLength;
+        }
+        auto pathLength = source.distance + Math::length(toReceiver);
+        sourceDistanceSignalOfReceiver = DistanceSignal::encode(pathLength);
+    }
+
     receiverObject->getLock();
 
-    // Copy signal to receiver
-    copyChannels(receiverObject->typeData.cell.neuralActivity.signals, senderObject->typeData.cell.neuralActivity.signals);
-
-    // The encoded angle is relative to each cell's absolute front direction. senderFacing is the sender's absolute
-    // encoded direction; convert it back into the receiver's frame so the absolute direction is preserved.
-    auto receiverAngle = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, senderFacing);
-    receiverObject->typeData.cell.neuralActivity.signals[Channels::CommunicatorAngle] = receiverAngle;
+    auto& receiverSignals = receiverObject->typeData.cell.neuralActivity.signals;
+    auto isAccepted = DistanceSignal::isAtLeastAsClose(sourceDistanceSignalOfReceiver, receiverSignals[Channels::CommunicatorDistance]);
+    if (isAccepted) {
+        copyChannels(receiverSignals, senderObject->typeData.cell.neuralActivity.signals);
+        receiverSignals[Channels::CommunicatorAngle] =
+            ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, sourceDirectionFromReceiver);
+        receiverSignals[Channels::CommunicatorDistance] = sourceDistanceSignalOfReceiver;
+    }
 
     receiverObject->releaseLock();
-    return true;
+    return isAccepted;
 }

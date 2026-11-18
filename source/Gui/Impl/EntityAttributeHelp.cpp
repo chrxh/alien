@@ -334,11 +334,15 @@ namespace
         // Communicator
         {EntityAttribute::CommunicatorMode,
          "Selects the role in the communication. It only takes place between different creatures and requires a valid front direction on both sides."
-         "\n" ICON_FA_CHEVRON_RIGHT " Send: transmits all own channels to the receivers in range. Requires a trigger via channel #0."
-         "\n" ICON_FA_CHEVRON_RIGHT " Receive: takes over the channels of a sender. Channel #1 is converted into the own frame of reference."},
+         "\n" ICON_FA_CHEVRON_RIGHT " Send: transmits all own channels to the receivers in range. Requires a trigger via channel #0. Channel #1 encodes the "
+         "direction of the information source and channel #3 its distance (1 = close, 0.5 = 128, 0 = infinitely far)."
+         "\n" ICON_FA_CHEVRON_RIGHT " Receive: takes over the channels of a sender whose information source is at least as close as the one in the own "
+         "channel #3, so the closest source wins. Channel #1 is converted so that it points from the own position to the information source, and the "
+         "distance in channel #3 grows by the distance to the sender."},
         {EntityAttribute::CommunicatorRange, "Radius within which receiver cells are addressed."},
         {EntityAttribute::CommunicatorOneway,
-         "If enabled, only the receivers on one side are addressed, namely those opposite to the direction that is encoded in channel #1."},
+         "If enabled, only receivers are addressed whose direction deviates by more than 100 degrees from the direction that is encoded in channel #1. "
+         "The information thus always moves away from its source."},
         {EntityAttribute::CommunicatorRestrictToColors, "Only signals from senders with one of the selected customization colors are accepted."},
         {EntityAttribute::CommunicatorRestrictToLineage,
          "Restricts the reception to the relationship with the own creature."

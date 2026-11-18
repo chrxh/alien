@@ -4,6 +4,7 @@
 
 #include <Data/DescEditService.h>
 #include <Data/Descs.h>
+#include <Data/DistanceSignal.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
@@ -1226,7 +1227,7 @@ TEST_F(SensorTests, detectSolid_wallDistanceAndAngleAreExact)
     EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
 
     // The wall is 20 units below, the hit is detected at the surface of the solids
-    auto expectedDistance = 1.0f - (20.0f - 0.75f) / 256.0f;
+    auto expectedDistance = DistanceSignal::encode(20.0f - 0.75f);
     EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
         << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
 
@@ -1257,7 +1258,7 @@ TEST_F(SensorTests, detectSolid_wallBeyondWorldBoundary)
     EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
 
     // The wall is 15 units below, across the world boundary
-    auto expectedDistance = 1.0f - (15.0f - 0.75f) / 256.0f;
+    auto expectedDistance = DistanceSignal::encode(15.0f - 0.75f);
     EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
         << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
     EXPECT_TRUE(approxCompare(0.5f, signals[Channels::SensorAngle], 0.05f)) << "Actual angle " << signals[Channels::SensorAngle];
@@ -1292,7 +1293,7 @@ TEST_F(SensorTests, detectSolid_gapInWallIsVisible)
 
     // Without the gap the wall would be at a distance of 9.25. The nearest solids are the tips of the wall next to the gap.
     auto distanceToTip = std::sqrt(5.0f * 5.0f + 10.0f * 10.0f) - 0.75f;
-    auto expectedDistance = 1.0f - distanceToTip / 256.0f;
+    auto expectedDistance = DistanceSignal::encode(distanceToTip);
     EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
         << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
 }
@@ -1318,7 +1319,7 @@ TEST_F(SensorTests, detectSolid_solidCloseToSensor)
     auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
     EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
 
-    auto expectedDistance = 1.0f - (3.0f - 0.75f) / 256.0f;
+    auto expectedDistance = DistanceSignal::encode(3.0f - 0.75f);
     EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.005f))
         << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
     // Straight above, i.e. -90 degrees
@@ -1531,9 +1532,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
         << "Expected angle " << expectedRelAngle << " but got " << actualRelAngle << " for input angle " << angle;
 
     // Verify the detected distance is approximately 6.0 units
-    // Distance formula: 1.0 - min(1.0, distance / 256)
-    // For distance = 6.0: 1.0 - 6.0/256 ≈ 0.977
-    auto expectedDistance = 1.0f - 6.0f / 256.0f;
+    auto expectedDistance = DistanceSignal::encode(6.0f);
     auto actualDistance = actualSensor.getCellRef()._neuralActivity._signals[Channels::SensorDistance];
     EXPECT_TRUE(approxCompare(expectedDistance, actualDistance, 0.1f)) << "Expected distance " << expectedDistance << " but got " << actualDistance;
 }
@@ -1559,7 +1558,7 @@ TEST_F(SensorTests, detectCreature_nearRangeDistanceHasSubUnitResolution)
     auto const& signals = actualSensor.getCellRef()._neuralActivity._signals;
     EXPECT_TRUE(approxCompare(1.0f, signals[Channels::SensorFoundResult]));
 
-    auto expectedDistance = 1.0f - std::sqrt(34.0f) / 256.0f;
+    auto expectedDistance = DistanceSignal::encode(std::sqrt(34.0f));
     EXPECT_TRUE(approxCompare(expectedDistance, signals[Channels::SensorDistance], 0.0002f))
         << "Expected distance " << expectedDistance << " but got " << signals[Channels::SensorDistance];
 }
