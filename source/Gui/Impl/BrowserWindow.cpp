@@ -767,16 +767,46 @@ void BrowserWindow::selectWorkspace(WorkspaceType workspaceType)
     _galleryWidget->resetPage();
 }
 
+namespace
+{
+    // A selection suggests the place where it is stored, so a shared upload in My uploads suggests Community. Featured and Liked are no places
+    // to save to.
+    std::optional<SaveTarget> getSaveTarget(WorkspaceType workspaceType, NetworkResourceTreeTO const& selectedTreeTO)
+    {
+        if (selectedTreeTO == nullptr) {
+            return std::nullopt;
+        }
+        if (isLocalWorkspace(workspaceType)) {
+            return SaveTarget::ThisComputer;
+        }
+        if (workspaceType == WorkspaceType_Community) {
+            return SaveTarget::Community;
+        }
+        if (workspaceType == WorkspaceType_Private) {
+            auto isSharedUpload = selectedTreeTO->isLeaf() && selectedTreeTO->getLeaf().rawTO->workspaceType != WorkspaceType_Private;
+            return isSharedUpload ? SaveTarget::Community : SaveTarget::Private;
+        }
+        return std::nullopt;
+    }
+}
+
 void BrowserWindow::onSaveSimulation()
 {
     // A browser that is closed or shows genomes has no selection that could name the simulation
     auto showsSimulations = isOn() && _data->getCurrentWorkspaceId().resourceType == NetworkResourceType_Simulation;
-    SaveSimulationDialog::get().open(NetworkResourceType_Simulation, std::nullopt, showsSimulations ? getNameSuggestedBySelection() : std::string());
+    if (showsSimulations) {
+        onSave();
+    } else {
+        SaveSimulationDialog::get().open(NetworkResourceType_Simulation);
+    }
 }
 
+// The selection suggests its name and its workspace as the target
 void BrowserWindow::onSave()
 {
-    SaveSimulationDialog::get().open(_data->getCurrentWorkspaceId().resourceType, std::nullopt, getNameSuggestedBySelection());
+    auto workspaceId = _data->getCurrentWorkspaceId();
+    auto suggestedTarget = getSaveTarget(workspaceId.workspaceType, _data->getSelectedTreeTO());
+    SaveSimulationDialog::get().open(workspaceId.resourceType, std::nullopt, getNameSuggestedBySelection(), suggestedTarget);
 }
 
 // What is selected suggests its name, also an autosave, and a selected folder suggests itself. An autosave of a folder outside the library

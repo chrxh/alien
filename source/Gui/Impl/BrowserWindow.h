@@ -26,7 +26,8 @@ public:
 
     DownloadCache const& getSimulationCache() const;
 
-    // Saves the running simulation like Save in the tool bar, so that the selection suggests the name while the browser shows simulations
+    // Saves the running simulation like Save in the tool bar, so that the selection suggests the name and the target while the browser shows
+    // simulations
     void onSaveSimulation();
 
 private:

@@ -214,14 +214,18 @@ namespace
     }
 }
 
-void SaveSimulationDialog::open(NetworkResourceType resourceType, std::optional<SaveTarget> target, std::string const& suggestedName)
+void SaveSimulationDialog::open(
+    NetworkResourceType resourceType,
+    std::optional<SaveTarget> target,
+    std::string const& suggestedName,
+    std::optional<SaveTarget> suggestedTarget)
 {
     auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
 
-    // A plain save never asks for a login, so a remembered upload falls back to this computer
+    // A plain save never asks for a login, so a suggested or remembered upload falls back to this computer
     auto remembersTarget = !target.has_value();
     if (remembersTarget) {
-        target = _lastTargetByType.at(resourceType);
+        target = suggestedTarget.value_or(_lastTargetByType.at(resourceType));
         if (isServerTarget(*target) && !isLoggedIn) {
             target = SaveTarget::ThisComputer;
         }
