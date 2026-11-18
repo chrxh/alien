@@ -151,17 +151,20 @@ namespace
          "Probability per node that it is toggled between void and a random other cell type. The first and the last node of a gene are not affected."},
         {EntityAttribute::MutationExtendGeneProbability,
          "Probability per gene that a new node is appended at its beginning or at its end. The new node has a random cell type. With equal probability, it "
-         "starts with the default neural network and default properties or with random ones."},
+         "starts with the default neural network and default properties or with random ones. In half of the cases, the nodes after it get random "
+         "connection weights for it, so that they can receive its signals."},
         {EntityAttribute::MutationAddNodeProbability,
          "Probability per insertion position that a new node is inserted there. The new node has a random cell type. With equal probability, it starts with "
-         "the default neural network and default properties or with random ones."},
+         "the default neural network and default properties or with random ones. In half of the cases, the nodes after it get random connection weights "
+         "for it, so that they can receive its signals."},
         {EntityAttribute::MutationTrimGeneProbability,
          "Probability per gene that its first or its last node is removed. The last remaining node of a gene is always kept."},
         {EntityAttribute::MutationDeleteNodeProbability, "Probability per node that it is removed. The last remaining node of a gene is always kept."},
         {EntityAttribute::MutationAddGeneProbability,
          "Probability per gene that a new gene consisting of a single node is created. A randomly chosen node of the triggering gene becomes a constructor "
          "that builds the new gene. Nodes whose cell type is void cannot become a constructor. The new node has a random cell type. With equal probability, "
-         "it starts with the default neural network and default properties or with random ones."},
+         "it starts with the default neural network and default properties or with random ones. In half of the cases, the constructor gets random "
+         "connection weights for the new node."},
         {EntityAttribute::MutationDuplicateGeneProbability,
          "Probability per gene that it is duplicated. Only genes that are referenced at least twice are duplicated; one of these references then points to the "
          "copy."},
