@@ -63,6 +63,8 @@ Open the genome in the genome editor. In the left column, the **Genome** group c
 | Copy and Move node section mutations | Groups of nodes are copied or moved to another place in the same gene or in another gene |
 | Add, Duplicate, Delete and Swap gene mutations | Genes are created, copied, removed or exchanged |
 
+A node created by an Extend gene, Add node or Add gene mutation gets a random cell type. With equal probability, it starts either with the default settings and the [default network](neural-networks.md#the-default-network) or with random ones. In the random case, the neural network, the connection weights and the settings of the cell type are all chosen at random.
+
 Every mutation is explained in detail in its tooltip. Probabilities between 0.001 and 0.01 are a reasonable starting point. Rates that are too high destroy working genomes faster than selection can keep up.
 
 ### Letting evolution choose the rates

@@ -20,13 +20,15 @@
 #define ALIEN_MUTATION_FIELD_COUNT(Type, Count) \
     static_assert( \
         boost::pfr::tuple_size_v<Type> == (Count), \
-        #Type " field count changed - review applyMutations_cellTypeProperties() and applyMutations_cellType() in MutationProcessor.cuh and update this count")
+        #Type " field count changed - review applyMutations_cellTypeProperties(), applyMutations_cellType() and setRandomCellTypeProperties() in " \
+              "MutationProcessor.cuh and update this count")
 
 #define ALIEN_MUTATION_MODE_COUNT(Type, Count) \
     static_assert( \
         std::variant_size_v<Type> == (Count), \
         #Type \
-        " mode count changed - review applyMutations_cellTypeProperties() and applyMutations_cellTypeMode() in MutationProcessor.cuh and update this count")
+        " mode count changed - review applyMutations_cellTypeProperties(), applyMutations_cellTypeMode() and setRandomCellTypeProperties() in " \
+        "MutationProcessor.cuh and update this count")
 
 // --- Cell types (switch (node.cellType)) ---
 ALIEN_MUTATION_FIELD_COUNT(BaseGenomeDesc, 0);

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <algorithm>
+#include <type_traits>
+#include <variant>
 #include <vector>
 
 #include <Data/Descs.h>
@@ -23,6 +25,33 @@ public:
     ~MutationTestsBase() = default;
 
 protected:
+    template <typename T>
+    struct IsVariant : std::false_type
+    {};
+    template <typename... Ts>
+    struct IsVariant<std::variant<Ts...>> : std::true_type
+    {};
+
+    // Resets all mutable cell type properties to their defaults while preserving the active cell type and its active mode.
+    static void resetCellTypeProperties(CellTypeGenomeDesc& cellType)
+    {
+        std::visit(
+            [](auto& cellTypeData) {
+                using CellTypeData = std::decay_t<decltype(cellTypeData)>;
+                if constexpr (requires { cellTypeData._mode; }) {
+                    auto mode = cellTypeData._mode;
+                    if constexpr (IsVariant<std::decay_t<decltype(mode)>>::value) {
+                        std::visit([](auto& modeData) { modeData = std::decay_t<decltype(modeData)>{}; }, mode);
+                    }
+                    cellTypeData = CellTypeData{};
+                    cellTypeData._mode = mode;
+                    return;
+                }
+                cellTypeData = CellTypeData{};
+            },
+            cellType);
+    }
+
     GenomeDesc createTestGenome() const
     {
         auto const& factory = DescTestDataFactory::get();

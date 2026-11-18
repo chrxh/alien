@@ -53,7 +53,9 @@ private:
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
     __inline__ __device__ static CellType chooseRandomCellTypeExceptVoid(SimulationData& data);
     __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node);
-    __inline__ __device__ static void initNewNode(SimulationData& data, Node& node, int color);
+    __inline__ __device__ static void setRandomCellTypeProperties(SimulationData& data, Genome* genome, Node& node);
+    __inline__ __device__ static void setRandomNeuralNetwork(SimulationData& data, Node& node);
+    __inline__ __device__ static void initNewNode(SimulationData& data, Genome* genome, Node& node, int color);
     __inline__ __device__ static void initNewGene(Gene& gene);
     __inline__ __device__ static int parseMutationGeneNumber(Char64 const& name);
     __inline__ __device__ static void setDefaultGeneName(Gene& gene, int number);
@@ -958,9 +960,181 @@ __inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationDa
     return changed;
 }
 
-__inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, Node& node, int color)
+__inline__ __device__ void MutationProcessor::setRandomCellTypeProperties(SimulationData& data, Genome* genome, Node& node)
 {
-    // A freshly created node uses the shared default attribute values (mirrors NodeDesc / NeuralNetGenomeDesc defaults).
+    // Draws every attribute that applyMutations_cellTypeProperties mutates uniformly from the value range used there.
+    // The cell type and its mode stay as they are.
+    auto constexpr MaxOfOpenRanges = 100;
+
+    auto randomInt = [&](int minValue, int maxValue) { return minValue + data.primaryNumberGen.random(maxValue - minValue); };
+    auto randomFloat = [&](float minValue, float maxValue) { return data.primaryNumberGen.random(minValue, maxValue); };
+    auto randomBool = [&] { return data.primaryNumberGen.randomBool(); };
+    auto randomBitset = [&](int mask) { return static_cast<uint16_t>((data.primaryNumberGen.randomByte() | data.primaryNumberGen.randomByte() << 8) & mask); };
+    auto randomColors = [&] { return randomBitset(Const::RestrictToColors_Max); };
+    auto randomLineageRestriction = [&] { return static_cast<LineageRestriction>(randomInt(0, LineageRestriction_Count - 1)); };
+    auto randomMuscleRatio = [&] { return randomFloat(Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max); };
+
+    auto& cellTypeData = node.cellTypeData;
+    switch (node.cellType) {
+    case CellType_Depot:
+        cellTypeData.depot.storageLimit = randomFloat(Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
+        break;
+    case CellType_Sensor: {
+        auto& sensor = cellTypeData.sensor;
+        sensor.autoTrigger = randomBool();
+        sensor.tagForAttackers = randomBool();
+        sensor.maxRange = static_cast<uint16_t>(randomInt(Const::SensorRange_Min, Const::SensorRange_Max));
+        sensor.minRange = static_cast<uint16_t>(randomInt(Const::SensorRange_Min, sensor.maxRange));
+        switch (sensor.mode) {
+        case SensorMode_DetectEnergy:
+            sensor.modeData.detectEnergy.minDensity = randomFloat(Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
+            break;
+        case SensorMode_DetectSolid:
+            break;
+        case SensorMode_DetectFreeCell:
+            sensor.modeData.detectFreeCell.minDensity = randomFloat(Const::DetectFreeCellMinDensity_Min, Const::DetectFreeCellMinDensity_Max);
+            sensor.modeData.detectFreeCell.restrictToColors = randomColors();
+            break;
+        case SensorMode_DetectCreature: {
+            auto& detectCreature = sensor.modeData.detectCreature;
+            detectCreature.maxNumCells = randomInt(Const::CreatureNumCells_Min, MaxOfOpenRanges);
+            detectCreature.minNumCells = randomInt(Const::CreatureNumCells_Min, detectCreature.maxNumCells);
+            detectCreature.restrictToColors = randomColors();
+            detectCreature.restrictToLineage = randomLineageRestriction();
+        } break;
+        }
+    } break;
+    case CellType_Generator: {
+        auto& generator = cellTypeData.generator;
+        generator.additive = randomBool();
+        generator.maxValue = randomFloat(Const::GeneratorValue_Min, Const::GeneratorValue_Max);
+        generator.minValue = randomFloat(Const::GeneratorValue_Min, generator.maxValue);
+        generator.timeOffset = randomInt(Const::GeneratorTimeOffset_Min, MaxOfOpenRanges);
+        switch (generator.mode) {
+        case GeneratorMode_SquareSignal:
+            generator.modeData.squareSignal.period = randomInt(Const::GeneratorPeriod_Min, MaxOfOpenRanges);
+            break;
+        case GeneratorMode_SawtoothSignal:
+            generator.modeData.sawtoothSignal.period = randomInt(Const::GeneratorPeriod_Min, MaxOfOpenRanges);
+            break;
+        }
+    } break;
+    case CellType_Attacker:
+        if (cellTypeData.attacker.mode == AttackerMode_FreeCell) {
+            cellTypeData.attacker.modeData.attackFreeCell.restrictToColors = randomColors();
+        }
+        break;
+    case CellType_Injector:
+        cellTypeData.injector.geneIndex = static_cast<uint16_t>(randomInt(0, max(0, genome->numGenes - 1)));
+        break;
+    case CellType_Muscle: {
+        auto& muscle = cellTypeData.muscle;
+        switch (muscle.mode) {
+        case MuscleMode_AutoBending:
+            muscle.modeData.autoBending = {randomMuscleRatio(), randomMuscleRatio()};
+            break;
+        case MuscleMode_ManualBending:
+            muscle.modeData.manualBending = {randomMuscleRatio(), randomMuscleRatio()};
+            break;
+        case MuscleMode_AngleBending:
+            muscle.modeData.angleBending = {randomMuscleRatio(), randomMuscleRatio()};
+            break;
+        case MuscleMode_AutoCrawling:
+            muscle.modeData.autoCrawling = {randomMuscleRatio(), randomMuscleRatio()};
+            break;
+        case MuscleMode_ManualCrawling:
+            muscle.modeData.manualCrawling = {randomMuscleRatio(), randomMuscleRatio()};
+            break;
+        case MuscleMode_DirectMovement:
+            break;
+        }
+    } break;
+    case CellType_Reconnector: {
+        auto& reconnector = cellTypeData.reconnector;
+        switch (reconnector.mode) {
+        case ReconnectorMode_Solid:
+            break;
+        case ReconnectorMode_FreeCell:
+            reconnector.modeData.reconnectFreeCell.restrictToColors = randomColors();
+            break;
+        case ReconnectorMode_Creature: {
+            auto& reconnectCreature = reconnector.modeData.reconnectCreature;
+            reconnectCreature.maxNumCells = randomInt(Const::CreatureNumCells_Min, MaxOfOpenRanges);
+            reconnectCreature.minNumCells = randomInt(Const::CreatureNumCells_Min, reconnectCreature.maxNumCells);
+            reconnectCreature.restrictToColors = randomColors();
+            reconnectCreature.restrictToLineage = randomLineageRestriction();
+        } break;
+        }
+    } break;
+    case CellType_Detonator:
+        cellTypeData.detonator.countdown = randomInt(Const::DetonatorCountdown_Min, MaxOfOpenRanges);
+        break;
+    case CellType_Digestor:
+        cellTypeData.digestor.rawEnergyConductivity = randomFloat(Const::DigestorRawEnergyConductivity_Min, Const::DigestorRawEnergyConductivity_Max);
+        break;
+    case CellType_Memory: {
+        auto& memory = cellTypeData.memory;
+        memory.channelBitMask = randomBitset(Const::MemoryChannelBitMask_Max);
+        memory.numSignalEntries = static_cast<uint8_t>(randomInt(Const::MemoryNumSignalEntries_Min, Const::MemoryNumSignalEntries_Max));
+        if (memory.numSignalEntries > 0) {
+            memory.signalEntries = data.entities.heap.getTypedSubArray<SignalEntryGenome>(memory.numSignalEntries);
+            for (int entryIndex = 0; entryIndex < memory.numSignalEntries; ++entryIndex) {
+                for (int channelIndex = 0; channelIndex < STANDARD_NEURONS_PER_CELL; ++channelIndex) {
+                    memory.signalEntries[entryIndex].channels[channelIndex] = randomFloat(-2.0f, 2.0f);
+                }
+            }
+        }
+        switch (memory.mode) {
+        case MemoryMode_SignalDelay:
+            memory.modeData.signalDelay.delay = static_cast<uint8_t>(randomInt(Const::SignalDelay_Min, Const::SignalDelay_Max));
+            break;
+        case MemoryMode_SignalRecorder:
+            memory.modeData.signalRecorder = {randomBool(), static_cast<uint8_t>(randomInt(0, memory.numSignalEntries))};
+            break;
+        case MemoryMode_SignalStorage:
+            memory.modeData.signalStorage.readOnly = randomBool();
+            break;
+        case MemoryMode_SignalIntegrator:
+            memory.modeData.signalIntegrator.newSignalWeight =
+                randomFloat(Const::SignalIntegratorNewSignalWeight_Min, Const::SignalIntegratorNewSignalWeight_Max);
+            break;
+        }
+    } break;
+    case CellType_Communicator: {
+        auto& communicator = cellTypeData.communicator;
+        switch (communicator.mode) {
+        case CommunicatorMode_Sender:
+            communicator.modeData.sender = {static_cast<uint8_t>(randomInt(Const::CommunicatorRange_Min, Const::CommunicatorRange_Max)), randomBool()};
+            break;
+        case CommunicatorMode_Receiver:
+            communicator.modeData.receiver = {randomColors(), randomLineageRestriction()};
+            break;
+        }
+    } break;
+    default:
+        // Base, defender and void cells have no attributes to draw.
+        break;
+    }
+}
+
+__inline__ __device__ void MutationProcessor::setRandomNeuralNetwork(SimulationData& data, Node& node)
+{
+    auto& neuralNetwork = node.neuralNetwork;
+    for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
+        neuralNetwork.weights[i] = NeuralNetWeight(data.primaryNumberGen.random(-2.0f, 2.0f));
+    }
+    for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
+        neuralNetwork.biases[i] = data.primaryNumberGen.random(-2.0f, 2.0f);
+        neuralNetwork.activationFunctions[i] = static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
+    }
+    for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+        neuralNetwork.connectionWeights[i] = data.primaryNumberGen.random(Const::ConnectionWeight_Min, Const::ConnectionWeight_Max);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, Genome* genome, Node& node, int color)
+{
+    // A freshly created node starts with the shared default attribute values (mirrors NodeDesc / NeuralNetGenomeDesc defaults).
     node.referenceAngle = 0.0f;
     node.color = color;
     for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
@@ -977,10 +1151,16 @@ __inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, 
     node.neuralNetwork.connectionWeights[0] = 1.0f;
     node.constructorAvailable = false;
 
-    // Random non-void cell type with a random mode; all cell-type attributes stay at their defaults.
+    // Random non-void cell type with a random mode and default cell-type attributes.
     node.cellType = chooseRandomCellTypeExceptVoid(data);
     resetCellTypeToDefault(node);
     setRandomCellTypeMode(data, node);
+
+    // With probability 1/2 the new node gets a random neural network and random cell-type attributes instead of the defaults.
+    if (data.primaryNumberGen.random() < 0.5f) {
+        setRandomNeuralNetwork(data, node);
+        setRandomCellTypeProperties(data, genome, node);
+    }
 }
 
 __inline__ __device__ void MutationProcessor::initNewGene(Gene& gene)
@@ -1105,13 +1285,13 @@ __inline__ __device__ void MutationProcessor::insertNode(SimulationData& data, G
         }
     }
 
-    // Reallocate the gene's node array with one extra slot at the given position holding the new default node.
+    // Reallocate the gene's node array with one extra slot at the given position holding the new node.
     auto const newNumNodes = oldNumNodes + 1;
     auto newNodes = data.entities.heap.getTypedSubArray<Node>(newNumNodes);
     for (int i = 0; i < position; ++i) {
         newNodes[i] = gene.nodes[i];
     }
-    initNewNode(data, newNodes[position], color);
+    initNewNode(data, genome, newNodes[position], color);
     for (int i = position; i < oldNumNodes; ++i) {
         newNodes[i + 1] = gene.nodes[i];
     }
@@ -1346,7 +1526,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
             initNewGene(newGene);
             newGene.nodes = data.entities.heap.getTypedSubArray<Node>(1);
             newGene.numNodes = 1;
-            initNewNode(data, newGene.nodes[0], chosenNode.color);
+            initNewNode(data, genome, newGene.nodes[0], chosenNode.color);
 
             chosenNode.constructorAvailable = true;
             chosenNode.constructor = {};

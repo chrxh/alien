@@ -48,6 +48,7 @@ PUBLIC
     MutationTestsBase.h
     NeuronMutationTests.cpp
     NeuronTests.cpp
+    NewNodeMutationTests.cpp
     ObjectConnectionTests.cpp
     PhysicsTests.cpp
     RadiationTests.cpp
