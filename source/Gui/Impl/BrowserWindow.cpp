@@ -769,13 +769,9 @@ void BrowserWindow::selectWorkspace(WorkspaceType workspaceType)
 
 namespace
 {
-    // A selection suggests the place where it is stored, so a shared upload in My uploads suggests Community. Featured and Liked are no places
-    // to save to.
-    std::optional<SaveTarget> getSaveTarget(WorkspaceType workspaceType, NetworkResourceTreeTO const& selectedTreeTO)
+    // Featured and Liked are no places to save to
+    std::optional<SaveTarget> getSaveTarget(WorkspaceType workspaceType)
     {
-        if (selectedTreeTO == nullptr) {
-            return std::nullopt;
-        }
         if (isLocalWorkspace(workspaceType)) {
             return SaveTarget::ThisComputer;
         }
@@ -783,8 +779,7 @@ namespace
             return SaveTarget::Community;
         }
         if (workspaceType == WorkspaceType_Private) {
-            auto isSharedUpload = selectedTreeTO->isLeaf() && selectedTreeTO->getLeaf().rawTO->workspaceType != WorkspaceType_Private;
-            return isSharedUpload ? SaveTarget::Community : SaveTarget::Private;
+            return SaveTarget::Private;
         }
         return std::nullopt;
     }
@@ -805,7 +800,7 @@ void BrowserWindow::onSaveSimulation()
 void BrowserWindow::onSave()
 {
     auto workspaceId = _data->getCurrentWorkspaceId();
-    auto suggestedTarget = getSaveTarget(workspaceId.workspaceType, _data->getSelectedTreeTO());
+    auto suggestedTarget = _data->getSelectedTreeTO() != nullptr ? getSaveTarget(workspaceId.workspaceType) : std::nullopt;
     SaveSimulationDialog::get().open(workspaceId.resourceType, std::nullopt, getNameSuggestedBySelection(), suggestedTarget);
 }
 
