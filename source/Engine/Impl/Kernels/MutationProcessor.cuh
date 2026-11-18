@@ -29,8 +29,6 @@ private:
     // Probability that the cells receiving the signals of a new node start to listen to it.
     static auto constexpr ListenToNewNodeProbability = 0.5f;
 
-    // A constructed cell holds the cell constructed before it at this connection index, see ConstructorProcessor::continueConstructionOnBranch.
-    // Only the last cell of a construction with separation holds it at index 0, which the default network already listens to.
     static auto constexpr PredecessorConnectionIndex = 1;
 
     // Largest connection index at which a constructor cell usually holds the branch it builds. The index depends on the angles during
