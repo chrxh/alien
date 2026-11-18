@@ -25,7 +25,7 @@ void ResizeWorldDialog::open()
 }
 
 ResizeWorldDialog::ResizeWorldDialog()
-    : AlienDialog("Resize world")
+    : AlienDialog("Resize world", {450.0f, 180.0f})
 {}
 
 void ResizeWorldDialog::processIntern()
