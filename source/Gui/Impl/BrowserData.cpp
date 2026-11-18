@@ -260,6 +260,21 @@ NetworkResourceRawTO _BrowserData::findUpload(NetworkResourceRawTO const& localR
     return findResult != uploads.end() ? *findResult : nullptr;
 }
 
+std::vector<NetworkResourceRawTO> _BrowserData::findOwnUploads(NetworkResourceType resourceType, std::string const& name) const
+{
+    auto userName = NetworkService::get().getLoggedInUserName();
+    if (!userName.has_value()) {
+        return {};
+    }
+    std::vector<NetworkResourceRawTO> result;
+    for (auto const& upload : _workspaces.at(WorkspaceId{resourceType, WorkspaceType_Private}).rawTOs) {
+        if (upload->userName == *userName && upload->resourceName == name) {
+            result.emplace_back(upload);
+        }
+    }
+    return result;
+}
+
 uint64_t _BrowserData::getTotalUploadSize() const
 {
     uint64_t result = 0;

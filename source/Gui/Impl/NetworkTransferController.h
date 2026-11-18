@@ -30,6 +30,9 @@ public:
     void onEdit(EditNetworkResourceRequestData const& requestData);
     void onMove(MoveNetworkResourceRequestData const& requestData);
 
+    // Uploads, name changes and deletions that the server has not finished yet, after which the uploads of the user carry other names
+    bool hasPendingNameChanges() const;
+
 private:
     void init() override;
     void process() override;

@@ -15,6 +15,7 @@
 #include <Persister/Interface/LocalLibraryService.h>
 
 #include "AlienGui.h"
+#include "BrowserController.h"
 #include "BrowserData.h"
 #include "BrowserWindow.h"
 #include "DelayedExecutionController.h"
@@ -36,6 +37,27 @@ namespace
     std::string getLocalNameHint(std::string const& name)
     {
         return name.starts_with('/') || name.ends_with('/') || name.contains("//") ? EmptyFolderHint : LocalNameHint;
+    }
+
+    // A name belongs to one upload of the user. Uploads that share a name anyway, since they were uploaded from elsewhere at the same time, may
+    // keep it.
+    std::optional<std::string> findNameOfOtherUpload(
+        NetworkResourceType resourceType,
+        std::vector<std::pair<NetworkResourceRawTO, std::string>> const& newNames)
+    {
+        auto const& data = BrowserController::get().getData();
+        for (auto const& [rawTO, newName] : newNames) {
+            if (newName == rawTO->resourceName) {
+                continue;
+            }
+            for (auto const& upload : data->findOwnUploads(resourceType, newName)) {
+                auto isRenamedToo = std::ranges::any_of(newNames, [&](auto const& otherNewName) { return otherNewName.first->id == upload->id; });
+                if (!isRenamedToo) {
+                    return newName;
+                }
+            }
+        }
+        return std::nullopt;
     }
 }
 
@@ -100,9 +122,14 @@ void EditSimulationDialog::processForLeaf()
 
     // A simulation named like a genome file keeps its name, which no other simulation may get, while only its description is changed
     auto keepsGenomeLikeName = !isGenome && newName == _treeTO->getLeaf().rawTO->resourceName && service.isValidFolderName(newName);
-    auto valid = isLocal() ? isValidLocalName || keepsGenomeLikeName : !_newName.empty();
+    auto valid = isLocal() ? isValidLocalName || keepsGenomeLikeName : !newName.empty();
     if (isLocal() && !valid && !newName.empty() && !_errorMessage.has_value()) {
         _errorMessage = !isGenome && service.isValidFolderName(newName) ? "The name of a simulation must not end with .genome" : getLocalNameHint(newName);
+    }
+    if (!isLocal() && valid) {
+        auto isNameTaken = findNameOfOtherUpload(_treeTO->type, {{_treeTO->getLeaf().rawTO, newName}}).has_value();
+        valid = !isNameTaken;
+        _errorMessage = isNameTaken ? std::make_optional<std::string>("Another upload of yours already has this name") : std::nullopt;
     }
     processErrorMessage();
 
@@ -136,9 +163,14 @@ void EditSimulationDialog::processForFolder()
             _errorMessage.reset();
         }
         auto newName = boost::algorithm::trim_copy(_newName);
-        valid = isLocal() ? LocalLibraryService::get().isValidFolderName(newName) : !_newName.empty();
+        valid = isLocal() ? LocalLibraryService::get().isValidFolderName(newName) : !newName.empty();
         if (isLocal() && !valid && !newName.empty() && !_errorMessage.has_value()) {
             _errorMessage = getLocalNameHint(newName);
+        }
+        if (!isLocal() && valid) {
+            auto takenName = findNameOfOtherUpload(_treeTO->type, getUploadNamesInNewFolder());
+            valid = !takenName.has_value();
+            _errorMessage = takenName.has_value() ? std::make_optional("Another upload of yours already has the name " + *takenName) : std::nullopt;
         }
         processErrorMessage();
     }
@@ -185,6 +217,17 @@ bool EditSimulationDialog::isLocal() const
     return isLocalWorkspace(BrowserWindow::get().getCurrentWorkspaceType());
 }
 
+std::vector<std::pair<NetworkResourceRawTO, std::string>> EditSimulationDialog::getUploadNamesInNewFolder() const
+{
+    std::vector<std::pair<NetworkResourceRawTO, std::string>> result;
+    auto newFolderName = boost::algorithm::trim_copy(_newName);
+    for (auto const& rawTO : _rawTOs) {
+        auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
+        result.emplace_back(rawTO, NetworkResourceService::get().concatenateFolderName({newFolderName, nameWithoutOldFolder}, false));
+    }
+    return result;
+}
+
 void EditSimulationDialog::onApplyToLeaf()
 {
     auto& rawTO = _treeTO->getLeaf().rawTO;
@@ -199,8 +242,9 @@ void EditSimulationDialog::onApplyToLeaf()
         return;
     }
 
-    if (NetworkValidationService::get().isStringValidForDatabase(_newName) && NetworkValidationService::get().isStringValidForDatabase(_newDescription)) {
-        EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription};
+    auto newName = boost::algorithm::trim_copy(_newName);
+    if (NetworkValidationService::get().isStringValidForDatabase(newName) && NetworkValidationService::get().isStringValidForDatabase(_newDescription)) {
+        EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = newName, .newDescription = _newDescription};
         NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
         close();
     } else {
@@ -234,9 +278,7 @@ void EditSimulationDialog::onApplyToFolder()
 
     if (NetworkValidationService::get().isStringValidForDatabase(_newName)) {
         EditNetworkResourceRequestData requestData;
-        for (auto const& rawTO : _rawTOs) {
-            auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
-            auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
+        for (auto const& [rawTO, newName] : getUploadNamesInNewFolder()) {
             requestData.entries.emplace_back(rawTO->id, newName, rawTO->description);
         }
         NetworkTransferController::get().onEdit(requestData);
