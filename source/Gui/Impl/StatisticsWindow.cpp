@@ -806,17 +806,21 @@ void StatisticsWindow::processFilterBar()
     ImGui::SameLine(0, scale(12.0f));
 
     ImGui::PushID("all");
-    if (filterChip("All", _colorFilter == AllColorsFilter, 0, _cellColors)) {
+    if (filterChip("All", false, 0, _cellColors)) {
         _colorFilter = AllColorsFilter;
     }
     ImGui::PopID();
 
-    auto selectedColors = _colorFilter != AllColorsFilter ? _colorFilter : 0;
+    // A selected color without lineages stays listed so that it can be deselected, unless every color is selected
+    auto selectsEveryColor = _colorFilter == AllColorsFilter;
     std::vector<int> listedColors;
+    auto listedColorBitset = 0;
     auto widthWithCounts = 0.0f;
     for (auto const& [color, numLineages] : _numLineagesByColor | std::views::enumerate) {
-        if (numLineages > 0 || (selectedColors & (1 << color)) != 0) {
+        auto isSelected = (_colorFilter & (1 << color)) != 0;
+        if (numLineages > 0 || (isSelected && !selectsEveryColor)) {
             listedColors.emplace_back(toInt(color));
+            listedColorBitset |= 1 << color;
             widthWithCounts += scale(FilterChipSpacing) + calcFilterChipWidth(StringHelper::format(numLineages), true);
         }
     }
@@ -826,8 +830,8 @@ void StatisticsWindow::processFilterBar()
         auto numLineages = _numLineagesByColor.at(color);
         ImGui::SameLine(0, scale(FilterChipSpacing));
         ImGui::PushID(color);
-        if (filterChip(showCounts ? StringHelper::format(numLineages) : "", (selectedColors & (1 << color)) != 0, 1 << color, _cellColors)) {
-            _colorFilter = selectedColors ^ (1 << color);
+        if (filterChip(showCounts ? StringHelper::format(numLineages) : "", (_colorFilter & (1 << color)) != 0, 1 << color, _cellColors)) {
+            _colorFilter = (_colorFilter & listedColorBitset) ^ (1 << color);
         }
         ImGui::PopID();
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(getNumLineagesTooltip(numLineages)));
