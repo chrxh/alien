@@ -35,10 +35,14 @@ class SaveSimulationDialog : public AlienDialog
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SaveSimulationDialog);
 
 public:
-    // Saves the running simulation or the genome of the genome editor. Without a target, the dialog starts with the one that the user has chosen
-    // for the last save, which is this computer at first. A suggested name is one of this computer, and one that ends with a slash names only
-    // the folder.
-    void open(NetworkResourceType resourceType, std::optional<SaveTarget> target = std::nullopt, std::string const& suggestedName = "");
+    // Saves the running simulation or the genome of the genome editor. Without a target, the dialog starts with the suggested target, or else with
+    // the one that the user has chosen for the last save, which is this computer at first. A suggested name that ends with a slash names only the
+    // folder.
+    void open(
+        NetworkResourceType resourceType,
+        std::optional<SaveTarget> target = std::nullopt,
+        std::string const& suggestedName = "",
+        std::optional<SaveTarget> suggestedTarget = std::nullopt);
 
     // Uploads a simulation or a genome of this computer
     void openForSharing(NetworkResourceType resourceType, std::filesystem::path const& file, std::string const& nameInLibrary, std::string const& description);
