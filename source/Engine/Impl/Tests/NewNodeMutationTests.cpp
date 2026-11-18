@@ -168,6 +168,26 @@ TEST_P(NewNodeMutationTests, newNode_randomCellTypePropertiesOnlyWithRandomNeura
     EXPECT_LT(numRandomNodes / 2, numRandomNodesWithChangedProperties);
 }
 
+TEST_P(NewNodeMutationTests, newNode_creatureFilterAdmitsSomeSize)
+{
+    auto admitsSomeSize = [](auto const& filter) {
+        auto maxNumCells = filter._maxNumCells.value_or(0);
+        return maxNumCells == 0 || filter._minNumCells.value_or(0) <= maxNumCells;
+    };
+    for (auto const& node : getNewNodes(createGenomeWithNewNodes())) {
+        if (auto sensor = std::get_if<SensorGenomeDesc>(&node._cellType)) {
+            if (auto detectCreature = std::get_if<DetectCreatureGenomeDesc>(&sensor->_mode)) {
+                EXPECT_TRUE(admitsSomeSize(*detectCreature));
+            }
+        }
+        if (auto reconnector = std::get_if<ReconnectorGenomeDesc>(&node._cellType)) {
+            if (auto reconnectCreature = std::get_if<ReconnectCreatureGenomeDesc>(&reconnector->_mode)) {
+                EXPECT_TRUE(admitsSomeSize(*reconnectCreature));
+            }
+        }
+    }
+}
+
 TEST_P(NewNodeMutationTests, newNode_passesValidation)
 {
     auto genome = createGenomeWithNewNodes();

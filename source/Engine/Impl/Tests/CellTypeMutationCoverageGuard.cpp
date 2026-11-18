@@ -20,14 +20,14 @@
 #define ALIEN_MUTATION_FIELD_COUNT(Type, Count) \
     static_assert( \
         boost::pfr::tuple_size_v<Type> == (Count), \
-        #Type " field count changed - review applyMutations_cellTypeProperties(), applyMutations_cellType() and setRandomCellTypeProperties() in " \
+        #Type " field count changed - review forEachCellTypeProperty() and applyMutations_cellType() in " \
               "MutationProcessor.cuh and update this count")
 
 #define ALIEN_MUTATION_MODE_COUNT(Type, Count) \
     static_assert( \
         std::variant_size_v<Type> == (Count), \
         #Type \
-        " mode count changed - review applyMutations_cellTypeProperties(), applyMutations_cellTypeMode() and setRandomCellTypeProperties() in " \
+        " mode count changed - review forEachCellTypeProperty() and applyMutations_cellTypeMode() in " \
         "MutationProcessor.cuh and update this count")
 
 // --- Cell types (switch (node.cellType)) ---
@@ -97,7 +97,7 @@ ALIEN_MUTATION_MODE_COUNT(CommunicatorModeGenomeDesc, 2);
 // Defender's mode is a plain enum, not a variant.
 static_assert(
     DefenderMode_Count == 2,
-    "DefenderMode count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count");
+    "DefenderMode count changed - review forEachCellTypeProperty() in MutationProcessor.cuh and update this count");
 
 #undef ALIEN_MUTATION_MODE_COUNT
 #undef ALIEN_MUTATION_FIELD_COUNT

@@ -28,6 +28,9 @@ private:
 
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    template <typename NumberOp, typename BoolOp, typename BitsetOp, typename EnumOp, typename SignalEntriesOp>
+    __inline__ __device__ static void
+    forEachCellTypeProperty(Genome* genome, Node& node, NumberOp numberOp, BoolOp boolOp, BitsetOp bitsetOp, EnumOp enumOp, SignalEntriesOp signalEntriesOp);
     __inline__ __device__ static void applyMutations_cellTypeProperties(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_geometry(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -229,6 +232,173 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
     }
 }
 
+template <typename NumberOp, typename BoolOp, typename BitsetOp, typename EnumOp, typename SignalEntriesOp>
+__inline__ __device__ void MutationProcessor::forEachCellTypeProperty(
+    Genome* genome,
+    Node& node,
+    NumberOp numberOp,
+    BoolOp boolOp,
+    BitsetOp bitsetOp,
+    EnumOp enumOp,
+    SignalEntriesOp signalEntriesOp)
+{
+    // Passes each attribute of the node's cell type and mode to the operation for its kind, numbers together with their value range.
+    // The cell type and the mode themselves are not visited.
+    auto constexpr MaxOfOpenRanges = 100;
+    auto muscleRatioOp = [&](auto& value) { numberOp(value, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max); };
+    auto creatureFilterOp = [&](auto& filter) {
+        numberOp(filter.minNumCells, Const::CreatureNumCells_Min, MaxOfOpenRanges);
+        numberOp(filter.maxNumCells, Const::CreatureNumCells_Min, MaxOfOpenRanges);
+        bitsetOp(filter.restrictToColors, Const::RestrictToColors_Max);
+        enumOp(filter.restrictToLineage, LineageRestriction_Count);
+    };
+
+    auto& cellTypeData = node.cellTypeData;
+    switch (node.cellType) {
+    case CellType_Base:
+        break;
+    case CellType_Depot:
+        numberOp(cellTypeData.depot.storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
+        break;
+    case CellType_Sensor: {
+        auto& sensor = cellTypeData.sensor;
+        boolOp(sensor.autoTrigger);
+        boolOp(sensor.tagForAttackers);
+        numberOp(sensor.minRange, Const::SensorRange_Min, sensor.maxRange);
+        numberOp(sensor.maxRange, sensor.minRange, Const::SensorRange_Max);
+        switch (sensor.mode) {
+        case SensorMode_DetectEnergy:
+            numberOp(sensor.modeData.detectEnergy.minDensity, Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
+            break;
+        case SensorMode_DetectSolid:
+            break;
+        case SensorMode_DetectFreeCell:
+            numberOp(sensor.modeData.detectFreeCell.minDensity, Const::DetectFreeCellMinDensity_Min, Const::DetectFreeCellMinDensity_Max);
+            bitsetOp(sensor.modeData.detectFreeCell.restrictToColors, Const::RestrictToColors_Max);
+            break;
+        case SensorMode_DetectCreature:
+            creatureFilterOp(sensor.modeData.detectCreature);
+            break;
+        }
+    } break;
+    case CellType_Generator: {
+        auto& generator = cellTypeData.generator;
+        boolOp(generator.additive);
+        numberOp(generator.minValue, Const::GeneratorValue_Min, Const::GeneratorValue_Max);
+        numberOp(generator.maxValue, Const::GeneratorValue_Min, Const::GeneratorValue_Max);
+        numberOp(generator.timeOffset, Const::GeneratorTimeOffset_Min, MaxOfOpenRanges);
+        switch (generator.mode) {
+        case GeneratorMode_SquareSignal:
+            numberOp(generator.modeData.squareSignal.period, Const::GeneratorPeriod_Min, MaxOfOpenRanges);
+            break;
+        case GeneratorMode_SawtoothSignal:
+            numberOp(generator.modeData.sawtoothSignal.period, Const::GeneratorPeriod_Min, MaxOfOpenRanges);
+            break;
+        }
+        if (generator.minValue > generator.maxValue) {
+            auto temp = generator.minValue;
+            generator.minValue = generator.maxValue;
+            generator.maxValue = temp;
+        }
+    } break;
+    case CellType_Attacker:
+        switch (cellTypeData.attacker.mode) {
+        case AttackerMode_FreeCell:
+            bitsetOp(cellTypeData.attacker.modeData.attackFreeCell.restrictToColors, Const::RestrictToColors_Max);
+            break;
+        case AttackerMode_Creature:
+            break;
+        }
+        break;
+    case CellType_Injector:
+        numberOp(cellTypeData.injector.geneIndex, 0, max(0, genome->numGenes - 1));
+        break;
+    case CellType_Muscle: {
+        auto& modeData = cellTypeData.muscle.modeData;
+        switch (cellTypeData.muscle.mode) {
+        case MuscleMode_AutoBending:
+            muscleRatioOp(modeData.autoBending.maxAngleDeviation);
+            muscleRatioOp(modeData.autoBending.forwardBackwardRatio);
+            break;
+        case MuscleMode_ManualBending:
+            muscleRatioOp(modeData.manualBending.maxAngleDeviation);
+            muscleRatioOp(modeData.manualBending.forwardBackwardRatio);
+            break;
+        case MuscleMode_AngleBending:
+            muscleRatioOp(modeData.angleBending.maxAngleDeviation);
+            muscleRatioOp(modeData.angleBending.attractionRepulsionRatio);
+            break;
+        case MuscleMode_AutoCrawling:
+            muscleRatioOp(modeData.autoCrawling.maxDistanceDeviation);
+            muscleRatioOp(modeData.autoCrawling.forwardBackwardRatio);
+            break;
+        case MuscleMode_ManualCrawling:
+            muscleRatioOp(modeData.manualCrawling.maxDistanceDeviation);
+            muscleRatioOp(modeData.manualCrawling.forwardBackwardRatio);
+            break;
+        case MuscleMode_DirectMovement:
+            break;
+        }
+    } break;
+    case CellType_Defender:
+        break;
+    case CellType_Reconnector: {
+        auto& reconnector = cellTypeData.reconnector;
+        switch (reconnector.mode) {
+        case ReconnectorMode_Solid:
+            break;
+        case ReconnectorMode_FreeCell:
+            bitsetOp(reconnector.modeData.reconnectFreeCell.restrictToColors, Const::RestrictToColors_Max);
+            break;
+        case ReconnectorMode_Creature:
+            creatureFilterOp(reconnector.modeData.reconnectCreature);
+            break;
+        }
+    } break;
+    case CellType_Detonator:
+        numberOp(cellTypeData.detonator.countdown, Const::DetonatorCountdown_Min, MaxOfOpenRanges);
+        break;
+    case CellType_Digestor:
+        numberOp(cellTypeData.digestor.rawEnergyConductivity, Const::DigestorRawEnergyConductivity_Min, Const::DigestorRawEnergyConductivity_Max);
+        break;
+    case CellType_Memory: {
+        auto& memory = cellTypeData.memory;
+        bitsetOp(memory.channelBitMask, Const::MemoryChannelBitMask_Max);
+        signalEntriesOp(memory);
+        switch (memory.mode) {
+        case MemoryMode_SignalDelay:
+            numberOp(memory.modeData.signalDelay.delay, Const::SignalDelay_Min, Const::SignalDelay_Max);
+            break;
+        case MemoryMode_SignalRecorder:
+            boolOp(memory.modeData.signalRecorder.readOnly);
+            numberOp(memory.modeData.signalRecorder.numWrittenSignalEntries, 0, static_cast<int>(memory.numSignalEntries));
+            break;
+        case MemoryMode_SignalStorage:
+            boolOp(memory.modeData.signalStorage.readOnly);
+            break;
+        case MemoryMode_SignalIntegrator:
+            numberOp(memory.modeData.signalIntegrator.newSignalWeight, Const::SignalIntegratorNewSignalWeight_Min, Const::SignalIntegratorNewSignalWeight_Max);
+            break;
+        }
+    } break;
+    case CellType_Communicator: {
+        auto& communicator = cellTypeData.communicator;
+        switch (communicator.mode) {
+        case CommunicatorMode_Sender:
+            numberOp(communicator.modeData.sender.range, Const::CommunicatorRange_Min, Const::CommunicatorRange_Max);
+            boolOp(communicator.modeData.sender.oneway);
+            break;
+        case CommunicatorMode_Receiver:
+            bitsetOp(communicator.modeData.receiver.restrictToColors, Const::RestrictToColors_Max);
+            enumOp(communicator.modeData.receiver.restrictToLineage, LineageRestriction_Count);
+            break;
+        }
+    } break;
+    case CellType_Void:
+        break;
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto block = cg_mutation::this_thread_block();
@@ -303,132 +473,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     }
                 };
 
-                switch (node.cellType) {
-                case CellType_Base:
-                    break;
-                case CellType_Depot:
-                    mutateNumber(node.cellTypeData.depot.storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
-                    break;
-                case CellType_Sensor:
-                    mutateBoolField(node.cellTypeData.sensor.autoTrigger);
-                    mutateBoolField(node.cellTypeData.sensor.tagForAttackers);
-                    mutateNumber(node.cellTypeData.sensor.minRange, Const::SensorRange_Min, node.cellTypeData.sensor.maxRange);
-                    mutateNumber(node.cellTypeData.sensor.maxRange, node.cellTypeData.sensor.minRange, Const::SensorRange_Max);
-                    switch (node.cellTypeData.sensor.mode) {
-                    case SensorMode_DetectEnergy:
-                        mutateNumber(
-                            node.cellTypeData.sensor.modeData.detectEnergy.minDensity, Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
-                        break;
-                    case SensorMode_DetectSolid:
-                        break;
-                    case SensorMode_DetectFreeCell:
-                        mutateNumber(
-                            node.cellTypeData.sensor.modeData.detectFreeCell.minDensity,
-                            Const::DetectFreeCellMinDensity_Min,
-                            Const::DetectFreeCellMinDensity_Max);
-                        mutateBitset(node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors, Const::RestrictToColors_Max);
-                        break;
-                    case SensorMode_DetectCreature:
-                        mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateBitset(node.cellTypeData.sensor.modeData.detectCreature.restrictToColors, Const::RestrictToColors_Max);
-                        mutateEnumField(node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage, LineageRestriction_Count);
-                        break;
-                    }
-                    break;
-                case CellType_Generator:
-                    mutateBoolField(node.cellTypeData.generator.additive);
-                    mutateNumber(node.cellTypeData.generator.minValue, Const::GeneratorValue_Min, Const::GeneratorValue_Max);
-                    mutateNumber(node.cellTypeData.generator.maxValue, Const::GeneratorValue_Min, Const::GeneratorValue_Max);
-                    mutateNumber(node.cellTypeData.generator.timeOffset, Const::GeneratorTimeOffset_Min, 100);
-                    switch (node.cellTypeData.generator.mode) {
-                    case GeneratorMode_SquareSignal:
-                        mutateNumber(node.cellTypeData.generator.modeData.squareSignal.period, Const::GeneratorPeriod_Min, 100);
-                        break;
-                    case GeneratorMode_SawtoothSignal:
-                        mutateNumber(node.cellTypeData.generator.modeData.sawtoothSignal.period, Const::GeneratorPeriod_Min, 100);
-                        break;
-                    }
-                    if (node.cellTypeData.generator.minValue > node.cellTypeData.generator.maxValue) {
-                        auto const temp = node.cellTypeData.generator.minValue;
-                        node.cellTypeData.generator.minValue = node.cellTypeData.generator.maxValue;
-                        node.cellTypeData.generator.maxValue = temp;
-                    }
-                    break;
-                case CellType_Attacker:
-                    switch (node.cellTypeData.attacker.mode) {
-                    case AttackerMode_FreeCell:
-                        mutateBitset(node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors, Const::RestrictToColors_Max);
-                        break;
-                    case AttackerMode_Creature:
-                        break;
-                    }
-                    break;
-                case CellType_Injector:
-                    mutateNumber(node.cellTypeData.injector.geneIndex, 0, max(0, genome->numGenes - 1));
-                    break;
-                case CellType_Muscle:
-                    switch (node.cellTypeData.muscle.mode) {
-                    case MuscleMode_AutoBending:
-                        mutateNumber(node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        break;
-                    case MuscleMode_ManualBending:
-                        mutateNumber(node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        break;
-                    case MuscleMode_AngleBending:
-                        mutateNumber(node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        break;
-                    case MuscleMode_AutoCrawling:
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        break;
-                    case MuscleMode_ManualCrawling:
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
-                        break;
-                    case MuscleMode_DirectMovement:
-                        break;
-                    }
-                    break;
-                case CellType_Defender:
-                    break;
-                case CellType_Reconnector:
-                    switch (node.cellTypeData.reconnector.mode) {
-                    case ReconnectorMode_Solid:
-                        break;
-                    case ReconnectorMode_FreeCell:
-                        mutateBitset(node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors, Const::RestrictToColors_Max);
-                        break;
-                    case ReconnectorMode_Creature:
-                        mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateBitset(node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors, Const::RestrictToColors_Max);
-                        mutateEnumField(node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage, LineageRestriction_Count);
-                        break;
-                    }
-                    break;
-                case CellType_Detonator:
-                    mutateNumber(node.cellTypeData.detonator.countdown, Const::DetonatorCountdown_Min, 100);
-                    break;
-                case CellType_Digestor:
-                    mutateNumber(
-                        node.cellTypeData.digestor.rawEnergyConductivity, Const::DigestorRawEnergyConductivity_Min, Const::DigestorRawEnergyConductivity_Max);
-                    break;
-                case CellType_Memory: {
-                    mutateBitset(node.cellTypeData.memory.channelBitMask, Const::MemoryChannelBitMask_Max);
-
+                auto mutateSignalEntries = [&](auto& memory) {
                     if (rate.valueChangeSigma > 0) {
-                        auto& memory = node.cellTypeData.memory;
                         auto oldNumSignalEntries = toInt(memory.numSignalEntries);
                         auto roundedDelta = toInt(std::round(generateGaussian(data) * rate.valueChangeSigma));
                         auto newNumSignalEntries =
@@ -460,45 +506,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                             atomicAdd_block(&accumulatedMutations, signalMutations / newNumSignalEntries);
                         }
                     }
+                };
 
-                    switch (node.cellTypeData.memory.mode) {
-                    case MemoryMode_SignalDelay:
-                        mutateNumber(node.cellTypeData.memory.modeData.signalDelay.delay, Const::SignalDelay_Min, Const::SignalDelay_Max);
-                        break;
-                    case MemoryMode_SignalRecorder:
-                        mutateBoolField(node.cellTypeData.memory.modeData.signalRecorder.readOnly);
-                        mutateNumber(
-                            node.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries,
-                            0,
-                            static_cast<int>(node.cellTypeData.memory.numSignalEntries));
-                        break;
-                    case MemoryMode_SignalStorage:
-                        mutateBoolField(node.cellTypeData.memory.modeData.signalStorage.readOnly);
-                        break;
-                    case MemoryMode_SignalIntegrator:
-                        mutateNumber(
-                            node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight,
-                            Const::SignalIntegratorNewSignalWeight_Min,
-                            Const::SignalIntegratorNewSignalWeight_Max);
-                        break;
-                    }
-                    break;
-                }
-                case CellType_Communicator:
-                    switch (node.cellTypeData.communicator.mode) {
-                    case CommunicatorMode_Sender:
-                        mutateNumber(node.cellTypeData.communicator.modeData.sender.range, Const::CommunicatorRange_Min, Const::CommunicatorRange_Max);
-                        mutateBoolField(node.cellTypeData.communicator.modeData.sender.oneway);
-                        break;
-                    case CommunicatorMode_Receiver:
-                        mutateBitset(node.cellTypeData.communicator.modeData.receiver.restrictToColors, Const::RestrictToColors_Max);
-                        mutateEnumField(node.cellTypeData.communicator.modeData.receiver.restrictToLineage, LineageRestriction_Count);
-                        break;
-                    }
-                    break;
-                case CellType_Void:
-                    break;
-                }
+                forEachCellTypeProperty(genome, node, mutateNumber, mutateBoolField, mutateBitset, mutateEnumField, mutateSignalEntries);
             }
         }
     }
@@ -965,158 +975,48 @@ __inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationDa
 
 __inline__ __device__ void MutationProcessor::setRandomCellTypeProperties(SimulationData& data, Genome* genome, Node& node)
 {
-    // Draws every attribute that applyMutations_cellTypeProperties mutates uniformly from the value range used there.
-    // The cell type and its mode stay as they are.
-    auto constexpr MaxOfOpenRanges = 100;
-
-    auto randomInt = [&](int minValue, int maxValue) { return minValue + data.primaryNumberGen.random(maxValue - minValue); };
-    auto randomFloat = [&](float minValue, float maxValue) { return data.primaryNumberGen.random(minValue, maxValue); };
-    auto randomBool = [&] { return data.primaryNumberGen.randomBool(); };
-    auto randomBitset = [&](int mask) { return static_cast<uint16_t>((data.primaryNumberGen.randomByte() | data.primaryNumberGen.randomByte() << 8) & mask); };
-    auto randomColors = [&] { return randomBitset(Const::RestrictToColors_Max); };
-    auto randomLineageRestriction = [&] { return static_cast<LineageRestriction>(randomInt(0, LineageRestriction_Count - 1)); };
-    auto randomMuscleRatio = [&] { return randomFloat(Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max); };
-
-    auto& cellTypeData = node.cellTypeData;
-    switch (node.cellType) {
-    case CellType_Depot:
-        cellTypeData.depot.storageLimit = randomFloat(Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
-        break;
-    case CellType_Sensor: {
-        auto& sensor = cellTypeData.sensor;
-        sensor.autoTrigger = randomBool();
-        sensor.tagForAttackers = randomBool();
-        sensor.maxRange = static_cast<uint16_t>(randomInt(Const::SensorRange_Min, Const::SensorRange_Max));
-        sensor.minRange = static_cast<uint16_t>(randomInt(Const::SensorRange_Min, sensor.maxRange));
-        switch (sensor.mode) {
-        case SensorMode_DetectEnergy:
-            sensor.modeData.detectEnergy.minDensity = randomFloat(Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
-            break;
-        case SensorMode_DetectSolid:
-            break;
-        case SensorMode_DetectFreeCell:
-            sensor.modeData.detectFreeCell.minDensity = randomFloat(Const::DetectFreeCellMinDensity_Min, Const::DetectFreeCellMinDensity_Max);
-            sensor.modeData.detectFreeCell.restrictToColors = randomColors();
-            break;
-        case SensorMode_DetectCreature: {
-            auto& detectCreature = sensor.modeData.detectCreature;
-            detectCreature.maxNumCells = randomInt(Const::CreatureNumCells_Min, MaxOfOpenRanges);
-            detectCreature.minNumCells = randomInt(Const::CreatureNumCells_Min, detectCreature.maxNumCells);
-            detectCreature.restrictToColors = randomColors();
-            detectCreature.restrictToLineage = randomLineageRestriction();
-        } break;
+    // Draws every attribute of the node's cell type and mode at random within its value range.
+    auto drawNumber = [&](auto& value, auto minValue, auto maxValue) {
+        using ValueType = std::decay_t<decltype(value)>;
+        if constexpr (std::is_integral_v<ValueType>) {
+            auto intMinValue = static_cast<int>(minValue);
+            value = static_cast<ValueType>(intMinValue + data.primaryNumberGen.random(static_cast<int>(maxValue) - intMinValue));
+        } else {
+            value = data.primaryNumberGen.random(static_cast<ValueType>(minValue), static_cast<ValueType>(maxValue));
         }
-    } break;
-    case CellType_Generator: {
-        auto& generator = cellTypeData.generator;
-        generator.additive = randomBool();
-        generator.maxValue = randomFloat(Const::GeneratorValue_Min, Const::GeneratorValue_Max);
-        generator.minValue = randomFloat(Const::GeneratorValue_Min, generator.maxValue);
-        generator.timeOffset = randomInt(Const::GeneratorTimeOffset_Min, MaxOfOpenRanges);
-        switch (generator.mode) {
-        case GeneratorMode_SquareSignal:
-            generator.modeData.squareSignal.period = randomInt(Const::GeneratorPeriod_Min, MaxOfOpenRanges);
-            break;
-        case GeneratorMode_SawtoothSignal:
-            generator.modeData.sawtoothSignal.period = randomInt(Const::GeneratorPeriod_Min, MaxOfOpenRanges);
-            break;
-        }
-    } break;
-    case CellType_Attacker:
-        if (cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-            cellTypeData.attacker.modeData.attackFreeCell.restrictToColors = randomColors();
-        }
-        break;
-    case CellType_Injector:
-        cellTypeData.injector.geneIndex = static_cast<uint16_t>(randomInt(0, max(0, genome->numGenes - 1)));
-        break;
-    case CellType_Muscle: {
-        auto& muscle = cellTypeData.muscle;
-        switch (muscle.mode) {
-        case MuscleMode_AutoBending:
-            muscle.modeData.autoBending = {randomMuscleRatio(), randomMuscleRatio()};
-            break;
-        case MuscleMode_ManualBending:
-            muscle.modeData.manualBending = {randomMuscleRatio(), randomMuscleRatio()};
-            break;
-        case MuscleMode_AngleBending:
-            muscle.modeData.angleBending = {randomMuscleRatio(), randomMuscleRatio()};
-            break;
-        case MuscleMode_AutoCrawling:
-            muscle.modeData.autoCrawling = {randomMuscleRatio(), randomMuscleRatio()};
-            break;
-        case MuscleMode_ManualCrawling:
-            muscle.modeData.manualCrawling = {randomMuscleRatio(), randomMuscleRatio()};
-            break;
-        case MuscleMode_DirectMovement:
-            break;
-        }
-    } break;
-    case CellType_Reconnector: {
-        auto& reconnector = cellTypeData.reconnector;
-        switch (reconnector.mode) {
-        case ReconnectorMode_Solid:
-            break;
-        case ReconnectorMode_FreeCell:
-            reconnector.modeData.reconnectFreeCell.restrictToColors = randomColors();
-            break;
-        case ReconnectorMode_Creature: {
-            auto& reconnectCreature = reconnector.modeData.reconnectCreature;
-            reconnectCreature.maxNumCells = randomInt(Const::CreatureNumCells_Min, MaxOfOpenRanges);
-            reconnectCreature.minNumCells = randomInt(Const::CreatureNumCells_Min, reconnectCreature.maxNumCells);
-            reconnectCreature.restrictToColors = randomColors();
-            reconnectCreature.restrictToLineage = randomLineageRestriction();
-        } break;
-        }
-    } break;
-    case CellType_Detonator:
-        cellTypeData.detonator.countdown = randomInt(Const::DetonatorCountdown_Min, MaxOfOpenRanges);
-        break;
-    case CellType_Digestor:
-        cellTypeData.digestor.rawEnergyConductivity = randomFloat(Const::DigestorRawEnergyConductivity_Min, Const::DigestorRawEnergyConductivity_Max);
-        break;
-    case CellType_Memory: {
-        auto& memory = cellTypeData.memory;
-        memory.channelBitMask = randomBitset(Const::MemoryChannelBitMask_Max);
-        memory.numSignalEntries = static_cast<uint8_t>(randomInt(Const::MemoryNumSignalEntries_Min, Const::MemoryNumSignalEntries_Max));
+    };
+    auto drawBool = [&](bool& value) { value = data.primaryNumberGen.randomBool(); };
+    auto drawBitset = [&](auto& value, auto mask) {
+        auto randomBits = data.primaryNumberGen.randomByte() | data.primaryNumberGen.randomByte() << 8;
+        value = static_cast<std::decay_t<decltype(value)>>(randomBits & mask);
+    };
+    auto drawEnum = [&](auto& value, int count) { value = static_cast<std::decay_t<decltype(value)>>(data.primaryNumberGen.random(count - 1)); };
+    auto drawSignalEntries = [&](auto& memory) {
+        drawNumber(memory.numSignalEntries, Const::MemoryNumSignalEntries_Min, Const::MemoryNumSignalEntries_Max);
         if (memory.numSignalEntries > 0) {
             memory.signalEntries = data.entities.heap.getTypedSubArray<SignalEntryGenome>(memory.numSignalEntries);
             for (int entryIndex = 0; entryIndex < memory.numSignalEntries; ++entryIndex) {
                 for (int channelIndex = 0; channelIndex < STANDARD_NEURONS_PER_CELL; ++channelIndex) {
-                    memory.signalEntries[entryIndex].channels[channelIndex] = randomFloat(-2.0f, 2.0f);
+                    drawNumber(memory.signalEntries[entryIndex].channels[channelIndex], -2.0f, 2.0f);
                 }
             }
         }
-        switch (memory.mode) {
-        case MemoryMode_SignalDelay:
-            memory.modeData.signalDelay.delay = static_cast<uint8_t>(randomInt(Const::SignalDelay_Min, Const::SignalDelay_Max));
-            break;
-        case MemoryMode_SignalRecorder:
-            memory.modeData.signalRecorder = {randomBool(), static_cast<uint8_t>(randomInt(0, memory.numSignalEntries))};
-            break;
-        case MemoryMode_SignalStorage:
-            memory.modeData.signalStorage.readOnly = randomBool();
-            break;
-        case MemoryMode_SignalIntegrator:
-            memory.modeData.signalIntegrator.newSignalWeight =
-                randomFloat(Const::SignalIntegratorNewSignalWeight_Min, Const::SignalIntegratorNewSignalWeight_Max);
-            break;
+    };
+    forEachCellTypeProperty(genome, node, drawNumber, drawBool, drawBitset, drawEnum, drawSignalEntries);
+
+    // Independently drawn size limits of a creature filter could exclude every creature.
+    auto orderCreatureSizes = [](auto& filter) {
+        if (filter.maxNumCells > 0 && filter.minNumCells > filter.maxNumCells) {
+            auto temp = filter.minNumCells;
+            filter.minNumCells = filter.maxNumCells;
+            filter.maxNumCells = temp;
         }
-    } break;
-    case CellType_Communicator: {
-        auto& communicator = cellTypeData.communicator;
-        switch (communicator.mode) {
-        case CommunicatorMode_Sender:
-            communicator.modeData.sender = {static_cast<uint8_t>(randomInt(Const::CommunicatorRange_Min, Const::CommunicatorRange_Max)), randomBool()};
-            break;
-        case CommunicatorMode_Receiver:
-            communicator.modeData.receiver = {randomColors(), randomLineageRestriction()};
-            break;
-        }
-    } break;
-    default:
-        // Base, defender and void cells have no attributes to draw.
-        break;
+    };
+    if (node.cellType == CellType_Sensor && node.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+        orderCreatureSizes(node.cellTypeData.sensor.modeData.detectCreature);
+    }
+    if (node.cellType == CellType_Reconnector && node.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+        orderCreatureSizes(node.cellTypeData.reconnector.modeData.reconnectCreature);
     }
 }
 
