@@ -805,9 +805,10 @@ void StatisticsWindow::processFilterBar()
         "use at least one of them.");
     ImGui::SameLine(0, scale(12.0f));
 
+    // Deselecting a color also deselects All
     ImGui::PushID("all");
-    if (filterChip("All", false, 0, _cellColors)) {
-        _colorFilter = AllColorsFilter;
+    if (filterChip("All", _colorFilter == AllColorsFilter, 0, _cellColors)) {
+        _colorFilter = _colorFilter == AllColorsFilter ? 0 : AllColorsFilter;
     }
     ImGui::PopID();
 
