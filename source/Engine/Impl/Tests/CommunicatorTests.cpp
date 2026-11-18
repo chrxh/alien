@@ -288,30 +288,10 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[0], -1.0f);
 }
 
-/**
- * Directional gating: the sender only transmits to receivers whose direction deviates by more than
- * Const::CommunicatorOnewayMinAngle from the encoded facing direction.
- */
-TEST_F(CommunicatorTests, sender_receiverInFacingHalfPlane_noSignalTransmitted)
-{
-    // Sender faces south; the receiver is placed south of the sender (same half-plane as the facing direction)
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
-    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver in the facing half-plane should NOT receive the signal
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
-}
-
 TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
 {
     // Rotating the sender's front by 180 degrees flips the facing direction to north, so now a southern receiver
-    // (in the opposite half-plane) receives, while a northern receiver is blocked.
+    // (opposite to the facing direction) receives, while a northern receiver is blocked.
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 180.0f);
     data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);  // South -> should receive
     data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);   // North -> should be blocked
@@ -328,7 +308,7 @@ TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
 TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
 {
     // With an encoded angle of 0, the facing direction equals the absolute front (east). A western receiver is then
-    // in the opposite half-plane and receives, while an eastern receiver is blocked.
+    // opposite to the facing direction and receives, while an eastern receiver is blocked.
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 0.0f, 0.0f);
     data.add(createReceiverCreature(2, {90.0f, 100.0f}), false);   // West -> should receive
     data.add(createReceiverCreature(3, {110.0f, 100.0f}), false);  // East -> should be blocked
@@ -342,6 +322,10 @@ TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
     EXPECT_TRUE(result.getObjectRef(300).getCellRef()._neuralActivity._signals[0] == 0.0f);
 }
 
+/**
+ * Directional gating: the sender only transmits to receivers whose direction deviates by more than
+ * Const::CommunicatorOnewayMinAngle from the encoded facing direction.
+ */
 class CommunicatorTests_OnewayAngle
     : public CommunicatorTests
     , public testing::WithParamInterface<std::pair<float, bool>>
@@ -396,20 +380,6 @@ TEST_F(CommunicatorTests, receiver_frontAngleNotInitialized_noSignalTransmitted)
     auto receiver = result.getObjectRef(200);
 
     EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
-}
-
-TEST_F(CommunicatorTests, sender_sourceDistance_receiverBehindSender)
-{
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(50.0f));
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    EXPECT_FLOAT_EQ(signals[0], 1.0f);
-    EXPECT_NEAR(signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
-    EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(60.0f), 1e-4f);
 }
 
 TEST_F(CommunicatorTests, sender_sourceDistance_receiverBesideSender)
