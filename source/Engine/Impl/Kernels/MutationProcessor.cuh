@@ -52,7 +52,7 @@ private:
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
     __inline__ __device__ static CellType chooseRandomCellTypeExceptVoid(SimulationData& data);
-    __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node);
+    __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node, bool excludeCurrentMode);
     __inline__ __device__ static void setRandomCellTypeProperties(SimulationData& data, Genome* genome, Node& node);
     __inline__ __device__ static void setRandomNeuralNetwork(SimulationData& data, Node& node);
     __inline__ __device__ static void initNewNode(SimulationData& data, Genome* genome, Node& node, int color);
@@ -748,7 +748,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                 continue;
             }
             // Switch the node to a different random mode (its data is reset to defaults); cell types without a mode are unaffected.
-            if (setRandomCellTypeMode(data, gene.nodes[nodeIndex])) {
+            if (setRandomCellTypeMode(data, gene.nodes[nodeIndex], true)) {
                 atomicAdd_block(&accumulatedMutations, 1.0f);
             }
         }
@@ -912,11 +912,14 @@ __inline__ __device__ CellType MutationProcessor::chooseRandomCellTypeExceptVoid
     return static_cast<CellType>(cellType);
 }
 
-__inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationData& data, Node& node)
+__inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationData& data, Node& node, bool excludeCurrentMode)
 {
-    // Pick a mode different from the node's current mode for its cell type and reset that mode's data to its defaults.
-    // Returns whether the cell type has a mode at all.
+    // Pick a random mode for the node's cell type and reset that mode's data to its defaults.
+    // With excludeCurrentMode the new mode differs from the node's current one. Returns whether the cell type has a mode at all.
     auto pickNewMode = [&](int currentMode, int count) {
+        if (!excludeCurrentMode) {
+            return data.primaryNumberGen.random(count - 1);
+        }
         auto newMode = data.primaryNumberGen.random(count - 2);
         if (newMode >= currentMode) {
             ++newMode;
@@ -1119,13 +1122,22 @@ __inline__ __device__ void MutationProcessor::setRandomCellTypeProperties(Simula
 
 __inline__ __device__ void MutationProcessor::setRandomNeuralNetwork(SimulationData& data, Node& node)
 {
+    // The network is sparse: each weight, bias and activation function is random only with the probability Density and 0 or Identity otherwise.
+    // On average it has as many weights as the default network. A dense random network would emit signals nearly always, even without any input.
+    auto constexpr Density = 1.0f / NEURAL_NET_INPUTS;
+    auto isRandom = [&] { return data.primaryNumberGen.random() < Density; };
+    auto randomValue = [&] { return data.primaryNumberGen.random(-2.0f, 2.0f); };
+
     auto& neuralNetwork = node.neuralNetwork;
     for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
-        neuralNetwork.weights[i] = NeuralNetWeight(data.primaryNumberGen.random(-2.0f, 2.0f));
+        neuralNetwork.weights[i] = NeuralNetWeight(isRandom() ? randomValue() : 0.0f);
     }
     for (int i = 0; i < NEURAL_NET_OUTPUTS; ++i) {
-        neuralNetwork.biases[i] = data.primaryNumberGen.random(-2.0f, 2.0f);
-        neuralNetwork.activationFunctions[i] = static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
+        neuralNetwork.biases[i] = isRandom() ? randomValue() : 0.0f;
+        neuralNetwork.activationFunctions[i] = ActivationFunction_Identity;
+        if (isRandom()) {
+            neuralNetwork.activationFunctions[i] = static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
+        }
     }
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
         neuralNetwork.connectionWeights[i] = data.primaryNumberGen.random(Const::ConnectionWeight_Min, Const::ConnectionWeight_Max);
@@ -1154,9 +1166,9 @@ __inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, 
     // Random non-void cell type with a random mode and default cell-type attributes.
     node.cellType = chooseRandomCellTypeExceptVoid(data);
     resetCellTypeToDefault(node);
-    setRandomCellTypeMode(data, node);
+    setRandomCellTypeMode(data, node, false);
 
-    // With probability 1/2 the new node gets a random neural network and random cell-type attributes instead of the defaults.
+    // With probability 1/2 the new node gets a sparse random neural network and random cell-type attributes instead of the defaults.
     if (data.primaryNumberGen.random() < 0.5f) {
         setRandomNeuralNetwork(data, node);
         setRandomCellTypeProperties(data, genome, node);

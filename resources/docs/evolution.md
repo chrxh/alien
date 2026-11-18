@@ -63,7 +63,7 @@ Open the genome in the genome editor. In the left column, the **Genome** group c
 | Copy and Move node section mutations | Groups of nodes are copied or moved to another place in the same gene or in another gene |
 | Add, Duplicate, Delete and Swap gene mutations | Genes are created, copied, removed or exchanged |
 
-A node created by an Extend gene, Add node or Add gene mutation gets a random cell type. With equal probability, it starts either with the default settings and the [default network](neural-networks.md#the-default-network) or with random ones. In the random case, the neural network, the connection weights and the settings of the cell type are all chosen at random.
+A node created by an Extend gene, Add node or Add gene mutation gets a random cell type with a random mode. For everything else there are two equally likely cases. In the first case, the node gets the default settings of its cell type and the [default network](neural-networks.md#the-default-network). In the second case, the settings of the cell type and the connection weights are chosen at random, and the node gets a sparse random network. Only about 12 of the 192 weights of such a network differ from 0, and a bias or an activation function other than *Identity* is just as rare. Most of these networks therefore send no signal on channel #0 as long as they receive none.
 
 Every mutation is explained in detail in its tooltip. Probabilities between 0.001 and 0.01 are a reasonable starting point. Rates that are too high destroy working genomes faster than selection can keep up.
 

@@ -67,7 +67,7 @@ In a gene, the first connection of each node points to the next node, and the fi
 
 When you add a node at the end of a gene, the genome editor sets the first connection weight of the new last node to 0 and that of the previous last node to 1. This way, the last node does not listen to its constructor. The single node of a new gene keeps the weight 1, and removing or moving nodes does not change any weights. After such edits, check the connection weights of the last node.
 
-The Extend gene, Add node and Add gene mutations use the default network and the default connection weights only for half of the new nodes. The other half gets a random network and random connection weights. See [Evolution experiments](evolution.md#ingredient-2-variation).
+The Extend gene, Add node and Add gene mutations use the default network and the default connection weights only for half of the new nodes. The other half gets a sparse random network, in which only about 12 of the 192 weights differ from 0, and random connection weights. See [Evolution experiments](evolution.md#ingredient-2-variation).
 
 ## Signal channels and cell types
 
