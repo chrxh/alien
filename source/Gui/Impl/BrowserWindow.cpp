@@ -767,25 +767,31 @@ void BrowserWindow::selectWorkspace(WorkspaceType workspaceType)
     _galleryWidget->resetPage();
 }
 
+void BrowserWindow::onSaveSimulation()
+{
+    // A browser that is closed or shows genomes has no selection that could name the simulation
+    auto showsSimulations = isOn() && _data->getCurrentWorkspaceId().resourceType == NetworkResourceType_Simulation;
+    SaveSimulationDialog::get().open(NetworkResourceType_Simulation, std::nullopt, showsSimulations ? getNameSuggestedBySelection() : std::string());
+}
+
 void BrowserWindow::onSave()
 {
-    auto workspaceId = _data->getCurrentWorkspaceId();
-    auto selectedTreeTO = _data->getSelectedTreeTO();
+    SaveSimulationDialog::get().open(_data->getCurrentWorkspaceId().resourceType, std::nullopt, getNameSuggestedBySelection());
+}
 
-    // What is selected suggests its name, also an autosave, and a selected folder suggests itself. An autosave of a folder outside the library
-    // suggests nothing, since its name would address another file.
-    std::string suggestedName;
-    if (selectedTreeTO != nullptr) {
-        if (selectedTreeTO->isLeaf()) {
-            auto const& rawTO = selectedTreeTO->getLeaf().rawTO;
-            if (!isLocalWorkspace(rawTO->workspaceType) || hasNameInLibrary(rawTO)) {
-                suggestedName = rawTO->resourceName;
-            }
-        } else if (!selectedTreeTO->folderNames.empty()) {
-            suggestedName = NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
-        }
+// What is selected suggests its name, also an autosave, and a selected folder suggests itself. An autosave of a folder outside the library
+// suggests nothing, since its name would address another file.
+std::string BrowserWindow::getNameSuggestedBySelection() const
+{
+    auto selectedTreeTO = _data->getSelectedTreeTO();
+    if (selectedTreeTO == nullptr) {
+        return {};
     }
-    SaveSimulationDialog::get().open(workspaceId.resourceType, std::nullopt, suggestedName);
+    if (selectedTreeTO->isLeaf()) {
+        auto const& rawTO = selectedTreeTO->getLeaf().rawTO;
+        return !isLocalWorkspace(rawTO->workspaceType) || hasNameInLibrary(rawTO) ? rawTO->resourceName : std::string();
+    }
+    return selectedTreeTO->folderNames.empty() ? std::string() : NetworkResourceService::get().concatenateFolderName(selectedTreeTO->folderNames, true);
 }
 
 void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)

@@ -132,7 +132,10 @@ namespace
 
     AlienGui::ActionButtonParameters createDeleteButtonParameters()
     {
-        return AlienGui::ActionButtonParameters().buttonText(ICON_FA_TRASH "  Delete").transparentBackground(false);
+        return AlienGui::ActionButtonParameters()
+            .buttonText(ICON_FA_TRASH "  Delete")
+            .textColor(Const::BrowserDeleteButtonTextColor)
+            .transparentBackground(false);
     }
 
     bool processDeleteButton()

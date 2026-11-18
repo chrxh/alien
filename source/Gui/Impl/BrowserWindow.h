@@ -26,6 +26,9 @@ public:
 
     DownloadCache const& getSimulationCache() const;
 
+    // Saves the running simulation like Save in the tool bar, so that the selection suggests the name while the browser shows simulations
+    void onSaveSimulation();
+
 private:
     BrowserWindow();
 
@@ -58,6 +61,7 @@ private:
     void selectWorkspace(WorkspaceType workspaceType);
 
     void onSave();
+    std::string getNameSuggestedBySelection() const;
     void onEditResource(NetworkResourceTreeTO const& treeTO);
     void onChangeVisibility(NetworkResourceTreeTO const& treeTO);
     void onMoveResource(NetworkResourceTreeTO const& treeTO);

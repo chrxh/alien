@@ -469,8 +469,7 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("New").keyCtrl(true).key(ImGuiKey_N), [&] { NewSimulationDialog::get().open(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Open").keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulationDialog(); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { SaveSimulationDialog::get().open(NetworkResourceType_Simulation); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { BrowserWindow::get().onSaveSimulation(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Save picture"), [&] { SavePictureDialog::get().open(); });
     AlienGui::MenuSeparator();
     auto running = _SimulationFacade::get()->isSimulationRunning();

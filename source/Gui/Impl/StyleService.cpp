@@ -481,7 +481,7 @@ void StyleService::setupPalette() const
 
     BrowserOwnReactionButtonTextColor = themed(ImColor::HSV(0.375f, 0.6f, 0.7f), ImColor::HSV(0.375f, 0.8f, 0.5f));
     BrowserDownloadButtonTextColor = themed(ImColor::HSV(0.55f, 0.6f, 1.0f), ImColor::HSV(0.55f, 0.85f, 0.65f));
-    BrowserDeleteButtonTextColor = themed(ImColor::HSV(0.0f, 0.6f, 0.8f), ImColor::HSV(0.0f, 0.75f, 0.7f));
+    BrowserDeleteButtonTextColor = themed(ImColor::HSV(0.94f, 0.55f, 0.92f), ImColor::HSV(0.94f, 0.75f, 0.7f));
     BrowserLeafTextColor = themed(ImColor::HSV(0.58f, 0.2f, 1.0f), ImColor::HSV(0.58f, 0.6f, 0.45f));
     BrowserResourceTextColor = TextStrongColor;
     BrowserResourceNewTextColor = themed(ImColor::HSV(0.15f, 0.8f, 1.0f), ImColor::HSV(0.11f, 0.9f, 0.75f));
