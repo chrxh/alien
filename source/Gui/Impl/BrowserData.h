@@ -108,6 +108,10 @@ public:
 
     // The upload of the user that carries the name of a simulation of this computer, with or without the folder of the user in front
     NetworkResourceRawTO findUpload(NetworkResourceRawTO const& localRawTO) const;
+
+    // The uploads of the user with this name, whoever can see them. A name belongs to one upload of a user, but uploads from elsewhere at the
+    // same time can still create several.
+    std::vector<NetworkResourceRawTO> findOwnUploads(NetworkResourceType resourceType, std::string const& name) const;
     uint64_t getTotalUploadSize() const;  // Simulations and genomes together, as the server counts them for the storage limit
 
     void loadLastSessionData();

@@ -127,7 +127,12 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
             return _PersisterFacade::get()->scheduleDeleteNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
-        [&](auto const& requestId) { _PersisterFacade::get()->fetchDeleteNetworkResourcesData(requestId); },
+        [&](auto const& requestId) {
+            _PersisterFacade::get()->fetchDeleteNetworkResourcesData(requestId);
+
+            // A refresh that started before the deletion has finished would list the deleted resources again
+            BrowserWindow::get().onRefresh();
+        },
         [](auto const& errors) {
             BrowserWindow::get().onRefresh();
             GenericMessageDialog::get().information("Error", errors);
@@ -162,6 +167,11 @@ void NetworkTransferController::onMove(MoveNetworkResourceRequestData const& req
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+}
+
+bool NetworkTransferController::hasPendingNameChanges() const
+{
+    return _uploadProcessor->pendingTasks() || _editProcessor->pendingTasks() || _deleteProcessor->pendingTasks();
 }
 
 void NetworkTransferController::process()

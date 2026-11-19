@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <Base/Singleton.h>
@@ -31,6 +32,7 @@ private:
     void processButtons(bool valid);
 
     bool isLocal() const;
+    std::vector<std::pair<NetworkResourceRawTO, std::string>> getUploadNamesInNewFolder() const;
     void onApplyToLeaf();
     void onApplyToFolder();
 

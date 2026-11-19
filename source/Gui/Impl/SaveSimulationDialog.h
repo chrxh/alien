@@ -29,7 +29,8 @@ enum class SaveTarget
 };
 
 // Stores a simulation or a genome under a name with a description and a picture: on this computer, or on the server as an upload. A name that is
-// already in use at the target replaces what is stored there. The dialog also leads to the file dialog that saves to any folder.
+// already in use on this computer or by an upload of the user, whoever can see it, replaces what is stored there. The dialog also leads to the
+// file dialog that saves to any folder.
 class SaveSimulationDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SaveSimulationDialog);
@@ -66,7 +67,7 @@ private:
     {
         bool possible = false;
         bool needsLogin = false;
-        std::optional<std::string> replacedResourceId;  // An own upload with the same name at the target
+        std::optional<std::string> replacedResourceId;  // An own upload with the same name, whoever can see it
         bool replacesFile = false;
         std::optional<std::string> message;
     };
@@ -103,6 +104,7 @@ private:
     std::map<NetworkResourceType, SaveTarget> _lastTargetByType;
     bool _remembersTarget = false;
     bool _targetChosen = false;
+    bool _uploadsRefreshed = false;
 
     std::string _name;
     std::string _description;

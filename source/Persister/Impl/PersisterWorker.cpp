@@ -501,21 +501,28 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     SimulationDesc deserializedSim;
     if (resourceType == NetworkResourceType_Simulation) {
-        try {
-            auto simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.timestep(_SimulationFacade::get()->getCurrentTimestep())
-                .realTime(_SimulationFacade::get()->getRealTime())
-                .zoom(simulationData.zoom)
-                .center(simulationData.center)
-                .worldSize(_SimulationFacade::get()->getWorldSize())
-                .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
-                .statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
-                .mainData(_SimulationFacade::get()->getSimulationData());
-        } catch (...) {
-            return std::make_shared<_PersisterRequestError>(
-                request->getRequestId(),
-                request->getSenderInfo().senderId,
-                PersisterErrorInfo{"The simulation could not be replaced because no valid data could be obtained from the GPU."});
+        auto const& simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
+        if (simulationData.filename.has_value()) {
+            if (!SerializerService::get().deserializeSimulationFromFiles(deserializedSim, *simulationData.filename)) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation file could not be read for replacing."});
+            }
+        } else {
+            try {
+                deserializedSim.timestep(_SimulationFacade::get()->getCurrentTimestep())
+                    .realTime(_SimulationFacade::get()->getRealTime())
+                    .zoom(simulationData.zoom)
+                    .center(simulationData.center)
+                    .worldSize(_SimulationFacade::get()->getWorldSize())
+                    .simulationParameters(_SimulationFacade::get()->getSimulationParameters())
+                    .statistics(_SimulationFacade::get()->getStatisticsHistory().getCopiedData())
+                    .mainData(_SimulationFacade::get()->getSimulationData());
+            } catch (...) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(),
+                    request->getSenderInfo().senderId,
+                    PersisterErrorInfo{"The simulation could not be replaced because no valid data could be obtained from the GPU."});
+            }
         }
 
         if (!SerializerService::get().serializeSimulationToString(mainData, deserializedSim)) {
@@ -524,7 +531,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
         worldSize = {deserializedSim._worldSize.x, deserializedSim._worldSize.y};
         numObjects = toInt(deserializedSim._mainData._objects.size() + deserializedSim._mainData._energies.size());
-        pictureJpg = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data).jpg;
+        pictureJpg = simulationData.jpg;
     } else {
         auto const& creatureData = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data);
         auto const& genome = creatureData.description;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -20,6 +21,7 @@ struct ReplaceNetworkResourceRequestData
         float zoom = 1.0f;
         RealVector2D center;
         std::string jpg;
+        std::optional<std::filesystem::path> filename;  // Replaces by this file instead of the running simulation
     };
     struct CreatureData
     {

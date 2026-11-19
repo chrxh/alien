@@ -4,6 +4,7 @@
 #include <functional>
 #include <optional>
 #include <ranges>
+#include <tuple>
 #include <vector>
 
 #include <boost/algorithm/string/trim.hpp>
@@ -170,18 +171,37 @@ namespace
         return findResult != files.end() ? &*findResult : nullptr;
     }
 
-    // The private workspace lists all uploads of the user, whoever can see them
+    // A name belongs to one upload of the user, whoever can see it. Of several uploads with the name, the one with the visibility of the target
+    // and then the newest one is replaced.
     NetworkResourceRawTO findOwnUpload(NetworkResourceType resourceType, SaveTarget target, std::string const& name)
     {
-        auto userName = NetworkService::get().getLoggedInUserName();
-        if (!userName.has_value()) {
+        auto uploads = BrowserController::get().getData()->findOwnUploads(resourceType, name);
+        if (uploads.empty()) {
             return nullptr;
         }
-        auto const& rawTOs = BrowserController::get().getData()->getWorkspace(WorkspaceId{resourceType, WorkspaceType_Private}).rawTOs;
-        auto findResult = std::ranges::find_if(rawTOs, [&](NetworkResourceRawTO const& rawTO) {
-            return rawTO->userName == *userName && rawTO->resourceName == name && rawTO->workspaceType == toWorkspaceType(target);
+        return std::ranges::max(uploads, {}, [&](NetworkResourceRawTO const& upload) {
+            return std::make_tuple(upload->workspaceType == toWorkspaceType(target), upload->timestamp, upload->id);
         });
-        return findResult != rawTOs.end() ? *findResult : nullptr;
+    }
+
+    // Replacing keeps the visibility of an upload, which may differ from the target
+    std::string getReplacementMessage(NetworkResourceRawTO const& upload, SaveTarget target)
+    {
+        auto date = upload->timestamp.substr(0, DateLength);
+        if (upload->workspaceType == toWorkspaceType(target)) {
+            return "Replaces your upload of " + date + " and keeps its reactions";
+        }
+        auto place = [&] {
+            switch (upload->workspaceType) {
+            case WorkspaceType_Private:
+                return "My uploads";
+            case WorkspaceType_Featured:
+                return "Featured";
+            default:
+                return "Community";
+            }
+        }();
+        return "Replaces your upload of " + date + " in " + place + ", which keeps its visibility and reactions";
     }
 
     void processLabel(std::string const& text, std::optional<std::string> const& annotation = std::nullopt)
@@ -268,6 +288,7 @@ void SaveSimulationDialog::open(
         changeTitle("Save genome" + std::string(WindowId));
         _preview.createForGenome(GenomeEditorWindow::get().getCurrentPreviewDescs());
     }
+    _uploadsRefreshed = false;
     AlienDialog::open();
 }
 
@@ -304,6 +325,7 @@ void SaveSimulationDialog::openForSharing(
 
     changeTitle(std::string(resourceType == NetworkResourceType_Simulation ? "Share simulation" : "Share genome") + WindowId);
     _preview.createForPicture(LocalLibraryService::get().loadPicture(file).value_or(std::string()));
+    _uploadsRefreshed = false;
     AlienDialog::open();
 }
 
@@ -359,6 +381,14 @@ void SaveSimulationDialog::shutdownIntern()
 
 void SaveSimulationDialog::processIntern()
 {
+    // An upload with the name may come from elsewhere, so the uploads are refreshed once a target on the server is chosen
+    if (isServerTarget(_target) && !_uploadsRefreshed && NetworkService::get().getLoggedInUserName().has_value()) {
+        _uploadsRefreshed = true;
+        if (!BrowserController::get().isRefreshing()) {
+            BrowserController::get().refresh(false);
+        }
+    }
+
     auto outcome = evaluate();
     updateDescription(outcome);
 
@@ -562,11 +592,14 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
     if (NetworkResourceService::get().removeFoldersFromName(name).empty()) {
         return result;
     }
-    if (_mode == Mode::RunningResource) {
-        if (auto rawTO = findOwnUpload(_resourceType, _target, name)) {
-            result.replacedResourceId = rawTO->id;
-            result.message = "Replaces your upload of " + rawTO->timestamp.substr(0, DateLength) + " and keeps its reactions";
-        }
+
+    if (BrowserController::get().isRefreshing() || NetworkTransferController::get().hasPendingNameChanges()) {
+        result.message = "Looking for an upload with this name ...";
+        return result;
+    }
+    if (auto rawTO = findOwnUpload(_resourceType, _target, name)) {
+        result.replacedResourceId = rawTO->id;
+        result.message = getReplacementMessage(rawTO, _target);
     }
     result.possible = true;
     return result;
@@ -743,20 +776,25 @@ void SaveSimulationDialog::onReplaceUpload(std::string const& resourceId, Worksp
     auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return ReplaceNetworkResourceRequestData::SimulationData{
-                .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .jpg = _preview.getJpg()};
+                .zoom = Viewport::get().getZoomFactor(),
+                .center = Viewport::get().getCenterInWorldPos(),
+                .jpg = _preview.getJpg(),
+                .filename = _simulationFile};
         } else {
-            return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome(), .jpg = _preview.getJpg()};
+            return ReplaceNetworkResourceRequestData::CreatureData{
+                .description = _savedGenome.has_value() ? *_savedGenome : GenomeEditorWindow::get().getCurrentGenome(), .jpg = _preview.getJpg()};
         }
     }();
+    auto isGenomeOfGenomeEditor = _resourceType == NetworkResourceType_Genome && !_savedGenome.has_value();
     NetworkTransferController::get().onReplace(
         ReplaceNetworkResourceRequestData{
             .resourceId = resourceId, .workspaceType = workspaceType, .downloadCache = BrowserWindow::get().getSimulationCache(), .data = data},
-        _resourceType == NetworkResourceType_Genome ? createMarkGenomeAsSavedFunc() : std::function<void()>());
+        isGenomeOfGenomeEditor ? createMarkGenomeAsSavedFunc() : std::function<void()>());
 
-    // Replacing keeps the name and the description, so a description written in this dialog is stored separately
+    // Replacing keeps the name and the description, so a description written in this dialog or that of a shared simulation is stored separately
     auto name = boost::algorithm::trim_copy(_name);
-    auto rawTO = findOwnUpload(_resourceType, _target, name);
-    if (_descriptionEdited && rawTO != nullptr && rawTO->description != _description) {
+    auto rawTO = BrowserController::get().getData()->findRawTO(resourceId);
+    if ((_descriptionEdited || _mode == Mode::Sharing) && rawTO != nullptr && rawTO->description != _description) {
         EditNetworkResourceRequestData::Entry entry{.resourceId = resourceId, .newName = name, .newDescription = _description};
         NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
     }
