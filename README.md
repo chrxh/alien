@@ -103,13 +103,15 @@ Plenty of examples can be found on the [YouTube channel](https://youtube.com/cha
 
 <a href="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31"><img width="2048" height="1152" alt="radiation_source" src="https://github.com/user-attachments/assets/a55cd25e-a443-42d8-ad5a-7dbe59640a31" /></a>
 
+<img width="1919" height="1000" alt="Simulation" src="https://github.com/user-attachments/assets/11a6dc09-7c15-4415-920e-4ef85cf06c5e" />
+
 ****Close-up of evolved digital organisms****
 
 <a href="https://github.com/user-attachments/assets/490c740a-02f1-4682-ba10-b63cf89d1fda"><img width="1920" height="1080" alt="alien-closeup-d-frost" src="https://github.com/user-attachments/assets/490c740a-02f1-4682-ba10-b63cf89d1fda" /></a>
 
-**Swarms attacking an ecosystem**
+**Simulation browser**
 
-![Swarms attacking an ecosystem](https://user-images.githubusercontent.com/73127001/229311606-2f590bfb-71a8-4f71-8ff7-7013de9d7496.jpg)
+<img width="1919" height="1079" alt="Browser" src="https://github.com/user-attachments/assets/d176b670-7e22-4cbe-b478-51c886017093" />
 
 **Genome editor**
 
