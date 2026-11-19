@@ -10,6 +10,7 @@
 #include <Persister/Interface/LoginResultData.h>
 #include <Persister/Interface/MoveNetworkResourceResultData.h>
 #include <Persister/Interface/PersisterRequestId.h>
+#include <Persister/Interface/ReadLocalLibraryResultData.h>
 #include <Persister/Interface/ReadSimulationResultData.h>
 #include <Persister/Interface/ReplaceNetworkResourceResultData.h>
 #include <Persister/Interface/SaveDeserializedSimulationResultData.h>
@@ -69,3 +70,4 @@ using _MoveNetworkResourceRequestResult = _ConcreteRequestResult<MoveNetworkReso
 using _ToggleReactionNetworkResourceRequestResult = _ConcreteRequestResult<ToggleReactionNetworkResourceResultData>;
 using _GetPeakSimulationRequestResult = _ConcreteRequestResult<GetPeakSimulationResultData>;
 using _SaveDeserializedSimulationRequestResult = _ConcreteRequestResult<SaveDeserializedSimulationResultData>;
+using _ReadLocalLibraryRequestResult = _ConcreteRequestResult<ReadLocalLibraryResultData>;
