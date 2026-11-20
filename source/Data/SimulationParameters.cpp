@@ -724,6 +724,15 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::moveNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
                         .description(metaMutationDescription("move node section")),
+                    ParameterSpec()
+                        .name("Roll out gene sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::rollOutGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("roll out gene")),
+                    ParameterSpec()
+                        .name("Roll up gene sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::rollUpGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("roll up gene")),
                 }),
             ParameterGroupSpec()
                 .name("Meta-mutations: Genome structure")

@@ -500,6 +500,7 @@ struct std::hash<NodeDesc>
         std::size_t seed = 0;
         hash_combine(seed, desc._referenceAngle);
         hash_combine(seed, desc._color);
+        hash_combine(seed, desc._restartConstruction);
         hash_combine(seed, std::hash<NeuralNetGenomeDesc>{}(desc._neuralNetwork));
         hash_combine(seed, std::hash<CellTypeGenomeDesc>{}(desc._cellType));
         if (desc._constructor.has_value()) {
@@ -572,6 +573,8 @@ struct std::hash<GenomeDesc>
         hash_combine(seed, desc._mutationRates._swapGeneMutation._geneProbability);
         hash_combine(seed, desc._mutationRates._copyNodeSectionMutation._geneProbability);
         hash_combine(seed, desc._mutationRates._moveNodeSectionMutation._geneProbability);
+        hash_combine(seed, desc._mutationRates._rollOutGeneMutation._geneProbability);
+        hash_combine(seed, desc._mutationRates._rollUpGeneMutation._geneProbability);
         return seed;
     }
 };

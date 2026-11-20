@@ -47,7 +47,7 @@ Open the genome in the genome editor. In the left column, the **Genome** group c
 | Connection weight mutations | The weights with which a cell reads the signals of its neighbors |
 | Neuron mutations | Weights, biases and activation functions of the neural networks |
 | Cell type property mutations | The settings of the cell types, for example the range of a sensor |
-| Geometry mutations | The stiffness and the shape generator of genes |
+| Geometry mutations | The stiffness and the shape generator of genes and whether a node restarts the construction |
 | Constructor mutations | The settings of constructors. A constructor can also be added or removed |
 
 **Changes to the structure.** For these you set only a probability.
@@ -61,11 +61,14 @@ Open the genome in the genome editor. In the left column, the **Genome** group c
 | Extend gene and Add node mutations | New nodes are added to genes |
 | Trim gene and Delete node mutations | Nodes are removed |
 | Copy and Move node section mutations | Groups of nodes are copied or moved to another place in the same gene or in another gene |
+| Roll out and Roll up gene mutations | The copies that concatenations build are written into the gene, or the gene is cut back to its first copy |
 | Add, Duplicate, Delete and Swap gene mutations | Genes are created, copied, removed or exchanged |
 
 A node created by an Extend gene, Add node or Add gene mutation gets a random cell type with a random mode. For everything else there are two equally likely cases. In the first case, the node gets the default settings of its cell type and the [default network](neural-networks.md#the-default-network). In the second case, the settings of the cell type and the connection weights are chosen at random, and the node gets a sparse random network. Only about 12 of the 192 weights of such a network differ from 0, and a bias or an activation function other than *Identity* is just as rare. Most of these networks therefore send no signal on channel #0 as long as they receive none.
 
 With the default connection weights, signals flow from the end of a gene towards its start, so a new node usually sends only to the node before it. In half of the cases, the mutation also gives the nodes after the new node a random connection weight for it. For a node that is not the last one of its gene, this is the next node. For a new last node, these are the constructors that build the gene without separation and, with several concatenations, the first node of the gene. Which connection of such a cell leads to the new node is only decided during construction. The mutation therefore changes the connections that usually lead there: the second connection of the next node or of the first node and the second and third connection of a constructor. Other neighbors can sit at these connections as well.
+
+A Roll out gene mutation writes the concatenations of a gene into the gene itself. The gene then holds its nodes as often as its constructors build it in a row, the first node of each copy gets [Restart construction](genomes.md#node-properties), and the constructors build the gene only once. If the constructors use different numbers of concatenations, the gene is repeated by their greatest common divisor. Creatures built from the new genome keep their structure, but from then on each copy can mutate on its own. The mutating creature itself keeps the old concatenations in the constructor cells it already has. After a roll out, it therefore extends body parts it has already built, and offspring that it builds from a rolled-out or rolled-up root gene get too many or too few copies. A Roll up gene mutation goes the other way. If the nodes before the first node with Restart construction fit into the gene a whole number of times, the gene is cut back to these nodes and the concatenations of its constructors are multiplied by this number. Differences between the copies are lost. Both mutations leave out genes that an injector refers to. A gene is only rolled out up to 2000 nodes and only rolled up while its constructors stay at no more than 100 concatenations.
 
 Every mutation is explained in detail in its tooltip. Probabilities between 0.001 and 0.01 are a reasonable starting point. Rates that are too high destroy working genomes faster than selection can keep up.
 
@@ -73,7 +76,7 @@ Every mutation is explained in detail in its tooltip. Probabilities between 0.00
 
 Instead of setting the rates by hand, you can let them evolve. If the **Apply meta-mutations** genome option is switched on, which is the default, the main probability of every mutation also changes slightly each time the genome mutates. The strengths and the other probabilities, such as the **Enum change probability**, stay as they are. How much the main probabilities change is set in the *Meta-mutations* groups of the simulation parameters, for example with **Neuron sigma**. These sigma parameters are 0 by default, so the main probabilities stay fixed.
 
-The evolution presets use this approach. All their sigma parameters are set to 0.0002, except **Customization sigma**, which is 0, so the probability of customization mutations stays at zero. The genomes in the *Matrix* preset start with all main probabilities at zero, while those in the *Vortices* preset start with small probabilities between 0.0005 and 0.005 for all kinds except customization mutations. Over millions of time steps, successful lineages end up with different probabilities for each kind of mutation, mostly between about 0.0001 and 0.015 and higher for a few kinds.
+The evolution presets use this approach. All their sigma parameters are set to 0.0002, except **Customization sigma**, **Roll out gene sigma** and **Roll up gene sigma**, which are 0, so the probabilities of these mutations stay at zero. The genomes in the *Matrix* preset start with all main probabilities at zero, while those in the *Vortices* preset start with small probabilities between 0.0005 and 0.005 for all kinds except customization, roll out gene and roll up gene mutations. Over millions of time steps, successful lineages end up with different probabilities for each kind of mutation, mostly between about 0.0001 and 0.015 and higher for a few kinds.
 
 ## Ingredient 3: Selection
 

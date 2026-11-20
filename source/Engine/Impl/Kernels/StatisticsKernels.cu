@@ -33,6 +33,8 @@ namespace
         addRate(rates.deleteNodeMutation.nodeProbability);
         addRate(rates.copyNodeSectionMutation.geneProbability);
         addRate(rates.moveNodeSectionMutation.geneProbability);
+        addRate(rates.rollOutGeneMutation.geneProbability);
+        addRate(rates.rollUpGeneMutation.geneProbability);
         addRate(rates.addGeneMutation.geneProbability);
         addRate(rates.duplicateGeneMutation.geneProbability);
         addRate(rates.deleteGeneMutation.geneProbability);

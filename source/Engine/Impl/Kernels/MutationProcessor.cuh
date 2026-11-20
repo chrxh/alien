@@ -25,6 +25,7 @@ private:
     // Upper bounds to avoid heap exhaustion.
     static auto constexpr MaxNodesPerGene = 2000;
     static auto constexpr MaxGenes = 1000;
+    static auto constexpr MaxMutatedConcatenations = 100;
 
     // Probability that the cells receiving the signals of a new node start to listen to it.
     static auto constexpr ListenToNewNodeProbability = 0.5f;
@@ -58,6 +59,15 @@ private:
     __inline__ __device__ static void applyMutations_moveNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static int getNumGeneReferences(Genome* genome, int geneIndex);
     __inline__ __device__ static Node* findNthGeneReference(Genome* genome, int geneIndex, int referenceIndex, bool& isInjector);
+    __inline__ __device__ static void applyMutations_rollOutGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_rollUpGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static bool* selectGenes(SimulationData& data, Genome* genome, float geneProbability);
+    __inline__ __device__ static int calcNumCopiesForRollOut(Genome* genome, int geneIndex);
+    __inline__ __device__ static int calcNumNodesForRollUp(Genome* genome, int geneIndex);
+    __inline__ __device__ static bool isReferencedByInjector(Genome* genome, int geneIndex);
+    template <typename Func>
+    __inline__ __device__ static void forEachConstructorBuildingGene(Genome* genome, int geneIndex, Func func);
+    __inline__ __device__ static void repeatNodes(SimulationData& data, Gene& gene, int numNewNodes, bool restartConstructionAtCopies);
     __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
 
@@ -159,6 +169,15 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     block.sync();
     if (nodeRates.moveNodeSectionMutation.geneProbability > 0) {
         applyMutations_moveNodeSection(data, genome, accumulatedMutations);
+        block.sync();
+        correctGenome(data, genome);
+    }
+
+    // Sync since the roll-out and roll-up mutations rebuild genes and change the constructors in other genes
+    block.sync();
+    if (nodeRates.rollOutGeneMutation.geneProbability > 0 || nodeRates.rollUpGeneMutation.geneProbability > 0) {
+        applyMutations_rollOutGene(data, genome, accumulatedMutations);
+        applyMutations_rollUpGene(data, genome, accumulatedMutations);
         block.sync();
         correctGenome(data, genome);
     }
@@ -577,6 +596,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_geometry(Simulation
                 }
                 gene.shape = newValue;
                 atomicAdd_block(&accumulatedMutations, toFloat(gene.numNodes));
+            }
+
+            // The first node is left out since the construction starts there anyway
+            if (rate.enumChangeProbability > 0 && gene.numNodes > 1 && data.primaryNumberGen.random() < rate.enumChangeProbability) {
+                auto& node = gene.nodes[data.primaryNumberGen.random(gene.numNodes - 2) + 1];
+                node.restartConstruction = !node.restartConstruction;
+                atomicAdd_block(&accumulatedMutations, 1.0f);
             }
 
             mutateNumber(gene.stiffness, Const::GeneStiffness_Min, Const::GeneStiffness_Max);
@@ -1075,6 +1101,7 @@ __inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, 
     // A freshly created node starts with the shared default attribute values (mirrors NodeDesc / NeuralNetGenomeDesc defaults).
     node.referenceAngle = 0.0f;
     node.color = color;
+    node.restartConstruction = false;
     for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
         node.neuralNetwork.weights[i] = NeuralNetWeight(0.0f);
     }
@@ -2134,7 +2161,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                     mutateEnumField(constructor.provideEnergy, ProvideEnergyGenome_Count);
                     mutateNumber(constructor.numBranches, 1, 6);
                     if (!ConstructorHelper::hasInfiniteConcatenations(constructor)) {
-                        mutateNumber(constructor.numConcatenations, 1, 100);
+                        mutateNumber(constructor.numConcatenations, 1, MaxMutatedConcatenations);
                     }
                     mutateBoolField(constructor.separation);
                 }
@@ -2156,6 +2183,214 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
             }
         }
     }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_rollOutGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    // A selected gene is repeated as often as the concatenations of all its constructors allow, and the first node of each copy restarts the
+    // construction. The concatenations are divided by the number of copies, so the constructors build the same structure as before.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    auto const& rate = genome->mutationRates.rollOutGeneMutation;
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ int numCopies;
+    auto isSelected = selectGenes(data, genome, rate.geneProbability);
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        if (!isSelected[geneIndex]) {
+            continue;
+        }
+        if (laneId == 0) {
+            numCopies = calcNumCopiesForRollOut(genome, geneIndex);
+            if (numCopies > 1) {
+                forEachConstructorBuildingGene(genome, geneIndex, [&](ConstructorGenome& constructor) {
+                    if (!ConstructorHelper::hasInfiniteConcatenations(constructor)) {
+                        constructor.numConcatenations /= numCopies;
+                    }
+                });
+            }
+        }
+        block.sync();
+
+        if (numCopies > 1) {
+            auto& gene = genome->genes[geneIndex];
+            auto numNodes = gene.numNodes;
+            repeatNodes(data, gene, numCopies * numNodes, true);
+            if (laneId == 0) {
+                atomicAdd_block(&accumulatedMutations, toFloat((numCopies - 1) * numNodes));
+            }
+        }
+        block.sync();
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_rollUpGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    // A selected gene is cut back to the nodes before its first restart of the construction if they fit into the gene a whole number of times,
+    // and the concatenations of its constructors are multiplied by this number. The constructors then build the first copy repeatedly.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    auto const& rate = genome->mutationRates.rollUpGeneMutation;
+    if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ int numRemainingNodes;
+    auto isSelected = selectGenes(data, genome, rate.geneProbability);
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        if (!isSelected[geneIndex]) {
+            continue;
+        }
+        if (laneId == 0) {
+            numRemainingNodes = calcNumNodesForRollUp(genome, geneIndex);
+            if (numRemainingNodes > 0) {
+                auto numCopies = genome->genes[geneIndex].numNodes / numRemainingNodes;
+                forEachConstructorBuildingGene(genome, geneIndex, [&](ConstructorGenome& constructor) {
+                    if (!ConstructorHelper::hasInfiniteConcatenations(constructor)) {
+                        constructor.numConcatenations *= numCopies;
+                    }
+                });
+            }
+        }
+        block.sync();
+
+        if (numRemainingNodes > 0) {
+            auto& gene = genome->genes[geneIndex];
+            auto numRemovedNodes = gene.numNodes - numRemainingNodes;
+            repeatNodes(data, gene, numRemainingNodes, false);
+            if (laneId == 0) {
+                atomicAdd_block(&accumulatedMutations, toFloat(numRemovedNodes));
+            }
+        }
+        block.sync();
+    }
+}
+
+__inline__ __device__ bool* MutationProcessor::selectGenes(SimulationData& data, Genome* genome, float geneProbability)
+{
+    // Called by the whole block. Returns for each gene whether it is selected.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    __shared__ bool* result;
+    block.sync();
+    if (laneId == 0) {
+        result = data.entities.heap.getTypedSubArray<bool>(genome->numGenes);
+    }
+    block.sync();
+    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+        result[geneIndex] = data.primaryNumberGen.random() < geneProbability;
+    }
+    block.sync();
+    return result;
+}
+
+__inline__ __device__ int MutationProcessor::calcNumCopiesForRollOut(Genome* genome, int geneIndex)
+{
+    // Greatest common divisor of the finite concatenations of the constructors that build the gene. Injected constructors keep their
+    // concatenations, so genes that injectors refer to are not rolled out.
+    if (genome->genes[geneIndex].numNodes == 0 || isReferencedByInjector(genome, geneIndex)) {
+        return 0;
+    }
+    int result = 0;
+    forEachConstructorBuildingGene(genome, geneIndex, [&](ConstructorGenome const& constructor) {
+        if (ConstructorHelper::hasInfiniteConcatenations(constructor)) {
+            return;
+        }
+        for (auto remainder = constructor.numConcatenations; remainder > 0;) {
+            auto nextRemainder = result % remainder;
+            result = remainder;
+            remainder = nextRemainder;
+        }
+    });
+    if (static_cast<int64_t>(result) * genome->genes[geneIndex].numNodes > MaxNodesPerGene) {
+        return 0;
+    }
+    return result;
+}
+
+__inline__ __device__ int MutationProcessor::calcNumNodesForRollUp(Genome* genome, int geneIndex)
+{
+    // Number of nodes before the first restart of the construction, provided that they fit into the gene a whole number of times
+    auto const& gene = genome->genes[geneIndex];
+    int result = 0;
+    for (int nodeIndex = 1; nodeIndex < gene.numNodes; ++nodeIndex) {
+        if (gene.nodes[nodeIndex].restartConstruction) {
+            result = nodeIndex;
+            break;
+        }
+    }
+    if (result == 0 || gene.numNodes % result != 0 || isReferencedByInjector(genome, geneIndex)) {
+        return 0;
+    }
+    // Concatenations beyond the range of the constructor mutation would jump back at its next change
+    auto numCopies = gene.numNodes / result;
+    auto exceedsMutatedConcatenations = false;
+    forEachConstructorBuildingGene(genome, geneIndex, [&](ConstructorGenome const& constructor) {
+        if (!ConstructorHelper::hasInfiniteConcatenations(constructor)
+            && static_cast<int64_t>(constructor.numConcatenations) * numCopies > MaxMutatedConcatenations) {
+            exceedsMutatedConcatenations = true;
+        }
+    });
+    return exceedsMutatedConcatenations ? 0 : result;
+}
+
+__inline__ __device__ bool MutationProcessor::isReferencedByInjector(Genome* genome, int geneIndex)
+{
+    for (int otherGeneIndex = 0; otherGeneIndex < genome->numGenes; ++otherGeneIndex) {
+        auto const& otherGene = genome->genes[otherGeneIndex];
+        for (int nodeIndex = 0; nodeIndex < otherGene.numNodes; ++nodeIndex) {
+            auto const& node = otherGene.nodes[nodeIndex];
+            if (node.cellType == CellType_Injector && node.cellTypeData.injector.geneIndex == geneIndex) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+template <typename Func>
+__inline__ __device__ void MutationProcessor::forEachConstructorBuildingGene(Genome* genome, int geneIndex, Func func)
+{
+    for (int otherGeneIndex = 0; otherGeneIndex < genome->numGenes; ++otherGeneIndex) {
+        auto& otherGene = genome->genes[otherGeneIndex];
+        for (int nodeIndex = 0; nodeIndex < otherGene.numNodes; ++nodeIndex) {
+            auto& node = otherGene.nodes[nodeIndex];
+            if (node.constructorAvailable && node.constructor.geneIndex == geneIndex) {
+                func(node.constructor);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::repeatNodes(SimulationData& data, Gene& gene, int numNewNodes, bool restartConstructionAtCopies)
+{
+    // Called by the whole block. The new nodes repeat the current ones, so that fewer new nodes keep only the first ones.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    __shared__ Node* newNodes;
+    if (laneId == 0) {
+        newNodes = data.entities.heap.getTypedSubArray<Node>(numNewNodes);
+    }
+    block.sync();
+
+    auto numNodes = gene.numNodes;
+    for (int index = laneId; index < numNewNodes; index += blockDim.x) {
+        newNodes[index] = gene.nodes[index % numNodes];
+        if (restartConstructionAtCopies && index % numNodes == 0) {
+            newNodes[index].restartConstruction = true;
+        }
+    }
+    block.sync();
+
+    if (laneId == 0) {
+        gene.nodes = newNodes;
+        gene.numNodes = numNewNodes;
+    }
+    block.sync();
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
@@ -2279,6 +2514,18 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (moveNodeSectionSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * moveNodeSectionSigma)); };
             mutateFloat(genome->mutationRates.moveNodeSectionMutation.geneProbability);
+        }
+
+        float rollOutGeneSigma = cudaSimulationParameters.rollOutGeneMetaMutationsSigma.value;
+        if (rollOutGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * rollOutGeneSigma)); };
+            mutateFloat(genome->mutationRates.rollOutGeneMutation.geneProbability);
+        }
+
+        float rollUpGeneSigma = cudaSimulationParameters.rollUpGeneMetaMutationsSigma.value;
+        if (rollUpGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * rollUpGeneSigma)); };
+            mutateFloat(genome->mutationRates.rollUpGeneMutation.geneProbability);
         }
 
         float constructorSigma = cudaSimulationParameters.constructorMetaMutationsSigma.value;

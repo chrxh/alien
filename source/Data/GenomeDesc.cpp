@@ -157,6 +157,16 @@ CellType GeneDesc::getCellType(int nodeIndex) const
     return _nodes.at(_homogeneousCellType ? 0 : nodeIndex).getCellType();
 }
 
+bool GeneDesc::isAngleFromShape(int nodeIndex) const
+{
+    // The constructor takes the angle from the node at the start and at the end of the gene and around each restart of the construction
+    auto lastNodeIndex = toInt(_nodes.size()) - 1;
+    if (nodeIndex == 0 || nodeIndex == lastNodeIndex) {
+        return false;
+    }
+    return !_nodes.at(nodeIndex)._restartConstruction && !_nodes.at(nodeIndex + 1)._restartConstruction;
+}
+
 CellType NodeDesc::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDesc>(_cellType)) {

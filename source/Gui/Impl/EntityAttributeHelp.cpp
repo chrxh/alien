@@ -137,7 +137,9 @@ namespace
         {EntityAttribute::MutationGeometryProbability, "Probability per gene that its geometry is changed."},
         {EntityAttribute::MutationGeometryValueChangeSigma,
          "Standard deviation of the Gaussian change of the stiffness, relative to its value range. The connection distance is not mutated."},
-        {EntityAttribute::MutationGeometryEnumChangeProbability, "Probability that the shape generator of the gene is replaced by a different one."},
+        {EntityAttribute::MutationGeometryEnumChangeProbability,
+         "Probability that the shape generator of the gene is replaced by a different one. With the same probability, 'Restart construction' is switched "
+         "at a random node of the gene other than the first."},
         {EntityAttribute::MutationCellTypeModeProbability,
          "Probability per node that the mode of its cell type is switched to a different one. The mode-specific properties are reset to their default values; "
          "cell types without a mode stay unchanged."},
@@ -178,6 +180,19 @@ namespace
          "Probability per gene that a contiguous section of its nodes is copied into a randomly chosen gene, which can also be the gene itself."},
         {EntityAttribute::MutationMoveNodeSectionProbability,
          "Probability per gene that a contiguous section of its nodes is moved into a randomly chosen gene. At least one node stays behind."},
+        {EntityAttribute::MutationRollOutGeneProbability,
+         "Probability per gene that it is rolled out. The gene then holds its nodes as often as its constructors build it in a row, with 'Restart "
+         "construction' at the first node of each copy, and the constructors build it only once. Creatures built from the new genome keep their "
+         "structure, but the copies can evolve separately. If the constructors use different numbers of concatenations, the gene is repeated by their "
+         "greatest common divisor and the concatenations are divided by it. Genes that an injector refers to or that would exceed 2000 nodes are not "
+         "rolled out. The mutating creature keeps the old concatenations in its existing constructor cells, so its own body parts and offspring can "
+         "still deviate."},
+        {EntityAttribute::MutationRollUpGeneProbability,
+         "Probability per gene that it is rolled up. If the nodes before the first node with 'Restart construction' fit into the gene a whole number of "
+         "times, the gene is cut back to these nodes and the concatenations of its constructors are multiplied by this number. The constructors then "
+         "build the first copy repeatedly, so differences between the copies are lost. Genes that an injector refers to are not rolled up, and neither "
+         "are genes whose constructors would get more than 100 concatenations. The mutating creature keeps the old concatenations in its existing "
+         "constructor cells, so its offspring can still deviate."},
         {EntityAttribute::MutationConstructorProbability, "Probability per node that the constructor properties of the node are changed."},
         {EntityAttribute::MutationConstructorValueChangeSigma,
          "Standard deviation of the Gaussian change of the numeric constructor properties, relative to the value range of each property."},
@@ -186,8 +201,12 @@ namespace
 
         // Genome node
         {EntityAttribute::NodeAngle,
-         "Angle of this cell relative to the connection to the previous cell. It is only evaluated for the first and the last node of a gene; for inner "
-         "nodes the angle results from the selected shape."},
+         "Angle of this cell relative to the connection to the previous cell. It is only evaluated for the first and the last node of a gene and for a "
+         "node with 'Restart construction' and the node before it. For the other nodes the angle results from the selected shape."},
+        {EntityAttribute::NodeRestartConstruction,
+         "If enabled, the constructor builds this node like the first node of a further concatenation. The shape starts over, this node and the node "
+         "before it use their own angle, and the cells built up to the node before it become active. If the constructor creates a new creature, the cell of "
+         "this node also becomes a head cell. Has no effect on the first node."},
         {EntityAttribute::NodeCustomization, "Customization color of the cell. Many simulation parameters are defined per color."},
         {EntityAttribute::NodeConstructionGene, "Gene that this cell builds as a constructor. 'None' means that the cell has no constructor."},
 

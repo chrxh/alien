@@ -18,6 +18,7 @@ private:
     struct NodeState
     {
         bool isVoid = false;
+        bool restartConstruction = false;
         std::optional<int> constructorGeneIndex;
         bool separation = false;
         std::optional<int> injectorGeneIndex;

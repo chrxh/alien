@@ -120,7 +120,7 @@ __inline__ __device__ bool GeneGraphProcessor::voidUnreachableNodes(SimulationDa
     // after its construction (see VoidProcessor).
     ShapeGenerator shapeGenerator;
     for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
-        auto shapeResult = shapeGenerator.generateNextConstructionData(gene.shape);
+        auto shapeResult = shapeGenerator.generateNextConstructionData(gene.shape, gene.nodes[nodeIndex].restartConstruction);
         if (isVoid(nodeIndex)) {
             continue;
         }

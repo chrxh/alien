@@ -318,6 +318,7 @@ struct NodeTO
 {
     float referenceAngle;
     int color;
+    bool restartConstruction;
 
     NeuralNetGenomeTO neuralNetwork;
     CellType cellType;
@@ -436,6 +437,16 @@ struct MoveNodeSectionMutationTO
     float geneProbability;
 };
 
+struct RollOutGeneMutationTO
+{
+    float geneProbability;
+};
+
+struct RollUpGeneMutationTO
+{
+    float geneProbability;
+};
+
 struct ConstructorMutationTO
 {
     float nodeProbability;
@@ -460,6 +471,8 @@ struct MutationRatesTO
     DeleteNodeMutationTO deleteNodeMutation;
     CopyNodeSectionMutationTO copyNodeSectionMutation;
     MoveNodeSectionMutationTO moveNodeSectionMutation;
+    RollOutGeneMutationTO rollOutGeneMutation;
+    RollUpGeneMutationTO rollUpGeneMutation;
     AddGeneMutationTO addGeneMutation;
     DuplicateGeneMutationTO duplicateGeneMutation;
     DeleteGeneMutationTO deleteGeneMutation;

@@ -383,6 +383,7 @@ struct NodeDesc
 
     MEMBER(NodeDesc, float, referenceAngle, 0.0f);
     MEMBER(NodeDesc, int, color, 0);
+    MEMBER(NodeDesc, bool, restartConstruction, false);
 
     MEMBER(NodeDesc, NeuralNetGenomeDesc, neuralNetwork, NeuralNetGenomeDesc());
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
@@ -403,6 +404,7 @@ struct GeneDesc
     MEMBER(GeneDesc, bool, homogeneousCellType, false);
 
     CellType getCellType(int nodeIndex) const;
+    bool isAngleFromShape(int nodeIndex) const;
 };
 
 struct NeuronMutationDesc
@@ -539,6 +541,20 @@ struct MoveNodeSectionMutationDesc
     MEMBER(MoveNodeSectionMutationDesc, float, geneProbability, 0.0f);
 };
 
+struct RollOutGeneMutationDesc
+{
+    auto operator<=>(RollOutGeneMutationDesc const&) const = default;
+
+    MEMBER(RollOutGeneMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct RollUpGeneMutationDesc
+{
+    auto operator<=>(RollUpGeneMutationDesc const&) const = default;
+
+    MEMBER(RollUpGeneMutationDesc, float, geneProbability, 0.0f);
+};
+
 struct ConstructorMutationDesc
 {
     auto operator<=>(ConstructorMutationDesc const&) const = default;
@@ -595,6 +611,8 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, DeleteNodeMutationDesc, deleteNodeMutation, DeleteNodeMutationDesc());
     MEMBER(MutationRatesDesc, CopyNodeSectionMutationDesc, copyNodeSectionMutation, CopyNodeSectionMutationDesc());
     MEMBER(MutationRatesDesc, MoveNodeSectionMutationDesc, moveNodeSectionMutation, MoveNodeSectionMutationDesc());
+    MEMBER(MutationRatesDesc, RollOutGeneMutationDesc, rollOutGeneMutation, RollOutGeneMutationDesc());
+    MEMBER(MutationRatesDesc, RollUpGeneMutationDesc, rollUpGeneMutation, RollUpGeneMutationDesc());
     MEMBER(MutationRatesDesc, AddGeneMutationDesc, addGeneMutation, AddGeneMutationDesc());
     MEMBER(MutationRatesDesc, DuplicateGeneMutationDesc, duplicateGeneMutation, DuplicateGeneMutationDesc());
     MEMBER(MutationRatesDesc, DeleteGeneMutationDesc, deleteGeneMutation, DeleteGeneMutationDesc());

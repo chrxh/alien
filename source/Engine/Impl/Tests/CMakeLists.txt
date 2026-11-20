@@ -53,6 +53,7 @@ PUBLIC
     PhysicsTests.cpp
     RadiationTests.cpp
     ReconnectorTests.cpp
+    RollOutGeneMutationTests.cpp
     SensorTests.cpp
     SeparationLimitTests.cpp
     SimulationControlTests.cpp

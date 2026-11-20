@@ -87,6 +87,8 @@ enum class EntityAttribute
     MutationSwapGeneProbability,
     MutationCopyNodeSectionProbability,
     MutationMoveNodeSectionProbability,
+    MutationRollOutGeneProbability,
+    MutationRollUpGeneProbability,
     MutationConstructorProbability,
     MutationConstructorValueChangeSigma,
     MutationConstructorEnumChangeProbability,
@@ -94,6 +96,7 @@ enum class EntityAttribute
 
     // Genome node
     NodeAngle,
+    NodeRestartConstruction,
     NodeCustomization,
     NodeConstructionGene,
 

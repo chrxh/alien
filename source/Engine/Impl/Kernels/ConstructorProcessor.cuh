@@ -28,9 +28,9 @@ private:
         uint16_t currentNodeIndex;
         uint32_t currentConcatenation;
         uint8_t currentBranch;
-        bool isFirstNode;
+        bool isFirstNode;  // Also true for a node that restarts the construction
         bool isFirstNodeOfFirstConcatenation;
-        bool isLastNode;
+        bool isLastNode;  // Also true for the node before a restart of the construction
         bool isLastNodeOfLastConcatenation;
         bool hasInfiniteConcatenations;
 
@@ -322,42 +322,40 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.gene = ConstructorHelper::getCurrentGene(constructor, *genome);
     result.node = &result.gene->nodes[result.currentNodeIndex];
     result.isSeparation = constructor.separation;
-    result.isFirstNode = result.currentNodeIndex == 0;
-    auto isFirstConcatenation = result.currentConcatenation == 0;
-    result.isFirstNodeOfFirstConcatenation = result.isFirstNode && isFirstConcatenation;
-    result.isLastNode = result.currentNodeIndex == result.gene->numNodes - 1;
-    result.isLastNodeOfLastConcatenation = result.isLastNode && result.currentConcatenation == constructor.numConcatenations - 1;
+
+    // A node that restarts the construction is built like the first node of a further concatenation and the node before it like a last node
+    auto isFirstNodeOfGene = result.currentNodeIndex == 0;
+    auto isLastNodeOfGene = result.currentNodeIndex == result.gene->numNodes - 1;
+    result.isFirstNode = isFirstNodeOfGene || result.node->restartConstruction;
+    result.isLastNode = isLastNodeOfGene || result.gene->nodes[result.currentNodeIndex + 1].restartConstruction;
+    result.isFirstNodeOfFirstConcatenation = isFirstNodeOfGene && result.currentConcatenation == 0;
+    result.isLastNodeOfLastConcatenation = isLastNodeOfGene && result.currentConcatenation == constructor.numConcatenations - 1;
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(constructor);
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = calcReservedEnergyToProvide(constructor, *genome, *result.node, object->color);
 
-    ShapeGenerator shapeGenerator;
+    auto restartNodeIndex = result.currentNodeIndex;
+    while (restartNodeIndex > 0 && !result.gene->nodes[restartNodeIndex].restartConstruction) {
+        --restartNodeIndex;
+    }
+    ShapeGenerator shapeGenerator(restartNodeIndex);
     auto shape = result.gene->shape;
-    for (int i = 0; i <= result.currentNodeIndex; ++i) {
-        auto generationResult = shapeGenerator.generateNextConstructionData(shape);
+    for (int i = restartNodeIndex; i <= result.currentNodeIndex; ++i) {
+        auto generationResult = shapeGenerator.generateNextConstructionData(shape, result.gene->nodes[i].restartConstruction);
         if (i == result.currentNodeIndex) {
             result.shapeResult = generationResult;
         }
     }
-    if (result.isFirstNode || result.isLastNode) {
+
+    if (result.isFirstNodeOfFirstConcatenation) {
+        result.shapeResult.angle = result.currentBranch == 0 ? constructor.constructionAngle : 0;
+    } else if (result.isFirstNode || result.isLastNode) {
         result.shapeResult.angle = result.node->referenceAngle;
     }
 
-    if (result.gene->numNodes == 1) {
+    if (result.isFirstNode && result.isLastNode) {
         result.shapeResult.numAdditionalConnections = 0;
-    }
-
-    if (result.isFirstNode) {
-        if (result.isFirstNodeOfFirstConcatenation && result.currentBranch == 0) {
-            result.shapeResult.angle = constructor.constructionAngle;
-        } else if (isFirstConcatenation) {
-            result.shapeResult.angle = 0;
-        } else {
-            result.shapeResult.angle = result.node->referenceAngle;
-        }
-    } else if (result.isLastNode) {
-        result.shapeResult.angle = result.node->referenceAngle;
     }
 
     return result;
