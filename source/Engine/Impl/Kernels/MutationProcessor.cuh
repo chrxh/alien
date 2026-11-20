@@ -27,8 +27,8 @@ private:
     static auto constexpr MaxGenes = 1000;
     static auto constexpr MaxMutatedConcatenations = 100;
 
-    // Probability that the cells receiving the signals of a new node start to listen to it.
-    static auto constexpr ListenToNewNodeProbability = 0.5f;
+    // Probability that the cells after a new node get a random connection weight for it, so that they receive its signals.
+    static auto constexpr ReceiveFromNewNodeProbability = 0.5f;
 
     static auto constexpr PredecessorConnectionIndex = 1;
 
@@ -47,8 +47,9 @@ private:
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_customization(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
-    __inline__ __device__ static void applyMutations_extendGene(SimulationData& data, Genome* genome, bool* listensToNewLastNode, float& accumulatedMutations);
-    __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, bool* listensToNewLastNode, float& accumulatedMutations);
+    __inline__ __device__ static void
+    applyMutations_extendGene(SimulationData& data, Genome* genome, bool* receiveFromNewLastNode, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, bool* receiveFromNewLastNode, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_trimGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_addGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -85,8 +86,8 @@ private:
     __inline__ __device__ static int findNodeForNewConstructor(SimulationData& data, Gene const& gene);
     __inline__ __device__ static bool insertNode(SimulationData& data, Genome* genome, Gene& gene, int position);
     __inline__ __device__ static void setRandomConnectionWeight(SimulationData& data, Node& node, int connectionIndex);
-    __inline__ __device__ static void listenToBuiltGene(SimulationData& data, Node& constructorNode);
-    __inline__ __device__ static void listenToNewLastNodes(SimulationData& data, Genome* genome, bool const* listensToNewLastNode);
+    __inline__ __device__ static void receiveFromBuiltGene(SimulationData& data, Node& constructorNode);
+    __inline__ __device__ static void receiveFromNewLastNodes(SimulationData& data, Genome* genome, bool const* receiveFromNewLastNode);
     __inline__ __device__ static void removeNode(SimulationData& data, Gene& gene, int position);
     __inline__ __device__ static void correctGenome(SimulationData& data, Genome* genome);
 
@@ -135,20 +136,20 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     bool anyNodeMutation = nodeRates.extendGeneMutation.geneProbability > 0 || nodeRates.addNodeMutation.nodeProbability > 0
         || nodeRates.trimGeneMutation.geneProbability > 0 || nodeRates.deleteNodeMutation.nodeProbability > 0;
     if (anyNodeMutation) {
-        __shared__ bool* listensToNewLastNode;
+        __shared__ bool* receiveFromNewLastNode;
         if (laneId == 0) {
-            listensToNewLastNode = genome->numGenes > 0 ? data.entities.heap.getTypedSubArray<bool>(genome->numGenes) : nullptr;
+            receiveFromNewLastNode = genome->numGenes > 0 ? data.entities.heap.getTypedSubArray<bool>(genome->numGenes) : nullptr;
         }
         block.sync();
         for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-            listensToNewLastNode[geneIndex] = false;
+            receiveFromNewLastNode[geneIndex] = false;
         }
-        applyMutations_extendGene(data, genome, listensToNewLastNode, accumulatedMutations);
-        applyMutations_addNode(data, genome, listensToNewLastNode, accumulatedMutations);
+        applyMutations_extendGene(data, genome, receiveFromNewLastNode, accumulatedMutations);
+        applyMutations_addNode(data, genome, receiveFromNewLastNode, accumulatedMutations);
 
         // Sync since the receivers of a new last node may lie in genes that other threads have just changed
         block.sync();
-        listenToNewLastNodes(data, genome, listensToNewLastNode);
+        receiveFromNewLastNodes(data, genome, receiveFromNewLastNode);
         block.sync();
 
         applyMutations_trimGene(data, genome, accumulatedMutations);
@@ -1232,7 +1233,7 @@ __inline__ __device__ int MutationProcessor::findNodeForNewConstructor(Simulatio
 
 __inline__ __device__ bool MutationProcessor::insertNode(SimulationData& data, Genome* genome, Gene& gene, int position)
 {
-    // Returns whether the receivers of the new node lie outside the gene and still have to start listening to it.
+    // Returns whether the receivers of the new node lie outside the gene and still need a connection weight for it.
     // The new node inherits the color of its previous neighbor, otherwise its next neighbor, otherwise the genome's first
     // node, otherwise a random color.
     auto const oldNumNodes = gene.numNodes;
@@ -1264,7 +1265,7 @@ __inline__ __device__ bool MutationProcessor::insertNode(SimulationData& data, G
     gene.nodes = newNodes;
     gene.numNodes = newNumNodes;
 
-    if (data.primaryNumberGen.random() >= ListenToNewNodeProbability) {
+    if (data.primaryNumberGen.random() >= ReceiveFromNewNodeProbability) {
         return false;
     }
     auto isLastNode = position == oldNumNodes;
@@ -1279,21 +1280,21 @@ __inline__ __device__ void MutationProcessor::setRandomConnectionWeight(Simulati
     node.neuralNetwork.connectionWeights[connectionIndex] = data.primaryNumberGen.random(Const::ConnectionWeight_Min, Const::ConnectionWeight_Max);
 }
 
-__inline__ __device__ void MutationProcessor::listenToBuiltGene(SimulationData& data, Node& constructorNode)
+__inline__ __device__ void MutationProcessor::receiveFromBuiltGene(SimulationData& data, Node& constructorNode)
 {
     for (int connectionIndex = PredecessorConnectionIndex; connectionIndex <= MaxBranchConnectionIndex; ++connectionIndex) {
         setRandomConnectionWeight(data, constructorNode, connectionIndex);
     }
 }
 
-__inline__ __device__ void MutationProcessor::listenToNewLastNodes(SimulationData& data, Genome* genome, bool const* listensToNewLastNode)
+__inline__ __device__ void MutationProcessor::receiveFromNewLastNodes(SimulationData& data, Genome* genome, bool const* receiveFromNewLastNode)
 {
     // The last node of a gene sends to the constructor cells that build the gene without separation and, with several concatenations,
     // to the first node of the next copy. Two threads may set the same weight, since a constructor node can be the first node of
     // another gene with a new last node. Either random value is fine.
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-        if (!listensToNewLastNode[geneIndex]) {
+        if (!receiveFromNewLastNode[geneIndex]) {
             continue;
         }
         auto isConcatenated = false;
@@ -1308,7 +1309,7 @@ __inline__ __device__ void MutationProcessor::listenToNewLastNodes(SimulationDat
                     isConcatenated = true;
                 }
                 if (!node.constructor.separation) {
-                    listenToBuiltGene(data, node);
+                    receiveFromBuiltGene(data, node);
                 }
             }
         }
@@ -1335,7 +1336,7 @@ __inline__ __device__ void MutationProcessor::removeNode(SimulationData& data, G
 }
 
 __inline__ __device__ void
-MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genome, bool* listensToNewLastNode, float& accumulatedMutations)
+MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genome, bool* receiveFromNewLastNode, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.extendGeneMutation;
@@ -1351,14 +1352,14 @@ MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genom
         }
         auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes;  // Start or end
         if (insertNode(data, genome, gene, position)) {
-            listensToNewLastNode[geneIndex] = true;
+            receiveFromNewLastNode[geneIndex] = true;
         }
         atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
 
 __inline__ __device__ void
-MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, bool* listensToNewLastNode, float& accumulatedMutations)
+MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, bool* receiveFromNewLastNode, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.addNodeMutation;
@@ -1378,7 +1379,7 @@ MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, 
                 continue;
             }
             if (insertNode(data, genome, gene, position)) {
-                listensToNewLastNode[geneIndex] = true;
+                receiveFromNewLastNode[geneIndex] = true;
             }
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
@@ -1559,8 +1560,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
             chosenNode.constructor.numBranches = 1;
             chosenNode.constructor.numConcatenations = 1;
             chosenNode.constructor.geneIndex = newIndex;
-            if (data.primaryNumberGen.random() < ListenToNewNodeProbability) {
-                listenToBuiltGene(data, chosenNode);
+            if (data.primaryNumberGen.random() < ReceiveFromNewNodeProbability) {
+                receiveFromBuiltGene(data, chosenNode);
             }
 
             atomicAdd_block(&accumulatedMutations, 2.0f);

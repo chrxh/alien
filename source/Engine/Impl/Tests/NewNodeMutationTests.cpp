@@ -198,7 +198,7 @@ TEST_P(NewNodeMutationTests, newNode_passesValidation)
     EXPECT_TRUE(genome == validatedGenome);
 }
 
-class NewNodeListeningTests : public MutationTestsBase
+class NewNodeReceiverTests : public MutationTestsBase
 {
 protected:
     static auto constexpr PredecessorConnectionIndex = 1;
@@ -236,81 +236,81 @@ protected:
         return *std::ranges::find_if(nodes, [&](auto const& node) { return node._constructor.has_value() && node._constructor->_geneIndex == geneIndex; });
     }
 
-    static bool listens(NodeDesc const& node, int connectionIndex) { return node._neuralNetwork._connectionWeights.at(connectionIndex) != 0.0f; }
+    static bool receives(NodeDesc const& node, int connectionIndex) { return node._neuralNetwork._connectionWeights.at(connectionIndex) != 0.0f; }
 
-    static void expectAboutHalf(int numListening, int numCandidates)
+    static void expectAboutHalf(int numReceiving, int numCandidates)
     {
         ASSERT_LT(50, numCandidates);
-        auto fraction = static_cast<float>(numListening) / static_cast<float>(numCandidates);
+        auto fraction = static_cast<float>(numReceiving) / static_cast<float>(numCandidates);
         EXPECT_LT(0.3f, fraction);
         EXPECT_GT(0.7f, fraction);
     }
 };
 
-TEST_F(NewNodeListeningTests, newNodeInFront_successorListensInHalfOfTheCases)
+TEST_F(NewNodeReceiverTests, newNodeInFront_successorReceivesInHalfOfTheCases)
 {
     auto genome = createGenomeWithExtendedGenes(std::nullopt);
 
     auto numCandidates = 0;
-    auto numListening = 0;
+    auto numReceiving = 0;
     for (auto const& gene : genome._genes) {
         auto const& oldNode = hasNewLastNode(gene) ? gene._nodes.front() : gene._nodes.back();
         if (hasNewLastNode(gene)) {
-            EXPECT_FALSE(listens(oldNode, PredecessorConnectionIndex));
+            EXPECT_FALSE(receives(oldNode, PredecessorConnectionIndex));
         } else {
             ++numCandidates;
-            numListening += listens(oldNode, PredecessorConnectionIndex) ? 1 : 0;
+            numReceiving += receives(oldNode, PredecessorConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numListening, numCandidates);
+    expectAboutHalf(numReceiving, numCandidates);
 }
 
-TEST_F(NewNodeListeningTests, newLastNode_constructorListensInHalfOfTheCases)
+TEST_F(NewNodeReceiverTests, newLastNode_constructorReceivesInHalfOfTheCases)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc());
 
     auto numCandidates = 0;
-    auto numListening = 0;
+    auto numReceiving = 0;
     for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
         auto const& constructorNode = getConstructorNode(genome, geneIndex);
         auto const& gene = genome._genes.at(geneIndex);
         if (hasNewLastNode(gene)) {
             ++numCandidates;
-            numListening += listens(constructorNode, BranchConnectionIndex) ? 1 : 0;
-            EXPECT_FALSE(listens(gene._nodes.front(), PredecessorConnectionIndex));
+            numReceiving += receives(constructorNode, BranchConnectionIndex) ? 1 : 0;
+            EXPECT_FALSE(receives(gene._nodes.front(), PredecessorConnectionIndex));
         } else {
-            EXPECT_FALSE(listens(constructorNode, BranchConnectionIndex));
+            EXPECT_FALSE(receives(constructorNode, BranchConnectionIndex));
         }
     }
-    expectAboutHalf(numListening, numCandidates);
+    expectAboutHalf(numReceiving, numCandidates);
 }
 
-TEST_F(NewNodeListeningTests, newLastNode_constructorWithSeparationDoesNotListen)
+TEST_F(NewNodeReceiverTests, newLastNode_constructorWithSeparationDoesNotReceive)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc().separation(true));
 
     for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
-        EXPECT_FALSE(listens(getConstructorNode(genome, geneIndex), BranchConnectionIndex));
+        EXPECT_FALSE(receives(getConstructorNode(genome, geneIndex), BranchConnectionIndex));
     }
 }
 
-TEST_F(NewNodeListeningTests, newLastNode_firstNodeListensWithConcatenations)
+TEST_F(NewNodeReceiverTests, newLastNode_firstNodeReceivesWithConcatenations)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc().separation(true).numConcatenations(2));
 
     auto numCandidates = 0;
-    auto numListening = 0;
+    auto numReceiving = 0;
     for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
         auto const& gene = genome._genes.at(geneIndex);
         if (hasNewLastNode(gene)) {
             ++numCandidates;
-            numListening += listens(gene._nodes.front(), PredecessorConnectionIndex) ? 1 : 0;
+            numReceiving += receives(gene._nodes.front(), PredecessorConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numListening, numCandidates);
+    expectAboutHalf(numReceiving, numCandidates);
 }
 
-TEST_F(NewNodeListeningTests, addedNodes_successorAndConstructorListenInHalfOfTheCases)
+TEST_F(NewNodeReceiverTests, addedNodes_successorAndConstructorReceiveInHalfOfTheCases)
 {
     // The genes form a chain: the old node of each gene builds the next gene.
     std::vector<GeneDesc> genes;
@@ -325,40 +325,40 @@ TEST_F(NewNodeListeningTests, addedNodes_successorAndConstructorListenInHalfOfTh
     genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(1.0f);
     auto mutatedGenome = mutate(genome);
 
-    // Add node inserts a new node before and after the old node of each gene. As a constructor, the old node listens to the next gene
-    // at both connections, so only the old nodes whose constructor does not listen show whether they listen as a successor.
+    // Add node inserts a new node before and after the old node of each gene. As a constructor, the old node receives from the next gene
+    // at both connections, so only the old nodes whose constructor does not receive show whether they receive as a successor.
     auto numCandidates = 0;
-    auto numConstructorsListening = 0;
-    auto numNonListeningConstructors = 0;
-    auto numSuccessorsListening = 0;
+    auto numConstructorsReceiving = 0;
+    auto numNonReceivingConstructors = 0;
+    auto numSuccessorsReceiving = 0;
     for (auto const& gene : mutatedGenome._genes | std::views::take(NumGenes - 1)) {
         auto const& oldNode = gene._nodes.at(1);
         ++numCandidates;
-        if (listens(oldNode, BranchConnectionIndex)) {
-            ++numConstructorsListening;
+        if (receives(oldNode, BranchConnectionIndex)) {
+            ++numConstructorsReceiving;
         } else {
-            ++numNonListeningConstructors;
-            numSuccessorsListening += listens(oldNode, PredecessorConnectionIndex) ? 1 : 0;
+            ++numNonReceivingConstructors;
+            numSuccessorsReceiving += receives(oldNode, PredecessorConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numConstructorsListening, numCandidates);
-    expectAboutHalf(numSuccessorsListening, numNonListeningConstructors);
+    expectAboutHalf(numConstructorsReceiving, numCandidates);
+    expectAboutHalf(numSuccessorsReceiving, numNonReceivingConstructors);
 }
 
-TEST_F(NewNodeListeningTests, newGene_constructorListensInHalfOfTheCases)
+TEST_F(NewNodeReceiverTests, newGene_constructorReceivesInHalfOfTheCases)
 {
     auto genome = GenomeDesc().genes(std::vector<GeneDesc>(NumGenes, GeneDesc().nodes({NodeDesc().referenceAngle(OldNodeAngle)})));
     genome._mutationRates._addGeneMutation = AddGeneMutationDesc().geneProbability(1.0f);
     auto mutatedGenome = mutate(genome);
 
     auto numCandidates = 0;
-    auto numListening = 0;
+    auto numReceiving = 0;
     for (auto const& gene : mutatedGenome._genes) {
         auto const& node = gene._nodes.front();
         if (node._constructor.has_value()) {
             ++numCandidates;
-            numListening += listens(node, BranchConnectionIndex) ? 1 : 0;
+            numReceiving += receives(node, BranchConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numListening, numCandidates);
+    expectAboutHalf(numReceiving, numCandidates);
 }
