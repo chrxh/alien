@@ -101,11 +101,10 @@ struct _GenomeTabEditData
     static void updateGeneGeometry(GeneDesc& gene)
     {
         ShapeGenerator shapeGenerator;
-        auto numNodes = gene._nodes.size();
         int index = 0;
         for (auto& node : gene._nodes) {
-            auto shapeGenerationResult = shapeGenerator.generateNextConstructionData(gene._shape);
-            if (index > 0 && index < numNodes - 1) {
+            auto shapeGenerationResult = shapeGenerator.generateNextConstructionData(gene._shape, node._restartConstruction);
+            if (gene.isAngleFromShape(index)) {
                 node._referenceAngle = shapeGenerationResult.angle;
             }
             ++index;

@@ -227,18 +227,23 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
 
             auto nodeIndex = _editData->getSelectedNodeIndex();
-            auto isInnerNode = nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1;
-            //if (!isInnerNode) {
+            auto isAngleFromShape = gene.isAngleFromShape(nodeIndex.value());
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Angle")
                     .textWidth(rightColumnWidth)
-                    .readOnly(isInnerNode)
-                    .infoLabel(isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
+                    .readOnly(isAngleFromShape)
+                    .infoLabel(isAngleFromShape ? std::make_optional(std::string("Deduced")) : std::nullopt)
                     .format("%.1f")
                     .tooltip(EntityAttributeHelp::get(EntityAttribute::NodeAngle)),
                 node._referenceAngle);
-            //}
+
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters()
+                    .name("Restart construction")
+                    .textWidth(rightColumnWidth)
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::NodeRestartConstruction)),
+                &node._restartConstruction);
 
             AlienGui::ComboColor(
                 AlienGui::ComboColorParameters()

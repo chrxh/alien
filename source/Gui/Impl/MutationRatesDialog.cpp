@@ -441,6 +441,10 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         settings.getValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
     mutationRates._moveNodeSectionMutation._geneProbability =
         settings.getValue(settingsPrefix + "move node section mutation.gene probability", mutationRates._moveNodeSectionMutation._geneProbability);
+    mutationRates._rollOutGeneMutation._geneProbability =
+        settings.getValue(settingsPrefix + "roll out gene mutation.gene probability", mutationRates._rollOutGeneMutation._geneProbability);
+    mutationRates._compactGeneMutation._geneProbability =
+        settings.getValue(settingsPrefix + "compact gene mutation.gene probability", mutationRates._compactGeneMutation._geneProbability);
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
@@ -508,6 +512,8 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     settings.setValue(settingsPrefix + "swap gene mutation.gene probability", mutationRates._swapGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
     settings.setValue(settingsPrefix + "move node section mutation.gene probability", mutationRates._moveNodeSectionMutation._geneProbability);
+    settings.setValue(settingsPrefix + "roll out gene mutation.gene probability", mutationRates._rollOutGeneMutation._geneProbability);
+    settings.setValue(settingsPrefix + "compact gene mutation.gene probability", mutationRates._compactGeneMutation._geneProbability);
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
@@ -707,6 +713,26 @@ void MutationRatesDialog::processContent()
                 processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate(
                         "Mutation rate", "MNSM", _mutation._moveNodeSectionMutation, RightColumnWidth, EntityAttribute::MutationMoveNodeSectionProbability);
+                    table.next();
+                });
+            }
+            AlienGui::EndTreeNode();
+            sectionTable.next();
+
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Roll out gene mutations").rank(AlienGui::TreeNodeRank::High))) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                    processGeneProbabilityMutationRate(
+                        "Mutation rate", "ROGM", _mutation._rollOutGeneMutation, RightColumnWidth, EntityAttribute::MutationRollOutGeneProbability);
+                    table.next();
+                });
+            }
+            AlienGui::EndTreeNode();
+            sectionTable.next();
+
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Compact gene mutations").rank(AlienGui::TreeNodeRank::High))) {
+                processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                    processGeneProbabilityMutationRate(
+                        "Mutation rate", "CPGM", _mutation._compactGeneMutation, RightColumnWidth, EntityAttribute::MutationCompactGeneProbability);
                     table.next();
                 });
             }

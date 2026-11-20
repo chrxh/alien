@@ -16,10 +16,20 @@ struct ShapeGeneratorResult
 class ShapeGenerator
 {
 public:
-    HOST_DEVICE ShapeGeneratorResult generateNextConstructionData(ConstructorShape shape);
+    ShapeGenerator() = default;
+
+    // Starts at a node that restarts the construction, or at the first node of the gene
+    HOST_DEVICE explicit ShapeGenerator(int restartNodeIndex)
+        : _nodeIndex(restartNodeIndex)
+        , _restartNodeIndex(restartNodeIndex)
+    {}
+
+    // A node that restarts the construction starts the shape over. The required node ids still count the nodes from the start of the gene.
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionData(ConstructorShape shape, bool restartConstruction = false);
     HOST_DEVICE float getPreferredFrontAngle(ConstructorShape shape);
 
 private:
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForShape(ConstructorShape shape);
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSegment();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForTriangle();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForRectangle();
@@ -32,13 +42,35 @@ private:
     int _nodePos = 0;
     int _edgePos = 0;
     int _connectedNodePos1 = 0;
+
+    int _nodeIndex = 0;
+    int _restartNodeIndex = 0;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 
-HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionData(ConstructorShape shape)
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionData(ConstructorShape shape, bool restartConstruction)
+{
+    if (restartConstruction && _nodeIndex > 0) {
+        _nodePos = 0;
+        _edgePos = 0;
+        _connectedNodePos1 = 0;
+        _restartNodeIndex = _nodeIndex;
+    }
+    ++_nodeIndex;
+
+    auto result = generateNextConstructionDataForShape(shape);
+    for (auto& requiredNodeId : result.requiredNodeId) {
+        if (requiredNodeId >= 0) {
+            requiredNodeId += _restartNodeIndex;
+        }
+    }
+    return result;
+}
+
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForShape(ConstructorShape shape)
 {
     switch (shape) {
     case ConstructorShape_Segment:

@@ -164,6 +164,7 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
                          .numBranches(3)
                          .numConcatenations(5))
         .color(4)
+        .restartConstruction(true)
         .referenceAngle(90.0f);
 }
 
@@ -195,6 +196,8 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .swapGeneMutation(SwapGeneMutationDesc().geneProbability(0.50f))
                         .copyNodeSectionMutation(CopyNodeSectionMutationDesc().geneProbability(0.47f))
                         .moveNodeSectionMutation(MoveNodeSectionMutationDesc().geneProbability(0.48f))
+                        .rollOutGeneMutation(RollOutGeneMutationDesc().geneProbability(0.51f))
+                        .compactGeneMutation(CompactGeneMutationDesc().geneProbability(0.52f))
                         .constructorMutations(
                             {ConstructorMutationDesc().nodeProbability(0.12f).valueChangeSigma(0.13f).enumChangeProbability(0.14f).constructorToggleProbability(0.15f),
                              ConstructorMutationDesc().nodeProbability(0.16f).valueChangeSigma(0.17f).enumChangeProbability(0.18f).constructorToggleProbability(0.19f)});
@@ -251,6 +254,7 @@ GenomeDesc DescTestDataFactory::createRandomGenome(std::mt19937& randomEngine) c
             if (randomEvent(0.35)) {
                 node.constructor(ConstructorGenomeDesc().geneIndex(randomInt(0, numGenes - 1)).separation(randomEvent(0.3)));
             }
+            node.restartConstruction(randomEvent(0.2));
             nodes.emplace_back(node);
         }
         genes.emplace_back(GeneDesc().shape(randomInt(0, ConstructorShape_Count - 1)).homogeneousCellType(randomEvent(0.1)).nodes(nodes));

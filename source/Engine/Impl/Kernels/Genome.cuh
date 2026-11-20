@@ -313,6 +313,7 @@ struct Node
 {
     float referenceAngle;
     int color;
+    bool restartConstruction;
 
     NeuralNetGenome neuralNetwork;
     CellType cellType;
@@ -434,6 +435,16 @@ struct MoveNodeSectionMutation
     float geneProbability;
 };
 
+struct RollOutGeneMutation
+{
+    float geneProbability;
+};
+
+struct CompactGeneMutation
+{
+    float geneProbability;
+};
+
 struct ConstructorMutation
 {
     float nodeProbability;
@@ -458,6 +469,8 @@ struct MutationRates
     DeleteNodeMutation deleteNodeMutation;
     CopyNodeSectionMutation copyNodeSectionMutation;
     MoveNodeSectionMutation moveNodeSectionMutation;
+    RollOutGeneMutation rollOutGeneMutation;
+    CompactGeneMutation compactGeneMutation;
     AddGeneMutation addGeneMutation;
     DuplicateGeneMutation duplicateGeneMutation;
     DeleteGeneMutation deleteGeneMutation;

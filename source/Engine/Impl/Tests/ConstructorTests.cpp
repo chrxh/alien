@@ -1,3 +1,8 @@
+#include <map>
+#include <ranges>
+#include <tuple>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <Base/Math.h>
@@ -1920,6 +1925,115 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
         auto angle = object.getAngleSpan(prevCellId, nextObjectId);
         angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);
+    }
+}
+
+class ConstructorTests_RestartConstruction
+    : public ConstructorTests
+    , public testing::WithParamInterface<ConstructorShape>
+{
+protected:
+    struct OffspringCell
+    {
+        bool headCell = false;
+        std::vector<std::tuple<int, float, float>> connections;  // Position of the connected cell, distance and angle from previous
+    };
+
+    // Returns the cells of the offspring by their position in the sequence of all built nodes
+    std::map<int, OffspringCell> buildOffspring(GeneDesc const& gene, int numConcatenations, int numNodesPerCopy)
+    {
+        auto const AutoTriggerInterval = 10;
+        auto numCells = toInt(gene._nodes.size()) * numConcatenations;
+
+        auto data = ContentDesc().addCreature(
+            {ObjectDesc()
+                 .id(1)
+                 .pos({100.0f, 100.0f})
+                 .type(CellDesc()
+                           .headCell(true)
+                           .usableEnergy(getConstructorEnergy() * toFloat(numCells))
+                           .constructor(
+                               ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numConcatenations(numConcatenations)))},
+            CreatureDesc().id(0),
+            GenomeDesc().genes({gene}));
+        _simulationFacade->setSimulationData(data);
+
+        ContentDesc actualData;
+        for (int retry = 0; actualData._objects.size() != numCells + 1; ++retry) {
+            if (retry == numCells * 10) {
+                ADD_FAILURE() << "The offspring was not built";
+                return {};
+            }
+            _simulationFacade->calcTimesteps(AutoTriggerInterval);
+            actualData = _simulationFacade->getSimulationData();
+        }
+
+        auto offspringObjects = actualData.getObjectsForCreature(actualData.getOtherCreatureRef(0)._id);
+        std::map<uint64_t, int> positionById;
+        for (auto const& object : offspringObjects) {
+            auto const& cell = object.getCellRef();
+            positionById.emplace(object._id, cell._concatenationIndex * numNodesPerCopy + cell._nodeIndex);
+        }
+        std::map<int, OffspringCell> result;
+        for (auto const& object : offspringObjects) {
+            OffspringCell offspringCell{.headCell = object.getCellRef()._headCell};
+            for (auto const& connection : object._connections) {
+                offspringCell.connections.emplace_back(positionById.at(connection._objectId), connection._distance, connection._angleFromPrevious);
+            }
+            result.emplace(positionById.at(object._id), offspringCell);
+        }
+        return result;
+    }
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstructorTests_RestartConstruction,
+    ConstructorTests_RestartConstruction,
+    ::testing::Values(
+        ConstructorShape_Segment,
+        ConstructorShape_Triangle,
+        ConstructorShape_Rectangle,
+        ConstructorShape_Hexagon,
+        ConstructorShape_Tube,
+        ConstructorShape_LargeLolli,
+        ConstructorShape_SmallLolli,
+        ConstructorShape_Zigzag));
+
+TEST_P(ConstructorTests_RestartConstruction, buildsSameStructureAsConcatenations)
+{
+    auto const NumNodesPerCopy = 7;
+    auto const NumConcatenations = 3;
+
+    std::vector<NodeDesc> nodes(NumNodesPerCopy);
+    nodes.front().referenceAngle(30.0f);
+    nodes.back().referenceAngle(-20.0f);
+    auto concatenatedGene = GeneDesc().shape(GetParam()).nodes(nodes);
+
+    auto rolledOutGene = concatenatedGene;
+    rolledOutGene._nodes.clear();
+    for ([[maybe_unused]] auto copy : std::views::iota(0, NumConcatenations)) {
+        rolledOutGene._nodes.insert(rolledOutGene._nodes.end(), nodes.begin(), nodes.end());
+        rolledOutGene._nodes.at(rolledOutGene._nodes.size() - NumNodesPerCopy).restartConstruction(true);
+    }
+
+    auto expectedCells = buildOffspring(concatenatedGene, NumConcatenations, NumNodesPerCopy);
+    auto actualCells = buildOffspring(rolledOutGene, 1, NumNodesPerCopy);
+
+    ASSERT_EQ(NumNodesPerCopy * NumConcatenations, expectedCells.size());
+    ASSERT_EQ(expectedCells.size(), actualCells.size());
+    for (auto const& [expected, actual] : std::views::zip(expectedCells, actualCells)) {
+        auto const& [expectedPosition, expectedCell] = expected;
+        auto const& [actualPosition, actualCell] = actual;
+        ASSERT_EQ(expectedPosition, actualPosition);
+        EXPECT_EQ(expectedCell.headCell, actualCell.headCell) << "cell " << expectedPosition;
+        ASSERT_EQ(expectedCell.connections.size(), actualCell.connections.size()) << "cell " << expectedPosition;
+        for (auto const& [expectedConnection, actualConnection] : std::views::zip(expectedCell.connections, actualCell.connections)) {
+            auto const& [expectedConnectedPosition, expectedDistance, expectedAngle] = expectedConnection;
+            auto const& [actualConnectedPosition, actualDistance, actualAngle] = actualConnection;
+            EXPECT_EQ(expectedConnectedPosition, actualConnectedPosition) << "cell " << expectedPosition;
+            EXPECT_TRUE(approxCompare(expectedDistance, actualDistance)) << "cell " << expectedPosition;
+            EXPECT_TRUE(approxCompare(expectedAngle, actualAngle)) << "cell " << expectedPosition;
+        }
     }
 }
 

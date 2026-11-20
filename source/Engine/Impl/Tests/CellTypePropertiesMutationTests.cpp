@@ -14,34 +14,6 @@
 class CellTypePropertiesMutationTests : public MutationTestsBase
 {
 protected:
-    template <typename T>
-    struct IsVariant : std::false_type
-    {};
-    template <typename... Ts>
-    struct IsVariant<std::variant<Ts...>> : std::true_type
-    {};
-
-    // Resets all mutable cell type properties to their defaults while preserving the active cell type and its active mode.
-    static void resetCellTypeProperties(CellTypeGenomeDesc& cellType)
-    {
-        std::visit(
-            [](auto& cellTypeData) {
-                using CellTypeData = std::decay_t<decltype(cellTypeData)>;
-                if constexpr (requires { cellTypeData._mode; }) {
-                    using ModeType = std::decay_t<decltype(cellTypeData._mode)>;
-                    if constexpr (IsVariant<ModeType>::value) {
-                        auto mode = cellTypeData._mode;
-                        std::visit([](auto& modeData) { modeData = std::decay_t<decltype(modeData)>{}; }, mode);
-                        cellTypeData = CellTypeData{};
-                        cellTypeData._mode = mode;
-                        return;
-                    }
-                }
-                cellTypeData = CellTypeData{};
-            },
-            cellType);
-    }
-
     bool compareAllExceptCellTypeProperties(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {

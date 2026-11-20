@@ -48,10 +48,12 @@ PUBLIC
     MutationTestsBase.h
     NeuronMutationTests.cpp
     NeuronTests.cpp
+    NewNodeMutationTests.cpp
     ObjectConnectionTests.cpp
     PhysicsTests.cpp
     RadiationTests.cpp
     ReconnectorTests.cpp
+    RollOutGeneMutationTests.cpp
     SensorTests.cpp
     SeparationLimitTests.cpp
     SimulationControlTests.cpp

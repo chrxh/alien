@@ -71,6 +71,8 @@ namespace
             genomeTO.mutationRates.swapGeneMutation = {genome->mutationRates.swapGeneMutation.geneProbability};
             genomeTO.mutationRates.copyNodeSectionMutation = {genome->mutationRates.copyNodeSectionMutation.geneProbability};
             genomeTO.mutationRates.moveNodeSectionMutation = {genome->mutationRates.moveNodeSectionMutation.geneProbability};
+            genomeTO.mutationRates.rollOutGeneMutation = {genome->mutationRates.rollOutGeneMutation.geneProbability};
+            genomeTO.mutationRates.compactGeneMutation = {genome->mutationRates.compactGeneMutation.geneProbability};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];
@@ -96,6 +98,7 @@ namespace
                     auto const& node = gene.nodes[i];
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
+                    nodeTO.restartConstruction = node.restartConstruction;
                     for (int i = 0; i < NEURAL_NET_OUTPUTS * NEURAL_NET_INPUTS; ++i) {
                         nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
                     }

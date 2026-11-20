@@ -25,7 +25,8 @@ namespace
     {
         return rates._extendGeneMutation._geneProbability > 0 || rates._addNodeMutation._nodeProbability > 0 || rates._trimGeneMutation._geneProbability > 0
             || rates._deleteNodeMutation._nodeProbability > 0 || rates._copyNodeSectionMutation._geneProbability > 0
-            || rates._moveNodeSectionMutation._geneProbability > 0;
+            || rates._moveNodeSectionMutation._geneProbability > 0 || rates._rollOutGeneMutation._geneProbability > 0
+            || rates._compactGeneMutation._geneProbability > 0;
     }
 }
 
@@ -36,7 +37,7 @@ CpuGeneGraphProcessor::CpuGeneGraphProcessor(GenomeDesc const& genome)
     for (auto const& [geneIndex, gene] : genome._genes | boost::adaptors::indexed(0)) {
         GeneState geneState{.geneIndex = toInt(geneIndex), .shape = gene._shape, .homogeneousCellType = gene._homogeneousCellType};
         for (auto const& node : gene._nodes) {
-            NodeState nodeState{.isVoid = node.getCellType() == CellType_Void};
+            NodeState nodeState{.isVoid = node.getCellType() == CellType_Void, .restartConstruction = node._restartConstruction};
             if (node._constructor.has_value() && isValidGeneIndex(node._constructor->_geneIndex)) {
                 nodeState.constructorGeneIndex = node._constructor->_geneIndex;
                 nodeState.separation = node._constructor->_separation;
@@ -92,7 +93,7 @@ std::vector<int> CpuGeneGraphProcessor::calcNodesCutOffFromLastNode(GeneState co
 
     ShapeGenerator shapeGenerator;
     for (auto nodeIndex : std::views::iota(0, numNodes)) {
-        auto shapeResult = shapeGenerator.generateNextConstructionData(gene.shape);
+        auto shapeResult = shapeGenerator.generateNextConstructionData(gene.shape, gene.nodes.at(nodeIndex).restartConstruction);
         if (isVoid(nodeIndex)) {
             continue;
         }

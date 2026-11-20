@@ -107,6 +107,10 @@ namespace
             EntityAttribute::MutationMoveNodeSectionProbability,
             {mutationRates._moveNodeSectionMutation._geneProbability});
         addActiveMutationType(
+            activeMutations, "Roll out gene mutations", EntityAttribute::MutationRollOutGeneProbability, {mutationRates._rollOutGeneMutation._geneProbability});
+        addActiveMutationType(
+            activeMutations, "Compact gene mutations", EntityAttribute::MutationCompactGeneProbability, {mutationRates._compactGeneMutation._geneProbability});
+        addActiveMutationType(
             activeMutations,
             "Constructor",
             EntityAttribute::MutationConstructorProbability,

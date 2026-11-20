@@ -92,6 +92,10 @@ namespace
 
     auto constexpr Id_MoveNodeSectionMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
+    auto constexpr Id_RollOutGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
+
+    auto constexpr Id_CompactGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
+
     auto constexpr Id_ConstructorMutation_NodeProbability = SerializationKey(0, "nodeProbability");
     auto constexpr Id_ConstructorMutation_ValueChangeSigma = SerializationKey(1, "valueChangeSigma");
     auto constexpr Id_ConstructorMutation_EnumChangeProbability = SerializationKey(2, "enumChangeProbability");
@@ -207,6 +211,7 @@ namespace
     auto constexpr Id_Node_NeuralNetwork = SerializationKey(2, "neuralNetwork");
     auto constexpr Id_Node_CellType = SerializationKey(3, "cellType");
     auto constexpr Id_Node_Constructor = SerializationKey(4, "constructor");
+    auto constexpr Id_Node_RestartConstruction = SerializationKey(5, "restartConstruction");
 
     auto constexpr Id_Gene_Nodes = SerializationKey(8, "nodes");
 
@@ -234,6 +239,8 @@ namespace
     auto constexpr Id_MutationRates_CustomizationMutation = SerializationKey(22, "customizationMutation");
     auto constexpr Id_MutationRates_AddGeneMutation = SerializationKey(23, "addGeneMutation");
     auto constexpr Id_MutationRates_SwapGeneMutation = SerializationKey(24, "swapGeneMutation");
+    auto constexpr Id_MutationRates_RollOutGeneMutation = SerializationKey(25, "rollOutGeneMutation");
+    auto constexpr Id_MutationRates_CompactGeneMutation = SerializationKey(26, "compactGeneMutation");
 
     auto constexpr Id_Genome_Genes = SerializationKey(6, "genes");
     auto constexpr Id_Genome_MutationRates = SerializationKey(7, "mutationRates");
@@ -726,6 +733,7 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         scope.addMember(Id_Node_Color, data._color, defaultObject._color);
+        scope.addMember(Id_Node_RestartConstruction, data._restartConstruction, defaultObject._restartConstruction);
         scope.addDesc(Id_Node_NeuralNetwork, data._neuralNetwork);
         scope.addDesc(Id_Node_CellType, data._cellType);
         scope.addDesc(Id_Node_Constructor, data._constructor);
@@ -917,6 +925,24 @@ namespace cereal
     SPLIT_SERIALIZATION(MoveNodeSectionMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, RollOutGeneMutationDesc& data)
+    {
+        RollOutGeneMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_RollOutGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(RollOutGeneMutationDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CompactGeneMutationDesc& data)
+    {
+        CompactGeneMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_CompactGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(CompactGeneMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorMutationDesc& data)
     {
         ConstructorMutationDesc defaultObject;
@@ -955,6 +981,8 @@ namespace cereal
         scope.addDesc(Id_MutationRates_SwapGeneMutation, data._swapGeneMutation);
         scope.addDesc(Id_MutationRates_CopyNodeSectionMutation, data._copyNodeSectionMutation);
         scope.addDesc(Id_MutationRates_MoveNodeSectionMutation, data._moveNodeSectionMutation);
+        scope.addDesc(Id_MutationRates_RollOutGeneMutation, data._rollOutGeneMutation);
+        scope.addDesc(Id_MutationRates_CompactGeneMutation, data._compactGeneMutation);
         scope.addDesc(Id_MutationRates_ConstructorMutation1, data._constructorMutations[0]);
         scope.addDesc(Id_MutationRates_ConstructorMutation2, data._constructorMutations[1]);
     }

@@ -137,7 +137,9 @@ namespace
         {EntityAttribute::MutationGeometryProbability, "Probability per gene that its geometry is changed."},
         {EntityAttribute::MutationGeometryValueChangeSigma,
          "Standard deviation of the Gaussian change of the stiffness, relative to its value range. The connection distance is not mutated."},
-        {EntityAttribute::MutationGeometryEnumChangeProbability, "Probability that the shape generator of the gene is replaced by a different one."},
+        {EntityAttribute::MutationGeometryEnumChangeProbability,
+         "Probability that the shape generator of the gene is replaced by a different one. With the same probability, 'Restart construction' is switched "
+         "at a random node of the gene other than the first."},
         {EntityAttribute::MutationCellTypeModeProbability,
          "Probability per node that the mode of its cell type is switched to a different one. The mode-specific properties are reset to their default values; "
          "cell types without a mode stay unchanged."},
@@ -149,14 +151,22 @@ namespace
          "simulation parameter 'Customization transition matrix'."},
         {EntityAttribute::MutationVoidProbability,
          "Probability per node that it is toggled between void and a random other cell type. The first and the last node of a gene are not affected."},
-        {EntityAttribute::MutationExtendGeneProbability, "Probability per gene that a new node is appended at its beginning or at its end."},
-        {EntityAttribute::MutationAddNodeProbability, "Probability per insertion position that a new node is inserted there."},
+        {EntityAttribute::MutationExtendGeneProbability,
+         "Probability per gene that a new node is appended at its beginning or at its end. The new node has a random cell type. With equal probability, it "
+         "starts with the default neural network and default properties or with random ones. In half of the cases, the nodes after it get random "
+         "connection weights for it, so that they can receive its signals."},
+        {EntityAttribute::MutationAddNodeProbability,
+         "Probability per insertion position that a new node is inserted there. The new node has a random cell type. With equal probability, it starts with "
+         "the default neural network and default properties or with random ones. In half of the cases, the nodes after it get random connection weights "
+         "for it, so that they can receive its signals."},
         {EntityAttribute::MutationTrimGeneProbability,
          "Probability per gene that its first or its last node is removed. The last remaining node of a gene is always kept."},
         {EntityAttribute::MutationDeleteNodeProbability, "Probability per node that it is removed. The last remaining node of a gene is always kept."},
         {EntityAttribute::MutationAddGeneProbability,
          "Probability per gene that a new gene consisting of a single node is created. A randomly chosen node of the triggering gene becomes a constructor "
-         "that builds the new gene. Nodes whose cell type is void cannot become a constructor."},
+         "that builds the new gene. Nodes whose cell type is void cannot become a constructor. The new node has a random cell type. With equal probability, "
+         "it starts with the default neural network and default properties or with random ones. In half of the cases, the constructor gets random "
+         "connection weights for the new node."},
         {EntityAttribute::MutationDuplicateGeneProbability,
          "Probability per gene that it is duplicated. Only genes that are referenced at least twice are duplicated; one of these references then points to the "
          "copy."},
@@ -170,6 +180,13 @@ namespace
          "Probability per gene that a contiguous section of its nodes is copied into a randomly chosen gene, which can also be the gene itself."},
         {EntityAttribute::MutationMoveNodeSectionProbability,
          "Probability per gene that a contiguous section of its nodes is moved into a randomly chosen gene. At least one node stays behind."},
+        {EntityAttribute::MutationRollOutGeneProbability,
+         "Probability per gene that it is rolled out. The gene then contains several copies of its nodes, each starting with 'Restart construction', and "
+         "its constructors build it correspondingly fewer times. The built structure stays the same, but the copies can evolve separately."},
+        {EntityAttribute::MutationCompactGeneProbability,
+         "Probability per gene that it is compacted, the reverse of a roll out. If the nodes before the first 'Restart construction' fit into the gene "
+         "a whole number of times, the gene is cut back to them and its constructors build it correspondingly more often. "
+         "Differences between the copies are lost."},
         {EntityAttribute::MutationConstructorProbability, "Probability per node that the constructor properties of the node are changed."},
         {EntityAttribute::MutationConstructorValueChangeSigma,
          "Standard deviation of the Gaussian change of the numeric constructor properties, relative to the value range of each property."},
@@ -178,8 +195,10 @@ namespace
 
         // Genome node
         {EntityAttribute::NodeAngle,
-         "Angle of this cell relative to the connection to the previous cell. It is only evaluated for the first and the last node of a gene; for inner "
-         "nodes the angle results from the selected shape."},
+         "Angle of this cell relative to the connection to the previous cell. It is only evaluated for the first and the last node of a gene and for a "
+         "node with 'Restart construction' and the node before it. For the other nodes the angle results from the selected shape."},
+        {EntityAttribute::NodeRestartConstruction,
+         "If enabled, this node is built like the first node of a new concatenation, so the shape starts over here. It has no effect on the first node."},
         {EntityAttribute::NodeCustomization, "Customization color of the cell. Many simulation parameters are defined per color."},
         {EntityAttribute::NodeConstructionGene, "Gene that this cell builds as a constructor. 'None' means that the cell has no constructor."},
 
