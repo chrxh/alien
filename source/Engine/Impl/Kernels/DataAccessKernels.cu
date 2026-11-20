@@ -72,7 +72,7 @@ namespace
             genomeTO.mutationRates.copyNodeSectionMutation = {genome->mutationRates.copyNodeSectionMutation.geneProbability};
             genomeTO.mutationRates.moveNodeSectionMutation = {genome->mutationRates.moveNodeSectionMutation.geneProbability};
             genomeTO.mutationRates.rollOutGeneMutation = {genome->mutationRates.rollOutGeneMutation.geneProbability};
-            genomeTO.mutationRates.rollUpGeneMutation = {genome->mutationRates.rollUpGeneMutation.geneProbability};
+            genomeTO.mutationRates.compactGeneMutation = {genome->mutationRates.compactGeneMutation.geneProbability};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];

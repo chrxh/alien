@@ -548,11 +548,11 @@ struct RollOutGeneMutationDesc
     MEMBER(RollOutGeneMutationDesc, float, geneProbability, 0.0f);
 };
 
-struct RollUpGeneMutationDesc
+struct CompactGeneMutationDesc
 {
-    auto operator<=>(RollUpGeneMutationDesc const&) const = default;
+    auto operator<=>(CompactGeneMutationDesc const&) const = default;
 
-    MEMBER(RollUpGeneMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(CompactGeneMutationDesc, float, geneProbability, 0.0f);
 };
 
 struct ConstructorMutationDesc
@@ -612,7 +612,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, CopyNodeSectionMutationDesc, copyNodeSectionMutation, CopyNodeSectionMutationDesc());
     MEMBER(MutationRatesDesc, MoveNodeSectionMutationDesc, moveNodeSectionMutation, MoveNodeSectionMutationDesc());
     MEMBER(MutationRatesDesc, RollOutGeneMutationDesc, rollOutGeneMutation, RollOutGeneMutationDesc());
-    MEMBER(MutationRatesDesc, RollUpGeneMutationDesc, rollUpGeneMutation, RollUpGeneMutationDesc());
+    MEMBER(MutationRatesDesc, CompactGeneMutationDesc, compactGeneMutation, CompactGeneMutationDesc());
     MEMBER(MutationRatesDesc, AddGeneMutationDesc, addGeneMutation, AddGeneMutationDesc());
     MEMBER(MutationRatesDesc, DuplicateGeneMutationDesc, duplicateGeneMutation, DuplicateGeneMutationDesc());
     MEMBER(MutationRatesDesc, DeleteGeneMutationDesc, deleteGeneMutation, DeleteGeneMutationDesc());

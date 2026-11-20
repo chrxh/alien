@@ -730,9 +730,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                             FloatSpec().member(&SimulationParameters::rollOutGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
                         .description(metaMutationDescription("roll out gene")),
                     ParameterSpec()
-                        .name("Roll up gene sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::rollUpGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
-                        .description(metaMutationDescription("roll up gene")),
+                        .name("Compact gene sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::compactGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
+                        .description(metaMutationDescription("compact gene")),
                 }),
             ParameterGroupSpec()
                 .name("Meta-mutations: Genome structure")

@@ -669,14 +669,14 @@ TEST_F(MetaMutationTests, metaMutation_rollOutGeneRatesActuallyChange)
     EXPECT_LE(actualGenome._mutationRates._rollOutGeneMutation._geneProbability, 1.0f);
 }
 
-TEST_F(MetaMutationTests, metaMutation_rollUpGeneRatesActuallyChange)
+TEST_F(MetaMutationTests, metaMutation_compactGeneRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._rollUpGeneMutation = RollUpGeneMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._compactGeneMutation = CompactGeneMutationDesc().geneProbability(0.5f);
 
     auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    _parameters.rollUpGeneMetaMutationsSigma.value = 1.0f;
+    _parameters.compactGeneMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
@@ -685,9 +685,9 @@ TEST_F(MetaMutationTests, metaMutation_rollUpGeneRatesActuallyChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._rollUpGeneMutation._geneProbability, 0.5f));
-    EXPECT_GE(actualGenome._mutationRates._rollUpGeneMutation._geneProbability, 0.0f);
-    EXPECT_LE(actualGenome._mutationRates._rollUpGeneMutation._geneProbability, 1.0f);
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._compactGeneMutation._geneProbability, 0.5f));
+    EXPECT_GE(actualGenome._mutationRates._compactGeneMutation._geneProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._compactGeneMutation._geneProbability, 1.0f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)

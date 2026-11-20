@@ -187,10 +187,10 @@ namespace
          "greatest common divisor and the concatenations are divided by it. Genes that an injector refers to or that would exceed 2000 nodes are not "
          "rolled out. The mutating creature keeps the old concatenations in its existing constructor cells, so its own body parts and offspring can "
          "still deviate."},
-        {EntityAttribute::MutationRollUpGeneProbability,
-         "Probability per gene that it is rolled up. If the nodes before the first node with 'Restart construction' fit into the gene a whole number of "
+        {EntityAttribute::MutationCompactGeneProbability,
+         "Probability per gene that it is compacted. If the nodes before the first node with 'Restart construction' fit into the gene a whole number of "
          "times, the gene is cut back to these nodes and the concatenations of its constructors are multiplied by this number. The constructors then "
-         "build the first copy repeatedly, so differences between the copies are lost. Genes that an injector refers to are not rolled up, and neither "
+         "build the first copy repeatedly, so differences between the copies are lost. Genes that an injector refers to are not compacted, and neither "
          "are genes whose constructors would get more than 100 concatenations. The mutating creature keeps the old concatenations in its existing "
          "constructor cells, so its offspring can still deviate."},
         {EntityAttribute::MutationConstructorProbability, "Probability per node that the constructor properties of the node are changed."},

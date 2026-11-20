@@ -26,7 +26,7 @@ namespace
         return rates._extendGeneMutation._geneProbability > 0 || rates._addNodeMutation._nodeProbability > 0 || rates._trimGeneMutation._geneProbability > 0
             || rates._deleteNodeMutation._nodeProbability > 0 || rates._copyNodeSectionMutation._geneProbability > 0
             || rates._moveNodeSectionMutation._geneProbability > 0 || rates._rollOutGeneMutation._geneProbability > 0
-            || rates._rollUpGeneMutation._geneProbability > 0;
+            || rates._compactGeneMutation._geneProbability > 0;
     }
 }
 

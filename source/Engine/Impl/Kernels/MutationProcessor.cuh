@@ -60,10 +60,10 @@ private:
     __inline__ __device__ static int getNumGeneReferences(Genome* genome, int geneIndex);
     __inline__ __device__ static Node* findNthGeneReference(Genome* genome, int geneIndex, int referenceIndex, bool& isInjector);
     __inline__ __device__ static void applyMutations_rollOutGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
-    __inline__ __device__ static void applyMutations_rollUpGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_compactGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static bool* selectGenes(SimulationData& data, Genome* genome, float geneProbability);
     __inline__ __device__ static int calcNumCopiesForRollOut(Genome* genome, int geneIndex);
-    __inline__ __device__ static int calcNumNodesForRollUp(Genome* genome, int geneIndex);
+    __inline__ __device__ static int calcNumNodesForCompaction(Genome* genome, int geneIndex);
     __inline__ __device__ static bool isReferencedByInjector(Genome* genome, int geneIndex);
     template <typename Func>
     __inline__ __device__ static void forEachConstructorBuildingGene(Genome* genome, int geneIndex, Func func);
@@ -173,11 +173,11 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         correctGenome(data, genome);
     }
 
-    // Sync since the roll-out and roll-up mutations rebuild genes and change the constructors in other genes
+    // Sync since the roll out and compact gene mutations rebuild genes and change the constructors in other genes
     block.sync();
-    if (nodeRates.rollOutGeneMutation.geneProbability > 0 || nodeRates.rollUpGeneMutation.geneProbability > 0) {
+    if (nodeRates.rollOutGeneMutation.geneProbability > 0 || nodeRates.compactGeneMutation.geneProbability > 0) {
         applyMutations_rollOutGene(data, genome, accumulatedMutations);
-        applyMutations_rollUpGene(data, genome, accumulatedMutations);
+        applyMutations_compactGene(data, genome, accumulatedMutations);
         block.sync();
         correctGenome(data, genome);
     }
@@ -2226,13 +2226,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_rollOutGene(Simulat
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_rollUpGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
+__inline__ __device__ void MutationProcessor::applyMutations_compactGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     // A selected gene is cut back to the nodes before its first restart of the construction if they fit into the gene a whole number of times,
     // and the concatenations of its constructors are multiplied by this number. The constructors then build the first copy repeatedly.
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
-    auto const& rate = genome->mutationRates.rollUpGeneMutation;
+    auto const& rate = genome->mutationRates.compactGeneMutation;
     if (rate.geneProbability <= 0) {  // Uniform across the block, so the early return does not desync the cooperative group
         return;
     }
@@ -2244,7 +2244,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_rollUpGene(Simulati
             continue;
         }
         if (laneId == 0) {
-            numRemainingNodes = calcNumNodesForRollUp(genome, geneIndex);
+            numRemainingNodes = calcNumNodesForCompaction(genome, geneIndex);
             if (numRemainingNodes > 0) {
                 auto numCopies = genome->genes[geneIndex].numNodes / numRemainingNodes;
                 forEachConstructorBuildingGene(genome, geneIndex, [&](ConstructorGenome& constructor) {
@@ -2311,7 +2311,7 @@ __inline__ __device__ int MutationProcessor::calcNumCopiesForRollOut(Genome* gen
     return result;
 }
 
-__inline__ __device__ int MutationProcessor::calcNumNodesForRollUp(Genome* genome, int geneIndex)
+__inline__ __device__ int MutationProcessor::calcNumNodesForCompaction(Genome* genome, int geneIndex)
 {
     // Number of nodes before the first restart of the construction, provided that they fit into the gene a whole number of times
     auto const& gene = genome->genes[geneIndex];
@@ -2522,10 +2522,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             mutateFloat(genome->mutationRates.rollOutGeneMutation.geneProbability);
         }
 
-        float rollUpGeneSigma = cudaSimulationParameters.rollUpGeneMetaMutationsSigma.value;
-        if (rollUpGeneSigma > 0) {
-            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * rollUpGeneSigma)); };
-            mutateFloat(genome->mutationRates.rollUpGeneMutation.geneProbability);
+        float compactGeneSigma = cudaSimulationParameters.compactGeneMetaMutationsSigma.value;
+        if (compactGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * compactGeneSigma)); };
+            mutateFloat(genome->mutationRates.compactGeneMutation.geneProbability);
         }
 
         float constructorSigma = cudaSimulationParameters.constructorMetaMutationsSigma.value;

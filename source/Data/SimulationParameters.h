@@ -150,7 +150,7 @@ struct SimulationParameters
     BaseParameter<float> copyNodeSectionMetaMutationsSigma = {0};
     BaseParameter<float> moveNodeSectionMetaMutationsSigma = {0};
     BaseParameter<float> rollOutGeneMetaMutationsSigma = {0};
-    BaseParameter<float> rollUpGeneMetaMutationsSigma = {0};
+    BaseParameter<float> compactGeneMetaMutationsSigma = {0};
 
     // Meta mutations: genome structure
     BaseParameter<float> addGeneMetaMutationsSigma = {0};

@@ -900,7 +900,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._mutationRates._copyNodeSectionMutation._geneProbability = genomeTO.mutationRates.copyNodeSectionMutation.geneProbability;
     result._mutationRates._moveNodeSectionMutation._geneProbability = genomeTO.mutationRates.moveNodeSectionMutation.geneProbability;
     result._mutationRates._rollOutGeneMutation._geneProbability = genomeTO.mutationRates.rollOutGeneMutation.geneProbability;
-    result._mutationRates._rollUpGeneMutation._geneProbability = genomeTO.mutationRates.rollUpGeneMutation.geneProbability;
+    result._mutationRates._compactGeneMutation._geneProbability = genomeTO.mutationRates.compactGeneMutation.geneProbability;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -1018,7 +1018,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.mutationRates.copyNodeSectionMutation = {genome._mutationRates._copyNodeSectionMutation._geneProbability};
     genomeTO.mutationRates.moveNodeSectionMutation = {genome._mutationRates._moveNodeSectionMutation._geneProbability};
     genomeTO.mutationRates.rollOutGeneMutation = {genome._mutationRates._rollOutGeneMutation._geneProbability};
-    genomeTO.mutationRates.rollUpGeneMutation = {genome._mutationRates._rollUpGeneMutation._geneProbability};
+    genomeTO.mutationRates.compactGeneMutation = {genome._mutationRates._compactGeneMutation._geneProbability};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

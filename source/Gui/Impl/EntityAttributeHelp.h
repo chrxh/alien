@@ -88,7 +88,7 @@ enum class EntityAttribute
     MutationCopyNodeSectionProbability,
     MutationMoveNodeSectionProbability,
     MutationRollOutGeneProbability,
-    MutationRollUpGeneProbability,
+    MutationCompactGeneProbability,
     MutationConstructorProbability,
     MutationConstructorValueChangeSigma,
     MutationConstructorEnumChangeProbability,

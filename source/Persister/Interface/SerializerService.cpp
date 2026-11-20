@@ -94,7 +94,7 @@ namespace
 
     auto constexpr Id_RollOutGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
-    auto constexpr Id_RollUpGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
+    auto constexpr Id_CompactGeneMutation_GeneProbability = SerializationKey(0, "geneProbability");
 
     auto constexpr Id_ConstructorMutation_NodeProbability = SerializationKey(0, "nodeProbability");
     auto constexpr Id_ConstructorMutation_ValueChangeSigma = SerializationKey(1, "valueChangeSigma");
@@ -240,7 +240,7 @@ namespace
     auto constexpr Id_MutationRates_AddGeneMutation = SerializationKey(23, "addGeneMutation");
     auto constexpr Id_MutationRates_SwapGeneMutation = SerializationKey(24, "swapGeneMutation");
     auto constexpr Id_MutationRates_RollOutGeneMutation = SerializationKey(25, "rollOutGeneMutation");
-    auto constexpr Id_MutationRates_RollUpGeneMutation = SerializationKey(26, "rollUpGeneMutation");
+    auto constexpr Id_MutationRates_CompactGeneMutation = SerializationKey(26, "compactGeneMutation");
 
     auto constexpr Id_Genome_Genes = SerializationKey(6, "genes");
     auto constexpr Id_Genome_MutationRates = SerializationKey(7, "mutationRates");
@@ -934,13 +934,13 @@ namespace cereal
     SPLIT_SERIALIZATION(RollOutGeneMutationDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, RollUpGeneMutationDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, CompactGeneMutationDesc& data)
     {
-        RollUpGeneMutationDesc defaultObject;
+        CompactGeneMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_RollUpGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+        scope.addMember(Id_CompactGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
     }
-    SPLIT_SERIALIZATION(RollUpGeneMutationDesc)
+    SPLIT_SERIALIZATION(CompactGeneMutationDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorMutationDesc& data)
@@ -982,7 +982,7 @@ namespace cereal
         scope.addDesc(Id_MutationRates_CopyNodeSectionMutation, data._copyNodeSectionMutation);
         scope.addDesc(Id_MutationRates_MoveNodeSectionMutation, data._moveNodeSectionMutation);
         scope.addDesc(Id_MutationRates_RollOutGeneMutation, data._rollOutGeneMutation);
-        scope.addDesc(Id_MutationRates_RollUpGeneMutation, data._rollUpGeneMutation);
+        scope.addDesc(Id_MutationRates_CompactGeneMutation, data._compactGeneMutation);
         scope.addDesc(Id_MutationRates_ConstructorMutation1, data._constructorMutations[0]);
         scope.addDesc(Id_MutationRates_ConstructorMutation2, data._constructorMutations[1]);
     }

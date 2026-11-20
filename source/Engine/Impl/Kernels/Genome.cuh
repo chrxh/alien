@@ -440,7 +440,7 @@ struct RollOutGeneMutation
     float geneProbability;
 };
 
-struct RollUpGeneMutation
+struct CompactGeneMutation
 {
     float geneProbability;
 };
@@ -470,7 +470,7 @@ struct MutationRates
     CopyNodeSectionMutation copyNodeSectionMutation;
     MoveNodeSectionMutation moveNodeSectionMutation;
     RollOutGeneMutation rollOutGeneMutation;
-    RollUpGeneMutation rollUpGeneMutation;
+    CompactGeneMutation compactGeneMutation;
     AddGeneMutation addGeneMutation;
     DuplicateGeneMutation duplicateGeneMutation;
     DeleteGeneMutation deleteGeneMutation;

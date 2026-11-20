@@ -14,10 +14,10 @@
 class RollOutGeneMutationTests : public MutationTestsBase
 {
 protected:
-    GenomeDesc mutate(GenomeDesc genome, float rollOutProbability, float rollUpProbability)
+    GenomeDesc mutate(GenomeDesc genome, float rollOutProbability, float compactProbability)
     {
         genome._mutationRates._rollOutGeneMutation = RollOutGeneMutationDesc().geneProbability(rollOutProbability);
-        genome._mutationRates._rollUpGeneMutation = RollUpGeneMutationDesc().geneProbability(rollUpProbability);
+        genome._mutationRates._compactGeneMutation = CompactGeneMutationDesc().geneProbability(compactProbability);
         _simulationFacade->setSimulationData(ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome));
         _simulationFacade->testOnly_mutate(1);
         return getMutatedGenome();
@@ -94,7 +94,7 @@ TEST_F(RollOutGeneMutationTests, rollOutGeneMutation_keepsGeneThatWouldExceedNod
     EXPECT_EQ(genome._genes, actualGenome._genes);
 }
 
-TEST_F(RollOutGeneMutationTests, rollUpGeneMutation_cutsGeneBackToFirstCopy)
+TEST_F(RollOutGeneMutationTests, compactGeneMutation_cutsGeneBackToFirstCopy)
 {
     std::vector<NodeDesc> builtNodes;
     for (auto color : std::views::iota(0, 6)) {
@@ -118,7 +118,7 @@ TEST_F(RollOutGeneMutationTests, rollUpGeneMutation_cutsGeneBackToFirstCopy)
     EXPECT_EQ(expectedGenome, actualGenome);
 }
 
-TEST_F(RollOutGeneMutationTests, rollUpGeneMutation_keepsGenesWithoutFittingCopy)
+TEST_F(RollOutGeneMutationTests, compactGeneMutation_keepsGenesWithoutFittingCopy)
 {
     std::vector<NodeDesc> nodesWithRemainder(5);
     nodesWithRemainder.at(2)._restartConstruction = true;
@@ -138,7 +138,7 @@ TEST_F(RollOutGeneMutationTests, rollUpGeneMutation_keepsGenesWithoutFittingCopy
     EXPECT_EQ(genome._genes, actualGenome._genes);
 }
 
-TEST_F(RollOutGeneMutationTests, rollUpGeneMutation_replacesVoidAtNewLastNode)
+TEST_F(RollOutGeneMutationTests, compactGeneMutation_replacesVoidAtNewLastNode)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
@@ -153,7 +153,7 @@ TEST_F(RollOutGeneMutationTests, rollUpGeneMutation_replacesVoidAtNewLastNode)
     EXPECT_EQ(2, actualGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
 }
 
-TEST_F(RollOutGeneMutationTests, rollOutAndRollUpGeneMutations_restoreGene)
+TEST_F(RollOutGeneMutationTests, rollOutAndCompactGeneMutations_restoreGene)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).numConcatenations(3))}),
