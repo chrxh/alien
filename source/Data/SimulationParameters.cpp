@@ -839,12 +839,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      "parameter applies only to muscle cells in 'Direct movement' mode."),
                     ParameterSpec()
                         .name("Crawling acceleration")
-                        .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
+                        .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0.0f).max(20.0f).logarithmic(true))
                         .description("Strength of the acceleration that a muscle cell generates while it changes the length of its connection. This "
                                      "parameter applies only to muscle cells in 'Auto crawling' or 'Manual crawling' mode."),
                     ParameterSpec()
                         .name("Bending acceleration")
-                        .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
+                        .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0.0f).max(20.0f).logarithmic(true))
                         .description("Strength of the acceleration that a muscle cell generates during a bending action. This parameter applies only to "
                                      "muscle cells in 'Auto bending' or 'Manual bending' mode."),
                 }),
