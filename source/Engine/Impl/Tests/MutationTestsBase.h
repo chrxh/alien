@@ -32,7 +32,7 @@ protected:
     struct IsVariant<std::variant<Ts...>> : std::true_type
     {};
 
-    // Resets all mutable cell type properties to their defaults while preserving the active cell type and its active mode.
+    // Sets the properties of the cell type to their defaults, but keeps the cell type and its mode.
     static void resetCellTypeProperties(CellTypeGenomeDesc& cellType)
     {
         std::visit(
