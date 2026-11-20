@@ -86,7 +86,14 @@ namespace
 {
     void glfwErrorCallback(int error, const char* description)
     {
-        throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
+        auto message = "Glfw error " + std::to_string(error) + ": " + description;
+
+        // A paste finds no text in the clipboard, for instance after a file has been copied
+        if (error == GLFW_FORMAT_UNAVAILABLE) {
+            log(Priority::Important, message);
+            return;
+        }
+        throw std::runtime_error(message);
     }
 
     void framebufferSizeCallback(GLFWwindow* window, int width, int height)

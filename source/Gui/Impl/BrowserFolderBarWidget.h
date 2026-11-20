@@ -6,7 +6,7 @@
 class _BrowserFolderBarWidget
 {
 public:
-    static BrowserFolderBarWidget create(BrowserData const& data);
+    static BrowserFolderBarWidget create();
 
     // The folder with its buttons, which takes the given width at most and returns the width it has taken
     float processFolder(float maxWidth);
@@ -15,7 +15,5 @@ public:
     void processAutosave();
 
 private:
-    _BrowserFolderBarWidget(BrowserData const& data);
-
-    BrowserData _data;
+    _BrowserFolderBarWidget() = default;
 };

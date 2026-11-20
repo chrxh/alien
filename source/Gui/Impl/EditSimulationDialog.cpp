@@ -263,7 +263,7 @@ void EditSimulationDialog::onApplyToFolder()
         std::vector<LocalLibraryController::Renaming> renamings;
         for (auto const& rawTO : _rawTOs) {
             auto simulationPath = StringHelper::toPath(rawTO->id);
-            auto name = service.getSimulationName(controller.getMainFolder(simulationPath), simulationPath);
+            auto name = service.getSimulationName(controller.getLibraryFolder(), simulationPath);
             if (name.has_value() && name->size() > _origFolderName.size()) {
                 renamings.emplace_back(simulationPath, newFolderName + name->substr(_origFolderName.size()));
             }
