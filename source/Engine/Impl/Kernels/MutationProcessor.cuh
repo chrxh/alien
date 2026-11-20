@@ -27,8 +27,8 @@ private:
     static auto constexpr MaxGenes = 1000;
     static auto constexpr MaxMutatedConcatenations = 100;
 
-    // Probability that the cells after a new node get a random connection weight for it, so that they receive its signals.
-    static auto constexpr ReceiverWeightsProbability = 0.5f;
+    // Probability that the cells after a new node get a random connection weight for it, so that its signals reach them.
+    static auto constexpr WeightsForNewNodeProbability = 0.5f;
 
     static auto constexpr PredecessorConnectionIndex = 1;
 
@@ -48,9 +48,8 @@ private:
     __inline__ __device__ static void applyMutations_customization(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void
-    applyMutations_extendGene(SimulationData& data, Genome* genome, bool* newLastNodeNeedsReceiverWeights, float& accumulatedMutations);
-    __inline__ __device__ static void
-    applyMutations_addNode(SimulationData& data, Genome* genome, bool* newLastNodeNeedsReceiverWeights, float& accumulatedMutations);
+    applyMutations_extendGene(SimulationData& data, Genome* genome, bool* newLastNodeNeedsWeights, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, bool* newLastNodeNeedsWeights, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_trimGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_addGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -87,8 +86,8 @@ private:
     __inline__ __device__ static int findNodeForNewConstructor(SimulationData& data, Gene const& gene);
     __inline__ __device__ static bool insertNode(SimulationData& data, Genome* genome, Gene& gene, int position);
     __inline__ __device__ static void setRandomConnectionWeight(SimulationData& data, Node& node, int connectionIndex);
-    __inline__ __device__ static void setReceiverWeightsForBuiltGene(SimulationData& data, Node& constructorNode);
-    __inline__ __device__ static void setReceiverWeightsForNewLastNodes(SimulationData& data, Genome* genome, bool const* newLastNodeNeedsReceiverWeights);
+    __inline__ __device__ static void setWeightsForBuiltGene(SimulationData& data, Node& constructorNode);
+    __inline__ __device__ static void setWeightsForNewLastNodes(SimulationData& data, Genome* genome, bool const* newLastNodeNeedsWeights);
     __inline__ __device__ static void removeNode(SimulationData& data, Gene& gene, int position);
     __inline__ __device__ static void correctGenome(SimulationData& data, Genome* genome);
 
@@ -137,20 +136,20 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     bool anyNodeMutation = nodeRates.extendGeneMutation.geneProbability > 0 || nodeRates.addNodeMutation.nodeProbability > 0
         || nodeRates.trimGeneMutation.geneProbability > 0 || nodeRates.deleteNodeMutation.nodeProbability > 0;
     if (anyNodeMutation) {
-        __shared__ bool* newLastNodeNeedsReceiverWeights;
+        __shared__ bool* newLastNodeNeedsWeights;
         if (laneId == 0) {
-            newLastNodeNeedsReceiverWeights = genome->numGenes > 0 ? data.entities.heap.getTypedSubArray<bool>(genome->numGenes) : nullptr;
+            newLastNodeNeedsWeights = genome->numGenes > 0 ? data.entities.heap.getTypedSubArray<bool>(genome->numGenes) : nullptr;
         }
         block.sync();
         for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-            newLastNodeNeedsReceiverWeights[geneIndex] = false;
+            newLastNodeNeedsWeights[geneIndex] = false;
         }
-        applyMutations_extendGene(data, genome, newLastNodeNeedsReceiverWeights, accumulatedMutations);
-        applyMutations_addNode(data, genome, newLastNodeNeedsReceiverWeights, accumulatedMutations);
+        applyMutations_extendGene(data, genome, newLastNodeNeedsWeights, accumulatedMutations);
+        applyMutations_addNode(data, genome, newLastNodeNeedsWeights, accumulatedMutations);
 
-        // Sync since the receivers of a new last node may lie in genes that other threads have just changed
+        // Sync since the nodes that get weights for a new last node may lie in genes that other threads have just changed
         block.sync();
-        setReceiverWeightsForNewLastNodes(data, genome, newLastNodeNeedsReceiverWeights);
+        setWeightsForNewLastNodes(data, genome, newLastNodeNeedsWeights);
         block.sync();
 
         applyMutations_trimGene(data, genome, accumulatedMutations);
@@ -1234,7 +1233,7 @@ __inline__ __device__ int MutationProcessor::findNodeForNewConstructor(Simulatio
 
 __inline__ __device__ bool MutationProcessor::insertNode(SimulationData& data, Genome* genome, Gene& gene, int position)
 {
-    // Returns whether the receivers of the new node lie outside the gene and still need a connection weight for it.
+    // Returns whether the nodes that get a weight for the new node lie outside the gene, so that the weights still have to be set.
     // The new node inherits the color of its previous neighbor, otherwise its next neighbor, otherwise the genome's first
     // node, otherwise a random color.
     auto const oldNumNodes = gene.numNodes;
@@ -1266,7 +1265,7 @@ __inline__ __device__ bool MutationProcessor::insertNode(SimulationData& data, G
     gene.nodes = newNodes;
     gene.numNodes = newNumNodes;
 
-    if (data.primaryNumberGen.random() >= ReceiverWeightsProbability) {
+    if (data.primaryNumberGen.random() >= WeightsForNewNodeProbability) {
         return false;
     }
     auto isLastNode = position == oldNumNodes;
@@ -1281,22 +1280,21 @@ __inline__ __device__ void MutationProcessor::setRandomConnectionWeight(Simulati
     node.neuralNetwork.connectionWeights[connectionIndex] = data.primaryNumberGen.random(Const::ConnectionWeight_Min, Const::ConnectionWeight_Max);
 }
 
-__inline__ __device__ void MutationProcessor::setReceiverWeightsForBuiltGene(SimulationData& data, Node& constructorNode)
+__inline__ __device__ void MutationProcessor::setWeightsForBuiltGene(SimulationData& data, Node& constructorNode)
 {
     for (int connectionIndex = PredecessorConnectionIndex; connectionIndex <= MaxBranchConnectionIndex; ++connectionIndex) {
         setRandomConnectionWeight(data, constructorNode, connectionIndex);
     }
 }
 
-__inline__ __device__ void
-MutationProcessor::setReceiverWeightsForNewLastNodes(SimulationData& data, Genome* genome, bool const* newLastNodeNeedsReceiverWeights)
+__inline__ __device__ void MutationProcessor::setWeightsForNewLastNodes(SimulationData& data, Genome* genome, bool const* newLastNodeNeedsWeights)
 {
     // The last node of a gene sends to the constructor cells that build the gene without separation and, with several concatenations,
     // to the first node of the next copy. Two threads may set the same weight, since a constructor node can be the first node of
     // another gene with a new last node. Either random value is fine.
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-        if (!newLastNodeNeedsReceiverWeights[geneIndex]) {
+        if (!newLastNodeNeedsWeights[geneIndex]) {
             continue;
         }
         auto isConcatenated = false;
@@ -1311,7 +1309,7 @@ MutationProcessor::setReceiverWeightsForNewLastNodes(SimulationData& data, Genom
                     isConcatenated = true;
                 }
                 if (!node.constructor.separation) {
-                    setReceiverWeightsForBuiltGene(data, node);
+                    setWeightsForBuiltGene(data, node);
                 }
             }
         }
@@ -1338,7 +1336,7 @@ __inline__ __device__ void MutationProcessor::removeNode(SimulationData& data, G
 }
 
 __inline__ __device__ void
-MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genome, bool* newLastNodeNeedsReceiverWeights, float& accumulatedMutations)
+MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genome, bool* newLastNodeNeedsWeights, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.extendGeneMutation;
@@ -1354,14 +1352,14 @@ MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genom
         }
         auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes;  // Start or end
         if (insertNode(data, genome, gene, position)) {
-            newLastNodeNeedsReceiverWeights[geneIndex] = true;
+            newLastNodeNeedsWeights[geneIndex] = true;
         }
         atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
 
 __inline__ __device__ void
-MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, bool* newLastNodeNeedsReceiverWeights, float& accumulatedMutations)
+MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, bool* newLastNodeNeedsWeights, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.addNodeMutation;
@@ -1381,7 +1379,7 @@ MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, 
                 continue;
             }
             if (insertNode(data, genome, gene, position)) {
-                newLastNodeNeedsReceiverWeights[geneIndex] = true;
+                newLastNodeNeedsWeights[geneIndex] = true;
             }
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
@@ -1562,8 +1560,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_addGene(SimulationD
             chosenNode.constructor.numBranches = 1;
             chosenNode.constructor.numConcatenations = 1;
             chosenNode.constructor.geneIndex = newIndex;
-            if (data.primaryNumberGen.random() < ReceiverWeightsProbability) {
-                setReceiverWeightsForBuiltGene(data, chosenNode);
+            if (data.primaryNumberGen.random() < WeightsForNewNodeProbability) {
+                setWeightsForBuiltGene(data, chosenNode);
             }
 
             atomicAdd_block(&accumulatedMutations, 2.0f);

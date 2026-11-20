@@ -247,7 +247,7 @@ protected:
     }
 };
 
-TEST_F(NewNodeConnectionWeightTests, newNodeInFront_successorGetsWeightInHalfOfTheCases)
+TEST_F(NewNodeConnectionWeightTests, newFirstNode_nextNodeGetsWeightForItInHalfOfTheCases)
 {
     auto genome = createGenomeWithExtendedGenes(std::nullopt);
 
@@ -265,7 +265,7 @@ TEST_F(NewNodeConnectionWeightTests, newNodeInFront_successorGetsWeightInHalfOfT
     expectWeightsForHalfOfCandidates(numWithWeights, numCandidates);
 }
 
-TEST_F(NewNodeConnectionWeightTests, newLastNode_constructorGetsWeightsInHalfOfTheCases)
+TEST_F(NewNodeConnectionWeightTests, newLastNode_constructorGetsWeightsForItInHalfOfTheCases)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc());
 
@@ -285,7 +285,7 @@ TEST_F(NewNodeConnectionWeightTests, newLastNode_constructorGetsWeightsInHalfOfT
     expectWeightsForHalfOfCandidates(numWithWeights, numCandidates);
 }
 
-TEST_F(NewNodeConnectionWeightTests, newLastNode_constructorWithSeparationGetsNoWeights)
+TEST_F(NewNodeConnectionWeightTests, newLastNode_constructorWithSeparationGetsNoWeightsForIt)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc().separation(true));
 
@@ -294,7 +294,7 @@ TEST_F(NewNodeConnectionWeightTests, newLastNode_constructorWithSeparationGetsNo
     }
 }
 
-TEST_F(NewNodeConnectionWeightTests, newLastNode_firstNodeGetsWeightWithConcatenations)
+TEST_F(NewNodeConnectionWeightTests, newLastNode_firstNodeGetsWeightForItWithConcatenations)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc().separation(true).numConcatenations(2));
 
@@ -310,7 +310,7 @@ TEST_F(NewNodeConnectionWeightTests, newLastNode_firstNodeGetsWeightWithConcaten
     expectWeightsForHalfOfCandidates(numWithWeights, numCandidates);
 }
 
-TEST_F(NewNodeConnectionWeightTests, addedNodes_successorAndConstructorGetWeightsInHalfOfTheCases)
+TEST_F(NewNodeConnectionWeightTests, newNodesAroundOldNode_oldNodeGetsWeightsForThemInHalfOfTheCases)
 {
     // The genes form a chain: the old node of each gene builds the next gene.
     std::vector<GeneDesc> genes;
@@ -345,7 +345,7 @@ TEST_F(NewNodeConnectionWeightTests, addedNodes_successorAndConstructorGetWeight
     expectWeightsForHalfOfCandidates(numSuccessorsWithWeight, numConstructorsWithoutWeights);
 }
 
-TEST_F(NewNodeConnectionWeightTests, newGene_constructorGetsWeightsInHalfOfTheCases)
+TEST_F(NewNodeConnectionWeightTests, newGene_constructorGetsWeightsForItInHalfOfTheCases)
 {
     auto genome = GenomeDesc().genes(std::vector<GeneDesc>(NumGenes, GeneDesc().nodes({NodeDesc().referenceAngle(OldNodeAngle)})));
     genome._mutationRates._addGeneMutation = AddGeneMutationDesc().geneProbability(1.0f);
