@@ -132,7 +132,7 @@ float _GenomeEditorWidget::processHeaderData()
                 .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeApplyMetaMutations)),
             &_editData->genome._applyMetaMutations);
 
-        _mutationRatesWidget.processAsSingleRow(_editData->genome._mutationRates, rightColumnWidth);
+        _mutationRatesWidget.process(_editData->genome._mutationRates, rightColumnWidth);
         contentHeight = ImGui::GetCursorPosY();
     }
     ImGui::EndChild();

@@ -50,7 +50,6 @@ enum class EntityAttribute
     GenomeFrontAngle,
     GenomeResistanceToInjection,
     GenomeApplyMetaMutations,
-    GenomeMutationRatesEdit,
     GenomeMutationRatesSummary,
 
     // Gene
