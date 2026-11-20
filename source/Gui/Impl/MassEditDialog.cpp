@@ -238,7 +238,7 @@ void MassEditDialog::processIntern()
 }
 
 MassEditDialog::MassEditDialog()
-    : AlienDialog("Mass operations")
+    : AlienDialog("Mass operations", {700.0f, 560.0f})
 {}
 
 void MassEditDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
