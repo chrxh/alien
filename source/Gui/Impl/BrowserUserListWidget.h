@@ -12,5 +12,7 @@ public:
 private:
     _BrowserUserListWidget(BrowserData const& data);
 
+    void processSortSpecs(bool isGpuVisible);
+
     BrowserData _data;
 };

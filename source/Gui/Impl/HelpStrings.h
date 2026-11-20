@@ -86,4 +86,5 @@ namespace Const
     std::string const BrowserGpuHiddenLoggedOutTooltip = "The GPU models are only visible to logged-in users who share their own GPU model.";
     std::string const BrowserGpuHiddenNotSharedTooltip = "The GPU models are only visible if you share your own GPU model.";
     std::string const BrowserShareGpuTooltip = "Other users will be able to see in the browser window that you have the following graphics card: ";
+    std::string const BrowserLastActivityTooltip = "Last activity";
 }

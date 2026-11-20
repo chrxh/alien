@@ -21,6 +21,7 @@ public:
     static void OpenButton(BrowserData const& data, BrowserLeaf const& leaf);
     static void HeartButton(BrowserData const& data, NetworkResourceRawTO const& rawTO, bool withReactionSummary);
     static NetworkResourceTreeTO createLeafTreeTO(NetworkResourceRawTO const& rawTO);
+    static std::string getShortGpuName(std::string const& gpu);  // Without the vendor prefix of NVIDIA models
 
     // A preview picture fitted into the given width. Null stands for a picture that is being loaded, no value for a missing one.
     static float calcPictureHeight(float width);
