@@ -12,7 +12,7 @@
 
 namespace
 {
-    size_t constexpr NumGenes = 400;
+    auto constexpr NumGenes = 400;
     auto constexpr OldNodeAngle = 45.0f;
 }
 
@@ -48,7 +48,7 @@ protected:
         return getMutatedGenome();
     }
 
-    static std::vector<NodeDesc> getNewNodes(GenomeDesc const& genome)
+    std::vector<NodeDesc> getNewNodes(GenomeDesc const& genome)
     {
         std::vector<NodeDesc> result;
         for (auto const& gene : genome._genes) {
@@ -64,7 +64,7 @@ protected:
     static bool hasDefaultNeuralNetwork(NodeDesc const& node) { return node._neuralNetwork == NeuralNetGenomeDesc(); }
 
     // Returns no value for cell types without a mode.
-    static std::optional<bool> hasDefaultCellTypeMode(NodeDesc const& node)
+    std::optional<bool> hasDefaultCellTypeMode(NodeDesc const& node)
     {
         return std::visit(
             [](auto const& cellTypeData) -> std::optional<bool> {
@@ -92,7 +92,7 @@ TEST_P(NewNodeMutationTests, newNode_halfKeepDefaultNeuralNetwork)
 {
     auto newNodes = getNewNodes(createGenomeWithNewNodes());
     // A probability of 1 still fails when the random number is exactly 1.
-    ASSERT_LE(NumGenes - 10, newNodes.size());
+    ASSERT_LE(NumGenes - 10, toInt(newNodes.size()));
 
     auto numDefaultNodes = std::ranges::count_if(newNodes, hasDefaultNeuralNetwork);
     auto defaultFraction = static_cast<float>(numDefaultNodes) / static_cast<float>(newNodes.size());
@@ -102,24 +102,24 @@ TEST_P(NewNodeMutationTests, newNode_halfKeepDefaultNeuralNetwork)
 
 TEST_P(NewNodeMutationTests, newNode_randomNeuralNetworkIsSparse)
 {
-    std::ptrdiff_t numRandomNodes = 0;
-    std::ptrdiff_t numWeights = 0;
-    std::ptrdiff_t numBiases = 0;
-    std::ptrdiff_t numActivationFunctions = 0;
+    auto numRandomNodes = 0;
+    auto numWeights = 0;
+    auto numBiases = 0;
+    auto numActivationFunctions = 0;
     for (auto const& node : getNewNodes(createGenomeWithNewNodes())) {
         if (hasDefaultNeuralNetwork(node)) {
             continue;
         }
         auto const& neuralNetwork = node._neuralNetwork;
         ++numRandomNodes;
-        numWeights += std::ranges::count_if(neuralNetwork._weights, [](auto const& weight) { return weight.getValue() != 0.0f; });
-        numBiases += std::ranges::count_if(neuralNetwork._biases, [](auto const& bias) { return bias != 0.0f; });
+        numWeights += toInt(std::ranges::count_if(neuralNetwork._weights, [](auto const& weight) { return weight.getValue() != 0.0f; }));
+        numBiases += toInt(std::ranges::count_if(neuralNetwork._biases, [](auto const& bias) { return bias != 0.0f; }));
         numActivationFunctions +=
-            std::ranges::count_if(neuralNetwork._activationFunctions, [](auto const& function) { return function != ActivationFunction_Identity; });
+            toInt(std::ranges::count_if(neuralNetwork._activationFunctions, [](auto const& function) { return function != ActivationFunction_Identity; }));
     }
 
     // Random weights, biases and activation functions occur, but fewer than 1 in 8 values differs from 0 or Identity.
-    auto expectSparse = [&](std::ptrdiff_t numRandomValues, std::ptrdiff_t numValuesPerNode) {
+    auto expectSparse = [&](int numRandomValues, int numValuesPerNode) {
         EXPECT_LT(0, numRandomValues);
         EXPECT_GT(numRandomNodes * numValuesPerNode / 8, numRandomValues);
     };
@@ -210,7 +210,7 @@ protected:
         std::vector<GeneDesc> genes(NumGenes, GeneDesc().nodes({NodeDesc().referenceAngle(OldNodeAngle)}));
         if (constructor.has_value()) {
             std::vector<NodeDesc> constructorNodes;
-            for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
+            for (int geneIndex = 1; geneIndex < NumGenes; ++geneIndex) {
                 constructorNodes.emplace_back(NodeDesc().referenceAngle(OldNodeAngle).constructor(ConstructorGenomeDesc(*constructor).geneIndex(geneIndex)));
             }
             genes.front() = GeneDesc().nodes(constructorNodes);
@@ -228,17 +228,17 @@ protected:
     }
 
     // Extend gene places the new node either before or after the old node.
-    static bool hasNewLastNode(GeneDesc const& gene) { return gene._nodes.front()._referenceAngle == OldNodeAngle; }
+    bool hasNewLastNode(GeneDesc const& gene) { return gene._nodes.front()._referenceAngle == OldNodeAngle; }
 
-    static NodeDesc const& getConstructorNode(GenomeDesc const& genome, int geneIndex)
+    NodeDesc const& getConstructorNode(GenomeDesc const& genome, int geneIndex)
     {
         auto const& nodes = genome._genes.front()._nodes;
         return *std::ranges::find_if(nodes, [&](auto const& node) { return node._constructor.has_value() && node._constructor->_geneIndex == geneIndex; });
     }
 
-    static bool receives(NodeDesc const& node, int connectionIndex) { return node._neuralNetwork._connectionWeights.at(connectionIndex) != 0.0f; }
+    bool receives(NodeDesc const& node, int connectionIndex) { return node._neuralNetwork._connectionWeights.at(connectionIndex) != 0.0f; }
 
-    static void expectAboutHalf(int numReceiving, int numCandidates)
+    void expectHalfOfCandidatesReceive(int numReceiving, int numCandidates)
     {
         ASSERT_LT(50, numCandidates);
         auto fraction = static_cast<float>(numReceiving) / static_cast<float>(numCandidates);
@@ -262,7 +262,7 @@ TEST_F(NewNodeReceiverTests, newNodeInFront_successorReceivesInHalfOfTheCases)
             numReceiving += receives(oldNode, PredecessorConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numReceiving, numCandidates);
+    expectHalfOfCandidatesReceive(numReceiving, numCandidates);
 }
 
 TEST_F(NewNodeReceiverTests, newLastNode_constructorReceivesInHalfOfTheCases)
@@ -271,7 +271,7 @@ TEST_F(NewNodeReceiverTests, newLastNode_constructorReceivesInHalfOfTheCases)
 
     auto numCandidates = 0;
     auto numReceiving = 0;
-    for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
+    for (int geneIndex = 1; geneIndex < NumGenes; ++geneIndex) {
         auto const& constructorNode = getConstructorNode(genome, geneIndex);
         auto const& gene = genome._genes.at(geneIndex);
         if (hasNewLastNode(gene)) {
@@ -282,14 +282,14 @@ TEST_F(NewNodeReceiverTests, newLastNode_constructorReceivesInHalfOfTheCases)
             EXPECT_FALSE(receives(constructorNode, BranchConnectionIndex));
         }
     }
-    expectAboutHalf(numReceiving, numCandidates);
+    expectHalfOfCandidatesReceive(numReceiving, numCandidates);
 }
 
 TEST_F(NewNodeReceiverTests, newLastNode_constructorWithSeparationDoesNotReceive)
 {
     auto genome = createGenomeWithExtendedGenes(ConstructorGenomeDesc().separation(true));
 
-    for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
+    for (int geneIndex = 1; geneIndex < NumGenes; ++geneIndex) {
         EXPECT_FALSE(receives(getConstructorNode(genome, geneIndex), BranchConnectionIndex));
     }
 }
@@ -300,23 +300,23 @@ TEST_F(NewNodeReceiverTests, newLastNode_firstNodeReceivesWithConcatenations)
 
     auto numCandidates = 0;
     auto numReceiving = 0;
-    for (int geneIndex = 1; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
+    for (int geneIndex = 1; geneIndex < NumGenes; ++geneIndex) {
         auto const& gene = genome._genes.at(geneIndex);
         if (hasNewLastNode(gene)) {
             ++numCandidates;
             numReceiving += receives(gene._nodes.front(), PredecessorConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numReceiving, numCandidates);
+    expectHalfOfCandidatesReceive(numReceiving, numCandidates);
 }
 
 TEST_F(NewNodeReceiverTests, addedNodes_successorAndConstructorReceiveInHalfOfTheCases)
 {
     // The genes form a chain: the old node of each gene builds the next gene.
     std::vector<GeneDesc> genes;
-    for (int geneIndex = 0; geneIndex < static_cast<int>(NumGenes); ++geneIndex) {
+    for (int geneIndex = 0; geneIndex < NumGenes; ++geneIndex) {
         auto node = NodeDesc().referenceAngle(OldNodeAngle);
-        if (geneIndex + 1 < static_cast<int>(NumGenes)) {
+        if (geneIndex + 1 < NumGenes) {
             node.constructor(ConstructorGenomeDesc().geneIndex(geneIndex + 1));
         }
         genes.emplace_back(GeneDesc().nodes({node}));
@@ -341,8 +341,8 @@ TEST_F(NewNodeReceiverTests, addedNodes_successorAndConstructorReceiveInHalfOfTh
             numSuccessorsReceiving += receives(oldNode, PredecessorConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numConstructorsReceiving, numCandidates);
-    expectAboutHalf(numSuccessorsReceiving, numNonReceivingConstructors);
+    expectHalfOfCandidatesReceive(numConstructorsReceiving, numCandidates);
+    expectHalfOfCandidatesReceive(numSuccessorsReceiving, numNonReceivingConstructors);
 }
 
 TEST_F(NewNodeReceiverTests, newGene_constructorReceivesInHalfOfTheCases)
@@ -360,5 +360,5 @@ TEST_F(NewNodeReceiverTests, newGene_constructorReceivesInHalfOfTheCases)
             numReceiving += receives(node, BranchConnectionIndex) ? 1 : 0;
         }
     }
-    expectAboutHalf(numReceiving, numCandidates);
+    expectHalfOfCandidatesReceive(numReceiving, numCandidates);
 }
