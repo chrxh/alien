@@ -5,6 +5,7 @@
 #include <numeric>
 
 #include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
@@ -314,7 +315,13 @@ std::vector<UserTO> const& _BrowserData::getUserTOs() const
 void _BrowserData::setUserTOs(std::vector<UserTO> const& userTOs)
 {
     _userTOs = userTOs;
-    std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
+    sortUserTOs();
+}
+
+void _BrowserData::setUserSortSpecs(std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs)
+{
+    _userSortSpecs = sortSpecs;
+    sortUserTOs();
 }
 
 std::optional<ActiveSimulatorCountsTO> const& _BrowserData::getActiveSimulatorCounts() const
@@ -625,4 +632,44 @@ std::unordered_set<NetworkResourceRawTO> _BrowserData::getAllRawTOs() const
         }
     }
     return result;
+}
+
+namespace
+{
+    bool isAscendingInColumn(UserTO const& left, UserTO const& right, ImGuiID columnId)
+    {
+        switch (columnId) {
+        case UserColumnId_UserName:
+            return boost::ilexicographical_compare(left.userName, right.userName);
+        case UserColumnId_Gpu:
+            return boost::ilexicographical_compare(BrowserHelper::getShortGpuName(left.gpu), BrowserHelper::getShortGpuName(right.gpu));
+        case UserColumnId_TimeSpent:
+            return left.timeSpent < right.timeSpent;
+        case UserColumnId_ReactionsReceived:
+            return left.starsReceived < right.starsReceived;
+        case UserColumnId_ReactionsGiven:
+            return left.starsGiven < right.starsGiven;
+        default:
+            return UserTO::compareOnlineAndTimestamp(left, right) < 0;
+        }
+    }
+}
+
+void _BrowserData::sortUserTOs()
+{
+    std::ranges::sort(_userTOs, [](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
+    if (_userSortSpecs.empty()) {
+        return;
+    }
+    auto const& sortSpec = _userSortSpecs.front();
+    std::ranges::stable_sort(_userTOs, [&](auto const& left, auto const& right) {
+        // Users who do not share their GPU model stay at the end in both directions
+        if (sortSpec.ColumnUserID == UserColumnId_Gpu && left.gpu.empty() != right.gpu.empty()) {
+            return right.gpu.empty();
+        }
+        if (sortSpec.SortDirection == ImGuiSortDirection_Ascending) {
+            return isAscendingInColumn(left, right, sortSpec.ColumnUserID);
+        }
+        return isAscendingInColumn(right, left, sortSpec.ColumnUserID);
+    });
 }

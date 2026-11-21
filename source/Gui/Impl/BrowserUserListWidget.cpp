@@ -4,9 +4,12 @@
 #include <cmath>
 #include <functional>
 #include <optional>
+#include <ranges>
 #include <vector>
+#include <cfloat>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
@@ -26,7 +29,10 @@
 
 namespace
 {
-    auto constexpr GpuColumn = 1;
+    auto constexpr ActivityColumn = 0;
+    auto constexpr ActivityColumnName = ICON_FA_CLOCK;
+    auto constexpr ActivityIconScale = 0.65f;  // Not higher than the header texts
+    auto constexpr GpuColumn = 2;
     auto constexpr GpuColumnName = "GPU model";
     auto constexpr HiddenGpuBarMinLength = 64.0f;
     auto constexpr HiddenGpuBarLengthVariation = 87;
@@ -52,21 +58,34 @@ namespace
         return bold ? AlienGui::TextStyle::Bold : AlienGui::TextStyle::Normal;
     }
 
-    std::string getGpuString(std::string const& gpu)
+    float calcActivityIconSize()
     {
-        if (gpu.substr(0, 6) == "NVIDIA") {
-            return gpu.substr(7);
-        }
-        return gpu;
+        return ImGui::GetFontSize() * ActivityIconScale;
     }
 
+    float calcActivityIconWidth()
+    {
+        return ImGui::GetFont()->CalcTextSizeA(calcActivityIconSize(), FLT_MAX, 0.0f, ActivityColumnName).x;
+    }
+
+    // Vertically centered on the capital letters of the header texts
+    float calcActivityIconOffsetY()
+    {
+        auto font = ImGui::GetFont();
+        unsigned int iconChar = 0;
+        ImTextCharFromUtf8(&iconChar, ActivityColumnName, nullptr);
+        auto capital = font->FindGlyph('H');
+        auto icon = font->FindGlyph(static_cast<ImWchar>(iconChar));
+        auto offset = (capital->Y0 + capital->Y1) / 2 - (icon->Y0 + icon->Y1) / 2 * ActivityIconScale;
+        return std::round(offset * ImGui::GetFontSize() / font->FontSize);
+    }
+
+    // Centered below the icon in the column header
     void drawOnlineMarker(ImColor const& color)
     {
-        auto radius = scale(OnlineMarkerRadius);
         auto pos = ImGui::GetCursorScreenPos();
-        auto lineHeight = ImGui::GetTextLineHeight();
-        ImGui::GetWindowDrawList()->AddCircleFilled({pos.x + radius, pos.y + lineHeight / 2}, radius, color);
-        ImGui::Dummy({radius * 2, lineHeight});
+        auto center = ImVec2(pos.x + calcActivityIconWidth() / 2, pos.y + ImGui::GetTextLineHeight() / 2);
+        ImGui::GetWindowDrawList()->AddCircleFilled(center, scale(OnlineMarkerRadius), color);
     }
 
     AlienGui::TabBadgeParameters getSimulatorCountBadge(std::string const& text, ImColor const& color)
@@ -87,6 +106,48 @@ namespace
         return result.badges(badges).badgeSpacing(SimulatorCountBadgeSpacing).tooltip(Const::BrowserSimulatorCountsTooltip);
     }
 
+    void processActivityHeader()
+    {
+        auto pos = ImGui::GetCursorScreenPos();
+
+        // The column only sorts descending, so its sort arrow is hidden
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4());
+        ImGui::TableHeader("##activity");
+        ImGui::PopStyleColor();
+
+        auto iconPos = ImVec2(pos.x, pos.y + calcActivityIconOffsetY());
+        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), calcActivityIconSize(), iconPos, Const::TextBaseColor, ActivityColumnName);
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
+    }
+
+    // Like ImGui::TableHeadersRow, with a small icon and a tooltip for the activity column
+    void processHeaderRow()
+    {
+        auto rowHeight = ImGui::TableGetHeaderRowHeight();
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers, rowHeight);
+        auto rowTop = ImGui::GetCursorScreenPos().y;
+        auto columnCount = ImGui::TableGetColumnCount();
+        for (auto column : std::views::iota(0, columnCount)) {
+            if (!ImGui::TableSetColumnIndex(column)) {
+                continue;
+            }
+            ImGui::PushID(column);
+            if (column == ActivityColumn) {
+                processActivityHeader();
+            } else {
+                ImGui::TableHeader(ImGui::TableGetColumnName(column));
+            }
+            ImGui::PopID();
+        }
+
+        // The empty area right of the last column opens the context menu, as in ImGui::TableHeadersRow
+        auto mouseY = ImGui::GetMousePos().y;
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && ImGui::TableGetHoveredColumn() == columnCount && mouseY >= rowTop
+            && mouseY < rowTop + rowHeight) {
+            ImGui::TableOpenContextMenu(columnCount);
+        }
+    }
+
     void drawGpuHeaderHiddenIcon()
     {
         if (!ImGui::TableSetColumnIndex(GpuColumn)) {
@@ -99,7 +160,7 @@ namespace
 
     std::string getOwnGpuString()
     {
-        return getGpuString(_SimulationFacade::get()->getGpuName());
+        return BrowserHelper::getShortGpuName(_SimulationFacade::get()->getGpuName());
     }
 
     void processOwnGpu()
@@ -112,7 +173,7 @@ namespace
         if (gpu.empty()) {
             AlienGui::Text(AlienGui::TextParameters().text("not shared").style(AlienGui::TextStyle::Decent).truncate(true));
         } else {
-            AlienGui::Text(AlienGui::TextParameters().text(getGpuString(gpu)).truncate(true));
+            AlienGui::Text(AlienGui::TextParameters().text(BrowserHelper::getShortGpuName(gpu)).truncate(true));
         }
     }
 
@@ -217,8 +278,8 @@ void _BrowserUserListWidget::process()
 {
     ImGui::PushID("User list");
     auto& styleService = StyleService::get();
-    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
-        | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
+        | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     auto selectedTabIndex = 0;
     AlienGui::TabBar(
@@ -226,23 +287,38 @@ void _BrowserUserListWidget::process()
         {getSimulatorsTabParameters(_data->getActiveSimulatorCounts())},
         selectedTabIndex);
 
-    if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+    if (ImGui::BeginTable("SimulatorList", 6, flags, ImVec2(-1, -1), 0.0f)) {
+        ImGui::TableSetupColumn(
+            ActivityColumnName,
+            ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_DefaultSort
+                | ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_NoSortAscending,
+            calcActivityIconWidth(),
+            UserColumnId_LastActivity);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, scale(90.0f), UserColumnId_UserName);
         auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
         auto isGpuVisible = isLoggedIn && LoginController::get().shareGpuInfo();
-        ImGui::TableSetupColumn(GpuColumnName, ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(200.0f));
-        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(80.0f));
         ImGui::TableSetupColumn(
-            "Reactions received",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            scale(120.0f));
-        ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleService.scale(100.0f));
+            GpuColumnName,
+            ImGuiTableColumnFlags_WidthFixed | (isGpuVisible ? ImGuiTableColumnFlags_None : ImGuiTableColumnFlags_NoSort),
+            styleService.scale(200.0f),
+            UserColumnId_Gpu);
+        ImGui::TableSetupColumn(
+            "Time spent", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, styleService.scale(80.0f), UserColumnId_TimeSpent);
+        ImGui::TableSetupColumn(
+            "Reactions received", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(120.0f), UserColumnId_ReactionsReceived);
+        ImGui::TableSetupColumn(
+            "Reactions given",
+            ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
+            styleService.scale(100.0f),
+            UserColumnId_ReactionsGiven);
         ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableHeadersRow();
+        processHeaderRow();
         if (!isGpuVisible) {
             drawGpuHeaderHiddenIcon();
         }
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
+
+        processSortSpecs(isGpuVisible);
 
         auto numRows = toInt(_data->getUserTOs().size());
         std::optional<GpuHintPlacement> gpuHintPlacement;
@@ -255,16 +331,16 @@ void _BrowserUserListWidget::process()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(BrowserHelper::RowHeight));
 
-                ImGui::TableNextColumn();
                 auto isOwnRow = isLoggedIn && *NetworkService::get().getLoggedInUserName() == user.userName;
 
+                ImGui::TableNextColumn();
                 if (user.online) {
                     drawOnlineMarker(Const::BrowserActiveSimulatorsColor);
-                    ImGui::SameLine();
                 } else if (user.lastDayOnline) {
                     drawOnlineMarker(Const::BrowserLastDaySimulatorsColor);
-                    ImGui::SameLine();
                 }
+
+                ImGui::TableNextColumn();
                 AlienGui::Text(AlienGui::TextParameters().text(user.userName).style(getTextStyle(isOwnRow)).truncate(true));
 
                 ImGui::TableNextColumn();
@@ -310,4 +386,23 @@ void _BrowserUserListWidget::process()
         ImGui::EndTable();
     }
     ImGui::PopID();
+}
+
+void _BrowserUserListWidget::processSortSpecs(bool isGpuVisible)
+{
+    auto sortSpecs = ImGui::TableGetSortSpecs();
+    if (sortSpecs == nullptr) {
+        return;
+    }
+
+    // An order by hidden GPU models would reveal them
+    if (!isGpuVisible && sortSpecs->SpecsCount > 0 && sortSpecs->Specs->ColumnUserID == UserColumnId_Gpu) {
+        ImGui::TableSetColumnSortDirection(ActivityColumn, ImGuiSortDirection_Descending, false);
+        sortSpecs = ImGui::TableGetSortSpecs();
+    }
+    if (!sortSpecs->SpecsDirty) {
+        return;
+    }
+    _data->setUserSortSpecs(std::vector(sortSpecs->Specs, sortSpecs->Specs + sortSpecs->SpecsCount));
+    sortSpecs->SpecsDirty = false;
 }

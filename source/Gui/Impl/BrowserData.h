@@ -61,6 +61,16 @@ struct Workspace
     uint64_t contentSize = 0;  // Of all rawTOs
 };
 
+enum UserColumnId
+{
+    UserColumnId_LastActivity,
+    UserColumnId_UserName,
+    UserColumnId_Gpu,
+    UserColumnId_TimeSpent,
+    UserColumnId_ReactionsReceived,
+    UserColumnId_ReactionsGiven
+};
+
 struct EmojiImage
 {
     ImTextureID textureId;
@@ -119,8 +129,9 @@ public:
     void registrateAsSeen(NetworkResourceRawTO const& rawTO);
     bool isNew(NetworkResourceRawTO const& rawTO) const;
 
-    std::vector<UserTO> const& getUserTOs() const;
+    std::vector<UserTO> const& getUserTOs() const;  // Sorted by the user sort specs, ties by last activity
     void setUserTOs(std::vector<UserTO> const& userTOs);
+    void setUserSortSpecs(std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs);
     std::optional<ActiveSimulatorCountsTO> const& getActiveSimulatorCounts() const;
     void setActiveSimulatorCounts(std::optional<ActiveSimulatorCountsTO> const& activeSimulatorCounts);
 
@@ -154,6 +165,7 @@ private:
     void deselectIfNotInTree(Workspace const& workspace);
     bool areOwnReactionsCurrent() const;
     std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
+    void sortUserTOs();
 
     std::map<WorkspaceId, Workspace> _workspaces;
     WorkspaceId _currentWorkspaceId = {NetworkResourceType_Simulation, WorkspaceType_Featured};
@@ -163,6 +175,7 @@ private:
     bool _scrollToSelection = false;
     LastSessionBrowserData _lastSessionData;
     std::vector<UserTO> _userTOs;
+    std::vector<ImGuiTableColumnSortSpecs> _userSortSpecs;
     std::optional<ActiveSimulatorCountsTO> _activeSimulatorCounts;
     DownloadCache _downloadCache;
 

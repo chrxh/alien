@@ -1,5 +1,6 @@
 #include "BrowserHelper.h"
 
+#include <string_view>
 #include <cfloat>
 
 #include <imgui.h>
@@ -23,6 +24,7 @@ namespace
     auto constexpr PictureBadgeHeight = 15.0f;
     auto constexpr PictureBadgeRounding = 4.0f;
     auto constexpr PictureBadgeFontScale = 0.72f;
+    auto constexpr NvidiaPrefix = std::string_view("NVIDIA ");
 }
 
 float BrowserHelper::calcFooterHeight()
@@ -114,6 +116,14 @@ NetworkResourceTreeTO BrowserHelper::createLeafTreeTO(NetworkResourceRawTO const
     result->folderNames = NetworkResourceService::get().getFolderNames(rawTO->resourceName);
     result->node = BrowserLeaf{.leafName = NetworkResourceService::get().removeFoldersFromName(rawTO->resourceName), .rawTO = rawTO};
     return result;
+}
+
+std::string BrowserHelper::getShortGpuName(std::string const& gpu)
+{
+    if (gpu.starts_with(NvidiaPrefix)) {
+        return gpu.substr(NvidiaPrefix.size());
+    }
+    return gpu;
 }
 
 float BrowserHelper::calcPictureHeight(float width)
