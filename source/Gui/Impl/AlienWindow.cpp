@@ -9,6 +9,7 @@
 
 namespace
 {
+    auto constexpr BottommostStackingIndex = std::numeric_limits<int>::min();
     auto constexpr TopmostStackingIndex = std::numeric_limits<int>::max();
 }
 
@@ -43,7 +44,7 @@ void AlienWindow::init()
     auto correction = WindowController::get().getContentScaleCorrection();
     _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _defaultSize.x) * correction;
     _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _defaultSize.y) * correction;
-    _stackingIndex = GlobalSettings::get().getValue(_settingsNode + ".stacking index", TopmostStackingIndex);
+    _stackingIndex = GlobalSettings::get().getValue(_settingsNode + ".stacking index", _defaultInBackground ? BottommostStackingIndex : TopmostStackingIndex);
     _windows.emplace_back(this);
     initIntern();
 }

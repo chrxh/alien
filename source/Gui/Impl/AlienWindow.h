@@ -40,6 +40,7 @@ protected:
 
     bool _on = false;
     bool _defaultOn = false;
+    bool _defaultInBackground = false;
     std::string _settingsNode;
 
 private:
