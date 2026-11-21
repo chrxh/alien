@@ -31,9 +31,11 @@ namespace
 {
     auto constexpr ActivityColumn = 0;
     auto constexpr ActivityColumnName = ICON_FA_CLOCK;
-    auto constexpr ActivityIconScale = 0.65f;  // Not higher than the header texts
+    auto constexpr HeaderIconScale = 0.65f;  // Not higher than the header texts
     auto constexpr GpuColumn = 2;
     auto constexpr GpuColumnName = "GPU model";
+    auto constexpr ReactionsReceivedColumn = 4;
+    auto constexpr ReactionsGivenColumn = 5;
     auto constexpr HiddenGpuBarMinLength = 64.0f;
     auto constexpr HiddenGpuBarLengthVariation = 87;
     auto constexpr HiddenGpuBarOffsetY = 4.0f;
@@ -58,33 +60,39 @@ namespace
         return bold ? AlienGui::TextStyle::Bold : AlienGui::TextStyle::Normal;
     }
 
-    float calcActivityIconSize()
+    float calcHeaderIconSize()
     {
-        return ImGui::GetFontSize() * ActivityIconScale;
+        return ImGui::GetFontSize() * HeaderIconScale;
     }
 
-    float calcActivityIconWidth()
+    float calcHeaderIconWidth(char const* icon)
     {
-        return ImGui::GetFont()->CalcTextSizeA(calcActivityIconSize(), FLT_MAX, 0.0f, ActivityColumnName).x;
+        return ImGui::GetFont()->CalcTextSizeA(calcHeaderIconSize(), FLT_MAX, 0.0f, icon).x;
     }
 
     // Vertically centered on the capital letters of the header texts
-    float calcActivityIconOffsetY()
+    float calcHeaderIconOffsetY(char const* icon)
     {
         auto font = ImGui::GetFont();
         unsigned int iconChar = 0;
-        ImTextCharFromUtf8(&iconChar, ActivityColumnName, nullptr);
-        auto capital = font->FindGlyph('H');
-        auto icon = font->FindGlyph(static_cast<ImWchar>(iconChar));
-        auto offset = (capital->Y0 + capital->Y1) / 2 - (icon->Y0 + icon->Y1) / 2 * ActivityIconScale;
+        ImTextCharFromUtf8(&iconChar, icon, nullptr);
+        auto capitalGlyph = font->FindGlyph('H');
+        auto iconGlyph = font->FindGlyph(static_cast<ImWchar>(iconChar));
+        auto offset = (capitalGlyph->Y0 + capitalGlyph->Y1) / 2 - (iconGlyph->Y0 + iconGlyph->Y1) / 2 * HeaderIconScale;
         return std::round(offset * ImGui::GetFontSize() / font->FontSize);
+    }
+
+    void drawHeaderIcon(char const* icon, ImVec2 const& pos)
+    {
+        auto iconPos = ImVec2(pos.x, pos.y + calcHeaderIconOffsetY(icon));
+        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), calcHeaderIconSize(), iconPos, Const::TextBaseColor, icon);
     }
 
     // Centered below the icon in the column header
     void drawOnlineMarker(ImColor const& color)
     {
         auto pos = ImGui::GetCursorScreenPos();
-        auto center = ImVec2(pos.x + calcActivityIconWidth() / 2, pos.y + ImGui::GetTextLineHeight() / 2);
+        auto center = ImVec2(pos.x + calcHeaderIconWidth(ActivityColumnName) / 2, pos.y + ImGui::GetTextLineHeight() / 2);
         ImGui::GetWindowDrawList()->AddCircleFilled(center, scale(OnlineMarkerRadius), color);
     }
 
@@ -115,12 +123,20 @@ namespace
         ImGui::TableHeader("##activity");
         ImGui::PopStyleColor();
 
-        auto iconPos = ImVec2(pos.x, pos.y + calcActivityIconOffsetY());
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), calcActivityIconSize(), iconPos, Const::TextBaseColor, ActivityColumnName);
+        drawHeaderIcon(ActivityColumnName, pos);
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
     }
 
-    // Like ImGui::TableHeadersRow, with a small icon and a tooltip for the activity column
+    // The header text is indented by the icon, while the clickable header still covers the whole cell
+    void processIconHeader(char const* icon, char const* text)
+    {
+        auto pos = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorScreenPos(ImVec2(pos.x + calcHeaderIconWidth(icon) + ImGui::CalcTextSize(" ").x, pos.y));
+        ImGui::TableHeader(text);
+        drawHeaderIcon(icon, pos);
+    }
+
+    // Like ImGui::TableHeadersRow, with small icons and a tooltip for the activity column
     void processHeaderRow()
     {
         auto rowHeight = ImGui::TableGetHeaderRowHeight();
@@ -134,6 +150,10 @@ namespace
             ImGui::PushID(column);
             if (column == ActivityColumn) {
                 processActivityHeader();
+            } else if (column == ReactionsReceivedColumn) {
+                processIconHeader(ICON_FA_HEART, "received");
+            } else if (column == ReactionsGivenColumn) {
+                processIconHeader(ICON_FA_HEART, "given");
             } else {
                 ImGui::TableHeader(ImGui::TableGetColumnName(column));
             }
@@ -292,7 +312,7 @@ void _BrowserUserListWidget::process()
             ActivityColumnName,
             ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_DefaultSort
                 | ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_NoSortAscending,
-            calcActivityIconWidth(),
+            calcHeaderIconWidth(ActivityColumnName),
             UserColumnId_LastActivity);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, scale(90.0f), UserColumnId_UserName);
         auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
@@ -305,12 +325,9 @@ void _BrowserUserListWidget::process()
         ImGui::TableSetupColumn(
             "Time spent", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, styleService.scale(80.0f), UserColumnId_TimeSpent);
         ImGui::TableSetupColumn(
-            ICON_FA_HEART " received",
-            ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            scale(100.0f),
-            UserColumnId_ReactionsReceived);
+            "Reactions received", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f), UserColumnId_ReactionsReceived);
         ImGui::TableSetupColumn(
-            ICON_FA_HEART " given", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(80.0f), UserColumnId_ReactionsGiven);
+            "Reactions given", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(80.0f), UserColumnId_ReactionsGiven);
         ImGui::TableSetupScrollFreeze(0, 1);
         processHeaderRow();
         if (!isGpuVisible) {
