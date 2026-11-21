@@ -1,6 +1,9 @@
 #include "NewSimulationService.h"
 
+#include <functional>
+
 #include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
 #include <Base/StringHelper.h>
 
 #include <Data/SimulationParameters.h>
@@ -10,6 +13,7 @@
 
 #include <Network/NetworkService.h>
 
+#include <Persister/Interface/LocalLibraryService.h>
 #include <Persister/Interface/PersisterFacade.h>
 
 #include "Viewport.h"
@@ -18,10 +22,18 @@ namespace
 {
     auto constexpr ProjectNameSize = sizeof(Char64) / sizeof(char);
     auto constexpr InitialZoomFactor = 4.0f;
-    auto constexpr AutosaveOriginSettingsKey = "services.new simulation.autosave origin";
-    auto constexpr AutosaveOriginServerSettingsKey = "services.new simulation.autosave origin server";
-    auto constexpr AutosaveNameInLibrarySettingsKey = "services.new simulation.autosave name in library";
-    auto constexpr AutosaveLocalFileSettingsKey = "services.new simulation.autosave local file";
+    auto constexpr ExitSaveOriginSettingsKey = "services.new simulation.exit save origin";
+    auto constexpr OriginKeySuffix = ".origin";
+    auto constexpr OriginServerKeySuffix = ".origin server";
+    auto constexpr NameInLibraryKeySuffix = ".name in library";
+    auto constexpr LocalFileKeySuffix = ".local file";
+
+    // Every folder ALIEN runs in has an exit save of its own, whose origin other ALIEN instances must not overwrite in the shared settings
+    std::string getExitSaveOriginSettingsKey()
+    {
+        auto exitSavePath = StringHelper::toUtf8(LocalLibraryService::get().normalize(Const::AutosaveFile));
+        return std::string(ExitSaveOriginSettingsKey) + "." + StringHelper::formatInHex(std::hash<std::string>{}(exitSavePath));
+    }
 }
 
 void NewSimulationService::createSimulation(Parameters const& parameters)
@@ -122,24 +134,28 @@ int NewSimulationService::getSimulationRevision() const
 
 void NewSimulationService::storeAutosaveOrigin() const
 {
-    GlobalSettings::get().setValue(AutosaveOriginSettingsKey, _originResourceId.value_or(std::string()));
-    GlobalSettings::get().setValue(AutosaveOriginServerSettingsKey, NetworkService::get().getServerAddress());
-    GlobalSettings::get().setValue(AutosaveNameInLibrarySettingsKey, _nameInLibrary.value_or(std::string()));
-    GlobalSettings::get().setValue(AutosaveLocalFileSettingsKey, _localFile.has_value() ? StringHelper::toUtf8(*_localFile) : std::string());
+    auto& settings = GlobalSettings::get();
+    auto key = getExitSaveOriginSettingsKey();
+    settings.setValue(key + OriginKeySuffix, _originResourceId.value_or(std::string()));
+    settings.setValue(key + OriginServerKeySuffix, NetworkService::get().getServerAddress());
+    settings.setValue(key + NameInLibraryKeySuffix, _nameInLibrary.value_or(std::string()));
+    settings.setValue(key + LocalFileKeySuffix, _localFile.has_value() ? StringHelper::toUtf8(*_localFile) : std::string());
 }
 
 void NewSimulationService::restoreAutosaveOrigin()
 {
-    auto originResourceId = GlobalSettings::get().getValue(AutosaveOriginSettingsKey, std::string());
-    auto originServer = GlobalSettings::get().getValue(AutosaveOriginServerSettingsKey, std::string());
+    auto& settings = GlobalSettings::get();
+    auto key = getExitSaveOriginSettingsKey();
+    auto originResourceId = settings.getValue(key + OriginKeySuffix, std::string());
+    auto originServer = settings.getValue(key + OriginServerKeySuffix, std::string());
     if (!originResourceId.empty() && originServer == NetworkService::get().getServerAddress()) {
         _originResourceId = originResourceId;
     }
-    auto nameInLibrary = GlobalSettings::get().getValue(AutosaveNameInLibrarySettingsKey, std::string());
+    auto nameInLibrary = settings.getValue(key + NameInLibraryKeySuffix, std::string());
     if (!nameInLibrary.empty()) {
         _nameInLibrary = nameInLibrary;
     }
-    auto localFile = GlobalSettings::get().getValue(AutosaveLocalFileSettingsKey, std::string());
+    auto localFile = settings.getValue(key + LocalFileKeySuffix, std::string());
     if (!localFile.empty()) {
         _localFile = StringHelper::toPath(localFile);
     }

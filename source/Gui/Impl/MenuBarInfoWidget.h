@@ -21,9 +21,10 @@ private:
     void processCurrentSimulation();
     void processServerSimulation(NetworkResourceRawTO const& rawTO);
     void processLocalSimulation(LibraryFile const& file);
+    void processOtherSimulation();
     void processServerTooltip(NetworkResourceRawTO const& rawTO, std::string const& displayName);
     void processLocalTooltip(LibraryFile const& file, std::string const& displayName);
     void processHeartButton(NetworkResourceRawTO const& rawTO, std::string const& displayName);
 
-    bool _localSimulationShown = false;
+    bool _shownWithoutServer = false;
 };
