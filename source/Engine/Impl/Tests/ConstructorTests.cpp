@@ -2037,6 +2037,70 @@ TEST_P(ConstructorTests_RestartConstruction, buildsSameStructureAsConcatenations
     }
 }
 
+TEST_F(ConstructorTests, restartConstruction_nodeBeforeRestart_staysUnderConstruction)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(false))),
+            ObjectDesc().id(1).pos({99.0f, 100.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({
+            GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc().restartConstruction(true), NodeDesc()}),
+        }));
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(3, actualData._objects.size());
+
+    auto newObject = actualData.getOtherObjectRef({0, 1});
+    EXPECT_EQ(1, newObject.getCellRef()._nodeIndex);
+    EXPECT_EQ(CellState_UnderConstruction, newObject.getCellRef()._cellState);
+}
+
+TEST_F(ConstructorTests, restartConstruction_lastNode_activatesAllCells)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(2).separation(false))),
+            ObjectDesc().id(1).pos({98.0f, 100.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(0)),
+            ObjectDesc().id(2).pos({99.0f, 100.0f}).type(CellDesc().cellState(CellState_UnderConstruction).nodeIndex(1)),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({
+            GeneDesc().nodes({NodeDesc(), NodeDesc().restartConstruction(true), NodeDesc()}),
+        }));
+    data.addConnection(0, 2);
+    data.addConnection(2, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(4, actualData._objects.size());
+
+    auto newObject = actualData.getOtherObjectRef({0, 1, 2});
+    EXPECT_EQ(2, newObject.getCellRef()._nodeIndex);
+    EXPECT_EQ(CellState_BeingActivated, newObject.getCellRef()._cellState);
+
+    _simulationFacade->calcTimesteps(1);
+    actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(CellState_BeingActivated, actualData.getObjectRef(2).getCellRef()._cellState);
+
+    _simulationFacade->calcTimesteps(1);
+    actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(CellState_BeingActivated, actualData.getObjectRef(1).getCellRef()._cellState);
+}
+
 TEST_F(ConstructorTests, generateTriangle_67cells_withSeparation)
 {
     auto const n = 67;
