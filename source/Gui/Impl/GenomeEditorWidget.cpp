@@ -108,6 +108,8 @@ float _GenomeEditorWidget::processHeaderData()
                 .generateValueFunc([] { return NameGeneratorService::get().createGenomeName(); }),
             _editData->genome._name);
 
+        _mutationRatesWidget.process(_editData->genome._mutationRates, rightColumnWidth);
+
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters()
                 .name("Front angle")
@@ -132,7 +134,6 @@ float _GenomeEditorWidget::processHeaderData()
                 .tooltip(EntityAttributeHelp::get(EntityAttribute::GenomeApplyMetaMutations)),
             &_editData->genome._applyMetaMutations);
 
-        _mutationRatesWidget.process(_editData->genome._mutationRates, rightColumnWidth);
         contentHeight = ImGui::GetCursorPosY();
     }
     ImGui::EndChild();
