@@ -543,7 +543,7 @@ void BrowserWindow::processAccountChip()
 void BrowserWindow::processUserList()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
-    if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomSpace)))) {
         _userListWidget->process();
     }
     ImGui::EndChild();
