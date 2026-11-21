@@ -68,6 +68,18 @@ namespace
         return ImGui::GetFont()->CalcTextSizeA(calcActivityIconSize(), FLT_MAX, 0.0f, ActivityColumnName).x;
     }
 
+    // Vertically centered on the capital letters of the header texts
+    float calcActivityIconOffsetY()
+    {
+        auto font = ImGui::GetFont();
+        unsigned int iconChar = 0;
+        ImTextCharFromUtf8(&iconChar, ActivityColumnName, nullptr);
+        auto capital = font->FindGlyph('H');
+        auto icon = font->FindGlyph(static_cast<ImWchar>(iconChar));
+        auto offset = (capital->Y0 + capital->Y1) / 2 - (icon->Y0 + icon->Y1) / 2 * ActivityIconScale;
+        return std::round(offset * ImGui::GetFontSize() / font->FontSize);
+    }
+
     // Centered below the icon in the column header
     void drawOnlineMarker(ImColor const& color)
     {
@@ -103,9 +115,8 @@ namespace
         ImGui::TableHeader("##activity");
         ImGui::PopStyleColor();
 
-        auto iconSize = calcActivityIconSize();
-        auto iconPos = ImVec2(pos.x, pos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), iconSize, iconPos, Const::TextBaseColor, ActivityColumnName);
+        auto iconPos = ImVec2(pos.x, pos.y + calcActivityIconOffsetY());
+        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), calcActivityIconSize(), iconPos, Const::TextBaseColor, ActivityColumnName);
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
     }
 
