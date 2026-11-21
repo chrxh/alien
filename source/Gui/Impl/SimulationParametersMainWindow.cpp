@@ -224,7 +224,7 @@ void SimulationParametersMainWindow::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
-        auto title = _locations.at(_selectedOrderNumber).name + (_filter.empty() ? " parameters" : " parameters (filtered)");
+        auto title = _locations.at(_selectedOrderNumber).name + " parameters";
         if (_detailWidgetOpen = AlienGui::BeginTreeNode(
                 AlienGui::TreeNodeParameters().name((title + "###parameters").c_str()).rank(AlienGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
