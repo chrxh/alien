@@ -305,12 +305,12 @@ void _BrowserUserListWidget::process()
         ImGui::TableSetupColumn(
             "Time spent", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, styleService.scale(80.0f), UserColumnId_TimeSpent);
         ImGui::TableSetupColumn(
-            "Reactions received", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(120.0f), UserColumnId_ReactionsReceived);
-        ImGui::TableSetupColumn(
-            "Reactions given",
+            ICON_FA_HEART " received",
             ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            styleService.scale(100.0f),
-            UserColumnId_ReactionsGiven);
+            scale(100.0f),
+            UserColumnId_ReactionsReceived);
+        ImGui::TableSetupColumn(
+            ICON_FA_HEART " given", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(80.0f), UserColumnId_ReactionsGiven);
         ImGui::TableSetupScrollFreeze(0, 1);
         processHeaderRow();
         if (!isGpuVisible) {

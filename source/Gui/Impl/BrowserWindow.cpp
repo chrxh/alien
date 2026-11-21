@@ -562,8 +562,6 @@ void BrowserWindow::processStatusBar()
         genomes.insert(genomeWorkspace.rawTOs.begin(), genomeWorkspace.rawTOs.end());
     }
     auto const& controller = LocalLibraryController::get();
-    auto resourceType = _data->getCurrentWorkspaceId().resourceType;
-    auto numLocalResources = _data->getWorkspace(WorkspaceId{resourceType, WorkspaceType_Local}).rawTOs.size();
 
     statusItems.emplace_back("Server: " + NetworkService::get().getServerAddress());
 
@@ -572,9 +570,7 @@ void BrowserWindow::processStatusBar()
     } else {
         statusItems.emplace_back("Not logged in");
     }
-    statusItems.emplace_back(std::to_string(simulations.size()) + " simulations and " + std::to_string(genomes.size()) + " genomes on the server");
-    statusItems.emplace_back(
-        std::to_string(numLocalResources) + (resourceType == NetworkResourceType_Simulation ? " simulations in My simulations" : " genomes in My genomes"));
+    statusItems.emplace_back(std::to_string(simulations.size()) + " simulations and " + std::to_string(genomes.size()) + " genomes visible to you");
     statusItems.emplace_back(std::to_string(_data->getUserTOs().size()) + " simulators found");
 
     if (!NetworkService::get().getLoggedInUserName()) {
