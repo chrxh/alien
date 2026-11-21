@@ -40,6 +40,7 @@ protected:
 
     bool _on = false;
     bool _defaultOn = false;
+    int _defaultStackingRank = 0;
     std::string _settingsNode;
 
 private:

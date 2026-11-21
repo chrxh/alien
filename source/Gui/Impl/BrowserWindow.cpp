@@ -79,7 +79,9 @@ namespace
 
 BrowserWindow::BrowserWindow()
     : AlienWindow("Browser", "windows.browser", true, true, {172.0f, 78.0f}, {1440.0f, 860.0f})
-{}
+{
+    _defaultStackingRank = 3;
+}
 
 namespace
 {

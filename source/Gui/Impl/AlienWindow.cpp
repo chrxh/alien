@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <utility>
 
 #include <imgui_internal.h>
 
@@ -156,7 +157,7 @@ void AlienWindow::restoreStackingOrder()
             shownWindows.emplace_back(*findResult);
         }
     }
-    std::ranges::stable_sort(shownWindows, {}, &AlienWindow::_stackingIndex);
+    std::ranges::stable_sort(shownWindows, {}, [](AlienWindow const* window) { return std::pair{window->_stackingIndex, window->_defaultStackingRank}; });
     for (auto const& window : shownWindows) {
         ImGui::FocusWindow(ImGui::FindWindowByName(window->_title.c_str()), ImGuiFocusRequestFlags_UnlessBelowModal);
     }
