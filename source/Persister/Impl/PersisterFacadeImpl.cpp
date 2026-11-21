@@ -219,6 +219,16 @@ SaveDeserializedSimulationResultData _PersisterFacadeImpl::fetchSaveDeserialized
     return fetchData<_SaveDeserializedSimulationRequestResult, SaveDeserializedSimulationResultData>(id);
 }
 
+PersisterRequestId _PersisterFacadeImpl::scheduleReadLocalLibrary(SenderInfo const& senderInfo, ReadLocalLibraryRequestData const& data)
+{
+    return scheduleRequest<_ReadLocalLibraryRequest>(senderInfo, data);
+}
+
+ReadLocalLibraryResultData _PersisterFacadeImpl::fetchReadLocalLibraryData(PersisterRequestId const& id)
+{
+    return fetchData<_ReadLocalLibraryRequestResult, ReadLocalLibraryResultData>(id);
+}
+
 PersisterRequestId _PersisterFacadeImpl::generateNewRequestId()
 {
     ++_latestRequestId;

@@ -24,6 +24,7 @@ namespace
 {
     auto constexpr SaveSenderId = "LocalLibrarySave";
     auto constexpr LoadSenderId = "LocalLibraryLoad";
+    auto constexpr ContentSenderId = "LocalLibraryContent";
     auto constexpr DefaultAutosaveFolderName = "Autosave";
     auto constexpr NumFramesBeforePicture = 3;
 
@@ -146,18 +147,7 @@ void LocalLibraryController::process()
     processPendingLoads();
     processPendingPicture();
     processAutosave();
-
-    if (_contentOutdated) {
-        auto& service = LocalLibraryService::get();
-        _content = service.loadContent(_libraryFolder);
-
-        // A folder may have been renamed to another spelling of its name, which the path of the running simulation follows
-        if (auto const& localFile = NewSimulationService::get().getLocalFile()) {
-            NewSimulationService::get().setLocalFile(service.normalize(*localFile));
-        }
-        _contentOutdated = false;
-        ++_revision;
-    }
+    processContent();
 }
 
 std::filesystem::path const& LocalLibraryController::getLibraryFolder() const
@@ -541,6 +531,40 @@ void LocalLibraryController::processAutosave()
     }
     if (std::chrono::steady_clock::now() - _lastAutosaveTimepoint >= std::chrono::minutes(_autosaveInterval)) {
         onAutosave();
+    }
+}
+
+void LocalLibraryController::processContent()
+{
+    if (_contentRequestId.has_value()) {
+        auto requestState = _PersisterFacade::get()->getRequestState(*_contentRequestId);
+        if (requestState == PersisterRequestState::InQueue || requestState == PersisterRequestState::InProgress) {
+            return;
+        }
+        if (requestState == PersisterRequestState::Error) {
+            GenericMessageDialog::get().information("Error", _PersisterFacade::get()->fetchError(*_contentRequestId).message);
+        } else if (requestState == PersisterRequestState::Finished) {
+            auto data = _PersisterFacade::get()->fetchReadLocalLibraryData(*_contentRequestId);
+
+            // The result is dropped if the files or the library folder have changed during the reading, which is then repeated
+            if (!_contentOutdated) {
+                _content = std::move(data.content);
+
+                // A folder may have been renamed to another spelling of its name, which the path of the running simulation follows
+                if (auto const& localFile = NewSimulationService::get().getLocalFile()) {
+                    NewSimulationService::get().setLocalFile(LocalLibraryService::get().normalize(*localFile));
+                }
+                ++_revision;
+            }
+        }
+        _contentRequestId.reset();
+    }
+
+    if (_contentOutdated) {
+        auto senderInfo = SenderInfo{.senderId = SenderId{ContentSenderId}, .wishResultData = true, .wishErrorInfo = true};
+        auto requestData = ReadLocalLibraryRequestData{.libraryFolder = _libraryFolder};
+        _contentRequestId = _PersisterFacade::get()->scheduleReadLocalLibrary(senderInfo, requestData);
+        _contentOutdated = false;
     }
 }
 

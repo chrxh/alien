@@ -31,6 +31,8 @@ add_library(PersisterInterface
     PersisterRequestId.h
     PersisterRequestResult.h
     PersisterRequestState.h
+    ReadLocalLibraryRequestData.h
+    ReadLocalLibraryResultData.h
     ReadSimulationRequestData.h
     ReadSimulationResultData.h
     ReplaceNetworkResourceRequestData.h
