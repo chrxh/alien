@@ -1,12 +1,14 @@
 #include "BrowserUserListWidget.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <optional>
 #include <ranges>
 #include <vector>
 #include <cfloat>
+#include <span>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -32,10 +34,13 @@ namespace
     auto constexpr ActivityColumn = 0;
     auto constexpr ActivityColumnName = ICON_FA_CLOCK;
     auto constexpr HeaderIconScale = 0.65f;  // Not higher than the header texts
+    auto constexpr HeaderIconSpacing = 3.0f;
     auto constexpr GpuColumn = 2;
     auto constexpr GpuColumnName = "GPU model";
     auto constexpr ReactionsReceivedColumn = 4;
+    auto constexpr ReactionsReceivedIcons = std::array{ICON_FA_HEART, ICON_FA_LONG_ARROW_ALT_RIGHT, ICON_FA_USER};
     auto constexpr ReactionsGivenColumn = 5;
+    auto constexpr ReactionsGivenIcons = std::array{ICON_FA_USER, ICON_FA_LONG_ARROW_ALT_RIGHT, ICON_FA_HEART};
     auto constexpr HiddenGpuBarMinLength = 64.0f;
     auto constexpr HiddenGpuBarLengthVariation = 87;
     auto constexpr HiddenGpuBarOffsetY = 4.0f;
@@ -127,16 +132,27 @@ namespace
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
     }
 
-    // The header text is indented by the icon, while the clickable header still covers the whole cell
-    void processIconHeader(char const* icon, char const* text)
+    void processIconHeader(std::span<char const* const> icons, char const* id, std::string const& tooltip)
     {
         auto pos = ImGui::GetCursorScreenPos();
-        ImGui::SetCursorScreenPos(ImVec2(pos.x + calcHeaderIconWidth(icon) + ImGui::CalcTextSize("  ").x, pos.y));
-        ImGui::TableHeader(text);
-        drawHeaderIcon(icon, pos);
+        auto iconsWidth = 0.0f;
+        for (auto icon : icons) {
+            iconsWidth += calcHeaderIconWidth(icon) + scale(HeaderIconSpacing);
+        }
+
+        // Shifted so that the auto-fitted column width includes the icons
+        ImGui::SetCursorScreenPos(ImVec2(pos.x + iconsWidth, pos.y));
+        ImGui::TableHeader(id);
+
+        auto iconPosX = pos.x;
+        for (auto icon : icons) {
+            drawHeaderIcon(icon, ImVec2(std::round(iconPosX), pos.y));
+            iconPosX += calcHeaderIconWidth(icon) + scale(HeaderIconSpacing);
+        }
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(tooltip));
     }
 
-    // Like ImGui::TableHeadersRow, with small icons and a tooltip for the activity column
+    // Like ImGui::TableHeadersRow, with small icons and tooltips for the icon columns
     void processHeaderRow()
     {
         auto rowHeight = ImGui::TableGetHeaderRowHeight();
@@ -151,9 +167,9 @@ namespace
             if (column == ActivityColumn) {
                 processActivityHeader();
             } else if (column == ReactionsReceivedColumn) {
-                processIconHeader(ICON_FA_HEART, "received");
+                processIconHeader(ReactionsReceivedIcons, "##reactionsReceived", Const::BrowserReactionsReceivedTooltip);
             } else if (column == ReactionsGivenColumn) {
-                processIconHeader(ICON_FA_HEART, "given");
+                processIconHeader(ReactionsGivenIcons, "##reactionsGiven", Const::BrowserReactionsGivenTooltip);
             } else {
                 ImGui::TableHeader(ImGui::TableGetColumnName(column));
             }
@@ -325,9 +341,9 @@ void _BrowserUserListWidget::process()
         ImGui::TableSetupColumn(
             "Time spent", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, styleService.scale(80.0f), UserColumnId_TimeSpent);
         ImGui::TableSetupColumn(
-            "Reactions received", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f), UserColumnId_ReactionsReceived);
+            "Reactions received", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(60.0f), UserColumnId_ReactionsReceived);
         ImGui::TableSetupColumn(
-            "Reactions given", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(80.0f), UserColumnId_ReactionsGiven);
+            "Reactions given", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(60.0f), UserColumnId_ReactionsGiven);
         ImGui::TableSetupScrollFreeze(0, 1);
         processHeaderRow();
         if (!isGpuVisible) {
