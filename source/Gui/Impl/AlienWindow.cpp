@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <utility>
 
 #include <imgui_internal.h>
 
@@ -9,7 +10,6 @@
 
 namespace
 {
-    auto constexpr BottommostStackingIndex = std::numeric_limits<int>::min();
     auto constexpr TopmostStackingIndex = std::numeric_limits<int>::max();
 }
 
@@ -44,7 +44,7 @@ void AlienWindow::init()
     auto correction = WindowController::get().getContentScaleCorrection();
     _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _defaultSize.x) * correction;
     _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _defaultSize.y) * correction;
-    _stackingIndex = GlobalSettings::get().getValue(_settingsNode + ".stacking index", _defaultInBackground ? BottommostStackingIndex : TopmostStackingIndex);
+    _stackingIndex = GlobalSettings::get().getValue(_settingsNode + ".stacking index", TopmostStackingIndex);
     _windows.emplace_back(this);
     initIntern();
 }
@@ -157,7 +157,7 @@ void AlienWindow::restoreStackingOrder()
             shownWindows.emplace_back(*findResult);
         }
     }
-    std::ranges::stable_sort(shownWindows, {}, &AlienWindow::_stackingIndex);
+    std::ranges::stable_sort(shownWindows, {}, [](AlienWindow const* window) { return std::pair{window->_stackingIndex, window->_defaultStackingRank}; });
     for (auto const& window : shownWindows) {
         ImGui::FocusWindow(ImGui::FindWindowByName(window->_title.c_str()), ImGuiFocusRequestFlags_UnlessBelowModal);
     }

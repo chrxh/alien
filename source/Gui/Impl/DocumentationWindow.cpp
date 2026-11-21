@@ -33,7 +33,9 @@ namespace
 
 DocumentationWindow::DocumentationWindow()
     : AlienWindow("Documentation", "windows.documentation", true, true, {500.0f, 250.0f}, {1000.0f, 700.0f})
-{}
+{
+    _defaultStackingRank = 4;
+}
 
 void DocumentationWindow::initIntern()
 {
