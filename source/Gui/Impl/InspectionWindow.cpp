@@ -875,7 +875,7 @@ namespace
 void _InspectionWindow::processCellTypeNode(CellDesc& cell, std::optional<GenomeDesc> const& genome)
 {
     auto cellType = cell.getCellType();
-    auto cellTypeName = Const::CellTypeStrings.at(cellType) + " properties";
+    auto const& cellTypeName = Const::CellTypeStrings.at(cellType);
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(cellTypeName + "##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
