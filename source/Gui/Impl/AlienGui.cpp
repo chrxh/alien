@@ -664,14 +664,14 @@ bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string&
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextStrongColor.Value);
         ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, Const::AccentLineColor.Value);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(FilterIconIndent) + iconWidth + framePadding.x, framePadding.y});
     }
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(FilterIconIndent) + iconWidth + framePadding.x, framePadding.y});
     auto result = AlienGui::InputText(
         AlienGui::InputTextParameters().hint(parameters._hint).bold(filterActive).textWidth(0).width(width - FilterClearButtonWidth), filter);
+    ImGui::PopStyleVar(filterActive ? 2 : 1);
+    auto fieldMin = ImGui::GetItemRectMin();
     if (filterActive) {
-        ImGui::PopStyleVar(2);
         ImGui::PopStyleColor(6);
-        auto fieldMin = ImGui::GetItemRectMin();
         auto fieldMax = ImGui::GetItemRectMax();
 
         // Covers the text that scrolls out of the field to the left
@@ -681,11 +681,11 @@ bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string&
             Const::AccentDeepColor,
             std::max(0.0f, ImGui::GetStyle().FrameRounding - 1.0f),
             ImDrawFlags_RoundCornersLeft);
-        AlienGui::SmallIcon(AlienGui::SmallIconParameters()
-                                .icon(ICON_FA_FILTER)
-                                .pos({fieldMin.x + scale(FilterIconIndent), fieldMin.y + framePadding.y})
-                                .color(Const::AccentColor));
     }
+    AlienGui::SmallIcon(AlienGui::SmallIconParameters()
+                            .icon(ICON_FA_FILTER)
+                            .pos({fieldMin.x + scale(FilterIconIndent), fieldMin.y + framePadding.y})
+                            .color(filterActive ? Const::AccentColor : Const::TextFaintColor));
     if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         filter.clear();
         result = true;
