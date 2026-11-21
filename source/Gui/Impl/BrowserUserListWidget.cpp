@@ -61,7 +61,7 @@ namespace
     void drawOnlineMarker(ImColor const& color)
     {
         auto pos = ImGui::GetCursorScreenPos();
-        auto center = ImVec2(pos.x + ImGui::CalcTextSize(ActivityColumnName).x / 2, pos.y + ImGui::GetTextLineHeight() / 2);
+        auto center = ImVec2(pos.x + AlienGui::CalcSmallIconWidth(ActivityColumnName) / 2, pos.y + ImGui::GetTextLineHeight() / 2);
         ImGui::GetWindowDrawList()->AddCircleFilled(center, scale(OnlineMarkerRadius), color);
     }
 
@@ -83,7 +83,15 @@ namespace
         return result.badges(badges).badgeSpacing(SimulatorCountBadgeSpacing).tooltip(Const::BrowserSimulatorCountsTooltip);
     }
 
-    // Like ImGui::TableHeadersRow, with a tooltip that names the icon of the activity column
+    void processActivityHeader()
+    {
+        auto pos = ImGui::GetCursorScreenPos();
+        ImGui::TableHeader("##activity");
+        AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(ActivityColumnName).pos({pos.x, pos.y}));
+        AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
+    }
+
+    // Like ImGui::TableHeadersRow, with a small icon and a tooltip for the activity column
     void processHeaderRow()
     {
         auto rowHeight = ImGui::TableGetHeaderRowHeight();
@@ -95,11 +103,12 @@ namespace
                 continue;
             }
             ImGui::PushID(column);
-            ImGui::TableHeader(ImGui::TableGetColumnName(column));
-            ImGui::PopID();
             if (column == ActivityColumn) {
-                AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
+                processActivityHeader();
+            } else {
+                ImGui::TableHeader(ImGui::TableGetColumnName(column));
             }
+            ImGui::PopID();
         }
 
         // The empty area right of the last column opens the context menu, as in ImGui::TableHeadersRow

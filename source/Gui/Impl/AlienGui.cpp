@@ -2795,13 +2795,13 @@ void AlienGui::SmallIcon(SmallIconParameters const& parameters)
     ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), iconSize, iconPos, parameters._color, parameters._icon.c_str());
 }
 
+float AlienGui::CalcSmallIconWidth(std::string const& icon)
+{
+    return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
+}
+
 namespace
 {
-    float calcSmallIconWidth(std::string const& icon)
-    {
-        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
-    }
-
     struct TabItemPadding
     {
         float left = 0;
@@ -2836,7 +2836,7 @@ namespace
         if (badge._icon.empty()) {
             return 0.0f;
         }
-        auto iconWidth = badge._smallIcon ? calcSmallIconWidth(badge._icon) : ImGui::CalcTextSize(badge._icon.c_str()).x;
+        auto iconWidth = badge._smallIcon ? AlienGui::CalcSmallIconWidth(badge._icon) : ImGui::CalcTextSize(badge._icon.c_str()).x;
         return iconWidth + ImGui::GetStyle().ItemInnerSpacing.x;
     }
 
@@ -3046,7 +3046,7 @@ float AlienGui::CalcActionButtonWidth(ActionButtonParameters const& parameters)
 {
     auto width = ImGui::CalcTextSize(parameters._buttonText.c_str()).x + ImGui::GetStyle().FramePadding.x * 2;
     if (parameters._smallIcon.has_value()) {
-        width += calcSmallIconWidth(*parameters._smallIcon) + ImGui::CalcTextSize("  ").x;
+        width += CalcSmallIconWidth(*parameters._smallIcon) + ImGui::CalcTextSize("  ").x;
     }
     return width;
 }
@@ -3089,7 +3089,7 @@ void AlienGui::StatusBar(StatusBarParameters const& parameters)
 
     if (parameters._warningItem.has_value()) {
         auto spaceWidth = ImGui::CalcTextSize(" ").x;
-        auto iconWidth = calcSmallIconWidth(ICON_FA_EXCLAMATION_TRIANGLE);
+        auto iconWidth = CalcSmallIconWidth(ICON_FA_EXCLAMATION_TRIANGLE);
         auto text = *parameters._warningItem + " ";
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::Dummy(ImVec2(spaceWidth * 2 + iconWidth + ImGui::CalcTextSize(text.c_str()).x, ImGui::GetTextLineHeight()));
