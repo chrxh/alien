@@ -30,7 +30,6 @@ namespace
 {
     auto constexpr ActivityColumn = 0;
     auto constexpr ActivityColumnName = ICON_FA_CLOCK;
-    auto constexpr ActivityColumnWidth = 30.0f;
     auto constexpr GpuColumn = 2;
     auto constexpr GpuColumnName = "GPU model";
     auto constexpr HiddenGpuBarMinLength = 64.0f;
@@ -86,7 +85,12 @@ namespace
     void processActivityHeader()
     {
         auto pos = ImGui::GetCursorScreenPos();
+
+        // The column only sorts descending, so its sort arrow is hidden
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4());
         ImGui::TableHeader("##activity");
+        ImGui::PopStyleColor();
+
         AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(ActivityColumnName).pos({pos.x, pos.y}));
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
     }
@@ -258,12 +262,12 @@ void _BrowserUserListWidget::process()
         {getSimulatorsTabParameters(_data->getActiveSimulatorCounts())},
         selectedTabIndex);
 
-    if (ImGui::BeginTable("Simulators", 6, flags, ImVec2(-1, -1), 0.0f)) {
+    if (ImGui::BeginTable("SimulatorList", 6, flags, ImVec2(-1, -1), 0.0f)) {
         ImGui::TableSetupColumn(
             ActivityColumnName,
             ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_DefaultSort
                 | ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_NoSortAscending,
-            scale(ActivityColumnWidth),
+            AlienGui::CalcSmallIconWidth(ActivityColumnName),
             UserColumnId_LastActivity);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, scale(90.0f), UserColumnId_UserName);
         auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
