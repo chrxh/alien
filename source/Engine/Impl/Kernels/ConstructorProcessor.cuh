@@ -31,6 +31,7 @@ private:
         bool isFirstNode;  // Also true for a node that restarts the construction
         bool isFirstNodeOfFirstConcatenation;
         bool isLastNode;  // Also true for the node before a restart of the construction
+        bool isLastNodeOfConcatenation;
         bool isLastNodeOfLastConcatenation;
         bool hasInfiniteConcatenations;
 
@@ -76,7 +77,8 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static bool hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy);
     __inline__ __device__ static bool isExternalEnergyInflowAllowed(Object* hostObject);
-    __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static void
+    activateNewObjectOnLastNodeOfConcatenation(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
 };
 
@@ -324,10 +326,12 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.isSeparation = constructor.separation;
 
     // A node that restarts the construction is built like the first node of a further concatenation and the node before it like a last node
+    // except for the activation, which waits until the concatenation is finished
     auto isFirstNodeOfGene = result.currentNodeIndex == 0;
     auto isLastNodeOfGene = result.currentNodeIndex == result.gene->numNodes - 1;
     result.isFirstNode = isFirstNodeOfGene || result.node->restartConstruction;
     result.isLastNode = isLastNodeOfGene || result.gene->nodes[result.currentNodeIndex + 1].restartConstruction;
+    result.isLastNodeOfConcatenation = isLastNodeOfGene;
     result.isFirstNodeOfFirstConcatenation = isFirstNodeOfGene && result.currentConcatenation == 0;
     result.isLastNodeOfLastConcatenation = isLastNodeOfGene && result.currentConcatenation == constructor.numConcatenations - 1;
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(constructor);
@@ -446,7 +450,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
     }
 
     setHeadCellOnFirstNode(newObject, hostObject, constructionData);
-    activateNewObjectOnLastNode(newObject, hostObject, constructionData);
+    activateNewObjectOnLastNodeOfConcatenation(newObject, hostObject, constructionData);
 
     newObject->releaseLock();
     return newObject;
@@ -588,7 +592,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     }
 
     setHeadCellOnFirstNode(newObject, hostObject, constructionData);
-    activateNewObjectOnLastNode(newObject, hostObject, constructionData);
+    activateNewObjectOnLastNodeOfConcatenation(newObject, hostObject, constructionData);
 
     newObject->releaseLock();
     return newObject;
@@ -791,9 +795,10 @@ __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(O
     return true;
 }
 
-__inline__ __device__ void ConstructorProcessor::activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData)
+__inline__ __device__ void
+ConstructorProcessor::activateNewObjectOnLastNodeOfConcatenation(Object* newObject, Object* hostObject, ConstructionData const& constructionData)
 {
-    if (constructionData.isLastNode) {
+    if (constructionData.isLastNodeOfConcatenation) {
         newObject->typeData.cell.cellState = CellState_BeingActivated;
     }
 }
