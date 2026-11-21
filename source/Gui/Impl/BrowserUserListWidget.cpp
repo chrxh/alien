@@ -339,7 +339,7 @@ void _BrowserUserListWidget::process()
             styleService.scale(200.0f),
             UserColumnId_Gpu);
         ImGui::TableSetupColumn(
-            "Time spent", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, styleService.scale(80.0f), UserColumnId_TimeSpent);
+            "Time spent", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, styleService.scale(90.0f), UserColumnId_TimeSpent);
         ImGui::TableSetupColumn(
             "Reactions received", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(60.0f), UserColumnId_ReactionsReceived);
         ImGui::TableSetupColumn(
