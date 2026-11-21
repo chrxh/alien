@@ -47,6 +47,7 @@ namespace
     auto constexpr ReadOnlyCellPadding = 1.0f;
     auto constexpr MaxFilterWidth = 400.0f;
     auto constexpr FilterClearButtonWidth = 28.0f;
+    auto constexpr FilterIconIndent = 6.0f;
     auto constexpr ChoiceBarRounding = 8.0f;
     auto constexpr ChoiceBarInset = 2.0f;
     auto constexpr ChoiceBarMinLabelMargin = 8.0f;
@@ -640,23 +641,73 @@ bool AlienGui::InputText(InputTextParameters const& parameters, std::string& tex
     return result;
 }
 
+namespace
+{
+    float calcSmallIconWidth(std::string const& icon)
+    {
+        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
+    }
+}
+
 bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string& filter)
 {
     auto width = std::min(parameters._width != 0.0f ? parameters._width : scaleInverse(ImGui::GetContentRegionAvail().x), MaxFilterWidth);
+
+    auto filterActive = !filter.empty();
+    auto framePadding = ImGui::GetStyle().FramePadding;
+    auto iconWidth = calcSmallIconWidth(ICON_FA_FILTER);
+    if (filterActive) {
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, Const::AccentDeepColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, Const::AccentDeepColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, Const::AccentDeepColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_Border, Const::AccentLineColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextStrongColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, Const::AccentLineColor.Value);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+    }
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {scale(FilterIconIndent) + iconWidth + framePadding.x, framePadding.y});
     auto result = AlienGui::InputText(
-        AlienGui::InputTextParameters().hint(parameters._hint).bold(!filter.empty()).textWidth(0).width(width - FilterClearButtonWidth), filter);
+        AlienGui::InputTextParameters().hint(parameters._hint).bold(filterActive).textWidth(0).width(width - FilterClearButtonWidth), filter);
+    ImGui::PopStyleVar(filterActive ? 2 : 1);
+    auto fieldMin = ImGui::GetItemRectMin();
+    if (filterActive) {
+        ImGui::PopStyleColor(6);
+        auto fieldMax = ImGui::GetItemRectMax();
+
+        // Covers the text that scrolls out of the field to the left
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            {fieldMin.x + 1.0f, fieldMin.y + 1.0f},
+            {fieldMin.x + scale(FilterIconIndent) + iconWidth, fieldMax.y - 1.0f},
+            Const::AccentDeepColor,
+            std::max(0.0f, ImGui::GetStyle().FrameRounding - 1.0f),
+            ImDrawFlags_RoundCornersLeft);
+    }
+    AlienGui::SmallIcon(AlienGui::SmallIconParameters()
+                            .icon(ICON_FA_FILTER)
+                            .pos({fieldMin.x + scale(FilterIconIndent), fieldMin.y + framePadding.y})
+                            .color(filterActive ? Const::AccentColor : Const::TextFaintColor));
     if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
         filter.clear();
         result = true;
     }
     ImGui::SameLine();
 
-    ImGui::BeginDisabled(filter.empty());
+    auto clearable = !filter.empty();
+    if (clearable) {
+        ImGui::PushStyleColor(ImGuiCol_Button, Const::AccentDeepColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::HeaderSelectedHoveredColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::HeaderActiveColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::AccentColor.Value);
+    }
+    ImGui::BeginDisabled(!clearable);
     if (AlienGui::Button(ICON_FA_TIMES)) {
         filter.clear();
         result = true;
     }
     ImGui::EndDisabled();
+    if (clearable) {
+        ImGui::PopStyleColor(4);
+    }
 
     return result;
 }
@@ -2797,11 +2848,6 @@ void AlienGui::SmallIcon(SmallIconParameters const& parameters)
 
 namespace
 {
-    float calcSmallIconWidth(std::string const& icon)
-    {
-        return ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize() * SmallIconScale, FLT_MAX, 0.0f, icon.c_str()).x;
-    }
-
     struct TabItemPadding
     {
         float left = 0;
