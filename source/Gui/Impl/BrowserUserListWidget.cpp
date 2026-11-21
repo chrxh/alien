@@ -131,7 +131,7 @@ namespace
     void processIconHeader(char const* icon, char const* text)
     {
         auto pos = ImGui::GetCursorScreenPos();
-        ImGui::SetCursorScreenPos(ImVec2(pos.x + calcHeaderIconWidth(icon) + ImGui::CalcTextSize(" ").x, pos.y));
+        ImGui::SetCursorScreenPos(ImVec2(pos.x + calcHeaderIconWidth(icon) + ImGui::CalcTextSize("  ").x, pos.y));
         ImGui::TableHeader(text);
         drawHeaderIcon(icon, pos);
     }
