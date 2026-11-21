@@ -392,10 +392,10 @@ void _BrowserUserListWidget::process()
                 }
 
                 ImGui::TableNextColumn();
-                AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsReceived)).style(getTextStyle(isOwnRow)).rightAligned(true));
+                AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsReceived)).style(getTextStyle(isOwnRow)));
 
                 ImGui::TableNextColumn();
-                AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsGiven)).style(getTextStyle(isOwnRow)).rightAligned(true));
+                AlienGui::Text(AlienGui::TextParameters().text(std::to_string(user.starsGiven)).style(getTextStyle(isOwnRow)));
 
                 ImGui::PopID();
             }
