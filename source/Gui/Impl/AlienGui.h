@@ -406,7 +406,6 @@ public:
         MEMBER(SmallIconParameters, ImColor, color, Const::TextBaseColor);
     };
     static void SmallIcon(SmallIconParameters const& parameters);
-    static float CalcSmallIconWidth(std::string const& icon);
 
     static void AddTextWithSubpixelAccuracy(
         ImDrawList* drawList,

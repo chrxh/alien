@@ -6,6 +6,7 @@
 #include <optional>
 #include <ranges>
 #include <vector>
+#include <cfloat>
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -30,6 +31,7 @@ namespace
 {
     auto constexpr ActivityColumn = 0;
     auto constexpr ActivityColumnName = ICON_FA_CLOCK;
+    auto constexpr ActivityIconScale = 0.65f;  // Not higher than the header texts
     auto constexpr GpuColumn = 2;
     auto constexpr GpuColumnName = "GPU model";
     auto constexpr HiddenGpuBarMinLength = 64.0f;
@@ -56,11 +58,21 @@ namespace
         return bold ? AlienGui::TextStyle::Bold : AlienGui::TextStyle::Normal;
     }
 
+    float calcActivityIconSize()
+    {
+        return ImGui::GetFontSize() * ActivityIconScale;
+    }
+
+    float calcActivityIconWidth()
+    {
+        return ImGui::GetFont()->CalcTextSizeA(calcActivityIconSize(), FLT_MAX, 0.0f, ActivityColumnName).x;
+    }
+
     // Centered below the icon in the column header
     void drawOnlineMarker(ImColor const& color)
     {
         auto pos = ImGui::GetCursorScreenPos();
-        auto center = ImVec2(pos.x + AlienGui::CalcSmallIconWidth(ActivityColumnName) / 2, pos.y + ImGui::GetTextLineHeight() / 2);
+        auto center = ImVec2(pos.x + calcActivityIconWidth() / 2, pos.y + ImGui::GetTextLineHeight() / 2);
         ImGui::GetWindowDrawList()->AddCircleFilled(center, scale(OnlineMarkerRadius), color);
     }
 
@@ -91,7 +103,9 @@ namespace
         ImGui::TableHeader("##activity");
         ImGui::PopStyleColor();
 
-        AlienGui::SmallIcon(AlienGui::SmallIconParameters().icon(ActivityColumnName).pos({pos.x, pos.y}));
+        auto iconSize = calcActivityIconSize();
+        auto iconPos = ImVec2(pos.x, pos.y + (ImGui::GetTextLineHeight() - iconSize) / 2);
+        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), iconSize, iconPos, Const::TextBaseColor, ActivityColumnName);
         AlienGui::Tooltip(AlienGui::TooltipParameters().text(Const::BrowserLastActivityTooltip));
     }
 
@@ -267,7 +281,7 @@ void _BrowserUserListWidget::process()
             ActivityColumnName,
             ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_DefaultSort
                 | ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_NoSortAscending,
-            AlienGui::CalcSmallIconWidth(ActivityColumnName),
+            calcActivityIconWidth(),
             UserColumnId_LastActivity);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, scale(90.0f), UserColumnId_UserName);
         auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
