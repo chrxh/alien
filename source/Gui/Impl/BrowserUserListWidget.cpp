@@ -95,7 +95,7 @@ namespace
 
     AlienGui::TabItemParameters getSimulatorsTabParameters(std::optional<ActiveSimulatorCountsTO> const& counts)
     {
-        auto result = AlienGui::TabItemParameters().name("Simulators");
+        auto result = AlienGui::TabItemParameters().name("Simulators").clipBadges(true);
         if (!counts) {
             return result;
         }

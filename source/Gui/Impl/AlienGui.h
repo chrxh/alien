@@ -596,6 +596,7 @@ public:
         MEMBER(TabItemParameters, std::optional<ImColor>, markerColor, std::nullopt);
         MEMBER(TabItemParameters, std::vector<TabBadgeParameters>, badges, {});
         MEMBER(TabItemParameters, std::optional<float>, badgeSpacing, std::nullopt);
+        MEMBER(TabItemParameters, bool, clipBadges, false);  // A narrow tab cuts off the badges instead of the name
         MEMBER(TabItemParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool BeginTabItem(TabItemParameters const& parameters);

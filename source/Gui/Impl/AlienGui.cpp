@@ -2942,7 +2942,7 @@ namespace
         }
 
         auto nameSize = ImGui::CalcTextSize(parameters._name.c_str());
-        auto nameMaxX = std::max(posX, contentMaxX - calcTabBadgesWidth(parameters));
+        auto nameMaxX = parameters._clipBadges ? contentMaxX : std::max(posX, contentMaxX - calcTabBadgesWidth(parameters));
         if (isGroupStyle) {
             ImGui::PushStyleColor(ImGuiCol_Text, selected ? Const::GroupHighTextColor.Value : Const::GroupTextColor.Value);
         }
