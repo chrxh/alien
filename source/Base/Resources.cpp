@@ -33,6 +33,7 @@ namespace Const
     std::string const AlienServerURL = "api.alien-project.org";
     std::string const StartupSimulationResourceName = "Startup/Version1";
 
+    std::filesystem::path const ProgramPath = getProgramDirectory();
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
     std::filesystem::path const LocalLibraryPath = "simulations";
@@ -49,5 +50,5 @@ namespace Const
     std::filesystem::path const LogoGlowFilename = ImagesPath / "logoGlow.png";
     std::vector<std::filesystem::path> const WindowIconFilenames =
         {ImagesPath / "alien16.png", ImagesPath / "alien32.png", ImagesPath / "alien48.png", ImagesPath / "alien256.png"};
-    std::filesystem::path const CaBundleFilename = getProgramDirectory() / ResourcePath / "ca-bundle.crt";
+    std::filesystem::path const CaBundleFilename = ProgramPath / ResourcePath / "ca-bundle.crt";
 }

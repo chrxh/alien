@@ -51,6 +51,11 @@ void McpPersisterTask::process()
     }
 }
 
+bool McpPersisterTask::isPending() const
+{
+    return _completion.has_value();
+}
+
 void McpPersisterTask::complete(McpToolResult const& result)
 {
     if (!_completion) {

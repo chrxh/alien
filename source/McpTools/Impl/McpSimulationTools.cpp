@@ -80,6 +80,11 @@ void McpSimulationTools::process()
     _loadTask.process();
 }
 
+bool McpSimulationTools::hasPendingRequests() const
+{
+    return _saveTask.isPending() || _loadTask.isPending();
+}
+
 McpToolResult McpSimulationTools::createSimulation(boost::json::object const& arguments) const
 {
     auto worldSize = _SimulationFacade::get()->getWorldSize();

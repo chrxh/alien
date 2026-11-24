@@ -8,12 +8,13 @@
 #include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
 
+#include <Rendering/Interface/PictureService.h>
+
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
-#include "PictureGuiService.h"
 #include "SimulationView.h"
 #include "Viewport.h"
 
@@ -87,7 +88,7 @@ void SavePictureDialog::onSavePicture()
             filename.replace_extension(".png");
         }
         try {
-            PictureGuiService::get().savePng(SimulationView::get().savePicture({_width, _height}), filename);
+            PictureService::get().savePng(SimulationView::get().savePicture({_width, _height}), filename);
             printOverlayMessage(filename.filename().string());
         } catch (AlienException const& exception) {
             GenericMessageDialog::get().information("Save picture", std::string("The picture could not be saved.\n\n") + exception.what());

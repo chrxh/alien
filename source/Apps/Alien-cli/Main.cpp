@@ -19,9 +19,13 @@
 #include <ConsoleUi/ConsoleSimulationPanel.h>
 
 #include <Engine/Interface/SimulationFacade.h>
+#include <Engine/Interface/TemporalControlService.h>
 
 #include <Engine/Impl/SimulationFacadeImpl.h>
 
+#include <McpTools/Impl/McpToolsFacadeImpl.h>
+
+#include <Network/McpServer.h>
 #include <Network/NetworkService.h>
 #include <Network/NetworkValidationService.h>
 
@@ -30,14 +34,21 @@
 
 #include <Persister/Impl/PersisterFacadeImpl.h>
 
+#include <Rendering/Interface/RenderingFacade.h>
+
+#include <Rendering/Impl/RenderingFacadeImpl.h>
+
 #include "CommandLineParser.h"
 #include "ConsoleOutput.h"
+#include "McpSession.h"
 #include "PeriodicUploader.h"
 #include "ServerSession.h"
 #include "SimulationRunner.h"
 
 namespace
 {
+    auto constexpr EmptyWorldSize = IntVector2D{1000, 500};
+
     void initDebugMode()
     {
         GlobalSettings::get().setDebugMode(true);
@@ -93,19 +104,54 @@ namespace
         return true;
     }
 
-    bool readSimulation(SimulationDesc& simData, std::string const& inputFilename)
+    void initPersister(CommandLineArguments const& arguments)
     {
-        if (inputFilename.empty()) {
+        if (!arguments.mcpServer && !isPeriodicUploadDesired(arguments)) {
+            return;
+        }
+        _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());
+        _PersisterFacade::get()->setup();
+    }
+
+    void shutdownPersister()
+    {
+        if (auto persisterFacade = _PersisterFacade::get()) {
+            persisterFacade->shutdown();
+        }
+    }
+
+    bool startMcpSession(std::optional<McpSession>& mcpSession, ConsoleLiveOutput& liveOutput, CommandLineArguments const& arguments)
+    {
+        if (!arguments.mcpServer) {
+            return true;
+        }
+        _McpToolsFacadeImpl::set(std::make_shared<_McpToolsFacadeImpl>());
+        mcpSession.emplace(liveOutput, arguments.mcpPort);
+        if (auto const& errorMessage = mcpSession->getErrorMessage()) {
+            ConsoleOutput::printError(*errorMessage);
+            return false;
+        }
+        ConsoleOutput::printStep("mcp", McpServer::createUrl(arguments.mcpPort));
+        return true;
+    }
+
+    bool readSimulation(SimulationDesc& simData, CommandLineArguments const& arguments)
+    {
+        if (arguments.inputFilename.empty()) {
+            if (arguments.mcpServer) {
+                simData.worldSize(EmptyWorldSize).center(toRealVector2D(EmptyWorldSize) / 2);
+                return true;
+            }
             ConsoleOutput::printError("No input file given.");
             return false;
         }
         auto startTimepoint = std::chrono::steady_clock::now();
-        if (!SerializerService::get().deserializeSimulationFromFiles(simData, inputFilename)) {
+        if (!SerializerService::get().deserializeSimulationFromFiles(simData, arguments.inputFilename)) {
             ConsoleOutput::printError("Could not read from input files.");
             return false;
         }
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint);
-        ConsoleOutput::printStep("input", inputFilename, StringHelper::format(duration.count()) + " ms");
+        ConsoleOutput::printStep("input", arguments.inputFilename, StringHelper::format(duration.count()) + " ms");
         return true;
     }
 
@@ -127,15 +173,36 @@ namespace
         if (!isPeriodicUploadDesired(arguments)) {
             return;
         }
-        _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());
-        _PersisterFacade::get()->setup();
         periodicUploader.emplace(liveOutput, arguments.uploadName, std::chrono::minutes(*arguments.uploadInterval));
         ConsoleOutput::printStep("upload", arguments.uploadName, "every " + StringHelper::format(*arguments.uploadInterval) + " min");
     }
 
-    std::chrono::milliseconds runSimulation(SimulationFacade const& simulationFacade, CommandLineArguments const& arguments)
+    void runMcpSession(
+        McpSession& mcpSession,
+        SimulationFacade const& simulationFacade,
+        SimulationDesc& simData,
+        ConsoleLiveOutput& liveOutput,
+        CommandLineArguments const& arguments)
     {
-        ConsoleLiveOutput liveOutput;
+        std::optional<PeriodicUploader> periodicUploader;
+        initPeriodicUpload(periodicUploader, liveOutput, arguments);
+
+        ConsoleOutput::printHint(std::string("Press Q to stop the MCP server") + (arguments.outputFilename.empty() ? "." : " and write the output file."));
+        ConsoleOutput::printBlankLine();
+
+        mcpSession.setVisibleArea(simData._center, simData._zoom);
+        TemporalControlService::get().createFlashback(std::move(simData._mainData));
+        if (!arguments.inputFilename.empty()) {
+            simulationFacade->runSimulation();
+        }
+        SimulationRunner::runWithMcpServer(simulationFacade, liveOutput, periodicUploader ? &*periodicUploader : nullptr);
+
+        simData.worldSize(simulationFacade->getWorldSize()).center(mcpSession.getVisibleAreaCenter()).zoom(mcpSession.getZoomFactor());
+        ConsoleOutput::printBlankLine();
+    }
+
+    std::chrono::milliseconds runSimulation(SimulationFacade const& simulationFacade, ConsoleLiveOutput& liveOutput, CommandLineArguments const& arguments)
+    {
         std::optional<PeriodicUploader> periodicUploader;
         initPeriodicUpload(periodicUploader, liveOutput, arguments);
 
@@ -156,10 +223,6 @@ namespace
                 simulationFacade, arguments.timesteps, liveOutput, periodicUploader ? &*periodicUploader : nullptr);
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint);
-
-        if (periodicUploader.has_value()) {
-            _PersisterFacade::get()->shutdown();
-        }
 
         auto ms = elapsed.count();
         auto tps = ms != 0 ? 1000.0f * toFloat(calculatedTimesteps) / toFloat(ms) : 0.0f;
@@ -211,6 +274,9 @@ int main(int argc, char** argv)
             initDebugMode();
         }
 
+        _RenderingFacadeImpl::set(std::make_shared<_RenderingFacadeImpl>());
+        ExitScopeGuard shutdownRendering([] { _RenderingFacade::get()->shutdown(); });
+
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         ExitScopeGuard closeSimulation([] { _SimulationFacade::get()->closeSimulation(); });
         auto simulationFacade = _SimulationFacade::get();
@@ -223,19 +289,35 @@ int main(int argc, char** argv)
             return 1;
         }
 
+        initPersister(arguments);
+        ExitScopeGuard persisterGuard(shutdownPersister);
+
+        ConsoleLiveOutput liveOutput;
+        std::optional<McpSession> mcpSession;
+        if (!startMcpSession(mcpSession, liveOutput, arguments)) {
+            return 1;
+        }
+
         SimulationDesc simData;
-        if (!readSimulation(simData, arguments.inputFilename)) {
+        if (!readSimulation(simData, arguments)) {
             return 1;
         }
         initSimulation(simulationFacade, simData, arguments.timesteps);
 
-        auto elapsed = runSimulation(simulationFacade, arguments);
-        simulationFacade->setRealTime(simData._realTime + elapsed);
+        if (mcpSession) {
+            runMcpSession(*mcpSession, simulationFacade, simData, liveOutput, arguments);
+            mcpSession.reset();
+        } else {
+            auto elapsed = runSimulation(simulationFacade, liveOutput, arguments);
+            simulationFacade->setRealTime(simData._realTime + elapsed);
+        }
+        shutdownPersister();
         if (arguments.debugMode) {
             ConsoleOutput::printBlock(KernelProfiler::get().getReport());
         }
 
-        if (!writeSimulation(simulationFacade, simData, arguments.outputFilename)) {
+        auto outputDesired = !arguments.mcpServer || !arguments.outputFilename.empty();
+        if (outputDesired && !writeSimulation(simulationFacade, simData, arguments.outputFilename)) {
             return 1;
         }
         ConsoleOutput::printBlankLine();

@@ -205,7 +205,7 @@ Besides the graphical program, ALIEN includes `alien-cli` (on Windows `alien-cli
 ```
 alien-cli -i example.sim -o output.sim -t 1000
 ```
-runs the simulation file `example.sim` for 1000 time steps and writes the result to `output.sim`. Without `-t`, the simulation runs until you press Q or Ctrl+C. All options are described in the chapter [Files and command line](resources/docs/files.md#command-line-interface).
+runs the simulation file `example.sim` for 1000 time steps and writes the result to `output.sim`. Without `-t`, the simulation runs until you press Q or Ctrl+C. With `--mcp`, it can be controlled by [AI agents](resources/docs/ai-agents.md#console-mode-and-command-line). All options are described in the chapter [Files and command line](resources/docs/files.md#command-line-interface).
 
 ## 📘 Documentation
 

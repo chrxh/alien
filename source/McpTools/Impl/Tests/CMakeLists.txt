@@ -3,6 +3,8 @@ PUBLIC
     GenomeMassEditServiceTests.cpp
     JsonPathTests.cpp
     McpInspectionToolsTests.cpp
+    McpToolExecutorTests.cpp
+    McpToolsFacadeTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(McpToolsTests Base)

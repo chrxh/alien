@@ -6,6 +6,7 @@
 
 #include <Base/LoggingService.h>
 
+#include <Rendering/Interface/PictureService.h>
 #include <Rendering/Interface/RenderingFacade.h>
 
 #include "PictureGuiService.h"
@@ -100,7 +101,7 @@ void ResourcePreviewWidget::processSimulationPreview(float availableWidth, std::
 
 void ResourcePreviewWidget::processGenomePreview(float width, std::optional<std::string> const& label)
 {
-    auto const& resolution = PictureGuiService::PreviewPictureResolution;
+    auto const& resolution = PictureService::PreviewPictureResolution;
 
     // The aspect ratio of the uploaded picture makes the widget show the same tile layout
     auto height = width * toFloat(resolution.y) / toFloat(resolution.x);

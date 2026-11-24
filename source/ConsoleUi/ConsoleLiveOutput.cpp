@@ -18,11 +18,11 @@ ConsoleLiveOutput::~ConsoleLiveOutput()
 void ConsoleLiveOutput::update(std::vector<std::string> const& lines, std::string const& plainLine)
 {
     if (!Console::isRichOutput() || lines.empty()) {
-        if (plainLine.empty()) {
+        if (plainLine.empty() || plainLine == _printedPlainLine) {
             return;
         }
         auto output = createEraseSequence() + plainLine;
-        _plainLineLength = Console::getVisibleLength(plainLine);
+        _printedPlainLine = plainLine;
         std::cout << output << std::flush;
         return;
     }
@@ -54,23 +54,31 @@ void ConsoleLiveOutput::update(std::vector<std::string> const& lines, std::strin
 
 void ConsoleLiveOutput::printMessage(std::string const& message)
 {
+    auto panelLines = _printedLines;
+    auto plainLine = _printedPlainLine;
+
+    auto output = createEraseSequence();
+    if (!_lastMessage.empty()) {
+        output += Console::moveUp(1);
+    }
+    std::cout << output << message << Console::eraseToEndOfLine() << std::endl;
+    if (Console::isRichOutput()) {
+
+        // The trailing blank line separates the message from the panel that is redrawn below
+        std::cout << std::endl;
+    }
     _lastMessage = message;
 
-    // The trailing blank line separates the message from the panel that is redrawn below
-    std::cout << createEraseSequence() << message << std::endl << std::endl;
+    update(panelLines, plainLine);
 }
 
-void ConsoleLiveOutput::appendToLastMessage(std::string const& text)
+void ConsoleLiveOutput::appendToMessage(std::string const& message, std::string const& text)
 {
-    if (_lastMessage.empty()) {
+    if (!Console::isRichOutput() || _lastMessage != message) {
+        printMessage(message + text);
         return;
     }
     _lastMessage += text;
-
-    if (!Console::isRichOutput()) {
-        std::cout << createEraseSequence() << _lastMessage << std::endl << std::endl;
-        return;
-    }
 
     auto panelLines = _printedLines;
     std::cout << createEraseSequence() << Console::moveUp(LinesBetweenMessageAndPanel) << _lastMessage << Console::eraseToEndOfLine()
@@ -80,9 +88,9 @@ void ConsoleLiveOutput::appendToLastMessage(std::string const& text)
 
 void ConsoleLiveOutput::close()
 {
-    if (_plainLineLength > 0) {
+    if (!_printedPlainLine.empty()) {
         std::cout << std::endl;
-        _plainLineLength = 0;
+        _printedPlainLine.clear();
     }
     if (_cursorHidden) {
         std::cout << Console::showCursor() << std::flush;
@@ -99,9 +107,9 @@ std::string ConsoleLiveOutput::createEraseSequence()
         result = Console::moveUpAndErase(static_cast<int>(_printedLines.size()));
         _printedLines.clear();
     }
-    if (_plainLineLength > 0) {
-        result += "\r" + std::string(_plainLineLength, ' ') + "\r";
-        _plainLineLength = 0;
+    if (!_printedPlainLine.empty()) {
+        result += "\r" + std::string(Console::getVisibleLength(_printedPlainLine), ' ') + "\r";
+        _printedPlainLine.clear();
     }
     return result;
 }

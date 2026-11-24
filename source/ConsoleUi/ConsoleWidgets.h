@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -33,6 +34,10 @@ public:
 
     static std::string createField(std::string const& label, std::string const& value, int labelWidth, int valueWidth);
     static std::string createText(std::string const& text, ConsoleColor const& color);
+
+    static std::string createTimestamp(std::chrono::system_clock::time_point const& time);
+    static std::string
+    createCommandMessage(std::chrono::system_clock::time_point const& time, std::string const& command, std::string const& details, bool isError);
 
     static auto constexpr FrameContentOffset = 2;  // Border plus the space in front of the row content
 };

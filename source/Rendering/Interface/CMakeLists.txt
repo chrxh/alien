@@ -1,6 +1,8 @@
 add_library(RenderingInterface
     Definitions.h
     PictureData.h
+    PictureService.cpp
+    PictureService.h
     RenderingFacade.cpp
     RenderingFacade.h
     RenderView.h

@@ -79,7 +79,7 @@ std::vector<McpTool> McpNetworkTools::getTools(McpToolContext& context)
         McpTool{
             .name = "upload_simulation",
             .description = "Uploads the current simulation to the private workspace of the logged-in user on the ALIEN server. The simulation is not "
-                           "shared with the community. The user has to be logged in via ALIEN.",
+                           "shared with the community. The user has to be logged in to the ALIEN server.",
             .inputSchema = McpSchema::object(
                 {
                     {"name", McpSchema::string("Name of the simulation")},
@@ -97,6 +97,11 @@ void McpNetworkTools::process()
     _listTask.process();
     _downloadTask.process();
     _uploadTask.process();
+}
+
+bool McpNetworkTools::hasPendingRequests() const
+{
+    return _listTask.isPending() || _downloadTask.isPending() || _uploadTask.isPending();
 }
 
 void McpNetworkTools::listResources(boost::json::object const& arguments, McpToolCompletion const& completion)
@@ -236,7 +241,7 @@ void McpNetworkTools::uploadSimulation(boost::json::object const& arguments, Mcp
     auto description = McpArguments::getOptionalString(arguments, "description").value_or("");
     auto folder = McpArguments::getOptionalString(arguments, "folder").value_or("");
     if (!NetworkService::get().isLoggedIn()) {
-        throw std::runtime_error("The user is not logged in. Uploading requires the user to log in via ALIEN.");
+        throw std::runtime_error("The user is not logged in to the ALIEN server.");
     }
     auto previewJpg = _context->createSimulationPreviewJpg();
     if (!previewJpg) {

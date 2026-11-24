@@ -67,7 +67,9 @@ alien-cli -i input.sim -o output.sim -t 100000
 | --- | --- |
 | -i | The simulation file to run. |
 | -o | The file to which the result is written. |
-| -t | The number of time steps to calculate. Without it, the simulation runs until you press **Q** or **Ctrl+C**. Both stop the run and write the output file. |
+| -t | The number of time steps to calculate. Without it, the simulation runs until you press **Q** or **Ctrl+C**. Both stop the run and write the output file. Cannot be combined with --mcp. |
+| --mcp | Starts an MCP server, through which AI agents control the simulation until you press **Q** or **Ctrl+C**. Without -i, it begins with an empty and paused world. Without -o, no output file is written. See [AI agents](ai-agents.md#console-mode-and-command-line). |
+| --mcp-port | The port of the MCP server, by default 8765. Requires --mcp. |
 | -u, -p | User name and password for the ALIEN server. The long forms are --user and --password. |
 | --upload-name | The base name for periodic uploads of the running simulation to **My uploads**, visible only to you. Each upload gets this name followed by an underscore and a consecutive number, for example *Run_1* and *Run_2*. Requires --upload-interval and a login with -u and -p. |
 | --upload-interval | The number of minutes between two uploads. The first upload takes place one interval after the start. Requires --upload-name. |

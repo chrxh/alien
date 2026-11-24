@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <optional>
-#include <thread>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -16,9 +15,12 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
+#include <McpTools/Interface/McpToolsFacade.h>
+
 #include "BrowserController.h"
 #include "LocalLibraryController.h"
 #include "MainLoopController.h"
+#include "McpController.h"
 #include "WindowController.h"
 
 namespace
@@ -68,8 +70,12 @@ void ConsoleModeController::activate()
     std::cout << std::endl
               << "  " << ConsoleWidgets::createText("User interface and rendering are switched off.", ConsolePalette::Label) << std::endl
               << "  " << ConsoleWidgets::createText("Press ESC to return to the user interface.", ConsolePalette::Label) << std::endl
-              << "  " << ConsoleWidgets::createText("Press Q to quit, which saves on exit like the user interface does.", ConsolePalette::Label) << std::endl
-              << std::endl;
+              << "  " << ConsoleWidgets::createText("Press Q to quit, which saves on exit like the user interface does.", ConsolePalette::Label) << std::endl;
+    if (McpController::get().isServerRunning()) {
+        std::cout << "  " << ConsoleWidgets::createText("AI agents can still connect to the MCP server: ", ConsolePalette::Label)
+                  << ConsoleWidgets::createText(McpController::get().getServerUrl(), ConsolePalette::Value) << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 bool ConsoleModeController::isActive() const
@@ -84,6 +90,7 @@ void ConsoleModeController::process()
     }
     LocalLibraryController::get().process();
     BrowserController::get().process();
+    McpController::get().process();
     printSavedSimulation();
     printStatusLine();
 
@@ -96,7 +103,20 @@ void ConsoleModeController::process()
         deactivate();
         return;
     }
-    std::this_thread::sleep_for(PollInterval);
+    _McpToolsFacade::get()->waitForToolCalls(PollInterval);
+}
+
+void ConsoleModeController::onSpeedLimitChanged()
+{
+    _stateBeforeActivation.tpsRestriction = _SimulationFacade::get()->getTpsRestriction();
+}
+
+void ConsoleModeController::onMcpCommandExecuted(McpCommandLogEntry const& entry)
+{
+    if (!_active) {
+        return;
+    }
+    _liveOutput.printMessage(ConsoleWidgets::createCommandMessage(entry.time, entry.toolName, entry.isError ? entry.result : entry.arguments, entry.isError));
 }
 
 void ConsoleModeController::quit()

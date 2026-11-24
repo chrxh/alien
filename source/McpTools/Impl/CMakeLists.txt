@@ -31,6 +31,8 @@ add_library(McpToolsImpl
     McpSimulationTools.h
     McpTemporalTools.cpp
     McpTemporalTools.h
+    McpToolExecutor.cpp
+    McpToolExecutor.h
     McpToolsFacadeImpl.cpp
     McpToolsFacadeImpl.h
     McpViewTools.cpp

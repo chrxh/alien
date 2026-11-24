@@ -3,11 +3,15 @@
 #include <algorithm>
 #include <chrono>
 
+#include <Base/ExitScopeGuard.h>
+
 #include <ConsoleUi/ConsoleInput.h>
 #include <ConsoleUi/ConsoleLiveOutput.h>
 #include <ConsoleUi/ConsoleSimulationPanel.h>
 
 #include <Engine/Interface/SimulationFacade.h>
+
+#include <McpTools/Interface/McpToolsFacade.h>
 
 #include "PeriodicUploader.h"
 
@@ -31,6 +35,20 @@ namespace
     {
         auto pressedCharacter = ConsoleInput::readPressedCharacter();
         return ConsoleInput::isQuitRequested() || pressedCharacter == 'q' || pressedCharacter == 'Q';
+    }
+
+    void updateLiveOutput(ConsoleLiveOutput& liveOutput, ConsoleSimulationStatus& status, SimulationFacade const& simulationFacade)
+    {
+        auto statistics = simulationFacade->getStatisticsEntry();
+        status.numCells = statistics.objectStatistics.numCellObjects;
+        status.numCreatures = 0;
+        for (auto const& lineage : statistics.lineageEntries) {
+            status.numCreatures += lineage.numCreatures;
+        }
+        status.numLineages = toUInt32(statistics.lineageEntries.size());
+
+        auto lines = ConsoleSimulationPanel::fitsIntoConsole() ? ConsoleSimulationPanel::create(status) : std::vector<std::string>();
+        liveOutput.update(lines, ConsoleSimulationPanel::createPlainLine(status));
     }
 }
 
@@ -78,16 +96,7 @@ uint64_t SimulationRunner::calcTimestepsWithLiveOutput(
         status.tps = intervalMicroseconds > 0 ? toFloat(timestepsSinceUpdate) * 1.0e6f / toFloat(intervalMicroseconds) : 0.0f;
         timestepsSinceUpdate = 0;
 
-        auto statistics = simulationFacade->getStatisticsEntry();
-        status.numCells = statistics.objectStatistics.numCellObjects;
-        status.numCreatures = 0;
-        for (auto const& lineage : statistics.lineageEntries) {
-            status.numCreatures += lineage.numCreatures;
-        }
-        status.numLineages = toUInt32(statistics.lineageEntries.size());
-
-        auto lines = ConsoleSimulationPanel::fitsIntoConsole() ? ConsoleSimulationPanel::create(status) : std::vector<std::string>();
-        liveOutput.update(lines, ConsoleSimulationPanel::createPlainLine(status));
+        updateLiveOutput(liveOutput, status, simulationFacade);
 
         if (periodicUploader) {
             periodicUploader->process();
@@ -102,4 +111,39 @@ uint64_t SimulationRunner::calcTimestepsWithLiveOutput(
     ConsoleInput::end();
     liveOutput.close();
     return status.timestep - status.startTimestep;
+}
+
+void SimulationRunner::runWithMcpServer(SimulationFacade const& simulationFacade, ConsoleLiveOutput& liveOutput, PeriodicUploader* periodicUploader)
+{
+    ConsoleSimulationStatus status;
+    std::optional<std::chrono::steady_clock::time_point> lastUpdateTimepoint;
+
+    ConsoleInput::begin();
+    ExitScopeGuard endConsoleInput(&ConsoleInput::end);
+    while (!isStopRequested()) {
+        simulationFacade->checkAndThrowException();
+        _McpToolsFacade::get()->processToolCalls();
+
+        auto now = std::chrono::steady_clock::now();
+        if (!lastUpdateTimepoint || now - *lastUpdateTimepoint >= StatusUpdateInterval) {
+            lastUpdateTimepoint = now;
+
+            status.timestep = simulationFacade->getCurrentTimestep();
+            status.realTime = simulationFacade->getRealTime();
+            status.tps = simulationFacade->getTps();
+            status.paused = !simulationFacade->isSimulationRunning();
+            updateLiveOutput(liveOutput, status, simulationFacade);
+
+            if (periodicUploader) {
+                periodicUploader->process();
+            }
+        }
+        _McpToolsFacade::get()->waitForToolCalls(StatusUpdateInterval);
+    }
+    if (periodicUploader) {
+        periodicUploader->waitForPendingUpload();
+    }
+    liveOutput.close();
+
+    simulationFacade->pauseSimulation();
 }

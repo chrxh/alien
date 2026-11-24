@@ -21,10 +21,12 @@ FROM ${BASE_IMAGE}
 # Base links ImGui for settings serialization, which comes with the GLFW backend
 # of the GUI. alien-cli never opens a window and calls none of it, but shared libraries
 # of the windowing stack may still have to resolve when the executable is loaded.
+# The Vulkan loader is only needed for the screenshots of the MCP server.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         libgl1 \
         libglu1-mesa \
+        libvulkan1 \
         libx11-6 \
         libxext6 \
         libxrandr2 \

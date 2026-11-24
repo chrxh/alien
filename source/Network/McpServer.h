@@ -42,6 +42,12 @@ struct McpTool
 class McpServer
 {
 public:
+    static auto constexpr DefaultPort = 8765;
+    static auto constexpr MinPort = 1;
+    static auto constexpr MaxPort = 65535;
+
+    static std::string createUrl(int port);
+
     McpServer(std::string const& serverName, std::string const& serverVersion, std::string const& instructions, std::vector<McpTool> tools);
     ~McpServer();
 

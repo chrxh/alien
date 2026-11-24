@@ -5,6 +5,9 @@
 #include <cmath>
 #include <string_view>
 
+#include <Base/Definitions.h>
+#include <Base/StringHelper.h>
+
 namespace
 {
     auto constexpr FrameHorizontal = "\xe2\x94\x80";
@@ -21,6 +24,9 @@ namespace
 
     auto constexpr BannerWidth = 37;
     auto constexpr BannerIndent = 2;
+
+    auto constexpr MessageIndent = 2;
+    auto constexpr EllipsisWidth = 3;
 
     auto constexpr WordmarkWidth = 35;
     std::array<char const*, 5> const WordmarkArt = {
@@ -151,4 +157,22 @@ std::string ConsoleWidgets::createField(std::string const& label, std::string co
 std::string ConsoleWidgets::createText(std::string const& text, ConsoleColor const& color)
 {
     return Console::foreground(color) + text + Console::reset();
+}
+
+std::string ConsoleWidgets::createTimestamp(std::chrono::system_clock::time_point const& time)
+{
+    return createText("[" + StringHelper::format(time) + "]", ConsolePalette::Label);
+}
+
+std::string
+ConsoleWidgets::createCommandMessage(std::chrono::system_clock::time_point const& time, std::string const& command, std::string const& details, bool isError)
+{
+    auto result = std::string(MessageIndent, ' ') + createTimestamp(time) + " " + createText(command, isError ? ConsolePalette::Error : ConsolePalette::Accent);
+
+    auto remainingWidth = Console::getWidth() - Console::getVisibleLength(result) - EllipsisWidth - 2;
+    auto maxDetailsLength = Console::isRichOutput() ? remainingWidth : toInt(details.size());
+    if (!details.empty() && maxDetailsLength > 0) {
+        result += " " + createText(StringHelper::truncate(details, maxDetailsLength, 1), isError ? ConsolePalette::Error : ConsolePalette::Label);
+    }
+    return result;
 }

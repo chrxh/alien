@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <Network/McpServer.h>
+
 #include "AlienGui.h"
 #include "McpController.h"
 #include "StyleService.h"
@@ -23,7 +25,7 @@ void McpSettingsDialog::processIntern()
         AlienGui::InputIntParameters()
             .name("Port")
             .textWidth(RightColumnWidth)
-            .defaultValue(controller.getDefaultPort())
+            .defaultValue(McpServer::DefaultPort)
             .tooltip("Local port on which the MCP server accepts connections. A running server is restarted on the new port."),
         _port);
 

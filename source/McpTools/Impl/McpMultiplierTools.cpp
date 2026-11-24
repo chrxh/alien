@@ -159,6 +159,7 @@ McpToolResult McpMultiplierTools::undoMultiplication()
     if (!_origSelection) {
         throw std::invalid_argument("There is no multiplication to undo.");
     }
+    _SimulationFacade::get()->updateSelection();
     if (!_selectionAfterMultiplication->compareSizes(_SimulationFacade::get()->getSelectionShallowData())) {
         throw std::invalid_argument("The selection has changed since the last multiplication, so it can no longer be undone.");
     }
@@ -171,6 +172,7 @@ McpToolResult McpMultiplierTools::undoMultiplication()
 
 void McpMultiplierTools::checkSelectionForMultiplication(float numCopies) const
 {
+    _SimulationFacade::get()->updateSelection();
     auto selection = _SimulationFacade::get()->getSelectionShallowData();
     auto numEntities = selection.numClusterCells + selection.numEnergyParticles;
     if (numEntities == 0) {

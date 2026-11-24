@@ -10,9 +10,10 @@
 #include <Network/NetworkResourceService.h>
 #include <Network/NetworkService.h>
 
+#include <Rendering/Interface/PictureService.h>
+
 #include "AlienGui.h"
 #include "BrowserData.h"
-#include "PictureGuiService.h"
 #include "StyleService.h"
 
 namespace
@@ -128,7 +129,7 @@ std::string BrowserHelper::getShortGpuName(std::string const& gpu)
 
 float BrowserHelper::calcPictureHeight(float width)
 {
-    return width * toFloat(PictureGuiService::PreviewPictureResolution.y) / toFloat(PictureGuiService::PreviewPictureResolution.x);
+    return width * toFloat(PictureService::PreviewPictureResolution.y) / toFloat(PictureService::PreviewPictureResolution.x);
 }
 
 void BrowserHelper::Picture(std::optional<TextureData> const* picture, float width)

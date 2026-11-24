@@ -139,6 +139,7 @@ McpToolResult McpSelectionTools::clearSelection() const
 
 McpToolResult McpSelectionTools::getSelection() const
 {
+    _SimulationFacade::get()->updateSelection();
     auto selection = _SimulationFacade::get()->getSelectionShallowData();
     auto result = boost::json::object{
         {"objects", selection.numObjects},
@@ -243,6 +244,7 @@ McpToolResult McpSelectionTools::relaxSelection(boost::json::object const& argum
 
 SelectionShallowData McpSelectionTools::getNonEmptySelection() const
 {
+    _SimulationFacade::get()->updateSelection();
     auto result = _SimulationFacade::get()->getSelectionShallowData();
     if (result.numObjects == 0 && result.numEnergyParticles == 0) {
         throw std::invalid_argument("Nothing is selected. Select an area with select_area first.");

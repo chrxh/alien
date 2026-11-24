@@ -11,6 +11,8 @@
 #include <Fonts/AlienIconFont.h>
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <McpTools/Interface/McpToolsFacade.h>
+
 #include "AlienGui.h"
 #include "McpController.h"
 #include "McpSettingsDialog.h"
@@ -74,8 +76,8 @@ void McpWindow::processToolbar()
              AlienGui::ToolbarItemParameters().icon(ICON_FA_STOP).name("Stop server").disabled(!running).action([&] { controller.setServerRunning(false); })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
-             AlienGui::ToolbarItemParameters().icon(ICON_CLEAR).name("Clear command log").disabled(controller.getCommandLog().empty()).action([&] {
-                 controller.clearCommandLog();
+             AlienGui::ToolbarItemParameters().icon(ICON_CLEAR).name("Clear command log").disabled(_McpToolsFacade::get()->getCommandLog().empty()).action([] {
+                 _McpToolsFacade::get()->clearCommandLog();
              })),
          AlienGui::ToolbarItem::createSeparator(),
          AlienGui::ToolbarItem::createButton(
@@ -98,7 +100,7 @@ void McpWindow::processConnectionGuide()
         AlienGui::TooltipParameters()
             .textFunc([&] {
                 std::string toolGroups;
-                for (auto const& toolGroup : controller.getToolGroups()) {
+                for (auto const& toolGroup : _McpToolsFacade::get()->getToolGroups()) {
                     toolGroups += std::format("\n\n{}:\n{}", toolGroup.name, boost::algorithm::join(toolGroup.toolNames, ", "));
                 }
                 return std::format(
@@ -189,7 +191,7 @@ namespace
 
 void McpWindow::processCommandLog()
 {
-    auto const& commandLog = McpController::get().getCommandLog();
+    auto const& commandLog = _McpToolsFacade::get()->getCommandLog();
 
     ImGui::Spacing();
     AlienGui::Group(AlienGui::GroupParameters().text(std::format("Command log ({})", commandLog.size())));

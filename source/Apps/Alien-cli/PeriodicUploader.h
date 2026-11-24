@@ -18,13 +18,14 @@ public:
 
 private:
     void scheduleUpload();
-    void printMessage(std::string const& text) const;
+    void printMessage(std::string const& text);
     void appendResult(std::string const& text, bool isError) const;
 
     ConsoleLiveOutput& _liveOutput;
     std::string _baseName;
     std::chrono::minutes _interval;
     int _uploadNumber = 0;
+    std::string _uploadMessage;
     std::chrono::steady_clock::time_point _lastUploadTimepoint;
 
     TaskProcessor _taskProcessor;

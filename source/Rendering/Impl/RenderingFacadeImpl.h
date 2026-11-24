@@ -13,6 +13,7 @@ public:
     void setWindowHints() override;
     void setup(GLFWwindow* window) override;
     void setupSimulationRendering(ImFont* labelFont) override;
+    void setupForPicturesWithoutWindow() override;
     void shutdown() override;
 
     void newFrame() override;

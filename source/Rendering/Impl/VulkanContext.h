@@ -163,9 +163,10 @@ public:
     void onFrameCompleted(uint64_t frameNumber);
     uint64_t getFrameNumber() const;
     void advanceFrameNumber();
+    void completeFrame();
 
 private:
-    void createInstance();
+    void createInstance(std::vector<char const*> extensions);
     void selectPhysicalDevice(std::optional<GpuUuid> const& preferredGpu);
     void createDevice();
     void createDescriptorPool();

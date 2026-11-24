@@ -18,6 +18,7 @@ public:
         McpToolCompletion const& completion);
 
     void process();
+    bool isPending() const;
 
 private:
     void complete(McpToolResult const& result);

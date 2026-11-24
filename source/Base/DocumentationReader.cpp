@@ -11,16 +11,18 @@ namespace
 {
     auto constexpr ContentsFilename = "contents.md";
 
-    std::string readFile(std::filesystem::path const& path)
+    std::string readFile(std::filesystem::path const& filename)
     {
-        std::ifstream stream(path);
+        std::error_code error;
+        auto docsPath = std::filesystem::exists(Const::DocsPath, error) ? Const::DocsPath : Const::ProgramPath / Const::DocsPath;
+        std::ifstream stream(docsPath / filename);
         return {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
     }
 }
 
 std::vector<DocumentationChapter> DocumentationReader::getChapters()
 {
-    return parseChapters(readFile(Const::DocsPath / ContentsFilename));
+    return parseChapters(readFile(ContentsFilename));
 }
 
 std::vector<DocumentationChapter> DocumentationReader::parseChapters(std::string const& contentsText)
@@ -48,5 +50,5 @@ std::vector<DocumentationChapter> DocumentationReader::parseChapters(std::string
 
 std::string DocumentationReader::readChapter(DocumentationChapter const& chapter)
 {
-    return readFile(Const::DocsPath / chapter.filename);
+    return readFile(chapter.filename);
 }

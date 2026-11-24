@@ -26,6 +26,7 @@ public:
     void shutdown();
 
     void newFrame();
+    bool isPreparingFrame() const;
 
     // Fills the screen of the current frame with a color
     void clearScreen(FloatColorRGB const& color);
@@ -72,6 +73,7 @@ private:
     VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
     VkSemaphore _imageAcquiredSemaphore = VK_NULL_HANDLE;
     VkFence _frameFence = VK_NULL_HANDLE;
+    bool _preparingFrame = false;
     bool _frameSubmitted = false;
 
     Shader _presentationShader;

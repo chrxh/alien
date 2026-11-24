@@ -5,6 +5,8 @@
 
 #include <Base/Definitions.h>
 
+#include "McpCommandLogEntry.h"
+
 struct SimulationDesc;
 
 enum class McpPictureFormat
@@ -25,11 +27,13 @@ public:
 
     virtual void createSimulation(std::string const& projectName, IntVector2D const& worldSize) = 0;
     virtual void applySimulation(SimulationDesc const& simulation) = 0;
-    virtual void onSelectionChanged() = 0;
-    virtual void onNetworkResourcesChanged() = 0;
 
     virtual std::string createPicture(IntVector2D const& resolution, McpPictureFormat format) = 0;
     virtual std::optional<std::string> createSimulationPreviewJpg() = 0;
 
-    virtual void showMessage(std::string const& message) = 0;
+    virtual void onSelectionChanged() {}
+    virtual void onSpeedLimitChanged() {}
+    virtual void onNetworkResourcesChanged() {}
+    virtual void onCommandExecuted(McpCommandLogEntry const&) {}
+    virtual void showMessage(std::string const&) {}
 };

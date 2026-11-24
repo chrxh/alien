@@ -10,7 +10,7 @@ std::optional<int> CommandLineParser::parse(CommandLineArguments& arguments, int
 
     app.add_option("-i", arguments.inputFilename, "Specifies the name of the input file for the simulation to run.");
     app.add_option("-o", arguments.outputFilename, "Specifies the name of the output file for the simulation.");
-    app.add_option(
+    auto timestepsOption = app.add_option(
         "-t",
         arguments.timesteps,
         "The number of time steps to be calculated. If it is not specified, the simulation runs until it is stopped with Q or Ctrl+C, which writes the "
@@ -25,6 +25,16 @@ std::optional<int> CommandLineParser::parse(CommandLineArguments& arguments, int
         "--upload-interval to be given as well.");
     app.add_option(
         "--upload-interval", arguments.uploadInterval, "The number of minutes between two periodic uploads. Requires --upload-name to be given as well.");
+    auto mcpOption = app.add_flag(
+        "--mcp",
+        arguments.mcpServer,
+        "Starts an MCP server, through which AI agents on this computer control the simulation. It runs until it is stopped with Q or Ctrl+C. Without -i, it "
+        "starts with an empty world, which is paused. Without -o, no output file is written.");
+    mcpOption->excludes(timestepsOption);
+    app.add_option("--mcp-port", arguments.mcpPort, "The port of the MCP server.")
+        ->needs(mcpOption)
+        ->check(CLI::Range(McpServer::MinPort, McpServer::MaxPort))
+        ->capture_default_str();
     app.add_flag(
         "-d,--debug",
         arguments.debugMode,

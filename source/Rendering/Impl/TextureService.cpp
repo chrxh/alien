@@ -7,7 +7,10 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
 #include <imgui_impl_vulkan.h>
 
 #include <Base/ExitScopeGuard.h>

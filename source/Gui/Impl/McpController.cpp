@@ -1,23 +1,21 @@
 #include "McpController.h"
 
 #include <algorithm>
-#include <atomic>
 #include <stdexcept>
 #include <format>
-#include <future>
-
-#include <boost/json.hpp>
 
 #include <Base/GlobalSettings.h>
-#include <Base/LoggingService.h>
-#include <Base/Resources.h>
-#include <Base/StringHelper.h>
 
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <McpTools/Interface/McpToolsFacade.h>
 
+#include <Network/McpServer.h>
+
+#include <Rendering/Interface/PictureService.h>
+
 #include "BrowserWindow.h"
+#include "ConsoleModeController.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "MainLoopController.h"
@@ -27,28 +25,17 @@
 #include "SimulationView.h"
 #include "Viewport.h"
 
-namespace
+void McpController::process()
 {
-    auto constexpr DefaultPort = 8765;
-    auto constexpr MinPort = 1;
-    auto constexpr MaxPort = 65535;
-    auto constexpr ServerName = "alien";
-    auto constexpr TaskPollInterval = std::chrono::milliseconds(50);
-    auto constexpr ServerStoppedMessage = "The MCP server has been stopped.";
-    auto constexpr MaxCommandLogEntries = size_t{1000};
-    auto constexpr MaxLogTextLength = size_t{1000};
-    auto constexpr MaxLogTextLines = size_t{20};
-}
-
-McpController::~McpController()
-{
-    _stopping = true;
-    _server.reset();
+    if (!MainLoopController::get().isOperatingMode()) {
+        return;
+    }
+    _McpToolsFacade::get()->processToolCalls();
 }
 
 bool McpController::isServerRunning() const
 {
-    return _server != nullptr;
+    return _McpToolsFacade::get()->isServerRunning();
 }
 
 void McpController::setServerRunning(bool value)
@@ -56,10 +43,12 @@ void McpController::setServerRunning(bool value)
     if (value) {
         startServer();
         if (isServerRunning()) {
+            _startServerAtNextLaunch = true;
             printOverlayMessage("MCP server running at " + getServerUrl());
         }
     } else if (isServerRunning()) {
-        stopServer();
+        _McpToolsFacade::get()->stopServer();
+        _startServerAtNextLaunch = false;
         printOverlayMessage("MCP server stopped");
     }
 }
@@ -69,80 +58,40 @@ int McpController::getPort() const
     return _port;
 }
 
-int McpController::getDefaultPort() const
-{
-    return DefaultPort;
-}
-
 void McpController::setPort(int value)
 {
-    auto port = std::clamp(value, MinPort, MaxPort);
+    auto port = std::clamp(value, McpServer::MinPort, McpServer::MaxPort);
     if (port == _port) {
         return;
     }
     _port = port;
     if (isServerRunning()) {
-        stopServer();
+        _McpToolsFacade::get()->stopServer();
         setServerRunning(true);
     }
 }
 
 std::string McpController::getServerUrl() const
 {
-    return std::format("http://127.0.0.1:{}/mcp", _port);
-}
-
-std::vector<McpToolGroup> const& McpController::getToolGroups() const
-{
-    return _toolGroups;
-}
-
-std::deque<McpCommandLogEntry> const& McpController::getCommandLog() const
-{
-    return _commandLog;
-}
-
-void McpController::clearCommandLog()
-{
-    _commandLog.clear();
+    return McpServer::createUrl(_port);
 }
 
 void McpController::init()
 {
-    for (auto const& tool : createTools()) {
-        if (_toolGroups.empty() || _toolGroups.back().name != tool.group) {
-            _toolGroups.emplace_back(McpToolGroup{.name = tool.group});
-        }
-        _toolGroups.back().toolNames.emplace_back(tool.name);
-    }
-    setPort(GlobalSettings::get().getValue("settings.mcp server.port", DefaultPort));
-    if (GlobalSettings::get().getValue("settings.mcp server.enabled", false)) {
+    _McpToolsFacade::get()->setup(*this);
+
+    setPort(GlobalSettings::get().getValue("settings.mcp server.port", McpServer::DefaultPort));
+    _startServerAtNextLaunch = GlobalSettings::get().getValue("settings.mcp server.enabled", false);
+    if (_startServerAtNextLaunch) {
         startServer();
-    }
-}
-
-void McpController::process()
-{
-    if (!MainLoopController::get().isOperatingMode()) {
-        return;
-    }
-    _McpToolsFacade::get()->process();
-
-    decltype(_pendingTasks) tasks;
-    {
-        std::lock_guard lock(_pendingTasksMutex);
-        tasks.swap(_pendingTasks);
-    }
-    for (auto const& task : tasks) {
-        task();
     }
 }
 
 void McpController::shutdown()
 {
     GlobalSettings::get().setValue("settings.mcp server.port", _port);
-    GlobalSettings::get().setValue("settings.mcp server.enabled", isServerRunning());
-    stopServer();
+    GlobalSettings::get().setValue("settings.mcp server.enabled", _startServerAtNextLaunch);
+    _McpToolsFacade::get()->shutdown();
 }
 
 RealVector2D McpController::getVisibleAreaCenter() const
@@ -183,9 +132,25 @@ void McpController::applySimulation(SimulationDesc const& simulation)
     }
 }
 
+std::string McpController::createPicture(IntVector2D const& resolution, McpPictureFormat format)
+{
+    auto picture = SimulationView::get().savePicture(resolution);
+    return format == McpPictureFormat::Png ? PictureService::get().encodePng(picture) : PictureService::get().encodeJpg(picture);
+}
+
+std::optional<std::string> McpController::createSimulationPreviewJpg()
+{
+    return PictureGuiService::get().createSimulationPreviewJpg();
+}
+
 void McpController::onSelectionChanged()
 {
     EditorModel::get().update();
+}
+
+void McpController::onSpeedLimitChanged()
+{
+    ConsoleModeController::get().onSpeedLimitChanged();
 }
 
 void McpController::onNetworkResourcesChanged()
@@ -193,15 +158,9 @@ void McpController::onNetworkResourcesChanged()
     BrowserWindow::get().onRefresh();
 }
 
-std::string McpController::createPicture(IntVector2D const& resolution, McpPictureFormat format)
+void McpController::onCommandExecuted(McpCommandLogEntry const& entry)
 {
-    auto picture = SimulationView::get().savePicture(resolution);
-    return format == McpPictureFormat::Png ? PictureGuiService::get().encodePng(picture) : PictureGuiService::get().encodeJpg(picture);
-}
-
-std::optional<std::string> McpController::createSimulationPreviewJpg()
-{
-    return PictureGuiService::get().createSimulationPreviewJpg();
+    ConsoleModeController::get().onMcpCommandExecuted(entry);
 }
 
 void McpController::showMessage(std::string const& message)
@@ -211,107 +170,7 @@ void McpController::showMessage(std::string const& message)
 
 void McpController::startServer()
 {
-    if (_server) {
-        return;
-    }
-    auto server = std::make_unique<McpServer>(ServerName, Const::ProgramVersion, _McpToolsFacade::get()->getInstructions(), createTools());
-    if (!server->start(_port)) {
-        log(Priority::Important, std::format("mcp: could not start server on port {}", _port));
+    if (!_McpToolsFacade::get()->startServer(_port)) {
         GenericMessageDialog::get().information("MCP server", std::format("The MCP server could not be started because port {} is not available.", _port));
-        return;
-    }
-    _server = std::move(server);
-
-    log(Priority::Important, "mcp: server started at " + getServerUrl());
-}
-
-void McpController::stopServer()
-{
-    if (!_server) {
-        return;
-    }
-    _stopping = true;
-    _server->stop();
-    _server.reset();
-    {
-        std::lock_guard lock(_pendingTasksMutex);
-        _pendingTasks.clear();
-    }
-    _stopping = false;
-
-    log(Priority::Important, "mcp: server stopped");
-}
-
-std::vector<McpTool> McpController::createTools()
-{
-    std::vector<McpTool> result;
-    for (auto const& tool : _McpToolsFacade::get()->getTools(*this)) {
-        result.emplace_back(wrapTool(tool));
-    }
-    return result;
-}
-
-McpTool McpController::wrapTool(McpTool const& tool)
-{
-    auto result = tool;
-    result.deferredHandler = nullptr;
-    result.handler = [this, tool](boost::json::object const& arguments) {
-        return executeOnMainThread([this, tool, arguments](McpToolCompletion const& completion) {
-            auto completeAndLog = [this, name = tool.name, arguments, completion](McpToolResult const& toolResult) {
-                addCommandLogEntry(name, arguments, toolResult);
-                completion(toolResult);
-            };
-            try {
-                if (tool.handler) {
-                    completeAndLog(tool.handler(arguments));
-                } else {
-                    tool.deferredHandler(arguments, completeAndLog);
-                }
-            } catch (std::exception const& exception) {
-                completeAndLog(McpToolResult{.text = exception.what(), .isError = true});
-            }
-        });
-    };
-    return result;
-}
-
-McpToolResult McpController::executeOnMainThread(std::function<void(McpToolCompletion const&)> const& function)
-{
-    auto promise = std::make_shared<std::promise<McpToolResult>>();
-    auto completed = std::make_shared<std::atomic_flag>();
-    auto result = promise->get_future();
-    {
-        std::lock_guard lock(_pendingTasksMutex);
-        if (_stopping) {
-            return McpToolResult{.text = ServerStoppedMessage, .isError = true};
-        }
-        _pendingTasks.emplace_back([function, promise, completed] {
-            function([promise, completed](McpToolResult const& toolResult) {
-                if (!completed->test_and_set()) {
-                    promise->set_value(toolResult);
-                }
-            });
-        });
-    }
-    while (result.wait_for(TaskPollInterval) != std::future_status::ready) {
-        if (_stopping) {
-            return McpToolResult{.text = ServerStoppedMessage, .isError = true};
-        }
-    }
-    return result.get();
-}
-
-void McpController::addCommandLogEntry(std::string const& toolName, boost::json::object const& arguments, McpToolResult const& result)
-{
-    log(Priority::Important, result.isError ? std::format("mcp: {} -> error: {}", toolName, result.text) : "mcp: " + toolName);
-
-    _commandLog.emplace_back(McpCommandLogEntry{
-        .time = std::chrono::system_clock::now(),
-        .toolName = toolName,
-        .arguments = arguments.empty() ? std::string() : StringHelper::truncate(boost::json::serialize(arguments), MaxLogTextLength, MaxLogTextLines),
-        .result = StringHelper::truncate(result.text, MaxLogTextLength, MaxLogTextLines),
-        .isError = result.isError});
-    if (_commandLog.size() > MaxCommandLogEntries) {
-        _commandLog.pop_front();
     }
 }
