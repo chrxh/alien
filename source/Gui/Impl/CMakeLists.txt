@@ -204,8 +204,6 @@ add_library(GuiImpl
     SelectionWidget.h
     SignalsBufferDialog.cpp
     SignalsBufferDialog.h
-    SimulationGuiService.cpp
-    SimulationGuiService.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp
@@ -218,6 +216,8 @@ add_library(GuiImpl
     SimulationParametersLayerWidget.h
     SimulationScrollbars.cpp
     SimulationScrollbars.h
+    SimulationSessionGuiService.cpp
+    SimulationSessionGuiService.h
     SimulationView.cpp
     SimulationView.h
     SpatialControlWindow.cpp

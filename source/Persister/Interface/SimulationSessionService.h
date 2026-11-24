@@ -10,9 +10,9 @@
 
 #include <Data/Descs.h>
 
-class SimulationService
+class SimulationSessionService
 {
-    MAKE_SINGLETON(SimulationService);
+    MAKE_SINGLETON(SimulationSessionService);
 
 public:
     struct NewSimulationParameters

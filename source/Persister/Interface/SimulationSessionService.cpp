@@ -1,4 +1,4 @@
-#include "SimulationService.h"
+#include "SimulationSessionService.h"
 
 #include <Base/ExitScopeGuard.h>
 #include <Base/StringHelper.h>
@@ -15,7 +15,7 @@ namespace
     auto constexpr ProjectNameSize = sizeof(Char64) / sizeof(char);
 }
 
-void SimulationService::createSimulation(NewSimulationParameters const& parameters)
+void SimulationSessionService::createSimulation(NewSimulationParameters const& parameters)
 {
     SimulationParameters simulationParameters;
     if (parameters._adoptSimulationParameters) {
@@ -28,7 +28,7 @@ void SimulationService::createSimulation(NewSimulationParameters const& paramete
     TemporalControlService::get().createFlashback();
 }
 
-std::optional<std::string> SimulationService::loadSimulation(SimulationDesc simulation)
+std::optional<std::string> SimulationSessionService::loadSimulation(SimulationDesc simulation)
 {
     std::optional<std::string> errorMessage;
     replaceSimulation([&] {
@@ -57,7 +57,7 @@ std::optional<std::string> SimulationService::loadSimulation(SimulationDesc simu
     return errorMessage;
 }
 
-void SimulationService::replaceSimulation(std::function<void()> const& setupFunc)
+void SimulationSessionService::replaceSimulation(std::function<void()> const& setupFunc)
 {
     _PersisterFacade::get()->shutdown();
     ExitScopeGuard restartPersister([] { _PersisterFacade::get()->restart(); });

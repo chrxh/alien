@@ -13,7 +13,7 @@
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "OverlayController.h"
-#include "SimulationGuiService.h"
+#include "SimulationSessionGuiService.h"
 #include <Engine/Interface/SimulationFacade.h>
 #include <Persister/Interface/PersisterFacade.h>
 
@@ -42,7 +42,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
             if (data.resourceType == NetworkResourceType_Simulation) {
                 if (auto errorMessage =
-                        SimulationGuiService::get().loadSimulation(std::move(std::get<SimulationDesc>(data.resourceData)), data.resourceId)) {
+                        SimulationSessionGuiService::get().loadSimulation(std::move(std::get<SimulationDesc>(data.resourceData)), data.resourceId)) {
                     showMessage("Error", *errorMessage);
                 }
                 printOverlayMessage(data.resourceName);

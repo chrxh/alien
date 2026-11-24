@@ -12,7 +12,7 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
-#include <Persister/Interface/SimulationService.h>
+#include <Persister/Interface/SimulationSessionService.h>
 
 #include "AlienGui.h"
 #include "MutationRatesDialog.h"
@@ -306,7 +306,7 @@ void MassEditDialog::onExecute()
         _SimulationFacade::get()->removeSelectedObjects(true);
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
     } else {
-        SimulationService::get().replaceSimulation([&] {
+        SimulationSessionService::get().replaceSimulation([&] {
             _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
             _SimulationFacade::get()->setSimulationData(content);
         });

@@ -12,7 +12,7 @@
 
 #include <McpTools/Interface/McpToolsFacade.h>
 
-#include <Persister/Interface/SimulationService.h>
+#include <Persister/Interface/SimulationSessionService.h>
 
 #include <Rendering/Interface/PictureService.h>
 #include <Rendering/Interface/RenderingFacade.h>
@@ -65,16 +65,16 @@ void McpSession::setVisibleArea(RealVector2D const& center, float zoomFactor)
 
 void McpSession::createSimulation(std::string const& projectName, IntVector2D const& worldSize)
 {
-    SimulationService::get().createSimulation(SimulationService::NewSimulationParameters()
-                                                  .projectName(projectName)
-                                                  .worldSize(worldSize)
-                                                  .externalEnergy(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
+    SimulationSessionService::get().createSimulation(SimulationSessionService::NewSimulationParameters()
+                                                         .projectName(projectName)
+                                                         .worldSize(worldSize)
+                                                         .externalEnergy(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
     setVisibleArea(toRealVector2D(worldSize) / 2, InitialZoomFactor);
 }
 
 void McpSession::applySimulation(SimulationDesc const& simulation)
 {
-    auto errorMessage = SimulationService::get().loadSimulation(simulation);
+    auto errorMessage = SimulationSessionService::get().loadSimulation(simulation);
     setVisibleArea(simulation._center, simulation._zoom);
     if (errorMessage) {
         throw std::runtime_error(*errorMessage);

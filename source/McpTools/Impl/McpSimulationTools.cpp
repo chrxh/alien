@@ -14,7 +14,7 @@
 #include <Engine/Interface/TemporalControlService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
-#include <Persister/Interface/SimulationService.h>
+#include <Persister/Interface/SimulationSessionService.h>
 
 #include <Network/McpArguments.h>
 #include <Network/McpSchema.h>
@@ -120,7 +120,7 @@ McpToolResult McpSimulationTools::resizeWorld(boost::json::object const& argumen
     auto realTime = _SimulationFacade::get()->getRealTime();
     auto statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
 
-    SimulationService::get().replaceSimulation([&] {
+    SimulationSessionService::get().replaceSimulation([&] {
         _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
         if (scaleContent) {
             DescEditService::get().scaleContent(content, origWorldSize, worldSize);

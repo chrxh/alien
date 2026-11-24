@@ -7,7 +7,7 @@
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
 
-#include <Persister/Interface/SimulationService.h>
+#include <Persister/Interface/SimulationSessionService.h>
 
 #include "AlienGui.h"
 
@@ -89,7 +89,7 @@ void ResizeWorldDialog::onResizing()
     worldSize.x = _width;
     worldSize.y = _height;
 
-    SimulationService::get().replaceSimulation([&] {
+    SimulationSessionService::get().replaceSimulation([&] {
         _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
 
         if (_scaleContent) {

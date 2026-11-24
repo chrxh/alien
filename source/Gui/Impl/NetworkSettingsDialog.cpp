@@ -7,7 +7,7 @@
 #include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "HelpStrings.h"
-#include "SimulationGuiService.h"
+#include "SimulationSessionGuiService.h"
 #include "StyleService.h"
 
 namespace
@@ -51,7 +51,7 @@ void NetworkSettingsDialog::openIntern()
 void NetworkSettingsDialog::onChangeSettings()
 {
     if (_serverAddress != _origServerAddress) {
-        SimulationGuiService::get().setOriginResourceId(std::nullopt);
+        SimulationSessionGuiService::get().setOriginResourceId(std::nullopt);
     }
     NetworkService::get().setServerAddress(_serverAddress);
     NetworkService::get().setCountAsActive(_countAsActive);

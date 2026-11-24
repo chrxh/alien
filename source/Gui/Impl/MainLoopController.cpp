@@ -54,9 +54,9 @@
 #include "RecorderWindow.h"
 #include "SavePictureDialog.h"
 #include "SaveSimulationDialog.h"
-#include "SimulationGuiService.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
+#include "SimulationSessionGuiService.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
 #include "StatisticsWindow.h"
@@ -203,7 +203,7 @@ void MainLoopController::scheduleReadingAutosave()
         [this](auto const& requestId) {
             auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
             _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
-            SimulationGuiService::get().restoreAutosaveOrigin();
+            SimulationSessionGuiService::get().restoreAutosaveOrigin();
             finishSimulationLoading(data.simulationDesc);
         },
         [this](auto const&) { scheduleSearchingStartupSimulation(); });
@@ -248,7 +248,7 @@ void MainLoopController::scheduleDownloadingStartupSimulation(NetworkResourceRaw
             auto const& deserializedSim = std::get<SimulationDesc>(data.resourceData);
             _loadedSimulationName = data.resourceName;
             setupSimulation(deserializedSim);
-            SimulationGuiService::get().setOriginResourceId(data.resourceId);
+            SimulationSessionGuiService::get().setOriginResourceId(data.resourceId);
             finishSimulationLoading(deserializedSim);
         },
         [this](auto const&) { setupEmptySimulation(); });
@@ -343,7 +343,7 @@ void MainLoopController::processScheduleExit()
     _saveSimRequestId.reset();
     if (_saveOnExit) {
         printOverlayMessage("Saving on exit ...");
-        SimulationGuiService::get().storeAutosaveOrigin();
+        SimulationSessionGuiService::get().storeAutosaveOrigin();
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
