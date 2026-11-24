@@ -10,21 +10,39 @@
 class AttackerProcessor
 {
 public:
+    __inline__ __device__ static void countAttackerCellsPerTarget(SimulationData& data);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
+    __inline__ __device__ static void countAttackerCellPerTarget(SimulationData& data, Object* object);
+    __inline__ __device__ static bool canAttack(SimulationData& data, Object* object);
+    __inline__ __device__ static bool isTargetOfCreatureAttack(SimulationData& data, Object* object, Object* otherObject, uint16_t creatureIdPart);
+
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
+    __inline__ __device__ static float calcPackFraction(SimulationData& data, Object* targetObject, Object* attackerObject, int attackerColor);
     __inline__ __device__ static float calcAttackableEnergy(Cell* cell);
     __inline__ __device__ static float absorbAttackableEnergy(Cell* cell, float energy);
     __inline__ __device__ static float absorbEnergy(float* energy, float maxEnergy);
 
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
+
+    static int constexpr MaxPackSize = 10;
+    static int constexpr MaxTargetCreatures = 8;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+
+__device__ __inline__ void AttackerProcessor::countAttackerCellsPerTarget(SimulationData& data)
+{
+    auto& operations = data.cellTypeOperations[CellType_Attacker];
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
+        countAttackerCellPerTarget(data, operations.at(i).object);
+    }
+}
 
 __device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
@@ -33,6 +51,66 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         processCell(data, result, operations.at(i).object);
     }
+}
+
+__device__ __inline__ void AttackerProcessor::countAttackerCellPerTarget(SimulationData& data, Object* object)
+{
+    if (cudaSimulationParameters.attackerPackSize.value[calcMod(object->color, MAX_COLORS)] <= 1) {
+        return;
+    }
+    if (object->typeData.cell.cellTypeData.attacker.mode != AttackerMode_Creature || !canAttack(data, object)) {
+        return;
+    }
+    auto creatureIdPart = static_cast<uint16_t>(object->typeData.cell.creature->id & 0xffff);
+    Creature* targetCreatures[MaxTargetCreatures];
+    auto numTargetCreatures = 0;
+    data.objectGrid.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
+        if (numTargetCreatures == MaxTargetCreatures || !isTargetOfCreatureAttack(data, object, otherObject, creatureIdPart)) {
+            return;
+        }
+        auto targetCreature = otherObject->typeData.cell.creature;
+        for (int i = 0; i < numTargetCreatures; ++i) {
+            if (targetCreatures[i] == targetCreature) {
+                return;
+            }
+        }
+        targetCreatures[numTargetCreatures++] = targetCreature;
+    });
+    for (int i = 0; i < numTargetCreatures; ++i) {
+        if (auto detection = targetCreatures[i]->findDetectionBy(creatureIdPart)) {
+            atomicAdd(&detection->numAttackerCells, 1u);
+        }
+    }
+}
+
+__device__ __inline__ bool AttackerProcessor::canAttack(SimulationData& data, Object* object)
+{
+    auto const& cell = object->typeData.cell;
+    if (object->isStatic() || !NeuronProcessor::isManuallyTriggered(data, object) || cell.rawEnergy >= SimulationParameters::attackerMaxRawEnergyThreshold) {
+        return false;
+    }
+    auto attackerEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, object->pos, object->color);
+    auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
+    return cell.usableEnergy - attackerEnergyCost >= cellMinEnergy;
+}
+
+__device__ __inline__ bool AttackerProcessor::isTargetOfCreatureAttack(SimulationData& data, Object* object, Object* otherObject, uint16_t creatureIdPart)
+{
+    if (otherObject->type != ObjectType_Cell || otherObject->isStatic()) {
+        return false;
+    }
+    auto cell = &object->typeData.cell;
+    auto otherCell = &otherObject->typeData.cell;
+    if (cell->isSameCreature(otherCell) || otherCell->creature->ancestorId == cell->creature->id) {
+        return false;
+    }
+    auto color = calcMod(object->color, MAX_COLORS);
+    auto otherColor = calcMod(otherObject->color, MAX_COLORS);
+    if (!otherCell->creature->isDetectedBy(creatureIdPart, otherColor)
+        || ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor) <= NEAR_ZERO) {
+        return false;
+    }
+    return !ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject);
 }
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -54,6 +132,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto creatureIdPart = static_cast<uint16_t>(cell->creature->id & 0xffff);
 
         auto sumEnergyToTransfer = 0.0f;
+        auto sumReleasedEnergy = 0.0f;
         data.objectGrid.executeForEach(
             object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
                 if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
@@ -166,7 +245,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         otherCell->eventPos = object->pos;
 
                         // Absorb energy from attacked cell
-                        sumEnergyToTransfer += absorbAttackableEnergy(otherCell, energyToTransfer);
+                        auto absorbedEnergy = absorbAttackableEnergy(otherCell, energyToTransfer);
+                        auto gainedEnergy = absorbedEnergy * calcPackFraction(data, otherObject, object, color);
+                        sumEnergyToTransfer += gainedEnergy;
+                        sumReleasedEnergy += absorbedEnergy - gainedEnergy;
                     }
                 }
             });
@@ -179,6 +261,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             cell->event = CellEvent_Attacking;
             cell->eventCounter = 6;
         }
+        if (sumReleasedEnergy > NEAR_ZERO) {
+            EnergyProcessor::emitEnergyParticle(data, object, sumReleasedEnergy);
+        }
 
         // Radiation
         if (attackerEnergyCost > 0) {
@@ -188,6 +273,37 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         // Output (signal is already present since attacker can only be manually triggered)
         cell->neuralActivity.signals[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
     }
+}
+
+__inline__ __device__ float AttackerProcessor::calcPackFraction(SimulationData& data, Object* targetObject, Object* attackerObject, int attackerColor)
+{
+    auto packSize = min(MaxPackSize, cudaSimulationParameters.attackerPackSize.value[attackerColor]);
+    if (packSize <= 1) {
+        return 1.0f;
+    }
+
+    Creature* packMembers[MaxPackSize];
+    auto numPackMembers = 0;
+    auto targetCreature = targetObject->typeData.cell.creature;
+    data.objectGrid.executeForEach(
+        targetObject->pos, cudaSimulationParameters.attackerRadius.value[attackerColor], targetObject->detached(), [&](auto const& nearObject) {
+            if (numPackMembers == packSize || nearObject->type != ObjectType_Cell || nearObject->color != attackerColor) {
+                return;
+            }
+            auto const& nearCell = nearObject->typeData.cell;
+            if (nearCell.cellType != CellType_Attacker || nearCell.creature == targetCreature) {
+                return;
+            }
+            for (int i = 0; i < numPackMembers; ++i) {
+                if (packMembers[i] == nearCell.creature) {
+                    return;
+                }
+            }
+            packMembers[numPackMembers++] = nearCell.creature;
+        });
+    auto detection = targetCreature->findDetectionBy(static_cast<uint16_t>(attackerObject->typeData.cell.creature->id & 0xffff));
+    auto numOwnAttackers = detection != nullptr ? max(1u, detection->numAttackerCells) : 1u;
+    return toFloat(numPackMembers) / toFloat(packSize) / toFloat(numOwnAttackers);
 }
 
 __inline__ __device__ float AttackerProcessor::calcAttackableEnergy(Cell* cell)

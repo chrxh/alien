@@ -135,6 +135,7 @@ void SimulationKernelsService::launchTimestepKernels(
         launchKernel(KERNEL(cudaNextTimestep_constructor_provideExternalEnergy), LaunchConfig{numBlocks, 8}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_cellType_injector), LaunchConfig{numBlocks, 8}, _stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_sensor), LaunchConfig{numBlocks, 64}, _stream, data, statistics);  // Sensor must run before attackers
+        launchKernel(KERNEL(cudaNextTimestep_cellType_attacker_prepare), LaunchConfig{numBlocks, 8}, _stream, data);
         launchKernel(KERNEL(cudaNextTimestep_cellType_attacker), LaunchConfig{numBlocks, 4}, _stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_depot), LaunchConfig{numBlocks, 4}, _stream, data, statistics);
         launchKernel(KERNEL(cudaNextTimestep_cellType_muscle), LaunchConfig{numBlocks, 8}, _stream, data, statistics);

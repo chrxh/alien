@@ -436,6 +436,7 @@ struct SensorDetection
     uint16_t restrictToColors;
 };
 
+    uint32_t numAttackerCells;
 struct Creature
 {
     uint64_t id;
@@ -491,6 +492,16 @@ struct Creature
     {
         while (1 == atomicExch(&locked, 1)) {
         }
+    __device__ __inline__ SensorDetection* findDetectionBy(uint16_t creatureIdPart)
+    {
+        for (uint32_t i = 0; i < numDetectedBy; ++i) {
+            if (detectedBy[i].creatureIdPart == creatureIdPart) {
+                return &detectedBy[i];
+            }
+        }
+        return nullptr;
+    }
+
         __threadfence();
     }
 

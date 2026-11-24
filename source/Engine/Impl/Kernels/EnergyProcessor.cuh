@@ -23,6 +23,7 @@ public:
     __inline__ __device__ static void transformIntoFreeCells(SimulationData& data);
 
     __inline__ __device__ static void radiate(SimulationData& data, Object* cell, float energy);
+    __inline__ __device__ static void emitEnergyParticle(SimulationData& data, Object* object, float energy);
     __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
     __inline__ __device__ static void provideExternalEnergyForSources(SimulationData& data);
 
@@ -399,14 +400,19 @@ __inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object
         return;
     }
 
-    float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+    emitEnergyParticle(data, cell, radiationEnergy);
+}
+
+__inline__ __device__ void EnergyProcessor::emitEnergyParticle(SimulationData& data, Object* object, float energy)
+{
+    float2 particleVel = (object->vel * cudaSimulationParameters.radiationVelocityMultiplier)
         + float2{
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-    float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
+    float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
     data.world.correctPosition(particlePos);
 
-    EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
+    createEnergyParticle(data, particlePos, particleVel, object->color, energy);
 }
 
 __inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)

@@ -30,6 +30,7 @@ __global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(Simula
 __global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationData data);
 __global__ void cudaNextTimestep_geneGraph_updateTransitiveNumCells(SimulationData data);
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_attacker_prepare(SimulationData data);
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_defender(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_depot(SimulationData data, SimulationStatistics statistics);

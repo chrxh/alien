@@ -147,7 +147,7 @@ An attacker steals energy from free cells or from cells of other creatures. It i
 | Channel | Meaning |
 | --- | --- |
 | #0 (input) | Triggers an attack if the absolute value is at least 0.1. |
-| #2 (output) | Success: the stolen energy divided by 10, between 0 and 1. It is only written when the attacker is triggered and its raw energy is below 2. Otherwise the channel keeps the value of the neural network. |
+| #2 (output) | Success: the gained energy divided by 10, between 0 and 1. It is only written when the attacker is triggered and its raw energy is below 2. Otherwise the channel keeps the value of the neural network. |
 
 ### How attacks work
 
@@ -162,6 +162,8 @@ The amount of energy depends on several factors:
 - **Defender** cells in *Anti-attacker* mode reduce the amount if the target is such a defender or is directly connected to one, see [Defender](#defender).
 - **Same lineage protection** reduces attacks on related creatures and **Size protection** reduces attacks on larger creatures.
 
+**Pack size** rewards hunting in packs. It only applies to the *Creature* mode and counts the creatures that have an attacker cell of the attacker's color within the attack radius of the attacked cell. The attacking creature is included, the attacked creature is not. If there are fewer than the pack size, the target still loses the full amount, but the attacker gains only the corresponding fraction, for example half of it if one of two required creatures is missing. The rest is released as energy particles. Several attacker cells of the same creature count as one pack member, and those that attack the same creature share the gain. An attacker cell that attacks another creature keeps its full share.
+
 Each attack attempt costs the amount set by **Energy cost**. This energy is emitted as energy particles. An attacker does not attack if this would bring its usable energy below the minimum energy.
 
 ### Modes
@@ -171,7 +173,7 @@ Each attack attempt costs the amount set by **Energy cost**. This energy is emit
 | Free cell | Free cells, optionally restricted to colors. |
 | Creature | Cells of other creatures. Only creatures that a sensor of the same creature has detected and tagged in the current cycle are attacked, see **Tag for attackers** of the sensor. Within such a creature, only cells whose color is selected in **Restrict to colors** of at least one tagging sensor are attacked. A creature never attacks its own offspring. |
 
-**Parameters:** the *Cell type: Attacker* group with **Energy cost**, **Food chain color matrix**, **Attack strength**, **Same lineage protection**, **Size protection** and **Attack radius** (2 by default).
+**Parameters:** the *Cell type: Attacker* group with **Energy cost**, **Food chain color matrix**, **Attack strength**, **Same lineage protection**, **Size protection**, **Attack radius** (2 by default) and **Pack size** (1 by default, no effect).
 
 **Example:** A predator needs a sensor in *Detect creature* mode with **Tag for attackers** enabled, an attacker and a digestor connected to the attacker. The sensor has to scan in the same cycle in which the attacker is triggered, for example with **Auto trigger**. The sensor signal can trigger the attacker through channel #0.
 

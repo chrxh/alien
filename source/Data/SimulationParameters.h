@@ -165,6 +165,7 @@ struct SimulationParameters
     BaseLayerParameter<float> attackerSizeProtection = {.baseValue = 0.0f};
     BaseParameter<float> attackerStrength = {0.05f};
     BaseParameter<ColorVector<float>> attackerRadius = {ColorVector<float>::uniform(2.0f)};
+    BaseParameter<ColorVector<int>> attackerPackSize = {ColorVector<int>::uniform(1)};
     static float constexpr attackerMaxRawEnergyThreshold = 2.0f;
     static float constexpr attackerCreatureSensorRange = 5.0f;
 

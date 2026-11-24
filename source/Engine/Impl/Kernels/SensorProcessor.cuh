@@ -540,7 +540,7 @@ __inline__ __device__ void SensorProcessor::registerDetection(SimulationData& da
             creature->detectedBy = newDetectedBy;
             creature->detectedByCapacity = newCapacity;
         }
-        creature->detectedBy[numDetections] = SensorDetection{creatureIdPart, restrictToColors};
+        creature->detectedBy[numDetections] = SensorDetection{creatureIdPart, restrictToColors, 0};
         creature->numDetectedBy = numDetections + 1;
     }
 

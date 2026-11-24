@@ -229,6 +229,11 @@ __global__ void cudaNextTimestep_cellType_injector(SimulationData data, Simulati
     InjectorProcessor::process(data, statistics);
 }
 
+__global__ void cudaNextTimestep_cellType_attacker_prepare(SimulationData data)
+{
+    AttackerProcessor::countAttackerCellsPerTarget(data);
+}
+
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics)
 {
     AttackerProcessor::process(data, statistics);
