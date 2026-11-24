@@ -19,6 +19,7 @@
 #include <Engine/Interface/TemporalControlService.h>
 
 #include <Persister/Interface/SerializerService.h>
+#include <Persister/Interface/SimulationService.h>
 
 #include <Network/McpArguments.h>
 #include <Network/McpSchema.h>
@@ -206,11 +207,12 @@ void McpMassOperationTools::replaceWorldContent(ContentDesc const& content) cons
     auto parameters = _SimulationFacade::get()->getSimulationParameters();
     auto realTime = _SimulationFacade::get()->getRealTime();
     auto statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
-    _SimulationFacade::get()->closeSimulation();
 
-    _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
-    _SimulationFacade::get()->setSimulationData(content);
-    _SimulationFacade::get()->setStatisticsHistory(statistics);
-    _SimulationFacade::get()->setRealTime(realTime);
+    SimulationService::get().replaceSimulation([&] {
+        _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
+        _SimulationFacade::get()->setSimulationData(content);
+        _SimulationFacade::get()->setStatisticsHistory(statistics);
+        _SimulationFacade::get()->setRealTime(realTime);
+    });
     TemporalControlService::get().createFlashback();
 }

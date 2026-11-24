@@ -14,6 +14,7 @@
 #include <Engine/Interface/TemporalControlService.h>
 
 #include <Persister/Interface/PersisterFacade.h>
+#include <Persister/Interface/SimulationService.h>
 
 #include <Network/McpArguments.h>
 #include <Network/McpSchema.h>
@@ -118,15 +119,16 @@ McpToolResult McpSimulationTools::resizeWorld(boost::json::object const& argumen
     auto content = _SimulationFacade::get()->getSimulationData();
     auto realTime = _SimulationFacade::get()->getRealTime();
     auto statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
-    _SimulationFacade::get()->closeSimulation();
 
-    _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
-    if (scaleContent) {
-        DescEditService::get().scaleContent(content, origWorldSize, worldSize);
-    }
-    _SimulationFacade::get()->setSimulationData(content);
-    _SimulationFacade::get()->setStatisticsHistory(statistics);
-    _SimulationFacade::get()->setRealTime(realTime);
+    SimulationService::get().replaceSimulation([&] {
+        _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
+        if (scaleContent) {
+            DescEditService::get().scaleContent(content, origWorldSize, worldSize);
+        }
+        _SimulationFacade::get()->setSimulationData(content);
+        _SimulationFacade::get()->setStatisticsHistory(statistics);
+        _SimulationFacade::get()->setRealTime(realTime);
+    });
     TemporalControlService::get().createFlashback();
     _context->onSelectionChanged();
     _context->showMessage("World resized");

@@ -25,7 +25,7 @@ _PersisterWorker::_PersisterWorker() {}
 void _PersisterWorker::runThreadLoop()
 {
     std::unique_lock lock(_requestMutex);
-    while (!_isShutdown.load()) {
+    while (!_isShutdown.load() || !_openRequests.empty()) {
         if (_openRequests.empty()) {
             _conditionVariable.wait(lock);
         }
