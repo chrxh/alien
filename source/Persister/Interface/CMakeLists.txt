@@ -51,8 +51,8 @@ add_library(PersisterInterface
     SettingsParserService.cpp
     SettingsParserService.h
     SharedDeserializedSimulation.h
-    SimulationService.cpp
-    SimulationService.h
+    SimulationSessionService.cpp
+    SimulationSessionService.h
     TaskProcessor.cpp
     TaskProcessor.h
     ToggleReactionNetworkResourceRequestData.h

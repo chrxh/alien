@@ -1,4 +1,4 @@
-#include "SimulationGuiService.h"
+#include "SimulationSessionGuiService.h"
 
 #include <functional>
 
@@ -29,9 +29,9 @@ namespace
     }
 }
 
-void SimulationGuiService::createSimulation(Parameters const& parameters)
+void SimulationSessionGuiService::createSimulation(Parameters const& parameters)
 {
-    SimulationService::get().createSimulation(parameters);
+    SimulationSessionService::get().createSimulation(parameters);
     Viewport::get().setCenterInWorldPos({toFloat(parameters._worldSize.x) / 2, toFloat(parameters._worldSize.y) / 2});
     Viewport::get().setZoomFactor(InitialZoomFactor);
     _originResourceId.reset();
@@ -40,7 +40,7 @@ void SimulationGuiService::createSimulation(Parameters const& parameters)
     ++_simulationRevision;
 }
 
-std::optional<std::string> SimulationGuiService::loadSimulation(
+std::optional<std::string> SimulationSessionGuiService::loadSimulation(
     SimulationDesc simulation,
     std::optional<std::string> const& originResourceId,
     std::optional<std::string> const& nameInLibrary,
@@ -48,7 +48,7 @@ std::optional<std::string> SimulationGuiService::loadSimulation(
 {
     auto center = simulation._center;
     auto zoom = simulation._zoom;
-    auto errorMessage = SimulationService::get().loadSimulation(std::move(simulation));
+    auto errorMessage = SimulationSessionService::get().loadSimulation(std::move(simulation));
     Viewport::get().setCenterInWorldPos(center);
     Viewport::get().setZoomFactor(zoom);
     _originResourceId = errorMessage ? std::nullopt : originResourceId;
@@ -58,42 +58,42 @@ std::optional<std::string> SimulationGuiService::loadSimulation(
     return errorMessage;
 }
 
-std::optional<std::string> const& SimulationGuiService::getOriginResourceId() const
+std::optional<std::string> const& SimulationSessionGuiService::getOriginResourceId() const
 {
     return _originResourceId;
 }
 
-void SimulationGuiService::setOriginResourceId(std::optional<std::string> const& value)
+void SimulationSessionGuiService::setOriginResourceId(std::optional<std::string> const& value)
 {
     _originResourceId = value;
 }
 
-std::optional<std::string> const& SimulationGuiService::getNameInLibrary() const
+std::optional<std::string> const& SimulationSessionGuiService::getNameInLibrary() const
 {
     return _nameInLibrary;
 }
 
-void SimulationGuiService::setNameInLibrary(std::optional<std::string> const& value)
+void SimulationSessionGuiService::setNameInLibrary(std::optional<std::string> const& value)
 {
     _nameInLibrary = value;
 }
 
-std::optional<std::filesystem::path> const& SimulationGuiService::getLocalFile() const
+std::optional<std::filesystem::path> const& SimulationSessionGuiService::getLocalFile() const
 {
     return _localFile;
 }
 
-void SimulationGuiService::setLocalFile(std::optional<std::filesystem::path> const& value)
+void SimulationSessionGuiService::setLocalFile(std::optional<std::filesystem::path> const& value)
 {
     _localFile = value;
 }
 
-int SimulationGuiService::getSimulationRevision() const
+int SimulationSessionGuiService::getSimulationRevision() const
 {
     return _simulationRevision;
 }
 
-void SimulationGuiService::storeAutosaveOrigin() const
+void SimulationSessionGuiService::storeAutosaveOrigin() const
 {
     auto& settings = GlobalSettings::get();
     auto key = getExitSaveOriginSettingsKey();
@@ -103,7 +103,7 @@ void SimulationGuiService::storeAutosaveOrigin() const
     settings.setValue(key + LocalFileKeySuffix, _localFile.has_value() ? StringHelper::toUtf8(*_localFile) : std::string());
 }
 
-void SimulationGuiService::restoreAutosaveOrigin()
+void SimulationSessionGuiService::restoreAutosaveOrigin()
 {
     auto& settings = GlobalSettings::get();
     auto key = getExitSaveOriginSettingsKey();

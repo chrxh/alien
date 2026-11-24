@@ -39,7 +39,7 @@
 #include "LocalLibraryController.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
-#include "SimulationGuiService.h"
+#include "SimulationSessionGuiService.h"
 #include "StyleService.h"
 #include "Viewport.h"
 
@@ -108,7 +108,7 @@ namespace
     {
         auto name = getNameInUserFolder(getSuggestedNameWithoutFolder(resourceType));
         if (!isServerTarget(target) && resourceType == NetworkResourceType_Simulation) {
-            return SimulationGuiService::get().getNameInLibrary().value_or(name);
+            return SimulationSessionGuiService::get().getNameInLibrary().value_or(name);
         }
         return name;
     }

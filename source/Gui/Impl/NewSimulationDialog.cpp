@@ -9,7 +9,7 @@
 #include <Engine/Interface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "SimulationGuiService.h"
+#include "SimulationSessionGuiService.h"
 #include "StyleService.h"
 #include <Engine/Interface/SimulationFacade.h>
 
@@ -80,9 +80,9 @@ void NewSimulationDialog::openIntern()
 
 void NewSimulationDialog::onNewSimulation()
 {
-    SimulationGuiService::get().createSimulation(SimulationGuiService::Parameters()
-                                                     .projectName(_projectName)
-                                                     .worldSize({_width, _height})
-                                                     .externalEnergy(_externalEnergy)
-                                                     .adoptSimulationParameters(_adoptSimulationParameters));
+    SimulationSessionGuiService::get().createSimulation(SimulationSessionGuiService::Parameters()
+                                                            .projectName(_projectName)
+                                                            .worldSize({_width, _height})
+                                                            .externalEnergy(_externalEnergy)
+                                                            .adoptSimulationParameters(_adoptSimulationParameters));
 }
