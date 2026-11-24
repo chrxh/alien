@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -23,4 +24,5 @@ public:
     };
     void createSimulation(NewSimulationParameters const& parameters);
     std::optional<std::string> loadSimulation(SimulationDesc simulation);
+    void replaceSimulation(std::function<void()> const& setupFunc);
 };

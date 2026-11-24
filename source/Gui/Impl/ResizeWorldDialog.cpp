@@ -7,6 +7,8 @@
 #include <Engine/Interface/SimulationFacade.h>
 #include <Engine/Interface/TemporalControlService.h>
 
+#include <Persister/Interface/SimulationService.h>
+
 #include "AlienGui.h"
 
 void ResizeWorldDialog::initIntern()
@@ -82,19 +84,20 @@ void ResizeWorldDialog::onResizing()
     auto content = _SimulationFacade::get()->getSimulationData();
     auto realtime = _SimulationFacade::get()->getRealTime();
     auto const& statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
-    _SimulationFacade::get()->closeSimulation();
 
     IntVector2D origWorldSize = worldSize;
     worldSize.x = _width;
     worldSize.y = _height;
 
-    _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
+    SimulationService::get().replaceSimulation([&] {
+        _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
 
-    if (_scaleContent) {
-        DescEditService::get().scaleContent(content, origWorldSize, {_width, _height});
-    }
-    _SimulationFacade::get()->setSimulationData(content);
-    _SimulationFacade::get()->setStatisticsHistory(statistics);
-    _SimulationFacade::get()->setRealTime(realtime);
+        if (_scaleContent) {
+            DescEditService::get().scaleContent(content, origWorldSize, {_width, _height});
+        }
+        _SimulationFacade::get()->setSimulationData(content);
+        _SimulationFacade::get()->setStatisticsHistory(statistics);
+        _SimulationFacade::get()->setRealTime(realtime);
+    });
     TemporalControlService::get().createFlashback();
 }
