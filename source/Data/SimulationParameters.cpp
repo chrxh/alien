@@ -804,12 +804,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Max raw energy conductivity")
-                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(6.0f).format("%.3f"))
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(20.0f).format("%.3f"))
                         .description("Upper limit for the raw energy that a digestor cell can take in from a connected cell or pass on to a connected "
                                      "digestor cell. It scales the digestor property 'Energy conductivity'."),
                     ParameterSpec()
                         .name("Max raw energy conversion")
-                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f"))
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(5.0f).format("%.3f"))
                         .description("Upper limit for the raw energy that a digestor cell can convert into usable energy per time step. It scales the "
                                      "digestor property 'Energy conversion'."),
                 }),
