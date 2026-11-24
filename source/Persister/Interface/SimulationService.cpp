@@ -1,4 +1,4 @@
-#include "SimulationReplacementService.h"
+#include "SimulationService.h"
 
 #include <Base/StringHelper.h>
 
@@ -14,7 +14,7 @@ namespace
     auto constexpr ProjectNameSize = sizeof(Char64) / sizeof(char);
 }
 
-void SimulationReplacementService::createSimulation(NewSimulationParameters const& parameters)
+void SimulationService::createSimulation(NewSimulationParameters const& parameters)
 {
     SimulationParameters simulationParameters;
     if (parameters._adoptSimulationParameters) {
@@ -28,7 +28,7 @@ void SimulationReplacementService::createSimulation(NewSimulationParameters cons
     TemporalControlService::get().createFlashback();
 }
 
-std::optional<std::string> SimulationReplacementService::loadSimulation(SimulationDesc simulation)
+std::optional<std::string> SimulationService::loadSimulation(SimulationDesc simulation)
 {
     _PersisterFacade::get()->shutdown();
     _SimulationFacade::get()->closeSimulation();

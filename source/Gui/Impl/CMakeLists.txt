@@ -166,8 +166,6 @@ add_library(GuiImpl
     NeuralNetEditorWidget.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
-    NewSimulationService.cpp
-    NewSimulationService.h
     NewPasswordDialog.cpp
     NewPasswordDialog.h
     NodeEditorWidget.cpp
@@ -206,6 +204,8 @@ add_library(GuiImpl
     SelectionWidget.h
     SignalsBufferDialog.cpp
     SignalsBufferDialog.h
+    SimulationGuiService.cpp
+    SimulationGuiService.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp

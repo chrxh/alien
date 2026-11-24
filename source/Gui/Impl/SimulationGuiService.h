@@ -8,14 +8,14 @@
 
 #include <Data/Descs.h>
 
-#include <Persister/Interface/SimulationReplacementService.h>
+#include <Persister/Interface/SimulationService.h>
 
-class NewSimulationService
+class SimulationGuiService
 {
-    MAKE_SINGLETON(NewSimulationService);
+    MAKE_SINGLETON(SimulationGuiService);
 
 public:
-    using Parameters = SimulationReplacementService::NewSimulationParameters;
+    using Parameters = SimulationService::NewSimulationParameters;
     void createSimulation(Parameters const& parameters);
 
     std::optional<std::string> loadSimulation(

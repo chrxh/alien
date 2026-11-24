@@ -49,12 +49,12 @@
 #include "MenuBarInfoWidget.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
-#include "NewSimulationService.h"
 #include "OverlayController.h"
 #include "RecorderController.h"
 #include "RecorderWindow.h"
 #include "SavePictureDialog.h"
 #include "SaveSimulationDialog.h"
+#include "SimulationGuiService.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
@@ -203,7 +203,7 @@ void MainLoopController::scheduleReadingAutosave()
         [this](auto const& requestId) {
             auto const& data = _PersisterFacade::get()->fetchReadSimulationData(requestId);
             _loadedSimulationName = Const::AutosaveFileWithoutPath.string();
-            NewSimulationService::get().restoreAutosaveOrigin();
+            SimulationGuiService::get().restoreAutosaveOrigin();
             finishSimulationLoading(data.simulationDesc);
         },
         [this](auto const&) { scheduleSearchingStartupSimulation(); });
@@ -248,7 +248,7 @@ void MainLoopController::scheduleDownloadingStartupSimulation(NetworkResourceRaw
             auto const& deserializedSim = std::get<SimulationDesc>(data.resourceData);
             _loadedSimulationName = data.resourceName;
             setupSimulation(deserializedSim);
-            NewSimulationService::get().setOriginResourceId(data.resourceId);
+            SimulationGuiService::get().setOriginResourceId(data.resourceId);
             finishSimulationLoading(deserializedSim);
         },
         [this](auto const&) { setupEmptySimulation(); });
@@ -343,7 +343,7 @@ void MainLoopController::processScheduleExit()
     _saveSimRequestId.reset();
     if (_saveOnExit) {
         printOverlayMessage("Saving on exit ...");
-        NewSimulationService::get().storeAutosaveOrigin();
+        SimulationGuiService::get().storeAutosaveOrigin();
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};

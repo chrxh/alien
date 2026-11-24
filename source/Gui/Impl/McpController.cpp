@@ -19,9 +19,9 @@
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "MainLoopController.h"
-#include "NewSimulationService.h"
 #include "OverlayController.h"
 #include "PictureGuiService.h"
+#include "SimulationGuiService.h"
 #include "SimulationView.h"
 #include "Viewport.h"
 
@@ -119,7 +119,7 @@ void McpController::setVisibleArea(RealVector2D const& center, float zoomFactor)
 
 void McpController::createSimulation(std::string const& projectName, IntVector2D const& worldSize)
 {
-    NewSimulationService::get().createSimulation(NewSimulationService::Parameters()
+    SimulationGuiService::get().createSimulation(SimulationGuiService::Parameters()
                                                      .projectName(projectName)
                                                      .worldSize(worldSize)
                                                      .externalEnergy(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
@@ -127,7 +127,7 @@ void McpController::createSimulation(std::string const& projectName, IntVector2D
 
 void McpController::applySimulation(SimulationDesc const& simulation)
 {
-    if (auto errorMessage = NewSimulationService::get().loadSimulation(simulation)) {
+    if (auto errorMessage = SimulationGuiService::get().loadSimulation(simulation)) {
         throw std::runtime_error(*errorMessage);
     }
 }
