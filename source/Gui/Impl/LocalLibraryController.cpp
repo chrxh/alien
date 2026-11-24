@@ -15,9 +15,9 @@
 
 #include "ConsoleModeController.h"
 #include "GenericMessageDialog.h"
-#include "NewSimulationService.h"
 #include "OverlayController.h"
 #include "PictureGuiService.h"
+#include "SimulationGuiService.h"
 #include "Viewport.h"
 
 namespace
@@ -167,7 +167,7 @@ void LocalLibraryController::setLibraryFolder(std::filesystem::path const& value
     _libraryFolder = libraryFolder;
 
     // The name of the running simulation belongs to the previous library
-    NewSimulationService::get().setNameInLibrary(std::nullopt);
+    SimulationGuiService::get().setNameInLibrary(std::nullopt);
     _contentOutdated = true;
 }
 
@@ -398,17 +398,17 @@ std::optional<std::string> LocalLibraryController::onDelete(std::vector<std::fil
         return std::string(BusyMessage);
     }
     auto& service = LocalLibraryService::get();
-    auto const& nameOfRunningSimulation = NewSimulationService::get().getNameInLibrary();
+    auto const& nameOfRunningSimulation = SimulationGuiService::get().getNameInLibrary();
     for (auto const& simulationPath : simulationPaths) {
         if (service.isGenomePath(simulationPath)) {
             service.deleteGenome(_libraryFolder, simulationPath);
             continue;
         }
         if (nameOfRunningSimulation.has_value() && service.getSimulationName(_libraryFolder, simulationPath) == nameOfRunningSimulation) {
-            NewSimulationService::get().setNameInLibrary(std::nullopt);
+            SimulationGuiService::get().setNameInLibrary(std::nullopt);
         }
-        if (auto const& localFile = NewSimulationService::get().getLocalFile(); localFile.has_value() && *localFile == service.normalize(simulationPath)) {
-            NewSimulationService::get().setLocalFile(std::nullopt);
+        if (auto const& localFile = SimulationGuiService::get().getLocalFile(); localFile.has_value() && *localFile == service.normalize(simulationPath)) {
+            SimulationGuiService::get().setLocalFile(std::nullopt);
         }
         service.deleteSimulation(_libraryFolder, simulationPath);
     }
@@ -471,7 +471,7 @@ void LocalLibraryController::processPendingLoads()
         auto isAutosave = service.isAutosaveName(StringHelper::toUtf8(pendingLoad.simulationPath.stem()));
         auto nameInLibrary = name.has_value() && service.isValidSimulationName(*name) && !isAutosave ? name : std::nullopt;
         auto data = _PersisterFacade::get()->fetchReadSimulationData(pendingLoad.requestId);
-        if (auto errorMessage = NewSimulationService::get().loadSimulation(
+        if (auto errorMessage = SimulationGuiService::get().loadSimulation(
                 std::move(data.simulationDesc), std::nullopt, nameInLibrary, service.normalize(pendingLoad.simulationPath))) {
             GenericMessageDialog::get().information("Error", *errorMessage);
             continue;
@@ -516,7 +516,7 @@ void LocalLibraryController::processPendingPicture()
 void LocalLibraryController::processAutosave()
 {
     // Autosave belongs to one simulation, so a created or loaded one starts without it
-    auto simulationRevision = NewSimulationService::get().getSimulationRevision();
+    auto simulationRevision = SimulationGuiService::get().getSimulationRevision();
     if (simulationRevision != _lastSimulationRevision) {
         _lastSimulationRevision = simulationRevision;
         _autosaveEnabled = false;
@@ -551,8 +551,8 @@ void LocalLibraryController::processContent()
                 _content = std::move(data.content);
 
                 // A folder may have been renamed to another spelling of its name, which the path of the running simulation follows
-                if (auto const& localFile = NewSimulationService::get().getLocalFile()) {
-                    NewSimulationService::get().setLocalFile(LocalLibraryService::get().normalize(*localFile));
+                if (auto const& localFile = SimulationGuiService::get().getLocalFile()) {
+                    SimulationGuiService::get().setLocalFile(LocalLibraryService::get().normalize(*localFile));
                 }
                 ++_revision;
             }
@@ -610,8 +610,8 @@ void LocalLibraryController::onSaveFinished(PendingSave const& pendingSave, Save
 
         // Another simulation may have been loaded or created in the meantime
         if (pendingSave.sessionId == _SimulationFacade::get()->getSessionId()) {
-            NewSimulationService::get().setNameInLibrary(pendingSave.name);
-            NewSimulationService::get().setLocalFile(service.normalize(data.filename));
+            SimulationGuiService::get().setNameInLibrary(pendingSave.name);
+            SimulationGuiService::get().setLocalFile(service.normalize(data.filename));
         }
     }
     if (pendingSave.automatic && _saveMode == SaveMode_Limited) {
@@ -632,7 +632,7 @@ LocalLibraryController::rename(std::filesystem::path const& simulationPath, std:
     auto& service = LocalLibraryService::get();
     auto isGenome = service.isGenomePath(simulationPath);
     auto name = service.getSimulationName(_libraryFolder, simulationPath);
-    auto const& localFile = NewSimulationService::get().getLocalFile();
+    auto const& localFile = SimulationGuiService::get().getLocalFile();
     auto isLocalFile = localFile.has_value() && *localFile == service.normalize(simulationPath);
     auto isNameTaken =
         isGenome ? service.isGenomeNameTaken(_libraryFolder, newName, simulationPath) : service.isSimulationNameTaken(_libraryFolder, newName, simulationPath);
@@ -649,11 +649,11 @@ LocalLibraryController::rename(std::filesystem::path const& simulationPath, std:
         return std::nullopt;
     }
 
-    if (name.has_value() && name == NewSimulationService::get().getNameInLibrary()) {
-        NewSimulationService::get().setNameInLibrary(service.isValidSimulationName(newName) ? std::make_optional(newName) : std::nullopt);
+    if (name.has_value() && name == SimulationGuiService::get().getNameInLibrary()) {
+        SimulationGuiService::get().setNameInLibrary(service.isValidSimulationName(newName) ? std::make_optional(newName) : std::nullopt);
     }
     if (isLocalFile) {
-        NewSimulationService::get().setLocalFile(service.normalize(newSimulationPath));
+        SimulationGuiService::get().setLocalFile(service.normalize(newSimulationPath));
     }
     if (_pendingPicture.has_value() && _pendingPicture->simulationPath == simulationPath) {
         _pendingPicture->simulationPath = newSimulationPath;

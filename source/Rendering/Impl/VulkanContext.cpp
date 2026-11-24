@@ -57,13 +57,29 @@ void checkVkResult(VkResult result, char const* operation)
     }
 }
 
+namespace
+{
+    std::vector<char const*> getSurfaceExtensions()
+    {
+        uint32_t numExtensions = 0;
+        auto extensions = glfwGetRequiredInstanceExtensions(&numExtensions);
+        if (extensions == nullptr) {
+            throw std::runtime_error("The Vulkan surface extensions are not available.");
+        }
+        return {extensions, extensions + numExtensions};
+    }
+}
+
 void VulkanContext::setup(GLFWwindow* window, std::optional<GpuUuid> const& preferredGpu)
 {
-    if (volkInitialize() != VK_SUCCESS || !glfwVulkanSupported()) {
+    auto withWindow = window != nullptr;
+    if (volkInitialize() != VK_SUCCESS || (withWindow && !glfwVulkanSupported())) {
         throw std::runtime_error("Vulkan is not supported on this system. Please update your graphics driver.");
     }
-    createInstance();
-    checkVkResult(glfwCreateWindowSurface(_instance, window, nullptr, &_surface), "glfwCreateWindowSurface");
+    createInstance(withWindow ? getSurfaceExtensions() : std::vector<char const*>());
+    if (withWindow) {
+        checkVkResult(glfwCreateWindowSurface(_instance, window, nullptr, &_surface), "glfwCreateWindowSurface");
+    }
     selectPhysicalDevice(preferredGpu);
     createDevice();
     createSampler();
@@ -90,7 +106,9 @@ void VulkanContext::shutdown()
     vkDestroyFence(_device, _submitFence, nullptr);
     vkDestroyCommandPool(_device, _commandPool, nullptr);
     vkDestroyDevice(_device, nullptr);
-    vkDestroySurfaceKHR(_instance, _surface, nullptr);
+    if (_surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(_instance, _surface, nullptr);
+    }
     if (_debugMessenger != VK_NULL_HANDLE) {
         vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
     }
@@ -637,6 +655,13 @@ void VulkanContext::advanceFrameNumber()
     ++_frameNumber;
 }
 
+void VulkanContext::completeFrame()
+{
+    waitIdle();
+    onFrameCompleted(_frameNumber);
+    advanceFrameNumber();
+}
+
 namespace
 {
     bool isLayerAvailable(char const* layerName)
@@ -660,15 +685,8 @@ namespace
     }
 }
 
-void VulkanContext::createInstance()
+void VulkanContext::createInstance(std::vector<char const*> extensions)
 {
-    uint32_t numGlfwExtensions = 0;
-    auto glfwExtensions = glfwGetRequiredInstanceExtensions(&numGlfwExtensions);
-    if (glfwExtensions == nullptr) {
-        throw std::runtime_error("The Vulkan surface extensions are not available.");
-    }
-    std::vector<char const*> extensions(glfwExtensions, glfwExtensions + numGlfwExtensions);
-
     std::vector<char const*> layers;
     auto validationEnabled = GlobalSettings::get().isDebugMode() && isLayerAvailable(ValidationLayerName);
     if (validationEnabled) {
@@ -728,16 +746,19 @@ namespace
         return result;
     }
 
-    std::optional<uint32_t> findGraphicsAndPresentQueueFamily(VkPhysicalDevice device, VkSurfaceKHR surface)
+    std::optional<uint32_t> findQueueFamily(VkPhysicalDevice device, VkSurfaceKHR surface)
     {
         uint32_t numFamilies = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &numFamilies, nullptr);
         std::vector<VkQueueFamilyProperties> families(numFamilies);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &numFamilies, families.data());
         for (uint32_t index = 0; index < numFamilies; ++index) {
+            auto withSurface = surface != VK_NULL_HANDLE;
             VkBool32 presentSupported = VK_FALSE;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, index, surface, &presentSupported);
-            if ((families.at(index).queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0 && presentSupported == VK_TRUE) {
+            if (withSurface) {
+                vkGetPhysicalDeviceSurfaceSupportKHR(device, index, surface, &presentSupported);
+            }
+            if ((families.at(index).queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0 && (!withSurface || presentSupported == VK_TRUE)) {
                 return index;
             }
         }
@@ -791,10 +812,10 @@ void VulkanContext::selectPhysicalDevice(std::optional<GpuUuid> const& preferred
         VkPhysicalDeviceFeatures features;
         vkGetPhysicalDeviceFeatures(device, &features);
         auto extensions = getDeviceExtensions(device);
-        auto queueFamily = findGraphicsAndPresentQueueFamily(device, _surface);
+        auto queueFamily = findQueueFamily(device, _surface);
 
         if (properties.apiVersion < ApiVersion || !queueFamily || features.geometryShader != VK_TRUE
-            || !hasExtension(extensions, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
+            || (_surface != VK_NULL_HANDLE && !hasExtension(extensions, VK_KHR_SWAPCHAIN_EXTENSION_NAME))) {
             log(Priority::Important, std::string("Vulkan device ") + properties.deviceName + " is not suitable");
             continue;
         }
@@ -842,7 +863,10 @@ void VulkanContext::selectPhysicalDevice(std::optional<GpuUuid> const& preferred
 
 void VulkanContext::createDevice()
 {
-    std::vector<char const*> extensions{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    std::vector<char const*> extensions;
+    if (_surface != VK_NULL_HANDLE) {
+        extensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    }
     if (_memorySharingSupported) {
         extensions.emplace_back(ExternalMemoryExtensionName);
     }

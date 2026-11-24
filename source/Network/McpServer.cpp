@@ -6,6 +6,7 @@
 #include <chrono>
 #include <stdexcept>
 #include <string_view>
+#include <format>
 #include <future>
 
 #include <boost/json.hpp>
@@ -152,6 +153,11 @@ namespace
     }
 }
 
+std::string McpServer::createUrl(int port)
+{
+    return std::format("http://{}:{}{}", Host, port, Endpoint);
+}
+
 McpServer::McpServer(std::string const& serverName, std::string const& serverVersion, std::string const& instructions, std::vector<McpTool> tools)
     : _serverName(serverName)
     , _serverVersion(serverVersion)
@@ -168,10 +174,10 @@ namespace
 {
     void setSocketOptions(socket_t socket)
     {
-#ifdef _WIN32
-        httplib::default_socket_options(socket);
-#else
         int yes = 1;
+#ifdef _WIN32
+        setsockopt(socket, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, reinterpret_cast<char*>(&yes), sizeof(yes));
+#else
         setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<void*>(&yes), sizeof(yes));
 #endif
     }

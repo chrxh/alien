@@ -60,6 +60,7 @@ See [Energy](energy.md#troubleshooting-energy) and [Evolution experiments](evolu
 - The agent must connect to ALIEN from the same computer. Chat applications that connect through their provider's servers on the internet cannot reach ALIEN.
 - The URL configured in the agent must match the one shown in the **MCP server** window, including the port.
 - If another program uses the port, choose a different port with the **Settings** button of the **MCP server** window.
+- *alien-cli* only runs an MCP server if it has been started with --mcp. The option --mcp-port chooses a different port.
 - Some agents need to be restarted after adding a new MCP server.
 
 ## I lost my simulation

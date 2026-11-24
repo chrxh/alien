@@ -16,6 +16,7 @@ class McpTemporalTools
 public:
     std::vector<McpTool> getTools(McpToolContext& context);
     void process();
+    bool isCalculatingTimesteps() const;
 
 private:
     McpToolResult getTimeInfo() const;

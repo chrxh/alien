@@ -36,6 +36,8 @@ public:
     // The font is used for the labels of the cell types
     virtual void setupSimulationRendering(ImFont* labelFont) = 0;
 
+    virtual void setupForPicturesWithoutWindow() = 0;
+
     // Requires that the simulation is closed since the GPU engine writes into memory of the renderer
     virtual void shutdown() = 0;
 

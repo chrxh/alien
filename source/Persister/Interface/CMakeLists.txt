@@ -51,6 +51,8 @@ add_library(PersisterInterface
     SettingsParserService.cpp
     SettingsParserService.h
     SharedDeserializedSimulation.h
+    SimulationService.cpp
+    SimulationService.h
     TaskProcessor.cpp
     TaskProcessor.h
     ToggleReactionNetworkResourceRequestData.h
@@ -59,6 +61,7 @@ add_library(PersisterInterface
     UploadNetworkResourceResultData.h)
 
 target_link_libraries(PersisterInterface Base)
+target_link_libraries(PersisterInterface EngineInterface)
 
 target_link_libraries(PersisterInterface Boost::boost)
 target_link_libraries(PersisterInterface Boost::json)

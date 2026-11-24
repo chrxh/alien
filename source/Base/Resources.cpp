@@ -27,12 +27,13 @@ namespace
 
 namespace Const
 {
-    std::string const ProgramVersion = "5.0.0-beta.5";
+    std::string const ProgramVersion = "5.0.0-beta.6";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const PrivacyPolicyURL = "https://alien-project.org/privacy.html";
     std::string const AlienServerURL = "api.alien-project.org";
     std::string const StartupSimulationResourceName = "Startup/Version1";
 
+    std::filesystem::path const ProgramPath = getProgramDirectory();
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
     std::filesystem::path const LocalLibraryPath = "simulations";
@@ -49,5 +50,5 @@ namespace Const
     std::filesystem::path const LogoGlowFilename = ImagesPath / "logoGlow.png";
     std::vector<std::filesystem::path> const WindowIconFilenames =
         {ImagesPath / "alien16.png", ImagesPath / "alien32.png", ImagesPath / "alien48.png", ImagesPath / "alien256.png"};
-    std::filesystem::path const CaBundleFilename = getProgramDirectory() / ResourcePath / "ca-bundle.crt";
+    std::filesystem::path const CaBundleFilename = ProgramPath / ResourcePath / "ca-bundle.crt";
 }

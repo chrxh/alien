@@ -151,10 +151,10 @@ source/Engine/Interface/TestData/ Test data shared by the test suites
 source/Engine/Interface/Tests/    Engine interface unit tests
 source/Gui/Impl/                  Dear ImGui GUI, free of graphics API code
 source/Gui/Interface/             Abstract GUI API that manages the main window
-source/McpTools/Impl/             MCP tools operating on the simulation
+source/McpTools/Impl/             MCP tools operating on the simulation and the server offering them
 source/McpTools/Impl/Tests/       MCP tools unit tests
-source/McpTools/Interface/        Abstract MCP tools API
-source/Network/                   HTTP / cloud features, MCP server
+source/McpTools/Interface/        Abstract API of the MCP server and its tools
+source/Network/                   HTTP / cloud features, MCP protocol
 source/Network/Tests/             Network unit tests
 source/Persister/Impl/            Worker thread processing the persister requests
 source/Persister/Interface/       Abstract persistence APIs, file I/O and serialization

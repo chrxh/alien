@@ -106,6 +106,9 @@ void VulkanFrameRenderer::setup(GLFWwindow* window)
 
 void VulkanFrameRenderer::shutdown()
 {
+    if (_window == nullptr) {
+        return;
+    }
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
     context.waitIdle();
@@ -125,9 +128,15 @@ void VulkanFrameRenderer::shutdown()
 
 void VulkanFrameRenderer::newFrame()
 {
+    _preparingFrame = true;
     _clearColor = {0, 0, 0};
     _scene.reset();
     ImGui_ImplVulkan_NewFrame();
+}
+
+bool VulkanFrameRenderer::isPreparingFrame() const
+{
+    return _preparingFrame;
 }
 
 void VulkanFrameRenderer::clearScreen(FloatColorRGB const& color)
@@ -155,6 +164,7 @@ void VulkanFrameRenderer::render(ImDrawData* drawData)
 {
     auto& context = VulkanContext::get();
     auto device = context.getDevice();
+    _preparingFrame = false;
     _capturedScene.reset();
 
     // The scene rendering overwrites resources of the previous frame, e.g. the geometry buffers

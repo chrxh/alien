@@ -19,6 +19,7 @@ class McpNetworkTools
 public:
     std::vector<McpTool> getTools(McpToolContext& context);
     void process();
+    bool hasPendingRequests() const;
 
 private:
     void listResources(boost::json::object const& arguments, McpToolCompletion const& completion);

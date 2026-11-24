@@ -22,7 +22,7 @@
 #include "BrowserData.h"
 #include "BrowserWindow.h"
 #include "LocalLibraryController.h"
-#include "NewSimulationService.h"
+#include "SimulationGuiService.h"
 #include "StyleService.h"
 
 namespace
@@ -84,7 +84,7 @@ namespace
     // Unlike the entries of the browser, the content of the library is also kept up to date while the browser is closed
     LibraryFile const* findLocalFile()
     {
-        auto const& localFile = NewSimulationService::get().getLocalFile();
+        auto const& localFile = SimulationGuiService::get().getLocalFile();
         if (!localFile.has_value()) {
             return nullptr;
         }
@@ -115,7 +115,7 @@ void _MenuBarInfoWidget::processCurrentSimulation()
 
     // A simulation of the server takes precedence. While the browser receives the entries of the server, at the start and at every refresh,
     // another entry is only shown if it has been shown before.
-    if (auto const& originResourceId = NewSimulationService::get().getOriginResourceId()) {
+    if (auto const& originResourceId = SimulationGuiService::get().getOriginResourceId()) {
         if (auto rawTO = BrowserController::get().getData()->findRawTO(*originResourceId)) {
             _shownWithoutServer = false;
             processServerSimulation(rawTO);

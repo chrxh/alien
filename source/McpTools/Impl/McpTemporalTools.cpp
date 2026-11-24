@@ -122,6 +122,11 @@ void McpTemporalTools::process()
     }
 }
 
+bool McpTemporalTools::isCalculatingTimesteps() const
+{
+    return _pendingTimesteps.has_value();
+}
+
 McpToolResult McpTemporalTools::getTimeInfo() const
 {
     auto tpsRestriction = _SimulationFacade::get()->getTpsRestriction();
@@ -221,6 +226,7 @@ McpToolResult McpTemporalTools::setSpeedLimit(boost::json::object const& argumen
 {
     auto tps = McpArguments::getOptionalInt(arguments, "tps", 1, MaxTpsRestriction);
     _SimulationFacade::get()->setTpsRestriction(tps);
+    _context->onSpeedLimitChanged();
     return {.text = tps ? std::format("The simulation speed is limited to {} time steps per second.", *tps) : "The speed limit is removed."};
 }
 

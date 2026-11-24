@@ -8,6 +8,8 @@
 #include <ConsoleUi/ConsoleLiveOutput.h>
 #include <ConsoleUi/ConsoleSimulationPanel.h>
 
+#include <McpTools/Interface/McpCommandLogEntry.h>
+
 #include "Definitions.h"
 
 class ConsoleModeController
@@ -19,6 +21,9 @@ public:
     bool isActive() const;
 
     void process();  // Must not be called within an ImGui frame.
+
+    void onSpeedLimitChanged();
+    void onMcpCommandExecuted(McpCommandLogEntry const& entry);
 
 private:
     void quit();

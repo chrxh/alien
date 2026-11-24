@@ -12,6 +12,7 @@ namespace Const
     extern std::string const AlienServerURL;
     extern std::string const StartupSimulationResourceName;
 
+    extern std::filesystem::path const ProgramPath;
     extern std::filesystem::path const ResourcePath;
     extern std::filesystem::path const AutosavePath;
     extern std::filesystem::path const LocalLibraryPath;

@@ -483,7 +483,8 @@ _CellTypeOverlayRenderStep::~_CellTypeOverlayRenderStep()
 void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 {
     // Only render if zoom exceeds threshold and overlay is active
-    if (parameters._view.getScreenZoomFactor() <= ZoomFactorForCellDetails || !parameters._view.cellDetailOverlay) {
+    auto labelsAvailable = _cellTypeTextureAtlas.image != VK_NULL_HANDLE;
+    if (!labelsAvailable || parameters._view.getScreenZoomFactor() <= ZoomFactorForCellDetails || !parameters._view.cellDetailOverlay) {
         return;
     }
 
@@ -506,7 +507,9 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 _CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters, ImFont* labelFont)
     : _RenderStep(parameters)
 {
-    createCellTypeTextureAtlas(labelFont);
+    if (labelFont != nullptr) {
+        createCellTypeTextureAtlas(labelFont);
+    }
 }
 
 namespace

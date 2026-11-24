@@ -6,6 +6,8 @@ PUBLIC
     ConsoleOutput.cpp
     ConsoleOutput.h
     Main.cpp
+    McpSession.cpp
+    McpSession.h
     PeriodicUploader.cpp
     PeriodicUploader.h
     ServerSession.cpp
@@ -19,9 +21,13 @@ target_link_libraries(alien-cli EngineKernels)
 target_link_libraries(alien-cli EngineImpl)
 target_link_libraries(alien-cli Data)
 target_link_libraries(alien-cli EngineInterface)
+target_link_libraries(alien-cli McpToolsInterface)
+target_link_libraries(alien-cli McpToolsImpl)
 target_link_libraries(alien-cli Network)
 target_link_libraries(alien-cli PersisterInterface)
 target_link_libraries(alien-cli PersisterImpl)
+target_link_libraries(alien-cli RenderingInterface)
+target_link_libraries(alien-cli RenderingImpl)
 
 target_include_directories(alien-cli
     PRIVATE

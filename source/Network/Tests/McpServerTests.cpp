@@ -194,3 +194,32 @@ TEST_F(McpServerTests, http)
     _server.stop();
     EXPECT_FALSE(_server.isRunning());
 }
+
+TEST_F(McpServerTests, start_occupiedPort)
+{
+    ASSERT_TRUE(_server.start(0));
+    auto port = _server.getPort();
+
+    McpServer otherServer("alien", "1.0", "", {});
+    EXPECT_FALSE(otherServer.start(port));
+    EXPECT_FALSE(otherServer.isRunning());
+
+    _server.stop();
+    EXPECT_TRUE(otherServer.start(port));
+}
+
+TEST_F(McpServerTests, start_samePortAfterStop)
+{
+    ASSERT_TRUE(_server.start(0));
+    auto port = _server.getPort();
+    auto sendPing = [&] {
+        httplib::Client client("127.0.0.1", port);
+        auto result = client.Post("/mcp", R"({"jsonrpc": "2.0", "id": 1, "method": "ping"})", "application/json");
+        return result && result->status == 200;
+    };
+    ASSERT_TRUE(sendPing());
+
+    _server.stop();
+    ASSERT_TRUE(_server.start(port));
+    EXPECT_TRUE(sendPing());
+}

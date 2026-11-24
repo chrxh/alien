@@ -78,11 +78,21 @@ void _RenderingFacadeImpl::setupSimulationRendering(ImFont* labelFont)
     SimulationRenderer::get().setup(labelFont);
 }
 
+void _RenderingFacadeImpl::setupForPicturesWithoutWindow()
+{
+    GlobalSettings::get().setInterop(false);
+    VulkanContext::get().setup(nullptr, getEngineGpuUuid());
+    SimulationRenderer::get().setup(nullptr);
+}
+
 void _RenderingFacadeImpl::shutdown()
 {
+    auto& context = VulkanContext::get();
+    if (!context.isActive()) {
+        return;
+    }
     SimulationRenderer::get().shutdown();
 
-    auto& context = VulkanContext::get();
     context.releasePendingResources();
     TextureService::get().shutdown();
     VulkanFrameRenderer::get().shutdown();
@@ -121,6 +131,11 @@ std::optional<PictureData> _RenderingFacadeImpl::fetchCapturedSimulationFrame()
 
 PictureData _RenderingFacadeImpl::renderSimulationPicture(RenderView const& view)
 {
+    ExitScopeGuard releaseResourcesWithoutFrame([] {
+        if (!VulkanFrameRenderer::get().isPreparingFrame()) {
+            VulkanContext::get().completeFrame();
+        }
+    });
     return SimulationRenderer::get().renderPicture(view);
 }
 

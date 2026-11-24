@@ -2,8 +2,6 @@
 
 #include <thread>
 
-#include <Base/StringHelper.h>
-
 #include <ConsoleUi/ConsoleLiveOutput.h>
 #include <ConsoleUi/ConsoleWidgets.h>
 
@@ -74,14 +72,13 @@ void PeriodicUploader::scheduleUpload()
         });
 }
 
-void PeriodicUploader::printMessage(std::string const& text) const
+void PeriodicUploader::printMessage(std::string const& text)
 {
-    auto timestamp = "[" + StringHelper::format(std::chrono::system_clock::now()) + "]";
-    _liveOutput.printMessage(
-        "  " + ConsoleWidgets::createText(timestamp, ConsolePalette::Label) + " " + ConsoleWidgets::createText(text, ConsolePalette::Success));
+    _uploadMessage = "  " + ConsoleWidgets::createTimestamp(std::chrono::system_clock::now()) + " " + ConsoleWidgets::createText(text, ConsolePalette::Success);
+    _liveOutput.printMessage(_uploadMessage);
 }
 
 void PeriodicUploader::appendResult(std::string const& text, bool isError) const
 {
-    _liveOutput.appendToLastMessage(" " + ConsoleWidgets::createText(text, isError ? ConsolePalette::Error : ConsolePalette::Success));
+    _liveOutput.appendToMessage(_uploadMessage, " " + ConsoleWidgets::createText(text, isError ? ConsolePalette::Error : ConsolePalette::Success));
 }

@@ -4,24 +4,18 @@
 #include <optional>
 #include <string>
 
-#include <Base/Definitions.h>
-#include <Base/Macros.h>
 #include <Base/Singleton.h>
 
 #include <Data/Descs.h>
 
-class NewSimulationService
+#include <Persister/Interface/SimulationService.h>
+
+class SimulationGuiService
 {
-    MAKE_SINGLETON(NewSimulationService);
+    MAKE_SINGLETON(SimulationGuiService);
 
 public:
-    struct Parameters
-    {
-        MEMBER(Parameters, std::string, projectName, "");
-        MEMBER(Parameters, IntVector2D, worldSize, IntVector2D());
-        MEMBER(Parameters, float, externalEnergy, 0.0f);
-        MEMBER(Parameters, bool, adoptSimulationParameters, true);
-    };
+    using Parameters = SimulationService::NewSimulationParameters;
     void createSimulation(Parameters const& parameters);
 
     std::optional<std::string> loadSimulation(

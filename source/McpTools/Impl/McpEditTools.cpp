@@ -195,6 +195,7 @@ McpToolResult McpEditTools::cutConnections(boost::json::object const& arguments)
         throw std::invalid_argument("The start and end point of the cut must differ.");
     }
     auto onlyInSelection = McpArguments::getOptionalBool(arguments, "only_in_selection").value_or(false);
+    _SimulationFacade::get()->updateSelection();
     _SimulationFacade::get()->cutConnections(start, end, onlyInSelection, getIncludeClusters(arguments));
     _context->onSelectionChanged();
     return {.text = std::format("Cut the connections crossing the line from ({}, {}) to ({}, {}).", start.x, start.y, end.x, end.y)};
@@ -284,6 +285,7 @@ McpToolResult McpEditTools::applyForce(boost::json::object const& arguments) con
 
 SelectionShallowData McpEditTools::getNonEmptySelection() const
 {
+    _SimulationFacade::get()->updateSelection();
     auto result = _SimulationFacade::get()->getSelectionShallowData();
     if (result.numObjects == 0 && result.numEnergyParticles == 0) {
         throw std::invalid_argument("Nothing is selected. Select objects with select_area or select_at first.");

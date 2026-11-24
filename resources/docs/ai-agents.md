@@ -21,6 +21,25 @@ claude mcp add --transport http alien http://127.0.0.1:8765/mcp
 
 The **Command log** in the **MCP server** window lists the commands the agent sends, together with their results. This makes it easy to follow what the agent is doing. The log keeps the latest 1000 commands. Hover over a command or a result to see more of it in a tooltip.
 
+## Console mode and command line
+
+The MCP server does not need the user interface:
+
+- In [console mode](user-interface.md#console-mode), a running server stays available. The console window shows its address and lists the commands the agent sends.
+- The [command line interface](files.md#command-line-interface) starts a server of its own with the option --mcp. Without an input file, it begins with an empty and paused world, which the agent can fill or replace. A simulation given with -i runs right away.
+
+```
+alien-cli --mcp
+```
+
+The agent has the same tools as in the graphical program. For screenshots, the graphics driver has to support Vulkan 1.3. If another program already uses port 8765, choose a different one with --mcp-port. When you stop *alien-cli*, the simulation is only saved if an output file has been given with -o.
+
+The server only accepts connections from the same computer. To let an agent on your computer control *alien-cli* on another one, for example on a rented cloud server, forward the port with SSH. The URL stays the same:
+
+```
+ssh -L 8765:127.0.0.1:8765 user@server
+```
+
 ## Example prompts
 
 You can phrase your requests as you would to a knowledgeable assistant. The following prompts show what is possible. The results are best when you describe precisely what you want to see.

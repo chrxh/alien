@@ -1,4 +1,4 @@
-#include "NewSimulationService.h"
+#include "SimulationGuiService.h"
 
 #include <functional>
 
@@ -6,21 +6,14 @@
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
 
-#include <Data/SimulationParameters.h>
-
-#include <Engine/Interface/SimulationFacade.h>
-#include <Engine/Interface/TemporalControlService.h>
-
 #include <Network/NetworkService.h>
 
 #include <Persister/Interface/LocalLibraryService.h>
-#include <Persister/Interface/PersisterFacade.h>
 
 #include "Viewport.h"
 
 namespace
 {
-    auto constexpr ProjectNameSize = sizeof(Char64) / sizeof(char);
     auto constexpr InitialZoomFactor = 4.0f;
     auto constexpr ExitSaveOriginSettingsKey = "services.new simulation.exit save origin";
     auto constexpr OriginKeySuffix = ".origin";
@@ -36,60 +29,28 @@ namespace
     }
 }
 
-void NewSimulationService::createSimulation(Parameters const& parameters)
+void SimulationGuiService::createSimulation(Parameters const& parameters)
 {
-    SimulationParameters simulationParameters;
-    if (parameters._adoptSimulationParameters) {
-        simulationParameters = _SimulationFacade::get()->getSimulationParameters();
-    }
-    StringHelper::copy(simulationParameters.projectName.value, ProjectNameSize, parameters._projectName);
-    simulationParameters.externalEnergy.value = parameters._externalEnergy;
-    _SimulationFacade::get()->closeSimulation();
-
-    _SimulationFacade::get()->newSimulation(0, parameters._worldSize, simulationParameters);
+    SimulationService::get().createSimulation(parameters);
     Viewport::get().setCenterInWorldPos({toFloat(parameters._worldSize.x) / 2, toFloat(parameters._worldSize.y) / 2});
     Viewport::get().setZoomFactor(InitialZoomFactor);
-    TemporalControlService::get().createFlashback();
     _originResourceId.reset();
     _nameInLibrary.reset();
     _localFile.reset();
     ++_simulationRevision;
 }
 
-std::optional<std::string> NewSimulationService::loadSimulation(
+std::optional<std::string> SimulationGuiService::loadSimulation(
     SimulationDesc simulation,
     std::optional<std::string> const& originResourceId,
     std::optional<std::string> const& nameInLibrary,
     std::optional<std::filesystem::path> const& localFile)
 {
-    _PersisterFacade::get()->shutdown();
-    _SimulationFacade::get()->closeSimulation();
-
-    std::optional<std::string> errorMessage;
-    try {
-        _SimulationFacade::get()->newSimulation(simulation._timestep, simulation._worldSize, simulation._simulationParameters);
-        _SimulationFacade::get()->setRealTime(simulation._realTime);
-        _SimulationFacade::get()->setSimulationData(simulation._mainData);
-        _SimulationFacade::get()->setStatisticsHistory(simulation._statistics);
-    } catch (std::exception const& exception) {
-        errorMessage = exception.what();
-    } catch (...) {
-        errorMessage = "Failed to load simulation.";
-    }
-
-    if (errorMessage) {
-        _SimulationFacade::get()->closeSimulation();
-        _SimulationFacade::get()->newSimulation(simulation._timestep, simulation._worldSize, simulation._simulationParameters);
-    }
-    _PersisterFacade::get()->restart();
-
-    Viewport::get().setCenterInWorldPos(simulation._center);
-    Viewport::get().setZoomFactor(simulation._zoom);
-    if (errorMessage) {
-        TemporalControlService::get().createFlashback();
-    } else {
-        TemporalControlService::get().createFlashback(std::move(simulation._mainData));
-    }
+    auto center = simulation._center;
+    auto zoom = simulation._zoom;
+    auto errorMessage = SimulationService::get().loadSimulation(std::move(simulation));
+    Viewport::get().setCenterInWorldPos(center);
+    Viewport::get().setZoomFactor(zoom);
     _originResourceId = errorMessage ? std::nullopt : originResourceId;
     _nameInLibrary = errorMessage ? std::nullopt : nameInLibrary;
     _localFile = errorMessage ? std::nullopt : localFile;
@@ -97,42 +58,42 @@ std::optional<std::string> NewSimulationService::loadSimulation(
     return errorMessage;
 }
 
-std::optional<std::string> const& NewSimulationService::getOriginResourceId() const
+std::optional<std::string> const& SimulationGuiService::getOriginResourceId() const
 {
     return _originResourceId;
 }
 
-void NewSimulationService::setOriginResourceId(std::optional<std::string> const& value)
+void SimulationGuiService::setOriginResourceId(std::optional<std::string> const& value)
 {
     _originResourceId = value;
 }
 
-std::optional<std::string> const& NewSimulationService::getNameInLibrary() const
+std::optional<std::string> const& SimulationGuiService::getNameInLibrary() const
 {
     return _nameInLibrary;
 }
 
-void NewSimulationService::setNameInLibrary(std::optional<std::string> const& value)
+void SimulationGuiService::setNameInLibrary(std::optional<std::string> const& value)
 {
     _nameInLibrary = value;
 }
 
-std::optional<std::filesystem::path> const& NewSimulationService::getLocalFile() const
+std::optional<std::filesystem::path> const& SimulationGuiService::getLocalFile() const
 {
     return _localFile;
 }
 
-void NewSimulationService::setLocalFile(std::optional<std::filesystem::path> const& value)
+void SimulationGuiService::setLocalFile(std::optional<std::filesystem::path> const& value)
 {
     _localFile = value;
 }
 
-int NewSimulationService::getSimulationRevision() const
+int SimulationGuiService::getSimulationRevision() const
 {
     return _simulationRevision;
 }
 
-void NewSimulationService::storeAutosaveOrigin() const
+void SimulationGuiService::storeAutosaveOrigin() const
 {
     auto& settings = GlobalSettings::get();
     auto key = getExitSaveOriginSettingsKey();
@@ -142,7 +103,7 @@ void NewSimulationService::storeAutosaveOrigin() const
     settings.setValue(key + LocalFileKeySuffix, _localFile.has_value() ? StringHelper::toUtf8(*_localFile) : std::string());
 }
 
-void NewSimulationService::restoreAutosaveOrigin()
+void SimulationGuiService::restoreAutosaveOrigin()
 {
     auto& settings = GlobalSettings::get();
     auto key = getExitSaveOriginSettingsKey();

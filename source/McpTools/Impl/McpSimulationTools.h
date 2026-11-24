@@ -16,6 +16,7 @@ class McpSimulationTools
 public:
     std::vector<McpTool> getTools(McpToolContext& context);
     void process();
+    bool hasPendingRequests() const;
 
 private:
     McpToolResult createSimulation(boost::json::object const& arguments) const;

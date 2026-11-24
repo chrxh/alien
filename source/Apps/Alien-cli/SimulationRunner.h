@@ -16,4 +16,6 @@ public:
         std::optional<uint64_t> timesteps,
         ConsoleLiveOutput& liveOutput,
         PeriodicUploader* periodicUploader);
+
+    static void runWithMcpServer(SimulationFacade const& simulationFacade, ConsoleLiveOutput& liveOutput, PeriodicUploader* periodicUploader);
 };

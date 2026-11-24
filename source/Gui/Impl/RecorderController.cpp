@@ -13,6 +13,7 @@
 
 #include <Engine/Interface/SimulationFacade.h>
 
+#include <Rendering/Interface/PictureService.h>
 #include <Rendering/Interface/RenderingFacade.h>
 
 #include <Video/VideoWriter.h>
@@ -62,7 +63,7 @@ namespace
         auto isCroppable = picture.resolution.x >= resolution.x && picture.resolution.y >= resolution.y && picture.resolution.x <= resolution.x + 1
             && picture.resolution.y <= resolution.y + 1;
         if (!isCroppable) {
-            picture = PictureGuiService::get().scale(picture, resolution);
+            picture = PictureService::get().scale(picture, resolution);
         }
         if (picture.resolution == resolution) {
             return std::move(picture);
