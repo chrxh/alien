@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <optional>
+#include <string>
 
 #include <Base/Singleton.h>
 
@@ -23,13 +24,13 @@ public:
     void process();  // Must not be called within an ImGui frame.
 
     void onSpeedLimitChanged();
+    void onSimulationSaved(std::string const& filename);
     void onMcpCommandExecuted(McpCommandLogEntry const& entry);
 
 private:
     void quit();
     void leaveConsoleMode();
     void deactivate();
-    void printSavedSimulation();
     void printStatusLine();
 
     struct StateBeforeActivation
