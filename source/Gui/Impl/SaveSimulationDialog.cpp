@@ -56,6 +56,7 @@ namespace
     auto constexpr SectionSpacing = 10.0f;
     auto constexpr TargetSectionHeight = 164.0f;
     auto constexpr ReplaceSectionHeight = 90.0f;
+    auto constexpr AnnouncementOptionHeight = 26.0f;
     auto constexpr TimestampLengthWithoutSeconds = 16;  // e.g. 2026-11-13 14:02
     auto constexpr DateLength = 10;
 
@@ -74,6 +75,7 @@ namespace
         {SaveTarget::Community, "community"},
         {SaveTarget::Private, "private"},
         {SaveTarget::OtherLocation, "other location"}};
+    auto constexpr AnnounceOnDiscordSettingsKey = "dialogs.replace upload.announce on discord";
 
     std::string getSuggestedNameWithoutFolder(NetworkResourceType resourceType)
     {
@@ -147,14 +149,14 @@ namespace
         }
     }
 
-    std::string getTargetExplanation(SaveTarget target, std::string const& resourceTypeString)
+    std::string getTargetExplanation(SaveTarget target, std::string const& resourceTypeString, bool isNewUpload)
     {
         switch (target) {
         case SaveTarget::ThisComputer:
             return "The " + resourceTypeString + " is stored on this computer. You can share it from the browser at any time.";
         case SaveTarget::Community:
-            return "Everyone can see and download the " + resourceTypeString
-                + " in the Community workspace. It is also announced on the ALIEN Discord. Work in progress is welcome.";
+            return "Everyone can see and download the " + resourceTypeString + " in the Community workspace. "
+                + (isNewUpload ? "It is also announced on the ALIEN Discord. " : "") + "Work in progress is welcome.";
         case SaveTarget::OtherLocation:
             return "The " + resourceTypeString + " is stored as a file in any folder. Save asks for the folder and the file name.";
         default:
@@ -369,6 +371,7 @@ void SaveSimulationDialog::initIntern()
         auto findResult = std::ranges::find_if(SettingsValueByTarget, [&](auto const& entry) { return entry.second == value; });
         _lastTargetByType[resourceType] = findResult != SettingsValueByTarget.end() ? findResult->first : SaveTarget::ThisComputer;
     }
+    _announceOnDiscord = settings.getValue(AnnounceOnDiscordSettingsKey, _announceOnDiscord);
 }
 
 void SaveSimulationDialog::shutdownIntern()
@@ -377,6 +380,7 @@ void SaveSimulationDialog::shutdownIntern()
     for (auto const& [resourceType, target] : _lastTargetByType) {
         settings.setValue(LastTargetSettingsKeyByType.at(resourceType), SettingsValueByTarget.at(target));
     }
+    settings.setValue(AnnounceOnDiscordSettingsKey, _announceOnDiscord);
 }
 
 void SaveSimulationDialog::processIntern()
@@ -452,7 +456,12 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
             + " with this name is longer than this field can show. It is kept and can be changed in its text file.");
     }
     auto hasTargetSelection = _targets.size() > 1;
-    auto lowerSectionHeight = _mode == Mode::Replacing ? ReplaceSectionHeight : (hasTargetSelection ? TargetSectionHeight : 0.0f);
+    auto lowerSectionHeight = [&] {
+        if (_mode == Mode::Replacing) {
+            return outcome.replacesSharedUpload ? ReplaceSectionHeight + AnnouncementOptionHeight : ReplaceSectionHeight;
+        }
+        return hasTargetSelection ? TargetSectionHeight : 0.0f;
+    }();
     ImGui::PushID("description");
     ImGui::BeginDisabled(!_descriptionEditable || ignoresNameAndDescription);
     if (AlienGui::InputTextMultiline(
@@ -479,6 +488,7 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
         ImGui::PushTextWrapPos(0.0f);
         AlienGui::Text(explanation);
         ImGui::PopTextWrapPos();
+        processAnnouncementOption(outcome);
         if (isServerTarget(_target)) {
             AlienGui::PrivacyPolicyLink(privacyTooltip);
         }
@@ -502,13 +512,29 @@ void SaveSimulationDialog::processForm(Outcome const& outcome)
         _errorMessage.reset();
     }
 
+    auto isNewUpload = !outcome.replacedResourceId.has_value();
+    auto explainedTarget = _target;
+    if (!isNewUpload) {
+        explainedTarget = outcome.replacesSharedUpload ? SaveTarget::Community : SaveTarget::Private;
+    }
     ImGui::Spacing();
     ImGui::PushTextWrapPos(0.0f);
-    AlienGui::Text(getTargetExplanation(_target, resourceTypeString));
+    AlienGui::Text(getTargetExplanation(explainedTarget, resourceTypeString, isNewUpload));
     ImGui::PopTextWrapPos();
+    processAnnouncementOption(outcome);
     if (isServerTarget(_target)) {
         AlienGui::PrivacyPolicyLink(privacyTooltip);
     }
+}
+
+void SaveSimulationDialog::processAnnouncementOption(Outcome const& outcome)
+{
+    if (!outcome.replacesSharedUpload) {
+        return;
+    }
+    ImGui::Checkbox("##announceOnDiscord", &_announceOnDiscord);
+    ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+    AlienGui::Text("Announce on the ALIEN Discord");
 }
 
 void SaveSimulationDialog::processFooter(Outcome const& outcome)
@@ -550,6 +576,7 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
         result.possible = true;
         if (isServerTarget(_target)) {
             result.replacedResourceId = _replacedResource->id;
+            result.replacesSharedUpload = _replacedResource->workspaceType != WorkspaceType_Private;
         } else {
             result.replacesFile = true;
         }
@@ -599,6 +626,7 @@ auto SaveSimulationDialog::evaluate() const -> Outcome
     }
     if (auto rawTO = findOwnUpload(_resourceType, _target, name)) {
         result.replacedResourceId = rawTO->id;
+        result.replacesSharedUpload = rawTO->workspaceType != WorkspaceType_Private;
         result.message = getReplacementMessage(rawTO, _target);
     }
     result.possible = true;
@@ -680,7 +708,7 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
             return;
         }
         close();
-        onReplaceUpload(_replacedResource->id, _replacedResource->workspaceType);
+        onReplaceUpload(outcome, _replacedResource->workspaceType);
         return;
     }
     if (_mode == Mode::RunningResource && _remembersTarget && _targetChosen) {
@@ -725,7 +753,7 @@ void SaveSimulationDialog::onConfirm(Outcome const& outcome)
     }
     close();
     if (outcome.replacedResourceId.has_value()) {
-        onReplaceUpload(*outcome.replacedResourceId, toWorkspaceType(_target));
+        onReplaceUpload(outcome, toWorkspaceType(_target));
     } else {
         onUpload();
     }
@@ -770,8 +798,9 @@ void SaveSimulationDialog::onUpload()
         isGenomeOfGenomeEditor ? createMarkGenomeAsSavedFunc() : std::function<void()>());
 }
 
-void SaveSimulationDialog::onReplaceUpload(std::string const& resourceId, WorkspaceType workspaceType)
+void SaveSimulationDialog::onReplaceUpload(Outcome const& outcome, WorkspaceType workspaceType)
 {
+    auto const& resourceId = *outcome.replacedResourceId;
     auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return ReplaceNetworkResourceRequestData::SimulationData{
@@ -787,7 +816,11 @@ void SaveSimulationDialog::onReplaceUpload(std::string const& resourceId, Worksp
     auto isGenomeOfGenomeEditor = _resourceType == NetworkResourceType_Genome && !_savedGenome.has_value();
     NetworkTransferController::get().onReplace(
         ReplaceNetworkResourceRequestData{
-            .resourceId = resourceId, .workspaceType = workspaceType, .downloadCache = BrowserWindow::get().getSimulationCache(), .data = data},
+            .resourceId = resourceId,
+            .workspaceType = workspaceType,
+            .announceOnDiscord = _announceOnDiscord || !outcome.replacesSharedUpload,
+            .downloadCache = BrowserWindow::get().getSimulationCache(),
+            .data = data},
         isGenomeOfGenomeEditor ? createMarkGenomeAsSavedFunc() : std::function<void()>());
 
     // Replacing keeps the name and the description, so a description written in this dialog or that of a shared simulation is stored separately

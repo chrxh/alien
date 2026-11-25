@@ -705,7 +705,8 @@ bool NetworkService::replaceResource(
     IntVector2D const& worldSize,
     int numObjects,
     std::string const& mainData,
-    std::string const& picture)
+    std::string const& picture,
+    bool announceOnDiscord)
 {
     log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
 
@@ -720,6 +721,7 @@ bool NetworkService::replaceResource(
         {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "content.bin", "application/octet-stream"},
+        {"announceOnDiscord", announceOnDiscord ? "true" : "false", "", ""},
     };
     if (!picture.empty()) {
         items.push_back({"picture", picture, "picture.jpg", "image/jpeg"});

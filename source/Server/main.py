@@ -1747,6 +1747,7 @@ async def replace_simulation(request: Request):
     height = _parse_int(_require_field(fields, "height"))
     particles = _parse_int(_require_field(fields, "particles"))
     version = _require_field(fields, "version")
+    announce_on_discord = fields.get("announceOnDiscord", "true").lower() != "false"
 
     sim_id = _parse_int(simId)
     notify_name: str | None = None
@@ -1788,7 +1789,7 @@ async def replace_simulation(request: Request):
                 sim.picture = picture_bytes
             notify_picture = bytes(sim.picture or b"")
 
-    if notify_workspace != _WORKSPACE_PRIVATE and notify_name is not None:
+    if announce_on_discord and notify_workspace != _WORKSPACE_PRIVATE and notify_name is not None:
         _discord_notify_resource(
             "Simulation updated in the database" if notify_type == 0 else "Genome updated in the database",
             notify_name, userName, notify_desc, width, height, particles, notify_type, notify_picture,

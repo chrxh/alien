@@ -68,6 +68,7 @@ private:
         bool possible = false;
         bool needsLogin = false;
         std::optional<std::string> replacedResourceId;  // An own upload with the same name, whoever can see it
+        bool replacesSharedUpload = false;
         bool replacesFile = false;
         std::optional<std::string> message;
     };
@@ -86,6 +87,7 @@ private:
     void shutdownIntern() override;
     void processIntern() override;
     void processForm(Outcome const& outcome);
+    void processAnnouncementOption(Outcome const& outcome);
     void processFooter(Outcome const& outcome);
 
     Outcome evaluate() const;
@@ -95,7 +97,7 @@ private:
     void onConfirm(Outcome const& outcome);
     std::optional<std::string> saveOnThisComputer(std::string const& name, std::optional<std::string> const& description);  // Returns an error message
     void onUpload();
-    void onReplaceUpload(std::string const& resourceId, WorkspaceType workspaceType);
+    void onReplaceUpload(Outcome const& outcome, WorkspaceType workspaceType);
 
     Mode _mode = Mode::RunningResource;
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
@@ -105,6 +107,7 @@ private:
     bool _remembersTarget = false;
     bool _targetChosen = false;
     bool _uploadsRefreshed = false;
+    bool _announceOnDiscord = true;
 
     std::string _name;
     std::string _description;

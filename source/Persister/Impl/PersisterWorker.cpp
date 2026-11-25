@@ -550,7 +550,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         pictureJpg = creatureData.jpg;
     }
 
-    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, pictureJpg)) {
+    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, pictureJpg, requestData.announceOnDiscord)) {
 
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         return std::make_shared<_PersisterRequestError>(
