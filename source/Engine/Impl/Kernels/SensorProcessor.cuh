@@ -3,6 +3,7 @@
 #include <Data/DistanceSignal.h>
 
 #include "SimulationData.cuh"
+#include "TargetProcessor.cuh"
 
 class SensorProcessor
 {
@@ -38,6 +39,7 @@ private:
     __inline__ __device__ static uint64_t getRelocationMatchInfo(SimulationData& data, Object* object, float2 const& scanPos);
 
     __inline__ __device__ static void publishMatch(SimulationData& data, Object* object, uint64_t lookupResult);
+    __inline__ __device__ static uint16_t getSearchedColors(Sensor const& sensor);
     __inline__ __device__ static void publishNoMatch(Object* object);
 
     __inline__ __device__ static void registerDetections(SimulationData& data, Object* object);
@@ -102,7 +104,6 @@ private:
     static int constexpr MaxNearbyCreatures = 3;
     static float constexpr NearbyCreatureRadius = 4.0f;
     static uint32_t constexpr NoNearbyCreature = 0xffffffff;
-    static uint32_t constexpr MinDetectedByCapacity = 4;
 };
 
 /************************************************************************/
@@ -413,7 +414,7 @@ __inline__ __device__ void SensorProcessor::publishMatch(SimulationData& data, O
     auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - cell.frontAngle, -180.0f);
     writeSignal(cell.neuralActivity, relAngle, density, distance);
 
-    // No relocation for solids
+    // No relocation and no target for solids
     if (cell.cellTypeData.sensor.mode != SensorMode_DetectSolid) {
         auto matchPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
         data.world.correctPosition(matchPos);
@@ -421,7 +422,22 @@ __inline__ __device__ void SensorProcessor::publishMatch(SimulationData& data, O
         cell.cellTypeData.sensor.lastMatchAvailable = true;
         cell.cellTypeData.sensor.lastMatchCreatureIdPart = creatureIdPart;
         cell.cellTypeData.sensor.lastMatchPos = matchPos;
+
+        if (cell.creature->hasCommunicators) {
+            TargetProcessor::store(data, object, Target{matchPos, static_cast<uint32_t>(*data.timestep), 0, getSearchedColors(cell.cellTypeData.sensor)});
+        }
     }
+}
+
+__inline__ __device__ uint16_t SensorProcessor::getSearchedColors(Sensor const& sensor)
+{
+    switch (sensor.mode) {
+    case SensorMode_DetectFreeCell:
+        return sensor.modeData.detectFreeCell.restrictToColors;
+    case SensorMode_DetectCreature:
+        return sensor.modeData.detectCreature.restrictToColors;
+    }
+    return 0;
 }
 
 __inline__ __device__ void SensorProcessor::publishNoMatch(Object* object)
@@ -531,15 +547,7 @@ __inline__ __device__ void SensorProcessor::registerDetection(SimulationData& da
     if (index < numDetections) {
         creature->detectedBy[index].restrictToColors |= restrictToColors;
     } else {
-        if (numDetections == creature->detectedByCapacity) {
-            auto newCapacity = max(MinDetectedByCapacity, 2 * numDetections);
-            auto newDetectedBy = data.entities.heap.getTypedSubArray<SensorDetection>(newCapacity);
-            for (uint32_t i = 0; i < numDetections; ++i) {
-                newDetectedBy[i] = creature->detectedBy[i];
-            }
-            creature->detectedBy = newDetectedBy;
-            creature->detectedByCapacity = newCapacity;
-        }
+        data.entities.heap.growIfFull(creature->detectedBy, numDetections, creature->detectedByCapacity);
         creature->detectedBy[numDetections] = SensorDetection{creatureIdPart, restrictToColors, 0};
         creature->numDetectedBy = numDetections + 1;
     }

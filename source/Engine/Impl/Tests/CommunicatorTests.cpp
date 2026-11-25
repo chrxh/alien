@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <array>
 #include <optional>
+#include <ranges>
 
 #include <Base/Math.h>
 
@@ -30,525 +32,260 @@ public:
     ~CommunicatorTests() = default;
 
 protected:
-    // Helper to create a sender creature with 2 cells (sender + helper for reference direction).
-    // The sender is connected to a helper cell to the east, so its reference direction is (1, 0).
-    // With frontAngle and the encoded angle in signal.signals[CommunicatorAngle] (= angleChannel), the
-    // absolute facing direction defaults to south (0, +1): refAngle(90) + frontAngle(0) + angleChannel(0.5) * 180 = 180.
-    ContentDesc createSenderCreature(
-        uint64_t creatureId,
-        RealVector2D pos,
-        int range = 50,
-        int color = 0,
-        std::optional<float> frontAngle = 0.0f,
-        float angleChannel = 0.5f,
-        float distanceChannel = 1.0f,
-        bool oneway = true)
+    using Message = std::array<float, 4>;
+
+    static auto constexpr PreyColor = 5;
+    static auto constexpr OtherPreyColor = 6;
+    static auto constexpr AllColors = 0x3ff;
+    static auto constexpr TestMessage = Message{0.25f, 0.5f, 0.75f, -0.5f};
+    static auto constexpr ReceiverNetworkOutput = 0.125f;
+
+    CellDesc createSenderCell(int range = 50, Message const& message = {}, std::optional<float> frontAngle = 0.0f)
     {
-        auto data = ContentDesc().addCreature(
-            {
-                ObjectDesc()
-                    .id(creatureId * 100)
-                    .pos(pos)
-                    .color(color)
-                    .type(CellDesc()
-                              .frontAngle(frontAngle)
-                              .neuralNetwork(NeuralNetDesc().biases({1.0f, angleChannel, 2.0f, distanceChannel, 0, 0, 0, 0, 0, 0, 0, 0}))
-                              .cellType(CommunicatorDesc().mode(SenderDesc().range(range).oneway(oneway)))),
-                ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
-            },
-            CreatureDesc().id(creatureId));
-        data.addConnection(creatureId * 100, creatureId * 100 + 1);
+        return CellDesc()
+            .frontAngle(frontAngle)
+            .neuralNetwork(NeuralNetDesc().biases({1.0f, 0, 0, 0, message.at(0), message.at(1), message.at(2), message.at(3), 0, 0, 0, 0}))
+            .cellType(CommunicatorDesc().mode(SenderDesc().range(range).oneway(false)));
+    }
+
+    CellDesc
+    createReceiverCell(int restrictToColors = AllColors, LineageRestriction restrictToLineage = LineageRestriction_No, std::optional<float> frontAngle = 0.0f)
+    {
+        auto neuralNetwork = NeuralNetDesc().connectionWeight(0, 0.0f);
+        for (auto channel : std::views::iota(0, STANDARD_NEURONS_PER_CELL)) {
+            neuralNetwork.bias(channel, ReceiverNetworkOutput);
+        }
+        return CellDesc()
+            .frontAngle(frontAngle)
+            .neuralNetwork(neuralNetwork)
+            .cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToColors(restrictToColors).restrictToLineage(restrictToLineage)));
+    }
+
+    CellDesc createSensorCell(SensorModeDesc const& sensorMode)
+    {
+        return CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(sensorMode));
+    }
+
+    // Chain of cells to the east, the reference direction of the first cell is (1, 0)
+    ContentDesc createCreature(uint64_t creatureId, RealVector2D pos, std::vector<CellDesc> const& cells, int lineageId = 0)
+    {
+        auto numCells = toInt(cells.size());
+        std::vector<ObjectDesc> objects;
+        for (auto i : std::views::iota(0, numCells)) {
+            objects.emplace_back(ObjectDesc().id(creatureId * 100 + i).pos({pos.x + toFloat(i), pos.y}).type(cells.at(i)));
+        }
+        auto data = ContentDesc().addCreature(objects, CreatureDesc().id(creatureId).lineageId(lineageId));
+        for (auto i : std::views::iota(0, numCells - 1)) {
+            data.addConnection(creatureId * 100 + i, creatureId * 100 + i + 1);
+        }
         return data;
     }
 
-    // Helper to create a receiver creature with 2 cells (receiver + helper for reference direction).
-    ContentDesc createReceiverCreature(
+    ContentDesc createSenderCreature(uint64_t creatureId, RealVector2D pos, int range = 50, Message const& message = TestMessage)
+    {
+        return createCreature(creatureId, pos, {createSenderCell(range, message), CellDesc()});
+    }
+
+    // The sensor is located at a distance of 2 to the east of the sender
+    ContentDesc createObserverCreature(
         uint64_t creatureId,
         RealVector2D pos,
-        int restrictToColors = 0x3ff,
-        LineageRestriction restrictToLineage = LineageRestriction_No,
-        int color = 0,
-        std::optional<float> frontAngle = 0.0f,
-        float distanceChannel = 0.0f)
+        SensorModeDesc const& sensorMode = DetectCreatureDesc().restrictToColors(1 << PreyColor),
+        int range = 50)
     {
-        auto data = ContentDesc().addCreature(
-            {
-                ObjectDesc()
-                    .id(creatureId * 100)
-                    .pos(pos)
-                    .color(color)
-                    .type(CellDesc()
-                              .frontAngle(frontAngle)
-                              .neuralNetwork(NeuralNetDesc().biases({0, 0, 0, distanceChannel, 0, 0, 0, 0, 0, 0, 0, 0}))
-                              .cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToColors(restrictToColors).restrictToLineage(restrictToLineage)))),
-                ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
-            },
-            CreatureDesc().id(creatureId));
-        data.addConnection(creatureId * 100, creatureId * 100 + 1);
+        return createCreature(creatureId, pos, {createSenderCell(range), CellDesc(), createSensorCell(sensorMode)});
+    }
+
+    // The receiver is located at a distance of 2 to the east of the sender
+    ContentDesc createRelayCreature(uint64_t creatureId, RealVector2D pos, int range)
+    {
+        return createCreature(creatureId, pos, {createSenderCell(range), CellDesc(), createReceiverCell()});
+    }
+
+    ContentDesc createReceiverCreature(uint64_t creatureId, RealVector2D pos, int restrictToColors = AllColors)
+    {
+        return createCreature(creatureId, pos, {createReceiverCell(restrictToColors), CellDesc()});
+    }
+
+    ContentDesc createPrey(uint64_t creatureId, RealVector2D pos, int color = PreyColor)
+    {
+        return ContentDesc().addCreature({ObjectDesc().id(creatureId * 100).pos(pos).color(color)}, CreatureDesc().id(creatureId));
+    }
+
+    // Cells without a head cell die after about 200 time steps
+    ContentDesc letLivePermanently(ContentDesc data)
+    {
+        data._objects.front().getCellRef()._headCell = true;
         return data;
     }
 
-    float encodeAngleForDefaultReceiver(RealVector2D const& direction) const
+    // The creature still acts in the first cycle
+    ContentDesc letDieInFirstCycle(ContentDesc data)
+    {
+        for (auto& object : data._objects) {
+            object.getCellRef()._usableEnergy = 1.0f;
+        }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.cellDeathProbability.baseValue[i] = 1.0f;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+        return data;
+    }
+
+    void calcCycles(int numCycles) { _simulationFacade->calcTimesteps(numCycles * TIMESTEPS_PER_CELL_FUNCTION); }
+
+    std::vector<float> getSignals(uint64_t objectId)
+    {
+        return _simulationFacade->getSimulationData().getObjectRef(objectId).getCellRef()._neuralActivity._signals;
+    }
+
+    void expectMessage(uint64_t receiverId, Message const& message)
+    {
+        auto signals = getSignals(receiverId);
+        for (auto const& [signal, expectedSignal] : std::views::zip(signals | std::views::drop(Channels::CommunicatorMessage), message)) {
+            EXPECT_FLOAT_EQ(signal, expectedSignal);
+        }
+    }
+
+    void expectNoMessage(uint64_t receiverId)
+    {
+        for (auto const& signal : getSignals(receiverId) | std::views::drop(Channels::CommunicatorMessage)) {
+            EXPECT_FLOAT_EQ(signal, ReceiverNetworkOutput);
+        }
+    }
+
+    void expectTargetReceived(uint64_t receiverId, RealVector2D const& toTarget, int age = 0, float frontAngle = 0.0f)
+    {
+        auto signals = getSignals(receiverId);
+        EXPECT_FLOAT_EQ(signals.at(Channels::CommunicatorTargetReceived), 1.0f);
+        EXPECT_NEAR(signals.at(Channels::CommunicatorAngle), encodeAngleForDefaultReceiver(toTarget, frontAngle), 1e-2f);
+        EXPECT_NEAR(signals.at(Channels::CommunicatorFreshness), 1.0f - toFloat(age) / Const::CommunicatorTargetMaxAge, 1e-4f);
+        EXPECT_NEAR(signals.at(Channels::CommunicatorDistance), DistanceSignal::encode(Math::length(toTarget)), 1e-3f);
+    }
+
+    void expectNoTarget(uint64_t receiverId)
+    {
+        for (auto const& signal : getSignals(receiverId) | std::views::take(Channels::CommunicatorMessage)) {
+            EXPECT_FLOAT_EQ(signal, ReceiverNetworkOutput);
+        }
+    }
+
+    float encodeAngleForDefaultReceiver(RealVector2D const& direction, float frontAngle = 0.0f) const
     {
         auto referenceAngleEast = 90.0f;
-        return Math::getNormalizedAngle(Math::angleOfVector(direction) - referenceAngleEast, -180.0f) / 180.0f;
+        return Math::getNormalizedAngle(Math::angleOfVector(direction) - referenceAngleEast - frontAngle, -180.0f) / 180.0f;
     }
 };
 
-TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
+TEST_F(CommunicatorTests, receiver_noSender_neuralNetworkIsKept)
 {
-    // Create a sender with no nearby receiver
-    auto data = createSenderCreature(1, {100.0f, 100.0f});
+    _simulationFacade->setSimulationData(createReceiverCreature(2, {100.5f, 90.5f}));
+    calcCycles(1);
 
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto sender = result.getObjectRef(100);
-
-    // Sender should have signal channels populated
-    EXPECT_TRUE(sender.getCellRef()._neuralActivity._signals[0] != 0.0f);
+    expectNoMessage(200);
+    expectNoTarget(200);
 }
 
-TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
+TEST_F(CommunicatorTests, receiver_senderInRange_messageReceived)
 {
-    // Create sender in creature 1 (facing south)
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
-
-    // Create receiver in creature 2, within range and in the opposite half-plane (north of the sender)
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
+    auto data = createSenderCreature(1, {100.5f, 100.5f});
+    data.add(createReceiverCreature(2, {100.5f, 90.5f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver should have received the signal. Sender and receiver share the same absolute front direction,
-    // so the encoded angle is transmitted unchanged.
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[0], 1.0f);
-    EXPECT_NEAR(receiver.getCellRef()._neuralActivity._signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[2], 2.0f);
+    expectMessage(200, TestMessage);
+    expectNoTarget(200);
 }
 
-TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
+TEST_F(CommunicatorTests, receiver_senderOutOfRange_noMessage)
 {
-    // Create sender in creature 1 with small range
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 10.0f);
-
-    // Create receiver in creature 2, out of range (north but too far away)
-    data.add(createReceiverCreature(2, {100.0f, 85.0f}), false);
+    auto data = createSenderCreature(1, {100.5f, 100.5f}, 10);
+    data.add(createReceiverCreature(2, {100.5f, 85.5f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver should NOT have received the signal (channels should be zero)
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
+    expectNoMessage(200);
 }
 
-TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
+TEST_F(CommunicatorTests, receiver_senderOfSameCreature_noMessage)
 {
-    // Create sender and receiver in the same creature (both connected)
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().neuralActivity({1.0f, 2.0f, 3.0f, 1.0f, 0, 0, 0, 0})),
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(2).pos({100.0f, 90.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(ReceiverDesc()))),
-        },
-        CreatureDesc().id(1));
-    data.addConnection(0, 1);
-    data.addConnection(1, 2);
+    auto data = createCreature(1, {100.5f, 100.5f}, {createReceiverCell(), CellDesc(), createSenderCell(50, TestMessage)});
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(2);
-
-    // Since they're in the same creature, CommunicatorProcessor should NOT transmit (channels should be zero from transmitter).
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
+    expectNoMessage(100);
 }
 
-TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
+TEST_F(CommunicatorTests, receiver_senderNotTriggered_noMessage)
 {
-    // Create sender in creature 1 (facing south)
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
-
-    // Create multiple receivers in the opposite half-plane (north, north-east, north-west)
-    data.add(createReceiverCreature(2, {110.0f, 90.0f}), false);
-    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);
-    data.add(createReceiverCreature(4, {90.0f, 90.0f}), false);
+    auto data = createSenderCreature(1, {100.5f, 100.5f});
+    data.getObjectRef(100).getCellRef()._neuralNetwork.bias(Channels::CellTypeActivation, 0.0f);
+    data.add(createReceiverCreature(2, {100.5f, 90.5f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
+    expectNoMessage(200);
+}
 
-    // All receivers should have received the signal
-    for (uint64_t id : {200, 300, 400}) {
-        auto receiver = result.getObjectRef(id);
-        EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
+TEST_F(CommunicatorTests, receiver_multipleReceivers_allReceiveMessage)
+{
+    auto data = createSenderCreature(1, {100.5f, 100.5f});
+    data.add(createReceiverCreature(2, {110.5f, 90.5f}), false);
+    data.add(createReceiverCreature(3, {100.5f, 90.5f}), false);
+    data.add(createReceiverCreature(4, {90.5f, 110.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    for (auto receiverId : {200, 300, 400}) {
+        expectMessage(receiverId, TestMessage);
     }
 }
 
-TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
+TEST_F(CommunicatorTests, receiver_multipleSenders_messageOfNearestSender)
 {
-    // Create sender with color 2
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 2);
-
-    // Create receiver that only accepts color 2
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 1 << 2), false);
+    auto data = createSenderCreature(1, {100.5f, 100.5f}, 50, {1.0f, 1.0f, 1.0f, 1.0f});
+    data.add(createSenderCreature(2, {100.5f, 80.5f}, 50, TestMessage), false);
+    data.add(createSenderCreature(3, {115.5f, 85.5f}, 50, {1.0f, 1.0f, 1.0f, 1.0f}), false);
+    data.add(createReceiverCreature(4, {100.5f, 85.5f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver should have received the signal (color matches)
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
+    expectMessage(400, TestMessage);
 }
 
-TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
+TEST_F(CommunicatorTests, receiver_senderWithoutFrontAngle_messageReceived)
 {
-    // Create sender with color 3
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 3);
-
-    // Create receiver that only accepts color 2
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 1 << 2), false);
+    auto data = createCreature(1, {100.5f, 100.5f}, {createSenderCell(50, TestMessage, std::nullopt), CellDesc()});
+    data.add(createReceiverCreature(2, {100.5f, 90.5f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver should NOT have received the signal (color doesn't match)
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
+    expectMessage(200, TestMessage);
 }
 
-TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
+TEST_F(CommunicatorTests, receiver_noFrontAngle_noMessage)
 {
-    // Create sender without active signal
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            // No signal set, so signal is not active
-            ObjectDesc().id(101).pos({101.0f, 100.0f}),
-        },
-        CreatureDesc().id(1));
-    data.addConnection(100, 101);
-
-    // Create receiver
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
+    auto data = createSenderCreature(1, {100.5f, 100.5f});
+    data.add(createCreature(2, {100.5f, 90.5f}, {createReceiverCell(AllColors, LineageRestriction_No, std::nullopt), CellDesc()}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver should NOT have received the signal (sender has no active signal)
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
+    expectNoMessage(200);
 }
 
-TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
-{
-    // Create two senders (both facing south) and a receiver between them; only the sender for which the receiver
-    // lies in the opposite half-plane should transmit.
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0.5f, 0, 1.0f, 0, 0, 0, 0}))),
-        },
-        CreatureDesc().id(1));
-    data.addConnection(100, 101);
-
-    data.addCreature(
-        {
-            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({-1.0f, 0.5f, 0, 1.0f, 0, 0, 0, 0}))),
-        },
-        CreatureDesc().id(2));
-    data.addConnection(200, 201);
-
-    // Receiver between both senders; it lies north of sender 2 (opposite half-plane) but south of sender 1.
-    data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(300);
-
-    // Receiver should have received the signal from sender 2
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._neuralActivity._signals[0], -1.0f);
-}
-
-TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
-{
-    // Rotating the sender's front by 180 degrees flips the facing direction to north, so now a southern receiver
-    // (opposite to the facing direction) receives, while a northern receiver is blocked.
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 180.0f);
-    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);  // South -> should receive
-    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);   // North -> should be blocked
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-
-    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._neuralActivity._signals[0] != 0.0f);
-    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._neuralActivity._signals[0] == 0.0f);
-}
-
-TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
-{
-    // With an encoded angle of 0, the facing direction equals the absolute front (east). A western receiver is then
-    // opposite to the facing direction and receives, while an eastern receiver is blocked.
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 0.0f, 0.0f);
-    data.add(createReceiverCreature(2, {90.0f, 100.0f}), false);   // West -> should receive
-    data.add(createReceiverCreature(3, {110.0f, 100.0f}), false);  // East -> should be blocked
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-
-    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._neuralActivity._signals[0] != 0.0f);
-    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._neuralActivity._signals[0] == 0.0f);
-}
-
-/**
- * Directional gating: the sender only transmits to receivers whose direction deviates by more than
- * Const::CommunicatorOnewayMinAngle from the encoded facing direction.
- */
-class CommunicatorTests_OnewayAngle
-    : public CommunicatorTests
-    , public testing::WithParamInterface<std::pair<float, bool>>
-{};
-
-INSTANTIATE_TEST_SUITE_P(
-    CommunicatorTests_OnewayAngle,
-    CommunicatorTests_OnewayAngle,
-    ::testing::Values(std::make_pair(95.0f, false), std::make_pair(105.0f, true), std::make_pair(-95.0f, false), std::make_pair(-105.0f, true)));
-
-TEST_P(CommunicatorTests_OnewayAngle, sender_receiverDeviationFromFacing)
-{
-    auto [deviation, expectedTransmission] = GetParam();
-
-    auto facingAngleSouth = 180.0f;
-    auto receiverPos = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(facingAngleSouth + deviation) * 10.0f;
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
-    data.add(createReceiverCreature(2, receiverPos), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    EXPECT_EQ(expectedTransmission, signals[0] != 0.0f);
-}
-
-TEST_F(CommunicatorTests, sender_frontAngleNotInitialized_noSignalTransmitted)
-{
-    // Sender without an initialized front direction must not transmit
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, std::nullopt);
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
-}
-
-TEST_F(CommunicatorTests, receiver_frontAngleNotInitialized_noSignalTransmitted)
-{
-    // Receiver without an initialized front direction must not receive
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 0x3ff, LineageRestriction_No, 0, std::nullopt), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
-}
-
-TEST_F(CommunicatorTests, sender_sourceDistance_receiverBesideSender)
-{
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(50.0f));
-    data.add(createReceiverCreature(2, {90.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    RealVector2D receiverToSource{10.0f, 60.0f};
-    RealVector2D senderToReceiver{-10.0f, -10.0f};
-    EXPECT_NEAR(signals[Channels::CommunicatorAngle], encodeAngleForDefaultReceiver(receiverToSource), 1e-3f);
-    EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(50.0f + Math::length(senderToReceiver)), 1e-4f);
-}
-
-TEST_F(CommunicatorTests, sender_sourceAtSender_receiverPointsToSender)
-{
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, 1.0f);
-    data.add(createReceiverCreature(2, {90.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    RealVector2D receiverToSender{10.0f, 10.0f};
-    EXPECT_NEAR(signals[Channels::CommunicatorAngle], encodeAngleForDefaultReceiver(receiverToSender), 1e-3f);
-    EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(Math::length(receiverToSender)), 1e-4f);
-}
-
-TEST_F(CommunicatorTests, sender_farSource_receiverBehindSender)
-{
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(1000.0f));
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    EXPECT_FLOAT_EQ(signals[0], 1.0f);
-    EXPECT_NEAR(signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
-    EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(1010.0f), 1e-5f);
-}
-
-TEST_F(CommunicatorTests, sender_infinitelyFarSource_receiverKeepsAbsoluteDirection)
-{
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, 0.0f);
-    data.add(createReceiverCreature(2, {90.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    EXPECT_FLOAT_EQ(signals[0], 1.0f);
-    EXPECT_NEAR(signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
-    EXPECT_FLOAT_EQ(signals[Channels::CommunicatorDistance], 0.0f);
-}
-
-TEST_F(CommunicatorTests, sender_withoutOneway_receiverInFront_distanceGrowsByHopLength)
-{
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(50.0f), false);
-    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    EXPECT_FLOAT_EQ(signals[0], 1.0f);
-    EXPECT_NEAR(signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
-    EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(60.0f), 1e-4f);
-}
-
-TEST_F(CommunicatorTests, receiver_twoSenders_closerSourceWins)
-{
-    auto data = createSenderCreature(1, {95.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(500.0f));
-    data.add(createSenderCreature(2, {105.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(20.0f)), false);
-    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(300).getCellRef()._neuralActivity._signals;
-    RealVector2D closerSenderToReceiver{-5.0f, -10.0f};
-    EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(20.0f + Math::length(closerSenderToReceiver)), 1e-4f);
-}
-
-class CommunicatorTests_ReceiverOwnSource
-    : public CommunicatorTests
-    , public testing::WithParamInterface<std::pair<float, bool>>
-{};
-
-INSTANTIATE_TEST_SUITE_P(
-    CommunicatorTests_ReceiverOwnSource,
-    CommunicatorTests_ReceiverOwnSource,
-    ::testing::Values(std::make_pair(0.0f, true), std::make_pair(DistanceSignal::encode(500.0f), true), std::make_pair(DistanceSignal::encode(5.0f), false)));
-
-TEST_P(CommunicatorTests_ReceiverOwnSource, receiver_ownSourceDistance)
-{
-    auto [ownDistanceChannel, expectedTransmission] = GetParam();
-
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50, 0, 0.0f, 0.5f, DistanceSignal::encode(50.0f));
-    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 0x3ff, LineageRestriction_No, 0, 0.0f, ownDistanceChannel), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto signals = _simulationFacade->getSimulationData().getObjectRef(200).getCellRef()._neuralActivity._signals;
-    if (expectedTransmission) {
-        EXPECT_FLOAT_EQ(signals[0], 1.0f);
-        EXPECT_NEAR(signals[Channels::CommunicatorDistance], DistanceSignal::encode(60.0f), 1e-4f);
-    } else {
-        EXPECT_FLOAT_EQ(signals[0], 0.0f);
-        EXPECT_NEAR(signals[Channels::CommunicatorDistance], ownDistanceChannel, 1e-4f);
-    }
-}
-
-/**
- * Parameterized test for angle translation. The encoded angle is relative to the absolute front direction
- * (reference direction rotated by frontAngle). The receiver's stored angle must point to the encoded source
- * in the frame of the receiver.
- */
-class CommunicatorTests_AngleTranslation
-    : public CommunicatorTests
-    , public testing::WithParamInterface<float>
-{};
-
-INSTANTIATE_TEST_SUITE_P(CommunicatorTests_AngleTranslation, CommunicatorTests_AngleTranslation, ::testing::Values(0.0f, 90.0f, -90.0f, 180.0f));
-
-TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
-{
-    auto receiverFrontAngle = GetParam();
-    auto senderFrontAngle = 30.0f;
-
-    // Sender: reference direction east (refAngle 90), non-trivial frontAngle, encoded angle 0.5.
-    // Absolute encoded direction = 90 + senderFrontAngle + 0.5 * 180 = 210 + senderFrontAngle, still pointing into the
-    // southern half-plane, so the northern receiver passes the directional gate.
-    auto sourceDistance = 50.0f;
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, senderFrontAngle, 0.5f, DistanceSignal::encode(sourceDistance));
-
-    // Receiver: north of the sender (opposite half-plane), reference direction east, variable non-trivial frontAngle.
-    RealVector2D receiverPos{100.0f, 90.0f};
-    data.add(createReceiverCreature(2, receiverPos, 0x3ff, LineageRestriction_No, 0, receiverFrontAngle), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
-
-    // Absolute encoded angle = senderRefAngle(90) + senderFrontAngle + encodedAngle(0.5) * 180.
-    // Receiver angle = angle from the receiver to the source - receiverRefAngle(90) - receiverFrontAngle, normalized to [-1, 1].
-    auto absoluteAngle = 90.0f + senderFrontAngle + 0.5f * 180.0f;
-    auto sourcePos = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(absoluteAngle) * sourceDistance;
-    auto expectedAngle = Math::getNormalizedAngle(Math::angleOfVector(sourcePos - receiverPos) - 90.0f - receiverFrontAngle, -180.0f) / 180.0f;
-    EXPECT_NEAR(receiver.getCellRef()._neuralActivity._signals[Channels::CommunicatorAngle], expectedAngle, 0.001f);
-}
-
-/**
- * Parameterized test for lineage restriction.
- * Parameters: (LineageRestriction mode, relatedLineage flag, expected acceptance)
- */
 struct LineageRestrictionParams
 {
     LineageRestriction restriction;
-    bool relatedLineage;
-    bool expectedAccept;
+    bool isRelated;
+    bool isAccepted;
 };
 
 class CommunicatorTests_LineageRestriction
@@ -560,51 +297,388 @@ INSTANTIATE_TEST_SUITE_P(
     CommunicatorTests_LineageRestriction,
     CommunicatorTests_LineageRestriction,
     ::testing::Values(
-        LineageRestrictionParams{LineageRestriction_RelatedLineage, true, true},     // relatedLineage, accept
-        LineageRestrictionParams{LineageRestriction_RelatedLineage, false, false},   // relatedLineage, rejected
-        LineageRestrictionParams{LineageRestriction_UnrelatedLineage, false, true},  // unrelatedLineage, accept
-        LineageRestrictionParams{LineageRestriction_UnrelatedLineage, true, false}   // unrelatedLineage, rejected
-        ));
+        LineageRestrictionParams{LineageRestriction_RelatedLineage, true, true},
+        LineageRestrictionParams{LineageRestriction_RelatedLineage, false, false},
+        LineageRestrictionParams{LineageRestriction_UnrelatedLineage, true, false},
+        LineageRestrictionParams{LineageRestriction_UnrelatedLineage, false, true}));
 
-TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
+TEST_P(CommunicatorTests_LineageRestriction, receiver_lineageRestriction)
 {
-    auto params = GetParam();
+    auto [restriction, isRelated, isAccepted] = GetParam();
 
-    uint64_t senderLineageId = 12345;
-    uint64_t receiverLineageId = params.relatedLineage ? 12345 : 67890;
-
-    auto data = ContentDesc().addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().neuralActivity(NeuralActivityDesc().signals({1.0f, 0.5f, 0, 1.0f, 0, 0, 0, 0}))),
-        },
-        CreatureDesc().id(1).lineageId(senderLineageId),
-        GenomeDesc());
-    data.addConnection(100, 101);
-
-    // Receiver north of the sender (opposite half-plane)
-    data.addCreature(
-        {
-            ObjectDesc()
-                .id(200)
-                .pos({100.0f, 80.0f})
-                .type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(params.restriction)))),
-            ObjectDesc().id(201).pos({101.0f, 80.0f}),
-        },
-        CreatureDesc().id(2).lineageId(receiverLineageId),
-        GenomeDesc());
-    data.addConnection(200, 201);
+    auto data = createCreature(1, {100.5f, 100.5f}, {createSenderCell(50, TestMessage), CellDesc()}, 12345);
+    data.add(createCreature(2, {100.5f, 90.5f}, {createReceiverCell(AllColors, restriction), CellDesc()}, isRelated ? 12345 : 67890), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    calcCycles(1);
 
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    if (params.expectedAccept) {
-        EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] != 0.0f);
-        EXPECT_NEAR(receiver.getCellRef()._neuralActivity._signals[Channels::CommunicatorAngle], 0.5f, 1e-4f);
+    if (isAccepted) {
+        expectMessage(200, TestMessage);
     } else {
-        EXPECT_TRUE(receiver.getCellRef()._neuralActivity._signals[0] == 0.0f);
+        expectNoMessage(200);
     }
+}
+
+class CommunicatorTests_FrontAngle
+    : public CommunicatorTests
+    , public testing::WithParamInterface<float>
+{};
+
+INSTANTIATE_TEST_SUITE_P(CommunicatorTests_FrontAngle, CommunicatorTests_FrontAngle, ::testing::Values(0.0f, 90.0f, -90.0f, 180.0f));
+
+TEST_P(CommunicatorTests_FrontAngle, receiver_targetReceived)
+{
+    auto frontAngle = GetParam();
+
+    auto data = createObserverCreature(1, {100.5f, 100.5f});
+    data.add(createPrey(9, {102.5f, 106.5f}), false);
+    data.add(createCreature(2, {90.5f, 90.5f}, {createReceiverCell(AllColors, LineageRestriction_No, frontAngle), CellDesc()}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    expectTargetReceived(200, {12.0f, 16.0f}, 0, frontAngle);
+}
+
+TEST_F(CommunicatorTests, receiver_targetAcrossWorldBorder)
+{
+    auto data = createObserverCreature(1, {990.5f, 100.5f});
+    data.add(createPrey(9, {992.5f, 106.5f}), false);
+    data.add(createReceiverCreature(2, {8.5f, 100.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    expectTargetReceived(200, {-16.0f, 6.0f});
+}
+
+TEST_F(CommunicatorTests, receiver_targetIsKeptAndOnlyAges)
+{
+    auto data = letDieInFirstCycle(createObserverCreature(1, {100.5f, 100.5f}));
+    data.add(createPrey(9, {102.5f, 106.5f}), false);
+    data.add(createReceiverCreature(2, {90.5f, 90.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+    auto signals = getSignals(200);
+    calcCycles(3);
+    auto signalsAfterwards = getSignals(200);
+
+    EXPECT_FLOAT_EQ(signals.at(Channels::CommunicatorTargetReceived), 1.0f);
+    EXPECT_FLOAT_EQ(signalsAfterwards.at(Channels::CommunicatorTargetReceived), 0.0f);
+    EXPECT_FLOAT_EQ(signalsAfterwards.at(Channels::CommunicatorAngle), signals.at(Channels::CommunicatorAngle));
+    EXPECT_FLOAT_EQ(signalsAfterwards.at(Channels::CommunicatorDistance), signals.at(Channels::CommunicatorDistance));
+    auto aging = 3.0f * TIMESTEPS_PER_CELL_FUNCTION / Const::CommunicatorTargetMaxAge;
+    EXPECT_NEAR(signalsAfterwards.at(Channels::CommunicatorFreshness), signals.at(Channels::CommunicatorFreshness) - aging, 1e-4f);
+    expectNoMessage(200);
+}
+
+TEST_F(CommunicatorTests, receiver_targetIsForgottenAfterMaxAge)
+{
+    auto data = letDieInFirstCycle(createObserverCreature(1, {100.5f, 100.5f}));
+    data.add(createPrey(9, {102.5f, 106.5f}), false);
+    data.add(letLivePermanently(createReceiverCreature(2, {90.5f, 90.5f})), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1 + Const::CommunicatorTargetMaxAge / TIMESTEPS_PER_CELL_FUNCTION);
+    auto freshness = getSignals(200).at(Channels::CommunicatorFreshness);
+    calcCycles(1);
+
+    EXPECT_NEAR(freshness, 0.004f, 1e-4f);
+    expectNoTarget(200);
+}
+
+TEST_F(CommunicatorTests, sender_targetIsRememberedWithoutSensorMatch)
+{
+    auto data = createObserverCreature(1, {100.5f, 100.5f});
+    data.add(letDieInFirstCycle(createPrey(9, {102.5f, 106.5f})), false);
+    data.add(createReceiverCreature(2, {90.5f, 90.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+    _simulationFacade->testOnly_cleanupAfterDataManipulation();
+    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
+    calcCycles(2);
+
+    expectTargetReceived(200, {12.0f, 16.0f}, 2 * TIMESTEPS_PER_CELL_FUNCTION);
+}
+
+TEST_F(CommunicatorTests, sender_targetIsForgottenAfterMaxAge)
+{
+    auto data = letLivePermanently(createObserverCreature(1, {100.5f, 100.5f}));
+    data.add(letDieInFirstCycle(createPrey(9, {102.5f, 106.5f})), false);
+    data.add(letLivePermanently(createReceiverCreature(2, {90.5f, 90.5f})), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1 + Const::CommunicatorTargetMaxAge / TIMESTEPS_PER_CELL_FUNCTION);
+    auto received = getSignals(200).at(Channels::CommunicatorTargetReceived);
+    calcCycles(1);
+
+    EXPECT_FLOAT_EQ(received, 1.0f);
+    expectNoTarget(200);
+}
+
+TEST_F(CommunicatorTests, receiver_olderTargetsAreIgnored)
+{
+    auto data = createObserverCreature(1, {100.5f, 70.5f}, DetectCreatureDesc().restrictToColors(1 << OtherPreyColor));
+    data.add(createPrey(2, {102.5f, 64.5f}, OtherPreyColor), false);
+    data.add(createReceiverCreature(3, {100.5f, 85.5f}), false);
+    data.add(createObserverCreature(4, {100.5f, 100.5f}), false);
+    data.add(createObserverCreature(5, {80.5f, 85.5f}), false);
+    data.add(createObserverCreature(6, {120.5f, 85.5f}), false);
+    data.add(letDieInFirstCycle(createPrey(7, {102.5f, 106.5f})), false);
+    data.add(letDieInFirstCycle(createPrey(8, {82.5f, 91.5f})), false);
+    data.add(letDieInFirstCycle(createPrey(9, {122.5f, 91.5f})), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+    for ([[maybe_unused]] auto cycle : std::views::iota(0, 5)) {
+        calcCycles(1);
+        expectTargetReceived(300, {2.0f, -21.0f});
+    }
+}
+
+TEST_F(CommunicatorTests, receiver_targetOlderThanOwnSensorMatch)
+{
+    auto data = createObserverCreature(1, {100.5f, 100.5f});
+    data.add(letDieInFirstCycle(createPrey(2, {102.5f, 106.5f})), false);
+    auto ownSensor = createSensorCell(DetectCreatureDesc().restrictToColors(1 << OtherPreyColor));
+    data.add(createCreature(3, {90.5f, 90.5f}, {createReceiverCell(), CellDesc(), ownSensor}), false);
+    data.add(createPrey(4, {92.5f, 84.5f}, OtherPreyColor), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(3);
+
+    EXPECT_FLOAT_EQ(getSignals(302).at(Channels::SensorFoundResult), 1.0f);
+    expectTargetReceived(300, {12.0f, 16.0f}, 2 * TIMESTEPS_PER_CELL_FUNCTION);
+}
+
+TEST_F(CommunicatorTests, sender_targetIsRelayed)
+{
+    auto data = createObserverCreature(1, {100.5f, 100.5f}, DetectCreatureDesc().restrictToColors(1 << PreyColor), 14);
+    data.add(createPrey(9, {102.5f, 106.5f}), false);
+    data.add(createRelayCreature(2, {100.5f, 88.5f}, 15), false);
+    data.add(createReceiverCreature(3, {100.5f, 74.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(2);
+
+    expectTargetReceived(300, {2.0f, 32.0f}, TIMESTEPS_PER_CELL_FUNCTION);
+}
+
+TEST_F(CommunicatorTests, swarm_targetReachesAllCreatures)
+{
+    auto constexpr NumColumns = 8;
+    auto constexpr NumRows = 10;
+
+    auto data = createObserverCreature(1, {90.5f, 100.5f}, DetectCreatureDesc().restrictToColors(1 << PreyColor), 20);
+    data.add(createPrey(2, {92.5f, 106.5f}), false);
+    for (auto i : std::views::iota(0, NumColumns * NumRows)) {
+        data.add(createRelayCreature(3 + i, {100.5f + toFloat(i % NumColumns) * 5.0f, 90.5f + toFloat(i / NumColumns) * 2.0f}, 20), false);
+    }
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(5);
+
+    for (auto i : std::views::iota(0, NumColumns * NumRows)) {
+        auto signals = getSignals((3 + i) * 100 + 2);
+        EXPECT_FLOAT_EQ(signals.at(Channels::CommunicatorTargetReceived), 1.0f);
+        EXPECT_GT(signals.at(Channels::CommunicatorFreshness), 0.95f);
+    }
+}
+
+struct SearchedColorsParams
+{
+    int searchedColors;
+    int receiverColors;
+    bool isAccepted;
+};
+
+class CommunicatorTests_SearchedColors
+    : public CommunicatorTests
+    , public testing::WithParamInterface<SearchedColorsParams>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    CommunicatorTests_SearchedColors,
+    CommunicatorTests_SearchedColors,
+    ::testing::Values(
+        SearchedColorsParams{1 << 5, 1 << 5, true},
+        SearchedColorsParams{1 << 5, 0x3ff, true},
+        SearchedColorsParams{1 << 5, 1 << 6, false},
+        SearchedColorsParams{1 << 5 | 1 << 6, 1 << 5 | 1 << 6, true},
+        SearchedColorsParams{1 << 5 | 1 << 6, 1 << 5, false},
+        SearchedColorsParams{0x3ff, 1 << 5, false}));
+
+TEST_P(CommunicatorTests_SearchedColors, receiver_restrictToColors)
+{
+    auto [searchedColors, receiverColors, isAccepted] = GetParam();
+
+    auto data = createObserverCreature(1, {100.5f, 100.5f}, DetectCreatureDesc().restrictToColors(searchedColors));
+    data.add(createPrey(9, {102.5f, 106.5f}), false);
+    data.add(createReceiverCreature(2, {90.5f, 90.5f}, receiverColors), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    if (isAccepted) {
+        expectTargetReceived(200, {12.0f, 16.0f});
+    } else {
+        expectNoTarget(200);
+    }
+    expectMessage(200, {});
+}
+
+TEST_F(CommunicatorTests, receiver_restrictToColors_freeCells)
+{
+    auto data = createObserverCreature(1, {100.5f, 100.5f}, DetectFreeCellDesc().minDensity(0.05f).restrictToColors(1 << PreyColor));
+    for (auto i : std::views::iota(0, 8)) {
+        data._objects.emplace_back(ObjectDesc().id(1000 + i).pos({98.5f + toFloat(i), 80.5f}).color(PreyColor).type(FreeCellDesc()));
+    }
+    data.add(createReceiverCreature(2, {90.5f, 110.5f}, 1 << PreyColor), false);
+    data.add(createReceiverCreature(3, {110.5f, 110.5f}, 1 << OtherPreyColor), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    EXPECT_FLOAT_EQ(getSignals(200).at(Channels::CommunicatorTargetReceived), 1.0f);
+    expectNoTarget(300);
+}
+
+TEST_F(CommunicatorTests, receiver_restrictToColors_energyIsAccepted)
+{
+    auto data = createObserverCreature(1, {100.5f, 100.5f}, DetectEnergyDesc().minDensity(0.05f));
+    for (auto i : std::views::iota(0, 8)) {
+        data._energies.emplace_back(EnergyDesc().id(1000 + i).pos({98.5f + toFloat(i), 80.5f}).energy(10.0f));
+    }
+    data.add(createReceiverCreature(2, {90.5f, 110.5f}, 1 << PreyColor), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    EXPECT_FLOAT_EQ(getSignals(200).at(Channels::CommunicatorTargetReceived), 1.0f);
+}
+
+TEST_F(CommunicatorTests, sender_solidIsNoTarget)
+{
+    auto data = createObserverCreature(1, {100.5f, 100.5f}, DetectSolidDesc());
+    data._objects.emplace_back(ObjectDesc().id(1000).pos({102.5f, 106.5f}).type(SolidDesc()));
+    data.add(createReceiverCreature(2, {90.5f, 90.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    EXPECT_FLOAT_EQ(getSignals(102).at(Channels::SensorFoundResult), 1.0f);
+    expectNoTarget(200);
+}
+
+class CommunicatorTests_OnewayAngle
+    : public CommunicatorTests
+    , public testing::WithParamInterface<std::pair<float, bool>>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    CommunicatorTests_OnewayAngle,
+    CommunicatorTests_OnewayAngle,
+    ::testing::Values(std::make_pair(95.0f, false), std::make_pair(105.0f, true), std::make_pair(-95.0f, false), std::make_pair(-105.0f, true)));
+
+TEST_P(CommunicatorTests_OnewayAngle, sender_oneway_deviationFromTarget)
+{
+    auto [deviation, isAddressed] = GetParam();
+
+    RealVector2D senderPos{100.5f, 100.5f};
+    RealVector2D preyPos{102.5f, 106.5f};
+    auto receiverPos = senderPos + Math::unitVectorOfAngle(Math::angleOfVector(preyPos - senderPos) + deviation) * 10.0f;
+    auto data = createObserverCreature(1, senderPos);
+    data.getObjectRef(100).getCellRef()._cellType = CommunicatorDesc().mode(SenderDesc().range(50).oneway(true));
+    data.add(createPrey(9, preyPos), false);
+    data.add(createReceiverCreature(2, receiverPos), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    if (isAddressed) {
+        expectTargetReceived(200, preyPos - receiverPos);
+    } else {
+        expectNoTarget(200);
+        expectNoMessage(200);
+    }
+}
+
+TEST_F(CommunicatorTests, sender_oneway_noTarget_messageReceived)
+{
+    auto data = createSenderCreature(1, {100.5f, 100.5f});
+    data.getObjectRef(100).getCellRef()._cellType = CommunicatorDesc().mode(SenderDesc().range(50).oneway(true));
+    data.add(createReceiverCreature(2, {100.5f, 90.5f}), false);
+    data.add(createReceiverCreature(3, {100.5f, 110.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    expectMessage(200, TestMessage);
+    expectMessage(300, TestMessage);
+}
+
+class CommunicatorTests_LargeCreature : public CommunicatorTests
+{
+protected:
+    static auto constexpr NumCells = 20;
+    static auto constexpr Range = 12;
+
+    CellDesc createSensorCellForColor(int color) { return createSensorCell(DetectCreatureDesc().restrictToColors(1 << color)); }
+};
+
+TEST_F(CommunicatorTests_LargeCreature, sender_targetOfNearbySensorIsPreferred)
+{
+    std::vector<CellDesc> cells(NumCells);
+    cells.at(0) = createSensorCellForColor(PreyColor);
+    cells.at(1) = createSenderCell(Range);
+    cells.at(NumCells - 2) = createSenderCell(Range);
+    cells.at(NumCells - 1) = createSensorCellForColor(OtherPreyColor);
+    auto data = createCreature(1, {100.5f, 100.5f}, cells);
+    data.add(createPrey(8, {100.5f, 106.5f}, PreyColor), false);
+    data.add(createPrey(9, {119.5f, 106.5f}, OtherPreyColor), false);
+    data.add(createReceiverCreature(2, {101.5f, 90.5f}), false);
+    data.add(createReceiverCreature(3, {118.5f, 90.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    expectTargetReceived(200, {-1.0f, 16.0f});
+    expectTargetReceived(300, {1.0f, 16.0f});
+}
+
+TEST_F(CommunicatorTests_LargeCreature, sender_noSensorNearby_targetOfDistantSensor)
+{
+    std::vector<CellDesc> cells(NumCells);
+    cells.at(0) = createSensorCellForColor(PreyColor);
+    cells.at(NumCells - 1) = createSenderCell(Range);
+    auto data = createCreature(1, {100.5f, 100.5f}, cells);
+    data.add(createPrey(9, {100.5f, 106.5f}), false);
+    data.add(createReceiverCreature(2, {118.5f, 90.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(1);
+
+    expectTargetReceived(200, {-18.0f, 16.0f});
+}
+
+// The nearby sensors lose their prey, only the distant sensor still has a match
+TEST_F(CommunicatorTests_LargeCreature, sender_olderTargetOfNearbySensorsIsPreferred)
+{
+    std::vector<CellDesc> cells(NumCells);
+    cells.at(0) = createSensorCellForColor(PreyColor);
+    for (auto& cell : cells | std::views::drop(12)) {
+        cell = createSensorCellForColor(OtherPreyColor);
+    }
+    cells.at(NumCells - 1) = createSenderCell(Range);
+    auto data = createCreature(1, {100.5f, 100.5f}, cells);
+    data.add(createPrey(8, {100.5f, 106.5f}, PreyColor), false);
+    data.add(letDieInFirstCycle(createPrey(9, {115.5f, 106.5f}, OtherPreyColor)), false);
+    data.add(createReceiverCreature(2, {118.5f, 90.5f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    calcCycles(2);
+
+    expectTargetReceived(200, {-3.0f, 16.0f}, TIMESTEPS_PER_CELL_FUNCTION);
 }

@@ -342,7 +342,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->id = creatureTO.id;
     changeCreatureFromTO(creatureTO, creature);
     creature->creatureState = CreatureState_HostConfirmed;
-    creature->initDetectedBy();
+    creature->initTemporaryData();
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -598,6 +598,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                 cell->cellTypeData.communicator.modeData.receiver.restrictToColors = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColors;
                 cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
+                cell->cellTypeData.communicator.modeData.receiver.targetFreshness = 0;
+                cell->cellTypeData.communicator.modeData.receiver.nearestSenderDistance = 0;
             }
         } break;
         case CellType_Void: {
@@ -712,7 +714,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     newCreature->mutationState = MutationState_NotMutated;
     newCreature->creatureState = CreatureState_HostConfirmed;
     newCreature->externalEnergyInflowCellId = VALUE_NOT_SET_UINT64;
-    newCreature->initDetectedBy();
+    newCreature->initTemporaryData();
     return newCreature;
 }
 
@@ -994,6 +996,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         } else if (nodeCommunicator.mode == CommunicatorMode_Receiver) {
             communicator.modeData.receiver.restrictToColors = nodeCommunicator.modeData.receiver.restrictToColors;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;
+            communicator.modeData.receiver.targetFreshness = 0;
+            communicator.modeData.receiver.nearestSenderDistance = 0;
         }
     } break;
     case CellType_Void: {
@@ -1034,7 +1038,7 @@ __inline__ __device__ Creature* EntityFactory::createEmptyCreature()
 {
     auto creature = _data->entities.heap.getTypedSubArray<Creature>(1);
     creature->id = _data->primaryNumberGen.createEntityId();
-    creature->initDetectedBy();
+    creature->initTemporaryData();
     return creature;
 }
 

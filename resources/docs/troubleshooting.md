@@ -34,7 +34,7 @@ Open **Settings > Display settings**. **Adopt scaling from OS** is enabled by de
 - Muscles need a signal. Switch to edit mode with **Alt+E**, select the muscle cells and press **Alt+N**. In the inspection window, open **Neural activity** and check that **Signal #0** is not 0.
 - Signals flow from the last node of a gene towards node 0. A sensor or other signal source belongs at the end of the gene.
 - Muscles in *Auto bending* mode need a signal in channel #0 that stays either positive or negative. A negative value reverses the thrust, so a square signal that alternates between positive and negative values hardly moves a creature. Channel #1 gives the desired direction, and muscles that would push away from it reduce or stop their work. See [Muscle](cell-types.md#muscle).
-- Sensors, muscles and communicators need the front direction of their creature. The head cell sends it out every 100 time steps, so newly built cells can stay idle for up to about 100 time steps.
+- Sensors, muscles and communicator receivers need the front direction of their creature. The head cell sends it out every 100 time steps, so newly built cells can stay idle for up to about 100 time steps.
 - Cells under construction are inactive. They become active when the last node of their gene is built. With several concatenations or branches, each copy of the gene becomes active as soon as its own last node is built. Body parts that a creature builds later with its own constructors stay inactive until they are complete, while the rest of the creature already acts.
 
 ## My seeds do not build anything

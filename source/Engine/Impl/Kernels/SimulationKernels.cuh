@@ -40,6 +40,8 @@ __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, Simul
 __global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_communicator_prepare(SimulationData data);
+__global__ void cudaNextTimestep_cellType_communicator_selectTargets(SimulationData data);
 __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_void(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data);

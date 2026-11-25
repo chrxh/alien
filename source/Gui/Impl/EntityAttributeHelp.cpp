@@ -88,7 +88,7 @@ namespace
          "\n" ICON_FA_CHEVRON_RIGHT " Detonator: Explodes after a countdown and pushes away surrounding objects."
          "\n" ICON_FA_CHEVRON_RIGHT " Digestor: Converts raw energy into usable energy and conducts it to other digestor cells."
          "\n" ICON_FA_CHEVRON_RIGHT " Memory: Delays, records, stores or smooths the signal."
-         "\n" ICON_FA_CHEVRON_RIGHT " Communicator: Transmits the signal to communicator cells of other creatures."
+         "\n" ICON_FA_CHEVRON_RIGHT " Communicator: Transmits messages and sensor matches to communicator cells of other creatures."
          "\n" ICON_FA_CHEVRON_RIGHT " Void: Dissolves immediately after the cell network is finished and passes its energy to the neighboring cells. Serves as "
          "temporary scaffolding for constructing complex shapes."},
         {EntityAttribute::CellHasConstructor, "If enabled, the cell can build other cells specified by a gene."},
@@ -351,17 +351,17 @@ namespace
 
         // Communicator
         {EntityAttribute::CommunicatorMode,
-         "Selects the role in the communication. It only takes place between different creatures and requires a valid front direction on both sides."
-         "\n" ICON_FA_CHEVRON_RIGHT " Send: transmits all own channels to the receivers in range. Requires a trigger via channel #0. Channel #1 encodes the "
-         "direction of the information source and channel #3 its distance (1 = close, 0.5 = 128, 0 = infinitely far)."
-         "\n" ICON_FA_CHEVRON_RIGHT " Receive: takes over the channels of a sender whose information source is at least as close as the one in the own "
-         "channel #3, so the closest source wins. Channel #1 is converted so that it points from the own position to the information source, and the "
-         "distance in channel #3 grows by the distance to the sender."},
+         "Selects the role in the communication. It only takes place between different creatures."
+         "\n" ICON_FA_CHEVRON_RIGHT " Send: transmits the channels #4 to #7 as a message, together with the youngest target that its creature has found with "
+         "sensors or received. Requires a trigger via channel #0."
+         "\n" ICON_FA_CHEVRON_RIGHT " Receive: outputs the message of the nearest sender in the channels #4 to #7 and the youngest received target in the "
+         "channels #0 to #3 (newly received, direction, freshness, distance)."},
         {EntityAttribute::CommunicatorRange, "Radius within which receiver cells are addressed."},
         {EntityAttribute::CommunicatorOneway,
-         "If enabled, only receivers are addressed whose direction deviates by more than 100 degrees from the direction that is encoded in channel #1. "
+         "If enabled, only receivers are addressed whose direction deviates by more than 100 degrees from the direction of the target. "
          "The information thus always moves away from its source."},
-        {EntityAttribute::CommunicatorRestrictToColors, "Only signals from senders with one of the selected customization colors are accepted."},
+        {EntityAttribute::CommunicatorRestrictToColors,
+         "Only targets of sensors that search exclusively for the selected customization colors are taken over."},
         {EntityAttribute::CommunicatorRestrictToLineage,
          "Restricts the reception to the relationship with the own creature."
          "\n" ICON_FA_CHEVRON_RIGHT " No: the lineage is not taken into account."

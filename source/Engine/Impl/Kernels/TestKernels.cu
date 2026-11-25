@@ -296,7 +296,10 @@ __global__ void cudaTestIsDataValid(SimulationData data, bool* result)
                         if (!isPointerValid(object->typeData.cell.creature, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                             *result = false;
                         } else {
-                            *result &= isGenomeValid(data, object->typeData.cell.creature->genome);
+                            auto creature = object->typeData.cell.creature;
+                            *result &= isGenomeValid(data, creature->genome);
+                            *result &=
+                                creature->numTargets == 0 || isPointerValid(creature->targets, data.entities.heap.getArray(), data.entities.heap.getCapacity());
                         }
                     }
                 }

@@ -5,28 +5,64 @@
 
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
+#include "TargetProcessor.cuh"
 
 class CommunicatorProcessor
 {
 public:
+    __inline__ __device__ static void prepare(SimulationData& data);
+    __inline__ __device__ static void selectTargets(SimulationData& data);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
+    __inline__ __device__ static void prepareReceiver(Object* object);
+
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    struct InformationSource
-    {
-        float2 direction;
-        bool infinitelyFar;
-        float distance;
-    };
-    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, InformationSource const& source);
+    __inline__ __device__ static void transmit(SimulationData& data, Object* senderObject, Object* receiverObject);
+    __inline__ __device__ static void receiveTarget(SimulationData& data, Object* receiverObject, Target const& target);
+    __inline__ __device__ static void writeTargetSignals(Object* receiverObject, bool isNewTarget);
+
+    static int constexpr MaxReceivers = 512;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+
+__device__ __inline__ void CommunicatorProcessor::prepare(SimulationData& data)
+{
+    auto& operations = data.cellTypeOperations[CellType_Communicator];
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
+        auto object = operations.at(i).object;
+        object->typeData.cell.creature->hasCommunicators = true;
+        if (object->typeData.cell.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
+            prepareReceiver(object);
+        }
+    }
+}
+
+// The targets are selected before the transmissions, a target received in this cycle can thus be passed on in the next cycle at the earliest
+__device__ __inline__ void CommunicatorProcessor::selectTargets(SimulationData& data)
+{
+    auto& operations = data.cellTypeOperations[CellType_Communicator];
+    auto partition = calcBlockPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        auto object = operations.at(i).object;
+        auto& communicator = object->typeData.cell.cellTypeData.communicator;
+        if (communicator.mode == CommunicatorMode_Sender && NeuronProcessor::isManuallyTriggered(data, object)) {
+            Target target;
+            auto hasTarget = TargetProcessor::findYoungest_block(data, object, target);
+            if (threadIdx.x == 0) {
+                communicator.modeData.sender.hasTarget = hasTarget;
+                communicator.modeData.sender.target = target;
+            }
+        }
+        __syncthreads();
+    }
+}
 
 __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
@@ -34,6 +70,17 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).object);
+    }
+}
+
+// Without a newly received target, the last one stays in the channels and only its freshness decreases
+__device__ __inline__ void CommunicatorProcessor::prepareReceiver(Object* object)
+{
+    auto& receiver = object->typeData.cell.cellTypeData.communicator.modeData.receiver;
+    receiver.nearestSenderDistance = Infinity<float>::value;
+    receiver.targetFreshness = max(0.0f, receiver.targetFreshness - toFloat(TIMESTEPS_PER_CELL_FUNCTION) / Const::CommunicatorTargetMaxAge);
+    if (receiver.targetFreshness > 0.0f) {
+        writeTargetSignals(object, false);
     }
 }
 
@@ -50,7 +97,7 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
         if (mode == CommunicatorMode_Sender) {
             processSender(data, statistics, object);
         }
-        // Receiver mode: signals are set by senders, no additional processing needed
+        // Receiver mode: signals are set by senders and prepareReceiver
     }
 
     // Thread 0 must not overwrite the shared data for the next cell before every thread has finished this one, otherwise warps run out of step
@@ -61,28 +108,17 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 {
     __shared__ int range;
     __shared__ float2 senderPos;
-    __shared__ bool senderFrontValid;
-    __shared__ InformationSource source;
+    __shared__ Object* receivers[MaxReceivers];
+    __shared__ int numReceivers;
 
     if (threadIdx.x == 0) {
         auto& cell = object->typeData.cell;
         auto& sender = cell.cellTypeData.communicator.modeData.sender;
         range = sender.range;
         senderPos = object->pos;
-        senderFrontValid = cell.frontAngle != VALUE_NOT_SET_FLOAT;
-        if (senderFrontValid) {
-            auto const& signals = cell.neuralActivity.signals;
-            source.direction = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, signals[Channels::CommunicatorAngle]);
-            source.infinitelyFar = DistanceSignal::isInfinite(signals[Channels::CommunicatorDistance]);
-            source.distance = source.infinitelyFar ? 0.0f : DistanceSignal::decode(signals[Channels::CommunicatorDistance]);
-        }
+        numReceivers = 0;
     }
     __syncthreads();
-
-    // The sender must have an initialized front direction
-    if (!senderFrontValid) {
-        return;
-    }
 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherObject) {
@@ -101,11 +137,6 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         }
 
         auto const& receiver = otherObject->typeData.cell.cellTypeData.communicator.modeData.receiver;
-
-        // Check color restriction
-        if (!((receiver.restrictToColors >> object->color) & 1)) {
-            return false;
-        }
 
         // Check lineage restriction
         if (receiver.restrictToLineage != LineageRestriction_No) {
@@ -148,55 +179,78 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
-                tryTransmitSignal(data, object, otherObject, source);
+                auto index = atomicAdd(&numReceivers, 1);
+                if (index < MaxReceivers) {
+                    receivers[index] = otherObject;
+                }
             }
             otherIndex = otherRecord.nextObjectIndex;
         }
     }
+    __syncthreads();
+
+    // Only one thread transmits, otherwise two senders could wait for the locks of each other's receivers on AMD GPUs
+    if (threadIdx.x == 0) {
+        for (int i = 0; i < min(numReceivers, MaxReceivers); ++i) {
+            transmit(data, object, receivers[i]);
+        }
+    }
 }
 
-__inline__ __device__ bool
-CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, InformationSource const& source)
+// The message is taken over from the nearest sender, the target from each sender whose target is not older than the own one
+__inline__ __device__ void CommunicatorProcessor::transmit(SimulationData& data, Object* senderObject, Object* receiverObject)
 {
     auto toReceiver = data.world.getCorrectedDirection(receiverObject->pos - senderObject->pos);
 
     auto const& sender = senderObject->typeData.cell.cellTypeData.communicator.modeData.sender;
-    if (sender.oneway) {
-        // Direction gating: only send if the receiver deviates by more than the one-way angle from the encoded facing direction
+    if (sender.oneway && sender.hasTarget) {
+        // Direction gating: only send if the receiver deviates by more than the one-way angle from the direction of the target
+        auto toTarget = data.world.getCorrectedDirection(sender.target.pos - senderObject->pos);
         auto maxCosine = cosf(Const::CommunicatorOnewayMinAngle * Const::DEG_TO_RAD);
-        if (Math::dot(toReceiver, source.direction) >= maxCosine * Math::length(toReceiver)) {
-            return false;
+        if (Math::dot(toReceiver, toTarget) > maxCosine * Math::length(toReceiver) * Math::length(toTarget)) {
+            return;
         }
     }
 
     // The receiver must have an initialized front direction
     if (receiverObject->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
-        return false;
-    }
-
-    auto sourceDirectionFromReceiver = source.direction;
-    auto sourceDistanceSignalOfReceiver = 0.0f;
-    if (!source.infinitelyFar) {
-        auto receiverToSource = source.direction * source.distance - toReceiver;
-        auto receiverToSourceLength = Math::length(receiverToSource);
-        if (receiverToSourceLength > NEAR_ZERO) {
-            sourceDirectionFromReceiver = receiverToSource / receiverToSourceLength;
-        }
-        auto pathLength = source.distance + Math::length(toReceiver);
-        sourceDistanceSignalOfReceiver = DistanceSignal::encode(pathLength);
+        return;
     }
 
     receiverObject->getLock();
 
-    auto& receiverSignals = receiverObject->typeData.cell.neuralActivity.signals;
-    auto isAccepted = DistanceSignal::isAtLeastAsClose(sourceDistanceSignalOfReceiver, receiverSignals[Channels::CommunicatorDistance]);
-    if (isAccepted) {
-        copyChannels(receiverSignals, senderObject->typeData.cell.neuralActivity.signals);
-        receiverSignals[Channels::CommunicatorAngle] =
-            ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, sourceDirectionFromReceiver);
-        receiverSignals[Channels::CommunicatorDistance] = sourceDistanceSignalOfReceiver;
+    auto& receiver = receiverObject->typeData.cell.cellTypeData.communicator.modeData.receiver;
+    auto distance = Math::length(toReceiver);
+    if (distance < receiver.nearestSenderDistance) {
+        receiver.nearestSenderDistance = distance;
+        for (int channel = Channels::CommunicatorMessage; channel < STANDARD_NEURONS_PER_CELL; ++channel) {
+            receiverObject->typeData.cell.neuralActivity.signals[channel] = senderObject->typeData.cell.neuralActivity.signals[channel];
+        }
+    }
+    auto isTargetAllowed = sender.hasTarget && (sender.target.searchedColors & ~receiver.restrictToColors) == 0;
+    if (isTargetAllowed && TargetProcessor::tryTakeOver(data, receiverObject, sender.target)) {
+        receiveTarget(data, receiverObject, sender.target);
     }
 
     receiverObject->releaseLock();
-    return isAccepted;
+}
+
+__inline__ __device__ void CommunicatorProcessor::receiveTarget(SimulationData& data, Object* receiverObject, Target const& target)
+{
+    auto& receiver = receiverObject->typeData.cell.cellTypeData.communicator.modeData.receiver;
+    auto toTarget = data.world.getCorrectedDirection(target.pos - receiverObject->pos);
+    receiver.targetAngleSignal = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, toTarget);
+    receiver.targetFreshness = TargetProcessor::calcFreshness(data, target);
+    receiver.targetDistanceSignal = DistanceSignal::encode(Math::length(toTarget));
+    writeTargetSignals(receiverObject, true);
+}
+
+__inline__ __device__ void CommunicatorProcessor::writeTargetSignals(Object* receiverObject, bool isNewTarget)
+{
+    auto const& receiver = receiverObject->typeData.cell.cellTypeData.communicator.modeData.receiver;
+    auto& signals = receiverObject->typeData.cell.neuralActivity.signals;
+    signals[Channels::CommunicatorTargetReceived] = isNewTarget ? 1.0f : 0.0f;
+    signals[Channels::CommunicatorAngle] = receiver.targetAngleSignal;
+    signals[Channels::CommunicatorFreshness] = receiver.targetFreshness;
+    signals[Channels::CommunicatorDistance] = receiver.targetDistanceSignal;
 }

@@ -192,6 +192,22 @@ public:
         return getSubArray(size);
     }
 
+    // Moves the entries to a larger array if there is no space for another one
+    template <typename T>
+    __device__ __inline__ void growIfFull(T*& entries, uint32_t numEntries, uint32_t& capacity)
+    {
+        if (numEntries < capacity) {
+            return;
+        }
+        auto newCapacity = max(MinSubArrayCapacity, 2 * numEntries);
+        auto newEntries = getTypedSubArray<T>(newCapacity);
+        for (uint32_t i = 0; i < numEntries; ++i) {
+            newEntries[i] = entries[i];
+        }
+        entries = newEntries;
+        capacity = newCapacity;
+    }
+
     template <typename T>
     __device__ __inline__ T& atType(uint64_t address)
     {
@@ -202,6 +218,9 @@ public:
     {
         return *reinterpret_cast<T*>(*_data + address);
     }
+
+private:
+    static uint32_t constexpr MinSubArrayCapacity = 4;
 };
 
 // Data of UnmanagedArray is stored elsewhere

@@ -503,11 +503,15 @@ enum SignalRecorderState_
 //***************************
 namespace Channels
 {
+    auto constexpr CommunicatorTargetReceived = 0;
     auto constexpr CommunicatorAngle = 1;
+    auto constexpr CommunicatorFreshness = 2;
     auto constexpr CommunicatorDistance = 3;
+    auto constexpr CommunicatorMessage = 4;  // First of the channels that contain the message
 }
 namespace Const
 {
+    auto constexpr CommunicatorTargetMaxAge = 1000;  // In time steps
     auto constexpr CommunicatorRange_Min = 0;
     auto constexpr CommunicatorRange_Max = 20;
     auto constexpr CommunicatorRange_Default = 15;
