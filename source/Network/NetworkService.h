@@ -73,7 +73,13 @@ public:
         std::string const& picture,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
-    bool replaceResource(std::string const& resourceId, IntVector2D const& worldSize, int numObjects, std::string const& data, std::string const& picture);
+    bool replaceResource(
+        std::string const& resourceId,
+        IntVector2D const& worldSize,
+        int numObjects,
+        std::string const& data,
+        std::string const& picture,
+        bool announceOnDiscord);
     bool downloadResource(std::string& mainData, std::string const& simId);
     void incDownloadCounter(std::string const& simId);
     bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);

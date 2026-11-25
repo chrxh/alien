@@ -14,6 +14,7 @@ struct ReplaceNetworkResourceRequestData
 {
     std::string resourceId;
     WorkspaceType workspaceType = WorkspaceType_Community;
+    bool announceOnDiscord = true;
     DownloadCache downloadCache;
 
     struct SimulationData

@@ -1101,3 +1101,98 @@ def test_discord_notification_without_picture_stays_json(app_client, helpers, mo
     request = requests[0]
     assert request.get_header("Content-type") == "application/json"
     assert b"attachment://" not in request.data
+
+
+def _replace_simulation(client, sim_id, announce_on_discord=None):
+    files = {
+        "userName": (None, "alice"),
+        "password": (None, "pw"),
+        "simId": (None, sim_id),
+        "width": (None, "100"),
+        "height": (None, "50"),
+        "particles": (None, "1234"),
+        "version": (None, "9.9"),
+        "content": ("content.bin", b"NEW", "application/octet-stream"),
+    }
+    if announce_on_discord is not None:
+        files["announceOnDiscord"] = (None, announce_on_discord)
+    return client.post("/replacesimulation", files=files)
+
+
+def test_discord_notification_announces_replacement_by_default(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw").json()["simId"]
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    assert _replace_simulation(app_client, sim_id).json() == {"result": True}
+
+    assert len(requests) == 1
+    assert b"Simulation updated in the database" in requests[0].data
+
+
+def test_discord_notification_announces_replacement_on_request(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw", sim_type=1).json()["simId"]
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    assert _replace_simulation(app_client, sim_id, announce_on_discord="true").json() == {"result": True}
+
+    assert len(requests) == 1
+    assert b"Genome updated in the database" in requests[0].data
+
+
+def test_discord_notification_skips_replacement_on_request(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw").json()["simId"]
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    assert _replace_simulation(app_client, sim_id, announce_on_discord="false").json() == {"result": True}
+
+    assert requests == []
+    with main.Session(main.engine) as session:
+        assert bytes(session.get(main.Resource, int(sim_id)).content) == b"NEW"
+
+
+def test_discord_notification_skips_private_replacement(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = helpers.upload_simulation(app_client, "alice", "pw", workspace=2).json()["simId"]
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    assert _replace_simulation(app_client, sim_id, announce_on_discord="true").json() == {"result": True}
+
+    assert requests == []
+
+
+def test_discord_notification_announces_every_public_upload(app_client, helpers, monkeypatch):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+
+    main = app_client.app_module
+    requests = _capture_discord_requests(main, monkeypatch)
+
+    resp = app_client.post(
+        "/uploadsimulation",
+        files={
+            "userName": (None, "alice"),
+            "password": (None, "pw"),
+            "simName": (None, "sim"),
+            "simDesc": (None, "desc"),
+            "width": (None, "16"),
+            "height": (None, "8"),
+            "particles": (None, "100"),
+            "version": (None, "1.0"),
+            "content": ("content.bin", b"NEW", "application/octet-stream"),
+            "announceOnDiscord": (None, "false"),
+        },
+    )
+    assert resp.json()["result"] is True
+
+    assert len(requests) == 1
+    assert b"New simulation added to the database" in requests[0].data
