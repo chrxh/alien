@@ -14,6 +14,8 @@ in float vertexSolid[];
 out vec3 fragColor;
 
 uniform float zoom;
+uniform bool proportionalCellBrightness;
+uniform float cellBrightness;
 //uniform float lightAngle;
 
 #define PI 3.1415926538
@@ -21,6 +23,35 @@ uniform float zoom;
 // The heights of the objects vary randomly, so the lighting of small triangles is random as well. Solids are lit evenly with about the mean of
 // this lighting, so that their polygons and connections merge into a smooth area.
 const float SolidLighting = 0.94;
+
+// See Shaders/NonFluidObjectVS.h
+float getMetaballBrightness(float brightness)
+{
+    return brightness * smoothstep(0.05, 0.55, brightness);
+}
+
+// The metaballs step darkens dim objects far more than bright ones, see Shaders/MetaballsFS.h. Where the rasterized objects replace the ray
+// traced tissue, whose brightness is proportional to the energy of the cells, the color of a cell is chosen such that it leaves that step with
+// the given share of its brightness. Dim cells are brightened for it instead of fading out.
+vec3 getCellColor(vec3 color)
+{
+    float brightness = color.r + color.g + color.b;
+    if (!proportionalCellBrightness || brightness <= 0.0) {
+        return color;
+    }
+    float target = brightness * cellBrightness;
+    float low = 0.0;
+    float high = max(brightness, 1.0);
+    for (int i = 0; i < 16; ++i) {
+        float middle = 0.5 * (low + high);
+        if (getMetaballBrightness(middle) < target) {
+            low = middle;
+        } else {
+            high = middle;
+        }
+    }
+    return color * high / brightness;
+}
 
 void main()
 {
@@ -52,7 +83,8 @@ void main()
         // Keep the per triangle lighting subtle, the rounded shape of a body comes from the organic
         // surface filter. A strong term would show the triangulation as hard facets. The constant is
         // chosen so that the mean over both triangle windings stays at the one of the former term.
-        fragColor = vertexColor[i] * mix(0.9 + lightIntensity * 0.16, SolidLighting, vertexSolid[i]);
+        vec3 color = vertexColor[i] * mix(0.9 + lightIntensity * 0.16, SolidLighting, vertexSolid[i]);
+        fragColor = vertexSolid[i] > 0.5 ? color : getCellColor(color);
         EmitVertex();
     }
     EndPrimitive();

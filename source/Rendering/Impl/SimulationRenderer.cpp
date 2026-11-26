@@ -38,6 +38,10 @@ namespace
     // out, match it.
     auto constexpr RayTracedSolidBrightness = 0.5f;
 
+    // The connections and polygons of the rasterized cells match the brightness of the tissue as well. Unlike dim solids, dim cells are brightened
+    // for it, see Shaders/TriangleGS.h.
+    auto constexpr RayTracedCellBrightness = 0.64f;
+
     // Between these screen zoom factors, the structure of the solids fades in
     auto constexpr SolidDetailZoomStart = 15.0f;
     auto constexpr SolidDetailZoomEnd = 40.0f;
@@ -438,13 +442,24 @@ namespace
         };
     }
 
-    // Connections, polygons, cells and attack events of the rasterized view on a black layer
-    RenderSequence createObjectSequence(float solidBrightness)
+    // Connections, polygons, cells and attack events of the rasterized view on a black layer. With a cell brightness, the connections and polygons
+    // of the cells keep this share of their brightness through the metaballs step, see Shaders/TriangleGS.h. Otherwise, dim cells fade out there.
+    RenderSequence createObjectSequence(float solidBrightness, std::optional<float> cellBrightness)
     {
+        auto proportionalCellBrightness = cellBrightness.has_value();
+        auto cellBrightnessShare = cellBrightness.value_or(1.0f);
         return RenderSequence().steps({
-            _LineRenderStep::create(StepParameters().shader(ShaderSources::Line).addUniform("solidBrightness", solidBrightness)),
-            _TriangleRenderStep::create(
-                StepParameters().shader(ShaderSources::Triangle).addUniform("solidBrightness", solidBrightness).previousTargetSelection(0)),
+            _LineRenderStep::create(StepParameters()
+                                        .shader(ShaderSources::Line)
+                                        .addUniform("solidBrightness", solidBrightness)
+                                        .addUniform("proportionalCellBrightness", proportionalCellBrightness)
+                                        .addUniform("cellBrightness", cellBrightnessShare)),
+            _TriangleRenderStep::create(StepParameters()
+                                            .shader(ShaderSources::Triangle)
+                                            .addUniform("solidBrightness", solidBrightness)
+                                            .addUniform("proportionalCellBrightness", proportionalCellBrightness)
+                                            .addUniform("cellBrightness", cellBrightnessShare)
+                                            .previousTargetSelection(0)),
             _NonFluidObjectRenderStep::create(StepParameters()
                                                   .shader(ShaderSources::NonFluidObject)
                                                   .uniformFunc(getCellAppearanceUniforms)
@@ -705,7 +720,7 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
-                createObjectSequence(1.0f),
+                createObjectSequence(1.0f, std::nullopt),
             },
 
             // Render block: Merge fluid, connections and objects sequence
@@ -948,7 +963,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                     createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
-                createObjectSequence(RayTracedSolidBrightness),
+                createObjectSequence(RayTracedSolidBrightness, RayTracedCellBrightness),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
