@@ -462,6 +462,7 @@ struct CustomizationMutationDesc
     auto operator<=>(CustomizationMutationDesc const&) const = default;
 
     MEMBER(CustomizationMutationDesc, float, genomeProbability, 0.0f);
+    MEMBER(CustomizationMutationDesc, float, nodeProbability, 0.0f);
 };
 
 struct VoidMutationDesc

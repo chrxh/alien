@@ -148,6 +148,9 @@ namespace
         {EntityAttribute::MutationCustomizationProbability,
          "Probability per genome that one used customization color is replaced everywhere by another one. Which replacements are permitted is defined by the "
          "simulation parameter 'Customization transition matrix'."},
+        {EntityAttribute::MutationCustomizationNodeProbability,
+         "Probability per node that its customization color is replaced by another one. Which replacements are permitted is defined by the simulation "
+         "parameter 'Customization transition matrix'."},
         {EntityAttribute::MutationVoidProbability,
          "Probability per node that it is toggled between void and a random other cell type. The first and the last node of a gene are not affected."},
         {EntityAttribute::MutationExtendGeneProbability,

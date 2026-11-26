@@ -18,6 +18,7 @@ enum class MutationType
     Geometry,
     CellTypeMode,
     CellType,
+    Customization,
     Void,
     ExtendGene,
     AddNode,
@@ -42,6 +43,7 @@ INSTANTIATE_TEST_SUITE_P(
         MutationType::Geometry,
         MutationType::CellTypeMode,
         MutationType::CellType,
+        MutationType::Customization,
         MutationType::Void,
         MutationType::ExtendGene,
         MutationType::AddNode,
@@ -71,6 +73,9 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     case MutationType::CellType:
         genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
+        break;
+    case MutationType::Customization:
+        genome._mutationRates._customizationMutation = CustomizationMutationDesc().nodeProbability(1.0f);
         break;
     case MutationType::Void:
         genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);

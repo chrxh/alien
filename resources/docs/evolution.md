@@ -50,13 +50,13 @@ Open the genome in the genome editor. In the left column, the **Genome** group c
 | Geometry mutations | The stiffness and the shape generator of genes and whether a node restarts the construction |
 | Constructor mutations | The settings of constructors. A constructor can also be added or removed |
 
-**Changes to the structure.** For these you set only a probability.
+**Changes to the structure.** For these you set only probabilities.
 
 | Mutation | What changes |
 | --- | --- |
 | Cell type mutations | A node gets a different cell type |
 | Cell type mode mutations | A cell type switches to a different mode, for example a sensor to another detection mode |
-| Customization mutations | A customization color used in the genome is replaced everywhere by another one |
+| Customization mutations | A node gets a different customization color (**Node probability**), or a customization color used in the genome is replaced everywhere by another one (**Genome probability**) |
 | Void mutations | A node is toggled between void and a real cell type |
 | Extend gene and Add node mutations | New nodes are added to genes |
 | Trim gene and Delete node mutations | Nodes are removed |

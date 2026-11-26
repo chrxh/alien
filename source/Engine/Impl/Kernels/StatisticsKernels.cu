@@ -26,6 +26,7 @@ namespace
         addRate(rates.cellTypeModeMutation.nodeProbability);
         addRate(rates.cellTypeMutation.nodeProbability);
         addRate(rates.customizationMutation.genomeProbability);
+        addRate(rates.customizationMutation.nodeProbability);
         addRate(rates.voidMutation.nodeProbability);
         addRate(rates.extendGeneMutation.geneProbability);
         addRate(rates.addNodeMutation.nodeProbability);

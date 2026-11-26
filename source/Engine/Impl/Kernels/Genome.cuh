@@ -378,6 +378,7 @@ struct CellTypeMutation
 struct CustomizationMutation
 {
     float genomeProbability;
+    float nodeProbability;
 };
 
 struct VoidMutation
