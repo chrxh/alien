@@ -325,7 +325,7 @@ TEST_F(MetaMutationTests, metaMutation_cellTypeRatesZeroSigmaNoChange)
 TEST_F(MetaMutationTests, metaMutation_customizationRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._customizationMutation = CustomizationMutationDesc().genomeProbability(0.5f);
+    genome._mutationRates._customizationMutation = CustomizationMutationDesc().genomeProbability(0.5f).nodeProbability(0.5f);
 
     auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -341,12 +341,15 @@ TEST_F(MetaMutationTests, metaMutation_customizationRatesActuallyChange)
     EXPECT_NE(actualGenome._mutationRates._customizationMutation._genomeProbability, 0.5f);
     EXPECT_GE(actualGenome._mutationRates._customizationMutation._genomeProbability, 0.0f);
     EXPECT_LE(actualGenome._mutationRates._customizationMutation._genomeProbability, 1.0f);
+    EXPECT_NE(actualGenome._mutationRates._customizationMutation._nodeProbability, 0.5f);
+    EXPECT_GE(actualGenome._mutationRates._customizationMutation._nodeProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._customizationMutation._nodeProbability, 1.0f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_customizationRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._customizationMutation = CustomizationMutationDesc().genomeProbability(0.5f);
+    genome._mutationRates._customizationMutation = CustomizationMutationDesc().genomeProbability(0.5f).nodeProbability(0.5f);
 
     auto data = ContentDesc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -360,6 +363,7 @@ TEST_F(MetaMutationTests, metaMutation_customizationRatesZeroSigmaNoChange)
 
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(actualGenome._mutationRates._customizationMutation._genomeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._customizationMutation._nodeProbability, 0.5f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_voidRatesActuallyChange)

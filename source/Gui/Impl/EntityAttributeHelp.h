@@ -75,6 +75,7 @@ enum class EntityAttribute
     MutationCellTypeModeProbability,
     MutationCellTypeProbability,
     MutationCustomizationProbability,
+    MutationCustomizationNodeProbability,
     MutationVoidProbability,
     MutationExtendGeneProbability,
     MutationAddNodeProbability,

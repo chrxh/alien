@@ -59,7 +59,8 @@ namespace
             }
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};
-            genomeTO.mutationRates.customizationMutation = {genome->mutationRates.customizationMutation.genomeProbability};
+            genomeTO.mutationRates.customizationMutation = {
+                genome->mutationRates.customizationMutation.genomeProbability, genome->mutationRates.customizationMutation.nodeProbability};
             genomeTO.mutationRates.voidMutation = {genome->mutationRates.voidMutation.nodeProbability};
             genomeTO.mutationRates.extendGeneMutation = {genome->mutationRates.extendGeneMutation.geneProbability};
             genomeTO.mutationRates.addNodeMutation = {genome->mutationRates.addNodeMutation.nodeProbability};

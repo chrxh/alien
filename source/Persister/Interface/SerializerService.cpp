@@ -69,6 +69,7 @@ namespace
     auto constexpr Id_CellTypeMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
     auto constexpr Id_CustomizationMutation_GenomeProbability = SerializationKey(0, "genomeProbability");
+    auto constexpr Id_CustomizationMutation_NodeProbability = SerializationKey(1, "nodeProbability");
 
     auto constexpr Id_VoidMutation_NodeProbability = SerializationKey(0, "nodeProbability");
 
@@ -822,6 +823,7 @@ namespace cereal
         CustomizationMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_CustomizationMutation_GenomeProbability, data._genomeProbability, defaultObject._genomeProbability);
+        scope.addMember(Id_CustomizationMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
     }
     SPLIT_SERIALIZATION(CustomizationMutationDesc)
 

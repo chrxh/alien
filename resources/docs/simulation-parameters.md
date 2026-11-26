@@ -178,7 +178,7 @@ Meta-mutations change the mutation rates stored in genomes whose **Apply meta-mu
 | Meta-mutations: Gene structure | Add node sigma, Delete node sigma, Extend gene sigma, Trim gene sigma, Copy node section sigma, Move node section sigma, Roll out gene sigma, Compact gene sigma |
 | Meta-mutations: Genome structure | Add gene sigma, Duplicate gene sigma, Delete gene sigma, Swap gene sigma |
 
-The **Customization transition matrix** is not a sigma parameter. It decides which color may replace which other color in a customization mutation. Rows are the old colors, columns the new ones. By default, every color may be replaced by any other color. The matrix applies to every customization mutation, even in genomes in which **Apply meta-mutations** is switched off.
+**Customization sigma** changes both the node and the genome probability of the customization mutations. The **Customization transition matrix** is not a sigma parameter. It decides which color may replace which other color in a customization mutation. Rows are the old colors, columns the new ones. By default, every color may be replaced by any other color. The matrix applies to every customization mutation, even in genomes in which **Apply meta-mutations** is switched off.
 
 ## Cell type: Attacker
 

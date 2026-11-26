@@ -108,7 +108,7 @@ TEST_F(StatisticsTests, genomeNodesAndMutationRates)
     auto const& entry = entries.lineageEntries.front();
     EXPECT_EQ(1u, entry.numGenomes);
     EXPECT_EQ(numNodes, entry.sumGenomeNodes);
-    EXPECT_NEAR(0.21 / 26, entry.sumMutationRates, 1e-6);  // Mean over the 26 probability values of a genome
+    EXPECT_NEAR(0.21 / 27, entry.sumMutationRates, 1e-6);  // Mean over the 27 probability values of a genome
 }
 
 TEST_F(StatisticsTests, accumulatedMutations)

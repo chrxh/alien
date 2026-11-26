@@ -230,6 +230,17 @@ namespace
                     .textWidth(rightColumnWidth)
                     .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCustomizationProbability)),
                 &mutation._genomeProbability);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Node probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth)
+                    .tooltip(EntityAttributeHelp::get(EntityAttribute::MutationCustomizationNodeProbability)),
+                &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -419,6 +430,8 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         settings.getValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
     mutationRates._customizationMutation._genomeProbability =
         settings.getValue(settingsPrefix + "customization mutation.genome probability", mutationRates._customizationMutation._genomeProbability);
+    mutationRates._customizationMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "customization mutation.node probability", mutationRates._customizationMutation._nodeProbability);
     mutationRates._voidMutation._nodeProbability =
         settings.getValue(settingsPrefix + "void mutation.node probability", mutationRates._voidMutation._nodeProbability);
     mutationRates._extendGeneMutation._geneProbability =
@@ -501,6 +514,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     settings.setValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "customization mutation.genome probability", mutationRates._customizationMutation._genomeProbability);
+    settings.setValue(settingsPrefix + "customization mutation.node probability", mutationRates._customizationMutation._nodeProbability);
     settings.setValue(settingsPrefix + "void mutation.node probability", mutationRates._voidMutation._nodeProbability);
     settings.setValue(settingsPrefix + "extend gene mutation.gene probability", mutationRates._extendGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "add node mutation.node probability", mutationRates._addNodeMutation._nodeProbability);

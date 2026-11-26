@@ -46,6 +46,7 @@ private:
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_customization(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_nodeCustomization(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void
     applyMutations_extendGene(SimulationData& data, Genome* genome, bool* newLastNodeNeedsWeights, float& accumulatedMutations);
@@ -75,6 +76,7 @@ private:
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
     __inline__ __device__ static CellType chooseRandomCellTypeExceptVoid(SimulationData& data);
+    __inline__ __device__ static int chooseRandomTargetColor(SimulationData& data, int sourceColor);
     __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node, bool excludeCurrentMode);
     __inline__ __device__ static void setRandomCellTypeProperties(SimulationData& data, Genome* genome, Node& node);
     __inline__ __device__ static void setRandomNeuralNetwork(SimulationData& data, Node& node);
@@ -127,6 +129,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_cellTypeMode(data, genome, accumulatedMutations);
     applyMutations_cellType(data, genome, accumulatedMutations);
     applyMutations_customization(data, genome, accumulatedMutations);
+    applyMutations_nodeCustomization(data, genome, accumulatedMutations);
     applyMutations_void(data, genome, accumulatedMutations);
     applyMutations_constructor(data, genome, accumulatedMutations);
 
@@ -896,17 +899,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_customization(Simul
 
             if (numUsedColors > 0) {
                 auto candidateSourceColor = usedColors[data.primaryNumberGen.random(numUsedColors - 1)];
-
-                int allowedColors[MAX_COLORS];
-                int numAllowedColors = 0;
-                for (int color = 0; color < MAX_COLORS; ++color) {
-                    if (color != candidateSourceColor && cudaSimulationParameters.customizationTransitionMatrix.value[candidateSourceColor][color]) {
-                        allowedColors[numAllowedColors++] = color;
-                    }
-                }
-                if (numAllowedColors > 0) {
+                auto candidateTargetColor = chooseRandomTargetColor(data, candidateSourceColor);
+                if (candidateTargetColor != -1) {
                     sourceColor = candidateSourceColor;
-                    targetColor = allowedColors[data.primaryNumberGen.random(numAllowedColors - 1)];
+                    targetColor = candidateTargetColor;
                 }
             }
         }
@@ -928,6 +924,31 @@ __inline__ __device__ void MutationProcessor::applyMutations_customization(Simul
     }
     if (laneId == 0) {
         atomicAdd_block(&accumulatedMutations, 1.0f);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_nodeCustomization(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.customizationMutation;
+
+    if (rate.nodeProbability <= 0) {
+        return;
+    }
+
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        auto& gene = genome->genes[geneIndex];
+        for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            if (data.primaryNumberGen.random() >= rate.nodeProbability) {
+                continue;
+            }
+            auto& node = gene.nodes[nodeIndex];
+            auto targetColor = chooseRandomTargetColor(data, node.color);
+            if (targetColor != -1) {
+                node.color = targetColor;
+                atomicAdd_block(&accumulatedMutations, 1.0f);
+            }
+        }
     }
 }
 
@@ -973,6 +994,18 @@ __inline__ __device__ CellType MutationProcessor::chooseRandomCellTypeExceptVoid
         ++cellType;
     }
     return static_cast<CellType>(cellType);
+}
+
+__inline__ __device__ int MutationProcessor::chooseRandomTargetColor(SimulationData& data, int sourceColor)
+{
+    int allowedColors[MAX_COLORS];
+    int numAllowedColors = 0;
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        if (color != sourceColor && cudaSimulationParameters.customizationTransitionMatrix.value[sourceColor][color]) {
+            allowedColors[numAllowedColors++] = color;
+        }
+    }
+    return numAllowedColors > 0 ? allowedColors[data.primaryNumberGen.random(numAllowedColors - 1)] : -1;
 }
 
 __inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationData& data, Node& node, bool excludeCurrentMode)
@@ -2449,6 +2482,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (customizationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * customizationSigma)); };
             mutateFloat(genome->mutationRates.customizationMutation.genomeProbability);
+            mutateFloat(genome->mutationRates.customizationMutation.nodeProbability);
         }
 
         float voidMutationSigma = cudaSimulationParameters.voidMetaMutationsSigma.value;
