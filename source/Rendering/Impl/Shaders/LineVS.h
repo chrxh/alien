@@ -18,34 +18,9 @@ uniform vec2 rectUpperLeft;
 uniform float zoom;
 uniform vec2 viewportSize;
 uniform float solidBrightness;
+uniform float cellBrightness;
 
 const int ObjectType_Solid = 0;
-
-// See Shaders/NonFluidObjectVS.h
-float getMetaballBrightness(float brightness)
-{
-    return brightness * smoothstep(0.05, 0.55, brightness);
-}
-
-vec3 getSolidColor(vec3 color)
-{
-    float brightness = color.r + color.g + color.b;
-    float target = brightness * solidBrightness;
-    float low = 0.0;
-    float high = brightness;
-    if (getMetaballBrightness(high) <= target) {
-        return color;
-    }
-    for (int i = 0; i < 12; ++i) {
-        float middle = 0.5 * (low + high);
-        if (getMetaballBrightness(middle) < target) {
-            low = middle;
-        } else {
-            high = middle;
-        }
-    }
-    return color * high / max(brightness, 1e-4);
-}
 
 void main()
 {
@@ -59,7 +34,7 @@ void main()
     // Pass color to geometry shader
     int objectType = (state >> 8) & 0xFF;
     bool isSolid = objectType == ObjectType_Solid;
-    vertexColor = isSolid ? getSolidColor(aColor) : aColor;
+    vertexColor = aColor * (isSolid ? solidBrightness : cellBrightness);
     vertexSolid = isSolid ? 1.0 : 0.0;
 }
 )";

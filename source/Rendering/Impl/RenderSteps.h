@@ -83,6 +83,9 @@ struct StepParameters
     // A step with a render area only renders inside of it and clears the rest of the target to black
     MEMBER(StepParameters, RenderAreaFunc, renderAreaFunc, {});
 
+    // The alpha channel of a cleared target, see Shaders/MetaballsFS.h
+    MEMBER(StepParameters, float, clearAlpha, 1.0f);
+
     StepParameters& addUniform(std::string const& key, UniformValueType const& value);
 };
 
@@ -138,6 +141,7 @@ protected:
     UniformFunc _uniformFunc;
     PassThroughFunc _passThroughFunc;
     RenderAreaFunc _renderAreaFunc;
+    float _clearAlpha = 1.0f;
     DepthTest _depthTest = DepthTest::None;
 };
 

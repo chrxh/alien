@@ -20,38 +20,9 @@ flat out float aaMargin;
 uniform vec2 viewportSize;
 uniform float zoom;
 uniform float renderScale;
-uniform bool proportionalCellBrightness;
-uniform float cellBrightness;
 
 // See Shaders/TriangleGS.h
 const float SolidLighting = 0.94;
-
-// See Shaders/NonFluidObjectVS.h
-float getMetaballBrightness(float brightness)
-{
-    return brightness * smoothstep(0.05, 0.55, brightness);
-}
-
-// See Shaders/TriangleGS.h
-vec3 getCellColor(vec3 color)
-{
-    float brightness = color.r + color.g + color.b;
-    if (!proportionalCellBrightness || brightness <= 0.0) {
-        return color;
-    }
-    float target = brightness * cellBrightness;
-    float low = 0.0;
-    float high = max(brightness, 1.0);
-    for (int i = 0; i < 16; ++i) {
-        float middle = 0.5 * (low + high);
-        if (getMetaballBrightness(middle) < target) {
-            low = middle;
-        } else {
-            high = middle;
-        }
-    }
-    return color * high / brightness;
-}
 
 vec2 transform(vec2 v)
 {
@@ -93,8 +64,8 @@ void main()
 
     // Apply lighting to colors (same formula as triangles)
     float lighting = 0.8 + lightIntensity * 0.2;
-    vec3 color0 = vertexSolid[0] > 0.5 ? vertexColor[0] * SolidLighting : getCellColor(vertexColor[0] * lighting);
-    vec3 color1 = vertexSolid[1] > 0.5 ? vertexColor[1] * SolidLighting : getCellColor(vertexColor[1] * lighting);
+    vec3 color0 = vertexColor[0] * mix(lighting, SolidLighting, vertexSolid[0]);
+    vec3 color1 = vertexColor[1] * mix(lighting, SolidLighting, vertexSolid[1]);
 
     // Generate quad (4 vertices as triangle strip)
     // Vertex 0 (bottom-left)

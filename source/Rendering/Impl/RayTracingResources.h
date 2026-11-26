@@ -56,7 +56,8 @@ public:
     static RayTracingResources create();
     ~_RayTracingResources();
 
-    // Zoomed out, the rasterized objects replace the tissue, so that the view keeps the details and the brightness of the rasterized view
+    // Zoomed out, the rasterized objects replace the tissue, so that the view keeps the details of the rasterized view. They match the
+    // brightness of the tissue, see SimulationRenderer.
     static float getTissueVisibility(RenderView const& view);
 
     // The background is scaled by the inverse of the factor with which the bloom weights the scene, see SimulationRenderer

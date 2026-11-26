@@ -75,6 +75,7 @@ _RenderStep::_RenderStep(StepParameters const& parameters, DepthTest depthTest)
     , _uniformFunc(parameters._uniformFunc)
     , _passThroughFunc(parameters._passThroughFunc)
     , _renderAreaFunc(parameters._renderAreaFunc)
+    , _clearAlpha(parameters._clearAlpha)
     , _depthTest(depthTest)
 {
     if (!parameters._shader.vertex.empty()) {
@@ -167,7 +168,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters, std::v
         .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         .loadOp = loadOp,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        .clearValue = {.color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}},
+        .clearValue = {.color = {.float32 = {0.0f, 0.0f, 0.0f, _clearAlpha}}},
     };
     VkRenderingAttachmentInfo depthAttachment{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,

@@ -34,9 +34,9 @@ void main()
     float sheen = 0.12 * pow(max(dot(normal, halfVector), 0.0), 8.0);
     float silhouette = 1.0 - smoothstep(0.7, 1.0, radiusSquared);
 
-    // The metaballs step derives the silhouette of a cell from its brightness, so dimming here also shrinks
-    // the cell. The caller therefore keeps the brightness at 1 while the cells are meant to fuse with the
-    // bodies and dims them only where that does not matter.
+    // The metaballs step derives the silhouette of a cell from its brightness unless the density comes from the
+    // coverage, see SimulationRenderer.cpp, so dimming here also shrinks the cell. The caller therefore keeps the
+    // brightness at 1 while the cells are meant to fuse with the bodies and dims them only where that does not matter.
     FragColor = vec4(vColor * (diffuse + translucentRim + sheen) * silhouette * brightness, 1.0);
 }
 )";

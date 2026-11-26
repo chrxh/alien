@@ -34,12 +34,9 @@ namespace
     // that the overall brightness does not increase.
     auto constexpr GlowWeight = 0.7f;
 
-    // The tissue shows the solids darker than the cells, see Shaders/RayTracingTissueCS.h. The rasterized solids, which replace it when zoomed
-    // out, match it.
+    // The rasterized objects, which replace the tissue when zoomed out, match its brightness, which is proportional to the energy of the objects.
+    // The tissue shows the solids darker than the cells, see Shaders/RayTracingTissueCS.h.
     auto constexpr RayTracedSolidBrightness = 0.5f;
-
-    // The connections and polygons of the rasterized cells match the brightness of the tissue as well. Unlike dim solids, dim cells are brightened
-    // for it, see Shaders/TriangleGS.h.
     auto constexpr RayTracedCellBrightness = 0.64f;
 
     // Between these screen zoom factors, the structure of the solids fades in
@@ -442,34 +439,40 @@ namespace
         };
     }
 
-    // Connections, polygons, cells and attack events of the rasterized view on a black layer. With a cell brightness, the connections and polygons
-    // of the cells keep this share of their brightness through the metaballs step, see Shaders/TriangleGS.h. Otherwise, dim cells fade out there.
-    RenderSequence createObjectSequence(float solidBrightness, std::optional<float> cellBrightness)
+    // The metaballs step derives the density of the objects from their brightness or from their coverage, see Shaders/MetaballsFS.h. With the
+    // brightness, dim objects fade out there.
+    enum class MetaballDensity
     {
-        auto proportionalCellBrightness = cellBrightness.has_value();
-        auto cellBrightnessShare = cellBrightness.value_or(1.0f);
+        Brightness,
+        Coverage
+    };
+
+    // Connections, polygons, cells and attack events of the rasterized view on a black layer
+    RenderSequence createObjectSequence(float solidBrightness, float cellBrightness, MetaballDensity density)
+    {
+        auto coverageDensity = density == MetaballDensity::Coverage;
         return RenderSequence().steps({
             _LineRenderStep::create(StepParameters()
                                         .shader(ShaderSources::Line)
                                         .addUniform("solidBrightness", solidBrightness)
-                                        .addUniform("proportionalCellBrightness", proportionalCellBrightness)
-                                        .addUniform("cellBrightness", cellBrightnessShare)),
+                                        .addUniform("cellBrightness", cellBrightness)
+                                        .clearAlpha(coverageDensity ? 0.0f : 1.0f)),
             _TriangleRenderStep::create(StepParameters()
                                             .shader(ShaderSources::Triangle)
                                             .addUniform("solidBrightness", solidBrightness)
-                                            .addUniform("proportionalCellBrightness", proportionalCellBrightness)
-                                            .addUniform("cellBrightness", cellBrightnessShare)
+                                            .addUniform("cellBrightness", cellBrightness)
                                             .previousTargetSelection(0)),
             _NonFluidObjectRenderStep::create(StepParameters()
                                                   .shader(ShaderSources::NonFluidObject)
                                                   .uniformFunc(getCellAppearanceUniforms)
                                                   .addUniform("solidBrightness", solidBrightness)
+                                                  .addUniform("cellBrightness", cellBrightness)
                                                   .previousTargetSelection(0)),
             _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
             createModuloCopyStep(),
             createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
             createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
-            _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
+            _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs).addUniform("coverageDensity", coverageDensity)),
             _PostProcessingRenderStep::create(StepParameters()
                                                   .shader(ShaderSources::OrganicSurface)
                                                   .uniformFunc(getOrganicSurfaceUniforms)
@@ -720,7 +723,7 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
-                createObjectSequence(1.0f, std::nullopt),
+                createObjectSequence(1.0f, 1.0f, MetaballDensity::Brightness),
             },
 
             // Render block: Merge fluid, connections and objects sequence
@@ -963,7 +966,7 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                     createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
-                createObjectSequence(RayTracedSolidBrightness, RayTracedCellBrightness),
+                createObjectSequence(RayTracedSolidBrightness, RayTracedCellBrightness, MetaballDensity::Coverage),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),

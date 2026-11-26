@@ -14,6 +14,10 @@ uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
 uniform float zoom;
 
+// The objects can also be drawn on a target cleared to a transparent black, so that the alpha channel holds their coverage. The density then
+// derives from the coverage alone and dim objects keep their brightness.
+uniform bool coverageDensity;
+
 void main()
 {
     // Sample the input texture
@@ -24,7 +28,7 @@ void main()
     float luminance = color.r + color.g + color.b;//dot(color.rgb, vec3(0.299, 0.587, 0.114));
     
     // Also incorporate alpha for smoother edges from anti-aliasing
-    float density = luminance * color.a;
+    float density = coverageDensity ? color.a : luminance * color.a;
     
     // Apply metaballs threshold with smoothstep for smooth blob-like edges
     float threshold = 0.3;
