@@ -78,8 +78,6 @@ public:
     std::optional<std::string> onRename(std::vector<Renaming> const& renamings);
     std::optional<std::string> onDelete(std::vector<std::filesystem::path> const& simulationPaths);
 
-    std::optional<std::string> fetchSavedFilename();
-
 private:
     void init() override;
     void shutdown() override;
@@ -133,7 +131,6 @@ private:
     std::vector<PendingSave> _pendingSaves;
     std::vector<PendingLoad> _pendingLoads;
     std::optional<PendingPicture> _pendingPicture;
-    std::optional<std::string> _savedFilename;
 
     std::chrono::steady_clock::time_point _lastAutosaveTimepoint;
     std::optional<int> _lastSessionId;

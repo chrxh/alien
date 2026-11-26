@@ -417,13 +417,6 @@ std::optional<std::string> LocalLibraryController::onDelete(std::vector<std::fil
     return std::nullopt;
 }
 
-std::optional<std::string> LocalLibraryController::fetchSavedFilename()
-{
-    auto result = _savedFilename;
-    _savedFilename.reset();
-    return result;
-}
-
 void LocalLibraryController::processPendingSaves()
 {
     std::vector<PendingSave> remainingSaves;
@@ -618,7 +611,7 @@ void LocalLibraryController::onSaveFinished(PendingSave const& pendingSave, Save
     if (pendingSave.automatic && _saveMode == SaveMode_Limited) {
         service.removeExcessAutosaves(pendingSave.target, _numberOfFiles);
     }
-    _savedFilename = StringHelper::toUtf8(data.filename);
+    ConsoleModeController::get().onSimulationSaved(StringHelper::toUtf8(data.filename));
     _contentOutdated = true;
 }
 

@@ -91,7 +91,6 @@ void ConsoleModeController::process()
     LocalLibraryController::get().process();
     BrowserController::get().process();
     McpController::get().process();
-    printSavedSimulation();
     printStatusLine();
 
     auto pressedCharacter = ConsoleInput::readPressedCharacter();
@@ -109,6 +108,16 @@ void ConsoleModeController::process()
 void ConsoleModeController::onSpeedLimitChanged()
 {
     _stateBeforeActivation.tpsRestriction = _SimulationFacade::get()->getTpsRestriction();
+}
+
+void ConsoleModeController::onSimulationSaved(std::string const& filename)
+{
+    if (!_active) {
+        return;
+    }
+    _liveOutput.printMessage(
+        "  " + ConsoleWidgets::createText("Simulation saved: ", ConsolePalette::Success) + ConsoleWidgets::createText(filename, ConsolePalette::Value));
+    _lastPrintTimepoint.reset();
 }
 
 void ConsoleModeController::onMcpCommandExecuted(McpCommandLogEntry const& entry)
@@ -148,17 +157,6 @@ void ConsoleModeController::deactivate()
     std::cout << Console::clearScreen() << std::flush;
 
     WindowController::get().showWindow();
-}
-
-void ConsoleModeController::printSavedSimulation()
-{
-    auto filename = LocalLibraryController::get().fetchSavedFilename();
-    if (!filename.has_value()) {
-        return;
-    }
-    _liveOutput.printMessage(
-        "  " + ConsoleWidgets::createText("Simulation saved: ", ConsolePalette::Success) + ConsoleWidgets::createText(*filename, ConsolePalette::Value));
-    _lastPrintTimepoint.reset();
 }
 
 void ConsoleModeController::printStatusLine()
