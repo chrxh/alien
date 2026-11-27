@@ -540,6 +540,73 @@ TEST_F(GeometryTests, copyBuffers_activitySmoothsAlternatingSignals)
     }
 }
 
+TEST_F(GeometryTests, copyBuffers_attackEventCarriesColorOfAttackedCell)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).color(2).type(CellDesc().event(CellEvent_Attacked).eventCounter(5).eventPos({102.0f, 100.0f})),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
+
+    auto events = geometryBuffers->getAttackEventData();
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(2u, events.size());
+    ASSERT_EQ(1u, cellData.size());
+    EXPECT_FLOAT_EQ(102.0f, events.at(0).pos[0]);
+    EXPECT_FLOAT_EQ(100.0f, events.at(1).pos[0]);
+    for (auto const& event : events) {
+        for (auto [eventColor, cellColor] : std::views::zip(event.color, cellData.at(0).color)) {
+            EXPECT_FLOAT_EQ(cellColor, eventColor);
+        }
+        EXPECT_FLOAT_EQ(0.5f, event.intensity);
+        EXPECT_FLOAT_EQ(events.at(0).seed, event.seed);
+    }
+    EXPECT_GE(events.at(0).seed, 0.0f);
+    EXPECT_LE(events.at(0).seed, 1.0f);
+}
+
+TEST_F(GeometryTests, copyBuffers_digestionFollowsAttackEvent)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().event(CellEvent_Attacked).eventCounter(10)),
+        ObjectDesc().id(2).pos({200.0f, 100.0f}).type(CellDesc().event(CellEvent_Attacked).eventCounter(5)),
+        ObjectDesc().id(3).pos({300.0f, 100.0f}).type(CellDesc().event(CellEvent_Attacking).eventCounter(5)),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(3u, cellData.size());
+    EXPECT_FLOAT_EQ(1.0f, getVertexNextTo(cellData, {100.0f, 100.0f}).digestion);
+    EXPECT_NEAR(0.5f, getVertexNextTo(cellData, {200.0f, 100.0f}).digestion, 1.0f / 255);
+    EXPECT_FLOAT_EQ(0.0f, getVertexNextTo(cellData, {300.0f, 100.0f}).digestion);
+}
+
+TEST_F(GeometryTests, copyBuffers_cellsWithoutPreyHoldNoFood)
+{
+    auto data = ContentDesc().addCreature({
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc()).rawEnergy(50.0f)),
+        ObjectDesc().id(2).pos({200.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc()).event(CellEvent_Attacking).eventCounter(5)),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _HostGeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = visibleWorldRect});
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(2u, cellData.size());
+    for (auto const& cell : cellData) {
+        EXPECT_EQ(0u, cell.food);
+    }
+}
+
 TEST_F(GeometryTests, copyBuffers_creature)
 {
     auto data = ContentDesc().addCreature(

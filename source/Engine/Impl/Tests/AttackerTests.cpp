@@ -1,8 +1,14 @@
+#include <algorithm>
+
 #include <gtest/gtest.h>
 
+#include <Base/Math.h>
+
+#include <Data/Colors.h>
 #include <Data/DescEditService.h>
 #include <Data/Descs.h>
 
+#include <Engine/Interface/GeometryBuffers.h>
 #include <Engine/Interface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -76,6 +82,25 @@ protected:
             },
             CreatureDesc().id(creatureId));
         return data;
+    }
+
+    ObjectVertexData getRenderingDataNextTo(RealVector2D const& pos)
+    {
+        auto geometryBuffers = _HostGeometryBuffers::create();
+        _simulationFacade->tryCopyBuffersFromCudaToRenderer(geometryBuffers, {.visibleWorldRect = {{0, 0}, {1000, 1000}}});
+        auto vertices = geometryBuffers->getCellData();
+        return *std::ranges::min_element(
+            vertices, {}, [&](ObjectVertexData const& vertex) { return Math::length(RealVector2D{vertex.pos[0], vertex.pos[1]} - pos); });
+    }
+
+    // The food holds the r, g, b of the customization color of the prey in its lower bytes and its amount in the highest byte
+    void expectFoodOfPrey(uint32_t food, int preyColor)
+    {
+        auto color = Const::DefaultCustomizationColors[preyColor];
+        EXPECT_GT(food >> 24, 0u);
+        EXPECT_EQ((color >> 16) & 0xff, food & 0xff);
+        EXPECT_EQ((color >> 8) & 0xff, (food >> 8) & 0xff);
+        EXPECT_EQ(color & 0xff, (food >> 16) & 0xff);
     }
 };
 
@@ -1077,4 +1102,34 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 
     // Free cell should NOT be attacked in Creature mode
     EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._energy, actualTarget.getFreeCellRef()._energy));
+}
+
+TEST_F(AttackerTests, attackFeedsAttackerWithFoodInColorOfPrey)
+{
+    auto data = createAttacker({100.0f, 100.0f});
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    expectFoodOfPrey(getRenderingDataNextTo({100.0f, 100.0f}).food, 2);
+}
+
+TEST_F(AttackerTests, digestorHoldsFoodOfPrey)
+{
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc().mode(DetectCreatureDesc()))),
+            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc())),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION * 3);
+
+    expectFoodOfPrey(getRenderingDataNextTo({99.0f, 100.0f}).food, 2);
 }

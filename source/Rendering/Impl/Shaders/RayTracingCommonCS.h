@@ -54,14 +54,18 @@ struct ObjectVertex
     int state;
     float highlightIntensity;
     float activity;
+    float digestion;
+    uint food;
 };
 
 struct Sphere
 {
     vec4 centerRadius;  // xy: center, w: radius
     vec4 hueMaterial;   // rgb: hue, w: material
-    vec4 details;       // x: brightness of the color, y: random seed that stays with the object, z: 1 if isolated or at the end of a chain
-    vec4 neuron;        // x: 1 for a cell with a neuron, y: activity of the neuron
+    vec4 details;       // x: brightness of the color, y: random seed that stays with the object, z: 1 if isolated or at the end of a chain,
+                        // w: digestion by an attacker
+    vec4 neuron;        // x: 1 for a cell with a neuron, y: activity of the neuron, z: cell type
+    vec4 food;          // rgb: hue of the prey, w: feeding of an attacker or filling of a digestor
 };
 
 struct Aabb
@@ -115,7 +119,7 @@ layout(set = 0, binding = 0, std140) uniform FrameConstants
     ivec4 gasLightGrid;  // xy: number of light clusters, zw: number of nodes of the irradiance grid
     vec4 gasLighting;  // xy: world position of the first light cluster, z: strength of the light of the cells in the gas, w: distance of the
                        // nodes of the source light grid
-    vec4 world;        // xy: size of the world, z: 1 for borderless rendering
+    vec4 world;        // xy: size of the world, z: 1 for borderless rendering, w: time step of the animations of the food
     vec4 shadowGrid;  // xy: world position of the first node of the shadow grid, z: distance of the nodes, w: standard deviation of the blur in
                       // nodes
     ivec4 shadowGridSize;  // xy: number of nodes of the shadow grid, z: blur radius in nodes

@@ -315,7 +315,11 @@ __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& dat
             energyToTransfer = particle->energy;
         }
         if (object->type == ObjectType_Cell) {
-            object->typeData.cell.rawEnergy += energyToTransfer;
+            auto& cell = object->typeData.cell;
+
+            // Absorbed energy is no food from prey, see Cell::foodShare
+            cell.mixFoodShare(cell.rawEnergy, energyToTransfer, 0.0f);
+            cell.rawEnergy += energyToTransfer;
         } else {
             object->typeData.freeCell.energy += energyToTransfer;
         }

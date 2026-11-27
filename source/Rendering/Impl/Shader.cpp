@@ -214,6 +214,8 @@ namespace
                 {
                     {0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(AttackEventVertexData, pos)},
                     {1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(AttackEventVertexData, color)},
+                    {2, 0, VK_FORMAT_R32_SFLOAT, offsetof(AttackEventVertexData, intensity)},
+                    {3, 0, VK_FORMAT_R32_SFLOAT, offsetof(AttackEventVertexData, seed)},
                 }};
         case VertexLayout::DetonationInstances:
             return {

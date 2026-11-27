@@ -24,6 +24,8 @@ public:
     __inline__ __device__ static void decay(SimulationData& data, bool isPreview);
 
 private:
+    __inline__ __device__ static void transferFood(Cell& digestor, Cell const& source, float rawEnergyFlow, float origDigestorRawEnergy);
+
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
 };
@@ -397,10 +399,23 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
                 if (orig < 0) {
                     atomicAdd(&object->typeData.cell.rawEnergy, flow);
                 } else {
-                    atomicAdd(&connectedObject->typeData.cell.rawEnergy, flow);
+                    auto origConnected = atomicAdd(&connectedObject->typeData.cell.rawEnergy, flow);
+                    if (flow > NEAR_ZERO) {
+                        transferFood(connectedObject->typeData.cell, object->typeData.cell, flow, origConnected);
+                    }
                 }
             }
         }
+    }
+}
+
+// The raw energy carries its share of prey into the digestor, which shows this food, see Cell::foodShare
+__inline__ __device__ void CellProcessor::transferFood(Cell& digestor, Cell const& source, float rawEnergyFlow, float origDigestorRawEnergy)
+{
+    auto sourceShare = source.foodColor != NoFoodColor ? toFloat(source.foodShare) / 255.0f : 0.0f;
+    digestor.mixFoodShare(origDigestorRawEnergy, rawEnergyFlow, sourceShare);
+    if (sourceShare > 0.0f) {
+        digestor.foodColor = source.foodColor;
     }
 }
 

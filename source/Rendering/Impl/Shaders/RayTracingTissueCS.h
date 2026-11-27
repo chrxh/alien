@@ -9,8 +9,9 @@ namespace Shaders
     // group add up to a density. The tissue takes a smooth maximum of the groups, so that objects without a connection stay apart while
     // the transitions between overlapping groups remain invisible. The threshold of the density is the outline of the bodies. Inside, the
     // cells show wavy walls towards their neighbors and small organelles. Each cell is a neuron with a body and dendrites towards its
-    // neighbors, which glow with its activity and pass on a pulse of light when it fires. On a dark background the tissue is visible by its
-    // glow as in a fluorescence microscope, on a bright background by its absorption as in a brightfield microscope.
+    // neighbors, which glow with its activity and pass on a pulse of light when it fires. An attacker swallows the food of its prey in
+    // vesicles, which pass into its digestors and gather there in a vacuole, while the prey cells fade. On a dark background the tissue is
+    // visible by its glow as in a fluorescence microscope, on a bright background by its absorption as in a brightfield microscope.
     std::string_view const RayTracingTissueCS = R"(
 const float TwoPi = 6.2831853;
 
@@ -80,11 +81,12 @@ struct Tissue
     float weight;
     float brightness;
     float solid;
+    float digestion;
 };
 
 Tissue createTissue()
 {
-    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), vec3(0.0), 0.0, 0.0, 0.0);
+    return Tissue(0.0, vec2(0.0), 0.0, vec2(0.0), vec3(0.0), 0.0, 0.0, 0.0, 0.0);
 }
 
 // Smooth maximum of the group densities as the logarithm of a sum of exponentials. The gradient of the density is averaged with the same
@@ -110,6 +112,7 @@ void scaleMaterial(inout Tissue sum, float factor)
     sum.hue *= factor;
     sum.brightness *= factor;
     sum.solid *= factor;
+    sum.digestion *= factor;
 }
 
 void addGroup(inout TissueBlend blend, Tissue group, float dominance)
@@ -138,6 +141,7 @@ void addGroup(inout TissueBlend blend, Tissue group, float dominance)
     blend.weightedSum.hue += materialWeight * group.hue;
     blend.weightedSum.brightness += materialWeight * group.brightness;
     blend.weightedSum.solid += materialWeight * group.solid;
+    blend.weightedSum.digestion += materialWeight * group.digestion;
 }
 
 // The material of the result is normalized, i.e. its weight is 1
@@ -198,6 +202,7 @@ void addMaterial(inout Tissue tissue, Sphere sphere, float weight)
     tissue.weight += weight;
     tissue.brightness += sphere.details.x * weight;
     tissue.solid += sphere.hueMaterial.w == Material_Solid ? weight : 0.0;
+    tissue.digestion += sphere.details.w * weight;
 }
 
 // Living cells are not perfectly round, their outline varies with the direction
@@ -489,13 +494,111 @@ void addDendrite(inout Dendrites dendrites, uint cellIndex, Sphere cell, Sphere 
 }
 )"
                                                 R"(
+// While an attacker feeds, it pinches off vesicles with the food of its prey on the side away from its digestors. They wander into the
+// digestors and merge with their vacuoles, which hold the raw energy from prey until it is digested and turn slowly. The food shows the hue
+// of the prey, its dark membrane and grains let it stand out even in a predator of the same color. Sizes are given in world units, times in
+// time steps, see SimulationRenderer::getAnimationTimestep.
+const float VesicleRadius = 0.11;
+const float VesicleDeparture = 0.12;
+const float VesicleTravelTimesteps = 64.0;
+const int VesiclesPerConnection = 2;
+const float MaxVacuoleRadius = 0.27;
+const float VacuoleTurnTimesteps = 1024.0;
+const float FoodGlow = 0.45;
+const float FoodAbsorption = 0.85;
+const float FoodMembraneShade = 0.55;
+
+// Tissue being digested becomes translucent, loses its walls and organelles, curdles and frays, see Shaders/RayTracingPrepareCS.h for its
+// color
+const float DigestionTranslucency = 0.33;
+const float DigestionOutlineFade = 0.24;
+const float DigestionWallFade = 0.42;
+const float DigestionCurdling = 0.6;
+const float DigestionErosion = 0.6;
+
+// The food lies in front of the tissue, nearer droplets cover farther ones partially
+struct FoodLayer
+{
+    vec3 light;
+    float absorption;
+};
+
+FoodLayer createFoodLayer()
+{
+    return FoodLayer(vec3(0.0), 0.0);
+}
+
+// A droplet with a soft, slightly irregular outline, a darker membrane and grains, which turn with the angle. Droplets of few pixels fade out
+// instead of glittering.
+void addFoodDroplet(inout FoodLayer layer, vec3 hue, vec2 offset, float radius, float angle, float seed, float opacity)
+{
+    float pixelSize = getPixelSize();
+    opacity *= smoothstep(1.0, 2.5, radius / pixelSize);
+    if (opacity <= 0.0) {
+        return;
+    }
+    float distance = length(offset);
+    vec2 direction = offset / max(distance, 1e-5);
+    float outline = radius * (1.0 + 0.14 * (valueNoise(direction * 1.3 + seed * 17.0) - 0.5));
+    float inside = clamp(0.5 - (distance - outline) / max(0.8 * pixelSize, 0.004), 0.0, 1.0);
+    if (inside <= 0.0) {
+        return;
+    }
+    float membrane = exp(-square((distance - 0.86 * outline) / max(0.012, 0.6 * pixelSize))) * smoothstep(1.5, 4.0, radius / pixelSize);
+    vec2 turned = mat2(cos(angle), sin(angle), -sin(angle), cos(angle)) * offset;
+    float grain = valueNoise(turned / radius * 3.2 + seed * 11.0);
+    float swirl = 0.5 + 0.5 * sin(atan(turned.y, turned.x) * 3.0 + length(turned) / radius * 7.0);
+    vec3 light = hue * FoodGlow * (0.9 + 0.55 * grain + 0.35 * swirl) * (1.0 - FoodMembraneShade * membrane);
+    float alpha = inside * opacity;
+    layer.light = layer.light * (1.0 - alpha * FoodAbsorption) + light * alpha;
+    layer.absorption = max(layer.absorption, alpha * FoodAbsorption);
+}
+
+void addVesicles(inout FoodLayer layer, Sphere attacker, Sphere digestor, vec2 position)
+{
+    if (attacker.neuron.z != CellType_Attacker || digestor.neuron.z != CellType_Digestor || attacker.food.w <= 0.0) {
+        return;
+    }
+    vec2 axis = digestor.centerRadius.xy - attacker.centerRadius.xy;
+    float distance = length(axis);
+    if (distance < 1e-4) {
+        return;
+    }
+    vec2 mouth = attacker.centerRadius.xy - axis / distance * VesicleDeparture;
+    float seed = hash(vec2(attacker.details.y * 13.0, digestor.details.y * 7.0));
+    for (int i = 0; i < VesiclesPerConnection; ++i) {
+        float progress = fract(frame.world.w / VesicleTravelTimesteps + seed + float(i) / float(VesiclesPerConnection));
+        vec2 center = mix(mouth, digestor.centerRadius.xy, smoothstep(0.35, 1.0, progress));
+        float radius = VesicleRadius * smoothstep(0.0, 0.35, progress);
+        float opacity = attacker.food.w * (1.0 - smoothstep(0.8, 1.0, progress));
+        addFoodDroplet(layer, attacker.food.rgb, position - center, radius, 0.0, fract(seed * 7.0 + float(i) * 0.37), opacity);
+    }
+}
+
+// The outline of tissue being digested frays into a lace that reaches deeper the longer the attack lasts. The lace stays with the cells.
+float getErosion(Tissue tissue, Sphere cell, vec2 position)
+{
+    float digestion = tissue.digestion * DigestionErosion;
+    if (digestion <= 0.0) {
+        return 0.0;
+    }
+    float depth = max(tissue.density - DensityThreshold, 0.0) / max(length(tissue.gradient), 1e-4);
+    float nearOutline = 1.0 - smoothstep(0.0, 0.06 + 0.2 * digestion, depth);
+    float frequency = min(8.0, 0.3 * frame.view.w);
+    vec2 local = (position - cell.centerRadius.xy) * frequency + cell.details.y * 37.0;
+    float lace = 0.65 * valueNoise(local) + 0.35 * valueNoise(local * 2.3 + 17.0);
+    return nearOutline * smoothstep(0.78 - 0.38 * digestion, 0.9 - 0.3 * digestion, lace) * smoothstep(0.0, 0.25, digestion);
+}
+)"
+                                                R"(
 // The bounding boxes cover the range of each group, hence the ray finds all groups that reach the pixel. Each group reaches zero density
 // at the border of its bounding box, so that the tissue stays continuous.
-Tissue gatherTissue(vec2 position, out Neighborhood neighborhood, out Dendrites dendrites)
+Tissue gatherTissue(vec2 position, out Neighborhood neighborhood, out Dendrites dendrites, out FoodLayer vesicles)
 {
     TissueBlend blend = createTissueBlend();
     neighborhood = createNeighborhood();
     dendrites = createDendrites();
+    vesicles = createFoodLayer();
     float totalDensity = 0.0;
     vec2 totalGradient = vec2(0.0);
     rayQueryEXT query;
@@ -536,6 +639,8 @@ Tissue gatherTissue(vec2 position, out Neighborhood neighborhood, out Dendrites 
                 addDendrite(dendrites, indexA, a, b, position);
                 addDendrite(dendrites, indexB, b, a, position);
             }
+            addVesicles(vesicles, a, b, position);
+            addVesicles(vesicles, b, a, position);
         } else if (kind == Kind_Triangle) {
             uint indexA;
             uint indexB;
@@ -581,6 +686,7 @@ struct CellDetails
     float cellColorWeight;
     float soma;
     vec3 somaLight;
+    FoodLayer vacuole;
 };
 
 // The distance is measured from the side of the nearest cell, see Neighborhood for the ranks. A wall only appears where it lies in the
@@ -638,14 +744,15 @@ void addSoma(inout CellDetails details, Sphere cell, vec2 local, float visibilit
 // the cells appear with the tissue, those of the solids and the inner details only when they span several pixels.
 CellDetails getCellDetails(Neighborhood neighborhood, vec2 position)
 {
-    CellDetails result = CellDetails(0.0, 0.0, 0.0, vec3(0.0), 0.0, 0.0, vec3(0.0));
+    CellDetails result = CellDetails(0.0, 0.0, 0.0, vec3(0.0), 0.0, 0.0, vec3(0.0), createFoodLayer());
     if (neighborhood.spheres[0] == NoEntry) {
         return result;
     }
     Sphere cell = spheres[neighborhood.spheres[0]];
     bool solid = cell.hueMaterial.w == Material_Solid;
     float wallWidth = max(0.035, 0.7 * getPixelSize());
-    float wallVisibility = solid ? getSolidDetailVisibility() : frame.tissue.w;
+    float digestion = cell.details.w;
+    float wallVisibility = solid ? getSolidDetailVisibility() : frame.tissue.w * (1.0 - DigestionWallFade * digestion);
     for (int i = 1; i < NeighborhoodSize; ++i) {
         if (neighborhood.spheres[i] != NoEntry) {
             Sphere neighbor = spheres[neighborhood.spheres[i]];
@@ -664,13 +771,24 @@ CellDetails getCellDetails(Neighborhood neighborhood, vec2 position)
     }
     vec2 local = position - cell.centerRadius.xy;
     result.grain = (valueNoise(local / cell.centerRadius.w * CytoplasmGrain + cell.details.y * 29.0) - 0.5) * visibility;
-    addOrganelles(result, cell, local, visibility);
+
+    // A cell being digested curdles and its organelles dissolve
+    if (digestion > 0.0) {
+        float curdled = (valueNoise(local / cell.centerRadius.w * 4.5 + cell.details.y * 13.0) - 0.5) * 2.0 * visibility;
+        result.grain = mix(result.grain, curdled, DigestionCurdling * digestion);
+    }
+    addOrganelles(result, cell, local, visibility * (1.0 - DigestionCurdling * digestion));
     if (isNeuron(cell)) {
         addSoma(result, cell, local, visibility);
     }
+    if (cell.neuron.z == CellType_Digestor && cell.food.w > 0.0) {
+        float angle = TwoPi * frame.world.w / VacuoleTurnTimesteps + cell.details.y * 6.0;
+        addFoodDroplet(result.vacuole, cell.food.rgb, local, MaxVacuoleRadius * sqrt(cell.food.w), angle, cell.details.y, 1.0);
+    }
     return result;
 }
-
+)"
+                                                R"(
 // The material of the gathered tissue is normalized, see getBlendedTissue
 vec3 getTissueColor(Tissue tissue)
 {
@@ -689,16 +807,16 @@ const float TissueSourceLight = 1.6;
 const float SolidSourceLight = 1.2;
 
 // Zoomed out, the structures are only a few pixels wide and appear as dense lines without outline
-vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, Dendrites dendrites, vec2 position, vec3 medium, vec3 sourceLight)
+vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, Dendrites dendrites, FoodLayer vesicles, vec2 position, vec3 medium, vec3 sourceLight)
 {
     float closeUpWeight = getCloseUpWeight();
     float excess = max(tissue.density - DensityThreshold, 0.0);
     float edgeDistance = excess / max(length(tissue.gradient), 1e-4);
-    float outline = exp(-square(edgeDistance / max(0.05, 0.8 * getPixelSize()))) * closeUpWeight;
+    float outline = exp(-square(edgeDistance / max(0.05, 0.8 * getPixelSize()))) * closeUpWeight * (1.0 - DigestionOutlineFade * tissue.digestion);
 
     float totalExcess = max(tissue.totalDensity - DensityThreshold, 0.0);
     float thicknessGain = mix(ThicknessGain, SmoothSolidThicknessGain, tissue.solid * (1.0 - getSolidDetailVisibility()));
-    float thickness = mix(1.0, 1.0 - exp(-totalExcess * thicknessGain), closeUpWeight);
+    float thickness = mix(1.0, 1.0 - exp(-totalExcess * thicknessGain), closeUpWeight) * (1.0 - DigestionTranslucency * tissue.digestion);
     vec2 thicknessGradient = closeUpWeight * thicknessGain * exp(-totalExcess * thicknessGain) * tissue.totalGradient;
 
     CellDetails details = getCellDetails(neighborhood, position);
@@ -715,6 +833,8 @@ vec3 shadeTissue(Tissue tissue, Neighborhood neighborhood, Dendrites dendrites, 
     vec3 glow = max(details.somaLight, dendriteLight) + sourceLight * TissueSourceLight * thickness * color;
     float relief = 1.0 + MaxRelief * tanh(ReliefStrength * dot(thicknessGradient, ReliefDirection) / MaxRelief);
     vec3 result = (medium * transmittance + (fluorescence + glow) * mix(FarGlowGain, 1.0, closeUpWeight)) * relief;
+    result = result * (1.0 - details.vacuole.absorption) + details.vacuole.light;
+    result = result * (1.0 - vesicles.absorption) + vesicles.light;
 
     // Solids are dense grains without the inner structure of cells
     vec3 solidColor =
@@ -753,10 +873,14 @@ void main()
     if (tissueVisibility > 0.0) {
         Neighborhood neighborhood;
         Dendrites dendrites;
-        Tissue tissue = gatherTissue(position, neighborhood, dendrites);
+        FoodLayer vesicles;
+        Tissue tissue = gatherTissue(position, neighborhood, dendrites, vesicles);
         if (tissue.weight > 0.0) {
             float coverage = getCoverage(tissue);
-            color = mix(medium + getHalo(tissue), shadeTissue(tissue, neighborhood, dendrites, position, medium, sourceLight), coverage);
+            if (neighborhood.spheres[0] != NoEntry) {
+                coverage *= 1.0 - getErosion(tissue, spheres[neighborhood.spheres[0]], position);
+            }
+            color = mix(medium + getHalo(tissue), shadeTissue(tissue, neighborhood, dendrites, vesicles, position, medium, sourceLight), coverage);
         }
         color = mix(medium, color, tissueVisibility);
     }

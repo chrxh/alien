@@ -4,10 +4,10 @@
 
 namespace Shaders
 {
-    // Merges the ray tracing, its attack events and the rasterized objects, which replace the tissue when zoomed out. Like the tissue, the
-    // rasterized objects absorb the background in high dynamic range and scatter the light of the radiation sources. The absorption in the
-    // output of the ray tracing is therefore decoded, combined with the one of the rasterized objects and encoded again, see getForeground
-    // in Shaders/RayTracingTissueCS.h.
+    // Merges the ray tracing, the morsels of its attack events and the rasterized objects, which replace the tissue when zoomed out. The
+    // morsels only add their light. Like the tissue, the rasterized objects absorb the background in high dynamic range and scatter the light
+    // of the radiation sources. The absorption in the output of the ray tracing is therefore decoded, combined with the one of the rasterized
+    // objects and encoded again, see getForeground in Shaders/RayTracingTissueCS.h.
     std::string_view const RayTracingMergeFS = R"(
 #version 450
 out vec4 FragColor;
@@ -69,7 +69,7 @@ void main()
     vec3 background = inverseToneMapping(texture(inputTexture4, texCoord).rgb);
     vec4 rayTracingOutput = texture(inputTexture1, texCoord);
     vec3 rayTracing = decodeAbsorption(rayTracingOutput.rgb * bloomScale, background);
-    vec3 attackEvents = texture(inputTexture2, texCoord).rgb * objectGain * tissueVisibility;
+    vec3 attackEvents = texture(inputTexture2, texCoord).rgb * tissueVisibility;
     vec3 objects = texture(inputTexture3, texCoord).rgb * objectGain;
 
     float brightness = max(objects.r, max(objects.g, objects.b));

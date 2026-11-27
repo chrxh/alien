@@ -32,6 +32,8 @@ struct ObjectVertexData
                                // Bit 16 = is isolated (zero connections)
     float highlightIntensity;  // Highlight intensity in [0, 1]
     float activity;            // Positive part of signal #0 in [0, 1] or 1 while the cell is attacked, smoothed over time
+    float digestion;           // In [0, 1] while an attacker draws energy from the cell or free cell, smoothed over time for cells
+    uint32_t food;             // Bits 0..23: r, g, b of the prey color, bits 24..31: feeding of an attacker or filling of a digestor
 };
 
 struct FluidParticleVertexData
@@ -70,10 +72,13 @@ struct ConnectionArrowVertexData
     float connectionWeightToObject2;  // Connection weight for arrow toward second vertex
 };
 
+// Two vertices per attacked object, the first at its attacker, the second at itself
 struct AttackEventVertexData
 {
-    float pos[2];    // x, y position
-    float color[3];  // r, g, b color (red for attacked)
+    float pos[2];     // x, y position
+    float color[3];   // r, g, b color of the attacked object
+    float intensity;  // Remaining duration of the event in [0, 1]
+    float seed;       // Random number in [0, 1] that stays with the attacked object
 };
 
 struct DetonationEventVertexData

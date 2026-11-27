@@ -13,6 +13,7 @@
 
 #include "RenderGraph.h"
 #include "Shader.h"
+#include "SimulationRenderer.h"
 
 namespace
 {
@@ -660,11 +661,12 @@ void _AttackEventRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // The geometry shader converts the attack event lines to dashed quads
+    // The geometry shader converts the attack event lines to morsels on their way from the attacked object to the attacker
+    _shader->setFloat("timestep", SimulationRenderer::getAnimationTimestep(parameters._simulationFacade));
     auto const& geometryBuffers = parameters._geometryBuffers;
     draw(
         parameters,
-        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, .vertexLayout = VertexLayout::AttackEvents, .blendMode = BlendMode::AlphaAdditive},
+        {.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, .vertexLayout = VertexLayout::AttackEvents, .blendMode = BlendMode::Additive},
         geometryBuffers->getBuffer(GeometryBufferType_AttackEvents),
         geometryBuffers->getNumObjects().attackEventVertices);
 
