@@ -5,6 +5,10 @@ on:
     - cron: '0 0 * * *'
       timezone: 'Europe/Berlin'
   workflow_dispatch:
+  # A pushed version tag builds the installer from the tag and publishes it as GitHub release
+  push:
+    tags:
+      - 'v*'
 
 
 env:
@@ -21,12 +25,28 @@ env:
 jobs:
   windows-deploy:
     runs-on: [self-hosted, Windows]
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v7
       with:
         submodules: recursive
         clean: true
+
+    - name: Check that the tag matches the program version
+      if: github.event_name == 'push'
+      shell: pwsh
+      env:
+        TAG: ${{ github.ref_name }}
+      run: |
+        # The release is published with gh after the lengthy builds
+        Get-Command gh | Out-Null
+        $match = Select-String -Path source/Base/Resources.cpp -Pattern 'ProgramVersion = "([^"]+)"'
+        $version = $match.Matches[0].Groups[1].Value
+        if ("v$version" -cne $env:TAG) {
+          throw "Tag $env:TAG does not match ProgramVersion $version in source/Base/Resources.cpp"
+        }
 
     # Fail before the (lengthy) CUDA build rather than after it.
     - name: Check ROCm/HIP prerequisites
@@ -89,6 +109,7 @@ jobs:
         Compress-Archive -Path "$payload/*" -DestinationPath "deploy/alien-develop.zip" -Force
 
     - name: Upload to FTP (overwrite alien-develop.zip)
+      if: github.event_name != 'push'
       shell: pwsh
       env:
         FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -110,6 +131,7 @@ jobs:
       run: installer\build-installer.bat
 
     - name: Upload installer to FTP (overwrite alien-setup.exe)
+      if: github.event_name != 'push'
       shell: pwsh
       env:
         FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -126,3 +148,22 @@ jobs:
           --upload-file "installer/build/alien-setup.exe" `
           $url
         if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }
+
+    # Scoop installs alien-setup.exe of the latest release and pins its hash, so an
+    # installer that is already attached is never replaced. A release created by
+    # hand before the tag push, for example with written notes, only gets the file.
+    - name: Publish GitHub release
+      if: github.event_name == 'push'
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ github.ref_name }}
+      run: |
+        gh release view $env:TAG --repo $env:GITHUB_REPOSITORY *> $null
+        if ($LASTEXITCODE -eq 0) {
+          gh release upload $env:TAG installer/build/alien-setup.exe --repo $env:GITHUB_REPOSITORY
+        } else {
+          gh release create $env:TAG installer/build/alien-setup.exe --repo $env:GITHUB_REPOSITORY `
+            --title $env:TAG --generate-notes --latest --verify-tag
+        }
+        if ($LASTEXITCODE -ne 0) { throw "Publishing the release failed (gh exit $LASTEXITCODE)" }
