@@ -19,34 +19,9 @@ uniform float zoom;
 uniform vec2 viewportSize;
 uniform float renderScale;
 uniform float solidBrightness;
+uniform float cellBrightness;
 
 const int ObjectType_Solid = 0;
-
-// See Shaders/NonFluidObjectVS.h
-float getMetaballBrightness(float brightness)
-{
-    return brightness * smoothstep(0.05, 0.55, brightness);
-}
-
-vec3 getSolidColor(vec3 color)
-{
-    float brightness = color.r + color.g + color.b;
-    float target = brightness * solidBrightness;
-    float low = 0.0;
-    float high = brightness;
-    if (getMetaballBrightness(high) <= target) {
-        return color;
-    }
-    for (int i = 0; i < 12; ++i) {
-        float middle = 0.5 * (low + high);
-        if (getMetaballBrightness(middle) < target) {
-            low = middle;
-        } else {
-            high = middle;
-        }
-    }
-    return color * high / max(brightness, 1e-4);
-}
 
 void main()
 {
@@ -62,10 +37,10 @@ void main()
     bool isSolid = objectType == ObjectType_Solid;
     if (isSolid) {
         // Solids keep the brightness of their connections, so that their structure does not show
-        vertexColor = getSolidColor(aColor);
+        vertexColor = aColor * solidBrightness;
     } else {
         // At zoom 3 there are not individual cells visible anymore, so no need to highlight the polygone more
-        vertexColor = zoom / renderScale < 3.0 ? aColor * 1.4 : aColor;
+        vertexColor = (zoom / renderScale < 3.0 ? aColor * 1.4 : aColor) * cellBrightness;
     }
     vertexSolid = isSolid ? 1.0 : 0.0;
 }
