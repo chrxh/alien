@@ -397,7 +397,18 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
                 if (orig < 0) {
                     atomicAdd(&object->typeData.cell.rawEnergy, flow);
                 } else {
-                    atomicAdd(&connectedObject->typeData.cell.rawEnergy, flow);
+                    auto origConnected = atomicAdd(&connectedObject->typeData.cell.rawEnergy, flow);
+
+                    // The raw energy carries its share of prey into the digestor
+                    if (flow > NEAR_ZERO) {
+                        auto const& source = object->typeData.cell;
+                        auto& digestor = connectedObject->typeData.cell;
+                        auto sourceShare = source.foodColor != NoFoodColor ? toFloat(source.foodShare) / 255.0f : 0.0f;
+                        digestor.mixFoodShare(origConnected, flow, sourceShare);
+                        if (sourceShare > 0.0f) {
+                            digestor.foodColor = source.foodColor;
+                        }
+                    }
                 }
             }
         }

@@ -6,6 +6,8 @@
 #include <ranges>
 #include <format>
 
+#include <Data/CellTypeConstants.h>
+
 #include <Engine/Interface/SimulationFacade.h>
 
 #include <Rendering/Impl/Shaders/ShaderSources.h>
@@ -48,7 +50,7 @@ namespace
 
     auto constexpr MaxShadowGridBlurRadius = 16;
 
-    auto constexpr SphereSize = VkDeviceSize(64);
+    auto constexpr SphereSize = VkDeviceSize(80);
     auto constexpr AabbBufferUsage =
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     auto constexpr ViewImageUsage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -286,7 +288,9 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
         "const float LightFalloffDistance = {:.6f};\n"
         "const float SourceLightSpread = {:.6f};\n"
         "const int ShadowGridImageSize = {};\n"
-        "const float ShadowGridFixedPointScale = {:.6f};\n",
+        "const float ShadowGridFixedPointScale = {:.6f};\n"
+        "const float CellType_Attacker = {}.0;\n"
+        "const float CellType_Digestor = {}.0;\n",
         workGroupSize.x,
         workGroupSize.y,
         MAX_SOURCES,
@@ -304,7 +308,9 @@ RayTracingComputePipeline _RayTracingResources::createPipeline(std::string const
         RayTracingLayout::LightFalloffDistance,
         RayTracingLayout::SourceLightSpread,
         RayTracingLayout::MaxShadowGridNodes,
-        ShadowGridNodeData::FixedPointScale);
+        ShadowGridNodeData::FixedPointScale,
+        static_cast<int>(CellType_Attacker),
+        static_cast<int>(CellType_Digestor));
     return _RayTracingComputePipeline::create(declarations + std::string(Shaders::RayTracingCommonCS) + source, _pipelineLayout, workGroupSize);
 }
 
@@ -756,7 +762,11 @@ void _RayTracingResources::updateFrameConstants(
         .gasLightGrid = {gasGrid.numLightClusters.x, gasGrid.numLightClusters.y, gasGrid.irradianceSize.x, gasGrid.irradianceSize.y},
         .gasLighting =
             {gasGrid.lightClusterOrigin.x, gasGrid.lightClusterOrigin.y, MaxFluidIllumination * parameters.fluidIllumination.value, gasGrid.sourceLightNodeDistance},
-        .world = {toFloat(worldSize.x), toFloat(worldSize.y), parameters.borderlessRendering.value ? 1.0f : 0.0f, 0.0f},
+        .world =
+            {toFloat(worldSize.x),
+             toFloat(worldSize.y),
+             parameters.borderlessRendering.value ? 1.0f : 0.0f,
+             SimulationRenderer::getAnimationTimestep(simulationFacade)},
         .shadowGrid = {_shadowGrid.origin.x, _shadowGrid.origin.y, _shadowGrid.nodeDistance, shadowGridBlur},
         .shadowGridSize = {_shadowGrid.size.x, _shadowGrid.size.y, shadowGridBlurRadius, 0},
         .numSourceLights = {static_cast<int32_t>(_layout.sourceLights.size()), 0, gasGrid.sourceLightSize.x, gasGrid.sourceLightSize.y},
@@ -770,10 +780,11 @@ void _RayTracingResources::updateFrameConstants(
     }
     std::memcpy(_frameConstants.mapped, &constants, sizeof(constants));
 
-    // Apart from the objects, the light in the gas depends on the constants without the numbers of the objects
+    // Apart from the objects, the light in the gas depends on the constants without the numbers of the objects and the time of the animations
     auto lightConstants = constants;
     std::ranges::fill(lightConstants.counts, 0u);
     lightConstants.gasSize[3] = 0;
+    lightConstants.world[3] = 0.0f;
     updateLightReuse(std::as_bytes(std::span(&lightConstants, 1)), simulationFacade);
 }
 

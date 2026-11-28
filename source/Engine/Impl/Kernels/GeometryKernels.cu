@@ -13,6 +13,17 @@ namespace
     // flicker
     __device__ float constexpr ActivityResponseTimesteps = 30.0f;
 
+    // The rendered digestion of a cell follows its attack event with this time constant, so that it does not set in abruptly
+    __device__ float constexpr DigestionResponseTimesteps = 20.0f;
+
+    // The stomach of a digestor shows the raw energy from prey relative to the raw energy at which the digestor stops taking in more. Prey that
+    // a digestor converts at once still passes through its stomach, which is then filled to this level while an attacker feeds the digestor.
+    __device__ float constexpr FeedingStomachFilling = 0.4f;
+
+    // The stomach fills with the first time constant and empties with the second one
+    __device__ float constexpr StomachFillingTimesteps = 20.0f;
+    __device__ float constexpr StomachEmptyingTimesteps = 300.0f;
+
     // The outlines of solids follow the lattice of their particles in steps. Where an outline changes between bending outwards and inwards, its
     // particles are rendered closer to the middle of their neighbors on the outline. Outlines that bend in one direction only, such as those of
     // small round solids, keep their shape.
@@ -154,24 +165,89 @@ namespace
             && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
     }
 
-    // Only visible cells are updated, hence the elapsed simulation time is measured per cell. Paused simulations keep their rendered activity.
-    __device__ __inline__ void updateRenderedActivity(Cell& cell, uint64_t timestep)
+    __device__ __inline__ uint8_t approach(uint8_t value, uint8_t target, int elapsedTimesteps, float responseTimesteps)
     {
+        auto current = toInt(value);
+        auto targetValue = toInt(target);
+        auto result = targetValue + toInt(roundf(toFloat(current - targetValue) * expf(-toFloat(elapsedTimesteps) / responseTimesteps)));
+
+        // Differences below one step of the 8 bit value would otherwise remain forever
+        if (result == current && current != targetValue) {
+            result += current < targetValue ? 1 : -1;
+        }
+        return static_cast<uint8_t>(result);
+    }
+
+    __device__ __inline__ uint8_t getStomachTarget(Object* object)
+    {
+        auto const& cell = object->typeData.cell;
+        if (cell.cellType != CellType_Digestor || cell.foodColor == NoFoodColor) {
+            return 0;
+        }
+        auto filling = cell.rawEnergy * toFloat(cell.foodShare) / 255.0f / SimulationParameters::maxRawEnergyThresholdForConduction;
+        for (int i = 0; i < object->numConnections; ++i) {
+            auto const& connectedObject = object->connections[i].object;
+            if (connectedObject->type != ObjectType_Cell) {
+                continue;
+            }
+            auto const& connectedCell = connectedObject->typeData.cell;
+            if (connectedCell.cellType == CellType_Attacker && connectedCell.event == CellEvent_Attacking && connectedCell.eventCounter > 0
+                && connectedCell.foodColor != NoFoodColor) {
+                filling = max(filling, FeedingStomachFilling);
+            }
+        }
+        return static_cast<uint8_t>(min(max(filling, 0.0f), 1.0f) * 255.0f + 0.5f);
+    }
+
+    // Only visible cells are updated, hence the elapsed simulation time is measured per cell. Paused simulations keep their rendered values.
+    __device__ __inline__ void updateRenderedValues(Object* object, uint64_t timestep)
+    {
+        auto& cell = object->typeData.cell;
         auto timestepBits = static_cast<uint16_t>(timestep);
-        auto elapsedTimesteps = static_cast<uint16_t>(timestepBits - cell.renderedActivityTimestep);
+        auto elapsedTimesteps = static_cast<uint16_t>(timestepBits - cell.renderedTimestep);
         if (elapsedTimesteps == 0) {
             return;
         }
-        cell.renderedActivityTimestep = timestepBits;
-        auto activity = toInt(cell.renderedActivity);
-        auto target = toInt(cell.getRenderedActivityTarget());
-        auto newActivity = target + toInt(roundf(toFloat(activity - target) * expf(-toFloat(elapsedTimesteps) / ActivityResponseTimesteps)));
+        cell.renderedTimestep = timestepBits;
+        cell.renderedActivity = approach(cell.renderedActivity, cell.getRenderedActivityTarget(), elapsedTimesteps, ActivityResponseTimesteps);
+        cell.renderedDigestion = approach(cell.renderedDigestion, cell.getRenderedDigestionTarget(), elapsedTimesteps, DigestionResponseTimesteps);
+        auto stomachTarget = getStomachTarget(object);
+        auto stomachResponseTimesteps = stomachTarget > cell.renderedStomach ? StomachFillingTimesteps : StomachEmptyingTimesteps;
+        cell.renderedStomach = approach(cell.renderedStomach, stomachTarget, elapsedTimesteps, stomachResponseTimesteps);
+    }
 
-        // Differences below one step of the 8 bit activity would otherwise remain forever
-        if (newActivity == activity && activity != target) {
-            newActivity += activity < target ? 1 : -1;
+    // Colors of the food in the layout of the vertex data, the customization colors of the prey
+    __device__ __inline__ uint32_t getFoodColor(uint8_t colorCode)
+    {
+        auto coloring = cudaSimulationParameters.objectColoring.value[calcMod(colorCode, MAX_COLORS)];
+        auto color = coloring == CellColoring_None ? 0x7f7f7fu : getCustomizationColor(colorCode);
+        return ((color >> 16) & 0xff) | (color & 0xff00) | ((color & 0xff) << 16);
+    }
+
+    // An attacker holds food while it feeds, a digestor while its stomach is filled, see getStomachTarget
+    __device__ __inline__ uint32_t getFood(Cell const& cell)
+    {
+        if (cell.foodColor == NoFoodColor) {
+            return 0;
         }
-        cell.renderedActivity = static_cast<uint8_t>(newActivity);
+        auto amount = 0.0f;
+        if (cell.cellType == CellType_Attacker && cell.event == CellEvent_Attacking) {
+            amount = toFloat(cell.eventCounter) / toFloat(AttackingEventDuration);
+        } else if (cell.cellType == CellType_Digestor) {
+            amount = toFloat(cell.renderedStomach) / 255.0f;
+        }
+        auto amountBits = static_cast<uint32_t>(min(max(amount, 0.0f), 1.0f) * 255.0f + 0.5f);
+        return amountBits > 0 ? (amountBits << 24) | getFoodColor(cell.foodColor) : 0;
+    }
+
+    // Random number in [0, 1] that stays with an object
+    __device__ __inline__ float getRandomValue(uint64_t id)
+    {
+        uint64_t hash = id * 2654435761u;  // Knuth's multiplicative hash
+        hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
+        hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
+        hash = hash ^ (hash >> 16);
+        return toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
     }
 }
 
@@ -198,13 +274,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             }
 
             // Calculate deterministic z-position based on cell id for lighting
-            // Use a simple hash function to get a pseudo-random value in range [0, 1]
-            uint64_t hash = object->id * 2654435761u;  // Knuth's multiplicative hash
-            hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
-            hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
-            hash = hash ^ (hash >> 16);
-            float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
-            float zPos = normalizedHash * 0.05f;
+            float zPos = getRandomValue(object->id) * 0.05f;
 
             objectData[idx].pos[0] = pos.x;
             objectData[idx].pos[1] = pos.y;
@@ -214,20 +284,28 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             objectData[idx].color[1] = color.y;
             objectData[idx].color[2] = color.z;
 
-            // Compute highlight intensity and activity from cell
+            // Compute highlight intensity, activity, digestion and food from cell
             float highlightIntensity = 0.0f;
             float activity = 0.0f;
+            float digestion = 0.0f;
+            uint32_t food = 0;
             if (object->type == ObjectType_Cell) {
                 auto& cell = object->typeData.cell;
                 highlightIntensity = toFloat(cell.highlightIntensity) / 255.0f;
-                updateRenderedActivity(cell, *data.timestep);
+                updateRenderedValues(object, *data.timestep);
                 activity = toFloat(cell.renderedActivity) / 255.0f;
+                digestion = toFloat(cell.renderedDigestion) / 255.0f;
+                food = getFood(cell);
+            } else if (object->type == ObjectType_FreeCell && object->typeData.freeCell.event == CellEvent_Attacked) {
+                digestion = toFloat(object->typeData.freeCell.eventCounter) / toFloat(AttackedEventDuration);
             }
 
             // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolatedOrTail (bit 16) into state field
             objectData[idx].state = cellType | (object->type << 8) | (isIsolatedOrTail << 16);
             objectData[idx].highlightIntensity = highlightIntensity;
             objectData[idx].activity = activity;
+            objectData[idx].digestion = digestion;
+            objectData[idx].food = food;
 
             object->tempValue1.as_uint64 = idx;
         }
@@ -833,25 +911,23 @@ cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEve
 
             // Check if the attacker position is close enough to draw
             if (Math::length(eventPos - object->pos) < 10.0f) {
-                // Add attack event line data (2 vertices for the line: from attacker to attacked)
+                // Two vertices, from the attacker to the attacked object, which lends its color to the food flowing to the attacker
                 uint64_t vertexIndex = alienAtomicAdd64(numAttackEventVertices, uint64_t(2));
                 if (attackEventData != nullptr) {
-                    // Red color for attacked event
-                    float redColor[3] = {0.5f, 0.0f, 0.0f};
-
-                    // First vertex (attacker position - from eventPos)
-                    attackEventData[vertexIndex].pos[0] = eventPos.x;
-                    attackEventData[vertexIndex].pos[1] = eventPos.y;
-                    attackEventData[vertexIndex].color[0] = redColor[0];
-                    attackEventData[vertexIndex].color[1] = redColor[1];
-                    attackEventData[vertexIndex].color[2] = redColor[2];
-
-                    // Second vertex (attacked cell position)
-                    attackEventData[vertexIndex + 1].pos[0] = object->pos.x;
-                    attackEventData[vertexIndex + 1].pos[1] = object->pos.y;
-                    attackEventData[vertexIndex + 1].color[0] = redColor[0];
-                    attackEventData[vertexIndex + 1].color[1] = redColor[1];
-                    attackEventData[vertexIndex + 1].color[2] = redColor[2];
+                    auto color = getVertexColor(object);
+                    auto intensity = toFloat(eventCounter) / toFloat(AttackedEventDuration);
+                    auto seed = getRandomValue(object->id);
+                    auto writeVertex = [&](AttackEventVertexData& vertex, float2 const& pos) {
+                        vertex.pos[0] = pos.x;
+                        vertex.pos[1] = pos.y;
+                        vertex.color[0] = color.x;
+                        vertex.color[1] = color.y;
+                        vertex.color[2] = color.z;
+                        vertex.intensity = intensity;
+                        vertex.seed = seed;
+                    };
+                    writeVertex(attackEventData[vertexIndex], eventPos);
+                    writeVertex(attackEventData[vertexIndex + 1], object->pos);
                 }
             }
         }

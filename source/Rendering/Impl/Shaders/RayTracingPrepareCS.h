@@ -10,12 +10,17 @@ namespace Shaders
     // other, while the occlusion of the gas grid adds up as if the objects lay independently of each other. With them, the creatures would
     // shade the far part of the beams several times as much as the ray query sees them shade the near part. The spheres alone come close to it.
     std::string_view const RayTracingPrepareCS = R"(
+// A cell being digested by an attacker pales and loses brightness
+const float DigestionPaling = 0.35;
+const float DigestionDimming = 0.15;
+
 Sphere createSphere(uint index)
 {
     ObjectVertex object = objects[index];
     int objectType = getObjectType(object);
     vec3 color = vec3(object.color[0], object.color[1], object.color[2]);
     vec3 hue = getHue(color);
+    hue = mix(hue, vec3(luminance(hue)), DigestionPaling * object.digestion);
 
     float radius = CellRadius;
     float material = Material_Tissue;
@@ -34,8 +39,9 @@ Sphere createSphere(uint index)
     Sphere result;
     result.centerRadius = vec4(object.pos[0], object.pos[1], 0.0, radius);
     result.hueMaterial = vec4(hue, material);
-    result.details = vec4(getBrightness(color), seed, float((object.state >> 16) & 1), 0.0);
-    result.neuron = vec4(objectType == ObjectType_Cell ? 1.0 : 0.0, object.activity, 0.0, 0.0);
+    result.details = vec4(getBrightness(color) * (1.0 - DigestionDimming * object.digestion), seed, float((object.state >> 16) & 1), object.digestion);
+    result.neuron = vec4(objectType == ObjectType_Cell ? 1.0 : 0.0, object.activity, float(object.state & 0xff), 0.0);
+    result.food = unpackUnorm4x8(object.food);
     return result;
 }
 

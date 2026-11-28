@@ -46,6 +46,9 @@ namespace
     // Threads that share the work of a node of the irradiance grids, so that its light clusters and its rays to the radiation sources are
     // handled in parallel, see Shaders/RayTracingGasIrradianceCS.h. They lie in one subgroup, see VulkanContext.cpp.
     auto constexpr ThreadsPerIrradianceNode = 16;
+
+    // The animations of the food have periods of powers of two time steps. Their time remains an exact float.
+    auto constexpr AnimationPeriod = uint64_t(1) << 16;
 }
 
 void SimulationRenderer::setup(ImFont* labelFont)
@@ -101,6 +104,11 @@ float SimulationRenderer::getSolidDetailVisibility(RenderView const& view)
 {
     auto fraction = std::clamp((view.getScreenZoomFactor() - SolidDetailZoomStart) / (SolidDetailZoomEnd - SolidDetailZoomStart), 0.0f, 1.0f);
     return fraction * fraction * (3.0f - 2.0f * fraction);
+}
+
+float SimulationRenderer::getAnimationTimestep(SimulationFacade const& simulationFacade)
+{
+    return toFloat(simulationFacade->getCurrentTimestep() % AnimationPeriod);
 }
 
 PictureData SimulationRenderer::renderPictureInternal(RenderView const& view)
@@ -447,7 +455,7 @@ namespace
         Coverage
     };
 
-    // Connections, polygons, cells and attack events of the rasterized view on a black layer
+    // Connections, polygons and cells of the rasterized view on a black layer
     RenderSequence createObjectSequence(float solidBrightness, float cellBrightness, MetaballDensity density)
     {
         auto coverageDensity = density == MetaballDensity::Coverage;
@@ -468,7 +476,6 @@ namespace
                                                   .addUniform("solidBrightness", solidBrightness)
                                                   .addUniform("cellBrightness", cellBrightness)
                                                   .previousTargetSelection(0)),
-            _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
             createModuloCopyStep(),
             createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
             createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
@@ -733,6 +740,26 @@ void SimulationRenderer::createRasterGraph(ImFont* labelFont)
                         StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).uniformFunc(getObjectMergeUniforms)),
                 }),
             },
+
+            // Render block: Two outputs: The morsels of the attack events and the scene. The morsels are not processed like the objects, whose
+            // blur would wipe them out.
+            RenderBlock{
+                RenderSequence().steps({
+                    _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent)),
+                    createModuloCopyStep(),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+                }),
+            },
+
+            // Render block: Add the morsels to the scene
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
+                }),
+            },
         });
     append(blocks, createDetonationAndBloomBlocks());
     append(blocks, createToneMappingAndBackgroundBlocks(labelFont));
@@ -955,16 +982,13 @@ void SimulationRenderer::createRayTracingGraph(ImFont* labelFont)
                 }),
             },
 
-            // Render block: Four outputs: Ray tracing of the objects on the ground, its attack events softened as in the rasterized view, the
-            // rasterized objects, which replace the ray tracing when zoomed out, and the ground, which they absorb like the tissue
+            // Render block: Four outputs: Ray tracing of the objects on the ground, the morsels of its attack events, the rasterized objects,
+            // which replace the ray tracing when zoomed out, and the ground, which they absorb like the tissue
             RenderBlock{
                 createRayTracingSequence(_rayTracingResources),
                 RenderSequence().steps({
                     _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent)),
                     createModuloCopyStep(),
-                    createBlurStep(ShaderSources::BlurHorizontal, StepParameters().addUniform("strength", 0.1f)),
-                    createBlurStep(ShaderSources::BlurVertical, StepParameters().addUniform("strength", 0.1f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
                 }),
                 createObjectSequence(RayTracedSolidBrightness, RayTracedCellBrightness, MetaballDensity::Coverage),
                 RenderSequence().steps({

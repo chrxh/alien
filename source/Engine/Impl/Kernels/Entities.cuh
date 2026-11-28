@@ -521,6 +521,13 @@ struct Fluid
     float glow;
 };
 
+// Durations of the attack events in cell function passes. The attacked object remembers the position of its attacker for this long.
+auto constexpr AttackedEventDuration = 10;
+auto constexpr AttackingEventDuration = 6;
+
+// Cells without food from prey
+auto constexpr NoFoodColor = static_cast<uint8_t>(0xff);
+
 struct FreeCell
 {
     float energy;
@@ -551,6 +558,10 @@ struct Cell
     uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
     bool headCell;
     bool constructorAvailable;  // If true, constructor holds valid data
+
+    // Rendering data in padding bytes, updated without atomics: color of the prey and its share of the raw energy
+    uint8_t foodColor;
+    uint8_t foodShare;
     CellType cellType;
 
     Creature* creature;
@@ -563,8 +574,10 @@ struct Cell
     CellEvent event;
     uint8_t eventCounter;
     uint8_t highlightIntensity;
-    uint8_t renderedActivity;           // Rendering data in the padding before eventPos, see updateRenderedActivity in GeometryKernels.cu
-    uint16_t renderedActivityTimestep;  // Lower bits of the timestep of the last update of the rendered activity
+    uint8_t renderedActivity;   // Rendering data in the padding before eventPos
+    uint16_t renderedTimestep;  // Lower bits of the timestep of the last update of the rendered values
+    uint8_t renderedDigestion;
+    uint8_t renderedStomach;
     float2 eventPos;
 
     // Cell type data
@@ -595,10 +608,31 @@ struct Cell
         return static_cast<uint8_t>(min(max(neuralActivity.signals[0] / 2.0f, 0.0f), 1.0f) * 255.0f + 0.5f);
     }
 
-    __device__ __inline__ void initRenderedActivity()
+    // A cell is being digested while an attacker draws energy from it, and less so while the event fades out
+    __device__ __inline__ uint8_t getRenderedDigestionTarget() const
+    {
+        if (event != CellEvent_Attacked) {
+            return 0;
+        }
+        return static_cast<uint8_t>(min(eventCounter * 255 / AttackedEventDuration, 255));
+    }
+
+    // Updates the share of prey in the raw energy after an inflow of raw energy, which has its own share of prey
+    __device__ __inline__ void mixFoodShare(float origRawEnergy, float inflow, float inflowShare)
+    {
+        auto rawEnergy = max(origRawEnergy, 0.0f);
+        auto share = (rawEnergy * toFloat(foodShare) / 255.0f + inflow * inflowShare) / max(rawEnergy + inflow, NEAR_ZERO);
+        foodShare = static_cast<uint8_t>(min(max(share, 0.0f), 1.0f) * 255.0f + 0.5f);
+    }
+
+    __device__ __inline__ void initRenderingData()
     {
         renderedActivity = getRenderedActivityTarget();
-        renderedActivityTimestep = 0;
+        renderedDigestion = getRenderedDigestionTarget();
+        renderedStomach = 0;
+        renderedTimestep = 0;
+        foodColor = NoFoodColor;
+        foodShare = 0;
     }
 };
 

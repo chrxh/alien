@@ -38,6 +38,9 @@ public:
     // Zoomed out, connected solids appear as smooth areas, close up the structure of their particles becomes visible
     static float getSolidDetailVisibility(RenderView const& view);
 
+    // Time step that drives the animations of the food. It repeats with a period that the periods of all these animations divide.
+    static float getAnimationTimestep(SimulationFacade const& simulationFacade);
+
 private:
     void createRasterGraph(ImFont* labelFont);
     void createRayTracingGraph(ImFont* labelFont);

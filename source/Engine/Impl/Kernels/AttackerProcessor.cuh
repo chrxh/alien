@@ -54,6 +54,17 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto creatureIdPart = static_cast<uint16_t>(cell->creature->id & 0xffff);
 
         auto sumEnergyToTransfer = 0.0f;
+
+        // The prey that yields the most energy colors the food of the attacker
+        auto foodColor = NoFoodColor;
+        auto maxEnergyOfPrey = 0.0f;
+        auto addFood = [&](float energy, uint8_t color) {
+            sumEnergyToTransfer += energy;
+            if (energy > maxEnergyOfPrey) {
+                maxEnergyOfPrey = energy;
+                foodColor = color;
+            }
+        };
         data.objectGrid.executeForEach(
             object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
                 if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
@@ -97,13 +108,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     if (energyToTransfer > NEAR_ZERO) {
                         otherFreeCell->event = CellEvent_Attacked;
-                        otherFreeCell->eventCounter = 10;
+                        otherFreeCell->eventCounter = AttackedEventDuration;
                         otherFreeCell->eventPos = object->pos;
 
                         // Absorb energy from attacked cell
                         auto origEnergy = atomicAdd(&otherFreeCell->energy, -energyToTransfer);
                         if (origEnergy > energyToTransfer) {
-                            sumEnergyToTransfer += energyToTransfer;
+                            addFood(energyToTransfer, otherObject->color);
                         }
 
                         // Revert
@@ -162,22 +173,24 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                         // Notify attacked cell
                         otherCell->event = CellEvent_Attacked;
-                        otherCell->eventCounter = 10;
+                        otherCell->eventCounter = AttackedEventDuration;
                         otherCell->eventPos = object->pos;
 
                         // Absorb energy from attacked cell
-                        sumEnergyToTransfer += absorbAttackableEnergy(otherCell, energyToTransfer);
+                        addFood(absorbAttackableEnergy(otherCell, energyToTransfer), otherObject->color);
                     }
                 }
             });
 
         // Energy gain
         if (sumEnergyToTransfer > NEAR_ZERO) {
-            atomicAdd(&cell->rawEnergy, sumEnergyToTransfer);
+            auto origRawEnergy = atomicAdd(&cell->rawEnergy, sumEnergyToTransfer);
+            cell->mixFoodShare(origRawEnergy, sumEnergyToTransfer, 1.0f);
             statistics.addAttackedEnergy(cell->creature->lineageId, sumEnergyToTransfer);
 
             cell->event = CellEvent_Attacking;
-            cell->eventCounter = 6;
+            cell->eventCounter = AttackingEventDuration;
+            cell->foodColor = foodColor;
         }
 
         // Radiation

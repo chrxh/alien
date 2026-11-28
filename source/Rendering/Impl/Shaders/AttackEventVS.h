@@ -8,25 +8,23 @@ namespace Shaders
 #version 450
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec3 aColor;
+layout (location = 2) in float aIntensity;
+layout (location = 3) in float aSeed;
 
 out vec3 vertexColor;
+out float vertexIntensity;
+out float vertexSeed;
 
-uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
 uniform float zoom;
-uniform vec2 viewportSize;
 
 void main()
 {
-    // Transform world position to screen coordinates
-    // Note: Transform to normalized device coordinates is done in geometry shader.
-    vec2 relativePos = aPos - rectUpperLeft;
-    vec2 screenPos = relativePos * zoom;
-    
-    gl_Position = vec4(screenPos, 0.0, 1.0);
-    
-    // Pass color to geometry shader
+    // The geometry shader transforms the screen position to normalized device coordinates
+    gl_Position = vec4((aPos - rectUpperLeft) * zoom, 0.0, 1.0);
     vertexColor = aColor;
+    vertexIntensity = aIntensity;
+    vertexSeed = aSeed;
 }
 )";
 }
