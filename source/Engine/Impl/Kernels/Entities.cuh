@@ -526,7 +526,11 @@ auto constexpr AttackedEventDuration = 10;
 auto constexpr AttackingEventDuration = 6;
 
 // Cells without food from prey
-auto constexpr NoFoodColor = static_cast<uint8_t>(0xff);
+auto constexpr NoFoodColor = static_cast<uint8_t>(15);
+
+// The food takes the color of other prey only once that prey clearly outweighs the prey of its color
+auto constexpr MaxFoodColorShare = 15;
+auto constexpr FoodColorHysteresis = 1.5f;
 
 struct FreeCell
 {
@@ -559,8 +563,9 @@ struct Cell
     bool headCell;
     bool constructorAvailable;  // If true, constructor holds valid data
 
-    // Rendering data in padding bytes, updated without atomics: color of the prey and its share of the raw energy
-    uint8_t foodColor;
+    // Rendering data in padding bytes, updated without atomics: color of the prey, its share of the prey and the share of prey in the raw energy
+    uint8_t foodColor : 4;
+    uint8_t foodColorShare : 4;
     uint8_t foodShare;
     CellType cellType;
 
@@ -617,12 +622,36 @@ struct Cell
         return static_cast<uint8_t>(min(eventCounter * 255 / AttackedEventDuration, 255));
     }
 
-    // Updates the share of prey in the raw energy after an inflow of raw energy, which has its own share of prey
-    __device__ __inline__ void mixFoodShare(float origRawEnergy, float inflow, float inflowShare)
+    // Mixes an inflow of raw energy, which has its own share of prey in one color, into the food
+    __device__ __inline__ void mixFood(float origRawEnergy, float inflow, float inflowShare, uint8_t inflowColor)
     {
         auto rawEnergy = max(origRawEnergy, 0.0f);
-        auto share = (rawEnergy * toFloat(foodShare) / 255.0f + inflow * inflowShare) / max(rawEnergy + inflow, NEAR_ZERO);
-        foodShare = static_cast<uint8_t>(min(max(share, 0.0f), 1.0f) * 255.0f + 0.5f);
+        auto preyEnergy = rawEnergy * toFloat(foodShare) / 255.0f;
+        auto inflowPreyEnergy = inflowColor != NoFoodColor ? inflow * inflowShare : 0.0f;
+
+        // Shares are rounded stochastically, so that small inflows into a lot of food still shift them on average
+        auto dither = toFloat(((__float_as_uint(origRawEnergy) * 2654435761u ^ __float_as_uint(inflow)) * 2246822519u) >> 8) / 16777216.0f;
+
+        if (inflowPreyEnergy > NEAR_ZERO) {
+            auto colorEnergy = foodColor != NoFoodColor ? preyEnergy * toFloat(foodColorShare) / toFloat(MaxFoodColorShare) : 0.0f;
+            auto otherEnergy = preyEnergy - colorEnergy;
+            if (inflowColor == foodColor) {
+                colorEnergy += inflowPreyEnergy;
+            } else {
+                otherEnergy += inflowPreyEnergy;
+            }
+            if (otherEnergy > colorEnergy * FoodColorHysteresis) {
+                foodColor = inflowColor;
+                colorEnergy = otherEnergy;
+            }
+            foodColorShare = toQuantizedShare(colorEnergy / (preyEnergy + inflowPreyEnergy), MaxFoodColorShare, dither);
+        }
+        foodShare = toQuantizedShare((preyEnergy + inflowPreyEnergy) / max(rawEnergy + inflow, NEAR_ZERO), 255, dither);
+    }
+
+    __device__ __inline__ static uint8_t toQuantizedShare(float share, int maxValue, float dither)
+    {
+        return static_cast<uint8_t>(min(max(share, 0.0f), 1.0f) * toFloat(maxValue) + dither);
     }
 
     __device__ __inline__ void initRenderingData()
@@ -632,6 +661,7 @@ struct Cell
         renderedStomach = 0;
         renderedTimestep = 0;
         foodColor = NoFoodColor;
+        foodColorShare = 0;
         foodShare = 0;
     }
 };
