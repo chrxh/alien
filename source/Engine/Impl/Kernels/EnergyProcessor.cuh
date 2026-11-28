@@ -7,6 +7,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "EntityFactory.cuh"
+#include "FoodHelper.cuh"
 #include "ParameterCalculator.cuh"
 
 namespace cg = cooperative_groups;
@@ -318,7 +319,7 @@ __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& dat
             auto& cell = object->typeData.cell;
 
             // Absorbed energy is no food from prey
-            cell.mixFood(cell.rawEnergy, energyToTransfer, 0.0f, NoFoodColor);
+            FoodHelper::mixFood(cell, cell.rawEnergy, energyToTransfer, 0.0f, NoFoodColor);
             cell.rawEnergy += energyToTransfer;
         } else {
             object->typeData.freeCell.energy += energyToTransfer;
