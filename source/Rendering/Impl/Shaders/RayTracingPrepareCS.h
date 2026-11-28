@@ -10,7 +10,7 @@ namespace Shaders
     // other, while the occlusion of the gas grid adds up as if the objects lay independently of each other. With them, the creatures would
     // shade the far part of the beams several times as much as the ray query sees them shade the near part. The spheres alone come close to it.
     std::string_view const RayTracingPrepareCS = R"(
-// A cell being digested by an attacker pales and loses brightness, see Shaders/RayTracingTissueCS.h
+// A cell being digested by an attacker pales and loses brightness
 const float DigestionPaling = 0.35;
 const float DigestionDimming = 0.15;
 

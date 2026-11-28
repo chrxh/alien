@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    // A morsel is a torn off piece of tissue with a ragged outline, some grain and a faint halo, see Shaders/AttackEventGS.h
+    // A morsel is a torn off piece of tissue with a ragged outline, some grain and a faint halo
     std::string_view const AttackEventFS = R"(
 #version 450
 in vec3 morselLight;

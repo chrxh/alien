@@ -317,7 +317,7 @@ __inline__ __device__ void EnergyProcessor::absorbIntoObject(SimulationData& dat
         if (object->type == ObjectType_Cell) {
             auto& cell = object->typeData.cell;
 
-            // Absorbed energy is no food from prey, see Cell::foodShare
+            // Absorbed energy is no food from prey
             cell.mixFoodShare(cell.rawEnergy, energyToTransfer, 0.0f);
             cell.rawEnergy += energyToTransfer;
         } else {

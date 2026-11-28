@@ -98,7 +98,7 @@ void main()
         float phase = timestep / MorselTravelTimesteps + seed + float(k) / float(MorselsPerAttack);
         float progress = fract(phase);
 
-        // The time step repeats after this number of cycles, see SimulationRenderer::getAnimationTimestep
+        // The time step repeats after this number of cycles
         float cycle = mod(floor(phase), 1024.0);
         float eased = 0.6 * progress * progress * (3.0 - 2.0 * progress) + 0.4 * progress;
 

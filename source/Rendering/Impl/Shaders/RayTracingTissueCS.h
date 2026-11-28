@@ -497,7 +497,7 @@ void addDendrite(inout Dendrites dendrites, uint cellIndex, Sphere cell, Sphere 
 // While an attacker feeds, it pinches off vesicles with the food of its prey on the side away from its digestors. They wander into the
 // digestors and merge with their vacuoles, which hold the raw energy from prey until it is digested and turn slowly. The food shows the hue
 // of the prey, its dark membrane and grains let it stand out even in a predator of the same color. Sizes are given in world units, times in
-// time steps, see SimulationRenderer::getAnimationTimestep.
+// time steps.
 const float VesicleRadius = 0.11;
 const float VesicleDeparture = 0.12;
 const float VesicleTravelTimesteps = 64.0;
@@ -508,8 +508,7 @@ const float FoodGlow = 0.45;
 const float FoodAbsorption = 0.85;
 const float FoodMembraneShade = 0.55;
 
-// Tissue being digested becomes translucent, loses its walls and organelles, curdles and frays, see Shaders/RayTracingPrepareCS.h for its
-// color
+// Tissue being digested becomes translucent, loses its walls and organelles, curdles and frays
 const float DigestionTranslucency = 0.33;
 const float DigestionOutlineFade = 0.24;
 const float DigestionWallFade = 0.42;

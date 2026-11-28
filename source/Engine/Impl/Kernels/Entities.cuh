@@ -559,9 +559,7 @@ struct Cell
     bool headCell;
     bool constructorAvailable;  // If true, constructor holds valid data
 
-    // Rendering data in the padding before cellType: the color of the prey whose energy an attacker gained last or a digestor holds, and the
-    // share of the raw energy that comes from prey, see getFood in GeometryKernels.cu. Both are updated without atomics, since a lost update
-    // only shifts the rendering a little.
+    // Rendering data in padding bytes, updated without atomics: color of the prey and its share of the raw energy
     uint8_t foodColor;
     uint8_t foodShare;
     CellType cellType;
@@ -576,7 +574,7 @@ struct Cell
     CellEvent event;
     uint8_t eventCounter;
     uint8_t highlightIntensity;
-    uint8_t renderedActivity;   // Rendering data in the padding before eventPos, see updateRenderedValues in GeometryKernels.cu
+    uint8_t renderedActivity;   // Rendering data in the padding before eventPos
     uint16_t renderedTimestep;  // Lower bits of the timestep of the last update of the rendered values
     uint8_t renderedDigestion;
     uint8_t renderedStomach;
