@@ -3,6 +3,7 @@
 #include <Data/CellTypeConstants.h>
 #include <Data/SimulationParameters.h>
 
+#include "FoodHelper.cuh"
 #include "NeuronProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
@@ -185,12 +186,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         // Energy gain
         if (sumEnergyToTransfer > NEAR_ZERO) {
             auto origRawEnergy = atomicAdd(&cell->rawEnergy, sumEnergyToTransfer);
-            cell->mixFoodShare(origRawEnergy, sumEnergyToTransfer, 1.0f);
+            FoodHelper::mixFood(*cell, origRawEnergy, sumEnergyToTransfer, 1.0f, foodColor);
             statistics.addAttackedEnergy(cell->creature->lineageId, sumEnergyToTransfer);
 
             cell->event = CellEvent_Attacking;
             cell->eventCounter = AttackingEventDuration;
-            cell->foodColor = foodColor;
         }
 
         // Radiation

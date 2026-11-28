@@ -35,6 +35,7 @@ add_library(EngineKernels
     Entities.cu
     Entities.cuh
     EntityFactory.cuh
+    FoodHelper.cuh
     ForceFieldKernels.cu
     ForceFieldKernels.cuh
     GarbageCollectorKernels.cu

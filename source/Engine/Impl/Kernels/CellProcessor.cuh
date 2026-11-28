@@ -3,6 +3,7 @@
 #include <Data/CellTypeConstants.h>
 
 #include "ConstructorHelper.cuh"
+#include "FoodHelper.cuh"
 #include "MuscleProcessor.cuh"
 
 class CellProcessor
@@ -402,12 +403,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
                     // The raw energy carries its share of prey into the digestor
                     if (flow > NEAR_ZERO) {
                         auto const& source = object->typeData.cell;
-                        auto& digestor = connectedObject->typeData.cell;
-                        auto sourceShare = source.foodColor != NoFoodColor ? toFloat(source.foodShare) / 255.0f : 0.0f;
-                        digestor.mixFoodShare(origConnected, flow, sourceShare);
-                        if (sourceShare > 0.0f) {
-                            digestor.foodColor = source.foodColor;
-                        }
+                        FoodHelper::mixFood(connectedObject->typeData.cell, origConnected, flow, toFloat(source.foodShare) / 255.0f, source.foodColor);
                     }
                 }
             }

@@ -526,7 +526,7 @@ auto constexpr AttackedEventDuration = 10;
 auto constexpr AttackingEventDuration = 6;
 
 // Cells without food from prey
-auto constexpr NoFoodColor = static_cast<uint8_t>(0xff);
+auto constexpr NoFoodColor = static_cast<uint8_t>(15);
 
 struct FreeCell
 {
@@ -559,8 +559,9 @@ struct Cell
     bool headCell;
     bool constructorAvailable;  // If true, constructor holds valid data
 
-    // Rendering data in padding bytes, updated without atomics: color of the prey and its share of the raw energy
-    uint8_t foodColor;
+    // Rendering data in padding bytes, updated without atomics: color of the prey, its share of the prey and the share of prey in the raw energy
+    uint8_t foodColor : 4;
+    uint8_t foodColorShare : 4;
     uint8_t foodShare;
     CellType cellType;
 
@@ -617,14 +618,6 @@ struct Cell
         return static_cast<uint8_t>(min(eventCounter * 255 / AttackedEventDuration, 255));
     }
 
-    // Updates the share of prey in the raw energy after an inflow of raw energy, which has its own share of prey
-    __device__ __inline__ void mixFoodShare(float origRawEnergy, float inflow, float inflowShare)
-    {
-        auto rawEnergy = max(origRawEnergy, 0.0f);
-        auto share = (rawEnergy * toFloat(foodShare) / 255.0f + inflow * inflowShare) / max(rawEnergy + inflow, NEAR_ZERO);
-        foodShare = static_cast<uint8_t>(min(max(share, 0.0f), 1.0f) * 255.0f + 0.5f);
-    }
-
     __device__ __inline__ void initRenderingData()
     {
         renderedActivity = getRenderedActivityTarget();
@@ -632,6 +625,7 @@ struct Cell
         renderedStomach = 0;
         renderedTimestep = 0;
         foodColor = NoFoodColor;
+        foodColorShare = 0;
         foodShare = 0;
     }
 };
