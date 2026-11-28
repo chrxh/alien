@@ -13,6 +13,11 @@
 #include "AlienGui.h"
 #include "StyleService.h"
 
+namespace
+{
+    auto constexpr WindowId = "###GenericMessageDialog";
+}
+
 void GenericMessageDialog::processIntern()
 {
     switch (_dialogType) {
@@ -35,7 +40,7 @@ void GenericMessageDialog::information(std::string const& title, std::string con
     log(Priority::Important, "message dialog showing: '" + message + "'");
 
     AlienDialog::open();
-    changeTitle(title);
+    changeTitle(title + WindowId);
 }
 
 void GenericMessageDialog::information(std::string const& title, std::vector<PersisterErrorInfo> const& errors)
@@ -74,7 +79,7 @@ void GenericMessageDialog::yesNo(std::string const& title, std::string const& me
     _execFunction = yesFunction;
 
     AlienDialog::open();
-    changeTitle(title);
+    changeTitle(title + WindowId);
 }
 
 GenericMessageDialog::GenericMessageDialog()
