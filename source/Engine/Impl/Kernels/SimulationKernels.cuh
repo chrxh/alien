@@ -30,6 +30,7 @@ __global__ void cudaNextTimestep_geneGraph_removeUnreachableGenesFromRoot(Simula
 __global__ void cudaNextTimestep_geneGraph_limitGenesWithSeparation(SimulationData data);
 __global__ void cudaNextTimestep_geneGraph_updateTransitiveNumCells(SimulationData data);
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_attacker_prepare(SimulationData data);
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_defender(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_depot(SimulationData data, SimulationStatistics statistics);
@@ -39,6 +40,8 @@ __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, Simul
 __global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_communicator_prepare(SimulationData data);
+__global__ void cudaNextTimestep_cellType_communicator_selectTargets(SimulationData data);
 __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_void(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data);

@@ -75,13 +75,14 @@ The channels have no fixed meaning by themselves. They get their meaning from th
 
 | Channel | Written by |
 | --- | --- |
-| #0 | Sensor (found), Generator (value) |
+| #0 | Sensor (found), Generator (value), Communicator receiver (received) |
 | #1 | Sensor (angle), Injector (success), Communicator receiver (angle) |
-| #2 | Sensor (mass), Attacker (success), Reconnector (success) |
-| #3 | Sensor (distance) |
-| #4 | Constructor (success) |
+| #2 | Sensor (mass), Attacker (success), Reconnector (success), Communicator receiver (freshness) |
+| #3 | Sensor (distance), Communicator receiver (distance) |
+| #4 | Constructor (success), Communicator receiver (message) |
+| #5 to #7 | Communicator receiver (message) |
 
-Memory cells and communicators can write all channels. The complete list is in [Cell types](cell-types.md#how-cell-types-work).
+Memory cells can write all channels. The complete list is in [Cell types](cell-types.md#how-cell-types-work).
 
 ## The neural network editor
 

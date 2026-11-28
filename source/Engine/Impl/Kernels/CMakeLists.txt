@@ -79,6 +79,7 @@ add_library(EngineKernels
     SolidGrid.cuh
     StatisticsKernels.cu
     StatisticsKernels.cuh
+    TargetProcessor.cuh
     TestKernels.cu
     TestKernels.cuh
     TOs.cuh

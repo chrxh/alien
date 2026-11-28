@@ -190,6 +190,7 @@ Meta-mutations change the mutation rates stored in genomes whose **Apply meta-mu
 | Same lineage protection | 0 | Reduction of the stolen energy if the target belongs to the same lineage. Per color. |
 | Size protection | 0 | Reduction of the stolen energy if the target creature has more cells than the attacking creature. Can be overridden by layers. |
 | Attack radius | 2 | Maximum distance of an attack. Per color. |
+| Pack size | 1 | Number of creatures with an attacker cell of the same color within the attack radius of the target that are needed for the attacker to gain the full energy. Fewer gain only the corresponding fraction, the rest is released. Attacker cells of one creature that attack the same creature share the gain. Per color. |
 
 ## Cell type: Digestor
 

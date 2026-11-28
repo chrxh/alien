@@ -369,16 +369,37 @@ struct Memory
     SignalEntry* signalEntries;  // Pointer to SignalEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 
+// Sensor match that a sensor or receiver cell of a creature remembers
+struct Target
+{
+    float2 pos;
+    uint32_t timestep;        // Lower 32 bits of the time step of the sensor match
+    uint16_t cellIdPart;      // Lower 16 bits of the id of the sensor or receiver cell
+    uint16_t searchedColors;  // Colors that the sensor searches for
+};
+
 struct Sender
 {
+    // Fixed data
     uint8_t range;
     bool oneway;
+
+    // Process data, only valid within one cycle
+    bool hasTarget;
+    Target target;
 };
 
 struct Receiver
 {
+    // Fixed data
     uint16_t restrictToColors;  // Bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
+
+    // Process data
+    float targetAngleSignal;
+    float targetFreshness;  // Between 0 and 1, 0 = no target
+    float targetDistanceSignal;
+    float nearestSenderDistance;  // Only valid within one cycle
 };
 
 union CommunicatorModeData
@@ -434,6 +455,7 @@ struct SensorDetection
 {
     uint16_t creatureIdPart;  // Lower 16 bits of the id of the creature whose sensor detected the target creature
     uint16_t restrictToColors;
+    uint32_t numAttackerCells;
 };
 
 struct Creature
@@ -462,6 +484,10 @@ struct Creature
     SensorDetection* detectedBy;
     uint32_t numDetectedBy;
     uint32_t detectedByCapacity;
+    Target* targets;  // Only used if the creature has communicators
+    uint32_t numTargets;
+    uint32_t targetsCapacity;
+    bool hasCommunicators;
     int locked;
 
     __device__ __inline__ bool isSameLineage(Creature* other)
@@ -469,11 +495,15 @@ struct Creature
         return lineageId == other->lineageId;
     }
 
-    __device__ __inline__ void initDetectedBy()
+    __device__ __inline__ void initTemporaryData()
     {
         detectedBy = nullptr;
         numDetectedBy = 0;
         detectedByCapacity = 0;
+        targets = nullptr;
+        numTargets = 0;
+        targetsCapacity = 0;
+        hasCommunicators = false;
         locked = 0;
     }
 
@@ -485,6 +515,26 @@ struct Creature
             }
         }
         return false;
+    }
+
+    __device__ __inline__ SensorDetection* findDetectionBy(uint16_t creatureIdPart)
+    {
+        for (uint32_t i = 0; i < numDetectedBy; ++i) {
+            if (detectedBy[i].creatureIdPart == creatureIdPart) {
+                return &detectedBy[i];
+            }
+        }
+        return nullptr;
+    }
+
+    __device__ __inline__ Target* findTarget(uint16_t cellIdPart)
+    {
+        for (uint32_t i = 0; i < numTargets; ++i) {
+            if (targets[i].cellIdPart == cellIdPart) {
+                return &targets[i];
+            }
+        }
+        return nullptr;
     }
 
     __device__ __inline__ void getLock()
@@ -721,6 +771,7 @@ struct Object
     {
         while (1 == atomicExch(&locked, 1)) {
         }
+        __threadfence();
     }
 
     __device__ __inline__ bool tryLock()

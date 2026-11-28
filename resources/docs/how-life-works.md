@@ -83,7 +83,7 @@ Dying cells disintegrate over time and release their energy as energy particles.
 | [Detonator](cell-types.md#detonator) | Explodes after a countdown. |
 | [Digestor](cell-types.md#digestor) | Converts raw energy into usable energy. |
 | [Memory](cell-types.md#memory) | Delays, records, stores or smooths signals. |
-| [Communicator](cell-types.md#communicator) | Exchanges signals with other creatures. |
+| [Communicator](cell-types.md#communicator) | Exchanges messages and sensor matches with other creatures. |
 | [Void](cell-types.md#void) | A temporary placeholder that disappears after construction. |
 
 The ability to construct other cells is not a cell type of its own. Any cell except a void cell can additionally carry a [constructor](cell-types.md#constructor).

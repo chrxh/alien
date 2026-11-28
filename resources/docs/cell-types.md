@@ -10,7 +10,7 @@ Some general rules apply to all cell types:
 
 - Cells under construction stay inactive until the last cell of their gene is built, see [How construction works](#how-construction-works). Dying cells stay active until they disintegrate.
 - Many cell types act only when they are **triggered**. A cell is triggered when the absolute value of channel #0 is at least **0.1**. Some cell types additionally distinguish between positive and negative values.
-- Cell types that need a direction, such as sensors, muscles and communicators, use the **front direction** of the creature. It is defined in the genome and passed from the head cell to all other cells. Such cells only work once the front direction has reached them. The head cell sends it out every 100 time steps, so newly built cells can stay idle for up to about 100 time steps.
+- Cell types that need a direction, such as sensors, muscles and communicator receivers, use the **front direction** of the creature. It is defined in the genome and passed from the head cell to all other cells. Such cells only work once the front direction has reached them. The head cell sends it out every 100 time steps, so newly built cells can stay idle for up to about 100 time steps.
 - Channel values range from -2 to 2. Directions are encoded as a value between -1 and 1, which corresponds to an angle between -180 and 180 degrees relative to the front direction.
 - Energy that a cell type spends, for example for an attack, is not lost. It is emitted as energy particles next to the cell or at a radiation source. With a **Backflow** above 0, part of it can flow back into the external energy pool instead. See [Energy](energy.md#where-released-energy-goes).
 
@@ -28,7 +28,7 @@ Some general rules apply to all cell types:
 | [Detonator](#detonator) | #0 | | |
 | [Digestor](#digestor) | every cycle | | |
 | [Memory](#memory) | every cycle | #0 and all channels | selected channels |
-| [Communicator](#communicator) | #0 (sender) | all channels | all channels (receiver) |
+| [Communicator](#communicator) | #0 (sender) | #0, #4 to #7 (sender) | all channels (receiver) |
 | [Void](#void) | after construction | | |
 | [Constructor](#constructor) | interval or #0 | #0 | #4 |
 
@@ -79,7 +79,7 @@ A sensor scans the surroundings and reports the closest match. It is the eye of 
 | #2 (output) | Mass of the match. For energy particles: the total energy of the particles in a square of 8 by 8 units, divided by 64 and capped at 1. For free cells: the number of free cells in such a square divided by 64. For solids: always 1. For creatures: a value that grows with their size (0.5 for 30 cells, 0.75 for 60 cells, 1 for 120 cells or more). |
 | #3 (output) | Distance d of the match, encoded as 1 / (1 + d / 128): 1 means very close, 0.5 means 128 units, and the value approaches 0 for far matches. |
 
-Channels #1 to #3 are only written when something is found.
+Channels #1 to #3 are only written when something is found. Communicators can transmit the matches of sensors to other creatures, see [Communicator](#communicator).
 
 ### How scanning works
 
@@ -147,7 +147,7 @@ An attacker steals energy from free cells or from cells of other creatures. It i
 | Channel | Meaning |
 | --- | --- |
 | #0 (input) | Triggers an attack if the absolute value is at least 0.1. |
-| #2 (output) | Success: the stolen energy divided by 10, between 0 and 1. It is only written when the attacker is triggered and its raw energy is below 2. Otherwise the channel keeps the value of the neural network. |
+| #2 (output) | Success: the gained energy divided by 10, between 0 and 1. It is only written when the attacker is triggered and its raw energy is below 2. Otherwise the channel keeps the value of the neural network. |
 
 ### How attacks work
 
@@ -162,6 +162,8 @@ The amount of energy depends on several factors:
 - **Defender** cells in *Anti-attacker* mode reduce the amount if the target is such a defender or is directly connected to one, see [Defender](#defender).
 - **Same lineage protection** reduces attacks on related creatures and **Size protection** reduces attacks on larger creatures.
 
+**Pack size** rewards hunting in packs. It only applies to the *Creature* mode and counts the creatures that have an attacker cell of the attacker's color within the attack radius of the attacked cell. The attacking creature is included, the attacked creature is not. If there are fewer than the pack size, the target still loses the full amount, but the attacker gains only the corresponding fraction, for example half of it if one of two required creatures is missing. The rest is released as energy particles. Several attacker cells of the same creature count as one pack member, and those that attack the same creature share the gain. An attacker cell that attacks another creature keeps its full share.
+
 Each attack attempt costs the amount set by **Energy cost**. This energy is emitted as energy particles. An attacker does not attack if this would bring its usable energy below the minimum energy.
 
 ### Modes
@@ -171,7 +173,7 @@ Each attack attempt costs the amount set by **Energy cost**. This energy is emit
 | Free cell | Free cells, optionally restricted to colors. |
 | Creature | Cells of other creatures. Only creatures that a sensor of the same creature has detected and tagged in the current cycle are attacked, see **Tag for attackers** of the sensor. Within such a creature, only cells whose color is selected in **Restrict to colors** of at least one tagging sensor are attacked. A creature never attacks its own offspring. |
 
-**Parameters:** the *Cell type: Attacker* group with **Energy cost**, **Food chain color matrix**, **Attack strength**, **Same lineage protection**, **Size protection** and **Attack radius** (2 by default).
+**Parameters:** the *Cell type: Attacker* group with **Energy cost**, **Food chain color matrix**, **Attack strength**, **Same lineage protection**, **Size protection**, **Attack radius** (2 by default) and **Pack size** (1 by default, no effect).
 
 **Example:** A predator needs a sensor in *Detect creature* mode with **Tag for attackers** enabled, an attacker and a digestor connected to the attacker. The sensor has to scan in the same cycle in which the attacker is triggered, for example with **Auto trigger**. The sensor signal can trigger the attacker through channel #0.
 
@@ -363,30 +365,40 @@ A memory cell keeps signals over time. It can delay, record, store and smooth si
 
 ## Communicator
 
-A communicator exchanges signals between different creatures. It allows swarms, warnings and cooperation.
+A communicator exchanges information between different creatures. It allows swarms, warnings and cooperation.
 
-![A sender transmits its signal to receivers of other creatures within range](images/cell-communicator.png)
+![A sender transmits a message and a target to receivers of other creatures within range](images/cell-communicator.png)
+
+A sender transmits a message and a target. The **message** consists of four channels, and its meaning is entirely up to the neural networks. The **target** is something that a sensor has found. It can be passed on, but neural networks can neither invent nor change it.
 
 ### Signals
 
 | Channel | Meaning |
 | --- | --- |
 | #0 (input, sender) | Triggers a transmission if the absolute value is at least 0.1. |
-| all (sender) | All eight channels of the sender are transmitted. |
-| #1 | The direction of the information source. It is converted into the frame of reference of the receiver. |
-| #3 | The distance of the information source, encoded like a sensor distance. The receiver gets the direction from its own position to the source, and its distance is the distance of the sender plus the distance between sender and receiver. It is thus the length of the path the information has traveled and never smaller than the true distance. A value of 0 or less means infinitely far, then the receiver gets the same absolute direction. |
-| all (output, receiver) | The receiver takes over the channels of the sender, but only if the information source is at least as close as the one already described by its own channel #3, for example by its neural network or by an earlier sender in the same cycle. The closest source thus wins. Its neighbors read the channels in the next cycle. |
+| #4 to #7 (input, sender) | The message. |
+| #0 (output, receiver) | 1 if a target was taken over in this cycle, otherwise 0. |
+| #1 (output, receiver) | Direction of the target relative to the front direction, between -1 and 1. |
+| #2 (output, receiver) | Freshness of the target. It decreases evenly from 1 at the time of the sensor match to 0 after 1000 time steps. |
+| #3 (output, receiver) | Distance of the target, encoded like a sensor distance. |
+| #4 to #7 (output, receiver) | The message of the nearest sender. |
 
-Communication only takes place between different creatures, and both sides need a valid front direction.
+A receiver that knows no target does not write the channels #0 to #3, and without a message in the current cycle it does not write the channels #4 to #7. These channels keep the values of the neural network. Communication only takes place between different creatures, and the receiver needs a valid front direction.
 
-**Example:** A sensor detects prey, and its angle and distance reach a sender via the neural network. The receivers of other swarm members get direction and distance of the prey from their own position and pass them on with one-way senders. The whole swarm hunts the prey.
+### Targets
+
+Every sensor and every receiver of a creature remembers its last target for 1000 time steps. All sensor matches are targets except solids. A sender transmits the youngest target of the sensors and receivers of its creature that are at most 8 units away from it. If they know none, it transmits the youngest target of the whole creature.
+
+A receiver takes over a target if it is not older than the one that it remembers. The youngest target thus wins. The direction and the distance are measured at this moment from the position of the receiver. Afterwards they stay the same until the next takeover, and only the freshness decreases. A target keeps its position and its age when it is passed on, which is possible from the next cycle on. Targets are not saved with the simulation.
+
+**Example:** A sensor detects prey, and a sender of the same creature transmits it as a target. The receivers of other swarm members show the direction and the distance of the prey from their own position, and their senders pass the target on. The whole swarm hunts the prey, including the members that do not see it themselves.
 
 ### Modes
 
 | Mode | Properties |
 | --- | --- |
-| Send | **Range**: the radius in which receivers are addressed, at most 20. **One-way**: only receivers whose direction deviates by more than 100 degrees from the direction encoded in channel #1 are addressed, that is away from the information source. Every receiver is clearly farther away from the source than its sender, so relayed information always moves away from its source. |
-| Receive | **Restrict to colors** and **Restrict to lineage** select which senders are accepted. |
+| Send | **Range**: the radius in which receivers are addressed, at most 20. **One-way**: only receivers whose direction deviates by more than 100 degrees from the direction of the target are addressed, that is away from the target. Every receiver is clearly farther away from the target than its sender, so relayed information always moves away from its source. Without a target, all receivers in range are addressed. |
+| Receive | **Restrict to colors**: only targets of sensors that search exclusively for the selected colors are taken over. Energy particles have no color and are always accepted. Messages are not restricted. **Restrict to lineage**: only senders of the own or of a foreign lineage are accepted. |
 
 ## Void
 

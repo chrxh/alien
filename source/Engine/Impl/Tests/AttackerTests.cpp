@@ -58,6 +58,25 @@ protected:
     // A sensor only scans with a front angle
     CellDesc createSensorCell(SensorDesc const& sensor) { return CellDesc().frontAngle(0.0f).cellType(sensor); }
 
+    void setPackSizeWithoutAbsorption(int packSize)
+    {
+        _parameters.attackerPackSize.value[0] = packSize;
+        _parameters.radiationAbsorption.baseValue = ColorVector<float>::uniform(0.0f);
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
+
+    ContentDesc createPackMember(RealVector2D const& attackerPos, uint64_t firstObjectId, uint64_t creatureId)
+    {
+        auto data = ContentDesc().addCreature(
+            {
+                ObjectDesc().id(firstObjectId).pos(attackerPos).type(createAttackerCell()),
+                ObjectDesc().id(firstObjectId + 1).pos({attackerPos.x + 1.0f, attackerPos.y}).type(createSensorCell(SensorDesc())),
+            },
+            CreatureDesc().id(creatureId));
+        data.addConnection(firstObjectId, firstObjectId + 1);
+        return data;
+    }
+
     std::optional<int> getLastMatchedCreatureIdPart(ContentDesc const& data, uint64_t sensorId)
     {
         auto const& lastMatch = std::get<SensorDesc>(data.getObjectRef(sensorId).getCellRef()._cellType)._lastMatch;
@@ -1077,4 +1096,152 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 
     // Free cell should NOT be attacked in Creature mode
     EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._energy, actualTarget.getFreeCellRef()._energy));
+}
+
+TEST_F(AttackerTests, packSize_singleAttackerGainsFraction)
+{
+    setPackSizeWithoutAbsorption(2);
+
+    auto data = createPackMember({100.0f, 100.0f}, 1, 1);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
+    auto origEnergy = getEnergy(data);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto stolenEnergy = 100.0f - actualData.getObjectRef(100).getCellRef()._usableEnergy;
+    EXPECT_TRUE(stolenEnergy > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(stolenEnergy / 2, actualData.getObjectRef(1).getCellRef()._rawEnergy));
+    EXPECT_EQ(1, actualData._energies.size());
+    EXPECT_TRUE(approxCompare(origEnergy, getEnergy(actualData)));
+}
+
+TEST_F(AttackerTests, packSize_fullPackGainsAll)
+{
+    setPackSizeWithoutAbsorption(2);
+
+    auto data = createPackMember({100.0f, 100.0f}, 1, 1);
+    data.add(createPackMember({100.0f, 106.0f}, 3, 3), false);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto stolenEnergy = 100.0f - actualData.getObjectRef(100).getCellRef()._usableEnergy;
+    auto gainedEnergy = actualData.getObjectRef(1).getCellRef()._rawEnergy + actualData.getObjectRef(3).getCellRef()._rawEnergy;
+    EXPECT_TRUE(actualData.getObjectRef(1).getCellRef()._rawEnergy > NEAR_ZERO);
+    EXPECT_TRUE(actualData.getObjectRef(3).getCellRef()._rawEnergy > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(stolenEnergy, gainedEnergy));
+    EXPECT_TRUE(actualData._energies.empty());
+}
+
+TEST_F(AttackerTests, packSize_creatureBeyondAttackRadiusDoesNotCount)
+{
+    setPackSizeWithoutAbsorption(2);
+
+    auto data = createPackMember({100.0f, 100.0f}, 1, 1);
+    data.add(createPackMember({100.0f, 107.0f}, 3, 3), false);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto stolenEnergy = 100.0f - actualData.getObjectRef(100).getCellRef()._usableEnergy;
+    EXPECT_TRUE(stolenEnergy > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(stolenEnergy / 2, actualData.getObjectRef(1).getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, actualData.getObjectRef(3).getCellRef()._rawEnergy));
+}
+
+TEST_F(AttackerTests, packSize_attackersOfOneCreatureShareGain)
+{
+    setPackSizeWithoutAbsorption(2);
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc())),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}).type(createAttackerCell()),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.add(createTargetCreature({101.0f, 103.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto stolenEnergy = 100.0f - actualData.getObjectRef(100).getCellRef()._usableEnergy;
+    auto gainedEnergy = actualData.getObjectRef(1).getCellRef()._rawEnergy + actualData.getObjectRef(3).getCellRef()._rawEnergy;
+    EXPECT_TRUE(stolenEnergy > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(stolenEnergy / 4, gainedEnergy));
+}
+
+TEST_F(AttackerTests, packSize_attackerOutOfReachDoesNotShare)
+{
+    setPackSizeWithoutAbsorption(2);
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc())),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(4).pos({103.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(5).pos({104.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(6).pos({105.0f, 100.0f}).type(createAttackerCell()),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+    data.addConnection(4, 5);
+    data.addConnection(5, 6);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto stolenEnergy = 100.0f - actualData.getObjectRef(100).getCellRef()._usableEnergy;
+    EXPECT_TRUE(stolenEnergy > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(0.0f, actualData.getObjectRef(6).getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(stolenEnergy / 2, actualData.getObjectRef(1).getCellRef()._rawEnergy));
+}
+
+TEST_F(AttackerTests, packSize_attackersAtDifferentTargetsDoNotShare)
+{
+    setPackSizeWithoutAbsorption(2);
+
+    auto data = ContentDesc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(createAttackerCell()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(createSensorCell(SensorDesc())),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(4).pos({103.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(5).pos({104.0f, 100.0f}).type(createSensorCell(SensorDesc())),
+            ObjectDesc().id(6).pos({105.0f, 100.0f}).type(createAttackerCell()),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+    data.addConnection(4, 5);
+    data.addConnection(5, 6);
+    auto secondTarget = ContentDesc().addCreature({ObjectDesc().id(101).pos({105.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f))}, CreatureDesc().id(3));
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+    data.add(std::move(secondTarget), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto stolenEnergy1 = 100.0f - actualData.getObjectRef(100).getCellRef()._usableEnergy;
+    auto stolenEnergy2 = 100.0f - actualData.getObjectRef(101).getCellRef()._usableEnergy;
+    EXPECT_TRUE(stolenEnergy1 > NEAR_ZERO);
+    EXPECT_TRUE(stolenEnergy2 > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(stolenEnergy1 / 2, actualData.getObjectRef(1).getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(stolenEnergy2 / 2, actualData.getObjectRef(6).getCellRef()._rawEnergy));
 }

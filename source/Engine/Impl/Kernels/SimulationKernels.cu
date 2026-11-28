@@ -229,6 +229,11 @@ __global__ void cudaNextTimestep_cellType_injector(SimulationData data, Simulati
     InjectorProcessor::process(data, statistics);
 }
 
+__global__ void cudaNextTimestep_cellType_attacker_prepare(SimulationData data)
+{
+    AttackerProcessor::countAttackerCellsPerTarget(data);
+}
+
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics)
 {
     AttackerProcessor::process(data, statistics);
@@ -267,6 +272,16 @@ __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, Simulati
 __global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics)
 {
     MemoryProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_communicator_prepare(SimulationData data)
+{
+    CommunicatorProcessor::prepare(data);
+}
+
+__global__ void cudaNextTimestep_cellType_communicator_selectTargets(SimulationData data)
+{
+    CommunicatorProcessor::selectTargets(data);
 }
 
 __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, SimulationStatistics statistics)

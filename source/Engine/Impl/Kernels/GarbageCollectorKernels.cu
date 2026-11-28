@@ -232,6 +232,7 @@ __global__ void cudaCleanupCreaturesStep1(Array<Object*> cells, Heap newHeap)
                 *newCreature = *creature;
                 copyAndAssignNewHeapData(
                     reinterpret_cast<uint8_t*&>(newCreature->detectedBy), sizeof(SensorDetection) * newCreature->detectedByCapacity, newHeap);
+                copyAndAssignNewHeapData(reinterpret_cast<uint8_t*&>(newCreature->targets), sizeof(Target) * newCreature->targetsCapacity, newHeap);
 
                 auto newCreatureIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature) - newHeap.getArray());
                 alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, newCreatureIndex);

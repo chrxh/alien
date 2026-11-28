@@ -83,14 +83,21 @@ namespace
 
     std::vector<CellFunctionChannel> getCommunicatorChannels(CellProperties const& properties)
     {
-        if (properties.communicatorMode == CommunicatorMode_Sender) {
-            return {
-                readChannel(Channels::CellTypeActivation, "trigger"),
-                readChannel(Channels::CommunicatorAngle, "angle"),
-                readChannel(Channels::CommunicatorDistance, "distance")};
+        auto isSender = properties.communicatorMode == CommunicatorMode_Sender;
+        std::vector<CellFunctionChannel> result;
+        if (isSender) {
+            result = {readChannel(Channels::CellTypeActivation, "trigger")};
+        } else {
+            result = {
+                writeChannel(Channels::CommunicatorTargetReceived, "received"),
+                writeChannel(Channels::CommunicatorAngle, "angle"),
+                writeChannel(Channels::CommunicatorFreshness, "freshness"),
+                writeChannel(Channels::CommunicatorDistance, "distance")};
         }
-
-        return {writeChannel(Channels::CommunicatorAngle, "angle"), writeChannel(Channels::CommunicatorDistance, "distance")};
+        for (auto channel : std::views::iota(Channels::CommunicatorMessage, STANDARD_NEURONS_PER_CELL)) {
+            result.emplace_back(isSender ? readChannel(channel, "message") : writeChannel(channel, "message"));
+        }
+        return result;
     }
 
     std::vector<CellFunctionChannel> getCellTypeChannels(CellProperties const& properties)
